@@ -1,5 +1,5 @@
 class_name BlurTOP
-extends GNNode
+extends GNTopBase
 ## Applies a Gaussian blur to the input texture.
 ## Uses a two-pass separable blur (horizontal then vertical) for efficiency.
 
@@ -15,7 +15,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "blur"
-	family = GNFamily.Type.TOP
 	node_description = "Two-pass separable blur (Gaussian or Box)."
 
 

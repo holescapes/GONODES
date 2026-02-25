@@ -1,14 +1,11 @@
 class_name MergeSOP
-extends GNNode
+extends GNSopBase
 ## Merges multiple SOP inputs into a single mesh.
 ## Each input's surfaces are appended to the output mesh.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "merge"
-	family = GNFamily.Type.SOP
 	node_description = "Merge multiple meshes into one."
 
 

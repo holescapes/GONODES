@@ -1,5 +1,5 @@
 class_name CameraCOMP
-extends GNNode
+extends GNCompBase
 ## Provides a Camera3D for 3D scene rendering via RenderTOP.
 ## Wraps Godot's Camera3D with GONODES parameter controls.
 ## RenderTOP calls get_camera() to retrieve and place it in its SubViewport.
@@ -9,7 +9,6 @@ var _camera: Camera3D = null
 
 func _init() -> void:
 	node_type = "camera"
-	family = GNFamily.Type.COMP
 	node_description = "Provide a Camera3D for 3D rendering."
 
 
@@ -46,6 +45,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	if _camera == null:
 		_camera = Camera3D.new()
 		_camera.name = id + "_cam"
+		_scene_node = _camera  # Base class handles cleanup
 
 	# Update transform
 	_camera.position = Vector3(
@@ -86,9 +86,3 @@ func get_camera() -> Camera3D:
 	return _camera
 
 
-## Cleanup
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		if _camera != null and _camera.get_parent() != null:
-			_camera.get_parent().remove_child(_camera)
-			_camera.queue_free()

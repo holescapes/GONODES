@@ -1,5 +1,5 @@
 class_name WindowTOP
-extends GNNode
+extends GNTopBase
 ## Displays a TOP texture input in a standalone OS window.
 ## Supports multiple monitors, fullscreen/borderless/windowed modes,
 ## and positioning on any connected display.
@@ -27,7 +27,6 @@ var _window_params_dirty: bool = true
 
 func _init() -> void:
 	node_type = "window"
-	family = GNFamily.Type.TOP
 	node_description = "Display a texture in a standalone OS window (VJ output)."
 
 

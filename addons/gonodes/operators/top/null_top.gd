@@ -1,5 +1,5 @@
 class_name NullTOP
-extends GNNode
+extends GNTopBase
 ## Pass-through TOP — forwards its input unchanged.
 ## Useful for organizing networks, creating reference points,
 ## and as merge targets.
@@ -9,7 +9,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "null"
-	family = GNFamily.Type.TOP
 	node_description = "Pass-through. Useful for organization and expression references."
 
 

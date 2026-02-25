@@ -1,16 +1,14 @@
 class_name SpeedCHOP
-extends GNNode
+extends GNChopBase
 ## Integrates input values over time (velocity → position).
 ## Each frame, the output accumulates: position += input * dt.
 ## Similar to TouchDesigner's Speed CHOP.
 
 var _accum: Dictionary = {}  # channel_name -> float
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "speed"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Integrate input over time (velocity to position)."
 

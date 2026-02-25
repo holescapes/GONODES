@@ -1,17 +1,15 @@
 class_name TriggerCHOP
-extends GNNode
+extends GNChopBase
 ## Generates one-shot trigger pulses when the input crosses a threshold.
 ## Similar to TouchDesigner's Trigger CHOP.
 ## Outputs a pulse that decays over time after being triggered.
 
 var _active: Dictionary = {}  # channel -> { "timer": float, "triggered": bool }
 var _prev_in: Dictionary = {}  # channel -> float (for edge detection)
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "trigger"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "One-shot trigger pulse on threshold crossing."
 

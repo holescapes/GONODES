@@ -1,17 +1,14 @@
 class_name WaveCHOP
-extends GNNode
+extends GNChopBase
 ## Advanced waveform generator with multi-channel support and time controls.
 ## More flexible than LFO_CHOP — supports different wave shapes per channel,
 ## time range, and sample count.
 
 enum Waveform { SINE, TRIANGLE, SQUARE, SAWTOOTH, PULSE, RAMP }
 
-var _cached_channel_data: GNChannelData = null
-
 
 func _init() -> void:
 	node_type = "wave"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Advanced waveform generator with multi-channel support."
 

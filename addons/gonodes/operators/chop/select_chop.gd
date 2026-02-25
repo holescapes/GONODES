@@ -1,14 +1,11 @@
 class_name SelectCHOP
-extends GNNode
+extends GNChopBase
 ## Selects/renames specific channels from the input.
 ## Like TouchDesigner's Select CHOP — useful for picking out individual channels.
-
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "select"
-	family = GNFamily.Type.CHOP
 	node_description = "Select/rename specific channels from input."
 
 

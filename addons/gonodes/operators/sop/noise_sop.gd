@@ -1,15 +1,13 @@
 class_name NoiseSOP
-extends GNNode
+extends GNSopBase
 ## Displaces vertex positions of input geometry using 3D noise.
 ## Great for terrain generation, organic deformation, and wave effects.
 
-var _cached_geo: GNGeoData = null
 var _noise: FastNoiseLite = null
 
 
 func _init() -> void:
 	node_type = "noise"
-	family = GNFamily.Type.SOP
 	time_dependent = true
 	node_description = "Displace vertices with 3D noise."
 

@@ -1,5 +1,5 @@
 class_name ConstantTOP
-extends GNNode
+extends GNTopBase
 ## Generates a solid color texture. No shader needed.
 
 var _viewport: SubViewport = null
@@ -9,7 +9,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "constant"
-	family = GNFamily.Type.TOP
 	node_description = "Solid color texture."
 
 

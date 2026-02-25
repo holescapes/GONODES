@@ -1,5 +1,5 @@
 class_name RampTOP
-extends GNNode
+extends GNTopBase
 ## Generates a color gradient ramp (horizontal, vertical, radial, or circular).
 ## Source generator — no input required.
 
@@ -12,7 +12,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "ramp"
-	family = GNFamily.Type.TOP
 	node_description = "Gradient ramp generator (horizontal, vertical, radial, circular)."
 
 

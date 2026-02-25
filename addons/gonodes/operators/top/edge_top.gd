@@ -1,5 +1,5 @@
 class_name EdgeTOP
-extends GNNode
+extends GNTopBase
 ## Applies Sobel edge detection to an input texture.
 
 var _shader: Shader = null
@@ -11,7 +11,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "edge"
-	family = GNFamily.Type.TOP
 	node_description = "Sobel edge detection with configurable strength."
 
 

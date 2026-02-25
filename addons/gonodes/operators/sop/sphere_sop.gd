@@ -1,14 +1,11 @@
 class_name SphereSOP
-extends GNNode
+extends GNSopBase
 ## Generates a sphere mesh using Godot's SphereMesh primitive.
 ## Leverages Godot's built-in mesh generation.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "sphere"
-	family = GNFamily.Type.SOP
 	node_description = "Generate a sphere mesh."
 
 

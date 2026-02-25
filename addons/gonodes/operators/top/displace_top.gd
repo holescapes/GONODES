@@ -1,5 +1,5 @@
 class_name DisplaceTOP
-extends GNNode
+extends GNTopBase
 ## Displaces the UV coordinates of a source texture using a displacement map.
 
 var _shader: Shader = null
@@ -11,7 +11,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "displace"
-	family = GNFamily.Type.TOP
 	node_description = "Distort one texture using another as a displacement map."
 
 

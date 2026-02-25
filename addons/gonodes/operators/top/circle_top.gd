@@ -1,5 +1,5 @@
 class_name CircleTOP
-extends GNNode
+extends GNTopBase
 ## Generates a circle or ring shape using SDF rendering.
 ## Source generator — no input required.
 
@@ -12,7 +12,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "circle"
-	family = GNFamily.Type.TOP
 	node_description = "SDF circle or ring shape with fill/border/softness."
 
 

@@ -115,6 +115,22 @@ func _pre_cook(delta: float) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Preview — Override in Family Base Classes (GNTopBase, GNChopBase, etc.)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Creates the preview Control for this node's inline graph display.
+## Returns null by default (no preview).  Family base classes override this
+## to provide family-specific previews (texture thumbnail, channel graph, etc.).
+func create_preview_control() -> Control:
+	return null
+
+
+## Called each cook frame to update the preview control.
+## No-op by default.  Family base classes override with update logic.
+func update_preview_control(_control: Control) -> void:
+	pass
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Initialization
 # ═══════════════════════════════════════════════════════════════════════════════
 

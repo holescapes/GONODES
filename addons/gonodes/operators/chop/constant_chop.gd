@@ -1,14 +1,11 @@
 class_name ConstantCHOP
-extends GNNode
+extends GNChopBase
 ## Outputs one or more channels with constant (static) values.
 ## Each channel name and value can be configured via parameters.
-
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "constant"
-	family = GNFamily.Type.CHOP
 	node_description = "Output constant channel values."
 
 

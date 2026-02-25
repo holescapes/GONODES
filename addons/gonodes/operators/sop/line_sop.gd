@@ -1,14 +1,11 @@
 class_name LineSOP
-extends GNNode
+extends GNSopBase
 ## Generates a line (series of points) as a line-strip mesh.
 ## Useful for curves, trails, and path visualization.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "line"
-	family = GNFamily.Type.SOP
 	node_description = "Generate a line strip."
 
 

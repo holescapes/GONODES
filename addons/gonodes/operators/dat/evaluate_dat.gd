@@ -1,17 +1,15 @@
 class_name EvaluateDAT
-extends GNNode
+extends GNDatBase
 ## Evaluates expressions in each cell of the input table.
 ## Cells containing expressions (starting with '=') are evaluated.
 ## Non-expression cells pass through unchanged.
 ## Supports basic math: =1+2, =3*4, etc. via Godot's Expression class.
 
-var _cached_table: GNTableData = null
 var _expr: Expression = null
 
 
 func _init() -> void:
 	node_type = "evaluate"
-	family = GNFamily.Type.DAT
 	node_description = "Evaluate expressions in table cells (e.g. =1+2)."
 
 

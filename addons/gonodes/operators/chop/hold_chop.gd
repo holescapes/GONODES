@@ -1,16 +1,14 @@
 class_name HoldCHOP
-extends GNNode
+extends GNChopBase
 ## Sample-and-hold: captures the input value when triggered and holds it.
 ## Similar to TouchDesigner's Hold CHOP.
 
 var _held_values: Dictionary = {}  # channel -> float
 var _prev_trigger: float = 0.0
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "hold"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Sample-and-hold: capture input on trigger."
 

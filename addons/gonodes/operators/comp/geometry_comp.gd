@@ -1,5 +1,5 @@
 class_name GeometryCOMP
-extends GNNode
+extends GNCompBase
 ## Places SOP geometry into a 3D scene as a MeshInstance3D.
 ## Takes SOP input for the mesh and optional TOP input for the material texture.
 ## The actual MeshInstance3D is managed internally — the COMP outputs a reference
@@ -13,7 +13,6 @@ var _material: StandardMaterial3D = null
 
 func _init() -> void:
 	node_type = "geo"
-	family = GNFamily.Type.COMP
 	node_description = "Place SOP mesh into a 3D scene."
 
 
@@ -52,6 +51,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if _mesh_instance == null:
 		_mesh_instance = MeshInstance3D.new()
 		_mesh_instance.name = id + "_mesh"
+		_scene_node = _mesh_instance  # Base class handles cleanup
 		# Don't add_child — RenderTOP will adopt this into its SubViewport
 	if _material == null:
 		_material = StandardMaterial3D.new()
@@ -99,9 +99,3 @@ func get_mesh_instance() -> MeshInstance3D:
 	return _mesh_instance
 
 
-## Cleanup
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		if _mesh_instance != null and _mesh_instance.get_parent() != null:
-			_mesh_instance.get_parent().remove_child(_mesh_instance)
-			_mesh_instance.queue_free()

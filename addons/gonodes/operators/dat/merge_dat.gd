@@ -1,15 +1,12 @@
 class_name MergeDAT
-extends GNNode
+extends GNDatBase
 ## Merges two DAT tables by appending rows or columns.
 ## In row mode: appends rows of input 2 below input 1.
 ## In column mode: appends columns of input 2 beside input 1.
 
-var _cached_table: GNTableData = null
-
 
 func _init() -> void:
 	node_type = "merge"
-	family = GNFamily.Type.DAT
 	node_description = "Merge two tables (append rows or columns)."
 
 

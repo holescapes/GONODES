@@ -1,15 +1,12 @@
 class_name GridSOP
-extends GNNode
+extends GNSopBase
 ## Generates a planar grid mesh using Godot's SurfaceTool.
 ## Configurable rows, columns, and size — produces a subdivided quad
 ## suitable for displacement, terrain, or wave effects.
 
-var _cached_geo: GNGeoData = null
-
 
 func _init() -> void:
 	node_type = "grid"
-	family = GNFamily.Type.SOP
 	node_description = "Generate a subdivided planar grid."
 
 

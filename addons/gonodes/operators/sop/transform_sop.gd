@@ -1,14 +1,11 @@
 class_name TransformSOP
-extends GNNode
+extends GNSopBase
 ## Applies translate, rotate, and scale transformations to input geometry.
 ## Uses Godot's Transform3D for robust 3D transform operations.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "transform"
-	family = GNFamily.Type.SOP
 	node_description = "Translate, rotate, and scale geometry."
 
 

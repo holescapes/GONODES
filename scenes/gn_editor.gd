@@ -141,6 +141,9 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 
 	info_label.text = " | ".join(parts)
 
+	# Update live previews on all nodes in the graph
+	graph_editor.update_previews()
+
 
 func _on_cook_error(node_id: String, error_msg: String) -> void:
 	GNLogger.error("Editor", "Cook error '%s': %s" % [node_id, error_msg])
@@ -179,6 +182,10 @@ func _on_log_toggled(pressed: bool) -> void:
 		print("[GONODES] Logging ENABLED")
 	else:
 		print("[GONODES] Logging DISABLED")
+
+
+func _on_preview_toggled(pressed: bool) -> void:
+	graph_editor.set_previews_visible(pressed)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -243,6 +250,15 @@ func _setup_toolbar() -> void:
 	var sep := VSeparator.new()
 	info_bar.add_child(sep)
 	info_bar.move_child(sep, 4)
+
+	# Preview toggle
+	var preview_toggle := CheckButton.new()
+	preview_toggle.text = "Previews"
+	preview_toggle.tooltip_text = "Show / hide inline node previews"
+	preview_toggle.button_pressed = true
+	preview_toggle.toggled.connect(_on_preview_toggled)
+	info_bar.add_child(preview_toggle)
+	info_bar.move_child(preview_toggle, 5)
 
 
 ## Keyboard shortcuts for file operations.

@@ -1,5 +1,5 @@
 class_name LFO_CHOP
-extends GNNode
+extends GNChopBase
 ## Low-Frequency Oscillator — generates a single "out" channel with a periodic waveform.
 ## Always time-dependent (cooks every frame).
 
@@ -9,13 +9,9 @@ enum Waveform { SINE, TRIANGLE, SQUARE, SAWTOOTH, PULSE }
 ## Internal phase accumulator (wraps 0→1 continuously).
 var _phase_accum: float = 0.0
 
-## Reusable output data object (created once, updated each cook).
-var _cached_channel_data: GNChannelData = null
-
 
 func _init() -> void:
 	node_type = "lfo"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Low-frequency oscillator (sine, triangle, square, etc.)."
 

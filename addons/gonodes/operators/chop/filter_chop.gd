@@ -1,16 +1,14 @@
 class_name FilterCHOP
-extends GNNode
+extends GNChopBase
 ## Smooths/filters CHOP channel data using single-pole IIR (low-pass) or
 ## simple differencing (high-pass).
 ## Similar to TouchDesigner's Filter CHOP.
 
 var _prev_values: Dictionary = {}  # channel_name -> float (state for IIR)
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "filter"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Smooth/filter channels with low-pass or high-pass."
 

@@ -1,14 +1,11 @@
 class_name ConstantDAT
-extends GNNode
+extends GNDatBase
 ## Outputs a table with user-defined constant values.
 ## Supports up to 4 rows × 4 columns of hand-entered data.
-
-var _cached_table: GNTableData = null
 
 
 func _init() -> void:
 	node_type = "constant"
-	family = GNFamily.Type.DAT
 	node_description = "Table with user-defined constant values."
 
 

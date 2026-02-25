@@ -1,5 +1,5 @@
 class_name LevelTOP
-extends GNNode
+extends GNTopBase
 ## Applies brightness, contrast, gamma, invert, and opacity adjustments to a texture.
 ## Uses a SubViewport with a levels shader.
 ## SubViewport is a child of this Node — freed automatically on removal.
@@ -13,7 +13,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "level"
-	family = GNFamily.Type.TOP
 	node_description = "Brightness, contrast, gamma, invert, and opacity adjustments."
 
 

@@ -1,5 +1,5 @@
 class_name ResolutionTOP
-extends GNNode
+extends GNTopBase
 ## Resizes an input texture to a target resolution using a SubViewport.
 
 var _viewport: SubViewport = null
@@ -9,7 +9,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "resolution"
-	family = GNFamily.Type.TOP
 	node_description = "Resize a texture to a different resolution."
 
 

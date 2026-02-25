@@ -1,5 +1,5 @@
 class_name ThresholdTOP
-extends GNNode
+extends GNTopBase
 ## Converts an input texture to binary black/white based on luminance threshold.
 
 var _shader: Shader = null
@@ -11,7 +11,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "threshold"
-	family = GNFamily.Type.TOP
 	node_description = "Binary black/white threshold with optional softness."
 
 

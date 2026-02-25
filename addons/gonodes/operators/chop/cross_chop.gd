@@ -1,14 +1,11 @@
 class_name CrossCHOP
-extends GNNode
+extends GNChopBase
 ## Crossfades between two CHOP inputs channel-by-channel.
 ## Similar to TouchDesigner's Cross CHOP.
-
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "cross"
-	family = GNFamily.Type.CHOP
 	node_description = "Crossfade between two CHOP inputs."
 
 

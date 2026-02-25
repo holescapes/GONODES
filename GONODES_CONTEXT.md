@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-27
-> **Status:** Phase 6 In Progress — Save/load patches (.gnpatch), node copy/paste, undo/redo. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→COMP→RenderTOP) live. Phases 1–5.8 complete. 78 operators across 5 families.
+> **Status:** Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→COMP→RenderTOP) live. Phases 1–5.8 complete. 78 operators across 5 families.
 
 ---
 
@@ -188,6 +188,10 @@ GNGeoData wraps Godot's native `ArrayMesh`, leveraging Godot's built-in mesh typ
 
 ## 6. Operator Base Class
 
+### GNNode (Root Base)
+
+GNNode is **fully type-agnostic** — it contains no references to any family-specific data types. Preview methods are virtual no-ops that return null; family base classes (see below) override them.
+
 ```gdscript
 class_name GNNode extends Node
 
@@ -225,7 +229,42 @@ func _init_parameters() -> void: pass     # Override: define params
 func _cook(inputs: Array[GNData]) -> GNData: return null  # Override: produce output
 func get_input(index: int) -> GNData: ...  # Resolved by cook engine
 func mark_dirty() -> void: ...             # Propagates downstream
+
+# Preview (virtual — overridden by family base classes)
+func create_preview_control() -> Control:  return null   # No-op
+func update_preview_control(ctrl: Control) -> void: pass  # No-op
 ```
+
+# Preview (virtual — overridden by family base classes)
+func create_preview_control() -> Control:  return null   # No-op
+func update_preview_control(ctrl: Control) -> void: pass  # No-op
+```
+
+### Family Base Classes
+
+Five intermediate base classes sit between GNNode and the individual operators. Each sets the `family`, provides family-specific helpers, and overrides the preview virtual methods.
+
+| Base Class | Family | Cached Data | Preview | Helpers |
+|------------|--------|-------------|---------|--------|
+| `GNTopBase` | TOP | — (TOPs vary too much) | TextureRect from `cached_output.texture` | `_get_input_top()` |
+| `GNChopBase` | CHOP | `_cached_channel_data: GNChannelData` | Label: channel name:value pairs | `_prepare_output(sr)`, `_get_input_chop()` |
+| `GNDatBase` | DAT | `_cached_table: GNTableData` | Label: headers + first 3 rows | `_prepare_table(clear)`, `_get_input_dat()` |
+| `GNSopBase` | SOP | `_cached_geo: GNGeoData` | Label: vertex/surface counts | `_prepare_geo()`, `_get_input_sop()`, `_require_input_geo()` |
+| `GNCompBase` | COMP | `_scene_node: Node3D` | Label: node class + visibility | auto `_notification(PREDELETE)` cleanup, `get_scene_node()` |
+
+**Class Hierarchy:**
+```
+GNNode (type-agnostic base)
+├── GNTopBase (28 TOP operators)
+├── GNChopBase (21 CHOP operators, incl. DATtoCHOP bridge)
+├── GNDatBase (12 DAT operators)
+├── GNSopBase (14 SOP operators)
+└── GNCompBase (3 COMP operators)
+```
+
+**GNTopBase** intentionally does NOT include viewport/texture infrastructure because TOP operators vary significantly in rendering pipelines (SubViewport-based, compute shader, texture copy, etc.).
+
+**DATtoCHOP** extends `GNChopBase` (not GNDatBase) because its output is CHOP channel data.
 
 ### Node Lifecycle
 - `_init()` — set `node_type`, `family`, `time_dependent` (runs before entering tree)
@@ -468,10 +507,17 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 - Renders GNNetwork as GraphNode instances
 - Handles drag-and-drop from palette, wiring, deletion
 - Color-codes connections by family
-- Tab key opens node palette popup; right-click context menu planned
+- Tab key opens node palette popup
+- **Right-click context menu** (`PopupMenu`) with contextual options:
+  - Add Node… (opens palette), Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo
+  - Items grayed out when not applicable (e.g., no selection → copy/cut/delete disabled)
+  - Shortcut hints displayed in menu items
 - Emits `operator_selected` / `operator_deselected` signals
 - Handles node rename: disconnects visual wires under old name, updates view identity, reconnects under new name
 - Connects to `network.node_renamed` signal for model-driven rename updates
+- `previews_visible` flag — controls whether inline previews are shown; respects toggle on newly created views
+- `set_previews_visible(enabled)` — shows/hides all existing node preview controls; newly created views auto-hide if `previews_visible` is false
+- `update_previews()` — skips updates when `previews_visible` is false (zero cost when hidden)
 
 ### GNNodeView (extends GraphNode)
 - Visual representation of a GNNode
@@ -482,6 +528,8 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 - `rename_requested(old_id, new_id)` signal emitted on commit
 - Dynamic port rebuilding via `rebuild_slots()` + `reset_size()`
 - Port/node tooltips from descriptions
+- **Live preview** via `_setup_preview()` → family base class `create_preview_control()`
+- `show_preview()` / `hide_preview()` — toggle preview control visibility with `reset_size()` to resize the node
 
 ### GNInspector (GNParamInspector, extends PanelContainer)
 - Shows parameters for the currently selected node
@@ -521,7 +569,12 @@ GONODES/
 │       │   ├── gn_channel_data.gd  # GNChannelData (RefCounted)
 │       │   ├── gn_table_data.gd    # GNTableData — DAT output (RefCounted)
 │       │   ├── gn_geo_data.gd      # GNGeoData — SOP output, wraps ArrayMesh (RefCounted)
-│       │   ├── gn_node.gd          # GNNode base operator class (Node)
+│       │   ├── gn_node.gd          # GNNode base operator class (Node) — type-agnostic
+│       │   ├── gn_top_base.gd      # GNTopBase — TOP family base (texture preview)
+│       │   ├── gn_chop_base.gd     # GNChopBase — CHOP family base (channel data cache, label preview)
+│       │   ├── gn_dat_base.gd      # GNDatBase — DAT family base (table cache, label preview)
+│       │   ├── gn_sop_base.gd      # GNSopBase — SOP family base (geo cache, label preview)
+│       │   ├── gn_comp_base.gd     # GNCompBase — COMP family base (scene node, auto-cleanup)
 │       │   ├── gn_port.gd          # GNPort definition (RefCounted)
 │       │   ├── gn_connection.gd    # GNConnection (RefCounted)
 │       │   ├── gn_network.gd       # GNNetwork (Resource — serialization boundary)
@@ -676,10 +729,10 @@ GONODES/
 - [x] 14 new GPU shaders (blur, ramp, circle, rectangle, transform2d, hsv_adjust, edge, threshold, displace, flip, tile, cross, crop, lookup, feedback)
 - [x] All operators registered in palette registry
 - [x] CustomShaderTOP — user-editable GLSL shaders with live recompilation
-- [ ] Right-click context menu on graph canvas
-- [ ] Copy/paste nodes
-- [ ] Undo/redo (Godot's UndoRedo system)
-- [ ] Mini preview thumbnails on TOP nodes
+- [x] Right-click context menu on graph canvas (moved to Phase 6)
+- [x] Copy/paste nodes (moved to Phase 6)
+- [x] Undo/redo (Godot's UndoRedo system) (moved to Phase 6)
+- [x] Mini preview thumbnails on all nodes (moved to Phase 6)
 - [ ] Expression reference lines (dashed/stippled overlay between nodes when a parameter references another node via `chop()`/`op()`/`top()` expressions)
 
 ### Phase 5.5: DAT, SOP, COMP & 3D Pipeline ✅
@@ -760,6 +813,28 @@ GONODES/
   - Move tracked via GraphEdit `begin_node_move`/`end_node_move` signals with position diffing.
   - Paste/duplicate record compound actions (all pasted nodes removed on undo).
   - History cleared on New/Load to avoid cross-patch undo.
+- [x] **Mini preview thumbnails** on all nodes (generic preview system):
+  - `GNNode.create_preview_control()` — virtual, returns a custom `Control` for family-specific previews. Returns null by default (type-agnostic GNNode).
+  - `GNNode.update_preview_control(control)` — virtual, called each cook frame to update previews. No-op by default.
+  - Family base classes override these: GNTopBase (TextureRect), GNChopBase (Label: channel values), GNDatBase (Label: table rows), GNSopBase (Label: mesh stats), GNCompBase (Label: node class).
+  - `GNNodeView._setup_preview()` — creates preview control via `gn_node.create_preview_control()` (120×80px min size).
+  - `GNGraphEditor.update_previews()` iterates ALL node views each cook frame (skipped when hidden).
+  - Extensible: any operator can override `create_preview_control()` for operator-specific rendering.
+- [x] **Family base classes** — 5 intermediate bases between GNNode and operators:
+  - `GNTopBase` (28 TOPs), `GNChopBase` (21 CHOPs), `GNDatBase` (12 DATs), `GNSopBase` (14 SOPs), `GNCompBase` (3 COMPs).
+  - Each sets family, provides cached data helpers, and overrides preview methods.
+  - All 78 operators migrated. GNNode is now fully type-agnostic.
+- [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
+  - `GNGraphEditor.previews_visible` flag controls whether `update_previews()` processes updates.
+  - `GNGraphEditor.set_previews_visible(enabled)` shows/hides all preview controls on existing views.
+  - Newly created views auto-hide their preview if `previews_visible` is false.
+  - `GNNodeView.show_preview()` / `hide_preview()` toggle visibility with `reset_size()` to reflow node layout.
+- [x] **Right-click context menu** — contextual `PopupMenu` on graph canvas:
+  - Items: Add Node…, Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo.
+  - Selection-aware: copy/cut/delete/duplicate grayed out when nothing is selected.
+  - Clipboard-aware: paste grayed out when clipboard is empty.
+  - Undo/redo state-aware: grayed out when no history available.
+  - Shortcut hints displayed beside each item.
 - [ ] Multiple viewer windows
 - [ ] Performance profiling overlay (cook time per node)
 - [ ] Stress test: 50+ node network

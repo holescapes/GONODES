@@ -1,5 +1,5 @@
 class_name ImageFileInTOP
-extends GNNode
+extends GNTopBase
 ## Loads an image or texture resource from the project and outputs it as a TOP texture.
 ## Similar to TouchDesigner's Movie File In TOP for still images.
 ##
@@ -17,7 +17,6 @@ var _loaded_texture: Texture2D = null
 
 func _init() -> void:
 	node_type = "imagefilein"
-	family = GNFamily.Type.TOP
 	node_description = "Loads an image/texture from project resources (PNG, JPG, WebP, HDR, EXR, SVG, etc.)."
 
 

@@ -20,6 +20,25 @@ var _spawn_position: Vector2 = Vector2.ZERO
 ## Clipboard dictionary for copy/paste: {"nodes": {id: dict}, "connections": [dict]}.
 var _clipboard: Dictionary = {}
 
+## Whether live previews are shown on node views.
+var previews_visible: bool = true
+
+## Right-click context menu.
+var _context_menu: PopupMenu = null
+
+## Context menu item IDs.
+enum _CtxID {
+	ADD_NODE,
+	COPY,
+	CUT,
+	PASTE,
+	DUPLICATE,
+	DELETE,
+	SELECT_ALL,
+	UNDO,
+	REDO,
+}
+
 ## Undo/redo history for graph operations.
 var _undo_redo := UndoRedo.new()
 
@@ -75,6 +94,11 @@ func _ready() -> void:
 	_palette.node_type_selected.connect(_on_palette_node_selected)
 	add_child(_palette)
 
+	# Create context menu
+	_context_menu = PopupMenu.new()
+	_context_menu.id_pressed.connect(_on_context_menu_id_pressed)
+	add_child(_context_menu)
+
 	GNLogger.info("GraphEditor", "Graph editor ready")
 
 
@@ -101,9 +125,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
-			# Right-click → open palette
 			_spawn_position = (get_local_mouse_position() + scroll_offset) / zoom
-			_palette.popup_at(get_global_mouse_position())
+			_show_context_menu(get_screen_position() + get_local_mouse_position())
 			accept_event()
 
 
@@ -207,6 +230,11 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	view.rename_requested.connect(_on_node_rename_requested)
 	add_child(view)
 	_node_views[node.id] = view
+
+	# Respect current preview toggle state
+	if not previews_visible:
+		view.hide_preview()
+
 	return view
 
 
@@ -465,6 +493,27 @@ static func get_operator_registry() -> Dictionary:
 	return GNExtensionRegistry.instance().get_operator_registry()
 
 
+## Updates live preview on all node views.
+## Called after each cook frame by the editor.
+func update_previews() -> void:
+	if not previews_visible:
+		return
+	for view_name in _node_views:
+		var view: GNNodeView = _node_views[view_name]
+		view.update_preview()
+
+
+## Toggles preview visibility on all node views.
+func set_previews_visible(enabled: bool) -> void:
+	previews_visible = enabled
+	for view_name in _node_views:
+		var view: GNNodeView = _node_views[view_name]
+		if enabled:
+			view.show_preview()
+		else:
+			view.hide_preview()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Copy / Paste
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -609,6 +658,105 @@ func cut_selected() -> void:
 func duplicate_selected() -> void:
 	copy_selected()
 	paste_clipboard()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Context Menu
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Builds and shows the right-click context menu at the given screen position.
+func _show_context_menu(screen_pos: Vector2) -> void:
+	_context_menu.clear()
+
+	var has_selection := not _get_selected_node_ids().is_empty()
+	var has_clipboard := not _clipboard.is_empty()
+
+	# Always available
+	_context_menu.add_item("Add Node…", _CtxID.ADD_NODE)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.ADD_NODE), _shortcut(KEY_TAB), true)
+	_context_menu.add_separator()
+
+	# Selection-dependent items
+	_context_menu.add_item("Copy", _CtxID.COPY)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.COPY), _shortcut(KEY_C, true), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY), not has_selection)
+
+	_context_menu.add_item("Cut", _CtxID.CUT)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.CUT), _shortcut(KEY_X, true), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.CUT), not has_selection)
+
+	_context_menu.add_item("Paste", _CtxID.PASTE)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.PASTE), _shortcut(KEY_V, true), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.PASTE), not has_clipboard)
+
+	_context_menu.add_item("Duplicate", _CtxID.DUPLICATE)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.DUPLICATE), _shortcut(KEY_D, true), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.DUPLICATE), not has_selection)
+
+	_context_menu.add_separator()
+
+	_context_menu.add_item("Delete", _CtxID.DELETE)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.DELETE), _shortcut(KEY_DELETE), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.DELETE), not has_selection)
+
+	_context_menu.add_separator()
+
+	_context_menu.add_item("Select All", _CtxID.SELECT_ALL)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.SELECT_ALL), _shortcut(KEY_A, true), true)
+
+	_context_menu.add_separator()
+
+	_context_menu.add_item("Undo", _CtxID.UNDO)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.UNDO), _shortcut(KEY_Z, true), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.UNDO), not _undo_redo.has_undo())
+
+	_context_menu.add_item("Redo", _CtxID.REDO)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.REDO), _shortcut(KEY_Y, true), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.REDO), not _undo_redo.has_redo())
+
+	_context_menu.position = Vector2i(screen_pos)
+	_context_menu.reset_size()
+	_context_menu.popup()
+
+
+## Handles a context menu item being pressed.
+func _on_context_menu_id_pressed(id: int) -> void:
+	match id:
+		_CtxID.ADD_NODE:
+			_palette.popup_at(Vector2(_context_menu.position))
+		_CtxID.COPY:
+			copy_selected()
+		_CtxID.CUT:
+			cut_selected()
+		_CtxID.PASTE:
+			paste_clipboard()
+		_CtxID.DUPLICATE:
+			duplicate_selected()
+		_CtxID.DELETE:
+			var selected: Array[StringName] = []
+			for view_name in _node_views:
+				var view: GNNodeView = _node_views[view_name]
+				if view.selected:
+					selected.append(StringName(view_name))
+			if not selected.is_empty():
+				_on_delete_nodes_request(selected)
+		_CtxID.SELECT_ALL:
+			for view_name in _node_views:
+				_node_views[view_name].selected = true
+		_CtxID.UNDO:
+			undo_action()
+		_CtxID.REDO:
+			redo_action()
+
+
+## Helper: creates a Shortcut with a single InputEventKey for menu display.
+func _shortcut(keycode: Key, ctrl: bool = false) -> Shortcut:
+	var ev := InputEventKey.new()
+	ev.keycode = keycode
+	ev.ctrl_pressed = ctrl
+	var sc := Shortcut.new()
+	sc.events = [ev]
+	return sc
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

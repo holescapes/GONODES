@@ -1,5 +1,5 @@
 class_name TransformTOP
-extends GNNode
+extends GNTopBase
 ## Applies 2D spatial transformations (translate, rotate, scale) to an input texture.
 
 var _shader: Shader = null
@@ -11,7 +11,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "transform"
-	family = GNFamily.Type.TOP
 	node_description = "2D translate, rotate, and scale with extend modes."
 
 

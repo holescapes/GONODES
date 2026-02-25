@@ -17,6 +17,12 @@ signal rename_requested(old_id: String, new_id: String)
 ## The inline LineEdit used during rename (null when not renaming).
 var _rename_edit: LineEdit = null
 
+## Live preview control created by the GNNode.
+var _preview: Control = null
+
+## Thumbnail height in pixels (width stretches to fit the node).
+const THUMBNAIL_HEIGHT := 80
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Construction
@@ -74,6 +80,11 @@ func setup(node: GNNode) -> void:
 
 	# Build port slots
 	_build_slots()
+
+	# Add live preview area — supports all node families.
+	# The node decides what to show via get_preview_texture() or
+	# create_preview_control() (custom rendering).
+	_setup_preview()
 
 	# Track position changes
 	position_offset_changed.connect(_on_position_changed)
@@ -206,6 +217,37 @@ func update_status() -> void:
 		return
 	# Could add visual feedback (glow, error badge) here in the future
 	pass
+
+
+## Sets up the preview area for this node.
+## Delegates to the GNNode's create_preview_control() virtual method.
+func _setup_preview() -> void:
+	_preview = gn_node.create_preview_control()
+	if _preview != null:
+		_preview.custom_minimum_size = Vector2(120, THUMBNAIL_HEIGHT)
+		_preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_preview)
+
+
+## Updates the preview from the GNNode's current state.
+func update_preview() -> void:
+	if _preview != null and _preview.visible and gn_node != null:
+		gn_node.update_preview_control(_preview)
+
+
+## Shows the preview control (if one exists).
+func show_preview() -> void:
+	if _preview != null:
+		_preview.show()
+		reset_size()
+
+
+## Hides the preview control.
+func hide_preview() -> void:
+	if _preview != null:
+		_preview.hide()
+		reset_size()
 
 
 ## Handler for GNNode.ports_changed — triggers a slot rebuild.

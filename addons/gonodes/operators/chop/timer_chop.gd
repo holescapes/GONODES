@@ -1,19 +1,17 @@
 class_name TimerCHOP
-extends GNNode
+extends GNChopBase
 ## A versatile timer that counts up in seconds and provides normalized progress.
 ## Can be started/stopped/reset via input triggers.
 ## Similar to TouchDesigner's Timer CHOP.
 
 var _running: bool = false
 var _elapsed: float = 0.0
-var _cached_channel_data: GNChannelData = null
 var _prev_start: float = 0.0
 var _prev_reset: float = 0.0
 
 
 func _init() -> void:
 	node_type = "timer"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Count up in seconds with start/stop/reset triggers."
 

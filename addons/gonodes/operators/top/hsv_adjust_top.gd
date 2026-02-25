@@ -1,5 +1,5 @@
 class_name HSVAdjustTOP
-extends GNNode
+extends GNTopBase
 ## Adjusts hue, saturation, and value (brightness) of an input texture.
 ## Operates in HSV color space.
 
@@ -12,7 +12,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "hsv_adjust"
-	family = GNFamily.Type.TOP
 	node_description = "Hue offset, saturation, and value (brightness) adjustment."
 
 

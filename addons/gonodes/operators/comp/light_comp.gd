@@ -1,5 +1,5 @@
 class_name LightCOMP
-extends GNNode
+extends GNCompBase
 ## Provides a Light3D for 3D scene rendering via RenderTOP.
 ## Supports Directional, Omni (point), and Spot lights.
 ## Wraps Godot's native Light3D subclasses.
@@ -10,7 +10,6 @@ var _current_type: int = -1  # Track which type was last created
 
 func _init() -> void:
 	node_type = "light"
-	family = GNFamily.Type.COMP
 	node_description = "Provide a Light3D for 3D rendering."
 
 
@@ -60,6 +59,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 				_light = SpotLight3D.new()
 
 		_light.name = id + "_light"
+		_scene_node = _light  # Base class handles cleanup
 		_current_type = light_type
 
 	# Update common properties
@@ -89,9 +89,3 @@ func get_light() -> Light3D:
 	return _light
 
 
-## Cleanup
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		if _light != null and _light.get_parent() != null:
-			_light.get_parent().remove_child(_light)
-			_light.queue_free()

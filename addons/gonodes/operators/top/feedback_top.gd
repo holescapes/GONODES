@@ -1,5 +1,5 @@
 class_name FeedbackTOP
-extends GNNode
+extends GNTopBase
 ## Creates a temporal feedback loop: blends the current input with the previous
 ## frame's output, transforming the feedback UVs for motion effects.
 ## The internal feedback buffer is one frame behind.
@@ -15,7 +15,6 @@ var _frame_count: int = 0
 
 func _init() -> void:
 	node_type = "feedback"
-	family = GNFamily.Type.TOP
 	node_description = "Blends current frame with previous frame for trails/echoes."
 
 

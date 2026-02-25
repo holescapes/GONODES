@@ -1,5 +1,5 @@
 class_name CustomShaderTOP
-extends GNNode
+extends GNTopBase
 ## Allows the user to write custom Godot Shading Language (GLSL-like) code
 ## that runs on the GPU.  Input texture ports are created automatically by
 ## scanning the shader source for `uniform sampler2D gn_tex<N>` declarations.
@@ -57,7 +57,6 @@ var _shader_ok: bool = false
 
 func _init() -> void:
 	node_type = "glsl"
-	family = GNFamily.Type.TOP
 	time_dependent = true  # User code may use TIME
 	node_description = "User-editable GLSL shader with auto-detected texture inputs from uniform declarations."
 

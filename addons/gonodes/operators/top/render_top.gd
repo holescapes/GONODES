@@ -1,5 +1,5 @@
 class_name RenderTOP
-extends GNNode
+extends GNTopBase
 ## Renders a 3D scene to a texture — the bridge from COMPs back to the TOP pipeline.
 ##
 ## Takes COMP inputs (GeometryCOMP, CameraCOMP, LightCOMP) and renders them
@@ -24,7 +24,6 @@ var _managed_children: Array[Node3D] = []
 
 func _init() -> void:
 	node_type = "render"
-	family = GNFamily.Type.TOP
 	time_dependent = true
 	node_description = "Renders a 3D COMP scene into a 2D texture."
 

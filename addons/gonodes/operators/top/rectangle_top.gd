@@ -1,5 +1,5 @@
 class_name RectangleTOP
-extends GNNode
+extends GNTopBase
 ## Generates a rectangle or rounded rectangle shape using SDF rendering.
 ## Source generator — no input required.
 
@@ -12,7 +12,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "rectangle"
-	family = GNFamily.Type.TOP
 	node_description = "SDF rounded rectangle with fill/border/softness."
 
 

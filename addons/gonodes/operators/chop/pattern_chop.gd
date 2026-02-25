@@ -1,18 +1,16 @@
 class_name PatternCHOP
-extends GNNode
+extends GNChopBase
 ## Generates multi-sample patterns (ramp, sine, step, random) as CHOP data.
 ## Useful for creating lookup tables or animation curves.
 ## Similar to TouchDesigner's Pattern CHOP.
 
 enum PatternType { RAMP, SINE, COSINE, STEP, RANDOM, CONSTANT }
 
-var _cached_channel_data: GNChannelData = null
 var _rng: RandomNumberGenerator = null
 
 
 func _init() -> void:
 	node_type = "pattern"
-	family = GNFamily.Type.CHOP
 	node_description = "Generate multi-sample patterns (ramp, sine, step, etc.)."
 
 

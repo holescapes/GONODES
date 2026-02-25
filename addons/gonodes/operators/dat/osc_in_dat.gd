@@ -1,17 +1,15 @@
 class_name OscInDAT
-extends GNNode
+extends GNDatBase
 ## Receives OSC messages and stores them in a table.
 ## Stub for future OSC integration — currently generates placeholder data.
 ## When OSC is implemented, this will use Godot's UDP networking.
 
-var _cached_table: GNTableData = null
 var _messages: Array[PackedStringArray] = []
 var _max_messages: int = 100
 
 
 func _init() -> void:
 	node_type = "oscin"
-	family = GNFamily.Type.DAT
 	time_dependent = true
 	node_description = "Receive OSC messages into a table (stub)."
 

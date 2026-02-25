@@ -1,5 +1,5 @@
 class_name FlipTOP
-extends GNNode
+extends GNTopBase
 ## Flips/mirrors an input texture horizontally, vertically, or both.
 
 var _shader: Shader = null
@@ -11,7 +11,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "flip"
-	family = GNFamily.Type.TOP
 	node_description = "Mirror texture horizontally and/or vertically."
 
 

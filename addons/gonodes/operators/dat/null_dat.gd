@@ -1,12 +1,11 @@
 class_name NullDAT
-extends GNNode
+extends GNDatBase
 ## Pass-through DAT — forwards its input unchanged.
 ## Useful for organizing networks and creating reference points.
 
 
 func _init() -> void:
 	node_type = "null"
-	family = GNFamily.Type.DAT
 	node_description = "Pass-through for organization and references."
 
 

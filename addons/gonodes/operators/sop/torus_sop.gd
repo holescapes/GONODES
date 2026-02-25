@@ -1,13 +1,10 @@
 class_name TorusSOP
-extends GNNode
+extends GNSopBase
 ## Generates a torus mesh using Godot's TorusMesh primitive.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "torus"
-	family = GNFamily.Type.SOP
 	node_description = "Generate a torus mesh."
 
 

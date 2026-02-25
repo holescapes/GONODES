@@ -1,15 +1,12 @@
 class_name DATtoCHOP
-extends GNNode
+extends GNChopBase
 ## Converts a DAT table into CHOP channel data.
 ## Each column (or row, depending on layout) becomes a channel.
 ## Bridge operator: DAT input → CHOP output.
 
-var _cached_channel_data: GNChannelData = null
-
 
 func _init() -> void:
 	node_type = "dat_to_chop"
-	family = GNFamily.Type.CHOP
 	node_description = "Convert DAT table into CHOP channels."
 
 

@@ -1,18 +1,14 @@
 class_name MathCHOP
-extends GNNode
+extends GNChopBase
 ## Performs per-sample math operations on CHOP channel data.
 ## With 1 input: applies unary operation (Abs, Sin, Cos) or uses operand parameter.
 ## With 2 inputs: applies binary operation channel-by-channel.
 
 enum Operation { ADD, SUBTRACT, MULTIPLY, DIVIDE, ABS, SIN, COS, POW }
 
-## Reusable output data object (created once, updated each cook).
-var _cached_channel_data: GNChannelData = null
-
 
 func _init() -> void:
 	node_type = "math"
-	family = GNFamily.Type.CHOP
 	node_description = "Per-sample math on CHOP channels."
 
 

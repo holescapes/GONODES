@@ -1,14 +1,11 @@
 class_name TransposeDAT
-extends GNNode
+extends GNDatBase
 ## Transposes a table — swaps rows and columns.
 ## Row 0 becomes Column 0, Column 0 becomes Row 0, etc.
-
-var _cached_table: GNTableData = null
 
 
 func _init() -> void:
 	node_type = "transpose"
-	family = GNFamily.Type.DAT
 	node_description = "Transpose a table (swap rows and columns)."
 
 

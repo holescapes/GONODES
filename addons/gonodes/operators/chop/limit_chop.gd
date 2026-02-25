@@ -1,16 +1,13 @@
 class_name LimitCHOP
-extends GNNode
+extends GNChopBase
 ## Clamps, loops, or zig-zags channel values within min/max bounds.
 ## Similar to TouchDesigner's Limit CHOP.
 
 enum LimitType { CLAMP, LOOP, ZIGZAG }
 
-var _cached_channel_data: GNChannelData = null
-
 
 func _init() -> void:
 	node_type = "limit"
-	family = GNFamily.Type.CHOP
 	node_description = "Clamp, loop, or zig-zag values within bounds."
 
 

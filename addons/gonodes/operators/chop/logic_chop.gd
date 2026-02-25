@@ -1,17 +1,14 @@
 class_name LogicCHOP
-extends GNNode
+extends GNChopBase
 ## Performs boolean/logic operations on CHOP channels.
 ## Converts input to boolean (>= threshold → true), then applies logic.
 ## Similar to TouchDesigner's Logic CHOP.
 
 enum LogicOp { AND, OR, XOR, NAND, NOR, NOT }
 
-var _cached_channel_data: GNChannelData = null
-
 
 func _init() -> void:
 	node_type = "logic"
-	family = GNFamily.Type.CHOP
 	node_description = "Boolean logic operations on channels."
 
 

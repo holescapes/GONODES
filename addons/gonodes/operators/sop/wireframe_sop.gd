@@ -1,14 +1,11 @@
 class_name WireframeSOP
-extends GNNode
+extends GNSopBase
 ## Converts triangle mesh to wireframe (line) representation.
 ## Useful for visualization and stylized rendering.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "wireframe"
-	family = GNFamily.Type.SOP
 	node_description = "Convert triangles to wireframe lines."
 
 

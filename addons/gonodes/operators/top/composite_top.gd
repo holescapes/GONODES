@@ -1,5 +1,5 @@
 class_name CompositeTOP
-extends GNNode
+extends GNTopBase
 ## Blends two input textures (A and B) using a configurable blend operation.
 ## Uses a SubViewport with a composite shader.
 ## SubViewport is a child of this Node — freed automatically on removal.
@@ -15,7 +15,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "composite"
-	family = GNFamily.Type.TOP
 	node_description = "Blend two textures (Add, Multiply, Over, Screen, etc.)."
 
 

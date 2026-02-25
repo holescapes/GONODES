@@ -1,5 +1,5 @@
 class_name TileTOP
-extends GNNode
+extends GNTopBase
 ## Tiles/repeats an input texture with configurable repeat count and mirroring.
 
 var _shader: Shader = null
@@ -11,7 +11,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "tile"
-	family = GNFamily.Type.TOP
 	node_description = "Tile/repeat a texture with optional mirroring."
 
 

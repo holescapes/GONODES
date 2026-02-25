@@ -1,14 +1,11 @@
 class_name SwitchDAT
-extends GNNode
+extends GNDatBase
 ## Switches between multiple DAT inputs based on an index parameter.
 ## Number of inputs is controlled by the "num_inputs" parameter (2-8).
-
-var _cached_table: GNTableData = null
 
 
 func _init() -> void:
 	node_type = "switch"
-	family = GNFamily.Type.DAT
 	node_description = "Switch between multiple DAT inputs by index (dynamic port count)."
 
 

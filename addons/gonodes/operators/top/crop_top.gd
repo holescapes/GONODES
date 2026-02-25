@@ -1,5 +1,5 @@
 class_name CropTOP
-extends GNNode
+extends GNTopBase
 ## Crops a sub-region of the input texture.
 
 var _shader: Shader = null
@@ -11,7 +11,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "crop"
-	family = GNFamily.Type.TOP
 	node_description = "Crop a UV sub-region from the input texture."
 
 

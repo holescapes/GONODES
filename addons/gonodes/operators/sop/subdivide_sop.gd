@@ -1,14 +1,11 @@
 class_name SubdivideSOP
-extends GNNode
+extends GNSopBase
 ## Subdivides input geometry by splitting each triangle into 4.
 ## Useful for adding detail before noise displacement.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "subdivide"
-	family = GNFamily.Type.SOP
 	node_description = "Subdivide triangles into 4 sub-triangles."
 
 

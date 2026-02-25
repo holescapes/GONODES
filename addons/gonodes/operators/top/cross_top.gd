@@ -1,5 +1,5 @@
 class_name CrossTOP
-extends GNNode
+extends GNTopBase
 ## Crossfades between two input textures. Simple linear interpolation.
 
 var _shader: Shader = null
@@ -11,7 +11,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "cross"
-	family = GNFamily.Type.TOP
 	node_description = "Linear crossfade between two textures."
 
 

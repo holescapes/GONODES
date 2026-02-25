@@ -1,12 +1,11 @@
 class_name NullCHOP
-extends GNNode
+extends GNChopBase
 ## Pass-through CHOP — forwards its input unchanged.
 ## Useful for organizing networks and creating reference points.
 
 
 func _init() -> void:
 	node_type = "null"
-	family = GNFamily.Type.CHOP
 	node_description = "Pass-through for organization and references."
 
 

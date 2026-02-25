@@ -1,14 +1,11 @@
 class_name CircleSOP
-extends GNNode
+extends GNSopBase
 ## Generates a circle or disc mesh.
 ## Can produce a filled disc (triangles) or a wire circle (line loop).
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "circle"
-	family = GNFamily.Type.SOP
 	node_description = "Generate a circle or disc mesh."
 
 

@@ -1,5 +1,5 @@
 class_name LookupTOP
-extends GNNode
+extends GNTopBase
 ## Remaps the colors of a source texture using a second texture as a lookup table.
 ## Luminance of the source indexes into the lookup ramp texture.
 
@@ -12,7 +12,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "lookup"
-	family = GNFamily.Type.TOP
 	node_description = "Remap colors via a lookup table / ramp texture."
 
 

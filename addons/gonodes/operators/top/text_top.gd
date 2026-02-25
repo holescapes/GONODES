@@ -1,5 +1,5 @@
 class_name TextTOP
-extends GNNode
+extends GNTopBase
 ## Renders text onto a texture using Godot's Label node.
 ## Similar to TouchDesigner's Text TOP.
 
@@ -13,7 +13,6 @@ var _loaded_font_path: String = ""
 
 func _init() -> void:
 	node_type = "text"
-	family = GNFamily.Type.TOP
 	node_description = "Renders text to a texture via a Label in a SubViewport."
 
 

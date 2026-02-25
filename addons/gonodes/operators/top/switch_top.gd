@@ -1,5 +1,5 @@
 class_name SwitchTOP
-extends GNNode
+extends GNTopBase
 ## Selects one of multiple TOP inputs based on the index parameter.
 ## Like TouchDesigner's Switch TOP.  The number of inputs is controlled
 ## by the "num_inputs" parameter (2-8) so unused SubViewports are not created.
@@ -7,7 +7,6 @@ extends GNNode
 
 func _init() -> void:
 	node_type = "switch"
-	family = GNFamily.Type.TOP
 	node_description = "Select one of multiple texture inputs by index (dynamic port count)."
 
 

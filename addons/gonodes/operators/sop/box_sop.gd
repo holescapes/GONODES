@@ -1,14 +1,11 @@
 class_name BoxSOP
-extends GNNode
+extends GNSopBase
 ## Generates a box (cuboid) mesh using Godot's BoxMesh primitive.
 ## Leverages Godot's built-in mesh generation for optimal quality.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "box"
-	family = GNFamily.Type.SOP
 	node_description = "Generate a box (cuboid) mesh."
 
 

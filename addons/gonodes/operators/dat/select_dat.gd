@@ -1,14 +1,11 @@
 class_name SelectDAT
-extends GNNode
+extends GNDatBase
 ## Selects specific rows and/or columns from an input table.
 ## Supports range-based row/column selection.
-
-var _cached_table: GNTableData = null
 
 
 func _init() -> void:
 	node_type = "select"
-	family = GNFamily.Type.DAT
 	node_description = "Select rows and columns from a table by range."
 
 

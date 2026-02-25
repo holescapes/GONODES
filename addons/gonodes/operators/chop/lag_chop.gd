@@ -1,16 +1,14 @@
 class_name LagCHOP
-extends GNNode
+extends GNChopBase
 ## Applies attack/release smoothing to CHOP channels.
 ## When a value rises, it follows the attack speed; when it falls, the release speed.
 ## Similar to TouchDesigner's Lag CHOP.
 
 var _prev_values: Dictionary = {}  # channel_name -> float
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "lag"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Attack/release smoothing on channels."
 

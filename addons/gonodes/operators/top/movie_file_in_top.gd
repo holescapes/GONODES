@@ -1,5 +1,5 @@
 class_name MovieFileInTOP
-extends GNNode
+extends GNTopBase
 ## Loads and plays a video file as a texture stream.
 ## Uses Godot's native VideoStreamPlayer (.ogv Theora format built-in).
 ## Similar to TouchDesigner's Movie File In TOP.
@@ -18,7 +18,6 @@ var _awaiting_video_size: bool = false
 
 func _init() -> void:
 	node_type = "moviefilein"
-	family = GNFamily.Type.TOP
 	time_dependent = true
 	node_description = "Plays a video file (.ogv) as a texture stream. Godot's native VideoStreamPlayer."
 

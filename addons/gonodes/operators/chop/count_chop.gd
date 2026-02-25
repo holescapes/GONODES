@@ -1,16 +1,14 @@
 class_name CountCHOP
-extends GNNode
+extends GNChopBase
 ## Counts up, down, or tracks cumulative values on each input trigger.
 ## Similar to TouchDesigner's Count CHOP.
 
 var _count_values: Dictionary = {}  # channel -> float
 var _prev_in: Dictionary = {}  # channel -> float (for edge detection)
-var _cached_channel_data: GNChannelData = null
 
 
 func _init() -> void:
 	node_type = "count"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Count rising edges on input channels."
 

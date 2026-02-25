@@ -1,11 +1,10 @@
 class_name SwitchSOP
-extends GNNode
+extends GNSopBase
 ## Switches between multiple SOP inputs based on an index.
 ## Number of inputs is controlled by the "num_inputs" parameter (2-8).
 
 func _init() -> void:
 	node_type = "switch"
-	family = GNFamily.Type.SOP
 	node_description = "Switch between multiple SOP inputs by index (dynamic port count)."
 
 

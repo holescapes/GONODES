@@ -1,15 +1,12 @@
 class_name TextDAT
-extends GNNode
+extends GNDatBase
 ## Holds plain text content — editable via a string parameter.
 ## In text mode (not table mode). Useful for storing scripts,
 ## notes, or text data that other DATs can process.
 
-var _cached_table: GNTableData = null
-
 
 func _init() -> void:
 	node_type = "text"
-	family = GNFamily.Type.DAT
 	node_description = "Hold plain text content."
 
 

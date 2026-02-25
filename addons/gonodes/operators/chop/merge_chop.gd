@@ -1,15 +1,12 @@
 class_name MergeCHOP
-extends GNNode
+extends GNChopBase
 ## Merges channels from multiple CHOP inputs into a single output.
 ## Channels with matching names can be overwritten or renamed.
 ## Number of inputs is controlled by the "num_inputs" parameter (2-8).
 
-var _cached_channel_data: GNChannelData = null
-
 
 func _init() -> void:
 	node_type = "merge"
-	family = GNFamily.Type.CHOP
 	node_description = "Merge channels from multiple CHOP inputs (dynamic port count)."
 
 

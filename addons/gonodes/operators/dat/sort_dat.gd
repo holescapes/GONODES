@@ -1,14 +1,11 @@
 class_name SortDAT
-extends GNNode
+extends GNDatBase
 ## Sorts the rows of a table by a specified column.
 ## Supports ascending/descending and alphabetic/numeric sort.
-
-var _cached_table: GNTableData = null
 
 
 func _init() -> void:
 	node_type = "sort"
-	family = GNFamily.Type.DAT
 	node_description = "Sort table rows by a column."
 
 

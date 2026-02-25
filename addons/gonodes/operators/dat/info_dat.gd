@@ -1,15 +1,12 @@
 class_name InfoDAT
-extends GNNode
+extends GNDatBase
 ## Outputs system information as a DAT table.
 ## Columns: "property", "value".
 ## Includes FPS, frame number, elapsed time, renderer info, etc.
 
-var _cached_table: GNTableData = null
-
 
 func _init() -> void:
 	node_type = "info"
-	family = GNFamily.Type.DAT
 	time_dependent = true
 	node_description = "Output system info (FPS, frame, memory, etc.)."
 

@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 In Progress — Save/load (.gnpatch JSON), copy/paste, undo/redo. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline live. 78 operators across 5 families. Phases 1–5.8 complete.**
+**Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu. GNExtensionRegistry. 3D pipeline live. 78 operators across 5 families. Phases 1–5.8 complete.**
 
 ### Completed
 
@@ -112,11 +112,15 @@ SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and S
 - [x] Save/load patches (`.gnpatch` JSON files with full serialization pipeline)
 - [x] Node copy/paste (Ctrl+C/V/X/D with ID remapping and connection preservation)
 - [x] Undo/redo (Ctrl+Z/Y — add, delete, connect, disconnect, move, rename)
+- [x] Live node previews (all families: texture, channels, tables, mesh stats, scene info)
+- [x] Family base classes (GNTopBase, GNChopBase, GNDatBase, GNSopBase, GNCompBase)
+- [x] Preview toggle (toolbar CheckButton to show/hide all inline previews)
+- [x] Right-click context menu (Add Node, Copy/Cut/Paste/Duplicate, Delete, Select All, Undo/Redo)
 - ScriptCHOP (user GDScript for custom channel processing)
 - Code editor UI (CodeEdit-based multi-line editing in inspector)
-- Undo/redo
-- Mini preview thumbnails on TOP nodes
 - Right-click context menu on graph canvas
+- Multiple viewer windows
+- Performance profiling overlay
 
 ### Planned (Post-MVP)
 
@@ -192,8 +196,13 @@ GONODES/
 ├── README.md                        # This file
 ├── GONODES_CONTEXT.md               # Full architecture & design doc
 ├── addons/gonodes/
-│   ├── core/                        # Framework core (14 classes)
-│   │   ├── gn_node.gd              # Base operator (extends Node)
+│   ├── core/                        # Framework core (19 classes)
+│   │   ├── gn_node.gd              # Base operator (extends Node) — type-agnostic
+│   │   ├── gn_top_base.gd          # GNTopBase — TOP family base class
+│   │   ├── gn_chop_base.gd         # GNChopBase — CHOP family base class
+│   │   ├── gn_dat_base.gd          # GNDatBase — DAT family base class
+│   │   ├── gn_sop_base.gd          # GNSopBase — SOP family base class
+│   │   ├── gn_comp_base.gd         # GNCompBase — COMP family base class
 │   │   ├── gn_cook_engine.gd       # Frame-driven cook engine
 │   │   ├── gn_network.gd           # Graph model (Resource)
 │   │   ├── gn_parameter.gd         # Typed parameters with expressions

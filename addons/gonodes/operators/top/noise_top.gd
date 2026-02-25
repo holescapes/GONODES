@@ -1,5 +1,5 @@
 class_name NoiseTOP
-extends GNNode
+extends GNTopBase
 ## Generates a procedural noise texture using a SubViewport and a noise shader.
 ## Supports simplex noise with configurable scale, offset, seed, and animation.
 ## SubViewport is a child of this Node — freed automatically on removal.
@@ -22,7 +22,6 @@ var _cached_tex_data: GNTextureData = null
 
 func _init() -> void:
 	node_type = "noise"
-	family = GNFamily.Type.TOP
 	time_dependent = true
 	node_description = "Procedural noise texture (Simplex, Perlin, Voronoi, White). GPU shader."
 

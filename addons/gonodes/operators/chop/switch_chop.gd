@@ -1,12 +1,11 @@
 class_name SwitchCHOP
-extends GNNode
+extends GNChopBase
 ## Selects one of multiple CHOP inputs based on the index parameter.
 ## Number of inputs is controlled by the "num_inputs" parameter (2-8).
 
 
 func _init() -> void:
 	node_type = "switch"
-	family = GNFamily.Type.CHOP
 	node_description = "Select one of multiple CHOP inputs by index (dynamic port count)."
 
 

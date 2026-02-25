@@ -1,5 +1,5 @@
 class_name NoiseCHOP
-extends GNNode
+extends GNChopBase
 ## Generates smooth noise channels over time.
 ## Each channel produces a continuous noise signal seeded differently.
 ## Always time-dependent (cooks every frame).
@@ -7,15 +7,11 @@ extends GNNode
 
 func _init() -> void:
 	node_type = "noise"
-	family = GNFamily.Type.CHOP
 	time_dependent = true
 	node_description = "Generate smooth noise channels over time."
 
 ## Internal time accumulator for continuous noise evolution.
 var _time_accum: float = 0.0
-
-## Reusable output data object (created once, updated each cook).
-var _cached_channel_data: GNChannelData = null
 
 
 func _init_ports() -> void:

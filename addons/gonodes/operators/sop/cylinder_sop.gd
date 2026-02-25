@@ -1,14 +1,11 @@
 class_name CylinderSOP
-extends GNNode
+extends GNSopBase
 ## Generates a cylinder mesh using Godot's CylinderMesh primitive.
 ## Supports cones (top_radius = 0) and capsule-like shapes.
-
-var _cached_geo: GNGeoData = null
 
 
 func _init() -> void:
 	node_type = "cylinder"
-	family = GNFamily.Type.SOP
 	node_description = "Generate a cylinder mesh."
 
 

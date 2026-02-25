@@ -1,10 +1,9 @@
 class_name NullSOP
-extends GNNode
+extends GNSopBase
 ## Pass-through SOP — forwards its input geometry unchanged.
 
 func _init() -> void:
 	node_type = "null"
-	family = GNFamily.Type.SOP
 	node_description = "Pass-through for organization and references."
 
 
