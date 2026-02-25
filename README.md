@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. ~78 operators across 5 families. File parameter type, font selection, image/video input TOPs added. Phases 1–5.7 complete.**
+**Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. ~78 operators across 5 families. File parameter type, font selection, image/video input TOPs added. GNExtensionRegistry dynamic operator architecture. Phases 1–5.8 complete.**
 
 ### Completed
 
@@ -74,6 +74,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - **Phase 5.5: DAT, SOP, COMP & 3D Pipeline** — 12 DAT operators + 14 SOP operators + 3 COMP operators + RenderTOP. GNTableData and GNGeoData data types. Full 3D scene rendering pipeline using Godot's native scene graph. Total: ~75 operators across 5 families.
 - **Phase 5.6: UI Polish & Node Renaming** — Canvas anchoring fix (all 21 TOPs use `set_anchors_and_offsets_preset`), viewer panel sizing fix (`expand_mode = IGNORE_SIZE`, `clip_contents`), inline node renaming (double-click title bar with full ID update chain), inspector refresh on rename.
 - **Phase 5.7: File Parameters & Media Input** — FILE parameter type with project file picker (FileDialog). TextTOP font selection (TTF/OTF/WOFF). ImageFileInTOP (PNG, JPG, WebP, HDR, EXR, SVG). MovieFileInTOP (Godot VideoStreamPlayer, .ogv Theora).
+- **Phase 5.8: Extension Registry Architecture** — GNExtensionRegistry singleton replaces static match-factory and description dictionary. Dynamic operator registration API. Extension scanning (`gn_ext_*` addon manifests with `gn_extension.cfg`). ClassDB dependency guards for GDExtension addons. FFmpeg extension as future reference implementation.
 - **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
 - **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display (zero-copy GPU texture routing)
 - **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button
@@ -123,6 +124,7 @@ SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and S
 - Renderer switching (Forward+, Mobile, Compatibility) for target platform preview
 - Patch export as standalone apps (desktop, mobile, web)
 - LibGodot embedding for host applications (VDMX, Resolume)
+- FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — reference extension for GNExtensionRegistry (H.264, VP9, AV1, ProRes)
 - HAP codec GDExtension (GPU-direct S3TC/DXT video for VJ workflows, alpha support)
 - ImageSequenceTOP (numbered PNG/WebP frame playback with alpha)
 - Syphon / Spout texture sharing
@@ -189,11 +191,12 @@ GONODES/
 ├── README.md                        # This file
 ├── GONODES_CONTEXT.md               # Full architecture & design doc
 ├── addons/gonodes/
-│   ├── core/                        # Framework core (13 classes)
+│   ├── core/                        # Framework core (14 classes)
 │   │   ├── gn_node.gd              # Base operator (extends Node)
 │   │   ├── gn_cook_engine.gd       # Frame-driven cook engine
 │   │   ├── gn_network.gd           # Graph model (Resource)
 │   │   ├── gn_parameter.gd         # Typed parameters with expressions
+│   │   ├── gn_extension_registry.gd # Dynamic operator registry + extension loader
 │   │   ├── gn_data.gd              # Base output data (RefCounted)
 │   │   ├── gn_texture_data.gd      # TOP output data
 │   │   ├── gn_channel_data.gd      # CHOP output data

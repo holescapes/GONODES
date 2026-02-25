@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-27
-> **Status:** Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. Codebase reviewed and optimized. Phases 1–5 complete. ~75 operators across 5 families.
+> **Status:** Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. GNExtensionRegistry dynamic operator architecture. Phases 1–5.8 complete. 78 operators across 5 families.
 
 ---
 
@@ -53,6 +53,10 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 │  │  UI Layer                                   │ │
 │  │  GraphEdit canvas, Inspector panel,         │ │
 │  │  Viewer windows, Node palette, Timeline     │ │
+│  ├─────────────────────────────────────────────┤ │
+│  │  GNExtensionRegistry                        │ │
+│  │  Core operators + gn_ext_* addon operators  │ │
+│  │  Dynamic factory, descriptions, manifests   │ │
 │  ├─────────────────────────────────────────────┤ │
 │  │  Operator Library                           │ │
 │  │  Built-in TOPs, CHOPs, SOPs, DATs, MATs     │ │
@@ -523,6 +527,7 @@ GONODES/
 │       │   ├── gn_network.gd       # GNNetwork (Resource — serialization boundary)
 │       │   ├── gn_cook_engine.gd   # GNCookEngine (Node)
 │       │   ├── gn_parameter.gd     # GNParameter (Resource — typed param with expressions)
+│       │   ├── gn_extension_registry.gd # GNExtensionRegistry — dynamic operator registry + extension loader
 │       │   ├── gn_family.gd        # GNFamily enum constants
 │       │   └── gn_logger.gd        # GNLogger — centralized logging with level filtering
 │       ├── operators/
@@ -719,6 +724,22 @@ GONODES/
 - [x] **MovieFileInTOP** — new TOP generator using Godot's native `VideoStreamPlayer` for .ogv Theora video playback. Play/pause, loop, seek, speed controls. Video renders inside SubViewport for standard TOP pipeline integration.
   - **Codec limitations:** Godot's built-in Theora decoder outputs RGB only (no alpha). HAP codec (VJ-standard S3TC/DXT GPU-direct upload) requires a custom GDExtension — see roadmap. For alpha video, use image sequences (PNG/WebP).
 
+### Phase 5.8: Extension Registry Architecture ✅
+- [x] **GNExtensionRegistry** — centralized operator registry (`addons/gonodes/core/gn_extension_registry.gd`). Lazy singleton with `instance()`. Replaces the static match-factory in GNGraphEditor and the static description dictionary in GNNodePalette.
+  - `OperatorEntry` inner class: family, GDScript, description, source ("core" or extension name)
+  - `register_operator()` / `unregister_operator()` — dynamic operator registration API
+  - `create_instance(class_name)` → GNNode — data-driven factory (no more match block)
+  - `get_operator_registry()` → Dictionary grouped by family — same shape as before
+  - `get_description(class_name)` → String — tooltip text for palette
+  - `has_operator()`, `get_operator_count()`, `get_all_operator_names()`, `get_loaded_extensions()` — query API
+- [x] **Extension scanning** — `scan_extensions()` discovers `res://addons/gn_ext_*/gn_extension.cfg` manifest files (ConfigFile format). Each manifest declares:
+  - `[extension]` section: name, version, author, description, dependencies (ClassDB class names)
+  - `[operator.<ClassName>]` sections: family, script path, description
+  - Dependency guard via `ClassDB.class_exists()` — skips extensions whose GDExtension deps are missing
+- [x] **Refactored GNGraphEditor** — `_create_operator_instance()` and `get_operator_registry()` now delegate to GNExtensionRegistry (replaced ~230-line match block + ~40-line static dictionary)
+- [x] **Refactored GNNodePalette** — `_get_operator_description()` now delegates to GNExtensionRegistry (replaced ~80-line static dictionary)
+- [x] **Editor startup** — `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()` before network setup
+
 ### Phase 6: Integration & Stabilization (Week 6)
 - [ ] Save/load patches (.tres resources)
 - [ ] Multiple viewer windows
@@ -752,6 +773,10 @@ GONODES/
 - [ ] MIDI input operators
 - [ ] Audio input CHOP (microphone / audio file)
 - [ ] Webcam / video input TOP
+- [ ] FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — reference extension for GNExtensionRegistry
+  - Wraps [EIRTeam/EIRTeam.FFmpeg](https://github.com/EIRTeam/EIRTeam.FFmpeg) GDExtension
+  - FFmpegMovieTOP: H.264, VP9, AV1, ProRes playback via `VideoStreamFFmpeg`
+  - Demonstrates `gn_extension.cfg` manifest, `ClassDB.class_exists()` dependency guards
 - [ ] HAP codec GDExtension — GPU-direct S3TC/DXT video playback for VJ workflows
   - HAP, HAP Alpha, HAP Q variants
   - Custom `VideoStreamHAP` resource extending Godot's `VideoStream`
@@ -2342,6 +2367,86 @@ Current string parameters use single-line `LineEdit`. Code-based operators need:
 
 **Implementation plan:**
 - Add `ValueType.CODE` to `GNParameter` (or detect `shader_code` / `script_code` param names)
+
+---
+
+## 28. Extension Architecture (GNExtensionRegistry)
+
+### 28.1 Overview
+
+GONODES uses a dynamic operator registry (`GNExtensionRegistry`) to manage all operators — both built-in core operators and third-party extension-provided operators. This replaces the previous approach of hardcoded match-block factories and static description dictionaries, enabling a plugin-friendly architecture where GDExtension addons can register new operators without modifying core code.
+
+### 28.2 Registry Singleton
+
+`GNExtensionRegistry` is a `RefCounted`-based lazy singleton accessed via `GNExtensionRegistry.instance()`. It is initialized on first access, at which point all 78 core operators are registered via `_register_core_operators()`. Extension scanning happens explicitly via `scan_extensions()`, called during editor startup (`gn_editor.gd._ready()`).
+
+### 28.3 OperatorEntry
+
+Each registered operator is stored as an `OperatorEntry` with:
+- `family: String` — TOP, CHOP, SOP, DAT, MAT, COMP, POP
+- `script: GDScript` — the preloaded GDScript class (supports `.new()`)
+- `description: String` — one-line tooltip for the palette
+- `source: String` — "core" or the extension name that provided it
+
+### 28.4 API Surface
+
+| Method | Returns | Purpose |
+|--------|---------|---------|
+| `register_operator(name, family, script, desc, source)` | void | Register an operator |
+| `unregister_operator(name)` | void | Remove an operator |
+| `create_instance(name)` | GNNode | Data-driven factory (replaces match block) |
+| `get_operator_registry()` | Dictionary | `{ "TOP": [...], "CHOP": [...] }` — palette data |
+| `get_description(name)` | String | Tooltip text |
+| `has_operator(name)` | bool | Existence check |
+| `get_operator_count()` | int | Total registered operators |
+| `get_all_operator_names()` | PackedStringArray | All registered names |
+| `get_loaded_extensions()` | PackedStringArray | Loaded extension folder names |
+| `scan_extensions()` | void | Discover and load `gn_ext_*` addons |
+
+### 28.5 Extension Convention
+
+Extensions live under `res://addons/gn_ext_<name>/` and contain a `gn_extension.cfg` manifest (ConfigFile format):
+
+```ini
+[extension]
+name = "FFmpeg Codecs"
+version = "0.1.0"
+author = "Your Name"
+description = "H.264/VP9/HAP video codecs for MovieFileInTOP."
+dependencies = ["FFmpegFrameDecoder"]   ; ClassDB classes that must exist
+
+[operator.FFmpegMovieTOP]
+family = "TOP"
+script = "res://addons/gn_ext_ffmpeg/operators/ffmpeg_movie_top.gd"
+description = "H.264/VP9/AV1 video via FFmpeg GDExtension."
+
+[operator.HAPMovieTOP]
+family = "TOP"
+script = "res://addons/gn_ext_ffmpeg/operators/hap_movie_top.gd"
+description = "HAP codec GPU-direct video playback (S3TC/DXT)."
+```
+
+### 28.6 Dependency Guards
+
+Before loading an extension's operators, the registry checks `ClassDB.class_exists()` for each class listed in `dependencies`. If any dependency is missing (e.g., the GDExtension `.dll`/`.so` is not installed), the entire extension is skipped with a warning — no crash, no error.
+
+### 28.7 Loading Flow
+
+1. **Editor startup** → `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()`
+2. **First access** → `instance()` creates the singleton and runs `_register_core_operators()` (78 operators)
+3. **scan_extensions()** → iterates `res://addons/gn_ext_*/gn_extension.cfg`, checks dependencies, loads operator scripts
+4. **Palette/Factory** → `GNGraphEditor.get_operator_registry()` and `_create_operator_instance()` delegate to the registry
+5. **Palette tooltips** → `GNNodePalette._get_operator_description()` delegates to registry
+
+### 28.8 Future Extensions (Roadmap)
+
+| Extension | Folder | Dependencies | Operators |
+|-----------|--------|-------------|-----------|
+| FFmpeg | `gn_ext_ffmpeg` | `FFmpegFrameDecoder` | FFmpegMovieTOP, HAPMovieTOP |
+| Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP |
+| NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP |
+| Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP |
+| MIDI | `gn_ext_midi` | — | MidiInCHOP, MidiOutCHOP |
 - `GNParamRow` creates a `CodeEdit` instead of `LineEdit` for CODE-type params
 - `CodeEdit` supports syntax highlighting for `.gdshader` and `.gd` automatically
 - Apply-on-blur or explicit "Compile" button to avoid recompiling on every keystroke
