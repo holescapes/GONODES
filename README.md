@@ -85,10 +85,13 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - **20 new TOPs:** Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch
 - **17 new CHOPs:** Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch
 - **14 new GPU shaders** for blur, ramp, SDF shapes, transforms, color adjustments, edge detection, and more
-- Total operator count: **44 operators** (24 TOPs + 20 CHOPs) across generators, filters, combiners, and utilities
+- Total operator count: **45 operators** (25 TOPs + 20 CHOPs) across generators, filters, combiners, utilities, and scripting
+- **CustomShaderTOP**: Write custom GPU shaders (Godot Shading Language) with live recompilation, 4 texture inputs, and configurable uniforms
 
 ### Next Up (Phase 6)
 
+- ScriptCHOP (user GDScript for custom channel processing)
+- Code editor UI (CodeEdit-based multi-line editing in inspector)
 - Node copy/paste
 - Undo/redo
 - Mini preview thumbnails on TOP nodes
@@ -105,6 +108,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - Syphon / Spout texture sharing
 - OSC, MIDI, NDI input/output
 - Custom GLSL shader operators
+- Scriptable operators: ScriptCHOP, ScriptDAT, ScriptTOP, ComputeShaderTOP (see GONODES_CONTEXT.md §27)
 - Sub-networks (COMPs) with hierarchical paths
 
 ---

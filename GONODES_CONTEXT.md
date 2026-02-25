@@ -611,12 +611,17 @@ GONODES/
 - [ ] MIDI input operators
 - [ ] Audio input CHOP (microphone / audio file)
 - [ ] Webcam / video input TOP
-- [ ] Custom GLSL shader TOP (user-editable shader code)
+- [x] Custom GLSL shader TOP (user-editable shader code) — **Done: CustomShaderTOP**
+- [ ] ScriptCHOP (user GDScript for channel processing — see Section 27)
+- [ ] ScriptDAT (user GDScript for table/text processing — see Section 27)
 
 ### Long-term
 - [ ] NDI video streaming
 - [ ] FxPlug / FFGL plugin export (for VDMX, Resolume)
 - [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
+- [ ] ComputeShaderTOP (user-editable GPU compute shader — see Section 27)
+- [ ] ScriptTOP (CPU-side pixel generation via GDScript — see Section 27)
+- [ ] ScriptSOP (procedural geometry via GDScript — see Section 27)
 - [ ] Multi-threaded cook engine
 - [ ] Python scripting DAT (embedded Python via GDExtension)
 - [ ] Network collaboration (shared editing)
@@ -1815,3 +1820,187 @@ These are non-negotiable constraints discovered during development. **Never viol
 - **Workaround:** Change Window Mode back to Windowed from the inspector (requires access to the main editor window)
 - **Planned fix:** Investigate `Window._unhandled_input()` override, or a dedicated `SubViewport` overlay with `_input()` handler inside the output window
 - **Priority:** Low — does not affect core functionality, only UX convenience
+
+---
+
+## 27. Code-Based / Scriptable Operators — Architecture & Roadmap
+
+This section defines the strategy for operators where the user writes executable code (shaders, GDScript, or future languages). These are the GONODES equivalents of TouchDesigner's GLSL TOP, Script CHOP, Script SOP, and Python-based DATs.
+
+### 27.1 Design Philosophy
+
+1. **Sandboxed execution** — User code runs inside controlled contexts (shader uniforms, `Expression.execute()`, or dedicated `RefCounted` subclasses). Never `eval()` arbitrary strings on the main thread without containment.
+2. **Stable uniform/API contract** — Each scriptable operator defines a fixed set of inputs, outputs, and auto-bound variables. User code plugs into a well-defined slot; the framework handles plumbing.
+3. **Graceful failure** — Shader compilation errors, GDScript parse errors, and runtime exceptions are caught, logged, and the operator falls back to its last-good output. The network never crashes from user code.
+4. **Hot-reload** — Code changes recompile/re-evaluate without restarting the cook engine. Shader recompilation is synchronous; GDScript re-parse should be deferred to avoid frame spikes.
+
+### 27.2 Implemented: CustomShaderTOP (GLSL TOP)
+
+**Status: ✅ Done**
+
+The user provides a complete `shader_type canvas_item;` shader. The operator:
+- Accepts up to **4 texture inputs** (`gn_tex0` … `gn_tex3`)
+- Exposes **4 float uniforms** (`gn_float0` … `gn_float3`) bound to inspector params
+- Exposes **2 color uniforms** (`gn_color0`, `gn_color1`)
+- Exposes **resolution** (`gn_resolution`) and Godot's built-in `TIME`
+- Recompiles when `shader_code` string changes; keeps last-good shader on failure
+- Default template is a simple pass-through for rapid prototyping
+
+**Limitations:**
+- Godot does not surface shader compilation errors programmatically — they go to the editor output console. Future: parse console output or use RenderingServer API if exposed.
+- Single-pass only. Multi-pass requires chaining multiple CustomShaderTOP nodes.
+
+### 27.3 Planned: ScriptCHOP (GDScript CHOP)
+
+**Status: 🔲 Planned — Near-term priority**
+
+The GDScript equivalent of TouchDesigner's Script CHOP. The user writes a GDScript snippet that runs every cook and returns channel data.
+
+**Design:**
+```
+class_name ScriptCHOP extends GNNode
+
+# User-facing API (injected into Expression.execute or custom RefCounted):
+#   in0: GNChannelData — channels from input 0
+#   in1: GNChannelData — channels from input 1
+#   me:  GNNode        — self-reference (access own params)
+#   time, frame, dt    — engine time variables
+#
+# Return: Dictionary { "chan_name": float_or_array, ... }
+```
+
+**Implementation approach:**
+- Option A (MVP): Use Godot's `Expression` system — same as parameter expressions but returning a Dictionary. Simple, but limited to single-line expressions or small lambdas.
+- Option B (Full): Use a dynamically-loaded GDScript `Resource`. The user writes a script extending a `GNScriptContext` base class with an overridable `_evaluate()` method. The ScriptCHOP loads/caches this script and calls `_evaluate()` each cook. This gives full GDScript power (loops, variables, classes).
+- **Recommendation:** Start with Option A for quick scripting, add Option B for complex logic.
+
+**Uniform contract:**
+```gdscript
+# User writes:
+func _evaluate(in0: GNChannelData, in1: GNChannelData,
+               time: float, frame: int, dt: float) -> Dictionary:
+    var lfo_val = in0.get_value("out") if in0 else 0.0
+    return { "processed": lfo_val * 2.0 + sin(time) }
+```
+
+### 27.4 Planned: ScriptDAT (GDScript DAT)
+
+**Status: 🔲 Planned — Requires DAT family first**
+
+Processes table/text data via user GDScript. Depends on the DAT family implementation (GNTableData type).
+
+**Design:**
+```gdscript
+# User writes:
+func _evaluate(in_table: GNTableData, me: GNNode,
+               time: float) -> GNTableData:
+    var out = GNTableData.new()
+    for row in in_table.rows:
+        if float(row["value"]) > 0.5:
+            out.append_row(row)
+    return out
+```
+
+**Key decisions:**
+- GNTableData: Dictionary-of-arrays (column-major) or Array-of-Dictionaries (row-major)? TD uses row-major. Recommend row-major for user-friendliness.
+- String manipulation: full GDScript string API available (regex, split, JSON parse)
+- File I/O: sandboxed to project directory only (user:// paths)
+
+### 27.5 Planned: ScriptTOP (GDScript TOP)
+
+**Status: 🔲 Planned — Medium-term**
+
+The user writes GDScript that generates/manipulates pixel data on the CPU. Useful for procedural generation that's easier to express in code than shaders.
+
+**Design:**
+```gdscript
+# User writes:
+func _evaluate(in_img: Image, me: GNNode,
+               time: float) -> Image:
+    var out = Image.create(512, 512, false, Image.FORMAT_RGBA8)
+    for y in range(512):
+        for x in range(512):
+            var u = float(x) / 512.0
+            var v = float(y) / 512.0
+            out.set_pixel(x, y, Color(u, v, sin(time) * 0.5 + 0.5, 1.0))
+    return out
+```
+
+**Performance considerations:**
+- CPU pixel loops are slow for large resolutions. This is intentional — ScriptTOP is for prototyping or small textures.
+- For production GPU work, users should use CustomShaderTOP.
+- We could offer a compute shader variant later (ComputeShaderTOP).
+
+### 27.6 Planned: ComputeShaderTOP (GPU Compute)
+
+**Status: 🔲 Planned — Long-term**
+
+Uses Godot's `RenderingDevice` compute shader API for massively parallel GPU operations.
+
+**Design:**
+- User writes a GLSL compute shader
+- Framework handles buffer creation, dispatch, and readback
+- Useful for: particle simulation, fluid dynamics, image processing at scale
+- Depends on Godot's compute shader stability and RenderingDevice API maturity
+
+### 27.7 Planned: ScriptSOP (GDScript SOP)
+
+**Status: 🔲 Planned — Requires SOP family first**
+
+Procedural geometry generation/manipulation via GDScript. User receives mesh data arrays and returns modified arrays.
+
+### 27.8 Implementation Priorities
+
+| Priority | Operator | Depends On | Complexity |
+|----------|----------|------------|------------|
+| ✅ Done | CustomShaderTOP | — | Medium |
+| 🥇 Next | ScriptCHOP | GNScriptContext base class | Medium |
+| 🥈 | ScriptDAT | DAT family + GNTableData | Medium-High |
+| 🥉 | ScriptTOP | — | Low (but slow) |
+| Later | ComputeShaderTOP | RenderingDevice API | High |
+| Later | ScriptSOP | SOP family + GNMeshData | High |
+
+### 27.9 Shared Infrastructure: GNScriptContext
+
+All GDScript-based scriptable operators will share a common base class:
+
+```gdscript
+class_name GNScriptContext extends RefCounted
+## Base class for user-written script contexts.
+## Subclassed dynamically or used via Expression.
+
+var _script_text: String = ""
+var _compiled: bool = false
+var _error: String = ""
+var _last_good_result: Variant = null
+
+func compile(code: String) -> bool:
+    # Parse and validate the GDScript code
+    # Return true on success, false on error
+    pass
+
+func execute(inputs: Array, variables: Dictionary) -> Variant:
+    # Run the compiled code with the given inputs/variables
+    # On error, return _last_good_result (graceful fallback)
+    pass
+```
+
+This gives us:
+- **Consistent error handling** across all script operators
+- **Hot-reload** without restarting
+- **Sandboxing** via controlled variable injection
+- **Caching** of last-good results for smooth failure recovery
+
+### 27.10 UI Considerations for Code Editing
+
+Current string parameters use single-line `LineEdit`. Code-based operators need:
+
+1. **Phase 1 (MVP):** Multi-line `TextEdit` in the inspector for shader/script code. Monospace font, basic syntax highlighting via Godot's `CodeEdit` control.
+2. **Phase 2:** Popup code editor window (resizable, with line numbers, error gutter).
+3. **Phase 3:** Integration with external editor (VS Code) via file-on-disk + file watcher.
+
+**Implementation plan:**
+- Add `ValueType.CODE` to `GNParameter` (or detect `shader_code` / `script_code` param names)
+- `GNParamRow` creates a `CodeEdit` instead of `LineEdit` for CODE-type params
+- `CodeEdit` supports syntax highlighting for `.gdshader` and `.gd` automatically
+- Apply-on-blur or explicit "Compile" button to avoid recompiling on every keystroke

@@ -351,6 +351,9 @@ static func _create_operator_instance(operator_type: String) -> GNNode:
 			return DisplaceTOP.new()
 		"LookupTOP":
 			return LookupTOP.new()
+		# ── TOPs: Scripting ──
+		"CustomShaderTOP":
+			return CustomShaderTOP.new()
 		# ── TOPs: Utility ──
 		"NullTOP":
 			return NullTOP.new()
@@ -418,6 +421,7 @@ static func get_operator_registry() -> Dictionary:
 			"EdgeTOP", "ThresholdTOP", "FlipTOP", "TileTOP",
 			"CropTOP", "FeedbackTOP", "ResolutionTOP",
 			"CompositeTOP", "CrossTOP", "DisplaceTOP", "LookupTOP",
+			"CustomShaderTOP",
 			"NullTOP", "SwitchTOP",
 			"WindowTOP",
 		],
