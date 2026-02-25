@@ -61,24 +61,31 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 2 Complete & Verified — cook engine running, all operators functional.**
+**Phase 4 Complete — Node graph editor, parameter inspector, and live expression editing all functional.**
 
 ### Completed
 
 - **Phase 1: Core Framework** — GNNode, GNNetwork, GNCookEngine, GNParameter, GNData, GNPort, GNConnection, GNFamily (11 core classes)
 - **Phase 2: First Operators** — NoiseTOP, LevelTOP, CompositeTOP, LFO_CHOP, NoiseCHOP, MathCHOP, WindowTOP (7 operators + 3 shaders + test scene)
+- **Phase 3: Node Graph UI** — GNGraphEditor (GraphEdit canvas), GNNodeView (family-colored GraphNodes), GNNodePalette (Tab to open, search + family grouping), bidirectional network sync, editor scene with HSplit layout
+- **Phase 4: Parameters & Inspector** — GNParamInspector (live parameter panel), GNParamRow (type-specific controls: sliders, spinboxes, color pickers, enums, checkboxes), expression inline editor with mode toggle (C/E), live cook time display, NoiseTOP 4-algorithm shader
 - **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
 - **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display (zero-copy GPU texture routing)
 - **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button
 - **Expression system** — `chop("lfo1", "out") * 5.0` drives parameters across node families in real time
 - **Cook engine optimization** — Cached adjacency maps, upfront dirty propagation, zero-alloc input gathering
 
-### Next Up (Phase 3)
+### Known Bugs
 
-- Node graph editor (GraphEdit) with drag-and-drop wiring
-- Visual node representation with family-colored ports
-- Inspector panel for live parameter tweaking
-- Real-time texture viewer
+- **WindowTOP ESC key:** Cannot ESC out of Fullscreen/Borderless mode from the output window. Workaround: change Window Mode back to Windowed from the inspector panel.
+
+### Next Up (Phase 5)
+
+- Node copy/paste
+- Undo/redo
+- Mini preview thumbnails on TOP nodes
+- More operators (Blur, Ramp, Transform, AudioCHOP, etc.)
+- Right-click context menu on graph canvas
 
 ### Planned (Post-MVP)
 
@@ -167,11 +174,18 @@ GONODES/
 │   │   ├── top/                     # NoiseTOP, CompositeTOP, LevelTOP
 │   │   ├── chop/                    # LFO_CHOP, NoiseCHOP, MathCHOP
 │   │   └── output/                  # WindowTOP (multi-display)
-│   ├── ui/                          # Editor UI (future: Phase 3+)
+│   ├── ui/                          # Editor UI
+│   │   ├── gn_graph_editor.gd      # GraphEdit canvas (bidirectional sync)
+│   │   ├── gn_node_view.gd         # GraphNode per operator (family colors)
+│   │   ├── gn_node_palette.gd      # Popup node picker (Tab/right-click)
+│   │   ├── gn_param_inspector.gd   # Parameter inspector panel
+│   │   └── gn_param_row.gd         # Per-parameter widget (type-specific)
 │   └── shaders/                     # noise_simplex, composite, levels
 ├── scenes/
-│   ├── test_phase2.tscn             # Phase 2 test scene
-│   └── test_phase2.gd              # Test script (LFO→Noise→Level→Window)
+│   ├── gn_editor.tscn               # Main editor scene (HSplit layout)
+│   ├── gn_editor.gd                 # Editor wiring script
+│   ├── test_phase2.tscn             # Phase 2 test scene (legacy)
+│   └── test_phase2.gd               # Phase 2 test script
 └── tests/                           # Unit tests (future)
 ```
 

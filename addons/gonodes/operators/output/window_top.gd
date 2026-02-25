@@ -21,8 +21,8 @@ var _display_rect: TextureRect = null
 ## Whether the window has been created.
 var _window_created: bool = false
 
-## Whether the initial window position has been applied.
-var _positioned: bool = false
+## Whether window-level params need re-applying (set by own param changes only).
+var _window_params_dirty: bool = true
 
 
 func _init() -> void:
@@ -62,10 +62,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if _window != null:
 		_window.title = get_param_value("title")
 
-	# Apply position/mode only once (until we have param-change tracking)
-	if not _positioned:
+	# Apply heavyweight window params only when OUR params changed
+	# (not when upstream input changes mark us cook-dirty)
+	if _window_params_dirty:
 		_apply_window_params()
-		_positioned = true
+		_window_params_dirty = false
 
 	# Feed the texture — direct GPU reference, zero-copy.
 	# SubViewport.get_texture() returns a ViewportTexture with a direct RID
@@ -151,7 +152,7 @@ func _apply_window_params() -> void:
 		WindowMode.BORDERLESS:
 			_window.mode = Window.MODE_WINDOWED
 			_window.borderless = true
-			# Set to monitor's full resolution in borderless mode
+			# Borderless fills the target monitor (native Godot behaviour)
 			var screen_count := DisplayServer.get_screen_count()
 			var target_monitor := clampi(monitor_idx, 0, screen_count - 1)
 			var screen_size := DisplayServer.screen_get_size(target_monitor)
@@ -190,6 +191,12 @@ func _on_window_close_requested() -> void:
 	if _window:
 		_window.visible = false
 		GNLogger.info("WindowTOP", "'%s' output window hidden by user" % id)
+
+
+## Override: mark window params dirty when our own parameters change.
+func _on_parameter_changed(p_name: String, _new_value: Variant) -> void:
+	super._on_parameter_changed(p_name, _new_value)
+	_window_params_dirty = true
 
 
 ## Returns info about all connected displays (for UI picker / expression use).

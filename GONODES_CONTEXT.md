@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-25
-> **Status:** Phase 2 Complete & Verified — Animated noise driven by LFO expression, multi-window output working, cook engine optimized. Ready for Phase 3 (Node Graph UI).
+> **Status:** Phase 4 Complete — Node Graph UI, Parameter Inspector, and live expression editing all functional. Ready for Phase 5 (Polish & More Operators).
 
 ---
 
@@ -535,21 +535,29 @@ GONODES/
 - [x] Cook engine performance optimization (cached adjacency, zero-alloc inputs)
 - [x] Verified: animated noise, movable output window, stable cook times
 
-### Phase 3: Node Graph UI (Week 3)
-- [ ] Implement GNGraphEditor (GraphEdit wrapper)
-- [ ] Implement GNNodeView (GraphNode per operator)
-- [ ] Port rendering with family colors
-- [ ] Wire connection UI with type checking
-- [ ] Add/remove nodes via UI
-- [ ] Connect/disconnect wires via UI
-- [ ] Sync UI ↔ GNNetwork model bidirectionally
+### Phase 3: Node Graph UI (Week 3) ✅
+- [x] Implement GNGraphEditor (GraphEdit wrapper with bidirectional network sync)
+- [x] Implement GNNodeView (GraphNode per operator with family-colored title bar)
+- [x] Port rendering with family colors via `set_slot()` typed port slots
+- [x] Wire connection UI with type checking
+- [x] Add/remove nodes via UI (Tab / right-click palette)
+- [x] Connect/disconnect wires via UI
+- [x] Sync UI ↔ GNNetwork model bidirectionally (signal-driven)
+- [x] Implement GNNodePalette (popup with search + family grouping)
+- [x] Editor scene (gn_editor.tscn) with HSplit layout: graph + viewer/inspector
 
-### Phase 4: Parameters & Inspector (Week 4)
-- [ ] Implement GNInspector panel
-- [ ] Render parameter controls by type (slider, color picker, enum, etc.)
-- [ ] Parameter change → mark node dirty → recook
-- [ ] GNViewer panel showing TOP output in real-time
-- [ ] Expression mode: CHOP channel references in parameter fields
+### Phase 4: Parameters & Inspector (Week 4) ✅
+- [x] Implement GNParamInspector panel (family color bar, header, scrollable params)
+- [x] Implement GNParamRow (per-parameter widget with type-specific controls)
+- [x] Render parameter controls by type (FLOAT: slider+spinbox, INT: spinbox, BOOL: checkbox, ENUM: dropdown, COLOR: picker, VECTOR2/2I: dual spinbox, STRING: line edit)
+- [x] Parameter mode toggle (C=constant green / E=expression orange)
+- [x] Expression inline editor with focus guard (no 60fps text clobbering)
+- [x] Parameter change → mark node dirty → recook
+- [x] GNViewer panel showing TOP output in real-time (VSplit: viewer top, inspector bottom)
+- [x] Expression mode: CHOP channel references in parameter fields
+- [x] Live cook time display per node in inspector header
+- [x] NoiseTOP noise_type enum wired to shader (4 algorithms: Simplex/Perlin/Voronoi/White)
+- [x] WindowTOP `_window_params_dirty` flag — only reconfigures on own param changes, not upstream cook-dirty
 
 ### Phase 5: Polish & More Operators (Week 5)
 - [ ] MathCHOP, NoiseCHOP
@@ -1645,6 +1653,84 @@ The test scene includes a `CheckButton` (top-right corner, "Debug Log") that tog
 
 ---
 
+## 21. Phase 3 Architecture: Node Graph UI
+
+### Overview
+
+The editor UI is built on Godot's `GraphEdit` and `GraphNode` controls with bidirectional sync to the `GNNetwork` model. Flow is left-to-right (Godot `GraphEdit` is hardcoded horizontal — vertical layout would require replacing the entire widget).
+
+### Files
+
+| File | Class | Purpose |
+|------|-------|---------|
+| `addons/gonodes/ui/gn_node_view.gd` | `GNNodeView` | GraphNode wrapper per operator. Family-colored title bar (StyleBoxFlat), typed port slots via `set_slot()`, position sync via `position_offset_changed` |
+| `addons/gonodes/ui/gn_graph_editor.gd` | `GNGraphEditor` | GraphEdit canvas. Handles connection/disconnection/deletion, bidirectional sync with GNNetwork via signals, hosts palette. Signals: `operator_selected(node_id)`, `operator_deselected()` |
+| `addons/gonodes/ui/gn_node_palette.gd` | `GNNodePalette` | PopupPanel with search LineEdit + Tree grouped by family. Tab/right-click to open. Spawns operators via `_create_operator_instance()` |
+| `scenes/gn_editor.tscn` | — | HSplitContainer layout: GraphPanel (left) + RightPanel (VSplit: Viewer + Inspector) + InfoBar (bottom) |
+| `scenes/gn_editor.gd` | — | Wires graph_editor + inspector + cook_engine. Demo network: lfo1→noise1→level1→win1 |
+
+### Operator Registry
+
+Currently hardcoded in `GNGraphEditor.get_operator_registry()` as a static Dictionary:
+
+```gdscript
+{ "noise_top": NoiseTOP, "composite_top": CompositeTOP, ... }
+```
+
+New operators must be manually added to this dictionary.
+
+### Signal Flow
+
+```
+User drags wire → GraphEdit.connection_request
+  → GNGraphEditor._on_connection_request()
+    → GNNetwork.connect_nodes()
+      → GNNetwork.connection_added signal
+        → GNGraphEditor._on_network_connection_added()
+          → GraphEdit.connect_node() (visually)
+```
+
+Same pattern for disconnection, node add/remove.
+
+---
+
+## 22. Phase 4 Architecture: Parameters & Inspector
+
+### Overview
+
+The parameter inspector is a right-side panel that shows all parameters for the selected node, with type-specific UI controls, live expression editing, and mode toggling.
+
+### Files
+
+| File | Class | Purpose |
+|------|-------|---------|
+| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard |
+| `addons/gonodes/ui/gn_param_inspector.gd` | `GNParamInspector` | PanelContainer with family color bar, header (node ID, type, cook time), scrollable GNParamRow list, placeholder label when nothing selected |
+
+### Key Design Decisions
+
+1. **Per-cook updates are lightweight:** Inspector connects to `node_cooked` signal. Per-cook path only calls `update_expression_status()` (error label colors), NEVER `_update_mode_display()` (which sets text).
+2. **Focus guard:** `_expr_edit.has_focus()` is checked before setting text in any update path to prevent clobbering user edits.
+3. **Expression commit on focus-out:** `focus_exited` signal on expression LineEdit triggers `_apply_expression_text()`.
+4. **Mode toggle:** Single button cycles C→E (E→C). Button text and color update immediately.
+
+### Editor Layout
+
+```
+HSplitContainer
+├── GraphPanel (split_offset ratio ~2:1)
+│   └── GNGraphEditor (GraphEdit)
+└── RightPanel (VSplitContainer)
+    ├── ViewerPanel (TextureRect, split ~1.5)
+    │   └── _viewer_rect (shows selected TOP output)
+    └── InspectorPanel (split ~1.0)
+        └── GNParamInspector
+InfoBar (bottom)
+└── FPS label (yellow)
+```
+
+---
+
 ## 25. Hard Rules & Lessons Learned
 
 These are non-negotiable constraints discovered during development. **Never violate these.**
@@ -1670,11 +1756,13 @@ These are non-negotiable constraints discovered during development. **Never viol
 - `Object.get_name()` takes 0 args; a custom `get_name(family)` with 1 arg causes a signature collision at runtime
 - Use unique names: `get_family_name()`, not `get_name()`
 
-### 25.4 WindowTOP Positioning
+### 25.4 WindowTOP Cook-Dirty vs Param-Dirty
 
-- Only apply window position/mode once (use a `_positioned` flag), not every cook frame
-- Reapplying `_window.position` every frame prevents the user from moving the window
-- Parameter-change-driven repositioning should be added later when param change tracking exists
+- `dirty` on a sink node (WindowTOP) is `true` every frame when upstream contains time_dependent nodes
+- Using `if dirty:` to apply window config causes per-frame reconfiguration → 15fps
+- Use a dedicated `_window_params_dirty` flag, set only by overriding `_on_parameter_changed()`
+- Cook-dirty (upstream data changed) ≠ parameter-dirty (this node's params changed)
+- Any future config-heavy sink nodes should use the same pattern
 
 ### 25.5 Anchors Preset vs set_anchors_and_offsets_preset
 
@@ -1692,6 +1780,27 @@ These are non-negotiable constraints discovered during development. **Never viol
 - Use `DisplayServer.screen_get_size()` / `screen_get_position()` (not `get_screen_size/position`)
 - Use `DisplayServer.window_set_vsync_mode(mode, window_id)` for per-window vsync
 
+### 25.8 GraphEdit / GraphNode Signal Naming
+
+- `GraphEdit` has built-in signals named `node_selected` and `selection_cleared`
+- Custom signals on subclasses must use different names to avoid shadowing
+- Use `operator_selected` / `operator_deselected` instead
+
+### 25.9 Inspector Per-Cook Updates
+
+- Inspector is called every cook frame via `node_cooked` signal
+- NEVER call `_update_mode_display()` (which sets `_expr_edit.text`) per-cook — clobbers edits 60x/sec
+- Use lightweight `update_expression_status()` per-cook (only updates error label colors)
+- Check `_expr_edit.has_focus()` before setting text in any update path
+
 ---
 
-*This file should be read by the LLM at the start of each session to maintain continuity.*
+## 26. Known Bugs
+
+### 26.1 WindowTOP: ESC to Exit Fullscreen Not Working
+
+- **Issue:** When the output window is in Fullscreen or Borderless mode with Always On Top enabled, the user cannot escape back to windowed mode
+- **Root cause:** Input events in a child `Window` node stay in that window's viewport tree. `Input.is_action_just_pressed()` polled from the parent node's `_process()` never sees them. Attempts with `gui_input` on a focusable `TextureRect` inside the window also failed to trigger
+- **Workaround:** Change Window Mode back to Windowed from the inspector (requires access to the main editor window)
+- **Planned fix:** Investigate `Window._unhandled_input()` override, or a dedicated `SubViewport` overlay with `_input()` handler inside the output window
+- **Priority:** Low — does not affect core functionality, only UX convenience

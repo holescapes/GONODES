@@ -1,7 +1,8 @@
 shader_type canvas_item;
-// Simplex/Value noise shader for NoiseTOP.
-// Generates 2D noise as a grayscale or color texture.
+// Noise shader for NoiseTOP.
+// Generates 2D noise: Simplex (0), Perlin (1), Voronoi (2), White (3).
 
+uniform int noise_type = 0; // 0=Simplex, 1=Perlin, 2=Voronoi, 3=White
 uniform float scale : hint_range(0.1, 100.0) = 4.0;
 uniform vec2 offset = vec2(0.0, 0.0);
 uniform float time_offset = 0.0;
@@ -61,12 +62,61 @@ float snoise(vec2 v) {
 	return 130.0 * dot(m, g);
 }
 
+// Perlin-style gradient noise (classic grid-based)
+float pnoise(vec2 v) {
+	vec2 i = floor(v);
+	vec2 f = fract(v);
+	vec2 u = f * f * (3.0 - 2.0 * f); // smoothstep
+
+	float a = hash21(i + vec2(0.0, 0.0));
+	float b = hash21(i + vec2(1.0, 0.0));
+	float c = hash21(i + vec2(0.0, 1.0));
+	float d = hash21(i + vec2(1.0, 1.0));
+
+	return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 2.0 - 1.0;
+}
+
+// Voronoi (Worley) noise — returns distance to nearest cell center
+float voronoi(vec2 v) {
+	vec2 i = floor(v);
+	vec2 f = fract(v);
+	float min_dist = 1.0;
+
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
+			vec2 neighbor = vec2(float(x), float(y));
+			vec2 point = hash22(i + neighbor);
+			vec2 diff = neighbor + point - f;
+			float d = length(diff);
+			min_dist = min(min_dist, d);
+		}
+	}
+	return min_dist * 2.0 - 1.0; // remap to [-1, 1]
+}
+
+// White noise (fully random per pixel)
+float wnoise(vec2 v) {
+	return hash21(v) * 2.0 - 1.0;
+}
+
+// Dispatch noise by type — returns value in [-1, 1]
+float get_noise(vec2 v) {
+	if (noise_type == 1) {
+		return pnoise(v);
+	} else if (noise_type == 2) {
+		return voronoi(v);
+	} else if (noise_type == 3) {
+		return wnoise(v);
+	}
+	return snoise(v); // 0 = Simplex (default)
+}
+
 void fragment() {
 	vec2 uv = UV * scale + offset + vec2(float(seed_val) * 0.7123, float(seed_val) * 0.3917);
 	float t = time_offset;
 
 	// Use time as a Z-axis offset to animate the noise
-	float n = snoise(uv + vec2(t * 0.5, t * 0.3));
+	float n = get_noise(uv + vec2(t * 0.5, t * 0.3));
 	// Remap from [-1, 1] to [0, 1]
 	n = n * 0.5 + 0.5;
 
@@ -74,9 +124,9 @@ void fragment() {
 		COLOR = vec4(vec3(n), 1.0);
 	} else {
 		// Generate RGB channels with offset seeds
-		float r = snoise(uv + vec2(t * 0.5, t * 0.3)) * 0.5 + 0.5;
-		float g = snoise(uv + vec2(t * 0.3 + 100.0, t * 0.5 + 100.0)) * 0.5 + 0.5;
-		float b = snoise(uv + vec2(t * 0.7 + 200.0, t * 0.2 + 200.0)) * 0.5 + 0.5;
+		float r = get_noise(uv + vec2(t * 0.5, t * 0.3)) * 0.5 + 0.5;
+		float g = get_noise(uv + vec2(t * 0.3 + 100.0, t * 0.5 + 100.0)) * 0.5 + 0.5;
+		float b = get_noise(uv + vec2(t * 0.7 + 200.0, t * 0.2 + 200.0)) * 0.5 + 0.5;
 		COLOR = vec4(r, g, b, 1.0);
 	}
 }

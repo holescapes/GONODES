@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://gn_editor_scene"]
+[gd_scene load_steps=4 format=3 uid="uid://gn_editor_scene"]
 
 [ext_resource type="Script" path="res://scenes/gn_editor.gd" id="1_scene_script"]
 [ext_resource type="Script" path="res://addons/gonodes/ui/gn_graph_editor.gd" id="2_graph_editor"]
+[ext_resource type="Script" path="res://addons/gonodes/ui/gn_param_inspector.gd" id="3_inspector"]
 
 [node name="GNEditor" type="Control"]
 layout_mode = 3
@@ -31,15 +32,26 @@ size_flags_stretch_ratio = 2.0
 layout_mode = 2
 script = ExtResource("2_graph_editor")
 
-[node name="ViewerPanel" type="PanelContainer" parent="HSplit"]
+[node name="RightPanel" type="VSplitContainer" parent="HSplit"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 1.0
 
-[node name="Viewer" type="TextureRect" parent="HSplit/ViewerPanel"]
+[node name="ViewerPanel" type="PanelContainer" parent="HSplit/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.5
+
+[node name="Viewer" type="TextureRect" parent="HSplit/RightPanel/ViewerPanel"]
 layout_mode = 2
 stretch_mode = 5
 expand_mode = 3
+
+[node name="InspectorPanel" type="PanelContainer" parent="HSplit/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.0
+script = ExtResource("3_inspector")
 
 [node name="InfoBar" type="HBoxContainer" parent="."]
 layout_mode = 1

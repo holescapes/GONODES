@@ -45,6 +45,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_ensure_viewport()
 
 	var res: Vector2i = get_param_value("resolution")
+	var noise_type_idx: int = get_param_value("noise_type")
 	var scale_val: float = get_param_value("scale")
 	var offset_val: Vector2 = get_param_value("offset")
 	var time_off: float = get_param_value("time_offset")
@@ -57,6 +58,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		_canvas.size = Vector2(res)
 
 	# Update shader uniforms
+	_material.set_shader_parameter("noise_type", noise_type_idx)
 	_material.set_shader_parameter("scale", scale_val)
 	_material.set_shader_parameter("offset", offset_val)
 	_material.set_shader_parameter("time_offset", time_off)

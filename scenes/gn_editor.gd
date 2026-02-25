@@ -1,11 +1,12 @@
 extends Control
 ## GONODES Editor — Main editor scene.
-## Split layout: GNGraphEditor (left/center) + Viewer panel (right).
+## Split layout: GNGraphEditor (left/center) + Viewer + Inspector (right).
 ## Runs a cook engine each frame and displays the output of the last TOP
 ## in the viewer panel. Includes a debug info label and log toggle.
 
 @onready var graph_editor: GNGraphEditor = $HSplit/GraphPanel/GraphEditor
-@onready var viewer: TextureRect = $HSplit/ViewerPanel/Viewer
+@onready var viewer: TextureRect = $HSplit/RightPanel/ViewerPanel/Viewer
+@onready var inspector: GNParamInspector = $HSplit/RightPanel/InspectorPanel
 @onready var info_label: Label = $InfoBar/InfoLabel
 @onready var log_toggle: CheckButton = $InfoBar/LogToggle
 
@@ -24,6 +25,9 @@ func _ready() -> void:
 	graph_editor.bind_network(network)
 	graph_editor.operator_selected.connect(_on_graph_node_selected)
 	graph_editor.operator_deselected.connect(_on_graph_selection_cleared)
+
+	# Bind inspector to network
+	inspector.network = network
 
 	# Wire log toggle
 	log_toggle.toggled.connect(_on_log_toggled)
@@ -130,8 +134,13 @@ func _on_cook_error(node_id: String, error_msg: String) -> void:
 # Graph Editor Callbacks
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## User clicked a node — show its output in the viewer (if it's a TOP).
+## User clicked a node — show its output in the viewer (if it's a TOP)
+## and inspect its parameters.
 func _on_graph_node_selected(node_id: String) -> void:
+	# Always show inspector for any node type
+	inspector.inspect_node(node_id)
+
+	# Route viewer to TOPs only
 	var node: GNNode = network.get_node_by_id(node_id)
 	if node and node.family == GNFamily.Type.TOP:
 		_viewer_node_id = node_id
@@ -139,7 +148,7 @@ func _on_graph_node_selected(node_id: String) -> void:
 
 
 func _on_graph_selection_cleared() -> void:
-	pass  # Keep viewing current node — don't clear on deselect
+	inspector.clear_inspection()
 
 
 func _on_log_toggled(pressed: bool) -> void:
