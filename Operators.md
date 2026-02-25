@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **76 operators** across 6 categories: TOP, CHOP, DAT, SOP, COMP, and Output.
+> **78 operators** across 6 categories: TOP, CHOP, DAT, SOP, COMP, and Output.
 
 ---
 
@@ -19,7 +19,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP owns a SubViewport and renders its output via ShaderMaterial. Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback.
 
-**Total: 25 operators** — 7 generators, 13 filters, 3 combiners, 2 utility.
+**Total: 27 operators** — 9 generators, 13 filters, 3 combiners, 2 utility.
 
 ### Generators
 
@@ -116,12 +116,13 @@ Solid color texture.
 
 #### TextTOP
 
-Renders text to a texture.
+Renders text to a texture. Supports custom font loading from project resources.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | text | String | "Hello" | — | Text content |
 | resolution | Vector2i | 512×256 | — | Output resolution |
+| font_file | File | (none) | — | Font file path (TTF, OTF, WOFF, WOFF2, .tres/.res). Leave empty for default font. |
 | font_size | Int | 48 | 8–256 | Font size in pixels |
 | font_color | Color | White | — | Text color |
 | bg_color | Color | Black | — | Background color |
@@ -129,7 +130,47 @@ Renders text to a texture.
 | align_v | Enum | Center | Top, Center, Bottom | Vertical alignment |
 | word_wrap | Bool | true | — | Wrap text at edges |
 
-**How it works:** Uses Godot's `Label` node inside a SubViewport. The Label handles text layout, wrapping, and alignment natively.
+**How it works:** Uses Godot's `Label` node inside a SubViewport. The Label handles text layout, wrapping, and alignment natively. Custom fonts are loaded via `ResourceLoader` and applied with `add_theme_font_override()`.
+
+---
+
+#### ImageFileInTOP
+
+Loads an image or texture resource from the project and outputs it as a TOP texture.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | (none) | — | Image/texture path (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res) |
+| resolution | Vector2i | 512×512 | — | Output resolution |
+| fit_mode | Enum | Keep Aspect Centered | Stretch, Keep Aspect, Keep Aspect Centered, Keep Aspect Covered, Tile | How the image fits the output |
+| bg_color | Color | Black | — | Background color behind transparent or non-covering images |
+| filter | Bool | true | — | Bilinear filtering (on) or nearest-neighbor (off) |
+
+**How it works:** Loads any Godot-importable image format via `ResourceLoader`. The loaded `Texture2D` is displayed in a `TextureRect` inside a SubViewport. Supports all Godot stretch modes. Non-texture `Image` resources are automatically converted to `ImageTexture`.
+
+---
+
+#### MovieFileInTOP
+
+Plays a video file as a live texture stream. Similar to TouchDesigner's Movie File In TOP.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | (none) | — | Video file path (.ogv Theora format) |
+| resolution | Vector2i | 512×512 | — | Output resolution |
+| play | Bool | true | — | Play / pause |
+| loop | Bool | true | — | Loop when finished |
+| speed | Float | 1.0 | 0.0–4.0 | Playback speed multiplier |
+| seek | Float | -1.0 | -1.0–∞ | Seek to time in seconds (-1 = disabled) |
+| bg_color | Color | Black | — | Background color when no video loaded |
+
+**How it works:** Uses Godot's native `VideoStreamPlayer` inside a SubViewport. Supports Theora (.ogv) format out of the box. The video player renders frames directly as a Control filling the viewport. Additional codecs can be added via GDExtensions.
+
+**Codec notes:**
+- **Theora (.ogv):** Built-in. CPU-decoded. No alpha channel support in Godot's decoder.
+- **H.264/VP8/VP9:** Available via community `godot-videodecoder` GDExtension (FFmpeg-based). No alpha.
+- **HAP / HAP Alpha / HAP Q:** Not yet supported. HAP is a VJ-standard codec that stores S3TC/DXT-compressed frames, uploaded directly to the GPU with no CPU decode — ideal for real-time performance. Requires a custom GDExtension wrapping the [HAP library](https://github.com/Vidvox/hap). See roadmap.
+- **Image sequences:** For alpha-channel video content, use numbered PNG/WebP frame sequences with a future ImageSequenceTOP operator.
 
 ---
 

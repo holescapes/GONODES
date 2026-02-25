@@ -647,7 +647,7 @@ GONODES/
 ### Phase 4: Parameters & Inspector (Week 4) ✅
 - [x] Implement GNParamInspector panel (family color bar, header, scrollable params)
 - [x] Implement GNParamRow (per-parameter widget with type-specific controls)
-- [x] Render parameter controls by type (FLOAT: slider+spinbox, INT: spinbox, BOOL: checkbox, ENUM: dropdown, COLOR: picker, VECTOR2/2I: dual spinbox, STRING: line edit)
+- [x] Render parameter controls by type (FLOAT: slider+spinbox, INT: spinbox, BOOL: checkbox, ENUM: dropdown, COLOR: picker, VECTOR2/2I: dual spinbox, STRING: line edit, FILE: project file picker button with FileDialog)
 - [x] Parameter mode toggle (C=constant green / E=expression orange)
 - [x] Expression inline editor with focus guard (no 60fps text clobbering)
 - [x] Parameter change → mark node dirty → recook
@@ -711,6 +711,14 @@ GONODES/
 - [x] **Inspector refresh on rename** — header label updates when re-inspecting a renamed node
 - [x] **Documentation update** — GONODES_CONTEXT.md updated with Hard Rules 25.16–25.18
 
+### Phase 5.7: File Parameters & Media Input ✅
+- [x] **FILE parameter type** — new `ValueType.FILE` in GNParameter with `file_filters` (PackedStringArray of wildcard patterns). `create_file()` factory method. Stores `res://` paths.
+- [x] **File picker UI** — GNParamRow renders FILE params as a Button (showing filename) + "X" clear button. Opens Godot's native FileDialog scoped to `ACCESS_RESOURCES` (project directory only). Filter extensions from parameter's `file_filters`.
+- [x] **TextTOP font selection** — new `font_file` FILE parameter accepting TTF, OTF, WOFF, WOFF2. Loads via `ResourceLoader`, applies with `add_theme_font_override("font", ...)`. Empty = default theme font.
+- [x] **ImageFileInTOP** — new TOP generator loading image/texture resources (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res). TextureRect in SubViewport with configurable fit mode (Stretch, Keep Aspect, Keep Aspect Centered, Keep Aspect Covered, Tile). Bilinear/nearest filtering toggle.
+- [x] **MovieFileInTOP** — new TOP generator using Godot's native `VideoStreamPlayer` for .ogv Theora video playback. Play/pause, loop, seek, speed controls. Video renders inside SubViewport for standard TOP pipeline integration.
+  - **Codec limitations:** Godot's built-in Theora decoder outputs RGB only (no alpha). HAP codec (VJ-standard S3TC/DXT GPU-direct upload) requires a custom GDExtension — see roadmap. For alpha video, use image sequences (PNG/WebP).
+
 ### Phase 6: Integration & Stabilization (Week 6)
 - [ ] Save/load patches (.tres resources)
 - [ ] Multiple viewer windows
@@ -744,6 +752,12 @@ GONODES/
 - [ ] MIDI input operators
 - [ ] Audio input CHOP (microphone / audio file)
 - [ ] Webcam / video input TOP
+- [ ] HAP codec GDExtension — GPU-direct S3TC/DXT video playback for VJ workflows
+  - HAP, HAP Alpha, HAP Q variants
+  - Custom `VideoStreamHAP` resource extending Godot's `VideoStream`
+  - Wraps [Vidvox/hap](https://github.com/Vidvox/hap) (Snappy + DXT decompression, direct GPU upload)
+  - Enables alpha-channel video without image sequences
+- [ ] ImageSequenceTOP — numbered frame playback (PNG/WebP sequences with alpha support)
 - [x] Custom GLSL shader TOP (user-editable shader code) — **Done: CustomShaderTOP**
 - [ ] ScriptCHOP (user GDScript for channel processing — see Section 27)
 - [ ] ScriptDAT (user GDScript for table/text processing — see Section 27)
@@ -1943,7 +1957,7 @@ The parameter inspector is a right-side panel that shows all parameters for the 
 
 | File | Class | Purpose |
 |------|-------|---------|
-| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard |
+| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard |
 | `addons/gonodes/ui/gn_param_inspector.gd` | `GNParamInspector` | PanelContainer with family color bar, header (node ID, type, cook time), scrollable GNParamRow list, placeholder label when nothing selected |
 
 ### Key Design Decisions

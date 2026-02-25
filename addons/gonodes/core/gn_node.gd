@@ -231,6 +231,16 @@ func get_param_value(param_name: String) -> Variant:
 	return param.get_resolved_value()
 
 
+## Programmatically sets a parameter's constant value.
+## Useful for operators that auto-detect values (e.g., resolution from a loaded file).
+func set_param_value(p_name: String, new_value: Variant) -> void:
+	var param: GNParameter = parameters.get(p_name, null)
+	if param == null:
+		push_warning("GNNode '%s': unknown parameter '%s'" % [id, p_name])
+		return
+	param.set_value(new_value)
+
+
 ## Returns a list of all parameter names.
 func get_parameter_names() -> PackedStringArray:
 	var names := PackedStringArray()

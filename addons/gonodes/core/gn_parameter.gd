@@ -25,6 +25,7 @@ enum ValueType {
 	VECTOR4,
 	COLOR,
 	ENUM,
+	FILE,  ## Project resource file path (res://…) — shown as a file picker button
 }
 
 # ─── Identity ──────────────────────────────────────────────────────────────────
@@ -72,6 +73,10 @@ var fallback_value: Variant = 0.0
 
 ## For ENUM type: array of option labels, e.g., ["Sine", "Triangle", "Square"].
 @export var enum_options: PackedStringArray = PackedStringArray()
+
+## For FILE type: array of file extension filters for the picker dialog.
+## Each entry is a wildcard pattern, e.g., "*.ttf", "*.otf", "*.png".
+@export var file_filters: PackedStringArray = PackedStringArray()
 
 # ─── Expression Mode (MVP) ────────────────────────────────────────────────────
 
@@ -242,6 +247,26 @@ static func create_string(p_name: String, p_default: String,
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
 	param.description = p_description
 	param.value_type = ValueType.STRING
+	param.default_value = p_default
+	param.value = p_default
+	param.fallback_value = p_default
+	param.resolved_value = p_default
+	return param
+
+
+## Factory method to create a FILE parameter (project resource picker).
+## [param p_filters] is an array of wildcard patterns, e.g.
+## [code]PackedStringArray(["*.ttf", "*.otf"])[/code].
+static func create_file(p_name: String, p_default: String,
+		p_filters: PackedStringArray = PackedStringArray(),
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
+	var param := GNParameter.new()
+	param.param_name = p_name
+	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
+	param.value_type = ValueType.FILE
+	param.file_filters = p_filters
 	param.default_value = p_default
 	param.value = p_default
 	param.fallback_value = p_default

@@ -380,6 +380,10 @@ static func _create_operator_instance(operator_type: String) -> GNNode:
 			return ConstantTOP.new()
 		"TextTOP":
 			return TextTOP.new()
+		"ImageFileInTOP":
+			return ImageFileInTOP.new()
+		"MovieFileInTOP":
+			return MovieFileInTOP.new()
 		# ── TOPs: Filters (1 input) ──
 		"LevelTOP":
 			return LevelTOP.new()
@@ -551,7 +555,7 @@ static func get_operator_registry() -> Dictionary:
 	return {
 		"TOP": [
 			"NoiseTOP", "RampTOP", "CircleTOP", "RectangleTOP",
-			"ConstantTOP", "TextTOP",
+			"ConstantTOP", "TextTOP", "ImageFileInTOP", "MovieFileInTOP",
 			"LevelTOP", "BlurTOP", "TransformTOP", "HSVAdjustTOP",
 			"EdgeTOP", "ThresholdTOP", "FlipTOP", "TileTOP",
 			"CropTOP", "FeedbackTOP", "ResolutionTOP",

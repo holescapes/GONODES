@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. ~76 operators across 5 families. Node renaming, canvas anchoring, and viewer panel sizing polished. Phases 1–5.6 complete.**
+**Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. ~78 operators across 5 families. File parameter type, font selection, image/video input TOPs added. Phases 1–5.7 complete.**
 
 ### Completed
 
@@ -73,6 +73,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - **Phase 5: Operator Expansion** — 20 new TOPs + 17 new CHOPs + 14 new GPU shaders + CustomShaderTOP. Total at end of phase: 46 operators (26 TOPs + 20 CHOPs).
 - **Phase 5.5: DAT, SOP, COMP & 3D Pipeline** — 12 DAT operators + 14 SOP operators + 3 COMP operators + RenderTOP. GNTableData and GNGeoData data types. Full 3D scene rendering pipeline using Godot's native scene graph. Total: ~75 operators across 5 families.
 - **Phase 5.6: UI Polish & Node Renaming** — Canvas anchoring fix (all 21 TOPs use `set_anchors_and_offsets_preset`), viewer panel sizing fix (`expand_mode = IGNORE_SIZE`, `clip_contents`), inline node renaming (double-click title bar with full ID update chain), inspector refresh on rename.
+- **Phase 5.7: File Parameters & Media Input** — FILE parameter type with project file picker (FileDialog). TextTOP font selection (TTF/OTF/WOFF). ImageFileInTOP (PNG, JPG, WebP, HDR, EXR, SVG). MovieFileInTOP (Godot VideoStreamPlayer, .ogv Theora).
 - **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
 - **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display (zero-copy GPU texture routing)
 - **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button
@@ -87,7 +88,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 26 | Noise, Composite, Level, Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render |
+| **TOP** | 28 | Noise, Composite, Level, Blur, Ramp, Circle, Rectangle, Constant, Text, ImageFileIn, MovieFileIn, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render |
 | **CHOP** | 21 | LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP |
 | **DAT** | 12 | Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn (stub) |
 | **SOP** | 14 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch |
@@ -122,6 +123,8 @@ SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and S
 - Renderer switching (Forward+, Mobile, Compatibility) for target platform preview
 - Patch export as standalone apps (desktop, mobile, web)
 - LibGodot embedding for host applications (VDMX, Resolume)
+- HAP codec GDExtension (GPU-direct S3TC/DXT video for VJ workflows, alpha support)
+- ImageSequenceTOP (numbered PNG/WebP frame playback with alpha)
 - Syphon / Spout texture sharing
 - OSC, MIDI, NDI input/output
 - Scriptable operators: ScriptCHOP, ScriptDAT, ScriptTOP, ScriptSOP, ComputeShaderTOP

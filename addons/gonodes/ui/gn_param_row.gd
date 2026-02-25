@@ -112,6 +112,8 @@ func _create_value_control() -> Control:
 			return _create_color_control()
 		GNParameter.ValueType.VECTOR2, GNParameter.ValueType.VECTOR2I:
 			return _create_vector2_control()
+		GNParameter.ValueType.FILE:
+			return _create_file_control()
 		_:
 			var lbl := Label.new()
 			lbl.text = str(param.value)
@@ -223,6 +225,110 @@ func _create_vector2_control() -> Control:
 	return hbox
 
 
+func _create_file_control() -> Control:
+	var hbox := HBoxContainer.new()
+	hbox.size_flags_horizontal = SIZE_EXPAND_FILL
+	hbox.add_theme_constant_override("separation", 4)
+
+	var option := OptionButton.new()
+	option.size_flags_horizontal = SIZE_EXPAND_FILL
+	option.clip_text = true
+	option.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	option.tooltip_text = "Select a file from the project"
+	hbox.add_child(option)
+
+	# Populate with matching project files
+	_populate_file_dropdown(option)
+
+	# Connect selection
+	option.item_selected.connect(_on_file_option_selected)
+
+	# Refresh button to rescan project files
+	var refresh_btn := Button.new()
+	refresh_btn.text = "↻"
+	refresh_btn.custom_minimum_size = Vector2(28, 0)
+	refresh_btn.tooltip_text = "Rescan project for matching files"
+	refresh_btn.pressed.connect(func() -> void:
+		_populate_file_dropdown(option)
+	)
+	hbox.add_child(refresh_btn)
+
+	# Clear button
+	var clear_btn := Button.new()
+	clear_btn.text = "X"
+	clear_btn.custom_minimum_size = Vector2(24, 0)
+	clear_btn.tooltip_text = "Clear file selection"
+	clear_btn.pressed.connect(_on_file_clear_pressed)
+	hbox.add_child(clear_btn)
+
+	return hbox
+
+
+## Scans the project directory recursively for files matching the parameter's
+## file_filters and populates the OptionButton dropdown.
+func _populate_file_dropdown(option: OptionButton) -> void:
+	option.clear()
+	option.add_item("(none)", 0)
+	option.set_item_metadata(0, "")
+
+	# Collect matching files from the project
+	var extensions: Array[String] = []
+	for f in param.file_filters:
+		# Convert "*.png" → "png"
+		var ext := f.trim_prefix("*.")
+		if not ext.is_empty():
+			extensions.append(ext.to_lower())
+
+	var files := _scan_project_files("res://", extensions)
+	files.sort()
+
+	var selected_idx := 0
+	var current_path: String = str(param.value)
+
+	for i in range(files.size()):
+		var item_idx := i + 1  # 0 is "(none)"
+		# Show shortened path (strip res://) for display
+		var display := files[i].trim_prefix("res://")
+		option.add_item(display, item_idx)
+		option.set_item_metadata(item_idx, files[i])
+		option.set_item_tooltip(item_idx, files[i])
+		if files[i] == current_path:
+			selected_idx = item_idx
+
+	option.selected = selected_idx
+
+
+## Recursively scans a directory for files with matching extensions.
+func _scan_project_files(dir_path: String, extensions: Array[String]) -> Array[String]:
+	var results: Array[String] = []
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return results
+
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while not file_name.is_empty():
+		if file_name.begins_with("."):
+			file_name = dir.get_next()
+			continue
+		var full_path := dir_path.path_join(file_name)
+		if dir.current_is_dir():
+			# Skip .godot import cache and hidden directories
+			if file_name != ".godot" and file_name != ".import":
+				results.append_array(_scan_project_files(full_path, extensions))
+		else:
+			# Check extension match (if filters are empty, accept all files)
+			if extensions.is_empty():
+				results.append(full_path)
+			else:
+				var ext := file_name.get_extension().to_lower()
+				if ext in extensions:
+					results.append(full_path)
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	return results
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Value Change Handlers — UI → Model
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -306,6 +412,29 @@ func _on_vector2_y_changed(val: float) -> void:
 		param.set_value(Vector2i(current.x, int(val)))
 	else:
 		param.set_value(Vector2(current.x, val))
+
+
+func _on_file_option_selected(idx: int) -> void:
+	if _updating:
+		return
+	var hbox := _control as HBoxContainer
+	if hbox == null or hbox.get_child_count() < 1:
+		return
+	var option: OptionButton = hbox.get_child(0) as OptionButton
+	if option == null:
+		return
+	var path: String = option.get_item_metadata(idx)
+	param.set_value(path)
+
+
+func _on_file_clear_pressed() -> void:
+	param.set_value("")
+	# Reset dropdown to "(none)"
+	var hbox := _control as HBoxContainer
+	if hbox and hbox.get_child_count() >= 1:
+		var option: OptionButton = hbox.get_child(0) as OptionButton
+		if option:
+			option.selected = 0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -449,6 +578,22 @@ func _update_value_display() -> void:
 					x_spin.value = vec_val.x
 				if y_spin:
 					y_spin.value = vec_val.y
+		GNParameter.ValueType.FILE:
+			var hbox := _control as HBoxContainer
+			if hbox and hbox.get_child_count() >= 1:
+				var option: OptionButton = hbox.get_child(0) as OptionButton
+				if option:
+					var file_path: String = str(param.get_resolved_value())
+					# Find the matching item in the dropdown
+					var found := false
+					for i in range(option.item_count):
+						if option.get_item_metadata(i) == file_path:
+							option.selected = i
+							found = true
+							break
+					if not found and not file_path.is_empty():
+						# File not in dropdown — rescan then try again
+						_populate_file_dropdown(option)
 
 	_updating = false
 

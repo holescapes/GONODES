@@ -196,6 +196,8 @@ static func _get_operator_description(op_name: String) -> String:
 		"RectangleTOP": "SDF rounded rectangle with fill/border/softness.",
 		"ConstantTOP": "Solid color texture.",
 		"TextTOP": "Renders text to a texture via a Label in a SubViewport.",
+		"ImageFileInTOP": "Loads an image/texture from project resources (PNG, JPG, WebP, HDR, EXR, SVG, etc.).",
+		"MovieFileInTOP": "Plays a video file (.ogv Theora) as a live texture stream.",
 		"CustomShaderTOP": "User-editable GLSL shader with 4 texture inputs and uniforms.",
 		# ── TOP Filters ──────────────────────────────────────────────────
 		"LevelTOP": "Brightness, contrast, gamma, invert, and opacity adjustments.",
