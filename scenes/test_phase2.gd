@@ -49,7 +49,7 @@ func _setup_network() -> void:
 	noise.get_parameter("monochrome").set_value(true)
 	# Set time_offset to EXPRESSION mode: driven by the LFO
 	noise.get_parameter("time_offset").set_expression(
-		'chop("lfo1").value("out") * 5.0'
+		'chop("lfo1", "out") * 5.0'
 	)
 
 	var level := LevelTOP.new()
@@ -103,8 +103,8 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	var noise_node: GNNode = network.get_node_by_id("noise1")
 	var time_off: float = noise_node.get_parameter("time_offset").resolved_value if noise_node else 0.0
 
-	label.text = "Frame: %d | Cook: %.2fms | LFO: %.3f | TimeOffset: %.3f" % [
-		frame, cook_time_ms, lfo_val, time_off
+	label.text = "FPS: %d | Frame: %d | Cook: %.2fms | LFO: %.3f | TimeOffset: %.3f" % [
+		Engine.get_frames_per_second(), frame, cook_time_ms, lfo_val, time_off
 	]
 
 

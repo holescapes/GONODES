@@ -21,6 +21,9 @@ var _display_rect: TextureRect = null
 ## Whether the window has been created.
 var _window_created: bool = false
 
+## Whether the initial window position has been applied.
+var _positioned: bool = false
+
 
 func _init() -> void:
 	node_type = "window"
@@ -55,12 +58,23 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_ensure_window()
 
-	# Apply parameters
-	_apply_window_params()
+	# Apply lightweight params every frame (title, texture)
+	if _window != null:
+		_window.title = get_param_value("title")
 
-	# Feed the texture — this is a live GPU reference (zero-copy)
+	# Apply position/mode only once (until we have param-change tracking)
+	if not _positioned:
+		_apply_window_params()
+		_positioned = true
+
+	# Feed the texture — direct GPU reference, zero-copy.
+	# SubViewport.get_texture() returns a ViewportTexture with a direct RID
+	# to the GPU render target. No path resolution needed when assigned
+	# programmatically, so it works across Viewport boundaries.
 	if tex_in != null and tex_in.texture != null:
-		_display_rect.texture = tex_in.texture
+		if _display_rect.texture != tex_in.texture:
+			_display_rect.texture = tex_in.texture
+			GNLogger.debug("WindowTOP", "'%s' texture assigned (zero-copy GPU)" % id)
 		_display_rect.visible = true
 	else:
 		_display_rect.visible = false
@@ -86,10 +100,13 @@ func _ensure_window() -> void:
 	# Create TextureRect stretching to fill the window
 	_display_rect = TextureRect.new()
 	_display_rect.name = "Display"
-	_display_rect.anchors_preset = Control.PRESET_FULL_RECT
 	_display_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_display_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_window.add_child(_display_rect)
+
+	# Must be called AFTER adding to tree — the property setter anchors_preset
+	# only sets anchors but not offsets, leaving the rect at 0×0.
+	_display_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Add as child of this Node — Godot creates it as a separate OS window
 	add_child(_window)

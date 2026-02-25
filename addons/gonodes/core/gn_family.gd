@@ -37,7 +37,8 @@ const FAMILY_COLORS: Dictionary = {
 
 
 ## Returns the display name for a family enum value.
-static func get_name(family: Type) -> String:
+## Named get_family_name() to avoid collision with Object.get_name().
+static func get_family_name(family: Type) -> String:
 	return FAMILY_NAMES.get(family, "UNKNOWN")
 
 

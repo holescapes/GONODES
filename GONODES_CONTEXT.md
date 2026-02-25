@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-25
-> **Status:** Phase 1 & 2 Complete — Core framework, operators, cook engine, logging. Ready for first test run.
+> **Status:** Phase 2 Complete & Verified — Animated noise driven by LFO expression, multi-window output working, cook engine optimized. Ready for Phase 3 (Node Graph UI).
 
 ---
 
@@ -530,6 +530,10 @@ GONODES/
 - [x] Implement WindowTOP (multi-window/multi-display output)
 - [x] Implement GNLogger (centralized logging with toggle)
 - [x] Resource → Node/RefCounted migration
+- [x] Expression system debugging & rearchitecture (base_instance model)
+- [x] WindowTOP rendering fix (anchors + zero-copy texture routing)
+- [x] Cook engine performance optimization (cached adjacency, zero-alloc inputs)
+- [x] Verified: animated noise, movable output window, stable cook times
 
 ### Phase 3: Node Graph UI (Week 3)
 - [ ] Implement GNGraphEditor (GraphEdit wrapper)
@@ -615,6 +619,18 @@ Each TOP node owns a `SubViewport` for rendering its output texture:
 
 **Performance consideration:** Each SubViewport is a render pass. For large networks, we may need viewport pooling or deferred rendering optimizations. For MVP, one viewport per TOP is acceptable.
 
+### Cook Engine Optimizations (Implemented)
+
+The cook engine has been optimized with these patterns:
+
+1. **Cached adjacency maps** — `GNNetwork._downstream_map` and `_input_conn_map` are rebuilt only when the graph structure changes (node/connection add/remove). All per-frame lookups (dirty propagation, input gathering) use O(1) dictionary lookups instead of scanning all connections.
+
+2. **Upfront dirty propagation** — Dirty flags are propagated in a single BFS pass BEFORE the cook loop starts, not interleaved with cooking. This eliminates redundant BFS calls (previously one per producing node).
+
+3. **Cached input arrays** — `_input_cache` stores a reusable `Array[GNData]` per node. Arrays are cleared and refilled each frame instead of being reallocated. Zero per-frame allocations in steady state.
+
+4. **Skip-already-dirty BFS** — `propagate_dirty()` stops traversal at nodes already marked dirty, avoiding redundant downstream walks.
+
 ### CHOP Channel Model
 CHOPs produce `GNChannelData` which contains:
 - Named channels (e.g., "tx", "ty", "tz" or "out", "chan1")
@@ -628,18 +644,28 @@ Parameters support two modes:
 1. **Value mode:** Direct value (float, int, vec2, etc.)
 2. **Expression mode:** GDScript expression string evaluated at cook time
 
+**CRITICAL — Expression Architecture (Godot's Expression class):**
+
+Godot's `Expression` class resolves function calls as **method lookups on `base_instance`**, NOT as calls to input variables. You cannot pass Callables as input variables and expect to call them — they will be treated as data, not functions.
+
+Therefore:
+- `chop()`, `op()`, `top()` are **real public methods on GNCookEngine**
+- `Expression.execute()` uses `self` (the cook engine) as `base_instance`
+- Input variables are limited to data: `["me", "time", "frame", "dt"]`
+- The expression `chop("lfo1", "out") * 5.0` calls `GNCookEngine.chop("lfo1", "out")` directly
+
+This was a hard-won architectural insight — the original design passed Callable lambdas as input vars, which silently failed (Expression returned 0.0 fallback → static noise).
+
 Expression context provides:
-- `me` — reference to the owning node
-- `op(name)` — get another node by name
-- `chop(name)` — shorthand for getting a CHOP node
-- `top(name)` — shorthand for getting a TOP node
-- `time` — current time in seconds
-- `frame` — current frame number
-- `dt` — delta time
+- `me` — reference to the owning node (GNNode)
+- `chop(name, channel)` — method on base_instance, returns float
+- `op(name, param)` — method on base_instance, returns Variant
+- `top(name, property)` — method on base_instance, returns Variant
+- `time` — current time in seconds (input variable)
+- `frame` — current frame number (input variable)
+- `dt` — delta time (input variable)
 
-Example: `sin(time * 2.0) * chop("lfo1").value("out")`
-
-For MVP, this can be implemented with `Expression` class in Godot or simple `eval()`-style parsing.
+Example: `chop("lfo1", "out") * 5.0`
 
 ### Godot Version Requirements
 - **Godot 4.6** (for LibGodot support)
@@ -1539,7 +1565,13 @@ for i in range(DisplayServer.get_screen_count()):
 
 ### Texture Routing
 
-WindowTOP does NOT copy the texture. It sets its internal TextureRect's texture to the upstream TOP's `ViewportTexture` — a live GPU reference. The Window's render tree samples the same GPU texture as the graph viewer. **Zero-copy output.**
+WindowTOP does NOT copy the texture. It assigns the upstream TOP's `ViewportTexture` directly to its internal TextureRect — a live GPU reference. The Window's render tree samples the same GPU texture as the graph viewer. **Zero-copy output.**
+
+**Important — TextureRect layout in programmatic Windows:**
+When creating a TextureRect inside a Window node via code, do NOT use the `anchors_preset` property setter — it only sets anchors but leaves offsets at 0, resulting in a 0×0 rect. Always call `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER adding the control to the tree.
+
+**Important — ViewportTexture cross-viewport usage:**
+When assigning a ViewportTexture programmatically (not via the editor), it works across Viewport boundaries because it references the source SubViewport by RID, not by scene-relative path. Direct assignment (`texture_rect.texture = viewport.get_texture()`) works correctly even when the TextureRect lives inside a secondary Window.
 
 ### VJ Workflow
 
@@ -1606,6 +1638,59 @@ The test scene includes a `CheckButton` (top-right corner, "Debug Log") that tog
 7. **Compute shader availability:** Verify that `RenderingDevice` compute dispatches work in Mobile renderer on all targets (some mobile GPUs have limitations).
 8. **POP feedback loops:** Validate that the one-frame-latency feedback model works smoothly with Godot's `SubViewport` / buffer management.
 9. **Export tree-shaking:** Can we reliably detect which operator scripts/shaders a patch uses and exclude unused ones from the export?
+
+---
+
+*This file should be read by the LLM at the start of each session to maintain continuity.*
+
+---
+
+## 25. Hard Rules & Lessons Learned
+
+These are non-negotiable constraints discovered during development. **Never violate these.**
+
+### 25.1 No CPU Roundtrips for Real-Time Texture Data
+
+**NEVER** call `Texture2D.get_image()` or `Image.get_data()` in a per-frame path. This triggers a GPU→CPU readback that stalls the rendering pipeline and can cost 5-15ms per call.
+
+- Use `ViewportTexture` (live GPU reference) for texture routing between nodes
+- Use `ImageTexture` snapshots ONLY for one-time captures (thumbnails, file export)
+- All real-time texture passing stays on the GPU via SubViewport → ViewportTexture → TextureRect chain
+- If you need CPU-side pixel data (e.g., for a DAT or CHOP reading color values), do it async via `RenderingServer` and accept one-frame latency
+
+### 25.2 Godot Expression base_instance Architecture
+
+- Functions called inside an `Expression` are **method lookups on `base_instance`**, not calls to input variables
+- Passing Callables as input variables and calling them will **silently fail** (returns null, no error)
+- Always make expression-callable functions **real methods** on the base_instance object
+
+### 25.3 GNFamily.get_name → get_family_name
+
+- Static methods on classes extending `Object` must not shadow built-in methods
+- `Object.get_name()` takes 0 args; a custom `get_name(family)` with 1 arg causes a signature collision at runtime
+- Use unique names: `get_family_name()`, not `get_name()`
+
+### 25.4 WindowTOP Positioning
+
+- Only apply window position/mode once (use a `_positioned` flag), not every cook frame
+- Reapplying `_window.position` every frame prevents the user from moving the window
+- Parameter-change-driven repositioning should be added later when param change tracking exists
+
+### 25.5 Anchors Preset vs set_anchors_and_offsets_preset
+
+- `Control.anchors_preset = PRESET_FULL_RECT` only sets anchors, NOT offsets → 0×0 size
+- Always use `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` for full-rect layout
+- Must be called AFTER the control is added to the tree
+
+### 25.6 embed_subwindows
+
+- `project.godot` must have `window/subwindows/embed_subwindows=false` for WindowTOP to create real OS-level windows
+- Without this, Window nodes render as embedded panels inside the main window
+
+### 25.7 DisplayServer API (Godot 4.x)
+
+- Use `DisplayServer.screen_get_size()` / `screen_get_position()` (not `get_screen_size/position`)
+- Use `DisplayServer.window_set_vsync_mode(mode, window_id)` for per-window vsync
 
 ---
 

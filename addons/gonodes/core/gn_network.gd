@@ -19,6 +19,13 @@ var export_mappings: Array = []  # Array[GNExportMapping] — defined in cook en
 var _topo_cache: Array[GNNode] = []
 var _topo_dirty: bool = true
 
+## Cached adjacency maps — rebuilt when graph structure changes.
+## _downstream_map: node_id → Array of downstream node_ids (for dirty propagation)
+## _input_conn_map: node_id → Array[GNConnection] (for input gathering)
+var _downstream_map: Dictionary = {}
+var _input_conn_map: Dictionary = {}
+var _adjacency_dirty: bool = true
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted when a node is added to the network.
@@ -52,7 +59,7 @@ func add_node(node: GNNode) -> bool:
 		return false
 	nodes[node.id] = node
 	_invalidate_topo()
-	GNLogger.info("Network", "Node added: '%s' (%s/%s)" % [node.id, GNFamily.get_name(node.family), node.node_type])
+	GNLogger.info("Network", "Node added: '%s' (%s/%s)" % [node.id, GNFamily.get_family_name(node.family), node.node_type])
 	node_added.emit(node.id)
 	graph_changed.emit()
 	return true
@@ -137,7 +144,7 @@ func connect_nodes(from_id: String, from_port: int,
 	# Type check
 	if not in_port.can_connect_from(out_port):
 		push_warning("GNNetwork.connect: port type mismatch (%s → %s)" % [
-			GNFamily.get_name(out_port.family), GNFamily.get_name(in_port.family)])
+			GNFamily.get_family_name(out_port.family), GNFamily.get_family_name(in_port.family)])
 		return false
 
 	# Check if input already has a connection (unless multi_input)
@@ -192,12 +199,10 @@ func disconnect_nodes(from_id: String, from_port: int,
 
 
 ## Returns all connections feeding into a specific node.
-func get_input_connections(node_id: String) -> Array[GNConnection]:
-	var result: Array[GNConnection] = []
-	for conn in connections:
-		if conn.to_node == node_id:
-			result.append(conn)
-	return result
+## Uses cached input-connection map for O(1) lookup.
+func get_input_connections(node_id: String) -> Array:
+	_rebuild_adjacency()
+	return _input_conn_map.get(node_id, [])
 
 
 ## Returns all connections going out from a specific node.
@@ -343,6 +348,26 @@ func _dfs_has_cycle(node_id: String, color: Dictionary) -> bool:
 func _invalidate_topo() -> void:
 	_topo_dirty = true
 	_topo_cache.clear()
+	_adjacency_dirty = true
+
+
+## Rebuilds the cached adjacency maps from the connection list.
+## Called lazily when the graph structure changes.
+func _rebuild_adjacency() -> void:
+	if not _adjacency_dirty:
+		return
+	_downstream_map.clear()
+	_input_conn_map.clear()
+	for node_id in nodes:
+		_downstream_map[node_id] = []
+		_input_conn_map[node_id] = []
+	for conn in connections:
+		if nodes.has(conn.from_node) and nodes.has(conn.to_node):
+			var ds_list: Array = _downstream_map[conn.from_node]
+			if conn.to_node not in ds_list:
+				ds_list.append(conn.to_node)
+			_input_conn_map[conn.to_node].append(conn)
+	_adjacency_dirty = false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -351,22 +376,25 @@ func _invalidate_topo() -> void:
 
 ## Propagates dirty flags downstream from a given node (BFS).
 ## Called by the cook engine when a node's output changes.
+## Uses cached adjacency map for O(1) lookups per node.
 func propagate_dirty(from_node_id: String) -> void:
-	var visited: Dictionary = {}
-	var queue: Array[String] = [from_node_id]
+	_rebuild_adjacency()
+	var queue: Array[String] = []
+	# Seed with direct downstream of the source (not the source itself)
+	for ds_id in _downstream_map.get(from_node_id, []):
+		var ds_node: GNNode = nodes.get(ds_id, null)
+		if ds_node and not ds_node.dirty:
+			ds_node.mark_dirty()
+			queue.append(ds_id)
 
+	# BFS through further downstream
 	while not queue.is_empty():
 		var current_id: String = queue.pop_front()
-		if visited.has(current_id):
-			continue
-		visited[current_id] = true
-
-		for conn in connections:
-			if conn.from_node == current_id:
-				var downstream: GNNode = nodes.get(conn.to_node, null)
-				if downstream and not visited.has(conn.to_node):
-					downstream.mark_dirty()
-					queue.append(conn.to_node)
+		for ds_id in _downstream_map.get(current_id, []):
+			var ds_node: GNNode = nodes.get(ds_id, null)
+			if ds_node and not ds_node.dirty:
+				ds_node.mark_dirty()
+				queue.append(ds_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

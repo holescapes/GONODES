@@ -316,8 +316,10 @@ func _compile_expression() -> void:
 	_compiled_expression = Expression.new()
 	# Define the variable names available inside expressions.
 	# These are passed positionally via Expression.execute() at eval time.
+	# chop(), op(), top() are methods on the base_instance (CookEngine),
+	# so they are NOT listed here — Expression calls them directly.
 	var input_names := PackedStringArray([
-		"op", "chop", "top", "me", "time", "frame", "dt",
+		"me", "time", "frame", "dt",
 	])
 	var err := _compiled_expression.parse(expression, input_names)
 	if err != OK:

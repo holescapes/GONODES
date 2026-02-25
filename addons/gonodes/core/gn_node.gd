@@ -123,7 +123,7 @@ func initialize(p_id: String) -> void:
 		if not param.value_changed.is_connected(_on_parameter_changed):
 			param.value_changed.connect(_on_parameter_changed)
 	GNLogger.debug("GNNode", "Initialized '%s' (%s/%s) — %d in, %d out, %d params" % [
-		id, GNFamily.get_name(family), node_type,
+		id, GNFamily.get_family_name(family), node_type,
 		input_ports.size(), output_ports.size(), parameters.size()])
 
 
@@ -246,4 +246,4 @@ func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
 
 
 func _to_string() -> String:
-	return "[GNNode %s (%s/%s)]" % [id, GNFamily.get_name(family), node_type]
+	return "[GNNode %s (%s/%s)]" % [id, GNFamily.get_family_name(family), node_type]

@@ -50,8 +50,8 @@ Everything in GONODES is an **operator** (node). Operators are organized into fa
 Any parameter on any node can reference data from other nodes:
 
 ```
-chop("lfo1").value("out") * 10.0     # Drive a value with an LFO
-op("noise1").par.scale                # Read another node's parameter
+chop("lfo1", "out") * 10.0           # Drive a value with an LFO
+op("noise1", "scale")                # Read another node's parameter
 sin(time * 2.0) + 0.5                # Math expressions with time
 ```
 
@@ -61,24 +61,24 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 2 Complete — ready for first test run.**
+**Phase 2 Complete & Verified — cook engine running, all operators functional.**
 
 ### Completed
 
 - **Phase 1: Core Framework** — GNNode, GNNetwork, GNCookEngine, GNParameter, GNData, GNPort, GNConnection, GNFamily (11 core classes)
-- **Phase 2: First Operators** — NoiseTOP, LevelTOP, CompositeTOP, LFO_CHOP, NoiseCHOP, MathCHOP, WindowTOP (6 operators + 3 shaders + test scene)
+- **Phase 2: First Operators** — NoiseTOP, LevelTOP, CompositeTOP, LFO_CHOP, NoiseCHOP, MathCHOP, WindowTOP (7 operators + 3 shaders + test scene)
 - **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
-- **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display
+- **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display (zero-copy GPU texture routing)
 - **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button
+- **Expression system** — `chop("lfo1", "out") * 5.0` drives parameters across node families in real time
+- **Cook engine optimization** — Cached adjacency maps, upfront dirty propagation, zero-alloc input gathering
 
-### Next Up (Phase 3–6)
+### Next Up (Phase 3)
 
-- Node graph editor with drag-and-drop wiring
-- LFO CHOP driving a Noise TOP (demonstrating cross-family data flow)
-- Composite TOP, Level TOP
-- Parameter inspector with expression support
+- Node graph editor (GraphEdit) with drag-and-drop wiring
+- Visual node representation with family-colored ports
+- Inspector panel for live parameter tweaking
 - Real-time texture viewer
-- Save/load patches
 
 ### Planned (Post-MVP)
 

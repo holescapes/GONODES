@@ -39,14 +39,12 @@ var max_cooks_per_frame: int = 0
 
 # ─── Expression Context ───────────────────────────────────────────────────────
 
-## Reusable expression evaluation helpers — built once, updated each frame.
-## These are callables passed into Expression.execute() for op(), chop(), top(), etc.
-var _op_func: Callable = Callable()
-var _chop_func: Callable = Callable()
-var _top_func: Callable = Callable()
-
 ## Tracks whether network nodes have been adopted into the scene tree.
 var _nodes_adopted: bool = false
+
+## Per-node cached input arrays — avoids per-frame allocation.
+## Keyed by node id, value is Array[GNData] sized to input port count.
+var _input_cache: Dictionary = {}
 
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
@@ -62,7 +60,6 @@ signal cook_error(node_id: String, error_message: String)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _ready() -> void:
-	_build_expression_helpers()
 	_adopt_network_nodes()
 	GNLogger.info("CookEngine", "Engine ready — cooking_enabled=%s" % str(cooking_enabled))
 
@@ -122,7 +119,14 @@ func cook_frame(delta: float) -> void:
 	# Step 2: Get topological order
 	var topo_order: Array[GNNode] = network.get_topological_order()
 
-	# Step 3: Cook dirty nodes in order
+	# Step 3: Propagate dirty flags downstream BEFORE cooking.
+	# This ensures all affected nodes are marked dirty in one pass,
+	# eliminating redundant BFS calls during the cook loop.
+	for node in topo_order:
+		if node.dirty:
+			network.propagate_dirty(node.id)
+
+	# Step 4: Cook dirty nodes in topo order
 	var cooked_count := 0
 	for node in topo_order:
 		if not node.dirty:
@@ -142,25 +146,22 @@ func cook_frame(delta: float) -> void:
 		# Cook the node
 		var result := node.execute_cook(inputs, frame_count)
 
-		if result == null and node.input_ports.size() > 0:
-			# Only warn for nodes that expected to produce output
+		if result == null and node.output_ports.size() > 0:
+			# Only warn for nodes that are expected to produce output (have output ports).
+			# Sink nodes (e.g., WindowTOP) legitimately return null.
 			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
 			cook_error.emit(node.id, "cook returned null")
 		else:
 			GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
 
-		# Propagate dirty downstream
-		if result != null:
-			network.propagate_dirty(node.id)
-
 		cooked_count += 1
 		if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
 			break
 
-	# Step 4: Process export mappings (post-MVP, CHOP exports push values)
+	# Step 5: Process export mappings (post-MVP, CHOP exports push values)
 	_process_export_mappings()
 
-	# Step 5: Frame bookkeeping
+	# Step 6: Frame bookkeeping
 	frame_count += 1
 	var frame_end := Time.get_ticks_usec()
 	frame_cook_time_ms = (frame_end - frame_start) / 1000.0
@@ -185,10 +186,18 @@ func _pre_cook_pass(delta: float) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Gathers input data for a node from upstream nodes' cached outputs.
-## Returns an array aligned to the node's input port indices.
+## Returns a reused array aligned to the node's input port indices (zero-alloc).
 func _gather_inputs(node: GNNode) -> Array[GNData]:
-	var inputs: Array[GNData] = []
-	inputs.resize(node.input_ports.size())
+	var inputs: Array[GNData]
+	if _input_cache.has(node.id):
+		inputs = _input_cache[node.id]
+		# Clear previous frame's data
+		for i in range(inputs.size()):
+			inputs[i] = null
+	else:
+		inputs = []
+		inputs.resize(node.input_ports.size())
+		_input_cache[node.id] = inputs
 
 	for conn in network.get_input_connections(node.id):
 		var upstream: GNNode = network.nodes.get(conn.from_node, null)
@@ -228,19 +237,19 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 		param.resolved_value = param.fallback_value
 		return
 
-	# Build the context array matching the variable names declared during parse:
-	# ["op", "chop", "top", "me", "time", "frame", "dt"]
+	# Build the context array matching the input variable names:
+	# ["me", "time", "frame", "dt"]
+	# chop(), op(), top() are called as methods on the base_instance (self).
 	var context := [
-		_op_func,       # op(name) callable
-		_chop_func,     # chop(name) callable
-		_top_func,      # top(name) callable
 		node,           # me — the current node
 		elapsed_time,   # time — seconds since start
 		frame_count,    # frame — current frame number
 		current_delta,  # dt — delta time this frame
 	]
 
-	var result = expr.execute(context, node)
+	# Pass self (CookEngine) as base_instance so Expression can call
+	# our chop(), op(), top() methods directly.
+	var result = expr.execute(context, self)
 
 	if expr.has_execute_failed():
 		GNLogger.error("CookEngine", "Expression error on %s.%s — %s" % [
@@ -290,25 +299,49 @@ func _process_export_mappings() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Expression Helper Functions (op, chop, top)
-# ═══════════════════════════════════════════════════════════════════════════════
+# Expression Helper Methods — called by Expression base_instance
+# These are real methods so Godot's Expression class can call them
+# directly: chop("lfo1", "out"), op("noise1", "scale"), etc.
+# ═════════════════════════════════════════════════════════════════════════════
 
-## Builds the callables that are injected into expression evaluation.
-func _build_expression_helpers() -> void:
-	_op_func = _make_op_proxy
-	_chop_func = _make_chop_proxy
-	_top_func = _make_top_proxy
+## Read a CHOP channel value. Called by Expression as chop("lfo1", "out").
+func chop(node_name: String, channel: String = "", index: int = -1) -> Variant:
+	return _make_chop_proxy(node_name, channel, index)
+
+
+## Read a node's parameter. Called by Expression as op("noise1", "scale").
+func op(node_name: String, param_name: String = "") -> Variant:
+	return _make_op_proxy(node_name, param_name)
+
+
+## Read TOP info. Called by Expression as top("noise1", "resolution").
+func top(node_name: String, property: String = "") -> Variant:
+	return _make_top_proxy(node_name, property)
+
+
+# ─── Internal proxy implementations ─────────────────────────────────────────────
 
 
 ## Returns a proxy dictionary for the given node (used inside expressions as op("name")).
-func _make_op_proxy(node_name: String) -> Dictionary:
+## Can also be called as op("name", "param") to get a parameter value directly.
+func _make_op_proxy(node_name: String, param_name: String = "") -> Variant:
 	if network == null:
+		if not param_name.is_empty():
+			return 0.0
 		return {}
 	var node: GNNode = network.nodes.get(node_name, null)
 	if node == null:
 		GNLogger.warn("CookEngine", "op('%s') — node not found" % node_name)
+		if not param_name.is_empty():
+			return 0.0
 		return {}
-	# Build a proxy dictionary with commonly accessed properties
+	# If a param name was given, return its value directly
+	if not param_name.is_empty():
+		var param: GNParameter = node.parameters.get(param_name, null)
+		if param:
+			return param.get_resolved_value()
+		return 0.0
+	# Otherwise return a proxy dict
 	var par_dict := {}
 	for p_name in node.parameters:
 		par_dict[p_name] = node.parameters[p_name].get_resolved_value()
@@ -320,43 +353,66 @@ func _make_op_proxy(node_name: String) -> Dictionary:
 	}
 
 
-## Returns a proxy dictionary for CHOP access (used inside expressions as chop("name")).
-func _make_chop_proxy(node_name: String) -> Dictionary:
+## Returns a CHOP channel value. Usage in expressions:
+##   chop("lfo1", "out")           → float (latest sample)
+##   chop("lfo1", "out", 0)        → float (sample at index 0)
+##   chop("lfo1")                  → Dictionary with channel info (advanced)
+func _make_chop_proxy(node_name: String, channel: String = "", index: int = -1) -> Variant:
 	if network == null:
+		if not channel.is_empty():
+			return 0.0
 		return {}
 	var node: GNNode = network.nodes.get(node_name, null)
 	if node == null:
 		GNLogger.warn("CookEngine", "chop('%s') — node not found" % node_name)
+		if not channel.is_empty():
+			return 0.0
 		return {}
 	var data: GNData = node.cached_output
 	if data == null or not data is GNChannelData:
-		return {"value": func(_ch: String, _idx: int = -1) -> float: return 0.0}
+		if not channel.is_empty():
+			return 0.0
+		return {}
 	var ch_data: GNChannelData = data as GNChannelData
+	# If a channel name was given, return the value directly
+	if not channel.is_empty():
+		return ch_data.get_value(channel, index)
+	# Otherwise return a dict with channel info
 	return {
-		"value": func(channel: String, index: int = -1) -> float:
-			return ch_data.get_value(channel, index),
 		"channels": ch_data.get_channel_names(),
 		"length": ch_data.length,
 		"sample_rate": ch_data.sample_rate,
 	}
 
 
-## Returns a proxy dictionary for TOP access (used inside expressions as top("name")).
-func _make_top_proxy(node_name: String) -> Dictionary:
+## Returns TOP info. Usage in expressions:
+##   top("noise1", "resolution")   → Vector2i
+##   top("noise1", "aspect")       → float
+##   top("noise1")                 → Dictionary with all info
+func _make_top_proxy(node_name: String, property: String = "") -> Variant:
 	if network == null:
+		if not property.is_empty():
+			return 0.0
 		return {}
 	var node: GNNode = network.nodes.get(node_name, null)
 	if node == null:
 		GNLogger.warn("CookEngine", "top('%s') — node not found" % node_name)
+		if not property.is_empty():
+			return 0.0
 		return {}
 	var data: GNData = node.cached_output
 	if data == null or not data is GNTextureData:
+		if not property.is_empty():
+			return 0.0
 		return {"resolution": Vector2i.ZERO, "aspect": 1.0}
 	var tex_data: GNTextureData = data as GNTextureData
-	return {
+	var info := {
 		"resolution": tex_data.resolution,
 		"aspect": tex_data.get_aspect(),
 	}
+	if not property.is_empty():
+		return info.get(property, 0.0)
+	return info
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
