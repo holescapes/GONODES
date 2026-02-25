@@ -35,6 +35,9 @@ enum ValueType {
 ## Displayed label in the inspector UI.
 @export var label: String = ""
 
+## Human-readable description shown as tooltip in the inspector UI.
+@export var description: String = ""
+
 ## Data type of this parameter.
 @export var value_type: ValueType = ValueType.FLOAT
 
@@ -112,10 +115,12 @@ signal mode_changed(param_name: String, new_mode: Mode)
 ## Factory method to create a FLOAT parameter with typical settings.
 static func create_float(p_name: String, p_default: float,
 		p_min: Variant = null, p_max: Variant = null,
-		p_step: float = 0.01, p_label: String = "") -> GNParameter:
+		p_step: float = 0.01, p_label: String = "",
+		p_description: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
 	param.value_type = ValueType.FLOAT
 	param.default_value = p_default
 	param.value = p_default
@@ -130,10 +135,12 @@ static func create_float(p_name: String, p_default: float,
 ## Factory method to create an INT parameter.
 static func create_int(p_name: String, p_default: int,
 		p_min: Variant = null, p_max: Variant = null,
-		p_label: String = "") -> GNParameter:
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
 	param.value_type = ValueType.INT
 	param.default_value = p_default
 	param.value = p_default
@@ -147,10 +154,12 @@ static func create_int(p_name: String, p_default: int,
 
 ## Factory method to create a BOOL parameter.
 static func create_bool(p_name: String, p_default: bool,
-		p_label: String = "") -> GNParameter:
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
 	param.value_type = ValueType.BOOL
 	param.default_value = p_default
 	param.value = p_default
@@ -161,10 +170,12 @@ static func create_bool(p_name: String, p_default: bool,
 
 ## Factory method to create an ENUM parameter.
 static func create_enum(p_name: String, p_options: PackedStringArray,
-		p_default_index: int = 0, p_label: String = "") -> GNParameter:
+		p_default_index: int = 0, p_label: String = "",
+		p_description: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
 	param.value_type = ValueType.ENUM
 	param.enum_options = p_options
 	param.default_value = p_default_index
@@ -176,10 +187,12 @@ static func create_enum(p_name: String, p_options: PackedStringArray,
 
 ## Factory method to create a VECTOR2 parameter.
 static func create_vector2(p_name: String, p_default: Vector2,
-		p_label: String = "") -> GNParameter:
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
 	param.value_type = ValueType.VECTOR2
 	param.default_value = p_default
 	param.value = p_default
@@ -190,10 +203,12 @@ static func create_vector2(p_name: String, p_default: Vector2,
 
 ## Factory method to create a VECTOR2I parameter.
 static func create_vector2i(p_name: String, p_default: Vector2i,
-		p_label: String = "") -> GNParameter:
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
 	param.value_type = ValueType.VECTOR2I
 	param.default_value = p_default
 	param.value = p_default
@@ -204,10 +219,12 @@ static func create_vector2i(p_name: String, p_default: Vector2i,
 
 ## Factory method to create a COLOR parameter.
 static func create_color(p_name: String, p_default: Color,
-		p_label: String = "") -> GNParameter:
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
 	param.value_type = ValueType.COLOR
 	param.default_value = p_default
 	param.value = p_default
@@ -218,10 +235,12 @@ static func create_color(p_name: String, p_default: Color,
 
 ## Factory method to create a STRING parameter.
 static func create_string(p_name: String, p_default: String,
-		p_label: String = "") -> GNParameter:
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
 	param.value_type = ValueType.STRING
 	param.default_value = p_default
 	param.value = p_default

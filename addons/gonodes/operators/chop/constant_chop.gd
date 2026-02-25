@@ -9,19 +9,20 @@ var _cached_channel_data: GNChannelData = null
 func _init() -> void:
 	node_type = "constant"
 	family = GNFamily.Type.CHOP
+	node_description = "Output constant channel values."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.CHOP)
+	add_output("out", GNFamily.Type.CHOP, "Channel data output")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("name0", "chan1"))
-	add_parameter(GNParameter.create_float("value0", 0.0, null, null, 0.01))
-	add_parameter(GNParameter.create_string("name1", ""))
-	add_parameter(GNParameter.create_float("value1", 0.0, null, null, 0.01))
-	add_parameter(GNParameter.create_string("name2", ""))
-	add_parameter(GNParameter.create_float("value2", 0.0, null, null, 0.01))
+	add_parameter(GNParameter.create_string("name0", "chan1", "", "Name for channel slot 0"))
+	add_parameter(GNParameter.create_float("value0", 0.0, null, null, 0.01, "", "Constant value for channel 0"))
+	add_parameter(GNParameter.create_string("name1", "", "", "Name for channel slot 1 (empty = skip)"))
+	add_parameter(GNParameter.create_float("value1", 0.0, null, null, 0.01, "", "Constant value for channel 1"))
+	add_parameter(GNParameter.create_string("name2", "", "", "Name for channel slot 2 (empty = skip)"))
+	add_parameter(GNParameter.create_float("value2", 0.0, null, null, 0.01, "", "Constant value for channel 2"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

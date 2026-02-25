@@ -715,6 +715,14 @@ GONODES/
 - [ ] ScriptCHOP (user GDScript for channel processing — see Section 27)
 - [ ] ScriptDAT (user GDScript for table/text processing — see Section 27)
 
+### Performance & GPU Optimizations
+- [ ] SubViewport `UPDATE_ONCE` / `UPDATE_DISABLED` for non-time-dependent TOPs (see Hard Rule 25.13)
+- [ ] Viewport pooling — reuse freed SubViewports instead of creating/destroying (reduces allocation churn at scale)
+- [ ] Resolution downscaling for editor previews — render thumbnails at ¼ res, full res only for the active output chain
+- [ ] Cook only the active output chain — skip cooking subgraphs that don't feed into a WindowTOP or visible preview
+- [ ] Lazy viewport creation for disconnected/unused nodes — delay `_ensure_viewport()` until the node is actually part of a live chain
+- [ ] GPU memory budget monitoring — track total VRAM usage across all SubViewports and warn when approaching limits
+
 ### Long-term
 - [ ] NDI video streaming
 - [ ] FxPlug / FFGL plugin export (for VDMX, Resolume)
@@ -2011,6 +2019,57 @@ These are non-negotiable constraints discovered during development. **Never viol
 - RenderTOP uses `SubViewport.own_world_3d = true` to create an isolated 3D world
 - Without this, 3D content from RenderTOP would appear in the main editor viewport
 - Each RenderTOP has its own Environment/WorldEnvironment for independent lighting/sky
+
+### 25.13 Lazy Cook / No Unnecessary Work
+
+- **A node must NOT cook (or render) if nothing changed.** A cook fires only when:
+  1. `time_dependent = true` → always dirty each frame
+  2. A parameter value changed (expression eval, UI edit, script)
+  3. An upstream input produced new output (dirty propagation)
+- **Applies to ALL families equally** — TOPs, CHOPs, DATs, SOPs, COMPs
+- **TOP-specific rule — SubViewport update mode:**
+  - `time_dependent = true` → `UPDATE_ALWAYS` (renders every frame)
+  - `time_dependent = false` → `UPDATE_ONCE` on cook (Godot renders one frame, then auto-flips to `UPDATE_DISABLED`)
+  - `_ensure_viewport()` should default to `UPDATE_DISABLED` (not `UPDATE_ALWAYS`) so the viewport never renders before first cook
+- **No per-frame overhead when static:** A non-time-dependent NoiseTOP with unchanged params produces zero GPU render passes after its initial cook
+- **Expression-driven params are safe:** Expression evaluation that changes a param marks the node dirty → re-cook → `UPDATE_ONCE` fires → exactly one render pass. No difference from `UPDATE_ALWAYS` in that scenario, but saves the render pass when the expression result is unchanged
+- **SOP/DAT/CHOP equivalent:** The cook engine already skips `_cook()` on clean nodes. No additional mechanism needed — just never set `time_dependent = true` unless the operator genuinely changes every frame
+
+### 25.14 Tooltip Descriptions — Mandatory for Every Operator
+
+- **Every operator MUST provide three levels of description:**
+  1. `node_description` — set in `_init()` alongside `node_type` and `family`. Short sentence describing the node's purpose (shown in palette tooltip and node header).
+  2. **Port descriptions** — last argument (`desc`) on every `add_input()` / `add_output()` call in `_init_ports()`. Describes what the port expects or produces.
+  3. **Parameter descriptions** — last argument (`p_description`) on every `GNParameter.create_*()` call in `_init_parameters()`. Describes what the parameter controls.
+- **Factory method pattern:** `p_description` is always the LAST positional argument, after `p_label`. If a parameter has no custom label, pass `""` for `p_label` before the description: `create_float("size", 1.0, 0.0, 10.0, 0.1, "", "Widget size in pixels")`.
+- **Port method pattern:** `desc` is the last arg: `add_input("in", GNFamily.Type.TOP, false, "Input texture")`.
+- **UI wiring (already implemented):**
+  - Inspector: `GNParamRow` sets `tooltip_text` on the parameter name label from `param.description`.
+  - Graph ports: `GNNodeView._build_slots()` sets `tooltip_text` on the row container from port descriptions.
+  - Palette: `GNNodePalette` shows `_get_operator_description()` as tree-item tooltip.
+- **When adding a new operator:** follow this rule or the node will have empty tooltips.
+
+### 25.15 Dynamic Port Counts — Runtime-Adjustable I/O Ports
+
+- **Goal:** Nodes whose input (or output) count is logically variable should expose a parameter or auto-detection mechanism that adds/removes ports at runtime instead of wasting fixed slots.
+- **Base-class API (GNNode):**
+  - `set_input_count(count, port_family, name_prefix, desc_prefix)` — clears all input ports, rebuilds `count` sequentially-named ports, emits `ports_changed(node_id)`.
+  - `set_output_count(…)` — same for outputs.
+  - `signal ports_changed(node_id: String)` — fired after any port-count change.
+- **Graph wiring (GNGraphEditor + GNNetwork):**
+  - `GNGraphEditor` connects to `ports_changed` **before** `GNNodeView.setup()` so stale wires are pruned first.
+  - `GNNetwork.prune_stale_connections(node_id)` removes any connection whose port index exceeds the node's current port count, emitting `connection_removed` for each.
+  - `GNNodeView` listens for `ports_changed` and calls `rebuild_slots()` to update the visual GraphNode.
+- **Parameter-driven pattern (Switch / Merge nodes):**
+  - Add a `num_inputs` INT parameter (min 2, max 8, default 2).
+  - Override `_on_parameter_changed` — when `num_inputs` changes, call `set_input_count()` and clamp the `index` parameter's `max_value` to `num_inputs - 1`.
+  - Applies to: SwitchTOP, SwitchCHOP, SwitchDAT, SwitchSOP, MergeCHOP.
+- **Shader-driven pattern (CustomShaderTOP):**
+  - On shader recompile, scan for `uniform sampler2D gn_tex<N>` declarations.
+  - Rebuild input ports to match the highest `gn_tex` index found + 1 (clamped 0-8).
+  - No explicit `num_inputs` parameter — the shader source is the single source of truth.
+- **Resource motivation:** Every unused TOP input port can imply an idle SubViewport. Fewer ports = fewer GPU resources wasted.
+- **When adding a new operator with variable port count:** follow either the parameter-driven or auto-detection pattern above. Always emit `ports_changed` after modifying port arrays.
 
 ---
 

@@ -12,16 +12,17 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "edge"
 	family = GNFamily.Type.TOP
+	node_description = "Sobel edge detection with configurable strength."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture")
+	add_output("out", GNFamily.Type.TOP, "Edge-detected texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 10.0, 0.1))
-	add_parameter(GNParameter.create_bool("grayscale", true, "Grayscale Output"))
+	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 10.0, 0.1, "", "Edge strength multiplier"))
+	add_parameter(GNParameter.create_bool("grayscale", true, "Grayscale Output", "Output grayscale or colored edges"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

@@ -16,18 +16,19 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "blur"
 	family = GNFamily.Type.TOP
+	node_description = "Two-pass separable blur (Gaussian or Box)."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to blur")
+	add_output("out", GNFamily.Type.TOP, "Blurred texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("size", 5.0, 0.0, 100.0, 0.1, "Blur Size"))
-	add_parameter(GNParameter.create_int("quality", 4, 1, 8))
+	add_parameter(GNParameter.create_float("size", 5.0, 0.0, 100.0, 0.1, "Blur Size", "Blur radius in pixels"))
+	add_parameter(GNParameter.create_int("quality", 4, 1, 8, "", "Samples per direction (higher = smoother)"))
 	add_parameter(GNParameter.create_enum("method",
-		PackedStringArray(["Gaussian", "Box"]), 0))
+		PackedStringArray(["Gaussian", "Box"]), 0, "", "Blur algorithm"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

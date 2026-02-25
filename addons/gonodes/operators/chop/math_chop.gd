@@ -13,19 +13,20 @@ var _cached_channel_data: GNChannelData = null
 func _init() -> void:
 	node_type = "math"
 	family = GNFamily.Type.CHOP
+	node_description = "Per-sample math on CHOP channels."
 
 
 func _init_ports() -> void:
-	add_input("in1", GNFamily.Type.CHOP)
-	add_input("in2", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in1", GNFamily.Type.CHOP, false, "First input (required)")
+	add_input("in2", GNFamily.Type.CHOP, false, "Second input (optional, uses operand if absent)")
+	add_output("out", GNFamily.Type.CHOP, "Math result")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("operation",
 		PackedStringArray(["Add", "Subtract", "Multiply", "Divide",
-			"Abs", "Sin", "Cos", "Pow"]), 0))
-	add_parameter(GNParameter.create_float("operand", 0.0, null, null, 0.01))
+			"Abs", "Sin", "Cos", "Pow"]), 0, "", "Math operation to apply"))
+	add_parameter(GNParameter.create_float("operand", 0.0, null, null, 0.01, "", "Scalar operand when in2 is absent"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

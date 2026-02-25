@@ -13,21 +13,22 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "ramp"
 	family = GNFamily.Type.TOP
+	node_description = "Gradient ramp generator (horizontal, vertical, radial, circular)."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.TOP)
+	add_output("out", GNFamily.Type.TOP, "Generated gradient texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512)))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_enum("type",
-		PackedStringArray(["Horizontal", "Vertical", "Radial", "Circular"]), 0))
-	add_parameter(GNParameter.create_color("color_a", Color.BLACK))
-	add_parameter(GNParameter.create_color("color_b", Color.WHITE))
-	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5)))
-	add_parameter(GNParameter.create_float("phase", 0.0, null, null, 0.01))
-	add_parameter(GNParameter.create_bool("repeat", false))
+		PackedStringArray(["Horizontal", "Vertical", "Radial", "Circular"]), 0, "", "Gradient direction"))
+	add_parameter(GNParameter.create_color("color_a", Color.BLACK, "", "Start color"))
+	add_parameter(GNParameter.create_color("color_b", Color.WHITE, "", "End color"))
+	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5), "", "Center point for radial/circular"))
+	add_parameter(GNParameter.create_float("phase", 0.0, null, null, 0.01, "", "Phase offset"))
+	add_parameter(GNParameter.create_bool("repeat", false, "", "Repeat the gradient pattern"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

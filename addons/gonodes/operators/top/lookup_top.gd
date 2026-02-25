@@ -13,17 +13,18 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "lookup"
 	family = GNFamily.Type.TOP
+	node_description = "Remap colors via a lookup table / ramp texture."
 
 
 func _init_ports() -> void:
-	add_input("source", GNFamily.Type.TOP)
-	add_input("ramp", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("source", GNFamily.Type.TOP, false, "Image to remap")
+	add_input("ramp", GNFamily.Type.TOP, false, "Color lookup table / ramp")
+	add_output("out", GNFamily.Type.TOP, "Remapped texture")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("index_by",
-		PackedStringArray(["Luminance", "Red", "Green", "Blue"]), 0))
+		PackedStringArray(["Luminance", "Red", "Green", "Blue"]), 0, "", "Which channel indexes the ramp"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

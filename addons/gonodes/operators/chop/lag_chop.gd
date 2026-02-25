@@ -12,19 +12,20 @@ func _init() -> void:
 	node_type = "lag"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "Attack/release smoothing on channels."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels")
+	add_output("out", GNFamily.Type.CHOP, "Smoothed channels")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("attack", 0.2, 0.0, 10.0, 0.01,
-		"Attack Time (sec)"))
+		"Attack Time (sec)", "Rise smoothing time in seconds"))
 	add_parameter(GNParameter.create_float("release", 0.2, 0.0, 10.0, 0.01,
-		"Release Time (sec)"))
-	add_parameter(GNParameter.create_bool("reset", false))
+		"Release Time (sec)", "Fall smoothing time in seconds"))
+	add_parameter(GNParameter.create_bool("reset", false, "", "Clear smooth state"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

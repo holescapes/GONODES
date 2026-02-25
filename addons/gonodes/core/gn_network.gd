@@ -222,6 +222,35 @@ func get_connection_at_input(node_id: String, port_index: int) -> GNConnection:
 	return null
 
 
+## Removes any connections whose port index exceeds the node's current port count.
+## Called after a node rebuilds its ports (dynamic port count change).
+## Returns the number of pruned connections.
+func prune_stale_connections(node_id: String) -> int:
+	var node: GNNode = nodes.get(node_id, null)
+	if node == null:
+		return 0
+
+	var in_count := node.input_ports.size()
+	var out_count := node.output_ports.size()
+	var stale: Array[GNConnection] = []
+
+	for conn in connections:
+		if conn.to_node == node_id and conn.to_port >= in_count:
+			stale.append(conn)
+		elif conn.from_node == node_id and conn.from_port >= out_count:
+			stale.append(conn)
+
+	for conn in stale:
+		connections.erase(conn)
+		connection_removed.emit(conn)
+
+	if stale.size() > 0:
+		_invalidate_topo()
+		graph_changed.emit()
+		GNLogger.info("Network", "Pruned %d stale connection(s) on '%s'" % [stale.size(), node_id])
+	return stale.size()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Graph Queries
 # ═══════════════════════════════════════════════════════════════════════════════

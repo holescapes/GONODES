@@ -9,11 +9,12 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "wireframe"
 	family = GNFamily.Type.SOP
+	node_description = "Convert triangles to wireframe lines."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP)
-	add_output("out", GNFamily.Type.SOP)
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry")
+	add_output("out", GNFamily.Type.SOP, "Wireframe mesh")
 
 
 func _init_parameters() -> void:

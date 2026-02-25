@@ -9,19 +9,20 @@ var _cached_table: GNTableData = null
 func _init() -> void:
 	node_type = "select"
 	family = GNFamily.Type.DAT
+	node_description = "Select rows and columns from a table by range."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT)
-	add_output("out", GNFamily.Type.DAT)
+	add_input("in", GNFamily.Type.DAT, false, "Input table")
+	add_output("out", GNFamily.Type.DAT, "Selected subset")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("row_start", 0, 0, null, "Row Start"))
-	add_parameter(GNParameter.create_int("row_end", -1, -1, null, "Row End"))
-	add_parameter(GNParameter.create_int("col_start", 0, 0, null, "Col Start"))
-	add_parameter(GNParameter.create_int("col_end", -1, -1, null, "Col End"))
-	add_parameter(GNParameter.create_bool("include_header", true, "Include Header"))
+	add_parameter(GNParameter.create_int("row_start", 0, 0, null, "Row Start", "First row index"))
+	add_parameter(GNParameter.create_int("row_end", -1, -1, null, "Row End", "Last row index (-1 = end)"))
+	add_parameter(GNParameter.create_int("col_start", 0, 0, null, "Col Start", "First column index"))
+	add_parameter(GNParameter.create_int("col_end", -1, -1, null, "Col End", "Last column index (-1 = end)"))
+	add_parameter(GNParameter.create_bool("include_header", true, "Include Header", "Keep header row in output"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

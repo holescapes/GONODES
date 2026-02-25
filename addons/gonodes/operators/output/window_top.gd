@@ -28,29 +28,30 @@ var _window_params_dirty: bool = true
 func _init() -> void:
 	node_type = "window"
 	family = GNFamily.Type.TOP
+	node_description = "Display a texture in a standalone OS window (VJ output)."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Texture to display in the window")
 	# No outputs — this is a display sink
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("title", "GONODES Output", "Title"))
+	add_parameter(GNParameter.create_string("title", "GONODES Output", "Title", "Window title bar text"))
 
 	# Monitor selection — 0 = primary, 1 = secondary, etc.
-	add_parameter(GNParameter.create_int("monitor", 0, 0, 8))
+	add_parameter(GNParameter.create_int("monitor", 0, 0, 8, "", "Target display index (0 = primary)"))
 
 	add_parameter(GNParameter.create_enum("window_mode",
-		PackedStringArray(["Windowed", "Fullscreen", "Borderless"]), 0))
+		PackedStringArray(["Windowed", "Fullscreen", "Borderless"]), 0, "", "Window display mode"))
 
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080)))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080), "", "Window resolution in pixels"))
 
 	# Position: (-1, -1) = auto-center on target monitor
-	add_parameter(GNParameter.create_vector2i("position", Vector2i(-1, -1)))
+	add_parameter(GNParameter.create_vector2i("position", Vector2i(-1, -1), "", "Window position (-1,-1 = auto center)"))
 
-	add_parameter(GNParameter.create_bool("always_on_top", false))
-	add_parameter(GNParameter.create_bool("vsync", true))
+	add_parameter(GNParameter.create_bool("always_on_top", false, "", "Keep window above all other windows"))
+	add_parameter(GNParameter.create_bool("vsync", true, "", "Enable vertical sync"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

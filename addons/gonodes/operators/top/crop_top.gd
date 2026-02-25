@@ -12,17 +12,18 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "crop"
 	family = GNFamily.Type.TOP
+	node_description = "Crop a UV sub-region from the input texture."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to crop")
+	add_output("out", GNFamily.Type.TOP, "Cropped texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output Resolution"))
-	add_parameter(GNParameter.create_vector2("left_top", Vector2(0.0, 0.0)))
-	add_parameter(GNParameter.create_vector2("right_bottom", Vector2(1.0, 1.0)))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output Resolution", "Output texture resolution"))
+	add_parameter(GNParameter.create_vector2("left_top", Vector2(0.0, 0.0), "", "Top-left UV corner of crop region"))
+	add_parameter(GNParameter.create_vector2("right_bottom", Vector2(1.0, 1.0), "", "Bottom-right UV corner of crop region"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

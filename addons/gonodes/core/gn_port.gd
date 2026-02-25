@@ -20,16 +20,21 @@ var is_input: bool = true
 ## Output ports always support fan-out regardless of this setting.
 var multi_input: bool = false
 
+## Human-readable description shown as tooltip when hovering over the port.
+var description: String = ""
+
 
 ## Creates a new port with the given configuration.
 static func create(p_name: String, p_family: GNFamily.Type, p_index: int,
-		p_is_input: bool, p_multi_input: bool = false) -> GNPort:
+		p_is_input: bool, p_multi_input: bool = false,
+		p_description: String = "") -> GNPort:
 	var port := GNPort.new()
 	port.port_name = p_name
 	port.family = p_family
 	port.index = p_index
 	port.is_input = p_is_input
 	port.multi_input = p_multi_input
+	port.description = p_description
 	return port
 
 

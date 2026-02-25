@@ -16,18 +16,19 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "composite"
 	family = GNFamily.Type.TOP
+	node_description = "Blend two textures (Add, Multiply, Over, Screen, etc.)."
 
 
 func _init_ports() -> void:
-	add_input("A", GNFamily.Type.TOP)
-	add_input("B", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("A", GNFamily.Type.TOP, false, "First texture (base)")
+	add_input("B", GNFamily.Type.TOP, false, "Second texture (blend)")
+	add_output("out", GNFamily.Type.TOP, "Composited texture")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("operation",
-		PackedStringArray(["Add", "Multiply", "Over", "Screen", "Subtract", "Difference"]), 0))
-	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01))
+		PackedStringArray(["Add", "Multiply", "Over", "Screen", "Subtract", "Difference"]), 0, "", "Blend mode"))
+	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01, "", "Blend opacity"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

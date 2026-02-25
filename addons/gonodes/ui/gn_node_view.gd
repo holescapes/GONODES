@@ -71,6 +71,9 @@ func setup(node: GNNode) -> void:
 	# Track position changes
 	position_offset_changed.connect(_on_position_changed)
 
+	# React to dynamic port changes at runtime
+	gn_node.ports_changed.connect(_on_ports_changed)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Port Slots
@@ -93,27 +96,45 @@ func _build_slots() -> void:
 		var has_left := i < in_count
 		var has_right := i < out_count
 
-		# Create a label for this slot row
-		var row_label := Label.new()
 		var left_name := gn_node.input_ports[i].port_name if has_left else ""
 		var right_name := gn_node.output_ports[i].port_name if has_right else ""
 
-		if has_left and has_right:
-			row_label.text = "%s      %s" % [left_name, right_name]
-			row_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		elif has_left:
-			row_label.text = left_name
-			row_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-		elif has_right:
-			row_label.text = right_name
-			row_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		else:
-			row_label.text = gn_node.node_type
-			row_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# Use an HBoxContainer so left/right labels stay flush against their edges
+		var row_container := HBoxContainer.new()
+		row_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-		row_label.add_theme_font_size_override("font_size", 12)
-		row_label.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
-		add_child(row_label)
+		var left_label := Label.new()
+		left_label.text = left_name if has_left else ""
+		left_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		left_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		left_label.add_theme_font_size_override("font_size", 12)
+		left_label.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
+		row_container.add_child(left_label)
+
+		var right_label := Label.new()
+		right_label.text = right_name if has_right else ""
+		right_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		right_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		right_label.add_theme_font_size_override("font_size", 12)
+		right_label.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
+		row_container.add_child(right_label)
+
+		# Fallback: if no ports at all on this row, show node type
+		if not has_left and not has_right:
+			left_label.text = gn_node.node_type
+			left_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+		# Port tooltips — build combined tooltip for the row
+		var port_tooltips: PackedStringArray = []
+		if has_left and not gn_node.input_ports[i].description.is_empty():
+			port_tooltips.append("%s: %s" % [left_name, gn_node.input_ports[i].description])
+		if has_right and not gn_node.output_ports[i].description.is_empty():
+			port_tooltips.append("%s: %s" % [right_name, gn_node.output_ports[i].description])
+		if port_tooltips.size() > 0:
+			row_container.tooltip_text = "\n".join(port_tooltips)
+			row_container.mouse_filter = Control.MOUSE_FILTER_PASS
+
+		add_child(row_container)
 
 		# Configure the slot
 		var left_color := Color.WHITE
@@ -147,6 +168,12 @@ func _build_slots() -> void:
 		add_child(type_label)
 
 
+## Public entry point — rebuilds all slot rows from the current port arrays.
+## Called by GNGraphEditor when ports_changed fires after stale connections are pruned.
+func rebuild_slots() -> void:
+	_build_slots()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Sync
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -163,3 +190,9 @@ func update_status() -> void:
 		return
 	# Could add visual feedback (glow, error badge) here in the future
 	pass
+
+
+## Handler for GNNode.ports_changed — triggers a slot rebuild.
+## Actual connection pruning is handled by GNGraphEditor before this fires.
+func _on_ports_changed(_node_id: String) -> void:
+	rebuild_slots()

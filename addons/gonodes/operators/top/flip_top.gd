@@ -12,16 +12,17 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "flip"
 	family = GNFamily.Type.TOP
+	node_description = "Mirror texture horizontally and/or vertically."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture")
+	add_output("out", GNFamily.Type.TOP, "Flipped texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_bool("flip_x", false, "Flip Horizontal"))
-	add_parameter(GNParameter.create_bool("flip_y", false, "Flip Vertical"))
+	add_parameter(GNParameter.create_bool("flip_x", false, "Flip Horizontal", "Mirror horizontally"))
+	add_parameter(GNParameter.create_bool("flip_y", false, "Flip Vertical", "Mirror vertically"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

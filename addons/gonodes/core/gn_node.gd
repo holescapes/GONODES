@@ -18,6 +18,9 @@ extends Node
 ## Which operator family this node belongs to.
 @export var family: GNFamily.Type = GNFamily.Type.TOP
 
+## Human-readable description of this operator for the palette tooltip.
+var node_description: String = ""
+
 # ─── Ports ─────────────────────────────────────────────────────────────────────
 
 ## Ordered list of input port definitions.
@@ -74,6 +77,10 @@ signal node_cooked(node_id: String)
 
 ## Emitted when a parameter value changes.
 signal parameter_changed(node_id: String, param_name: String)
+
+## Emitted when input or output ports are added/removed at runtime.
+## Listeners (GNGraphEditor, GNNodeView) must rebuild slots and prune stale wires.
+signal ports_changed(node_id: String)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -133,15 +140,16 @@ func initialize(p_id: String) -> void:
 
 ## Adds an input port and returns it.
 func add_input(port_name: String, port_family: GNFamily.Type,
-		multi: bool = false) -> GNPort:
-	var port := GNPort.create(port_name, port_family, input_ports.size(), true, multi)
+		multi: bool = false, desc: String = "") -> GNPort:
+	var port := GNPort.create(port_name, port_family, input_ports.size(), true, multi, desc)
 	input_ports.append(port)
 	return port
 
 
 ## Adds an output port and returns it.
-func add_output(port_name: String, port_family: GNFamily.Type) -> GNPort:
-	var port := GNPort.create(port_name, port_family, output_ports.size(), false)
+func add_output(port_name: String, port_family: GNFamily.Type,
+		desc: String = "") -> GNPort:
+	var port := GNPort.create(port_name, port_family, output_ports.size(), false, false, desc)
 	output_ports.append(port)
 	return port
 
@@ -158,6 +166,43 @@ func get_output_port(index: int) -> GNPort:
 	if index < 0 or index >= output_ports.size():
 		return null
 	return output_ports[index]
+
+
+## Replaces all input ports with [param count] sequentially-named ports of the
+## given [param port_family].  Emits [signal ports_changed] so the graph editor
+## can prune stale connections and rebuild slots.  Use from subclass overrides of
+## [method _on_parameter_changed] to implement dynamic port counts.
+##
+## [param count]       — desired number of input ports (clamped ≥ 0).
+## [param port_family] — GNFamily.Type for every port.
+## [param name_prefix] — port names become "prefix0", "prefix1", …
+## [param desc_prefix] — port descriptions become "Prefix 0", "Prefix 1", …
+func set_input_count(count: int, port_family: GNFamily.Type,
+		name_prefix: String = "in", desc_prefix: String = "Input") -> void:
+	count = maxi(count, 0)
+	if count == input_ports.size():
+		return  # No change
+	input_ports.clear()
+	for i in range(count):
+		add_input("%s%d" % [name_prefix, i], port_family, false,
+			"%s %d" % [desc_prefix, i])
+	GNLogger.debug("GNNode", "'%s' input port count → %d" % [id, count])
+	ports_changed.emit(id)
+
+
+## Replaces all output ports with [param count] sequentially-named ports.
+## Same semantics as [method set_input_count] but for outputs.
+func set_output_count(count: int, port_family: GNFamily.Type,
+		name_prefix: String = "out", desc_prefix: String = "Output") -> void:
+	count = maxi(count, 0)
+	if count == output_ports.size():
+		return
+	output_ports.clear()
+	for i in range(count):
+		add_output("%s%d" % [name_prefix, i], port_family,
+			"%s %d" % [desc_prefix, i])
+	GNLogger.debug("GNNode", "'%s' output port count → %d" % [id, count])
+	ports_changed.emit(id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -13,16 +13,17 @@ func _init() -> void:
 	node_type = "oscin"
 	family = GNFamily.Type.DAT
 	time_dependent = true
+	node_description = "Receive OSC messages into a table (stub)."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.DAT)
+	add_output("out", GNFamily.Type.DAT, "OSC messages table")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("port", 9000, 1, 65535, "Port"))
-	add_parameter(GNParameter.create_int("max_rows", 100, 1, 10000, "Max Rows"))
-	add_parameter(GNParameter.create_bool("active", true, "Active"))
+	add_parameter(GNParameter.create_int("port", 9000, 1, 65535, "Port", "UDP listen port"))
+	add_parameter(GNParameter.create_int("max_rows", 100, 1, 10000, "Max Rows", "Maximum stored messages"))
+	add_parameter(GNParameter.create_bool("active", true, "Active", "Enable OSC listener"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

@@ -10,35 +10,36 @@ var _camera: Camera3D = null
 func _init() -> void:
 	node_type = "camera"
 	family = GNFamily.Type.COMP
+	node_description = "Provide a Camera3D for 3D rendering."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.COMP)
+	add_output("out", GNFamily.Type.COMP, "Camera component")
 
 
 func _init_parameters() -> void:
 	# Position
-	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X"))
-	add_parameter(GNParameter.create_float("ty", 1.0, null, null, 0.01, "Translate Y"))
-	add_parameter(GNParameter.create_float("tz", 3.0, null, null, 0.01, "Translate Z"))
+	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "Camera X position"))
+	add_parameter(GNParameter.create_float("ty", 1.0, null, null, 0.01, "Translate Y", "Camera Y position"))
+	add_parameter(GNParameter.create_float("tz", 3.0, null, null, 0.01, "Translate Z", "Camera Z position"))
 	# Rotation
-	add_parameter(GNParameter.create_float("rx", -15.0, -90.0, 90.0, 0.1, "Rotate X"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z"))
+	add_parameter(GNParameter.create_float("rx", -15.0, -90.0, 90.0, 0.1, "Rotate X", "Pitch (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Yaw (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Roll (degrees)"))
 	# Look-at target (optional)
-	add_parameter(GNParameter.create_bool("use_look_at", false, "Use Look At"))
-	add_parameter(GNParameter.create_float("look_at_x", 0.0, null, null, 0.01, "Look At X"))
-	add_parameter(GNParameter.create_float("look_at_y", 0.0, null, null, 0.01, "Look At Y"))
-	add_parameter(GNParameter.create_float("look_at_z", 0.0, null, null, 0.01, "Look At Z"))
+	add_parameter(GNParameter.create_bool("use_look_at", false, "Use Look At", "Use look-at targeting instead of rotation"))
+	add_parameter(GNParameter.create_float("look_at_x", 0.0, null, null, 0.01, "Look At X", "Look-at target X"))
+	add_parameter(GNParameter.create_float("look_at_y", 0.0, null, null, 0.01, "Look At Y", "Look-at target Y"))
+	add_parameter(GNParameter.create_float("look_at_z", 0.0, null, null, 0.01, "Look At Z", "Look-at target Z"))
 	# Projection
 	add_parameter(GNParameter.create_enum("projection",
-		PackedStringArray(["Perspective", "Orthogonal"]), 0, "Projection"))
-	add_parameter(GNParameter.create_float("fov", 75.0, 1.0, 179.0, 0.5, "FOV"))
-	add_parameter(GNParameter.create_float("ortho_size", 10.0, 0.1, 1000.0, 0.1, "Ortho Size"))
-	add_parameter(GNParameter.create_float("near", 0.05, 0.001, 100.0, 0.01, "Near Plane"))
-	add_parameter(GNParameter.create_float("far", 100.0, 1.0, 10000.0, 1.0, "Far Plane"))
+		PackedStringArray(["Perspective", "Orthogonal"]), 0, "Projection", "Camera projection mode"))
+	add_parameter(GNParameter.create_float("fov", 75.0, 1.0, 179.0, 0.5, "FOV", "Field of view (perspective only)"))
+	add_parameter(GNParameter.create_float("ortho_size", 10.0, 0.1, 1000.0, 0.1, "Ortho Size", "Orthographic viewport size"))
+	add_parameter(GNParameter.create_float("near", 0.05, 0.001, 100.0, 0.01, "Near Plane", "Near clip distance"))
+	add_parameter(GNParameter.create_float("far", 100.0, 1.0, 10000.0, 1.0, "Far Plane", "Far clip distance"))
 	# Environment
-	add_parameter(GNParameter.create_color("clear_color", Color(0.1, 0.1, 0.1), "Clear Color"))
+	add_parameter(GNParameter.create_color("clear_color", Color(0.1, 0.1, 0.1), "Clear Color", "Background clear colour"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

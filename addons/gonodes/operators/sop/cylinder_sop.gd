@@ -9,20 +9,21 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "cylinder"
 	family = GNFamily.Type.SOP
+	node_description = "Generate a cylinder mesh."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.SOP)
+	add_output("out", GNFamily.Type.SOP, "Cylinder mesh")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("top_radius", 0.5, 0.0, 50.0, 0.01, "Top Radius"))
-	add_parameter(GNParameter.create_float("bottom_radius", 0.5, 0.0, 50.0, 0.01, "Bottom Radius"))
-	add_parameter(GNParameter.create_float("height", 1.0, 0.01, 100.0, 0.01, "Height"))
-	add_parameter(GNParameter.create_int("radial_segments", 32, 3, 256, "Radial Segments"))
-	add_parameter(GNParameter.create_int("rings", 4, 1, 128, "Rings"))
-	add_parameter(GNParameter.create_bool("cap_top", true, "Cap Top"))
-	add_parameter(GNParameter.create_bool("cap_bottom", true, "Cap Bottom"))
+	add_parameter(GNParameter.create_float("top_radius", 0.5, 0.0, 50.0, 0.01, "Top Radius", "Radius at the top (0 = cone)"))
+	add_parameter(GNParameter.create_float("bottom_radius", 0.5, 0.0, 50.0, 0.01, "Bottom Radius", "Radius at the bottom"))
+	add_parameter(GNParameter.create_float("height", 1.0, 0.01, 100.0, 0.01, "Height", "Cylinder height"))
+	add_parameter(GNParameter.create_int("radial_segments", 32, 3, 256, "Radial Segments", "Segments around circumference"))
+	add_parameter(GNParameter.create_int("rings", 4, 1, 128, "Rings", "Vertical edge loops"))
+	add_parameter(GNParameter.create_bool("cap_top", true, "Cap Top", "Close the top face"))
+	add_parameter(GNParameter.create_bool("cap_bottom", true, "Cap Bottom", "Close the bottom face"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

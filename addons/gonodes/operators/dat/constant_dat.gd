@@ -9,22 +9,23 @@ var _cached_table: GNTableData = null
 func _init() -> void:
 	node_type = "constant"
 	family = GNFamily.Type.DAT
+	node_description = "Table with user-defined constant values."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.DAT)
+	add_output("out", GNFamily.Type.DAT, "Table output")
 
 
 func _init_parameters() -> void:
 	# Column headers
-	add_parameter(GNParameter.create_string("col0", "name", "Column 0"))
-	add_parameter(GNParameter.create_string("col1", "value", "Column 1"))
-	add_parameter(GNParameter.create_string("col2", "", "Column 2"))
-	add_parameter(GNParameter.create_string("col3", "", "Column 3"))
+	add_parameter(GNParameter.create_string("col0", "name", "Column 0", "Header name for column 0"))
+	add_parameter(GNParameter.create_string("col1", "value", "Column 1", "Header name for column 1"))
+	add_parameter(GNParameter.create_string("col2", "", "Column 2", "Header for column 2 (empty = skip)"))
+	add_parameter(GNParameter.create_string("col3", "", "Column 3", "Header for column 3 (empty = skip)"))
 	# Row data (4 rows × 4 cols)
 	for r in range(4):
 		for c in range(4):
-			add_parameter(GNParameter.create_string("r%dc%d" % [r, c], "", "Row %d Col %d" % [r, c]))
+			add_parameter(GNParameter.create_string("r%dc%d" % [r, c], "", "Row %d Col %d" % [r, c], "Cell value"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

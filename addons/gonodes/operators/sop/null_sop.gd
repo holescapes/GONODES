@@ -5,11 +5,12 @@ extends GNNode
 func _init() -> void:
 	node_type = "null"
 	family = GNFamily.Type.SOP
+	node_description = "Pass-through for organization and references."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP)
-	add_output("out", GNFamily.Type.SOP)
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry")
+	add_output("out", GNFamily.Type.SOP, "Same geometry (pass-through)")
 
 
 func _init_parameters() -> void:

@@ -9,19 +9,20 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "circle"
 	family = GNFamily.Type.SOP
+	node_description = "Generate a circle or disc mesh."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.SOP)
+	add_output("out", GNFamily.Type.SOP, "Circle/disc mesh")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("radius", 0.5, 0.01, 100.0, 0.01, "Radius"))
-	add_parameter(GNParameter.create_int("segments", 32, 3, 512, "Segments"))
+	add_parameter(GNParameter.create_float("radius", 0.5, 0.01, 100.0, 0.01, "Radius", "Circle radius"))
+	add_parameter(GNParameter.create_int("segments", 32, 3, 512, "Segments", "Number of edge segments"))
 	add_parameter(GNParameter.create_enum("type",
-		PackedStringArray(["Filled Disc", "Wire Circle"]), 0, "Type"))
+		PackedStringArray(["Filled Disc", "Wire Circle"]), 0, "Type", "Filled disc or wire circle"))
 	add_parameter(GNParameter.create_enum("orientation",
-		PackedStringArray(["XZ (Horizontal)", "XY (Vertical)", "YZ (Side)"]), 0, "Orientation"))
+		PackedStringArray(["XZ (Horizontal)", "XY (Vertical)", "YZ (Side)"]), 0, "Orientation", "Plane orientation"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

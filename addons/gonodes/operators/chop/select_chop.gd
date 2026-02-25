@@ -9,18 +9,19 @@ var _cached_channel_data: GNChannelData = null
 func _init() -> void:
 	node_type = "select"
 	family = GNFamily.Type.CHOP
+	node_description = "Select/rename specific channels from input."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels")
+	add_output("out", GNFamily.Type.CHOP, "Selected channels")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("pattern", "*",
-		"Channel name pattern (* = all, comma-separated for multiple)"))
+		"Channel name pattern (* = all, comma-separated for multiple)", "Channel name filter pattern"))
 	add_parameter(GNParameter.create_string("rename", "",
-		"Rename pattern (leave empty to keep names)"))
+		"Rename pattern (leave empty to keep names)", "New names for selected channels"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

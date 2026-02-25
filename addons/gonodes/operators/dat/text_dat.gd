@@ -10,14 +10,15 @@ var _cached_table: GNTableData = null
 func _init() -> void:
 	node_type = "text"
 	family = GNFamily.Type.DAT
+	node_description = "Hold plain text content."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.DAT)
+	add_output("out", GNFamily.Type.DAT, "Text output")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("text", "", "Text"))
+	add_parameter(GNParameter.create_string("text", "", "Text", "Text content"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

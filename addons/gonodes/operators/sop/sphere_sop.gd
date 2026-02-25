@@ -9,18 +9,19 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "sphere"
 	family = GNFamily.Type.SOP
+	node_description = "Generate a sphere mesh."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.SOP)
+	add_output("out", GNFamily.Type.SOP, "Sphere mesh")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("radius", 0.5, 0.01, 100.0, 0.01, "Radius"))
-	add_parameter(GNParameter.create_float("height", 1.0, 0.01, 200.0, 0.01, "Height"))
-	add_parameter(GNParameter.create_int("radial_segments", 32, 3, 256, "Radial Segments"))
-	add_parameter(GNParameter.create_int("rings", 16, 2, 128, "Rings"))
-	add_parameter(GNParameter.create_bool("is_hemisphere", false, "Hemisphere"))
+	add_parameter(GNParameter.create_float("radius", 0.5, 0.01, 100.0, 0.01, "Radius", "Sphere radius"))
+	add_parameter(GNParameter.create_float("height", 1.0, 0.01, 200.0, 0.01, "Height", "Full sphere height (2 × radius for perfect sphere)"))
+	add_parameter(GNParameter.create_int("radial_segments", 32, 3, 256, "Radial Segments", "Segments around circumference"))
+	add_parameter(GNParameter.create_int("rings", 16, 2, 128, "Rings", "Horizontal edge loops"))
+	add_parameter(GNParameter.create_bool("is_hemisphere", false, "Hemisphere", "Only produce top half"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

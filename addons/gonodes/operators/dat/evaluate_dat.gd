@@ -12,11 +12,12 @@ var _expr: Expression = null
 func _init() -> void:
 	node_type = "evaluate"
 	family = GNFamily.Type.DAT
+	node_description = "Evaluate expressions in table cells (e.g. =1+2)."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT)
-	add_output("out", GNFamily.Type.DAT)
+	add_input("in", GNFamily.Type.DAT, false, "Input table with expressions")
+	add_output("out", GNFamily.Type.DAT, "Evaluated table")
 
 
 func _init_parameters() -> void:

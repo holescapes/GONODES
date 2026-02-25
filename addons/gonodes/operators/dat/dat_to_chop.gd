@@ -10,17 +10,18 @@ var _cached_channel_data: GNChannelData = null
 func _init() -> void:
 	node_type = "dat_to_chop"
 	family = GNFamily.Type.CHOP
+	node_description = "Convert DAT table into CHOP channels."
 
 
 func _init_ports() -> void:
-	add_input("dat_in", GNFamily.Type.DAT)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("dat_in", GNFamily.Type.DAT, false, "DAT table input")
+	add_output("out", GNFamily.Type.CHOP, "Channel data output")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("layout",
-		PackedStringArray(["Columns as Channels", "Rows as Channels"]), 0, "Layout"))
-	add_parameter(GNParameter.create_bool("first_is_name", true, "First Row/Col is Name"))
+		PackedStringArray(["Columns as Channels", "Rows as Channels"]), 0, "Layout", "Read channels from columns or rows"))
+	add_parameter(GNParameter.create_bool("first_is_name", true, "First Row/Col is Name", "Use first row/col as channel names"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

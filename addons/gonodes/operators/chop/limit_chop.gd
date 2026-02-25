@@ -11,18 +11,19 @@ var _cached_channel_data: GNChannelData = null
 func _init() -> void:
 	node_type = "limit"
 	family = GNFamily.Type.CHOP
+	node_description = "Clamp, loop, or zig-zag values within bounds."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels")
+	add_output("out", GNFamily.Type.CHOP, "Limited channels")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("type",
-		PackedStringArray(["Clamp", "Loop", "Zig-Zag"]), 0))
-	add_parameter(GNParameter.create_float("min", 0.0, null, null, 0.01))
-	add_parameter(GNParameter.create_float("max", 1.0, null, null, 0.01))
+		PackedStringArray(["Clamp", "Loop", "Zig-Zag"]), 0, "", "Limit mode"))
+	add_parameter(GNParameter.create_float("min", 0.0, null, null, 0.01, "", "Lower bound"))
+	add_parameter(GNParameter.create_float("max", 1.0, null, null, 0.01, "", "Upper bound"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

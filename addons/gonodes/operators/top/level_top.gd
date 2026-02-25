@@ -14,19 +14,20 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "level"
 	family = GNFamily.Type.TOP
+	node_description = "Brightness, contrast, gamma, invert, and opacity adjustments."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture")
+	add_output("out", GNFamily.Type.TOP, "Adjusted texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("brightness", 1.0, 0.0, 4.0, 0.01))
-	add_parameter(GNParameter.create_float("contrast", 1.0, 0.0, 4.0, 0.01))
-	add_parameter(GNParameter.create_float("gamma", 1.0, 0.01, 4.0, 0.01))
-	add_parameter(GNParameter.create_bool("invert", false))
-	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01))
+	add_parameter(GNParameter.create_float("brightness", 1.0, 0.0, 4.0, 0.01, "", "Brightness multiplier"))
+	add_parameter(GNParameter.create_float("contrast", 1.0, 0.0, 4.0, 0.01, "", "Contrast amount"))
+	add_parameter(GNParameter.create_float("gamma", 1.0, 0.01, 4.0, 0.01, "", "Gamma correction curve"))
+	add_parameter(GNParameter.create_bool("invert", false, "", "Invert all colors"))
+	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01, "", "Output opacity"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

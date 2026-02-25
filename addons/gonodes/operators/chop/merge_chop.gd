@@ -2,7 +2,7 @@ class_name MergeCHOP
 extends GNNode
 ## Merges channels from multiple CHOP inputs into a single output.
 ## Channels with matching names can be overwritten or renamed.
-## Similar to TouchDesigner's Merge CHOP.
+## Number of inputs is controlled by the "num_inputs" parameter (2-8).
 
 var _cached_channel_data: GNChannelData = null
 
@@ -10,19 +10,29 @@ var _cached_channel_data: GNChannelData = null
 func _init() -> void:
 	node_type = "merge"
 	family = GNFamily.Type.CHOP
+	node_description = "Merge channels from multiple CHOP inputs (dynamic port count)."
 
 
 func _init_ports() -> void:
-	add_input("in1", GNFamily.Type.CHOP)
-	add_input("in2", GNFamily.Type.CHOP)
-	add_input("in3", GNFamily.Type.CHOP)
-	add_input("in4", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in0", GNFamily.Type.CHOP, false, "Input channels 0")
+	add_input("in1", GNFamily.Type.CHOP, false, "Input channels 1")
+	add_output("out", GNFamily.Type.CHOP, "Merged channels")
 
 
 func _init_parameters() -> void:
+	add_parameter(GNParameter.create_int("num_inputs", 2, 2, 8, "Num Inputs",
+		"Number of CHOP inputs to merge (2-8)"))
 	add_parameter(GNParameter.create_enum("duplicate",
-		PackedStringArray(["Overwrite", "Rename"]), 0))
+		PackedStringArray(["Overwrite", "Rename"]), 0, "",
+		"How to handle duplicate channel names"))
+
+
+func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
+	if param_name == "num_inputs":
+		var count: int = get_param_value("num_inputs")
+		set_input_count(count, GNFamily.Type.CHOP, "in", "Input channels")
+	mark_dirty()
+	parameter_changed.emit(id, param_name)
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -48,7 +58,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		for ch_name in ch_data.channels:
 			var out_name: String = ch_name
 			if dup_mode == 1:
-				# Rename duplicates by appending a suffix
 				var suffix_idx: int = 1
 				while _cached_channel_data.channels.has(out_name):
 					out_name = "%s_%d" % [ch_name, suffix_idx]

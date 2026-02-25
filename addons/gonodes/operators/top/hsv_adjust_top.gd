@@ -13,17 +13,18 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "hsv_adjust"
 	family = GNFamily.Type.TOP
+	node_description = "Hue offset, saturation, and value (brightness) adjustment."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture")
+	add_output("out", GNFamily.Type.TOP, "HSV-adjusted texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("hue_offset", 0.0, -1.0, 1.0, 0.01))
-	add_parameter(GNParameter.create_float("saturation", 1.0, 0.0, 4.0, 0.01))
-	add_parameter(GNParameter.create_float("value", 1.0, 0.0, 4.0, 0.01))
+	add_parameter(GNParameter.create_float("hue_offset", 0.0, -1.0, 1.0, 0.01, "", "Hue rotation (wraps around)"))
+	add_parameter(GNParameter.create_float("saturation", 1.0, 0.0, 4.0, 0.01, "", "Saturation multiplier (0 = grayscale)"))
+	add_parameter(GNParameter.create_float("value", 1.0, 0.0, 4.0, 0.01, "", "Value/brightness multiplier"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

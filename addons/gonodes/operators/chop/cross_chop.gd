@@ -9,16 +9,17 @@ var _cached_channel_data: GNChannelData = null
 func _init() -> void:
 	node_type = "cross"
 	family = GNFamily.Type.CHOP
+	node_description = "Crossfade between two CHOP inputs."
 
 
 func _init_ports() -> void:
-	add_input("A", GNFamily.Type.CHOP)
-	add_input("B", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("A", GNFamily.Type.CHOP, false, "First input")
+	add_input("B", GNFamily.Type.CHOP, false, "Second input")
+	add_output("out", GNFamily.Type.CHOP, "Blended output")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("cross", 0.5, 0.0, 1.0, 0.01, "Cross Value"))
+	add_parameter(GNParameter.create_float("cross", 0.5, 0.0, 1.0, 0.01, "Cross Value", "Blend factor (0 = A, 1 = B)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

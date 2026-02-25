@@ -12,16 +12,17 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "cross"
 	family = GNFamily.Type.TOP
+	node_description = "Linear crossfade between two textures."
 
 
 func _init_ports() -> void:
-	add_input("A", GNFamily.Type.TOP)
-	add_input("B", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("A", GNFamily.Type.TOP, false, "First texture (cross=0)")
+	add_input("B", GNFamily.Type.TOP, false, "Second texture (cross=1)")
+	add_output("out", GNFamily.Type.TOP, "Crossfaded texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("cross", 0.5, 0.0, 1.0, 0.01, "Cross Value"))
+	add_parameter(GNParameter.create_float("cross", 0.5, 0.0, 1.0, 0.01, "Cross Value", "Crossfade (0 = A, 1 = B)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

@@ -10,19 +10,20 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "grid"
 	family = GNFamily.Type.SOP
+	node_description = "Generate a subdivided planar grid."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.SOP)
+	add_output("out", GNFamily.Type.SOP, "Grid mesh")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("size_x", 2.0, 0.01, 100.0, 0.1, "Size X"))
-	add_parameter(GNParameter.create_float("size_z", 2.0, 0.01, 100.0, 0.1, "Size Z"))
-	add_parameter(GNParameter.create_int("rows", 10, 1, 500, "Rows"))
-	add_parameter(GNParameter.create_int("cols", 10, 1, 500, "Columns"))
+	add_parameter(GNParameter.create_float("size_x", 2.0, 0.01, 100.0, 0.1, "Size X", "Grid width"))
+	add_parameter(GNParameter.create_float("size_z", 2.0, 0.01, 100.0, 0.1, "Size Z", "Grid depth"))
+	add_parameter(GNParameter.create_int("rows", 10, 1, 500, "Rows", "Row subdivisions"))
+	add_parameter(GNParameter.create_int("cols", 10, 1, 500, "Columns", "Column subdivisions"))
 	add_parameter(GNParameter.create_enum("orientation",
-		PackedStringArray(["XZ (Horizontal)", "XY (Vertical)", "YZ (Side)"]), 0, "Orientation"))
+		PackedStringArray(["XZ (Horizontal)", "XY (Vertical)", "YZ (Side)"]), 0, "Orientation", "Plane orientation"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

@@ -14,33 +14,34 @@ var _material: StandardMaterial3D = null
 func _init() -> void:
 	node_type = "geo"
 	family = GNFamily.Type.COMP
+	node_description = "Place SOP mesh into a 3D scene."
 
 
 func _init_ports() -> void:
-	add_input("geo_in", GNFamily.Type.SOP)
-	add_input("tex_in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.COMP)
+	add_input("geo_in", GNFamily.Type.SOP, false, "SOP geometry input")
+	add_input("tex_in", GNFamily.Type.TOP, false, "Texture for material (optional)")
+	add_output("out", GNFamily.Type.COMP, "Geometry component")
 
 
 func _init_parameters() -> void:
 	# Transform
-	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X"))
-	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y"))
-	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z"))
-	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z"))
-	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X"))
-	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y"))
-	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z"))
+	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "Object X position"))
+	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Object Y position"))
+	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Object Z position"))
+	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Rotation around X (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Rotation around Y (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Rotation around Z (degrees)"))
+	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Scale along X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Scale along Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Scale along Z"))
 
 	# Material
-	add_parameter(GNParameter.create_color("albedo_color", Color.WHITE, "Albedo Color"))
-	add_parameter(GNParameter.create_float("metallic", 0.0, 0.0, 1.0, 0.01, "Metallic"))
-	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01, "Roughness"))
-	add_parameter(GNParameter.create_float("emission_energy", 0.0, 0.0, 16.0, 0.1, "Emission Energy"))
-	add_parameter(GNParameter.create_color("emission_color", Color.BLACK, "Emission Color"))
-	add_parameter(GNParameter.create_bool("visible", true, "Visible"))
+	add_parameter(GNParameter.create_color("albedo_color", Color.WHITE, "Albedo Color", "Surface base colour"))
+	add_parameter(GNParameter.create_float("metallic", 0.0, 0.0, 1.0, 0.01, "Metallic", "Metallic factor (0 = dielectric)"))
+	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01, "Roughness", "Surface roughness"))
+	add_parameter(GNParameter.create_float("emission_energy", 0.0, 0.0, 16.0, 0.1, "Emission Energy", "Emission brightness (0 = off)"))
+	add_parameter(GNParameter.create_color("emission_color", Color.BLACK, "Emission Color", "Emission colour"))
+	add_parameter(GNParameter.create_bool("visible", true, "Visible", "Show or hide the mesh"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

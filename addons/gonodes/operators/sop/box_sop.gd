@@ -9,19 +9,20 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "box"
 	family = GNFamily.Type.SOP
+	node_description = "Generate a box (cuboid) mesh."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.SOP)
+	add_output("out", GNFamily.Type.SOP, "Box mesh")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("size_x", 1.0, 0.01, 100.0, 0.1, "Size X"))
-	add_parameter(GNParameter.create_float("size_y", 1.0, 0.01, 100.0, 0.1, "Size Y"))
-	add_parameter(GNParameter.create_float("size_z", 1.0, 0.01, 100.0, 0.1, "Size Z"))
-	add_parameter(GNParameter.create_int("subdivide_w", 0, 0, 100, "Subdivide Width"))
-	add_parameter(GNParameter.create_int("subdivide_h", 0, 0, 100, "Subdivide Height"))
-	add_parameter(GNParameter.create_int("subdivide_d", 0, 0, 100, "Subdivide Depth"))
+	add_parameter(GNParameter.create_float("size_x", 1.0, 0.01, 100.0, 0.1, "Size X", "Width along X axis"))
+	add_parameter(GNParameter.create_float("size_y", 1.0, 0.01, 100.0, 0.1, "Size Y", "Height along Y axis"))
+	add_parameter(GNParameter.create_float("size_z", 1.0, 0.01, 100.0, 0.1, "Size Z", "Depth along Z axis"))
+	add_parameter(GNParameter.create_int("subdivide_w", 0, 0, 100, "Subdivide Width", "Subdivisions along width"))
+	add_parameter(GNParameter.create_int("subdivide_h", 0, 0, 100, "Subdivide Height", "Subdivisions along height"))
+	add_parameter(GNParameter.create_int("subdivide_d", 0, 0, 100, "Subdivide Depth", "Subdivisions along depth"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

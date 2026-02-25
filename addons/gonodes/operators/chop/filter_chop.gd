@@ -12,19 +12,20 @@ func _init() -> void:
 	node_type = "filter"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "Smooth/filter channels with low-pass or high-pass."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels")
+	add_output("out", GNFamily.Type.CHOP, "Filtered channels")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("type",
-		PackedStringArray(["Low Pass", "High Pass"]), 0))
+		PackedStringArray(["Low Pass", "High Pass"]), 0, "", "Filter algorithm"))
 	add_parameter(GNParameter.create_float("cutoff", 0.1, 0.001, 1.0, 0.001,
-		"Filter Cutoff (0-1)"))
-	add_parameter(GNParameter.create_bool("reset", false))
+		"Filter Cutoff (0-1)", "Cutoff frequency (lower = smoother)"))
+	add_parameter(GNParameter.create_bool("reset", false, "", "Clear filter state"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

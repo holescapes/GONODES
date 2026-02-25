@@ -9,19 +9,20 @@ var _cached_table: GNTableData = null
 func _init() -> void:
 	node_type = "sort"
 	family = GNFamily.Type.DAT
+	node_description = "Sort table rows by a column."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT)
-	add_output("out", GNFamily.Type.DAT)
+	add_input("in", GNFamily.Type.DAT, false, "Input table")
+	add_output("out", GNFamily.Type.DAT, "Sorted table")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("sort_col", 0, 0, null, "Sort Column"))
+	add_parameter(GNParameter.create_int("sort_col", 0, 0, null, "Sort Column", "Column index to sort by"))
 	add_parameter(GNParameter.create_enum("order",
-		PackedStringArray(["Ascending", "Descending"]), 0, "Order"))
+		PackedStringArray(["Ascending", "Descending"]), 0, "Order", "Sort direction"))
 	add_parameter(GNParameter.create_enum("sort_type",
-		PackedStringArray(["Alphabetic", "Numeric"]), 0, "Sort Type"))
+		PackedStringArray(["Alphabetic", "Numeric"]), 0, "Sort Type", "Comparison method"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

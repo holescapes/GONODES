@@ -26,23 +26,24 @@ func _init() -> void:
 	node_type = "render"
 	family = GNFamily.Type.TOP
 	time_dependent = true
+	node_description = "Renders a 3D COMP scene into a 2D texture."
 
 
 func _init_ports() -> void:
 	# Multi-input COMP — accepts geometry, camera, lights
-	add_input("comp_in", GNFamily.Type.COMP, true)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("comp_in", GNFamily.Type.COMP, true, "Connect GeometryCOMP, CameraCOMP, LightCOMP")
+	add_output("out", GNFamily.Type.TOP, "Rendered 3D scene texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1280, 720), "Resolution"))
-	add_parameter(GNParameter.create_color("bg_color", Color(0.1, 0.1, 0.12), "Background Color"))
-	add_parameter(GNParameter.create_bool("transparent_bg", false, "Transparent BG"))
-	add_parameter(GNParameter.create_bool("use_environment", true, "Use Environment"))
-	add_parameter(GNParameter.create_float("ambient_energy", 0.3, 0.0, 4.0, 0.05, "Ambient Energy"))
-	add_parameter(GNParameter.create_color("ambient_color", Color(0.3, 0.3, 0.4), "Ambient Color"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1280, 720), "Resolution", "Render resolution"))
+	add_parameter(GNParameter.create_color("bg_color", Color(0.1, 0.1, 0.12), "Background Color", "Background clear color"))
+	add_parameter(GNParameter.create_bool("transparent_bg", false, "Transparent BG", "Use transparent background"))
+	add_parameter(GNParameter.create_bool("use_environment", true, "Use Environment", "Enable environment lighting"))
+	add_parameter(GNParameter.create_float("ambient_energy", 0.3, 0.0, 4.0, 0.05, "Ambient Energy", "Ambient light intensity"))
+	add_parameter(GNParameter.create_color("ambient_color", Color(0.3, 0.3, 0.4), "Ambient Color", "Ambient light color"))
 	add_parameter(GNParameter.create_enum("anti_aliasing",
-		PackedStringArray(["Off", "2x MSAA", "4x MSAA", "8x MSAA"]), 2, "Anti-Aliasing"))
+		PackedStringArray(["Off", "2x MSAA", "4x MSAA", "8x MSAA"]), 2, "Anti-Aliasing", "MSAA quality level"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

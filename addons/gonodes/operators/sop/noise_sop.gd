@@ -11,25 +11,26 @@ func _init() -> void:
 	node_type = "noise"
 	family = GNFamily.Type.SOP
 	time_dependent = true
+	node_description = "Displace vertices with 3D noise."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP)
-	add_output("out", GNFamily.Type.SOP)
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry")
+	add_output("out", GNFamily.Type.SOP, "Displaced geometry")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("amplitude", 0.2, 0.0, 100.0, 0.01, "Amplitude"))
-	add_parameter(GNParameter.create_float("frequency", 2.0, 0.01, 100.0, 0.1, "Frequency"))
-	add_parameter(GNParameter.create_float("offset_x", 0.0, null, null, 0.1, "Offset X"))
-	add_parameter(GNParameter.create_float("offset_y", 0.0, null, null, 0.1, "Offset Y"))
-	add_parameter(GNParameter.create_float("offset_z", 0.0, null, null, 0.1, "Offset Z"))
-	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, 10.0, 0.01, "Speed"))
+	add_parameter(GNParameter.create_float("amplitude", 0.2, 0.0, 100.0, 0.01, "Amplitude", "Displacement strength"))
+	add_parameter(GNParameter.create_float("frequency", 2.0, 0.01, 100.0, 0.1, "Frequency", "Noise frequency (detail)"))
+	add_parameter(GNParameter.create_float("offset_x", 0.0, null, null, 0.1, "Offset X", "Noise offset along X"))
+	add_parameter(GNParameter.create_float("offset_y", 0.0, null, null, 0.1, "Offset Y", "Noise offset along Y"))
+	add_parameter(GNParameter.create_float("offset_z", 0.0, null, null, 0.1, "Offset Z", "Noise offset along Z"))
+	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, 10.0, 0.01, "Speed", "Animation speed"))
 	add_parameter(GNParameter.create_enum("noise_type",
-		PackedStringArray(["Simplex", "Perlin", "Cellular", "Value"]), 0, "Noise Type"))
+		PackedStringArray(["Simplex", "Perlin", "Cellular", "Value"]), 0, "Noise Type", "Noise algorithm"))
 	add_parameter(GNParameter.create_enum("displace_axis",
-		PackedStringArray(["Normal", "X", "Y", "Z"]), 0, "Displace Along"))
-	add_parameter(GNParameter.create_int("seed", 0, 0, 9999, "Seed"))
+		PackedStringArray(["Normal", "X", "Y", "Z"]), 0, "Displace Along", "Displacement direction"))
+	add_parameter(GNParameter.create_int("seed", 0, 0, 9999, "Seed", "Random seed"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

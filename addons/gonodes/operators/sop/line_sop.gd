@@ -9,17 +9,18 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "line"
 	family = GNFamily.Type.SOP
+	node_description = "Generate a line strip."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.SOP)
+	add_output("out", GNFamily.Type.SOP, "Line mesh")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("points", 10, 2, 10000, "Num Points"))
+	add_parameter(GNParameter.create_int("points", 10, 2, 10000, "Num Points", "Number of vertices"))
 	add_parameter(GNParameter.create_enum("direction",
-		PackedStringArray(["X", "Y", "Z"]), 0, "Direction"))
-	add_parameter(GNParameter.create_float("length", 2.0, 0.01, 1000.0, 0.1, "Length"))
+		PackedStringArray(["X", "Y", "Z"]), 0, "Direction", "Line axis"))
+	add_parameter(GNParameter.create_float("length", 2.0, 0.01, 1000.0, 0.1, "Length", "Total line length"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

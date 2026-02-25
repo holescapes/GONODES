@@ -12,18 +12,19 @@ var _cached_channel_data: GNChannelData = null
 func _init() -> void:
 	node_type = "logic"
 	family = GNFamily.Type.CHOP
+	node_description = "Boolean logic operations on channels."
 
 
 func _init_ports() -> void:
-	add_input("in1", GNFamily.Type.CHOP)
-	add_input("in2", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in1", GNFamily.Type.CHOP, false, "First input")
+	add_input("in2", GNFamily.Type.CHOP, false, "Second input")
+	add_output("out", GNFamily.Type.CHOP, "Logic result (0 or 1)")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("operation",
-		PackedStringArray(["AND", "OR", "XOR", "NAND", "NOR", "NOT"]), 0))
-	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01))
+		PackedStringArray(["AND", "OR", "XOR", "NAND", "NOR", "NOT"]), 0, "", "Logic operation to apply"))
+	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "", "Boolean threshold (>= = true)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

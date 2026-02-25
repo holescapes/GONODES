@@ -10,17 +10,18 @@ var _cached_table: GNTableData = null
 func _init() -> void:
 	node_type = "merge"
 	family = GNFamily.Type.DAT
+	node_description = "Merge two tables (append rows or columns)."
 
 
 func _init_ports() -> void:
-	add_input("in1", GNFamily.Type.DAT)
-	add_input("in2", GNFamily.Type.DAT)
-	add_output("out", GNFamily.Type.DAT)
+	add_input("in1", GNFamily.Type.DAT, false, "First table")
+	add_input("in2", GNFamily.Type.DAT, false, "Second table")
+	add_output("out", GNFamily.Type.DAT, "Merged table")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("mode",
-		PackedStringArray(["Rows", "Columns"]), 0, "Merge Mode"))
+		PackedStringArray(["Rows", "Columns"]), 0, "Merge Mode", "Merge direction"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

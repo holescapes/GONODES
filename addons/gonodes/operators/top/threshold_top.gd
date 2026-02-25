@@ -12,17 +12,18 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "threshold"
 	family = GNFamily.Type.TOP
+	node_description = "Binary black/white threshold with optional softness."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture")
+	add_output("out", GNFamily.Type.TOP, "Thresholded texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("threshold", 0.5, 0.0, 1.0, 0.01))
-	add_parameter(GNParameter.create_float("softness", 0.0, 0.0, 0.5, 0.01))
-	add_parameter(GNParameter.create_bool("use_alpha", false))
+	add_parameter(GNParameter.create_float("threshold", 0.5, 0.0, 1.0, 0.01, "", "Luminance cutoff value"))
+	add_parameter(GNParameter.create_float("softness", 0.0, 0.0, 0.5, 0.01, "", "Soft transition width"))
+	add_parameter(GNParameter.create_bool("use_alpha", false, "", "Threshold alpha channel instead of luminance"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

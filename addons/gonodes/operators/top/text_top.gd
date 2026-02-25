@@ -12,23 +12,24 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "text"
 	family = GNFamily.Type.TOP
+	node_description = "Renders text to a texture via a Label in a SubViewport."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.TOP)
+	add_output("out", GNFamily.Type.TOP, "Rendered text texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("text", "Hello"))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 256)))
-	add_parameter(GNParameter.create_int("font_size", 48, 8, 256))
-	add_parameter(GNParameter.create_color("font_color", Color.WHITE))
-	add_parameter(GNParameter.create_color("bg_color", Color.BLACK))
+	add_parameter(GNParameter.create_string("text", "Hello", "", "Text content to display"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 256), "", "Output texture resolution in pixels"))
+	add_parameter(GNParameter.create_int("font_size", 48, 8, 256, "", "Font size in pixels"))
+	add_parameter(GNParameter.create_color("font_color", Color.WHITE, "", "Text color"))
+	add_parameter(GNParameter.create_color("bg_color", Color.BLACK, "", "Background color"))
 	add_parameter(GNParameter.create_enum("align_h",
-		PackedStringArray(["Left", "Center", "Right"]), 1))
+		PackedStringArray(["Left", "Center", "Right"]), 1, "", "Horizontal text alignment"))
 	add_parameter(GNParameter.create_enum("align_v",
-		PackedStringArray(["Top", "Center", "Bottom"]), 1))
-	add_parameter(GNParameter.create_bool("word_wrap", true))
+		PackedStringArray(["Top", "Center", "Bottom"]), 1, "", "Vertical text alignment"))
+	add_parameter(GNParameter.create_bool("word_wrap", true, "", "Wrap text at texture edges"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

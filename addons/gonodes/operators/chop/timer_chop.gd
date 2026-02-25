@@ -15,19 +15,20 @@ func _init() -> void:
 	node_type = "timer"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "Count up in seconds with start/stop/reset triggers."
 
 
 func _init_ports() -> void:
-	add_input("start", GNFamily.Type.CHOP)
-	add_input("reset", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("start", GNFamily.Type.CHOP, false, "Start trigger")
+	add_input("reset", GNFamily.Type.CHOP, false, "Reset trigger")
+	add_output("out", GNFamily.Type.CHOP, "Timer channels (seconds, fraction, running, done)")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("length", 10.0, 0.0, null, 0.1, "Length (sec)"))
-	add_parameter(GNParameter.create_bool("loop", false))
-	add_parameter(GNParameter.create_bool("auto_start", true, "Auto Start"))
-	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, null, 0.01))
+	add_parameter(GNParameter.create_float("length", 10.0, 0.0, null, 0.1, "Length (sec)", "Timer duration in seconds"))
+	add_parameter(GNParameter.create_bool("loop", false, "", "Loop when complete"))
+	add_parameter(GNParameter.create_bool("auto_start", true, "Auto Start", "Start automatically on first cook"))
+	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, null, 0.01, "", "Playback speed multiplier"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

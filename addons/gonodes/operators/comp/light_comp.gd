@@ -11,32 +11,33 @@ var _current_type: int = -1  # Track which type was last created
 func _init() -> void:
 	node_type = "light"
 	family = GNFamily.Type.COMP
+	node_description = "Provide a Light3D for 3D rendering."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.COMP)
+	add_output("out", GNFamily.Type.COMP, "Light component")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("type",
-		PackedStringArray(["Directional", "Omni", "Spot"]), 0, "Light Type"))
+		PackedStringArray(["Directional", "Omni", "Spot"]), 0, "Light Type", "Light algorithm"))
 	# Position (for omni/spot)
-	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X"))
-	add_parameter(GNParameter.create_float("ty", 3.0, null, null, 0.01, "Translate Y"))
-	add_parameter(GNParameter.create_float("tz", 2.0, null, null, 0.01, "Translate Z"))
+	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "Light X position"))
+	add_parameter(GNParameter.create_float("ty", 3.0, null, null, 0.01, "Translate Y", "Light Y position"))
+	add_parameter(GNParameter.create_float("tz", 2.0, null, null, 0.01, "Translate Z", "Light Z position"))
 	# Rotation
-	add_parameter(GNParameter.create_float("rx", -45.0, -90.0, 90.0, 0.1, "Rotate X"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z"))
+	add_parameter(GNParameter.create_float("rx", -45.0, -90.0, 90.0, 0.1, "Rotate X", "Light pitch (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Light yaw (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Light roll (degrees)"))
 	# Properties
-	add_parameter(GNParameter.create_color("color", Color.WHITE, "Color"))
-	add_parameter(GNParameter.create_float("energy", 1.0, 0.0, 16.0, 0.1, "Energy"))
-	add_parameter(GNParameter.create_bool("shadows", true, "Shadows"))
+	add_parameter(GNParameter.create_color("color", Color.WHITE, "Color", "Light colour"))
+	add_parameter(GNParameter.create_float("energy", 1.0, 0.0, 16.0, 0.1, "Energy", "Light intensity"))
+	add_parameter(GNParameter.create_bool("shadows", true, "Shadows", "Enable shadow casting"))
 	# Omni-specific
-	add_parameter(GNParameter.create_float("omni_range", 10.0, 0.1, 1000.0, 0.5, "Omni Range"))
+	add_parameter(GNParameter.create_float("omni_range", 10.0, 0.1, 1000.0, 0.5, "Omni Range", "Point light range"))
 	# Spot-specific
-	add_parameter(GNParameter.create_float("spot_range", 10.0, 0.1, 1000.0, 0.5, "Spot Range"))
-	add_parameter(GNParameter.create_float("spot_angle", 45.0, 0.1, 90.0, 0.5, "Spot Angle"))
+	add_parameter(GNParameter.create_float("spot_range", 10.0, 0.1, 1000.0, 0.5, "Spot Range", "Spotlight range"))
+	add_parameter(GNParameter.create_float("spot_angle", 45.0, 0.1, 90.0, 0.5, "Spot Angle", "Spotlight cone angle (degrees)"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

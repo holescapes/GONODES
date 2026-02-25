@@ -12,19 +12,20 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "displace"
 	family = GNFamily.Type.TOP
+	node_description = "Distort one texture using another as a displacement map."
 
 
 func _init_ports() -> void:
-	add_input("source", GNFamily.Type.TOP)
-	add_input("displace", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("source", GNFamily.Type.TOP, false, "Texture to distort")
+	add_input("displace", GNFamily.Type.TOP, false, "Displacement map")
+	add_output("out", GNFamily.Type.TOP, "Displaced texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("weight", 0.1, 0.0, 2.0, 0.01))
+	add_parameter(GNParameter.create_float("weight", 0.1, 0.0, 2.0, 0.01, "", "Displacement strength"))
 	add_parameter(GNParameter.create_enum("method",
-		PackedStringArray(["RG as XY", "Luminance", "RGB as XYZ"]), 0))
-	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0)))
+		PackedStringArray(["RG as XY", "Luminance", "RGB as XYZ"]), 0, "", "How to read the displacement map"))
+	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "", "Per-axis displacement scale"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

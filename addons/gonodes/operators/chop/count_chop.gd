@@ -12,22 +12,23 @@ func _init() -> void:
 	node_type = "count"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "Count rising edges on input channels."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP)
-	add_input("reset", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in", GNFamily.Type.CHOP, false, "Input signal for edge detection")
+	add_input("reset", GNFamily.Type.CHOP, false, "Reset trigger signal")
+	add_output("out", GNFamily.Type.CHOP, "Count values")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01))
-	add_parameter(GNParameter.create_float("step", 1.0, null, null, 0.01, "Count Step"))
-	add_parameter(GNParameter.create_float("limit_min", 0.0, null, null, 0.01))
-	add_parameter(GNParameter.create_float("limit_max", 1000000.0, null, null, 0.01))
+	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "", "Edge trigger threshold"))
+	add_parameter(GNParameter.create_float("step", 1.0, null, null, 0.01, "Count Step", "Amount added per trigger"))
+	add_parameter(GNParameter.create_float("limit_min", 0.0, null, null, 0.01, "", "Minimum count value"))
+	add_parameter(GNParameter.create_float("limit_max", 1000000.0, null, null, 0.01, "", "Maximum count value"))
 	add_parameter(GNParameter.create_enum("overflow",
-		PackedStringArray(["Clamp", "Loop"]), 0))
-	add_parameter(GNParameter.create_bool("reset_all", false, "Reset All"))
+		PackedStringArray(["Clamp", "Loop"]), 0, "", "Behaviour when count exceeds limits"))
+	add_parameter(GNParameter.create_bool("reset_all", false, "Reset All", "Reset all counters to zero"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

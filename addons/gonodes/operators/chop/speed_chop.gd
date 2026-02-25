@@ -12,20 +12,21 @@ func _init() -> void:
 	node_type = "speed"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "Integrate input over time (velocity to position)."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP)
-	add_input("reset", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in", GNFamily.Type.CHOP, false, "Velocity input")
+	add_input("reset", GNFamily.Type.CHOP, false, "Reset trigger")
+	add_output("out", GNFamily.Type.CHOP, "Accumulated position")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("scale", 1.0, null, null, 0.01))
-	add_parameter(GNParameter.create_bool("clamp", false))
-	add_parameter(GNParameter.create_float("min", -1000.0, null, null, 0.01))
-	add_parameter(GNParameter.create_float("max", 1000.0, null, null, 0.01))
-	add_parameter(GNParameter.create_bool("reset_all", false, "Reset"))
+	add_parameter(GNParameter.create_float("scale", 1.0, null, null, 0.01, "", "Velocity multiplier"))
+	add_parameter(GNParameter.create_bool("clamp", false, "", "Clamp output to min/max range"))
+	add_parameter(GNParameter.create_float("min", -1000.0, null, null, 0.01, "", "Minimum clamp value"))
+	add_parameter(GNParameter.create_float("max", 1000.0, null, null, 0.01, "", "Maximum clamp value"))
+	add_parameter(GNParameter.create_bool("reset_all", false, "Reset", "Reset all accumulators"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

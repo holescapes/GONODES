@@ -16,19 +16,20 @@ var _frame_count: int = 0
 func _init() -> void:
 	node_type = "feedback"
 	family = GNFamily.Type.TOP
+	node_description = "Blends current frame with previous frame for trails/echoes."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture")
+	add_output("out", GNFamily.Type.TOP, "Feedback-blended texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("mix", 0.9, 0.0, 1.0, 0.01, "Feedback Mix"))
-	add_parameter(GNParameter.create_vector2("translate", Vector2.ZERO))
-	add_parameter(GNParameter.create_float("rotate", 0.0, null, null, 0.01, "Rotate (rad)"))
-	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0)))
-	add_parameter(GNParameter.create_bool("reset", false, "Reset Feedback"))
+	add_parameter(GNParameter.create_float("mix", 0.9, 0.0, 1.0, 0.01, "Feedback Mix", "Persistence (higher = longer trails)"))
+	add_parameter(GNParameter.create_vector2("translate", Vector2.ZERO, "", "Feedback UV translation per frame"))
+	add_parameter(GNParameter.create_float("rotate", 0.0, null, null, 0.01, "Rotate (rad)", "Feedback rotation per frame"))
+	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "", "Feedback scale per frame"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset Feedback", "Clear the feedback buffer"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

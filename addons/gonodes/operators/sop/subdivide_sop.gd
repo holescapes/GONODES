@@ -9,15 +9,16 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "subdivide"
 	family = GNFamily.Type.SOP
+	node_description = "Subdivide triangles into 4 sub-triangles."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP)
-	add_output("out", GNFamily.Type.SOP)
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry")
+	add_output("out", GNFamily.Type.SOP, "Subdivided geometry")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("iterations", 1, 1, 4, "Iterations"))
+	add_parameter(GNParameter.create_int("iterations", 1, 1, 4, "Iterations", "Number of subdivision passes"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

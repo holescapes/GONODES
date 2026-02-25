@@ -12,18 +12,19 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "tile"
 	family = GNFamily.Type.TOP
+	node_description = "Tile/repeat a texture with optional mirroring."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to tile")
+	add_output("out", GNFamily.Type.TOP, "Tiled texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2("repeat", Vector2(2.0, 2.0)))
-	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO))
-	add_parameter(GNParameter.create_bool("mirror_x", false))
-	add_parameter(GNParameter.create_bool("mirror_y", false))
+	add_parameter(GNParameter.create_vector2("repeat", Vector2(2.0, 2.0), "", "Repeat count per axis"))
+	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO, "", "UV offset"))
+	add_parameter(GNParameter.create_bool("mirror_x", false, "", "Mirror on horizontal repeats"))
+	add_parameter(GNParameter.create_bool("mirror_y", false, "", "Mirror on vertical repeats"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

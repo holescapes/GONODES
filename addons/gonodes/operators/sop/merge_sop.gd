@@ -9,11 +9,12 @@ var _cached_geo: GNGeoData = null
 func _init() -> void:
 	node_type = "merge"
 	family = GNFamily.Type.SOP
+	node_description = "Merge multiple meshes into one."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, true)  # multi-input
-	add_output("out", GNFamily.Type.SOP)
+	add_input("in", GNFamily.Type.SOP, true, "Geometry inputs (multi)")  # multi-input
+	add_output("out", GNFamily.Type.SOP, "Merged mesh")
 
 
 func _init_parameters() -> void:

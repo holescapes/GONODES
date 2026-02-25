@@ -13,19 +13,20 @@ func _init() -> void:
 	node_type = "trigger"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "One-shot trigger pulse on threshold crossing."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in", GNFamily.Type.CHOP, false, "Input signal")
+	add_output("out", GNFamily.Type.CHOP, "Trigger pulse output")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01))
-	add_parameter(GNParameter.create_float("attack", 0.0, 0.0, 10.0, 0.01, "Attack (sec)"))
-	add_parameter(GNParameter.create_float("peak", 1.0, 0.0, null, 0.01, "Peak Value"))
-	add_parameter(GNParameter.create_float("decay", 0.5, 0.0, 10.0, 0.01, "Decay (sec)"))
-	add_parameter(GNParameter.create_bool("retrigger", true, "Allow Retrigger"))
+	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "", "Trigger threshold"))
+	add_parameter(GNParameter.create_float("attack", 0.0, 0.0, 10.0, 0.01, "Attack (sec)", "Pulse rise time in seconds"))
+	add_parameter(GNParameter.create_float("peak", 1.0, 0.0, null, 0.01, "Peak Value", "Maximum pulse value"))
+	add_parameter(GNParameter.create_float("decay", 0.5, 0.0, 10.0, 0.01, "Decay (sec)", "Pulse fall time in seconds"))
+	add_parameter(GNParameter.create_bool("retrigger", true, "Allow Retrigger", "Allow retriggering while active"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

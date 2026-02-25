@@ -9,11 +9,12 @@ var _cached_table: GNTableData = null
 func _init() -> void:
 	node_type = "transpose"
 	family = GNFamily.Type.DAT
+	node_description = "Transpose a table (swap rows and columns)."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT)
-	add_output("out", GNFamily.Type.DAT)
+	add_input("in", GNFamily.Type.DAT, false, "Input table")
+	add_output("out", GNFamily.Type.DAT, "Transposed table")
 
 
 func _init_parameters() -> void:

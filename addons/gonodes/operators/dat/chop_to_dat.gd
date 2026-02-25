@@ -10,16 +10,17 @@ var _cached_table: GNTableData = null
 func _init() -> void:
 	node_type = "chop_to_dat"
 	family = GNFamily.Type.DAT
+	node_description = "Convert CHOP channels into a DAT table."
 
 
 func _init_ports() -> void:
-	add_input("chop_in", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.DAT)
+	add_input("chop_in", GNFamily.Type.CHOP, false, "CHOP channel input")
+	add_output("out", GNFamily.Type.DAT, "Table output")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("layout",
-		PackedStringArray(["Channels as Columns", "Channels as Rows"]), 0, "Layout"))
+		PackedStringArray(["Channels as Columns", "Channels as Rows"]), 0, "Layout", "Table orientation"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

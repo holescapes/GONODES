@@ -10,11 +10,12 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "null"
 	family = GNFamily.Type.TOP
+	node_description = "Pass-through. Useful for organization and expression references."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture")
+	add_output("out", GNFamily.Type.TOP, "Same texture (pass-through)")
 
 
 func _init_parameters() -> void:

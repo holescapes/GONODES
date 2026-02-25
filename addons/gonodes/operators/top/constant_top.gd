@@ -10,16 +10,17 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "constant"
 	family = GNFamily.Type.TOP
+	node_description = "Solid color texture."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.TOP)
+	add_output("out", GNFamily.Type.TOP, "Solid color texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512)))
-	add_parameter(GNParameter.create_color("color", Color.BLACK))
-	add_parameter(GNParameter.create_float("alpha", 1.0, 0.0, 1.0, 0.01))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
+	add_parameter(GNParameter.create_color("color", Color.BLACK, "", "Fill color"))
+	add_parameter(GNParameter.create_float("alpha", 1.0, 0.0, 1.0, 0.01, "", "Alpha override"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

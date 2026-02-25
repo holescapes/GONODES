@@ -12,20 +12,21 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "transform"
 	family = GNFamily.Type.TOP
+	node_description = "2D translate, rotate, and scale with extend modes."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture")
+	add_output("out", GNFamily.Type.TOP, "Transformed texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2("translate", Vector2.ZERO))
-	add_parameter(GNParameter.create_float("rotate", 0.0, null, null, 0.01, "Rotate (rad)"))
-	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0)))
-	add_parameter(GNParameter.create_vector2("pivot", Vector2(0.5, 0.5)))
+	add_parameter(GNParameter.create_vector2("translate", Vector2.ZERO, "", "UV translation"))
+	add_parameter(GNParameter.create_float("rotate", 0.0, null, null, 0.01, "Rotate (rad)", "Rotation in radians"))
+	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "", "UV scale"))
+	add_parameter(GNParameter.create_vector2("pivot", Vector2(0.5, 0.5), "", "Transform pivot point in UV space"))
 	add_parameter(GNParameter.create_enum("extend",
-		PackedStringArray(["Clamp", "Repeat", "Mirror", "Zero"]), 0))
+		PackedStringArray(["Clamp", "Repeat", "Mirror", "Zero"]), 0, "", "Edge extension mode"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

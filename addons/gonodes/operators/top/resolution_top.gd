@@ -10,17 +10,18 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "resolution"
 	family = GNFamily.Type.TOP
+	node_description = "Resize a texture to a different resolution."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP)
-	add_output("out", GNFamily.Type.TOP)
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to resize")
+	add_output("out", GNFamily.Type.TOP, "Resized texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080), "Output Resolution"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080), "Output Resolution", "Target output resolution"))
 	add_parameter(GNParameter.create_enum("filter",
-		PackedStringArray(["Linear", "Nearest"]), 0))
+		PackedStringArray(["Linear", "Nearest"]), 0, "", "Filtering mode (Linear = smooth, Nearest = pixelated)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

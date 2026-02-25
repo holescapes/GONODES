@@ -12,19 +12,20 @@ func _init() -> void:
 	node_type = "hold"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "Sample-and-hold: capture input on trigger."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP)
-	add_input("trigger", GNFamily.Type.CHOP)
-	add_output("out", GNFamily.Type.CHOP)
+	add_input("in", GNFamily.Type.CHOP, false, "Input to sample")
+	add_input("trigger", GNFamily.Type.CHOP, false, "Trigger signal")
+	add_output("out", GNFamily.Type.CHOP, "Held values")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01))
+	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "", "Trigger threshold"))
 	add_parameter(GNParameter.create_bool("hold_on_start", true,
-		"Capture initial value on first cook"))
-	add_parameter(GNParameter.create_bool("reset", false))
+		"Capture initial value on first cook", "Capture value on first cook"))
+	add_parameter(GNParameter.create_bool("reset", false, "", "Clear held values"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

@@ -13,21 +13,22 @@ var _cached_tex_data: GNTextureData = null
 func _init() -> void:
 	node_type = "rectangle"
 	family = GNFamily.Type.TOP
+	node_description = "SDF rounded rectangle with fill/border/softness."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.TOP)
+	add_output("out", GNFamily.Type.TOP, "Generated rectangle texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512)))
-	add_parameter(GNParameter.create_color("fill_color", Color.WHITE))
-	add_parameter(GNParameter.create_color("bg_color", Color.BLACK))
-	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5)))
-	add_parameter(GNParameter.create_vector2("size", Vector2(0.6, 0.4)))
-	add_parameter(GNParameter.create_float("corner_radius", 0.0, 0.0, 0.5, 0.01))
-	add_parameter(GNParameter.create_float("border_width", 0.0, 0.0, 0.5, 0.01))
-	add_parameter(GNParameter.create_float("softness", 0.005, 0.0, 0.1, 0.001))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
+	add_parameter(GNParameter.create_color("fill_color", Color.WHITE, "", "Rectangle fill color"))
+	add_parameter(GNParameter.create_color("bg_color", Color.BLACK, "", "Background color"))
+	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5), "", "Rectangle center in UV space"))
+	add_parameter(GNParameter.create_vector2("size", Vector2(0.6, 0.4), "", "Rectangle width and height"))
+	add_parameter(GNParameter.create_float("corner_radius", 0.0, 0.0, 0.5, 0.01, "", "Rounded corner radius"))
+	add_parameter(GNParameter.create_float("border_width", 0.0, 0.0, 0.5, 0.01, "", "Border only mode (0 = filled)"))
+	add_parameter(GNParameter.create_float("softness", 0.005, 0.0, 0.1, 0.001, "", "Edge antialiasing"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

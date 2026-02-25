@@ -9,6 +9,7 @@ func _init() -> void:
 	node_type = "noise"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "Generate smooth noise channels over time."
 
 ## Internal time accumulator for continuous noise evolution.
 var _time_accum: float = 0.0
@@ -18,16 +19,16 @@ var _cached_channel_data: GNChannelData = null
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.CHOP)
+	add_output("out", GNFamily.Type.CHOP, "Noise channel data")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("num_channels", 1, 1, 16))
+	add_parameter(GNParameter.create_int("num_channels", 1, 1, 16, "", "Number of noise channels"))
 	add_parameter(GNParameter.create_string("channel_names", "chan1",
-		"Channel Names"))
-	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01))
-	add_parameter(GNParameter.create_float("period", 1.0, 0.01, 100.0, 0.01))
-	add_parameter(GNParameter.create_int("seed", 0, 0, 99999))
+		"Channel Names", "Comma-separated channel names"))
+	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01, "", "Octave detail (0 = smooth, 1 = rough)"))
+	add_parameter(GNParameter.create_float("period", 1.0, 0.01, 100.0, 0.01, "", "Time period of noise cycle"))
+	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "", "Random seed"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

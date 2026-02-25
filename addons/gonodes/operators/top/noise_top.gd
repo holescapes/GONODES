@@ -24,21 +24,22 @@ func _init() -> void:
 	node_type = "noise"
 	family = GNFamily.Type.TOP
 	time_dependent = true
+	node_description = "Procedural noise texture (Simplex, Perlin, Voronoi, White). GPU shader."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.TOP)
+	add_output("out", GNFamily.Type.TOP, "Generated noise texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512)))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_enum("noise_type",
-		PackedStringArray(["Simplex", "Perlin", "Voronoi", "White"]), 0))
-	add_parameter(GNParameter.create_float("scale", 4.0, 0.1, 100.0, 0.1))
-	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO))
-	add_parameter(GNParameter.create_float("time_offset", 0.0, null, null, 0.01))
-	add_parameter(GNParameter.create_int("seed", 0, 0, 99999))
-	add_parameter(GNParameter.create_bool("monochrome", true))
+		PackedStringArray(["Simplex", "Perlin", "Voronoi", "White"]), 0, "", "Noise algorithm"))
+	add_parameter(GNParameter.create_float("scale", 4.0, 0.1, 100.0, 0.1, "", "Noise frequency / zoom level"))
+	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO, "", "Spatial offset for panning the noise"))
+	add_parameter(GNParameter.create_float("time_offset", 0.0, null, null, 0.01, "", "Z-axis offset for animation (drive with LFO)"))
+	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "", "Random seed for noise variation"))
+	add_parameter(GNParameter.create_bool("monochrome", true, "", "Grayscale (on) or RGB color noise (off)"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

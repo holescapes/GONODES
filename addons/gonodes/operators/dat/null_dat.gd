@@ -7,11 +7,12 @@ extends GNNode
 func _init() -> void:
 	node_type = "null"
 	family = GNFamily.Type.DAT
+	node_description = "Pass-through for organization and references."
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT)
-	add_output("out", GNFamily.Type.DAT)
+	add_input("in", GNFamily.Type.DAT, false, "Input table")
+	add_output("out", GNFamily.Type.DAT, "Same table (pass-through)")
 
 
 func _init_parameters() -> void:

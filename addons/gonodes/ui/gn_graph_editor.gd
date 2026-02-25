@@ -164,6 +164,11 @@ func _clear_graph() -> void:
 
 ## Creates a GNNodeView for the given GNNode and adds it to the graph.
 func _create_node_view(node: GNNode) -> GNNodeView:
+	# Connect the graph editor's handler FIRST so stale wires are pruned
+	# before GNNodeView rebuilds its slots (signal fires in connection order).
+	if not node.ports_changed.is_connected(_on_node_ports_changed):
+		node.ports_changed.connect(_on_node_ports_changed)
+
 	var view := GNNodeView.new()
 	view.setup(node)
 	add_child(view)
@@ -275,6 +280,16 @@ func _on_network_connection_added(conn: GNConnection) -> void:
 ## A connection was removed from the network.
 func _on_network_connection_removed(conn: GNConnection) -> void:
 	_remove_visual_connection(conn)
+
+
+## A node's port count changed at runtime.  Prune any wires that reference
+## ports that no longer exist, then let the GNNodeView rebuild its slots.
+## The view's own ports_changed handler fires AFTER this because GDScript
+## signal connections are called in registration order (GNGraphEditor connects
+## before GNNodeView.setup).
+func _on_node_ports_changed(node_id: String) -> void:
+	if network:
+		network.prune_stale_connections(node_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

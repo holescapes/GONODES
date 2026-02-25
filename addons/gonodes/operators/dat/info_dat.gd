@@ -11,10 +11,11 @@ func _init() -> void:
 	node_type = "info"
 	family = GNFamily.Type.DAT
 	time_dependent = true
+	node_description = "Output system info (FPS, frame, memory, etc.)."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.DAT)
+	add_output("out", GNFamily.Type.DAT, "System info table")
 
 
 func _init_parameters() -> void:

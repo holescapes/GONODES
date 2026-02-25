@@ -13,23 +13,24 @@ func _init() -> void:
 	node_type = "wave"
 	family = GNFamily.Type.CHOP
 	time_dependent = true
+	node_description = "Advanced waveform generator with multi-channel support."
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.CHOP)
+	add_output("out", GNFamily.Type.CHOP, "Waveform data")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("waveform",
-		PackedStringArray(["Sine", "Triangle", "Square", "Sawtooth", "Pulse", "Ramp"]), 0))
-	add_parameter(GNParameter.create_int("channels", 1, 1, 16))
-	add_parameter(GNParameter.create_int("length", 1, 1, 4096, "Sample Length"))
-	add_parameter(GNParameter.create_float("frequency", 1.0, 0.001, 1000.0, 0.01))
-	add_parameter(GNParameter.create_float("amplitude", 1.0, 0.0, null, 0.01))
-	add_parameter(GNParameter.create_float("offset", 0.0, null, null, 0.01))
-	add_parameter(GNParameter.create_float("phase", 0.0, 0.0, 1.0, 0.001))
+		PackedStringArray(["Sine", "Triangle", "Square", "Sawtooth", "Pulse", "Ramp"]), 0, "", "Waveform shape"))
+	add_parameter(GNParameter.create_int("channels", 1, 1, 16, "", "Number of channels"))
+	add_parameter(GNParameter.create_int("length", 1, 1, 4096, "Sample Length", "Samples per channel"))
+	add_parameter(GNParameter.create_float("frequency", 1.0, 0.001, 1000.0, 0.01, "", "Wave frequency in Hz"))
+	add_parameter(GNParameter.create_float("amplitude", 1.0, 0.0, null, 0.01, "", "Output amplitude"))
+	add_parameter(GNParameter.create_float("offset", 0.0, null, null, 0.01, "", "DC offset"))
+	add_parameter(GNParameter.create_float("phase", 0.0, 0.0, 1.0, 0.001, "", "Initial phase offset (0-1)"))
 	add_parameter(GNParameter.create_float("phase_step", 0.0, 0.0, 1.0, 0.01,
-		"Phase offset per channel"))
+		"Phase offset per channel", "Phase offset added per channel"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
