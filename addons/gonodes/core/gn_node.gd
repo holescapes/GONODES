@@ -307,3 +307,53 @@ func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
 
 func _to_string() -> String:
 	return "[GNNode %s (%s/%s)]" % [id, GNFamily.get_family_name(family), node_type]
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Serialization
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Serializes this node's user-editable state to a Dictionary.
+## Captures operator type, graph position, and all parameter values/modes.
+## Does NOT serialize ports or cook state (those are rebuilt on construction).
+## The "type" field uses the GDScript class_name (e.g. "NoiseTOP") which matches
+## the GNExtensionRegistry key, NOT the short node_type (e.g. "noise").
+func to_dict() -> Dictionary:
+	# Use the GDScript class_name — it matches the registry key exactly.
+	var registry_type: String = get_script().get_global_name()
+	var d: Dictionary = {
+		"type": registry_type,
+		"position": [graph_position.x, graph_position.y],
+	}
+
+	# Serialize parameters (only those that differ from defaults, or have expressions)
+	var params_dict: Dictionary = {}
+	for param_name in parameters:
+		var param: GNParameter = parameters[param_name]
+		var pd := param.to_dict()
+		if not pd.is_empty():
+			params_dict[param_name] = pd
+	if not params_dict.is_empty():
+		d["parameters"] = params_dict
+
+	return d
+
+
+## Restores parameter values and graph position from a serialized Dictionary.
+## Call AFTER initialize() so parameters and ports already exist.
+func from_dict(d: Dictionary) -> void:
+	# Restore graph position
+	if d.has("position"):
+		var pos: Array = d["position"]
+		if pos.size() >= 2:
+			graph_position = Vector2(float(pos[0]), float(pos[1]))
+
+	# Restore parameter values/modes/expressions
+	if d.has("parameters"):
+		var params_dict: Dictionary = d["parameters"]
+		for param_name in params_dict:
+			var param: GNParameter = parameters.get(param_name, null)
+			if param == null:
+				GNLogger.warn("GNNode", "'%s': skipping unknown parameter '%s' during load" % [id, param_name])
+				continue
+			param.from_dict(params_dict[param_name])

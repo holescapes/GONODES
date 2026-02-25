@@ -3,6 +3,7 @@ extends Control
 ## Split layout: GNGraphEditor (left/center) + Viewer + Inspector (right).
 ## Runs a cook engine each frame and displays the output of the last TOP
 ## in the viewer panel. Includes a debug info label and log toggle.
+## Supports save/load of patches as `.gnpatch` JSON files.
 
 @onready var graph_editor: GNGraphEditor = $HSplit/GraphPanel/GraphEditor
 @onready var viewer: TextureRect = $HSplit/RightPanel/ViewerPanel/Viewer
@@ -16,6 +17,13 @@ var cook_engine: GNCookEngine
 ## Which node's output to display in the viewer (click to select).
 var _viewer_node_id: String = ""
 
+## Path to the currently loaded/saved patch file (empty = unsaved).
+var _current_file_path: String = ""
+
+## FileDialogs for save and load.
+var _save_dialog: FileDialog = null
+var _load_dialog: FileDialog = null
+
 
 func _ready() -> void:
 	# Initialize extension registry — scan for gn_ext_* addon manifests
@@ -23,6 +31,8 @@ func _ready() -> void:
 
 	_setup_network()
 	_setup_cook_engine()
+	_setup_file_dialogs()
+	_setup_toolbar()
 
 	# Bind graph editor to network
 	graph_editor.bind_network(network)
@@ -169,3 +179,206 @@ func _on_log_toggled(pressed: bool) -> void:
 		print("[GONODES] Logging ENABLED")
 	else:
 		print("[GONODES] Logging DISABLED")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Save / Load
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Creates the FileDialogs for save and load.
+func _setup_file_dialogs() -> void:
+	_save_dialog = FileDialog.new()
+	_save_dialog.title = "Save Patch"
+	_save_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+	_save_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	_save_dialog.filters = PackedStringArray(["*.gnpatch ; GONODES Patch"])
+	_save_dialog.min_size = Vector2i(700, 500)
+	_save_dialog.file_selected.connect(_on_save_file_selected)
+	add_child(_save_dialog)
+
+	_load_dialog = FileDialog.new()
+	_load_dialog.title = "Open Patch"
+	_load_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	_load_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	_load_dialog.filters = PackedStringArray(["*.gnpatch ; GONODES Patch"])
+	_load_dialog.min_size = Vector2i(700, 500)
+	_load_dialog.file_selected.connect(_on_load_file_selected)
+	add_child(_load_dialog)
+
+
+## Adds New / Open / Save buttons to the InfoBar.
+func _setup_toolbar() -> void:
+	var info_bar: HBoxContainer = $InfoBar
+
+	# Add a separator and buttons BEFORE the info label (insert at front)
+	var btn_new := Button.new()
+	btn_new.text = "New"
+	btn_new.tooltip_text = "New patch (Ctrl+N)"
+	btn_new.pressed.connect(_on_new_pressed)
+	info_bar.add_child(btn_new)
+	info_bar.move_child(btn_new, 0)
+
+	var btn_open := Button.new()
+	btn_open.text = "Open"
+	btn_open.tooltip_text = "Open patch (Ctrl+O)"
+	btn_open.pressed.connect(_on_open_pressed)
+	info_bar.add_child(btn_open)
+	info_bar.move_child(btn_open, 1)
+
+	var btn_save := Button.new()
+	btn_save.text = "Save"
+	btn_save.tooltip_text = "Save patch (Ctrl+S)"
+	btn_save.pressed.connect(_on_save_pressed)
+	info_bar.add_child(btn_save)
+	info_bar.move_child(btn_save, 2)
+
+	var btn_save_as := Button.new()
+	btn_save_as.text = "Save As"
+	btn_save_as.tooltip_text = "Save patch as… (Ctrl+Shift+S)"
+	btn_save_as.pressed.connect(_on_save_as_pressed)
+	info_bar.add_child(btn_save_as)
+	info_bar.move_child(btn_save_as, 3)
+
+	# Separator between buttons and info label
+	var sep := VSeparator.new()
+	info_bar.add_child(sep)
+	info_bar.move_child(sep, 4)
+
+
+## Keyboard shortcuts for file operations.
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.ctrl_pressed:
+			match event.keycode:
+				KEY_S:
+					if event.shift_pressed:
+						_on_save_as_pressed()
+					else:
+						_on_save_pressed()
+					get_viewport().set_input_as_handled()
+				KEY_O:
+					_on_open_pressed()
+					get_viewport().set_input_as_handled()
+				KEY_N:
+					_on_new_pressed()
+					get_viewport().set_input_as_handled()
+
+
+## New patch — clears everything and starts fresh.
+func _on_new_pressed() -> void:
+	_viewer_node_id = ""
+	viewer.texture = null
+	inspector.clear_inspection()
+	graph_editor._unbind_network()
+
+	# Stop cook engine and remove old network's nodes from tree
+	cook_engine.network = null
+	_remove_network_nodes_from_tree()
+
+	# Create fresh network
+	network = GNNetwork.new()
+	_current_file_path = ""
+
+	# Rebind everything
+	graph_editor.bind_network(network)
+	inspector.network = network
+	cook_engine.network = network
+	cook_engine._nodes_adopted = false
+
+	network.node_renamed.connect(_on_node_renamed)
+	graph_editor.clear_undo_history()
+
+	_update_title()
+	GNLogger.info("Editor", "New patch created")
+
+
+## Open — show file dialog.
+func _on_open_pressed() -> void:
+	_load_dialog.popup_centered()
+
+
+## Save — save to current path or show Save As dialog.
+func _on_save_pressed() -> void:
+	if _current_file_path.is_empty():
+		_on_save_as_pressed()
+		return
+	_save_to_path(_current_file_path)
+
+
+## Save As — always show file dialog.
+func _on_save_as_pressed() -> void:
+	_save_dialog.popup_centered()
+
+
+## Called when user picks a file in the Save dialog.
+func _on_save_file_selected(path: String) -> void:
+	_save_to_path(path)
+
+
+## Called when user picks a file in the Load dialog.
+func _on_load_file_selected(path: String) -> void:
+	_load_from_path(path)
+
+
+## Saves the current network to the given path.
+func _save_to_path(path: String) -> void:
+	var err := network.save_to_file(path)
+	if err == OK:
+		_current_file_path = path
+		_update_title()
+		print("[GONODES] Saved patch: %s" % path)
+	else:
+		push_error("[GONODES] Failed to save patch to '%s' (error %d)" % [path, err])
+
+
+## Loads a network from the given path.
+func _load_from_path(path: String) -> void:
+	_viewer_node_id = ""
+	viewer.texture = null
+	inspector.clear_inspection()
+	graph_editor._unbind_network()
+
+	# Stop cook engine and remove old network's nodes from the scene tree
+	cook_engine.network = null
+	_remove_network_nodes_from_tree()
+
+	# Create fresh network and load into it
+	network = GNNetwork.new()
+	var err := network.load_from_file(path)
+	if err != OK:
+		push_error("[GONODES] Failed to load patch from '%s' (error %d)" % [path, err])
+		return
+
+	_current_file_path = path
+
+	# Rebind everything — cook engine will adopt nodes on next frame
+	graph_editor.bind_network(network)
+	inspector.network = network
+	cook_engine.network = network
+	cook_engine._nodes_adopted = false  # Force re-adoption of loaded nodes
+
+	network.node_renamed.connect(_on_node_renamed)
+	graph_editor.clear_undo_history()
+
+	_update_title()
+	print("[GONODES] Loaded patch: %s (%d nodes, %d connections)" % [
+		path, network.get_node_count(), network.get_connection_count()])
+
+
+## Removes all current network node instances from the scene tree.
+func _remove_network_nodes_from_tree() -> void:
+	if network == null:
+		return
+	for node_id in network.nodes:
+		var node: GNNode = network.nodes[node_id]
+		if node.is_inside_tree():
+			node.get_parent().remove_child(node)
+
+
+## Updates the window title to show the current file name.
+func _update_title() -> void:
+	if _current_file_path.is_empty():
+		get_window().title = "GONODES Editor — Untitled"
+	else:
+		var file_name := _current_file_path.get_file()
+		get_window().title = "GONODES Editor — %s" % file_name

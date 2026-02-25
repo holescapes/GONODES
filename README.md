@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. ~78 operators across 5 families. File parameter type, font selection, image/video input TOPs added. GNExtensionRegistry dynamic operator architecture. Phases 1–5.8 complete.**
+**Phase 6 In Progress — Save/load (.gnpatch JSON), copy/paste, undo/redo. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline live. 78 operators across 5 families. Phases 1–5.8 complete.**
 
 ### Completed
 
@@ -109,13 +109,14 @@ SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and S
 
 ### Next Up (Phase 6)
 
+- [x] Save/load patches (`.gnpatch` JSON files with full serialization pipeline)
+- [x] Node copy/paste (Ctrl+C/V/X/D with ID remapping and connection preservation)
+- [x] Undo/redo (Ctrl+Z/Y — add, delete, connect, disconnect, move, rename)
 - ScriptCHOP (user GDScript for custom channel processing)
 - Code editor UI (CodeEdit-based multi-line editing in inspector)
-- Node copy/paste
 - Undo/redo
 - Mini preview thumbnails on TOP nodes
 - Right-click context menu on graph canvas
-- Save/load patches (.tres resources)
 
 ### Planned (Post-MVP)
 

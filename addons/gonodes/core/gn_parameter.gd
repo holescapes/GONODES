@@ -400,3 +400,110 @@ func _clamp_value(val: Variant) -> Variant:
 		if max_value != null and val > max_value:
 			return max_value
 	return val
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Serialization
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Converts a Godot Variant to a JSON-safe representation.
+## Handles Vector2, Vector2i, Vector3, Vector4, Color → arrays.
+## Primitives (float, int, bool, String) pass through as-is.
+static func _variant_to_json(val: Variant) -> Variant:
+	if val is Vector2:
+		return {"_type": "Vector2", "x": val.x, "y": val.y}
+	if val is Vector2i:
+		return {"_type": "Vector2i", "x": val.x, "y": val.y}
+	if val is Vector3:
+		return {"_type": "Vector3", "x": val.x, "y": val.y, "z": val.z}
+	if val is Vector4:
+		return {"_type": "Vector4", "x": val.x, "y": val.y, "z": val.z, "w": val.w}
+	if val is Color:
+		return {"_type": "Color", "r": val.r, "g": val.g, "b": val.b, "a": val.a}
+	# float, int, bool, String → JSON-native
+	return val
+
+
+## Reconstructs a Godot Variant from its JSON representation.
+static func _json_to_variant(json_val: Variant, target_type: ValueType) -> Variant:
+	if json_val is Dictionary and json_val.has("_type"):
+		match json_val["_type"]:
+			"Vector2":
+				return Vector2(json_val["x"], json_val["y"])
+			"Vector2i":
+				return Vector2i(int(json_val["x"]), int(json_val["y"]))
+			"Vector3":
+				return Vector3(json_val["x"], json_val["y"], json_val["z"])
+			"Vector4":
+				return Vector4(json_val["x"], json_val["y"], json_val["z"], json_val["w"])
+			"Color":
+				return Color(json_val["r"], json_val["g"], json_val["b"], json_val["a"])
+	# For numeric types, ensure correct cast
+	match target_type:
+		ValueType.FLOAT:
+			return float(json_val) if json_val != null else 0.0
+		ValueType.INT, ValueType.ENUM:
+			return int(json_val) if json_val != null else 0
+		ValueType.BOOL:
+			return bool(json_val) if json_val != null else false
+	return json_val
+
+
+## Serializes this parameter's user-editable state to a Dictionary.
+## Only saves state that differs from defaults (compact output).
+func to_dict() -> Dictionary:
+	var d: Dictionary = {}
+
+	# Always save the current value
+	d["value"] = _variant_to_json(value)
+
+	# Save mode if not CONSTANT
+	if mode != Mode.CONSTANT:
+		d["mode"] = Mode.keys()[mode]  # "EXPRESSION", "BIND", "EXPORT"
+
+	# Save expression text if in expression mode
+	if mode == Mode.EXPRESSION and not expression.is_empty():
+		d["expression"] = expression
+
+	# Save bind info if in bind mode
+	if mode == Mode.BIND:
+		if not bind_source_node.is_empty():
+			d["bind_source_node"] = bind_source_node
+		if not bind_source_param.is_empty():
+			d["bind_source_param"] = bind_source_param
+
+	return d
+
+
+## Restores this parameter's user-editable state from a Dictionary.
+## Call after the parameter has been created by the operator's _init_parameters().
+func from_dict(d: Dictionary) -> void:
+	# Restore mode
+	var mode_str: String = d.get("mode", "CONSTANT")
+	match mode_str:
+		"EXPRESSION":
+			mode = Mode.EXPRESSION
+		"BIND":
+			mode = Mode.BIND
+		"EXPORT":
+			mode = Mode.EXPORT
+		_:
+			mode = Mode.CONSTANT
+
+	# Restore value
+	if d.has("value"):
+		var restored := _json_to_variant(d["value"], value_type)
+		value = _clamp_value(restored)
+		resolved_value = value
+		fallback_value = value
+
+	# Restore expression
+	if d.has("expression"):
+		expression = d["expression"]
+		_compile_expression()
+
+	# Restore bind info
+	if d.has("bind_source_node"):
+		bind_source_node = d["bind_source_node"]
+	if d.has("bind_source_param"):
+		bind_source_param = d["bind_source_param"]

@@ -500,5 +500,160 @@ func get_connection_count() -> int:
 	return connections.size()
 
 
+## Serializes the entire network (nodes + connections) to a Dictionary.
+## This is the canonical save format — can be written to JSON.
+func to_dict() -> Dictionary:
+	var d: Dictionary = {
+		"version": "1.0.0",
+		"generator": "GONODES",
+	}
+
+	# Serialize nodes
+	var nodes_dict: Dictionary = {}
+	for node_id in nodes:
+		var node: GNNode = nodes[node_id]
+		nodes_dict[node_id] = node.to_dict()
+	d["nodes"] = nodes_dict
+
+	# Serialize connections
+	var conns_array: Array = []
+	for conn in connections:
+		conns_array.append({
+			"from": conn.from_node,
+			"from_port": conn.from_port,
+			"to": conn.to_node,
+			"to_port": conn.to_port,
+		})
+	d["connections"] = conns_array
+
+	return d
+
+
+## Reconstructs the network from a serialized Dictionary.
+## Clears any existing state first. Uses GNExtensionRegistry to create operator
+## instances by type name.
+## Returns true on success, false if the data is malformed.
+func from_dict(d: Dictionary) -> bool:
+	if not d.has("nodes") or not d.has("connections"):
+		GNLogger.error("Network", "Patch file missing 'nodes' or 'connections' key")
+		return false
+
+	# Clear current state (without emitting signals for each removal)
+	_clear_all()
+
+	var registry := GNExtensionRegistry.instance()
+
+	# ── Reconstruct nodes ──
+	var nodes_dict: Dictionary = d["nodes"]
+	for node_id in nodes_dict:
+		var nd: Dictionary = nodes_dict[node_id]
+		var op_type: String = nd.get("type", "")
+		if op_type.is_empty():
+			GNLogger.warn("Network", "Skipping node '%s': missing 'type'" % node_id)
+			continue
+
+		var node: GNNode = registry.create_instance(op_type)
+		if node == null:
+			GNLogger.warn("Network", "Skipping node '%s': unknown type '%s'" % [node_id, op_type])
+			continue
+
+		node.initialize(node_id)
+		node.from_dict(nd)
+
+		nodes[node_id] = node
+		GNLogger.debug("Network", "Loaded node '%s' (%s)" % [node_id, op_type])
+
+	# ── Reconstruct connections ──
+	var conns_array: Array = d["connections"]
+	for cd in conns_array:
+		var from_id: String = cd.get("from", "")
+		var to_id: String = cd.get("to", "")
+		var from_port: int = int(cd.get("from_port", 0))
+		var to_port: int = int(cd.get("to_port", 0))
+
+		if not nodes.has(from_id) or not nodes.has(to_id):
+			GNLogger.warn("Network", "Skipping connection %s:%d → %s:%d (missing node)" % [
+				from_id, from_port, to_id, to_port])
+			continue
+
+		var conn := GNConnection.create(from_id, from_port, to_id, to_port)
+		connections.append(conn)
+
+		# Mark target dirty
+		var to_node: GNNode = nodes.get(to_id, null)
+		if to_node:
+			to_node.mark_dirty()
+
+	_invalidate_topo()
+
+	GNLogger.info("Network", "Loaded patch: %d nodes, %d connections" % [
+		nodes.size(), connections.size()])
+	return true
+
+
+## Saves the network to a `.gnpatch` JSON file at the given path.
+## Returns OK on success or an error code.
+func save_to_file(file_path: String) -> Error:
+	var d := to_dict()
+	var json_string := JSON.stringify(d, "\t")  # Pretty-printed
+
+	var file := FileAccess.open(file_path, FileAccess.WRITE)
+	if file == null:
+		var err := FileAccess.get_open_error()
+		GNLogger.error("Network", "Failed to open '%s' for writing (error %d)" % [file_path, err])
+		return err
+
+	file.store_string(json_string)
+	file.close()
+	GNLogger.info("Network", "Saved patch to '%s' (%d nodes, %d connections)" % [
+		file_path, nodes.size(), connections.size()])
+	return OK
+
+
+## Loads the network from a `.gnpatch` JSON file at the given path.
+## Clears and replaces current state.
+## Returns OK on success or an error code.
+func load_from_file(file_path: String) -> Error:
+	var file := FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		var err := FileAccess.get_open_error()
+		GNLogger.error("Network", "Failed to open '%s' for reading (error %d)" % [file_path, err])
+		return err
+
+	var json_string := file.get_as_text()
+	file.close()
+
+	var json := JSON.new()
+	var parse_err := json.parse(json_string)
+	if parse_err != OK:
+		GNLogger.error("Network", "JSON parse error in '%s': %s (line %d)" % [
+			file_path, json.get_error_message(), json.get_error_line()])
+		return parse_err
+
+	var d: Dictionary = json.data
+	if not d is Dictionary:
+		GNLogger.error("Network", "Patch file '%s' does not contain a JSON object" % file_path)
+		return ERR_INVALID_DATA
+
+	if not from_dict(d):
+		return ERR_INVALID_DATA
+
+	GNLogger.info("Network", "Loaded patch from '%s'" % file_path)
+	return OK
+
+
+## Clears all nodes and connections without emitting individual signals.
+## Used internally by from_dict() — emits graph_changed once at the end.
+func _clear_all() -> void:
+	connections.clear()
+	for node_id in nodes:
+		var node: GNNode = nodes[node_id]
+		if node.is_inside_tree():
+			node.get_parent().remove_child(node)
+		node.queue_free()
+	nodes.clear()
+	_invalidate_topo()
+
+
 func _to_string() -> String:
 	return "[GNNetwork: %d nodes, %d connections]" % [nodes.size(), connections.size()]

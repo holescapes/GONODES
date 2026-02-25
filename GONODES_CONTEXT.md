@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-27
-> **Status:** Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. GNExtensionRegistry dynamic operator architecture. Phases 1–5.8 complete. 78 operators across 5 families.
+> **Status:** Phase 6 In Progress — Save/load patches (.gnpatch), node copy/paste, undo/redo. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→COMP→RenderTOP) live. Phases 1–5.8 complete. 78 operators across 5 families.
 
 ---
 
@@ -741,7 +741,25 @@ GONODES/
 - [x] **Editor startup** — `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()` before network setup
 
 ### Phase 6: Integration & Stabilization (Week 6)
-- [ ] Save/load patches (.tres resources)
+- [x] **Save/load patches** (`.gnpatch` JSON files) — full serialization pipeline:
+  - `GNParameter.to_dict()` / `from_dict()` — serializes value, mode, expression, bind info. Custom `_variant_to_json()` / `_json_to_variant()` handles Vector2, Vector2i, Vector3, Vector4, Color → typed JSON dicts.
+  - `GNNode.to_dict()` / `from_dict()` — serializes operator type, graph position, all parameters.
+  - `GNNetwork.to_dict()` / `from_dict()` — serializes all nodes + connections. Uses `GNExtensionRegistry.create_instance()` for reconstruction.
+  - `GNNetwork.save_to_file(path)` / `load_from_file(path)` — JSON read/write with pretty-printing.
+  - Editor UI: New / Open / Save / Save As buttons in bottom bar + Ctrl+N / Ctrl+O / Ctrl+S / Ctrl+Shift+S keyboard shortcuts. FileDialog for file picker. Window title shows current file name.
+- [x] **Node copy/paste** — clipboard-based with ID remapping:
+  - `GNGraphEditor._clipboard` stores serialized nodes + internal connections.
+  - Copy (Ctrl+C): serializes selected nodes via `to_dict()`, gathers connections where both endpoints are selected.
+  - Paste (Ctrl+V): reconstructs with fresh IDs via `generate_unique_id()`, offsets positions +50/+50, remaps internal connections, auto-selects pasted nodes.
+  - Cut (Ctrl+X): copy then delete. Duplicate (Ctrl+D): copy then paste in one step.
+- [x] **Undo/redo** — Godot `UndoRedo` command pattern:
+  - Tracks: add node, delete node(s), connect, disconnect, move node(s), rename.
+  - Keyboard shortcuts: Ctrl+Z (undo), Ctrl+Y / Ctrl+Shift+Z (redo).
+  - `_ur_*` helper methods on GNGraphEditor operate on the network model; network signals update views automatically.
+  - Delete snapshots node dict + connections for full reconstruction on undo.
+  - Move tracked via GraphEdit `begin_node_move`/`end_node_move` signals with position diffing.
+  - Paste/duplicate record compound actions (all pasted nodes removed on undo).
+  - History cleared on New/Load to avoid cross-patch undo.
 - [ ] Multiple viewer windows
 - [ ] Performance profiling overlay (cook time per node)
 - [ ] Stress test: 50+ node network
@@ -753,7 +771,7 @@ GONODES/
 ## 13. Future Roadmap (Post-MVP)
 
 ### Near-term
-- [ ] JSON patch export/import (.GNNode format)
+- [ ] Patch export to standalone runnables (Godot export templates)
 - [ ] Patch export to standalone runnables (Godot export templates)
 - [ ] Renderer selection UI in editor (Forward+, Mobile, Compatibility)
 - [x] SOP family (procedural geometry: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch)
