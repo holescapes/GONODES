@@ -49,7 +49,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		_cached_channel_data.length = 0
 	_cached_channel_data.sample_rate = 60.0
 
-	var t: float = current_time
+	var t: float = elapsed_time
 
 	for ch in range(num_ch):
 		var ch_name: String = "chan%d" % (ch + 1)
