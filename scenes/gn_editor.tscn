@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://gn_editor_scene"]
+
+[ext_resource type="Script" path="res://scenes/gn_editor.gd" id="1_scene_script"]
+[ext_resource type="Script" path="res://addons/gonodes/ui/gn_graph_editor.gd" id="2_graph_editor"]
+
+[node name="GNEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_scene_script")
+
+[node name="HSplit" type="HSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -36.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = -400
+
+[node name="GraphPanel" type="PanelContainer" parent="HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="GraphEditor" type="GraphEdit" parent="HSplit/GraphPanel"]
+layout_mode = 2
+script = ExtResource("2_graph_editor")
+
+[node name="ViewerPanel" type="PanelContainer" parent="HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
+
+[node name="Viewer" type="TextureRect" parent="HSplit/ViewerPanel"]
+layout_mode = 2
+stretch_mode = 5
+expand_mode = 3
+
+[node name="InfoBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -36.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="InfoLabel" type="Label" parent="InfoBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+text = "Initializing..."
+
+[node name="LogToggle" type="CheckButton" parent="InfoBar"]
+layout_mode = 2
+text = "Debug Log"
