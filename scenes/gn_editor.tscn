@@ -39,18 +39,22 @@ size_flags_stretch_ratio = 1.0
 
 [node name="ViewerPanel" type="PanelContainer" parent="HSplit/RightPanel"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
 size_flags_vertical = 3
 size_flags_stretch_ratio = 1.5
+clip_contents = true
 
 [node name="Viewer" type="TextureRect" parent="HSplit/RightPanel/ViewerPanel"]
 layout_mode = 2
 stretch_mode = 5
-expand_mode = 3
+expand_mode = 1
 
 [node name="InspectorPanel" type="PanelContainer" parent="HSplit/RightPanel"]
 layout_mode = 2
+custom_minimum_size = Vector2(260, 40)
 size_flags_vertical = 3
 size_flags_stretch_ratio = 1.0
+clip_contents = true
 script = ExtResource("3_inspector")
 
 [node name="InfoBar" type="HBoxContainer" parent="."]

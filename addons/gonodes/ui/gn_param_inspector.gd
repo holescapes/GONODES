@@ -27,7 +27,7 @@ var _no_selection_label: Label = null
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(260, 0)
+	# Minimum width set in scene (custom_minimum_size on parent PanelContainer)
 
 	var root_vbox := VBoxContainer.new()
 	root_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -168,10 +168,49 @@ func clear_inspection() -> void:
 func _on_node_cooked(node_id: String) -> void:
 	if _current_node == null or _current_node.id != node_id:
 		return
-	_status_label.text = "%s  |  %s  |  %.2fms" % [
+
+	var base_text := "%s  |  %s  |  %.2fms" % [
 		GNFamily.get_family_name(_current_node.family),
 		_current_node.node_type,
 		_current_node.cook_time_ms]
+
+	# For TOPs, append output resolution (and input resolutions if connected)
+	if _current_node.family == GNFamily.Type.TOP:
+		var res_parts: PackedStringArray = []
+
+		# Gather input resolutions
+		var in_res: PackedStringArray = []
+		for i in range(_current_node.input_ports.size()):
+			var label := "in%d" % i
+			# Walk network connections to find upstream cached output
+			var found := false
+			if _current_node.get_parent() is GNCookEngine:
+				var engine: GNCookEngine = _current_node.get_parent() as GNCookEngine
+				if engine.network:
+					var conn: GNConnection = engine.network.get_connection_at_input(_current_node.id, i)
+					if conn:
+						var upstream: GNNode = engine.network.get_node_by_id(conn.from_node)
+						if upstream and upstream.cached_output is GNTextureData:
+							var td: GNTextureData = upstream.cached_output as GNTextureData
+							in_res.append("%s:%dx%d" % [label, td.resolution.x, td.resolution.y])
+							found = true
+			if not found:
+				in_res.append("%s:--" % label)
+
+		if in_res.size() > 0:
+			res_parts.append("In [%s]" % ", ".join(in_res))
+
+		# Output resolution
+		if _current_node.cached_output is GNTextureData:
+			var out_td: GNTextureData = _current_node.cached_output as GNTextureData
+			res_parts.append("Out %dx%d" % [out_td.resolution.x, out_td.resolution.y])
+		else:
+			res_parts.append("Out --")
+
+		if res_parts.size() > 0:
+			base_text += "  |  %s" % "  |  ".join(res_parts)
+
+	_status_label.text = base_text
 
 	# Update expression-mode rows to show resolved values
 	for p_name in _param_rows:

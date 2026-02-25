@@ -56,7 +56,6 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Update viewport size
 	if _viewport.size != res:
 		_viewport.size = res
-		_canvas.size = Vector2(res)
 
 	# Update shader uniforms
 	_material.set_shader_parameter("noise_type", noise_type_idx)
@@ -97,9 +96,9 @@ func _ensure_viewport() -> void:
 	# Create canvas rect filling the viewport
 	_canvas = ColorRect.new()
 	_canvas.name = "Canvas"
-	_canvas.size = Vector2(_viewport.size)
 	_canvas.material = _material
 	_viewport.add_child(_canvas)
+	_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Create reusable output data — ViewportTexture is a live GPU reference
 	_cached_tex_data = GNTextureData.new()

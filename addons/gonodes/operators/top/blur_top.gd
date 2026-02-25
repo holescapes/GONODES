@@ -47,8 +47,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if _viewport_h.size != res:
 		_viewport_h.size = res
 		_viewport_v.size = res
-		_canvas_h.size = Vector2(res)
-		_canvas_v.size = Vector2(res)
 
 	# Horizontal pass: reads source texture
 	_material_h.set_shader_parameter("source_tex", tex_in.texture)
@@ -87,9 +85,9 @@ func _ensure_viewport() -> void:
 
 	_canvas_h = ColorRect.new()
 	_canvas_h.name = "Canvas_H"
-	_canvas_h.size = Vector2(512, 512)
 	_canvas_h.material = _material_h
 	_viewport_h.add_child(_canvas_h)
+	_canvas_h.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Vertical pass viewport
 	_viewport_v = SubViewport.new()
@@ -106,10 +104,10 @@ func _ensure_viewport() -> void:
 
 	_canvas_v = TextureRect.new()
 	_canvas_v.name = "Canvas_V"
-	_canvas_v.size = Vector2(512, 512)
 	_canvas_v.stretch_mode = TextureRect.STRETCH_SCALE
 	_canvas_v.material = _material_v
 	_viewport_v.add_child(_canvas_v)
+	_canvas_v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Output from the vertical pass
 	_cached_tex_data = GNTextureData.new()

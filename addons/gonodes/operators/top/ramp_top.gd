@@ -44,7 +44,6 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	if _viewport.size != res:
 		_viewport.size = res
-		_canvas.size = Vector2(res)
 
 	_material.set_shader_parameter("ramp_type", type_idx)
 	_material.set_shader_parameter("color_a", col_a)
@@ -77,9 +76,9 @@ func _ensure_viewport() -> void:
 
 	_canvas = ColorRect.new()
 	_canvas.name = "Canvas"
-	_canvas.size = Vector2(512, 512)
 	_canvas.material = _material
 	_viewport.add_child(_canvas)
+	_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	_cached_tex_data = GNTextureData.new()
 	_cached_tex_data.texture = _viewport.get_texture()

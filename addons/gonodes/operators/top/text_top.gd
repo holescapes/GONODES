@@ -46,8 +46,6 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	if _viewport.size != res:
 		_viewport.size = res
-		_bg.size = Vector2(res)
-		_label.size = Vector2(res)
 
 	_bg.color = bgcol
 
@@ -94,16 +92,16 @@ func _ensure_viewport() -> void:
 
 	_bg = ColorRect.new()
 	_bg.name = "BG"
-	_bg.size = Vector2(512, 256)
 	_bg.color = Color.BLACK
 	_viewport.add_child(_bg)
+	_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	_label = Label.new()
 	_label.name = "TextLabel"
-	_label.size = Vector2(512, 256)
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_viewport.add_child(_label)
+	_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	_cached_tex_data = GNTextureData.new()
 	_cached_tex_data.texture = _viewport.get_texture()
