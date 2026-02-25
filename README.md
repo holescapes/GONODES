@@ -86,6 +86,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - Mini preview thumbnails on TOP nodes
 - More operators (Blur, Ramp, Transform, AudioCHOP, etc.)
 - Right-click context menu on graph canvas
+- Expression reference lines (dashed/stippled overlay between nodes referencing each other, like TouchDesigner)
 
 ### Planned (Post-MVP)
 

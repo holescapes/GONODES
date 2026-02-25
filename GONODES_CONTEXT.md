@@ -566,6 +566,7 @@ GONODES/
 - [ ] Copy/paste nodes
 - [ ] Undo/redo (Godot's UndoRedo system)
 - [ ] Mini preview thumbnails on TOP nodes
+- [ ] Expression reference lines (dashed/stippled overlay between nodes when a parameter references another node via `chop()`/`op()`/`top()` expressions)
 
 ### Phase 6: Integration & Stabilization (Week 6)
 - [ ] Save/load patches (.tres resources)
