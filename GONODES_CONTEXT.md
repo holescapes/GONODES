@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
-> **Last updated:** 2026-02-26
-> **Status:** Phase 5 In Progress — Massive operator expansion (20 new TOPs + 17 new CHOPs). Phases 1–4 complete.
+> **Last updated:** 2026-02-27
+> **Status:** Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. Codebase reviewed and optimized. Phases 1–5 complete. ~75 operators across 5 families.
 
 ---
 
@@ -97,11 +97,11 @@ Embedding Model (Future):
 | Operator (OP)         | `GNNode` (Node subclass) with `cook()` method             |
 | TOP (Texture OP)      | `GNTopNode` — uses SubViewport + ShaderMaterial           |
 | CHOP (Channel OP)     | `GNChopNode` — processes named float arrays              |
-| SOP (Surface OP)      | `GNSopNode` — produces ArrayMesh (future)                |
+| SOP (Surface OP)      | `GNSopNode` — produces ArrayMesh via GNGeoData           |
 | POP (Point OP)        | `GNPopNode` — GPU particle/point cloud system (future)   |
-| DAT (Data OP)         | `GNDatNode` — tables/text (future)                       |
+| DAT (Data OP)         | `GNDatNode` — tables/text via GNTableData                |
 | MAT (Material OP)     | `GNMatNode` — Godot ShaderMaterial (future)              |
-| COMP (Component OP)   | `GNCompNode` — nested networks (future)                  |
+| COMP (Component OP)   | `GNCompNode` — 3D scene components (Camera, Light, Geo)  |
 | Network / Canvas      | `GNNetwork` (Resource) displayed in `GraphEdit`          |
 | Wire / Connection     | `GNConnection` — typed, family-checked                   |
 | Cook / Evaluate       | `GNCookEngine` — topological DAG walk + dirty flags      |
@@ -143,6 +143,42 @@ GNChannelData extends GNData (RefCounted)
 └── get_value(channel: String, index: int = -1) -> float
     (index=-1 returns last sample, useful for single-value CHOPs)
 ```
+
+### GNTableData (DAT output)
+```
+GNTableData extends GNData (RefCounted)
+├── is_table: bool           # true = 2D table mode, false = plain text mode
+├── headers: PackedStringArray
+├── rows: Array[PackedStringArray]
+├── text: String             # Plain text content (text mode only)
+├── cell(row, col) -> String
+├── cell_by_name(row, col_name) -> String
+├── cell_as_float(row, col) -> float
+├── set_headers(headers: PackedStringArray)
+├── append_row(row: PackedStringArray)
+├── set_text(text: String)
+├── to_tsv() -> String       # Export as tab-separated values
+└── from_tsv(tsv: String)    # Import from tab-separated values
+```
+
+### GNGeoData (SOP output)
+```
+GNGeoData extends GNData (RefCounted)
+├── mesh: ArrayMesh          # Godot native mesh — the actual geometry
+├── transform: Transform3D   # Object-space transform
+├── bounds: AABB             # Bounding box
+├── vertex_count: int
+├── point_attribs: Dictionary # Custom per-point attributes
+├── set_surface_arrays(arrays: Array, primitive: Mesh.PrimitiveType)
+├── set_from_surface_tool(st: SurfaceTool)
+├── set_mesh(primitive_mesh: PrimitiveMesh)  # Copy from Godot PrimitiveMesh
+├── get_positions() -> PackedVector3Array
+├── get_normals() -> PackedVector3Array
+├── get_uvs() -> PackedVector2Array
+└── has_geometry() -> bool
+```
+
+GNGeoData wraps Godot's native `ArrayMesh`, leveraging Godot's built-in mesh types (`BoxMesh`, `SphereMesh`, `CylinderMesh`, `TorusMesh`) via `set_mesh()` and Godot's `SurfaceTool` for procedural generation.
 
 ---
 
@@ -453,6 +489,8 @@ GONODES/
 │       │   ├── gn_data.gd          # GNData base class (RefCounted)
 │       │   ├── gn_texture_data.gd  # GNTextureData (RefCounted)
 │       │   ├── gn_channel_data.gd  # GNChannelData (RefCounted)
+│       │   ├── gn_table_data.gd    # GNTableData — DAT output (RefCounted)
+│       │   ├── gn_geo_data.gd      # GNGeoData — SOP output, wraps ArrayMesh (RefCounted)
 │       │   ├── gn_node.gd          # GNNode base operator class (Node)
 │       │   ├── gn_port.gd          # GNPort definition (RefCounted)
 │       │   ├── gn_connection.gd    # GNConnection (RefCounted)
@@ -463,17 +501,51 @@ GONODES/
 │       │   └── gn_logger.gd        # GNLogger — centralized logging with level filtering
 │       ├── operators/
 │       │   ├── top/
-│       │   │   ├── noise_top.gd
+│       │   │   ├── noise_top.gd         # + 19 more TOPs (blur, ramp, circle, etc.)
 │       │   │   ├── composite_top.gd
-│       │   │   └── level_top.gd
+│       │   │   ├── level_top.gd
+│       │   │   └── render_top.gd        # RenderTOP — 3D SubViewport bridge (COMP→TOP)
 │       │   ├── chop/
-│       │   │   ├── lfo_chop.gd
+│       │   │   ├── lfo_chop.gd          # + 19 more CHOPs (wave, pattern, filter, etc.)
 │       │   │   ├── math_chop.gd
 │       │   │   └── noise_chop.gd
+│       │   ├── dat/
+│       │   │   ├── constant_dat.gd      # 4×4 editable table
+│       │   │   ├── text_dat.gd          # Plain text
+│       │   │   ├── null_dat.gd          # Passthrough
+│       │   │   ├── select_dat.gd        # Row/col range selection
+│       │   │   ├── merge_dat.gd         # Row or column merge
+│       │   │   ├── transpose_dat.gd     # Transpose rows/cols
+│       │   │   ├── sort_dat.gd          # Sort by column (alpha/numeric)
+│       │   │   ├── evaluate_dat.gd      # Expression cells (=expr)
+│       │   │   ├── switch_dat.gd        # Index-based input select
+│       │   │   ├── chop_to_dat.gd       # CHOP→DAT bridge
+│       │   │   ├── dat_to_chop.gd       # DAT→CHOP bridge (family=CHOP)
+│       │   │   ├── info_dat.gd          # System info table (time-dependent)
+│       │   │   └── osc_in_dat.gd        # OSC input (stub for future UDP)
+│       │   ├── sop/
+│       │   │   ├── grid_sop.gd          # Subdivided plane (SurfaceTool)
+│       │   │   ├── box_sop.gd           # Godot BoxMesh
+│       │   │   ├── sphere_sop.gd        # Godot SphereMesh
+│       │   │   ├── torus_sop.gd         # Godot TorusMesh
+│       │   │   ├── cylinder_sop.gd      # Godot CylinderMesh
+│       │   │   ├── line_sop.gd          # Line strip
+│       │   │   ├── circle_sop.gd        # Filled disc or wire circle
+│       │   │   ├── transform_sop.gd     # TRS with 6 transform orders
+│       │   │   ├── noise_sop.gd         # FastNoiseLite vertex displacement
+│       │   │   ├── subdivide_sop.gd     # Triangle→4 split (up to 4 iterations)
+│       │   │   ├── wireframe_sop.gd     # Triangles→lines (edge dedup)
+│       │   │   ├── merge_sop.gd         # Multi-input surface append
+│       │   │   ├── null_sop.gd          # Passthrough
+│       │   │   └── switch_sop.gd        # Index-based input select
+│       │   ├── comp/
+│       │   │   ├── geometry_comp.gd     # MeshInstance3D wrapper (SOP→3D scene)
+│       │   │   ├── camera_comp.gd       # Camera3D wrapper (perspective/ortho)
+│       │   │   └── light_comp.gd        # Light3D wrapper (dir/omni/spot)
 │       │   ├── bridge/
-│       │   │   └── chop_to_top.gd  # (or parameter expression system)
+│       │   │   └── chop_to_top.gd       # (or parameter expression system)
 │       │   └── output/
-│       │       └── window_top.gd   # WindowTOP — multi-window display output
+│       │       └── window_top.gd        # WindowTOP — multi-window display output
 │       ├── ui/
 │       │   ├── gn_graph_editor.gd
 │       │   ├── gn_graph_editor.tscn
@@ -559,7 +631,7 @@ GONODES/
 - [x] NoiseTOP noise_type enum wired to shader (4 algorithms: Simplex/Perlin/Voronoi/White)
 - [x] WindowTOP `_window_params_dirty` flag — only reconfigures on own param changes, not upstream cook-dirty
 
-### Phase 5: Polish & More Operators (Week 5)
+### Phase 5: Polish & More Operators (Week 5) ✅
 - [x] MathCHOP, NoiseCHOP (completed in Phase 2)
 - [x] Massive operator expansion — 20 new TOPs + 17 new CHOPs
   - **New TOP generators:** RampTOP, CircleTOP, RectangleTOP, ConstantTOP, TextTOP
@@ -572,11 +644,39 @@ GONODES/
   - **New CHOP utility:** NullCHOP, SwitchCHOP
 - [x] 14 new GPU shaders (blur, ramp, circle, rectangle, transform2d, hsv_adjust, edge, threshold, displace, flip, tile, cross, crop, lookup, feedback)
 - [x] All operators registered in palette registry
+- [x] CustomShaderTOP — user-editable GLSL shaders with live recompilation
 - [ ] Right-click context menu on graph canvas
 - [ ] Copy/paste nodes
 - [ ] Undo/redo (Godot's UndoRedo system)
 - [ ] Mini preview thumbnails on TOP nodes
 - [ ] Expression reference lines (dashed/stippled overlay between nodes when a parameter references another node via `chop()`/`op()`/`top()` expressions)
+
+### Phase 5.5: DAT, SOP, COMP & 3D Pipeline ✅
+- [x] **GNTableData** — DAT output data type (2D string table + text mode, headers, TSV import/export)
+- [x] **GNGeoData** — SOP output data type wrapping Godot's native `ArrayMesh`
+- [x] **12 DAT operators:** ConstantDAT, TextDAT, NullDAT, SelectDAT, MergeDAT, TransposeDAT, SortDAT, EvaluateDAT, SwitchDAT, CHOPDAT (CHOP→DAT bridge), DATtoCHOP (DAT→CHOP bridge), InfoDAT
+  - OscInDAT stub for future UDP/OSC input
+- [x] **14 SOP operators:** GridSOP, BoxSOP, SphereSOP, TorusSOP, CylinderSOP, LineSOP, CircleSOP, TransformSOP, NoiseSOP, SubdivideSOP, WireframeSOP, MergeSOP, NullSOP, SwitchSOP
+  - SOP generators use Godot native meshes: BoxMesh, SphereMesh, CylinderMesh, TorusMesh
+  - Procedural generators use Godot SurfaceTool (GridSOP, LineSOP, CircleSOP)
+  - NoiseSOP uses Godot FastNoiseLite for vertex displacement
+- [x] **3 COMP operators:** GeometryCOMP, CameraCOMP, LightCOMP
+  - GeometryCOMP: wraps MeshInstance3D, applies SOP geometry + StandardMaterial3D + TOP texture
+  - CameraCOMP: wraps Camera3D, perspective/ortho, look-at mode
+  - LightCOMP: wraps DirectionalLight3D / OmniLight3D / SpotLight3D with shadow control
+- [x] **RenderTOP** — 3D SubViewport bridge (COMP → TOP texture pipeline)
+  - Own `World3D` per viewport (isolated 3D scene)
+  - Walks network connections to adopt GeometryCOMP/CameraCOMP/LightCOMP nodes
+  - Default camera fallback if no CameraCOMP connected
+  - WorldEnvironment with configurable ambient/background
+  - MSAA control (Off/2x/4x/8x), transparent background option
+- [x] **All operators registered** in graph editor registry + palette
+- [x] **Codebase review & bug fixes:**
+  - Fixed multi-input port data loss in `_gather_inputs()` (MergeSOP, CompositeTOP now work)
+  - Fixed stale `cached_output` when cook returns null
+  - Fixed COMP null-return warning suppression
+  - Fixed PatternCHOP per-frame RNG allocation (moved to member variable)
+  - Fixed `_select_first_leaf` recursive tree traversal in palette
 
 ### Phase 6: Integration & Stabilization (Week 6)
 - [ ] Save/load patches (.tres resources)
@@ -594,10 +694,10 @@ GONODES/
 - [ ] JSON patch export/import (.GNNode format)
 - [ ] Patch export to standalone runnables (Godot export templates)
 - [ ] Renderer selection UI in editor (Forward+, Mobile, Compatibility)
-- [ ] SOP family (procedural geometry: Grid, Circle, Merge, Transform)
-- [ ] DAT family (Table, Text, Script)
+- [x] SOP family (procedural geometry: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch)
+- [x] DAT family (Constant, Text, Select, Merge, Transpose, Sort, Evaluate, Switch, bridges)
 - [ ] MAT family (PBR Material, Shader Material)
-- [ ] COMP family (nested sub-networks, UI containers)
+- [x] COMP family (GeometryCOMP, CameraCOMP, LightCOMP + RenderTOP bridge)
 - [ ] Keyboard shortcuts and workflow polish
 
 ### Medium-term
@@ -955,15 +1055,15 @@ top("noise1").resolution.y        # Height
 top("noise1").aspect              # float (width / height)
 ```
 
-#### `sop(name)` — SOP Proxy (Future)
+#### `sop(name)` — SOP Proxy (Planned)
 ```gdscript
 sop("grid1").num_points           # Total point count
 sop("grid1").num_prims            # Primitive count
-sop("grid1").point(0).P           # Position of point 0 (Vector3) — CPU readback!
+sop("grid1").point(0).P           # Position of point 0 (Vector3)
 sop("grid1").point(0).N           # Normal of point 0
 sop("grid1").bounds               # AABB bounding box
 ```
-**Warning:** Accessing individual SOP point data in an expression requires GPU→CPU readback, which is expensive. Limit to occasional use (not per-frame for many points). Use CHOP bridges for bulk data instead.
+**Note:** SOP family is implemented (14 operators, GNGeoData type), but the expression proxy for `sop()` is not yet wired up. Access SOP data through GeometryCOMP or DATtoCHOP bridges for now.
 
 #### `pop(name)` — POP Proxy (Future)
 ```gdscript
@@ -975,7 +1075,7 @@ pop("particles1").point(0).PartAge    # Age
 pop("particles1").attr("custom_attr") # Custom attribute value at point 0
 ```
 
-#### `dat(name)` — DAT Proxy (Future)
+#### `dat(name)` — DAT Proxy (Planned)
 ```gdscript
 dat("table1").cell(1, "name")     # Cell value at row 1, column "name"
 dat("table1").cell(2, 3)          # Cell value at row 2, column 3
@@ -985,6 +1085,7 @@ dat("table1").row(0)              # Entire row as Array
 dat("table1").col("name")         # Entire column as Array
 dat("text1").text                 # Full text content of a Text DAT
 ```
+**Note:** DAT family is implemented (12 operators, GNTableData type), but the expression proxy for `dat()` is not yet wired up. Access DAT data through DATtoCHOP bridge for now.
 
 #### `mat(name)` — MAT Proxy (Future)
 ```gdscript
@@ -1392,6 +1493,85 @@ The editor allows switching renderers at runtime for preview purposes:
 
 ---
 
+## 20.5. 3D Scene Pipeline (SOP → COMP → RenderTOP)
+
+GONODES uses Godot's native scene graph for 3D rendering instead of building a custom 3D engine. SOPs produce geometry data, COMPs wrap Godot Node3D types, and RenderTOP renders everything through a SubViewport back into the TOP texture pipeline.
+
+### Architecture
+
+```
+SOP Chain (geometry data)          COMP Layer (3D scene nodes)          TOP Pipeline
+┌──────────┐  ┌─────────────┐      ┌──────────────┐                     ┌───────────┐
+│ GridSOP  │→→│ TransformSOP│──→── │GeometryCOMP  │ (MeshInstance3D)──→─│           │
+└──────────┘  └─────────────┘      └──────────────┘                     │           │
+                                   ┌──────────────┐                     │ RenderTOP │→→ texture
+                                   │ CameraCOMP   │ (Camera3D) ────→───│           │   output
+                                   └──────────────┘                     │           │
+                                   ┌──────────────┐                     │           │
+                                   │ LightCOMP    │ (Light3D) ─────→───│           │
+                                   └──────────────┘                     └───────────┘
+```
+
+### Key Design Decisions
+
+1. **Godot-native 3D nodes** — GeometryCOMP creates a real `MeshInstance3D`, CameraCOMP creates a real `Camera3D`, LightCOMP creates a real `DirectionalLight3D`/`OmniLight3D`/`SpotLight3D`. No custom rendering abstraction.
+
+2. **Isolated World3D** — Each RenderTOP creates a `SubViewport` with `own_world_3d = true`, giving it a separate 3D scene. This prevents 3D content from appearing in the main editor viewport and allows multiple independent 3D scenes in one network.
+
+3. **Scene population via network walk** — RenderTOP's `_populate_scene_from_network()` walks upstream connections to discover COMP nodes, then reparents their Node3D children into the RenderTOP's viewport. This means the 3D scene is defined by network wiring, not by Godot scene tree structure.
+
+4. **TOP texture input on GeometryCOMP** — GeometryCOMP accepts a TOP texture input to apply as albedo on a `StandardMaterial3D`. This bridges the 2D texture pipeline directly into 3D materials.
+
+5. **Default camera fallback** — If no CameraCOMP is connected to a RenderTOP, it creates a default perspective camera at (0, 2, 5) looking at origin, ensuring there's always a valid render.
+
+### COMP Family Details
+
+COMPs are unique in that they don't produce data output (no `GNData` return from cook). Instead, they create and maintain Godot Node3D instances that other nodes access via API methods:
+
+- `GeometryCOMP.get_mesh_instance() → MeshInstance3D`
+- `CameraCOMP.get_camera() → Camera3D`
+- `LightCOMP.get_light() → Light3D`
+
+The cook engine suppresses null-output warnings for COMP family nodes since this is intentional design.
+
+### SOP Data Flow
+
+SOPs output `GNGeoData` which wraps an `ArrayMesh`:
+
+```
+SOP generators (BoxSOP, SphereSOP, etc.)
+  → create GNGeoData with ArrayMesh
+  → pass downstream via SOP ports
+
+SOP filters (TransformSOP, NoiseSOP, etc.)
+  → read input GNGeoData
+  → extract vertex arrays
+  → modify and produce new GNGeoData
+
+GeometryCOMP (terminal SOP consumer)
+  → reads GNGeoData from SOP input
+  → applies mesh to its MeshInstance3D
+  → optionally reads TOP texture for albedo
+```
+
+### Godot Types Used
+
+| GONODES Operator | Godot Type Used |
+|---|---|
+| BoxSOP | `BoxMesh` |
+| SphereSOP | `SphereMesh` |
+| CylinderSOP | `CylinderMesh` |
+| TorusSOP | `TorusMesh` |
+| GridSOP, LineSOP, CircleSOP | `SurfaceTool` → `ArrayMesh` |
+| NoiseSOP | `FastNoiseLite` + `SurfaceTool` |
+| TransformSOP | Manual vertex transform via `Basis` |
+| GeometryCOMP | `MeshInstance3D` + `StandardMaterial3D` |
+| CameraCOMP | `Camera3D` |
+| LightCOMP | `DirectionalLight3D` / `OmniLight3D` / `SpotLight3D` |
+| RenderTOP | `SubViewport` + `WorldEnvironment` + `Environment` |
+
+---
+
 ## 21. Data Ownership & Passing Model
 
 ### How TouchDesigner Does It
@@ -1418,9 +1598,10 @@ Ownership Rule:
 |--------|-------------------|---------|------------------------------------------------------|
 | TOP    | GNTextureData     | GPU     | ViewportTexture reference. Zero-copy. Texture stays on GPU. Downstream samples via shader uniform. |
 | CHOP   | GNChannelData     | CPU     | Reference to channels Dictionary. Read-only. PackedFloat32Array is CoW-safe. |
-| SOP    | (future)          | CPU/GPU | Reference to mesh/point data. Transform ops create new output. |
+| SOP    | GNGeoData         | CPU/GPU | Reference to ArrayMesh. Transform ops create new output. Mesh data on GPU after upload. |
 | POP    | (future)          | GPU     | GPU buffer handle. Zero-copy. Downstream compute shaders bind the buffer. |
-| DAT    | (future)          | CPU     | Reference to table/text data. Read-only. |
+| DAT    | GNTableData       | CPU     | Reference to table/text data. Read-only. Lightweight string arrays. |
+| COMP   | null (scene nodes) | N/A    | COMPs return null from cook. Access via API: get_mesh_instance(), get_camera(), get_light(). |
 
 ### GNTextureData Reuse
 
@@ -1809,6 +1990,28 @@ These are non-negotiable constraints discovered during development. **Never viol
 - Use lightweight `update_expression_status()` per-cook (only updates error label colors)
 - Check `_expr_edit.has_focus()` before setting text in any update path
 
+### 25.10 Multi-Input Port Data Gathering
+
+- `_gather_inputs()` in the cook engine has TWO code paths:
+  - **Single-input ports** (fast path): cached array aligned by port index, one connection per slot
+  - **Multi-input ports** (`port.multi_input = true`): collects ALL upstream connections into a flat array
+- If only the fast path exists, multi-input operators (MergeSOP, CompositeTOP, RenderTOP) silently lose all but the last connection
+- Always check for the `multi_input` flag when modifying input gathering logic
+
+### 25.11 COMP Nodes Return Null Output
+
+- COMPs (GeometryCOMP, CameraCOMP, LightCOMP) intentionally return `null` from `_cook()`
+- Their "output" is a Godot Node3D (MeshInstance3D, Camera3D, Light3D), not a GNData subclass
+- Downstream access is via API methods: `get_mesh_instance()`, `get_camera()`, `get_light()`
+- The cook engine must suppress null-output warnings for `GNFamily.COMP` nodes
+- RenderTOP accesses COMP nodes by walking the network graph, not by reading cook output
+
+### 25.12 SubViewport own_world_3d for Isolated 3D Scenes
+
+- RenderTOP uses `SubViewport.own_world_3d = true` to create an isolated 3D world
+- Without this, 3D content from RenderTOP would appear in the main editor viewport
+- Each RenderTOP has its own Environment/WorldEnvironment for independent lighting/sky
+
 ---
 
 ## 26. Known Bugs
@@ -1885,9 +2088,9 @@ func _evaluate(in0: GNChannelData, in1: GNChannelData,
 
 ### 27.4 Planned: ScriptDAT (GDScript DAT)
 
-**Status: 🔲 Planned — Requires DAT family first**
+**Status: 🔲 Planned**
 
-Processes table/text data via user GDScript. Depends on the DAT family implementation (GNTableData type).
+Processes table/text data via user GDScript. DAT family and GNTableData are now implemented.
 
 **Design:**
 ```gdscript
@@ -1945,9 +2148,9 @@ Uses Godot's `RenderingDevice` compute shader API for massively parallel GPU ope
 
 ### 27.7 Planned: ScriptSOP (GDScript SOP)
 
-**Status: 🔲 Planned — Requires SOP family first**
+**Status: 🔲 Planned**
 
-Procedural geometry generation/manipulation via GDScript. User receives mesh data arrays and returns modified arrays.
+Procedural geometry generation/manipulation via GDScript. SOP family and GNGeoData are now implemented. User receives mesh data arrays and returns modified arrays.
 
 ### 27.8 Implementation Priorities
 
@@ -1955,10 +2158,10 @@ Procedural geometry generation/manipulation via GDScript. User receives mesh dat
 |----------|----------|------------|------------|
 | ✅ Done | CustomShaderTOP | — | Medium |
 | 🥇 Next | ScriptCHOP | GNScriptContext base class | Medium |
-| 🥈 | ScriptDAT | DAT family + GNTableData | Medium-High |
+| 🥈 | ScriptDAT | — (DAT family done) | Medium-High |
 | 🥉 | ScriptTOP | — | Low (but slow) |
 | Later | ComputeShaderTOP | RenderingDevice API | High |
-| Later | ScriptSOP | SOP family + GNMeshData | High |
+| Later | ScriptSOP | — (SOP family done) | High |
 
 ### 27.9 Shared Infrastructure: GNScriptContext
 

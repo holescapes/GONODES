@@ -7,6 +7,7 @@ extends GNNode
 enum PatternType { RAMP, SINE, COSINE, STEP, RANDOM, CONSTANT }
 
 var _cached_channel_data: GNChannelData = null
+var _rng: RandomNumberGenerator = null
 
 
 func _init() -> void:
@@ -45,8 +46,9 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		_cached_channel_data.length = 0
 	_cached_channel_data.sample_rate = 60.0
 
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_val
+	if _rng == null:
+		_rng = RandomNumberGenerator.new()
+	_rng.seed = seed_val
 
 	for ch in range(num_ch):
 		var ch_name: String = "chan%d" % (ch + 1)
@@ -70,8 +72,8 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 				PatternType.STEP:
 					samples[i] = to_val if t >= 0.5 else from_val
 				PatternType.RANDOM:
-					rng.seed = seed_val + i * 31 + ch * 997
-					samples[i] = lerpf(from_val, to_val, rng.randf())
+					_rng.seed = seed_val + i * 31 + ch * 997
+					samples[i] = lerpf(from_val, to_val, _rng.randf())
 				PatternType.CONSTANT:
 					samples[i] = from_val
 

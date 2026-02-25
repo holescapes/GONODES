@@ -359,6 +359,9 @@ static func _create_operator_instance(operator_type: String) -> GNNode:
 			return NullTOP.new()
 		"SwitchTOP":
 			return SwitchTOP.new()
+		# ── TOPs: 3D Rendering ──
+		"RenderTOP":
+			return RenderTOP.new()
 		# ── TOPs: Output ──
 		"WindowTOP":
 			return WindowTOP.new()
@@ -406,6 +409,77 @@ static func _create_operator_instance(operator_type: String) -> GNNode:
 			return NullCHOP.new()
 		"SwitchCHOP":
 			return SwitchCHOP.new()
+		# ── CHOPs: Bridge ──
+		"DATtoCHOP":
+			return DATtoCHOP.new()
+		# ── SOPs: Generators ──
+		"GridSOP":
+			return GridSOP.new()
+		"BoxSOP":
+			return BoxSOP.new()
+		"SphereSOP":
+			return SphereSOP.new()
+		"TorusSOP":
+			return TorusSOP.new()
+		"CylinderSOP":
+			return CylinderSOP.new()
+		"LineSOP":
+			return LineSOP.new()
+		"CircleSOP":
+			return CircleSOP.new()
+		# ── SOPs: Filters ──
+		"TransformSOP":
+			return TransformSOP.new()
+		"NoiseSOP":
+			return NoiseSOP.new()
+		"SubdivideSOP":
+			return SubdivideSOP.new()
+		"WireframeSOP":
+			return WireframeSOP.new()
+		# ── SOPs: Combiners ──
+		"MergeSOP":
+			return MergeSOP.new()
+		# ── SOPs: Utility ──
+		"NullSOP":
+			return NullSOP.new()
+		"SwitchSOP":
+			return SwitchSOP.new()
+		# ── DATs: Generators ──
+		"ConstantDAT":
+			return ConstantDAT.new()
+		"TextDAT":
+			return TextDAT.new()
+		"InfoDAT":
+			return InfoDAT.new()
+		"OscInDAT":
+			return OscInDAT.new()
+		# ── DATs: Filters ──
+		"SelectDAT":
+			return SelectDAT.new()
+		"TransposeDAT":
+			return TransposeDAT.new()
+		"SortDAT":
+			return SortDAT.new()
+		"EvaluateDAT":
+			return EvaluateDAT.new()
+		# ── DATs: Combiners ──
+		"MergeDAT":
+			return MergeDAT.new()
+		# ── DATs: Utility ──
+		"NullDAT":
+			return NullDAT.new()
+		"SwitchDAT":
+			return SwitchDAT.new()
+		# ── DATs: Bridge ──
+		"CHOPDAT":
+			return CHOPDAT.new()
+		# ── COMPs ──
+		"GeometryCOMP":
+			return GeometryCOMP.new()
+		"CameraCOMP":
+			return CameraCOMP.new()
+		"LightCOMP":
+			return LightCOMP.new()
 		_:
 			return null
 
@@ -421,7 +495,7 @@ static func get_operator_registry() -> Dictionary:
 			"EdgeTOP", "ThresholdTOP", "FlipTOP", "TileTOP",
 			"CropTOP", "FeedbackTOP", "ResolutionTOP",
 			"CompositeTOP", "CrossTOP", "DisplaceTOP", "LookupTOP",
-			"CustomShaderTOP",
+			"CustomShaderTOP", "RenderTOP",
 			"NullTOP", "SwitchTOP",
 			"WindowTOP",
 		],
@@ -433,5 +507,23 @@ static func get_operator_registry() -> Dictionary:
 			"SelectCHOP",
 			"LogicCHOP", "MergeCHOP", "CrossCHOP",
 			"NullCHOP", "SwitchCHOP",
+			"DATtoCHOP",
+		],
+		"SOP": [
+			"GridSOP", "BoxSOP", "SphereSOP", "TorusSOP",
+			"CylinderSOP", "LineSOP", "CircleSOP",
+			"TransformSOP", "NoiseSOP", "SubdivideSOP", "WireframeSOP",
+			"MergeSOP",
+			"NullSOP", "SwitchSOP",
+		],
+		"DAT": [
+			"ConstantDAT", "TextDAT", "InfoDAT", "OscInDAT",
+			"SelectDAT", "TransposeDAT", "SortDAT", "EvaluateDAT",
+			"MergeDAT",
+			"NullDAT", "SwitchDAT",
+			"CHOPDAT",
+		],
+		"COMP": [
+			"GeometryCOMP", "CameraCOMP", "LightCOMP",
 		],
 	}

@@ -61,7 +61,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 5 In Progress — Massive operator expansion with 20 new TOPs and 17 new CHOPs. Phases 1–4 complete.**
+**Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. ~75 operators across 5 families. Phases 1–5 complete.**
 
 ### Completed
 
@@ -69,24 +69,39 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - **Phase 2: First Operators** — NoiseTOP, LevelTOP, CompositeTOP, LFO_CHOP, NoiseCHOP, MathCHOP, WindowTOP (7 operators + 3 shaders + test scene)
 - **Phase 3: Node Graph UI** — GNGraphEditor (GraphEdit canvas), GNNodeView (family-colored GraphNodes), GNNodePalette (Tab to open, search + family grouping), bidirectional network sync, editor scene with HSplit layout
 - **Phase 4: Parameters & Inspector** — GNParamInspector (live parameter panel), GNParamRow (type-specific controls: sliders, spinboxes, color pickers, enums, checkboxes), expression inline editor with mode toggle (C/E), live cook time display, NoiseTOP 4-algorithm shader
-- **Phase 5: Operator Expansion** — 20 new TOPs + 17 new CHOPs + 14 new GPU shaders. Total: 44 operators (24 TOPs + 20 CHOPs). Covers generators, filters, combiners, and utility operators matching TouchDesigner's core library.
+- **Phase 5: Operator Expansion** — 20 new TOPs + 17 new CHOPs + 14 new GPU shaders + CustomShaderTOP. Total at end of phase: 46 operators (26 TOPs + 20 CHOPs).
+- **Phase 5.5: DAT, SOP, COMP & 3D Pipeline** — 12 DAT operators + 14 SOP operators + 3 COMP operators + RenderTOP. GNTableData and GNGeoData data types. Full 3D scene rendering pipeline using Godot's native scene graph. Total: ~75 operators across 5 families.
 - **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
 - **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display (zero-copy GPU texture routing)
 - **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button
 - **Expression system** — `chop("lfo1", "out") * 5.0` drives parameters across node families in real time
-- **Cook engine optimization** — Cached adjacency maps, upfront dirty propagation, zero-alloc input gathering
+- **Cook engine optimization** — Cached adjacency maps, upfront dirty propagation, zero-alloc input gathering, multi-input port support
 
 ### Known Bugs
 
 - **WindowTOP ESC key:** Cannot ESC out of Fullscreen/Borderless mode from the output window. Workaround: change Window Mode back to Windowed from the inspector panel.
 
-### Phase 5: Operator Expansion (Current)
+### Operator Library
 
-- **20 new TOPs:** Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch
-- **17 new CHOPs:** Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch
-- **14 new GPU shaders** for blur, ramp, SDF shapes, transforms, color adjustments, edge detection, and more
-- Total operator count: **45 operators** (25 TOPs + 20 CHOPs) across generators, filters, combiners, utilities, and scripting
-- **CustomShaderTOP**: Write custom GPU shaders (Godot Shading Language) with live recompilation, 4 texture inputs, and configurable uniforms
+| Family | Count | Operators |
+|--------|-------|-----------|
+| **TOP** | 26 | Noise, Composite, Level, Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render |
+| **CHOP** | 21 | LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP |
+| **DAT** | 12 | Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn (stub) |
+| **SOP** | 14 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch |
+| **COMP** | 3 | Geometry, Camera, Light |
+
+### 3D Scene Pipeline
+
+SOPs produce geometry → COMPs wrap Godot's native 3D nodes → RenderTOP renders through an isolated SubViewport back into the TOP texture pipeline:
+
+```
+GridSOP → TransformSOP → GeometryCOMP (MeshInstance3D) ─┐
+                         CameraCOMP   (Camera3D)        ├─→ RenderTOP → texture output
+                         LightCOMP    (Light3D)         ─┘
+```
+
+SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and SurfaceTool for procedural generation. NoiseSOP uses FastNoiseLite for vertex displacement.
 
 ### Next Up (Phase 6)
 
@@ -96,19 +111,18 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - Undo/redo
 - Mini preview thumbnails on TOP nodes
 - Right-click context menu on graph canvas
-- Expression reference lines (dashed/stippled overlay between nodes referencing each other, like TouchDesigner)
+- Save/load patches (.tres resources)
 
 ### Planned (Post-MVP)
 
-- SOP, POP, DAT, MAT, COMP families
+- POP, MAT families
 - GPU particle system (millions of points via compute shaders)
 - Renderer switching (Forward+, Mobile, Compatibility) for target platform preview
 - Patch export as standalone apps (desktop, mobile, web)
 - LibGodot embedding for host applications (VDMX, Resolume)
 - Syphon / Spout texture sharing
 - OSC, MIDI, NDI input/output
-- Custom GLSL shader operators
-- Scriptable operators: ScriptCHOP, ScriptDAT, ScriptTOP, ComputeShaderTOP (see GONODES_CONTEXT.md §27)
+- Scriptable operators: ScriptCHOP, ScriptDAT, ScriptTOP, ScriptSOP, ComputeShaderTOP
 - Sub-networks (COMPs) with hierarchical paths
 
 ---
@@ -170,7 +184,7 @@ GONODES/
 ├── README.md                        # This file
 ├── GONODES_CONTEXT.md               # Full architecture & design doc
 ├── addons/gonodes/
-│   ├── core/                        # Framework core (11 classes)
+│   ├── core/                        # Framework core (13 classes)
 │   │   ├── gn_node.gd              # Base operator (extends Node)
 │   │   ├── gn_cook_engine.gd       # Frame-driven cook engine
 │   │   ├── gn_network.gd           # Graph model (Resource)
@@ -178,13 +192,18 @@ GONODES/
 │   │   ├── gn_data.gd              # Base output data (RefCounted)
 │   │   ├── gn_texture_data.gd      # TOP output data
 │   │   ├── gn_channel_data.gd      # CHOP output data
+│   │   ├── gn_table_data.gd        # DAT output data (table + text modes)
+│   │   ├── gn_geo_data.gd          # SOP output data (ArrayMesh wrapper)
 │   │   ├── gn_port.gd              # Port definition
 │   │   ├── gn_connection.gd        # Wire connection
 │   │   ├── gn_family.gd            # OP family enum
 │   │   └── gn_logger.gd            # Centralized logging
 │   ├── operators/                   # Built-in operators organized by family
-│   │   ├── top/                     # 24 TOPs: Noise, Level, Composite, Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch
-│   │   ├── chop/                    # 20 CHOPs: LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch
+│   │   ├── top/                     # 26 TOPs: Noise, Level, Composite, Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render
+│   │   ├── chop/                    # 21 CHOPs: LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP
+│   │   ├── dat/                     # 12 DATs: Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn
+│   │   ├── sop/                     # 14 SOPs: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch
+│   │   ├── comp/                    # 3 COMPs: Geometry, Camera, Light
 │   │   └── output/                  # WindowTOP (multi-display)
 │   ├── ui/                          # Editor UI
 │   │   ├── gn_graph_editor.gd      # GraphEdit canvas (bidirectional sync)

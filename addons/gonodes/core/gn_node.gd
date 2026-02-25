@@ -227,6 +227,8 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 		cached_output = result
 		cook_valid = true
 	else:
+		# Clear stale cached output so downstream nodes don't read old data
+		cached_output = null
 		cook_valid = false
 		GNLogger.debug("GNNode", "'%s' cook produced null output" % id)
 

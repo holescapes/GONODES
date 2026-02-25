@@ -109,16 +109,19 @@ func _populate_tree(filter: String) -> void:
 
 
 ## Selects the first selectable leaf item in the tree (for keyboard navigation).
-func _select_first_leaf(parent: TreeItem) -> void:
+## Returns true if a leaf was selected.
+func _select_first_leaf(parent: TreeItem) -> bool:
 	var child := parent.get_first_child()
 	while child:
 		if child.is_selectable(0):
 			child.select(0)
 			_tree.scroll_to_item(child)
-			return
+			return true
 		# Recurse into groups
-		_select_first_leaf(child)
+		if _select_first_leaf(child):
+			return true
 		child = child.get_next()
+	return false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

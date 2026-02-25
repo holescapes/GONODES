@@ -146,9 +146,10 @@ func cook_frame(delta: float) -> void:
 		# Cook the node
 		var result := node.execute_cook(inputs, frame_count)
 
-		if result == null and node.output_ports.size() > 0:
-			# Only warn for nodes that are expected to produce output (have output ports).
+		if result == null and node.output_ports.size() > 0 and node.family != GNFamily.Type.COMP:
+			# Only warn for non-COMP nodes with output ports.
 			# Sink nodes (e.g., WindowTOP) legitimately return null.
+			# COMPs (Camera, Light) return null — their outputs are scene graph nodes, not data.
 			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
 			cook_error.emit(node.id, "cook returned null")
 		else:
@@ -186,25 +187,42 @@ func _pre_cook_pass(delta: float) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Gathers input data for a node from upstream nodes' cached outputs.
-## Returns a reused array aligned to the node's input port indices (zero-alloc).
+## For single-input ports, returns a flat array aligned by port index.
+## For multi-input ports, collects all connections into an array at that slot.
 func _gather_inputs(node: GNNode) -> Array[GNData]:
-	var inputs: Array[GNData]
-	if _input_cache.has(node.id):
-		inputs = _input_cache[node.id]
-		# Clear previous frame's data
-		for i in range(inputs.size()):
-			inputs[i] = null
-	else:
-		inputs = []
-		inputs.resize(node.input_ports.size())
-		_input_cache[node.id] = inputs
+	# Check if any port is multi-input
+	var has_multi: bool = false
+	for port in node.input_ports:
+		if port.multi_input:
+			has_multi = true
+			break
 
+	if not has_multi:
+		# Fast path: simple single-input ports (most operators)
+		var inputs: Array[GNData]
+		if _input_cache.has(node.id):
+			inputs = _input_cache[node.id]
+			for i in range(inputs.size()):
+				inputs[i] = null
+		else:
+			inputs = []
+			inputs.resize(node.input_ports.size())
+			_input_cache[node.id] = inputs
+
+		for conn in network.get_input_connections(node.id):
+			var upstream: GNNode = network.nodes.get(conn.from_node, null)
+			if upstream and upstream.cached_output and conn.to_port < inputs.size():
+				inputs[conn.to_port] = upstream.cached_output
+		return inputs
+
+	# Multi-input path: collect all upstream data per multi-input port into a flat array
+	# E.g., MergeSOP with 5 connections on port 0 → inputs array has 5 elements
+	var multi_data: Array[GNData] = []
 	for conn in network.get_input_connections(node.id):
 		var upstream: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream and upstream.cached_output and conn.to_port < inputs.size():
-			inputs[conn.to_port] = upstream.cached_output
-
-	return inputs
+		if upstream and upstream.cached_output:
+			multi_data.append(upstream.cached_output)
+	return multi_data
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

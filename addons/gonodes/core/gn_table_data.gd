@@ -1,0 +1,206 @@
+class_name GNTableData
+extends GNData
+## Output data type for DAT operators.
+## Holds a 2D table of strings (rows × columns) with optional header row,
+## plus a plain-text buffer for text-mode DATs.
+## RefCounted (inherits from GNData) — transient compute result.
+
+## Table storage: array of rows, each row is an array of String cells.
+## Row 0 is typically the header row when [member has_header] is true.
+var table: Array[PackedStringArray] = []
+
+## Whether the first row should be treated as column headers.
+var has_header: bool = true
+
+## Plain text content (for text-mode DATs like TextDAT, ScriptDAT).
+var text: String = ""
+
+## Whether this DAT is in table mode (true) or text mode (false).
+var is_table: bool = true
+
+
+func get_family() -> GNFamily.Type:
+	return GNFamily.Type.DAT
+
+
+# ─── Table Dimensions ─────────────────────────────────────────────────────────
+
+## Returns the number of rows (excluding header if present).
+func num_rows() -> int:
+	var total: int = table.size()
+	if has_header and total > 0:
+		return total - 1
+	return total
+
+
+## Returns the number of columns (from header row or first data row).
+func num_cols() -> int:
+	if table.is_empty():
+		return 0
+	return table[0].size()
+
+
+# ─── Cell Access ───────────────────────────────────────────────────────────────
+
+## Returns the cell value at [param row], [param col].
+## Row index is 0-based relative to data rows (skips header automatically).
+func cell(row: int, col: int) -> String:
+	var actual_row: int = row + (1 if has_header else 0)
+	if actual_row < 0 or actual_row >= table.size():
+		return ""
+	if col < 0 or col >= table[actual_row].size():
+		return ""
+	return table[actual_row][col]
+
+
+## Sets a cell value at [param row], [param col].
+func set_cell(row: int, col: int, value: String) -> void:
+	var actual_row: int = row + (1 if has_header else 0)
+	if actual_row < 0 or actual_row >= table.size():
+		return
+	if col < 0 or col >= table[actual_row].size():
+		return
+	table[actual_row][col] = value
+
+
+## Returns a cell by column name (header lookup) and row index.
+func cell_by_name(row: int, col_name: String) -> String:
+	var col_idx: int = _col_index(col_name)
+	if col_idx < 0:
+		return ""
+	return cell(row, col_idx)
+
+
+# ─── Row / Column Access ──────────────────────────────────────────────────────
+
+## Returns the header row (column names), or empty array if no header.
+func get_headers() -> PackedStringArray:
+	if not has_header or table.is_empty():
+		return PackedStringArray()
+	return table[0]
+
+
+## Returns a full data row as a PackedStringArray.
+func get_row(row: int) -> PackedStringArray:
+	var actual_row: int = row + (1 if has_header else 0)
+	if actual_row < 0 or actual_row >= table.size():
+		return PackedStringArray()
+	return table[actual_row]
+
+
+## Returns all values in a column by index.
+func get_col(col: int) -> PackedStringArray:
+	var result := PackedStringArray()
+	var start: int = 1 if has_header else 0
+	for r in range(start, table.size()):
+		if col < table[r].size():
+			result.append(table[r][col])
+		else:
+			result.append("")
+	return result
+
+
+## Returns all values in a column by header name.
+func get_col_by_name(col_name: String) -> PackedStringArray:
+	var idx: int = _col_index(col_name)
+	if idx < 0:
+		return PackedStringArray()
+	return get_col(idx)
+
+
+# ─── Table Building ───────────────────────────────────────────────────────────
+
+## Sets the header row. Clears existing data rows.
+func set_headers(headers: PackedStringArray) -> void:
+	table.clear()
+	table.append(headers)
+	has_header = true
+	is_table = true
+
+
+## Appends a data row. Must match column count.
+func append_row(row: PackedStringArray) -> void:
+	table.append(row)
+
+
+## Creates a table with the given dimensions, filled with empty strings.
+func create_empty(rows: int, cols: int, headers: PackedStringArray = PackedStringArray()) -> void:
+	table.clear()
+	is_table = true
+	if not headers.is_empty():
+		has_header = true
+		table.append(headers)
+	else:
+		has_header = false
+	for _r in range(rows):
+		var row := PackedStringArray()
+		row.resize(cols)
+		table.append(row)
+
+
+## Sets plain text content and switches to text mode.
+func set_text(content: String) -> void:
+	text = content
+	is_table = false
+
+
+# ─── Conversion ────────────────────────────────────────────────────────────────
+
+## Converts the table to a tab-separated string (for display/export).
+func to_tsv() -> String:
+	var lines := PackedStringArray()
+	for row in table:
+		lines.append("\t".join(row))
+	return "\n".join(lines)
+
+
+## Parses a tab-separated string into the table.
+func from_tsv(tsv: String, first_row_header: bool = true) -> void:
+	table.clear()
+	has_header = first_row_header
+	is_table = true
+	var lines: PackedStringArray = tsv.split("\n")
+	for line in lines:
+		if line.is_empty():
+			continue
+		table.append(PackedStringArray(line.split("\t")))
+
+
+## Returns cell value as float (0.0 if not a valid number).
+func cell_as_float(row: int, col: int) -> float:
+	var val: String = cell(row, col)
+	if val.is_valid_float():
+		return val.to_float()
+	return 0.0
+
+
+# ─── Duplication ───────────────────────────────────────────────────────────────
+
+func invalidate() -> void:
+	super.invalidate()
+	table.clear()
+	text = ""
+
+
+func duplicate_data() -> GNData:
+	var copy := GNTableData.new()
+	copy.valid = valid
+	copy.timestamp = timestamp
+	copy.has_header = has_header
+	copy.is_table = is_table
+	copy.text = text
+	for row in table:
+		copy.table.append(row.duplicate())
+	return copy
+
+
+# ─── Internal ──────────────────────────────────────────────────────────────────
+
+## Returns the column index for a header name, or -1 if not found.
+func _col_index(col_name: String) -> int:
+	if not has_header or table.is_empty():
+		return -1
+	for i in range(table[0].size()):
+		if table[0][i] == col_name:
+			return i
+	return -1
