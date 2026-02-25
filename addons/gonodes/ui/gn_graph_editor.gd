@@ -23,6 +23,9 @@ var _clipboard: Dictionary = {}
 ## Whether live previews are shown on node views.
 var previews_visible: bool = true
 
+## Whether the performance profiling overlay is shown on node views.
+var perf_overlay_visible: bool = false
+
 ## Right-click context menu.
 var _context_menu: PopupMenu = null
 
@@ -234,6 +237,10 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	# Respect current preview toggle state
 	if not previews_visible:
 		view.hide_preview()
+
+	# Respect current perf overlay state
+	if perf_overlay_visible:
+		view.show_perf_overlay()
 
 	return view
 
@@ -512,6 +519,27 @@ func set_previews_visible(enabled: bool) -> void:
 			view.show_preview()
 		else:
 			view.hide_preview()
+
+
+## Updates performance overlay on all node views.
+## Called after each cook frame by the editor.
+func update_perf_overlays() -> void:
+	if not perf_overlay_visible:
+		return
+	for view_name in _node_views:
+		var view: GNNodeView = _node_views[view_name]
+		view.update_perf_overlay()
+
+
+## Toggles performance overlay visibility on all node views.
+func set_perf_overlay_visible(enabled: bool) -> void:
+	perf_overlay_visible = enabled
+	for view_name in _node_views:
+		var view: GNNodeView = _node_views[view_name]
+		if enabled:
+			view.show_perf_overlay()
+		else:
+			view.hide_perf_overlay()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-27
-> **Status:** Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→COMP→RenderTOP) live. Phases 1–5.8 complete. 78 operators across 5 families.
+> **Status:** Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu, performance profiling overlay. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→COMP→RenderTOP) live. Phases 1–5.8 complete. 78 operators across 5 families.
 
 ---
 
@@ -516,8 +516,11 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 - Handles node rename: disconnects visual wires under old name, updates view identity, reconnects under new name
 - Connects to `network.node_renamed` signal for model-driven rename updates
 - `previews_visible` flag — controls whether inline previews are shown; respects toggle on newly created views
+- `perf_overlay_visible` flag — controls per-node cook time badge; respects toggle on newly created views
 - `set_previews_visible(enabled)` — shows/hides all existing node preview controls; newly created views auto-hide if `previews_visible` is false
+- `set_perf_overlay_visible(enabled)` — shows/hides all existing perf overlay labels; newly created views auto-show if `perf_overlay_visible` is true
 - `update_previews()` — skips updates when `previews_visible` is false (zero cost when hidden)
+- `update_perf_overlays()` — skips updates when `perf_overlay_visible` is false
 
 ### GNNodeView (extends GraphNode)
 - Visual representation of a GNNode
@@ -530,6 +533,8 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 - Port/node tooltips from descriptions
 - **Live preview** via `_setup_preview()` → family base class `create_preview_control()`
 - `show_preview()` / `hide_preview()` — toggle preview control visibility with `reset_size()` to resize the node
+- **Performance overlay** via `_perf_label` (Label): color-coded cook time badge (✓/✗ + ms)
+- `show_perf_overlay()` / `hide_perf_overlay()` / `update_perf_overlay()` — lazy label creation, color-coded by threshold
 
 ### GNInspector (GNParamInspector, extends PanelContainer)
 - Shows parameters for the currently selected node
@@ -835,8 +840,15 @@ GONODES/
   - Clipboard-aware: paste grayed out when clipboard is empty.
   - Undo/redo state-aware: grayed out when no history available.
   - Shortcut hints displayed beside each item.
+- [x] **Performance profiling overlay** — per-node cook time badge with toolbar toggle:
+  - `GNNodeView._perf_label` (Label) shows `✓ 0.12ms` or `✗ 0.00ms` with color coding.
+  - Color thresholds: green (<1ms), yellow (<5ms), red (≥5ms).
+  - Created lazily on first `show_perf_overlay()` call (zero cost when never enabled).
+  - `GNGraphEditor.perf_overlay_visible` flag; `set_perf_overlay_visible(enabled)` toggles all views.
+  - `GNGraphEditor.update_perf_overlays()` called each cook frame (skipped when hidden).
+  - Newly created views auto-show overlay if `perf_overlay_visible` is true.
+  - Editor toolbar "Perf" `CheckButton` (off by default) wired to `_on_perf_toggled()`.
 - [ ] Multiple viewer windows
-- [ ] Performance profiling overlay (cook time per node)
 - [ ] Stress test: 50+ node network
 - [ ] Bug fixes
 - [ ] README and basic documentation

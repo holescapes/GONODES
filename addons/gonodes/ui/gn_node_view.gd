@@ -20,6 +20,9 @@ var _rename_edit: LineEdit = null
 ## Live preview control created by the GNNode.
 var _preview: Control = null
 
+## Performance overlay label (cook time + status badge).
+var _perf_label: Label = null
+
 ## Thumbnail height in pixels (width stretches to fit the node).
 const THUMBNAIL_HEIGHT := 80
 
@@ -248,6 +251,52 @@ func hide_preview() -> void:
 	if _preview != null:
 		_preview.hide()
 		reset_size()
+
+
+## Updates the performance overlay with the latest cook stats.
+func update_perf_overlay() -> void:
+	if _perf_label == null or not _perf_label.visible or gn_node == null:
+		return
+	var status_icon := "✓" if gn_node.cook_valid else "✗"
+	var cook_ms := gn_node.cook_time_ms
+	# Color-code: green < 1ms, yellow < 5ms, red >= 5ms
+	var color: Color
+	if cook_ms < 1.0:
+		color = Color(0.4, 1.0, 0.4)
+	elif cook_ms < 5.0:
+		color = Color(1.0, 0.9, 0.3)
+	else:
+		color = Color(1.0, 0.35, 0.3)
+	_perf_label.text = "%s %.2fms" % [status_icon, cook_ms]
+	_perf_label.add_theme_color_override("font_color", color)
+
+
+## Shows the performance overlay label.
+func show_perf_overlay() -> void:
+	if _perf_label == null:
+		_setup_perf_overlay()
+	_perf_label.show()
+	reset_size()
+
+
+## Hides the performance overlay label.
+func hide_perf_overlay() -> void:
+	if _perf_label != null:
+		_perf_label.hide()
+		reset_size()
+
+
+## Creates the perf overlay label (called lazily on first show).
+func _setup_perf_overlay() -> void:
+	_perf_label = Label.new()
+	_perf_label.text = "— 0.00ms"
+	_perf_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_perf_label.add_theme_font_size_override("font_size", 11)
+	_perf_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	_perf_label.custom_minimum_size = Vector2(80, 16)
+	_perf_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_perf_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_perf_label)
 
 
 ## Handler for GNNode.ports_changed — triggers a slot rebuild.

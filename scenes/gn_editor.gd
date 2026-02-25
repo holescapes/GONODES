@@ -144,6 +144,9 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	# Update live previews on all nodes in the graph
 	graph_editor.update_previews()
 
+	# Update performance overlays on all nodes
+	graph_editor.update_perf_overlays()
+
 
 func _on_cook_error(node_id: String, error_msg: String) -> void:
 	GNLogger.error("Editor", "Cook error '%s': %s" % [node_id, error_msg])
@@ -186,6 +189,10 @@ func _on_log_toggled(pressed: bool) -> void:
 
 func _on_preview_toggled(pressed: bool) -> void:
 	graph_editor.set_previews_visible(pressed)
+
+
+func _on_perf_toggled(pressed: bool) -> void:
+	graph_editor.set_perf_overlay_visible(pressed)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -259,6 +266,15 @@ func _setup_toolbar() -> void:
 	preview_toggle.toggled.connect(_on_preview_toggled)
 	info_bar.add_child(preview_toggle)
 	info_bar.move_child(preview_toggle, 5)
+
+	# Performance overlay toggle
+	var perf_toggle := CheckButton.new()
+	perf_toggle.text = "Perf"
+	perf_toggle.tooltip_text = "Show / hide per-node cook time overlay"
+	perf_toggle.button_pressed = false
+	perf_toggle.toggled.connect(_on_perf_toggled)
+	info_bar.add_child(perf_toggle)
+	info_bar.move_child(perf_toggle, 6)
 
 
 ## Keyboard shortcuts for file operations.

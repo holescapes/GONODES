@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu. GNExtensionRegistry. 3D pipeline live. 78 operators across 5 families. Phases 1–5.8 complete.**
+**Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu, performance profiling overlay. GNExtensionRegistry. 3D pipeline live. 78 operators across 5 families. Phases 1–5.8 complete.**
 
 ### Completed
 
@@ -116,6 +116,7 @@ SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and S
 - [x] Family base classes (GNTopBase, GNChopBase, GNDatBase, GNSopBase, GNCompBase)
 - [x] Preview toggle (toolbar CheckButton to show/hide all inline previews)
 - [x] Right-click context menu (Add Node, Copy/Cut/Paste/Duplicate, Delete, Select All, Undo/Redo)
+- [x] Performance profiling overlay (per-node cook time badge with color coding, toolbar toggle)
 - ScriptCHOP (user GDScript for custom channel processing)
 - Code editor UI (CodeEdit-based multi-line editing in inspector)
 - Right-click context menu on graph canvas
