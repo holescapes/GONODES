@@ -82,8 +82,14 @@ func setup(node: GNNode) -> void:
 ## Builds GraphNode slot rows from the GNNode's input and output ports.
 ## Each slot row has an optional left (input) and right (output) port.
 func _build_slots() -> void:
-	# Clear any existing children
+	# Clear existing slot configs for all previous rows first
+	for i in range(_slot_map.size()):
+		set_slot(i, false, 0, Color.WHITE, false, 0, Color.WHITE)
+
+	# Remove existing children immediately (not queue_free — we need them gone
+	# before adding new children so GraphNode slot indices stay correct).
 	for child in get_children():
+		remove_child(child)
 		child.queue_free()
 	_slot_map.clear()
 
@@ -172,6 +178,9 @@ func _build_slots() -> void:
 ## Called by GNGraphEditor when ports_changed fires after stale connections are pruned.
 func rebuild_slots() -> void:
 	_build_slots()
+	# Force GraphNode to recalculate its minimum size so it shrinks when
+	# ports are removed (GraphNode caches its size otherwise).
+	reset_size()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
