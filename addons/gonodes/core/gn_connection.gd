@@ -1,19 +1,20 @@
 class_name GNConnection
-extends Resource
+extends RefCounted
 ## Represents a wire between two operator ports in the node graph.
 ## Connections carry data from an output port to an input port.
+## RefCounted — lightweight struct, not serialized individually.
 
 ## ID of the source GNNode.
-@export var from_node: String = ""
+var from_node: String = ""
 
 ## Output port index on the source node.
-@export var from_port: int = 0
+var from_port: int = 0
 
 ## ID of the destination GNNode.
-@export var to_node: String = ""
+var to_node: String = ""
 
 ## Input port index on the destination node.
-@export var to_port: int = 0
+var to_port: int = 0
 
 
 ## Creates a new connection between two node ports.

@@ -1,13 +1,14 @@
 class_name GNData
-extends Resource
+extends RefCounted
 ## Base class for all operator output data in GONODES.
 ## Subclassed by GNTextureData (TOPs), GNChannelData (CHOPs), etc.
+## RefCounted — transient compute results, never serialized.
 
 ## Whether this data was produced by a successful cook.
-@export var valid: bool = false
+var valid: bool = false
 
 ## Frame number when this data was last cooked.
-@export var timestamp: int = -1
+var timestamp: int = -1
 
 
 ## Returns the operator family this data type belongs to.

@@ -1,7 +1,10 @@
 class_name GNNode
-extends Resource
+extends Node
 ## Base class for all GONODES operators (TOPs, CHOPs, SOPs, etc.).
-## Provides the cook lifecycle, port/parameter management, and dirty propagation.
+## Extends Node so operators can parent SubViewports (TOPs), Windows (output),
+## and participate in the scene tree lifecycle.  Processing is disabled —
+## only the GNCookEngine drives cooking via the cook lifecycle methods.
+##
 ## Subclasses override [method _init_ports], [method _init_parameters], and [method _cook].
 
 # ─── Identity ──────────────────────────────────────────────────────────────────
@@ -44,6 +47,17 @@ var cook_time_ms: float = 0.0
 
 ## True if the last cook completed without errors.
 var cook_valid: bool = false
+
+# ─── Timing (set by GNCookEngine each frame before cooking) ────────────────────
+
+## Delta time for the current frame (seconds).
+var current_delta: float = 0.0
+
+## Elapsed time since the cook engine started (seconds).
+var elapsed_time: float = 0.0
+
+## Current frame number.
+var current_frame: int = 0
 
 # ─── UI Metadata ───────────────────────────────────────────────────────────────
 
@@ -96,8 +110,11 @@ func _pre_cook(delta: float) -> void:
 
 ## Initializes the node — sets up ports, parameters, and wires internal signals.
 ## Call this after creating a node instance (constructor can't call virtual methods).
+## Disables self-processing — only the cook engine drives cooking.
 func initialize(p_id: String) -> void:
 	id = p_id
+	name = p_id  # Match scene tree name to network ID
+	process_mode = PROCESS_MODE_DISABLED
 	_init_ports()
 	_init_parameters()
 	# Wire parameter change signals to mark this node dirty
@@ -105,6 +122,9 @@ func initialize(p_id: String) -> void:
 		var param: GNParameter = parameters[param_name]
 		if not param.value_changed.is_connected(_on_parameter_changed):
 			param.value_changed.connect(_on_parameter_changed)
+	GNLogger.debug("GNNode", "Initialized '%s' (%s/%s) — %d in, %d out, %d params" % [
+		id, GNFamily.get_name(family), node_type,
+		input_ports.size(), output_ports.size(), parameters.size()])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -208,6 +228,7 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 		cook_valid = true
 	else:
 		cook_valid = false
+		GNLogger.debug("GNNode", "'%s' cook produced null output" % id)
 
 	clear_dirty()
 	node_cooked.emit(id)

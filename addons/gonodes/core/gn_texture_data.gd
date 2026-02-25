@@ -2,6 +2,7 @@ class_name GNTextureData
 extends GNData
 ## Output data type for TOP operators.
 ## Wraps a Texture2D produced by rendering through a SubViewport.
+## RefCounted (inherits from GNData) — transient render result.
 
 ## The rendered texture result (read from SubViewport after cook).
 var texture: Texture2D = null
@@ -10,10 +11,10 @@ var texture: Texture2D = null
 var viewport: SubViewport = null
 
 ## Output resolution in pixels.
-@export var resolution: Vector2i = Vector2i(512, 512)
+var resolution: Vector2i = Vector2i(512, 512)
 
 ## Image format of the texture.
-@export var format: Image.Format = Image.FORMAT_RGBA8
+var format: Image.Format = Image.FORMAT_RGBA8
 
 
 func get_family() -> GNFamily.Type:

@@ -52,16 +52,22 @@ func add_node(node: GNNode) -> bool:
 		return false
 	nodes[node.id] = node
 	_invalidate_topo()
+	GNLogger.info("Network", "Node added: '%s' (%s/%s)" % [node.id, GNFamily.get_name(node.family), node.node_type])
 	node_added.emit(node.id)
 	graph_changed.emit()
 	return true
 
 
 ## Removes a node and all its connections from the network.
+## Since GNNode extends Node, this also removes it from the scene tree
+## and queues it for deletion.
 func remove_node(node_id: String) -> bool:
 	if not nodes.has(node_id):
 		push_warning("GNNetwork.remove_node: node '%s' not found" % node_id)
 		return false
+
+	var node: GNNode = nodes[node_id]
+
 	# Remove all connections involving this node
 	var to_remove: Array[GNConnection] = []
 	for conn in connections:
@@ -73,8 +79,14 @@ func remove_node(node_id: String) -> bool:
 
 	nodes.erase(node_id)
 	_invalidate_topo()
+	GNLogger.info("Network", "Node removed: '%s' (removed %d connection(s))" % [node_id, to_remove.size()])
 	node_removed.emit(node_id)
 	graph_changed.emit()
+
+	# Clean up the Node from the scene tree (children like SubViewports are freed too)
+	if node.is_inside_tree():
+		node.get_parent().remove_child(node)
+	node.queue_free()
 	return true
 
 
@@ -146,12 +158,14 @@ func connect_nodes(from_id: String, from_port: int,
 	connections.append(test_conn)
 	if has_cycle():
 		connections.erase(test_conn)
+		GNLogger.warn("Network", "Connection %s:%d → %s:%d rejected — would create cycle" % [from_id, from_port, to_id, to_port])
 		push_warning("GNNetwork.connect: would create a cycle")
 		return false
 
 	# Connection is valid and already added
 	_invalidate_topo()
 	to_node.mark_dirty()
+	GNLogger.info("Network", "Connected %s:%d → %s:%d" % [from_id, from_port, to_id, to_port])
 	connection_added.emit(test_conn)
 	graph_changed.emit()
 	return true
@@ -169,6 +183,7 @@ func disconnect_nodes(from_id: String, from_port: int,
 			var to_node: GNNode = nodes.get(to_id, null)
 			if to_node:
 				to_node.mark_dirty()
+			GNLogger.info("Network", "Disconnected %s:%d → %s:%d" % [from_id, from_port, to_id, to_port])
 			connection_removed.emit(conn)
 			graph_changed.emit()
 			return true
@@ -300,7 +315,10 @@ func _compute_topological_order() -> Array[GNNode]:
 
 	# If sorted.size() < nodes.size(), there's a cycle — return partial order
 	if sorted.size() < nodes.size():
+		GNLogger.error("Network", "Topological sort incomplete: %d/%d nodes — cycle detected" % [sorted.size(), nodes.size()])
 		push_warning("GNNetwork: topological sort incomplete — possible cycle detected")
+	else:
+		GNLogger.debug("Network", "Topo sort computed: %d node(s)" % sorted.size())
 	return sorted
 
 

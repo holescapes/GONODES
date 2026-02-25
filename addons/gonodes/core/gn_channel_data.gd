@@ -2,16 +2,17 @@ class_name GNChannelData
 extends GNData
 ## Output data type for CHOP operators.
 ## Holds named channels of float sample arrays.
+## RefCounted (inherits from GNData) — transient compute result.
 
 ## Channel data: maps channel name → float sample array.
 ## Example: {"tx": PackedFloat32Array([0.0, 0.1, ...]), "ty": PackedFloat32Array([...])}
 var channels: Dictionary = {}
 
 ## Sample rate in Hz (e.g., 60.0 for frame-rate, 44100.0 for audio).
-@export var sample_rate: float = 60.0
+var sample_rate: float = 60.0
 
 ## Number of samples per channel.  All channels share the same length.
-@export var length: int = 1
+var length: int = 1
 
 
 func get_family() -> GNFamily.Type:

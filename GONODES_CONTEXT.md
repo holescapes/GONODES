@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-25
-> **Status:** Pre-implementation / Architecture Planning Complete
+> **Status:** Phase 1 & 2 Complete — Core framework, operators, cook engine, logging. Ready for first test run.
 
 ---
 
@@ -94,7 +94,7 @@ Embedding Model (Future):
 
 | TouchDesigner         | GONODES Implementation                                   |
 |-----------------------|----------------------------------------------------------|
-| Operator (OP)         | `GNNode` (Resource subclass) with `cook()` method        |
+| Operator (OP)         | `GNNode` (Node subclass) with `cook()` method             |
 | TOP (Texture OP)      | `GNTopNode` — uses SubViewport + ShaderMaterial           |
 | CHOP (Channel OP)     | `GNChopNode` — processes named float arrays              |
 | SOP (Surface OP)      | `GNSopNode` — produces ArrayMesh (future)                |
@@ -117,7 +117,7 @@ Embedding Model (Future):
 
 ### GNData (Base)
 ```
-GNData (Resource)
+GNData (RefCounted)
 ├── valid: bool
 ├── timestamp: int (cook frame)
 └── type() -> GNFamily
@@ -125,16 +125,16 @@ GNData (Resource)
 
 ### GNTextureData (TOP output)
 ```
-GNTextureData extends GNData
+GNTextureData extends GNData (RefCounted)
 ├── texture: Texture2D (result of SubViewport rendering)
-├── viewport: SubViewport (owned, used for rendering)
+├── viewport: SubViewport (owned by the TOP node)
 ├── resolution: Vector2i
 └── format: Image.Format
 ```
 
 ### GNChannelData (CHOP output)
 ```
-GNChannelData extends GNData
+GNChannelData extends GNData (RefCounted)
 ├── channels: Dictionary[String, PackedFloat32Array]
 │   e.g., {"tx": [0.0, 0.1, ...], "ty": [...], "tz": [...]}
 ├── sample_rate: float
@@ -149,7 +149,7 @@ GNChannelData extends GNData
 ## 6. Operator Base Class
 
 ```gdscript
-class_name GNNode extends Resource
+class_name GNNode extends Node
 
 enum GNFamily { TOP, CHOP, SOP, POP, DAT, MAT, COMP }
 
@@ -169,6 +169,12 @@ var parameters: Dictionary         # name -> GNParameter
 var dirty: bool = true
 var cached_output: GNData = null
 var cook_time_ms: float = 0.0      # Profiling
+var cook_valid: bool = false
+
+# Timing (injected by GNCookEngine before each cook)
+var current_delta: float = 0.0     # Frame delta in seconds
+var elapsed_time: float = 0.0      # Total time since engine start
+var current_frame: int = 0         # Frame counter
 
 # UI metadata (stored but not used by cook engine)
 var graph_position: Vector2 = Vector2.ZERO
@@ -181,12 +187,20 @@ func get_input(index: int) -> GNData: ...  # Resolved by cook engine
 func mark_dirty() -> void: ...             # Propagates downstream
 ```
 
+### Node Lifecycle
+- `_init()` — set `node_type`, `family`, `time_dependent` (runs before entering tree)
+- `initialize(id)` — sets `name = id`, `process_mode = DISABLED`, calls `_init_ports()` / `_init_parameters()`
+- Processing is disabled on GNNodes — only the cook engine drives cooking
+- TOPs add SubViewport as `add_child()` during first `_cook()` — auto-freed on removal
+- CookEngine adopts all network nodes as children via `add_child()` in `_ready()`
+- `queue_free()` cascades to SubViewport/Window children (no manual cleanup needed)
+
 ---
 
 ## 7. Port System
 
 ```gdscript
-class_name GNPort extends Resource
+class_name GNPort extends RefCounted
 
 var port_name: String
 var family: GNNode.GNFamily    # Type of data this port accepts/produces
@@ -238,7 +252,7 @@ func has_cycle() -> bool
 
 ### GNConnection
 ```gdscript
-class_name GNConnection extends Resource
+class_name GNConnection extends RefCounted
 
 var from_node: String    # GNNode id
 var from_port: int       # Output port index
@@ -436,16 +450,17 @@ GONODES/
 │       ├── plugin.cfg
 │       ├── gonodes_plugin.gd       # EditorPlugin entry (for editor mode)
 │       ├── core/
-│       │   ├── gn_data.gd          # GNData base class
-│       │   ├── gn_texture_data.gd  # GNTextureData
-│       │   ├── gn_channel_data.gd  # GNChannelData
-│       │   ├── gn_node.gd          # GNNode base operator class
-│       │   ├── gn_port.gd          # GNPort definition
-│       │   ├── gn_connection.gd    # GNConnection
-│       │   ├── gn_network.gd       # GNNetwork (graph model)
-│       │   ├── gn_cook_engine.gd   # GNCookEngine
-│       │   ├── gn_parameter.gd     # GNParameter (typed param with expressions)
-│       │   └── gn_family.gd        # GNFamily enum constants
+│       │   ├── gn_data.gd          # GNData base class (RefCounted)
+│       │   ├── gn_texture_data.gd  # GNTextureData (RefCounted)
+│       │   ├── gn_channel_data.gd  # GNChannelData (RefCounted)
+│       │   ├── gn_node.gd          # GNNode base operator class (Node)
+│       │   ├── gn_port.gd          # GNPort definition (RefCounted)
+│       │   ├── gn_connection.gd    # GNConnection (RefCounted)
+│       │   ├── gn_network.gd       # GNNetwork (Resource — serialization boundary)
+│       │   ├── gn_cook_engine.gd   # GNCookEngine (Node)
+│       │   ├── gn_parameter.gd     # GNParameter (Resource — typed param with expressions)
+│       │   ├── gn_family.gd        # GNFamily enum constants
+│       │   └── gn_logger.gd        # GNLogger — centralized logging with level filtering
 │       ├── operators/
 │       │   ├── top/
 │       │   │   ├── noise_top.gd
@@ -455,8 +470,10 @@ GONODES/
 │       │   │   ├── lfo_chop.gd
 │       │   │   ├── math_chop.gd
 │       │   │   └── noise_chop.gd
-│       │   └── bridge/
-│       │       └── chop_to_top.gd  # (or parameter expression system)
+│       │   ├── bridge/
+│       │   │   └── chop_to_top.gd  # (or parameter expression system)
+│       │   └── output/
+│       │       └── window_top.gd   # WindowTOP — multi-window display output
 │       ├── ui/
 │       │   ├── gn_graph_editor.gd
 │       │   ├── gn_graph_editor.tscn
@@ -492,23 +509,27 @@ GONODES/
 
 ## 12. Development Phases
 
-### Phase 1: Core Framework (Week 1)
-- [ ] Set up Godot 4.6 project structure
-- [ ] Implement GNData, GNTextureData, GNChannelData
-- [ ] Implement GNPort, GNConnection
-- [ ] Implement GNParameter (value + expression support)
-- [ ] Implement GNNode base class with cook lifecycle
-- [ ] Implement GNNetwork (graph model, topological sort, cycle detection)
-- [ ] Implement GNCookEngine (dirty propagation, frame cook loop)
+### Phase 1: Core Framework (Week 1) ✅
+- [x] Set up Godot 4.6 project structure
+- [x] Implement GNData, GNTextureData, GNChannelData
+- [x] Implement GNPort, GNConnection
+- [x] Implement GNParameter (value + expression support)
+- [x] Implement GNNode base class with cook lifecycle
+- [x] Implement GNNetwork (graph model, topological sort, cycle detection)
+- [x] Implement GNCookEngine (dirty propagation, frame cook loop)
 - [ ] Write unit tests for graph operations and cook order
 
-### Phase 2: First Operators (Week 2)
-- [ ] Implement NoiseTOP (SubViewport + noise shader)
-- [ ] Implement LFO_CHOP (waveform generator)
-- [ ] Wire up cook engine to process a test network from code
-- [ ] Test: LFO_CHOP output channel driving NoiseTOP parameter
-- [ ] Implement CompositeTOP
-- [ ] Implement LevelTOP
+### Phase 2: First Operators (Week 2) ✅
+- [x] Implement NoiseTOP (SubViewport + noise shader)
+- [x] Implement LFO_CHOP (waveform generator)
+- [x] Wire up cook engine to process a test network from code
+- [x] Test scene: LFO_CHOP expression driving NoiseTOP.time_offset
+- [x] Implement CompositeTOP
+- [x] Implement LevelTOP
+- [x] Implement NoiseCHOP, MathCHOP
+- [x] Implement WindowTOP (multi-window/multi-display output)
+- [x] Implement GNLogger (centralized logging with toggle)
+- [x] Resource → Node/RefCounted migration
 
 ### Phase 3: Node Graph UI (Week 3)
 - [ ] Implement GNGraphEditor (GraphEdit wrapper)
@@ -676,7 +697,7 @@ Patches should be exportable as standalone applications on all Godot-supported p
 1. **Data flows left to right** — Inputs on left, outputs on right, consistent with TD.
 2. **Type safety at wire level** — Only compatible ports connect. Errors are prevented, not reported.
 3. **Lazy evaluation** — Nothing cooks unless it needs to. Dirty flags propagate downstream.
-4. **Separation of model and view** — GNNetwork/GNNode are pure data. UI reads/writes them but doesn't own them.
+4. **Separation of model and view** — GNNetwork is the pure data model (Resource). GNNode is a Node in the scene tree but doesn't do UI — the cook engine drives it. UI reads/writes the model but doesn't own it.
 5. **Operators are self-describing** — Each operator declares its ports, parameters, and family. The UI renders them generically. Adding a new operator = one new script file.
 6. **Robust error handling** — Cook errors don't crash the app. Failed nodes output null/default data and show error state in UI.
 7. **Performance visibility** — Cook times are always measurable. Users can see which nodes are expensive.
@@ -1318,6 +1339,259 @@ The editor allows switching renderers at runtime for preview purposes:
 - This lets artists preview exactly how their patch will look on mobile/web before exporting
 
 **Technical note:** Godot 4.x requires a restart for full renderer change. For live preview, we may use a secondary viewport with the alternate renderer, or simply restart the embedded preview. Investigate during implementation.
+
+---
+
+## 21. Data Ownership & Passing Model
+
+### How TouchDesigner Does It
+- **TOPs:** Textures live on the GPU. Downstream nodes receive a **handle/reference** to the GPU texture, not a pixel copy. The producer node owns its framebuffer; consumers sample it read-only via shader uniforms. Zero-copy.
+- **CHOPs:** Channel arrays are passed by reference. The cook engine manages lifecycle. Consumers read the producing node's output; only the producing node writes.
+- **SOPs/POPs:** Geometry/point data is passed by reference. Copy-on-write only when a node modifies geometry (e.g., Transform SOP creates its own output, doesn't mutate input).
+- **Core rule: producer owns the data, consumers borrow it read-only.**
+
+### GONODES Data Passing Rules
+
+```
+Ownership Rule:
+  1. Each node OWNS its cached_output (the GNData it produced last cook).
+  2. The cook engine passes cached_output REFERENCES to downstream _cook(inputs) calls.
+  3. Downstream nodes MUST NEVER mutate input data — always create new output data.
+  4. GNTextureData: the ViewportTexture is a live GPU reference (zero-copy on GPU).
+  5. GNChannelData: PackedFloat32Array is copy-on-write in GDScript — safe as long as
+     downstream doesn't mutate it. The contract forbids mutation.
+```
+
+### Per-Family Behavior
+
+| Family | Data Type         | GPU/CPU | Passing Strategy                                     |
+|--------|-------------------|---------|------------------------------------------------------|
+| TOP    | GNTextureData     | GPU     | ViewportTexture reference. Zero-copy. Texture stays on GPU. Downstream samples via shader uniform. |
+| CHOP   | GNChannelData     | CPU     | Reference to channels Dictionary. Read-only. PackedFloat32Array is CoW-safe. |
+| SOP    | (future)          | CPU/GPU | Reference to mesh/point data. Transform ops create new output. |
+| POP    | (future)          | GPU     | GPU buffer handle. Zero-copy. Downstream compute shaders bind the buffer. |
+| DAT    | (future)          | CPU     | Reference to table/text data. Read-only. |
+
+### GNTextureData Reuse
+
+Previously, each TOP cook created a new `GNTextureData` every frame. This caused unnecessary GC pressure.
+
+**New rule:** Each TOP creates its `GNTextureData` once (during `_ensure_viewport()`) and reuses it across cooks. Only metadata (resolution, timestamp) is updated. The `ViewportTexture` reference is stable — it auto-updates when the SubViewport re-renders.
+
+```gdscript
+# In each TOP's _cook():
+# BAD (old):
+var data := GNTextureData.new()  # Allocates every frame
+data.texture = _viewport.get_texture()
+return data
+
+# GOOD (new):
+_cached_tex_data.resolution = res
+return _cached_tex_data  # Same object, reused
+```
+
+### Thread Safety (Future)
+
+When the cook engine moves to threaded cooking:
+- GNData becomes **immutable after cook** — the producing node creates a new GNData for each cook, and the old one can be read by consumers on other threads.
+- Or: **double-buffering** — each node has two GNData slots (front/back), consumers read front while producer writes back.
+- For MVP (single-threaded `_process`), reference passing with read-only contract is sufficient.
+
+---
+
+## 22. Node-Based Architecture (GNNode extends Node)
+
+GNNode extends Godot's `Node` class instead of `Resource`. This gives operators direct scene tree participation, allowing TOPs to own SubViewports as children and WindowTOPs to create OS windows naturally.
+
+### Why Not Resource?
+- **No scene tree lifecycle** — Resources have no `_ready()`, `_process()`, `_exit_tree()`. This forced workarounds: a centralized ViewportManager for TOPs, `Engine.get_frames_per_second()` hacks for delta time, manual `cleanup()` methods for SubViewport teardown.
+- **Accidental copy risk** — `Resource.duplicate()` creates broken shallow copies of viewport/material references. Resource's serialization machinery was never used (patches serialize via GNNetwork, not individual nodes).
+- **Per-frame allocation overhead** — GNData as Resource had unnecessary serialization infrastructure for transient compute results.
+
+### The Tiered Design
+
+| Class | Extends | Why |
+|---|---|---|
+| **GNNode** | **Node** | Scene tree access, TOPs own SubViewports, auto-cleanup via queue_free() |
+| **GNData/GNTextureData/GNChannelData** | **RefCounted** | Transient compute results — lightest possible allocation |
+| **GNPort** | **RefCounted** | Lightweight struct, no serialization needed |
+| **GNConnection** | **RefCounted** | Lightweight struct, network serializes connection info |
+| **GNParameter** | **Resource** | Benefits from @export for inspector + value persistence |
+| **GNNetwork** | **Resource** | The serialization boundary — saves/loads patch files as .tres |
+
+### Scene Tree Structure
+
+```
+MainScene (Node)
+  ├── Viewer (TextureRect)
+  ├── InfoLabel (Label)
+  └── CookEngine (GNCookEngine extends Node)
+        ├── lfo1 (LFO_CHOP extends GNNode extends Node)
+        ├── noise1 (NoiseTOP extends GNNode extends Node)
+        │   └── VP_noise1 (SubViewport)       ← owned by TOP, auto-freed
+        │       └── Canvas (ColorRect + ShaderMaterial)
+        ├── level1 (LevelTOP extends GNNode extends Node)
+        │   └── VP_level1 (SubViewport)       ← owned by TOP, auto-freed
+        │       └── Canvas (TextureRect + ShaderMaterial)
+        └── win1 (WindowTOP extends GNNode extends Node)
+            └── GNOutput_win1 (Window)        ← separate OS window, auto-freed
+                └── Display (TextureRect)
+```
+
+### Timing Injection
+
+Since `process_mode = DISABLED` on GNNodes, they can't self-tick. The cook engine injects timing each frame:
+
+```gdscript
+# In GNCookEngine.cook_frame():
+for node in topo_order:
+    node.current_delta = current_delta    # Frame delta (seconds)
+    node.elapsed_time = elapsed_time      # Total time since start
+    node.current_frame = frame_count      # Frame counter
+```
+
+Operators use `self.current_delta` instead of the old `Engine.get_frames_per_second()` hack.
+
+### Node Adoption
+
+The cook engine parents all network nodes as children in `_ready()`:
+
+```gdscript
+func _adopt_network_nodes() -> void:
+    for node_id in network.nodes:
+        var node: GNNode = network.nodes[node_id]
+        if node.get_parent() == null:
+            add_child(node)
+```
+
+When `network.remove_node()` is called, it removes the node from the tree and calls `queue_free()`, cascading cleanup to all child SubViewports and Windows.
+
+---
+
+## 23. Multi-Window & Multi-Display Output
+
+GONODES supports multiple output windows, each displayable on any connected monitor. This is essential for VJing (editor on laptop screen, output on projector).
+
+### Godot's Multi-Window Support
+
+Godot 4.x provides:
+- `Window` node — creates an OS-level window, can be moved/resized/fullscreened
+- `DisplayServer.get_screen_count()` — enumerate connected monitors
+- `DisplayServer.get_screen_position(idx)` / `get_screen_size(idx)` — monitor geometry
+- `DisplayServer.window_set_mode()` — fullscreen, borderless, windowed
+- Each `Window` can host its own `SubViewportContainer` to display content
+
+### WindowTOP Operator
+
+A new TOP operator that takes a texture input and displays it in a standalone OS window.
+
+```
+WindowTOP
+├── Inputs: 1 (TOP texture)
+├── Outputs: 0 (display-only, terminal node)
+├── Parameters:
+│   ├── title: String ("GONODES Output")
+│   ├── monitor: int (0 = primary, 1 = secondary, ...)
+│   ├── window_mode: enum (Windowed, Fullscreen, Borderless)
+│   ├── resolution: Vector2i (1920×1080)
+│   ├── position: Vector2i (auto = centered on target monitor)
+│   ├── always_on_top: bool (false)
+│   └── vsync: bool (true)
+└── Implementation:
+    ├── Creates a Godot Window node
+    ├── Inside: SubViewportContainer + SubViewport + TextureRect
+    ├── TextureRect.texture = input TOP's ViewportTexture
+    ├── Window positioned on target monitor
+    └── Updates every frame (the TextureRect auto-updates from ViewportTexture)
+```
+
+### Multi-Window Architecture
+
+```
+Scene Tree:
+  Root (Window — main editor)
+  ├── MainEditor (editor UI, graph, inspector)
+  └── CookEngine (GNCookEngine)
+        ├── noise1 (NoiseTOP)
+        │   └── VP_noise1 (SubViewport)
+        │       └── Canvas (ColorRect)
+        ├── level1 (LevelTOP)
+        │   └── VP_level1 (SubViewport)
+        │       └── Canvas (TextureRect)
+        ├── win1 (WindowTOP — second monitor, fullscreen)
+        │   └── GNOutput_win1 (Window — OS window)
+        │       └── Display (TextureRect → level1's ViewportTexture)
+        └── win2 (WindowTOP — projector, borderless)
+            └── GNOutput_win2 (Window — OS window)
+                └── Display (TextureRect → noise1's ViewportTexture)
+```
+
+### Monitor Enumeration at Runtime
+
+```gdscript
+# Available to WindowTOP and the editor's display picker:
+# Note: Godot 4.x uses screen_get_position/screen_get_size (not get_screen_*).
+for i in range(DisplayServer.get_screen_count()):
+    var pos := DisplayServer.screen_get_position(i)
+    var size := DisplayServer.screen_get_size(i)
+    print("Display %d: %s at %s" % [i, size, pos])
+```
+
+### Texture Routing
+
+WindowTOP does NOT copy the texture. It sets its internal TextureRect's texture to the upstream TOP's `ViewportTexture` — a live GPU reference. The Window's render tree samples the same GPU texture as the graph viewer. **Zero-copy output.**
+
+### VJ Workflow
+
+1. Build patch in the editor (monitor 1)
+2. Add a WindowTOP node, set `monitor = 1` (projector), `window_mode = Borderless`
+3. Wire the final TOP chain into the WindowTOP
+4. The projector shows the live output, borderless, fullscreen
+5. Multiple WindowTOPs can show different parts of the patch on different displays
+6. Parameters (monitor, fullscreen, resolution) can be driven by CHOPs for live switching
+
+---
+
+## 24. Logging System (GNLogger)
+
+GNLogger is a static utility class (`extends RefCounted`, `class_name GNLogger`) providing centralized, toggleable logging across the framework.
+
+### Design
+
+- **Static API** — call from anywhere without instantiation: `GNLogger.info("Category", "message")`
+- **Master toggle** — `GNLogger.enabled` (off by default, no output when disabled)
+- **Level filtering** — `GNLogger.level` with `DEBUG`, `INFO`, `WARN`, `ERROR`, `NONE`
+- **Category muting** — `GNLogger.muted_categories["CookEngine"] = true` to silence a subsystem
+- **Routing** — `WARN` → `push_warning()`, `ERROR` → `push_error()`, others → `print()`
+- **Per-line metadata** — frame number, optional timestamps
+
+### Usage
+
+```gdscript
+GNLogger.enabled = true
+GNLogger.level = GNLogger.Level.DEBUG  # See everything
+
+GNLogger.info("CookEngine", "Frame cooked in %.2fms" % t)
+GNLogger.debug("NoiseTOP", "Viewport created: %s" % vp.name)
+GNLogger.warn("Network", "Cycle detected")
+GNLogger.error("Parameter", "Expression compile failed")
+```
+
+### Coverage
+
+| Subsystem | Logged Events |
+|---|---|
+| GNCookEngine | Engine ready, node adoption, per-frame summary (DEBUG), per-node cook timing (DEBUG), expression/bind errors, proxy lookup failures, invalidate/reset |
+| GNNetwork | Node add/remove, connect/disconnect, cycle detection, topo sort recomputation |
+| GNNode | Initialize (ports/params), null cook output |
+| TOP operators | Viewport creation, missing input warnings |
+| WindowTOP | Window creation, window hidden by user |
+| CHOP operators | Missing input warnings |
+| GNParameter | Expression compile success/failure |
+
+### UI Toggle
+
+The test scene includes a `CheckButton` (top-right corner, "Debug Log") that toggles `GNLogger.enabled` at runtime.
 
 ---
 

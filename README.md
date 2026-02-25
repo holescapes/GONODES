@@ -61,9 +61,17 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Pre-implementation.** Architecture and planning are complete. Implementation is starting.
+**Phase 2 Complete — ready for first test run.**
 
-### MVP Target (4–6 weeks)
+### Completed
+
+- **Phase 1: Core Framework** — GNNode, GNNetwork, GNCookEngine, GNParameter, GNData, GNPort, GNConnection, GNFamily (11 core classes)
+- **Phase 2: First Operators** — NoiseTOP, LevelTOP, CompositeTOP, LFO_CHOP, NoiseCHOP, MathCHOP, WindowTOP (6 operators + 3 shaders + test scene)
+- **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
+- **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display
+- **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button
+
+### Next Up (Phase 3–6)
 
 - Node graph editor with drag-and-drop wiring
 - LFO CHOP driving a Noise TOP (demonstrating cross-family data flow)
@@ -143,15 +151,28 @@ GONODES/
 ├── README.md                        # This file
 ├── GONODES_CONTEXT.md               # Full architecture & design doc
 ├── addons/gonodes/
-│   ├── core/                        # Framework core (data types, cook engine, network model)
+│   ├── core/                        # Framework core (11 classes)
+│   │   ├── gn_node.gd              # Base operator (extends Node)
+│   │   ├── gn_cook_engine.gd       # Frame-driven cook engine
+│   │   ├── gn_network.gd           # Graph model (Resource)
+│   │   ├── gn_parameter.gd         # Typed parameters with expressions
+│   │   ├── gn_data.gd              # Base output data (RefCounted)
+│   │   ├── gn_texture_data.gd      # TOP output data
+│   │   ├── gn_channel_data.gd      # CHOP output data
+│   │   ├── gn_port.gd              # Port definition
+│   │   ├── gn_connection.gd        # Wire connection
+│   │   ├── gn_family.gd            # OP family enum
+│   │   └── gn_logger.gd            # Centralized logging
 │   ├── operators/                   # Built-in operators organized by family
-│   │   ├── top/                     # Texture operators
-│   │   ├── chop/                    # Channel operators
-│   │   └── ...
-│   ├── ui/                          # Editor UI (graph editor, inspector, viewer)
-│   └── shaders/                     # GLSL shaders for TOP/POP processing
-├── scenes/                          # Application scenes
-└── tests/                           # Unit tests
+│   │   ├── top/                     # NoiseTOP, CompositeTOP, LevelTOP
+│   │   ├── chop/                    # LFO_CHOP, NoiseCHOP, MathCHOP
+│   │   └── output/                  # WindowTOP (multi-display)
+│   ├── ui/                          # Editor UI (future: Phase 3+)
+│   └── shaders/                     # noise_simplex, composite, levels
+├── scenes/
+│   ├── test_phase2.tscn             # Phase 2 test scene
+│   └── test_phase2.gd              # Test script (LFO→Noise→Level→Window)
+└── tests/                           # Unit tests (future)
 ```
 
 ---

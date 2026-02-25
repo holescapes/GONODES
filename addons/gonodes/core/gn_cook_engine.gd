@@ -5,8 +5,9 @@ extends Node
 ## resolves parameters (expressions, binds, exports), topologically sorts
 ## dirty nodes, and cooks them in order.
 ##
-## Attach this as a child of your main scene. It uses [method _process] to
-## drive the cook loop at the project's frame rate.
+## Operator nodes (GNNode) are children of this Node in the scene tree.
+## The cook engine adopts them when a network is assigned, giving TOPs
+## direct subtree ownership of their SubViewports.
 
 # ─── References ────────────────────────────────────────────────────────────────
 
@@ -44,6 +45,9 @@ var _op_func: Callable = Callable()
 var _chop_func: Callable = Callable()
 var _top_func: Callable = Callable()
 
+## Tracks whether network nodes have been adopted into the scene tree.
+var _nodes_adopted: bool = false
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted after all nodes in a frame have been cooked.
@@ -59,14 +63,49 @@ signal cook_error(node_id: String, error_message: String)
 
 func _ready() -> void:
 	_build_expression_helpers()
+	_adopt_network_nodes()
+	GNLogger.info("CookEngine", "Engine ready — cooking_enabled=%s" % str(cooking_enabled))
 
 
 func _process(delta: float) -> void:
 	if not cooking_enabled or network == null:
 		return
+	# Ensure any newly added network nodes are in the scene tree
+	if not _nodes_adopted:
+		_adopt_network_nodes()
 	current_delta = delta
 	elapsed_time += delta
 	cook_frame(delta)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Node Adoption — GNNodes are children of CookEngine in the scene tree
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Adds all network nodes as children of this CookEngine node.
+## This places TOPs' SubViewports and WindowTOPs' Windows into the scene tree.
+func _adopt_network_nodes() -> void:
+	if network == null:
+		return
+	var adopted_count := 0
+	for node_id in network.nodes:
+		var node: GNNode = network.nodes[node_id]
+		if node.get_parent() == null:
+			add_child(node)
+			adopted_count += 1
+	# Wire signals for future dynamic node additions
+	if not network.node_added.is_connected(_on_network_node_added):
+		network.node_added.connect(_on_network_node_added)
+	_nodes_adopted = true
+	GNLogger.info("CookEngine", "Adopted %d node(s) into scene tree" % adopted_count)
+
+
+## Called when a node is dynamically added to the network at runtime.
+func _on_network_node_added(node_id: String) -> void:
+	var node: GNNode = network.nodes.get(node_id, null)
+	if node and node.get_parent() == null:
+		add_child(node)
+		GNLogger.debug("CookEngine", "Dynamically adopted node '%s' (%s)" % [node_id, node.node_type])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -89,6 +128,11 @@ func cook_frame(delta: float) -> void:
 		if not node.dirty:
 			continue
 
+		# Inject timing context (so operators can use self.current_delta, etc.)
+		node.current_delta = current_delta
+		node.elapsed_time = elapsed_time
+		node.current_frame = frame_count
+
 		# Resolve parameters (expressions, binds) before cooking
 		_resolve_node_parameters(node)
 
@@ -100,7 +144,10 @@ func cook_frame(delta: float) -> void:
 
 		if result == null and node.input_ports.size() > 0:
 			# Only warn for nodes that expected to produce output
+			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
 			cook_error.emit(node.id, "cook returned null")
+		else:
+			GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
 
 		# Propagate dirty downstream
 		if result != null:
@@ -117,6 +164,7 @@ func cook_frame(delta: float) -> void:
 	frame_count += 1
 	var frame_end := Time.get_ticks_usec()
 	frame_cook_time_ms = (frame_end - frame_start) / 1000.0
+	GNLogger.debug("CookEngine", "Frame %d: cooked %d node(s) in %.2fms" % [frame_count, cooked_count, frame_cook_time_ms])
 	frame_cooked.emit(frame_count, frame_cook_time_ms)
 
 
@@ -195,7 +243,7 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 	var result = expr.execute(context, node)
 
 	if expr.has_execute_failed():
-		push_warning("GNCookEngine: expression error on %s.%s — %s" % [
+		GNLogger.error("CookEngine", "Expression error on %s.%s — %s" % [
 			node.id, param.param_name, expr.get_error_text()])
 		param.resolved_value = param.fallback_value
 		cook_error.emit(node.id, "Expression error: %s" % expr.get_error_text())
@@ -212,13 +260,13 @@ func _resolve_bind(_node: GNNode, param: GNParameter) -> void:
 
 	var source_node: GNNode = network.nodes.get(param.bind_source_node, null)
 	if source_node == null:
-		push_warning("GNCookEngine: bind source node '%s' not found" % param.bind_source_node)
+		GNLogger.warn("CookEngine", "Bind source node '%s' not found" % param.bind_source_node)
 		param.resolved_value = param.fallback_value
 		return
 
 	var source_param: GNParameter = source_node.parameters.get(param.bind_source_param, null)
 	if source_param == null:
-		push_warning("GNCookEngine: bind source param '%s.%s' not found" % [
+		GNLogger.warn("CookEngine", "Bind source param '%s.%s' not found" % [
 			param.bind_source_node, param.bind_source_param])
 		param.resolved_value = param.fallback_value
 		return
@@ -258,7 +306,7 @@ func _make_op_proxy(node_name: String) -> Dictionary:
 		return {}
 	var node: GNNode = network.nodes.get(node_name, null)
 	if node == null:
-		push_warning("GNCookEngine: op('%s') — node not found" % node_name)
+		GNLogger.warn("CookEngine", "op('%s') — node not found" % node_name)
 		return {}
 	# Build a proxy dictionary with commonly accessed properties
 	var par_dict := {}
@@ -278,7 +326,7 @@ func _make_chop_proxy(node_name: String) -> Dictionary:
 		return {}
 	var node: GNNode = network.nodes.get(node_name, null)
 	if node == null:
-		push_warning("GNCookEngine: chop('%s') — node not found" % node_name)
+		GNLogger.warn("CookEngine", "chop('%s') — node not found" % node_name)
 		return {}
 	var data: GNData = node.cached_output
 	if data == null or not data is GNChannelData:
@@ -299,7 +347,7 @@ func _make_top_proxy(node_name: String) -> Dictionary:
 		return {}
 	var node: GNNode = network.nodes.get(node_name, null)
 	if node == null:
-		push_warning("GNCookEngine: top('%s') — node not found" % node_name)
+		GNLogger.warn("CookEngine", "top('%s') — node not found" % node_name)
 		return {}
 	var data: GNData = node.cached_output
 	if data == null or not data is GNTextureData:
@@ -321,6 +369,7 @@ func invalidate_all() -> void:
 		return
 	for node_id in network.nodes:
 		network.nodes[node_id].mark_dirty()
+	GNLogger.info("CookEngine", "Invalidated all %d node(s)" % network.nodes.size())
 
 
 ## Resets the engine state (frame counter, time, etc.).
@@ -329,4 +378,5 @@ func reset() -> void:
 	elapsed_time = 0.0
 	current_delta = 0.0
 	frame_cook_time_ms = 0.0
+	GNLogger.info("CookEngine", "Engine reset")
 	invalidate_all()

@@ -1,23 +1,24 @@
 class_name GNPort
-extends Resource
+extends RefCounted
 ## Defines a typed input or output port on a GNNode.
 ## Ports enforce family-based type checking for connections.
+## RefCounted — lightweight struct, not serialized individually.
 
 ## Human-readable name for this port (e.g., "texture_in", "channel_out").
-@export var port_name: String = ""
+var port_name: String = ""
 
 ## The operator family this port accepts or produces.
-@export var family: GNFamily.Type = GNFamily.Type.TOP
+var family: GNFamily.Type = GNFamily.Type.TOP
 
 ## Port index on the node (0-based, within input or output group).
-@export var index: int = 0
+var index: int = 0
 
 ## True for input ports, false for output ports.
-@export var is_input: bool = true
+var is_input: bool = true
 
 ## If true, this input port accepts multiple incoming connections (e.g., Composite TOP).
 ## Output ports always support fan-out regardless of this setting.
-@export var multi_input: bool = false
+var multi_input: bool = false
 
 
 ## Creates a new port with the given configuration.

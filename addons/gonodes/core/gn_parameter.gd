@@ -323,10 +323,11 @@ func _compile_expression() -> void:
 	if err != OK:
 		_expression_valid = false
 		expression_error = _compiled_expression.get_error_text()
-		push_warning("GNParameter '%s': expression parse error — %s" % [param_name, expression_error])
+		GNLogger.error("Parameter", "'%s' expression parse error — %s" % [param_name, expression_error])
 	else:
 		_expression_valid = true
 		expression_error = ""
+		GNLogger.debug("Parameter", "'%s' expression compiled OK: %s" % [param_name, expression])
 
 
 ## Returns the compiled Expression, or null if compilation failed.
