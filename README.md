@@ -61,7 +61,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 4 Complete — Node graph editor, parameter inspector, and live expression editing all functional.**
+**Phase 5 In Progress — Massive operator expansion with 20 new TOPs and 17 new CHOPs. Phases 1–4 complete.**
 
 ### Completed
 
@@ -69,6 +69,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - **Phase 2: First Operators** — NoiseTOP, LevelTOP, CompositeTOP, LFO_CHOP, NoiseCHOP, MathCHOP, WindowTOP (7 operators + 3 shaders + test scene)
 - **Phase 3: Node Graph UI** — GNGraphEditor (GraphEdit canvas), GNNodeView (family-colored GraphNodes), GNNodePalette (Tab to open, search + family grouping), bidirectional network sync, editor scene with HSplit layout
 - **Phase 4: Parameters & Inspector** — GNParamInspector (live parameter panel), GNParamRow (type-specific controls: sliders, spinboxes, color pickers, enums, checkboxes), expression inline editor with mode toggle (C/E), live cook time display, NoiseTOP 4-algorithm shader
+- **Phase 5: Operator Expansion** — 20 new TOPs + 17 new CHOPs + 14 new GPU shaders. Total: 44 operators (24 TOPs + 20 CHOPs). Covers generators, filters, combiners, and utility operators matching TouchDesigner's core library.
 - **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
 - **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display (zero-copy GPU texture routing)
 - **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button
@@ -79,12 +80,18 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 - **WindowTOP ESC key:** Cannot ESC out of Fullscreen/Borderless mode from the output window. Workaround: change Window Mode back to Windowed from the inspector panel.
 
-### Next Up (Phase 5)
+### Phase 5: Operator Expansion (Current)
+
+- **20 new TOPs:** Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch
+- **17 new CHOPs:** Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch
+- **14 new GPU shaders** for blur, ramp, SDF shapes, transforms, color adjustments, edge detection, and more
+- Total operator count: **44 operators** (24 TOPs + 20 CHOPs) across generators, filters, combiners, and utilities
+
+### Next Up (Phase 6)
 
 - Node copy/paste
 - Undo/redo
 - Mini preview thumbnails on TOP nodes
-- More operators (Blur, Ramp, Transform, AudioCHOP, etc.)
 - Right-click context menu on graph canvas
 - Expression reference lines (dashed/stippled overlay between nodes referencing each other, like TouchDesigner)
 
@@ -172,8 +179,8 @@ GONODES/
 │   │   ├── gn_family.gd            # OP family enum
 │   │   └── gn_logger.gd            # Centralized logging
 │   ├── operators/                   # Built-in operators organized by family
-│   │   ├── top/                     # NoiseTOP, CompositeTOP, LevelTOP
-│   │   ├── chop/                    # LFO_CHOP, NoiseCHOP, MathCHOP
+│   │   ├── top/                     # 24 TOPs: Noise, Level, Composite, Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch
+│   │   ├── chop/                    # 20 CHOPs: LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch
 │   │   └── output/                  # WindowTOP (multi-display)
 │   ├── ui/                          # Editor UI
 │   │   ├── gn_graph_editor.gd      # GraphEdit canvas (bidirectional sync)
@@ -181,7 +188,7 @@ GONODES/
 │   │   ├── gn_node_palette.gd      # Popup node picker (Tab/right-click)
 │   │   ├── gn_param_inspector.gd   # Parameter inspector panel
 │   │   └── gn_param_row.gd         # Per-parameter widget (type-specific)
-│   └── shaders/                     # noise_simplex, composite, levels
+│   └── shaders/                     # 17 shaders: noise_simplex, composite, levels, blur, ramp, circle, rectangle, transform2d, hsv_adjust, edge, threshold, displace, flip, tile, cross, crop, lookup, feedback
 ├── scenes/
 │   ├── gn_editor.tscn               # Main editor scene (HSplit layout)
 │   ├── gn_editor.gd                 # Editor wiring script

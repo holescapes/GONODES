@@ -306,22 +306,103 @@ func _on_palette_node_selected(operator_type: String) -> void:
 ## Returns null for unknown types.
 static func _create_operator_instance(operator_type: String) -> GNNode:
 	match operator_type:
-		# TOPs
+		# ── TOPs: Generators ──
 		"NoiseTOP":
 			return NoiseTOP.new()
+		"RampTOP":
+			return RampTOP.new()
+		"CircleTOP":
+			return CircleTOP.new()
+		"RectangleTOP":
+			return RectangleTOP.new()
+		"ConstantTOP":
+			return ConstantTOP.new()
+		"TextTOP":
+			return TextTOP.new()
+		# ── TOPs: Filters (1 input) ──
 		"LevelTOP":
 			return LevelTOP.new()
+		"BlurTOP":
+			return BlurTOP.new()
+		"TransformTOP":
+			return TransformTOP.new()
+		"HSVAdjustTOP":
+			return HSVAdjustTOP.new()
+		"EdgeTOP":
+			return EdgeTOP.new()
+		"ThresholdTOP":
+			return ThresholdTOP.new()
+		"FlipTOP":
+			return FlipTOP.new()
+		"TileTOP":
+			return TileTOP.new()
+		"CropTOP":
+			return CropTOP.new()
+		"FeedbackTOP":
+			return FeedbackTOP.new()
+		"ResolutionTOP":
+			return ResolutionTOP.new()
+		# ── TOPs: Combiners (2 inputs) ──
 		"CompositeTOP":
 			return CompositeTOP.new()
+		"CrossTOP":
+			return CrossTOP.new()
+		"DisplaceTOP":
+			return DisplaceTOP.new()
+		"LookupTOP":
+			return LookupTOP.new()
+		# ── TOPs: Utility ──
+		"NullTOP":
+			return NullTOP.new()
+		"SwitchTOP":
+			return SwitchTOP.new()
+		# ── TOPs: Output ──
 		"WindowTOP":
 			return WindowTOP.new()
-		# CHOPs
+		# ── CHOPs: Generators ──
 		"LFO_CHOP":
 			return LFO_CHOP.new()
-		"MathCHOP":
-			return MathCHOP.new()
+		"WaveCHOP":
+			return WaveCHOP.new()
 		"NoiseCHOP":
 			return NoiseCHOP.new()
+		"ConstantCHOP":
+			return ConstantCHOP.new()
+		"PatternCHOP":
+			return PatternCHOP.new()
+		"TimerCHOP":
+			return TimerCHOP.new()
+		# ── CHOPs: Filters (1 input) ──
+		"MathCHOP":
+			return MathCHOP.new()
+		"FilterCHOP":
+			return FilterCHOP.new()
+		"LagCHOP":
+			return LagCHOP.new()
+		"LimitCHOP":
+			return LimitCHOP.new()
+		"TriggerCHOP":
+			return TriggerCHOP.new()
+		"SpeedCHOP":
+			return SpeedCHOP.new()
+		"CountCHOP":
+			return CountCHOP.new()
+		"HoldCHOP":
+			return HoldCHOP.new()
+		"SelectCHOP":
+			return SelectCHOP.new()
+		# ── CHOPs: Combiners ──
+		"LogicCHOP":
+			return LogicCHOP.new()
+		"MergeCHOP":
+			return MergeCHOP.new()
+		"CrossCHOP":
+			return CrossCHOP.new()
+		# ── CHOPs: Utility ──
+		"NullCHOP":
+			return NullCHOP.new()
+		"SwitchCHOP":
+			return SwitchCHOP.new()
 		_:
 			return null
 
@@ -330,6 +411,23 @@ static func _create_operator_instance(operator_type: String) -> GNNode:
 ## Used by the palette to display options.
 static func get_operator_registry() -> Dictionary:
 	return {
-		"TOP": ["NoiseTOP", "LevelTOP", "CompositeTOP", "WindowTOP"],
-		"CHOP": ["LFO_CHOP", "MathCHOP", "NoiseCHOP"],
+		"TOP": [
+			"NoiseTOP", "RampTOP", "CircleTOP", "RectangleTOP",
+			"ConstantTOP", "TextTOP",
+			"LevelTOP", "BlurTOP", "TransformTOP", "HSVAdjustTOP",
+			"EdgeTOP", "ThresholdTOP", "FlipTOP", "TileTOP",
+			"CropTOP", "FeedbackTOP", "ResolutionTOP",
+			"CompositeTOP", "CrossTOP", "DisplaceTOP", "LookupTOP",
+			"NullTOP", "SwitchTOP",
+			"WindowTOP",
+		],
+		"CHOP": [
+			"LFO_CHOP", "WaveCHOP", "NoiseCHOP", "ConstantCHOP",
+			"PatternCHOP", "TimerCHOP",
+			"MathCHOP", "FilterCHOP", "LagCHOP", "LimitCHOP",
+			"TriggerCHOP", "SpeedCHOP", "CountCHOP", "HoldCHOP",
+			"SelectCHOP",
+			"LogicCHOP", "MergeCHOP", "CrossCHOP",
+			"NullCHOP", "SwitchCHOP",
+		],
 	}

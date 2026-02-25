@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
-> **Last updated:** 2026-02-25
-> **Status:** Phase 4 Complete — Node Graph UI, Parameter Inspector, and live expression editing all functional. Ready for Phase 5 (Polish & More Operators).
+> **Last updated:** 2026-02-26
+> **Status:** Phase 5 In Progress — Massive operator expansion (20 new TOPs + 17 new CHOPs). Phases 1–4 complete.
 
 ---
 
@@ -560,8 +560,18 @@ GONODES/
 - [x] WindowTOP `_window_params_dirty` flag — only reconfigures on own param changes, not upstream cook-dirty
 
 ### Phase 5: Polish & More Operators (Week 5)
-- [ ] MathCHOP, NoiseCHOP
-- [ ] Node palette (categorized operator list, drag-to-add)
+- [x] MathCHOP, NoiseCHOP (completed in Phase 2)
+- [x] Massive operator expansion — 20 new TOPs + 17 new CHOPs
+  - **New TOP generators:** RampTOP, CircleTOP, RectangleTOP, ConstantTOP, TextTOP
+  - **New TOP filters:** BlurTOP (2-pass Gaussian), TransformTOP, HSVAdjustTOP, EdgeTOP, ThresholdTOP, FlipTOP, TileTOP, CropTOP, FeedbackTOP, ResolutionTOP
+  - **New TOP combiners:** CrossTOP, DisplaceTOP, LookupTOP
+  - **New TOP utility:** NullTOP, SwitchTOP
+  - **New CHOP generators:** ConstantCHOP, WaveCHOP, PatternCHOP, TimerCHOP
+  - **New CHOP filters:** FilterCHOP, LagCHOP, LimitCHOP, TriggerCHOP, SpeedCHOP, CountCHOP, HoldCHOP, SelectCHOP
+  - **New CHOP combiners:** LogicCHOP, MergeCHOP, CrossCHOP
+  - **New CHOP utility:** NullCHOP, SwitchCHOP
+- [x] 14 new GPU shaders (blur, ramp, circle, rectangle, transform2d, hsv_adjust, edge, threshold, displace, flip, tile, cross, crop, lookup, feedback)
+- [x] All operators registered in palette registry
 - [ ] Right-click context menu on graph canvas
 - [ ] Copy/paste nodes
 - [ ] Undo/redo (Godot's UndoRedo system)

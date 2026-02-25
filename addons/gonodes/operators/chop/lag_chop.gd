@@ -1,0 +1,71 @@
+class_name LagCHOP
+extends GNNode
+## Applies attack/release smoothing to CHOP channels.
+## When a value rises, it follows the attack speed; when it falls, the release speed.
+## Similar to TouchDesigner's Lag CHOP.
+
+var _prev_values: Dictionary = {}  # channel_name -> float
+var _cached_channel_data: GNChannelData = null
+
+
+func _init() -> void:
+	node_type = "lag"
+	family = GNFamily.Type.CHOP
+	time_dependent = true
+
+
+func _init_ports() -> void:
+	add_input("in", GNFamily.Type.CHOP)
+	add_output("out", GNFamily.Type.CHOP)
+
+
+func _init_parameters() -> void:
+	add_parameter(GNParameter.create_float("attack", 0.2, 0.0, 10.0, 0.01,
+		"Attack Time (sec)"))
+	add_parameter(GNParameter.create_float("release", 0.2, 0.0, 10.0, 0.01,
+		"Release Time (sec)"))
+	add_parameter(GNParameter.create_bool("reset", false))
+
+
+func _cook(inputs: Array[GNData]) -> GNData:
+	var in_data: GNChannelData = inputs[0] as GNChannelData if inputs.size() > 0 and inputs[0] is GNChannelData else null
+	if in_data == null:
+		GNLogger.warn("LagCHOP", "'%s' — no valid input" % id)
+		return null
+
+	var attack: float = get_param_value("attack")
+	var release: float = get_param_value("release")
+	var do_reset: bool = get_param_value("reset")
+	var dt: float = current_delta
+
+	if do_reset:
+		_prev_values.clear()
+
+	if _cached_channel_data == null:
+		_cached_channel_data = GNChannelData.new()
+	else:
+		_cached_channel_data.channels.clear()
+		_cached_channel_data.length = 0
+	_cached_channel_data.sample_rate = in_data.sample_rate
+
+	for ch_name in in_data.channels:
+		var samples: PackedFloat32Array = in_data.channels[ch_name]
+		var out_samples := PackedFloat32Array()
+		out_samples.resize(samples.size())
+
+		var prev: float = _prev_values.get(ch_name, samples[0]) if samples.size() > 0 else 0.0
+
+		for i in range(samples.size()):
+			var target: float = samples[i]
+			var tau: float = attack if target > prev else release
+			if tau <= 0.0:
+				prev = target
+			else:
+				var alpha: float = 1.0 - exp(-dt / tau) if dt > 0.0 else 1.0
+				prev = prev + alpha * (target - prev)
+			out_samples[i] = prev
+
+		_prev_values[ch_name] = prev
+		_cached_channel_data.set_channel(ch_name, out_samples)
+
+	return _cached_channel_data
