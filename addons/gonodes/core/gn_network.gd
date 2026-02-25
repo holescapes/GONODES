@@ -43,6 +43,9 @@ signal connection_removed(connection: GNConnection)
 ## Emitted when the graph structure changes (any add/remove of nodes or connections).
 signal graph_changed()
 
+## Emitted when a node is renamed.
+signal node_renamed(old_id: String, new_id: String)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Node Management
@@ -110,6 +113,63 @@ func generate_unique_id(base_type: String) -> String:
 		counter += 1
 		candidate = base_type + str(counter)
 	return candidate
+
+
+## Renames a node, updating the nodes dictionary, all connections, and
+## expression references across the entire network.
+## Returns true on success, false if old_id not found or new_id already taken.
+func rename_node(old_id: String, new_id: String) -> bool:
+	if old_id == new_id:
+		return true
+	if not nodes.has(old_id):
+		push_warning("GNNetwork.rename_node: node '%s' not found" % old_id)
+		return false
+	if new_id.is_empty():
+		push_warning("GNNetwork.rename_node: new ID is empty")
+		return false
+	if nodes.has(new_id):
+		push_warning("GNNetwork.rename_node: ID '%s' already taken" % new_id)
+		return false
+
+	# Validate: only allow alphanumeric + underscore
+	var valid_regex := RegEx.new()
+	valid_regex.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+	if not valid_regex.search(new_id):
+		push_warning("GNNetwork.rename_node: invalid ID '%s' (must be alphanumeric/underscore, start with letter or _)" % new_id)
+		return false
+
+	var node: GNNode = nodes[old_id]
+
+	# Update nodes dictionary
+	nodes.erase(old_id)
+	node.id = new_id
+	node.name = new_id
+	nodes[new_id] = node
+
+	# Update all connections referencing this node
+	for conn in connections:
+		if conn.from_node == old_id:
+			conn.from_node = new_id
+		if conn.to_node == old_id:
+			conn.to_node = new_id
+
+	# Update expression references across all nodes in the network.
+	# Simple string replace: "old_id" -> "new_id" in expression text.
+	for n_id in nodes:
+		var n: GNNode = nodes[n_id]
+		for param_name in n.parameters:
+			var param: GNParameter = n.parameters[param_name]
+			if not param.expression.is_empty() and old_id in param.expression:
+				var updated := param.expression.replace(
+					'"%s"' % old_id, '"%s"' % new_id)
+				if updated != param.expression:
+					param.set_expression(updated)
+
+	_invalidate_topo()
+	GNLogger.info("Network", "Node renamed: '%s' → '%s'" % [old_id, new_id])
+	node_renamed.emit(old_id, new_id)
+	graph_changed.emit()
+	return true
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -112,7 +112,9 @@ func inspect_node(node_id: String) -> void:
 ## Inspects the given GNNode, building param rows for all its parameters.
 func inspect(node: GNNode) -> void:
 	if _current_node == node:
-		return  # Already inspecting this node
+		# Same node — just refresh the header (e.g., after rename)
+		_header_label.text = "%s" % node.id
+		return
 
 	_clear_rows()
 	_current_node = node

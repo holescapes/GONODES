@@ -93,6 +93,7 @@ func bind_network(net: GNNetwork) -> void:
 	network.node_removed.connect(_on_network_node_removed)
 	network.connection_added.connect(_on_network_connection_added)
 	network.connection_removed.connect(_on_network_connection_removed)
+	network.node_renamed.connect(_on_network_node_renamed)
 
 	# Build initial graph
 	_populate_from_network()
@@ -114,6 +115,8 @@ func _unbind_network() -> void:
 		network.connection_added.disconnect(_on_network_connection_added)
 	if network.connection_removed.is_connected(_on_network_connection_removed):
 		network.connection_removed.disconnect(_on_network_connection_removed)
+	if network.node_renamed.is_connected(_on_network_node_renamed):
+		network.node_renamed.disconnect(_on_network_node_renamed)
 
 	_clear_graph()
 	network = null
@@ -171,6 +174,7 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 
 	var view := GNNodeView.new()
 	view.setup(node)
+	view.rename_requested.connect(_on_node_rename_requested)
 	add_child(view)
 	_node_views[node.id] = view
 	return view
@@ -290,6 +294,48 @@ func _on_network_connection_removed(conn: GNConnection) -> void:
 func _on_node_ports_changed(node_id: String) -> void:
 	if network:
 		network.prune_stale_connections(node_id)
+
+
+## User requested a rename from a GNNodeView's inline edit.
+func _on_node_rename_requested(old_id: String, new_id: String) -> void:
+	if network == null:
+		return
+	if not network.rename_node(old_id, new_id):
+		GNLogger.warn("GraphEditor", "Rename '%s' → '%s' failed" % [old_id, new_id])
+
+
+## Network confirmed a node was renamed — update visual wires and view registry.
+func _on_network_node_renamed(old_id: String, new_id: String) -> void:
+	if not _node_views.has(old_id):
+		return
+
+	var view: GNNodeView = _node_views[old_id]
+
+	# Disconnect and reconnect all visual wires involving this node.
+	# GraphEdit identifies nodes by GraphNode.name, so we must remove wires
+	# under the old name, update the view, then re-add wires under the new name.
+	var affected_conns: Array[GNConnection] = []
+	for conn in network.connections:
+		if conn.from_node == new_id or conn.to_node == new_id:
+			affected_conns.append(conn)
+
+	# Remove visual wires under old name
+	for conn in affected_conns:
+		var vis_from := old_id if conn.from_node == new_id else conn.from_node
+		var vis_to := old_id if conn.to_node == new_id else conn.to_node
+		disconnect_node(vis_from, conn.from_port, vis_to, conn.to_port)
+
+	# Update the view identity
+	_node_views.erase(old_id)
+	view.apply_rename(old_id, new_id)
+	_node_views[new_id] = view
+
+	# Re-add visual wires under new name
+	for conn in affected_conns:
+		_add_visual_connection(conn)
+
+	# Re-emit selection with new ID so inspector/viewer update
+	operator_selected.emit(new_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

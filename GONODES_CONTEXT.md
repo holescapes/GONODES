@@ -274,8 +274,16 @@ class_name GNNetwork extends Resource
 var nodes: Dictionary = {}            # id -> GNNode
 var connections: Array[GNConnection] = []
 
-func add_node(node: GNNode) -> void
-func remove_node(id: String) -> void
+signal node_added(node_id: String)
+signal node_removed(node_id: String)
+signal connection_added(connection: GNConnection)
+signal connection_removed(connection: GNConnection)
+signal node_renamed(old_id: String, new_id: String)
+signal graph_changed()
+
+func add_node(node: GNNode) -> bool
+func remove_node(id: String) -> bool
+func rename_node(old_id: String, new_id: String) -> bool
 func connect_nodes(from_id: String, from_port: int,
                    to_id: String, to_port: int) -> bool
 func disconnect_nodes(from_id: String, from_port: int,
@@ -284,7 +292,11 @@ func get_topological_order() -> Array[GNNode]
 func get_upstream_nodes(id: String) -> Array[GNNode]
 func get_downstream_nodes(id: String) -> Array[GNNode]
 func has_cycle() -> bool
+func generate_unique_id(base_type: String) -> String
+func prune_stale_connections(node_id: String) -> void
 ```
+
+**`rename_node()` updates:** nodes dictionary key, `GNNode.id`, `GNNode.name`, all `GNConnection.from_node`/`to_node` references, expression strings across all parameters in the network (simple `"old_id"` -> `"new_id"` replacement). Validates: alphanumeric/underscore only, no duplicates, no empty. Emits `node_renamed` then `graph_changed`.
 
 ### GNConnection
 ```gdscript
@@ -424,40 +436,53 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 ### Main Editor Layout
 ```
 ┌──────────────────────────────────────────────────┐
-│  Menu Bar                                        │
-├──────────┬───────────────────────┬───────────────┤
-│          │                       │               │
-│  Node    │   Graph Editor        │   Inspector   │
-│  Palette │   (GraphEdit)         │   (Params)    │
-│          │                       │               │
-│          │   ┌───┐    ┌───┐      │               │
-│  TOPs    │   │LFO│───▶│NOI│      │  [NoiseTOP]   │
-│  CHOPs   │   │   │    │SE │      │  scale: 4.0   │
-│  SOPs    │   └───┘    └───┘      │  seed: 42     │
-│  ...     │                       │  type: Simplex│
-│          │                       │               │
-├──────────┴───────────────────────┴───────────────┤
-│  Viewer (SubViewportContainer — shows TOP output)│
-│                                                  │
+│  HSplitContainer                                │
+├─────────────────────────────┬────────────────────┤
+│                             │  VSplitContainer   │
+│  GraphPanel (stretch 2x)    ├────────────────────┤
+│  └─ GraphEdit               │  ViewerPanel       │
+│     + Node Palette popup    │  (stretch 1.5)     │
+│                             │  └─ TextureRect    │
+│     ┌───┐    ┌───┐          │    KEEP_ASPECT_CTR │
+│     │LFO│───▶│NOI│          │    IGNORE_SIZE    │
+│     │   │    │SE │          ├────────────────────┤
+│     └───┘    └───┘          │  InspectorPanel   │
+│                             │  (stretch 1.0)     │
+│                             │  └─ GNParamInsp.  │
+│                             │    260px min width │
+├─────────────────────────────┴────────────────────┤
+│  InfoBar: FPS | Frame | Cook | Viewing: nodeID  │
 └──────────────────────────────────────────────────┘
 ```
+
+**Scene file:** `scenes/gn_editor.tscn`
+- Viewer TextureRect: `stretch_mode = KEEP_ASPECT_CENTERED`, `expand_mode = IGNORE_SIZE` (texture aspect doesn't force panel width)
+- Both panels: `clip_contents = true`, `custom_minimum_size.y = 40` (freely resizable via VSplit splitter)
+- Window stretch: `canvas_items` mode, `expand` aspect (set in `project.godot`)
 
 ### GNGraphEditor (extends GraphEdit)
 - Renders GNNetwork as GraphNode instances
 - Handles drag-and-drop from palette, wiring, deletion
 - Color-codes connections by family
-- Right-click context menu to add nodes
-- Emits signals when user modifies graph → updates GNNetwork model
+- Tab key opens node palette popup; right-click context menu planned
+- Emits `operator_selected` / `operator_deselected` signals
+- Handles node rename: disconnects visual wires under old name, updates view identity, reconnects under new name
+- Connects to `network.node_renamed` signal for model-driven rename updates
 
 ### GNNodeView (extends GraphNode)
 - Visual representation of a GNNode
 - Shows typed input/output ports with family colors
-- Shows node name and type icon
-- Shows mini preview (thumbnail) for TOP outputs
-- Highlights when cooking, shows cook time
+- Family-colored title bar via StyleBoxFlat theme overrides
+- Title format: `"nodeId  [FAMILY]"` (e.g., `"noise1  [TOP]"`)
+- **Double-click title bar to rename** — inline LineEdit overlay, commits on Enter or focus-lost
+- `rename_requested(old_id, new_id)` signal emitted on commit
+- Dynamic port rebuilding via `rebuild_slots()` + `reset_size()`
+- Port/node tooltips from descriptions
 
-### GNInspector (extends VBoxContainer)
+### GNInspector (GNParamInspector, extends PanelContainer)
 - Shows parameters for the currently selected node
+- Header shows node ID (updates on rename) + status line (family, type, port count, resolution for TOPs)
+- Resolution display for TOPs: `In [in0:512x512, in1:256x256] | Out 512x512`
 - Renders appropriate controls per parameter type:
   - float → HSlider + SpinBox
   - int → SpinBox
@@ -468,10 +493,11 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
   - String → LineEdit
 - Expression toggle: switch from value to expression mode
 
-### GNViewer (extends SubViewportContainer)
-- Full-size preview of a selected TOP's output
-- Can be popped out into a separate window
-- Shows resolution, cook time, FPS overlay
+### GNViewer (TextureRect in ViewerPanel)
+- Aspect-correct preview of a selected TOP's output
+- `stretch_mode = KEEP_ASPECT_CENTERED`, `expand_mode = IGNORE_SIZE`
+- Panel freely resizable via VSplitContainer splitter
+- `clip_contents = true` on ViewerPanel prevents texture aspect from forcing panel size
 
 ---
 
@@ -678,6 +704,13 @@ GONODES/
   - Fixed PatternCHOP per-frame RNG allocation (moved to member variable)
   - Fixed `_select_first_leaf` recursive tree traversal in palette
 
+### Phase 5.6: UI Polish & Node Renaming ✅
+- [x] **Canvas anchoring fix** — all 21 TOP operators now use `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` for SubViewport canvas sizing (replaces manual `_canvas.size = Vector2(res)`)
+- [x] **Viewer panel sizing fix** — TextureRect `expand_mode = 1` (IGNORE_SIZE), `clip_contents = true` on both ViewerPanel and InspectorPanel, prevents texture aspect ratio from forcing panel width
+- [x] **Node renaming** — double-click title bar to rename nodes inline; full ID update chain: nodes dict, GNNode.id/name, all GNConnection references, expression strings, visual wires
+- [x] **Inspector refresh on rename** — header label updates when re-inspecting a renamed node
+- [x] **Documentation update** — GONODES_CONTEXT.md updated with Hard Rules 25.16–25.18
+
 ### Phase 6: Integration & Stabilization (Week 6)
 - [ ] Save/load patches (.tres resources)
 - [ ] Multiple viewer windows
@@ -742,11 +775,12 @@ GONODES/
 
 ### SubViewport Strategy for TOPs
 Each TOP node owns a `SubViewport` for rendering its output texture:
-- The viewport has a `ColorRect` (or `MeshInstance2D`) with a `ShaderMaterial`
-- Input textures are passed as shader uniforms
+- The viewport has a `ColorRect` or `TextureRect` canvas with a `ShaderMaterial`
+- **Canvas uses `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` to auto-fill its parent viewport** — no manual `_canvas.size` management (see Hard Rule 25.16)
+- Input textures are passed as shader uniforms (zero-copy GPU references)
 - The viewport renders each frame (or only when dirty)
 - The output `ViewportTexture` becomes the node's `GNTextureData.texture`
-- Resolution is configurable per node
+- Resolution is configurable per node — only `_viewport.size` is set in `_cook()`; canvas follows via anchors
 - Viewports are managed by the cook engine (created/destroyed with nodes)
 
 **Performance consideration:** Each SubViewport is a render pass. For large networks, we may need viewport pooling or deferred rendering optimizations. For MVP, one viewport per TOP is acceptable.
@@ -2070,6 +2104,37 @@ These are non-negotiable constraints discovered during development. **Never viol
   - No explicit `num_inputs` parameter — the shader source is the single source of truth.
 - **Resource motivation:** Every unused TOP input port can imply an idle SubViewport. Fewer ports = fewer GPU resources wasted.
 - **When adding a new operator with variable port count:** follow either the parameter-driven or auto-detection pattern above. Always emit `ports_changed` after modifying port arrays.
+
+### 25.16 Canvas Anchoring in TOP SubViewports
+
+- **Problem:** Setting `_canvas.size = Vector2(res)` manually causes rendering glitches when switching between inputs with different resolutions. The canvas can end up smaller than the viewport or positioned incorrectly, producing clipped or offset output.
+- **Root cause:** Manual size management has timing issues with Godot's layout system. When the viewport resizes, the canvas may not update in the same frame.
+- **Solution:** Use `_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER `add_child(_canvas)` (anchors require a parent). The canvas auto-fills its parent viewport at any resolution. In `_cook()`, only set `_viewport.size = res` — the canvas follows automatically via anchors.
+- **Critical:** Use `set_anchors_and_offsets_preset()`, NOT `set_anchors_preset()`. The latter only sets anchor values but adjusts offsets to maintain the current rect (which is zero-sized), resulting in an invisible canvas. `set_anchors_and_offsets_preset()` properly zeroes offsets so the Control fills the parent.
+- **Applies to:** All 21 TOP operators with SubViewports (every file in `operators/top/` except null_top, switch_top, render_top, window_top).
+- **Special cases:** `blur_top.gd` has 2 canvases (`_canvas_h`, `_canvas_v`), `text_top.gd` has `_bg` + `_label` — all get anchors.
+
+### 25.17 Viewer Panel Sizing — TextureRect expand_mode
+
+- **Problem:** The ViewerPanel (TOP preview) forces the entire right panel to grow when displaying a wide texture (e.g., 512x256 = 2:1 ratio doubles the panel width).
+- **Root cause:** `TextureRect.expand_mode = EXPAND_FIT_HEIGHT` (value 3) scales the texture to fit the panel's height, then demands width matching the texture's aspect ratio. This feeds back into the SplitContainer's minimum size calculation.
+- **Solution:** Use `expand_mode = EXPAND_IGNORE_SIZE` (value 1). The TextureRect reports zero minimum size, so the panel is freely resizable. Combined with `stretch_mode = KEEP_ASPECT_CENTERED` (value 5), the texture renders with correct proportions inside whatever space is available.
+- **Also:** Set `clip_contents = true` and a small `custom_minimum_size.y = 40` on both ViewerPanel and InspectorPanel so the VSplitContainer allows them to shrink freely.
+
+### 25.18 Node Renaming — Full ID Update Chain
+
+- **Feature:** Double-click a node's title bar to rename it inline. Press Enter or click away to commit.
+- **Implementation chain:**
+  1. `GNNodeView._gui_input()` detects double-click in the title bar area (y <= 30px)
+  2. A `LineEdit` is added as an overlay (NOT as a GraphNode child row — but since GraphNode auto-slots children, we must call `reset_size()` after removal to prevent height growth)
+  3. On commit, `rename_requested(old_id, new_id)` signal fires
+  4. `GNGraphEditor._on_node_rename_requested()` calls `network.rename_node()`
+  5. `GNNetwork.rename_node()` updates: nodes dict key, `GNNode.id`, `GNNode.name`, all `GNConnection` references, expression strings across all params, then emits `node_renamed`
+  6. `GNGraphEditor._on_network_node_renamed()` disconnects visual wires under old name, updates `_node_views` dict key, calls `view.apply_rename()`, reconnects wires, re-emits `operator_selected`
+  7. `gn_editor.gd._on_node_renamed()` updates `_viewer_node_id` if renamed node was being viewed
+  8. Inspector refreshes header label on re-inspect of same node object
+- **Validation:** IDs must match `^[a-zA-Z_][a-zA-Z0-9_]*$` (alphanumeric + underscore, starts with letter or underscore). Empty and duplicate IDs are rejected.
+- **GraphNode.name matters:** GraphEdit uses `GraphNode.name` for wire routing. The `name` property MUST be updated atomically with the visual wire disconnect/reconnect to avoid orphaned connections.
 
 ---
 

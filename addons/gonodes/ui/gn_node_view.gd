@@ -2,6 +2,7 @@ class_name GNNodeView
 extends GraphNode
 ## Visual representation of a single GNNode operator in the graph editor.
 ## Shows family-colored title bar, typed port slots, and the node name.
+## Double-click the title bar to rename the node.
 ## One GNNodeView per GNNode in the network.
 
 ## The GNNode this view represents.
@@ -9,6 +10,12 @@ var gn_node: GNNode = null
 
 ## Map of slot index → port info for event handling.
 var _slot_map: Array[Dictionary] = []
+
+## Emitted when the user commits a rename (old_id, new_id).
+signal rename_requested(old_id: String, new_id: String)
+
+## The inline LineEdit used during rename (null when not renaming).
+var _rename_edit: LineEdit = null
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -205,3 +212,85 @@ func update_status() -> void:
 ## Actual connection pruning is handled by GNGraphEditor before this fires.
 func _on_ports_changed(_node_id: String) -> void:
 	rebuild_slots()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Inline Rename
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Detect double-click on the title bar to start renaming.
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.double_click and event.button_index == MOUSE_BUTTON_LEFT:
+		# Only trigger if clicking within the title bar area (top portion of the node)
+		if event.position.y <= 30.0:
+			_start_rename()
+			accept_event()
+
+
+## Opens an inline LineEdit over the title bar for renaming.
+func _start_rename() -> void:
+	if _rename_edit != null:
+		return  # Already renaming
+	if gn_node == null:
+		return
+
+	_rename_edit = LineEdit.new()
+	_rename_edit.text = gn_node.id
+	_rename_edit.select_all()
+	_rename_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_rename_edit.add_theme_font_size_override("font_size", 14)
+
+	# Position over the title bar
+	_rename_edit.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_rename_edit.offset_top = 2.0
+	_rename_edit.offset_bottom = 28.0
+	_rename_edit.offset_left = 4.0
+	_rename_edit.offset_right = -4.0
+
+	add_child(_rename_edit)
+	_rename_edit.grab_focus()
+
+	_rename_edit.text_submitted.connect(_on_rename_submitted)
+	_rename_edit.focus_exited.connect(_on_rename_focus_lost)
+
+
+## Commits the rename when the user presses Enter.
+func _on_rename_submitted(new_text: String) -> void:
+	_finish_rename(new_text.strip_edges())
+
+
+## Commits the rename when the LineEdit loses focus.
+func _on_rename_focus_lost() -> void:
+	if _rename_edit != null:
+		_finish_rename(_rename_edit.text.strip_edges())
+
+
+## Validates and emits the rename request, then removes the LineEdit.
+func _finish_rename(new_id: String) -> void:
+	if _rename_edit == null:
+		return
+
+	var old_id := gn_node.id
+
+	# Clean up the LineEdit first
+	var edit := _rename_edit
+	_rename_edit = null
+	edit.text_submitted.disconnect(_on_rename_submitted)
+	if edit.focus_exited.is_connected(_on_rename_focus_lost):
+		edit.focus_exited.disconnect(_on_rename_focus_lost)
+	remove_child(edit)
+	edit.queue_free()
+	reset_size()
+
+	# Only emit if the name actually changed and isn't empty
+	if new_id.is_empty() or new_id == old_id:
+		return
+
+	rename_requested.emit(old_id, new_id)
+
+
+## Updates the view after a successful rename (called by GNGraphEditor).
+func apply_rename(old_id: String, new_id: String) -> void:
+	name = new_id
+	title = "%s  [%s]" % [new_id, GNFamily.get_family_name(gn_node.family)]
+	tooltip_text = "%s (%s)" % [gn_node.node_type, GNFamily.get_family_name(gn_node.family)]

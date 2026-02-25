@@ -41,9 +41,10 @@ Everything in GONODES is an **operator** (node). Operators are organized into fa
 
 1. **Drop nodes** onto the canvas from the palette.
 2. **Wire them together.** Data flows left to right. Connections are type-safe — you can only connect compatible ports.
-3. **Tweak parameters** in the inspector. Every parameter can be a constant value, a live expression, or bound to another node's output.
-4. **See results instantly.** TOP outputs show live texture previews. The viewer panel shows full-resolution output.
-5. **Export.** Package your patch as a standalone app for any platform.
+3. **Rename nodes.** Double-click a node's title bar to rename it inline. All connections, expressions, and references update automatically.
+4. **Tweak parameters** in the inspector. Every parameter can be a constant value, a live expression, or bound to another node's output.
+5. **See results instantly.** TOP outputs show live texture previews. The viewer panel shows full-resolution output.
+6. **Export.** Package your patch as a standalone app for any platform.
 
 ### Parameter Referencing
 
@@ -61,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. ~75 operators across 5 families. Phases 1–5 complete.**
+**Phase 6 In Progress — DAT, SOP, and COMP families implemented. 3D scene pipeline (SOP→COMP→RenderTOP) live. ~76 operators across 5 families. Node renaming, canvas anchoring, and viewer panel sizing polished. Phases 1–5.6 complete.**
 
 ### Completed
 
@@ -71,6 +72,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - **Phase 4: Parameters & Inspector** — GNParamInspector (live parameter panel), GNParamRow (type-specific controls: sliders, spinboxes, color pickers, enums, checkboxes), expression inline editor with mode toggle (C/E), live cook time display, NoiseTOP 4-algorithm shader
 - **Phase 5: Operator Expansion** — 20 new TOPs + 17 new CHOPs + 14 new GPU shaders + CustomShaderTOP. Total at end of phase: 46 operators (26 TOPs + 20 CHOPs).
 - **Phase 5.5: DAT, SOP, COMP & 3D Pipeline** — 12 DAT operators + 14 SOP operators + 3 COMP operators + RenderTOP. GNTableData and GNGeoData data types. Full 3D scene rendering pipeline using Godot's native scene graph. Total: ~75 operators across 5 families.
+- **Phase 5.6: UI Polish & Node Renaming** — Canvas anchoring fix (all 21 TOPs use `set_anchors_and_offsets_preset`), viewer panel sizing fix (`expand_mode = IGNORE_SIZE`, `clip_contents`), inline node renaming (double-click title bar with full ID update chain), inspector refresh on rename.
 - **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
 - **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display (zero-copy GPU texture routing)
 - **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button

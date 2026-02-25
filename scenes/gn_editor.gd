@@ -29,6 +29,9 @@ func _ready() -> void:
 	# Bind inspector to network
 	inspector.network = network
 
+	# Track node renames so viewer target stays correct
+	network.node_renamed.connect(_on_node_renamed)
+
 	# Wire log toggle
 	log_toggle.toggled.connect(_on_log_toggled)
 	GNLogger.enabled = log_toggle.button_pressed
@@ -149,6 +152,12 @@ func _on_graph_node_selected(node_id: String) -> void:
 
 func _on_graph_selection_cleared() -> void:
 	inspector.clear_inspection()
+
+
+## Keep viewer target in sync when a node is renamed.
+func _on_node_renamed(old_id: String, new_id: String) -> void:
+	if _viewer_node_id == old_id:
+		_viewer_node_id = new_id
 
 
 func _on_log_toggled(pressed: bool) -> void:
