@@ -27,7 +27,7 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 | Engine                 | Godot 4.6 (with LibGodot)                           |
 | Primary Language       | GDScript (GDExtension/C++ for hot paths later)      |
 | Patch Format (MVP)     | Godot Resource (.tres)                              |
-| Patch Format (Future)  | JSON (.gonode) for cross-app portability             |
+| Patch Format (Future)  | JSON (.GNNode) for cross-app portability             |
 | Project Name           | GONODES                                             |
 | Target Use Case        | Visual/generative art, VJing                        |
 | Priority OP Families   | TOPs (textures) and CHOPs (channels/signals) first  |
@@ -56,19 +56,19 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 │  ├─────────────────────────────────────────────┤ │
 │  │  Operator Library                           │ │
 │  │  Built-in TOPs, CHOPs, SOPs, DATs, MATs     │ │
-│  │  Each is a GONode subclass with cook()      │ │
+│  │  Each is a GNNode subclass with cook()      │ │
 │  ├─────────────────────────────────────────────┤ │
 │  │  Cook Engine                                │ │
 │  │  DAG traversal, dirty propagation,          │ │
 │  │  lazy evaluation, caching                   │ │
 │  ├─────────────────────────────────────────────┤ │
 │  │  Node Graph Model                           │ │
-│  │  GONetwork, GONode, GOConnection, GOPort    │ │
+│  │  GNNetwork, GNNode, GNConnection, GNPort    │ │
 │  │  Type system, serialization                 │ │
 │  ├─────────────────────────────────────────────┤ │
 │  │  Data Types                                 │ │
-│  │  GOTextureData, GOChannelData, GOGeoData,   │ │
-│  │  GOTableData, GOMaterialData                │ │
+│  │  GNTextureData, GNChannelData, GNGeoData,   │ │
+│  │  GNTableData, GNMaterialData                │ │
 │  ├─────────────────────────────────────────────┤ │
 │  │  Godot Engine (renderer, audio, compute)    │ │
 │  └─────────────────────────────────────────────┘ │
@@ -84,7 +84,7 @@ Embedding Model (Future):
 │  └────────────────────┘  │
 │  Host feeds data in →    │
 │  ← reads textures out    │
-│  Loads .gonode patches   │
+│  Loads .GNNode patches   │
 └──────────────────────────┘
 ```
 
@@ -94,20 +94,20 @@ Embedding Model (Future):
 
 | TouchDesigner         | GONODES Implementation                                   |
 |-----------------------|----------------------------------------------------------|
-| Operator (OP)         | `GONode` (Resource subclass) with `cook()` method        |
-| TOP (Texture OP)      | `GOTopNode` — uses SubViewport + ShaderMaterial           |
-| CHOP (Channel OP)     | `GOChopNode` — processes named float arrays              |
-| SOP (Surface OP)      | `GOSopNode` — produces ArrayMesh (future)                |
-| POP (Point OP)        | `GOPopNode` — GPU particle/point cloud system (future)   |
-| DAT (Data OP)         | `GODatNode` — tables/text (future)                       |
-| MAT (Material OP)     | `GOMatNode` — Godot ShaderMaterial (future)              |
-| COMP (Component OP)   | `GOCompNode` — nested networks (future)                  |
-| Network / Canvas      | `GONetwork` (Resource) displayed in `GraphEdit`          |
-| Wire / Connection     | `GOConnection` — typed, family-checked                   |
-| Cook / Evaluate       | `GOCookEngine` — topological DAG walk + dirty flags      |
+| Operator (OP)         | `GNNode` (Resource subclass) with `cook()` method        |
+| TOP (Texture OP)      | `GNTopNode` — uses SubViewport + ShaderMaterial           |
+| CHOP (Channel OP)     | `GNChopNode` — processes named float arrays              |
+| SOP (Surface OP)      | `GNSopNode` — produces ArrayMesh (future)                |
+| POP (Point OP)        | `GNPopNode` — GPU particle/point cloud system (future)   |
+| DAT (Data OP)         | `GNDatNode` — tables/text (future)                       |
+| MAT (Material OP)     | `GNMatNode` — Godot ShaderMaterial (future)              |
+| COMP (Component OP)   | `GNCompNode` — nested networks (future)                  |
+| Network / Canvas      | `GNNetwork` (Resource) displayed in `GraphEdit`          |
+| Wire / Connection     | `GNConnection` — typed, family-checked                   |
+| Cook / Evaluate       | `GNCookEngine` — topological DAG walk + dirty flags      |
 | Parameter Reference   | GDScript expression evaluated at cook time               |
 | Timeline              | Godot `_process()` driving cook engine each frame        |
-| Parameter             | `GOParameter` — typed value with optional expression     |
+| Parameter             | `GNParameter` — typed value with optional expression     |
 | Param References      | `op("name").par.X` / `chop("name").value("ch")` syntax   |
 | Patch Export           | Godot export system → standalone runnable per platform   |
 
@@ -115,26 +115,26 @@ Embedding Model (Future):
 
 ## 5. Core Data Types
 
-### GOData (Base)
+### GNData (Base)
 ```
-GOData (Resource)
+GNData (Resource)
 ├── valid: bool
 ├── timestamp: int (cook frame)
-└── type() -> GOFamily
+└── type() -> GNFamily
 ```
 
-### GOTextureData (TOP output)
+### GNTextureData (TOP output)
 ```
-GOTextureData extends GOData
+GNTextureData extends GNData
 ├── texture: Texture2D (result of SubViewport rendering)
 ├── viewport: SubViewport (owned, used for rendering)
 ├── resolution: Vector2i
 └── format: Image.Format
 ```
 
-### GOChannelData (CHOP output)
+### GNChannelData (CHOP output)
 ```
-GOChannelData extends GOData
+GNChannelData extends GNData
 ├── channels: Dictionary[String, PackedFloat32Array]
 │   e.g., {"tx": [0.0, 0.1, ...], "ty": [...], "tz": [...]}
 ├── sample_rate: float
@@ -149,25 +149,25 @@ GOChannelData extends GOData
 ## 6. Operator Base Class
 
 ```gdscript
-class_name GONode extends Resource
+class_name GNNode extends Resource
 
-enum GOFamily { TOP, CHOP, SOP, POP, DAT, MAT, COMP }
+enum GNFamily { TOP, CHOP, SOP, POP, DAT, MAT, COMP }
 
 # Identity
 var id: String                     # Unique ID within network
 var node_type: String              # e.g., "noise", "lfo", "composite"
-var family: GOFamily               # Which OP family
+var family: GNFamily               # Which OP family
 
 # Ports
-var input_ports: Array[GOPort]     # Defined by subclass
-var output_ports: Array[GOPort]    # Defined by subclass
+var input_ports: Array[GNPort]     # Defined by subclass
+var output_ports: Array[GNPort]    # Defined by subclass
 
 # Parameters
-var parameters: Dictionary         # name -> GOParameter
+var parameters: Dictionary         # name -> GNParameter
 
 # Cook state
 var dirty: bool = true
-var cached_output: GOData = null
+var cached_output: GNData = null
 var cook_time_ms: float = 0.0      # Profiling
 
 # UI metadata (stored but not used by cook engine)
@@ -176,8 +176,8 @@ var graph_position: Vector2 = Vector2.ZERO
 # Interface
 func _init_ports() -> void: pass          # Override: define ports
 func _init_parameters() -> void: pass     # Override: define params
-func _cook(inputs: Array[GOData]) -> GOData: return null  # Override: produce output
-func get_input(index: int) -> GOData: ...  # Resolved by cook engine
+func _cook(inputs: Array[GNData]) -> GNData: return null  # Override: produce output
+func get_input(index: int) -> GNData: ...  # Resolved by cook engine
 func mark_dirty() -> void: ...             # Propagates downstream
 ```
 
@@ -186,10 +186,10 @@ func mark_dirty() -> void: ...             # Propagates downstream
 ## 7. Port System
 
 ```gdscript
-class_name GOPort extends Resource
+class_name GNPort extends Resource
 
 var port_name: String
-var family: GONode.GOFamily    # Type of data this port accepts/produces
+var family: GNNode.GNFamily    # Type of data this port accepts/produces
 var index: int                 # Port index on the node
 var is_input: bool
 var multi_input: bool = false  # Some ops accept multiple inputs (e.g., Composite)
@@ -217,40 +217,40 @@ var multi_input: bool = false  # Some ops accept multiple inputs (e.g., Composit
 
 ## 8. Network & Cook Engine
 
-### GONetwork
+### GNNetwork
 ```gdscript
-class_name GONetwork extends Resource
+class_name GNNetwork extends Resource
 
-var nodes: Dictionary = {}            # id -> GONode
-var connections: Array[GOConnection] = []
+var nodes: Dictionary = {}            # id -> GNNode
+var connections: Array[GNConnection] = []
 
-func add_node(node: GONode) -> void
+func add_node(node: GNNode) -> void
 func remove_node(id: String) -> void
 func connect_nodes(from_id: String, from_port: int,
                    to_id: String, to_port: int) -> bool
 func disconnect_nodes(from_id: String, from_port: int,
                       to_id: String, to_port: int) -> void
-func get_topological_order() -> Array[GONode]
-func get_upstream_nodes(id: String) -> Array[GONode]
-func get_downstream_nodes(id: String) -> Array[GONode]
+func get_topological_order() -> Array[GNNode]
+func get_upstream_nodes(id: String) -> Array[GNNode]
+func get_downstream_nodes(id: String) -> Array[GNNode]
 func has_cycle() -> bool
 ```
 
-### GOConnection
+### GNConnection
 ```gdscript
-class_name GOConnection extends Resource
+class_name GNConnection extends Resource
 
-var from_node: String    # GONode id
+var from_node: String    # GNNode id
 var from_port: int       # Output port index
-var to_node: String      # GONode id
+var to_node: String      # GNNode id
 var to_port: int         # Input port index
 ```
 
-### GOCookEngine
+### GNCookEngine
 ```gdscript
-class_name GOCookEngine extends Node
+class_name GNCookEngine extends Node
 
-var network: GONetwork
+var network: GNNetwork
 var frame_count: int = 0
 
 func _process(delta: float) -> void:
@@ -265,13 +265,13 @@ func cook_frame(delta: float) -> void:
     # 6. Clear dirty flags
     # 7. Increment frame_count
 
-func cook_node(node: GONode) -> GOData:
+func cook_node(node: GNNode) -> GNData:
     # Resolve inputs from upstream cached outputs
     # Call node._cook(inputs)
     # Cache result
     # Record cook time for profiling
 
-func propagate_dirty(node: GONode) -> void:
+func propagate_dirty(node: GNNode) -> void:
     # Walk downstream connections, mark all as dirty
 ```
 
@@ -359,7 +359,7 @@ func propagate_dirty(node: GONode) -> void:
 This is not a traditional operator — it's a mechanism for CHOP channels to drive TOP parameters.
 
 **Implementation approach for MVP:**
-Parameter expressions on any GONode can reference CHOP outputs:
+Parameter expressions on any GNNode can reference CHOP outputs:
 ```
 # On NoiseTOP.scale parameter expression:
 chop("lfo1").value("out")   # Gets last sample of channel "out" from node "lfo1"
@@ -392,21 +392,21 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 └──────────────────────────────────────────────────┘
 ```
 
-### GOGraphEditor (extends GraphEdit)
-- Renders GONetwork as GraphNode instances
+### GNGraphEditor (extends GraphEdit)
+- Renders GNNetwork as GraphNode instances
 - Handles drag-and-drop from palette, wiring, deletion
 - Color-codes connections by family
 - Right-click context menu to add nodes
-- Emits signals when user modifies graph → updates GONetwork model
+- Emits signals when user modifies graph → updates GNNetwork model
 
-### GONodeView (extends GraphNode)
-- Visual representation of a GONode
+### GNNodeView (extends GraphNode)
+- Visual representation of a GNNode
 - Shows typed input/output ports with family colors
 - Shows node name and type icon
 - Shows mini preview (thumbnail) for TOP outputs
 - Highlights when cooking, shows cook time
 
-### GOInspector (extends VBoxContainer)
+### GNInspector (extends VBoxContainer)
 - Shows parameters for the currently selected node
 - Renders appropriate controls per parameter type:
   - float → HSlider + SpinBox
@@ -418,7 +418,7 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
   - String → LineEdit
 - Expression toggle: switch from value to expression mode
 
-### GOViewer (extends SubViewportContainer)
+### GNViewer (extends SubViewportContainer)
 - Full-size preview of a selected TOP's output
 - Can be popped out into a separate window
 - Shows resolution, cook time, FPS overlay
@@ -436,16 +436,16 @@ GONODES/
 │       ├── plugin.cfg
 │       ├── gonodes_plugin.gd       # EditorPlugin entry (for editor mode)
 │       ├── core/
-│       │   ├── go_data.gd          # GOData base class
-│       │   ├── go_texture_data.gd  # GOTextureData
-│       │   ├── go_channel_data.gd  # GOChannelData
-│       │   ├── go_node.gd          # GONode base operator class
-│       │   ├── go_port.gd          # GOPort definition
-│       │   ├── go_connection.gd    # GOConnection
-│       │   ├── go_network.gd       # GONetwork (graph model)
-│       │   ├── go_cook_engine.gd   # GOCookEngine
-│       │   ├── go_parameter.gd     # GOParameter (typed param with expressions)
-│       │   └── go_family.gd        # GOFamily enum constants
+│       │   ├── gn_data.gd          # GNData base class
+│       │   ├── gn_texture_data.gd  # GNTextureData
+│       │   ├── gn_channel_data.gd  # GNChannelData
+│       │   ├── gn_node.gd          # GNNode base operator class
+│       │   ├── gn_port.gd          # GNPort definition
+│       │   ├── gn_connection.gd    # GNConnection
+│       │   ├── gn_network.gd       # GNNetwork (graph model)
+│       │   ├── gn_cook_engine.gd   # GNCookEngine
+│       │   ├── gn_parameter.gd     # GNParameter (typed param with expressions)
+│       │   └── gn_family.gd        # GNFamily enum constants
 │       ├── operators/
 │       │   ├── top/
 │       │   │   ├── noise_top.gd
@@ -458,17 +458,17 @@ GONODES/
 │       │   └── bridge/
 │       │       └── chop_to_top.gd  # (or parameter expression system)
 │       ├── ui/
-│       │   ├── go_graph_editor.gd
-│       │   ├── go_graph_editor.tscn
-│       │   ├── go_node_view.gd
-│       │   ├── go_node_view.tscn
-│       │   ├── go_inspector.gd
-│       │   ├── go_inspector.tscn
-│       │   ├── go_viewer.gd
-│       │   ├── go_viewer.tscn
-│       │   ├── go_node_palette.gd
-│       │   ├── go_node_palette.tscn
-│       │   └── go_main_editor.tscn # Main layout scene
+│       │   ├── gn_graph_editor.gd
+│       │   ├── gn_graph_editor.tscn
+│       │   ├── gn_node_view.gd
+│       │   ├── gn_node_view.tscn
+│       │   ├── gn_inspector.gd
+│       │   ├── gn_inspector.tscn
+│       │   ├── gn_viewer.gd
+│       │   ├── gn_viewer.tscn
+│       │   ├── gn_node_palette.gd
+│       │   ├── gn_node_palette.tscn
+│       │   └── gn_main_editor.tscn # Main layout scene
 │       ├── shaders/
 │       │   ├── noise_simplex.gdshader
 │       │   ├── noise_perlin.gdshader
@@ -494,12 +494,12 @@ GONODES/
 
 ### Phase 1: Core Framework (Week 1)
 - [ ] Set up Godot 4.6 project structure
-- [ ] Implement GOData, GOTextureData, GOChannelData
-- [ ] Implement GOPort, GOConnection
-- [ ] Implement GOParameter (value + expression support)
-- [ ] Implement GONode base class with cook lifecycle
-- [ ] Implement GONetwork (graph model, topological sort, cycle detection)
-- [ ] Implement GOCookEngine (dirty propagation, frame cook loop)
+- [ ] Implement GNData, GNTextureData, GNChannelData
+- [ ] Implement GNPort, GNConnection
+- [ ] Implement GNParameter (value + expression support)
+- [ ] Implement GNNode base class with cook lifecycle
+- [ ] Implement GNNetwork (graph model, topological sort, cycle detection)
+- [ ] Implement GNCookEngine (dirty propagation, frame cook loop)
 - [ ] Write unit tests for graph operations and cook order
 
 ### Phase 2: First Operators (Week 2)
@@ -511,19 +511,19 @@ GONODES/
 - [ ] Implement LevelTOP
 
 ### Phase 3: Node Graph UI (Week 3)
-- [ ] Implement GOGraphEditor (GraphEdit wrapper)
-- [ ] Implement GONodeView (GraphNode per operator)
+- [ ] Implement GNGraphEditor (GraphEdit wrapper)
+- [ ] Implement GNNodeView (GraphNode per operator)
 - [ ] Port rendering with family colors
 - [ ] Wire connection UI with type checking
 - [ ] Add/remove nodes via UI
 - [ ] Connect/disconnect wires via UI
-- [ ] Sync UI ↔ GONetwork model bidirectionally
+- [ ] Sync UI ↔ GNNetwork model bidirectionally
 
 ### Phase 4: Parameters & Inspector (Week 4)
-- [ ] Implement GOInspector panel
+- [ ] Implement GNInspector panel
 - [ ] Render parameter controls by type (slider, color picker, enum, etc.)
 - [ ] Parameter change → mark node dirty → recook
-- [ ] GOViewer panel showing TOP output in real-time
+- [ ] GNViewer panel showing TOP output in real-time
 - [ ] Expression mode: CHOP channel references in parameter fields
 
 ### Phase 5: Polish & More Operators (Week 5)
@@ -547,7 +547,7 @@ GONODES/
 ## 13. Future Roadmap (Post-MVP)
 
 ### Near-term
-- [ ] JSON patch export/import (.gonode format)
+- [ ] JSON patch export/import (.GNNode format)
 - [ ] Patch export to standalone runnables (Godot export templates)
 - [ ] Renderer selection UI in editor (Forward+, Mobile, Compatibility)
 - [ ] SOP family (procedural geometry: Grid, Circle, Merge, Transform)
@@ -560,7 +560,7 @@ GONODES/
 - [ ] POP family (GPU point/particle operators — see Section 18)
 - [ ] LibGodot embedding proof-of-concept
   - Build a minimal host app that embeds LibGodot
-  - Load a .gonode patch via API
+  - Load a .GNNode patch via API
   - Feed data in, read textures out
 - [ ] Syphon (macOS) / Spout (Windows) texture sharing
 - [ ] OSC input/output operators
@@ -588,14 +588,14 @@ Each TOP node owns a `SubViewport` for rendering its output texture:
 - The viewport has a `ColorRect` (or `MeshInstance2D`) with a `ShaderMaterial`
 - Input textures are passed as shader uniforms
 - The viewport renders each frame (or only when dirty)
-- The output `ViewportTexture` becomes the node's `GOTextureData.texture`
+- The output `ViewportTexture` becomes the node's `GNTextureData.texture`
 - Resolution is configurable per node
 - Viewports are managed by the cook engine (created/destroyed with nodes)
 
 **Performance consideration:** Each SubViewport is a render pass. For large networks, we may need viewport pooling or deferred rendering optimizations. For MVP, one viewport per TOP is acceptable.
 
 ### CHOP Channel Model
-CHOPs produce `GOChannelData` which contains:
+CHOPs produce `GNChannelData` which contains:
 - Named channels (e.g., "tx", "ty", "tz" or "out", "chan1")
 - Each channel is a `PackedFloat32Array`
 - Single-value CHOPs (like LFO) have arrays of length 1
@@ -649,11 +649,11 @@ Godot 4.x offers three rendering backends. GONODES must support all three so exp
 Patches should be exportable as standalone applications on all Godot-supported platforms:
 
 **How it works:**
-1. The GONODES editor saves the network as a `.tres` resource (MVP) or `.gonode` JSON (future).
+1. The GONODES editor saves the network as a `.tres` resource (MVP) or `.GNNode` JSON (future).
 2. A "Export Patch" command generates a minimal Godot project:
    - `project.godot` configured for the selected renderer
    - The patch resource
-   - A thin `main.tscn` that loads the patch into a `GOCookEngine` + output `SubViewport`
+   - A thin `main.tscn` that loads the patch into a `GNCookEngine` + output `SubViewport`
    - Only the needed operator scripts/shaders (tree-shaken)
 3. Godot's standard export system packages it for the target platform.
 
@@ -676,7 +676,7 @@ Patches should be exportable as standalone applications on all Godot-supported p
 1. **Data flows left to right** — Inputs on left, outputs on right, consistent with TD.
 2. **Type safety at wire level** — Only compatible ports connect. Errors are prevented, not reported.
 3. **Lazy evaluation** — Nothing cooks unless it needs to. Dirty flags propagate downstream.
-4. **Separation of model and view** — GONetwork/GONode are pure data. UI reads/writes them but doesn't own them.
+4. **Separation of model and view** — GNNetwork/GNNode are pure data. UI reads/writes them but doesn't own them.
 5. **Operators are self-describing** — Each operator declares its ports, parameters, and family. The UI renders them generically. Adding a new operator = one new script file.
 6. **Robust error handling** — Cook errors don't crash the app. Failed nodes output null/default data and show error state in UI.
 7. **Performance visibility** — Cook times are always measurable. Users can see which nodes are expensive.
@@ -698,7 +698,7 @@ Patches should be exportable as standalone applications on all Godot-supported p
    - `HTTPRequest`, `TCPServer`, `UDPServer` for networking operators
    - `MIDIMessage` / `InputEventMIDI` for MIDI input
    - Signals for event-driven communication between components
-   - `ConfigFile` / `JSON` for settings and future .gonode format
+   - `ConfigFile` / `JSON` for settings and future .GNNode format
    - `ResourceLoader` / `ResourceSaver` for async resource management
    - `Thread` / `Mutex` / `Semaphore` for future multi-threaded cook engine
    
@@ -710,15 +710,15 @@ Patches should be exportable as standalone applications on all Godot-supported p
 
 | Element                | Convention                    | Example               |
 |------------------------|-------------------------------|-----------------------|
-| GDScript files         | `snake_case.gd`              | `go_node.gd`          |
-| Class names            | `PascalCase`                 | `GONode`, `GONetwork` |
+| GDScript files         | `snake_case.gd`              | `gn_node.gd`          |
+| Class names            | `PascalCase`                 | `GNNode`, `GNNetwork` |
 | Variables              | `snake_case`                 | `cook_time_ms`         |
-| Constants/Enums        | `UPPER_SNAKE_CASE`           | `GOFamily.TOP`        |
+| Constants/Enums        | `UPPER_SNAKE_CASE`           | `GNFamily.TOP`        |
 | Signals                | `snake_case` (past tense)    | `node_cooked`         |
 | Shader files           | `snake_case.gdshader`        | `noise_simplex.gdshader` |
-| Scene files            | `snake_case.tscn`            | `go_graph_editor.tscn` |
+| Scene files            | `snake_case.tscn`            | `gn_graph_editor.tscn` |
 | Operator scripts       | `type_family.gd`             | `noise_top.gd`        |
-| Resource prefix        | `GO` (all core classes)      | `GOData`, `GOPort`    |
+| Resource prefix        | `GN` (all core classes)      | `GNData`, `GNPort`    |
 
 ---
 
@@ -731,7 +731,7 @@ One of TouchDesigner's most powerful features is referencing parameters and data
 TouchDesigner has 4 parameter modes. GONODES implements all 4, but only **Constant** and **Expression** are in the MVP. **Bind** and **Export** are designed now for architecture compatibility and implemented post-MVP.
 
 ```
-GOParameter.Mode:
+GNParameter.Mode:
 ├── CONSTANT     ← MVP   — Direct literal value. No evaluation overhead.
 ├── EXPRESSION   ← MVP   — String evaluated each cook frame. Flexible, some overhead.
 ├── BIND         ← Later — Direct link to another parameter. Zero-overhead relay, no string parsing.
@@ -761,7 +761,7 @@ A direct pointer/link from one parameter to another parameter on a different nod
 ```
 **Implementation:**
 ```gdscript
-# GOParameter in BIND mode:
+# GNParameter in BIND mode:
 var bind_source_node: String    # e.g., "ctrl_panel"
 var bind_source_param: String   # e.g., "master_scale"
 var bind_transform: Callable    # Optional: transform function (e.g., * 2.0, clamp)
@@ -798,7 +798,7 @@ LFO_CHOP "lfo1"
 
 **Implementation:**
 ```gdscript
-class_name GOExportMapping extends Resource
+class_name GNExportMapping extends Resource
 
 var source_node: String          # CHOP node ID
 var source_channel: String       # Channel name (e.g., "out")
@@ -809,7 +809,7 @@ var offset: float = 0.0          # Add after scaling
 var clamp_min: float = -INF      # Optional clamp range
 var clamp_max: float = INF
 
-# Stored in GONetwork.export_mappings: Array[GOExportMapping]
+# Stored in GNNetwork.export_mappings: Array[GNExportMapping]
 ```
 
 **Cook engine behavior:**
@@ -861,7 +861,7 @@ Each family has its own reference proxy with family-specific accessors. **MVP im
 #### `op(name)` — Generic (all families)
 ```gdscript
 op("any_node").par.<param_name>   # Resolved parameter value (any family)
-op("any_node").family             # GOFamily enum
+op("any_node").family             # GNFamily enum
 op("any_node").cook_time          # Last cook duration in ms
 op("any_node").valid              # Whether node cooked successfully
 ```
@@ -923,7 +923,7 @@ mat("pbr1").par.roughness
 
 ### 17.4 Node Path Resolution (Hierarchical — Designed, Flat for MVP)
 
-**MVP:** `op("name")` resolves by flat string lookup within the current network (`GONetwork.nodes[name]`). Node names must be unique within a network.
+**MVP:** `op("name")` resolves by flat string lookup within the current network (`GNNetwork.nodes[name]`). Node names must be unique within a network.
 
 **Future (when COMPs are added):**
 Paths follow a filesystem-like hierarchy:
@@ -948,7 +948,7 @@ me.parent().par.scale      # Parameter of the parent COMP
 
 **Implementation design (future):**
 ```gdscript
-func resolve_node_path(from_node: GONode, path: String) -> GONode:
+func resolve_node_path(from_node: GNNode, path: String) -> GNNode:
     if path.begins_with("/"):
         # Absolute path: walk from root network
         return _resolve_absolute(path)
@@ -965,26 +965,26 @@ func resolve_node_path(from_node: GONode, path: String) -> GONode:
 ### 17.5 Expression Evaluation Engine
 
 ```gdscript
-class_name GOExpressionEngine
+class_name GNExpressionEngine
 
-var network: GONetwork
+var network: GNNetwork
 var expression_cache: Dictionary = {}  # "node_id:param_name" -> Expression
 var dependency_map: Dictionary = {}    # "node_id:param_name" -> Array[String] (referenced node IDs)
 
-func resolve_parameter(node: GONode, param_name: String) -> Variant:
-    var param: GOParameter = node.parameters[param_name]
+func resolve_parameter(node: GNNode, param_name: String) -> Variant:
+    var param: GNParameter = node.parameters[param_name]
     match param.mode:
-        GOParameter.Mode.CONSTANT:
+        GNParameter.Mode.CONSTANT:
             return param.value
-        GOParameter.Mode.EXPRESSION:
+        GNParameter.Mode.EXPRESSION:
             return _evaluate_expression(node, param_name, param)
-        GOParameter.Mode.BIND:
+        GNParameter.Mode.BIND:
             return _resolve_bind(node, param)
-        GOParameter.Mode.EXPORT:
+        GNParameter.Mode.EXPORT:
             return param.value  # Export sets value directly, just read it
     return param.value
 
-func _evaluate_expression(node: GONode, param_name: String, param: GOParameter) -> Variant:
+func _evaluate_expression(node: GNNode, param_name: String, param: GNParameter) -> Variant:
     var expr: Expression = _get_or_compile(node.id, param_name, param.expression)
     var result = expr.execute(_build_context(node), node)
     if expr.has_execute_failed():
@@ -993,11 +993,11 @@ func _evaluate_expression(node: GONode, param_name: String, param: GOParameter) 
     param.resolved_value = result    # Cache for UI tooltip display
     return result
 
-func _resolve_bind(node: GONode, param: GOParameter) -> Variant:
-    var source_node: GONode = network.nodes.get(param.bind_source_node, null)
+func _resolve_bind(node: GNNode, param: GNParameter) -> Variant:
+    var source_node: GNNode = network.nodes.get(param.bind_source_node, null)
     if not source_node:
         return param.fallback_value
-    var source_param: GOParameter = source_node.parameters.get(param.bind_source_param, null)
+    var source_param: GNParameter = source_node.parameters.get(param.bind_source_param, null)
     if not source_param:
         return param.fallback_value
     var value: Variant = resolve_parameter(source_node, param.bind_source_param)
@@ -1005,12 +1005,12 @@ func _resolve_bind(node: GONode, param: GOParameter) -> Variant:
         value = param.bind_transform.call(value)
     return value
 
-func _build_context(node: GONode) -> Array:
+func _build_context(node: GNNode) -> Array:
     # Build the bindings array for Expression.execute()
     # Returns: [op_func, chop_func, top_func, me_ref, time, frame, dt, ...]
     pass
 
-func get_expression_dependencies(node: GONode, param_name: String) -> Array[String]:
+func get_expression_dependencies(node: GNNode, param_name: String) -> Array[String]:
     # Parse expression string to find op("..."), chop("..."), top("...") references
     # Returns list of node IDs this expression depends on
     # Used by cook engine for implicit dirty propagation
@@ -1116,10 +1116,10 @@ POPs (Point Operators) are a **GPU-native geometry processing system**. Key char
 | **Rendering**      | Texture Map POP, Projection POP            | Apply textures to points |
 | **Analysis**       | Analyze POP, Neighbor POP, Histogram POP   | Analyze point clouds |
 
-### POP Data Model: GOPointData
+### POP Data Model: GNPointData
 
 ```gdscript
-class_name GOPointData extends GOData
+class_name GNPointData extends GNData
 
 # Core: all attribute data lives on GPU buffers
 var point_count: int
@@ -1204,7 +1204,7 @@ frame N+1: ParticlePOP reads NullPOP again (feedback)
 ```
 
 This is a **controlled cycle** in the DAG — the only allowed exception to the no-cycles rule. Implementation:
-- `GONetwork` allows one feedback edge per ParticlePOP, flagged as `is_feedback = true`
+- `GNNetwork` allows one feedback edge per ParticlePOP, flagged as `is_feedback = true`
 - The cook engine handles feedback connections specially: reads from previous frame's cache, not current frame
 - This gives one frame of latency, which is standard for particle systems
 
@@ -1222,7 +1222,7 @@ This is a **controlled cycle** in the DAG — the only allowed exception to the 
 ### Phase Planning for POPs
 
 **Phase A (foundation):** After SOP family is working
-- Implement `GOPointData` with GPU buffer management
+- Implement `GNPointData` with GPU buffer management
 - Implement basic generators: Grid POP, Sphere POP
 - Implement Transform POP (compute shader: modify P attribute)
 - Implement Render TOP integration (MultiMesh from POP points)
@@ -1270,7 +1270,7 @@ Exported patches (standalone runnables) can target **all Godot-supported platfor
 Every operator declares which renderers it supports:
 
 ```gdscript
-# In GONode base class:
+# In GNNode base class:
 func get_supported_renderers() -> Array[String]:
     return ["forward_plus", "mobile", "gl_compatibility"]  # Default: all
 
@@ -1296,9 +1296,9 @@ The cook engine checks compatibility at cook time:
    - Compatibility check: warns about unsupported operators
 3. GONODES generates a minimal Godot project:
    - project.godot (configured for target renderer)
-   - The patch resource (.tres or .gonode)
+   - The patch resource (.tres or .GNNode)
    - A runtime main.tscn:
-     - GOCookEngine (loads patch, runs cook loop)
+     - GNCookEngine (loads patch, runs cook loop)
      - Output viewport (fullscreen or configurable)
      - Optional: OSC/MIDI input listeners
      - Optional: Syphon/Spout/NDI output
@@ -1326,7 +1326,7 @@ The editor allows switching renderers at runtime for preview purposes:
 1. **GraphEdit vs custom canvas:** Godot's `GraphEdit` has limitations (styling, custom port shapes, minimap). May need custom drawing. Evaluate during Phase 3.
 2. **Expression sandboxing:** GDScript `Expression` class is limited. May need a custom expression parser for the `op()/chop()` syntax. Evaluate during Phase 4.
 3. **Viewport performance ceiling:** How many SubViewports can run simultaneously before frame drops? Profile during Phase 6.
-4. **Thread safety:** When moving cook engine to threads (future), GOData needs immutable snapshots or double-buffering. Design for this but don't implement in MVP.
+4. **Thread safety:** When moving cook engine to threads (future), GNData needs immutable snapshots or double-buffering. Design for this but don't implement in MVP.
 5. **LibGodot API surface:** What exactly does the LibGodot C API expose? Need to research when targeting host embedding post-MVP.
 6. **Renderer live-switching:** Does Godot 4.6 support hot-swapping renderers without restart? If not, what's the best workaround for editor preview?
 7. **Compute shader availability:** Verify that `RenderingDevice` compute dispatches work in Mobile renderer on all targets (some mobile GPUs have limitations).
