@@ -14,6 +14,9 @@ var _slot_map: Array[Dictionary] = []
 ## Emitted when the user commits a rename (old_id, new_id).
 signal rename_requested(old_id: String, new_id: String)
 
+## Emitted when the user clicks the help (?) button on a node.
+signal help_requested(node_id: String)
+
 ## The inline LineEdit used during rename (null when not renaming).
 var _rename_edit: LineEdit = null
 
@@ -88,6 +91,9 @@ func setup(node: GNNode) -> void:
 	# The node decides what to show via get_preview_texture() or
 	# create_preview_control() (custom rendering).
 	_setup_preview()
+
+	# Add help (?) button to the title bar
+	_setup_help_button()
 
 	# Track position changes
 	position_offset_changed.connect(_on_position_changed)
@@ -231,6 +237,27 @@ func _setup_preview() -> void:
 		_preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(_preview)
+
+
+## Adds a small "?" button to the GraphNode title bar.
+## Uses GraphNode.get_titlebar_hbox() to inject into the built-in title HBox.
+func _setup_help_button() -> void:
+	var titlebar: HBoxContainer = get_titlebar_hbox()
+	if titlebar == null:
+		return
+
+	var btn := Button.new()
+	btn.text = "?"
+	btn.tooltip_text = "Show node help"
+	btn.custom_minimum_size = Vector2(24, 24)
+	btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	btn.add_theme_font_size_override("font_size", 12)
+	# Flat style so it doesn't clash with the title bar
+	btn.flat = true
+	btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	btn.add_theme_color_override("font_hover_color", Color.WHITE)
+	btn.pressed.connect(func(): help_requested.emit(gn_node.id))
+	titlebar.add_child(btn)
 
 
 ## Updates the preview from the GNNode's current state.
@@ -385,3 +412,5 @@ func apply_rename(old_id: String, new_id: String) -> void:
 	name = new_id
 	title = "%s  [%s]" % [new_id, GNFamily.get_family_name(gn_node.family)]
 	tooltip_text = "%s (%s)" % [gn_node.node_type, GNFamily.get_family_name(gn_node.family)]
+	# Force the GraphNode to recalculate its size to fit the new title
+	reset_size()

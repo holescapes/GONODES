@@ -81,6 +81,8 @@ var fallback_value: Variant = 0.0
 # ─── Expression Mode (MVP) ────────────────────────────────────────────────────
 
 ## The expression string (GDScript syntax), e.g.: chop("lfo1").value("out") * 10.0
+## For scalar types (FLOAT, INT, BOOL, STRING, ENUM, FILE) this is the single expression.
+## For multi-dimensional types, use `component_expressions` instead.
 @export var expression: String = ""
 
 ## Compiled Godot Expression object (cached, recompiled on expression text change).
@@ -91,6 +93,27 @@ var _expression_valid: bool = false
 
 ## Last expression error text (for UI display).
 var expression_error: String = ""
+
+# ─── Per-Component Expressions (for Vector2, Vector3, Vector4, Color) ─────────
+## Each component of a multi-dimensional parameter has its own mode (C/E) and
+## expression string, matching the TouchDesigner / Houdini workflow where
+## tx, ty, tz are independently controllable.
+
+## Per-component mode: CONSTANT or EXPRESSION. Array length matches component count
+## (2 for Vec2/Vec2i, 3 for Vec3, 4 for Vec4/Color). Empty for scalar types.
+var component_modes: Array = []  # Array[Mode]
+
+## Per-component expression strings. Same indexing as component_modes.
+@export var component_expressions: Array = []  # Array[String]
+
+## Per-component compiled Expression objects.
+var _compiled_component_expressions: Array = []  # Array[Expression]
+
+## Per-component validity flags.
+var _component_expression_valid: Array = []  # Array[bool]
+
+## Per-component error strings (for UI display).
+var component_expression_errors: Array = []  # Array[String]
 
 # ─── Bind Mode (Post-MVP) ─────────────────────────────────────────────────────
 
@@ -203,6 +226,7 @@ static func create_vector2(p_name: String, p_default: Vector2,
 	param.value = p_default
 	param.fallback_value = p_default
 	param.resolved_value = p_default
+	param._ensure_component_arrays()
 	return param
 
 
@@ -219,6 +243,7 @@ static func create_vector2i(p_name: String, p_default: Vector2i,
 	param.value = p_default
 	param.fallback_value = p_default
 	param.resolved_value = p_default
+	param._ensure_component_arrays()
 	return param
 
 
@@ -235,6 +260,7 @@ static func create_color(p_name: String, p_default: Color,
 	param.value = p_default
 	param.fallback_value = p_default
 	param.resolved_value = p_default
+	param._ensure_component_arrays()
 	return param
 
 
@@ -306,6 +332,13 @@ func reset() -> void:
 	bind_source_node = ""
 	bind_source_param = ""
 	bind_transform = Callable()
+	# Reset per-component expressions
+	for i in range(component_modes.size()):
+		component_modes[i] = Mode.CONSTANT
+		component_expressions[i] = ""
+		_compiled_component_expressions[i] = null
+		_component_expression_valid[i] = false
+		component_expression_errors[i] = ""
 	value_changed.emit(param_name, value)
 
 
@@ -389,6 +422,198 @@ func is_expression_valid() -> bool:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Per-Component Expression Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns the number of components for this parameter's type.
+## 0 for scalar types (FLOAT, INT, BOOL, STRING, ENUM, FILE).
+func get_component_count() -> int:
+	match value_type:
+		ValueType.VECTOR2, ValueType.VECTOR2I: return 2
+		ValueType.VECTOR3: return 3
+		ValueType.VECTOR4, ValueType.COLOR: return 4
+		_: return 0
+
+
+## Returns true if this parameter is a multi-dimensional type.
+func is_multi_component() -> bool:
+	return get_component_count() > 0
+
+
+## Component label names for UI display (e.g., ["X", "Y"] or ["R", "G", "B", "A"]).
+func get_component_labels() -> PackedStringArray:
+	match value_type:
+		ValueType.VECTOR2, ValueType.VECTOR2I: return PackedStringArray(["X", "Y"])
+		ValueType.VECTOR3: return PackedStringArray(["X", "Y", "Z"])
+		ValueType.VECTOR4: return PackedStringArray(["X", "Y", "Z", "W"])
+		ValueType.COLOR: return PackedStringArray(["R", "G", "B", "A"])
+		_: return PackedStringArray()
+
+
+## Ensures the component arrays are correctly sized.  Called during init or
+## whenever the parameter is restored from serialization.
+func _ensure_component_arrays() -> void:
+	var count := get_component_count()
+	if count == 0:
+		return
+	if component_modes.size() != count:
+		component_modes.resize(count)
+		component_expressions.resize(count)
+		_compiled_component_expressions.resize(count)
+		_component_expression_valid.resize(count)
+		component_expression_errors.resize(count)
+		for i in range(count):
+			if component_modes[i] == null:
+				component_modes[i] = Mode.CONSTANT
+			if component_expressions[i] == null:
+				component_expressions[i] = ""
+			if _compiled_component_expressions[i] == null:
+				_compiled_component_expressions[i] = null
+			if _component_expression_valid[i] == null:
+				_component_expression_valid[i] = false
+			if component_expression_errors[i] == null:
+				component_expression_errors[i] = ""
+
+
+## Sets a single component to EXPRESSION mode with the given expression text.
+func set_component_expression(component_idx: int, expr_text: String) -> void:
+	_ensure_component_arrays()
+	if component_idx < 0 or component_idx >= component_modes.size():
+		return
+	component_modes[component_idx] = Mode.EXPRESSION
+	component_expressions[component_idx] = expr_text
+	_compile_component_expression(component_idx)
+	# If ANY component is in expression mode, the overall param mode is EXPRESSION
+	mode = Mode.EXPRESSION
+	mode_changed.emit(param_name, mode)
+
+
+## Sets a single component back to CONSTANT mode.
+func set_component_constant(component_idx: int) -> void:
+	_ensure_component_arrays()
+	if component_idx < 0 or component_idx >= component_modes.size():
+		return
+	component_modes[component_idx] = Mode.CONSTANT
+	component_expressions[component_idx] = ""
+	_compiled_component_expressions[component_idx] = null
+	_component_expression_valid[component_idx] = false
+	component_expression_errors[component_idx] = ""
+	# Check if ALL components are back to constant
+	var all_constant := true
+	for m in component_modes:
+		if m != Mode.CONSTANT:
+			all_constant = false
+			break
+	if all_constant:
+		mode = Mode.CONSTANT
+	mode_changed.emit(param_name, mode)
+
+
+## Returns true if any component has an active expression.
+func has_any_component_expression() -> bool:
+	for m in component_modes:
+		if m == Mode.EXPRESSION:
+			return true
+	return false
+
+
+## Compiles a single component's expression string.
+func _compile_component_expression(idx: int) -> void:
+	var expr_text: String = component_expressions[idx]
+	if expr_text.is_empty():
+		_component_expression_valid[idx] = false
+		component_expression_errors[idx] = "Empty expression"
+		_compiled_component_expressions[idx] = null
+		return
+
+	var expr := Expression.new()
+	var input_names := PackedStringArray(["me", "time", "frame", "dt"])
+	var err := expr.parse(expr_text, input_names)
+	if err != OK:
+		_component_expression_valid[idx] = false
+		component_expression_errors[idx] = expr.get_error_text()
+		_compiled_component_expressions[idx] = null
+		var labels := get_component_labels()
+		var label_str: String = labels[idx] if idx < labels.size() else str(idx)
+		GNLogger.error("Parameter", "'%s'[%s] expression parse error — %s" % [
+			param_name, label_str, component_expression_errors[idx]])
+	else:
+		_component_expression_valid[idx] = true
+		component_expression_errors[idx] = ""
+		_compiled_component_expressions[idx] = expr
+
+
+## Returns the compiled Expression for a component, or null.
+func get_compiled_component_expression(idx: int) -> Expression:
+	_ensure_component_arrays()
+	if idx < 0 or idx >= _compiled_component_expressions.size():
+		return null
+	if _compiled_component_expressions[idx] == null and not component_expressions[idx].is_empty():
+		_compile_component_expression(idx)
+	return _compiled_component_expressions[idx] if _component_expression_valid[idx] else null
+
+
+## Returns the constant value of a single component (extracted from the stored value).
+func get_component_value(idx: int) -> float:
+	match value_type:
+		ValueType.VECTOR2:
+			var v: Vector2 = value if value is Vector2 else Vector2.ZERO
+			return v.x if idx == 0 else v.y
+		ValueType.VECTOR2I:
+			var v: Vector2i = value if value is Vector2i else Vector2i.ZERO
+			return float(v.x if idx == 0 else v.y)
+		ValueType.VECTOR3:
+			var v: Vector3 = value if value is Vector3 else Vector3.ZERO
+			return [v.x, v.y, v.z][idx] if idx < 3 else 0.0
+		ValueType.VECTOR4:
+			var v: Vector4 = value if value is Vector4 else Vector4.ZERO
+			return [v.x, v.y, v.z, v.w][idx] if idx < 4 else 0.0
+		ValueType.COLOR:
+			var c: Color = value if value is Color else Color.BLACK
+			return [c.r, c.g, c.b, c.a][idx] if idx < 4 else 0.0
+		_:
+			return 0.0
+
+
+## Sets a single component's constant value (updates the stored vector/color).
+func set_component_value(idx: int, val: float) -> void:
+	match value_type:
+		ValueType.VECTOR2:
+			var v: Vector2 = value if value is Vector2 else Vector2.ZERO
+			if idx == 0: v.x = val
+			else: v.y = val
+			set_value(v)
+		ValueType.VECTOR2I:
+			var v: Vector2i = value if value is Vector2i else Vector2i.ZERO
+			if idx == 0: v.x = int(val)
+			else: v.y = int(val)
+			set_value(v)
+		ValueType.VECTOR3:
+			var v: Vector3 = value if value is Vector3 else Vector3.ZERO
+			match idx:
+				0: v.x = val
+				1: v.y = val
+				2: v.z = val
+			set_value(v)
+		ValueType.VECTOR4:
+			var v: Vector4 = value if value is Vector4 else Vector4.ZERO
+			match idx:
+				0: v.x = val
+				1: v.y = val
+				2: v.z = val
+				3: v.w = val
+			set_value(v)
+		ValueType.COLOR:
+			var c: Color = value if value is Color else Color.BLACK
+			match idx:
+				0: c.r = val
+				1: c.g = val
+				2: c.b = val
+				3: c.a = val
+			set_value(c)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Internal Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -465,6 +690,16 @@ func to_dict() -> Dictionary:
 	if mode == Mode.EXPRESSION and not expression.is_empty():
 		d["expression"] = expression
 
+	# Save per-component expressions for multi-dimensional types
+	if is_multi_component() and has_any_component_expression():
+		var comp_data: Array = []
+		for i in range(component_modes.size()):
+			comp_data.append({
+				"mode": Mode.keys()[component_modes[i]],
+				"expression": component_expressions[i],
+			})
+		d["component_expressions"] = comp_data
+
 	# Save bind info if in bind mode
 	if mode == Mode.BIND:
 		if not bind_source_node.is_empty():
@@ -501,6 +736,18 @@ func from_dict(d: Dictionary) -> void:
 	if d.has("expression"):
 		expression = d["expression"]
 		_compile_expression()
+
+	# Restore per-component expressions
+	if d.has("component_expressions"):
+		_ensure_component_arrays()
+		var comp_data: Array = d["component_expressions"]
+		for i in range(mini(comp_data.size(), component_modes.size())):
+			var cd: Dictionary = comp_data[i]
+			var cm_str: String = cd.get("mode", "CONSTANT")
+			component_modes[i] = Mode.EXPRESSION if cm_str == "EXPRESSION" else Mode.CONSTANT
+			component_expressions[i] = cd.get("expression", "")
+			if component_modes[i] == Mode.EXPRESSION and not component_expressions[i].is_empty():
+				_compile_component_expression(i)
 
 	# Restore bind info
 	if d.has("bind_source_node"):

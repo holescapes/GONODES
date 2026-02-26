@@ -111,6 +111,100 @@ GridSOP → TransformSOP → GeometryCOMP (MeshInstance3D) ─┐
 
 SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and SurfaceTool for procedural generation. NoiseSOP uses FastNoiseLite for vertex displacement. MAT operators wrap Godot's Material system (StandardMaterial3D, ShaderMaterial) for per-object material assignment. GeometryCOMP accepts SOP, MAT, and TOP inputs. MergeCOMP groups multiple COMPs for scene composition. Shadow controls span all three levels: per-light (LightCOMP), per-object (GeometryCOMP), and global quality (RenderTOP).
 
+---
+
+## Node Help System
+
+Every node has a **?** button in its title bar and a **Node Help** entry in the right-click context menu. Clicking either opens a floating help window with documentation for that operator.
+
+### How Help Content Is Generated
+
+Help content comes from two sources, checked in order:
+
+1. **Custom `.md` file** — If a file exists at `addons/gonodes/help/<family>/<node_type>.md`, its contents are displayed first, followed by the auto-generated reference tables.
+2. **Auto-generated from metadata** — When no custom file exists (the default), the help window builds everything automatically from the operator's code:
+   - **Header** — Node name with family-colored badge
+   - **Description** — From `node_description` (set in `_init()`)
+   - **Inputs table** — Port name, family, description, multi-input flag
+   - **Outputs table** — Port name, family, description
+   - **Parameters table** — Name, type, default value, range, description
+   - **Properties** — Time-dependent flag, family, node type
+
+### Writing Good Operator Descriptions
+
+The help system pulls directly from operator metadata. To produce useful auto-generated docs, **every operator should have**:
+
+| Metadata | Where to set it | Example |
+|----------|----------------|---------|
+| `node_description` | `_init()` | `node_description = "Plays a video file (.ogv) as a texture stream."` |
+| Port descriptions | `add_input()` / `add_output()` | `add_output("out", GNFamily.Type.TOP, "Video frame texture")` |
+| Parameter descriptions | `GNParameter.create_*()` last arg | `GNParameter.create_float("speed", 1.0, 0.0, 4.0, 0.05, "", "Playback speed multiplier")` |
+
+If a description is missing the help window shows "—" in its place. The more you fill in, the better the auto-generated docs become — **no separate documentation files needed**.
+
+### Custom Help Files (`.md`)
+
+For operators that need richer docs (usage tips, gotchas, visual diagrams, links), create a Markdown file:
+
+```
+addons/gonodes/help/<family>/<node_type>.md
+```
+
+Examples:
+- `addons/gonodes/help/top/noise_top.md`
+- `addons/gonodes/help/chop/lfo_chop.md`
+- `addons/gonodes/help/dat/osc_in_dat.md`
+
+The custom content appears above the auto-generated reference tables, so you don't need to repeat port/parameter info.
+
+### Example Patches
+
+Example patches are `.gnpatch` files that demonstrate how a node is used in practice. When examples exist for a node, the help window shows **"Open Example Patch"** buttons at the bottom. Clicking one opens the patch in a new floating editor window — your current work stays untouched.
+
+#### Where to put them
+
+```
+addons/gonodes/help/<family>/<node_type>_<label>.gnpatch
+```
+
+#### Naming convention
+
+The filename **must start with the `node_type`** followed by `_` and a descriptive label:
+
+| Filename | Operator | Label shown in help |
+|----------|----------|---------------------|
+| `noise_top_example.gnpatch` | NoiseTOP | "Noise Top Example" |
+| `noise_top_feedback.gnpatch` | NoiseTOP | "Noise Top Feedback" |
+| `lfo_chop_basics.gnpatch` | LfoChop | "Lfo Chop Basics" |
+| `composite_top_layers.gnpatch` | CompositeTOP | "Composite Top Layers" |
+
+A single `.gnpatch` named exactly `<node_type>.gnpatch` (e.g. `noise_top.gnpatch`) also works.
+
+Multiple examples per node are fully supported — each gets its own button.
+
+#### How discovery works
+
+When a help window opens, it scans `addons/gonodes/help/<family>/` for **all** `.gnpatch` files whose filename starts with the node's `node_type` prefix. No manifest file, no registration step — just drop a `.gnpatch` into the right folder and it's automatically discovered.
+
+#### Folder structure
+
+```
+addons/gonodes/help/
+├── top/
+│   ├── noise_top.md                    # Custom help (optional)
+│   ├── noise_top_example.gnpatch       # Example patch
+│   ├── noise_top_feedback.gnpatch      # Another example
+│   ├── composite_top_layers.gnpatch
+│   └── ...
+├── chop/
+│   ├── lfo_chop_basics.gnpatch
+│   └── ...
+├── dat/
+├── sop/
+├── comp/
+└── mat/
+```
+
 ### Next Up (Phase 7: Creative Tools, Performance & Workflow)
 
 **Script Operators:**
@@ -135,6 +229,7 @@ SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and S
 - [ ] Resolution downscaling for preview thumbnails
 
 **Workflow:**
+- [x] Node help system (? button + context menu, auto-generated docs, example patches)
 - [ ] Keyboard shortcut reference card (? key help overlay)
 - [ ] Node alignment tools (align H/V, distribute evenly)
 - [ ] Fit-to-view (F key)
@@ -265,7 +360,15 @@ GONODES/
 │   │   ├── gn_node_view.gd         # GraphNode per operator (family colors)
 │   │   ├── gn_node_palette.gd      # Popup node picker (Tab/right-click)
 │   │   ├── gn_param_inspector.gd   # Parameter inspector panel
-│   │   └── gn_param_row.gd         # Per-parameter widget (type-specific)
+│   │   ├── gn_param_row.gd         # Per-parameter widget (type-specific)
+│   │   └── gn_help_window.gd       # Floating help window (auto-docs + examples)
+│   ├── help/                        # Node documentation & example patches
+│   │   ├── top/                     # TOP help files & examples
+│   │   ├── chop/                    # CHOP help files & examples
+│   │   ├── dat/                     # DAT help files & examples
+│   │   ├── sop/                     # SOP help files & examples
+│   │   ├── comp/                    # COMP help files & examples
+│   │   └── mat/                     # MAT help files & examples
 │   └── shaders/                     # 17 shaders: noise_simplex, composite, levels, blur, ramp, circle, rectangle, transform2d, hsv_adjust, edge, threshold, displace, flip, tile, cross, crop, lookup, feedback
 ├── scenes/
 │   ├── gn_editor.tscn               # Main editor scene (HSplit layout)

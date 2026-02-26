@@ -574,6 +574,7 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
   - bool → CheckBox
   - String → LineEdit
 - Expression toggle: switch from value to expression mode
+- **Per-component expressions** (TD-style): multi-dimensional types (Vector2, Vector2i, Vector3, Vector4, Color) have independent C/E toggles per component (X/Y/Z/W or R/G/B/A). Each component can independently be a constant or an expression. Managed by `GNParameter.component_modes[]`, `component_expressions[]`, serialized in `to_dict()`/`from_dict()`, evaluated per-component in `GNCookEngine._evaluate_component_expressions()`.
 
 ### GNViewer (TextureRect in ViewerPanel)
 - Aspect-correct preview of a selected TOP's output
@@ -746,6 +747,7 @@ GONODES/
 - [x] Parameter change → mark node dirty → recook
 - [x] GNViewer panel showing TOP output in real-time (VSplit: viewer top, inspector bottom)
 - [x] Expression mode: CHOP channel references in parameter fields
+- [x] Per-component expressions for multi-dimensional params (Vector2, Vector3, Vector4, Color — TD-style independent C/E per component)
 - [x] Live cook time display per node in inspector header
 - [x] NoiseTOP noise_type enum wired to shader (4 algorithms: Simplex/Perlin/Voronoi/White)
 - [x] WindowTOP `_window_params_dirty` flag — only reconfigures on own param changes, not upstream cook-dirty
@@ -974,6 +976,14 @@ GONODES/
   - Node bypass/disable toggle (B key — node passes input through unchanged).
   - Node lock toggle (L key — prevents accidental parameter changes).
   - Wire style options (curved/straight/right-angle).
+- [ ] **Expression & scripting system refinement**:
+  - Autocomplete / intellisense for expression fields (node IDs, channel names, param names).
+  - Expression syntax highlighting in LineEdit (colored keywords, function names, errors).
+  - Custom user-defined expression functions (register GDScript callables as expression helpers).
+  - Multi-line expression editor popup for complex expressions (modal dialog with larger text area).
+  - Expression presets / snippets (save/load common patterns like oscillators, remaps).
+  - Expression profiling (per-expression eval time shown in tooltip or perf overlay).
+  - Reference: `help/expressions_guide.md` for current expression system docs.
 - [ ] **Renderer selection UI**:
   - Dropdown in toolbar: Forward+, Mobile, Compatibility.
   - Applies to RenderTOP SubViewport and WindowTOP output.
@@ -996,24 +1006,31 @@ GONODES/
     - An in-app "Extensions" settings panel listing installed / available extensions with enable/disable toggles.
     - Version compatibility checks (engine version, GONODES version) in the manifest.
     - Hot-reload of extensions without restarting the editor.
-- [ ] **Node help system**:
-  - `?` button in node context menu (or node header) opens a help Window.
+- [x] **Node help system**:
+  - `?` button in node header **and** right-click context menu opens a help Window.
   - Help window: `Window` + `RichTextLabel` rendering per-node documentation.
-  - Documentation stored as `.md` files in `res://addons/gonodes/help/<family>/`.
+  - Custom `.md` docs stored in `res://addons/gonodes/help/<family>/<node_type>.md`.
   - File naming convention: `<node_type>.md` (e.g. `noise_top.md`, `lfo_chop.md`).
-  - Auto-generation: bootstrap help files from existing `node_description`, port
-    descriptions, and parameter descriptions already defined in each operator.
-  - Template: heading, description, inputs table, outputs table, parameters table,
-    usage notes, example patch links.
-  - Example patches stored as `.gnpatch` files alongside help (e.g. `noise_top_example.gnpatch`).
-  - "Open Example" button at bottom of help page loads the example patch into the
-    editor (with confirmation if current patch has unsaved changes).
+  - Auto-generation: builds docs from existing `node_description`, port descriptions,
+    and parameter descriptions already defined in each operator — zero manual authoring.
+  - Template: family-colored header, description, inputs table, outputs table,
+    parameters table (with type/default/range), properties section.
+  - **Example patches**: `.gnpatch` files in `help/<family>/` whose filename starts
+    with `<node_type>_` are auto-discovered via directory scan (e.g., `noise_top_example.gnpatch`,
+    `noise_top_feedback.gnpatch`). Multiple examples per node supported — each gets its own button.
+  - Discovery is lazy (scans when help is opened), no manifest or startup registration needed.
+  - "Open Example Patch" buttons at bottom of help page open the patch in a new
+    floating editor window (current work stays untouched).
+  - Implementation: `GNHelpWindow` class (`addons/gonodes/ui/gn_help_window.gd`),
+    `?` button via `_setup_help_button()` in `GNNodeView`, `NODE_HELP` context
+    menu item in `GNGraphEditor`, wired through `gn_editor.gd`.
   - Folder structure:
     ```
     addons/gonodes/help/
     ├── top/
-    │   ├── noise_top.md
-    │   ├── noise_top_example.gnpatch
+    │   ├── noise_top.md                  # Custom help (optional)
+    │   ├── noise_top_example.gnpatch     # Example patch
+    │   ├── noise_top_feedback.gnpatch    # Another example
     │   ├── blur_top.md
     │   └── ...
     ├── chop/

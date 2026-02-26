@@ -28,6 +28,19 @@ var _value_container: HBoxContainer = null
 ## Track whether we're programmatically updating (avoid feedback loops).
 var _updating: bool = false
 
+# ─── Per-Component Expression UI (for Vector2, Vector3, Vector4, Color) ───────
+## Per-component C/E toggle buttons.  indexed same as GNParameter.component_modes.
+var _comp_mode_btns: Array[Button] = []
+
+## Per-component spinboxes (constant mode widgets).
+var _comp_spins: Array[SpinBox] = []
+
+## Per-component expression LineEdits (expression mode widgets).
+var _comp_expr_edits: Array[LineEdit] = []
+
+## Whether this row uses per-component expression UI.
+var _is_multi_component: bool = false
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Construction
@@ -37,16 +50,18 @@ var _updating: bool = false
 func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 	param = p_param
 	owner_node = p_owner
+	_is_multi_component = param.is_multi_component()
 
 	size_flags_horizontal = SIZE_EXPAND_FILL
 	add_theme_constant_override("separation", 4)
 
-	# Mode toggle button (C = constant, E = expression)
-	_mode_btn = Button.new()
-	_mode_btn.custom_minimum_size = Vector2(24, 24)
-	_mode_btn.tooltip_text = "Click to toggle CONSTANT / EXPRESSION mode"
-	_mode_btn.pressed.connect(_on_mode_toggle)
-	add_child(_mode_btn)
+	if not _is_multi_component:
+		# ── Scalar parameter: single C/E button, value control, expression edit ──
+		_mode_btn = Button.new()
+		_mode_btn.custom_minimum_size = Vector2(24, 24)
+		_mode_btn.tooltip_text = "Click to toggle CONSTANT / EXPRESSION mode"
+		_mode_btn.pressed.connect(_on_mode_toggle)
+		add_child(_mode_btn)
 
 	# Parameter name label
 	_name_label = Label.new()
@@ -66,21 +81,25 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 	_value_container.add_theme_constant_override("separation", 2)
 	add_child(_value_container)
 
-	# Build the appropriate value control
-	_control = _create_value_control()
-	if _control:
-		_value_container.add_child(_control)
+	if _is_multi_component:
+		# ── Multi-component: per-component rows with individual C/E toggles ──
+		_build_multi_component_ui()
+	else:
+		# Build the appropriate value control
+		_control = _create_value_control()
+		if _control:
+			_value_container.add_child(_control)
 
-	# Build expression editor (hidden by default)
-	_expr_edit = LineEdit.new()
-	_expr_edit.placeholder_text = "expression…"
-	_expr_edit.size_flags_horizontal = SIZE_EXPAND_FILL
-	_expr_edit.add_theme_font_size_override("font_size", 11)
-	_expr_edit.text = param.expression
-	_expr_edit.text_submitted.connect(_on_expression_submitted)
-	_expr_edit.focus_exited.connect(_on_expression_focus_lost)
-	_expr_edit.visible = false
-	_value_container.add_child(_expr_edit)
+		# Build expression editor (hidden by default)
+		_expr_edit = LineEdit.new()
+		_expr_edit.placeholder_text = "expression…"
+		_expr_edit.size_flags_horizontal = SIZE_EXPAND_FILL
+		_expr_edit.add_theme_font_size_override("font_size", 11)
+		_expr_edit.text = param.expression
+		_expr_edit.text_submitted.connect(_on_expression_submitted)
+		_expr_edit.focus_exited.connect(_on_expression_focus_lost)
+		_expr_edit.visible = false
+		_value_container.add_child(_expr_edit)
 
 	# Wire parameter signals for external updates
 	param.value_changed.connect(_on_param_value_changed)
@@ -89,6 +108,88 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 	# Set initial state
 	_update_mode_display()
 	_update_value_display()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Multi-Component UI Builder (TD/Houdini-style per-channel expressions)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Builds per-component rows inside _value_container.
+## Each component gets: [C/E button] [SpinBox] [LineEdit (hidden)]
+## For Color params, an additional ColorPickerButton is shown for visual editing.
+func _build_multi_component_ui() -> void:
+	param._ensure_component_arrays()
+	var count := param.get_component_count()
+	var labels := param.get_component_labels()
+	var is_color := param.value_type == GNParameter.ValueType.COLOR
+
+	# Use a VBoxContainer so components stack vertically
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 2)
+	_value_container.add_child(vbox)
+
+	# If it's a color, add a picker at the top for quick visual editing
+	if is_color:
+		_control = _create_color_control()
+		vbox.add_child(_control)
+
+	for i in range(count):
+		var row := HBoxContainer.new()
+		row.size_flags_horizontal = SIZE_EXPAND_FILL
+		row.add_theme_constant_override("separation", 2)
+
+		# Per-component C/E toggle
+		var mode_btn := Button.new()
+		mode_btn.custom_minimum_size = Vector2(22, 22)
+		mode_btn.add_theme_font_size_override("font_size", 10)
+		mode_btn.tooltip_text = "Toggle %s between CONSTANT / EXPRESSION" % labels[i]
+		var comp_idx := i  # capture for lambda
+		mode_btn.pressed.connect(func() -> void: _on_comp_mode_toggle(comp_idx))
+		row.add_child(mode_btn)
+		_comp_mode_btns.append(mode_btn)
+
+		# Component label
+		var comp_label := Label.new()
+		comp_label.text = labels[i]
+		comp_label.custom_minimum_size = Vector2(16, 0)
+		comp_label.add_theme_font_size_override("font_size", 11)
+		comp_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		row.add_child(comp_label)
+
+		# SpinBox (visible in constant mode)
+		var spin := SpinBox.new()
+		if is_color:
+			spin.min_value = 0.0
+			spin.max_value = 1.0
+			spin.step = 0.01
+		else:
+			spin.min_value = -9999
+			spin.max_value = 9999
+			spin.step = param.step
+		spin.value = param.get_component_value(i)
+		spin.size_flags_horizontal = SIZE_EXPAND_FILL
+		var spin_idx := i
+		spin.value_changed.connect(func(val: float) -> void: _on_comp_spin_changed(spin_idx, val))
+		row.add_child(spin)
+		_comp_spins.append(spin)
+
+		# Expression LineEdit (visible in expression mode)
+		var expr_edit := LineEdit.new()
+		expr_edit.placeholder_text = "%s expr…" % labels[i]
+		expr_edit.size_flags_horizontal = SIZE_EXPAND_FILL
+		expr_edit.add_theme_font_size_override("font_size", 11)
+		expr_edit.visible = false
+		var expr_idx := i
+		expr_edit.text_submitted.connect(func(text: String) -> void: _on_comp_expr_submitted(expr_idx, text))
+		expr_edit.focus_exited.connect(func() -> void: _on_comp_expr_focus_lost(expr_idx))
+		row.add_child(expr_edit)
+		_comp_expr_edits.append(expr_edit)
+
+		vbox.add_child(row)
+
+	# Restore any existing per-component expression state
+	_update_comp_mode_displays()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -473,6 +574,116 @@ func _apply_expression_text(text: String) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Per-Component Expression Handling (Vector2, Vector3, Vector4, Color)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Toggles a single component between CONSTANT and EXPRESSION mode.
+func _on_comp_mode_toggle(idx: int) -> void:
+	if param.component_modes[idx] == GNParameter.Mode.CONSTANT:
+		# Switch to expression mode
+		var expr_text: String = param.component_expressions[idx]
+		_comp_expr_edits[idx].text = expr_text
+		param.set_component_expression(idx, expr_text)
+	else:
+		# Switch back to constant
+		param.set_component_constant(idx)
+	_update_comp_mode_display(idx)
+
+
+## Called when a per-component spinbox changes.
+func _on_comp_spin_changed(idx: int, val: float) -> void:
+	if _updating:
+		return
+	param.set_component_value(idx, val)
+
+
+## Called when a per-component expression is submitted.
+func _on_comp_expr_submitted(idx: int, text: String) -> void:
+	_apply_comp_expression(idx, text)
+
+
+## Called when a per-component expression field loses focus.
+func _on_comp_expr_focus_lost(idx: int) -> void:
+	if idx < _comp_expr_edits.size() and _comp_expr_edits[idx].visible:
+		_apply_comp_expression(idx, _comp_expr_edits[idx].text)
+
+
+## Applies/compiles a per-component expression (or reverts to constant if empty).
+func _apply_comp_expression(idx: int, text: String) -> void:
+	if text.strip_edges().is_empty():
+		param.set_component_constant(idx)
+	else:
+		if text != param.component_expressions[idx]:
+			param.set_component_expression(idx, text)
+	_update_comp_mode_display(idx)
+
+
+## Updates the C/E button and spin/expr visibility for all components.
+func _update_comp_mode_displays() -> void:
+	for i in range(param.get_component_count()):
+		_update_comp_mode_display(i)
+
+
+## Updates the C/E button and spin/expr visibility for a single component.
+func _update_comp_mode_display(idx: int) -> void:
+	if idx >= _comp_mode_btns.size():
+		return
+	var btn := _comp_mode_btns[idx]
+	var spin := _comp_spins[idx]
+	var expr_edit := _comp_expr_edits[idx]
+	var comp_mode: int = param.component_modes[idx]
+
+	if comp_mode == GNParameter.Mode.EXPRESSION:
+		btn.text = "E"
+		btn.modulate = Color(0.8, 0.6, 0.2)  # Orange
+		spin.visible = false
+		expr_edit.visible = true
+		if not expr_edit.has_focus():
+			expr_edit.text = param.component_expressions[idx]
+		# Error state
+		if idx < param.component_expression_errors.size():
+			var err: String = param.component_expression_errors[idx]
+			if not err.is_empty():
+				expr_edit.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
+				expr_edit.tooltip_text = err
+			else:
+				expr_edit.remove_theme_color_override("font_color")
+				expr_edit.tooltip_text = ""
+	else:
+		btn.text = "C"
+		btn.modulate = Color(0.5, 0.8, 0.5)  # Green
+		spin.visible = true
+		expr_edit.visible = false
+
+
+## Updates per-component expression error indicators (called per-cook).
+func _update_comp_expression_status() -> void:
+	for i in range(mini(_comp_expr_edits.size(), param.component_expression_errors.size())):
+		var expr_edit := _comp_expr_edits[i]
+		if not expr_edit.visible:
+			continue
+		var err: String = param.component_expression_errors[i]
+		if not err.is_empty():
+			expr_edit.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
+			expr_edit.tooltip_text = err
+		else:
+			expr_edit.remove_theme_color_override("font_color")
+			expr_edit.tooltip_text = ""
+
+
+## Syncs per-component spinbox values from the parameter model.
+func _update_comp_value_display() -> void:
+	if _updating:
+		return
+	_updating = true
+	var count := mini(_comp_spins.size(), param.get_component_count())
+	for i in range(count):
+		if _comp_spins[i].visible:
+			_comp_spins[i].value = param.get_component_value(i)
+	_updating = false
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Mode Toggle
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -488,6 +699,11 @@ func _on_mode_toggle() -> void:
 
 
 func _update_mode_display() -> void:
+	if _is_multi_component:
+		_update_comp_mode_displays()
+		return
+	if _mode_btn == null:
+		return
 	match param.mode:
 		GNParameter.Mode.CONSTANT:
 			_mode_btn.text = "C"
@@ -521,7 +737,12 @@ func _update_mode_display() -> void:
 ## Updates only the expression error/tooltip indicator (called per-cook).
 ## Does NOT touch _expr_edit.text to avoid destroying user edits.
 func update_expression_status() -> void:
-	if param == null or _expr_edit == null:
+	if param == null:
+		return
+	if _is_multi_component:
+		_update_comp_expression_status()
+		return
+	if _expr_edit == null:
 		return
 	if not param.expression_error.is_empty():
 		_expr_edit.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
@@ -544,6 +765,9 @@ func _on_param_mode_changed(_p_name: String, _new_mode: GNParameter.Mode) -> voi
 
 ## Syncs the UI control to the parameter's current value.
 func _update_value_display() -> void:
+	if _is_multi_component:
+		_update_comp_value_display()
+		return
 	if _control == null or _updating:
 		return
 	_updating = true

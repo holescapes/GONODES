@@ -5,6 +5,8 @@ extends Control
 ## in the viewer panel. Includes a debug info label and log toggle.
 ## Supports save/load of patches as `.gnpatch` JSON files.
 
+const GNHelpWindowScene := preload("res://addons/gonodes/ui/gn_help_window.gd")
+
 @onready var graph_editor: GNGraphEditor = $HSplit/GraphPanel/GraphEditor
 @onready var viewer: TextureRect = $HSplit/RightPanel/ViewerPanel/Viewer
 @onready var inspector: GNParamInspector = $HSplit/RightPanel/InspectorPanel
@@ -32,6 +34,9 @@ var _load_dialog: FileDialog = null
 
 ## Floating viewer windows — each pinned to a specific node's output.
 var _viewer_windows: Array[GNViewerWindow] = []
+
+## Floating help windows.
+var _help_windows: Array = []
 
 ## Settings file path for persisting editor state (last opened patch, etc.).
 const _SETTINGS_PATH := "user://gonodes_settings.cfg"
@@ -63,6 +68,7 @@ func _ready() -> void:
 	graph_editor.operator_selected.connect(_on_graph_node_selected)
 	graph_editor.operator_deselected.connect(_on_graph_selection_cleared)
 	graph_editor.open_viewer_requested.connect(_on_open_viewer_requested)
+	graph_editor.help_requested.connect(_on_help_requested)
 
 	# Bind inspector to network
 	inspector.network = network
@@ -244,6 +250,76 @@ func _close_all_viewer_windows() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Help Windows
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Opens a help window for the given node.
+func _on_help_requested(node_id: String) -> void:
+	var node: GNNode = network.get_node_by_id(node_id)
+	if node == null:
+		push_warning("[GONODES] Help requested for unknown node '%s'" % node_id)
+		return
+
+	# If a help window for this node is already open, just focus it
+	for hw in _help_windows:
+		if is_instance_valid(hw) and hw.gn_node == node:
+			hw.grab_focus()
+			return
+
+	var hw := GNHelpWindowScene.new()
+	hw.show_help_for(node)
+	var offset := _help_windows.size() * 30
+	hw.position = Vector2i(300 + offset, 100 + offset)
+	hw.closed.connect(_on_help_window_closed)
+	hw.example_patch_requested.connect(_on_example_patch_requested)
+	add_child(hw)
+	hw.popup_centered()
+	_help_windows.append(hw)
+	GNLogger.info("Editor", "Opened help window for '%s'" % node_id)
+
+
+## Called when a help window is closed.
+func _on_help_window_closed(hw: Window) -> void:
+	_help_windows.erase(hw)
+
+
+## Handles "Open Example Patch" — loads the .gnpatch into a new floating editor.
+func _on_example_patch_requested(patch_path: String) -> void:
+	if not FileAccess.file_exists(patch_path):
+		push_error("[GONODES] Example patch not found: %s" % patch_path)
+		return
+
+	# Load the example into a new Window containing a fresh editor instance
+	var editor_scene := load("res://scenes/gn_editor.tscn")
+	if editor_scene == null:
+		push_error("[GONODES] Failed to load editor scene for example patch")
+		return
+
+	var win := Window.new()
+	win.title = "Example — %s" % patch_path.get_file().get_basename()
+	win.size = Vector2i(1280, 720)
+	win.min_size = Vector2i(800, 500)
+	win.wrap_controls = true
+
+	var editor_instance: Control = editor_scene.instantiate()
+	win.add_child(editor_instance)
+	add_child(win)
+	win.popup_centered()
+
+	# After the editor is ready, load the example patch into it
+	editor_instance.call_deferred("_load_from_path", patch_path)
+	GNLogger.info("Editor", "Opened example patch: %s" % patch_path)
+
+
+## Closes all floating help windows.
+func _close_all_help_windows() -> void:
+	for hw in _help_windows.duplicate():
+		if is_instance_valid(hw):
+			hw.queue_free()
+	_help_windows.clear()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Save / Load
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -365,6 +441,7 @@ func _on_new_pressed() -> void:
 	_viewer_node_id = ""
 	viewer.texture = null
 	_close_all_viewer_windows()
+	_close_all_help_windows()
 	inspector.clear_inspection()
 	graph_editor._unbind_network()
 
@@ -434,6 +511,7 @@ func _load_from_path(path: String) -> void:
 	_viewer_node_id = ""
 	viewer.texture = null
 	_close_all_viewer_windows()
+	_close_all_help_windows()
 	inspector.clear_inspection()
 	graph_editor._unbind_network()
 

@@ -1,0 +1,110 @@
+{
+	"connections": [],
+	"generator": "GONODES",
+	"nodes": {
+		"lfo1": {
+			"parameters": {
+				"amplitude": {
+					"value": 1.47
+				},
+				"duty_cycle": {
+					"value": 0.56
+				},
+				"frequency": {
+					"value": 1.471
+				},
+				"offset": {
+					"value": 9.48
+				},
+				"phase": {
+					"value": 0.853
+				},
+				"waveform": {
+					"value": 0
+				}
+			},
+			"position": [
+				60.0,
+				380.0
+			],
+			"type": "LFO_CHOP"
+		},
+		"lfo2": {
+			"parameters": {
+				"amplitude": {
+					"value": 0.66
+				},
+				"duty_cycle": {
+					"value": 0.5
+				},
+				"frequency": {
+					"value": 3.681
+				},
+				"offset": {
+					"value": 0.66
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"waveform": {
+					"value": 0
+				}
+			},
+			"position": [
+				60.0,
+				560.0
+			],
+			"type": "LFO_CHOP"
+		},
+		"noise1": {
+			"parameters": {
+				"monochrome": {
+					"value": true
+				},
+				"noise_type": {
+					"value": 0
+				},
+				"offset": {
+					"component_expressions": [
+						{
+							"expression": "chop(\"lfo1\", \"out\", 0) / 5",
+							"mode": "EXPRESSION"
+						},
+						{
+							"expression": "chop(\"lfo2\", \"out\", 0) / 5",
+							"mode": "EXPRESSION"
+						}
+					],
+					"mode": "EXPRESSION",
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 10.3
+				},
+				"seed": {
+					"value": 0
+				},
+				"time_offset": {
+					"value": 0.22
+				}
+			},
+			"position": [
+				500.0,
+				280.0
+			],
+			"type": "NoiseTOP"
+		}
+	},
+	"version": "1.0.0"
+}

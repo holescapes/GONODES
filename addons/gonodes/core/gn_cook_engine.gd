@@ -239,7 +239,10 @@ func _resolve_node_parameters(node: GNNode) -> void:
 				# Value already set — nothing to resolve
 				pass
 			GNParameter.Mode.EXPRESSION:
-				_evaluate_expression(node, param)
+				if param.is_multi_component() and param.has_any_component_expression():
+					_evaluate_component_expressions(node, param)
+				else:
+					_evaluate_expression(node, param)
 			GNParameter.Mode.BIND:
 				_resolve_bind(node, param)
 			GNParameter.Mode.EXPORT:
@@ -277,6 +280,56 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 	else:
 		param.resolved_value = result
 		param.fallback_value = result  # Update fallback for next failure
+
+
+## Evaluates per-component expressions for multi-dimensional parameters.
+## Each component is resolved independently: CONSTANT components keep their
+## stored value, EXPRESSION components are evaluated (must return float/int).
+## The final resolved_value is assembled from all components.
+func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
+	var count := param.get_component_count()
+	var components: Array[float] = []
+	components.resize(count)
+
+	var context := [
+		node,           # me
+		elapsed_time,   # time
+		frame_count,    # frame
+		current_delta,  # dt
+	]
+
+	for i in range(count):
+		if param.component_modes[i] == GNParameter.Mode.EXPRESSION:
+			var expr: Expression = param.get_compiled_component_expression(i)
+			if expr == null:
+				components[i] = param.get_component_value(i)
+				continue
+			var result = expr.execute(context, self)
+			if expr.has_execute_failed():
+				var labels := param.get_component_labels()
+				var label_str: String = labels[i] if i < labels.size() else str(i)
+				GNLogger.error("CookEngine", "Expression error on %s.%s[%s] — %s" % [
+					node.id, param.param_name, label_str, expr.get_error_text()])
+				components[i] = param.get_component_value(i)
+			else:
+				components[i] = float(result)
+		else:
+			# CONSTANT — use stored component value
+			components[i] = param.get_component_value(i)
+
+	# Assemble the final value from components
+	match param.value_type:
+		GNParameter.ValueType.VECTOR2:
+			param.resolved_value = Vector2(components[0], components[1])
+		GNParameter.ValueType.VECTOR2I:
+			param.resolved_value = Vector2i(int(components[0]), int(components[1]))
+		GNParameter.ValueType.VECTOR3:
+			param.resolved_value = Vector3(components[0], components[1], components[2])
+		GNParameter.ValueType.VECTOR4:
+			param.resolved_value = Vector4(components[0], components[1], components[2], components[3])
+		GNParameter.ValueType.COLOR:
+			param.resolved_value = Color(components[0], components[1], components[2], components[3])
+	param.fallback_value = param.resolved_value
 
 
 ## Resolves a bind-mode parameter by reading the source parameter's value.

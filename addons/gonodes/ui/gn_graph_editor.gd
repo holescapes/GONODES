@@ -42,6 +42,7 @@ enum _CtxID {
 	REDO,
 	OPEN_VIEWER,
 	TOGGLE_PREVIEW,
+	NODE_HELP,
 }
 
 ## Undo/redo history for graph operations.
@@ -58,6 +59,9 @@ signal operator_deselected()
 
 ## Signal emitted when "Open Viewer" is chosen from the context menu.
 signal open_viewer_requested(node_id: String)
+
+## Signal emitted when help is requested for a node (? button or context menu).
+signal help_requested(node_id: String)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -236,6 +240,7 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	var view := GNNodeView.new()
 	view.setup(node)
 	view.rename_requested.connect(_on_node_rename_requested)
+	view.help_requested.connect(func(nid: String) -> void: help_requested.emit(nid))
 	add_child(view)
 	_node_views[node.id] = view
 
@@ -651,7 +656,14 @@ func paste_clipboard() -> void:
 			GNLogger.warn("GraphEditor", "Paste: unknown type '%s', skipping" % op_type)
 			continue
 
-		var new_id := network.generate_unique_id(op_type)
+		# Use original node ID + "_copy" as the base for the new name.
+		# If that's taken, generate_unique_id will append a counter.
+		var copy_base: String = old_id + "_copy"
+		var new_id: String
+		if not network.nodes.has(copy_base):
+			new_id = copy_base
+		else:
+			new_id = network.generate_unique_id(copy_base)
 		node.initialize(new_id)
 		node.from_dict(nd)
 
@@ -794,6 +806,10 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item(preview_label, _CtxID.TOGGLE_PREVIEW)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.TOGGLE_PREVIEW), not has_selection)
 
+	_context_menu.add_separator()
+	_context_menu.add_item("Node Help", _CtxID.NODE_HELP)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.NODE_HELP), selected_ids.size() != 1)
+
 	_context_menu.position = Vector2i(screen_pos)
 	_context_menu.reset_size()
 	_context_menu.popup()
@@ -833,6 +849,10 @@ func _on_context_menu_id_pressed(id: int) -> void:
 				open_viewer_requested.emit(selected[0])
 		_CtxID.TOGGLE_PREVIEW:
 			_toggle_selected_previews()
+		_CtxID.NODE_HELP:
+			var selected := _get_selected_node_ids()
+			if selected.size() == 1:
+				help_requested.emit(selected[0])
 
 
 ## Helper: creates a Shortcut with a single InputEventKey for menu display.
