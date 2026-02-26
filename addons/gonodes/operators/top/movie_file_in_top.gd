@@ -7,10 +7,8 @@ extends GNTopBase
 ## The video plays inside a SubViewport; output is a live GPU texture.
 ## Supports play, pause, loop, speed, and seek controls.
 
-var _viewport: SubViewport = null
 var _video_player: VideoStreamPlayer = null
 var _bg: ColorRect = null
-var _cached_tex_data: GNTextureData = null
 var _loaded_file_path: String = ""
 var _stream: VideoStream = null
 var _awaiting_video_size: bool = false
@@ -43,7 +41,7 @@ func _init_parameters() -> void:
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
-	_ensure_viewport()
+	_setup_viewport()
 
 	var file_path: String = get_param_value("file")
 	var res: Vector2i = get_param_value("resolution")
@@ -92,22 +90,15 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	return _cached_tex_data
 
 
-func _ensure_viewport() -> void:
+func _setup_viewport() -> void:
 	if _viewport != null:
 		return
 
-	_viewport = SubViewport.new()
-	_viewport.name = "VP_%s" % id
-	_viewport.size = Vector2i(512, 512)
-	_viewport.transparent_bg = false
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport.disable_3d = true
-	_viewport.gui_disable_input = true
+	_ensure_viewport(get_param_value("resolution"), false)
 	# CRITICAL: GNNode sets process_mode = DISABLED on itself.
 	# SubViewport and VideoStreamPlayer need processing enabled to decode
 	# and render video frames. Override to ALWAYS on these children.
 	_viewport.process_mode = Node.PROCESS_MODE_ALWAYS
-	add_child(_viewport)
 
 	# Background fill
 	_bg = ColorRect.new()
@@ -126,12 +117,6 @@ func _ensure_viewport() -> void:
 	_viewport.add_child(_video_player)
 	_video_player.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_video_player.finished.connect(_on_video_finished)
-
-	_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = _viewport.get_texture()
-	_cached_tex_data.viewport = _viewport
-	_cached_tex_data.resolution = _viewport.size
-	GNLogger.debug("MovieFileInTOP", "'%s' viewport created" % id)
 
 
 func _apply_video_file(file_path: String) -> void:

@@ -4,8 +4,6 @@ extends GNTopBase
 ## Useful for organizing networks, creating reference points,
 ## and as merge targets.
 
-var _cached_tex_data: GNTextureData = null
-
 
 func _init() -> void:
 	node_type = "null"

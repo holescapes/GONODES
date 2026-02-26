@@ -1,39 +1,41 @@
 class_name CustomShaderTOP
 extends GNTopBase
 ## Allows the user to write custom Godot Shading Language (GLSL-like) code
-## that runs on the GPU.  Input texture ports are created automatically by
-## scanning the shader source for `uniform sampler2D gn_tex<N>` declarations.
-## Float and color uniforms plus TIME are also available.
+## that runs on the GPU.  Input texture ports AND inspector parameters are
+## created **dynamically** by scanning the shader source for uniform declarations.
 ##
 ## The user provides the FULL shader source (shader_type canvas_item; …).
 ## A default template is loaded on first cook if no code is set.
 ## The shader is recompiled only when the code text changes.
 ##
-## Uniform contract (always available in user code):
-##   uniform sampler2D gn_tex0;       // Auto-creates input port 0
-##   uniform sampler2D gn_tex1;       // Auto-creates input port 1
-##   …                                // Up to gn_tex7
-##   uniform float     gn_float0;     // Param Float A
-##   uniform float     gn_float1;     // Param Float B
-##   uniform float     gn_float2;     // Param Float C
-##   uniform float     gn_float3;     // Param Float D
-##   uniform vec4      gn_color0;     // Param Color A
-##   uniform vec4      gn_color1;     // Param Color B
-##   uniform vec2      gn_resolution; // Output resolution in pixels
-##   // TIME is built-in to Godot shaders — no extra uniform needed.
+## How uniforms map to the editor:
+##   uniform sampler2D gn_tex<N>;       → Auto-creates input port N (up to 8)
+##   uniform float     <name> = …;     → Creates a Float parameter named <name>
+##   uniform int       <name> = …;     → Creates an Int parameter named <name>
+##   uniform bool      <name> = …;     → Creates a Bool parameter named <name>
+##   uniform vec2      <name> = …;     → Creates a Vector2 parameter named <name>
+##   uniform vec4      <name> : source_color = …; → Creates a Color parameter
+##   uniform vec4      <name> = …;     → Creates a Color parameter named <name>
+##   uniform vec2      gn_resolution;  → Auto-bound to output resolution (no param)
+##   TIME                               → Built-in to Godot shaders (no uniform)
+##
+## Reserved uniform names (no param created):
+##   gn_tex0..gn_tex7   — handled as input texture ports
+##   gn_resolution      — auto-bound to output resolution
 
 const DEFAULT_SHADER_CODE := """shader_type canvas_item;
 
 // ─── GONODES Uniforms (auto-bound) ───────────────────────
 // Input textures — add more gn_tex<N> uniforms to auto-create input ports.
 uniform sampler2D gn_tex0 : hint_default_white;
-uniform float gn_float0 = 0.0;
-uniform float gn_float1 = 0.0;
-uniform float gn_float2 = 0.0;
-uniform float gn_float3 = 0.0;
-uniform vec4 gn_color0 : source_color = vec4(1.0);
-uniform vec4 gn_color1 : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform vec2 gn_resolution = vec2(512.0);
+
+// Your own uniforms — each becomes an inspector parameter automatically.
+// Supported types: float, int, bool, vec2, vec4 (color).
+// uniform float brightness = 1.0;
+// uniform vec4 tint : source_color = vec4(1.0);
+
+// gn_resolution is auto-bound (no param created).
+// uniform vec2 gn_resolution;
 
 // ─── Your fragment shader ────────────────────────────────
 void fragment() {
@@ -42,11 +44,11 @@ void fragment() {
 }
 """
 
+## Uniform names that are auto-bound and should NOT create inspector params.
+## (gn_tex* are already excluded by the sampler2D filter.)
+const _RESERVED_UNIFORMS: Array = ["gn_resolution"]
+
 var _shader: Shader = null
-var _viewport: SubViewport = null
-var _canvas: ColorRect = null
-var _material: ShaderMaterial = null
-var _cached_tex_data: GNTextureData = null
 
 ## Track the last successfully compiled code to avoid redundant recompiles.
 var _last_compiled_code: String = ""
@@ -54,10 +56,14 @@ var _last_compiled_code: String = ""
 ## Whether the current shader compiled successfully.
 var _shader_ok: bool = false
 
+## Names of parameters dynamically created from shader uniform declarations.
+## Rebuilt each time the shader code changes.  Used in _cook() to bind values.
+var _dynamic_param_names: PackedStringArray = PackedStringArray()
+
 
 func _init() -> void:
 	node_type = "glsl"
-	time_dependent = true  # User code may use TIME
+	time_dependent = true  # Default on — user can toggle off via parameter
 	node_description = "User-editable GLSL shader with auto-detected texture inputs from uniform declarations."
 
 
@@ -68,19 +74,60 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
+	add_parameter(GNParameter.create_bool("time_dependent", true,
+		"Time Dependent", "Re-cook every frame (enable for shaders using TIME)"))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_string("shader_code", DEFAULT_SHADER_CODE.strip_edges(),
 		"Shader Code", "Full shader_type canvas_item shader code (live recompile)"))
-	add_parameter(GNParameter.create_float("float_a", 0.0, null, null, 0.01, "Float A", "User float uniform (gn_float0)"))
-	add_parameter(GNParameter.create_float("float_b", 0.0, null, null, 0.01, "Float B", "User float uniform (gn_float1)"))
-	add_parameter(GNParameter.create_float("float_c", 0.0, null, null, 0.01, "Float C", "User float uniform (gn_float2)"))
-	add_parameter(GNParameter.create_float("float_d", 0.0, null, null, 0.01, "Float D", "User float uniform (gn_float3)"))
-	add_parameter(GNParameter.create_color("color_a", Color.WHITE, "Color A", "User color uniform (gn_color0)"))
-	add_parameter(GNParameter.create_color("color_b", Color.BLACK, "Color B", "User color uniform (gn_color1)"))
+
+
+## Override _pre_cook to respect the time_dependent parameter toggle.
+func _pre_cook(delta: float) -> void:
+	time_dependent = get_param_value("time_dependent")
+	super._pre_cook(delta)
+
+
+## Override from_dict to rebuild dynamic params from the restored shader code
+## BEFORE trying to restore the dynamic param values from the save file.
+func from_dict(d: Dictionary) -> void:
+	# Restore static params first (shader_code, resolution, position, etc.)
+	super.from_dict(d)
+
+	# Now the shader_code param has the saved value — parse it to create dynamic params
+	var code: String = get_param_value("shader_code")
+	if not code.is_empty():
+		var init_size := Vector2i(512, 512)
+		if parameters.has("resolution"):
+			init_size = get_param_value("resolution")
+		_setup_viewport(init_size)
+		_compile_shader(code)
+
+	# Now dynamic params exist — restore their saved values
+	if d.has("parameters"):
+		var params_dict: Dictionary = d["parameters"]
+		for param_name in params_dict:
+			# Skip static params (already restored by super)
+			if param_name in ["resolution", "shader_code", "time_dependent"]:
+				continue
+			var param: GNParameter = parameters.get(param_name, null)
+			if param != null:
+				param.from_dict(params_dict[param_name])
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	_ensure_viewport()
+	# ── Resolution (computed first so viewport is created at correct size) ──
+	var res := Vector2i(512, 512)
+
+	# Generator shaders have a resolution param; filter shaders inherit from input
+	if parameters.has("resolution"):
+		res = get_param_value("resolution")
+
+	# If an input is connected, use its resolution
+	var tex0: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
+	if tex0 != null:
+		res = tex0.resolution
+
+	_setup_viewport(res)
 
 	# ── Compile shader if code changed ──
 	var code: String = get_param_value("shader_code")
@@ -91,14 +138,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		# Return last good output (or null on first failure)
 		return _cached_tex_data if _cached_tex_data != null else null
 
-	# ── Resolution ──
-	var res: Vector2i = get_param_value("resolution")
-
-	# If an input is connected, default to its resolution
-	var tex0: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	if tex0 != null and res == Vector2i(512, 512):
-		res = tex0.resolution
-
 	if _viewport.size != res:
 		_viewport.size = res
 
@@ -108,15 +147,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		if tex != null:
 			_material.set_shader_parameter("gn_tex%d" % i, tex.texture)
 
-	# ── Bind float params ──
-	_material.set_shader_parameter("gn_float0", get_param_value("float_a"))
-	_material.set_shader_parameter("gn_float1", get_param_value("float_b"))
-	_material.set_shader_parameter("gn_float2", get_param_value("float_c"))
-	_material.set_shader_parameter("gn_float3", get_param_value("float_d"))
-
-	# ── Bind color params ──
-	_material.set_shader_parameter("gn_color0", get_param_value("color_a"))
-	_material.set_shader_parameter("gn_color1", get_param_value("color_b"))
+	# ── Bind all dynamic uniform params (name == shader uniform name) ──
+	for p_name in _dynamic_param_names:
+		_material.set_shader_parameter(p_name, get_param_value(p_name))
 
 	# ── Resolution uniform ──
 	_material.set_shader_parameter("gn_resolution", Vector2(res))
@@ -127,7 +160,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 ## Attempts to compile the shader from source code.
 ## On failure, keeps the old shader active and logs the error.
-## On success, scans for gn_tex<N> uniforms and rebuilds input ports to match.
+## On success, scans for uniforms and rebuilds input ports + params to match.
 func _compile_shader(code: String) -> void:
 	if code.is_empty():
 		GNLogger.warn("CustomShaderTOP", "'%s' — empty shader code" % id)
@@ -158,6 +191,37 @@ func _compile_shader(code: String) -> void:
 	if tex_count != input_ports.size():
 		_rebuild_tex_inputs(tex_count)
 
+	# Resolution param: only needed for generator shaders (no texture inputs).
+	# Filter shaders auto-inherit resolution from their input.
+	var is_generator := tex_count == 0
+	var has_res_param := parameters.has("resolution")
+	if is_generator and not has_res_param:
+		var res_param := GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels")
+		# Insert resolution before shader_code by removing/re-adding
+		var saved_params: Dictionary = {}
+		for k in parameters:
+			saved_params[k] = parameters[k]
+		parameters.clear()
+		parameters["resolution"] = res_param
+		for k in saved_params:
+			parameters[k] = saved_params[k]
+		res_param.value_changed.connect(_on_parameter_changed)
+		res_param.mode_changed.connect(_on_parameter_mode_changed)
+	elif not is_generator and has_res_param:
+		var res_param: GNParameter = parameters["resolution"]
+		if res_param.value_changed.is_connected(_on_parameter_changed):
+			res_param.value_changed.disconnect(_on_parameter_changed)
+		if res_param.mode_changed.is_connected(_on_parameter_mode_changed):
+			res_param.mode_changed.disconnect(_on_parameter_mode_changed)
+		parameters.erase("resolution")
+
+	# Rebuild dynamic params from non-reserved uniforms
+	_rebuild_uniform_params(code)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Uniform Parsing & Dynamic Parameters
+# ═══════════════════════════════════════════════════════════════════════════════
 
 ## Parses shader source for `uniform sampler2D gn_tex<N>` declarations and
 ## returns how many distinct texture input slots the shader expects (clamped 0-8).
@@ -166,10 +230,8 @@ static func _count_shader_tex_inputs(code: String) -> int:
 	var max_idx: int = -1
 	for line in code.split("\n"):
 		var stripped := line.strip_edges()
-		# Skip comments
 		if stripped.begins_with("//"):
 			continue
-		# Look for "uniform sampler2D gn_tex"
 		var pos := stripped.find("uniform")
 		if pos == -1:
 			continue
@@ -179,7 +241,6 @@ static func _count_shader_tex_inputs(code: String) -> int:
 		var tex_pos := stripped.find("gn_tex", sampler_pos)
 		if tex_pos == -1:
 			continue
-		# Extract the digit(s) after "gn_tex"
 		var digit_start := tex_pos + 6  # len("gn_tex")
 		var digit_str := ""
 		while digit_start < stripped.length() and stripped[digit_start].is_valid_int():
@@ -189,7 +250,6 @@ static func _count_shader_tex_inputs(code: String) -> int:
 			var idx := digit_str.to_int()
 			if idx > max_idx:
 				max_idx = idx
-	# Number of ports = highest index + 1, clamped to 0-8
 	return clampi(max_idx + 1, 0, 8)
 
 
@@ -203,21 +263,242 @@ func _rebuild_tex_inputs(count: int) -> void:
 	ports_changed.emit(id)
 
 
-func _ensure_viewport() -> void:
+## Information about one parsed uniform declaration.
+class _UniformInfo:
+	var uniform_name: String
+	var type: GNParameter.ValueType
+	var default_value: Variant
+
+	func _init(p_name: String, p_type: GNParameter.ValueType, p_default: Variant) -> void:
+		uniform_name = p_name
+		type = p_type
+		default_value = p_default
+
+
+## Parses ALL non-reserved, non-sampler uniforms from the shader code.
+## Returns an Array of _UniformInfo in declaration order.
+static func _parse_uniforms(code: String) -> Array:
+	var result: Array = []
+	for line in code.split("\n"):
+		var stripped := line.strip_edges()
+		if stripped.begins_with("//"):
+			continue
+		if stripped.find("uniform") == -1:
+			continue
+		# Skip sampler2D (handled as texture ports)
+		if stripped.find("sampler2D") != -1:
+			continue
+
+		# Determine type
+		var info: _UniformInfo = null
+		if stripped.find("vec4") != -1:
+			info = _parse_vec4_uniform(stripped)
+		elif stripped.find("vec2") != -1:
+			info = _parse_vec2_uniform(stripped)
+		elif stripped.find("float") != -1:
+			info = _parse_float_uniform(stripped)
+		elif stripped.find("int") != -1:
+			info = _parse_int_uniform(stripped)
+		elif stripped.find("bool") != -1:
+			info = _parse_bool_uniform(stripped)
+
+		if info != null and info.uniform_name not in _RESERVED_UNIFORMS:
+			result.append(info)
+	return result
+
+
+## Extracts the uniform name from a stripped line.
+## Expects the name to be the token right after the type keyword.
+## e.g. "uniform float brightness = 0.5;" → "brightness"
+static func _extract_name_after(stripped: String, type_keyword: String) -> String:
+	var type_pos := stripped.find(type_keyword)
+	if type_pos == -1:
+		return ""
+	var start := type_pos + type_keyword.length()
+	# Skip whitespace
+	while start < stripped.length() and stripped[start] == " ":
+		start += 1
+	# Read identifier characters (alphanumeric + underscore)
+	var name_str := ""
+	while start < stripped.length():
+		var c := stripped[start]
+		if c == "_" or c.is_valid_identifier():
+			name_str += c
+			start += 1
+		else:
+			break
+	return name_str
+
+
+static func _parse_float_uniform(stripped: String) -> _UniformInfo:
+	var uname := _extract_name_after(stripped, "float")
+	if uname.is_empty():
+		return null
+	var def_val := 0.0
+	var eq_pos := stripped.find("=")
+	if eq_pos != -1:
+		var val_str := stripped.substr(eq_pos + 1).strip_edges().rstrip(";").strip_edges()
+		if val_str.is_valid_float():
+			def_val = val_str.to_float()
+	return _UniformInfo.new(uname, GNParameter.ValueType.FLOAT, def_val)
+
+
+static func _parse_int_uniform(stripped: String) -> _UniformInfo:
+	var uname := _extract_name_after(stripped, "int")
+	if uname.is_empty():
+		return null
+	var def_val := 0
+	var eq_pos := stripped.find("=")
+	if eq_pos != -1:
+		var val_str := stripped.substr(eq_pos + 1).strip_edges().rstrip(";").strip_edges()
+		if val_str.is_valid_int():
+			def_val = val_str.to_int()
+	return _UniformInfo.new(uname, GNParameter.ValueType.INT, def_val)
+
+
+static func _parse_bool_uniform(stripped: String) -> _UniformInfo:
+	var uname := _extract_name_after(stripped, "bool")
+	if uname.is_empty():
+		return null
+	var def_val := false
+	var eq_pos := stripped.find("=")
+	if eq_pos != -1:
+		var val_str := stripped.substr(eq_pos + 1).strip_edges().rstrip(";").strip_edges()
+		def_val = val_str == "true"
+	return _UniformInfo.new(uname, GNParameter.ValueType.BOOL, def_val)
+
+
+static func _parse_vec2_uniform(stripped: String) -> _UniformInfo:
+	var uname := _extract_name_after(stripped, "vec2")
+	if uname.is_empty():
+		return null
+	var def_val := Vector2.ZERO
+	var eq_pos := stripped.find("=")
+	if eq_pos != -1:
+		# Try to extract vec2(x, y) or vec2(x)
+		var vec_pos := stripped.find("vec2(", eq_pos)
+		if vec_pos != -1:
+			var inner := _extract_parens(stripped, vec_pos + 4)
+			var parts := inner.split(",")
+			if parts.size() >= 2:
+				def_val = Vector2(parts[0].strip_edges().to_float(), parts[1].strip_edges().to_float())
+			elif parts.size() == 1 and not parts[0].strip_edges().is_empty():
+				var v := parts[0].strip_edges().to_float()
+				def_val = Vector2(v, v)
+	return _UniformInfo.new(uname, GNParameter.ValueType.VECTOR2, def_val)
+
+
+static func _parse_vec4_uniform(stripped: String) -> _UniformInfo:
+	var uname := _extract_name_after(stripped, "vec4")
+	if uname.is_empty():
+		return null
+	var def_val := Color.WHITE
+	var eq_pos := stripped.find("=")
+	if eq_pos != -1:
+		var vec_pos := stripped.find("vec4(", eq_pos)
+		if vec_pos != -1:
+			var inner := _extract_parens(stripped, vec_pos + 4)
+			var parts := inner.split(",")
+			if parts.size() >= 4:
+				def_val = Color(
+					parts[0].strip_edges().to_float(),
+					parts[1].strip_edges().to_float(),
+					parts[2].strip_edges().to_float(),
+					parts[3].strip_edges().to_float())
+			elif parts.size() == 1 and not parts[0].strip_edges().is_empty():
+				var v := parts[0].strip_edges().to_float()
+				def_val = Color(v, v, v, v)
+	return _UniformInfo.new(uname, GNParameter.ValueType.COLOR, def_val)
+
+
+## Extracts text between '(' at [param open_pos] and matching ')'.
+static func _extract_parens(text: String, open_pos: int) -> String:
+	var depth := 0
+	var start := open_pos + 1
+	for i in range(open_pos, text.length()):
+		if text[i] == "(":
+			depth += 1
+		elif text[i] == ")":
+			depth -= 1
+			if depth == 0:
+				return text.substr(start, i - start)
+	return text.substr(start)
+
+
+## Removes old dynamic params, creates new ones from shader uniforms,
+## preserving any values that match by name + type.
+func _rebuild_uniform_params(code: String) -> void:
+	var new_uniforms: Array = _parse_uniforms(code)
+
+	# Snapshot old dynamic param values for preservation
+	var old_values: Dictionary = {}  # name → { "value": Variant, "type": ValueType }
+	for p_name in _dynamic_param_names:
+		var param := get_parameter(p_name)
+		if param != null:
+			old_values[p_name] = { "value": param.value, "type": param.value_type }
+
+	# Remove old dynamic params
+	for p_name in _dynamic_param_names:
+		if parameters.has(p_name):
+			var param: GNParameter = parameters[p_name]
+			# Disconnect signals
+			if param.value_changed.is_connected(_on_parameter_changed):
+				param.value_changed.disconnect(_on_parameter_changed)
+			if param.mode_changed.is_connected(_on_parameter_mode_changed):
+				param.mode_changed.disconnect(_on_parameter_mode_changed)
+			parameters.erase(p_name)
+	_dynamic_param_names.clear()
+
+	# Create new params from parsed uniforms
+	for info in new_uniforms:
+		var ui: _UniformInfo = info as _UniformInfo
+		var param: GNParameter = null
+
+		match ui.type:
+			GNParameter.ValueType.FLOAT:
+				param = GNParameter.create_float(ui.uniform_name, ui.default_value,
+					null, null, 0.01, "", "Shader uniform '%s'" % ui.uniform_name)
+			GNParameter.ValueType.INT:
+				param = GNParameter.create_int(ui.uniform_name, ui.default_value,
+					null, null, "", "Shader uniform '%s'" % ui.uniform_name)
+			GNParameter.ValueType.BOOL:
+				param = GNParameter.create_bool(ui.uniform_name, ui.default_value,
+					"", "Shader uniform '%s'" % ui.uniform_name)
+			GNParameter.ValueType.VECTOR2:
+				param = GNParameter.create_vector2(ui.uniform_name, ui.default_value,
+					"", "Shader uniform '%s'" % ui.uniform_name)
+			GNParameter.ValueType.COLOR:
+				param = GNParameter.create_color(ui.uniform_name, ui.default_value,
+					"", "Shader uniform '%s'" % ui.uniform_name)
+
+		if param == null:
+			continue
+
+		# Restore previous value if same name and type existed before
+		if old_values.has(ui.uniform_name):
+			var old: Dictionary = old_values[ui.uniform_name]
+			if old["type"] == ui.type:
+				param.value = old["value"]
+				param.resolved_value = old["value"]
+
+		# Register and wire signals
+		add_parameter(param)
+		param.value_changed.connect(_on_parameter_changed)
+		param.mode_changed.connect(_on_parameter_mode_changed)
+		_dynamic_param_names.append(ui.uniform_name)
+
+	GNLogger.info("CustomShaderTOP", "'%s' dynamic params → %s" % [id, str(_dynamic_param_names)])
+	parameters_changed.emit(id)
+
+
+func _setup_viewport(size: Vector2i = Vector2i(512, 512)) -> void:
 	if _viewport != null:
 		return
 
 	_shader = Shader.new()
 	_shader.code = DEFAULT_SHADER_CODE
 
-	_viewport = SubViewport.new()
-	_viewport.name = "VP_%s" % id
-	_viewport.size = Vector2i(512, 512)
-	_viewport.transparent_bg = true
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport.disable_3d = true
-	_viewport.gui_disable_input = true
-	add_child(_viewport)
+	_ensure_viewport(size)
 
 	_material = ShaderMaterial.new()
 	_material.shader = _shader
@@ -228,11 +509,5 @@ func _ensure_viewport() -> void:
 	_viewport.add_child(_canvas)
 	_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = _viewport.get_texture()
-	_cached_tex_data.viewport = _viewport
-	_cached_tex_data.resolution = _viewport.size
-
 	_shader_ok = true
 	_last_compiled_code = DEFAULT_SHADER_CODE
-	GNLogger.debug("CustomShaderTOP", "'%s' viewport + default shader created" % id)

@@ -3,10 +3,8 @@ extends GNTopBase
 ## Renders text onto a texture using Godot's Label node.
 ## Similar to TouchDesigner's Text TOP.
 
-var _viewport: SubViewport = null
 var _label: Label = null
 var _bg: ColorRect = null
-var _cached_tex_data: GNTextureData = null
 var _loaded_font: Font = null
 var _loaded_font_path: String = ""
 
@@ -37,7 +35,7 @@ func _init_parameters() -> void:
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
-	_ensure_viewport()
+	_setup_viewport()
 
 	var txt: String = get_param_value("text")
 	var res: Vector2i = get_param_value("resolution")
@@ -85,18 +83,11 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	return _cached_tex_data
 
 
-func _ensure_viewport() -> void:
+func _setup_viewport() -> void:
 	if _viewport != null:
 		return
 
-	_viewport = SubViewport.new()
-	_viewport.name = "VP_%s" % id
-	_viewport.size = Vector2i(512, 256)
-	_viewport.transparent_bg = false
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport.disable_3d = true
-	_viewport.gui_disable_input = true
-	add_child(_viewport)
+	_ensure_viewport(get_param_value("resolution"), false)
 
 	_bg = ColorRect.new()
 	_bg.name = "BG"
@@ -110,12 +101,6 @@ func _ensure_viewport() -> void:
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_viewport.add_child(_label)
 	_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = _viewport.get_texture()
-	_cached_tex_data.viewport = _viewport
-	_cached_tex_data.resolution = _viewport.size
-	GNLogger.debug("TextTOP", "'%s' viewport created" % id)
 
 
 ## Loads and applies a custom font, or reverts to the default theme font.

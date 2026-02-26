@@ -7,18 +7,6 @@ extends GNTopBase
 ## Preloaded noise shader resource.
 var _shader: Shader = null
 
-## The SubViewport used for rendering this TOP's output (child of this node).
-var _viewport: SubViewport = null
-
-## The ColorRect that draws the noise via ShaderMaterial.
-var _canvas: ColorRect = null
-
-## The ShaderMaterial applied to the canvas.
-var _material: ShaderMaterial = null
-
-## Reusable output data object (created once, updated each cook).
-var _cached_tex_data: GNTextureData = null
-
 
 func _init() -> void:
 	node_type = "noise"
@@ -42,9 +30,8 @@ func _init_parameters() -> void:
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
-	_ensure_viewport()
-
 	var res: Vector2i = get_param_value("resolution")
+	_init_shader_viewport("res://addons/gonodes/shaders/noise_simplex.gdshader", false, false, res)
 	var noise_type_idx: int = get_param_value("noise_type")
 	var scale_val: float = get_param_value("scale")
 	var offset_val: Vector2 = get_param_value("offset")
@@ -71,37 +58,4 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 ## Lazily creates the SubViewport + ColorRect + ShaderMaterial rendering pipeline
 ## as children of this Node.
-func _ensure_viewport() -> void:
-	if _viewport != null:
-		return
 
-	# Load shader
-	_shader = load("res://addons/gonodes/shaders/noise_simplex.gdshader") as Shader
-
-	# Create SubViewport as child
-	_viewport = SubViewport.new()
-	_viewport.name = "VP_%s" % id
-	_viewport.size = Vector2i(512, 512)
-	_viewport.transparent_bg = false
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport.disable_3d = true
-	_viewport.gui_disable_input = true
-	add_child(_viewport)
-
-	# Create material
-	_material = ShaderMaterial.new()
-	_material.shader = _shader
-
-	# Create canvas rect filling the viewport
-	_canvas = ColorRect.new()
-	_canvas.name = "Canvas"
-	_canvas.material = _material
-	_viewport.add_child(_canvas)
-	_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	# Create reusable output data — ViewportTexture is a live GPU reference
-	_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = _viewport.get_texture()
-	_cached_tex_data.viewport = _viewport
-	_cached_tex_data.resolution = _viewport.size
-	GNLogger.debug("NoiseTOP", "'%s' viewport created: %s" % [id, str(_viewport.size)])

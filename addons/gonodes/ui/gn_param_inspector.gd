@@ -151,6 +151,10 @@ func inspect(node: GNNode) -> void:
 	if not node.node_cooked.is_connected(_on_node_cooked):
 		node.node_cooked.connect(_on_node_cooked)
 
+	# Connect to parameters_changed so we auto-refresh when params are shown/hidden
+	if not node.parameters_changed.is_connected(_on_parameters_changed):
+		node.parameters_changed.connect(_on_parameters_changed)
+
 	GNLogger.debug("Inspector", "Inspecting '%s' — %d parameters" % [
 		node.id, param_names.size()])
 
@@ -160,6 +164,17 @@ func clear_inspection() -> void:
 	_clear_rows()
 	_current_node = null
 	_show_empty_state()
+
+
+## Called when the currently inspected node dynamically changes its parameter set.
+## Forces a full rebuild of the parameter rows for the same node.
+func _on_parameters_changed(node_id: String) -> void:
+	if _current_node == null or _current_node.id != node_id:
+		return
+	# Force re-inspect by clearing _current_node first
+	var node := _current_node
+	_current_node = null
+	inspect(node)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -230,6 +245,8 @@ func _clear_rows() -> void:
 	# Disconnect from previous node
 	if _current_node and _current_node.node_cooked.is_connected(_on_node_cooked):
 		_current_node.node_cooked.disconnect(_on_node_cooked)
+	if _current_node and _current_node.parameters_changed.is_connected(_on_parameters_changed):
+		_current_node.parameters_changed.disconnect(_on_parameters_changed)
 
 	for p_name in _param_rows:
 		var row: GNParamRow = _param_rows[p_name]

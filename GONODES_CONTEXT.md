@@ -99,7 +99,7 @@ Embedding Model (Future):
 | TouchDesigner         | GONODES Implementation                                   |
 |-----------------------|----------------------------------------------------------|
 | Operator (OP)         | `GNNode` (Node subclass) with `cook()` method             |
-| TOP (Texture OP)      | `GNTopNode` — uses SubViewport + ShaderMaterial           |
+| TOP (Texture OP)      | `GNTopBase` — SubViewport + ShaderMaterial (infra in base class) |
 | CHOP (Channel OP)     | `GNChopNode` — processes named float arrays              |
 | SOP (Surface OP)      | `GNSopNode` — produces ArrayMesh via GNGeoData           |
 | POP (Point OP)        | `GNPopNode` — GPU particle/point cloud system (future)   |
@@ -258,7 +258,7 @@ Five intermediate base classes sit between GNNode and the individual operators. 
 
 | Base Class | Family | Cached Data | Preview | Helpers |
 |------------|--------|-------------|---------|--------|
-| `GNTopBase` | TOP | — (TOPs vary too much) | TextureRect from `cached_output.texture` | `_get_input_top()` |
+| `GNTopBase` | TOP | `_viewport`, `_material`, `_canvas`, `_cached_tex_data` | TextureRect from `cached_output.texture` | `_get_input_top()`, `_create_viewport()`, `_ensure_viewport()`, `_init_shader_viewport()`, `execute_cook()` |
 | `GNChopBase` | CHOP | `_cached_channel_data: GNChannelData` | Label: channel name:value pairs | `_prepare_output(sr)`, `_get_input_chop()` |
 | `GNDatBase` | DAT | `_cached_table: GNTableData` | Label: headers + first 3 rows | `_prepare_table(clear)`, `_get_input_dat()` |
 | `GNSopBase` | SOP | `_cached_geo: GNGeoData` | Label: vertex/surface counts | `_prepare_geo()`, `_get_input_sop()`, `_require_input_geo()` |
@@ -276,7 +276,17 @@ GNNode (type-agnostic base)
 └── GNMatBase (2 MAT operators)
 ```
 
-**GNTopBase** intentionally does NOT include viewport/texture infrastructure because TOP operators vary significantly in rendering pipelines (SubViewport-based, compute shader, texture copy, etc.).
+**GNTopBase** provides the shared viewport/texture infrastructure used by all TOP operators:
+- **`_viewport: SubViewport`** — primary render viewport (null until first cook).
+- **`_material: ShaderMaterial`** — shader material applied to the canvas (null for non-shader TOPs like Text, Movie).
+- **`_canvas: Control`** — a `ColorRect` (generators) or `TextureRect` (filters) that fills the viewport.
+- **`_cached_tex_data: GNTextureData`** — reusable output data wrapping the viewport texture.
+- **`_create_viewport()`** — factory that creates a SubViewport with `UPDATE_DISABLED` and sensible defaults.
+- **`_ensure_viewport(size)`** — lazily creates `_viewport` + `_cached_tex_data`. Used by custom TOPs (Constant, Text, Blur, etc.).
+- **`_init_shader_viewport(shader_path, transparent_bg, use_texture_rect, size)`** — full pipeline setup: SubViewport → ShaderMaterial → canvas → GNTextureData. Used by the 17 standard shader TOPs.
+- **`execute_cook()`** — overrides GNNode to trigger `UPDATE_ONCE` on all child SubViewports after `_cook()` completes, eliminating wasted GPU work on non-dirty frames.
+
+Generator TOPs pass `get_param_value("resolution")` as the viewport size. Filter TOPs pass `tex_in.resolution` (matching their input). No hardcoded sizes.
 
 **DATtoCHOP** extends `GNChopBase` (not GNDatBase) because its output is CHOP channel data.
 
@@ -285,6 +295,7 @@ GNNode (type-agnostic base)
 - `initialize(id)` — sets `name = id`, `process_mode = DISABLED`, calls `_init_ports()` / `_init_parameters()`
 - Processing is disabled on GNNodes — only the cook engine drives cooking
 - TOPs add SubViewport as `add_child()` during first `_cook()` — auto-freed on removal
+- `execute_cook()` (GNTopBase override) — after `_cook()` completes, sets `UPDATE_ONCE` on all child SubViewports so they render exactly once per cook cycle
 - CookEngine adopts all network nodes as children via `add_child()` in `_ready()`
 - `queue_free()` cascades to SubViewport/Window children (no manual cleanup needed)
 
@@ -589,7 +600,7 @@ GONODES/
 │       │   ├── gn_table_data.gd    # GNTableData — DAT output (RefCounted)
 │       │   ├── gn_geo_data.gd      # GNGeoData — SOP output, wraps ArrayMesh (RefCounted)
 │       │   ├── gn_node.gd          # GNNode base operator class (Node) — type-agnostic
-│       │   ├── gn_top_base.gd      # GNTopBase — TOP family base (texture preview)
+│       │   ├── gn_top_base.gd      # GNTopBase — TOP family base (viewport infra, shader pipeline, render-once-per-cook)
 │       │   ├── gn_chop_base.gd     # GNChopBase — CHOP family base (channel data cache, label preview)
 │       │   ├── gn_dat_base.gd      # GNDatBase — DAT family base (table cache, label preview)
 │       │   ├── gn_sop_base.gd      # GNSopBase — SOP family base (geo cache, label preview)
@@ -935,8 +946,9 @@ GONODES/
   - PNG/WebP/JPG sequences with alpha support.
   - Configurable frame range, speed, loop mode, hold first/last.
   - Expression-driven frame index for precise sequencing.
-- [ ] **Performance: SubViewport UPDATE_ONCE** for non-time-dependent TOPs:
-  - TOPs that don't use `elapsed_time`/`current_delta` only render once when inputs change.
+- [x] **Performance: SubViewport UPDATE_ONCE** for non-time-dependent TOPs:
+  - All SubViewports now created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` after each cook — TOPs render exactly once per dirty cycle.
+  - Time-dependent TOPs (e.g., CustomShaderTOP with `time_dependent` toggle) are re-cooked each frame by the cook engine, so they naturally re-render via the same mechanism.
   - Reduces GPU load significantly for static texture chains.
 - [ ] **Performance: Viewport pooling**:
   - Reuse freed SubViewports instead of creating/destroying.
@@ -945,9 +957,9 @@ GONODES/
   - Only cook subgraphs that feed into a WindowTOP, visible preview, or viewer window.
   - Disconnected/orphan subgraphs skip cooking entirely.
   - `GNCookEngine.active_outputs` tracks which sink nodes are live.
-- [ ] **Performance: Lazy viewport creation**:
-  - Delay `_ensure_viewport()` until the TOP is actually part of a live chain.
-  - Disconnected TOPs have zero GPU footprint.
+- [x] **Performance: Lazy viewport creation**:
+  - Viewport creation is deferred to first `_cook()` call — `_init_shader_viewport()` and `_ensure_viewport()` guard with `if _viewport != null: return`.
+  - Disconnected TOPs have zero GPU footprint until first cook.
 - [ ] **Performance: GPU memory budget monitoring**:
   - Track total estimated VRAM across all SubViewports.
   - Warn when approaching configurable budget limit.
@@ -1071,19 +1083,69 @@ GONODES/
 
 ---
 
+## 13.5. Coding Guidelines
+
+These principles guide all GONODES development. Follow them when adding new operators, refactoring existing code, or reviewing contributions.
+
+### 1. Consolidate Common Members in Family Base Classes
+
+Shared properties, cached data, and helper methods that appear in more than one operator within a family **must** live in the family base class (`GNTopBase`, `GNChopBase`, `GNDatBase`, `GNSopBase`, `GNCompBase`, `GNMatBase`), not duplicated across subclasses.
+
+**Why:** Reduces boilerplate, prevents drift between implementations, and makes family-wide behavioral changes (like the UPDATE_ONCE render lifecycle) possible in one place.
+
+**Examples:**
+- `GNTopBase._viewport`, `_material`, `_canvas`, `_cached_tex_data` — every TOP needs viewport infrastructure.
+- `GNChopBase._cached_channel_data` — every CHOP caches channel output.
+- `GNDatBase._cached_table` — every DAT caches table output.
+
+**Rule of thumb:** If you're about to declare the same `var` in a third subclass, move it to the base.
+
+### 2. Prefer Godot Built-in Classes
+
+Use Godot's native types and engine classes wherever possible instead of building custom abstractions.
+
+**Why:** Godot's built-in classes are optimized, well-documented, and battle-tested. Wrapping them adds indirection with no benefit. Leveraging the engine's type system (Node, Resource, RefCounted) also enables automatic memory management, serialization, and editor integration for free.
+
+**Concrete preferences:**
+| Instead of … | Use … |
+|---|---|
+| Custom render pipeline | `SubViewport` + `ShaderMaterial` + `ColorRect`/`TextureRect` |
+| Manual memory management | `RefCounted` subclasses (freed automatically) |
+| Custom mesh format | `ArrayMesh` / `SurfaceTool` / `PrimitiveMesh` |
+| Custom material wrapper | `StandardMaterial3D` / `ShaderMaterial` |
+| Custom signal bus | Godot signals, `Node.notification()` |
+| Manual tree cleanup | `queue_free()` cascade, `_notification(PREDELETE)` |
+| Custom serialization | `Resource` with `@export` properties |
+| Custom logging | `GNLogger` wrapping Godot's `push_warning()` / `push_error()` |
+
+### 3. Resolution Follows Context
+
+- **Generator TOPs** (no input): viewport size = `get_param_value("resolution")`.
+- **Filter TOPs** (has input): viewport size = `tex_in.resolution` (matches input).
+- Never hardcode viewport sizes (e.g., `Vector2i(512, 512)`) in operator `_cook()` methods. The factory defaults in `_create_viewport()` are only fallbacks for when no resolution is available yet.
+
+### 4. Render Only When Needed
+
+SubViewports must be created with `UPDATE_DISABLED`. The base class (`GNTopBase.execute_cook()`) triggers `UPDATE_ONCE` after each successful cook. Operators must **not** set `UPDATE_ALWAYS` or manually trigger renders — the base class owns the render lifecycle.
+
+Exception: `process_mode = PROCESS_MODE_ALWAYS` is acceptable for media-playback TOPs (Movie, FFmpeg) that need Godot's built-in `_process()` for decoder advancement.
+
+---
+
 ## 14. Technical Notes
 
 ### SubViewport Strategy for TOPs
-Each TOP node owns a `SubViewport` for rendering its output texture:
-- The viewport has a `ColorRect` or `TextureRect` canvas with a `ShaderMaterial`
-- **Canvas uses `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` to auto-fill its parent viewport** — no manual `_canvas.size` management (see Hard Rule 25.16)
-- Input textures are passed as shader uniforms (zero-copy GPU references)
-- The viewport renders each frame (or only when dirty)
-- The output `ViewportTexture` becomes the node's `GNTextureData.texture`
-- Resolution is configurable per node — only `_viewport.size` is set in `_cook()`; canvas follows via anchors
-- Viewports are managed by the cook engine (created/destroyed with nodes)
+Each TOP node owns a `SubViewport` for rendering its output texture. The infrastructure lives in **GNTopBase**:
 
-**Performance consideration:** Each SubViewport is a render pass. For large networks, we may need viewport pooling or deferred rendering optimizations. For MVP, one viewport per TOP is acceptable.
+- **Creation:** `_create_viewport()` factory produces a SubViewport with `UPDATE_DISABLED`, `gui_disable_input = true`, and optional transparency / 3D. Higher-level helpers `_ensure_viewport()` and `_init_shader_viewport()` build upon it.
+- **Canvas:** A `ColorRect` (generators) or `TextureRect` (filters) with `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` auto-fills the viewport — no manual `_canvas.size` management (see Hard Rule 25.16).
+- **Resolution:** Generator TOPs pass `get_param_value("resolution")` as the viewport size. Filter TOPs pass `tex_in.resolution` (matching their input). No hardcoded sizes.
+- **Render lifecycle:** Viewports are created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` on every child SubViewport after `_cook()` sets uniforms/textures, so each TOP renders **exactly once per cook cycle** — no wasted GPU passes on non-dirty frames.
+- **Input textures** are passed as shader uniforms (zero-copy GPU references).
+- **Output:** The `ViewportTexture` is wrapped in `GNTextureData` and becomes the node's `cached_output`.
+- **Cleanup:** Viewports are children of the GNNode; `queue_free()` cascades automatically.
+
+**Performance consideration:** Each SubViewport is a render pass. For large networks, viewport pooling or deferred rendering may be needed. For MVP, one viewport per TOP is acceptable.
 
 ### Cook Engine Optimizations (Implemented)
 

@@ -21,17 +21,11 @@ extends GNTopBase
 # Internals
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## SubViewport hosting the VideoStreamPlayer (child of this Node).
-var _viewport: SubViewport = null
-
 ## The VideoStreamPlayer that decodes and renders video frames.
 var _video_player: VideoStreamPlayer = null
 
 ## Background fill behind the video.
 var _bg: ColorRect = null
-
-## Reusable output data (created once, updated each cook).
-var _cached_tex_data: GNTextureData = null
 
 ## Path of the currently loaded file — avoids reloading every cook.
 var _loaded_file_path: String = ""
@@ -83,7 +77,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			"'%s': EIRTeam.FFmpeg GDExtension not loaded" % id)
 		return null
 
-	_ensure_viewport()
+	_setup_viewport()
 
 	var file_path: String = get_param_value("file")
 	var res: Vector2i    = get_param_value("resolution")
@@ -198,22 +192,14 @@ func _apply_video_file(file_path: String) -> void:
 
 ## Lazily creates the SubViewport + VideoStreamPlayer rendering pipeline
 ## as children of this Node.
-func _ensure_viewport() -> void:
+func _setup_viewport() -> void:
 	if _viewport != null:
 		return
 
-	# SubViewport — captures the video frame each tick
-	_viewport = SubViewport.new()
-	_viewport.name = "VP_%s" % id
-	_viewport.size = Vector2i(512, 512)
-	_viewport.transparent_bg = false
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport.disable_3d = true
-	_viewport.gui_disable_input = true
+	_ensure_viewport(get_param_value("resolution"), false)
 	# GNNode sets process_mode = DISABLED on itself.
 	# SubViewport and VideoStreamPlayer need processing to decode frames.
 	_viewport.process_mode = Node.PROCESS_MODE_ALWAYS
-	add_child(_viewport)
 
 	# Background fill
 	_bg = ColorRect.new()
@@ -233,12 +219,6 @@ func _ensure_viewport() -> void:
 	_viewport.add_child(_video_player)
 	_video_player.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_video_player.finished.connect(_on_video_finished)
-
-	# Reusable output data — ViewportTexture is a live GPU reference
-	_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = _viewport.get_texture()
-	_cached_tex_data.viewport = _viewport
-	_cached_tex_data.resolution = _viewport.size
 
 	GNLogger.debug("FFmpegInTOP", "'%s' viewport created" % id)
 

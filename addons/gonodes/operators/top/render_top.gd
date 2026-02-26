@@ -13,8 +13,6 @@ extends GNTopBase
 ## Uses Godot's native 3D renderer (Forward+) via SubViewport for full PBR,
 ## shadows, reflections, and all built-in rendering features.
 
-var _viewport: SubViewport = null
-var _cached_tex_data: GNTextureData = null
 var _environment: Environment = null
 var _world_env: WorldEnvironment = null
 
@@ -56,7 +54,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	_ensure_viewport()
+	_setup_viewport()
 
 	var res: Vector2i = get_param_value("resolution")
 	var bg_color: Color = get_param_value("bg_color")
@@ -114,19 +112,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 ## Lazily creates the 3D SubViewport and environment.
-func _ensure_viewport() -> void:
+func _setup_viewport() -> void:
 	if _viewport != null:
 		return
 
-	_viewport = SubViewport.new()
-	_viewport.name = "VP3D_%s" % id
-	_viewport.size = Vector2i(1280, 720)
-	_viewport.transparent_bg = false
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport.disable_3d = false
-	_viewport.gui_disable_input = true
+	_viewport = _create_viewport("VP3D_%s" % id, get_param_value("resolution"), false, false)
 	_viewport.own_world_3d = true  # Isolated 3D world
-	add_child(_viewport)
 
 	# Create environment for the scene
 	_environment = Environment.new()
@@ -146,8 +137,6 @@ func _ensure_viewport() -> void:
 	_cached_tex_data.texture = _viewport.get_texture()
 	_cached_tex_data.viewport = _viewport
 	_cached_tex_data.resolution = _viewport.size
-
-	GNLogger.debug("RenderTOP", "'%s' 3D viewport created: %s" % [id, str(_viewport.size)])
 
 
 ## Populates the 3D viewport with scene nodes from connected COMPs.

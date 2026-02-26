@@ -127,10 +127,10 @@ SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and S
 - [ ] ImageSequenceTOP — numbered frame playback with alpha
 
 **Performance:**
-- [ ] SubViewport UPDATE_ONCE for non-time-dependent TOPs
+- [x] SubViewport UPDATE_ONCE for non-time-dependent TOPs
 - [ ] Viewport pooling (reuse freed SubViewports by resolution)
 - [ ] Active chain cooking (skip disconnected subgraphs)
-- [ ] Lazy viewport creation (zero GPU footprint for unused TOPs)
+- [x] Lazy viewport creation (zero GPU footprint for unused TOPs)
 - [ ] GPU memory budget monitoring (VRAM tracking + warnings)
 - [ ] Resolution downscaling for preview thumbnails
 
@@ -213,7 +213,12 @@ git clone https://github.com/your-username/gonodes.git
 
 GONODES is built directly on Godot's native systems — SubViewports for texture processing, compute shaders for GPU particle work, GraphEdit for the node editor, Resource serialization for patches. No abstraction layers, no engine-agnostic wrappers. This keeps the codebase lean and ensures patches export cleanly to every platform Godot targets.
 
-For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT.md).
+**Key design principles:**
+- **Consolidate shared infrastructure in family base classes** — common members (`_viewport`, `_material`, `_cached_tex_data`, etc.) and lifecycle helpers live in `GNTopBase`, `GNChopBase`, `GNDatBase`, etc., not duplicated across operators.
+- **Prefer Godot built-in classes** — `SubViewport`, `ShaderMaterial`, `ArrayMesh`, `RefCounted`, `Resource` — over custom abstractions.
+- **Render only when needed** — SubViewports use `UPDATE_DISABLED` + `UPDATE_ONCE` per cook cycle, not `UPDATE_ALWAYS`.
+
+For the full technical design document and coding guidelines, see [GONODES_CONTEXT.md](GONODES_CONTEXT.md).
 
 ---
 

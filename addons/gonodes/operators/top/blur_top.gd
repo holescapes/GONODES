@@ -10,7 +10,6 @@ var _canvas_h: ColorRect = null
 var _canvas_v: TextureRect = null
 var _material_h: ShaderMaterial = null
 var _material_v: ShaderMaterial = null
-var _cached_tex_data: GNTextureData = null
 
 
 func _init() -> void:
@@ -36,11 +35,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		GNLogger.warn("BlurTOP", "'%s' — no valid input" % id)
 		return null
 
-	_ensure_viewport()
+	var res: Vector2i = tex_in.resolution
+	_setup_viewport(res)
 
 	var blur_size: float = get_param_value("size")
 	var quality_val: int = get_param_value("quality")
-	var res: Vector2i = tex_in.resolution
 
 	# Match viewport sizes to input
 	if _viewport_h.size != res:
@@ -63,21 +62,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return _cached_tex_data
 
 
-func _ensure_viewport() -> void:
+func _setup_viewport(size: Vector2i = Vector2i(512, 512)) -> void:
 	if _viewport_h != null:
 		return
 
 	_shader = load("res://addons/gonodes/shaders/blur.gdshader") as Shader
 
 	# Horizontal pass viewport
-	_viewport_h = SubViewport.new()
-	_viewport_h.name = "VP_H_%s" % id
-	_viewport_h.size = Vector2i(512, 512)
-	_viewport_h.transparent_bg = true
-	_viewport_h.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport_h.disable_3d = true
-	_viewport_h.gui_disable_input = true
-	add_child(_viewport_h)
+	_viewport_h = _create_viewport("VP_H_%s" % id, size)
 
 	_material_h = ShaderMaterial.new()
 	_material_h.shader = _shader
@@ -89,14 +81,7 @@ func _ensure_viewport() -> void:
 	_canvas_h.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Vertical pass viewport
-	_viewport_v = SubViewport.new()
-	_viewport_v.name = "VP_V_%s" % id
-	_viewport_v.size = Vector2i(512, 512)
-	_viewport_v.transparent_bg = true
-	_viewport_v.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport_v.disable_3d = true
-	_viewport_v.gui_disable_input = true
-	add_child(_viewport_v)
+	_viewport_v = _create_viewport("VP_V_%s" % id, size)
 
 	_material_v = ShaderMaterial.new()
 	_material_v.shader = _shader
@@ -113,4 +98,3 @@ func _ensure_viewport() -> void:
 	_cached_tex_data.texture = _viewport_v.get_texture()
 	_cached_tex_data.viewport = _viewport_v
 	_cached_tex_data.resolution = _viewport_v.size
-	GNLogger.debug("BlurTOP", "'%s' viewports created (2-pass)" % id)

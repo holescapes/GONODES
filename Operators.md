@@ -17,7 +17,7 @@
 
 ## TOP — Texture Operators
 
-TOPs process 2D textures on the GPU. Each TOP owns a SubViewport and renders its output via ShaderMaterial. Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback.
+TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
 **Total: 27 operators** — 9 generators, 13 filters, 3 combiners, 2 utility.
 

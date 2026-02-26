@@ -2,10 +2,6 @@ class_name ResolutionTOP
 extends GNTopBase
 ## Resizes an input texture to a target resolution using a SubViewport.
 
-var _viewport: SubViewport = null
-var _canvas: TextureRect = null
-var _cached_tex_data: GNTextureData = null
-
 
 func _init() -> void:
 	node_type = "resolution"
@@ -29,7 +25,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		GNLogger.warn("ResolutionTOP", "'%s' — no valid input" % id)
 		return null
 
-	_ensure_viewport()
+	_setup_viewport()
 
 	var res: Vector2i = get_param_value("resolution")
 	var filter_idx: int = get_param_value("filter")
@@ -37,34 +33,21 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if _viewport.size != res:
 		_viewport.size = res
 
-	_canvas.texture = tex_in.texture
+	(_canvas as TextureRect).texture = tex_in.texture
 	_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if filter_idx == 0 else CanvasItem.TEXTURE_FILTER_NEAREST
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
 
-func _ensure_viewport() -> void:
+func _setup_viewport() -> void:
 	if _viewport != null:
 		return
 
-	_viewport = SubViewport.new()
-	_viewport.name = "VP_%s" % id
-	_viewport.size = Vector2i(1920, 1080)
-	_viewport.transparent_bg = true
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_viewport.disable_3d = true
-	_viewport.gui_disable_input = true
-	add_child(_viewport)
+	_ensure_viewport(get_param_value("resolution"))
 
 	_canvas = TextureRect.new()
 	_canvas.name = "Canvas"
 	_canvas.stretch_mode = TextureRect.STRETCH_SCALE
 	_viewport.add_child(_canvas)
 	_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = _viewport.get_texture()
-	_cached_tex_data.viewport = _viewport
-	_cached_tex_data.resolution = _viewport.size
-	GNLogger.debug("ResolutionTOP", "'%s' viewport created" % id)
