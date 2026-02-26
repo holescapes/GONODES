@@ -167,10 +167,13 @@ func _create_bool_control() -> Control:
 
 
 func _create_string_control() -> Control:
-	var edit := LineEdit.new()
+	var edit := TextEdit.new()
 	edit.text = str(param.value)
 	edit.size_flags_horizontal = SIZE_EXPAND_FILL
-	edit.text_submitted.connect(_on_string_changed)
+	edit.custom_minimum_size = Vector2(0, 80)
+	edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	edit.scroll_fit_content_height = false
+	edit.focus_exited.connect(_on_string_focus_lost.bind(edit))
 	return edit
 
 
@@ -382,6 +385,15 @@ func _on_string_changed(text: String) -> void:
 	param.set_value(text)
 
 
+## Called when the TextEdit for a string parameter loses focus — commits the value.
+func _on_string_focus_lost(edit: TextEdit) -> void:
+	if _updating:
+		return
+	var new_text := edit.text
+	if new_text != str(param.value):
+		param.set_value(new_text)
+
+
 func _on_enum_changed(idx: int) -> void:
 	if _updating:
 		return
@@ -556,7 +568,7 @@ func _update_value_display() -> void:
 				cb.button_pressed = bool(param.get_resolved_value())
 				cb.text = "On" if cb.button_pressed else "Off"
 		GNParameter.ValueType.STRING:
-			var edit := _control as LineEdit
+			var edit := _control as TextEdit
 			if edit:
 				edit.text = str(param.get_resolved_value())
 		GNParameter.ValueType.ENUM:

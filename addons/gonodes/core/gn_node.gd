@@ -86,6 +86,10 @@ signal parameter_changed(node_id: String, param_name: String)
 ## Listeners (GNGraphEditor, GNNodeView) must rebuild slots and prune stale wires.
 signal ports_changed(node_id: String)
 
+## Emitted when parameters are added, removed, or their visibility changes.
+## Listeners (GNParamInspector) should rebuild parameter rows.
+signal parameters_changed(node_id: String)
+
 ## Emitted after this node is renamed (old_id, new_id).
 signal node_renamed(old_id: String, new_id: String)
 
