@@ -57,54 +57,125 @@ func _ready() -> void:
 	print("GONODES Editor running (%d display(s))" % displays.size())
 
 
-## Creates the same demo network from Phase 2 test for initial testing.
+## Demo network: SOP → COMP → RenderTOP pipeline with animated noise + spinning torus.
 func _setup_network() -> void:
 	network = GNNetwork.new()
 
-	# --- Create nodes ---
+	# ── CHOP: LFO drives torus rotation ────────────────────────────────────
 	var lfo := LFO_CHOP.new()
 	lfo.initialize("lfo1")
-	lfo.get_parameter("frequency").set_value(0.5)
-	lfo.get_parameter("amplitude").set_value(1.0)
-	lfo.get_parameter("waveform").set_value(LFO_CHOP.Waveform.SINE)
-	lfo.graph_position = Vector2(50, 200)
+	lfo.get_parameter("frequency").set_value(0.25)
+	lfo.get_parameter("amplitude").set_value(360.0)
+	lfo.get_parameter("waveform").set_value(LFO_CHOP.Waveform.SAWTOOTH)
+	lfo.graph_position = Vector2(50, 450)
 
-	var noise := NoiseTOP.new()
-	noise.initialize("noise1")
-	noise.get_parameter("scale").set_value(6.0)
-	noise.get_parameter("resolution").set_value(Vector2i(512, 512))
-	noise.get_parameter("monochrome").set_value(true)
-	noise.get_parameter("time_offset").set_expression('chop("lfo1", "out") * 5.0')
-	noise.graph_position = Vector2(350, 100)
+	# ── SOP generators ─────────────────────────────────────────────────────
+	var box := BoxSOP.new()
+	box.initialize("box1")
+	box.get_parameter("size_x").set_value(1.0)
+	box.get_parameter("size_y").set_value(1.0)
+	box.get_parameter("size_z").set_value(1.0)
+	box.get_parameter("subdivide_w").set_value(8)
+	box.get_parameter("subdivide_h").set_value(8)
+	box.get_parameter("subdivide_d").set_value(8)
+	box.graph_position = Vector2(50, 50)
 
-	var level := LevelTOP.new()
-	level.initialize("level1")
-	level.get_parameter("contrast").set_value(2.5)
-	level.get_parameter("brightness").set_value(0.8)
-	level.get_parameter("gamma").set_value(0.6)
-	level.get_parameter("invert").set_value(true)
-	level.graph_position = Vector2(650, 100)
+	var torus := TorusSOP.new()
+	torus.initialize("torus1")
+	torus.get_parameter("inner_radius").set_value(0.15)
+	torus.get_parameter("outer_radius").set_value(0.6)
+	torus.get_parameter("rings").set_value(48)
+	torus.get_parameter("ring_segments").set_value(24)
+	torus.graph_position = Vector2(50, 250)
 
-	var win := WindowTOP.new()
-	win.initialize("win1")
-	win.get_parameter("title").set_value("GONODES Output")
-	win.get_parameter("monitor").set_value(0)
-	win.get_parameter("window_mode").set_value(WindowTOP.WindowMode.WINDOWED)
-	win.get_parameter("resolution").set_value(Vector2i(800, 600))
-	win.graph_position = Vector2(950, 100)
+	# ── SOP filters ────────────────────────────────────────────────────────
+	var noise_sop := NoiseSOP.new()
+	noise_sop.initialize("noise_sop1")
+	noise_sop.get_parameter("amplitude").set_value(0.15)
+	noise_sop.get_parameter("frequency").set_value(3.0)
+	noise_sop.get_parameter("speed").set_value(0.8)
+	noise_sop.graph_position = Vector2(350, 50)
 
-	# --- Add to network ---
+	var box_xform := TransformSOP.new()
+	box_xform.initialize("box_xform1")
+	box_xform.get_parameter("tx").set_value(-1.2)
+	box_xform.graph_position = Vector2(650, 50)
+
+	var xform := TransformSOP.new()
+	xform.initialize("xform1")
+	xform.get_parameter("tx").set_value(1.2)
+	xform.get_parameter("ty").set_value(0.3)
+	xform.get_parameter("rx").set_expression('chop("lfo1", "out")')
+	xform.graph_position = Vector2(350, 250)
+
+	var merge := MergeSOP.new()
+	merge.initialize("merge1")
+	merge.graph_position = Vector2(950, 150)
+
+	# ── COMPs ──────────────────────────────────────────────────────────────
+	var geo := GeometryCOMP.new()
+	geo.initialize("geo1")
+	geo.get_parameter("metallic").set_value(0.3)
+	geo.get_parameter("roughness").set_value(0.4)
+	geo.get_parameter("albedo_color").set_value(Color(0.85, 0.55, 0.2))
+	geo.graph_position = Vector2(1250, 150)
+
+	var cam := CameraCOMP.new()
+	cam.initialize("cam1")
+	cam.get_parameter("tx").set_value(0.0)
+	cam.get_parameter("ty").set_value(1.2)
+	cam.get_parameter("tz").set_value(3.5)
+	cam.get_parameter("rx").set_value(-15.0)
+	cam.get_parameter("fov").set_value(60.0)
+	cam.graph_position = Vector2(1250, 350)
+
+	var light := LightCOMP.new()
+	light.initialize("light1")
+	light.get_parameter("type").set_value(0)
+	light.get_parameter("rx").set_value(-40.0)
+	light.get_parameter("ry").set_value(30.0)
+	light.get_parameter("energy").set_value(1.2)
+	light.get_parameter("shadows").set_value(true)
+	light.graph_position = Vector2(1250, 500)
+
+	# ── Render TOP ─────────────────────────────────────────────────────────
+	var render := RenderTOP.new()
+	render.initialize("render1")
+	render.get_parameter("resolution").set_value(Vector2i(1280, 720))
+	render.get_parameter("bg_color").set_value(Color(0.08, 0.08, 0.1))
+	render.get_parameter("anti_aliasing").set_value(2)
+	render.get_parameter("ambient_energy").set_value(0.4)
+	render.graph_position = Vector2(1550, 300)
+
+	# ── Add all nodes ──────────────────────────────────────────────────────
 	network.add_node(lfo)
-	network.add_node(noise)
-	network.add_node(level)
-	network.add_node(win)
+	network.add_node(box)
+	network.add_node(torus)
+	network.add_node(noise_sop)
+	network.add_node(box_xform)
+	network.add_node(xform)
+	network.add_node(merge)
+	network.add_node(geo)
+	network.add_node(cam)
+	network.add_node(light)
+	network.add_node(render)
 
-	# --- Wire ---
-	network.connect_nodes("noise1", 0, "level1", 0)
-	network.connect_nodes("level1", 0, "win1", 0)
+	# ── Wire ───────────────────────────────────────────────────────────────
+	# Box (input 0) → noise → box_xform → merge input 0
+	network.connect_nodes("box1", 0, "noise_sop1", 0)
+	network.connect_nodes("noise_sop1", 0, "box_xform1", 0)
+	network.connect_nodes("box_xform1", 0, "merge1", 0)
+	# Torus (input 1) → xform → merge input 1
+	network.connect_nodes("torus1", 0, "xform1", 0)
+	network.connect_nodes("xform1", 0, "merge1", 0)
+	# Merge → GeometryCOMP → RenderTOP
+	network.connect_nodes("merge1", 0, "geo1", 0)
+	network.connect_nodes("geo1", 0, "render1", 0)
+	network.connect_nodes("cam1", 0, "render1", 0)
+	network.connect_nodes("light1", 0, "render1", 0)
 
-	# Default viewer target: last TOP before output
-	_viewer_node_id = "level1"
+	# Default viewer target: rendered 3D output
+	_viewer_node_id = "render1"
 
 
 func _setup_cook_engine() -> void:

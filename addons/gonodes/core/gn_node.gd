@@ -109,9 +109,18 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 ## Optional override — called once per frame before cook, even when not dirty.
 ## Useful for time-dependent nodes to check if they should mark themselves dirty.
+## Also marks nodes dirty if any parameter is in EXPRESSION mode, since expressions
+## may reference external state (e.g., chop("lfo1", "out"), time) that changes
+## every frame without triggering dirty propagation through wires.
 func _pre_cook(delta: float) -> void:
 	if time_dependent:
 		mark_dirty()
+		return
+	# Check if any parameter uses an expression — if so, must re-cook every frame
+	for param_name in parameters:
+		if parameters[param_name].mode == GNParameter.Mode.EXPRESSION:
+			mark_dirty()
+			return
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -148,6 +157,8 @@ func initialize(p_id: String) -> void:
 		var param: GNParameter = parameters[param_name]
 		if not param.value_changed.is_connected(_on_parameter_changed):
 			param.value_changed.connect(_on_parameter_changed)
+		if not param.mode_changed.is_connected(_on_parameter_mode_changed):
+			param.mode_changed.connect(_on_parameter_mode_changed)
 	GNLogger.debug("GNNode", "Initialized '%s' (%s/%s) — %d in, %d out, %d params" % [
 		id, GNFamily.get_family_name(family), node_type,
 		input_ports.size(), output_ports.size(), parameters.size()])
@@ -317,6 +328,13 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 
 ## Called when any parameter's value changes — marks this node dirty.
 func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
+	mark_dirty()
+	parameter_changed.emit(id, param_name)
+
+
+## Called when any parameter's mode changes (constant ↔ expression ↔ bind).
+## Marks dirty so the node re-cooks with the new mode's resolved value.
+func _on_parameter_mode_changed(param_name: String, _new_mode: int) -> void:
 	mark_dirty()
 	parameter_changed.emit(id, param_name)
 

@@ -25,6 +25,12 @@ func _init() -> void:
 	family = GNFamily.Type.COMP
 
 
+## Ensures family is set even when subclass _init() doesn't call super().
+func initialize(p_id: String) -> void:
+	family = GNFamily.Type.COMP
+	super.initialize(p_id)
+
+
 ## Default output port.  Override in subclass to add inputs or extra outputs.
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.COMP, "Component output")
