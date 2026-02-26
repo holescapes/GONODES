@@ -40,6 +40,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
+	add_parameter(GNParameter.create_bool("open", false, "Open", "Show/hide the output window"))
 	add_parameter(GNParameter.create_string("title", "GONODES Output", "Title", "Window title bar text"))
 
 	# Monitor selection — 0 = primary, 1 = secondary, etc.
@@ -48,7 +49,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("window_mode",
 		PackedStringArray(["Windowed", "Fullscreen", "Borderless"]), 0, "", "Window display mode"))
 
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080), "", "Window resolution in pixels"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Window resolution in pixels"))
 
 	# Position: (-1, -1) = auto-center on target monitor
 	add_parameter(GNParameter.create_vector2i("position", Vector2i(-1, -1), "", "Window position (-1,-1 = auto center)"))
@@ -61,6 +62,13 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
 
 	_ensure_window()
+
+	# Sync window visibility with the "open" parameter
+	var should_open: bool = get_param_value("open")
+	if _window != null and _window.visible != should_open:
+		_window.visible = should_open
+		if should_open:
+			GNLogger.info("WindowTOP", "'%s' output window re-opened via parameter" % id)
 
 	# Apply lightweight params every frame (title, texture)
 	if _window != null:
@@ -198,9 +206,11 @@ func _position_on_monitor(monitor_idx: int, pos: Vector2i, mode_idx: int) -> voi
 
 ## Called when the user clicks the window's close button.
 func _on_window_close_requested() -> void:
-	# Hide instead of destroying — the window can be re-shown
+	# Hide instead of destroying — flip the "open" param so the inspector
+	# reflects the current state and the user can toggle it back on.
 	if _window:
 		_window.visible = false
+		set_param_value("open", false)
 		GNLogger.info("WindowTOP", "'%s' output window hidden by user" % id)
 
 

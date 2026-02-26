@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu, performance profiling overlay. GNExtensionRegistry. 3D pipeline live. 78 operators across 5 families. Phases 1–5.8 complete.**
+**Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu, performance profiling overlay. GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. 3D pipeline live. 82 operators across 6 families. Phases 1–5.8 complete.**
 
 ### Completed
 
@@ -93,19 +93,22 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 | **CHOP** | 21 | LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP |
 | **DAT** | 12 | Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn (stub) |
 | **SOP** | 14 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch |
-| **COMP** | 3 | Geometry, Camera, Light |
+| **MAT** | 2 | PBR, Shader |
+| **COMP** | 4 | Geometry, Camera, Light, Merge |
 
 ### 3D Scene Pipeline
 
-SOPs produce geometry → COMPs wrap Godot's native 3D nodes → RenderTOP renders through an isolated SubViewport back into the TOP texture pipeline:
+SOPs produce geometry → MATs define materials → COMPs compose the 3D scene → RenderTOP renders through an isolated SubViewport back into the TOP texture pipeline:
 
 ```
 GridSOP → TransformSOP → GeometryCOMP (MeshInstance3D) ─┐
-                         CameraCOMP   (Camera3D)        ├─→ RenderTOP → texture output
-                         LightCOMP    (Light3D)         ─┘
+                   ↑           ↑                        │
+              PBR_MAT     CameraCOMP (Camera3D)       ├─→ RenderTOP → texture output
+                          LightCOMP  (Light3D)        │
+                          MergeCOMP  (Node3D group) ──┘
 ```
 
-SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and SurfaceTool for procedural generation. NoiseSOP uses FastNoiseLite for vertex displacement.
+SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and SurfaceTool for procedural generation. NoiseSOP uses FastNoiseLite for vertex displacement. MAT operators wrap Godot's Material system (StandardMaterial3D, ShaderMaterial) for per-object material assignment. GeometryCOMP accepts SOP, MAT, and TOP inputs. MergeCOMP groups multiple COMPs for scene composition. Shadow controls span all three levels: per-light (LightCOMP), per-object (GeometryCOMP), and global quality (RenderTOP).
 
 ### Next Up (Phase 6)
 
@@ -117,16 +120,17 @@ SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and S
 - [x] Preview toggle (toolbar CheckButton to show/hide all inline previews)
 - [x] Right-click context menu (Add Node, Copy/Cut/Paste/Duplicate, Delete, Select All, Undo/Redo)
 - [x] Performance profiling overlay (per-node cook time badge with color coding, toolbar toggle)
-- ScriptCHOP (user GDScript for custom channel processing)
-- Code editor UI (CodeEdit-based multi-line editing in inspector)
-- Right-click context menu on graph canvas
-- Multiple viewer windows
-- Performance profiling overlay
+- [x] MAT family (PBR_MAT, Shader_MAT — per-object materials via GeometryCOMP)
+- [x] MergeCOMP (groups COMP scene nodes for multi-object 3D scenes)
+- [x] Shadow system (per-light, per-object, and global shadow quality controls)
+- [x] Bug fixes (family assignment, expression re-cook, preview label centering)
+- [x] Multiple viewer windows (floating windows pinned to any TOP node, toolbar + context menu)
+- Stress test: 50+ node network
 
 ### Planned (Post-MVP)
 
-- POP, MAT families
-- GPU particle system (millions of points via compute shaders)
+- POP family (GPU particle system — millions of points via compute shaders)
+- ScriptCHOP / ScriptDAT (user GDScript for custom processing)
 - Renderer switching (Forward+, Mobile, Compatibility) for target platform preview
 - Patch export as standalone apps (desktop, mobile, web)
 - LibGodot embedding for host applications (VDMX, Resolume)
@@ -204,6 +208,7 @@ GONODES/
 │   │   ├── gn_dat_base.gd          # GNDatBase — DAT family base class
 │   │   ├── gn_sop_base.gd          # GNSopBase — SOP family base class
 │   │   ├── gn_comp_base.gd         # GNCompBase — COMP family base class
+│   │   ├── gn_mat_base.gd          # GNMatBase — MAT family base class
 │   │   ├── gn_cook_engine.gd       # Frame-driven cook engine
 │   │   ├── gn_network.gd           # Graph model (Resource)
 │   │   ├── gn_parameter.gd         # Typed parameters with expressions
@@ -213,6 +218,7 @@ GONODES/
 │   │   ├── gn_channel_data.gd      # CHOP output data
 │   │   ├── gn_table_data.gd        # DAT output data (table + text modes)
 │   │   ├── gn_geo_data.gd          # SOP output data (ArrayMesh wrapper)
+│   │   ├── gn_material_data.gd     # MAT output data (Material wrapper)
 │   │   ├── gn_port.gd              # Port definition
 │   │   ├── gn_connection.gd        # Wire connection
 │   │   ├── gn_family.gd            # OP family enum
@@ -222,7 +228,8 @@ GONODES/
 │   │   ├── chop/                    # 21 CHOPs: LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP
 │   │   ├── dat/                     # 12 DATs: Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn
 │   │   ├── sop/                     # 14 SOPs: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch
-│   │   ├── comp/                    # 3 COMPs: Geometry, Camera, Light
+│   │   ├── mat/                     # 2 MATs: PBR, Shader
+│   │   ├── comp/                    # 4 COMPs: Geometry, Camera, Light, Merge
 │   │   └── output/                  # WindowTOP (multi-display)
 │   ├── ui/                          # Editor UI
 │   │   ├── gn_graph_editor.gd      # GraphEdit canvas (bidirectional sync)

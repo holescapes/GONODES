@@ -40,6 +40,7 @@ enum _CtxID {
 	SELECT_ALL,
 	UNDO,
 	REDO,
+	OPEN_VIEWER,
 }
 
 ## Undo/redo history for graph operations.
@@ -53,6 +54,9 @@ signal operator_selected(node_id: String)
 
 ## Signal emitted when selection is cleared.
 signal operator_deselected()
+
+## Signal emitted when "Open Viewer" is chosen from the context menu.
+signal open_viewer_requested(node_id: String)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -107,8 +111,8 @@ func _ready() -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_TAB:
-			# Open node palette at mouse position
+		if event.keycode == KEY_A and event.alt_pressed and not event.ctrl_pressed:
+			# Open node palette at mouse position (Alt+A)
 			_spawn_position = (get_local_mouse_position() + scroll_offset) / zoom
 			_palette.popup_at(get_global_mouse_position())
 			get_viewport().set_input_as_handled()
@@ -701,7 +705,7 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 
 	# Always available
 	_context_menu.add_item("Add Node…", _CtxID.ADD_NODE)
-	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.ADD_NODE), _shortcut(KEY_TAB), true)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.ADD_NODE), _shortcut(KEY_A, false, true), true)
 	_context_menu.add_separator()
 
 	# Selection-dependent items
@@ -742,6 +746,17 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.REDO), _shortcut(KEY_Y, true), true)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.REDO), not _undo_redo.has_redo())
 
+	# Viewer window — enabled when exactly one TOP node is selected
+	var selected_ids := _get_selected_node_ids()
+	var single_top_selected := false
+	if selected_ids.size() == 1 and network != null:
+		var sel_node: GNNode = network.get_node_by_id(selected_ids[0])
+		if sel_node != null and sel_node.family == GNFamily.Type.TOP:
+			single_top_selected = true
+	_context_menu.add_separator()
+	_context_menu.add_item("Open Viewer", _CtxID.OPEN_VIEWER)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.OPEN_VIEWER), not single_top_selected)
+
 	_context_menu.position = Vector2i(screen_pos)
 	_context_menu.reset_size()
 	_context_menu.popup()
@@ -775,13 +790,18 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			undo_action()
 		_CtxID.REDO:
 			redo_action()
+		_CtxID.OPEN_VIEWER:
+			var selected := _get_selected_node_ids()
+			if selected.size() == 1:
+				open_viewer_requested.emit(selected[0])
 
 
 ## Helper: creates a Shortcut with a single InputEventKey for menu display.
-func _shortcut(keycode: Key, ctrl: bool = false) -> Shortcut:
+func _shortcut(keycode: Key, ctrl: bool = false, alt: bool = false) -> Shortcut:
 	var ev := InputEventKey.new()
 	ev.keycode = keycode
 	ev.ctrl_pressed = ctrl
+	ev.alt_pressed = alt
 	var sc := Shortcut.new()
 	sc.events = [ev]
 	return sc

@@ -24,6 +24,9 @@ var _current_file_path: String = ""
 var _save_dialog: FileDialog = null
 var _load_dialog: FileDialog = null
 
+## Floating viewer windows — each pinned to a specific node's output.
+var _viewer_windows: Array[GNViewerWindow] = []
+
 
 func _ready() -> void:
 	# Initialize extension registry — scan for gn_ext_* addon manifests
@@ -38,6 +41,7 @@ func _ready() -> void:
 	graph_editor.bind_network(network)
 	graph_editor.operator_selected.connect(_on_graph_node_selected)
 	graph_editor.operator_deselected.connect(_on_graph_selection_cleared)
+	graph_editor.open_viewer_requested.connect(_on_open_viewer_requested)
 
 	# Bind inspector to network
 	inspector.network = network
@@ -221,6 +225,9 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 			if tex_data.texture:
 				viewer.texture = tex_data.texture
 
+	# Update all floating viewer windows
+	_update_viewer_windows()
+
 	# Build info text
 	var parts: Array[String] = ["FPS: %d" % Engine.get_frames_per_second()]
 	parts.append("Frame: %d" % frame)
@@ -264,10 +271,18 @@ func _on_graph_selection_cleared() -> void:
 	inspector.clear_inspection()
 
 
+## Context menu "Open Viewer" — spawn a floating viewer window for the node.
+func _on_open_viewer_requested(node_id: String) -> void:
+	open_viewer_window(node_id)
+
+
 ## Keep viewer target in sync when a node is renamed.
 func _on_node_renamed(old_id: String, new_id: String) -> void:
 	if _viewer_node_id == old_id:
 		_viewer_node_id = new_id
+	# Update floating viewer windows
+	for vw in _viewer_windows:
+		vw.handle_node_renamed(old_id, new_id)
 
 
 func _on_log_toggled(pressed: bool) -> void:
@@ -284,6 +299,53 @@ func _on_preview_toggled(pressed: bool) -> void:
 
 func _on_perf_toggled(pressed: bool) -> void:
 	graph_editor.set_perf_overlay_visible(pressed)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Viewer Windows
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Opens a floating viewer window for the given node (or the current viewer target).
+func open_viewer_window(target_node_id: String = "") -> void:
+	var nid: String = target_node_id if not target_node_id.is_empty() else _viewer_node_id
+	if nid.is_empty():
+		return
+
+	var vw := GNViewerWindow.new()
+	vw.node_id = nid
+	# Offset each new window slightly so they don't stack exactly
+	var offset := _viewer_windows.size() * 30
+	vw.position = Vector2i(200 + offset, 150 + offset)
+	vw.closed.connect(_on_viewer_window_closed)
+	add_child(vw)
+	_viewer_windows.append(vw)
+	GNLogger.info("Editor", "Opened viewer window for '%s'" % nid)
+
+
+## Called when a floating viewer window is closed by the user.
+func _on_viewer_window_closed(vw: GNViewerWindow) -> void:
+	_viewer_windows.erase(vw)
+
+
+## Updates all floating viewer windows with their pinned node's texture.
+func _update_viewer_windows() -> void:
+	for vw in _viewer_windows:
+		if not is_instance_valid(vw):
+			continue
+		var node: GNNode = network.get_node_by_id(vw.node_id)
+		if node != null and node.cached_output is GNTextureData:
+			var tex_data: GNTextureData = node.cached_output as GNTextureData
+			vw.update_texture(tex_data.texture)
+		else:
+			vw.update_texture(null)
+
+
+## Closes all floating viewer windows.
+func _close_all_viewer_windows() -> void:
+	for vw in _viewer_windows.duplicate():
+		if is_instance_valid(vw):
+			vw.queue_free()
+	_viewer_windows.clear()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -367,6 +429,14 @@ func _setup_toolbar() -> void:
 	info_bar.add_child(perf_toggle)
 	info_bar.move_child(perf_toggle, 6)
 
+	# Open Viewer button
+	var btn_viewer := Button.new()
+	btn_viewer.text = "+ Viewer"
+	btn_viewer.tooltip_text = "Open a floating viewer window for the selected TOP node"
+	btn_viewer.pressed.connect(func(): open_viewer_window())
+	info_bar.add_child(btn_viewer)
+	info_bar.move_child(btn_viewer, 7)
+
 
 ## Keyboard shortcuts for file operations.
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -391,6 +461,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _on_new_pressed() -> void:
 	_viewer_node_id = ""
 	viewer.texture = null
+	_close_all_viewer_windows()
 	inspector.clear_inspection()
 	graph_editor._unbind_network()
 
@@ -458,6 +529,7 @@ func _save_to_path(path: String) -> void:
 func _load_from_path(path: String) -> void:
 	_viewer_node_id = ""
 	viewer.texture = null
+	_close_all_viewer_windows()
 	inspector.clear_inspection()
 	graph_editor._unbind_network()
 

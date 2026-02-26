@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-27
-> **Status:** Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu, performance profiling overlay. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→COMP→RenderTOP) live. Phases 1–5.8 complete. 78 operators across 5 families.
+> **Status:** Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu, performance profiling overlay. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. Phases 1–5.8 complete. 82 operators across 6 families (28 TOP, 21 CHOP, 12 DAT, 14 SOP, 4 COMP, 2 MAT, 1 output).
 
 ---
 
@@ -104,7 +104,7 @@ Embedding Model (Future):
 | SOP (Surface OP)      | `GNSopNode` — produces ArrayMesh via GNGeoData           |
 | POP (Point OP)        | `GNPopNode` — GPU particle/point cloud system (future)   |
 | DAT (Data OP)         | `GNDatNode` — tables/text via GNTableData                |
-| MAT (Material OP)     | `GNMatNode` — Godot ShaderMaterial (future)              |
+| MAT (Material OP)     | `GNMatNode` — PBR or custom ShaderMaterial               |
 | COMP (Component OP)   | `GNCompNode` — 3D scene components (Camera, Light, Geo)  |
 | Network / Canvas      | `GNNetwork` (Resource) displayed in `GraphEdit`          |
 | Wire / Connection     | `GNConnection` — typed, family-checked                   |
@@ -184,6 +184,18 @@ GNGeoData extends GNData (RefCounted)
 
 GNGeoData wraps Godot's native `ArrayMesh`, leveraging Godot's built-in mesh types (`BoxMesh`, `SphereMesh`, `CylinderMesh`, `TorusMesh`) via `set_mesh()` and Godot's `SurfaceTool` for procedural generation.
 
+### GNMaterialData (MAT output)
+```
+GNMaterialData extends GNData (RefCounted)
+├── material: Material       # Godot Material base class (StandardMaterial3D, ShaderMaterial, etc.)
+├── material_label: String   # Human-readable label for UI preview (e.g., "PBR", "Shader: custom_toon")
+├── get_family() -> MAT
+├── invalidate()             # Clears material and label
+└── duplicate_data() -> GNData  # Deep-copies Material resource
+```
+
+GNMaterialData wraps Godot's `Material` base class, allowing any material type (StandardMaterial3D, ShaderMaterial, ORMMaterial3D) to flow through the graph. MAT operators produce GNMaterialData, which GeometryCOMP consumes as an optional material override.
+
 ---
 
 ## 6. Operator Base Class
@@ -251,6 +263,7 @@ Five intermediate base classes sit between GNNode and the individual operators. 
 | `GNDatBase` | DAT | `_cached_table: GNTableData` | Label: headers + first 3 rows | `_prepare_table(clear)`, `_get_input_dat()` |
 | `GNSopBase` | SOP | `_cached_geo: GNGeoData` | Label: vertex/surface counts | `_prepare_geo()`, `_get_input_sop()`, `_require_input_geo()` |
 | `GNCompBase` | COMP | `_scene_node: Node3D` | Label: node class + visibility | auto `_notification(PREDELETE)` cleanup, `get_scene_node()` |
+| `GNMatBase` | MAT | `_cached_mat_data: GNMaterialData` | Label: material type/label | `_prepare_output()` |
 
 **Class Hierarchy:**
 ```
@@ -259,7 +272,8 @@ GNNode (type-agnostic base)
 ├── GNChopBase (21 CHOP operators, incl. DATtoCHOP bridge)
 ├── GNDatBase (12 DAT operators)
 ├── GNSopBase (14 SOP operators)
-└── GNCompBase (3 COMP operators)
+├── GNCompBase (4 COMP operators)
+└── GNMatBase (2 MAT operators)
 ```
 
 **GNTopBase** intentionally does NOT include viewport/texture infrastructure because TOP operators vary significantly in rendering pipelines (SubViewport-based, compute shader, texture copy, etc.).
@@ -825,10 +839,10 @@ GONODES/
   - `GNNodeView._setup_preview()` — creates preview control via `gn_node.create_preview_control()` (120×80px min size).
   - `GNGraphEditor.update_previews()` iterates ALL node views each cook frame (skipped when hidden).
   - Extensible: any operator can override `create_preview_control()` for operator-specific rendering.
-- [x] **Family base classes** — 5 intermediate bases between GNNode and operators:
-  - `GNTopBase` (28 TOPs), `GNChopBase` (21 CHOPs), `GNDatBase` (12 DATs), `GNSopBase` (14 SOPs), `GNCompBase` (3 COMPs).
+- [x] **Family base classes** — 6 intermediate bases between GNNode and operators:
+  - `GNTopBase` (28 TOPs), `GNChopBase` (21 CHOPs), `GNDatBase` (12 DATs), `GNSopBase` (14 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
   - Each sets family, provides cached data helpers, and overrides preview methods.
-  - All 78 operators migrated. GNNode is now fully type-agnostic.
+  - All 82 operators migrated. GNNode is now fully type-agnostic.
 - [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
   - `GNGraphEditor.previews_visible` flag controls whether `update_previews()` processes updates.
   - `GNGraphEditor.set_previews_visible(enabled)` shows/hides all preview controls on existing views.
@@ -848,10 +862,30 @@ GONODES/
   - `GNGraphEditor.update_perf_overlays()` called each cook frame (skipped when hidden).
   - Newly created views auto-show overlay if `perf_overlay_visible` is true.
   - Editor toolbar "Perf" `CheckButton` (off by default) wired to `_on_perf_toggled()`.
-- [ ] Multiple viewer windows
+- [x] **MAT family** — material operators with per-object material binding:
+  - `GNMaterialData` data type wrapping Godot's `Material` base class.
+  - `GNMatBase` family base class with `_prepare_output()` helper and material label preview.
+  - `PBR_MAT` — StandardMaterial3D wrapper: albedo color, metallic, roughness, specular, emission (toggle/color/energy), normal scale, transparency mode (Disabled/Alpha/Alpha Scissor/Depth Pre-Pass), alpha scissor threshold, cull mode (Back/Front/Disabled), triplanar UV. 3 optional TOP inputs (albedo texture, normal map, ORM texture).
+  - `Shader_MAT` — ShaderMaterial wrapper: inline shader code (string param) or external `.gdshader` file. 8 float uniforms (u0–u7), 2 color uniforms (color0, color1), 2 optional TOP inputs (tex0, tex1). Lazy shader recompilation (only when source changes).
+  - GeometryCOMP updated: 3 inputs (SOP, MAT, TOP). MAT input overrides fallback PBR; when disconnected, built-in PBR params still work.
+- [x] **MergeCOMP** — groups multiple COMP scene nodes under a single Node3D parent:
+  - Multi-input COMP port. Full transform params (t/r/s xyz) + visible toggle.
+  - `_populate_from_network()` walks upstream connections, reparents COMP scene nodes.
+  - RenderTOP updated to recognize MergeCOMP and adopt entire group node.
+- [x] **Shadow system** — per-light and global shadow controls:
+  - LightCOMP: shadow_bias, shadow_normal_bias, shadow_blur, shadow_opacity, directional shadow mode (Orthogonal/PSSM2/PSSM4).
+  - RenderTOP: shadow atlas size, directional shadow size, shadow filter quality.
+  - GeometryCOMP: cast_shadow mode (Off/On/Double-Sided/Shadows Only).
+- [x] **Bug fixes** — family assignment (`_init()` override without `super()`), expression re-cook (`_pre_cook` detection + `mode_changed` signal), torus Y-axis rotation visibility.
+- [x] **Multiple viewer windows** — floating viewer windows pinned to any TOP node:
+  - `GNViewerWindow` extends Window — dark background, TextureRect with aspect-preserving display.
+  - Each window is pinned to a specific node via `node_id` and updates every cook frame.
+  - Spawned via toolbar "+ Viewer" button (uses current viewer target) or right-click "Open Viewer" on a selected TOP node.
+  - Windows track node renames automatically and clean up on new/load.
+  - Multiple windows can be open simultaneously, each showing a different node's output.
+  - Close button frees the window and removes it from the tracked array.
 - [ ] Stress test: 50+ node network
-- [ ] Bug fixes
-- [ ] README and basic documentation
+- [x] README and basic documentation
 
 ---
 
@@ -859,12 +893,11 @@ GONODES/
 
 ### Near-term
 - [ ] Patch export to standalone runnables (Godot export templates)
-- [ ] Patch export to standalone runnables (Godot export templates)
 - [ ] Renderer selection UI in editor (Forward+, Mobile, Compatibility)
 - [x] SOP family (procedural geometry: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch)
 - [x] DAT family (Constant, Text, Select, Merge, Transpose, Sort, Evaluate, Switch, bridges)
-- [ ] MAT family (PBR Material, Shader Material)
-- [x] COMP family (GeometryCOMP, CameraCOMP, LightCOMP + RenderTOP bridge)
+- [x] MAT family (PBR_MAT, Shader_MAT)
+- [x] COMP family (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP + RenderTOP bridge)
 - [ ] Keyboard shortcuts and workflow polish
 
 ### Medium-term
@@ -1686,16 +1719,21 @@ GONODES uses Godot's native scene graph for 3D rendering instead of building a c
 ### Architecture
 
 ```
-SOP Chain (geometry data)          COMP Layer (3D scene nodes)          TOP Pipeline
-┌──────────┐  ┌─────────────┐      ┌──────────────┐                     ┌───────────┐
-│ GridSOP  │→→│ TransformSOP│──→── │GeometryCOMP  │ (MeshInstance3D)──→─│           │
-└──────────┘  └─────────────┘      └──────────────┘                     │           │
-                                   ┌──────────────┐                     │ RenderTOP │→→ texture
-                                   │ CameraCOMP   │ (Camera3D) ────→───│           │   output
-                                   └──────────────┘                     │           │
-                                   ┌──────────────┐                     │           │
-                                   │ LightCOMP    │ (Light3D) ─────→───│           │
-                                   └──────────────┘                     └───────────┘
+SOP Chain (geometry)    MAT Layer        COMP Layer (3D scene)              TOP Pipeline
+┌──────────┐  ┌────────────┐             ┌──────────────┐                     ┌───────────┐
+│ GridSOP  │→→│TransformSOP│──→──┐       │              │                     │           │
+└──────────┘  └────────────┘     ├──→─── │GeometryCOMP  │ (MeshInstance3D)─┐  │           │
+                   ┌─────────┐  │       │              │                  │  │           │
+                   │ PBR_MAT │──→──┘     └──────────────┘                  ├──│ RenderTOP │→→ texture
+                   └─────────┘           ┌──────────────┐                  │  │           │   output
+                                         │ CameraCOMP   │ (Camera3D) ─────┤  │           │
+                                         └──────────────┘                  │  │           │
+                                         ┌──────────────┐                  │  │           │
+                                         │ LightCOMP    │ (Light3D) ──────┤  │           │
+                                         └──────────────┘                  │  └───────────┘
+                                         ┌──────────────┐                  │
+                                         │ MergeCOMP    │ (Node3D group)──┘
+                                         └──────────────┘
 ```
 
 ### Key Design Decisions
@@ -1706,9 +1744,13 @@ SOP Chain (geometry data)          COMP Layer (3D scene nodes)          TOP Pipe
 
 3. **Scene population via network walk** — RenderTOP's `_populate_scene_from_network()` walks upstream connections to discover COMP nodes, then reparents their Node3D children into the RenderTOP's viewport. This means the 3D scene is defined by network wiring, not by Godot scene tree structure.
 
-4. **TOP texture input on GeometryCOMP** — GeometryCOMP accepts a TOP texture input to apply as albedo on a `StandardMaterial3D`. This bridges the 2D texture pipeline directly into 3D materials.
+4. **MAT input on GeometryCOMP** — GeometryCOMP accepts 3 inputs: SOP (geometry), MAT (material override), TOP (albedo texture for fallback PBR). When a MAT is connected, its Material is used directly via `material_override`; when disconnected, built-in PBR params + TOP texture build a fallback `StandardMaterial3D`.
 
 5. **Default camera fallback** — If no CameraCOMP is connected to a RenderTOP, it creates a default perspective camera at (0, 2, 5) looking at origin, ensuring there's always a valid render.
+
+6. **MergeCOMP for scene composition** — MergeCOMP groups multiple COMP scene nodes under a single `Node3D` parent. RenderTOP recognizes MergeCOMP and adopts the entire group node, enabling multi-object scenes wired through a single connection.
+
+7. **Shadow system** — Shadows are controlled at three levels: per-light (LightCOMP: bias, normal_bias, blur, opacity, directional shadow mode), per-object (GeometryCOMP: cast_shadow mode), and global quality (RenderTOP: shadow atlas size, directional shadow size, shadow filter).
 
 ### COMP Family Details
 
@@ -1717,6 +1759,7 @@ COMPs are unique in that they don't produce data output (no `GNData` return from
 - `GeometryCOMP.get_mesh_instance() → MeshInstance3D`
 - `CameraCOMP.get_camera() → Camera3D`
 - `LightCOMP.get_light() → Light3D`
+- `MergeCOMP.get_group_node() → Node3D`
 
 The cook engine suppresses null-output warnings for COMP family nodes since this is intentional design.
 
@@ -1737,7 +1780,8 @@ SOP filters (TransformSOP, NoiseSOP, etc.)
 GeometryCOMP (terminal SOP consumer)
   → reads GNGeoData from SOP input
   → applies mesh to its MeshInstance3D
-  → optionally reads TOP texture for albedo
+  → if MAT input connected: uses Material directly (material_override)
+  → else: builds fallback StandardMaterial3D from params + optional TOP albedo texture
 ```
 
 ### Godot Types Used
