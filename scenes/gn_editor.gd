@@ -109,6 +109,30 @@ func _setup_cook_engine() -> void:
 	cook_engine.frame_cooked.connect(_check_stress_report)
 	cook_engine.cook_error.connect(_on_cook_error)
 
+	# Initial sink list
+	_push_active_sinks()
+
+
+## Builds the UI-level sink list and pushes it to the cook engine.
+## Called only when viewer targets actually change (not per-frame).
+## Structural sinks (is_sink nodes) are auto-detected by the engine.
+func _push_active_sinks() -> void:
+	if cook_engine == null:
+		return
+	var sinks: Array[String] = []
+
+	# Main viewer target
+	if not _viewer_node_id.is_empty():
+		sinks.append(_viewer_node_id)
+
+	# Floating viewer windows
+	for vw in _viewer_windows:
+		if is_instance_valid(vw) and not vw.node_id.is_empty():
+			if vw.node_id not in sinks:
+				sinks.append(vw.node_id)
+
+	cook_engine.set_active_sinks(sinks)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Cook Callbacks
@@ -130,7 +154,9 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	var parts: Array[String] = ["FPS: %d" % Engine.get_frames_per_second()]
 	parts.append("Frame: %d" % frame)
 	parts.append("Cook: %.2fms" % cook_time_ms)
-	parts.append("Nodes: %d" % network.get_node_count())
+	var total_nodes := network.get_node_count()
+	var active_count: int = cook_engine._active_set.size()
+	parts.append("Active: %d/%d" % [active_count, total_nodes])
 
 	if not _viewer_node_id.is_empty():
 		parts.append("Viewing: %s" % _viewer_node_id)
@@ -165,6 +191,7 @@ func _on_graph_node_selected(node_id: String) -> void:
 	var node: GNNode = network.get_node_by_id(node_id)
 	if node and node.family == GNFamily.Type.TOP:
 		_viewer_node_id = node_id
+		_push_active_sinks()
 		GNLogger.info("Editor", "Viewer → '%s'" % node_id)
 
 
@@ -184,6 +211,7 @@ func _on_node_renamed(old_id: String, new_id: String) -> void:
 	# Update floating viewer windows
 	for vw in _viewer_windows:
 		vw.handle_node_renamed(old_id, new_id)
+	_push_active_sinks()
 
 
 func _on_log_toggled(pressed: bool) -> void:
@@ -223,12 +251,14 @@ func open_viewer_window(target_node_id: String = "") -> void:
 	vw.closed.connect(_on_viewer_window_closed)
 	add_child(vw)
 	_viewer_windows.append(vw)
+	_push_active_sinks()
 	GNLogger.info("Editor", "Opened viewer window for '%s'" % nid)
 
 
 ## Called when a floating viewer window is closed by the user.
 func _on_viewer_window_closed(vw: GNViewerWindow) -> void:
 	_viewer_windows.erase(vw)
+	_push_active_sinks()
 
 
 ## Updates all floating viewer windows with their pinned node's texture.
@@ -499,6 +529,7 @@ func _on_new_pressed() -> void:
 	network.node_renamed.connect(_on_node_renamed)
 	graph_editor.clear_undo_history()
 
+	_push_active_sinks()
 	_update_title()
 	GNLogger.info("Editor", "New patch created")
 
@@ -575,6 +606,7 @@ func _load_from_path(path: String) -> void:
 	network.node_renamed.connect(_on_node_renamed)
 	graph_editor.clear_undo_history()
 
+	_push_active_sinks()
 	_update_title()
 	print("[GONODES] Loaded patch: %s (%d nodes, %d connections)" % [
 		path, network.get_node_count(), network.get_connection_count()])
@@ -618,6 +650,7 @@ func _on_stress_test_pressed() -> void:
 	network.node_renamed.connect(_on_node_renamed)
 	graph_editor.clear_undo_history()
 	_viewer_node_id = "render_main"
+	_push_active_sinks()
 	_update_title()
 	# Start warm-up countdown — report prints after N frames
 	_stress_warmup_frames = STRESS_WARMUP_COUNT

@@ -31,6 +31,7 @@ var _window_params_dirty: bool = true
 
 func _init() -> void:
 	node_type = "window"
+	is_sink = true
 	node_description = "Display a texture in a standalone OS window (VJ output)."
 
 

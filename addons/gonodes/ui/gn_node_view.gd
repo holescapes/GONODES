@@ -299,6 +299,13 @@ func hide_preview() -> void:
 func update_perf_overlay() -> void:
 	if _perf_label == null or not _perf_label.visible or gn_node == null:
 		return
+
+	# Inactive nodes show a dimmed "zzz" indicator
+	if not gn_node.is_active:
+		_perf_label.text = "zzz"
+		_perf_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 0.6))
+		return
+
 	var status_icon := "✓" if gn_node.cook_valid else "✗"
 	var cook_ms := gn_node.cook_time_ms
 	# Color-code: green < 1ms, yellow < 5ms, red >= 5ms

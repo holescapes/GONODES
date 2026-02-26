@@ -55,6 +55,23 @@ var _lag_state: Dictionary = {}
 ## Per-key state for the trigger() expression function.
 var _trigger_state: Dictionary = {}
 
+# ─── Active Chain Cooking ──────────────────────────────────────────────────────
+
+## IDs of nodes that are live sinks (viewers, WindowTOPs, etc.).
+## Set by the editor via [method set_active_sinks] when viewer targets change.
+var active_sinks: Array[String] = []
+
+## Cached set of node IDs in the active chain (fed from active_sinks).
+## Rebuilt only when topology or sinks change (event-driven, not per-frame).
+var _active_set: Dictionary = {}
+
+## When true, _active_set needs recomputing. Set by topology/sink changes.
+var _active_set_dirty: bool = true
+
+## Regex for extracting node references from expressions.
+## Matches chop("id"), op("id"), top("id"), sop("id"), dat("id"), mat("id").
+static var _expr_ref_regex: RegEx = null
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted after all nodes in a frame have been cooked.
@@ -99,9 +116,19 @@ func _adopt_network_nodes() -> void:
 		if node.get_parent() == null:
 			add_child(node)
 			adopted_count += 1
+		# Listen for expression changes so active set includes referenced nodes
+		if not node.parameter_changed.is_connected(_on_node_param_changed):
+			node.parameter_changed.connect(_on_node_param_changed)
 	# Wire signals for future dynamic node additions
 	if not network.node_added.is_connected(_on_network_node_added):
 		network.node_added.connect(_on_network_node_added)
+	# Wire topology signals for active set invalidation
+	if not network.node_removed.is_connected(_on_topology_changed):
+		network.node_removed.connect(_on_topology_changed)
+	if not network.connection_added.is_connected(_on_connection_changed):
+		network.connection_added.connect(_on_connection_changed)
+	if not network.connection_removed.is_connected(_on_connection_changed):
+		network.connection_removed.connect(_on_connection_changed)
 	_nodes_adopted = true
 	GNLogger.info("CookEngine", "Adopted %d node(s) into scene tree" % adopted_count)
 
@@ -112,6 +139,144 @@ func _on_network_node_added(node_id: String) -> void:
 	if node and node.get_parent() == null:
 		add_child(node)
 		GNLogger.debug("CookEngine", "Dynamically adopted node '%s' (%s)" % [node_id, node.node_type])
+	if node and not node.parameter_changed.is_connected(_on_node_param_changed):
+		node.parameter_changed.connect(_on_node_param_changed)
+	_active_set_dirty = true
+
+
+## Called when any node's parameter changes (value or mode).
+## Expression edits may change which nodes are referenced, so we
+## invalidate the active set. This fires rarely (user interaction only).
+func _on_node_param_changed(_node_id: String, _param_name: String) -> void:
+	_active_set_dirty = true
+
+
+## Called when a node is removed — invalidates the active set.
+func _on_topology_changed(_arg: Variant = null) -> void:
+	_active_set_dirty = true
+
+
+## Called when a connection is added or removed — invalidates the active set.
+func _on_connection_changed(_arg: Variant = null) -> void:
+	_active_set_dirty = true
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Active Chain Cooking
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Sets the list of external sink node IDs (viewer targets, etc.)
+## and marks the active set for recomputation.
+func set_active_sinks(sinks: Array[String]) -> void:
+	if sinks == active_sinks:
+		return
+	active_sinks = sinks
+	_active_set_dirty = true
+
+
+## Marks the active set for recomputation on the next cook frame.
+## Called by the editor when viewer targets change, or internally
+## when topology changes.
+func invalidate_active_set() -> void:
+	_active_set_dirty = true
+
+
+## Computes the set of node IDs that feed into any active sink.
+## Auto-detects structural sinks (nodes with [member GNNode.is_sink] = true)
+## in addition to any UI sinks listed in [member active_sinks].
+## Uses the network's cached adjacency map for O(N) traversal.
+## Returns a Dictionary of { node_id: true } for O(1) lookup.
+func _compute_active_set() -> Dictionary:
+	var active: Dictionary = {}
+	if network == null:
+		return active
+
+	# Seed the queue with externally-specified sinks (viewers, etc.)
+	var queue: Array[String] = []
+	for sink_id in active_sinks:
+		if network.nodes.has(sink_id) and not active.has(sink_id):
+			active[sink_id] = true
+			queue.append(sink_id)
+
+	# Auto-detect structural sinks inside the engine (editor-independent).
+	# Any operator that sets is_sink = true in its _init() is included.
+	# This covers WindowTOP, SpoutOut, MIDIOut, OSCOut, NDIOut, etc.
+	for node_id in network.nodes:
+		if active.has(node_id):
+			continue
+		var node: GNNode = network.nodes[node_id]
+		if node.is_sink:
+			active[node_id] = true
+			queue.append(node_id)
+
+	# If still no sinks at all, everything is active (safety fallback)
+	if queue.is_empty():
+		for node_id in network.nodes:
+			active[node_id] = true
+		return active
+
+	# BFS upstream using cached adjacency (get_input_connections)
+	# AND expression references (chop/op/top/sop/dat/mat calls).
+	# Expression refs are implicit dependencies — if an active node reads
+	# chop("lfo1", "out"), then lfo1 must also be active.
+	while not queue.is_empty():
+		var current_id: String = queue.pop_front()
+
+		# Follow wire connections upstream
+		var in_conns: Array = network.get_input_connections(current_id)
+		for conn in in_conns:
+			var upstream_id: String = conn.from_node
+			if not active.has(upstream_id):
+				active[upstream_id] = true
+				queue.append(upstream_id)
+
+		# Follow expression references (implicit dependencies)
+		var expr_refs: Array[String] = _get_expression_refs(current_id)
+		for ref_id in expr_refs:
+			if network.nodes.has(ref_id) and not active.has(ref_id):
+				active[ref_id] = true
+				queue.append(ref_id)
+
+	return active
+
+
+## Extracts node IDs referenced in expressions of the given node.
+## Scans all parameters for chop()/op()/top()/sop()/dat()/mat() calls.
+func _get_expression_refs(node_id: String) -> Array[String]:
+	var refs: Array[String] = []
+	var node: GNNode = network.nodes.get(node_id, null)
+	if node == null:
+		return refs
+
+	# Lazy-init regex (same pattern as GNGraphEditor's overlay scanner)
+	if _expr_ref_regex == null:
+		_expr_ref_regex = RegEx.new()
+		_expr_ref_regex.compile("(?:chop|op|top|sop|dat|mat)\\s*\\(\\s*\"([^\"]+)\"")
+
+	for param_name in node.parameters:
+		var param: GNParameter = node.parameters[param_name]
+
+		# Main expression
+		if param.mode == GNParameter.Mode.EXPRESSION and param.expression != "":
+			var results := _expr_ref_regex.search_all(param.expression)
+			for m in results:
+				var ref_id: String = m.get_string(1)
+				if ref_id != node_id and not refs.has(ref_id):
+					refs.append(ref_id)
+
+		# Per-component expressions (Vector2/3/4, Color)
+		for i in range(param.component_expressions.size()):
+			if param.component_modes.size() > i and \
+					param.component_modes[i] == GNParameter.Mode.EXPRESSION:
+				var comp_expr: String = param.component_expressions[i]
+				if comp_expr != "":
+					var results := _expr_ref_regex.search_all(comp_expr)
+					for m in results:
+						var ref_id: String = m.get_string(1)
+						if ref_id != node_id and not refs.has(ref_id):
+							refs.append(ref_id)
+
+	return refs
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -135,10 +300,23 @@ func cook_frame(delta: float) -> void:
 		if node.dirty:
 			network.propagate_dirty(node.id)
 
-	# Step 4: Cook dirty nodes in topo order
+	# Step 3b: Recompute active chain only when topology or sinks changed.
+	if _active_set_dirty:
+		_active_set = _compute_active_set()
+		for node in topo_order:
+			node.is_active = _active_set.has(node.id)
+		_active_set_dirty = false
+
+	# Step 4: Cook dirty + active nodes in topo order
 	var cooked_count := 0
+	var skipped_count := 0
 	for node in topo_order:
 		if not node.dirty:
+			continue
+
+		# Skip inactive nodes — they keep cached_output frozen
+		if not node.is_active:
+			skipped_count += 1
 			continue
 
 		# Inject timing context (so operators can use self.current_delta, etc.)
@@ -192,7 +370,7 @@ func cook_frame(delta: float) -> void:
 	frame_count += 1
 	var frame_end := Time.get_ticks_usec()
 	frame_cook_time_ms = (frame_end - frame_start) / 1000.0
-	GNLogger.debug("CookEngine", "Frame %d: cooked %d node(s) in %.2fms" % [frame_count, cooked_count, frame_cook_time_ms])
+	GNLogger.debug("CookEngine", "Frame %d: cooked %d, skipped %d inactive in %.2fms" % [frame_count, cooked_count, skipped_count, frame_cook_time_ms])
 	frame_cooked.emit(frame_count, frame_cook_time_ms)
 
 
@@ -679,5 +857,7 @@ func reset() -> void:
 	_smooth_state.clear()
 	_lag_state.clear()
 	_trigger_state.clear()
+	_active_set.clear()
+	_active_set_dirty = true
 	GNLogger.info("CookEngine", "Engine reset")
 	invalidate_all()

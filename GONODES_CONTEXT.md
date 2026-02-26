@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-26
-> **Status:** Phase 6 Complete — Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Phases 1–6 complete. 82 operators across 6 families (28 TOP, 21 CHOP, 12 DAT, 14 SOP, 4 COMP, 2 MAT, 1 output).
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Phases 1–6 complete. 83 operators across 6 families (29 TOP, 21 CHOP, 12 DAT, 14 SOP, 4 COMP, 2 MAT, 1 output).
 
 ---
 
@@ -226,6 +226,13 @@ var dirty: bool = true
 var cached_output: GNData = null
 var cook_time_ms: float = 0.0      # Profiling
 var cook_valid: bool = false
+var time_dependent: bool = false    # Always dirty each frame (LFO, Noise, etc.)
+
+# Active chain cooking
+var is_sink: bool = false           # True for output operators (WindowTOP, SpoutOut, MIDIOut, etc.)
+                                    # Set by operator in _init(). Engine auto-detects these as sinks.
+var is_active: bool = true          # Set by cook engine per frame. False = skip cooking.
+                                    # Inactive nodes keep cached_output frozen.
 
 # Timing (injected by GNCookEngine before each cook)
 var current_delta: float = 0.0     # Frame delta in seconds
@@ -268,7 +275,7 @@ Five intermediate base classes sit between GNNode and the individual operators. 
 **Class Hierarchy:**
 ```
 GNNode (type-agnostic base)
-├── GNTopBase (28 TOP operators)
+├── GNTopBase (29 TOP operators)
 ├── GNChopBase (21 CHOP operators, incl. DATtoCHOP bridge)
 ├── GNDatBase (12 DAT operators)
 ├── GNSopBase (14 SOP operators)
@@ -291,12 +298,13 @@ Generator TOPs pass `get_param_value("resolution")` as the viewport size. Filter
 **DATtoCHOP** extends `GNChopBase` (not GNDatBase) because its output is CHOP channel data.
 
 ### Node Lifecycle
-- `_init()` — set `node_type`, `family`, `time_dependent` (runs before entering tree)
+- `_init()` — set `node_type`, `family`, `time_dependent`, `is_sink` (runs before entering tree)
 - `initialize(id)` — sets `name = id`, `process_mode = DISABLED`, calls `_init_ports()` / `_init_parameters()`
 - Processing is disabled on GNNodes — only the cook engine drives cooking
 - TOPs add SubViewport as `add_child()` during first `_cook()` — auto-freed on removal
 - `execute_cook()` (GNTopBase override) — after `_cook()` completes, sets `UPDATE_ONCE` on all child SubViewports so they render exactly once per cook cycle
 - CookEngine adopts all network nodes as children via `add_child()` in `_ready()`
+- During adoption, CookEngine connects `parameter_changed` signal per node + topology signals (`node_added`, `node_removed`, `connection_added`, `connection_removed`) to invalidate the active chain set
 - `queue_free()` cascades to SubViewport/Window children (no manual cleanup needed)
 
 ---
@@ -383,35 +391,62 @@ class_name GNCookEngine extends Node
 var network: GNNetwork
 var frame_count: int = 0
 
+# Active chain cooking state
+var active_sinks: Array[String] = []    # UI-level sinks (viewer, floating windows)
+var _active_set: Dictionary = {}        # { node_id: true } — cached active node set
+var _active_set_dirty: bool = true      # Recompute on next cook frame
+static var _expr_ref_regex: RegEx       # Regex for chop()/op()/top()/sop()/dat()/mat() refs
+
 func _process(delta: float) -> void:
     cook_frame(delta)
 
 func cook_frame(delta: float) -> void:
-    # 1. Mark time-dependent nodes dirty (LFO, Noise with time input, etc.)
-    # 2. Collect dirty nodes
-    # 3. Get topological order (only dirty + downstream)
-    # 4. Cook each in order, passing resolved inputs
-    # 5. Cache results
-    # 6. Clear dirty flags
-    # 7. Increment frame_count
+    # 1. _pre_cook_pass — mark time-dependent nodes dirty
+    # 2. Get topological order (Kahn's BFS, cached by GNNetwork)
+    # 3. Propagate dirty flags downstream in one BFS pass
+    # 3b. If _active_set_dirty: recompute active set, stamp node.is_active
+    # 4. Cook dirty+active nodes in topo order (skip inactive)
+    #    - Inject timing (current_delta, elapsed_time, current_frame)
+    #    - Resolve parameters (expressions, binds, exports)
+    #    - Gather inputs from upstream cached_output
+    #    - Handle bypass (pass-through first input)
+    #    - Call node.execute_cook(inputs, frame)
+    # 5. Process export mappings (CHOP exports, post-MVP stub)
+    # 6. Frame bookkeeping — increment frame_count, emit frame_cooked
 
-func cook_node(node: GNNode) -> GNData:
-    # Resolve inputs from upstream cached outputs
-    # Call node._cook(inputs)
-    # Cache result
-    # Record cook time for profiling
+# Active chain cooking — finds all nodes feeding live sinks
+func _compute_active_set() -> Dictionary:
+    # 1. Seed queue with active_sinks (UI viewers)
+    # 2. Auto-detect structural sinks (node.is_sink == true)
+    # 3. Fallback: if no sinks found, all nodes are active
+    # 4. BFS upstream following:
+    #    a. Wire connections (get_input_connections — cached adjacency)
+    #    b. Expression references (chop/op/top/sop/dat/mat regex scan)
+    # Returns { node_id: true } dict
 
-func propagate_dirty(node: GNNode) -> void:
-    # Walk downstream connections, mark all as dirty
+# Expression reference extraction (engine-level, no editor dependency)
+func _get_expression_refs(node_id: String) -> Array[String]:
+    # Scans all parameters of the node for expression-mode strings
+    # Regex extracts node IDs from chop("id")/op("id")/top("id") etc.
+    # Returns list of referenced node IDs (excludes self-references)
+
+# Invalidation signals (wired during _adopt_network_nodes):
+#   network.node_added      → _active_set_dirty = true + adopt
+#   network.node_removed    → _active_set_dirty = true
+#   network.connection_added/removed → _active_set_dirty = true
+#   node.parameter_changed  → _active_set_dirty = true (per-node)
+#   set_active_sinks()      → _active_set_dirty = true (from editor)
 ```
 
 ### Cook Semantics
 - **Time-dependent nodes** (LFO, Noise with `time` param) are always dirty.
 - **Parameter-changed nodes** are marked dirty when a parameter changes.
 - **Input-changed nodes** are marked dirty via `propagate_dirty()`.
-- **Nodes only cook when dirty** — lazy evaluation.
+- **Nodes only cook when dirty AND active** — lazy evaluation + active chain cooking.
 - **Each node cooks at most once per frame** — results are cached.
 - **Cook order** = topological sort of the dirty subgraph.
+- **Inactive nodes** (not feeding any sink) keep `cached_output` frozen and skip cooking entirely.
+- **Active set** is event-driven — recomputed only when graph topology, sinks, or expressions change.
 
 ---
 
@@ -859,9 +894,9 @@ GONODES/
   - `GNGraphEditor.update_previews()` iterates ALL node views each cook frame (skipped when hidden).
   - Extensible: any operator can override `create_preview_control()` for operator-specific rendering.
 - [x] **Family base classes** — 6 intermediate bases between GNNode and operators:
-  - `GNTopBase` (28 TOPs), `GNChopBase` (21 CHOPs), `GNDatBase` (12 DATs), `GNSopBase` (14 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
+  - `GNTopBase` (29 TOPs), `GNChopBase` (21 CHOPs), `GNDatBase` (12 DATs), `GNSopBase` (14 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
   - Each sets family, provides cached data helpers, and overrides preview methods.
-  - All 82 operators migrated. GNNode is now fully type-agnostic.
+  - All 83 operators migrated. GNNode is now fully type-agnostic.
 - [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
   - `GNGraphEditor.previews_visible` flag controls whether `update_previews()` processes updates.
   - `GNGraphEditor.set_previews_visible(enabled)` shows/hides all preview controls on existing views.
@@ -958,10 +993,16 @@ GONODES/
 - [ ] **Performance: Viewport pooling**:
   - Reuse freed SubViewports instead of creating/destroying.
   - Pool tracks available viewports by resolution. Reduces allocation churn at scale.
-- [ ] **Performance: Active chain cooking**:
-  - Only cook subgraphs that feed into a WindowTOP, visible preview, or viewer window.
-  - Disconnected/orphan subgraphs skip cooking entirely.
-  - `GNCookEngine.active_outputs` tracks which sink nodes are live.
+- [x] **Performance: Active chain cooking**:
+  - Only cook subgraphs that feed into a live sink (viewer, floating window, or any `is_sink` node).
+  - Disconnected/orphan subgraphs skip cooking entirely (keep cached_output frozen).
+  - **Engine-level** (editor-independent): structural sinks auto-detected via `GNNode.is_sink` flag — operators set `is_sink = true` in `_init()` (WindowTOP, future SpoutOut, MIDIOut, OSCOut, NDIOut, etc.).
+  - **Editor-level**: UI sinks (viewer panel, floating windows) passed via `active_sinks`.
+  - BFS follows both wire connections AND expression references (`chop()/op()/top()` calls) — implicit dependencies are tracked.
+  - Event-driven: active set recomputed only when topology, sinks, or expressions change (not per-frame).
+  - `GNNode.is_active` flag updated every frame; perf overlay shows "zzz" for inactive nodes.
+  - Always-on (no toggle) — info bar shows "Active: N/M" count.
+  - Clicking a node routes the viewer to it, making it a sink and instantly activating its chain.
 - [x] **Performance: Lazy viewport creation**:
   - Viewport creation is deferred to first `_cook()` call — `_init_shader_viewport()` and `_ensure_viewport()` guard with `if _viewport != null: return`.
   - Disconnected TOPs have zero GPU footprint until first cook.
@@ -1184,6 +1225,54 @@ The cook engine has been optimized with these patterns:
 5. **SubViewport render-once-per-cook** — All TOP SubViewports are created with `UPDATE_DISABLED` instead of `UPDATE_ALWAYS`. Previously every SubViewport rendered every frame regardless of whether the TOP was dirty, wasting GPU passes on static texture chains. Now `GNTopBase.execute_cook()` sets `UPDATE_ONCE` on each child SubViewport only after `_cook()` finishes setting uniforms/textures. This means a TOP renders **exactly once per dirty cycle** — if it isn't cooked, its viewport never re-renders. For a network with N TOPs where only K are dirty, this reduces per-frame GPU render passes from N to K.
 
 6. **Lazy viewport creation** — `_init_shader_viewport()` and `_ensure_viewport()` are guarded with `if _viewport != null: return`, deferring SubViewport allocation to the first `_cook()` call. TOPs that are never cooked (disconnected, orphaned) have zero GPU footprint — no SubViewport, no texture memory, no render passes.
+
+7. **Active chain cooking** — Only nodes that feed a live sink are cooked. The active set is computed via BFS upstream from sinks, following both wire connections and expression references. Key design points:
+
+   **Architecture (engine vs. editor separation):**
+   - `GNCookEngine._compute_active_set()` is engine-level — works without an editor (headless, game embed).
+   - Structural sinks (operators with `is_sink = true`) are auto-detected by the engine.
+   - UI sinks (viewer panel, floating windows) are passed from the editor via `set_active_sinks()`.
+   - If no sinks exist at all, fallback activates everything (backward compatible).
+
+   **Sink detection — extensibility via `GNNode.is_sink` flag:**
+   - Operators set `is_sink = true` in their `_init()` — no hardcoded type strings in the engine.
+   - Current sinks: `WindowTOP`.
+   - Future sinks: `SpoutOutTOP`, `NDIOutTOP`, `MIDIOutCHOP`, `OSCOutCHOP`, `AudioOutCHOP`, etc.
+   - To make any new output operator a sink: add `is_sink = true` to its `_init()`. Zero engine changes.
+
+   **Dependency tracking (wires + expressions):**
+   - Wire connections: followed via `network.get_input_connections()` (cached adjacency, O(1) per node).
+   - Expression references: regex scans for `chop("id")/op("id")/top("id")/sop("id")/dat("id")/mat("id")` patterns.
+   - Both are followed recursively — if A references B which references C, all three are active.
+   - `_get_expression_refs()` scans main expressions AND per-component expressions (Vector2/3/4, Color).
+   - Same regex pattern as `GNGraphEditor._scan_expr_references()` (dashed overlay lines).
+
+   **Invalidation triggers (event-driven, not per-frame):**
+   | Trigger | Signal / Method | Source |
+   |---------|-----------------|--------|
+   | Connection added | `network.connection_added` | Engine listens in `_adopt_network_nodes()` |
+   | Connection removed | `network.connection_removed` | Engine listens in `_adopt_network_nodes()` |
+   | Node added | `network.node_added` | Engine listens in `_adopt_network_nodes()` |
+   | Node removed | `network.node_removed` | Engine listens in `_adopt_network_nodes()` |
+   | Parameter/expression edit | `node.parameter_changed` | Engine connects per-node in `_adopt_network_nodes()` |
+   | Viewer target changed | `set_active_sinks()` | Editor calls `_push_active_sinks()` |
+   | Viewer window opened/closed | `set_active_sinks()` | Editor calls `_push_active_sinks()` |
+   | Node renamed | `set_active_sinks()` | Editor rebuilds sink list with new IDs |
+   | New/load patch | `set_active_sinks()` | Editor calls `_push_active_sinks()` after rebind |
+   | Engine reset | `reset()` | Internal — clears `_active_set`, sets dirty |
+
+   During steady-state playback (no user interaction), the per-frame cost is exactly one `if _active_set_dirty:` bool check — the BFS does not run.
+
+   **Adding a new invalidation trigger:**
+   - If a new feature can change which nodes feed sinks (e.g., dynamic port rewiring, node groups):
+     1. Call `cook_engine.invalidate_active_set()` from the code that makes the change, OR
+     2. Connect the relevant signal to `_on_topology_changed` / `_on_connection_changed`.
+   - The active set will recompute on the next cook frame automatically.
+
+   **Visual feedback:**
+   - Info bar: `Active: N/M` — active nodes vs. total.
+   - Perf overlay: inactive nodes show dimmed `zzz` instead of cook time.
+   - `GNNode.is_active` is readable by any code (operators, inspector, etc.).
 
 ### CHOP Channel Model
 CHOPs produce `GNChannelData` which contains:

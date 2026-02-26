@@ -79,6 +79,17 @@ var bypass: bool = false
 ## (inspector controls are disabled). Cook still proceeds normally.
 var locked: bool = false
 
+## Whether this node is a structural output sink (e.g., WindowTOP, SpoutOut,
+## MIDIOut, OSCOut). Sink nodes are always included in the active cooking chain.
+## Set by operators in _init() — the cook engine reads this flag, no hardcoded
+## type-name checks needed.
+var is_sink: bool = false
+
+## Whether this node is in the active cooking chain (feeds a live sink).
+## Set each frame by the cook engine. Inactive nodes keep their cached_output
+## but skip cooking to save GPU/CPU time.
+var is_active: bool = true
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted when this node is marked dirty (before cook).

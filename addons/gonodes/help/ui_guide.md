@@ -136,7 +136,7 @@ The toolbar runs across the bottom of the editor. From left to right:
 | **Minimap** ☑      | Show/hide the corner minimap (same as M key)                  |
 | **Wire style** ▾   | Dropdown: Curved / Straight / Right-Angle (same as W key)     |
 | **Layout**         | Auto-layout all nodes using topological order (Ctrl+L)        |
-| *(Info label)*     | Displays: FPS, frame count, cook time (ms), node count, viewed node ID |
+| *(Info label)*     | Displays: FPS, frame count, cook time (ms), active/total nodes, viewed node ID |
 
 ---
 
@@ -207,6 +207,7 @@ Nodes display status through visual cues on the title bar and body:
 | Family color bar   | Title bar is tinted per family (CHOP=green, TOP=purple, etc.) |
 | Preview thumbnail  | Inline output preview (80px tall, live-updating)              |
 | Perf overlay       | Cook time in ms (when Perf toggle is on)                      |
+| **zzz** overlay    | Node is **inactive** — not in any active chain (frozen output)|
 | Error badge        | Cook errors appear in the perf overlay                        |
 
 ### Family Colors
@@ -347,3 +348,40 @@ Patches are saved as `.gonodes` JSON files containing:
 - Node states (bypass, locked, preview enabled)
 
 Bypass and lock states are persisted — reloading a patch restores all node states.
+
+---
+
+## Active Chain Cooking
+
+GONODES automatically optimizes performance by only cooking nodes that feed a
+**live sink** — a node whose output is currently being displayed. This is
+always-on with no toggle required.
+
+### What counts as a sink?
+
+| Sink Type               | When active                                       |
+|--------------------------|---------------------------------------------------|
+| **Viewer panel**         | The node you last clicked (if it's a TOP)         |
+| **Floating viewer window** | Each pinned viewer window targets a specific node |
+| **is_sink operators**    | Any node with `is_sink = true` (WindowTOP, future SpoutOut, MIDIOut, OSCOut, NDIOut, etc.) |
+
+### How it works
+
+1. Every frame, the editor tells the cook engine which nodes are sinks.
+2. The cook engine walks **upstream** from each sink via BFS to find all
+   contributing nodes — this is the **active set**.
+3. The walk follows both **wire connections** and **expression references**
+   (e.g., `chop("lfo1", "out")` makes `lfo1` part of the active chain).
+4. Nodes **outside** the active set skip cooking entirely. Their `cached_output`
+   is frozen at whatever it last produced.
+5. When you click a different node, it becomes the viewer target (a new sink),
+   and its entire upstream chain activates instantly.
+6. The active set is **event-driven** — it only recomputes when topology,
+   viewer targets, or expressions change (not every frame).
+
+### Visual feedback
+
+- **Info bar** shows `Active: N/M` — how many nodes are cooking vs. total.
+- **Perf overlay** shows `zzz` in gray on inactive nodes (when the Perf toggle
+  is on).
+- Selecting a node immediately activates it and its upstream chain.
