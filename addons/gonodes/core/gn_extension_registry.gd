@@ -88,11 +88,13 @@ var _loaded_extensions: PackedStringArray = []
 func register_operator(class_name_key: String, family: String, op_script: GDScript,
 		description: String, source: String = "core") -> void:
 	_operators[class_name_key] = OperatorEntry.new(family, op_script, description, source)
+	_invalidate_port_cache()
 
 
 ## Unregister an operator by class name.
 func unregister_operator(class_name_key: String) -> void:
 	_operators.erase(class_name_key)
+	_invalidate_port_cache()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -161,6 +163,71 @@ func get_all_operator_names() -> PackedStringArray:
 ## Returns a list of loaded extension names.
 func get_loaded_extensions() -> PackedStringArray:
 	return _loaded_extensions.duplicate()
+
+
+## Lazily-built cache: GNFamily.Type → Array[String] of operator names that accept
+## that family as an input port.  Built once on first query, invalidated on
+## register/unregister so subsequent queries rebuild.
+var _input_family_cache: Dictionary = {}
+
+## Returns operator names that have at least one input port matching [param family].
+## Instantiates each operator once to inspect its ports, then caches the result.
+func get_operators_accepting_family(family: GNFamily.Type) -> Array[String]:
+	if _input_family_cache.has(family):
+		return _input_family_cache[family]
+
+	# Build the full cache for ALL families in one pass (avoids repeated instantiation).
+	_build_input_family_cache()
+
+	if _input_family_cache.has(family):
+		return _input_family_cache[family]
+	return []
+
+
+## Builds (or rebuilds) the input-family → operators cache by instantiating every
+## registered operator and reading its input ports.
+func _build_input_family_cache() -> void:
+	_input_family_cache.clear()
+	for op_name in _operators:
+		var node: GNNode = create_instance(op_name)
+		if node == null:
+			continue
+		# create_instance() calls .new() which only runs _init().
+		# Ports are set up in _init_ports(), which is called by initialize().
+		# We don't want full initialize() (needs an ID, wires signals, etc.)
+		# so call _init_ports() directly to populate input/output port arrays.
+		node._init_ports()
+		for port: GNPort in node.input_ports:
+			if not _input_family_cache.has(port.family):
+				_input_family_cache[port.family] = [] as Array[String]
+			var arr: Array[String] = _input_family_cache[port.family]
+			if not arr.has(op_name):
+				arr.append(op_name)
+		# Also include operators whose output family matches (for dragging FROM
+		# an input port backwards — we want nodes that produce the right type).
+		for port: GNPort in node.output_ports:
+			var key_str := "output:%d" % port.family
+			if not _input_family_cache.has(key_str):
+				_input_family_cache[key_str] = [] as Array[String]
+			var arr_out: Array[String] = _input_family_cache[key_str]
+			if not arr_out.has(op_name):
+				arr_out.append(op_name)
+		node.free()
+
+
+## Returns operator names that have at least one output port matching [param family].
+func get_operators_producing_family(family: GNFamily.Type) -> Array[String]:
+	if _input_family_cache.is_empty():
+		_build_input_family_cache()
+	var key_str := "output:%d" % family
+	if _input_family_cache.has(key_str):
+		return _input_family_cache[key_str]
+	return []
+
+
+## Invalidates the input-family cache (call after register/unregister).
+func _invalidate_port_cache() -> void:
+	_input_family_cache.clear()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

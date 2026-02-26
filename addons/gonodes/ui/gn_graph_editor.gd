@@ -68,6 +68,17 @@ var _bookmarks: Dictionary = {}
 ## Wire curvature mode: 0=curved, 1=straight, 2=right-angle.
 var _wire_style: int = 0
 
+## Pending connection info when user drops a wire on empty space.
+## Stores { "from_node": String, "from_port": int, "family": GNFamily.Type, "direction": String }
+## direction is "output" (dragged from output) or "input" (dragged from input backwards).
+## Cleared after node creation + auto-connect, or when palette is cancelled.
+var _pending_connection: Dictionary = {}
+
+## Ghost wire drawn while the palette is open after a connection drop.
+## Stores the release position in LOCAL (overlay) coordinates and the port info.
+## Empty dict = no ghost wire.  Drawn on _expr_ref_overlay.
+var _ghost_wire: Dictionary = {}  # { "node_id": String, "port": int, "release": Vector2, "direction": String, "color": Color }
+
 ## Cached expression references: { from_node_id: [to_node_id, ...] }
 var _expr_refs: Dictionary = {}
 
@@ -123,10 +134,15 @@ func _ready() -> void:
 	self.duplicate_nodes_request.connect(duplicate_selected)
 	self.cut_nodes_request.connect(cut_selected)
 
+	# Wire dropped on empty space → open filtered palette for auto-connect
+	self.connection_to_empty.connect(_on_connection_to_empty)
+	self.connection_from_empty.connect(_on_connection_from_empty)
+
 	# Create palette popup
 	_palette = GNNodePalette.new()
 	_palette.visible = false
 	_palette.node_type_selected.connect(_on_palette_node_selected)
+	_palette.popup_hide.connect(_on_palette_closed)
 	add_child(_palette)
 
 	# Create context menu
@@ -394,6 +410,98 @@ func _on_disconnection_request(from_node: StringName, from_port: int,
 	_undo_redo.commit_action(false)
 
 
+## User drags a wire FROM an output port and drops it on empty canvas.
+## Opens a filtered palette showing only operators that accept this family as input.
+func _on_connection_to_empty(from_node: StringName, from_port: int,
+		release_position: Vector2) -> void:
+	if network == null:
+		return
+
+	var source_node: GNNode = network.get_node_by_id(String(from_node))
+	if source_node == null:
+		return
+	var out_port: GNPort = source_node.get_output_port(from_port)
+	if out_port == null:
+		return
+
+	# Store pending connection for auto-connect after palette selection
+	_pending_connection = {
+		"from_node": String(from_node),
+		"from_port": from_port,
+		"family": out_port.family,
+		"direction": "output",
+	}
+
+	# Convert release_position to graph coordinates for node placement
+	_spawn_position = (release_position + scroll_offset) / zoom
+
+	# Show ghost wire from port to release point while palette is open
+	_ghost_wire = {
+		"node_id": String(from_node),
+		"port": from_port,
+		"release": release_position,
+		"direction": "output",
+		"color": GNFamily.get_color(out_port.family),
+	}
+	_expr_ref_overlay.queue_redraw()
+
+	# Get compatible operators and open filtered palette
+	var registry := GNExtensionRegistry.instance()
+	var compatible := registry.get_operators_accepting_family(out_port.family)
+	var allowed := PackedStringArray()
+	for op_name in compatible:
+		allowed.append(op_name)
+
+	_palette.popup_at_filtered(
+		get_screen_position() + release_position, allowed)
+
+
+## User drags a wire FROM an input port backwards and drops on empty canvas.
+## Opens a filtered palette showing only operators that produce this family as output.
+func _on_connection_from_empty(to_node: StringName, to_port: int,
+		release_position: Vector2) -> void:
+	if network == null:
+		return
+
+	var target_node: GNNode = network.get_node_by_id(String(to_node))
+	if target_node == null:
+		return
+	var in_port: GNPort = target_node.get_input_port(to_port)
+	if in_port == null:
+		return
+
+	# Store pending connection for auto-connect after palette selection
+	_pending_connection = {
+		"to_node": String(to_node),
+		"to_port": to_port,
+		"family": in_port.family,
+		"direction": "input",
+	}
+
+	# Convert release_position to graph coordinates for node placement
+	_spawn_position = (release_position + scroll_offset) / zoom
+
+	# Show ghost wire from port to release point while palette is open
+	_ghost_wire = {
+		"node_id": String(to_node),
+		"port": to_port,
+		"release": release_position,
+		"direction": "input",
+		"color": GNFamily.get_color(in_port.family),
+	}
+	_expr_ref_overlay.queue_redraw()
+
+	# Get operators that produce this family type
+	var registry := GNExtensionRegistry.instance()
+	var compatible := registry.get_operators_producing_family(in_port.family)
+	var allowed := PackedStringArray()
+	for op_name in compatible:
+		allowed.append(op_name)
+
+	_palette.popup_at_filtered(
+		get_screen_position() + release_position, allowed)
+
+
 ## User presses Delete with nodes selected.
 func _on_delete_nodes_request(node_names: Array[StringName]) -> void:
 	if network == null:
@@ -566,8 +674,19 @@ func _on_palette_node_selected(operator_type: String) -> void:
 	_undo_redo.add_undo_method(_ur_remove_node.bind(unique_id))
 	_undo_redo.commit_action(false)
 
+	# Auto-connect if this node was spawned from a dropped connection
+	_try_auto_connect_pending(node)
+
 	GNLogger.info("GraphEditor", "Spawned '%s' (%s) at %s" % [
 		unique_id, operator_type, str(_spawn_position)])
+
+
+## Called when the palette popup closes (user selected a node or cancelled).
+## Clears any pending connection state so stale data doesn't affect future spawns.
+func _on_palette_closed() -> void:
+	_pending_connection = {}
+	_ghost_wire = {}
+	_expr_ref_overlay.queue_redraw()
 
 
 ## Factory that creates operator instances by type name.
@@ -575,6 +694,64 @@ func _on_palette_node_selected(operator_type: String) -> void:
 ## Returns null for unknown types.
 static func _create_operator_instance(operator_type: String) -> GNNode:
 	return GNExtensionRegistry.instance().create_instance(operator_type)
+
+
+## Attempts to auto-connect a pending dropped wire to the newly created node.
+## If the user dropped an output wire → connect to the new node's first compatible input.
+## If the user dropped an input wire → connect from the new node's first compatible output.
+func _try_auto_connect_pending(new_node: GNNode) -> void:
+	if _pending_connection.is_empty():
+		return
+
+	# Read all pending info before clearing
+	var family: GNFamily.Type = _pending_connection.get("family", -1)
+	var direction: String = _pending_connection.get("direction", "")
+	var from_node_id: String = _pending_connection.get("from_node", "")
+	var from_port: int = _pending_connection.get("from_port", -1)
+	var to_node_id: String = _pending_connection.get("to_node", "")
+	var to_port: int = _pending_connection.get("to_port", -1)
+	_pending_connection = {}
+
+	if family < 0 or direction.is_empty():
+		return
+
+	if direction == "output":
+		# Dragged from an output port → connect to new node's first matching input
+		if from_node_id.is_empty() or from_port < 0:
+			return
+		for port: GNPort in new_node.input_ports:
+			if port.family == family:
+				var success := network.connect_nodes(from_node_id, from_port,
+						new_node.id, port.index)
+				if success:
+					_undo_redo.create_action("Connect %s → %s" % [from_node_id, new_node.id])
+					_undo_redo.add_do_method(_ur_connect.bind(
+							from_node_id, from_port, new_node.id, port.index))
+					_undo_redo.add_undo_method(_ur_disconnect.bind(
+							from_node_id, from_port, new_node.id, port.index))
+					_undo_redo.commit_action(false)
+					GNLogger.info("GraphEditor", "Auto-connected %s:%d → %s:%d" % [
+						from_node_id, from_port, new_node.id, port.index])
+				return
+
+	elif direction == "input":
+		# Dragged from an input port backwards → connect new node's first matching output
+		if to_node_id.is_empty() or to_port < 0:
+			return
+		for port: GNPort in new_node.output_ports:
+			if port.family == family:
+				var success := network.connect_nodes(new_node.id, port.index,
+						to_node_id, to_port)
+				if success:
+					_undo_redo.create_action("Connect %s → %s" % [new_node.id, to_node_id])
+					_undo_redo.add_do_method(_ur_connect.bind(
+							new_node.id, port.index, to_node_id, to_port))
+					_undo_redo.add_undo_method(_ur_disconnect.bind(
+							new_node.id, port.index, to_node_id, to_port))
+					_undo_redo.commit_action(false)
+					GNLogger.info("GraphEditor", "Auto-connected %s:%d → %s:%d" % [
+						new_node.id, port.index, to_node_id, to_port])
+				return
 
 
 ## Returns a list of all available operator types grouped by family.
@@ -887,9 +1064,14 @@ func update_expr_refs() -> void:
 		_expr_ref_overlay.queue_redraw()
 
 
-## Draws dashed lines between nodes that reference each other via expressions.
+## Draws dashed lines between nodes that reference each other via expressions,
+## and the ghost wire when a connection is pending (dropped on empty canvas).
 ## Connected to [member _expr_ref_overlay]'s `draw` signal.
 func _draw_expr_ref_lines() -> void:
+	# --- Ghost wire (pending connection drop) ---
+	_draw_ghost_wire()
+
+	# --- Expression reference lines ---
 	if not expr_refs_visible or _expr_refs.is_empty():
 		return
 
@@ -948,6 +1130,43 @@ func _draw_dashed_line_on(canvas: Control, from: Vector2, to: Vector2,
 	var arrow_right := arrow_base - perp * arrow_size * 0.5
 	canvas.draw_colored_polygon(
 			PackedVector2Array([arrow_tip, arrow_left, arrow_right]), color)
+
+
+## Draws a temporary "ghost" wire from a port to the drop point while the
+## palette popup is open.  Gives visual continuity so the user sees where the
+## wire will connect.
+func _draw_ghost_wire() -> void:
+	if _ghost_wire.is_empty():
+		return
+
+	var node_id: String = _ghost_wire.get("node_id", "")
+	var port_idx: int = _ghost_wire.get("port", -1)
+	var release_pos: Vector2 = _ghost_wire.get("release", Vector2.ZERO)
+	var direction: String = _ghost_wire.get("direction", "")
+	var wire_color: Color = _ghost_wire.get("color", Color.WHITE)
+
+	var view: GNNodeView = _node_views.get(node_id, null)
+	if view == null:
+		return
+
+	# Get port position in graph-content space (GraphNode local + offset)
+	var port_local: Vector2
+	if direction == "output":
+		port_local = view.get_output_port_position(port_idx)
+	else:
+		port_local = view.get_input_port_position(port_idx)
+	var port_graph := view.position_offset + port_local
+
+	# Convert both positions from graph-content space to overlay (screen) space
+	var p_port := (port_graph - scroll_offset / zoom) * zoom
+	var p_release := release_pos  # Already in local overlay space (from the event)
+
+	# Draw a semi-transparent solid line (not dashed — looks like a real wire)
+	wire_color.a = 0.5
+	_expr_ref_overlay.draw_line(p_port, p_release, wire_color, 2.0, true)
+
+	# Small circle at the release end to indicate the "open" end
+	_expr_ref_overlay.draw_circle(p_release, 4.0, wire_color)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

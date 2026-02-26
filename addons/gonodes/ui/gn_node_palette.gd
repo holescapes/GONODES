@@ -13,6 +13,9 @@ var _search_edit: LineEdit = null
 ## Tree that displays operators grouped by family.
 var _tree: Tree = null
 
+## When non-empty, only these operator names are shown (for connection-drop filtering).
+var _allowed_operators: PackedStringArray = []
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Lifecycle
@@ -52,6 +55,18 @@ func _ready() -> void:
 
 ## Opens the palette popup at the given global position.
 func popup_at(global_pos: Vector2) -> void:
+	_allowed_operators = []
+	position = Vector2i(global_pos)
+	popup()
+	_search_edit.text = ""
+	_search_edit.grab_focus()
+	_populate_tree("")
+
+
+## Opens the palette filtered to only show operators in [param allowed].
+## Used when the user drops a connection on empty space — only compatible nodes shown.
+func popup_at_filtered(global_pos: Vector2, allowed: PackedStringArray) -> void:
+	_allowed_operators = allowed
 	position = Vector2i(global_pos)
 	popup()
 	_search_edit.text = ""
@@ -81,6 +96,9 @@ func _populate_tree(filter: String) -> void:
 		var filtered_ops: Array[String] = []
 
 		for op_name in ops:
+			# Apply connection-drop family filter (empty = show all)
+			if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
+				continue
 			if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
 				filtered_ops.append(op_name)
 
@@ -152,6 +170,7 @@ func _on_item_activated() -> void:
 ## Called when popup is hidden.
 func _on_popup_hide() -> void:
 	_search_edit.text = ""
+	_allowed_operators = []
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
