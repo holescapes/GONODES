@@ -1056,6 +1056,14 @@ GONODES/
   - [x] Expression profiling — per-expression eval time (µs) tracked on `GNParameter.expression_eval_usec/avg_usec`, shown in expression field tooltip + editor info bar. Per-component timing independent.
   - [x] Built-in utility functions on CookEngine: `fit()`, `fit01()`, `smooth()`, `lag()`, `pulse()`, `step()`, `smoothstep()`, `cycle()`, `bounce()`, `noise1()`, `noise2()`, `trigger()`. Stateful functions use per-key state dicts.
   - Reference: `help/expressions_guide.md` for complete expression system docs.
+- [ ] **File output / save-to-disk operators**:
+  - **FileSaveIMG** (IMG family) — saves CPU Image to disk (PNG, WebP, EXR, HDR). Path, format, quality params. Optional auto-numbering for sequences.
+  - **FileSaveTOP** (TOP family) — reads GPU texture back to CPU, saves to disk. Same formats as FileSaveIMG but adds the GPU→CPU readback step.
+  - **FileSaveDAT** (DAT family) — exports table/text to disk (CSV, TSV, JSON, plain text). Path + format params.
+  - **MovieOutTOP** (TOP family / sink) — records TOP frame stream to video file. Requires FFmpeg GDExtension or Godot MovieWriter API. Frame rate, codec, quality params. Start/stop toggle.
+  - **RecordCHOP** (CHOP family) — records channel data over time to CSV/JSON. Start/stop/reset controls. Max duration / sample limit.
+  - All output operators set `is_sink = true` so active-chain cooking keeps them alive.
+  - Common pattern: `trigger` toggle param (manual) or `auto_save` mode (save every N frames / on change).
 - [ ] **Renderer selection UI**:
   - Dropdown in toolbar: Forward+, Mobile, Compatibility.
   - Applies to RenderTOP SubViewport and WindowTOP output.
@@ -1138,6 +1146,7 @@ GONODES/
 - [x] Keyboard shortcuts and workflow polish (Alt+A palette, context menu shortcuts, per-node preview toggle)
 
 ### Medium-term
+- [ ] File output operators (FileSaveIMG, FileSaveTOP, FileSaveDAT, MovieOutTOP, RecordCHOP — save images, tables, video, channels to disk)
 - [ ] POP family (GPU point/particle operators — see Section 18)
 - [ ] LibGodot embedding proof-of-concept
   - Build a minimal host app that embeds LibGodot
@@ -1160,6 +1169,22 @@ GONODES/
 ### Performance & GPU Optimizations (Post-Phase 7)
 - [ ] Multi-threaded cook engine
 - [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
+- [ ] **GDExtension (C++) hot-path migration** — port inner loops to native code for 50-100× speedup:
+  - **IMG operators (highest priority):** Pixel loops (`get_pixel`/`set_pixel` over 262K+ pixels) are the biggest GDScript bottleneck. BlurIMG, EdgeDetectIMG, PixelSortIMG, NoiseIMG all iterate every pixel. Port `_cook()` internals to C++ with direct `uint8_t*` pointer arithmetic. Alternative: rewrite as GPU compute shaders (even faster than C++ for batch pixel ops).
+  - **SOP operators (high priority):** Vertex-heavy mesh construction (SubdivideSOP, NoiseSOP, BooleanSOP) scales with vertex count. SurfaceTool overhead in GDScript is significant at 10K+ verts. Port vertex loops to C++ via GDExtension.
+  - **CHOP operators (medium priority, audio-rate only):** Control-rate CHOPs (few hundred samples) are fine in GDScript. Audio-rate CHOPs (44.1K samples: AudioInCHOP, AudioSpectrumCHOP) need native inner loops.
+  - **Keep in GDScript (low priority, not worth porting):**
+    - Cook engine / core: graph traversal is O(node_count), typically hundreds — negligible overhead.
+    - TOP operators: already GPU-bound (GDScript just sets shader uniforms + triggers SubViewport render).
+    - DAT operators: string/table ops backed by native Godot `String` — rarely a bottleneck.
+    - Expression system: evaluated once per parameter per frame, microsecond overhead.
+    - Extension registry / UI: trivially cheap.
+  - **Migration strategy:** Architecture already supports this — each operator's `_cook()` is a clean seam. Options: (a) C++ GDExtension class replacing the GDScript operator entirely, (b) C++ helper library called from GDScript `_cook()` for just the inner loop, (c) GPU compute shader via `RenderingDevice` (best for IMG batch pixel ops).
+- [ ] **GPU compute shaders for IMG operators** — alternative to C++ for pixel processing:
+  - Use Godot's `RenderingDevice` API to run GLSL compute shaders on `Image` data.
+  - Upload Image → storage buffer, dispatch compute, download result.
+  - Faster than C++ for embarrassingly parallel ops (blur, edge detect, noise, color transforms).
+  - Could share infrastructure with ComputeShaderTOP (user-editable compute).
 
 ### Long-term
 - [ ] NDI video streaming

@@ -70,10 +70,10 @@ func _populate_tree(filter: String) -> void:
 	var registry := GNGraphEditor.get_operator_registry()
 	var filter_lower := filter.to_lower()
 
-	# Family display order
-	var families := ["TOP", "CHOP", "SOP", "POP", "DAT", "MAT", "COMP"]
-
-	for family_name in families:
+	# Iterate families in enum order (driven by GNFamily.FAMILY_NAMES).
+	# No hardcoded list — new families are picked up automatically.
+	for family_enum: GNFamily.Type in GNFamily.FAMILY_NAMES:
+		var family_name: String = GNFamily.FAMILY_NAMES[family_enum]
 		if not registry.has(family_name):
 			continue
 
@@ -93,9 +93,7 @@ func _populate_tree(filter: String) -> void:
 		family_item.set_selectable(0, false)
 
 		# Color the family header
-		var family_enum := _family_name_to_enum(family_name)
-		if family_enum >= 0:
-			family_item.set_custom_color(0, GNFamily.get_color(family_enum))
+		family_item.set_custom_color(0, GNFamily.get_color(family_enum))
 
 		# Add operators under the family
 		for op_name in filtered_ops:
@@ -171,19 +169,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
-
-## Converts a family name string to the GNFamily.Type enum value.
-static func _family_name_to_enum(family_name: String) -> int:
-	match family_name:
-		"TOP": return GNFamily.Type.TOP
-		"CHOP": return GNFamily.Type.CHOP
-		"SOP": return GNFamily.Type.SOP
-		"POP": return GNFamily.Type.POP
-		"DAT": return GNFamily.Type.DAT
-		"MAT": return GNFamily.Type.MAT
-		"COMP": return GNFamily.Type.COMP
-		_: return -1
-
 
 ## Returns a short description for an operator class name (for palette tooltips).
 ## Delegates to GNExtensionRegistry so extensions can provide their own descriptions.

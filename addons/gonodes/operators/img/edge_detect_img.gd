@@ -78,7 +78,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 					gy += l * ky[ki]
 					ki += 1
 
-			var mag := sqrtf(gx * gx + gy * gy) * strength
+			var mag := sqrt(gx * gx + gy * gy) * strength
 
 			if color_edges:
 				# Encode gradient direction as color
