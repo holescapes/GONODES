@@ -610,7 +610,8 @@ GONODES/
 │       │   ├── gn_connection.gd    # GNConnection (RefCounted)
 │       │   ├── gn_network.gd       # GNNetwork (Resource — serialization boundary)
 │       │   ├── gn_cook_engine.gd   # GNCookEngine (Node)
-│       │   ├── gn_parameter.gd     # GNParameter (Resource — typed param with expressions)
+│       │   ├── gn_parameter.gd     # GNParameter (Resource — typed param with expressions + profiling)
+│       │   ├── gn_expression_functions.gd # GNExpressionFunctions — custom function registry (static)
 │       │   ├── gn_extension_registry.gd # GNExtensionRegistry — dynamic operator registry + extension loader
 │       │   ├── gn_family.gd        # GNFamily enum constants
 │       │   └── gn_logger.gd        # GNLogger — centralized logging with level filtering
@@ -976,14 +977,15 @@ GONODES/
   - [x] Node bypass/disable toggle (B key — node passes input through unchanged, ⏩ indicator, dimmed, cook engine pass-through).
   - [x] Node lock toggle (L key — prevents parameter changes, 🔒 indicator, inspector dims and disables inputs).
   - [ ] Wire style options (curved/straight/right-angle).
-- [ ] **Expression & scripting system refinement**:
-  - Autocomplete / intellisense for expression fields (node IDs, channel names, param names).
-  - Expression syntax highlighting in LineEdit (colored keywords, function names, errors).
-  - Custom user-defined expression functions (register GDScript callables as expression helpers).
-  - Multi-line expression editor popup for complex expressions (modal dialog with larger text area).
-  - Expression presets / snippets (save/load common patterns like oscillators, remaps).
-  - Expression profiling (per-expression eval time shown in tooltip or perf overlay).
-  - Reference: `help/expressions_guide.md` for current expression system docs.
+- [x] **Expression & scripting system refinement**:
+  - [x] Autocomplete / intellisense for expression fields (node IDs, channel names, param names) — via GNExpressionEditor CodeEdit autocomplete.
+  - [x] Expression syntax highlighting (CodeHighlighter in GNExpressionEditor — GONODES keywords green/purple, context vars cyan, math funcs blue, built-in utilities teal, GDScript keywords pink).
+  - [x] Custom user-defined expression functions — `GNExpressionFunctions` registry + `fn()` dispatch on CookEngine. Register via `GNExpressionFunctions.register()`, call via `fn("name", args...)`.
+  - [x] Multi-line expression editor popup — `GNExpressionEditor` (Window) with CodeEdit, syntax highlighting, live validation, autocomplete, Ctrl+Enter confirm, Escape cancel. Opened via ↗ button next to expression fields.
+  - [x] Expression presets / snippets — Snippets ▾ dropdown in expression editor with 30+ templates across 6 categories (Time, Remapping, Smoothing, Noise, Node References, Math Patterns).
+  - [x] Expression profiling — per-expression eval time (µs) tracked on `GNParameter.expression_eval_usec/avg_usec`, shown in expression field tooltip + editor info bar. Per-component timing independent.
+  - [x] Built-in utility functions on CookEngine: `fit()`, `fit01()`, `smooth()`, `lag()`, `pulse()`, `step()`, `smoothstep()`, `cycle()`, `bounce()`, `noise1()`, `noise2()`, `trigger()`. Stateful functions use per-key state dicts.
+  - Reference: `help/expressions_guide.md` for complete expression system docs.
 - [ ] **Renderer selection UI**:
   - Dropdown in toolbar: Forward+, Mobile, Compatibility.
   - Applies to RenderTOP SubViewport and WindowTOP output.
@@ -2337,7 +2339,8 @@ The parameter inspector is a right-side panel that shows all parameters for the 
 
 | File | Class | Purpose |
 |------|-------|---------|
-| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard |
+| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard. ↗ expand buttons open multi-line editor. Profiling tooltip. |
+| `addons/gonodes/ui/gn_expression_editor.gd` | `GNExpressionEditor` | Modal Window with CodeEdit for multi-line expression editing. Syntax highlighting, live validation, autocomplete (node IDs, channels, params, custom funcs), Snippets dropdown (30+ presets), profiling info bar. |
 | `addons/gonodes/ui/gn_param_inspector.gd` | `GNParamInspector` | PanelContainer with family color bar, header (node ID, type, cook time), scrollable GNParamRow list, placeholder label when nothing selected |
 
 ### Key Design Decisions

@@ -115,6 +115,20 @@ var _component_expression_valid: Array = []  # Array[bool]
 ## Per-component error strings (for UI display).
 var component_expression_errors: Array = []  # Array[String]
 
+# ─── Expression Profiling ─────────────────────────────────────────────────────
+
+## Last expression evaluation time in microseconds.
+var expression_eval_usec: float = 0.0
+
+## Rolling average expression evaluation time in microseconds.
+var expression_eval_avg_usec: float = 0.0
+
+## Per-component evaluation times in microseconds.
+var component_expression_eval_usec: Array = []  # Array[float]
+
+## Number of samples used for the rolling average.
+const _PROFILE_ALPHA: float = 0.1  # Exponential moving average smoothing
+
 # ─── Bind Mode (Post-MVP) ─────────────────────────────────────────────────────
 
 ## Node ID of the bind source (e.g., "ctrl_panel").

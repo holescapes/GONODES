@@ -10,6 +10,9 @@ var param: GNParameter = null
 ## The owning GNNode (for dirty marking).
 var owner_node: GNNode = null
 
+## Network reference for expression editor autocomplete.
+var network: GNNetwork = null
+
 ## Mode label showing C/E/B/X badge.
 var _mode_btn: Button = null
 
@@ -40,6 +43,15 @@ var _comp_expr_edits: Array[LineEdit] = []
 
 ## Whether this row uses per-component expression UI.
 var _is_multi_component: bool = false
+
+## The shared expression editor popup (created lazily).
+var _expr_editor: GNExpressionEditor = null
+
+## Scalar expand button for opening the expression editor.
+var _expand_btn: Button = null
+
+## Per-component expand buttons for opening the expression editor.
+var _comp_expand_btns: Array[Button] = []
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -100,6 +112,17 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 		_expr_edit.focus_exited.connect(_on_expression_focus_lost)
 		_expr_edit.visible = false
 		_value_container.add_child(_expr_edit)
+
+		# Expand button to open multi-line expression editor
+		_expand_btn = Button.new()
+		_expand_btn.text = "\u2197"  # ↗
+		_expand_btn.tooltip_text = "Open multi-line expression editor"
+		_expand_btn.custom_minimum_size = Vector2(24, 24)
+		_expand_btn.add_theme_font_size_override("font_size", 12)
+		_expand_btn.flat = true
+		_expand_btn.visible = false
+		_expand_btn.pressed.connect(func() -> void: _open_expression_editor(-1))
+		_value_container.add_child(_expand_btn)
 
 	# Wire parameter signals for external updates
 	param.value_changed.connect(_on_param_value_changed)
@@ -185,6 +208,19 @@ func _build_multi_component_ui() -> void:
 		expr_edit.focus_exited.connect(func() -> void: _on_comp_expr_focus_lost(expr_idx))
 		row.add_child(expr_edit)
 		_comp_expr_edits.append(expr_edit)
+
+		# Per-component expand button for multi-line editor
+		var expand_btn := Button.new()
+		expand_btn.text = "\u2197"  # \u2197
+		expand_btn.tooltip_text = "Open multi-line expression editor for %s" % labels[i]
+		expand_btn.custom_minimum_size = Vector2(22, 22)
+		expand_btn.add_theme_font_size_override("font_size", 11)
+		expand_btn.flat = true
+		expand_btn.visible = false
+		var expand_idx := i
+		expand_btn.pressed.connect(func() -> void: _open_expression_editor(expand_idx))
+		row.add_child(expand_btn)
+		_comp_expand_btns.append(expand_btn)
 
 		vbox.add_child(row)
 
@@ -649,11 +685,15 @@ func _update_comp_mode_display(idx: int) -> void:
 			else:
 				expr_edit.remove_theme_color_override("font_color")
 				expr_edit.tooltip_text = ""
+		if idx < _comp_expand_btns.size():
+			_comp_expand_btns[idx].visible = true
 	else:
 		btn.text = "C"
 		btn.modulate = Color(0.5, 0.8, 0.5)  # Green
 		spin.visible = true
 		expr_edit.visible = false
+		if idx < _comp_expand_btns.size():
+			_comp_expand_btns[idx].visible = false
 
 
 ## Updates per-component expression error indicators (called per-cook).
@@ -668,7 +708,12 @@ func _update_comp_expression_status() -> void:
 			expr_edit.tooltip_text = err
 		else:
 			expr_edit.remove_theme_color_override("font_color")
-			expr_edit.tooltip_text = ""
+			# Show per-component profiling info
+			if i < param.component_expression_eval_usec.size() and \
+					param.component_expression_eval_usec[i] > 0.0:
+				expr_edit.tooltip_text = "Eval: %.1f\u00b5s" % param.component_expression_eval_usec[i]
+			else:
+				expr_edit.tooltip_text = ""
 
 
 ## Syncs per-component spinbox values from the parameter model.
@@ -711,12 +756,14 @@ func _update_mode_display() -> void:
 			if _control:
 				_control.visible = true
 			_expr_edit.visible = false
+			_set_expand_btn_visible(false)
 		GNParameter.Mode.EXPRESSION:
 			_mode_btn.text = "E"
 			_mode_btn.modulate = Color(0.8, 0.6, 0.2)  # Orange tint
 			if _control:
 				_control.visible = false
 			_expr_edit.visible = true
+			_set_expand_btn_visible(true)
 			# Only set text if the user is NOT currently editing
 			if not _expr_edit.has_focus():
 				_expr_edit.text = param.expression
@@ -749,7 +796,12 @@ func update_expression_status() -> void:
 		_expr_edit.tooltip_text = param.expression_error
 	else:
 		_expr_edit.remove_theme_color_override("font_color")
-		_expr_edit.tooltip_text = ""
+		# Show profiling info in tooltip when no error
+		if param.expression_eval_usec > 0.0:
+			_expr_edit.tooltip_text = "Eval: %.1f\u00b5s (avg: %.1f\u00b5s)" % [
+				param.expression_eval_usec, param.expression_eval_avg_usec]
+		else:
+			_expr_edit.tooltip_text = ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Model → UI Sync (external updates reflected in controls)
@@ -837,6 +889,56 @@ func _update_value_display() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Cleanup
 # ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Expression Editor Integration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Shows or hides the scalar expand button.
+func _set_expand_btn_visible(visible: bool) -> void:
+	if _expand_btn != null:
+		_expand_btn.visible = visible
+
+
+## Opens the multi-line expression editor popup for a param or component.
+## component_idx == -1 means the main (scalar) expression.
+func _open_expression_editor(component_idx: int) -> void:
+	# Lazily create the editor
+	if _expr_editor == null:
+		_expr_editor = GNExpressionEditor.new()
+		add_child(_expr_editor)
+		_expr_editor.expression_committed.connect(_on_expr_editor_committed)
+
+	# Pass network reference for autocomplete
+	_expr_editor.network = network
+
+	# Open for the appropriate param/component
+	_expr_editor.open(param, component_idx)
+
+
+## Handles committed expression text from the multi-line editor.
+func _on_expr_editor_committed(text: String, p_param: GNParameter, component_idx: int) -> void:
+	if p_param != param:
+		return
+
+	if component_idx < 0:
+		# Main scalar expression
+		param.set_expression(text)
+		if _expr_edit != null and not _expr_edit.has_focus():
+			_expr_edit.text = text
+		_update_mode_display()
+	else:
+		# Per-component expression
+		if component_idx < param.component_expressions.size():
+			param.component_expressions[component_idx] = text
+			param.component_modes[component_idx] = GNParameter.Mode.EXPRESSION
+			param._compile_component_expression(component_idx)
+			_update_comp_mode_display(component_idx)
+
+	# Mark the owner node dirty so the network recooks
+	if owner_node:
+		owner_node.dirty = true
+
 
 ## Disconnects signals when this row is removed.
 func cleanup() -> void:

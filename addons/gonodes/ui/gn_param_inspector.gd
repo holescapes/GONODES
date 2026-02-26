@@ -143,6 +143,7 @@ func inspect(node: GNNode) -> void:
 			continue
 
 		var row := GNParamRow.new()
+		row.network = network
 		row.setup(param, node)
 		_vbox.add_child(row)
 		_param_rows[p_name] = row

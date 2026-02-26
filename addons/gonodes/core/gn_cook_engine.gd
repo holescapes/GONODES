@@ -46,6 +46,15 @@ var _nodes_adopted: bool = false
 ## Keyed by node id, value is Array[GNData] sized to input port count.
 var _input_cache: Dictionary = {}
 
+## Per-key state for the smooth() expression function.
+var _smooth_state: Dictionary = {}
+
+## Per-key state for the lag() expression function.
+var _lag_state: Dictionary = {}
+
+## Per-key state for the trigger() expression function.
+var _trigger_state: Dictionary = {}
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted after all nodes in a frame have been cooked.
@@ -287,7 +296,13 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 
 	# Pass self (CookEngine) as base_instance so Expression can call
 	# our chop(), op(), top() methods directly.
+	var _t0 := Time.get_ticks_usec()
 	var result = expr.execute(context, self)
+	var _t1 := Time.get_ticks_usec()
+	var eval_usec := float(_t1 - _t0)
+	param.expression_eval_usec = eval_usec
+	param.expression_eval_avg_usec = lerpf(param.expression_eval_avg_usec, eval_usec,
+		GNParameter._PROFILE_ALPHA) if param.expression_eval_avg_usec > 0.0 else eval_usec
 
 	if expr.has_execute_failed():
 		GNLogger.error("CookEngine", "Expression error on %s.%s — %s" % [
@@ -315,13 +330,22 @@ func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
 		current_delta,  # dt
 	]
 
+	# Ensure per-component timing array is sized
+	if param.component_expression_eval_usec.size() != count:
+		param.component_expression_eval_usec.resize(count)
+		for ci in range(count):
+			param.component_expression_eval_usec[ci] = 0.0
+
 	for i in range(count):
 		if param.component_modes[i] == GNParameter.Mode.EXPRESSION:
 			var expr: Expression = param.get_compiled_component_expression(i)
 			if expr == null:
 				components[i] = param.get_component_value(i)
 				continue
+			var ct0 := Time.get_ticks_usec()
 			var result = expr.execute(context, self)
+			var ct1 := Time.get_ticks_usec()
+			param.component_expression_eval_usec[i] = float(ct1 - ct0)
 			if expr.has_execute_failed():
 				var labels := param.get_component_labels()
 				var label_str: String = labels[i] if i < labels.size() else str(i)
@@ -504,6 +528,136 @@ func _make_top_proxy(node_name: String, property: String = "") -> Variant:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Built-in Expression Utility Functions
+# ═══════════════════════════════════════════════════════════════════════════════
+# These are callable directly in expressions: fit(v, 0, 1, -1, 1)
+
+## Linearly remaps [param value] from [in_min..in_max] to [out_min..out_max].
+## TouchDesigner-style fit(). Returns out_min if in_min == in_max.
+func fit(value: float, in_min: float, in_max: float,
+		out_min: float, out_max: float) -> float:
+	if is_equal_approx(in_max, in_min):
+		return out_min
+	return out_min + (value - in_min) / (in_max - in_min) * (out_max - out_min)
+
+
+## Remaps [param value] from [in_min..in_max] to [0..1].
+func fit01(value: float, in_min: float, in_max: float) -> float:
+	return fit(value, in_min, in_max, 0.0, 1.0)
+
+
+## Exponential smoothing with per-key state.
+## Returns a value that smoothly tracks [param target] over time.
+## [param key] identifies the smoothing instance (use a unique string per usage).
+## [param speed] controls convergence rate (higher = faster).
+func smooth(key: String, target: float, speed: float = 5.0) -> float:
+	if not _smooth_state.has(key):
+		_smooth_state[key] = target
+		return target
+	var factor := clampf(speed * current_delta, 0.0, 1.0)
+	_smooth_state[key] = lerpf(_smooth_state[key], target, factor)
+	return _smooth_state[key]
+
+
+## Asymmetric lag filter. [param up_speed] when target > current,
+## [param down_speed] when target < current.
+func lag(key: String, target: float,
+		up_speed: float = 5.0, down_speed: float = 5.0) -> float:
+	if not _lag_state.has(key):
+		_lag_state[key] = target
+		return target
+	var current_val: float = _lag_state[key]
+	var spd := up_speed if target > current_val else down_speed
+	var factor := clampf(spd * current_delta, 0.0, 1.0)
+	_lag_state[key] = lerpf(current_val, target, factor)
+	return _lag_state[key]
+
+
+## Pulse wave: returns 1.0 when fmod(phase, 1.0) < duty, else 0.0.
+func pulse(phase: float, duty: float = 0.5) -> float:
+	return 1.0 if fmod(absf(phase), 1.0) < duty else 0.0
+
+
+## Step function: returns 1.0 if val >= edge, else 0.0.
+func step(edge: float, val: float) -> float:
+	return 1.0 if val >= edge else 0.0
+
+
+## Hermite smoothstep interpolation between edge0 and edge1.
+func smoothstep(edge0: float, edge1: float, x: float) -> float:
+	if is_equal_approx(edge1, edge0):
+		return 0.0 if x < edge0 else 1.0
+	var t := clampf((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
+
+
+## Cyclic 0→1 ramp with the given period (seconds).
+func cycle(period: float) -> float:
+	if period <= 0.0:
+		return 0.0
+	return fmod(elapsed_time, period) / period
+
+
+## Bounce easing: abs(sin(t * PI)).
+func bounce(t: float) -> float:
+	return absf(sin(t * PI))
+
+
+## Simple 1D value noise using sin-based hash. Returns ~[-1, 1].
+func noise1(x: float) -> float:
+	var ix := floorf(x)
+	var fx := x - ix
+	# Smooth interpolation
+	fx = fx * fx * (3.0 - 2.0 * fx)
+	var a := _hash1(ix)
+	var b := _hash1(ix + 1.0)
+	return lerpf(a, b, fx)
+
+
+## Simple 2D value noise. Returns ~[-1, 1].
+func noise2(x: float, y: float) -> float:
+	var ix := floorf(x)
+	var iy := floorf(y)
+	var fx := x - ix
+	var fy := y - iy
+	fx = fx * fx * (3.0 - 2.0 * fx)
+	fy = fy * fy * (3.0 - 2.0 * fy)
+	var a := lerpf(_hash2(ix, iy), _hash2(ix + 1.0, iy), fx)
+	var b := lerpf(_hash2(ix, iy + 1.0), _hash2(ix + 1.0, iy + 1.0), fx)
+	return lerpf(a, b, fy)
+
+
+## Trigger detection: returns 1.0 on the frame [param value] crosses above
+## [param threshold], 0.0 otherwise. Uses per-key state.
+func trigger(key: String, value: float, threshold: float = 0.5) -> float:
+	var prev: float = _trigger_state.get(key, 0.0)
+	_trigger_state[key] = value
+	return 1.0 if prev < threshold and value >= threshold else 0.0
+
+
+## Dispatch to a user-defined custom function registered via GNExpressionFunctions.
+## Usage: fn("my_func", arg1, arg2, ...)
+func fn(func_name: String, a = null, b = null, c = null,
+		d = null, e = null, f = null) -> Variant:
+	var args: Array = []
+	for arg in [a, b, c, d, e, f]:
+		if arg == null:
+			break
+		args.append(arg)
+	return GNExpressionFunctions.call_func(func_name, args)
+
+
+# ─── Noise Helpers (internal) ────────────────────────────────────────────────
+
+func _hash1(n: float) -> float:
+	return fmod(sin(n * 127.1) * 43758.5453, 1.0) * 2.0 - 1.0
+
+
+func _hash2(x: float, y: float) -> float:
+	return fmod(sin(x * 127.1 + y * 311.7) * 43758.5453, 1.0) * 2.0 - 1.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Utility
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -522,5 +676,8 @@ func reset() -> void:
 	elapsed_time = 0.0
 	current_delta = 0.0
 	frame_cook_time_ms = 0.0
+	_smooth_state.clear()
+	_lag_state.clear()
+	_trigger_state.clear()
 	GNLogger.info("CookEngine", "Engine reset")
 	invalidate_all()

@@ -265,3 +265,131 @@ me.cook_valid
 4. **Node IDs are case-sensitive.** `chop("LFO1", "out")` won't find `lfo1`.
 5. **Renaming a node** automatically updates all expression strings across the
    network that reference the old name.
+
+---
+
+## Multi-line Expression Editor
+
+For complex expressions, click the **↗** button next to any expression field to
+open the **Expression Editor** popup. It provides:
+
+- **CodeEdit** with syntax highlighting for GONODES keywords, GDScript functions,
+  and context variables
+- **Live validation** — errors shown immediately as you type
+- **Autocomplete** — press Ctrl+Space for suggestions:
+  - Inside `chop("`, `op("`, `top("` — suggests node IDs
+  - Inside `chop("lfo1", "` — suggests channel names
+  - Inside `op("node1", "` — suggests parameter names
+  - Inside `fn("` — suggests registered custom functions
+  - General context — variables, functions, constants
+- **Snippets** dropdown — pre-built expression templates (see below)
+- **Profiling info** — shows last/average evaluation time
+- **Ctrl+Enter** to confirm, **Escape** to cancel
+
+---
+
+## Built-in Utility Functions
+
+These functions are available in all expressions, called directly (no imports needed):
+
+### Remapping
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `fit` | `fit(value, in_min, in_max, out_min, out_max)` | Linear remap between ranges (TD-style) |
+| `fit01` | `fit01(value, in_min, in_max)` | Shorthand for `fit(value, in_min, in_max, 0.0, 1.0)` |
+| `step` | `step(edge, value)` | Returns 1.0 if value >= edge, else 0.0 |
+| `smoothstep` | `smoothstep(edge0, edge1, x)` | Hermite smoothstep between two edges |
+
+### Smoothing & Filtering
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `smooth` | `smooth(key, target, speed)` | Exponential smoothing with per-key state |
+| `lag` | `lag(key, target, up_speed, down_speed)` | Asymmetric lag (different speeds up/down) |
+| `trigger` | `trigger(key, value, threshold)` | Returns 1.0 on the frame value crosses above threshold |
+
+> **Note:** `smooth()`, `lag()`, and `trigger()` use a string `key` to maintain
+> state between frames. Use unique keys per usage (e.g., `smooth("vol", value, 5.0)`).
+
+### Waveforms & Time
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `pulse` | `pulse(phase, duty)` | Pulse wave: 1.0 when fmod(phase, 1.0) < duty |
+| `cycle` | `cycle(period)` | Cyclic 0→1 ramp with given period in seconds |
+| `bounce` | `bounce(t)` | Bounce easing: `abs(sin(t * PI))` |
+
+### Noise
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `noise1` | `noise1(x)` | 1D value noise, returns ~[-1, 1] |
+| `noise2` | `noise2(x, y)` | 2D value noise, returns ~[-1, 1] |
+
+### Examples
+
+```gdscript
+# Smoothly remap an LFO to a custom range
+fit(chop("lfo1", "out"), -1.0, 1.0, 100.0, 500.0)
+
+# Smooth follow a noisy value
+smooth("my_smooth", chop("noise1", "out"), 3.0)
+
+# Asymmetric lag: fast attack, slow release
+lag("volume", chop("audio1", "level"), 10.0, 2.0)
+
+# Cyclic animation with 4-second period
+cycle(4.0) * 360.0
+
+# Trigger detection
+trigger("beat", chop("audio1", "level"), 0.8)
+```
+
+---
+
+## Custom User-Defined Functions
+
+You can register custom functions via `GNExpressionFunctions.register()` and call
+them from expressions using the `fn()` dispatch method:
+
+```gdscript
+# In expressions:
+fn("my_func", arg1, arg2)
+
+# Registration (in your script):
+GNExpressionFunctions.register("my_func", my_callable, "Description", ["arg1", "arg2"])
+```
+
+Custom functions appear in the expression editor's autocomplete when typing
+inside `fn("`.
+
+---
+
+## Expression Snippets
+
+The expression editor's **Snippets ▾** dropdown provides ready-to-use templates:
+
+| Category | Snippets |
+|----------|----------|
+| **Time & Animation** | Sine wave, Cosine wave, Sawtooth, Cyclic ramp, Ping-pong, Bounce, Pulse wave |
+| **Remapping** | Fit to range, Fit to 0-1, Sin to 0-1, Smoothstep, Step threshold |
+| **Smoothing** | Smooth follow, Lag (asymmetric), Trigger detect |
+| **Noise & Random** | Noise 1D, Noise 2D, Random [0,1], Random range |
+| **Node References** | Read CHOP channel, Read parameter, TOP resolution, TOP aspect |
+| **Math Patterns** | Sine + offset, Exponential decay, Power curve, Circular motion, Quantize |
+
+Snippets are inserted at the cursor position, or replace the entire editor if empty.
+
+---
+
+## Expression Profiling
+
+Expression evaluation timing is automatically tracked per parameter:
+
+- **Tooltip** on expression fields shows last eval time and rolling average (µs)
+- **Expression editor** info bar shows average eval time when opened
+- **Per-component** timing is tracked independently
+
+Timing is measured in microseconds (µs). Most expressions evaluate in < 5µs.
+Complex expressions referencing many nodes may take 10-50µs.
