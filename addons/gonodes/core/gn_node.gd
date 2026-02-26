@@ -67,6 +67,10 @@ var current_frame: int = 0
 ## Position of this node in the graph editor (stored for serialization).
 @export var graph_position: Vector2 = Vector2.ZERO
 
+## Per-node preview toggle. When false, inline preview is hidden even if
+## the global previews toggle is on. Persists with save/load.
+var preview_enabled: bool = true
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted when this node is marked dirty (before cook).
@@ -360,6 +364,9 @@ func to_dict() -> Dictionary:
 		"position": [graph_position.x, graph_position.y],
 	}
 
+	if not preview_enabled:
+		d["preview_enabled"] = false
+
 	# Serialize parameters (only those that differ from defaults, or have expressions)
 	var params_dict: Dictionary = {}
 	for param_name in parameters:
@@ -381,6 +388,10 @@ func from_dict(d: Dictionary) -> void:
 		var pos: Array = d["position"]
 		if pos.size() >= 2:
 			graph_position = Vector2(float(pos[0]), float(pos[1]))
+
+	# Restore per-node preview flag
+	if d.has("preview_enabled"):
+		preview_enabled = d["preview_enabled"]
 
 	# Restore parameter values/modes/expressions
 	if d.has("parameters"):

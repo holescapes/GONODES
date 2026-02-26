@@ -209,6 +209,7 @@ func _setup_cook_engine() -> void:
 	add_child(cook_engine)
 
 	cook_engine.frame_cooked.connect(_on_frame_cooked)
+	cook_engine.frame_cooked.connect(_check_stress_report)
 	cook_engine.cook_error.connect(_on_cook_error)
 
 
@@ -437,6 +438,14 @@ func _setup_toolbar() -> void:
 	info_bar.add_child(btn_viewer)
 	info_bar.move_child(btn_viewer, 7)
 
+	# Stress Test button
+	var btn_stress := Button.new()
+	btn_stress.text = "Stress Test"
+	btn_stress.tooltip_text = "Build a 55+ node network for performance testing"
+	btn_stress.pressed.connect(_on_stress_test_pressed)
+	info_bar.add_child(btn_stress)
+	info_bar.move_child(btn_stress, 8)
+
 
 ## Keyboard shortcuts for file operations.
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -577,3 +586,372 @@ func _update_title() -> void:
 	else:
 		var file_name := _current_file_path.get_file()
 		get_window().title = "GONODES Editor — %s" % file_name
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Stress Test — 55+ node network exercising all 6 families
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Number of warm-up frames before printing the report.
+var _stress_warmup_frames: int = -1
+const STRESS_WARMUP_COUNT: int = 30
+
+func _on_stress_test_pressed() -> void:
+	_on_new_pressed()
+	_build_stress_test_network()
+	# Rebind everything
+	graph_editor.bind_network(network)
+	inspector.network = network
+	cook_engine.network = network
+	cook_engine._nodes_adopted = false
+	network.node_renamed.connect(_on_node_renamed)
+	graph_editor.clear_undo_history()
+	_viewer_node_id = "render_main"
+	_update_title()
+	# Start warm-up countdown — report prints after N frames
+	_stress_warmup_frames = STRESS_WARMUP_COUNT
+	print("[STRESS] Network built — %d nodes, %d connections. Warming up %d frames…" % [
+		network.get_node_count(), network.get_connection_count(), STRESS_WARMUP_COUNT])
+
+
+## Helper to add a node to the stress test network with position.
+func _stress_add(n: GNNode, id: String, x: float, y: float) -> GNNode:
+	n.initialize(id)
+	n.graph_position = Vector2(x, y)
+	network.add_node(n)
+	return n
+
+
+## Builds a large network with 55+ nodes across all 6 families.
+## Layout: multiple parallel TOP chains, CHOP generator/filter chains,
+## DAT table chains, SOP geometry chains feeding COMPs with MATs,
+## merged into a single RenderTOP output.
+func _build_stress_test_network() -> void:
+	network = GNNetwork.new()
+
+	var col_x := 0  # X offset tracker for laying out columns
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# CHOP chain (12 nodes) — generators + filters
+	# ═══════════════════════════════════════════════════════════════════════
+
+	var lfo1 := _stress_add(LFO_CHOP.new(), "lfo1", 0, 0)
+	lfo1.get_parameter("frequency").set_value(0.5)
+	lfo1.get_parameter("amplitude").set_value(1.0)
+
+	var lfo2 := _stress_add(LFO_CHOP.new(), "lfo2", 0, 150)
+	lfo2.get_parameter("frequency").set_value(0.3)
+	lfo2.get_parameter("waveform").set_value(LFO_CHOP.Waveform.SAWTOOTH)
+
+	_stress_add(NoiseCHOP.new(), "noise_c1", 0, 300)
+	var const_c := _stress_add(ConstantCHOP.new(), "const_c1", 0, 450)
+	const_c.get_parameter("value0").set_value(2.0)
+	_stress_add(WaveCHOP.new(), "wave_c1", 0, 600)
+
+	_stress_add(MathCHOP.new(), "math_c1", 300, 0)
+	_stress_add(MathCHOP.new(), "math_c2", 300, 150)
+	_stress_add(LagCHOP.new(), "lag_c1", 300, 300)
+	_stress_add(FilterCHOP.new(), "filter_c1", 300, 450)
+	_stress_add(LimitCHOP.new(), "limit_c1", 300, 600)
+	_stress_add(MergeCHOP.new(), "merge_c1", 600, 150)
+	_stress_add(NullCHOP.new(), "null_c1", 600, 300)
+
+	# Wire CHOP chain
+	network.connect_nodes("lfo1", 0, "math_c1", 0)
+	network.connect_nodes("lfo2", 0, "math_c2", 0)
+	network.connect_nodes("noise_c1", 0, "lag_c1", 0)
+	network.connect_nodes("const_c1", 0, "filter_c1", 0)
+	network.connect_nodes("wave_c1", 0, "limit_c1", 0)
+	network.connect_nodes("math_c1", 0, "merge_c1", 0)
+	network.connect_nodes("math_c2", 0, "merge_c1", 0)
+	network.connect_nodes("lag_c1", 0, "null_c1", 0)
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# DAT chain (8 nodes)
+	# ═══════════════════════════════════════════════════════════════════════
+	col_x = 800
+	_stress_add(ConstantDAT.new(), "const_d1", col_x, 0)
+	_stress_add(ConstantDAT.new(), "const_d2", col_x, 150)
+	_stress_add(TextDAT.new(), "text_d1", col_x, 300)
+	_stress_add(MergeDAT.new(), "merge_d1", col_x + 300, 0)
+	_stress_add(SelectDAT.new(), "select_d1", col_x + 300, 150)
+	_stress_add(SortDAT.new(), "sort_d1", col_x + 300, 300)
+	_stress_add(TransposeDAT.new(), "transpose_d1", col_x + 600, 0)
+	_stress_add(NullDAT.new(), "null_d1", col_x + 600, 150)
+
+	network.connect_nodes("const_d1", 0, "merge_d1", 0)
+	network.connect_nodes("const_d2", 0, "merge_d1", 0)
+	network.connect_nodes("merge_d1", 0, "transpose_d1", 0)
+	network.connect_nodes("text_d1", 0, "select_d1", 0)
+	network.connect_nodes("select_d1", 0, "sort_d1", 0)
+	network.connect_nodes("sort_d1", 0, "null_d1", 0)
+
+	# Bridges: CHOP → DAT → CHOP round-trip
+	_stress_add(CHOPDAT.new(), "chop_to_dat1", col_x + 600, 300)
+	_stress_add(DATtoCHOP.new(), "dat_to_chop1", col_x + 900, 300)
+	network.connect_nodes("merge_c1", 0, "chop_to_dat1", 0)
+	network.connect_nodes("chop_to_dat1", 0, "dat_to_chop1", 0)
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# TOP chain A — Noise → Level → Blur → HSV → Threshold → NullTOP (6)
+	# ═══════════════════════════════════════════════════════════════════════
+	col_x = 0
+	var row_y := 900
+	var noise_t := _stress_add(NoiseTOP.new(), "noise_t1", col_x, row_y)
+	noise_t.get_parameter("resolution").set_value(Vector2i(256, 256))
+	_stress_add(LevelTOP.new(), "level_t1", col_x + 300, row_y)
+	_stress_add(BlurTOP.new(), "blur_t1", col_x + 600, row_y)
+	_stress_add(HSVAdjustTOP.new(), "hsv_t1", col_x + 900, row_y)
+	_stress_add(ThresholdTOP.new(), "thresh_t1", col_x + 1200, row_y)
+	_stress_add(NullTOP.new(), "null_t1", col_x + 1500, row_y)
+
+	network.connect_nodes("noise_t1", 0, "level_t1", 0)
+	network.connect_nodes("level_t1", 0, "blur_t1", 0)
+	network.connect_nodes("blur_t1", 0, "hsv_t1", 0)
+	network.connect_nodes("hsv_t1", 0, "thresh_t1", 0)
+	network.connect_nodes("thresh_t1", 0, "null_t1", 0)
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# TOP chain B — Ramp → Transform → Tile → Edge → Composite (5)
+	# ═══════════════════════════════════════════════════════════════════════
+	row_y = 1100
+	var ramp_t := _stress_add(RampTOP.new(), "ramp_t1", col_x, row_y)
+	ramp_t.get_parameter("resolution").set_value(Vector2i(256, 256))
+	_stress_add(TransformTOP.new(), "xform_t1", col_x + 300, row_y)
+	_stress_add(TileTOP.new(), "tile_t1", col_x + 600, row_y)
+	_stress_add(EdgeTOP.new(), "edge_t1", col_x + 900, row_y)
+	_stress_add(CompositeTOP.new(), "comp_t1", col_x + 1200, row_y)
+
+	network.connect_nodes("ramp_t1", 0, "xform_t1", 0)
+	network.connect_nodes("xform_t1", 0, "tile_t1", 0)
+	network.connect_nodes("tile_t1", 0, "edge_t1", 0)
+	# Composite: chain A + chain B
+	network.connect_nodes("null_t1", 0, "comp_t1", 0)
+	network.connect_nodes("edge_t1", 0, "comp_t1", 1)
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# TOP chain C — Constants, Circle, Rectangle, Cross, Flip (5)
+	# ═══════════════════════════════════════════════════════════════════════
+	row_y = 1300
+	var const_t := _stress_add(ConstantTOP.new(), "const_t1", col_x, row_y)
+	const_t.get_parameter("resolution").set_value(Vector2i(256, 256))
+	var circle_t := _stress_add(CircleTOP.new(), "circle_t1", col_x + 300, row_y)
+	circle_t.get_parameter("resolution").set_value(Vector2i(256, 256))
+	var rect_t := _stress_add(RectangleTOP.new(), "rect_t1", col_x + 600, row_y)
+	rect_t.get_parameter("resolution").set_value(Vector2i(256, 256))
+	_stress_add(CrossTOP.new(), "cross_t1", col_x + 900, row_y)
+	_stress_add(FlipTOP.new(), "flip_t1", col_x + 1200, row_y)
+
+	network.connect_nodes("circle_t1", 0, "cross_t1", 0)
+	network.connect_nodes("rect_t1", 0, "cross_t1", 1)
+	network.connect_nodes("cross_t1", 0, "flip_t1", 0)
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# SOP chains (8 nodes) — Two geometry paths
+	# ═══════════════════════════════════════════════════════════════════════
+	col_x = 2000
+	var box_s := _stress_add(BoxSOP.new(), "box_s1", col_x, 0)
+	box_s.get_parameter("subdivide_w").set_value(6)
+	box_s.get_parameter("subdivide_h").set_value(6)
+	box_s.get_parameter("subdivide_d").set_value(6)
+	var noise_s := _stress_add(NoiseSOP.new(), "noise_s1", col_x + 300, 0)
+	noise_s.get_parameter("amplitude").set_value(0.2)
+	noise_s.get_parameter("frequency").set_value(3.0)
+	noise_s.get_parameter("speed").set_value(0.5)
+	_stress_add(SubdivideSOP.new(), "subdiv_s1", col_x + 600, 0)
+
+	var torus_s := _stress_add(TorusSOP.new(), "torus_s1", col_x, 200)
+	torus_s.get_parameter("rings").set_value(48)
+	torus_s.get_parameter("ring_segments").set_value(24)
+	var xform_s := _stress_add(TransformSOP.new(), "xform_s1", col_x + 300, 200)
+	xform_s.get_parameter("ry").set_expression('chop("lfo1", "out") * 360.0')
+
+	var sphere_s := _stress_add(SphereSOP.new(), "sphere_s1", col_x, 400)
+	sphere_s.get_parameter("radial_segments").set_value(32)
+	sphere_s.get_parameter("rings").set_value(16)
+	var grid_s := _stress_add(GridSOP.new(), "grid_s1", col_x, 600)
+	grid_s.get_parameter("rows").set_value(20)
+	grid_s.get_parameter("cols").set_value(20)
+
+	# Wire SOP chains
+	network.connect_nodes("box_s1", 0, "noise_s1", 0)
+	network.connect_nodes("noise_s1", 0, "subdiv_s1", 0)
+	network.connect_nodes("torus_s1", 0, "xform_s1", 0)
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# MAT nodes (4)
+	# ═══════════════════════════════════════════════════════════════════════
+	col_x = 2600
+	var mat1 := _stress_add(PBR_MAT.new(), "mat_blue", col_x, 0)
+	mat1.get_parameter("albedo_color").set_value(Color(0.1, 0.3, 0.9))
+	mat1.get_parameter("metallic").set_value(0.8)
+	mat1.get_parameter("roughness").set_value(0.15)
+
+	var mat2 := _stress_add(PBR_MAT.new(), "mat_red", col_x, 200)
+	mat2.get_parameter("albedo_color").set_value(Color(0.9, 0.15, 0.1))
+	mat2.get_parameter("emission_enabled").set_value(true)
+	mat2.get_parameter("emission_color").set_value(Color(0.9, 0.1, 0.05))
+	mat2.get_parameter("emission_energy").set_value(0.6)
+
+	var mat3 := _stress_add(PBR_MAT.new(), "mat_green", col_x, 400)
+	mat3.get_parameter("albedo_color").set_value(Color(0.1, 0.8, 0.2))
+	mat3.get_parameter("roughness").set_value(0.9)
+
+	var mat4 := _stress_add(PBR_MAT.new(), "mat_chrome", col_x, 600)
+	mat4.get_parameter("albedo_color").set_value(Color(0.85, 0.85, 0.9))
+	mat4.get_parameter("metallic").set_value(1.0)
+	mat4.get_parameter("roughness").set_value(0.05)
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# COMP nodes — 4 Geometry + Camera + 2 Lights + Merge (8)
+	# ═══════════════════════════════════════════════════════════════════════
+	col_x = 3000
+	var geo1 := _stress_add(GeometryCOMP.new(), "geo1", col_x, 0)
+	geo1.get_parameter("tx").set_value(-2.0)
+	geo1.get_parameter("ty").set_value(0.5)
+
+	var geo2 := _stress_add(GeometryCOMP.new(), "geo2", col_x, 200)
+	geo2.get_parameter("tx").set_value(0.0)
+
+	var geo3 := _stress_add(GeometryCOMP.new(), "geo3", col_x, 400)
+	geo3.get_parameter("tx").set_value(2.0)
+	geo3.get_parameter("ty").set_value(0.5)
+
+	var geo4 := _stress_add(GeometryCOMP.new(), "geo4", col_x, 600)
+	geo4.get_parameter("ty").set_value(-0.5)
+
+	# Wire SOP → Geo + MAT → Geo
+	network.connect_nodes("subdiv_s1", 0, "geo1", 0)   # subdivided box
+	network.connect_nodes("mat_blue", 0, "geo1", 1)
+	network.connect_nodes("xform_s1", 0, "geo2", 0)    # spinning torus
+	network.connect_nodes("mat_red", 0, "geo2", 1)
+	network.connect_nodes("sphere_s1", 0, "geo3", 0)   # sphere
+	network.connect_nodes("mat_green", 0, "geo3", 1)
+	network.connect_nodes("grid_s1", 0, "geo4", 0)     # ground plane
+	network.connect_nodes("mat_chrome", 0, "geo4", 1)
+
+	# Camera
+	var cam := _stress_add(CameraCOMP.new(), "cam_main", col_x, 800)
+	cam.get_parameter("tx").set_value(0.0)
+	cam.get_parameter("ty").set_value(2.0)
+	cam.get_parameter("tz").set_value(5.0)
+	cam.get_parameter("rx").set_value(-20.0)
+	cam.get_parameter("fov").set_value(55.0)
+
+	# Two lights for more interesting shading
+	var light1 := _stress_add(LightCOMP.new(), "light_dir", col_x, 1000)
+	light1.get_parameter("type").set_value(0)  # Directional
+	light1.get_parameter("rx").set_value(-45.0)
+	light1.get_parameter("ry").set_value(30.0)
+	light1.get_parameter("energy").set_value(1.0)
+	light1.get_parameter("shadows").set_value(true)
+
+	var light2 := _stress_add(LightCOMP.new(), "light_point", col_x, 1200)
+	light2.get_parameter("type").set_value(1)  # Omni
+	light2.get_parameter("tx").set_value(2.0)
+	light2.get_parameter("ty").set_value(3.0)
+	light2.get_parameter("tz").set_value(1.0)
+	light2.get_parameter("energy").set_value(0.8)
+	light2.get_parameter("color").set_value(Color(0.6, 0.8, 1.0))
+
+	# MergeCOMP
+	_stress_add(MergeCOMP.new(), "merge_scene", col_x + 400, 300)
+	network.connect_nodes("geo1", 0, "merge_scene", 0)
+	network.connect_nodes("geo2", 0, "merge_scene", 0)
+	network.connect_nodes("geo3", 0, "merge_scene", 0)
+	network.connect_nodes("geo4", 0, "merge_scene", 0)
+
+	# ═══════════════════════════════════════════════════════════════════════
+	# RenderTOP (1 node) — final output
+	# ═══════════════════════════════════════════════════════════════════════
+	var render := _stress_add(RenderTOP.new(), "render_main", col_x + 700, 300)
+	render.get_parameter("resolution").set_value(Vector2i(1280, 720))
+	render.get_parameter("bg_color").set_value(Color(0.06, 0.06, 0.08))
+	render.get_parameter("anti_aliasing").set_value(2)
+	render.get_parameter("ambient_energy").set_value(0.3)
+	network.connect_nodes("merge_scene", 0, "render_main", 0)
+	network.connect_nodes("cam_main", 0, "render_main", 0)
+	network.connect_nodes("light_dir", 0, "render_main", 0)
+	network.connect_nodes("light_point", 0, "render_main", 0)
+
+	# Use composite texture as a material texture on the box (TOP → Geo)
+	network.connect_nodes("comp_t1", 0, "geo1", 2)  # TOP texture input
+
+	print("[STRESS] Built %d nodes, %d connections" % [
+		network.get_node_count(), network.get_connection_count()])
+
+
+## Called each frame after cook — if we're in stress warmup, count down and print report.
+func _check_stress_report(_frame: int, _cook_time_ms: float) -> void:
+	if _stress_warmup_frames < 0:
+		return
+	_stress_warmup_frames -= 1
+	if _stress_warmup_frames > 0:
+		return
+
+	# Warmup complete — print the report
+	_stress_warmup_frames = -1
+	_print_stress_report()
+
+
+## Prints a per-node cook time report sorted by cost (descending).
+func _print_stress_report() -> void:
+	var node_count := network.get_node_count()
+	var conn_count := network.get_connection_count()
+
+	# Gather per-node stats
+	var entries: Array[Dictionary] = []
+	var total_ms := 0.0
+	for node_id in network.nodes:
+		var node: GNNode = network.nodes[node_id]
+		entries.append({
+			"id": node.id,
+			"type": node.node_type,
+			"family": GNFamily.get_family_name(node.family),
+			"cook_ms": node.cook_time_ms,
+			"dirty": node.dirty,
+		})
+		total_ms += node.cook_time_ms
+
+	# Sort descending by cook time
+	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return a["cook_ms"] > b["cook_ms"])
+
+	# Per-family totals
+	var family_totals: Dictionary = {}
+	for e in entries:
+		var fam: String = e["family"]
+		family_totals[fam] = family_totals.get(fam, 0.0) + e["cook_ms"]
+
+	# Print report
+	print("")
+	print("╔══════════════════════════════════════════════════════════════════╗")
+	print("║         GONODES STRESS TEST REPORT — %d NODES                  ║" % node_count)
+	print("╠══════════════════════════════════════════════════════════════════╣")
+	print("║  Nodes: %d  |  Connections: %d  |  Frame cook: %.2fms" % [
+		node_count, conn_count, cook_engine.frame_cook_time_ms])
+	print("║  FPS:   %d  |  Total node cook: %.2fms" % [
+		Engine.get_frames_per_second(), total_ms])
+	print("╠══════════════════════════════════════════════════════════════════╣")
+	print("║  PER-FAMILY TOTALS:")
+	for fam_name in family_totals:
+		print("║    %-8s  %.3fms" % [fam_name, family_totals[fam_name]])
+	print("╠══════════════════════════════════════════════════════════════════╣")
+	print("║  TOP 15 MOST EXPENSIVE NODES:")
+	print("║  %-20s %-14s %-6s %s" % ["ID", "Type", "Family", "Cook (ms)"])
+	print("║  " + "—".repeat(58))
+	var show_count := mini(entries.size(), 15)
+	for i in range(show_count):
+		var e: Dictionary = entries[i]
+		print("║  %-20s %-14s %-6s %.3f" % [e["id"], e["type"], e["family"], e["cook_ms"]])
+	print("╠══════════════════════════════════════════════════════════════════╣")
+	if total_ms < 5.0:
+		print("║  VERDICT: ✅ EXCELLENT — well under 16ms budget (60 FPS)")
+	elif total_ms < 12.0:
+		print("║  VERDICT: ✅ GOOD — within 16ms budget (60 FPS)")
+	elif total_ms < 16.67:
+		print("║  VERDICT: ⚠️  BORDERLINE — near 16ms budget")
+	else:
+		print("║  VERDICT: ❌ OVER BUDGET — exceeds 16ms (%.1f FPS target)" % (1000.0 / total_ms))
+	print("╚══════════════════════════════════════════════════════════════════╝")
+	print("")

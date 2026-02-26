@@ -41,6 +41,7 @@ enum _CtxID {
 	UNDO,
 	REDO,
 	OPEN_VIEWER,
+	TOGGLE_PREVIEW,
 }
 
 ## Undo/redo history for graph operations.
@@ -238,8 +239,8 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	add_child(view)
 	_node_views[node.id] = view
 
-	# Respect current preview toggle state
-	if not previews_visible:
+	# Respect per-node preview flag
+	if not node.preview_enabled:
 		view.hide_preview()
 
 	# Respect current perf overlay state
@@ -506,23 +507,50 @@ static func get_operator_registry() -> Dictionary:
 
 ## Updates live preview on all node views.
 ## Called after each cook frame by the editor.
+## Only updates nodes whose per-node preview_enabled flag is true.
 func update_previews() -> void:
-	if not previews_visible:
-		return
 	for view_name in _node_views:
 		var view: GNNodeView = _node_views[view_name]
+		if view.gn_node != null and not view.gn_node.preview_enabled:
+			continue
 		view.update_preview()
 
 
-## Toggles preview visibility on all node views.
+## Bulk-toggles preview on all nodes by setting each node's preview_enabled flag.
+## Acts as a master switch — sets every node's per-node flag to match.
 func set_previews_visible(enabled: bool) -> void:
 	previews_visible = enabled
 	for view_name in _node_views:
 		var view: GNNodeView = _node_views[view_name]
+		if view.gn_node != null:
+			view.gn_node.preview_enabled = enabled
 		if enabled:
 			view.show_preview()
 		else:
 			view.hide_preview()
+
+
+## Toggles preview_enabled on all selected nodes and shows/hides accordingly.
+func _toggle_selected_previews() -> void:
+	var selected_ids := _get_selected_node_ids()
+	if selected_ids.is_empty() or network == null:
+		return
+	# Determine toggle direction from first selected node
+	var first_node: GNNode = network.get_node_by_id(selected_ids[0])
+	if first_node == null:
+		return
+	var new_state := not first_node.preview_enabled
+	for nid in selected_ids:
+		var node: GNNode = network.get_node_by_id(nid)
+		if node == null:
+			continue
+		node.preview_enabled = new_state
+		var view: GNNodeView = _node_views.get(nid, null)
+		if view != null:
+			if new_state:
+				view.show_preview()
+			else:
+				view.hide_preview()
 
 
 ## Updates performance overlay on all node views.
@@ -757,6 +785,15 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item("Open Viewer", _CtxID.OPEN_VIEWER)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.OPEN_VIEWER), not single_top_selected)
 
+	# Per-node preview toggle — label reflects current state of first selected node
+	var preview_label := "Toggle Preview"
+	if selected_ids.size() >= 1 and network != null:
+		var first_node: GNNode = network.get_node_by_id(selected_ids[0])
+		if first_node != null:
+			preview_label = "Preview: ON" if first_node.preview_enabled else "Preview: OFF"
+	_context_menu.add_item(preview_label, _CtxID.TOGGLE_PREVIEW)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.TOGGLE_PREVIEW), not has_selection)
+
 	_context_menu.position = Vector2i(screen_pos)
 	_context_menu.reset_size()
 	_context_menu.popup()
@@ -794,6 +831,8 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			var selected := _get_selected_node_ids()
 			if selected.size() == 1:
 				open_viewer_requested.emit(selected[0])
+		_CtxID.TOGGLE_PREVIEW:
+			_toggle_selected_previews()
 
 
 ## Helper: creates a Shortcut with a single InputEventKey for menu display.

@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu, performance profiling overlay. GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. 3D pipeline live. 82 operators across 6 families. Phases 1–5.8 complete.**
+**Phase 6 Complete — Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowTOP open/close toggle. 3D pipeline live. 82 operators across 6 families. Phases 1–6 complete.**
 
 ### Completed
 
@@ -75,6 +75,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 - **Phase 5.6: UI Polish & Node Renaming** — Canvas anchoring fix (all 21 TOPs use `set_anchors_and_offsets_preset`), viewer panel sizing fix (`expand_mode = IGNORE_SIZE`, `clip_contents`), inline node renaming (double-click title bar with full ID update chain), inspector refresh on rename.
 - **Phase 5.7: File Parameters & Media Input** — FILE parameter type with project file picker (FileDialog). TextTOP font selection (TTF/OTF/WOFF). ImageFileInTOP (PNG, JPG, WebP, HDR, EXR, SVG). MovieFileInTOP (Godot VideoStreamPlayer, .ogv Theora).
 - **Phase 5.8: Extension Registry Architecture** — GNExtensionRegistry singleton replaces static match-factory and description dictionary. Dynamic operator registration API. Extension scanning (`gn_ext_*` addon manifests with `gn_extension.cfg`). ClassDB dependency guards for GDExtension addons. FFmpeg extension as future reference implementation.
+- **Phase 6: Integration & Stabilization** — Save/load patches (`.gnpatch` JSON), copy/paste with ID remapping, undo/redo (Godot UndoRedo), live node previews (per-family: texture, channels, tables, mesh stats), per-node preview toggle (right-click on/off), global preview master switch, performance profiling overlay (per-node cook time badges), right-click context menu, MAT family (PBR_MAT + Shader_MAT), MergeCOMP, shadow system (per-light/per-object/global), multiple floating viewer windows, WindowTOP open/close toggle, stress test (59 nodes, auto-report), bug fixes.
 - **Architecture: Node/RefCounted migration** — GNNode extends Node (scene tree), GNData extends RefCounted (lightweight)
 - **Multi-window output** — WindowTOP creates OS windows for VJ output on any connected display (zero-copy GPU texture routing)
 - **Logging system** — GNLogger with level filtering, per-category muting, and runtime toggle button
@@ -110,37 +111,60 @@ GridSOP → TransformSOP → GeometryCOMP (MeshInstance3D) ─┐
 
 SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and SurfaceTool for procedural generation. NoiseSOP uses FastNoiseLite for vertex displacement. MAT operators wrap Godot's Material system (StandardMaterial3D, ShaderMaterial) for per-object material assignment. GeometryCOMP accepts SOP, MAT, and TOP inputs. MergeCOMP groups multiple COMPs for scene composition. Shadow controls span all three levels: per-light (LightCOMP), per-object (GeometryCOMP), and global quality (RenderTOP).
 
-### Next Up (Phase 6)
+### Next Up (Phase 7: Creative Tools, Performance & Workflow)
 
-- [x] Save/load patches (`.gnpatch` JSON files with full serialization pipeline)
-- [x] Node copy/paste (Ctrl+C/V/X/D with ID remapping and connection preservation)
-- [x] Undo/redo (Ctrl+Z/Y — add, delete, connect, disconnect, move, rename)
-- [x] Live node previews (all families: texture, channels, tables, mesh stats, scene info)
-- [x] Family base classes (GNTopBase, GNChopBase, GNDatBase, GNSopBase, GNCompBase)
-- [x] Preview toggle (toolbar CheckButton to show/hide all inline previews)
-- [x] Right-click context menu (Add Node, Copy/Cut/Paste/Duplicate, Delete, Select All, Undo/Redo)
-- [x] Performance profiling overlay (per-node cook time badge with color coding, toolbar toggle)
-- [x] MAT family (PBR_MAT, Shader_MAT — per-object materials via GeometryCOMP)
-- [x] MergeCOMP (groups COMP scene nodes for multi-object 3D scenes)
-- [x] Shadow system (per-light, per-object, and global shadow quality controls)
-- [x] Bug fixes (family assignment, expression re-cook, preview label centering)
-- [x] Multiple viewer windows (floating windows pinned to any TOP node, toolbar + context menu)
-- Stress test: 50+ node network
+**Script Operators:**
+- [ ] ScriptCHOP — user GDScript for custom channel processing (inline or .gd file)
+- [ ] ScriptDAT — user GDScript for table/text processing
+- [ ] ScriptTOP — CPU-side pixel generation via GDScript
+- [ ] ScriptSOP — procedural geometry via GDScript
 
-### Planned (Post-MVP)
+**Media I/O:**
+- [ ] OSC input/output operators (OscInCHOP, OscOutCHOP, complete OscInDAT stub)
+- [ ] MIDI input (MidiInCHOP, MidiInDAT with device selection)
+- [ ] Audio input (AudioInCHOP, AudioSpectrumCHOP, AudioFileInCHOP)
+- [ ] WebcamTOP — live camera feed via CameraServer
+- [ ] ImageSequenceTOP — numbered frame playback with alpha
+
+**Performance:**
+- [ ] SubViewport UPDATE_ONCE for non-time-dependent TOPs
+- [ ] Viewport pooling (reuse freed SubViewports by resolution)
+- [ ] Active chain cooking (skip disconnected subgraphs)
+- [ ] Lazy viewport creation (zero GPU footprint for unused TOPs)
+- [ ] GPU memory budget monitoring (VRAM tracking + warnings)
+- [ ] Resolution downscaling for preview thumbnails
+
+**Workflow:**
+- [ ] Keyboard shortcut reference card (? key help overlay)
+- [ ] Node alignment tools (align H/V, distribute evenly)
+- [ ] Fit-to-view (F key)
+- [ ] Node bypass/disable toggle (B key)
+- [ ] Node lock toggle (L key)
+- [ ] Wire style options (curved/straight/right-angle)
+- [ ] Renderer selection UI (Forward+/Mobile/Compatibility dropdown)
+- [ ] Patch export to standalone apps (desktop/web via Godot export templates)
+- [ ] Node grouping / sub-networks (collapse → dive → breadcrumbs)
+- [ ] Minimap navigation
+- [ ] Node bookmarks (quick-jump 1-9)
+- [ ] Auto-layout (topological + layer assignment)
+- [ ] Parameter presets (save/load/copy between nodes)
+
+### Planned (Post-Phase 7)
 
 - POP family (GPU particle system — millions of points via compute shaders)
-- ScriptCHOP / ScriptDAT (user GDScript for custom processing)
-- Renderer switching (Forward+, Mobile, Compatibility) for target platform preview
-- Patch export as standalone apps (desktop, mobile, web)
 - LibGodot embedding for host applications (VDMX, Resolume)
-- FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — reference extension for GNExtensionRegistry (H.264, VP9, AV1, ProRes)
+- FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — H.264, VP9, AV1, ProRes
 - HAP codec GDExtension (GPU-direct S3TC/DXT video for VJ workflows, alpha support)
-- ImageSequenceTOP (numbered PNG/WebP frame playback with alpha)
 - Syphon / Spout texture sharing
-- OSC, MIDI, NDI input/output
-- Scriptable operators: ScriptCHOP, ScriptDAT, ScriptTOP, ScriptSOP, ComputeShaderTOP
-- Sub-networks (COMPs) with hierarchical paths
+- NDI video streaming
+- FxPlug / FFGL plugin export
+- ComputeShaderTOP (user-editable GPU compute shader)
+- Multi-threaded cook engine
+- GPU compute shaders for CHOPs
+- Python scripting DAT (embedded Python via GDExtension)
+- Network collaboration (shared editing)
+- Asset/patch marketplace
+- Mobile/web export for patches
 
 ---
 

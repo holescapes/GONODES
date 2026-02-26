@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
-> **Last updated:** 2026-02-27
-> **Status:** Phase 6 In Progress — Save/load, copy/paste, undo/redo, live node previews with toggle, family base classes, right-click context menu, performance profiling overlay. GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. Phases 1–5.8 complete. 82 operators across 6 families (28 TOP, 21 CHOP, 12 DAT, 14 SOP, 4 COMP, 2 MAT, 1 output).
+> **Last updated:** 2026-02-26
+> **Status:** Phase 6 Complete — Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Phases 1–6 complete. 82 operators across 6 families (28 TOP, 21 CHOP, 12 DAT, 14 SOP, 4 COMP, 2 MAT, 1 output).
 
 ---
 
@@ -812,7 +812,7 @@ GONODES/
 - [x] **Refactored GNNodePalette** — `_get_operator_description()` now delegates to GNExtensionRegistry (replaced ~80-line static dictionary)
 - [x] **Editor startup** — `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()` before network setup
 
-### Phase 6: Integration & Stabilization (Week 6)
+### Phase 6: Integration & Stabilization (Week 6) ✅
 - [x] **Save/load patches** (`.gnpatch` JSON files) — full serialization pipeline:
   - `GNParameter.to_dict()` / `from_dict()` — serializes value, mode, expression, bind info. Custom `_variant_to_json()` / `_json_to_variant()` handles Vector2, Vector2i, Vector3, Vector4, Color → typed JSON dicts.
   - `GNNode.to_dict()` / `from_dict()` — serializes operator type, graph position, all parameters.
@@ -884,21 +884,112 @@ GONODES/
   - Windows track node renames automatically and clean up on new/load.
   - Multiple windows can be open simultaneously, each showing a different node's output.
   - Close button frees the window and removes it from the tracked array.
-- [ ] Stress test: 50+ node network
+- [x] Stress test: 50+ node network (59 nodes across all 6 families, toolbar button + auto-report)
+- [x] **Per-node preview toggle** — right-click context menu "Preview: ON/OFF":
+  - `GNNode.preview_enabled` flag (default true, persists with save/load).
+  - Global "Previews" toolbar toggle acts as master switch (sets all per-node flags).
+  - Per-node toggle works independently — turn global off, then selectively re-enable specific nodes.
+  - `update_previews()` skips nodes with `preview_enabled = false` (zero cost).
+  - TOGGLE_PREVIEW added to `_CtxID` enum. Shows current state in menu label.
+- [x] **WindowTOP open/close toggle** — `open` boolean parameter:
+  - Default `false` (window doesn't pop up on creation). Resolution default changed to 512×512.
+  - Close button sets `open = false` in inspector. Toggle back to `true` to reopen.
+  - `_cook()` syncs `_window.visible` with param each frame.
 - [x] README and basic documentation
 
----
-
-## 13. Future Roadmap (Post-MVP)
+### Phase 7: Creative Tools, Performance & Workflow
+- [ ] **ScriptCHOP** — user-editable GDScript for custom channel processing:
+  - Inline code editor (string param) or external `.gd` file.
+  - `cook(inputs, frame, time, delta)` entry point returning channel dict.
+  - Access to all expression context variables.
+- [ ] **ScriptDAT** — user-editable GDScript for table/text processing:
+  - Same inline/file model as ScriptCHOP.
+  - `cook(inputs, frame, time, delta)` entry point returning table/text data.
+- [ ] **ScriptTOP** — CPU-side pixel generation via GDScript:
+  - Write to Image pixel-by-pixel or via bulk operations.
+  - Input textures readable as Image data.
+- [ ] **ScriptSOP** — procedural geometry via GDScript:
+  - SurfaceTool-based mesh generation.
+  - Access to input geometry vertices/normals/UVs.
+- [ ] **OSC input/output operators**:
+  - OscInCHOP — receives OSC messages on configurable UDP port, maps to channels.
+  - OscOutCHOP — sends channel data as OSC messages to target host:port.
+  - Complete the OscInDAT stub with actual UDP listener.
+- [ ] **MIDI input operators**:
+  - MidiInCHOP — receives MIDI note/CC/pitch bend, maps to channels.
+  - MidiInDAT — raw MIDI message log as table rows.
+  - Device selection parameter (enumerate OS MIDI inputs).
+- [ ] **Audio input CHOP**:
+  - AudioInCHOP — microphone or audio file input as waveform channels.
+  - AudioSpectrumCHOP — FFT analysis, outputs frequency bands as channels.
+  - AudioFileInCHOP — playback of WAV/OGG with transport controls (play, pause, seek, loop).
+- [ ] **Webcam / video input TOP**:
+  - WebcamTOP — live camera feed via CameraServer.
+  - Device selection, resolution, and format parameters.
+- [ ] **ImageSequenceTOP** — numbered frame playback:
+  - PNG/WebP/JPG sequences with alpha support.
+  - Configurable frame range, speed, loop mode, hold first/last.
+  - Expression-driven frame index for precise sequencing.
+- [ ] **Performance: SubViewport UPDATE_ONCE** for non-time-dependent TOPs:
+  - TOPs that don't use `elapsed_time`/`current_delta` only render once when inputs change.
+  - Reduces GPU load significantly for static texture chains.
+- [ ] **Performance: Viewport pooling**:
+  - Reuse freed SubViewports instead of creating/destroying.
+  - Pool tracks available viewports by resolution. Reduces allocation churn at scale.
+- [ ] **Performance: Active chain cooking**:
+  - Only cook subgraphs that feed into a WindowTOP, visible preview, or viewer window.
+  - Disconnected/orphan subgraphs skip cooking entirely.
+  - `GNCookEngine.active_outputs` tracks which sink nodes are live.
+- [ ] **Performance: Lazy viewport creation**:
+  - Delay `_ensure_viewport()` until the TOP is actually part of a live chain.
+  - Disconnected TOPs have zero GPU footprint.
+- [ ] **Performance: GPU memory budget monitoring**:
+  - Track total estimated VRAM across all SubViewports.
+  - Warn when approaching configurable budget limit.
+  - Display in info bar alongside FPS/cook time.
+- [ ] **Performance: Resolution downscaling for previews**:
+  - Render inline preview thumbnails at ¼ or ½ res.
+  - Full resolution only for the active viewer output and WindowTOPs.
+- [ ] **Keyboard shortcuts & workflow polish**:
+  - Consistent shortcut reference card (help overlay, '?' key).
+  - Node alignment tools (align horizontal/vertical, distribute evenly).
+  - Fit-to-view (F key zooms to selected nodes or entire graph).
+  - Node bypass/disable toggle (B key — node passes input through unchanged).
+  - Node lock toggle (L key — prevents accidental parameter changes).
+  - Wire style options (curved/straight/right-angle).
+- [ ] **Renderer selection UI**:
+  - Dropdown in toolbar: Forward+, Mobile, Compatibility.
+  - Applies to RenderTOP SubViewport and WindowTOP output.
+  - Enables previewing how patches will look on different target platforms.
+- [ ] **Patch export to standalone apps**:
+  - Godot export templates for desktop (Windows/macOS/Linux).
+  - Export dialog with platform selection, resolution, and fullscreen options.
+  - Strips editor UI, runs cook engine + WindowTOP output only.
+  - Web export (Compatibility renderer) for browser-based installations.
+- [ ] **Node grouping / sub-networks**:
+  - Select multiple nodes → group into a collapsed sub-network node.
+  - Double-click to dive into sub-network. Breadcrumb navigation.
+  - Input/output tunnel nodes for wiring between levels.
+- [ ] **Minimap**:
+  - Small overview panel showing entire graph layout.
+  - Click to navigate. Viewport rectangle shows current zoom region.
+- [ ] **Node bookmarks**:
+  - Tag important nodes with named bookmarks.
+  - Quick-jump dropdown or number keys (1-9) to teleport to bookmarked nodes.
+- [ ] **Auto-layout**:
+  - One-click graph cleanup using topological order + layer assignment.
+  - Minimizes wire crossings. Configurable spacing.
+- [ ] **Parameter presets**:
+  - Save/load named parameter snapshots per operator instance.
+  - Copy parameters between nodes of the same type.
+  - Global preset library for reusable configurations.
 
 ### Near-term
-- [ ] Patch export to standalone runnables (Godot export templates)
-- [ ] Renderer selection UI in editor (Forward+, Mobile, Compatibility)
 - [x] SOP family (procedural geometry: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch)
 - [x] DAT family (Constant, Text, Select, Merge, Transpose, Sort, Evaluate, Switch, bridges)
 - [x] MAT family (PBR_MAT, Shader_MAT)
 - [x] COMP family (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP + RenderTOP bridge)
-- [ ] Keyboard shortcuts and workflow polish
+- [x] Keyboard shortcuts and workflow polish (Alt+A palette, context menu shortcuts, per-node preview toggle)
 
 ### Medium-term
 - [ ] POP family (GPU point/particle operators — see Section 18)
@@ -907,10 +998,6 @@ GONODES/
   - Load a .GNNode patch via API
   - Feed data in, read textures out
 - [ ] Syphon (macOS) / Spout (Windows) texture sharing
-- [ ] OSC input/output operators
-- [ ] MIDI input operators
-- [ ] Audio input CHOP (microphone / audio file)
-- [ ] Webcam / video input TOP
 - [ ] FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — reference extension for GNExtensionRegistry
   - Wraps [EIRTeam/EIRTeam.FFmpeg](https://github.com/EIRTeam/EIRTeam.FFmpeg) GDExtension
   - FFmpegMovieTOP: H.264, VP9, AV1, ProRes playback via `VideoStreamFFmpeg`
@@ -920,27 +1007,18 @@ GONODES/
   - Custom `VideoStreamHAP` resource extending Godot's `VideoStream`
   - Wraps [Vidvox/hap](https://github.com/Vidvox/hap) (Snappy + DXT decompression, direct GPU upload)
   - Enables alpha-channel video without image sequences
-- [ ] ImageSequenceTOP — numbered frame playback (PNG/WebP sequences with alpha support)
 - [x] Custom GLSL shader TOP (user-editable shader code) — **Done: CustomShaderTOP**
-- [ ] ScriptCHOP (user GDScript for channel processing — see Section 27)
-- [ ] ScriptDAT (user GDScript for table/text processing — see Section 27)
+- [ ] ComputeShaderTOP (user-editable GPU compute shader — see Section 27)
 
-### Performance & GPU Optimizations
-- [ ] SubViewport `UPDATE_ONCE` / `UPDATE_DISABLED` for non-time-dependent TOPs (see Hard Rule 25.13)
-- [ ] Viewport pooling — reuse freed SubViewports instead of creating/destroying (reduces allocation churn at scale)
-- [ ] Resolution downscaling for editor previews — render thumbnails at ¼ res, full res only for the active output chain
-- [ ] Cook only the active output chain — skip cooking subgraphs that don't feed into a WindowTOP or visible preview
-- [ ] Lazy viewport creation for disconnected/unused nodes — delay `_ensure_viewport()` until the node is actually part of a live chain
-- [ ] GPU memory budget monitoring — track total VRAM usage across all SubViewports and warn when approaching limits
+### Performance & GPU Optimizations (Post-Phase 7)
+- [ ] Multi-threaded cook engine
+- [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
 
 ### Long-term
 - [ ] NDI video streaming
 - [ ] FxPlug / FFGL plugin export (for VDMX, Resolume)
-- [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
-- [ ] ComputeShaderTOP (user-editable GPU compute shader — see Section 27)
 - [ ] ScriptTOP (CPU-side pixel generation via GDScript — see Section 27)
 - [ ] ScriptSOP (procedural geometry via GDScript — see Section 27)
-- [ ] Multi-threaded cook engine
 - [ ] Python scripting DAT (embedded Python via GDExtension)
 - [ ] Network collaboration (shared editing)
 - [ ] Asset/patch marketplace
