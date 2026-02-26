@@ -38,7 +38,7 @@ const THUMBNAIL_HEIGHT := 80
 func setup(node: GNNode) -> void:
 	gn_node = node
 	name = node.id
-	title = "%s  [%s]" % [node.id, GNFamily.get_family_name(node.family)]
+	title = node.id
 	position_offset = node.graph_position
 	tooltip_text = "%s (%s)" % [node.node_type, GNFamily.get_family_name(node.family)]
 
@@ -61,6 +61,18 @@ func setup(node: GNNode) -> void:
 	var sb_title_sel := sb_title.duplicate()
 	sb_title_sel.bg_color = title_color_sel
 	add_theme_stylebox_override("titlebar_selected", sb_title_sel)
+
+	# Title text — white with dark outline + drop shadow for readability
+	# GraphNode doesn't propagate shadow/outline overrides to its internal
+	# title Label, so we find it via get_titlebar_hbox() and style it directly.
+	add_theme_color_override("title_color", Color.WHITE)
+	var titlebar_hbox: HBoxContainer = get_titlebar_hbox()
+	if titlebar_hbox != null:
+		for child in titlebar_hbox.get_children():
+			if child is Label:
+				child.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.5))
+				child.add_theme_constant_override("outline_size", 3)
+				break
 
 	# Panel body — dark background
 	var sb_panel := StyleBoxFlat.new()
@@ -254,8 +266,11 @@ func _setup_help_button() -> void:
 	btn.add_theme_font_size_override("font_size", 12)
 	# Flat style so it doesn't clash with the title bar
 	btn.flat = true
-	btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
-	btn.add_theme_color_override("font_hover_color", Color.WHITE)
+	btn.add_theme_color_override("font_color", Color.WHITE)
+	btn.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 0.7))
+	# Dark outline for readability on colored title bars
+	btn.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.5))
+	btn.add_theme_constant_override("outline_size", 3)
 	btn.pressed.connect(func(): help_requested.emit(gn_node.id))
 	titlebar.add_child(btn)
 
@@ -330,6 +345,32 @@ func _setup_perf_overlay() -> void:
 ## Actual connection pruning is handled by GNGraphEditor before this fires.
 func _on_ports_changed(_node_id: String) -> void:
 	rebuild_slots()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Bypass & Lock Visual State
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Updates title and visual indicators to reflect bypass/lock state.
+func update_bypass_lock_visuals() -> void:
+	if gn_node == null:
+		return
+
+	# Title text: prepend state indicators
+	var base_title := gn_node.id
+	if gn_node.bypass and gn_node.locked:
+		title = "⏩🔒 " + base_title
+	elif gn_node.bypass:
+		title = "⏩ " + base_title
+	elif gn_node.locked:
+		title = "🔒 " + base_title
+	else:
+		title = base_title
+
+	# Dim the node when bypassed
+	self_modulate = Color(0.5, 0.5, 0.5, 0.7) if gn_node.bypass else Color.WHITE
+
+	reset_size()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -410,7 +451,6 @@ func _finish_rename(new_id: String) -> void:
 ## Updates the view after a successful rename (called by GNGraphEditor).
 func apply_rename(old_id: String, new_id: String) -> void:
 	name = new_id
-	title = "%s  [%s]" % [new_id, GNFamily.get_family_name(gn_node.family)]
 	tooltip_text = "%s (%s)" % [gn_node.node_type, GNFamily.get_family_name(gn_node.family)]
-	# Force the GraphNode to recalculate its size to fit the new title
-	reset_size()
+	# Rebuild title with bypass/lock indicators
+	update_bypass_lock_visuals()

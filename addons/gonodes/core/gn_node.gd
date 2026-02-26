@@ -71,6 +71,14 @@ var current_frame: int = 0
 ## the global previews toggle is on. Persists with save/load.
 var preview_enabled: bool = true
 
+## When true, the node is bypassed: it passes its first input straight through
+## without cooking. If no inputs exist, it outputs null.
+var bypass: bool = false
+
+## When true, the node is locked: parameter values cannot be changed by the user
+## (inspector controls are disabled). Cook still proceeds normally.
+var locked: bool = false
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted when this node is marked dirty (before cook).
@@ -370,6 +378,10 @@ func to_dict() -> Dictionary:
 
 	if not preview_enabled:
 		d["preview_enabled"] = false
+	if bypass:
+		d["bypass"] = true
+	if locked:
+		d["locked"] = true
 
 	# Serialize parameters (only those that differ from defaults, or have expressions)
 	var params_dict: Dictionary = {}
@@ -396,6 +408,10 @@ func from_dict(d: Dictionary) -> void:
 	# Restore per-node preview flag
 	if d.has("preview_enabled"):
 		preview_enabled = d["preview_enabled"]
+	if d.has("bypass"):
+		bypass = d["bypass"]
+	if d.has("locked"):
+		locked = d["locked"]
 
 	# Restore parameter values/modes/expressions
 	if d.has("parameters"):

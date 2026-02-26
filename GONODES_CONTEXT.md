@@ -770,7 +770,7 @@ GONODES/
 - [x] Copy/paste nodes (moved to Phase 6)
 - [x] Undo/redo (Godot's UndoRedo system) (moved to Phase 6)
 - [x] Mini preview thumbnails on all nodes (moved to Phase 6)
-- [ ] Expression reference lines (dashed/stippled overlay between nodes when a parameter references another node via `chop()`/`op()`/`top()` expressions)
+- [x] Expression reference lines (dashed/stippled cyan overlay with arrowheads between nodes when a parameter references another node via `chop()`/`op()`/`top()`/`sop()`/`dat()`/`mat()` expressions)
 
 ### Phase 5.5: DAT, SOP, COMP & 3D Pipeline ✅
 - [x] **GNTableData** — DAT output data type (2D string table + text mode, headers, TSV import/export)
@@ -969,13 +969,13 @@ GONODES/
 - [ ] **Performance: Resolution downscaling for previews**:
   - Render inline preview thumbnails at ¼ or ½ res.
   - Full resolution only for the active viewer output and WindowTOPs.
-- [ ] **Keyboard shortcuts & workflow polish**:
-  - Consistent shortcut reference card (help overlay, '?' key).
-  - Node alignment tools (align horizontal/vertical, distribute evenly).
-  - Fit-to-view (F key zooms to selected nodes or entire graph).
-  - Node bypass/disable toggle (B key — node passes input through unchanged).
-  - Node lock toggle (L key — prevents accidental parameter changes).
-  - Wire style options (curved/straight/right-angle).
+- [x] **Keyboard shortcuts & workflow polish** (partial — core features done):
+  - [ ] Consistent shortcut reference card (help overlay, '?' key).
+  - [x] Node alignment tools (H key = align horizontal, V key = align vertical) — context menu entries.
+  - [x] Fit-to-view (F key zooms/pans to selected nodes or entire graph).
+  - [x] Node bypass/disable toggle (B key — node passes input through unchanged, ⏩ indicator, dimmed, cook engine pass-through).
+  - [x] Node lock toggle (L key — prevents parameter changes, 🔒 indicator, inspector dims and disables inputs).
+  - [ ] Wire style options (curved/straight/right-angle).
 - [ ] **Expression & scripting system refinement**:
   - Autocomplete / intellisense for expression fields (node IDs, channel names, param names).
   - Expression syntax highlighting in LineEdit (colored keywords, function names, errors).

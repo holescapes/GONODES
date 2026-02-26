@@ -143,6 +143,23 @@ func cook_frame(delta: float) -> void:
 		# Gather input data from upstream cached outputs
 		var inputs: Array[GNData] = _gather_inputs(node)
 
+		# Bypass: pass first input through without cooking
+		if node.bypass:
+			var passthrough: GNData = null
+			for inp in inputs:
+				if inp != null:
+					passthrough = inp
+					break
+			node.cached_output = passthrough
+			node.cook_valid = passthrough != null
+			node.cook_time_ms = 0.0
+			node.clear_dirty()
+			node.node_cooked.emit(node.id)
+			cooked_count += 1
+			if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
+				break
+			continue
+
 		# Cook the node
 		var result := node.execute_cook(inputs, frame_count)
 

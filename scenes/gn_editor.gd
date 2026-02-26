@@ -143,6 +143,9 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	# Update performance overlays on all nodes
 	graph_editor.update_perf_overlays()
 
+	# Update expression reference lines (dashed overlays)
+	graph_editor.update_expr_refs()
+
 
 func _on_cook_error(node_id: String, error_msg: String) -> void:
 	GNLogger.error("Editor", "Cook error '%s': %s" % [node_id, error_msg])

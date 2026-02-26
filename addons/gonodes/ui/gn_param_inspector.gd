@@ -147,6 +147,9 @@ func inspect(node: GNNode) -> void:
 		_vbox.add_child(row)
 		_param_rows[p_name] = row
 
+	# Apply lock state — disable all param rows when node is locked
+	_apply_lock_state()
+
 	# Connect to node's cooked signal for live status updates
 	if not node.node_cooked.is_connected(_on_node_cooked):
 		node.node_cooked.connect(_on_node_cooked)
@@ -260,5 +263,30 @@ func _clear_rows() -> void:
 func _show_empty_state() -> void:
 	_header_label.text = "Inspector"
 	_status_label.text = "No node selected"
+
+
+## Enables or disables parameter rows based on the node's locked state.
+func _apply_lock_state() -> void:
+	if _current_node == null:
+		return
+	var is_locked := _current_node.locked
+	for p_name in _param_rows:
+		var row: GNParamRow = _param_rows[p_name]
+		# Disable mouse input and visually dim when locked
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE if is_locked else Control.MOUSE_FILTER_STOP
+		row.modulate = Color(0.6, 0.6, 0.6, 0.8) if is_locked else Color.WHITE
+		# Recursively set mouse filter on children
+		_set_children_mouse_filter(row, Control.MOUSE_FILTER_IGNORE if is_locked else Control.MOUSE_FILTER_STOP)
+	# Show lock indicator in status
+	if is_locked:
+		_status_label.text += "  |  🔒 LOCKED"
+
+
+## Recursively sets mouse_filter on all Control children.
+func _set_children_mouse_filter(node: Control, filter: Control.MouseFilter) -> void:
+	for child in node.get_children():
+		if child is Control:
+			child.mouse_filter = filter
+			_set_children_mouse_filter(child, filter)
 	_family_bar.color = Color(0.3, 0.3, 0.3)
 	_no_selection_label.get_parent().visible = true

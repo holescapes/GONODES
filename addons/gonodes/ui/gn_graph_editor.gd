@@ -43,6 +43,10 @@ enum _CtxID {
 	OPEN_VIEWER,
 	TOGGLE_PREVIEW,
 	NODE_HELP,
+	TOGGLE_BYPASS,
+	TOGGLE_LOCK,
+	ALIGN_H,
+	ALIGN_V,
 }
 
 ## Undo/redo history for graph operations.
@@ -50,6 +54,15 @@ var _undo_redo := UndoRedo.new()
 
 ## Snapshot of selected node positions before a drag move begins.
 var _pre_move_positions: Dictionary = {}
+
+## Whether expression reference lines are visible.
+var expr_refs_visible: bool = true
+
+## Cached expression references: { from_node_id: [to_node_id, ...] }
+var _expr_refs: Dictionary = {}
+
+## The overlay Control that draws expression reference lines.
+var _expr_ref_overlay: Control = null
 
 ## Signal emitted when an operator node is selected (for external inspector/viewer hookup).
 signal operator_selected(node_id: String)
@@ -111,6 +124,14 @@ func _ready() -> void:
 	_context_menu.id_pressed.connect(_on_context_menu_id_pressed)
 	add_child(_context_menu)
 
+	# Create expression reference overlay (draws dashed lines)
+	_expr_ref_overlay = Control.new()
+	_expr_ref_overlay.name = "ExprRefOverlay"
+	_expr_ref_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_expr_ref_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_expr_ref_overlay.draw.connect(_draw_expr_ref_lines)
+	add_child(_expr_ref_overlay)
+
 	GNLogger.info("GraphEditor", "Graph editor ready")
 
 
@@ -131,6 +152,23 @@ func _unhandled_key_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 				KEY_Y:
 					redo_action()
+					get_viewport().set_input_as_handled()
+		elif not event.ctrl_pressed and not event.alt_pressed:
+			match event.keycode:
+				KEY_B:
+					_toggle_selected_bypass()
+					get_viewport().set_input_as_handled()
+				KEY_L:
+					_toggle_selected_lock()
+					get_viewport().set_input_as_handled()
+				KEY_F:
+					_fit_view_to_selection()
+					get_viewport().set_input_as_handled()
+				KEY_H:
+					_align_selected_horizontal()
+					get_viewport().set_input_as_handled()
+				KEY_V:
+					_align_selected_vertical()
 					get_viewport().set_input_as_handled()
 
 
@@ -580,6 +618,304 @@ func set_perf_overlay_visible(enabled: bool) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Bypass / Lock
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Toggles bypass on all selected nodes (B key).
+## Bypassed nodes pass their first input through without cooking.
+func _toggle_selected_bypass() -> void:
+	var selected_ids := _get_selected_node_ids()
+	if selected_ids.is_empty() or network == null:
+		return
+	var first_node: GNNode = network.get_node_by_id(selected_ids[0])
+	if first_node == null:
+		return
+	var new_state := not first_node.bypass
+	for nid in selected_ids:
+		var node: GNNode = network.get_node_by_id(nid)
+		if node == null:
+			continue
+		node.bypass = new_state
+		node.mark_dirty()
+		var view: GNNodeView = _node_views.get(nid, null)
+		if view != null:
+			view.update_bypass_lock_visuals()
+	GNLogger.info("GraphEditor", "Bypass %s on %d node(s)" % [
+		"ON" if new_state else "OFF", selected_ids.size()])
+
+
+## Toggles lock on all selected nodes (L key).
+## Locked nodes cannot have their parameters changed by the user.
+func _toggle_selected_lock() -> void:
+	var selected_ids := _get_selected_node_ids()
+	if selected_ids.is_empty() or network == null:
+		return
+	var first_node: GNNode = network.get_node_by_id(selected_ids[0])
+	if first_node == null:
+		return
+	var new_state := not first_node.locked
+	for nid in selected_ids:
+		var node: GNNode = network.get_node_by_id(nid)
+		if node == null:
+			continue
+		node.locked = new_state
+		var view: GNNodeView = _node_views.get(nid, null)
+		if view != null:
+			view.update_bypass_lock_visuals()
+	# Re-emit selection so the inspector immediately refreshes lock state
+	if selected_ids.size() == 1:
+		operator_selected.emit(selected_ids[0])
+	GNLogger.info("GraphEditor", "Lock %s on %d node(s)" % [
+		"ON" if new_state else "OFF", selected_ids.size()])
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Fit-to-View
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Fits the graph view to the selected nodes, or all nodes if none selected (F key).
+func _fit_view_to_selection() -> void:
+	if network == null:
+		return
+
+	var target_ids := _get_selected_node_ids()
+	if target_ids.is_empty():
+		# No selection — fit all nodes
+		target_ids = []
+		for nid in _node_views:
+			target_ids.append(nid)
+	if target_ids.is_empty():
+		return
+
+	# Compute bounding rectangle of target nodes
+	var first := true
+	var min_pos := Vector2.ZERO
+	var max_pos := Vector2.ZERO
+	for nid in target_ids:
+		var view: GNNodeView = _node_views.get(nid, null)
+		if view == null:
+			continue
+		var pos: Vector2 = view.position_offset
+		var node_size: Vector2 = view.size
+		if first:
+			min_pos = pos
+			max_pos = pos + node_size
+			first = true  # Will be overridden below
+		min_pos.x = minf(min_pos.x, pos.x)
+		min_pos.y = minf(min_pos.y, pos.y)
+		max_pos.x = maxf(max_pos.x, pos.x + node_size.x)
+		max_pos.y = maxf(max_pos.y, pos.y + node_size.y)
+		first = false
+
+	if first:
+		return  # No valid views found
+
+	var bounds_center: Vector2 = (min_pos + max_pos) / 2.0
+	var bounds_size: Vector2 = max_pos - min_pos
+	var view_size: Vector2 = size
+
+	# Calculate zoom to fit with padding
+	var padding := 100.0
+	var fit_zoom_x: float = view_size.x / (bounds_size.x + padding * 2.0) if bounds_size.x > 0 else 1.0
+	var fit_zoom_y: float = view_size.y / (bounds_size.y + padding * 2.0) if bounds_size.y > 0 else 1.0
+	var fit_zoom: float = minf(fit_zoom_x, fit_zoom_y)
+	fit_zoom = clampf(fit_zoom, 0.2, 2.0)  # Stay within sane zoom limits
+
+	zoom = fit_zoom
+	scroll_offset = bounds_center * zoom - view_size / 2.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Alignment & Distribution
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Aligns all selected nodes to the same horizontal center (H key).
+## Nodes move to share the same Y as the average Y of the selection.
+func _align_selected_horizontal() -> void:
+	var selected_ids := _get_selected_node_ids()
+	if selected_ids.size() < 2 or network == null:
+		return
+
+	# Compute average Y center
+	var sum_y := 0.0
+	var count := 0
+	for nid in selected_ids:
+		var view: GNNodeView = _node_views.get(nid, null)
+		if view == null:
+			continue
+		sum_y += view.position_offset.y + view.size.y / 2.0
+		count += 1
+	if count == 0:
+		return
+	var avg_y := sum_y / float(count)
+
+	for nid in selected_ids:
+		var node: GNNode = network.get_node_by_id(nid)
+		var view: GNNodeView = _node_views.get(nid, null)
+		if node == null or view == null:
+			continue
+		var new_y := avg_y - view.size.y / 2.0
+		node.graph_position.y = new_y
+		view.position_offset = node.graph_position
+	GNLogger.info("GraphEditor", "Aligned %d node(s) horizontally" % count)
+
+
+## Aligns all selected nodes to the same vertical center (V key — only when no Ctrl).
+## Nodes move to share the same X as the average X of the selection.
+func _align_selected_vertical() -> void:
+	var selected_ids := _get_selected_node_ids()
+	if selected_ids.size() < 2 or network == null:
+		return
+
+	# Compute average X center
+	var sum_x := 0.0
+	var count := 0
+	for nid in selected_ids:
+		var view: GNNodeView = _node_views.get(nid, null)
+		if view == null:
+			continue
+		sum_x += view.position_offset.x + view.size.x / 2.0
+		count += 1
+	if count == 0:
+		return
+	var avg_x := sum_x / float(count)
+
+	for nid in selected_ids:
+		var node: GNNode = network.get_node_by_id(nid)
+		var view: GNNodeView = _node_views.get(nid, null)
+		if node == null or view == null:
+			continue
+		var new_x := avg_x - view.size.x / 2.0
+		node.graph_position.x = new_x
+		view.position_offset = node.graph_position
+	GNLogger.info("GraphEditor", "Aligned %d node(s) vertically" % count)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Expression Reference Lines
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Regex pattern for extracting node IDs from expression strings.
+## Matches chop("id"), op("id"), top("id") — with optional whitespace.
+static var _expr_ref_regex: RegEx = null
+
+
+## Scans all nodes' parameters for expression references (chop/op/top calls)
+## and caches them in [member _expr_refs] as `{ from_id: [to_id, ...] }`.
+func _scan_expr_references() -> void:
+	_expr_refs.clear()
+	if network == null:
+		return
+
+	# Lazy-init regex
+	if _expr_ref_regex == null:
+		_expr_ref_regex = RegEx.new()
+		_expr_ref_regex.compile("(?:chop|op|top|sop|dat|mat)\\s*\\(\\s*\"([^\"]+)\"")
+
+	for node_id in network.nodes:
+		var node: GNNode = network.nodes[node_id]
+		var refs: Array[String] = []
+
+		for param_name in node.parameters:
+			var param: GNParameter = node.parameters[param_name]
+
+			# Check main expression
+			if param.mode == GNParameter.Mode.EXPRESSION and param.expression != "":
+				_extract_refs_from(param.expression, refs)
+
+			# Check per-component expressions
+			for i in range(param.component_expressions.size()):
+				if param.component_modes.size() > i and \
+						param.component_modes[i] == GNParameter.Mode.EXPRESSION:
+					var comp_expr: String = param.component_expressions[i]
+					if comp_expr != "":
+						_extract_refs_from(comp_expr, refs)
+
+		if refs.size() > 0:
+			_expr_refs[node_id] = refs
+
+
+## Extracts referenced node IDs from an expression string and appends unique
+## entries to [param out_refs].
+func _extract_refs_from(expr_text: String, out_refs: Array[String]) -> void:
+	var results := _expr_ref_regex.search_all(expr_text)
+	for m in results:
+		var ref_id: String = m.get_string(1)
+		if not out_refs.has(ref_id):
+			out_refs.append(ref_id)
+
+
+## Rescans expression references and triggers a redraw of the overlay.
+func update_expr_refs() -> void:
+	_scan_expr_references()
+	if _expr_ref_overlay != null:
+		_expr_ref_overlay.queue_redraw()
+
+
+## Draws dashed lines between nodes that reference each other via expressions.
+## Connected to [member _expr_ref_overlay]'s `draw` signal.
+func _draw_expr_ref_lines() -> void:
+	if not expr_refs_visible or _expr_refs.is_empty():
+		return
+
+	var line_color := Color(0.2, 0.85, 0.95, 0.55)  # Cyan, semi-transparent
+	var line_width := 1.5
+	var dash_length := 8.0
+	var gap_length := 4.0
+
+	for from_id in _expr_refs:
+		var from_view: GNNodeView = _node_views.get(from_id, null)
+		if from_view == null:
+			continue
+
+		var ref_ids: Array = _expr_refs[from_id]
+		for to_id in ref_ids:
+			var to_view: GNNodeView = _node_views.get(to_id, null)
+			if to_view == null:
+				continue
+
+			# Compute center positions in graph space, then convert to overlay space
+			var from_center := from_view.position_offset + from_view.size / 2.0
+			var to_center := to_view.position_offset + to_view.size / 2.0
+
+			# Convert from graph-content space to overlay (screen) space
+			var p1 := (from_center - scroll_offset / zoom) * zoom
+			var p2 := (to_center - scroll_offset / zoom) * zoom
+
+			_draw_dashed_line_on(_expr_ref_overlay, p1, p2,
+					line_color, line_width, dash_length, gap_length)
+
+
+## Draws a dashed line on the given Control between two points.
+func _draw_dashed_line_on(canvas: Control, from: Vector2, to: Vector2,
+		color: Color, width: float, dash: float, gap: float) -> void:
+	var direction := (to - from)
+	var total_length := direction.length()
+	if total_length < 1.0:
+		return
+	var dir_norm := direction / total_length
+	var segment := dash + gap
+	var pos := 0.0
+
+	while pos < total_length:
+		var seg_start := from + dir_norm * pos
+		var seg_end_len := minf(pos + dash, total_length)
+		var seg_end := from + dir_norm * seg_end_len
+		canvas.draw_line(seg_start, seg_end, color, width, true)
+		pos += segment
+
+	# Draw a small arrow head at the destination
+	var arrow_size := 6.0
+	var perp := Vector2(-dir_norm.y, dir_norm.x)
+	var arrow_tip := to
+	var arrow_base := to - dir_norm * arrow_size
+	var arrow_left := arrow_base + perp * arrow_size * 0.5
+	var arrow_right := arrow_base - perp * arrow_size * 0.5
+	canvas.draw_colored_polygon(
+			PackedVector2Array([arrow_tip, arrow_left, arrow_right]), color)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Copy / Paste
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -806,6 +1142,37 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item(preview_label, _CtxID.TOGGLE_PREVIEW)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.TOGGLE_PREVIEW), not has_selection)
 
+	# Bypass toggle — shows current state of first selected node
+	var bypass_label := "Bypass"
+	if selected_ids.size() >= 1 and network != null:
+		var bn: GNNode = network.get_node_by_id(selected_ids[0])
+		if bn != null:
+			bypass_label = "Bypass: ON" if bn.bypass else "Bypass: OFF"
+	_context_menu.add_item(bypass_label, _CtxID.TOGGLE_BYPASS)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.TOGGLE_BYPASS), _shortcut(KEY_B), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.TOGGLE_BYPASS), not has_selection)
+
+	# Lock toggle
+	var lock_label := "Lock"
+	if selected_ids.size() >= 1 and network != null:
+		var ln: GNNode = network.get_node_by_id(selected_ids[0])
+		if ln != null:
+			lock_label = "Lock: ON" if ln.locked else "Lock: OFF"
+	_context_menu.add_item(lock_label, _CtxID.TOGGLE_LOCK)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.TOGGLE_LOCK), _shortcut(KEY_L), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.TOGGLE_LOCK), not has_selection)
+
+	_context_menu.add_separator()
+
+	# Alignment tools (need 2+ selected)
+	var multi_selected := selected_ids.size() >= 2
+	_context_menu.add_item("Align Horizontal", _CtxID.ALIGN_H)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.ALIGN_H), _shortcut(KEY_H), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.ALIGN_H), not multi_selected)
+
+	_context_menu.add_item("Align Vertical", _CtxID.ALIGN_V)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.ALIGN_V), not multi_selected)
+
 	_context_menu.add_separator()
 	_context_menu.add_item("Node Help", _CtxID.NODE_HELP)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.NODE_HELP), selected_ids.size() != 1)
@@ -849,6 +1216,14 @@ func _on_context_menu_id_pressed(id: int) -> void:
 				open_viewer_requested.emit(selected[0])
 		_CtxID.TOGGLE_PREVIEW:
 			_toggle_selected_previews()
+		_CtxID.TOGGLE_BYPASS:
+			_toggle_selected_bypass()
+		_CtxID.TOGGLE_LOCK:
+			_toggle_selected_lock()
+		_CtxID.ALIGN_H:
+			_align_selected_horizontal()
+		_CtxID.ALIGN_V:
+			_align_selected_vertical()
 		_CtxID.NODE_HELP:
 			var selected := _get_selected_node_ids()
 			if selected.size() == 1:
