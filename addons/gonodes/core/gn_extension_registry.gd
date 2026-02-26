@@ -174,19 +174,28 @@ func scan_extensions() -> void:
 	var addons_path := "res://addons"
 	var dir := DirAccess.open(addons_path)
 	if dir == null:
-		GNLogger.warn("ExtRegistry", "Cannot open addons directory")
+		print("[ExtRegistry] Cannot open addons directory")
 		return
 
+	var found_count := 0
 	dir.list_dir_begin()
 	var folder_name := dir.get_next()
 	while folder_name != "":
 		if dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
+			found_count += 1
 			var ext_path := addons_path + "/" + folder_name
 			var cfg_path := ext_path + "/gn_extension.cfg"
 			if FileAccess.file_exists(cfg_path):
 				_load_extension(cfg_path, folder_name)
+			else:
+				print("[ExtRegistry] Extension folder '%s' has no gn_extension.cfg" % folder_name)
 		folder_name = dir.get_next()
 	dir.list_dir_end()
+
+	if found_count == 0:
+		print("[ExtRegistry] No extensions found")
+	else:
+		print("[ExtRegistry] Scanned %d extension(s)" % found_count)
 
 
 ## Loads a single extension manifest and registers its operators.
@@ -197,7 +206,7 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 	var cfg := ConfigFile.new()
 	var err := cfg.load(cfg_path)
 	if err != OK:
-		GNLogger.error("ExtRegistry", "Failed to load manifest: %s (error %d)" % [cfg_path, err])
+		print("[ExtRegistry] Failed to load manifest: %s (error %d)" % [cfg_path, err])
 		return
 
 	var ext_name: String = cfg.get_value("extension", "name", folder_name)
@@ -206,8 +215,7 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 	var deps: Array = cfg.get_value("extension", "dependencies", [])
 	for dep_class in deps:
 		if not ClassDB.class_exists(dep_class):
-			GNLogger.warn("ExtRegistry",
-				"Extension '%s' skipped: missing dependency '%s'" % [ext_name, dep_class])
+			print("[ExtRegistry] Extension '%s' skipped — missing dependency '%s'" % [ext_name, dep_class])
 			return
 
 	# ── Register operators ──
@@ -223,28 +231,24 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 		var desc: String = cfg.get_value(section, "description", "")
 
 		if family.is_empty() or script_path.is_empty():
-			GNLogger.warn("ExtRegistry",
-				"Extension '%s': operator '%s' missing family or script" % [ext_name, op_class])
+			print("[ExtRegistry] Extension '%s': operator '%s' missing family or script" % [ext_name, op_class])
 			continue
 
 		# Load the operator script
 		if not ResourceLoader.exists(script_path):
-			GNLogger.warn("ExtRegistry",
-				"Extension '%s': script not found '%s'" % [ext_name, script_path])
+			print("[ExtRegistry] Extension '%s': script not found '%s'" % [ext_name, script_path])
 			continue
 
 		var loaded_script: GDScript = load(script_path) as GDScript
 		if loaded_script == null:
-			GNLogger.error("ExtRegistry",
-				"Extension '%s': failed to load script '%s'" % [ext_name, script_path])
+			print("[ExtRegistry] Extension '%s': failed to load script '%s'" % [ext_name, script_path])
 			continue
 
 		register_operator(op_class, family, loaded_script, desc, ext_name)
 		registered_count += 1
 
 	_loaded_extensions.append(folder_name)
-	GNLogger.info("ExtRegistry",
-		"Loaded extension '%s' (%d operators)" % [ext_name, registered_count])
+	print("[ExtRegistry] Loaded extension '%s' (%d operators)" % [ext_name, registered_count])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

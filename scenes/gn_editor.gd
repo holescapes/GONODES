@@ -29,6 +29,11 @@ var _viewer_windows: Array[GNViewerWindow] = []
 
 
 func _ready() -> void:
+	# Wire log toggle early so extension scan results are visible
+	log_toggle.toggled.connect(_on_log_toggled)
+	GNLogger.enabled = log_toggle.button_pressed
+	GNLogger.level = GNLogger.Level.DEBUG
+
 	# Initialize extension registry — scan for gn_ext_* addon manifests
 	GNExtensionRegistry.instance().scan_extensions()
 
@@ -48,11 +53,6 @@ func _ready() -> void:
 
 	# Track node renames so viewer target stays correct
 	network.node_renamed.connect(_on_node_renamed)
-
-	# Wire log toggle
-	log_toggle.toggled.connect(_on_log_toggled)
-	GNLogger.enabled = log_toggle.button_pressed
-	GNLogger.level = GNLogger.Level.DEBUG
 
 	# Print display info
 	var displays := WindowTOP.get_display_info()

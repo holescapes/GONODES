@@ -671,6 +671,11 @@ GONODES/
 │           ├── top_icon.svg
 │           ├── chop_icon.svg
 │           └── ... (per-operator icons)
+│   └── gn_ext_ffmpeg/                  # ← First GNExtension addon (reference impl)
+│       ├── gn_extension.cfg            # Manifest: name, deps, operator list
+│       ├── README.md
+│       └── operators/top/
+│           └── ffmpeg_in_top.gd        # FFmpegInTOP — dynamic ClassDB.instantiate("FFmpegVideoStream")
 ├── scenes/
 │   └── main.tscn                   # Application entry scene
 ├── tests/
@@ -966,6 +971,18 @@ GONODES/
   - Export dialog with platform selection, resolution, and fullscreen options.
   - Strips editor UI, runs cook engine + WindowTOP output only.
   - Web export (Compatibility renderer) for browser-based installations.
+  - **Extension distribution for exported apps**: When GONODES ships as a
+    standalone application (not running inside the Godot editor), users will need
+    a way to install extensions without touching `res://addons/`. Design a
+    user-facing `Extensions/` folder (e.g. next to the executable or in
+    `user://extensions/`) that `scan_extensions()` also searches. This keeps the
+    same `gn_ext_<name>/gn_extension.cfg` manifest convention but lets
+    end-users drag-and-drop extension folders without rebuilding the project.
+    Consider:
+    - Scanning both `res://addons/gn_ext_*` (dev) and `user://extensions/gn_ext_*` (end-user).
+    - An in-app "Extensions" settings panel listing installed / available extensions with enable/disable toggles.
+    - Version compatibility checks (engine version, GONODES version) in the manifest.
+    - Hot-reload of extensions without restarting the editor.
 - [ ] **Node grouping / sub-networks**:
   - Select multiple nodes → group into a collapsed sub-network node.
   - Double-click to dive into sub-network. Breadcrumb navigation.
@@ -998,10 +1015,11 @@ GONODES/
   - Load a .GNNode patch via API
   - Feed data in, read textures out
 - [ ] Syphon (macOS) / Spout (Windows) texture sharing
-- [ ] FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — reference extension for GNExtensionRegistry
+- [x] FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — **Done: first reference extension for GNExtensionRegistry**
   - Wraps [EIRTeam/EIRTeam.FFmpeg](https://github.com/EIRTeam/EIRTeam.FFmpeg) GDExtension
-  - FFmpegMovieTOP: H.264, VP9, AV1, ProRes playback via `VideoStreamFFmpeg`
+  - FFmpegInTOP: H.264, H.265, VP9, AV1, ProRes playback via dynamic `ClassDB.instantiate("FFmpegVideoStream")`
   - Demonstrates `gn_extension.cfg` manifest, `ClassDB.class_exists()` dependency guards
+  - Core MovieFileInTOP always available (Theora .ogv); FFmpegInTOP appears only when GDExtension installed
 - [ ] HAP codec GDExtension — GPU-direct S3TC/DXT video playback for VJ workflows
   - HAP, HAP Alpha, HAP Q variants
   - Custom `VideoStreamHAP` resource extending Godot's `VideoStream`
@@ -2636,21 +2654,16 @@ Extensions live under `res://addons/gn_ext_<name>/` and contain a `gn_extension.
 
 ```ini
 [extension]
-name = "FFmpeg Codecs"
-version = "0.1.0"
-author = "Your Name"
-description = "H.264/VP9/HAP video codecs for MovieFileInTOP."
-dependencies = ["FFmpegFrameDecoder"]   ; ClassDB classes that must exist
+name="FFmpeg Video Support"
+version="1.0.0"
+author="GONODES"
+description="FFmpeg-powered video decoding. Adds FFmpegInTOP with H.264, H.265, VP9, AV1 and broad format support."
+dependencies=["FFmpegVideoStream"]
 
-[operator.FFmpegMovieTOP]
-family = "TOP"
-script = "res://addons/gn_ext_ffmpeg/operators/ffmpeg_movie_top.gd"
-description = "H.264/VP9/AV1 video via FFmpeg GDExtension."
-
-[operator.HAPMovieTOP]
-family = "TOP"
-script = "res://addons/gn_ext_ffmpeg/operators/hap_movie_top.gd"
-description = "HAP codec GPU-direct video playback (S3TC/DXT)."
+[operator.FFmpegInTOP]
+family="TOP"
+script="res://addons/gn_ext_ffmpeg/operators/top/ffmpeg_in_top.gd"
+description="FFmpeg video decoder. H.264, H.265, VP9, AV1 and more."
 ```
 
 ### 28.6 Dependency Guards
@@ -2660,20 +2673,20 @@ Before loading an extension's operators, the registry checks `ClassDB.class_exis
 ### 28.7 Loading Flow
 
 1. **Editor startup** → `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()`
-2. **First access** → `instance()` creates the singleton and runs `_register_core_operators()` (78 operators)
+2. **First access** → `instance()` creates the singleton and runs `_register_core_operators()` (82 core operators)
 3. **scan_extensions()** → iterates `res://addons/gn_ext_*/gn_extension.cfg`, checks dependencies, loads operator scripts
 4. **Palette/Factory** → `GNGraphEditor.get_operator_registry()` and `_create_operator_instance()` delegate to the registry
 5. **Palette tooltips** → `GNNodePalette._get_operator_description()` delegates to registry
 
 ### 28.8 Future Extensions (Roadmap)
 
-| Extension | Folder | Dependencies | Operators |
-|-----------|--------|-------------|-----------|
-| FFmpeg | `gn_ext_ffmpeg` | `FFmpegFrameDecoder` | FFmpegMovieTOP, HAPMovieTOP |
-| Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP |
-| NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP |
-| Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP |
-| MIDI | `gn_ext_midi` | — | MidiInCHOP, MidiOutCHOP |
+| Extension | Folder | Dependencies | Operators | Status |
+|-----------|--------|-------------|-----------|--------|
+| FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | ✅ Done |
+| Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned |
+| NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned |
+| Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP | Planned |
+| MIDI | `gn_ext_midi` | — | MidiInCHOP, MidiOutCHOP | Planned |
 - `GNParamRow` creates a `CodeEdit` instead of `LineEdit` for CODE-type params
 - `CodeEdit` supports syntax highlighting for `.gdshader` and `.gd` automatically
 - Apply-on-blur or explicit "Compile" button to avoid recompiling on every keystroke
