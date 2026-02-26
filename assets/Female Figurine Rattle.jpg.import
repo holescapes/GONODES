@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c8nq8re7myef5"
-path="res://.godot/imported/image (8).png-32d820d0295a0c77a1a3fab4727fd2fa.ctex"
+uid="uid://cf4p277gap3ne"
+path="res://.godot/imported/Female Figurine Rattle.jpg-e7ceb88781e6839988a395b1bae84e34.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/image (8).png"
-dest_files=["res://.godot/imported/image (8).png-32d820d0295a0c77a1a3fab4727fd2fa.ctex"]
+source_file="res://assets/Female Figurine Rattle.jpg"
+dest_files=["res://.godot/imported/Female Figurine Rattle.jpg-e7ceb88781e6839988a395b1bae84e34.ctex"]
 
 [params]
 

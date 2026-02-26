@@ -10,9 +10,15 @@ extends Control
 @onready var inspector: GNParamInspector = $HSplit/RightPanel/InspectorPanel
 @onready var info_label: Label = $InfoBar/InfoLabel
 @onready var log_toggle: CheckButton = $InfoBar/LogToggle
+@onready var hsplit: HSplitContainer = $HSplit
+@onready var right_panel: VSplitContainer = $HSplit/RightPanel
 
 var network: GNNetwork
 var cook_engine: GNCookEngine
+
+## Toolbar toggles (created in _setup_toolbar, stored for state persistence).
+var preview_toggle: CheckButton
+var perf_toggle: CheckButton
 
 ## Which node's output to display in the viewer (click to select).
 var _viewer_node_id: String = ""
@@ -26,6 +32,9 @@ var _load_dialog: FileDialog = null
 
 ## Floating viewer windows — each pinned to a specific node's output.
 var _viewer_windows: Array[GNViewerWindow] = []
+
+## Settings file path for persisting editor state (last opened patch, etc.).
+const _SETTINGS_PATH := "user://gonodes_settings.cfg"
 
 
 func _ready() -> void:
@@ -41,6 +50,13 @@ func _ready() -> void:
 	_setup_cook_engine()
 	_setup_file_dialogs()
 	_setup_toolbar()
+
+	# Persist split-container sizes when the user drags them
+	hsplit.dragged.connect(func(offset: int): _save_setting("hsplit_offset", offset))
+	right_panel.dragged.connect(func(offset: int): _save_setting("vsplit_offset", offset))
+
+	# Restore all persisted UI state (toggles, panel sizes)
+	_restore_ui_state()
 
 	# Bind graph editor to network
 	graph_editor.bind_network(network)
@@ -61,145 +77,20 @@ func _ready() -> void:
 	print("GONODES Editor running (%d display(s))" % displays.size())
 
 
-## Demo network: Two objects with different MATs → MergeCOMP → RenderTOP.
+## Sets up the network — restores the last opened patch or starts empty.
 func _setup_network() -> void:
-	network = GNNetwork.new()
-
-	# ── CHOP: LFO drives torus rotation ────────────────────────────────────
-	var lfo := LFO_CHOP.new()
-	lfo.initialize("lfo1")
-	lfo.get_parameter("frequency").set_value(0.25)
-	lfo.get_parameter("amplitude").set_value(360.0)
-	lfo.get_parameter("waveform").set_value(LFO_CHOP.Waveform.SAWTOOTH)
-	lfo.graph_position = Vector2(50, 550)
-
-	# ── SOP generators ─────────────────────────────────────────────────────
-	var box := BoxSOP.new()
-	box.initialize("box1")
-	box.get_parameter("size_x").set_value(1.0)
-	box.get_parameter("size_y").set_value(1.0)
-	box.get_parameter("size_z").set_value(1.0)
-	box.get_parameter("subdivide_w").set_value(8)
-	box.get_parameter("subdivide_h").set_value(8)
-	box.get_parameter("subdivide_d").set_value(8)
-	box.graph_position = Vector2(50, 50)
-
-	var torus := TorusSOP.new()
-	torus.initialize("torus1")
-	torus.get_parameter("inner_radius").set_value(0.15)
-	torus.get_parameter("outer_radius").set_value(0.6)
-	torus.get_parameter("rings").set_value(48)
-	torus.get_parameter("ring_segments").set_value(24)
-	torus.graph_position = Vector2(50, 300)
-
-	# ── SOP filters ────────────────────────────────────────────────────────
-	var noise_sop := NoiseSOP.new()
-	noise_sop.initialize("noise_sop1")
-	noise_sop.get_parameter("amplitude").set_value(0.15)
-	noise_sop.get_parameter("frequency").set_value(3.0)
-	noise_sop.get_parameter("speed").set_value(0.8)
-	noise_sop.graph_position = Vector2(350, 50)
-
-	var xform := TransformSOP.new()
-	xform.initialize("xform1")
-	xform.get_parameter("rx").set_expression('chop("lfo1", "out")')
-	xform.graph_position = Vector2(350, 300)
-
-	# ── MAT operators ─────────────────────────────────────────────────────
-	var mat_box := PBR_MAT.new()
-	mat_box.initialize("mat_box")
-	mat_box.get_parameter("albedo_color").set_value(Color(0.2, 0.5, 0.9))
-	mat_box.get_parameter("metallic").set_value(0.7)
-	mat_box.get_parameter("roughness").set_value(0.2)
-	mat_box.graph_position = Vector2(350, 150)
-
-	var mat_torus := PBR_MAT.new()
-	mat_torus.initialize("mat_torus")
-	mat_torus.get_parameter("albedo_color").set_value(Color(0.9, 0.3, 0.1))
-	mat_torus.get_parameter("metallic").set_value(0.1)
-	mat_torus.get_parameter("roughness").set_value(0.6)
-	mat_torus.get_parameter("emission_enabled").set_value(true)
-	mat_torus.get_parameter("emission_color").set_value(Color(0.9, 0.2, 0.05))
-	mat_torus.get_parameter("emission_energy").set_value(0.5)
-	mat_torus.graph_position = Vector2(350, 420)
-
-	# ── COMPs ──────────────────────────────────────────────────────────────
-	# Each geo gets its own material via MAT input
-	var geo_box := GeometryCOMP.new()
-	geo_box.initialize("geo_box")
-	geo_box.get_parameter("tx").set_value(-1.2)
-	geo_box.graph_position = Vector2(700, 50)
-
-	var geo_torus := GeometryCOMP.new()
-	geo_torus.initialize("geo_torus")
-	geo_torus.get_parameter("tx").set_value(1.2)
-	geo_torus.get_parameter("ty").set_value(0.3)
-	geo_torus.graph_position = Vector2(700, 300)
-
-	var merge_comp := MergeCOMP.new()
-	merge_comp.initialize("merge_comp1")
-	merge_comp.graph_position = Vector2(1050, 180)
-
-	var cam := CameraCOMP.new()
-	cam.initialize("cam1")
-	cam.get_parameter("tx").set_value(0.0)
-	cam.get_parameter("ty").set_value(1.2)
-	cam.get_parameter("tz").set_value(3.5)
-	cam.get_parameter("rx").set_value(-15.0)
-	cam.get_parameter("fov").set_value(60.0)
-	cam.graph_position = Vector2(1050, 400)
-
-	var light := LightCOMP.new()
-	light.initialize("light1")
-	light.get_parameter("type").set_value(0)
-	light.get_parameter("rx").set_value(-40.0)
-	light.get_parameter("ry").set_value(30.0)
-	light.get_parameter("energy").set_value(1.2)
-	light.get_parameter("shadows").set_value(true)
-	light.graph_position = Vector2(1050, 550)
-
-	# ── Render TOP ─────────────────────────────────────────────────────────
-	var render := RenderTOP.new()
-	render.initialize("render1")
-	render.get_parameter("resolution").set_value(Vector2i(1280, 720))
-	render.get_parameter("bg_color").set_value(Color(0.08, 0.08, 0.1))
-	render.get_parameter("anti_aliasing").set_value(2)
-	render.get_parameter("ambient_energy").set_value(0.4)
-	render.graph_position = Vector2(1400, 350)
-
-	# ── Add all nodes ──────────────────────────────────────────────────────
-	network.add_node(lfo)
-	network.add_node(box)
-	network.add_node(torus)
-	network.add_node(noise_sop)
-	network.add_node(xform)
-	network.add_node(mat_box)
-	network.add_node(mat_torus)
-	network.add_node(geo_box)
-	network.add_node(geo_torus)
-	network.add_node(merge_comp)
-	network.add_node(cam)
-	network.add_node(light)
-	network.add_node(render)
-
-	# ── Wire ───────────────────────────────────────────────────────────────
-	# Box → NoiseSOP → GeometryCOMP (geo input 0) + PBR_MAT (mat input 1)
-	network.connect_nodes("box1", 0, "noise_sop1", 0)
-	network.connect_nodes("noise_sop1", 0, "geo_box", 0)
-	network.connect_nodes("mat_box", 0, "geo_box", 1)
-	# Torus → TransformSOP → GeometryCOMP (geo input 0) + PBR_MAT (mat input 1)
-	network.connect_nodes("torus1", 0, "xform1", 0)
-	network.connect_nodes("xform1", 0, "geo_torus", 0)
-	network.connect_nodes("mat_torus", 0, "geo_torus", 1)
-	# Both geos → MergeCOMP → RenderTOP
-	network.connect_nodes("geo_box", 0, "merge_comp1", 0)
-	network.connect_nodes("geo_torus", 0, "merge_comp1", 0)
-	network.connect_nodes("merge_comp1", 0, "render1", 0)
-	network.connect_nodes("cam1", 0, "render1", 0)
-	network.connect_nodes("light1", 0, "render1", 0)
-
-	# Default viewer target: rendered 3D output
-	_viewer_node_id = "render1"
+	var last_path := _load_setting("last_patch_path", "") as String
+	if not last_path.is_empty() and FileAccess.file_exists(last_path):
+		network = GNNetwork.new()
+		var err := network.load_from_file(last_path)
+		if err == OK:
+			_current_file_path = last_path
+			print("[GONODES] Restored last patch: %s" % last_path)
+		else:
+			print("[GONODES] Failed to restore '%s' — starting empty" % last_path)
+			network = GNNetwork.new()
+	else:
+		network = GNNetwork.new()
 
 
 func _setup_cook_engine() -> void:
@@ -288,6 +179,7 @@ func _on_node_renamed(old_id: String, new_id: String) -> void:
 
 func _on_log_toggled(pressed: bool) -> void:
 	GNLogger.enabled = pressed
+	_save_setting("log_enabled", pressed)
 	if pressed:
 		print("[GONODES] Logging ENABLED")
 	else:
@@ -296,10 +188,12 @@ func _on_log_toggled(pressed: bool) -> void:
 
 func _on_preview_toggled(pressed: bool) -> void:
 	graph_editor.set_previews_visible(pressed)
+	_save_setting("preview_enabled", pressed)
 
 
 func _on_perf_toggled(pressed: bool) -> void:
 	graph_editor.set_perf_overlay_visible(pressed)
+	_save_setting("perf_enabled", pressed)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -413,7 +307,7 @@ func _setup_toolbar() -> void:
 	info_bar.move_child(sep, 4)
 
 	# Preview toggle
-	var preview_toggle := CheckButton.new()
+	preview_toggle = CheckButton.new()
 	preview_toggle.text = "Previews"
 	preview_toggle.tooltip_text = "Show / hide inline node previews"
 	preview_toggle.button_pressed = true
@@ -422,7 +316,7 @@ func _setup_toolbar() -> void:
 	info_bar.move_child(preview_toggle, 5)
 
 	# Performance overlay toggle
-	var perf_toggle := CheckButton.new()
+	perf_toggle = CheckButton.new()
 	perf_toggle.text = "Perf"
 	perf_toggle.tooltip_text = "Show / hide per-node cook time overlay"
 	perf_toggle.button_pressed = false
@@ -528,6 +422,7 @@ func _save_to_path(path: String) -> void:
 	var err := network.save_to_file(path)
 	if err == OK:
 		_current_file_path = path
+		_save_setting("last_patch_path", path)
 		_update_title()
 		print("[GONODES] Saved patch: %s" % path)
 	else:
@@ -554,6 +449,7 @@ func _load_from_path(path: String) -> void:
 		return
 
 	_current_file_path = path
+	_save_setting("last_patch_path", path)
 
 	# Rebind everything — cook engine will adopt nodes on next frame
 	graph_editor.bind_network(network)
@@ -955,3 +851,51 @@ func _print_stress_report() -> void:
 		print("║  VERDICT: ❌ OVER BUDGET — exceeds 16ms (%.1f FPS target)" % (1000.0 / total_ms))
 	print("╚══════════════════════════════════════════════════════════════════╝")
 	print("")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Settings Persistence
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Saves a key-value pair to the user settings file.
+func _save_setting(key: String, value: Variant) -> void:
+	var cfg := ConfigFile.new()
+	# Load existing settings first so we don't clobber other keys
+	if FileAccess.file_exists(_SETTINGS_PATH):
+		cfg.load(_SETTINGS_PATH)
+	cfg.set_value("editor", key, value)
+	cfg.save(_SETTINGS_PATH)
+
+
+## Loads a setting value, returning [param default] if the key doesn't exist.
+func _load_setting(key: String, default: Variant = null) -> Variant:
+	var cfg := ConfigFile.new()
+	if not FileAccess.file_exists(_SETTINGS_PATH):
+		return default
+	if cfg.load(_SETTINGS_PATH) != OK:
+		return default
+	return cfg.get_value("editor", key, default)
+
+
+## Restores all persisted UI state — toggles, split offsets, etc.
+## Called once at the end of _ready(), after toolbar and panels are set up.
+func _restore_ui_state() -> void:
+	# Toggles — set button_pressed which fires the toggled signal automatically
+	var saved_preview: bool = _load_setting("preview_enabled", true)
+	preview_toggle.set_pressed_no_signal(saved_preview)
+	graph_editor.set_previews_visible(saved_preview)
+
+	var saved_perf: bool = _load_setting("perf_enabled", false)
+	perf_toggle.set_pressed_no_signal(saved_perf)
+	graph_editor.set_perf_overlay_visible(saved_perf)
+
+	var saved_log: bool = _load_setting("log_enabled", false)
+	log_toggle.set_pressed_no_signal(saved_log)
+	GNLogger.enabled = saved_log
+
+	# Split container offsets
+	var saved_hsplit: int = _load_setting("hsplit_offset", -400)
+	hsplit.split_offset = saved_hsplit
+
+	var saved_vsplit: int = _load_setting("vsplit_offset", 0)
+	right_panel.split_offset = saved_vsplit
