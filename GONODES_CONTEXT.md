@@ -1159,6 +1159,10 @@ The cook engine has been optimized with these patterns:
 
 4. **Skip-already-dirty BFS** — `propagate_dirty()` stops traversal at nodes already marked dirty, avoiding redundant downstream walks.
 
+5. **SubViewport render-once-per-cook** — All TOP SubViewports are created with `UPDATE_DISABLED` instead of `UPDATE_ALWAYS`. Previously every SubViewport rendered every frame regardless of whether the TOP was dirty, wasting GPU passes on static texture chains. Now `GNTopBase.execute_cook()` sets `UPDATE_ONCE` on each child SubViewport only after `_cook()` finishes setting uniforms/textures. This means a TOP renders **exactly once per dirty cycle** — if it isn't cooked, its viewport never re-renders. For a network with N TOPs where only K are dirty, this reduces per-frame GPU render passes from N to K.
+
+6. **Lazy viewport creation** — `_init_shader_viewport()` and `_ensure_viewport()` are guarded with `if _viewport != null: return`, deferring SubViewport allocation to the first `_cook()` call. TOPs that are never cooked (disconnected, orphaned) have zero GPU footprint — no SubViewport, no texture memory, no render passes.
+
 ### CHOP Channel Model
 CHOPs produce `GNChannelData` which contains:
 - Named channels (e.g., "tx", "ty", "tz" or "out", "chan1")
