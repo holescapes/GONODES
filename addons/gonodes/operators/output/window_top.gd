@@ -8,6 +8,10 @@ extends GNTopBase
 ## Multiple WindowTOP instances create multiple output windows.
 ## The Window node is a child of this GNNode in the scene tree —
 ## freed automatically when the node is removed.
+##
+## NOTE: Always use the 'monitor' parameter to assign the output display.
+## Manually dragging the window to another screen causes tearing because
+## Windows DWM doesn't re-sync the GPU swapchain to the new display.
 
 ## Window mode options matching Godot's Window.Mode.
 enum WindowMode { WINDOWED, FULLSCREEN, BORDERLESS }
@@ -76,6 +80,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		if _display_rect.texture != tex_in.texture:
 			_display_rect.texture = tex_in.texture
 			GNLogger.debug("WindowTOP", "'%s' texture assigned (zero-copy GPU)" % id)
+		# Force the output window to present this frame's content immediately.
+		# Without this, the separate Window viewport may not redraw every frame
+		# because Godot only auto-redraws when it detects a property change on
+		# the TextureRect — but ViewportTexture updates in-place via its RID.
+		_display_rect.queue_redraw()
 		_display_rect.visible = true
 	else:
 		_display_rect.visible = false
@@ -132,7 +141,9 @@ func _apply_window_params() -> void:
 	_window.title = title_val
 	_window.always_on_top = on_top
 
-	# Apply V-Sync
+	# Apply V-Sync — standard VSYNC_ENABLED for tear-free output.
+	# The queue_redraw() call in _cook() ensures the output window redraws
+	# every cook frame, keeping it in sync with the viewer panel.
 	if vsync_val:
 		DisplayServer.window_set_vsync_mode(
 			DisplayServer.VSYNC_ENABLED, _window.get_window_id())
