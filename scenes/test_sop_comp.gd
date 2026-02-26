@@ -1,19 +1,22 @@
 extends Node
-## SOP + COMP test scene — builds a 3D pipeline and renders it to a window:
+## SOP + MAT + COMP test scene — builds a 3D pipeline with per-object materials:
 ##
-##   BoxSOP → NoiseSOP (animated vertex displacement)
-##                                                     ↘
-##                                                      MergeSOP → GeometryCOMP ─┐
-##                                                     ↗                          │
-##   TorusSOP → TransformSOP (spinning via LFO expr)                              ├→ RenderTOP → viewer
-##                                                              CameraCOMP ───────┤
-##                                                              LightCOMP ────────┘
+##   PBR_MAT (blue) ────────────┐
+##                              ├→ GeometryCOMP ──┐
+##   BoxSOP → NoiseSOP ─────────┘                 │
+##                                                ├→ MergeCOMP ──┐
+##   PBR_MAT (orange+glow) ────┐                  │              │
+##                             ├→ GeometryCOMP ──┘              ├→ RenderTOP → viewer
+##   TorusSOP → TransformSOP ──┘                                │
+##                                                CameraCOMP ───┤
+##                                                LightCOMP ────┘
 ##
 ## Validates:
+##   • MAT operators  (PBR_MAT with different settings per object)
 ##   • SOP generators (BoxSOP, TorusSOP)
 ##   • SOP filters   (NoiseSOP time-dependent, TransformSOP with expression)
-##   • SOP merging   (MergeSOP multi-input)
-##   • COMP nodes    (GeometryCOMP, CameraCOMP, LightCOMP)
+##   • COMP merging  (MergeCOMP scene graph composition)
+##   • COMP nodes    (GeometryCOMP with MAT input, CameraCOMP, LightCOMP)
 ##   • 3D rendering  (RenderTOP → SubViewport → texture output)
 ##   • Expression binding (LFO_CHOP drives transform rotation)
 
@@ -68,35 +71,44 @@ func _setup_network() -> void:
 	torus.get_parameter("ring_segments").set_value(24)
 
 	# ── SOP filters ────────────────────────────────────────────────────────
-	# Animated noise on the box
 	var noise := NoiseSOP.new()
 	noise.initialize("noise_sop1")
 	noise.get_parameter("amplitude").set_value(0.15)
 	noise.get_parameter("frequency").set_value(3.0)
 	noise.get_parameter("speed").set_value(0.8)
 
-	# Move the box to the left
-	var box_xform := TransformSOP.new()
-	box_xform.initialize("box_xform1")
-	box_xform.get_parameter("tx").set_value(-1.2)
-
-	# Spin the torus — rotation X driven by the LFO
 	var xform := TransformSOP.new()
 	xform.initialize("xform1")
-	xform.get_parameter("tx").set_value(1.2)
-	xform.get_parameter("ty").set_value(0.3)
 	xform.get_parameter("rx").set_expression('chop("lfo1", "out")')
 
-	# Merge both objects into one scene
-	var merge := MergeSOP.new()
-	merge.initialize("merge1")
+	# ── MAT operators ─────────────────────────────────────────────────────
+	var mat_box := PBR_MAT.new()
+	mat_box.initialize("mat_box")
+	mat_box.get_parameter("albedo_color").set_value(Color(0.2, 0.5, 0.9))
+	mat_box.get_parameter("metallic").set_value(0.7)
+	mat_box.get_parameter("roughness").set_value(0.2)
+
+	var mat_torus := PBR_MAT.new()
+	mat_torus.initialize("mat_torus")
+	mat_torus.get_parameter("albedo_color").set_value(Color(0.9, 0.3, 0.1))
+	mat_torus.get_parameter("metallic").set_value(0.1)
+	mat_torus.get_parameter("roughness").set_value(0.6)
+	mat_torus.get_parameter("emission_enabled").set_value(true)
+	mat_torus.get_parameter("emission_color").set_value(Color(0.9, 0.2, 0.05))
+	mat_torus.get_parameter("emission_energy").set_value(0.5)
 
 	# ── COMPs ──────────────────────────────────────────────────────────────
-	var geo := GeometryCOMP.new()
-	geo.initialize("geo1")
-	geo.get_parameter("metallic").set_value(0.3)
-	geo.get_parameter("roughness").set_value(0.4)
-	geo.get_parameter("albedo_color").set_value(Color(0.85, 0.55, 0.2))
+	var geo_box := GeometryCOMP.new()
+	geo_box.initialize("geo_box")
+	geo_box.get_parameter("tx").set_value(-1.2)
+
+	var geo_torus := GeometryCOMP.new()
+	geo_torus.initialize("geo_torus")
+	geo_torus.get_parameter("tx").set_value(1.2)
+	geo_torus.get_parameter("ty").set_value(0.3)
+
+	var merge_comp := MergeCOMP.new()
+	merge_comp.initialize("merge_comp1")
 
 	var cam := CameraCOMP.new()
 	cam.initialize("cam1")
@@ -128,25 +140,29 @@ func _setup_network() -> void:
 	network.add_node(box)
 	network.add_node(torus)
 	network.add_node(noise)
-	network.add_node(box_xform)
 	network.add_node(xform)
-	network.add_node(merge)
-	network.add_node(geo)
+	network.add_node(mat_box)
+	network.add_node(mat_torus)
+	network.add_node(geo_box)
+	network.add_node(geo_torus)
+	network.add_node(merge_comp)
 	network.add_node(cam)
 	network.add_node(light)
 	network.add_node(render)
 
 	# ── Wire the graph ─────────────────────────────────────────────────────
-	# Box (input 0) → noise → box_xform → merge input 0
+	# Box → NoiseSOP → GeometryCOMP + PBR_MAT
 	network.connect_nodes("box1", 0, "noise_sop1", 0)
-	network.connect_nodes("noise_sop1", 0, "box_xform1", 0)
-	network.connect_nodes("box_xform1", 0, "merge1", 0)
-	# Torus (input 1) → xform → merge input 1
+	network.connect_nodes("noise_sop1", 0, "geo_box", 0)
+	network.connect_nodes("mat_box", 0, "geo_box", 1)
+	# Torus → TransformSOP → GeometryCOMP + PBR_MAT
 	network.connect_nodes("torus1", 0, "xform1", 0)
-	network.connect_nodes("xform1", 0, "merge1", 0)
-	# Merge → GeometryCOMP → RenderTOP
-	network.connect_nodes("merge1", 0, "geo1", 0)
-	network.connect_nodes("geo1", 0, "render1", 0)
+	network.connect_nodes("xform1", 0, "geo_torus", 0)
+	network.connect_nodes("mat_torus", 0, "geo_torus", 1)
+	# Both geos → MergeCOMP → RenderTOP
+	network.connect_nodes("geo_box", 0, "merge_comp1", 0)
+	network.connect_nodes("geo_torus", 0, "merge_comp1", 0)
+	network.connect_nodes("merge_comp1", 0, "render1", 0)
 	network.connect_nodes("cam1", 0, "render1", 0)
 	network.connect_nodes("light1", 0, "render1", 0)
 
@@ -181,18 +197,8 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	parts.append("Frame: %d" % frame)
 	parts.append("Cook: %.2fms" % cook_time_ms)
 
-	# Show some node stats
-	var merge_node: GNNode = network.get_node_by_id("merge1")
-	if merge_node != null and merge_node.cached_output is GNGeoData:
-		var geo_data: GNGeoData = merge_node.cached_output as GNGeoData
-		if geo_data.mesh != null:
-			var verts: int = 0
-			for s in range(geo_data.mesh.get_surface_count()):
-				var arrays: Array = geo_data.mesh.surface_get_arrays(s)
-				if arrays[Mesh.ARRAY_VERTEX] != null:
-					verts += (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
-			parts.append("Verts: %d" % verts)
-			parts.append("Surfaces: %d" % geo_data.mesh.get_surface_count())
+	# Show node count
+	parts.append("Nodes: %d" % network.nodes.size())
 
 	var lfo_node: GNNode = network.get_node_by_id("lfo1")
 	if lfo_node != null and lfo_node.cached_output is GNChannelData:

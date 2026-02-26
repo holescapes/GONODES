@@ -32,6 +32,15 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_color("color", Color.WHITE, "Color", "Light colour"))
 	add_parameter(GNParameter.create_float("energy", 1.0, 0.0, 16.0, 0.1, "Energy", "Light intensity"))
 	add_parameter(GNParameter.create_bool("shadows", true, "Shadows", "Enable shadow casting"))
+	# Shadow tuning
+	add_parameter(GNParameter.create_float("shadow_bias", 0.1, 0.0, 16.0, 0.01, "Shadow Bias", "Depth bias to reduce shadow acne"))
+	add_parameter(GNParameter.create_float("shadow_normal_bias", 1.0, 0.0, 16.0, 0.1, "Shadow Normal Bias", "Normal-based offset to reduce acne on curved surfaces"))
+	add_parameter(GNParameter.create_float("shadow_blur", 1.0, 0.0, 10.0, 0.1, "Shadow Blur", "Soft shadow blur radius"))
+	add_parameter(GNParameter.create_float("shadow_opacity", 1.0, 0.0, 1.0, 0.05, "Shadow Opacity", "Shadow darkness (0 = invisible, 1 = fully dark)"))
+	# Directional shadow mode
+	add_parameter(GNParameter.create_enum("dir_shadow_mode",
+		PackedStringArray(["Orthogonal", "PSSM 2 Splits", "PSSM 4 Splits"]), 2,
+		"Dir Shadow Mode", "Directional light shadow split mode (ignored for Omni/Spot)"))
 	# Omni-specific
 	add_parameter(GNParameter.create_float("omni_range", 10.0, 0.1, 1000.0, 0.5, "Omni Range", "Point light range"))
 	# Spot-specific
@@ -66,6 +75,21 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_light.light_color = get_param_value("color")
 	_light.light_energy = get_param_value("energy")
 	_light.shadow_enabled = get_param_value("shadows")
+
+	# Shadow parameters (common to all light types)
+	_light.shadow_bias = get_param_value("shadow_bias")
+	_light.shadow_normal_bias = get_param_value("shadow_normal_bias")
+	_light.shadow_blur = get_param_value("shadow_blur")
+	_light.shadow_opacity = get_param_value("shadow_opacity")
+
+	# Directional shadow mode
+	if _light is DirectionalLight3D:
+		var dir_light: DirectionalLight3D = _light as DirectionalLight3D
+		var dir_mode: int = get_param_value("dir_shadow_mode")
+		match dir_mode:
+			0: dir_light.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
+			1: dir_light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+			2: dir_light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 
 	# Transform
 	_light.position = Vector3(

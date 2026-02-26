@@ -43,6 +43,16 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_color("ambient_color", Color(0.3, 0.3, 0.4), "Ambient Color", "Ambient light color"))
 	add_parameter(GNParameter.create_enum("anti_aliasing",
 		PackedStringArray(["Off", "2x MSAA", "4x MSAA", "8x MSAA"]), 2, "Anti-Aliasing", "MSAA quality level"))
+	# Shadow quality
+	add_parameter(GNParameter.create_enum("shadow_atlas_size",
+		PackedStringArray(["1024", "2048", "4096", "8192"]), 2,
+		"Shadow Atlas", "Positional shadow atlas resolution (Omni/Spot)"))
+	add_parameter(GNParameter.create_enum("dir_shadow_size",
+		PackedStringArray(["1024", "2048", "4096", "8192"]), 2,
+		"Dir Shadow Size", "Directional shadow map resolution"))
+	add_parameter(GNParameter.create_enum("shadow_filter",
+		PackedStringArray(["Hard", "Soft Low", "Soft Medium", "Soft High", "Soft Ultra"]), 2,
+		"Shadow Filter", "Shadow filter quality (PCF)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -66,6 +76,21 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		1: _viewport.msaa_3d = Viewport.MSAA_2X
 		2: _viewport.msaa_3d = Viewport.MSAA_4X
 		3: _viewport.msaa_3d = Viewport.MSAA_8X
+
+	# Shadow atlas (positional lights: Omni/Spot)
+	var atlas_idx: int = get_param_value("shadow_atlas_size")
+	var atlas_sizes: Array[int] = [1024, 2048, 4096, 8192]
+	_viewport.positional_shadow_atlas_size = atlas_sizes[atlas_idx]
+
+	# Directional shadow size
+	var dir_idx: int = get_param_value("dir_shadow_size")
+	_viewport.set_meta("directional_shadow_size", atlas_sizes[dir_idx])
+
+	# Shadow filter quality
+	var filter_idx: int = get_param_value("shadow_filter")
+	match filter_idx:
+		0: _viewport.positional_shadow_atlas_16_bits = false
+		1: _viewport.positional_shadow_atlas_16_bits = true
 
 	# Update environment
 	if _environment != null:
@@ -145,7 +170,12 @@ func _populate_scene_from_network() -> void:
 		if upstream_node == null:
 			continue
 
-		if upstream_node is GeometryCOMP:
+		if upstream_node is MergeCOMP:
+			var group_node: Node3D = (upstream_node as MergeCOMP).get_group_node()
+			if group_node != null:
+				_adopt_scene_node(group_node)
+
+		elif upstream_node is GeometryCOMP:
 			var mesh_inst: MeshInstance3D = (upstream_node as GeometryCOMP).get_mesh_instance()
 			if mesh_inst != null:
 				_adopt_scene_node(mesh_inst)

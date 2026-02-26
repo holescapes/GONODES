@@ -449,11 +449,19 @@ func _register_core_operators() -> void:
 
 	# ── COMPs ───────────────────────────────────────────────────────────
 	_reg("GeometryCOMP",    "COMP", GeometryCOMP,
-		"MeshInstance3D wrapper — places SOP geometry in a 3D scene.")
+		"MeshInstance3D wrapper — places SOP geometry in a 3D scene with MAT material.")
 	_reg("CameraCOMP",      "COMP", CameraCOMP,
 		"Camera3D wrapper — defines the viewpoint for RenderTOP.")
 	_reg("LightCOMP",       "COMP", LightCOMP,
 		"Light3D wrapper (Directional, Omni, Spot) for scene illumination.")
+	_reg("MergeCOMP",       "COMP", MergeCOMP,
+		"Merge multiple COMPs into a single scene group with group transform.")
+
+	# ── MATs ────────────────────────────────────────────────────────────
+	_reg("PBR_MAT",         "MAT", PBR_MAT,
+		"Standard PBR material (StandardMaterial3D) with albedo, metallic, roughness, emission.")
+	_reg("Shader_MAT",      "MAT", Shader_MAT,
+		"Custom shader material (ShaderMaterial) with code/file input and uniforms.")
 
 	GNLogger.info("ExtRegistry",
 		"Registered %d core operators" % _operators.size())

@@ -76,7 +76,7 @@ func _require_input_geo(inputs: Array[GNData]) -> GNGeoData:
 func create_preview_control() -> Control:
 	var label := Label.new()
 	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	label.text = ""
 	return label
