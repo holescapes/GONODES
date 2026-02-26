@@ -4,7 +4,8 @@ class_name GNFamily
 
 ## Operator family enum — matches TouchDesigner's family model.
 enum Type {
-	TOP,   ## Texture Operators — 2D image/texture processing
+	TOP,   ## Texture Operators — GPU 2D image/texture processing (SubViewport / Shader)
+	IMG,   ## Image Operators — CPU-side pixel processing (Image, no SubViewport)
 	CHOP,  ## Channel Operators — sample-based numeric data (LFO, math, audio)
 	SOP,   ## Surface Operators — 3D geometry (meshes, point clouds)
 	POP,   ## Point Operators — GPU-accelerated particle/point systems
@@ -16,6 +17,7 @@ enum Type {
 ## Family display names for UI.
 const FAMILY_NAMES: Dictionary = {
 	Type.TOP:  "TOP",
+	Type.IMG:  "IMG",
 	Type.CHOP: "CHOP",
 	Type.SOP:  "SOP",
 	Type.POP:  "POP",
@@ -27,6 +29,7 @@ const FAMILY_NAMES: Dictionary = {
 ## Family colors for port/wire rendering in the graph editor.
 const FAMILY_COLORS: Dictionary = {
 	Type.TOP:  Color(0.6, 0.2, 0.8),    # Purple
+	Type.IMG:  Color(0.3, 0.7, 0.7),    # Teal
 	Type.CHOP: Color(0.2, 0.8, 0.2),    # Green
 	Type.SOP:  Color(0.2, 0.4, 0.9),    # Blue
 	Type.POP:  Color(0.2, 0.8, 0.8),    # Cyan

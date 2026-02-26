@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-26
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Phases 1–6 complete. 83 operators across 6 families (29 TOP, 21 CHOP, 12 DAT, 14 SOP, 4 COMP, 2 MAT, 1 output).
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge). Phases 1–6 complete. 93 operators across 7 families (29 TOP, 7 IMG, 22 CHOP, 13 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output).
 
 ---
 
@@ -276,9 +276,10 @@ Five intermediate base classes sit between GNNode and the individual operators. 
 ```
 GNNode (type-agnostic base)
 ├── GNTopBase (29 TOP operators)
-├── GNChopBase (21 CHOP operators, incl. DATtoCHOP bridge)
-├── GNDatBase (12 DAT operators)
-├── GNSopBase (14 SOP operators)
+├── GNImgBase (7 IMG operators)
+├── GNChopBase (22 CHOP operators, incl. DATtoCHOP bridge)
+├── GNDatBase (13 DAT operators)
+├── GNSopBase (15 SOP operators)
 ├── GNCompBase (4 COMP operators)
 └── GNMatBase (2 MAT operators)
 ```
@@ -294,6 +295,15 @@ GNNode (type-agnostic base)
 - **`execute_cook()`** — overrides GNNode to trigger `UPDATE_ONCE` on all child SubViewports after `_cook()` completes, eliminating wasted GPU work on non-dirty frames.
 
 Generator TOPs pass `get_param_value("resolution")` as the viewport size. Filter TOPs pass `tex_in.resolution` (matching their input). No hardcoded sizes.
+
+**GNImgBase** provides the CPU-side image infrastructure used by all IMG operators:
+- **`_cached_image_data: GNImageData`** — reusable output data wrapping the CPU Image.
+- **`_prepare_image()`** — lazily creates `_cached_image_data`. Operators write a new Image into it via `set_image()`.
+- **`_get_input_img(inputs, port)`** — safely extracts `GNImageData` from inputs.
+- **Preview** — creates `TextureRect`, uploads Image to `ImageTexture` on-the-fly during `update_preview_control()`.
+- **No SubViewport** — no `execute_cook()` override needed, uses GNNode's default cook cycle.
+
+**ImgToTOP** extends `GNTopBase` (not GNImgBase) because its output is TOP texture data. Overrides `execute_cook()` to skip the SubViewport render logic.
 
 **DATtoCHOP** extends `GNChopBase` (not GNDatBase) because its output is CHOP channel data.
 
@@ -894,9 +904,9 @@ GONODES/
   - `GNGraphEditor.update_previews()` iterates ALL node views each cook frame (skipped when hidden).
   - Extensible: any operator can override `create_preview_control()` for operator-specific rendering.
 - [x] **Family base classes** — 6 intermediate bases between GNNode and operators:
-  - `GNTopBase` (29 TOPs), `GNChopBase` (21 CHOPs), `GNDatBase` (12 DATs), `GNSopBase` (14 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
+  - `GNTopBase` (29 TOPs), `GNImgBase` (7 IMGs), `GNChopBase` (22 CHOPs), `GNDatBase` (13 DATs), `GNSopBase` (15 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
   - Each sets family, provides cached data helpers, and overrides preview methods.
-  - All 83 operators migrated. GNNode is now fully type-agnostic.
+  - All 93 operators migrated. GNNode is now fully type-agnostic.
 - [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
   - `GNGraphEditor.previews_visible` flag controls whether `update_previews()` processes updates.
   - `GNGraphEditor.set_previews_visible(enabled)` shows/hides all preview controls on existing views.
@@ -952,19 +962,36 @@ GONODES/
 - [x] README and basic documentation
 
 ### Phase 7: Creative Tools, Performance & Workflow
-- [ ] **ScriptCHOP** — user-editable GDScript for custom channel processing:
-  - Inline code editor (string param) or external `.gd` file.
-  - `cook(inputs, frame, time, delta)` entry point returning channel dict.
-  - Access to all expression context variables.
-- [ ] **ScriptDAT** — user-editable GDScript for table/text processing:
-  - Same inline/file model as ScriptCHOP.
-  - `cook(inputs, frame, time, delta)` entry point returning table/text data.
-- [ ] **ScriptTOP** — CPU-side pixel generation via GDScript:
-  - Write to Image pixel-by-pixel or via bulk operations.
-  - Input textures readable as Image data.
-- [ ] **ScriptSOP** — procedural geometry via GDScript:
-  - SurfaceTool-based mesh generation.
-  - Access to input geometry vertices/normals/UVs.
+- [x] **ScriptCHOP** — user-editable GDScript for custom channel processing:
+  - Runtime GDScript compilation via `GDScript.new()` + `reload()`.
+  - `cook()` entry point with `me`, `inputs`, `op` (GNChannelData), `time`, `frame`, `dt` context.
+  - `@param` annotations for dynamic inspector parameters.
+  - `@input` annotations for dynamic multi-family input ports.
+  - Optional `setup()` runs once after compilation. Instance reused across frames.
+  - `time_dependent` toggle (default off). `from_dict()` override for save/load.
+- [x] **ScriptDAT** — user-editable GDScript for table/text processing:
+  - Same architecture as ScriptCHOP. `op` is GNTableData.
+  - Default template builds a row table with configurable columns.
+- [x] **ScriptIMG** — CPU-side pixel generation via GDScript:
+  - `op` is GNImageData with `set_image(img)` method.
+  - Extends GNImgBase — no SubViewport, pure CPU Image.
+  - Replaces ScriptTOP (CPU image work separated from GPU TOP pipeline).
+  - Use ImgToTOP bridge to convert output to GPU texture.
+- [x] **ScriptSOP** — procedural geometry via GDScript:
+  - `op` is GNGeoData. User builds mesh via SurfaceTool then `op.set_from_surface_tool(st)`.
+  - Default template scatters random points in a sphere.
+- [x] **GNScriptHelper** — shared static helper class for all 4 Script operators:
+  - Runtime compilation, annotation parsing, context injection, preset management.
+  - Factory presets at `res://addons/gonodes/presets/<family>/`.
+- [x] **IMG family** — CPU-side image processing operators (new family):
+  - `GNImageData` (wraps Image, no GPU texture) and `GNImgBase` (no SubViewport).
+  - Teal color in graph editor. Family enum `GNFamily.Type.IMG`.
+  - **Generators:** `NoiseIMG` (value/white noise via FastNoiseLite), `CheckerboardIMG` (configurable grid).
+  - **Filters:** `BlurIMG` (separable box blur), `EdgeDetectIMG` (Sobel/Prewitt), `PixelSortIMG` (glitch art).
+  - **Bridge:** `ImgToTOP` — uploads CPU Image to GPU ImageTexture for TOP pipeline.
+  - **Scripting:** `ScriptIMG` — user GDScript with `@param`/`@input` annotations.
+  - User presets at `user://gonodes_presets/<family>/` (load/save via static methods).
+  - Dynamic param rebuild with value preservation (same pattern as CustomShaderTOP).
 - [ ] **OSC input/output operators**:
   - OscInCHOP — receives OSC messages on configurable UDP port, maps to channels.
   - OscOutCHOP — sends channel data as OSC messages to target host:port.
@@ -1137,8 +1164,8 @@ GONODES/
 ### Long-term
 - [ ] NDI video streaming
 - [ ] FxPlug / FFGL plugin export (for VDMX, Resolume)
-- [ ] ScriptTOP (CPU-side pixel generation via GDScript — see Section 27)
-- [ ] ScriptSOP (procedural geometry via GDScript — see Section 27)
+- [ ] Generic ScriptNode (family-less, multi-type output via `# @output` annotations)
+- [ ] Preset dropdown parameter (Option B — inspector renders preset as dropdown)
 - [ ] Python scripting DAT (embedded Python via GDExtension)
 - [ ] Network collaboration (shared editing)
 - [ ] Asset/patch marketplace
@@ -2639,184 +2666,296 @@ These are non-negotiable constraints discovered during development. **Never viol
 
 ---
 
-## 27. Code-Based / Scriptable Operators — Architecture & Roadmap
+## 27. Code-Based / Scriptable Operators — Architecture
 
-This section defines the strategy for operators where the user writes executable code (shaders, GDScript, or future languages). These are the GONODES equivalents of TouchDesigner's GLSL TOP, Script CHOP, Script SOP, and Python-based DATs.
+This section documents the scripting operator system: operators where the user writes executable GDScript code that runs every cook. These are the GONODES equivalents of TouchDesigner's Script CHOP, Script SOP, Script DAT, and GLSL TOP.
 
 ### 27.1 Design Philosophy
 
-1. **Sandboxed execution** — User code runs inside controlled contexts (shader uniforms, `Expression.execute()`, or dedicated `RefCounted` subclasses). Never `eval()` arbitrary strings on the main thread without containment.
-2. **Stable uniform/API contract** — Each scriptable operator defines a fixed set of inputs, outputs, and auto-bound variables. User code plugs into a well-defined slot; the framework handles plumbing.
-3. **Graceful failure** — Shader compilation errors, GDScript parse errors, and runtime exceptions are caught, logged, and the operator falls back to its last-good output. The network never crashes from user code.
-4. **Hot-reload** — Code changes recompile/re-evaluate without restarting the cook engine. Shader recompilation is synchronous; GDScript re-parse should be deferred to avoid frame spikes.
+1. **Sandboxed execution** — User code runs inside a dynamically-compiled `RefCounted` subclass. The framework injects context variables; the user's code sees only what's exposed.
+2. **Stable API contract** — Each Script operator defines a fixed output type (per family) but dynamic input ports and parameters via comment annotations. User code plugs into `cook()` and optionally `setup()`.
+3. **Graceful failure** — GDScript compilation errors are caught. Runtime errors print to console but don't crash the network. The operator falls back to its last-good cached output.
+4. **Hot-reload** — Code changes trigger recompilation + `setup()` re-run without restarting the cook engine. The compiled instance is reused across frames (state persists).
+5. **Per-family, not generic** — Each Script operator belongs to its family (ScriptCHOP extends GNChopBase, etc.), inheriting family colors, preview, output helpers. A generic multi-output ScriptNode is on the roadmap.
 
 ### 27.2 Implemented: CustomShaderTOP (GLSL TOP)
 
 **Status: ✅ Done**
 
-The user provides a complete `shader_type canvas_item;` shader. The operator:
-- Accepts up to **4 texture inputs** (`gn_tex0` … `gn_tex3`)
-- Exposes **4 float uniforms** (`gn_float0` … `gn_float3`) bound to inspector params
-- Exposes **2 color uniforms** (`gn_color0`, `gn_color1`)
-- Exposes **resolution** (`gn_resolution`) and Godot's built-in `TIME`
-- Recompiles when `shader_code` string changes; keeps last-good shader on failure
-- Default template is a simple pass-through for rapid prototyping
+GPU-side shader operator. The user provides a full `shader_type canvas_item;` shader. Dynamic texture input ports from `uniform sampler2D gn_tex<N>` declarations. Dynamic inspector parameters from non-reserved uniform declarations. Recompiles on code change. Default template included.
 
-**Limitations:**
-- Godot does not surface shader compilation errors programmatically — they go to the editor output console. Future: parse console output or use RenderingServer API if exposed.
-- Single-pass only. Multi-pass requires chaining multiple CustomShaderTOP nodes.
+See CustomShaderTOP source for full implementation details (uniform parsing, dynamic port/param rebuild, generator vs. filter mode).
 
-### 27.3 Planned: ScriptCHOP (GDScript CHOP)
+### 27.3 Implemented: Script Operators (GDScript)
 
-**Status: 🔲 Planned — Near-term priority**
+**Status: ✅ Done — ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG**
 
-The GDScript equivalent of TouchDesigner's Script CHOP. The user writes a GDScript snippet that runs every cook and returns channel data.
+All four share `GNScriptHelper` for compilation, annotation parsing, and execution.
 
-**Design:**
-```
-class_name ScriptCHOP extends GNNode
+#### 27.3.1 Operator Table
 
-# User-facing API (injected into Expression.execute or custom RefCounted):
-#   in0: GNChannelData — channels from input 0
-#   in1: GNChannelData — channels from input 1
-#   me:  GNNode        — self-reference (access own params)
-#   time, frame, dt    — engine time variables
-#
-# Return: Dictionary { "chan_name": float_or_array, ... }
-```
+| Operator | Extends | Output Type | `node_type` | `op` object |
+|----------|---------|-------------|-------------|-------------|
+| ScriptCHOP | GNChopBase | GNChannelData | `"scriptchop"` | GNChannelData (`add_channel`, `set_single_value`, etc.) |
+| ScriptDAT | GNDatBase | GNTableData | `"scriptdat"` | GNTableData (`set_headers`, `append_row`, `set_text`, etc.) |
+| ScriptSOP | GNSopBase | GNGeoData | `"scriptsop"` | GNGeoData (`set_from_surface_tool`, `set_surface_arrays`, etc.) |
+| ScriptIMG | GNImgBase | GNImageData | `"scriptimg"` | GNImageData (`set_image(img)`, `image`, `resolution`, etc.) |
 
-**Implementation approach:**
-- Option A (MVP): Use Godot's `Expression` system — same as parameter expressions but returning a Dictionary. Simple, but limited to single-line expressions or small lambdas.
-- Option B (Full): Use a dynamically-loaded GDScript `Resource`. The user writes a script extending a `GNScriptContext` base class with an overridable `_evaluate()` method. The ScriptCHOP loads/caches this script and calls `_evaluate()` each cook. This gives full GDScript power (loops, variables, classes).
-- **Recommendation:** Start with Option A for quick scripting, add Option B for complex logic.
+#### 27.3.2 Execution Engine — Runtime GDScript Compilation
 
-**Uniform contract:**
 ```gdscript
-# User writes:
-func _evaluate(in0: GNChannelData, in1: GNChannelData,
-               time: float, frame: int, dt: float) -> Dictionary:
-    var lfo_val = in0.get_value("out") if in0 else 0.0
-    return { "processed": lfo_val * 2.0 + sin(time) }
+# How it works internally:
+var script = GDScript.new()
+script.source_code = PREAMBLE + user_code  # Preamble injects context vars + helpers
+script.reload()                             # Compiles — error code if fails
+var instance = script.new()                 # Create RefCounted instance
+# Instance is reused across frames — state persists
 ```
 
-### 27.4 Planned: ScriptDAT (GDScript DAT)
+**Lifecycle:**
+1. Recompile only when code text changes (tracked via `_last_compiled_code`)
+2. Reuse the instance across frames — user-defined `var` declarations persist
+3. Inject fresh context (`me`, `inputs`, `op`, `time`, `frame`, `dt`, `_engine`) before each `cook()` call
+4. Call `setup()` once after successful compilation (if method exists)
+5. Call `cook()` every frame (when node is dirty + active)
 
-**Status: 🔲 Planned**
+#### 27.3.3 User Code API
 
-Processes table/text data via user GDScript. DAT family and GNTableData are now implemented.
+The user writes code that looks like this:
 
-**Design:**
 ```gdscript
-# User writes:
-func _evaluate(in_table: GNTableData, me: GNNode,
-               time: float) -> GNTableData:
-    var out = GNTableData.new()
-    for row in in_table.rows:
-        if float(row["value"]) > 0.5:
-            out.append_row(row)
-    return out
+# @input chop  Upstream channels
+# @input dat   Config table
+# @param float speed 1.0 Animation speed
+# @param int count 4 Number of output channels
+
+func setup():
+    # Runs once after compilation. Can initialize persistent state.
+    print("Initialized for ", me.id)
+
+func cook():
+    # Runs every frame when dirty. Must populate `op` with output data.
+    var src = inputs[0]  # GNChannelData from first input
+    for i in range(par("count")):
+        op.set_single_value("chan%d" % i, sin(time * par("speed") + i))
 ```
 
-**Key decisions:**
-- GNTableData: Dictionary-of-arrays (column-major) or Array-of-Dictionaries (row-major)? TD uses row-major. Recommend row-major for user-friendliness.
-- String manipulation: full GDScript string API available (regex, split, JSON parse)
-- File I/O: sandboxed to project directory only (user:// paths)
+**Injected context variables:**
 
-### 27.5 Planned: ScriptTOP (GDScript TOP)
+| Variable | Type | Description |
+|----------|------|-------------|
+| `me` | GNNode | This node instance |
+| `inputs` | Array[GNData] | Upstream data, ordered by input port index |
+| `op` | family-specific | Pre-prepared output object (see operator table) |
+| `time` | float | Elapsed seconds since start |
+| `frame` | int | Current frame number |
+| `dt` | float | Delta time this frame |
+| `_engine` | Node | CookEngine reference (for advanced use) |
 
-**Status: 🔲 Planned — Medium-term**
+**Injected helper functions:**
 
-The user writes GDScript that generates/manipulates pixel data on the CPU. Useful for procedural generation that's easier to express in code than shaders.
+| Function | Returns | Description |
+|----------|---------|-------------|
+| `par(name)` | Variant | Shorthand for `me.get_param_value(name)` |
+| `chop(id, chan, index)` | Variant | Cross-reference CHOP channel value |
+| `op_ref(id, param_name)` | Variant | Cross-reference any node's parameter |
+| `top(id, property)` | Variant | Cross-reference TOP info |
+| `sop(id)` | Variant | Cross-reference SOP data |
+| `dat(id, row, col)` | Variant | Cross-reference DAT cell |
 
-**Design:**
+Note: `op_ref()` is used instead of `op()` because `op` is already the output object variable name.
+
+#### 27.3.4 Annotation System — @param
+
+Dynamic inspector parameters are declared via `# @param` comment annotations:
+
+```
+# @param <type> <name> <default> <description...>
+```
+
+| Type | GNParameter.ValueType | Default format | Example |
+|------|----------------------|----------------|---------|
+| `float` | FLOAT | `1.0` | `# @param float speed 1.0 Animation speed` |
+| `int` | INT | `42` | `# @param int count 4 Channels` |
+| `bool` | BOOL | `true`/`false` | `# @param bool loop true Enable loop` |
+| `color` | COLOR | `#rrggbb` | `# @param color tint #ff0000 Tint` |
+| `vec2` | VECTOR2 | `x,y` | `# @param vec2 offset 0.0,0.0 Position` |
+| `vec2i` | VECTOR2I | `x,y` | `# @param vec2i size 256,256 Size` |
+| `string` | STRING | `"text"` | `# @param string label "hello" Label` |
+| `file` | FILE | (ignored) | `# @param file texture *.png Path` |
+
+**Rebuild cycle:** Identical to CustomShaderTOP — regex parses annotations, diffs old vs. new, preserves values for same name+type, disconnects/reconnects signals, emits `parameters_changed`.
+
+#### 27.3.5 Annotation System — @input
+
+Dynamic input ports with per-port family type:
+
+```
+# @input <family> <description...>
+```
+
+| Family | Port Type | Expected GNData |
+|--------|-----------|-----------------|
+| `top` | GNFamily.Type.TOP | GNTextureData |
+| `img` | GNFamily.Type.IMG | GNImageData |
+| `chop` | GNFamily.Type.CHOP | GNChannelData |
+| `dat` | GNFamily.Type.DAT | GNTableData |
+| `sop` | GNFamily.Type.SOP | GNGeoData |
+| `comp` | GNFamily.Type.COMP | GNCompData |
+| `mat` | GNFamily.Type.MAT | GNMaterialData |
+
+Ports are rebuilt when annotations change, same `ports_changed.emit()` pattern. No `@input` annotations = no input ports (generator mode).
+
+**Cross-family inputs:** A ScriptIMG can accept IMG + CHOP + DAT inputs simultaneously:
 ```gdscript
-# User writes:
-func _evaluate(in_img: Image, me: GNNode,
-               time: float) -> Image:
-    var out = Image.create(512, 512, false, Image.FORMAT_RGBA8)
-    for y in range(512):
-        for x in range(512):
-            var u = float(x) / 512.0
-            var v = float(y) / 512.0
-            out.set_pixel(x, y, Color(u, v, sin(time) * 0.5 + 0.5, 1.0))
-    return out
+# @input img   Background image
+# @input chop  Animation data
+# @input dat   Label table
+
+func cook():
+    var bg = inputs[0]    # GNImageData
+    var anim = inputs[1]  # GNChannelData
+    var labels = inputs[2] # GNTableData
 ```
 
-**Performance considerations:**
-- CPU pixel loops are slow for large resolutions. This is intentional — ScriptTOP is for prototyping or small textures.
-- For production GPU work, users should use CustomShaderTOP.
-- We could offer a compute shader variant later (ComputeShaderTOP).
+#### 27.3.6 Static Parameters
 
-### 27.6 Planned: ComputeShaderTOP (GPU Compute)
+All Script operators share two static (non-annotation) parameters:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `time_dependent` | bool | `false` | Re-cook every frame. Default off — scripts only cook when dirty. |
+| `code` | string | Default template | The user's GDScript code |
+
+`time_dependent` is respected via `_pre_cook()` override (same pattern as CustomShaderTOP).
+
+#### 27.3.7 ScriptIMG — CPU Image Output
+
+ScriptIMG extends GNImgBase (not GNTopBase) — pure CPU Image pipeline:
+- **No SubViewport** — output is `GNImageData` wrapping a CPU `Image`
+- **`op` is GNImageData** — the user calls `op.set_image(img)` to publish output
+- **No `execute_cook()` override needed** — GNImgBase uses GNNode's default (no viewport logic)
+- **Use ImgToTOP** to convert to GPU texture for the TOP pipeline
+- **Complementary to CustomShaderTOP** — use ScriptIMG for CPU logic, CustomShaderTOP for GPU shaders
+
+### 27.4 IMG Family — CPU Image Operators
+
+**Status: ✅ Done**
+
+The IMG family provides CPU-side image processing as a first-class citizen, cleanly separated from the GPU-based TOP pipeline.
+
+#### 27.4.1 Architecture
+
+| Component | Description |
+|-----------|-------------|
+| `GNFamily.Type.IMG` | New enum value. Teal color `(0.3, 0.7, 0.7)` in graph editor. |
+| `GNImageData` | Data class wrapping `Image`. `set_image()`, `resolution`, `format`. Deep-copies on `duplicate_data()`. |
+| `GNImgBase` | Family base class. No SubViewport. `_prepare_image()` helper. TextureRect preview (uploads to ImageTexture on-the-fly). |
+| `@input img` | Annotation support in Script operators. Maps to `GNFamily.Type.IMG`. |
+
+#### 27.4.2 Operators
+
+| Operator | Type | Description |
+|----------|------|-------------|
+| NoiseIMG | Generator | Value noise (FastNoiseLite) or white noise. Mono/RGB, octaves, persistence, seed. |
+| CheckerboardIMG | Generator | 2-color grid. Configurable cells, optional softness (anti-aliased edges). |
+| BlurIMG | Filter | Separable box blur with sliding-window accumulator. Multi-pass for Gaussian approximation. |
+| EdgeDetectIMG | Filter | Sobel or Prewitt 3×3 kernels. Grayscale or color-encoded gradient direction. |
+| PixelSortIMG | Filter | Glitch art pixel sorting. Sort by brightness/hue/saturation/channel. Threshold-controlled spans. |
+| ScriptIMG | Scripting | User GDScript with `@param`/`@input` annotations. Full GNScriptHelper integration. |
+| ImgToTOP | Bridge | Uploads CPU Image to GPU ImageTexture → GNTextureData output. Overrides `execute_cook()` to skip SubViewport logic. |
+
+### 27.5 GNScriptHelper — Shared Infrastructure
+
+`GNScriptHelper` (extends RefCounted) is instantiated per Script operator. It manages:
+
+| Responsibility | Method |
+|----------------|--------|
+| Compilation | `compile(code)` — wraps user code in preamble, `GDScript.new().reload()`, creates instance |
+| Annotation parsing | `parse_param_annotations(code)`, `parse_input_annotations(code)` — regex-based line scanning |
+| Dynamic param rebuild | `rebuild_dynamic_params(node, code)` — diff + preserve + reconnect signals |
+| Dynamic port rebuild | `rebuild_input_ports(node, code)` — diff + emit `ports_changed` |
+| Full code change | `on_code_changed(node, code)` — ports → params → compile (in order) |
+| Context injection + execution | `run_cook(node, inputs, output, engine)` — injects context, calls `setup()` once, calls `cook()` |
+| Preset management | Static `get_preset_list()`, `load_preset()`, `save_preset()` |
+| Save/load support | Static `restore_dynamic_param_values()` |
+
+**Preamble injection:** The preamble extends `RefCounted` and declares `var me`, `var inputs`, `var op`, `var time`, `var frame`, `var dt`, `var _engine`, plus helper functions (`par()`, `chop()`, `op_ref()`, `top()`, `sop()`, `dat()`). The user's code is appended after the preamble.
+
+### 27.6 Presets — Factory & User
+
+**Storage layout:**
+```
+res://addons/gonodes/presets/          # Factory (read-only, ships with addon)
+    scriptchop/
+        sine_waves.gd
+        smooth_channels.gd
+        beat_clock.gd
+    scriptdat/
+        chop_to_table.gd
+        empty_table.gd
+    scriptsop/
+        scatter_points.gd
+        wave_deform.gd
+    scriptimg/
+        gradient.gd
+        cpu_threshold.gd
+
+user://gonodes_presets/                 # User (read-write, created on first save)
+    scriptchop/
+        my_custom_lfo.gd
+    ...
+```
+
+Each preset file is raw user code (annotations + `cook()` + `setup()` + helpers). Pure text, no wrapper.
+
+**UI — Option A (current):** Load/Save buttons in the inspector. Load opens a file dialog scoped to preset directories. Save prompts for a name.
+
+**Roadmap — Option B:** Preset dropdown parameter in inspector, populated by scanning preset directories.
+
+### 27.7 Save/Load
+
+Each Script operator overrides `from_dict()` following the CustomShaderTOP pattern:
+1. `super.from_dict(d)` — restores static params (`code`, `time_dependent`, position, etc.)
+2. `_helper.on_code_changed(self, code)` — recompiles, creates dynamic params + ports
+3. `GNScriptHelper.restore_dynamic_param_values()` — restores dynamic param values from saved dict, skipping static param names
+
+### 27.8 Adding a New Script Family
+
+To add a Script operator for a new family (e.g., ScriptMAT):
+1. Create `script_mat.gd` extending `GNMatBase`
+2. Instantiate `GNScriptHelper` as `_helper`
+3. Set `node_type`, define static params (`time_dependent`, `code`)
+4. In `_cook()`: prepare output via family helper, call `_helper.run_cook()`
+5. Override `from_dict()` with the 3-step pattern above
+6. Create default code template with `@input`/`@param` annotations
+7. Register in `GNExtensionRegistry._register_core_operators()`
+8. Add factory presets to `res://addons/gonodes/presets/scriptmat/`
+
+### 27.9 Planned: ComputeShaderTOP (GPU Compute)
 
 **Status: 🔲 Planned — Long-term**
 
-Uses Godot's `RenderingDevice` compute shader API for massively parallel GPU operations.
+Uses Godot's `RenderingDevice` compute shader API for massively parallel GPU operations. User writes a GLSL compute shader. Framework handles buffer creation, dispatch, and readback.
 
-**Design:**
-- User writes a GLSL compute shader
-- Framework handles buffer creation, dispatch, and readback
-- Useful for: particle simulation, fluid dynamics, image processing at scale
-- Depends on Godot's compute shader stability and RenderingDevice API maturity
+### 27.10 Planned: Generic ScriptNode (Multi-Output)
 
-### 27.7 Planned: ScriptSOP (GDScript SOP)
+**Status: 🔲 Planned — Long-term**
 
-**Status: 🔲 Planned**
+A family-less node with annotated output ports (`# @output chop`, `# @output top`). Would extend `GNNode` directly, get a neutral color in the graph, and return outputs via a dict. The per-family Script operators remain the 90% use case.
 
-Procedural geometry generation/manipulation via GDScript. SOP family and GNGeoData are now implemented. User receives mesh data arrays and returns modified arrays.
+### 27.11 Implementation Priorities
 
-### 27.8 Implementation Priorities
-
-| Priority | Operator | Depends On | Complexity |
-|----------|----------|------------|------------|
-| ✅ Done | CustomShaderTOP | — | Medium |
-| 🥇 Next | ScriptCHOP | GNScriptContext base class | Medium |
-| 🥈 | ScriptDAT | — (DAT family done) | Medium-High |
-| 🥉 | ScriptTOP | — | Low (but slow) |
-| Later | ComputeShaderTOP | RenderingDevice API | High |
-| Later | ScriptSOP | — (SOP family done) | High |
-
-### 27.9 Shared Infrastructure: GNScriptContext
-
-All GDScript-based scriptable operators will share a common base class:
-
-```gdscript
-class_name GNScriptContext extends RefCounted
-## Base class for user-written script contexts.
-## Subclassed dynamically or used via Expression.
-
-var _script_text: String = ""
-var _compiled: bool = false
-var _error: String = ""
-var _last_good_result: Variant = null
-
-func compile(code: String) -> bool:
-    # Parse and validate the GDScript code
-    # Return true on success, false on error
-    pass
-
-func execute(inputs: Array, variables: Dictionary) -> Variant:
-    # Run the compiled code with the given inputs/variables
-    # On error, return _last_good_result (graceful fallback)
-    pass
-```
-
-This gives us:
-- **Consistent error handling** across all script operators
-- **Hot-reload** without restarting
-- **Sandboxing** via controlled variable injection
-- **Caching** of last-good results for smooth failure recovery
-
-### 27.10 UI Considerations for Code Editing
-
-Current string parameters use single-line `LineEdit`. Code-based operators need:
-
-1. **Phase 1 (MVP):** Multi-line `TextEdit` in the inspector for shader/script code. Monospace font, basic syntax highlighting via Godot's `CodeEdit` control.
-2. **Phase 2:** Popup code editor window (resizable, with line numbers, error gutter).
-3. **Phase 3:** Integration with external editor (VS Code) via file-on-disk + file watcher.
-
-**Implementation plan:**
-- Add `ValueType.CODE` to `GNParameter` (or detect `shader_code` / `script_code` param names)
+| Priority | Operator | Status |
+|----------|----------|--------|
+| ✅ Done | CustomShaderTOP | GPU shaders with dynamic uniforms |
+| ✅ Done | ScriptCHOP | GDScript channel generation/processing |
+| ✅ Done | ScriptDAT | GDScript table/text generation/processing |
+| ✅ Done | ScriptSOP | GDScript geometry generation/processing |
+| ✅ Done | ScriptIMG | CPU-side Image manipulation via GDScript |
+| ✅ Done | IMG family | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP |
+| 🔲 Planned | ComputeShaderTOP | GPU compute via RenderingDevice |
+| 🔲 Planned | Generic ScriptNode | Multi-output, family-less |
 
 ---
 

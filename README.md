@@ -208,10 +208,18 @@ addons/gonodes/help/
 ### Next Up (Phase 7: Creative Tools, Performance & Workflow)
 
 **Script Operators:**
-- [ ] ScriptCHOP — user GDScript for custom channel processing (inline or .gd file)
-- [ ] ScriptDAT — user GDScript for table/text processing
-- [ ] ScriptTOP — CPU-side pixel generation via GDScript
-- [ ] ScriptSOP — procedural geometry via GDScript
+- [x] ScriptCHOP — user GDScript for custom channel processing
+- [x] ScriptDAT — user GDScript for table/text processing
+- [x] ScriptIMG — CPU-side pixel generation via GDScript (IMG family)
+- [x] ScriptSOP — procedural geometry via GDScript
+
+**IMG Family (CPU Image Processing):**
+- [x] NoiseIMG — value/white noise generator
+- [x] CheckerboardIMG — 2-color grid pattern
+- [x] BlurIMG — separable box blur filter
+- [x] EdgeDetectIMG — Sobel/Prewitt edge detection
+- [x] PixelSortIMG — glitch art pixel sorting
+- [x] ImgToTOP — CPU Image → GPU Texture bridge
 
 **Media I/O:**
 - [ ] OSC input/output operators (OscInCHOP, OscOutCHOP, complete OscInDAT stub)

@@ -383,6 +383,10 @@ func _register_core_operators() -> void:
 	_reg("DATtoCHOP",       "CHOP", DATtoCHOP,
 		"Convert DAT table to CHOP channels.")
 
+	# ── CHOPs: Scripting ────────────────────────────────────────────────
+	_reg("ScriptCHOP",      "CHOP", ScriptCHOP,
+		"User-scripted CHOP. Write GDScript to generate or transform channel data.")
+
 	# ── SOPs: Generators ────────────────────────────────────────────────
 	_reg("GridSOP",         "SOP", GridSOP,
 		"Subdivided plane with configurable orientation.")
@@ -419,6 +423,10 @@ func _register_core_operators() -> void:
 	_reg("SwitchSOP",       "SOP", SwitchSOP,
 		"Select one of 2 geometry inputs by index.")
 
+	# ── SOPs: Scripting ─────────────────────────────────────────────────
+	_reg("ScriptSOP",       "SOP", ScriptSOP,
+		"User-scripted SOP. Write GDScript to generate or transform 3D geometry.")
+
 	# ── DATs: Generators ────────────────────────────────────────────────
 	_reg("ConstantDAT",     "DAT", ConstantDAT,
 		"Manually editable 4x4 table with column headers.")
@@ -452,6 +460,32 @@ func _register_core_operators() -> void:
 	# ── DATs: Bridge ────────────────────────────────────────────────────
 	_reg("CHOPDAT",         "DAT", CHOPDAT,
 		"Convert CHOP channels to a DAT table.")
+
+	# ── DATs: Scripting ─────────────────────────────────────────────────
+	_reg("ScriptDAT",       "DAT", ScriptDAT,
+		"User-scripted DAT. Write GDScript to generate or transform table/text data.")
+
+	# ── IMGs: Generators ─────────────────────────────────────────────────
+	_reg("NoiseIMG",        "IMG", NoiseIMG,
+		"CPU procedural noise image (value noise, white noise).")
+	_reg("CheckerboardIMG", "IMG", CheckerboardIMG,
+		"CPU checkerboard pattern generator.")
+
+	# ── IMGs: Filters ───────────────────────────────────────────────────
+	_reg("BlurIMG",         "IMG", BlurIMG,
+		"CPU box blur filter. Separable horizontal/vertical passes.")
+	_reg("EdgeDetectIMG",   "IMG", EdgeDetectIMG,
+		"CPU edge detection (Sobel / Prewitt). Outputs grayscale edges.")
+	_reg("PixelSortIMG",    "IMG", PixelSortIMG,
+		"CPU pixel sorting glitch effect (sort pixel spans by brightness/hue).")
+
+	# ── IMGs: Scripting ─────────────────────────────────────────────────
+	_reg("ScriptIMG",       "IMG", ScriptIMG,
+		"User-scripted IMG. Write GDScript to generate or transform CPU Images.")
+
+	# ── IMGs: Bridge ────────────────────────────────────────────────────
+	_reg("ImgToTOP",        "IMG", ImgToTOP,
+		"Convert IMG (CPU Image) to TOP (GPU Texture). Bridge operator.")
 
 	# ── COMPs ───────────────────────────────────────────────────────────
 	_reg("GeometryCOMP",    "COMP", GeometryCOMP,

@@ -1,0 +1,594 @@
+class_name GNScriptHelper
+extends RefCounted
+## Shared infrastructure for all Script operators (ScriptCHOP, ScriptDAT,
+## ScriptSOP, ScriptIMG).  Provides:
+##   • Runtime GDScript compilation with preamble injection
+##   • @param / @input annotation parsing for dynamic params and ports
+##   • Context injection (me, inputs, op, time, frame, dt, helpers)
+##   • setup() and cook() dispatch with error handling
+##   • Preset load/save (factory + user directories)
+##
+## Each Script operator holds a GNScriptHelper instance.  The operator's
+## _cook() delegates to helper.run_cook() which manages the full lifecycle.
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Constants
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Annotation regex:  # @param <type> <name> <default> <description...>
+## Groups: 1=type, 2=name, 3=default, 4=description (optional)
+static var _param_regex: RegEx = null
+
+## Input annotation regex:  # @input <family> <description...>
+## Groups: 1=family, 2=description (optional)
+static var _input_regex: RegEx = null
+
+## Maps annotation type names to GNParameter.ValueType.
+const _TYPE_MAP: Dictionary = {
+	"float":  GNParameter.ValueType.FLOAT,
+	"int":    GNParameter.ValueType.INT,
+	"bool":   GNParameter.ValueType.BOOL,
+	"color":  GNParameter.ValueType.COLOR,
+	"vec2":   GNParameter.ValueType.VECTOR2,
+	"vec2i":  GNParameter.ValueType.VECTOR2I,
+	"string": GNParameter.ValueType.STRING,
+	"file":   GNParameter.ValueType.FILE,
+}
+
+## Maps family annotation strings to GNFamily.Type.
+const _FAMILY_MAP: Dictionary = {
+	"top":  GNFamily.Type.TOP,
+	"img":  GNFamily.Type.IMG,
+	"chop": GNFamily.Type.CHOP,
+	"dat":  GNFamily.Type.DAT,
+	"sop":  GNFamily.Type.SOP,
+	"comp": GNFamily.Type.COMP,
+	"mat":  GNFamily.Type.MAT,
+}
+
+## Preamble injected before user code.  Provides context variables and helper
+## methods so the user script can call par(), chop(), op(), etc.
+const _PREAMBLE := """extends RefCounted
+
+# ─── Injected context (set by GNScriptHelper before each cook) ───
+var me: GNNode = null
+var inputs: Array = []
+var op = null
+var time: float = 0.0
+var frame: int = 0
+var dt: float = 0.0
+var _engine = null
+
+func par(p_name: String) -> Variant:
+	if me == null:
+		return null
+	return me.get_param_value(p_name)
+
+func chop(id: String, chan: String = "", index: int = -1) -> Variant:
+	if _engine == null:
+		return 0.0
+	return _engine.chop(id, chan, index)
+
+func op_ref(id: String, param_name: String = "") -> Variant:
+	if _engine == null:
+		return 0.0
+	return _engine.op(id, param_name)
+
+func top(id: String, property: String = "") -> Variant:
+	if _engine == null:
+		return 0.0
+	return _engine.top(id, property)
+
+func sop(id: String) -> Variant:
+	if _engine == null:
+		return null
+	return _engine.sop(id)
+
+func dat(id: String, row = null, col = null) -> Variant:
+	if _engine == null:
+		return null
+	return _engine.dat(id, row, col)
+
+# ─── USER CODE BELOW ──────────────────────────────────────
+"""
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Instance State
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## The compiled GDScript resource.
+var _script: GDScript = null
+
+## The live instance of the compiled script (reused across frames).
+var _instance: RefCounted = null
+
+## Last successfully compiled code (skip recompile when unchanged).
+var _last_compiled_code: String = ""
+
+## Whether the current script compiled and loaded successfully.
+var script_ok: bool = false
+
+## Compilation error message (empty if OK).
+var compile_error: String = ""
+
+## Names of dynamically created parameters from @param annotations.
+var dynamic_param_names: PackedStringArray = PackedStringArray()
+
+## Parsed input annotations from the last compile.
+var parsed_inputs: Array = []  # Array of { "family": GNFamily.Type, "desc": String }
+
+## Whether setup() has been called on the current instance.
+var _setup_done: bool = false
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Regex Initialization
+# ═══════════════════════════════════════════════════════════════════════════════
+
+static func _ensure_regex() -> void:
+	if _param_regex == null:
+		_param_regex = RegEx.new()
+		# Groups: 1=type, 2=name, 3=default_value, 4=description
+		_param_regex.compile("^#\\s*@param\\s+(\\w+)\\s+(\\w+)\\s+(\\S+)(?:\\s+(.*))?$")
+	if _input_regex == null:
+		_input_regex = RegEx.new()
+		# Groups: 1=family, 2=description
+		_input_regex.compile("^#\\s*@input\\s+(\\w+)(?:\\s+(.*))?$")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Compilation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Compiles user code into a GDScript class.  Returns true on success.
+## On failure, sets compile_error and keeps the old instance alive.
+func compile(code: String) -> bool:
+	if code == _last_compiled_code and script_ok:
+		return true  # Already compiled this exact code
+
+	_last_compiled_code = code
+	_setup_done = false
+
+	if code.strip_edges().is_empty():
+		compile_error = "Empty script"
+		script_ok = false
+		return false
+
+	# Build full source: preamble + user code
+	var full_source: String = _PREAMBLE + code
+
+	var new_script := GDScript.new()
+	new_script.source_code = full_source
+
+	# Attempt compilation
+	var err := new_script.reload()
+	if err != OK:
+		compile_error = "Compilation failed (error %d). Check script syntax." % err
+		GNLogger.error("ScriptHelper", compile_error)
+		script_ok = false
+		return false
+
+	# Create instance
+	var new_instance = new_script.new()
+	if new_instance == null:
+		compile_error = "Failed to instantiate compiled script"
+		GNLogger.error("ScriptHelper", compile_error)
+		script_ok = false
+		return false
+
+	# Verify cook() method exists
+	if not new_instance.has_method("cook"):
+		compile_error = "Script must define a cook() function"
+		GNLogger.error("ScriptHelper", compile_error)
+		script_ok = false
+		return false
+
+	_script = new_script
+	_instance = new_instance
+	script_ok = true
+	compile_error = ""
+	return true
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Context Injection & Execution
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Injects context variables into the script instance and calls cook().
+## Returns true if cook() executed without errors.
+func run_cook(node: GNNode, inputs: Array[GNData], output: Variant,
+		engine: Node) -> bool:
+	if not script_ok or _instance == null:
+		return false
+
+	# Inject context
+	_instance.me = node
+	_instance.inputs = inputs
+	_instance.op = output
+	_instance.time = engine.elapsed_time
+	_instance.frame = engine.frame_count
+	_instance.dt = engine.current_delta
+	_instance._engine = engine
+
+	# Run setup() once after compilation
+	if not _setup_done and _instance.has_method("setup"):
+		_setup_done = true
+		var setup_err := _safe_call(_instance, "setup", node)
+		if not setup_err.is_empty():
+			GNLogger.error("ScriptHelper", "'%s' setup() error: %s" % [node.id, setup_err])
+
+	# Run cook()
+	var cook_err := _safe_call(_instance, "cook", node)
+	if not cook_err.is_empty():
+		GNLogger.error("ScriptHelper", "'%s' cook() error: %s" % [node.id, cook_err])
+		return false
+
+	return true
+
+
+## Safely calls a method on the instance, catching runtime errors.
+## Returns empty string on success, or the error message on failure.
+static func _safe_call(instance: RefCounted, method: String, node: GNNode) -> String:
+	# GDScript doesn't have try/catch, but we can check for common issues.
+	# Runtime errors in Godot 4.x will print to console but won't crash.
+	# We rely on Godot's built-in error reporting for now.
+	if instance.has_method(method):
+		instance.call(method)
+		return ""
+	return "Method '%s' not found" % method
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Annotation Parsing — @param
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Parsed parameter annotation record.
+class ParamAnnotation:
+	var param_name: String
+	var type_name: String
+	var value_type: GNParameter.ValueType
+	var default_value: Variant
+	var description: String
+
+	func _init(p_name: String, p_type_name: String, p_value_type: GNParameter.ValueType,
+			p_default: Variant, p_desc: String) -> void:
+		param_name = p_name
+		type_name = p_type_name
+		value_type = p_value_type
+		default_value = p_default
+		description = p_desc
+
+
+## Parses @param annotations from user code.
+## Returns Array[ParamAnnotation] in declaration order.
+static func parse_param_annotations(code: String) -> Array:
+	_ensure_regex()
+	var result: Array = []
+	for line in code.split("\n"):
+		var stripped := line.strip_edges()
+		var m := _param_regex.search(stripped)
+		if m == null:
+			continue
+		var type_name: String = m.get_string(1).to_lower()
+		var param_name: String = m.get_string(2)
+		var default_str: String = m.get_string(3)
+		var desc: String = m.get_string(4).strip_edges() if m.get_string(4) != "" else ""
+
+		if not _TYPE_MAP.has(type_name):
+			GNLogger.warn("ScriptHelper", "Unknown @param type '%s' for '%s'" % [type_name, param_name])
+			continue
+
+		var value_type: GNParameter.ValueType = _TYPE_MAP[type_name]
+		var default_value: Variant = _parse_default(type_name, default_str)
+
+		result.append(ParamAnnotation.new(param_name, type_name, value_type,
+			default_value, desc))
+	return result
+
+
+## Converts a default value string to the appropriate Variant.
+static func _parse_default(type_name: String, default_str: String) -> Variant:
+	match type_name:
+		"float":
+			return default_str.to_float() if default_str.is_valid_float() else 0.0
+		"int":
+			return default_str.to_int() if default_str.is_valid_int() else 0
+		"bool":
+			return default_str.to_lower() == "true"
+		"color":
+			return Color.from_string(default_str, Color.WHITE)
+		"vec2":
+			var parts := default_str.split(",")
+			if parts.size() >= 2:
+				return Vector2(parts[0].strip_edges().to_float(),
+					parts[1].strip_edges().to_float())
+			return Vector2(default_str.to_float(), default_str.to_float())
+		"vec2i":
+			var parts := default_str.split(",")
+			if parts.size() >= 2:
+				return Vector2i(parts[0].strip_edges().to_int(),
+					parts[1].strip_edges().to_int())
+			return Vector2i(default_str.to_int(), default_str.to_int())
+		"string":
+			# Strip surrounding quotes if present
+			if default_str.begins_with("\"") and default_str.ends_with("\""):
+				return default_str.substr(1, default_str.length() - 2)
+			return default_str
+		"file":
+			return ""
+	return null
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Annotation Parsing — @input
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Parsed input annotation record.
+class InputAnnotation:
+	var family: GNFamily.Type
+	var description: String
+
+	func _init(p_family: GNFamily.Type, p_desc: String) -> void:
+		family = p_family
+		description = p_desc
+
+
+## Parses @input annotations from user code.
+## Returns Array[InputAnnotation] in declaration order.
+static func parse_input_annotations(code: String) -> Array:
+	_ensure_regex()
+	var result: Array = []
+	for line in code.split("\n"):
+		var stripped := line.strip_edges()
+		var m := _input_regex.search(stripped)
+		if m == null:
+			continue
+		var family_name: String = m.get_string(1).to_lower()
+		var desc: String = m.get_string(2).strip_edges() if m.get_string(2) != "" else ""
+
+		if not _FAMILY_MAP.has(family_name):
+			GNLogger.warn("ScriptHelper", "Unknown @input family '%s'" % family_name)
+			continue
+
+		var family_type: GNFamily.Type = _FAMILY_MAP[family_name]
+		if desc.is_empty():
+			desc = "%s input %d" % [family_name.to_upper(), result.size()]
+
+		result.append(InputAnnotation.new(family_type, desc))
+	return result
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Dynamic Parameter Rebuild
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Removes old dynamic params, creates new ones from @param annotations,
+## preserving values that match by name + type.  Mirrors CustomShaderTOP pattern.
+## Returns true if parameters changed.
+func rebuild_dynamic_params(node: GNNode, code: String) -> bool:
+	var annotations: Array = parse_param_annotations(code)
+
+	# Check if anything changed
+	var new_names := PackedStringArray()
+	for ann in annotations:
+		new_names.append((ann as ParamAnnotation).param_name)
+	if new_names == dynamic_param_names:
+		return false  # No structural change
+
+	# Snapshot old values for preservation
+	var old_values: Dictionary = {}
+	for p_name in dynamic_param_names:
+		var param := node.get_parameter(p_name)
+		if param != null:
+			old_values[p_name] = { "value": param.value, "type": param.value_type }
+
+	# Remove old dynamic params
+	for p_name in dynamic_param_names:
+		if node.parameters.has(p_name):
+			var param: GNParameter = node.parameters[p_name]
+			if param.value_changed.is_connected(node._on_parameter_changed):
+				param.value_changed.disconnect(node._on_parameter_changed)
+			if param.mode_changed.is_connected(node._on_parameter_mode_changed):
+				param.mode_changed.disconnect(node._on_parameter_mode_changed)
+			node.parameters.erase(p_name)
+	dynamic_param_names.clear()
+
+	# Create new params from annotations
+	for ann in annotations:
+		var a: ParamAnnotation = ann as ParamAnnotation
+		var param: GNParameter = _create_param_from_annotation(a)
+		if param == null:
+			continue
+
+		# Restore previous value if same name + type
+		if old_values.has(a.param_name):
+			var old: Dictionary = old_values[a.param_name]
+			if old["type"] == a.value_type:
+				param.value = old["value"]
+				param.resolved_value = old["value"]
+
+		node.add_parameter(param)
+		param.value_changed.connect(node._on_parameter_changed)
+		param.mode_changed.connect(node._on_parameter_mode_changed)
+		dynamic_param_names.append(a.param_name)
+
+	GNLogger.info("ScriptHelper", "'%s' dynamic params → %s" % [node.id, str(dynamic_param_names)])
+	node.parameters_changed.emit(node.id)
+	return true
+
+
+## Creates a GNParameter from a ParamAnnotation.
+static func _create_param_from_annotation(ann: ParamAnnotation) -> GNParameter:
+	var desc: String = ann.description if not ann.description.is_empty() \
+		else "Script param '%s'" % ann.param_name
+	match ann.type_name:
+		"float":
+			return GNParameter.create_float(ann.param_name, ann.default_value,
+				null, null, 0.01, "", desc)
+		"int":
+			return GNParameter.create_int(ann.param_name, ann.default_value,
+				null, null, "", desc)
+		"bool":
+			return GNParameter.create_bool(ann.param_name, ann.default_value, "", desc)
+		"color":
+			return GNParameter.create_color(ann.param_name, ann.default_value, "", desc)
+		"vec2":
+			return GNParameter.create_vector2(ann.param_name, ann.default_value, "", desc)
+		"vec2i":
+			return GNParameter.create_vector2i(ann.param_name, ann.default_value, "", desc)
+		"string":
+			return GNParameter.create_string(ann.param_name, ann.default_value, "", desc)
+		"file":
+			return GNParameter.create_file(ann.param_name, "",
+				PackedStringArray(["*.*"]), "", desc)
+	return null
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Dynamic Port Rebuild
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Rebuilds input ports from @input annotations.  Returns true if ports changed.
+func rebuild_input_ports(node: GNNode, code: String) -> bool:
+	var annotations: Array = parse_input_annotations(code)
+
+	# Check if anything changed
+	if annotations.size() == parsed_inputs.size():
+		var same := true
+		for i in range(annotations.size()):
+			var new_ann: InputAnnotation = annotations[i] as InputAnnotation
+			var old_ann: InputAnnotation = parsed_inputs[i] as InputAnnotation
+			if new_ann.family != old_ann.family or new_ann.description != old_ann.description:
+				same = false
+				break
+		if same:
+			return false
+
+	parsed_inputs = annotations
+
+	# Rebuild ports
+	node.input_ports.clear()
+	for i in range(annotations.size()):
+		var ann: InputAnnotation = annotations[i] as InputAnnotation
+		var family_str: String = GNFamily.get_family_name(ann.family).to_lower()
+		node.add_input("in%d" % i, ann.family, false, ann.description)
+	GNLogger.info("ScriptHelper", "'%s' input ports → %d (from @input annotations)" % [
+		node.id, annotations.size()])
+	node.ports_changed.emit(node.id)
+	return true
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Full Code Change Handler
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Called when the user's code text changes.  Handles the full lifecycle:
+## 1. Parse annotations → rebuild ports and params
+## 2. Compile the new code
+## 3. Returns true if compilation succeeded
+func on_code_changed(node: GNNode, code: String) -> bool:
+	rebuild_input_ports(node, code)
+	rebuild_dynamic_params(node, code)
+	return compile(code)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Preset Management
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Factory presets directory (read-only, ships with addon).
+const FACTORY_PRESET_DIR := "res://addons/gonodes/presets/"
+
+## User presets directory (read-write, created on first save).
+const USER_PRESET_DIR := "user://gonodes_presets/"
+
+
+## Returns all available preset names for a given family.
+## Returns Array of { "name": String, "path": String, "is_factory": bool }.
+static func get_preset_list(family_folder: String) -> Array:
+	var result: Array = []
+
+	# Factory presets
+	var factory_path := FACTORY_PRESET_DIR + family_folder
+	_scan_preset_dir(factory_path, true, result)
+
+	# User presets
+	var user_path := USER_PRESET_DIR + family_folder
+	_scan_preset_dir(user_path, false, result)
+
+	return result
+
+
+## Scans a directory for .gd preset files.
+static func _scan_preset_dir(dir_path: String, is_factory: bool, result: Array) -> void:
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var fname := dir.get_next()
+	while fname != "":
+		if not dir.current_is_dir() and fname.ends_with(".gd"):
+			var preset_name := fname.get_basename()
+			result.append({
+				"name": preset_name,
+				"path": dir_path + "/" + fname,
+				"is_factory": is_factory,
+			})
+		fname = dir.get_next()
+	dir.list_dir_end()
+
+
+## Loads a preset file and returns its code text, or empty string on failure.
+static func load_preset(file_path: String) -> String:
+	if not FileAccess.file_exists(file_path):
+		GNLogger.warn("ScriptHelper", "Preset not found: %s" % file_path)
+		return ""
+	var file := FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		GNLogger.warn("ScriptHelper", "Cannot open preset: %s" % file_path)
+		return ""
+	var code := file.get_as_text()
+	file.close()
+	return code
+
+
+## Saves user code as a preset.  Creates directories if needed.
+## Returns true on success.
+static func save_preset(family_folder: String, preset_name: String,
+		code: String) -> bool:
+	var dir_path := USER_PRESET_DIR + family_folder
+	# Ensure directory exists
+	if not DirAccess.dir_exists_absolute(dir_path):
+		var err := DirAccess.make_dir_recursive_absolute(dir_path)
+		if err != OK:
+			GNLogger.error("ScriptHelper",
+				"Cannot create preset directory: %s (error %d)" % [dir_path, err])
+			return false
+	var file_path := dir_path + "/" + preset_name + ".gd"
+	var file := FileAccess.open(file_path, FileAccess.WRITE)
+	if file == null:
+		GNLogger.error("ScriptHelper",
+			"Cannot write preset: %s" % file_path)
+		return false
+	file.store_string(code)
+	file.close()
+	GNLogger.info("ScriptHelper", "Saved preset: %s" % file_path)
+	return true
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Save / Load Support
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Restores dynamic params from a saved dict AFTER recompilation has created them.
+## Call from operator's from_dict() override, after super.from_dict() and on_code_changed().
+static func restore_dynamic_param_values(node: GNNode, params_dict: Dictionary,
+		static_param_names: PackedStringArray) -> void:
+	for param_name in params_dict:
+		if param_name in static_param_names:
+			continue  # Already restored by super.from_dict()
+		var param: GNParameter = node.parameters.get(param_name, null)
+		if param != null:
+			param.from_dict(params_dict[param_name])
