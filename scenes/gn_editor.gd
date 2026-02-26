@@ -419,6 +419,32 @@ func _setup_toolbar() -> void:
 	info_bar.add_child(btn_stress)
 	info_bar.move_child(btn_stress, 8)
 
+	# Separator before graph-view tools
+	var sep2 := VSeparator.new()
+	info_bar.add_child(sep2)
+	info_bar.move_child(sep2, 9)
+
+	# Minimap toggle
+	var minimap_toggle := CheckButton.new()
+	minimap_toggle.text = "Minimap"
+	minimap_toggle.tooltip_text = "Show / hide minimap (M)"
+	minimap_toggle.button_pressed = graph_editor.minimap_enabled
+	minimap_toggle.toggled.connect(func(on: bool):
+		graph_editor.minimap_enabled = on)
+	info_bar.add_child(minimap_toggle)
+	info_bar.move_child(minimap_toggle, 10)
+
+	# Wire style OptionButton
+	var wire_opt := OptionButton.new()
+	wire_opt.tooltip_text = "Wire style (W to cycle)"
+	for wn in GNGraphEditor._WIRE_STYLE_NAMES:
+		wire_opt.add_item(wn)
+	wire_opt.selected = 0
+	wire_opt.item_selected.connect(func(idx: int):
+		graph_editor.set_wire_style(idx))
+	info_bar.add_child(wire_opt)
+	info_bar.move_child(wire_opt, 11)
+
 
 ## Keyboard shortcuts for file operations.
 func _unhandled_key_input(event: InputEvent) -> void:

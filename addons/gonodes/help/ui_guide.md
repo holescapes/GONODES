@@ -39,6 +39,19 @@ mouse interaction, and inspector control in the GONODES editor.
 | **F**    | **Fit to view** — zooms and pans to frame the selected nodes (or the entire graph if nothing is selected). |
 | **H**    | **Align Horizontal** — moves 2+ selected nodes so they share the same vertical center (average Y). |
 | **V**    | **Align Vertical** — moves 2+ selected nodes so they share the same horizontal center (average X). |
+| **M**    | **Minimap** toggle — show/hide the corner minimap. |
+| **W**    | **Wire style** — cycle through Curved → Straight → Right-Angle wire rendering. |
+| **?** (Shift+/) | **Shortcut reference card** — show/hide the keyboard shortcuts overlay. Press ? or Escape to dismiss. |
+
+### Node Bookmarks
+
+| Shortcut       | Action                                                     |
+|----------------|-------------------------------------------------------------|
+| **Ctrl + 1-9** | Set a **bookmark** on the currently selected single node.   |
+| **1-9**        | Jump to the bookmarked node (selects & centers it in view). |
+
+Bookmarked nodes display a small blue numbered badge. Up to 9 bookmarks are
+available per session. Re-assigning a slot replaces the previous bookmark.
 
 ---
 
@@ -92,6 +105,16 @@ Greyed-out items require a selection, clipboard content, or ≥2 nodes.
 | **Align Vertical** | —               | Align selected nodes to same X (needs 2+)          |
 | **Node Help**      | —               | Open help window (needs exactly 1 node selected)   |
 
+### Quick-Access Keys (not in context menu)
+
+| Key       | Action                            |
+|-----------|-----------------------------------|
+| **M**     | Toggle minimap                    |
+| **W**     | Cycle wire style                  |
+| **?**     | Show shortcut reference card      |
+| **1-9**   | Jump to bookmark                  |
+| **Ctrl + 1-9** | Set bookmark on selected node |
+
 ---
 
 ## Toolbar (Info Bar)
@@ -108,6 +131,8 @@ The toolbar runs across the bottom of the editor. From left to right:
 | **Perf** ☑         | Show/hide per-node cook-time overlay (ms + warning badges)    |
 | **+ Viewer**       | Open a floating viewer window for the currently viewed TOP    |
 | **Stress Test**    | Generate a 55+ node test network for benchmarking             |
+| **Minimap** ☑      | Show/hide the corner minimap (same as M key)                  |
+| **Wire style** ▾   | Dropdown: Curved / Straight / Right-Angle (same as W key)     |
 | *(Info label)*     | Displays: FPS, frame count, cook time (ms), node count, viewed node ID |
 
 ---
@@ -211,13 +236,15 @@ referenced node.
 
 ## Graph Navigation
 
-| Feature              | Details                                              |
-|----------------------|------------------------------------------------------|
-| **Minimap**          | 200×150px minimap in the corner (built-in GraphEdit) |
-| **Zoom range**       | 0.25× to 2.5× (scroll wheel, step 0.1)              |
-| **Default zoom**     | 0.8×                                                 |
-| **Snap grid**        | 20px grid snapping (enabled by default)              |
-| **Fit to view (F)**  | Frames selected nodes or all nodes with padding      |
+| Feature              | Details                                                  |
+|----------------------|----------------------------------------------------------|
+| **Minimap**          | 200×150px minimap in the corner (toggle with M or toolbar) |
+| **Zoom range**       | 0.25× to 2.5× (scroll wheel, step 0.1)                  |
+| **Default zoom**     | 0.8×                                                     |
+| **Snap grid**        | 20px grid snapping (enabled by default)                  |
+| **Fit to view (F)**  | Frames selected nodes or all nodes with padding          |
+| **Bookmarks (1-9)**  | Ctrl+# to set, # to jump — instant node navigation      |
+| **Wire styles (W)**  | Curved (default), Straight, or Right-Angle connections   |
 
 ---
 
@@ -240,9 +267,20 @@ Open with **Alt + A** or **right-click → Add Node…**
 | Drag from input port → empty space  | Disconnect (right-disconnects mode) |
 | Right-drag from connected input     | Disconnect the wire                 |
 | Delete a node                       | All connected wires are removed     |
+| Press **W**                         | Cycle wire style (Curved → Straight → Right-Angle) |
 
 Wires are type-checked — you can only connect ports of matching families
 (CHOP→CHOP, TOP→TOP, etc.). Invalid connections are silently rejected.
+
+### Wire Styles
+
+| Style          | Curvature | Description                              |
+|----------------|-----------|------------------------------------------|
+| **Curved**     | 0.5       | Default smooth Bézier curves             |
+| **Straight**   | 0.0       | Direct line from port to port            |
+| **Right-Angle**| 1.5       | Sharp bend for schematic-style wiring    |
+
+Toggle from the toolbar dropdown or press **W** to cycle.
 
 ---
 

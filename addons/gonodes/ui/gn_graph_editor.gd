@@ -58,6 +58,15 @@ var _pre_move_positions: Dictionary = {}
 ## Whether expression reference lines are visible.
 var expr_refs_visible: bool = true
 
+## Shortcut reference overlay panel (toggled by ?).
+var _shortcut_overlay: PanelContainer = null
+
+## Node bookmarks: key 1-9 → node_id string.
+var _bookmarks: Dictionary = {}
+
+## Wire curvature mode: 0=curved, 1=straight, 2=right-angle.
+var _wire_style: int = 0
+
 ## Cached expression references: { from_node_id: [to_node_id, ...] }
 var _expr_refs: Dictionary = {}
 
@@ -153,6 +162,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				KEY_Y:
 					redo_action()
 					get_viewport().set_input_as_handled()
+				KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
+					set_bookmark(event.keycode - KEY_0)
+					get_viewport().set_input_as_handled()
 		elif not event.ctrl_pressed and not event.alt_pressed:
 			match event.keycode:
 				KEY_B:
@@ -169,6 +181,25 @@ func _unhandled_key_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 				KEY_V:
 					_align_selected_vertical()
+					get_viewport().set_input_as_handled()
+				KEY_M:
+					minimap_enabled = not minimap_enabled
+					GNLogger.info("GraphEditor", "Minimap %s" % ("ON" if minimap_enabled else "OFF"))
+					get_viewport().set_input_as_handled()
+				KEY_W:
+					cycle_wire_style()
+					get_viewport().set_input_as_handled()
+				KEY_SLASH:
+					if event.shift_pressed:
+						toggle_shortcut_overlay()
+						get_viewport().set_input_as_handled()
+				KEY_ESCAPE:
+					if _shortcut_overlay != null:
+						_shortcut_overlay.queue_free()
+						_shortcut_overlay = null
+						get_viewport().set_input_as_handled()
+				KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
+					jump_to_bookmark(event.keycode - KEY_0)
 					get_viewport().set_input_as_handled()
 
 
@@ -1066,6 +1097,224 @@ func cut_selected() -> void:
 func duplicate_selected() -> void:
 	copy_selected()
 	paste_clipboard()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Shortcut Reference Overlay
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Toggles the shortcut reference overlay (? key).
+func toggle_shortcut_overlay() -> void:
+	if _shortcut_overlay != null:
+		_shortcut_overlay.queue_free()
+		_shortcut_overlay = null
+		return
+
+	_shortcut_overlay = PanelContainer.new()
+	_shortcut_overlay.name = "ShortcutOverlay"
+	_shortcut_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	# Semi-transparent dark background
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.08, 0.12, 0.92)
+	style.corner_radius_top_left = 10
+	style.corner_radius_top_right = 10
+	style.corner_radius_bottom_left = 10
+	style.corner_radius_bottom_right = 10
+	style.content_margin_left = 24
+	style.content_margin_right = 24
+	style.content_margin_top = 18
+	style.content_margin_bottom = 18
+	_shortcut_overlay.add_theme_stylebox_override("panel", style)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 4)
+	_shortcut_overlay.add_child(vbox)
+
+	# Title
+	var title := Label.new()
+	title.text = "Keyboard Shortcuts"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", Color(0.9, 0.85, 0.55))
+	vbox.add_child(title)
+
+	var sep_top := HSeparator.new()
+	vbox.add_child(sep_top)
+
+	# Build shortcut table
+	var shortcuts: Array[Array] = [
+		["─── Navigation ───", ""],
+		["Alt + A", "Open Node Palette"],
+		["F", "Fit View to Selection"],
+		["M", "Toggle Minimap"],
+		["?", "Toggle This Overlay"],
+		["1-9", "Jump to Bookmark"],
+		["Ctrl + 1-9", "Set Bookmark"],
+		["─── Editing ───", ""],
+		["Ctrl + C", "Copy"],
+		["Ctrl + X", "Cut"],
+		["Ctrl + V", "Paste"],
+		["Ctrl + D", "Duplicate"],
+		["Delete", "Delete Selected"],
+		["Ctrl + A", "Select All"],
+		["Ctrl + Z", "Undo"],
+		["Ctrl + Y", "Redo"],
+		["─── Node Control ───", ""],
+		["B", "Toggle Bypass"],
+		["L", "Toggle Lock"],
+		["H", "Align Horizontally"],
+		["V", "Align Vertically"],
+		["W", "Cycle Wire Style"],
+		["─── File ───", ""],
+		["Ctrl + N", "New Patch"],
+		["Ctrl + O", "Open Patch"],
+		["Ctrl + S", "Save Patch"],
+		["Ctrl + Shift + S", "Save Patch As…"],
+	]
+
+	for entry in shortcuts:
+		var key_str: String = entry[0]
+		var desc: String = entry[1]
+
+		if desc == "":
+			# Section header
+			var header := Label.new()
+			header.text = key_str
+			header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			header.add_theme_font_size_override("font_size", 13)
+			header.add_theme_color_override("font_color", Color(0.6, 0.75, 1.0))
+			vbox.add_child(header)
+		else:
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 12)
+
+			var key_label := Label.new()
+			key_label.text = key_str
+			key_label.custom_minimum_size.x = 160
+			key_label.add_theme_font_size_override("font_size", 13)
+			key_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.95))
+			row.add_child(key_label)
+
+			var desc_label := Label.new()
+			desc_label.text = desc
+			desc_label.add_theme_font_size_override("font_size", 13)
+			desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
+			row.add_child(desc_label)
+
+			vbox.add_child(row)
+
+	var hint := Label.new()
+	hint.text = "Press ? or Escape to close"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override("font_size", 11)
+	hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	vbox.add_child(hint)
+
+	add_child(_shortcut_overlay)
+
+	# Center the overlay
+	await get_tree().process_frame
+	if is_instance_valid(_shortcut_overlay):
+		_shortcut_overlay.position = (size - _shortcut_overlay.size) / 2
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Wire Style
+# ═══════════════════════════════════════════════════════════════════════════════
+
+const _WIRE_CURVATURES: Array[float] = [0.5, 0.0, 1.5]
+const _WIRE_STYLE_NAMES: Array[String] = ["Curved", "Straight", "Right-Angle"]
+
+## Cycles through wire styles: curved → straight → right-angle.
+func cycle_wire_style() -> void:
+	_wire_style = (_wire_style + 1) % _WIRE_CURVATURES.size()
+	connection_lines_curvature = _WIRE_CURVATURES[_wire_style]
+	queue_redraw()
+	GNLogger.info("GraphEditor", "Wire style: %s" % _WIRE_STYLE_NAMES[_wire_style])
+
+## Sets the wire style by index (0=curved, 1=straight, 2=right-angle).
+func set_wire_style(idx: int) -> void:
+	_wire_style = clampi(idx, 0, _WIRE_CURVATURES.size() - 1)
+	connection_lines_curvature = _WIRE_CURVATURES[_wire_style]
+	queue_redraw()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Node Bookmarks
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Sets a bookmark (Ctrl+1-9) for the currently selected single node.
+func set_bookmark(slot: int) -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1:
+		GNLogger.warn("GraphEditor", "Select exactly one node to set a bookmark")
+		return
+	var node_id: String = selected[0]
+	_bookmarks[slot] = node_id
+	# Update visual badge on the node view
+	if _node_views.has(node_id):
+		_update_bookmark_badge(node_id, slot)
+	GNLogger.info("GraphEditor", "Bookmark %d → %s" % [slot, node_id])
+
+
+## Jumps to a bookmarked node (key 1-9).
+func jump_to_bookmark(slot: int) -> void:
+	if not _bookmarks.has(slot):
+		GNLogger.info("GraphEditor", "No bookmark set for %d" % slot)
+		return
+	var node_id: String = _bookmarks[slot]
+	if not _node_views.has(node_id):
+		GNLogger.warn("GraphEditor", "Bookmark %d: node '%s' no longer exists" % [slot, node_id])
+		_bookmarks.erase(slot)
+		return
+	var view: GNNodeView = _node_views[node_id]
+	# Deselect all, select the bookmarked node
+	for vn in _node_views:
+		_node_views[vn].selected = false
+	view.selected = true
+	# Center view on the node
+	scroll_offset = view.position_offset * zoom - size / 2 + view.size * zoom / 2
+	GNLogger.info("GraphEditor", "Jumped to bookmark %d → %s" % [slot, node_id])
+
+
+## Draws or removes a small numbered badge on a bookmarked node view.
+func _update_bookmark_badge(node_id: String, slot: int) -> void:
+	if not _node_views.has(node_id):
+		return
+	var view: GNNodeView = _node_views[node_id]
+	# Remove existing badge if any
+	var existing: Node = view.find_child("BookmarkBadge", false, false)
+	if existing:
+		existing.queue_free()
+	# Add new badge
+	var badge := Label.new()
+	badge.name = "BookmarkBadge"
+	badge.text = str(slot)
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.add_theme_font_size_override("font_size", 11)
+	badge.add_theme_color_override("font_color", Color.WHITE)
+	badge.custom_minimum_size = Vector2(18, 18)
+
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.2, 0.55, 1.0, 0.85)
+	bg.corner_radius_top_left = 9
+	bg.corner_radius_top_right = 9
+	bg.corner_radius_bottom_left = 9
+	bg.corner_radius_bottom_right = 9
+	badge.add_theme_stylebox_override("normal", bg)
+
+	view.add_child(badge)
+	badge.position = Vector2(view.size.x - 22, 2)
+
+
+## Clears bookmark badge from a node when the bookmark is reassigned.
+func _clear_bookmark_badge(node_id: String) -> void:
+	if not _node_views.has(node_id):
+		return
+	var existing: Node = _node_views[node_id].find_child("BookmarkBadge", false, false)
+	if existing:
+		existing.queue_free()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

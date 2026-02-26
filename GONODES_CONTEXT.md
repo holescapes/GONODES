@@ -971,12 +971,12 @@ GONODES/
   - Render inline preview thumbnails at ¼ or ½ res.
   - Full resolution only for the active viewer output and WindowTOPs.
 - [x] **Keyboard shortcuts & workflow polish** (partial — core features done):
-  - [ ] Consistent shortcut reference card (help overlay, '?' key).
+  - [x] Consistent shortcut reference card (help overlay, '?' key — semi-transparent overlay listing all shortcuts).
   - [x] Node alignment tools (H key = align horizontal, V key = align vertical) — context menu entries.
   - [x] Fit-to-view (F key zooms/pans to selected nodes or entire graph).
   - [x] Node bypass/disable toggle (B key — node passes input through unchanged, ⏩ indicator, dimmed, cook engine pass-through).
   - [x] Node lock toggle (L key — prevents parameter changes, 🔒 indicator, inspector dims and disables inputs).
-  - [ ] Wire style options (curved/straight/right-angle).
+  - [x] Wire style options (W key to cycle, toolbar dropdown — curved/straight/right-angle via `connection_lines_curvature`).
 - [x] **Expression & scripting system refinement**:
   - [x] Autocomplete / intellisense for expression fields (node IDs, channel names, param names) — via GNExpressionEditor CodeEdit autocomplete.
   - [x] Expression syntax highlighting (CodeHighlighter in GNExpressionEditor — GONODES keywords green/purple, context vars cyan, math funcs blue, built-in utilities teal, GDScript keywords pink).
@@ -1045,12 +1045,12 @@ GONODES/
   - Select multiple nodes → group into a collapsed sub-network node.
   - Double-click to dive into sub-network. Breadcrumb navigation.
   - Input/output tunnel nodes for wiring between levels.
-- [ ] **Minimap**:
-  - Small overview panel showing entire graph layout.
+- [x] **Minimap**:
+  - Built-in GraphEdit minimap (200×150px). Toggle with M key or toolbar CheckButton.
   - Click to navigate. Viewport rectangle shows current zoom region.
-- [ ] **Node bookmarks**:
-  - Tag important nodes with named bookmarks.
-  - Quick-jump dropdown or number keys (1-9) to teleport to bookmarked nodes.
+- [x] **Node bookmarks**:
+  - Ctrl+1-9 to set bookmark on selected node. 1-9 to jump to bookmarked node.
+  - Blue numbered badge displayed on bookmarked nodes. Up to 9 per session.
 - [ ] **Auto-layout**:
   - One-click graph cleanup using topological order + layer assignment.
   - Minimizes wire crossings. Configurable spacing.
