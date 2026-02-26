@@ -967,10 +967,11 @@ GONODES/
   - Applies to RenderTOP SubViewport and WindowTOP output.
   - Enables previewing how patches will look on different target platforms.
 - [ ] **Patch export to standalone apps**:
-  - Godot export templates for desktop (Windows/macOS/Linux).
-  - Export dialog with platform selection, resolution, and fullscreen options.
-  - Strips editor UI, runs cook engine + WindowTOP output only.
-  - Web export (Compatibility renderer) for browser-based installations.
+  - **Pre-built Player approach**: Ship a `GONODESPlayer.exe` alongside the editor —
+    a minimal runtime that loads a `.gnpatch`, runs the cook engine + WindowTOP
+    output only (no editor UI). "Build" button copies Player + patch + assets → output folder.
+  - Player entry scene (`player_main.tscn`): loads patch, starts cook, opens WindowTOPs.
+  - Later: Godot export templates for desktop (Windows/macOS/Linux), web export (Compatibility renderer).
   - **Extension distribution for exported apps**: When GONODES ships as a
     standalone application (not running inside the Godot editor), users will need
     a way to install extensions without touching `res://addons/`. Design a
@@ -983,6 +984,32 @@ GONODES/
     - An in-app "Extensions" settings panel listing installed / available extensions with enable/disable toggles.
     - Version compatibility checks (engine version, GONODES version) in the manifest.
     - Hot-reload of extensions without restarting the editor.
+- [ ] **Node help system**:
+  - `?` button in node context menu (or node header) opens a help Window.
+  - Help window: `Window` + `RichTextLabel` rendering per-node documentation.
+  - Documentation stored as `.md` files in `res://addons/gonodes/help/<family>/`.
+  - File naming convention: `<node_type>.md` (e.g. `noise_top.md`, `lfo_chop.md`).
+  - Auto-generation: bootstrap help files from existing `node_description`, port
+    descriptions, and parameter descriptions already defined in each operator.
+  - Template: heading, description, inputs table, outputs table, parameters table,
+    usage notes, example patch links.
+  - Example patches stored as `.gnpatch` files alongside help (e.g. `noise_top_example.gnpatch`).
+  - "Open Example" button at bottom of help page loads the example patch into the
+    editor (with confirmation if current patch has unsaved changes).
+  - Folder structure:
+    ```
+    addons/gonodes/help/
+    ├── top/
+    │   ├── noise_top.md
+    │   ├── noise_top_example.gnpatch
+    │   ├── blur_top.md
+    │   └── ...
+    ├── chop/
+    ├── dat/
+    ├── sop/
+    ├── comp/
+    └── mat/
+    ```
 - [ ] **Node grouping / sub-networks**:
   - Select multiple nodes → group into a collapsed sub-network node.
   - Double-click to dive into sub-network. Breadcrumb navigation.
