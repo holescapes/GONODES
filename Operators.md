@@ -170,7 +170,29 @@ Plays a video file as a live texture stream. Similar to TouchDesigner's Movie Fi
 - **Theora (.ogv):** Built-in. CPU-decoded. No alpha channel support in Godot's decoder.
 - **H.264/VP8/VP9:** Available via community `godot-videodecoder` GDExtension (FFmpeg-based). No alpha.
 - **HAP / HAP Alpha / HAP Q:** Not yet supported. HAP is a VJ-standard codec that stores S3TC/DXT-compressed frames, uploaded directly to the GPU with no CPU decode — ideal for real-time performance. Requires a custom GDExtension wrapping the [HAP library](https://github.com/Vidvox/hap). See roadmap.
-- **Image sequences:** For alpha-channel video content, use numbered PNG/WebP frame sequences with a future ImageSequenceTOP operator.
+- **Image sequences:** For alpha-channel video content, use numbered PNG/WebP frame sequences with the ImageSequenceTOP operator.
+
+---
+
+#### ImageSequenceTOP
+
+Plays a numbered image sequence as animated texture frames. Supports PNG, WebP, JPG, and other Godot-importable formats.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | (none) | — | Path to ANY frame in the sequence (auto-discovers siblings) |
+| resolution | Vector2i | 512×512 | — | Output resolution (auto-set from first frame) |
+| play | Bool | true | — | Play / pause |
+| speed | Float | 1.0 | 0.01–10.0 | Playback speed multiplier |
+| index | Int | -1 | -1–∞ | Manual frame index override (-1 = auto time-based) |
+| loop_mode | Enum | Loop | — | Loop, Hold First, Hold Last, Ping-Pong |
+| fit_mode | Enum | Keep Aspect Centered | — | Stretch, Keep Aspect, Centered, Covered |
+| bg_color | Color | Black | — | Background behind transparent/non-covering frames |
+| preload_all | Bool | false | — | Load all frames at startup (faster playback, more RAM) |
+
+**How it works:** Given any frame file (e.g., `render_0042.png`), the operator parses the filename to find the prefix and numbering pattern, then scans the directory for all matching files. Frames are lazy-loaded and cached on demand (or preloaded if the toggle is on). Supports expression-driven `index` for precise sequencing. The ping-pong mode reverses direction at sequence boundaries.
+
+**Naming convention:** Files must have a consistent prefix followed by digits: `myprefix0001.png`, `myprefix0002.png`, etc. Zero-padding width is flexible. Sorting is lexicographic (works correctly for zero-padded names).
 
 ---
 

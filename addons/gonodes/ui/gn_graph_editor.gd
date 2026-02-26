@@ -47,6 +47,7 @@ enum _CtxID {
 	TOGGLE_LOCK,
 	ALIGN_H,
 	ALIGN_V,
+	AUTO_LAYOUT,
 }
 
 ## Undo/redo history for graph operations.
@@ -161,6 +162,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 				KEY_Y:
 					redo_action()
+					get_viewport().set_input_as_handled()
+				KEY_L:
+					auto_layout()
 					get_viewport().set_input_as_handled()
 				KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 					set_bookmark(event.keycode - KEY_0)
@@ -1100,6 +1104,106 @@ func duplicate_selected() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Auto-Layout
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Auto-layout spacing constants.
+const _LAYOUT_H_SPACING := 280.0
+const _LAYOUT_V_SPACING := 100.0
+
+## Arranges all nodes using topological order with layered assignment.
+## Nodes in the same layer (same max-depth from sources) are stacked vertically.
+## Undoable via Ctrl+Z.
+func auto_layout() -> void:
+	if network == null or network.nodes.is_empty():
+		return
+
+	# Snapshot old positions for undo
+	var old_positions: Dictionary = {}
+	for node_id in _node_views:
+		old_positions[node_id] = _node_views[node_id].position_offset
+
+	# Build adjacency: from_id → [to_id, ...]
+	var adjacency: Dictionary = {}
+	var in_degree: Dictionary = {}
+	for node_id in network.nodes:
+		adjacency[node_id] = []
+		in_degree[node_id] = 0
+	for conn in network.connections:
+		if network.nodes.has(conn.from_node) and network.nodes.has(conn.to_node):
+			adjacency[conn.from_node].append(conn.to_node)
+			in_degree[conn.to_node] += 1
+
+	# Assign layers via BFS from sources (in_degree == 0)
+	# Each node gets the maximum layer of all upstream nodes + 1
+	var layer: Dictionary = {}  # node_id → int
+	var queue: Array[String] = []
+	for node_id in in_degree:
+		if in_degree[node_id] == 0:
+			queue.append(node_id)
+			layer[node_id] = 0
+
+	# Handle cycles / disconnected: if no sources, seed everything at layer 0
+	if queue.is_empty():
+		for node_id in network.nodes:
+			layer[node_id] = 0
+	else:
+		# BFS — propagate max layer
+		var visited_count := 0
+		while not queue.is_empty():
+			var current_id: String = queue.pop_front()
+			visited_count += 1
+			for downstream_id in adjacency.get(current_id, []):
+				var new_layer: int = layer[current_id] + 1
+				if not layer.has(downstream_id) or new_layer > layer[downstream_id]:
+					layer[downstream_id] = new_layer
+					queue.append(downstream_id)
+		# Assign remaining unvisited nodes (cycles) to layer 0
+		for node_id in network.nodes:
+			if not layer.has(node_id):
+				layer[node_id] = 0
+
+	# Group nodes by layer
+	var layers: Dictionary = {}  # int → Array[String]
+	for node_id in layer:
+		var l: int = layer[node_id]
+		if not layers.has(l):
+			layers[l] = []
+		layers[l].append(node_id)
+
+	# Sort layer keys
+	var layer_keys: Array = layers.keys()
+	layer_keys.sort()
+
+	# Position nodes: X by layer, Y by index within layer
+	var new_positions: Dictionary = {}
+	for l_idx in layer_keys:
+		var l_int: int = l_idx as int
+		var node_ids: Array = layers[l_int]
+		for row_idx in node_ids.size():
+			var nid: String = node_ids[row_idx]
+			new_positions[nid] = Vector2(l_int * _LAYOUT_H_SPACING, row_idx * _LAYOUT_V_SPACING)
+
+	# Apply positions
+	for node_id in new_positions:
+		var pos: Vector2 = new_positions[node_id]
+		var node: GNNode = network.get_node_by_id(node_id)
+		if node:
+			node.graph_position = pos
+		if _node_views.has(node_id):
+			_node_views[node_id].position_offset = pos
+
+	# Record for undo/redo
+	_undo_redo.create_action("Auto-layout %d node(s)" % network.nodes.size())
+	_undo_redo.add_do_method(_ur_set_positions.bind(new_positions))
+	_undo_redo.add_undo_method(_ur_set_positions.bind(old_positions))
+	_undo_redo.commit_action(false)
+
+	GNLogger.info("GraphEditor", "Auto-layout: %d nodes across %d layers" % [
+		network.nodes.size(), layer_keys.size()])
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Shortcut Reference Overlay
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1165,6 +1269,7 @@ func toggle_shortcut_overlay() -> void:
 		["L", "Toggle Lock"],
 		["H", "Align Horizontally"],
 		["V", "Align Vertically"],
+		["Ctrl + L", "Auto-Layout Graph"],
 		["W", "Cycle Wire Style"],
 		["─── File ───", ""],
 		["Ctrl + N", "New Patch"],
@@ -1422,6 +1527,9 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item("Align Vertical", _CtxID.ALIGN_V)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.ALIGN_V), not multi_selected)
 
+	_context_menu.add_item("Auto-Layout All", _CtxID.AUTO_LAYOUT)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.AUTO_LAYOUT), _shortcut(KEY_L, true), true)
+
 	_context_menu.add_separator()
 	_context_menu.add_item("Node Help", _CtxID.NODE_HELP)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.NODE_HELP), selected_ids.size() != 1)
@@ -1473,6 +1581,8 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			_align_selected_horizontal()
 		_CtxID.ALIGN_V:
 			_align_selected_vertical()
+		_CtxID.AUTO_LAYOUT:
+			auto_layout()
 		_CtxID.NODE_HELP:
 			var selected := _get_selected_node_ids()
 			if selected.size() == 1:

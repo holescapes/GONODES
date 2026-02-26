@@ -945,10 +945,12 @@ GONODES/
 - [ ] **Webcam / video input TOP**:
   - WebcamTOP — live camera feed via CameraServer.
   - Device selection, resolution, and format parameters.
-- [ ] **ImageSequenceTOP** — numbered frame playback:
-  - PNG/WebP/JPG sequences with alpha support.
-  - Configurable frame range, speed, loop mode, hold first/last.
-  - Expression-driven frame index for precise sequencing.
+- [x] **ImageSequenceTOP** — numbered frame playback:
+  - PNG/WebP/JPG sequences with auto-discovery from any frame in the sequence.
+  - Configurable frame range via file path, speed, loop modes (Loop, Hold First, Hold Last, Ping-Pong).
+  - Expression-driven frame index for precise sequencing (`index` param, -1 for auto).
+  - On-demand frame caching with optional preload-all toggle.
+  - Auto-resolution from first frame. Fit modes (Stretch, Keep Aspect, Centered, Covered).
 - [x] **Performance: SubViewport UPDATE_ONCE** for non-time-dependent TOPs:
   - All SubViewports now created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` after each cook — TOPs render exactly once per dirty cycle.
   - Time-dependent TOPs (e.g., CustomShaderTOP with `time_dependent` toggle) are re-cooked each frame by the cook engine, so they naturally re-render via the same mechanism.
@@ -1051,9 +1053,10 @@ GONODES/
 - [x] **Node bookmarks**:
   - Ctrl+1-9 to set bookmark on selected node. 1-9 to jump to bookmarked node.
   - Blue numbered badge displayed on bookmarked nodes. Up to 9 per session.
-- [ ] **Auto-layout**:
-  - One-click graph cleanup using topological order + layer assignment.
-  - Minimizes wire crossings. Configurable spacing.
+- [x] **Auto-layout**:
+  - Ctrl+L or toolbar "Layout" button. Topological BFS layering (sources at left, sinks at right).
+  - Configurable spacing (280px horizontal, 100px vertical). Undoable via Ctrl+Z.
+  - Context menu entry "Auto-Layout All" with Ctrl+L shortcut.
 - [ ] **Parameter presets**:
   - Save/load named parameter snapshots per operator instance.
   - Copy parameters between nodes of the same type.

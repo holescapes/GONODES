@@ -276,6 +276,8 @@ func _register_core_operators() -> void:
 		"Loads an image/texture from project resources (PNG, JPG, WebP, HDR, EXR, SVG, etc.).")
 	_reg("MovieFileInTOP",  "TOP", MovieFileInTOP,
 		"Plays a video file (.ogv Theora) as a live texture stream.")
+	_reg("ImageSequenceTOP", "TOP", ImageSequenceTOP,
+		"Plays a numbered image sequence (PNG, WebP, JPG) as animated texture frames.")
 
 	# ── TOPs: Filters (1 input) ─────────────────────────────────────────
 	_reg("LevelTOP",        "TOP", LevelTOP,

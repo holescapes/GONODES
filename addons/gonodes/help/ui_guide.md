@@ -41,6 +41,7 @@ mouse interaction, and inspector control in the GONODES editor.
 | **V**    | **Align Vertical** — moves 2+ selected nodes so they share the same horizontal center (average X). |
 | **M**    | **Minimap** toggle — show/hide the corner minimap. |
 | **W**    | **Wire style** — cycle through Curved → Straight → Right-Angle wire rendering. |
+| **Ctrl + L** | **Auto-layout** — arrange all nodes using topological layering. Undoable. |
 | **?** (Shift+/) | **Shortcut reference card** — show/hide the keyboard shortcuts overlay. Press ? or Escape to dismiss. |
 
 ### Node Bookmarks
@@ -111,6 +112,7 @@ Greyed-out items require a selection, clipboard content, or ≥2 nodes.
 |-----------|-----------------------------------|
 | **M**     | Toggle minimap                    |
 | **W**     | Cycle wire style                  |
+| **Ctrl + L** | Auto-layout entire graph       |
 | **?**     | Show shortcut reference card      |
 | **1-9**   | Jump to bookmark                  |
 | **Ctrl + 1-9** | Set bookmark on selected node |
@@ -133,6 +135,7 @@ The toolbar runs across the bottom of the editor. From left to right:
 | **Stress Test**    | Generate a 55+ node test network for benchmarking             |
 | **Minimap** ☑      | Show/hide the corner minimap (same as M key)                  |
 | **Wire style** ▾   | Dropdown: Curved / Straight / Right-Angle (same as W key)     |
+| **Layout**         | Auto-layout all nodes using topological order (Ctrl+L)        |
 | *(Info label)*     | Displays: FPS, frame count, cook time (ms), node count, viewed node ID |
 
 ---
@@ -245,6 +248,7 @@ referenced node.
 | **Fit to view (F)**  | Frames selected nodes or all nodes with padding          |
 | **Bookmarks (1-9)**  | Ctrl+# to set, # to jump — instant node navigation      |
 | **Wire styles (W)**  | Curved (default), Straight, or Right-Angle connections   |
+| **Auto-layout (Ctrl+L)** | Topological layered arrangement, undoable            |
 
 ---
 

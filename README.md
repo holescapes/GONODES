@@ -90,7 +90,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 28 | Noise, Composite, Level, Blur, Ramp, Circle, Rectangle, Constant, Text, ImageFileIn, MovieFileIn, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render |
+| **TOP** | 29 | Noise, Composite, Level, Blur, Ramp, Circle, Rectangle, Constant, Text, ImageFileIn, MovieFileIn, ImageSequence, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render |
 | **CHOP** | 21 | LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP |
 | **DAT** | 12 | Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn (stub) |
 | **SOP** | 14 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch |

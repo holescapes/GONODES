@@ -445,6 +445,14 @@ func _setup_toolbar() -> void:
 	info_bar.add_child(wire_opt)
 	info_bar.move_child(wire_opt, 11)
 
+	# Auto-layout button
+	var btn_layout := Button.new()
+	btn_layout.text = "Layout"
+	btn_layout.tooltip_text = "Auto-layout all nodes (Ctrl+L)"
+	btn_layout.pressed.connect(func(): graph_editor.auto_layout())
+	info_bar.add_child(btn_layout)
+	info_bar.move_child(btn_layout, 12)
+
 
 ## Keyboard shortcuts for file operations.
 func _unhandled_key_input(event: InputEvent) -> void:
