@@ -1120,18 +1120,37 @@ GONODES/
   - `GNNodePalette.popup_at_filtered(pos, allowed_operators)` shows only compatible operators. Filter cleared on popup hide.
   - `GNGraphEditor` connects `connection_to_empty` / `connection_from_empty` signals. Stores `_pending_connection` dict, opens filtered palette, auto-connects first compatible port on selection (with undo/redo).
   - **Ghost wire**: semi-transparent line from source port to drop point while palette is open, drawn on expression-ref overlay. Stored in `_ghost_wire` dict, cleared on palette close.
-- [ ] **OSC input/output operators**:
-  - OscInCHOP — receives OSC messages on configurable UDP port, maps to channels.
-  - OscOutCHOP — sends channel data as OSC messages to target host:port.
-  - Complete the OscInDAT stub with actual UDP listener.
-- [ ] **MIDI input operators**:
-  - MidiInCHOP — receives MIDI note/CC/pitch bend, maps to channels.
-  - MidiInDAT — raw MIDI message log as table rows.
-  - Device selection parameter (enumerate OS MIDI inputs).
-- [ ] **Audio input CHOP**:
-  - AudioInCHOP — microphone or audio file input as waveform channels.
-  - AudioSpectrumCHOP — FFT analysis, outputs frequency bands as channels.
-  - AudioFileInCHOP — playback of WAV/OGG with transport controls (play, pause, seek, loop).
+- [x] **OSC input/output operators**:
+  - `OscInCHOP` — receives OSC messages on configurable UDP port, maps numeric args to channels.
+    - Channel naming: `/foo` → channel `foo`, `/bar` with 3 floats → `bar:0`, `bar:1`, `bar:2`.
+    - Address filter, normalize names, max channels, reset pulse params.
+  - `OscOutCHOP` — sends CHOP channel values as OSC messages to target host:port.
+    - Individual or bundle send mode. Prefix param. `is_sink = true`.
+  - `OscInDAT` — receives OSC messages and logs as table rows (address, types, arg0-3, timestamp).
+    - Replaced stub with actual UDP listener + `GNOscParser` integration. Ring buffer.
+  - **Shared infrastructure:** `GNOscParser` static class (`addons/gonodes/core/gn_osc_parser.gd`) —
+    lightweight OSC 1.0 binary parser/builder. Handles int32, float32, string, blob, bool, null,
+    bundles. All encoding/decoding is pure GDScript using `PacketPeerUDP` for transport.
+- [x] **MIDI input operators**:
+  - `MidiInCHOP` — receives MIDI note/CC/pitch bend via Godot's built-in `InputEventMIDI`.
+    - Channels: note, velocity, gate, channel, pitchbend, aftertouch, cc:N (auto-created per CC number).
+    - Device filter, channel filter, normalize (0-1) toggle, reset pulse.
+    - Uses `OS.open_midi_inputs()` / `_unhandled_input()` for event capture.
+  - `MidiInDAT` — raw MIDI message log as table rows (type, channel, note, velocity, cc_num, cc_val, pitchbend, pressure, timestamp).
+    - Same MIDI API, ring buffer with configurable max rows.
+  - Device selection parameter (index-based, -1 = all devices).
+- [x] **Audio input CHOP**:
+  - `AudioInCHOP` — microphone capture via `AudioStreamMicrophone` + `AudioEffectCapture` on a
+    dedicated AudioServer bus. Outputs left/right waveform channels + RMS level.
+    - Creates/destroys bus dynamically. Mutes playback bus to prevent feedback.
+  - `AudioSpectrumCHOP` — FFT analysis via Godot's `AudioEffectSpectrumAnalyzer`.
+    - Logarithmic frequency distribution, configurable band count/range/FFT size.
+    - Temporal smoothing. Convenience bass/mid/treble aggregate channels.
+    - Can analyze any audio bus (Master, or AudioInCHOP's capture bus).
+  - `AudioFileInCHOP` — audio file playback (WAV/OGG) with waveform capture.
+    - Transport: play, stop, seek, loop. Volume (dB), mute toggle.
+    - Output channels: left, right, level, pos, length, playing.
+    - Dedicated AudioServer bus with capture effect for PCM extraction.
 - [x] **Webcam / video input TOP**:
   - WebcamIMG — live camera feed via CameraServer as CPU Image. Chain → ImgToTOP for GPU.
   - Device selection (index), resolution, active toggle, horizontal mirror params.
@@ -1145,9 +1164,15 @@ GONODES/
   - All SubViewports now created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` after each cook — TOPs render exactly once per dirty cycle.
   - Time-dependent TOPs (e.g., CustomShaderTOP with `time_dependent` toggle) are re-cooked each frame by the cook engine, so they naturally re-render via the same mechanism.
   - Reduces GPU load significantly for static texture chains.
-- [ ] **Performance: Viewport pooling**:
-  - Reuse freed SubViewports instead of creating/destroying.
-  - Pool tracks available viewports by resolution. Reduces allocation churn at scale.
+- [x] **Performance: Viewport pooling** — **DEFERRED (low value)**:
+  - Original idea: reuse freed SubViewports instead of creating/destroying. Pool tracks available viewports by resolution to reduce allocation churn.
+  - **Analysis concluded this is near-zero net gain.** Arguments:
+    1. **Size mismatch kills reuse.** TOPs have varying resolutions (1024×1024 noise, 512×512 blur, 1920×1080 composite). A pooled viewport only helps if the next requester wants the exact same size. Resizing a SubViewport is just as expensive as creating one — Godot destroys and recreates the internal framebuffer on `size` change.
+    2. **Allocation is infrequent.** Viewports are created once when a TOP first cooks (lazy creation), then persist for the node's lifetime. The churn scenario (rapid create/destroy cycles) rarely happens — users build a patch and run it.
+    3. **Active-chain cooking already eliminates the biggest cost.** Inactive TOPs never cook, so their lazily-created viewports never allocate. The pool would only help nodes that *do* cook, and those need their viewports alive anyway.
+    4. **Resolution buckets waste VRAM.** Rounding sizes up to power-of-2 buckets (256, 512, 1024, 2048) increases hit rates but trades allocation churn for memory bloat on oversized buffers.
+    5. **Narrow use case.** The only scenario with measurable benefit: a patch with dozens of same-resolution TOPs that gets loaded/unloaded repeatedly (e.g., VJ set with everything at 1920×1080). Real but uncommon.
+  - **Conclusion:** The existing lazy viewport creation + active-chain cooking + UPDATE_ONCE already cover this. Multi-threaded cook, C++ hot-paths, and GPU compute would deliver far greater measurable gains. Not implementing — documented as intentionally deferred.
 - [x] **Performance: Active chain cooking**:
   - Only cook subgraphs that feed into a live sink (viewer, floating window, or any `is_sink` node).
   - Disconnected/orphan subgraphs skip cooking entirely (keep cached_output frozen).
@@ -1347,6 +1372,14 @@ GONODES/
 - [ ] Network collaboration (shared editing)
 - [ ] Asset/patch marketplace
 - [ ] Mobile/web export for patches (leveraging Godot's Mobile + Compatibility renderers)
+- [ ] **MidiOutCHOP** — send MIDI messages from CHOP channel values:
+  - Requires a **GDExtension** wrapping RtMidi or portmidi. Godot 4.x exposes `OS.open_midi_inputs()`
+    and `InputEventMIDI` for MIDI *input*, but has **no MIDI output API** — there is no
+    `OS.send_midi_message()`, no `MidiOut` class, and no way to open an output device.
+  - A C++ GDExtension (~200-400 LOC) would expose `MidiOut.open(device_index)`, `send_note_on()`,
+    `send_cc()`, `send_pitchbend()`, etc. RtMidi is header-only with a permissive license.
+  - Map CHOP channels (`note`, `velocity`, `cc:N`, `pitchbend`) to outgoing MIDI messages each frame.
+  - Only relevant for hardware control surfaces, lighting rigs, or synth triggering — lower priority.
 
 ---
 

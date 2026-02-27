@@ -452,6 +452,20 @@ func _register_core_operators() -> void:
 	_reg("ScriptCHOP",      "CHOP", ScriptCHOP,
 		"User-scripted CHOP. Write GDScript to generate or transform channel data.")
 
+	# ── CHOPs: I/O (OSC, MIDI, Audio) ──────────────────────────────────
+	_reg("OscInCHOP",       "CHOP", OscInCHOP,
+		"Receive OSC messages as CHOP channels via UDP.")
+	_reg("OscOutCHOP",      "CHOP", OscOutCHOP,
+		"Send CHOP channels as OSC messages over UDP.")
+	_reg("MidiInCHOP",      "CHOP", MidiInCHOP,
+		"Receive MIDI note, CC, pitch bend as CHOP channels.")
+	_reg("AudioInCHOP",     "CHOP", AudioInCHOP,
+		"Capture live microphone audio as CHOP channels.")
+	_reg("AudioSpectrumCHOP", "CHOP", AudioSpectrumCHOP,
+		"FFT spectrum analysis — frequency bands as CHOP channels.")
+	_reg("AudioFileInCHOP", "CHOP", AudioFileInCHOP,
+		"Play audio file (WAV/OGG) and output waveform as CHOP channels.")
+
 	# ── CHOPs: Output / Sinks ───────────────────────────────────────────
 	_reg("RecordCHOP",      "CHOP", RecordCHOP,
 		"Record CHOP channels over time to buffer. Save to CSV/JSON.")
@@ -504,7 +518,9 @@ func _register_core_operators() -> void:
 	_reg("InfoDAT",         "DAT", InfoDAT,
 		"System info table (fps, frame, time, OS, memory).")
 	_reg("OscInDAT",        "DAT", OscInDAT,
-		"OSC message receiver (stub — networking not yet implemented).")
+		"Receive OSC messages into a DAT table via UDP.")
+	_reg("MidiInDAT",       "DAT", MidiInDAT,
+		"Log raw MIDI messages (note, CC, pitch bend) into a DAT table.")
 
 	# ── DATs: Filters ───────────────────────────────────────────────────
 	_reg("SelectDAT",       "DAT", SelectDAT,
