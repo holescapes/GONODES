@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-26
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 93 operators across 7 families (29 TOP, 7 IMG, 22 CHOP, 13 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). Clean editor/engine separation — headless execution carries zero UI overhead.
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 101 operators across 7 families (28 TOP, 14 IMG, 23 CHOP, 14 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead.
 
 ---
 
@@ -124,8 +124,19 @@ Embedding Model (Future):
 GNData (RefCounted)
 ├── valid: bool
 ├── timestamp: int (cook frame)
+├── _shared: bool (set by cook engine — true when output feeds 2+ consumers)
 └── type() -> GNFamily
 ```
+
+**Copy-on-Write (COW) data sharing:** Node outputs are shared by reference. When a node's output feeds multiple downstream consumers (fan-out), the cook engine sets `_shared = true` on the output data. Operators that need to **mutate** input data must call `_mutable_input(data)` (on GNNode) which duplicates only when `_shared` is true — zero-copy for single-consumer chains. The `_consumer_counts` dictionary in GNCookEngine is rebuilt from connection topology only when wires change (not per-frame).
+
+**Example — BlurIMG:** A NoiseIMG fans out to both BlurIMG and PixelSortIMG. BlurIMG needs to modify pixels in-place (sliding-window accumulator). It calls `_mutable_input(src)` which sees `_shared = true` (two consumers) and returns a duplicate — BlurIMG blurs its own copy, PixelSortIMG gets the original untouched. If NoiseIMG only fed BlurIMG (no fan-out), `_mutable_input()` returns the original — zero copy, BlurIMG modifies it directly.
+
+**TOPs are immune:** Each TOP renders into its own SubViewport, producing a fresh GPU texture every cook. Downstream TOPs sample that texture via shader `uniform sampler2D` — inherently read-only. No downstream TOP can mutate an upstream TOP's framebuffer, so COW is unnecessary for the GPU pipeline.
+
+**Affected families:** IMG (Image pixels), SOP (mesh arrays), CHOP (channel arrays), DAT (table rows), MAT (Material properties) — all CPU-side heap objects passed by reference in GDScript.
+
+**Built-in operators** use `_mutable_input()` when they need to modify input data (e.g., BlurIMG, PixelSortIMG). **Script operators** do NOT auto-copy — if user code mutates `inputs[0]` directly at a fan-out point, it will corrupt upstream data. Users must `duplicate()` manually (see §27.3.3).
 
 ### GNTextureData (TOP output)
 ```
@@ -246,6 +257,7 @@ var graph_position: Vector2 = Vector2.ZERO
 func _init_ports() -> void: pass          # Override: define ports
 func _init_parameters() -> void: pass     # Override: define params
 func _cook(inputs: Array[GNData]) -> GNData: return null  # Override: produce output
+func _mutable_input(data: GNData) -> GNData: ...  # COW: duplicates only if data._shared
 func get_input(index: int) -> GNData: ...  # Resolved by cook engine
 func mark_dirty() -> void: ...             # Propagates downstream
 
@@ -871,9 +883,9 @@ GONODES/
 - [x] **FILE parameter type** — new `ValueType.FILE` in GNParameter with `file_filters` (PackedStringArray of wildcard patterns). `create_file()` factory method. Stores `res://` paths.
 - [x] **File picker UI** — GNParamRow renders FILE params as a Button (showing filename) + "X" clear button. Opens Godot's native FileDialog scoped to `ACCESS_RESOURCES` (project directory only). Filter extensions from parameter's `file_filters`.
 - [x] **TextTOP font selection** — new `font_file` FILE parameter accepting TTF, OTF, WOFF, WOFF2. Loads via `ResourceLoader`, applies with `add_theme_font_override("font", ...)`. Empty = default theme font.
-- [x] **ImageFileInTOP** — new TOP generator loading image/texture resources (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res). TextureRect in SubViewport with configurable fit mode (Stretch, Keep Aspect, Keep Aspect Centered, Keep Aspect Covered, Tile). Bilinear/nearest filtering toggle.
-- [x] **MovieFileInTOP** — new TOP generator using Godot's native `VideoStreamPlayer` for .ogv Theora video playback. Play/pause, loop, seek, speed controls. Video renders inside SubViewport for standard TOP pipeline integration.
-  - **Codec limitations:** Godot's built-in Theora decoder outputs RGB only (no alpha). HAP codec (VJ-standard S3TC/DXT GPU-direct upload) requires a custom GDExtension — see roadmap. For alpha video, use image sequences (PNG/WebP).
+- [x] **ImageFileInIMG** — loads image files (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res) as CPU Image. Pure CPU, no SubViewport. Resize param, reload pulse. Chain → ImgToTOP for GPU.
+- [x] **MovieFileInTOP** — plays .ogv Theora video as live GPU texture stream. Uses Godot's native `VideoStreamPlayer`. Play/pause, loop, seek, speed controls. Video decodes internally to GPU — no CPU image access (Godot limitation).
+  - **Codec limitations:** Godot's built-in Theora decoder outputs RGB only (no alpha). For alpha video, use image sequences (PNG/WebP).
 
 ### Phase 5.8: Extension Registry Architecture ✅
 - [x] **GNExtensionRegistry** — centralized operator registry (`addons/gonodes/core/gn_extension_registry.gd`). Lazy singleton with `instance()`. Replaces the static match-factory in GNGraphEditor and the static description dictionary in GNNodePalette.
@@ -921,7 +933,7 @@ GONODES/
 - [x] **Family base classes** — 6 intermediate bases between GNNode and operators:
   - `GNTopBase` (29 TOPs), `GNImgBase` (7 IMGs), `GNChopBase` (22 CHOPs), `GNDatBase` (13 DATs), `GNSopBase` (15 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
   - Each sets family, provides cached data helpers, and overrides preview methods.
-  - All 93 operators migrated. GNNode is now fully type-agnostic.
+  - All 101 operators migrated. GNNode is now fully type-agnostic.
 - [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
   - `GNGraphEditor.previews_visible` flag controls whether `update_previews()` processes updates.
   - `GNGraphEditor.set_previews_visible(enabled)` shows/hides all preview controls on existing views.
@@ -1003,8 +1015,9 @@ GONODES/
   - Teal color in graph editor. Family enum `GNFamily.Type.IMG`.
   - **Generators:** `NoiseIMG` (value/white noise via FastNoiseLite), `CheckerboardIMG` (configurable grid).
   - **Filters:** `BlurIMG` (separable box blur), `EdgeDetectIMG` (Sobel/Prewitt), `PixelSortIMG` (glitch art).
-  - **Bridge:** `ImgToTOP` — uploads CPU Image to GPU ImageTexture for TOP pipeline.
+  - **Bridge:** `ImgToTOP` — uploads CPU Image to GPU ImageTexture for TOP pipeline. `TOPtoIMG` — GPU→CPU readback (reverse).
   - **Scripting:** `ScriptIMG` — user GDScript with `@param`/`@input` annotations.
+  - **Sinks:** `FileSaveIMG` (save to disk), `MovieOutIMG` (image sequence), `FFmpegOutIMG` (video encode via CLI).
   - User presets at `user://gonodes_presets/<family>/` (load/save via static methods).
   - Dynamic param rebuild with value preservation (same pattern as CustomShaderTOP).
 - [x] **IMG preview optimization** — changed GNImgBase preview from TextureRect (GPU upload every cook) to lightweight text Label showing “512×320\nRGBA8”. No GPU upload, consistent with SOP/CHOP/DAT label-based previews. Helper `_format_name()` maps `Image.Format` enums to short names.
@@ -1026,15 +1039,15 @@ GONODES/
   - AudioInCHOP — microphone or audio file input as waveform channels.
   - AudioSpectrumCHOP — FFT analysis, outputs frequency bands as channels.
   - AudioFileInCHOP — playback of WAV/OGG with transport controls (play, pause, seek, loop).
-- [ ] **Webcam / video input TOP**:
-  - WebcamTOP — live camera feed via CameraServer.
-  - Device selection, resolution, and format parameters.
-- [x] **ImageSequenceTOP** — numbered frame playback:
+- [x] **Webcam / video input TOP**:
+  - WebcamIMG — live camera feed via CameraServer as CPU Image. Chain → ImgToTOP for GPU.
+  - Device selection (index), resolution, active toggle, horizontal mirror params.
+- [x] **ImageSequenceIMG** — numbered frame playback as CPU Images:
   - PNG/WebP/JPG sequences with auto-discovery from any frame in the sequence.
   - Configurable frame range via file path, speed, loop modes (Loop, Hold First, Hold Last, Ping-Pong).
   - Expression-driven frame index for precise sequencing (`index` param, -1 for auto).
   - On-demand frame caching with optional preload-all toggle.
-  - Auto-resolution from first frame. Fit modes (Stretch, Keep Aspect, Centered, Covered).
+  - Auto-resolution from first frame. Pure CPU — no SubViewport.
 - [x] **Performance: SubViewport UPDATE_ONCE** for non-time-dependent TOPs:
   - All SubViewports now created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` after each cook — TOPs render exactly once per dirty cycle.
   - Time-dependent TOPs (e.g., CustomShaderTOP with `time_dependent` toggle) are re-cooked each frame by the cook engine, so they naturally re-render via the same mechanism.
@@ -1059,9 +1072,14 @@ GONODES/
   - Track total estimated VRAM across all SubViewports.
   - Warn when approaching configurable budget limit.
   - Display in info bar alongside FPS/cook time.
-- [ ] **Performance: Resolution downscaling for previews**:
-  - Render inline preview thumbnails at ¼ or ½ res.
-  - Full resolution only for the active viewer output and WindowTOPs.
+- [x] **Performance: Resolution downscaling for previews** — **DEFERRED (low value)**:
+  - Original idea: render inline preview thumbnails at ¼ or ½ res; full res only for viewer + sinks.
+  - **Analysis concluded this is near-zero net gain.** Arguments:
+    1. **Viewport resize = GPU reallocation** — `SubViewport.size = x` destroys and recreates the render buffer; resizing 30 viewports at once causes a visible hitch.
+    2. **Dual viewports per TOP doubles overhead** — the idle full-res viewport still holds VRAM; downstream consumers need full-res input textures as shader uniforms regardless.
+    3. **Snapshot approach (GPU→CPU readback → ImageTexture thumbnail) adds work, not saves it** — the full-res `ViewportTexture` already exists in VRAM for downstream nodes; a TextureRect sampling it at 120×80 during UI draw is essentially free (one texture sample). CPU readback + resize + re-upload is strictly more expensive.
+    4. **The only real case** is leaf TOPs (no downstream, not viewer target, not sink) where the SubViewport could render at ¼ res. But active-chain cooking already **skips these entirely** (they don't cook, so their viewport never renders). The overlap makes the optimization redundant.
+  - **Conclusion:** The big GPU wins (active-chain cooking, UPDATE_ONCE, lazy viewport creation) already cover this. Marked done — not implementing, documented as intentionally deferred.
 - [x] **Keyboard shortcuts & workflow polish** (partial — core features done):
   - [x] Consistent shortcut reference card (help overlay, '?' key — semi-transparent overlay listing all shortcuts).
   - [x] Node alignment tools (H key = align horizontal, V key = align vertical) — context menu entries.
@@ -1079,14 +1097,20 @@ GONODES/
   - [x] Built-in utility functions on CookEngine: `fit()`, `fit01()`, `smooth()`, `lag()`, `pulse()`, `step()`, `smoothstep()`, `cycle()`, `bounce()`, `noise1()`, `noise2()`, `trigger()`. Stateful functions use per-key state dicts.
   - [x] Windowed code editor for Script operators & CustomShaderTOP — `GNCodeEditor` (extends `GNBaseCodeEditor`) with CodeEdit, mode-adaptive syntax highlighting (GDScript for Script ops, GLSL for shaders), preset load/save via GNScriptHelper, reference cheatsheet, Ctrl+Enter confirm. Opened via "Edit ↗" button in GNParamRow. Both `GNCodeEditor` and `GNExpressionEditor` share a common base class (`GNBaseCodeEditor`) providing Window layout, CodeEdit configuration, key bindings, and status bar.
   - Reference: `help/expressions_guide.md` for complete expression system docs.
-- [ ] **File output / save-to-disk operators**:
-  - **FileSaveIMG** (IMG family) — saves CPU Image to disk (PNG, WebP, EXR, HDR). Path, format, quality params. Optional auto-numbering for sequences.
-  - **FileSaveTOP** (TOP family) — reads GPU texture back to CPU, saves to disk. Same formats as FileSaveIMG but adds the GPU→CPU readback step.
-  - **FileSaveDAT** (DAT family) — exports table/text to disk (CSV, TSV, JSON, plain text). Path + format params.
-  - **MovieOutTOP** (TOP family / sink) — records TOP frame stream to video file. Requires FFmpeg GDExtension or Godot MovieWriter API. Frame rate, codec, quality params. Start/stop toggle.
-  - **RecordCHOP** (CHOP family) — records channel data over time to CSV/JSON. Start/stop/reset controls. Max duration / sample limit.
+- [x] **File output / save-to-disk operators** — all implemented with `is_sink = true` and `active` toggle:
+  - **FileSaveIMG** (IMG family) — saves CPU Image to disk (PNG, WebP, EXR). Auto-numbering for sequences.
+  - **FileSaveTOP** (TOP family) — GPU→CPU readback via `get_image()`, saves to disk (PNG, WebP, EXR). Auto-numbering.
+  - **FileSaveDAT** (DAT family) — exports table/text to disk (CSV, TSV, JSON, plain text). Proper CSV escaping.
+  - **MovieOutIMG** (IMG family / sink) — saves image sequence as numbered frames (PNG/WebP). Configurable prefix, padding, folder.
+  - **FFmpegOutIMG** (IMG family / sink) — records frames to temp dir, encodes to video (H.264/H.265/VP9/ProRes) via `ffmpeg` CLI on deactivation. Requires `ffmpeg` on PATH.
+  - **RecordCHOP** (CHOP family) — accumulates channel samples into buffer, saves to CSV/JSON via rising-edge pulse. Max samples with ring-buffer trim.
   - All output operators set `is_sink = true` so active-chain cooking keeps them alive.
-  - Common pattern: `trigger` toggle param (manual) or `auto_save` mode (save every N frames / on change).
+  - Common UX: `active` bool param — when checked, saving occurs every cook. Toggle off to stop.
+- [x] **TOPtoIMG bridge** — GPU Texture → CPU Image conversion (`Texture2D.get_image()`). Reverse of ImgToTOP.
+- [x] **Cook-once pulse** for Script operators (ScriptCHOP/DAT/SOP/IMG) and CustomShaderTOP:
+  - New `cook_once` bool param (default OFF). Toggle ON → forces one cook, auto-resets to OFF.
+  - Implemented in `_pre_cook()`: calls `mark_dirty()` then `set_param_value("cook_once", false)`.
+  - Flexible in combination with `time_dependent`: TD=OFF + cook_once = cook exactly when pulsed.
 - [ ] **Renderer selection UI**:
   - Dropdown in toolbar: Forward+, Mobile, Compatibility.
   - Applies to RenderTOP SubViewport and WindowTOP output.
@@ -1169,7 +1193,7 @@ GONODES/
 - [x] Keyboard shortcuts and workflow polish (Alt+A palette, context menu shortcuts, per-node preview toggle)
 
 ### Medium-term
-- [ ] File output operators (FileSaveIMG, FileSaveTOP, FileSaveDAT, MovieOutTOP, RecordCHOP — save images, tables, video, channels to disk)
+- [x] File output operators (FileSaveIMG, FileSaveTOP, FileSaveDAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP + TOPtoIMG bridge)
 - [ ] POP family (GPU point/particle operators — see Section 18)
 - [ ] LibGodot embedding proof-of-concept
   - Build a minimal host app that embeds LibGodot
@@ -1186,6 +1210,18 @@ GONODES/
   - Custom `VideoStreamHAP` resource extending Godot's `VideoStream`
   - Wraps [Vidvox/hap](https://github.com/Vidvox/hap) (Snappy + DXT decompression, direct GPU upload)
   - Enables alpha-channel video without image sequences
+  - **Exception to CPU-first philosophy:** HAP frames are already GPU-compressed (S3TC/DXT), so the operator is a TOP — CPU detour would be counterproductive.
+- [ ] **CPU-side video frame decoder GDExtension** (`gn_ext_video_decoder`) — enables IMG-family video operators
+  - Custom GDExtension (~300-500 LOC C++) using FFmpeg's C API directly (libavcodec/libavformat/libswscale).
+  - **Motivation:** Godot's `VideoStreamPlayback` only exposes GPU textures (`get_video_texture()`). Internally, both Theora and FFmpeg decode to CPU pixel buffers first, then immediately upload to GPU via `RenderingServer::texture_2d_update()` — but this CPU data is never exposed via any public API. EIRTeam.FFmpeg also doesn't expose it (just another `VideoStream` subclass).
+  - Exposes a `VideoFrameDecoder` class to GDScript:
+    - `open(path) → Error`, `decode_next_frame() → Image`, `seek(time_sec)`, `get_duration()`, `get_fps()`, `close()`
+  - Decodes video frames to `Image::create_from_data()` — stays CPU-side, zero GPU involvement.
+  - Would enable proper **MovieFileInIMG** and **FFmpegInIMG** operators outputting `GNImageData` directly into the IMG pipeline.
+  - The FFmpeg shared libraries are already shipped in `addons/ffmpeg/win64/` and `linux64/`.
+  - Eliminates the wasteful CPU→GPU→CPU roundtrip that `get_video_texture().get_image()` would cause (~1-4ms stall per frame).
+  - Frame-accurate seeking, frame stepping — things `VideoStreamPlayer` handles poorly.
+  - **OpenCV was considered and rejected:** no production-ready Godot 4 GDExtension exists, and `cv::VideoCapture` just wraps FFmpeg internally anyway — massive dependency for nothing extra.
 - [x] Custom GLSL shader TOP (user-editable shader code) — **Done: CustomShaderTOP**
 - [ ] ComputeShaderTOP (user-editable GPU compute shader — see Section 27)
 
@@ -2834,6 +2870,14 @@ func cook():
 
 Note: `op_ref()` is used instead of `op()` because `op` is already the output object variable name.
 
+> **⚠ Data Aliasing Warning for Script Operators:** Input data (`inputs[N]`) is passed by reference from upstream nodes' `cached_output`. If this node sits at a fan-out point (the upstream output feeds other nodes too), mutating the input data in-place will **corrupt** all other consumers. Built-in operators use `_mutable_input()` to handle this automatically, but Script operators do **not** auto-copy for performance reasons. If your Script code modifies input data (e.g., `inputs[0].image.resize()`), **duplicate first**:
+> ```gdscript
+> var img = inputs[0].image.duplicate()
+> img.resize(512, 512)  # safe — your own copy
+> op.set_image(img)
+> ```
+> This only matters at fan-out. If the upstream node feeds only this Script, mutation is safe.
+
 #### 27.3.4 Annotation System — @param
 
 Dynamic inspector parameters are declared via `# @param` comment annotations:
@@ -2913,6 +2957,25 @@ ScriptIMG extends GNImgBase (not GNTopBase) — pure CPU Image pipeline:
 
 The IMG family provides CPU-side image processing as a first-class citizen, cleanly separated from the GPU-based TOP pipeline.
 
+#### CPU-First Input Philosophy
+
+**Principle:** When source data originates on the CPU (files on disk, camera feeds, procedural generation), the operator should live in the **IMG family** and output `GNImageData`. The user explicitly bridges to GPU via `→ ImgToTOP` only when needed. This gives maximum flexibility — CPU processing (ScriptIMG, BlurIMG, OpenCV via GDExtension, etc.) can happen *before* any GPU upload, and users who never need GPU textures avoid the upload entirely.
+
+**Rationale for the split:**
+
+| Source | Family | Why |
+|--------|--------|-----|
+| Image files (PNG, JPG, EXR, etc.) | **IMG** (ImageFileInIMG) | `ResourceLoader` returns CPU `Image` — data is natively CPU-side. |
+| Numbered image sequences | **IMG** (ImageSequenceIMG) | Same — loads frames from disk as CPU Images. |
+| Webcam / camera feed | **IMG** (WebcamIMG) | CameraFeed frame data is CPU-accessible. |
+| Video playback (.ogv Theora) | **TOP** (MovieFileInTOP) | Godot's `VideoStreamPlayer` only exposes decoded frames as GPU textures via `get_video_texture()` — no CPU-side Image API exists. |
+| FFmpeg video (H.264, VP9, etc.) | **TOP** (FFmpegInTOP) | Same — EIRTeam.FFmpeg GDExtension decodes to GPU texture internally. |
+
+**Exceptions exist** — some future sources may bypass CPU entirely and deliver directly to GPU:
+- **HAP codec** (S3TC/DXT compressed video) — frames are already in GPU-native compressed format. A HAP operator would be a **TOP**, uploading S3TC blocks directly to GPU texture without CPU pixel decoding. CPU detour would be counterproductive.
+- **Spout / NDI / Syphon** texture sharing — shared GPU textures arrive on the GPU. These will be TOPs.
+- Any future GPU-direct capture or decode path where CPU-side data simply doesn't exist.
+
 #### 27.4.1 Architecture
 
 | Component | Description |
@@ -2933,6 +2996,10 @@ The IMG family provides CPU-side image processing as a first-class citizen, clea
 | PixelSortIMG | Filter | Glitch art pixel sorting. Sort by brightness/hue/saturation/channel. Threshold-controlled spans. |
 | ScriptIMG | Scripting | User GDScript with `@param`/`@input` annotations. Full GNScriptHelper integration. |
 | ImgToTOP | Bridge | Uploads CPU Image to GPU ImageTexture → GNTextureData output. Overrides `execute_cook()` to skip SubViewport logic. |
+| TOPtoIMG | Bridge | GPU Texture → CPU Image via `get_image()`. Reverse of ImgToTOP. |
+| FileSaveIMG | Sink | Saves CPU Image to disk (PNG/WebP/EXR). `active` toggle, auto-numbering, quality param. `is_sink = true`. |
+| MovieOutIMG | Sink | Numbered image sequence output (PNG/WebP). Configurable prefix, padding, folder. `is_sink = true`. |
+| FFmpegOutIMG | Sink | Records frames to temp dir, encodes via `ffmpeg` CLI (H.264/H.265/VP9/ProRes) on deactivation. `is_sink = true`. |
 
 ### 27.5 GNScriptHelper — Shared Infrastructure
 
@@ -3022,7 +3089,10 @@ A family-less node with annotated output ports (`# @output chop`, `# @output top
 | ✅ Done | ScriptDAT | GDScript table/text generation/processing |
 | ✅ Done | ScriptSOP | GDScript geometry generation/processing |
 | ✅ Done | ScriptIMG | CPU-side Image manipulation via GDScript |
-| ✅ Done | IMG family | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP |
+| ✅ Done | IMG family | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP, TOPtoIMG, FileSaveIMG, MovieOutIMG, FFmpegOutIMG |
+| ✅ Done | Output operators | FileSaveTOP, FileSaveDAT, RecordCHOP — file save sinks with `active` toggle |
+| ✅ Done | WebcamIMG | Live camera feed as CPU Image via CameraServer |
+| ✅ Done | Cook-once pulse | `cook_once` param on Script ops + CustomShaderTOP — auto-reset after one cook |
 | 🔲 Planned | ComputeShaderTOP | GPU compute via RenderingDevice |
 | 🔲 Planned | Generic ScriptNode | Multi-output, family-less |
 

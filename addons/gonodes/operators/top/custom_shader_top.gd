@@ -76,6 +76,8 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("time_dependent", true,
 		"Time Dependent", "Re-cook every frame (enable for shaders using TIME)"))
+	add_parameter(GNParameter.create_bool("cook_once", false,
+		"Cook Once", "Pulse: toggle ON to force a single cook, auto-resets to OFF"))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_string("shader_code", DEFAULT_SHADER_CODE.strip_edges(),
 		"Shader Code", "Full shader_type canvas_item shader code (live recompile)"))
@@ -84,6 +86,10 @@ func _init_parameters() -> void:
 ## Override _pre_cook to respect the time_dependent parameter toggle.
 func _pre_cook(delta: float) -> void:
 	time_dependent = get_param_value("time_dependent")
+	# Cook-once pulse: mark dirty for one frame, then auto-reset
+	if get_param_value("cook_once"):
+		mark_dirty()
+		set_param_value("cook_once", false)
 	super._pre_cook(delta)
 
 
@@ -107,7 +113,7 @@ func from_dict(d: Dictionary) -> void:
 		var params_dict: Dictionary = d["parameters"]
 		for param_name in params_dict:
 			# Skip static params (already restored by super)
-			if param_name in ["resolution", "shader_code", "time_dependent"]:
+			if param_name in ["resolution", "shader_code", "time_dependent", "cook_once"]:
 				continue
 			var param: GNParameter = parameters.get(param_name, null)
 			if param != null:

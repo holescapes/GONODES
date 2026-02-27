@@ -324,6 +324,19 @@ func clear_dirty() -> void:
 # Cook Execution (called by GNCookEngine, not directly by users)
 # ═══════════════════════════════════════════════════════════════════════════════
 
+## Returns a mutable copy of the given input data.  If the upstream output is
+## shared (feeds multiple consumers), duplicates it so in-place modifications
+## are safe.  If this node is the sole consumer, returns the original — zero
+## copy cost.  Built-in operators that modify input data should use this
+## instead of unconditional [code]duplicate()[/code].
+func _mutable_input(data: GNData) -> GNData:
+	if data == null:
+		return null
+	if data._shared:
+		return data.duplicate_data()
+	return data
+
+
 ## Executes the cook cycle for this node with the provided input data.
 ## Returns the cooked output GNData, or null on failure.
 func execute_cook(inputs: Array[GNData], frame: int) -> GNData:

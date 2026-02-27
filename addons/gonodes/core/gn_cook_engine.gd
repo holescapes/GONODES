@@ -55,6 +55,13 @@ var _lag_state: Dictionary = {}
 ## Per-key state for the trigger() expression function.
 var _trigger_state: Dictionary = {}
 
+## Cached map of node_id → number of downstream consumers.
+## Rebuilt when topology changes (_active_set_dirty also triggers rebuild).
+var _consumer_counts: Dictionary = {}
+
+## When true, _consumer_counts needs recomputing.
+var _consumer_counts_dirty: bool = true
+
 # ─── Active Chain Cooking ──────────────────────────────────────────────────────
 
 ## IDs of nodes that are live sinks (viewers, WindowTOPs, etc.).
@@ -154,11 +161,13 @@ func _on_node_param_changed(_node_id: String, _param_name: String) -> void:
 ## Called when a node is removed — invalidates the active set.
 func _on_topology_changed(_arg: Variant = null) -> void:
 	_active_set_dirty = true
+	_consumer_counts_dirty = true
 
 
 ## Called when a connection is added or removed — invalidates the active set.
 func _on_connection_changed(_arg: Variant = null) -> void:
 	_active_set_dirty = true
+	_consumer_counts_dirty = true
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -307,6 +316,10 @@ func cook_frame(delta: float) -> void:
 			node.is_active = _active_set.has(node.id)
 		_active_set_dirty = false
 
+	# Step 3c: Rebuild consumer counts when topology changed.
+	if _consumer_counts_dirty:
+		_rebuild_consumer_counts()
+
 	# Step 4: Cook dirty + active nodes in topo order
 	var cooked_count := 0
 	var skipped_count := 0
@@ -338,6 +351,8 @@ func cook_frame(delta: float) -> void:
 					passthrough = inp
 					break
 			node.cached_output = passthrough
+			if passthrough != null:
+				passthrough._shared = _consumer_counts.get(node.id, 0) > 1
 			node.cook_valid = passthrough != null
 			node.cook_time_ms = 0.0
 			node.clear_dirty()
@@ -349,6 +364,11 @@ func cook_frame(delta: float) -> void:
 
 		# Cook the node
 		var result := node.execute_cook(inputs, frame_count)
+
+		# Tag the output as shared if this node feeds multiple downstream consumers.
+		# Operators use _mutable_input() to check this flag before mutating data.
+		if result != null:
+			result._shared = _consumer_counts.get(node.id, 0) > 1
 
 		if result == null and node.output_ports.size() > 0 and node.family != GNFamily.Type.COMP:
 			# Only warn for non-COMP nodes with output ports.
@@ -389,6 +409,19 @@ func _pre_cook_pass(delta: float) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Input Resolution
 # ═══════════════════════════════════════════════════════════════════════════════
+
+## Rebuilds the per-node downstream consumer count from the connection topology.
+## O(connections) — only runs when wires change, not every frame.
+func _rebuild_consumer_counts() -> void:
+	_consumer_counts.clear()
+	if network == null:
+		_consumer_counts_dirty = false
+		return
+	for conn in network.connections:
+		var from_id: String = conn.from_node
+		_consumer_counts[from_id] = _consumer_counts.get(from_id, 0) + 1
+	_consumer_counts_dirty = false
+
 
 ## Gathers input data for a node from upstream nodes' cached outputs.
 ## For single-input ports, returns a flat array aligned by port index.
@@ -859,5 +892,7 @@ func reset() -> void:
 	_trigger_state.clear()
 	_active_set.clear()
 	_active_set_dirty = true
+	_consumer_counts.clear()
+	_consumer_counts_dirty = true
 	GNLogger.info("CookEngine", "Engine reset")
 	invalidate_all()

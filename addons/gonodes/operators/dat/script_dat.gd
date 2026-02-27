@@ -38,7 +38,7 @@ func cook():
 """
 
 const _STATIC_PARAMS: PackedStringArray = [
-	"time_dependent", "code",
+	"time_dependent", "cook_once", "code",
 ]
 
 var _helper: GNScriptHelper = GNScriptHelper.new()
@@ -58,12 +58,18 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("time_dependent", false,
 		"Time Dependent", "Re-cook every frame even when inputs haven't changed"))
+	add_parameter(GNParameter.create_bool("cook_once", false,
+		"Cook Once", "Pulse: toggle ON to force a single cook, auto-resets to OFF"))
 	add_parameter(GNParameter.create_string("code", DEFAULT_CODE.strip_edges(),
 		"Script Code", "GDScript code with cook() function and @param/@input annotations"))
 
 
 func _pre_cook(delta: float) -> void:
 	time_dependent = get_param_value("time_dependent")
+	# Cook-once pulse: mark dirty for one frame, then auto-reset
+	if get_param_value("cook_once"):
+		mark_dirty()
+		set_param_value("cook_once", false)
 	super._pre_cook(delta)
 
 

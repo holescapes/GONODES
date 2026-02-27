@@ -339,12 +339,8 @@ func _register_core_operators() -> void:
 		"Solid color texture.")
 	_reg("TextTOP",         "TOP", TextTOP,
 		"Renders text to a texture via a Label in a SubViewport.")
-	_reg("ImageFileInTOP",  "TOP", ImageFileInTOP,
-		"Loads an image/texture from project resources (PNG, JPG, WebP, HDR, EXR, SVG, etc.).")
 	_reg("MovieFileInTOP",  "TOP", MovieFileInTOP,
 		"Plays a video file (.ogv Theora) as a live texture stream.")
-	_reg("ImageSequenceTOP", "TOP", ImageSequenceTOP,
-		"Plays a numbered image sequence (PNG, WebP, JPG) as animated texture frames.")
 
 	# ── TOPs: Filters (1 input) ─────────────────────────────────────────
 	_reg("LevelTOP",        "TOP", LevelTOP,
@@ -397,6 +393,8 @@ func _register_core_operators() -> void:
 	# ── TOPs: Output ────────────────────────────────────────────────────
 	_reg("WindowTOP",       "TOP", WindowTOP,
 		"Display a texture in a standalone OS window (VJ output).")
+	_reg("FileSaveTOP",     "TOP", FileSaveTOP,
+		"Save GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write.")
 
 	# ── CHOPs: Generators ───────────────────────────────────────────────
 	_reg("LFO_CHOP",        "CHOP", LFO_CHOP,
@@ -453,6 +451,10 @@ func _register_core_operators() -> void:
 	# ── CHOPs: Scripting ────────────────────────────────────────────────
 	_reg("ScriptCHOP",      "CHOP", ScriptCHOP,
 		"User-scripted CHOP. Write GDScript to generate or transform channel data.")
+
+	# ── CHOPs: Output / Sinks ───────────────────────────────────────────
+	_reg("RecordCHOP",      "CHOP", RecordCHOP,
+		"Record CHOP channels over time to buffer. Save to CSV/JSON.")
 
 	# ── SOPs: Generators ────────────────────────────────────────────────
 	_reg("GridSOP",         "SOP", GridSOP,
@@ -532,11 +534,23 @@ func _register_core_operators() -> void:
 	_reg("ScriptDAT",       "DAT", ScriptDAT,
 		"User-scripted DAT. Write GDScript to generate or transform table/text data.")
 
+	# ── DATs: Output / Sinks ────────────────────────────────────────────
+	_reg("FileSaveDAT",     "DAT", FileSaveDAT,
+		"Export table/text to disk (CSV, TSV, JSON, plain text).")
+
 	# ── IMGs: Generators ─────────────────────────────────────────────────
 	_reg("NoiseIMG",        "IMG", NoiseIMG,
 		"CPU procedural noise image (value noise, white noise).")
 	_reg("CheckerboardIMG", "IMG", CheckerboardIMG,
 		"CPU checkerboard pattern generator.")
+
+	# ── IMGs: File / Media Input ───────────────────────────────────────
+	_reg("ImageFileInIMG",  "IMG", ImageFileInIMG,
+		"Loads an image file (PNG, JPG, WebP, HDR, EXR, etc.) as CPU Image.")
+	_reg("ImageSequenceIMG", "IMG", ImageSequenceIMG,
+		"Plays a numbered image sequence as animated CPU Image frames.")
+	_reg("WebcamIMG",       "IMG", WebcamIMG,
+		"Live webcam/camera feed as CPU Image. Chain → ImgToTOP for GPU.")
 
 	# ── IMGs: Filters ───────────────────────────────────────────────────
 	_reg("BlurIMG",         "IMG", BlurIMG,
@@ -553,6 +567,16 @@ func _register_core_operators() -> void:
 	# ── IMGs: Bridge ────────────────────────────────────────────────────
 	_reg("ImgToTOP",        "IMG", ImgToTOP,
 		"Convert IMG (CPU Image) to TOP (GPU Texture). Bridge operator.")
+	_reg("TOPtoIMG",        "IMG", TOPtoIMG,
+		"Convert TOP (GPU Texture) to IMG (CPU Image). Bridge operator (GPU readback).")
+
+	# ── IMGs: Output / Sinks ────────────────────────────────────────────
+	_reg("FileSaveIMG",     "IMG", FileSaveIMG,
+		"Save CPU Image to disk (PNG, WebP, EXR). Toggle 'active' to write.")
+	_reg("MovieOutIMG",     "IMG", MovieOutIMG,
+		"Save image sequence to disk as numbered PNG/WebP frames.")
+	_reg("FFmpegOutIMG",    "IMG", FFmpegOutIMG,
+		"Encode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, ProRes).")
 
 	# ── COMPs ───────────────────────────────────────────────────────────
 	_reg("GeometryCOMP",    "COMP", GeometryCOMP,

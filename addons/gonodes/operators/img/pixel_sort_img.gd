@@ -48,7 +48,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var threshold_high: float = get_param_value("threshold_high")
 	var reverse: bool = get_param_value("reverse")
 
-	var img := src.image.duplicate()
+	# COW: duplicate only when upstream output is shared (fan-out)
+	var src_data := _mutable_input(src) as GNImageData
+	var img: Image = src_data.image
 	var w: int = img.get_width()
 	var h: int = img.get_height()
 

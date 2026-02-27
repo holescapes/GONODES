@@ -30,8 +30,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var radius: int = get_param_value("radius")
 	var passes: int = get_param_value("passes")
 
-	# Work on a copy so we don't modify upstream data
-	var img := src.image.duplicate()
+	# COW: duplicate only when upstream output is shared (fan-out)
+	var src_data := _mutable_input(src) as GNImageData
+	var img: Image = src_data.image
 	var w: int = img.get_width()
 	var h: int = img.get_height()
 
