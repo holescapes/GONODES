@@ -1186,10 +1186,15 @@ GONODES/
 - [x] **Performance: Lazy viewport creation**:
   - Viewport creation is deferred to first `_cook()` call — `_init_shader_viewport()` and `_ensure_viewport()` guard with `if _viewport != null: return`.
   - Disconnected TOPs have zero GPU footprint until first cook.
-- [ ] **Performance: GPU memory budget monitoring**:
-  - Track total estimated VRAM across all SubViewports.
-  - Warn when approaching configurable budget limit.
-  - Display in info bar alongside FPS/cook time.
+- [x] **Performance: GPU memory budget monitoring**:
+  - **Opt-in toggle** ("VRAM" CheckButton in toolbar, default OFF) — zero overhead when disabled.
+  - When enabled, reads `RenderingServer.get_rendering_info()` each frame for:
+    - `RENDERING_INFO_TEXTURE_MEM_USED` — texture memory (SubViewport FBOs, imported textures, etc.)
+    - `RENDERING_INFO_BUFFER_MEM_USED` — GPU buffer memory (meshes, particles, SSBOs)
+  - Info bar displays: `VRAM: 142MB (tex 120 + buf 22)`.
+  - Optional budget warning: `_vram_budget_mb` threshold — when exceeded, appends `⚠ >NMB` to the display.
+  - Cost: `get_rendering_info()` reads an internal engine counter — effectively free (no GPU readback, no stall).
+    Toggle exists for user peace of mind and to avoid visual clutter, not for performance reasons.
 - [x] **Performance: Resolution downscaling for previews** — **DEFERRED (low value)**:
   - Original idea: render inline preview thumbnails at ¼ or ½ res; full res only for viewer + sinks.
   - **Analysis concluded this is near-zero net gain.** Arguments:

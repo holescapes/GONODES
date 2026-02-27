@@ -21,8 +21,13 @@ var cook_engine: GNCookEngine
 ## Toolbar toggles (created in _setup_toolbar, stored for state persistence).
 var preview_toggle: CheckButton
 var perf_toggle: CheckButton
+var vram_toggle: CheckButton
 var nrt_toggle: CheckButton
 var nrt_fps_spin: SpinBox
+
+## VRAM budget monitoring (opt-in via toolbar toggle).
+var _vram_enabled: bool = false
+var _vram_budget_mb: float = 0.0   ## User-configurable budget (0 = no limit warning)
 
 ## Which node's output to display in the viewer (click to select).
 var _viewer_node_id: String = ""
@@ -159,6 +164,21 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	var total_nodes := network.get_node_count()
 	var active_count: int = cook_engine._active_set.size()
 	parts.append("Active: %d/%d" % [active_count, total_nodes])
+
+	# VRAM monitoring (only when toggled on)
+	if _vram_enabled:
+		var vram_tex: int = RenderingServer.get_rendering_info(
+			RenderingServer.RENDERING_INFO_TEXTURE_MEM_USED)
+		var vram_buf: int = RenderingServer.get_rendering_info(
+			RenderingServer.RENDERING_INFO_BUFFER_MEM_USED)
+		var vram_total_mb: float = float(vram_tex + vram_buf) / (1024.0 * 1024.0)
+		var vram_tex_mb: float = float(vram_tex) / (1024.0 * 1024.0)
+		var vram_buf_mb: float = float(vram_buf) / (1024.0 * 1024.0)
+		var vram_str: String = "VRAM: %.0fMB (tex %.0f + buf %.0f)" % [
+			vram_total_mb, vram_tex_mb, vram_buf_mb]
+		if _vram_budget_mb > 0.0 and vram_total_mb > _vram_budget_mb:
+			vram_str += " ⚠ >%.0fMB" % _vram_budget_mb
+		parts.append(vram_str)
 
 	if not _viewer_node_id.is_empty():
 		parts.append("Viewing: %s" % _viewer_node_id)
@@ -450,13 +470,22 @@ func _setup_toolbar() -> void:
 	info_bar.add_child(perf_toggle)
 	info_bar.move_child(perf_toggle, 6)
 
+	# VRAM monitoring toggle
+	vram_toggle = CheckButton.new()
+	vram_toggle.text = "VRAM"
+	vram_toggle.tooltip_text = "Show GPU memory usage in the info bar (opt-in — reads RenderingServer stats each frame when enabled)"
+	vram_toggle.button_pressed = false
+	vram_toggle.toggled.connect(func(on: bool): _vram_enabled = on)
+	info_bar.add_child(vram_toggle)
+	info_bar.move_child(vram_toggle, 7)
+
 	# Open Viewer button
 	var btn_viewer := Button.new()
 	btn_viewer.text = "+ Viewer"
 	btn_viewer.tooltip_text = "Open a floating viewer window for the selected TOP node"
 	btn_viewer.pressed.connect(func(): open_viewer_window())
 	info_bar.add_child(btn_viewer)
-	info_bar.move_child(btn_viewer, 7)
+	info_bar.move_child(btn_viewer, 8)
 
 	# Stress Test button
 	var btn_stress := Button.new()
@@ -464,12 +493,12 @@ func _setup_toolbar() -> void:
 	btn_stress.tooltip_text = "Build a 55+ node network for performance testing"
 	btn_stress.pressed.connect(_on_stress_test_pressed)
 	info_bar.add_child(btn_stress)
-	info_bar.move_child(btn_stress, 8)
+	info_bar.move_child(btn_stress, 9)
 
 	# Separator before graph-view tools
 	var sep2 := VSeparator.new()
 	info_bar.add_child(sep2)
-	info_bar.move_child(sep2, 9)
+	info_bar.move_child(sep2, 10)
 
 	# Minimap toggle
 	var minimap_toggle := CheckButton.new()
@@ -479,7 +508,7 @@ func _setup_toolbar() -> void:
 	minimap_toggle.toggled.connect(func(on: bool):
 		graph_editor.minimap_enabled = on)
 	info_bar.add_child(minimap_toggle)
-	info_bar.move_child(minimap_toggle, 10)
+	info_bar.move_child(minimap_toggle, 11)
 
 	# Wire style OptionButton
 	var wire_opt := OptionButton.new()
@@ -490,7 +519,7 @@ func _setup_toolbar() -> void:
 	wire_opt.item_selected.connect(func(idx: int):
 		graph_editor.set_wire_style(idx))
 	info_bar.add_child(wire_opt)
-	info_bar.move_child(wire_opt, 11)
+	info_bar.move_child(wire_opt, 12)
 
 	# Auto-layout button
 	var btn_layout := Button.new()
@@ -498,12 +527,12 @@ func _setup_toolbar() -> void:
 	btn_layout.tooltip_text = "Auto-layout all nodes (Ctrl+L)"
 	btn_layout.pressed.connect(func(): graph_editor.auto_layout())
 	info_bar.add_child(btn_layout)
-	info_bar.move_child(btn_layout, 12)
+	info_bar.move_child(btn_layout, 13)
 
 	# Separator before Non-Realtime controls
 	var sep3 := VSeparator.new()
 	info_bar.add_child(sep3)
-	info_bar.move_child(sep3, 13)
+	info_bar.move_child(sep3, 14)
 
 	# Non-Realtime toggle
 	nrt_toggle = CheckButton.new()
@@ -512,7 +541,7 @@ func _setup_toolbar() -> void:
 	nrt_toggle.button_pressed = false
 	nrt_toggle.toggled.connect(_on_nrt_toggled)
 	info_bar.add_child(nrt_toggle)
-	info_bar.move_child(nrt_toggle, 14)
+	info_bar.move_child(nrt_toggle, 15)
 
 	# Non-Realtime FPS SpinBox
 	nrt_fps_spin = SpinBox.new()
@@ -526,7 +555,7 @@ func _setup_toolbar() -> void:
 	nrt_fps_spin.custom_minimum_size.x = 90
 	nrt_fps_spin.value_changed.connect(_on_nrt_fps_changed)
 	info_bar.add_child(nrt_fps_spin)
-	info_bar.move_child(nrt_fps_spin, 15)
+	info_bar.move_child(nrt_fps_spin, 16)
 
 
 ## Keyboard shortcuts for file operations.
