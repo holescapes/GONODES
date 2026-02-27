@@ -53,6 +53,15 @@ var _expand_btn: Button = null
 ## Per-component expand buttons for opening the expression editor.
 var _comp_expand_btns: Array[Button] = []
 
+## Direct reference to the code TextEdit when inside a code-editor wrapper VBox.
+var _code_edit: TextEdit = null
+
+## Preloaded GNCodeEditor script (lazy reference avoids class_name resolution issues).
+const _GNCodeEditorScript := preload("res://addons/gonodes/ui/gn_code_editor.gd")
+
+## Lazily-created windowed code editor for Script/Shader params.
+var _code_editor: Window = null
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Construction
@@ -311,7 +320,62 @@ func _create_string_control() -> Control:
 	edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 	edit.scroll_fit_content_height = false
 	edit.focus_exited.connect(_on_string_focus_lost.bind(edit))
+
+	# If this is a code param (Script operators or CustomShaderTOP), add Edit ↗ button
+	if _is_code_editor_param():
+		_code_edit = edit
+		var vbox := VBoxContainer.new()
+		vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+		vbox.add_theme_constant_override("separation", 2)
+
+		# "Edit ↗" opens the full windowed code editor (presets, highlighting, etc.)
+		var edit_btn := Button.new()
+		edit_btn.text = "Edit \u2197"
+		edit_btn.tooltip_text = "Open full code editor (syntax highlighting, presets, Ctrl+Enter)"
+		edit_btn.custom_minimum_size = Vector2(60, 26)
+		edit_btn.pressed.connect(_open_code_editor)
+		vbox.add_child(edit_btn)
+		vbox.add_child(edit)
+		return vbox
+
 	return edit
+
+
+## Returns true if this row represents a code parameter that should get the
+## windowed code-editor UI:  "code" on Script operators, or "shader_code" on
+## CustomShaderTOP (node_type == "glsl").
+func _is_code_editor_param() -> bool:
+	if owner_node == null or param == null:
+		return false
+	if param.param_name == "code" and owner_node.node_type.begins_with("script"):
+		return true
+	if param.param_name == "shader_code":
+		return true
+	return false
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Windowed Code Editor
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Lazily creates (or re-opens) the windowed GNCodeEditor for this param.
+func _open_code_editor() -> void:
+	if _code_editor == null:
+		_code_editor = _GNCodeEditorScript.new()
+		add_child(_code_editor)
+		_code_editor.code_committed.connect(_on_code_editor_committed)
+	_code_editor.open(owner_node, param.param_name)
+
+
+## Handles confirmed code from the windowed editor — applies it to the param
+## and syncs the inline TextEdit.
+func _on_code_editor_committed(text: String, _param_name: String) -> void:
+	param.set_value(text)
+	if _code_edit != null:
+		_code_edit.text = text
+	if owner_node:
+		owner_node.mark_dirty()
+
 
 
 func _create_enum_control() -> Control:
@@ -844,7 +908,8 @@ func _update_value_display() -> void:
 				cb.button_pressed = bool(param.get_resolved_value())
 				cb.text = "On" if cb.button_pressed else "Off"
 		GNParameter.ValueType.STRING:
-			var edit := _control as TextEdit
+			# _code_edit is set when this is a Script code param wrapped in VBox
+			var edit: TextEdit = _code_edit if _code_edit != null else (_control as TextEdit)
 			if edit:
 				edit.text = str(param.get_resolved_value())
 		GNParameter.ValueType.ENUM:

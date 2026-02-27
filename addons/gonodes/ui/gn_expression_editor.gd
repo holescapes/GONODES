@@ -1,14 +1,15 @@
 class_name GNExpressionEditor
-extends Window
+extends "res://addons/gonodes/ui/gn_base_code_editor.gd"
 ## A modal multi-line expression editor popup.
 ## Provides a CodeEdit with syntax-hinting, an autocomplete helper,
 ## and a live error indicator for writing complex GDScript expressions.
+##
+## Extends GNBaseCodeEditor for shared Window / CodeEdit / button-row layout.
 ##
 ## Usage:
 ##   var editor := GNExpressionEditor.new()
 ##   add_child(editor)
 ##   editor.open(param, component_index)
-##   # Connect to expression_committed to receive the final text
 ##   editor.expression_committed.connect(_handle_expr)
 
 const _ExprFunctions := preload("res://addons/gonodes/core/gn_expression_functions.gd")
@@ -21,13 +22,8 @@ signal expression_committed(text: String, param: GNParameter, component_idx: int
 ## The network reference for autocomplete (node IDs, params, channels).
 var network: GNNetwork = null
 
-# ─── Internal UI ──────────────────────────────────────────────────────────────
+# ─── Internal State ───────────────────────────────────────────────────────────
 
-var _code_edit: CodeEdit = null
-var _error_label: Label = null
-var _ok_btn: Button = null
-var _cancel_btn: Button = null
-var _info_label: Label = null
 var _param: GNParameter = null
 var _component_idx: int = -1
 
@@ -46,124 +42,47 @@ static var _user_snippets_loaded: bool = false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Lifecycle
+# Lifecycle Overrides
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
+	super()
 	title = "Expression Editor"
 	size = Vector2i(560, 400)
-	min_size = Vector2i(400, 280)
-	unresizable = false
-	exclusive = true
-	wrap_controls = true
-	transient = true
 
 
-func _ready() -> void:
-	# Root container
-	var root := MarginContainer.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.add_theme_constant_override("margin_left", 8)
-	root.add_theme_constant_override("margin_right", 8)
-	root.add_theme_constant_override("margin_top", 8)
-	root.add_theme_constant_override("margin_bottom", 8)
-	add_child(root)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 6)
-	root.add_child(vbox)
-
-	# Info label (shows param name + type)
-	_info_label = Label.new()
-	_info_label.add_theme_font_size_override("font_size", 12)
-	_info_label.add_theme_color_override("font_color", Color(0.65, 0.65, 0.65))
-	vbox.add_child(_info_label)
-
-	# CodeEdit — the main expression editing area
-	_code_edit = CodeEdit.new()
-	_code_edit.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_code_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_code_edit.custom_minimum_size = Vector2(0, 180)
-	_code_edit.add_theme_font_size_override("font_size", 14)
-
-	# Appearance tweaks
-	_code_edit.gutters_draw_line_numbers = true
-	_code_edit.scroll_smooth = true
-	_code_edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
-	_code_edit.caret_blink = true
-	_code_edit.highlight_current_line = true
-	_code_edit.draw_tabs = true
-
-	# Code completion
-	_code_edit.code_completion_enabled = true
-	_code_edit.code_completion_prefixes = PackedStringArray([".", "(", "\""])
-	_code_edit.code_completion_requested.connect(_on_code_completion_requested)
-
-	# Syntax coloring
+## Configures code completion and syntax highlighting on the shared CodeEdit.
+func _setup_code_edit(edit: CodeEdit) -> void:
+	edit.code_completion_enabled = true
+	edit.code_completion_prefixes = PackedStringArray([".", "(", "\""])
+	edit.code_completion_requested.connect(_on_code_completion_requested)
+	edit.text_changed.connect(_on_text_changed)
 	_setup_syntax_highlighter()
 
-	_code_edit.text_changed.connect(_on_text_changed)
-	vbox.add_child(_code_edit)
 
-	# Error label (shows compile errors in red)
-	_error_label = Label.new()
-	_error_label.add_theme_font_size_override("font_size", 11)
-	_error_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.3))
-	_error_label.text = ""
-	_error_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_error_label.custom_minimum_size = Vector2(0, 20)
-	vbox.add_child(_error_label)
-
-	# Button row
-	var btn_row := HBoxContainer.new()
-	btn_row.add_theme_constant_override("separation", 8)
-	btn_row.alignment = BoxContainer.ALIGNMENT_END
-	vbox.add_child(btn_row)
-
-	# Presets / Snippets dropdown
+## Adds the Snippets dropdown and reference cheatsheet to the bottom bar.
+func _build_bottom_bar(bar: HBoxContainer) -> void:
 	var presets_btn := MenuButton.new()
-	presets_btn.text = "Snippets ▾"
+	presets_btn.text = "Snippets \u25be"
 	presets_btn.tooltip_text = "Insert expression preset or snippet"
 	presets_btn.custom_minimum_size = Vector2(90, 30)
 	presets_btn.flat = false
 	_snippets_popup = presets_btn.get_popup()
 	_load_user_snippets()
 	_build_presets_menu(_snippets_popup)
-	btn_row.add_child(presets_btn)
+	bar.add_child(presets_btn)
 
-	# Reference cheatsheet
 	var ref_label := Label.new()
 	ref_label.text = "Vars: me, time, frame, dt  |  Funcs: chop(), op(), top(), fit(), smooth()"
 	ref_label.add_theme_font_size_override("font_size", 10)
 	ref_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	ref_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	btn_row.add_child(ref_label)
-
-	_cancel_btn = Button.new()
-	_cancel_btn.text = "Cancel"
-	_cancel_btn.custom_minimum_size = Vector2(80, 30)
-	_cancel_btn.pressed.connect(_on_cancel)
-	btn_row.add_child(_cancel_btn)
-
-	_ok_btn = Button.new()
-	_ok_btn.text = "OK"
-	_ok_btn.custom_minimum_size = Vector2(80, 30)
-	_ok_btn.pressed.connect(_on_ok)
-	btn_row.add_child(_ok_btn)
-
-	# Window close = cancel
-	close_requested.connect(_on_cancel)
+	bar.add_child(ref_label)
 
 
-func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_ENTER and event.ctrl_pressed:
-			# Ctrl+Enter → confirm
-			_on_ok()
-			get_viewport().set_input_as_handled()
-		elif event.keycode == KEY_ESCAPE:
-			_on_cancel()
-			get_viewport().set_input_as_handled()
+func _on_ok() -> void:
+	var text := _code_edit.text.strip_edges()
+	expression_committed.emit(text, _param, _component_idx)
+	hide()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -211,10 +130,7 @@ func open(param: GNParameter, component_idx: int = -1) -> void:
 	_validate_expression(expr_text)
 
 	popup_centered()
-	_code_edit.grab_focus()
-	# Move caret to end
-	_code_edit.set_caret_line(_code_edit.get_line_count() - 1)
-	_code_edit.set_caret_column(_code_edit.get_line(_code_edit.get_line_count() - 1).length())
+	_focus_end()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -735,17 +651,3 @@ func _validate_expression(text: String) -> void:
 	else:
 		_error_label.text = "Expression OK"
 		_error_label.add_theme_color_override("font_color", Color(0.4, 0.85, 0.4))
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Actions
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func _on_ok() -> void:
-	var text := _code_edit.text.strip_edges()
-	expression_committed.emit(text, _param, _component_idx)
-	hide()
-
-
-func _on_cancel() -> void:
-	hide()

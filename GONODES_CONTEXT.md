@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-02-26
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge). Phases 1–6 complete. 93 operators across 7 families (29 TOP, 7 IMG, 22 CHOP, 13 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output).
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 93 operators across 7 families (29 TOP, 7 IMG, 22 CHOP, 13 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). Clean editor/engine separation — headless execution carries zero UI overhead.
 
 ---
 
@@ -261,11 +261,12 @@ func update_preview_control(ctrl: Control) -> void: pass  # No-op
 
 ### Family Base Classes
 
-Five intermediate base classes sit between GNNode and the individual operators. Each sets the `family`, provides family-specific helpers, and overrides the preview virtual methods.
+Seven intermediate base classes sit between GNNode and the individual operators. Each sets the `family`, provides family-specific helpers, and overrides the preview virtual methods.
 
 | Base Class | Family | Cached Data | Preview | Helpers |
 |------------|--------|-------------|---------|--------|
 | `GNTopBase` | TOP | `_viewport`, `_material`, `_canvas`, `_cached_tex_data` | TextureRect from `cached_output.texture` | `_get_input_top()`, `_create_viewport()`, `_ensure_viewport()`, `_init_shader_viewport()`, `execute_cook()` |
+| `GNImgBase` | IMG | `_cached_image_data: GNImageData` | Label: resolution + format (no GPU upload) | `_prepare_image()`, `_get_input_img()`, `_format_name()` |
 | `GNChopBase` | CHOP | `_cached_channel_data: GNChannelData` | Label: channel name:value pairs | `_prepare_output(sr)`, `_get_input_chop()` |
 | `GNDatBase` | DAT | `_cached_table: GNTableData` | Label: headers + first 3 rows | `_prepare_table(clear)`, `_get_input_dat()` |
 | `GNSopBase` | SOP | `_cached_geo: GNGeoData` | Label: vertex/surface counts | `_prepare_geo()`, `_get_input_sop()`, `_require_input_geo()` |
@@ -577,7 +578,13 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 - Renders GNNetwork as GraphNode instances
 - Handles drag-and-drop from palette, wiring, deletion
 - Color-codes connections by family
-- Tab key opens node palette popup
+- Tab key opens node palette popup (unfiltered)
+- **Drop-wire-to-add-node**: dropping a wire on empty canvas opens a filtered palette showing only compatible operators:
+  - `connection_to_empty` signal (output → canvas): filters to operators accepting that output's family
+  - `connection_from_empty` signal (canvas → input): filters to operators producing that input's family
+  - Selected operator auto-connects to the first compatible port (with undo/redo support)
+  - **Ghost wire**: semi-transparent line drawn from the source port to the drop point while the palette is open, cleared on palette close/select
+  - Pending connection and ghost wire state stored in `_pending_connection` / `_ghost_wire` dicts, cleared on palette close
 - **Right-click context menu** (`PopupMenu`) with contextual options:
   - Add Node… (opens palette), Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo
   - Items grayed out when not applicable (e.g., no selection → copy/cut/delete disabled)
@@ -591,6 +598,14 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 - `set_perf_overlay_visible(enabled)` — shows/hides all existing perf overlay labels; newly created views auto-show if `perf_overlay_visible` is true
 - `update_previews()` — skips updates when `previews_visible` is false (zero cost when hidden)
 - `update_perf_overlays()` — skips updates when `perf_overlay_visible` is false
+
+### GNNodePalette (extends Popup)
+- Tree-based operator browser grouped by family, with search filtering
+- Family groups iterate `GNFamily.FAMILY_NAMES` dynamically (not hardcoded) — adding a new family auto-populates the palette
+- Operator descriptions fetched from `GNExtensionRegistry.get_description()` for tooltips
+- **Filtered mode** via `popup_at_filtered(global_pos, allowed_operators: PackedStringArray)`: only shows operators in the allowed list. Used by drop-wire-to-add-node.
+- **Unfiltered mode** via `popup_at(global_pos)`: shows all operators (Tab key, right-click → Add Node)
+- Filter cleared automatically on `popup_hide` signal
 
 ### GNNodeView (extends GraphNode)
 - Visual representation of a GNNode
@@ -899,7 +914,7 @@ GONODES/
 - [x] **Mini preview thumbnails** on all nodes (generic preview system):
   - `GNNode.create_preview_control()` — virtual, returns a custom `Control` for family-specific previews. Returns null by default (type-agnostic GNNode).
   - `GNNode.update_preview_control(control)` — virtual, called each cook frame to update previews. No-op by default.
-  - Family base classes override these: GNTopBase (TextureRect), GNChopBase (Label: channel values), GNDatBase (Label: table rows), GNSopBase (Label: mesh stats), GNCompBase (Label: node class).
+  - Family base classes override these: GNTopBase (TextureRect), GNImgBase (Label: resolution/format — no GPU upload), GNChopBase (Label: channel values), GNDatBase (Label: table rows), GNSopBase (Label: mesh stats), GNCompBase (Label: node class), GNMatBase (Label: material type).
   - `GNNodeView._setup_preview()` — creates preview control via `gn_node.create_preview_control()` (120×80px min size).
   - `GNGraphEditor.update_previews()` iterates ALL node views each cook frame (skipped when hidden).
   - Extensible: any operator can override `create_preview_control()` for operator-specific rendering.
@@ -992,6 +1007,13 @@ GONODES/
   - **Scripting:** `ScriptIMG` — user GDScript with `@param`/`@input` annotations.
   - User presets at `user://gonodes_presets/<family>/` (load/save via static methods).
   - Dynamic param rebuild with value preservation (same pattern as CustomShaderTOP).
+- [x] **IMG preview optimization** — changed GNImgBase preview from TextureRect (GPU upload every cook) to lightweight text Label showing “512×320\nRGBA8”. No GPU upload, consistent with SOP/CHOP/DAT label-based previews. Helper `_format_name()` maps `Image.Format` enums to short names.
+- [x] **Dynamic palette family iteration** — GNNodePalette now iterates `GNFamily.FAMILY_NAMES` dynamically instead of a hardcoded array. Adding a new family enum auto-populates the palette with zero code changes. Removed `_family_name_to_enum()` helper.
+- [x] **Drop-wire-to-add-node workflow** — dropping a wire on empty canvas opens a filtered palette:
+  - `GNExtensionRegistry.get_operators_accepting_family(family)` / `get_operators_producing_family(family)` with lazy `_input_family_cache` (built by instantiating all operators + `_init_ports()` to inspect ports, freed immediately).
+  - `GNNodePalette.popup_at_filtered(pos, allowed_operators)` shows only compatible operators. Filter cleared on popup hide.
+  - `GNGraphEditor` connects `connection_to_empty` / `connection_from_empty` signals. Stores `_pending_connection` dict, opens filtered palette, auto-connects first compatible port on selection (with undo/redo).
+  - **Ghost wire**: semi-transparent line from source port to drop point while palette is open, drawn on expression-ref overlay. Stored in `_ghost_wire` dict, cleared on palette close.
 - [ ] **OSC input/output operators**:
   - OscInCHOP — receives OSC messages on configurable UDP port, maps to channels.
   - OscOutCHOP — sends channel data as OSC messages to target host:port.
@@ -1055,6 +1077,7 @@ GONODES/
   - [x] Expression presets / snippets — Snippets ▾ dropdown in expression editor with 30+ templates across 6 categories (Time, Remapping, Smoothing, Noise, Node References, Math Patterns).
   - [x] Expression profiling — per-expression eval time (µs) tracked on `GNParameter.expression_eval_usec/avg_usec`, shown in expression field tooltip + editor info bar. Per-component timing independent.
   - [x] Built-in utility functions on CookEngine: `fit()`, `fit01()`, `smooth()`, `lag()`, `pulse()`, `step()`, `smoothstep()`, `cycle()`, `bounce()`, `noise1()`, `noise2()`, `trigger()`. Stateful functions use per-key state dicts.
+  - [x] Windowed code editor for Script operators & CustomShaderTOP — `GNCodeEditor` (extends `GNBaseCodeEditor`) with CodeEdit, mode-adaptive syntax highlighting (GDScript for Script ops, GLSL for shaders), preset load/save via GNScriptHelper, reference cheatsheet, Ctrl+Enter confirm. Opened via "Edit ↗" button in GNParamRow. Both `GNCodeEditor` and `GNExpressionEditor` share a common base class (`GNBaseCodeEditor`) providing Window layout, CodeEdit configuration, key bindings, and status bar.
   - Reference: `help/expressions_guide.md` for complete expression system docs.
 - [ ] **File output / save-to-disk operators**:
   - **FileSaveIMG** (IMG family) — saves CPU Image to disk (PNG, WebP, EXR, HDR). Path, format, quality params. Optional auto-numbering for sequences.
@@ -2483,8 +2506,10 @@ The parameter inspector is a right-side panel that shows all parameters for the 
 
 | File | Class | Purpose |
 |------|-------|---------|
-| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard. ↗ expand buttons open multi-line editor. Profiling tooltip. |
-| `addons/gonodes/ui/gn_expression_editor.gd` | `GNExpressionEditor` | Modal Window with CodeEdit for multi-line expression editing. Syntax highlighting, live validation, autocomplete (node IDs, channels, params, custom funcs), Snippets dropdown (30+ presets), profiling info bar. |
+| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard. ↗ expand buttons open multi-line editor. Code params get "Edit ↗" button opening GNCodeEditor. Profiling tooltip. |
+| `addons/gonodes/ui/gn_base_code_editor.gd` | `GNBaseCodeEditor` | Abstract base class (extends Window) for modal code-editing windows. Provides shared layout: MarginContainer → VBox → info label → toolbar hook → CodeEdit (line numbers, auto-indent, brace completion, word wrap) → status label → Cancel/OK buttons. Key bindings (Ctrl+Enter, Escape). Virtual hooks: `_build_toolbar()`, `_setup_code_edit()`, `_build_bottom_bar()`, `_on_ok()`. Helper methods: `_focus_end()`, `_set_status()`. |
+| `addons/gonodes/ui/gn_expression_editor.gd` | `GNExpressionEditor` | Extends GNBaseCodeEditor. Expression editing with code completion (node IDs, channels, params, custom funcs), live validation, Snippets ▾ dropdown (30+ built-in + user snippets persisted to disk), reference cheatsheet. |
+| `addons/gonodes/ui/gn_code_editor.gd` | `GNCodeEditor` | Extends GNBaseCodeEditor. Script operator / CustomShaderTOP code editing with GDScript or GLSL syntax highlighting (mode-adaptive), preset load/save toolbar (via GNScriptHelper), save-preset dialog, reference cheatsheet. |
 | `addons/gonodes/ui/gn_param_inspector.gd` | `GNParamInspector` | PanelContainer with family color bar, header (node ID, type, cook time), scrollable GNParamRow list, placeholder label when nothing selected |
 
 ### Key Design Decisions
@@ -2676,6 +2701,25 @@ These are non-negotiable constraints discovered during development. **Never viol
   8. Inspector refreshes header label on re-inspect of same node object
 - **Validation:** IDs must match `^[a-zA-Z_][a-zA-Z0-9_]*$` (alphanumeric + underscore, starts with letter or underscore). Empty and duplicate IDs are rejected.
 - **GraphNode.name matters:** GraphEdit uses `GraphNode.name` for wire routing. The `name` property MUST be updated atomically with the visual wire disconnect/reconnect to avoid orphaned connections.
+
+### 25.19 GNNode Lifecycle — `.new()` vs `initialize()` vs `_init_ports()`
+
+- **Problem:** `create_instance()` calls `.new()` which runs `_init()`, but `_init_ports()` is NOT called in the constructor — it’s deferred to `initialize(id)`. This means a freshly `.new()`’d operator has **empty `input_ports` and `output_ports` arrays**.
+- **Root cause:** GDScript constructors (`_init()`) cannot reliably call virtual methods on subclasses. `_init_ports()` is virtual and overridden by every operator, so it must be called after construction.
+- **Lifecycle:**
+  1. `_init()` (constructor) — sets `node_type`, `family`, `node_description`, `time_dependent`, `is_sink`. **No ports, no parameters.**
+  2. `initialize(id)` — sets ID, disables processing, calls `_init_ports()` + `_init_parameters()`, wires parameter signals.
+  3. Full `initialize()` is only needed for nodes entering the network (need ID, need param signal wiring).
+- **When you only need ports** (e.g., building the input-family cache for the palette filter): call `node._init_ports()` explicitly after `.new()`. Do NOT call full `initialize()` — it requires a unique ID and wires signals that are unnecessary for introspection.
+- **When you only need identity** (family, node_type): `.new()` alone is sufficient.
+- **Applies to:** `GNExtensionRegistry._build_input_family_cache()` which instantiates all operators, calls `_init_ports()`, inspects port arrays, then frees them. Without the explicit `_init_ports()` call, the cache would be empty and palette filtering would show all operators unfiltered.
+
+### 25.20 Editor/Engine Separation — Headless Safety
+
+- **Rule:** Core engine code (`core/`, `operators/`) must NEVER import or reference UI code (`ui/`). The cook engine, network model, and all operators run without the editor present.
+- **Preview methods** (`create_preview_control()`, `update_preview_control()`) live in family base classes under `core/` but are virtual no-ops that create simple `Label`/`TextureRect` nodes. They are ONLY called by `GNNodeView` (in `ui/`) — never by the cook engine. In headless mode, no caller exists, so no Controls are created.
+- **Verified clean:** No file in `core/` or `operators/` uses `preload()`/`load()` on any `ui/` path. No operator references `GNNodeView`, `GNGraphEditor`, `GNParamInspector`, or any UI class.
+- **Cache building** (`_build_input_family_cache`): instantiates operators via `.new()` + `_init_ports()` only. Operator `_init()` methods set trivial string/bool fields — no viewports, shaders, textures, or Controls created. Nodes freed immediately after inspection.
 
 ---
 
@@ -2875,7 +2919,7 @@ The IMG family provides CPU-side image processing as a first-class citizen, clea
 |-----------|-------------|
 | `GNFamily.Type.IMG` | New enum value. Teal color `(0.3, 0.7, 0.7)` in graph editor. |
 | `GNImageData` | Data class wrapping `Image`. `set_image()`, `resolution`, `format`. Deep-copies on `duplicate_data()`. |
-| `GNImgBase` | Family base class. No SubViewport. `_prepare_image()` helper. TextureRect preview (uploads to ImageTexture on-the-fly). |
+| `GNImgBase` | Family base class. No SubViewport. `_prepare_image()` helper. Lightweight text Label preview showing resolution + format (no GPU upload). |
 | `@input img` | Annotation support in Script operators. Maps to `GNFamily.Type.IMG`. |
 
 #### 27.4.2 Operators
@@ -2992,7 +3036,7 @@ GONODES uses a dynamic operator registry (`GNExtensionRegistry`) to manage all o
 
 ### 28.2 Registry Singleton
 
-`GNExtensionRegistry` is a `RefCounted`-based lazy singleton accessed via `GNExtensionRegistry.instance()`. It is initialized on first access, at which point all 78 core operators are registered via `_register_core_operators()`. Extension scanning happens explicitly via `scan_extensions()`, called during editor startup (`gn_editor.gd._ready()`).
+`GNExtensionRegistry` is a `RefCounted`-based lazy singleton accessed via `GNExtensionRegistry.instance()`. It is initialized on first access, at which point all 93 core operators are registered via `_register_core_operators()`. Extension scanning happens explicitly via `scan_extensions()`, called during editor startup (`gn_editor.gd._ready()`).
 
 ### 28.3 OperatorEntry
 
@@ -3015,7 +3059,11 @@ Each registered operator is stored as an `OperatorEntry` with:
 | `get_operator_count()` | int | Total registered operators |
 | `get_all_operator_names()` | PackedStringArray | All registered names |
 | `get_loaded_extensions()` | PackedStringArray | Loaded extension folder names |
+| `get_operators_accepting_family(family)` | Array[String] | Operators with an input port matching `family` |
+| `get_operators_producing_family(family)` | Array[String] | Operators with an output port matching `family` |
 | `scan_extensions()` | void | Discover and load `gn_ext_*` addons |
+
+**Input-family cache:** `get_operators_accepting_family()` and `get_operators_producing_family()` are backed by a lazy `_input_family_cache` dictionary built on first call. The cache instantiates every registered operator (`.new()` + `_init_ports()` only — not full `initialize()`) to inspect their port arrays, then frees them. Cache is invalidated on `register_operator()` / `unregister_operator()`. Used by the drop-wire-to-add-node feature to filter the palette to compatible operators.
 
 ### 28.5 Extension Convention
 
