@@ -33,6 +33,17 @@ var frame_cook_time_ms: float = 0.0
 ## If true, the engine cooks every frame. Set false to pause cooking.
 var cooking_enabled: bool = true
 
+## Non-realtime mode — when true, uses a fixed timestep instead of wall-clock
+## delta.  Every cook frame advances by exactly 1.0 / non_realtime_fps seconds,
+## regardless of actual elapsed time.  This guarantees deterministic, frame-
+## perfect recording with zero dropped frames — heavy patches that can't keep up
+## in real-time produce identical output to lightweight ones.
+var non_realtime: bool = false
+
+## Target FPS for non-realtime mode.  Each cook frame advances virtual time by
+## 1.0 / non_realtime_fps.  Typical values: 24 (film), 30 (NTSC), 60 (game).
+var non_realtime_fps: float = 30.0
+
 ## Maximum nodes to cook per frame (0 = unlimited).
 ## Can be used to throttle heavy patches on low-end hardware.
 var max_cooks_per_frame: int = 0
@@ -103,9 +114,16 @@ func _process(delta: float) -> void:
 	# Ensure any newly added network nodes are in the scene tree
 	if not _nodes_adopted:
 		_adopt_network_nodes()
-	current_delta = delta
-	elapsed_time += delta
-	cook_frame(delta)
+
+	# Non-realtime: fixed timestep — deterministic, frame-perfect timing
+	if non_realtime:
+		current_delta = 1.0 / non_realtime_fps
+		elapsed_time += current_delta
+	else:
+		current_delta = delta
+		elapsed_time += delta
+
+	cook_frame(current_delta)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -424,42 +442,28 @@ func _rebuild_consumer_counts() -> void:
 
 
 ## Gathers input data for a node from upstream nodes' cached outputs.
-## For single-input ports, returns a flat array aligned by port index.
-## For multi-input ports, collects all connections into an array at that slot.
+## Returns a flat array aligned by port index — each slot holds the upstream
+## node's [code]cached_output[/code] or null if that port is disconnected.
+## Dynamic-input nodes may have trailing null slots for empty auto-grow ports.
 func _gather_inputs(node: GNNode) -> Array[GNData]:
-	# Check if any port is multi-input
-	var has_multi: bool = false
-	for port in node.input_ports:
-		if port.multi_input:
-			has_multi = true
-			break
-
-	if not has_multi:
-		# Fast path: simple single-input ports (most operators)
-		var inputs: Array[GNData]
-		if _input_cache.has(node.id):
-			inputs = _input_cache[node.id]
-			for i in range(inputs.size()):
-				inputs[i] = null
-		else:
-			inputs = []
+	var inputs: Array[GNData]
+	if _input_cache.has(node.id):
+		inputs = _input_cache[node.id]
+		# Resize if port count changed (dynamic inputs)
+		if inputs.size() != node.input_ports.size():
 			inputs.resize(node.input_ports.size())
-			_input_cache[node.id] = inputs
+		for i in range(inputs.size()):
+			inputs[i] = null
+	else:
+		inputs = []
+		inputs.resize(node.input_ports.size())
+		_input_cache[node.id] = inputs
 
-		for conn in network.get_input_connections(node.id):
-			var upstream: GNNode = network.nodes.get(conn.from_node, null)
-			if upstream and upstream.cached_output and conn.to_port < inputs.size():
-				inputs[conn.to_port] = upstream.cached_output
-		return inputs
-
-	# Multi-input path: collect all upstream data per multi-input port into a flat array
-	# E.g., MergeSOP with 5 connections on port 0 → inputs array has 5 elements
-	var multi_data: Array[GNData] = []
 	for conn in network.get_input_connections(node.id):
 		var upstream: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream and upstream.cached_output:
-			multi_data.append(upstream.cached_output)
-	return multi_data
+		if upstream and upstream.cached_output and conn.to_port < inputs.size():
+			inputs[conn.to_port] = upstream.cached_output
+	return inputs
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

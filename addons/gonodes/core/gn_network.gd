@@ -207,12 +207,11 @@ func connect_nodes(from_id: String, from_port: int,
 			GNFamily.get_family_name(out_port.family), GNFamily.get_family_name(in_port.family)])
 		return false
 
-	# Check if input already has a connection (unless multi_input)
-	if not in_port.multi_input:
-		for conn in connections:
-			if conn.to_node == to_id and conn.to_port == to_port:
-				push_warning("GNNetwork.connect: input port %d on '%s' already connected" % [to_port, to_id])
-				return false
+	# Each input port accepts exactly one connection
+	for conn in connections:
+		if conn.to_node == to_id and conn.to_port == to_port:
+			push_warning("GNNetwork.connect: input port %d on '%s' already connected" % [to_port, to_id])
+			return false
 
 	# Check for duplicate connection
 	for conn in connections:
@@ -235,6 +234,11 @@ func connect_nodes(from_id: String, from_port: int,
 	GNLogger.info("Network", "Connected %s:%d → %s:%d" % [from_id, from_port, to_id, to_port])
 	connection_added.emit(test_conn)
 	graph_changed.emit()
+
+	# Auto-grow dynamic input ports (adds a trailing empty slot)
+	if to_node._dynamic_input:
+		_update_dynamic_node_inputs(to_id)
+
 	return true
 
 
@@ -253,6 +257,11 @@ func disconnect_nodes(from_id: String, from_port: int,
 			GNLogger.info("Network", "Disconnected %s:%d → %s:%d" % [from_id, from_port, to_id, to_port])
 			connection_removed.emit(conn)
 			graph_changed.emit()
+
+			# Auto-shrink dynamic input ports (collapse trailing empties)
+			if to_node and to_node._dynamic_input:
+				_update_dynamic_node_inputs(to_id)
+
 			return true
 	push_warning("GNNetwork.disconnect: connection not found")
 	return false
@@ -263,6 +272,19 @@ func disconnect_nodes(from_id: String, from_port: int,
 func get_input_connections(node_id: String) -> Array:
 	_rebuild_adjacency()
 	return _input_conn_map.get(node_id, [])
+
+
+## Recalculates dynamic input port count for a node based on which ports
+## currently have connections.  Ensures exactly one trailing empty slot.
+func _update_dynamic_node_inputs(node_id: String) -> void:
+	var node: GNNode = nodes.get(node_id, null)
+	if node == null or not node._dynamic_input:
+		return
+	var connected: PackedInt32Array = []
+	for conn in connections:
+		if conn.to_node == node_id:
+			connected.append(conn.to_port)
+	node.update_dynamic_inputs(connected)
 
 
 ## Returns all connections going out from a specific node.
@@ -585,6 +607,14 @@ func from_dict(d: Dictionary) -> bool:
 			to_node.mark_dirty()
 
 	_invalidate_topo()
+
+	# ── Post-load: sync dynamic input port counts ──
+	# The saved dynamic_input_count was restored in from_dict(), but run the
+	# canonical update as a safety net so trailing empty slots are correct.
+	for node_id2 in nodes:
+		var n: GNNode = nodes[node_id2]
+		if n._dynamic_input:
+			_update_dynamic_node_inputs(node_id2)
 
 	GNLogger.info("Network", "Loaded patch: %d nodes, %d connections" % [
 		nodes.size(), connections.size()])

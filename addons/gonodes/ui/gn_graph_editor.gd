@@ -48,10 +48,17 @@ enum _CtxID {
 	ALIGN_H,
 	ALIGN_V,
 	AUTO_LAYOUT,
+	EXPORT_OUTPUT,
 }
 
 ## Undo/redo history for graph operations.
 var _undo_redo := UndoRedo.new()
+
+## FileDialog used by Export Output… context menu action.
+var _export_dialog: FileDialog = null
+
+## The node whose output is being exported (set before dialog opens).
+var _export_target_node: GNNode = null
 
 ## Snapshot of selected node positions before a drag move begins.
 var _pre_move_positions: Dictionary = {}
@@ -1753,6 +1760,19 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item("Node Help", _CtxID.NODE_HELP)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.NODE_HELP), selected_ids.size() != 1)
 
+	# Export Output — enabled when exactly one node selected with exportable output
+	var can_export := false
+	if selected_ids.size() == 1 and network != null:
+		var export_node: GNNode = network.get_node_by_id(selected_ids[0])
+		if export_node != null:
+			if export_node.cached_output != null and export_node.cached_output.valid:
+				can_export = true
+			elif export_node is GNCompBase and (export_node as GNCompBase).get_scene_node() != null:
+				# COMP nodes like LightCOMP/CameraCOMP return null data but have a scene node
+				can_export = true
+	_context_menu.add_item("Export Output…", _CtxID.EXPORT_OUTPUT)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.EXPORT_OUTPUT), not can_export)
+
 	_context_menu.position = Vector2i(screen_pos)
 	_context_menu.reset_size()
 	_context_menu.popup()
@@ -1806,6 +1826,8 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			var selected := _get_selected_node_ids()
 			if selected.size() == 1:
 				help_requested.emit(selected[0])
+		_CtxID.EXPORT_OUTPUT:
+			_begin_export_output()
 
 
 ## Helper: creates a Shortcut with a single InputEventKey for menu display.
@@ -1817,6 +1839,291 @@ func _shortcut(keycode: Key, ctrl: bool = false, alt: bool = false) -> Shortcut:
 	var sc := Shortcut.new()
 	sc.events = [ev]
 	return sc
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Export Output
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Begins the export workflow: identifies the selected node, configures the
+## FileDialog with family-appropriate filters, and shows it.
+func _begin_export_output() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node == null:
+		return
+	# COMP nodes may have a scene node even when cached_output is null (Light, Camera)
+	var has_data := node.cached_output != null and node.cached_output.valid
+	var has_scene := node is GNCompBase and (node as GNCompBase).get_scene_node() != null
+	if not has_data and not has_scene:
+		return
+	_export_target_node = node
+
+	# Lazy-init the FileDialog
+	if _export_dialog == null:
+		_export_dialog = FileDialog.new()
+		_export_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		_export_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+		_export_dialog.title = "Export Output"
+		_export_dialog.size = Vector2i(800, 500)
+		_export_dialog.file_selected.connect(_on_export_file_selected)
+		add_child(_export_dialog)
+
+	# Clear previous filters and set family-specific ones
+	_export_dialog.clear_filters()
+	var data: GNData = node.cached_output
+	var is_comp := node is GNCompBase
+
+	# COMP check first — COMPs may have null cached_output (Light, Camera)
+	if is_comp:
+		_export_dialog.add_filter("*.glb", "glTF Binary (scene graph — meshes, lights, cameras)")
+	elif data is GNTextureData or data is GNImageData:
+		_export_dialog.add_filter("*.png", "PNG Image")
+		_export_dialog.add_filter("*.webp", "WebP Image")
+		_export_dialog.add_filter("*.exr", "EXR Image (HDR)")
+	elif data is GNGeoData:
+		_export_dialog.add_filter("*.glb", "glTF Binary (mesh only)")
+	elif data is GNChannelData:
+		_export_dialog.add_filter("*.csv", "CSV (channels as columns)")
+		_export_dialog.add_filter("*.json", "JSON")
+	elif data is GNTableData:
+		_export_dialog.add_filter("*.csv", "CSV")
+		_export_dialog.add_filter("*.json", "JSON")
+		_export_dialog.add_filter("*.txt", "Plain Text")
+	elif data is GNMaterialData:
+		_export_dialog.add_filter("*.tres", "Godot Resource")
+	else:
+		_export_dialog.add_filter("*.tres", "Godot Resource")
+
+	_export_dialog.current_file = node.id
+	_export_dialog.popup_centered()
+
+
+## Called when the user confirms a file path in the export dialog.
+func _on_export_file_selected(path: String) -> void:
+	if _export_target_node == null:
+		return
+	var data: GNData = _export_target_node.cached_output
+	if data == null or not data.valid:
+		GNLogger.warn("Export", "No valid output to export from '%s'" % _export_target_node.id)
+		return
+
+	var is_comp := _export_target_node is GNCompBase
+	var err: Error = OK
+
+	if is_comp:
+		err = _export_comp_glb(path, _export_target_node)
+	elif data is GNTextureData:
+		err = _export_texture(path, data as GNTextureData)
+	elif data is GNImageData:
+		err = _export_image(path, data as GNImageData)
+	elif data is GNGeoData:
+		err = _export_geo_glb(path, data as GNGeoData)
+	elif data is GNChannelData:
+		err = _export_channel(path, data as GNChannelData)
+	elif data is GNTableData:
+		err = _export_table(path, data as GNTableData)
+	elif data is GNMaterialData:
+		err = _export_material(path, data as GNMaterialData)
+	else:
+		GNLogger.warn("Export", "Unsupported data type for export: %s" % data.get_class())
+		return
+
+	if err == OK:
+		GNLogger.info("Export", "Exported '%s' → %s" % [_export_target_node.id, path])
+	else:
+		GNLogger.error("Export", "Failed to export '%s' → %s (error %d)" % [_export_target_node.id, path, err])
+	_export_target_node = null
+
+
+## Exports a GNTextureData (TOP) by reading back from GPU to CPU Image.
+func _export_texture(path: String, tex_data: GNTextureData) -> Error:
+	if tex_data.texture == null:
+		return ERR_INVALID_DATA
+	var img: Image = tex_data.texture.get_image()
+	if img == null:
+		return ERR_INVALID_DATA
+	return _save_image_to_path(img, path)
+
+
+## Exports a GNImageData (IMG) directly as an image file.
+func _export_image(path: String, img_data: GNImageData) -> Error:
+	if img_data.image == null:
+		return ERR_INVALID_DATA
+	return _save_image_to_path(img_data.image, path)
+
+
+## Saves a CPU Image to disk based on file extension.
+func _save_image_to_path(img: Image, path: String) -> Error:
+	var ext := path.get_extension().to_lower()
+	match ext:
+		"png":
+			return img.save_png(path)
+		"webp":
+			return img.save_webp(path)
+		"exr":
+			return img.save_exr(path)
+		_:
+			# Default to PNG if unrecognised
+			return img.save_png(path)
+
+
+## Exports a GNGeoData (SOP) as a bare-mesh glTF binary (.glb).
+func _export_geo_glb(path: String, geo_data: GNGeoData) -> Error:
+	if geo_data.mesh == null:
+		return ERR_INVALID_DATA
+	var mesh_inst := MeshInstance3D.new()
+	mesh_inst.mesh = geo_data.mesh
+	mesh_inst.transform = geo_data.transform
+	var err := _write_gltf_scene(path, mesh_inst)
+	mesh_inst.free()
+	return err
+
+
+## Exports any COMP node as a glTF binary (.glb).
+## Deep-clones the full scene subtree from get_scene_node() — handles:
+##   • GeometryCOMP (MeshInstance3D + material_override)
+##   • LightCOMP (DirectionalLight3D / OmniLight3D / SpotLight3D)
+##   • CameraCOMP (Camera3D)
+##   • MergeCOMP (Node3D group with all of the above as children)
+func _export_comp_glb(path: String, node: GNNode) -> Error:
+	var comp := node as GNCompBase
+	if comp == null:
+		return ERR_INVALID_DATA
+	var scene_node: Node3D = comp.get_scene_node()
+	if scene_node == null:
+		# Fallback: try bare mesh from cached_output
+		var geo: GNGeoData = node.cached_output as GNGeoData
+		if geo != null:
+			return _export_geo_glb(path, geo)
+		return ERR_INVALID_DATA
+	# Deep-clone the live subtree so GLTFDocument can own a temporary copy
+	var clone: Node3D = scene_node.duplicate()
+	var err := _write_gltf_scene(path, clone)
+	clone.queue_free()
+	return err
+
+
+## Writes a Node3D subtree to a .glb file using Godot's GLTFDocument.
+func _write_gltf_scene(path: String, root: Node3D) -> Error:
+	# GLTFDocument needs the root in a temporary scene tree
+	var tmp_root := Node3D.new()
+	tmp_root.name = "ExportRoot"
+	tmp_root.add_child(root)
+	# Set owner on the entire subtree so GLTFDocument can traverse all nodes
+	# (lights, cameras, meshes inside MergeCOMP groups, etc.)
+	_set_owner_recursive(root, tmp_root)
+
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	var err := doc.append_from_scene(tmp_root, state)
+	if err != OK:
+		tmp_root.remove_child(root)
+		tmp_root.free()
+		return err
+	err = doc.write_to_filesystem(state, path)
+	tmp_root.remove_child(root)
+	tmp_root.free()
+	return err
+
+
+## Recursively sets owner on all descendants so GLTFDocument traverses them.
+func _set_owner_recursive(node: Node, owner: Node) -> void:
+	node.owner = owner
+	for child in node.get_children():
+		_set_owner_recursive(child, owner)
+
+
+## Exports GNChannelData (CHOP) as CSV or JSON.
+func _export_channel(path: String, ch_data: GNChannelData) -> Error:
+	var ext := path.get_extension().to_lower()
+	match ext:
+		"json":
+			var dict := {}
+			for ch_name in ch_data.channels:
+				var arr: PackedFloat32Array = ch_data.channels[ch_name]
+				var float_arr: Array = []
+				for v in arr:
+					float_arr.append(v)
+				dict[ch_name] = float_arr
+			var json_str := JSON.stringify(dict, "\t")
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			f.store_string(json_str)
+			f.close()
+			return OK
+		_:
+			# CSV: channels as columns, header row = channel names
+			var names: Array = ch_data.channels.keys()
+			if names.is_empty():
+				return ERR_INVALID_DATA
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			f.store_csv_line(PackedStringArray(names))
+			var length: int = ch_data.length
+			for i in range(length):
+				var row := PackedStringArray()
+				for ch_name in names:
+					var arr: PackedFloat32Array = ch_data.channels[ch_name]
+					row.append(str(arr[i]) if i < arr.size() else "")
+				f.store_csv_line(row)
+			f.close()
+			return OK
+
+
+## Exports GNTableData (DAT) as CSV, JSON, or plain text.
+func _export_table(path: String, tbl_data: GNTableData) -> Error:
+	var ext := path.get_extension().to_lower()
+	match ext:
+		"json":
+			var result: Array = []
+			if tbl_data.is_table:
+				var headers: PackedStringArray = tbl_data.table[0] if tbl_data.has_header and not tbl_data.table.is_empty() else PackedStringArray()
+				var start_row := 1 if tbl_data.has_header else 0
+				for r in range(start_row, tbl_data.table.size()):
+					var row_dict := {}
+					for c in range(tbl_data.table[r].size()):
+						var key: String = headers[c] if c < headers.size() else ("col%d" % c)
+						row_dict[key] = tbl_data.table[r][c]
+					result.append(row_dict)
+			var json_str := JSON.stringify(result, "\t")
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			f.store_string(json_str if tbl_data.is_table else tbl_data.text)
+			f.close()
+			return OK
+		"txt":
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			if tbl_data.is_table:
+				for row in tbl_data.table:
+					f.store_line("\t".join(row))
+			else:
+				f.store_string(tbl_data.text)
+			f.close()
+			return OK
+		_:
+			# CSV
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			for row in tbl_data.table:
+				f.store_csv_line(row)
+			f.close()
+			return OK
+
+
+## Exports GNMaterialData (MAT) as a Godot .tres resource.
+func _export_material(path: String, mat_data: GNMaterialData) -> Error:
+	if mat_data.material == null:
+		return ERR_INVALID_DATA
+	return ResourceSaver.save(mat_data.material, path)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

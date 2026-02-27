@@ -21,6 +21,8 @@ var cook_engine: GNCookEngine
 ## Toolbar toggles (created in _setup_toolbar, stored for state persistence).
 var preview_toggle: CheckButton
 var perf_toggle: CheckButton
+var nrt_toggle: CheckButton
+var nrt_fps_spin: SpinBox
 
 ## Which node's output to display in the viewer (click to select).
 var _viewer_node_id: String = ""
@@ -231,6 +233,21 @@ func _on_preview_toggled(pressed: bool) -> void:
 func _on_perf_toggled(pressed: bool) -> void:
 	graph_editor.set_perf_overlay_visible(pressed)
 	_save_setting("perf_enabled", pressed)
+
+
+## Toggles non-realtime mode on the cook engine.
+func _on_nrt_toggled(pressed: bool) -> void:
+	if cook_engine != null:
+		cook_engine.non_realtime = pressed
+	_save_setting("nrt_enabled", pressed)
+	GNLogger.info("Editor", "Non-Realtime mode: %s" % ("ON" if pressed else "OFF"))
+
+
+## Updates the non-realtime FPS on the cook engine.
+func _on_nrt_fps_changed(value: float) -> void:
+	if cook_engine != null:
+		cook_engine.non_realtime_fps = value
+	_save_setting("nrt_fps", value)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -483,6 +500,34 @@ func _setup_toolbar() -> void:
 	info_bar.add_child(btn_layout)
 	info_bar.move_child(btn_layout, 12)
 
+	# Separator before Non-Realtime controls
+	var sep3 := VSeparator.new()
+	info_bar.add_child(sep3)
+	info_bar.move_child(sep3, 13)
+
+	# Non-Realtime toggle
+	nrt_toggle = CheckButton.new()
+	nrt_toggle.text = "NRT"
+	nrt_toggle.tooltip_text = "Non-Realtime mode — fixed timestep for deterministic, frame-perfect recording"
+	nrt_toggle.button_pressed = false
+	nrt_toggle.toggled.connect(_on_nrt_toggled)
+	info_bar.add_child(nrt_toggle)
+	info_bar.move_child(nrt_toggle, 14)
+
+	# Non-Realtime FPS SpinBox
+	nrt_fps_spin = SpinBox.new()
+	nrt_fps_spin.min_value = 1.0
+	nrt_fps_spin.max_value = 240.0
+	nrt_fps_spin.value = 30.0
+	nrt_fps_spin.step = 1.0
+	nrt_fps_spin.suffix = " fps"
+	nrt_fps_spin.tooltip_text = "Target FPS for non-realtime mode"
+	nrt_fps_spin.editable = true
+	nrt_fps_spin.custom_minimum_size.x = 90
+	nrt_fps_spin.value_changed.connect(_on_nrt_fps_changed)
+	info_bar.add_child(nrt_fps_spin)
+	info_bar.move_child(nrt_fps_spin, 15)
+
 
 ## Keyboard shortcuts for file operations.
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -707,7 +752,7 @@ func _build_stress_test_network() -> void:
 	network.connect_nodes("const_c1", 0, "filter_c1", 0)
 	network.connect_nodes("wave_c1", 0, "limit_c1", 0)
 	network.connect_nodes("math_c1", 0, "merge_c1", 0)
-	network.connect_nodes("math_c2", 0, "merge_c1", 0)
+	network.connect_nodes("math_c2", 0, "merge_c1", 1)
 	network.connect_nodes("lag_c1", 0, "null_c1", 0)
 
 	# ═══════════════════════════════════════════════════════════════════════
@@ -724,7 +769,7 @@ func _build_stress_test_network() -> void:
 	_stress_add(NullDAT.new(), "null_d1", col_x + 600, 150)
 
 	network.connect_nodes("const_d1", 0, "merge_d1", 0)
-	network.connect_nodes("const_d2", 0, "merge_d1", 0)
+	network.connect_nodes("const_d2", 0, "merge_d1", 1)
 	network.connect_nodes("merge_d1", 0, "transpose_d1", 0)
 	network.connect_nodes("text_d1", 0, "select_d1", 0)
 	network.connect_nodes("select_d1", 0, "sort_d1", 0)
@@ -814,6 +859,8 @@ func _build_stress_test_network() -> void:
 	sphere_s.get_parameter("radial_segments").set_value(32)
 	sphere_s.get_parameter("rings").set_value(16)
 	var grid_s := _stress_add(GridSOP.new(), "grid_s1", col_x, 600)
+	grid_s.get_parameter("size_x").set_value(10.0)
+	grid_s.get_parameter("size_z").set_value(10.0)
 	grid_s.get_parameter("rows").set_value(20)
 	grid_s.get_parameter("cols").set_value(20)
 
@@ -843,8 +890,8 @@ func _build_stress_test_network() -> void:
 
 	var mat4 := _stress_add(PBR_MAT.new(), "mat_chrome", col_x, 600)
 	mat4.get_parameter("albedo_color").set_value(Color(0.85, 0.85, 0.9))
-	mat4.get_parameter("metallic").set_value(1.0)
-	mat4.get_parameter("roughness").set_value(0.05)
+	mat4.get_parameter("metallic").set_value(0.8)
+	mat4.get_parameter("roughness").set_value(0.15)
 
 	# ═══════════════════════════════════════════════════════════════════════
 	# COMP nodes — 4 Geometry + Camera + 2 Lights + Merge (8)
@@ -877,9 +924,12 @@ func _build_stress_test_network() -> void:
 	# Camera
 	var cam := _stress_add(CameraCOMP.new(), "cam_main", col_x, 800)
 	cam.get_parameter("tx").set_value(0.0)
-	cam.get_parameter("ty").set_value(2.0)
+	cam.get_parameter("ty").set_value(3.0)
 	cam.get_parameter("tz").set_value(5.0)
-	cam.get_parameter("rx").set_value(-20.0)
+	cam.get_parameter("use_look_at").set_value(true)
+	cam.get_parameter("look_at_x").set_value(0.0)
+	cam.get_parameter("look_at_y").set_value(0.0)
+	cam.get_parameter("look_at_z").set_value(0.0)
 	cam.get_parameter("fov").set_value(55.0)
 
 	# Two lights for more interesting shading
@@ -901,9 +951,9 @@ func _build_stress_test_network() -> void:
 	# MergeCOMP
 	_stress_add(MergeCOMP.new(), "merge_scene", col_x + 400, 300)
 	network.connect_nodes("geo1", 0, "merge_scene", 0)
-	network.connect_nodes("geo2", 0, "merge_scene", 0)
-	network.connect_nodes("geo3", 0, "merge_scene", 0)
-	network.connect_nodes("geo4", 0, "merge_scene", 0)
+	network.connect_nodes("geo2", 0, "merge_scene", 1)
+	network.connect_nodes("geo3", 0, "merge_scene", 2)
+	network.connect_nodes("geo4", 0, "merge_scene", 3)
 
 	# ═══════════════════════════════════════════════════════════════════════
 	# RenderTOP (1 node) — final output
@@ -914,9 +964,9 @@ func _build_stress_test_network() -> void:
 	render.get_parameter("anti_aliasing").set_value(2)
 	render.get_parameter("ambient_energy").set_value(0.3)
 	network.connect_nodes("merge_scene", 0, "render_main", 0)
-	network.connect_nodes("cam_main", 0, "render_main", 0)
-	network.connect_nodes("light_dir", 0, "render_main", 0)
-	network.connect_nodes("light_point", 0, "render_main", 0)
+	network.connect_nodes("cam_main", 0, "render_main", 1)
+	network.connect_nodes("light_dir", 0, "render_main", 2)
+	network.connect_nodes("light_point", 0, "render_main", 3)
 
 	# Use composite texture as a material texture on the box (TOP → Geo)
 	network.connect_nodes("comp_t1", 0, "geo1", 2)  # TOP texture input
@@ -1040,6 +1090,17 @@ func _restore_ui_state() -> void:
 	var saved_log: bool = _load_setting("log_enabled", false)
 	log_toggle.set_pressed_no_signal(saved_log)
 	GNLogger.enabled = saved_log
+
+	# Non-Realtime mode
+	var saved_nrt: bool = _load_setting("nrt_enabled", false)
+	nrt_toggle.set_pressed_no_signal(saved_nrt)
+	if cook_engine != null:
+		cook_engine.non_realtime = saved_nrt
+
+	var saved_nrt_fps: float = _load_setting("nrt_fps", 30.0)
+	nrt_fps_spin.set_value_no_signal(saved_nrt_fps)
+	if cook_engine != null:
+		cook_engine.non_realtime_fps = saved_nrt_fps
 
 	# Split container offsets
 	var saved_hsplit: int = _load_setting("hsplit_offset", -400)

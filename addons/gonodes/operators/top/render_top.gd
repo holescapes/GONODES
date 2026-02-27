@@ -27,8 +27,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	# Multi-input COMP — accepts geometry, camera, lights
-	add_input("comp_in", GNFamily.Type.COMP, true, "Connect GeometryCOMP, CameraCOMP, LightCOMP")
+	# Dynamic-input COMP — accepts geometry, camera, lights on numbered ports
+	_enable_dynamic_inputs(GNFamily.Type.COMP, "comp", "COMP Input")
 	add_output("out", GNFamily.Type.TOP, "Rendered 3D scene texture")
 
 
@@ -140,7 +140,7 @@ func _setup_viewport() -> void:
 
 
 ## Populates the 3D viewport with scene nodes from connected COMPs.
-## Walks the network's input connections to find GeometryCOMP, CameraCOMP, LightCOMP nodes.
+## Iterates connections sorted by input port index for deterministic ordering.
 func _populate_scene_from_network() -> void:
 	if _viewport == null:
 		return
@@ -153,8 +153,13 @@ func _populate_scene_from_network() -> void:
 	var network: GNNetwork = engine.network
 	var has_camera: bool = false
 
-	# Find all COMP nodes connected to this RenderTOP's input
-	for conn in network.get_input_connections(id):
+	# Sort connections by input port index for deterministic scene order
+	var conns: Array = network.get_input_connections(id).duplicate()
+	conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
+		return a.to_port < b.to_port)
+
+	# Find all COMP nodes connected to this RenderTOP's inputs
+	for conn in conns:
 		var upstream_node: GNNode = network.nodes.get(conn.from_node, null)
 		if upstream_node == null:
 			continue

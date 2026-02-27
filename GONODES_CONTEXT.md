@@ -341,14 +341,15 @@ var port_name: String
 var family: GNNode.GNFamily    # Type of data this port accepts/produces
 var index: int                 # Port index on the node
 var is_input: bool
-var multi_input: bool = false  # Some ops accept multiple inputs (e.g., Composite)
+var multi_input: bool = false  # DEPRECATED — use dynamic input ports instead
 ```
 
 ### Connection Rules
 - Ports can only connect within the same family (TOP→TOP, CHOP→CHOP)
 - Exception: Bridge operators (CHOPtoTOP, TOPtoCHOP) have mixed port types
 - One output can connect to many inputs (fan-out)
-- An input can receive one connection (unless multi_input=true)
+- Each input port accepts exactly one connection
+- **Dynamic input ports** — Operators like MergeCOMP, MergeSOP, and RenderTOP use auto-growing numbered ports: connecting to the last empty port automatically adds a new empty slot; disconnecting collapses trailing empties
 - No cycles allowed (DAG enforcement)
 
 ### Family Colors (UI)
@@ -470,6 +471,98 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 - **Cook order** = topological sort of the dirty subgraph.
 - **Inactive nodes** (not feeding any sink) keep `cached_output` frozen and skip cooking entirely.
 - **Active set** is event-driven — recomputed only when graph topology, sinks, or expressions change.
+
+### Non-Realtime Mode (NRT)
+
+A global cook engine toggle that replaces wall-clock delta with a fixed timestep
+for deterministic, frame-perfect recording.  When NRT is active, every cook frame
+advances virtual time by exactly `1.0 / non_realtime_fps` seconds, regardless of
+how long the frame actually takes to compute.
+
+```gdscript
+# GNCookEngine — new NRT state
+var non_realtime: bool = false       # Global toggle (toolbar "NRT" CheckButton)
+var non_realtime_fps: float = 30.0   # Target FPS (toolbar SpinBox, 1–240)
+
+func _process(delta: float) -> void:
+    # ...
+    if non_realtime:
+        current_delta = 1.0 / non_realtime_fps
+        elapsed_time += current_delta
+    else:
+        current_delta = delta
+        elapsed_time += delta
+    cook_frame(current_delta)
+```
+
+**Key properties:**
+
+| Aspect | Realtime (default) | Non-Realtime |
+|--------|-------------------|--------------|
+| Delta source | Godot's `_process(delta)` — wall clock | Fixed: `1.0 / non_realtime_fps` |
+| Time advancement | Real wall-clock time | Virtual: `elapsed_time += fixed_delta` |
+| Frame drops | Possible under load | Impossible — every frame cooks fully |
+| Use case | Live performance, interactive | Offline recording, heavy FX render |
+
+**Workflow:** Enable NRT via toolbar "NRT" toggle → set target FPS via the adjacent
+SpinBox → activate a recording sink (FileSaveIMG, MovieOutIMG, FFmpegOutIMG) →
+play the timeline.  Every frame is captured at the exact specified interval — no
+drops, no jitter, deterministic output regardless of scene complexity.
+
+**Persisted:** NRT enabled state and FPS value are saved/restored via
+`_save_setting()`/`_load_setting()` across editor sessions.
+
+### Right-Click Export Output
+
+Any node's cached output can be exported to disk via the context menu.  Right-click
+a single node → **Export Output…** opens a FileDialog with family-appropriate
+format filters.  The menu item is disabled when no node is selected, multiple nodes
+are selected, or the selected node has no valid `cached_output` (exception: COMP
+nodes with a live `get_scene_node()` are also exportable even when `cached_output`
+is null — this covers LightCOMP and CameraCOMP which return null data but own
+a Light3D / Camera3D).
+
+**Format mapping by family:**
+
+| Data Type | Family | Formats | Notes |
+|-----------|--------|---------|-------|
+| `GNTextureData` | TOP | PNG, WebP, EXR | GPU→CPU readback via `texture.get_image()` |
+| `GNImageData` | IMG | PNG, WebP, EXR | Direct CPU Image save |
+| `GNGeoData` | SOP | glTF Binary (.glb) | Bare mesh, no material |
+| Any COMP | COMP | glTF Binary (.glb) | Full scene graph via `get_scene_node().duplicate()` + `GLTFDocument` |
+| `GNChannelData` | CHOP | CSV, JSON | CSV: channels as columns, header row = names |
+| `GNTableData` | DAT | CSV, JSON, Text | JSON: array of {header: value} dicts |
+| `GNMaterialData` | MAT | .tres | Godot `ResourceSaver` |
+
+**COMP export supports the full scene graph:**
+
+| COMP Operator | Scene Node | glTF Result |
+|---------------|-----------|-------------|
+| GeometryCOMP | `MeshInstance3D` + `material_override` | Mesh + material + transform |
+| LightCOMP | `DirectionalLight3D` / `OmniLight3D` / `SpotLight3D` | glTF KHR_lights_punctual extension |
+| CameraCOMP | `Camera3D` | glTF camera node (perspective or orthographic) |
+| MergeCOMP | `Node3D` group with children | Full subtree — meshes, lights, cameras, transforms |
+
+Exporting a MergeCOMP that combines GeometryCOMPs, LightCOMPs, and a CameraCOMP
+produces a complete .glb scene ready to import in Blender, Unity, Unreal, or
+any glTF-compatible tool.
+
+**Implementation:**
+
+- `_CtxID.EXPORT_OUTPUT` added to context menu enum
+- `_begin_export_output()` — validates selection (checks `cached_output` OR `get_scene_node()` for COMPs), lazy-inits `FileDialog`, sets filters
+- `_on_export_file_selected(path)` — dispatches to family-specific export functions
+- `_export_texture()`, `_export_image()`, `_export_geo_glb()`, `_export_comp_glb()`,
+  `_export_channel()`, `_export_table()`, `_export_material()`
+- `_export_comp_glb()` — deep-clones via `get_scene_node().duplicate()`, works for any COMP type
+- `_write_gltf_scene()` — shared helper: parents clone under tmp root, calls `_set_owner_recursive()` so GLTFDocument traverses the full subtree, then `append_from_scene()` + `write_to_filesystem()`
+- `_set_owner_recursive()` — sets `owner` on all descendants (required for GLTFDocument to see children)
+
+**COMP vs SOP glTF export:** SOP exports a bare mesh (no material).  COMP
+nodes export from the scene graph level — GeometryCOMP provides mesh + material,
+LightCOMP provides light nodes, CameraCOMP provides camera, and MergeCOMP
+exports entire hierarchies.  This mirrors how 3D DCC tools work: the COMP layer
+is the "scene" while SOP is raw geometry data.
 
 ---
 
@@ -960,8 +1053,8 @@ GONODES/
   - `Shader_MAT` — ShaderMaterial wrapper: inline shader code (string param) or external `.gdshader` file. 8 float uniforms (u0–u7), 2 color uniforms (color0, color1), 2 optional TOP inputs (tex0, tex1). Lazy shader recompilation (only when source changes).
   - GeometryCOMP updated: 3 inputs (SOP, MAT, TOP). MAT input overrides fallback PBR; when disconnected, built-in PBR params still work.
 - [x] **MergeCOMP** — groups multiple COMP scene nodes under a single Node3D parent:
-  - Multi-input COMP port. Full transform params (t/r/s xyz) + visible toggle.
-  - `_populate_from_network()` walks upstream connections, reparents COMP scene nodes.
+  - Dynamic input COMP ports (auto-grow). Full transform params (t/r/s xyz) + visible toggle.
+  - `_populate_from_network()` walks upstream connections, reparents COMP scene nodes **sorted by input port index** (port 0 = first child, port 1 = second, …). Users control hierarchy by which port they wire into.
   - RenderTOP updated to recognize MergeCOMP and adopt entire group node.
 - [x] **Shadow system** — per-light and global shadow controls:
   - LightCOMP: shadow_bias, shadow_normal_bias, shadow_blur, shadow_opacity, directional shadow mode (Orthogonal/PSSM2/PSSM4).
@@ -2159,7 +2252,7 @@ SOP Chain (geometry)    MAT Layer        COMP Layer (3D scene)              TOP 
 
 5. **Default camera fallback** — If no CameraCOMP is connected to a RenderTOP, it creates a default perspective camera at (0, 2, 5) looking at origin, ensuring there's always a valid render.
 
-6. **MergeCOMP for scene composition** — MergeCOMP groups multiple COMP scene nodes under a single `Node3D` parent. RenderTOP recognizes MergeCOMP and adopts the entire group node, enabling multi-object scenes wired through a single connection.
+6. **MergeCOMP for scene composition** — MergeCOMP groups multiple COMP scene nodes under a single `Node3D` parent. Inputs use **dynamic numbered ports** (comp0, comp1, comp2, …) that auto-grow when connected. Port index determines the scene graph child order (port 0 = first child, port 1 = second, …), giving the user deterministic control via which port they wire into. RenderTOP recognizes MergeCOMP and adopts the entire group node, enabling multi-object scenes wired through a single connection.
 
 7. **Shadow system** — Shadows are controlled at three levels: per-light (LightCOMP: bias, normal_bias, blur, opacity, directional shadow mode), per-object (GeometryCOMP: cast_shadow mode), and global quality (RenderTOP: shadow atlas size, directional shadow size, shadow filter).
 
@@ -2634,13 +2727,18 @@ These are non-negotiable constraints discovered during development. **Never viol
 - Use lightweight `update_expression_status()` per-cook (only updates error label colors)
 - Check `_expr_edit.has_focus()` before setting text in any update path
 
-### 25.10 Multi-Input Port Data Gathering
+### 25.10 Dynamic Input Ports (Auto-Grow)
 
-- `_gather_inputs()` in the cook engine has TWO code paths:
-  - **Single-input ports** (fast path): cached array aligned by port index, one connection per slot
-  - **Multi-input ports** (`port.multi_input = true`): collects ALL upstream connections into a flat array
-- If only the fast path exists, multi-input operators (MergeSOP, CompositeTOP, RenderTOP) silently lose all but the last connection
-- Always check for the `multi_input` flag when modifying input gathering logic
+- Operators that accept a variable number of inputs use **dynamic input ports** instead of fixed port counts or the old `multi_input` flag.
+- **Operators using auto-grow:** MergeSOP, MergeCOMP, RenderTOP, MergeCHOP, SwitchTOP, SwitchCHOP, SwitchSOP, SwitchDAT (8 total).
+- **Mechanism:** `GNNode._enable_dynamic_inputs()` is called in `_init_ports()`. It stores the family/prefix and creates an initial empty port.
+- **Auto-grow:** After every `connect_nodes()`, the network calls `_update_dynamic_node_inputs()` which ensures `max_connected_port + 2` ports exist (one trailing empty slot for the next connection).
+- **Auto-shrink:** After every `disconnect_nodes()`, trailing empty ports are collapsed back, keeping at least one empty slot.
+- **Port index = hierarchy order:** For MergeCOMP/MergeSOP, the input port index directly determines the processing/child order. Port 0 is first, port 1 is second, etc. No Y-position sorting hack needed.
+- **Switch operators:** Override `update_dynamic_inputs()` to auto-adjust the `index` parameter's `max_value` to match `input_ports.size() - 2` (highest connected port). The old `num_inputs` parameter is removed — wiring is the source of truth.
+- **Serialization:** `to_dict()` saves `dynamic_input_count`, `from_dict()` restores it before connections are loaded. Post-load safety: `_update_dynamic_node_inputs()` runs for all dynamic nodes.
+- **Cook engine path:** `_gather_inputs()` uses a single code path — port-indexed array with possible null entries for disconnected ports. Operators must handle null inputs.
+- Supersedes the old `port.multi_input` flag and the `num_inputs` parameter pattern. `GNPort.multi_input` still exists but is unused (deprecated).
 
 ### 25.11 COMP Nodes Return Null Output
 
@@ -2696,10 +2794,15 @@ These are non-negotiable constraints discovered during development. **Never viol
   - `GNGraphEditor` connects to `ports_changed` **before** `GNNodeView.setup()` so stale wires are pruned first.
   - `GNNetwork.prune_stale_connections(node_id)` removes any connection whose port index exceeds the node's current port count, emitting `connection_removed` for each.
   - `GNNodeView` listens for `ports_changed` and calls `rebuild_slots()` to update the visual GraphNode.
-- **Parameter-driven pattern (Switch / Merge nodes):**
-  - Add a `num_inputs` INT parameter (min 2, max 8, default 2).
-  - Override `_on_parameter_changed` — when `num_inputs` changes, call `set_input_count()` and clamp the `index` parameter's `max_value` to `num_inputs - 1`.
-  - Applies to: SwitchTOP, SwitchCHOP, SwitchDAT, SwitchSOP, MergeCHOP.
+- **Parameter-driven pattern (DEPRECATED — replaced by dynamic auto-grow):**
+  - The old approach used a `num_inputs` INT parameter (min 2, max 8, default 2) with `_on_parameter_changed` calling `set_input_count()`.
+  - **Superseded by `_enable_dynamic_inputs()`** — all Switch and Merge operators now use auto-grow.
+- **Dynamic auto-grow pattern (Switch / Merge nodes):**
+  - In `_init_ports()`, call `_enable_dynamic_inputs(family, prefix, desc)` instead of manual `add_input()`.
+  - Ports auto-grow on connect (trailing empty slot) and auto-shrink on disconnect.
+  - Switch operators override `update_dynamic_inputs()` to adjust the `index` parameter's `max_value` to match the highest connected port (excludes trailing empty slot).
+  - Applies to: MergeSOP, MergeCOMP, RenderTOP, MergeCHOP, SwitchTOP, SwitchCHOP, SwitchDAT, SwitchSOP.
+  - No `num_inputs` parameter needed — wiring is the source of truth.
 - **Shader-driven pattern (CustomShaderTOP):**
   - On shader recompile, scan for `uniform sampler2D gn_tex<N>` declarations.
   - Rebuild input ports to match the highest `gn_tex` index found + 1 (clamped 0-8).
@@ -3174,6 +3277,43 @@ Before loading an extension's operators, the registry checks `ClassDB.class_exis
 | NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned |
 | Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP | Planned |
 | MIDI | `gn_ext_midi` | — | MidiInCHOP, MidiOutCHOP | Planned |
+
+### 28.9 Audio Recording & Muxing (Roadmap)
+
+**Status: 🔲 Planned — Medium-term**
+
+TD's Movie File Out TOP can record an audio track alongside video by wiring a
+time-sliced CHOP into its audio input.  GONODES needs an equivalent pipeline.
+
+**Design sketch:**
+
+1. **AudioOutCHOP** (new operator) — routes a CHOP's sample buffer to Godot's
+   AudioServer as an `AudioStreamGenerator`.  Enables live monitoring and provides
+   the raw PCM data for recording.
+
+2. **Audio track on FFmpegOutIMG** — when an AudioOutCHOP/CHOP is wired to a
+   secondary input, the recorder writes PCM samples alongside the temp PNG frames.
+   On finalization, FFmpeg muxes the audio track (WAV/PCM) into the output
+   container (MP4/MKV/WebM) with `-i audio.wav -c:a aac` (or `-c:a libopus` for
+   WebM).
+
+3. **Time-sliced CHOP accumulation** — in NRT mode, each cook frame appends
+   `length` samples from the audio CHOP to a growing `PackedFloat32Array` buffer.
+   The sample rate comes from `GNChannelData.sample_rate` (e.g., 44100 Hz).
+   Frames produce `sample_rate / non_realtime_fps` samples each (e.g., 1470
+   samples per frame at 44100 Hz / 30 fps).
+
+4. **WAV export helper** — `_write_wav(path, samples, sample_rate, channels)`
+   utility writes a standard 16-bit PCM WAV file for FFmpeg to consume.
+
+**Dependencies:** Godot's `AudioStreamGenerator` + `AudioStreamGeneratorPlayback`
+for live output; FFmpeg CLI for muxing (already used by FFmpegOutIMG).
+
+**Interaction with NRT mode:** Audio recording is most useful in Non-Realtime
+mode where every frame is guaranteed to produce the correct number of audio
+samples.  In real-time mode, dropped frames could cause audio gaps — a warning
+badge should indicate when frames are dropped during audio recording.
+
 - `GNParamRow` creates a `CodeEdit` instead of `LineEdit` for CODE-type params
 - `CodeEdit` supports syntax highlighting for `.gdshader` and `.gd` automatically
 - Apply-on-blur or explicit "Compile" button to avoid recompiling on every keystroke

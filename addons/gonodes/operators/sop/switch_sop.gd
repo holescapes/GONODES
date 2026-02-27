@@ -1,37 +1,32 @@
 class_name SwitchSOP
 extends GNSopBase
 ## Switches between multiple SOP inputs based on an index.
-## Number of inputs is controlled by the "num_inputs" parameter (2-8).
+## Uses dynamic auto-grow input ports — connect to add more slots.
 
 func _init() -> void:
 	node_type = "switch"
-	node_description = "Switch between multiple SOP inputs by index (dynamic port count)."
+	node_description = "Switch between multiple SOP inputs by index (auto-grow ports)."
 
 
 func _init_ports() -> void:
-	add_input("in0", GNFamily.Type.SOP, false, "Input 0")
-	add_input("in1", GNFamily.Type.SOP, false, "Input 1")
+	_enable_dynamic_inputs(GNFamily.Type.SOP, "in", "Input")
 	add_output("out", GNFamily.Type.SOP, "Selected input")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("num_inputs", 2, 2, 8, "Num Inputs",
-		"Number of selectable SOP inputs (2-8)"))
-	add_parameter(GNParameter.create_int("index", 0, 0, 1, "Index",
+	add_parameter(GNParameter.create_int("index", 0, 0, 0, "Index",
 		"Which input to output (0-based)"))
 
 
-func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
-	if param_name == "num_inputs":
-		var count: int = get_param_value("num_inputs")
-		set_input_count(count, GNFamily.Type.SOP, "in", "Input")
-		var idx_param := get_parameter("index")
-		if idx_param:
-			idx_param.max_value = count - 1
-			if int(idx_param.value) >= count:
-				idx_param.set_value(count - 1)
-	mark_dirty()
-	parameter_changed.emit(id, param_name)
+## Auto-adjust index param max_value when ports grow/shrink.
+func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
+	super(connected_ports)
+	var idx_param := get_parameter("index")
+	if idx_param:
+		var max_idx: int = maxi(input_ports.size() - 2, 0)
+		idx_param.max_value = max_idx
+		if int(idx_param.value) > max_idx:
+			idx_param.set_value(max_idx)
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

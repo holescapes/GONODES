@@ -23,7 +23,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.COMP, true, "COMP inputs (multi)")
+	_enable_dynamic_inputs(GNFamily.Type.COMP, "comp", "COMP Input")
 	add_output("out", GNFamily.Type.COMP, "Merged scene group")
 
 
@@ -74,6 +74,8 @@ func get_group_node() -> Node3D:
 
 ## Populates the group node with children from upstream COMP connections.
 ## Walks the network to find connected COMP nodes and reparents their scene nodes.
+## Children are ordered by input port index (port 0 = first child, port 1 = second, …),
+## giving the user deterministic control over the scene hierarchy via port wiring.
 func _populate_from_network() -> void:
 	if _group_node == null:
 		return
@@ -84,11 +86,15 @@ func _populate_from_network() -> void:
 
 	var network: GNNetwork = engine.network
 
-	for conn in network.get_input_connections(id):
+	# Get connections sorted by input port index (determines hierarchy order)
+	var conns: Array = network.get_input_connections(id).duplicate()
+	conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
+		return a.to_port < b.to_port)
+
+	for conn in conns:
 		var upstream: GNNode = network.nodes.get(conn.from_node, null)
 		if upstream == null or not (upstream is GNCompBase):
 			continue
-
 		var comp: GNCompBase = upstream as GNCompBase
 		var scene_nd: Node3D = comp.get_scene_node()
 		if scene_nd == null:

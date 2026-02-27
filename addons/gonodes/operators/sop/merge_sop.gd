@@ -10,7 +10,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, true, "Geometry inputs (multi)")  # multi-input
+	_enable_dynamic_inputs(GNFamily.Type.SOP, "geo", "Geometry")
 	add_output("out", GNFamily.Type.SOP, "Merged mesh")
 
 

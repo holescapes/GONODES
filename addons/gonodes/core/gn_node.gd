@@ -90,6 +90,22 @@ var is_sink: bool = false
 ## but skip cooking to save GPU/CPU time.
 var is_active: bool = true
 
+# ─── Dynamic Input Ports ───────────────────────────────────────────────────────
+
+## If true, this node auto-grows/shrinks its input ports to always have one
+## empty slot after the last connected port.  Set by subclasses via
+## [method _enable_dynamic_inputs] in their [method _init_ports] override.
+var _dynamic_input: bool = false
+
+## Family type for dynamically created input ports.
+var _dynamic_input_family: GNFamily.Type = GNFamily.Type.TOP
+
+## Port name prefix for dynamic inputs (e.g., "in" → "in0", "in1", …).
+var _dynamic_input_prefix: String = "in"
+
+## Port description prefix for dynamic inputs (e.g., "Input" → "Input 0", …).
+var _dynamic_input_desc: String = "Input"
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted when this node is marked dirty (before cook).
@@ -263,6 +279,45 @@ func set_output_count(count: int, port_family: GNFamily.Type,
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Dynamic Input Ports — Auto-grow / Auto-shrink
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Enables dynamic input port auto-grow for this node.
+## Call from [method _init_ports] instead of [code]add_input(..., true)[/code].
+## Creates [param initial_count] numbered input ports (default 1).
+## After every connection/disconnection the network calls
+## [method update_dynamic_inputs] to ensure one trailing empty slot exists.
+func _enable_dynamic_inputs(port_family: GNFamily.Type,
+		name_prefix: String = "in", desc_prefix: String = "Input",
+		initial_count: int = 1) -> void:
+	_dynamic_input = true
+	_dynamic_input_family = port_family
+	_dynamic_input_prefix = name_prefix
+	_dynamic_input_desc = desc_prefix
+	for i in range(initial_count):
+		add_input("%s%d" % [name_prefix, i], port_family, false,
+			"%s %d" % [desc_prefix, i])
+
+
+## Updates the dynamic input port count so there is always exactly one empty
+## port after the highest connected port.  Called by [code]GNNetwork[/code]
+## after every connection/disconnection involving this node.
+##
+## [param connected_ports] — port indices that currently have a wire attached.
+func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
+	if not _dynamic_input:
+		return
+	var max_port: int = -1
+	for p in connected_ports:
+		if p > max_port:
+			max_port = p
+	var desired: int = maxi(max_port + 2, 1)
+	if desired != input_ports.size():
+		set_input_count(desired, _dynamic_input_family,
+			_dynamic_input_prefix, _dynamic_input_desc)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Parameter Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -407,6 +462,10 @@ func to_dict() -> Dictionary:
 	if locked:
 		d["locked"] = true
 
+	# Save dynamic input port count so it can be restored before connections
+	if _dynamic_input and input_ports.size() > 1:
+		d["dynamic_input_count"] = input_ports.size()
+
 	# Serialize parameters (only those that differ from defaults, or have expressions)
 	var params_dict: Dictionary = {}
 	for param_name in parameters:
@@ -436,6 +495,13 @@ func from_dict(d: Dictionary) -> void:
 		bypass = d["bypass"]
 	if d.has("locked"):
 		locked = d["locked"]
+
+	# Restore dynamic input port count so connections can reference all ports
+	if _dynamic_input and d.has("dynamic_input_count"):
+		var count: int = int(d["dynamic_input_count"])
+		if count != input_ports.size():
+			set_input_count(count, _dynamic_input_family,
+				_dynamic_input_prefix, _dynamic_input_desc)
 
 	# Restore parameter values/modes/expressions
 	if d.has("parameters"):
