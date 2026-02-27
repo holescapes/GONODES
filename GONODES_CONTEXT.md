@@ -1195,6 +1195,7 @@ GONODES/
   - Optional budget warning: `_vram_budget_mb` threshold — when exceeded, appends `⚠ >NMB` to the display.
   - Cost: `get_rendering_info()` reads an internal engine counter — effectively free (no GPU readback, no stall).
     Toggle exists for user peace of mind and to avoid visual clutter, not for performance reasons.
+  - **Design rule for all perf metrics:** Always compute if it's free, only gate the *display* if it adds clutter. Any future perf metric that's just reading an engine counter (draw calls, object count, etc.) should follow the same approach: compute always, toggle the display. Only add a compute-level gate if the measurement itself is expensive (e.g., profiling individual node cook times per-frame at scale).
 - [x] **Performance: Resolution downscaling for previews** — **DEFERRED (low value)**:
   - Original idea: render inline preview thumbnails at ¼ or ½ res; full res only for viewer + sinks.
   - **Analysis concluded this is near-zero net gain.** Arguments:
