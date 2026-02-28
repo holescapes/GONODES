@@ -438,20 +438,30 @@ func _create_file_control() -> Control:
 	option.size_flags_horizontal = SIZE_EXPAND_FILL
 	option.clip_text = true
 	option.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	option.tooltip_text = "Select a file from the project"
+	option.tooltip_text = "Select a file from the project or bundled resources"
 	hbox.add_child(option)
 
-	# Populate with matching project files
+	# Populate with matching files from all tiers
 	_populate_file_dropdown(option)
 
 	# Connect selection
 	option.item_selected.connect(_on_file_option_selected)
 
+	# Browse button — opens native file dialog for Tier 3 (absolute) paths
+	var browse_btn := Button.new()
+	browse_btn.text = "…"
+	browse_btn.custom_minimum_size = Vector2(28, 0)
+	browse_btn.tooltip_text = "Browse filesystem for a file"
+	browse_btn.pressed.connect(func() -> void:
+		_open_file_browse_dialog(option)
+	)
+	hbox.add_child(browse_btn)
+
 	# Refresh button to rescan project files
 	var refresh_btn := Button.new()
 	refresh_btn.text = "↻"
 	refresh_btn.custom_minimum_size = Vector2(28, 0)
-	refresh_btn.tooltip_text = "Rescan project for matching files"
+	refresh_btn.tooltip_text = "Rescan for matching files"
 	refresh_btn.pressed.connect(func() -> void:
 		_populate_file_dropdown(option)
 	)
@@ -468,69 +478,101 @@ func _create_file_control() -> Control:
 	return hbox
 
 
-## Scans the project directory recursively for files matching the parameter's
-## file_filters and populates the OptionButton dropdown.
+## Populates the OptionButton dropdown with files from all tiers:
+## Tier 1 (bundled res://), Tier 2 (project folder), and any Tier 3 current value.
 func _populate_file_dropdown(option: OptionButton) -> void:
 	option.clear()
 	option.add_item("(none)", 0)
 	option.set_item_metadata(0, "")
 
-	# Collect matching files from the project
+	# Collect matching extensions
 	var extensions: Array[String] = []
 	for f in param.file_filters:
-		# Convert "*.png" → "png"
 		var ext := f.trim_prefix("*.")
 		if not ext.is_empty():
 			extensions.append(ext.to_lower())
 
-	var files := _scan_project_files("res://", extensions)
-	files.sort()
-
-	var selected_idx := 0
+	var item_idx := 1
 	var current_path: String = str(param.value)
+	var selected_idx := 0
 
-	for i in range(files.size()):
-		var item_idx := i + 1  # 0 is "(none)"
-		# Show shortened path (strip res://) for display
-		var display := files[i].trim_prefix("res://")
-		option.add_item(display, item_idx)
-		option.set_item_metadata(item_idx, files[i])
-		option.set_item_tooltip(item_idx, files[i])
-		if files[i] == current_path:
+	# ── Tier 1: Bundled (res://) ──
+	var bundled_files := GNResourceLoader.scan_directory("res://", extensions)
+	bundled_files.sort()
+	if not bundled_files.is_empty():
+		option.add_separator("── Bundled ──")
+		item_idx += 1
+		for file_path in bundled_files:
+			var display := file_path.trim_prefix("res://")
+			option.add_item(display, item_idx)
+			option.set_item_metadata(item_idx, file_path)
+			option.set_item_tooltip(item_idx, file_path)
+			if file_path == current_path:
+				selected_idx = item_idx
+			item_idx += 1
+
+	# ── Tier 2: Project folder ──
+	var proj_dir: String = owner_node.project_dir if owner_node != null else ""
+	if not proj_dir.is_empty():
+		var project_files := GNResourceLoader.scan_directory(proj_dir, extensions)
+		project_files.sort()
+		if not project_files.is_empty():
+			option.add_separator("── Project ──")
+			item_idx += 1
+			for abs_path in project_files:
+				var proj_path := GNResourceLoader.to_project_relative(abs_path, proj_dir)
+				var display := proj_path.trim_prefix(GNResourceLoader.PROJECT_PREFIX)
+				option.add_item(display, item_idx)
+				option.set_item_metadata(item_idx, proj_path)
+				option.set_item_tooltip(item_idx, abs_path)
+				if proj_path == current_path or abs_path == current_path:
+					selected_idx = item_idx
+				item_idx += 1
+
+	# ── Tier 3: If current value is an absolute path not in lists above, add it ──
+	if selected_idx == 0 and not current_path.is_empty():
+		var tier := GNResourceLoader.classify(current_path)
+		if tier == GNResourceLoader.PathTier.ABSOLUTE:
+			option.add_separator("── External ──")
+			item_idx += 1
+			var display := current_path.get_file()
+			option.add_item("⚠ " + display, item_idx)
+			option.set_item_metadata(item_idx, current_path)
+			option.set_item_tooltip(item_idx, "Absolute path (not portable): " + current_path)
 			selected_idx = item_idx
 
 	option.selected = selected_idx
 
 
-## Recursively scans a directory for files with matching extensions.
-func _scan_project_files(dir_path: String, extensions: Array[String]) -> Array[String]:
-	var results: Array[String] = []
-	var dir := DirAccess.open(dir_path)
-	if dir == null:
-		return results
+## Opens a native file dialog for browsing the filesystem (Tier 3).
+func _open_file_browse_dialog(option: OptionButton) -> void:
+	var dialog := FileDialog.new()
+	dialog.title = "Browse for %s" % param.label
+	dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	dialog.access = FileDialog.ACCESS_FILESYSTEM
+	if not param.file_filters.is_empty():
+		dialog.filters = param.file_filters
+	dialog.min_size = Vector2i(700, 500)
 
-	dir.list_dir_begin()
-	var file_name := dir.get_next()
-	while not file_name.is_empty():
-		if file_name.begins_with("."):
-			file_name = dir.get_next()
-			continue
-		var full_path := dir_path.path_join(file_name)
-		if dir.current_is_dir():
-			# Skip .godot import cache and hidden directories
-			if file_name != ".godot" and file_name != ".import":
-				results.append_array(_scan_project_files(full_path, extensions))
-		else:
-			# Check extension match (if filters are empty, accept all files)
-			if extensions.is_empty():
-				results.append(full_path)
-			else:
-				var ext := file_name.get_extension().to_lower()
-				if ext in extensions:
-					results.append(full_path)
-		file_name = dir.get_next()
-	dir.list_dir_end()
-	return results
+	dialog.file_selected.connect(func(path: String) -> void:
+		# Convert to project-relative if inside project folder
+		var proj_dir: String = owner_node.project_dir if owner_node != null else ""
+		var saveable := GNResourceLoader.to_saveable(path, proj_dir)
+		param.set_value(saveable)
+		_populate_file_dropdown(option)
+		dialog.queue_free()
+	)
+	dialog.canceled.connect(func() -> void:
+		dialog.queue_free()
+	)
+
+	# Add to a top-level node so it displays
+	var root := get_tree().root if get_tree() != null else null
+	if root != null:
+		root.add_child(dialog)
+	else:
+		add_child(dialog)
+	dialog.popup_centered()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

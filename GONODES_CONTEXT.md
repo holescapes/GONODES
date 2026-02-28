@@ -779,7 +779,9 @@ GONODES/
 │       │   ├── gn_expression_functions.gd # GNExpressionFunctions — custom function registry (static)
 │       │   ├── gn_extension_registry.gd # GNExtensionRegistry — dynamic operator registry + extension loader
 │       │   ├── gn_family.gd        # GNFamily enum constants
-│       │   └── gn_logger.gd        # GNLogger — centralized logging with level filtering
+│       │   ├── gn_logger.gd        # GNLogger — centralized logging with level filtering
+│       │   ├── gn_resource_loader.gd # GNResourceLoader — three-tier resource loading (res://, project://, absolute)
+│       │   └── gn_project_manager.gd # GNProjectManager — project folder lifecycle & scanning
 │       ├── operators/
 │       │   ├── top/
 │       │   │   ├── noise_top.gd         # + 19 more TOPs (blur, ramp, circle, etc.)
@@ -1318,6 +1320,38 @@ GONODES/
   - Save/load named parameter snapshots per operator instance.
   - Copy parameters between nodes of the same type.
   - Global preset library for reusable configurations.
+
+### Phase 7.5: Three-Tier Resource System ✅
+- [x] **GNResourceLoader** (`gn_resource_loader.gd`) — unified resource loading abstraction:
+  - Static utility class (~340 lines). Handles all three path tiers transparently.
+  - `PathTier` enum: `BUNDLED` (res://), `PROJECT` (project://), `ABSOLUTE`, `EMPTY`.
+  - `classify(path)` → PathTier. `resolve(path, project_dir)` → absolute filesystem path.
+  - `to_project_relative(abs_path, project_dir)` → project:// path. `to_saveable(abs_path, project_dir)` → best portable path.
+  - `exists(path, project_dir)` — works across all tiers.
+  - Type-specific loaders: `load_texture()`, `load_image()`, `load_font()`, `load_audio()`, `load_shader()`, `load_video()`, `load_any()`.
+  - Tier 1 (res://) uses `ResourceLoader.load()`. Tier 2/3 use filesystem APIs: `Image.load_from_file()`, `FontFile.load_dynamic_font()`, `AudioStreamOggVorbis.load_from_buffer()`, `Shader.code = FileAccess.get_as_text()`, `VideoStreamTheora.file = path`.
+  - `scan_directory(dir_path, extensions)` — lists files matching extensions in a given directory.
+- [x] **GNProjectManager** (`gn_project_manager.gd`) — project folder lifecycle:
+  - `set_from_patch_path(path)` — creates sibling folder to `.gnpatch` file with standard subfolders.
+  - `SUBFOLDERS`: textures, fonts, video, audio, models, shaders, presets, scripts, data.
+  - `scan_subfolder()`, `scan_all_subfolders()` — lists project files by category.
+  - `resolve_path(rel)` → absolute. `to_saveable(abs)` → project:// path. `has_project()` → bool.
+  - `signal project_changed(project_dir: String)`.
+- [x] **project_dir injection pipeline**: `GNProjectManager` → `GNCookEngine.project_dir` → `GNNode.project_dir` (set each frame alongside `current_delta`, `elapsed_time`, `current_frame`).
+- [x] **All 7 file-loading operators migrated** from `ResourceLoader.load()` to `GNResourceLoader`:
+  - `AudioFileInCHOP` → `GNResourceLoader.load_audio()`
+  - `MovieFileInTOP` → `GNResourceLoader.load_video()`
+  - `TextTOP` → `GNResourceLoader.load_font()`
+  - `ShaderMAT` → `GNResourceLoader.load_shader()`
+  - `ImageFileInIMG` → `GNResourceLoader.load_image()`
+  - `ImageSequenceIMG` → `GNResourceLoader.load_image()` + `resolve()` + `exists()`
+  - `FFmpegInTOP` → `GNResourceLoader.resolve()` before `_create_ffmpeg_stream()`
+- [x] **File param UI updated** to three-tier dropdown:
+  - `_create_file_control()` in `gn_param_row.gd`: OptionButton with Browse "…", Refresh "↻", Clear "X" buttons.
+  - `_populate_file_dropdown()`: Three sections with separators — "── Bundled ──" (res://), "── Project ──" (project folder), "── External ──" (absolute paths with ⚠ warning).
+  - `_open_file_browse_dialog()`: Native FileDialog, auto-converts to project:// if file is inside project folder.
+- [x] **Editor wired to GNProjectManager**: save/load/new/setup/auto-restore all update `_project` and `cook_engine.project_dir`.
+- [x] File output operators (FileSaveTOP, FileSaveDAT, RecordCHOP, MovieOutIMG, FFmpegOutIMG) confirmed write-only, use STRING params — not affected by resource loader migration.
 
 ### Near-term
 - [x] SOP family (procedural geometry: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch)
@@ -2269,6 +2303,123 @@ The editor allows switching renderers at runtime for preview purposes:
 - This lets artists preview exactly how their patch will look on mobile/web before exporting
 
 **Technical note:** Godot 4.x requires a restart for full renderer change. For live preview, we may use a secondary viewport with the alternate renderer, or simply restart the embedded preview. Investigate during implementation.
+
+---
+
+## 19.5. Three-Tier Resource Loading System
+
+### Problem Statement
+`ResourceLoader.load()` only works for `res://` paths (bundled Godot resources). Standalone exported apps and user projects need to reference files on the filesystem — textures, fonts, audio, video, shaders — that live alongside the `.gnpatch` file, not inside the Godot project tree.
+
+### Path Tiers
+
+| Tier | Prefix | Example | Resolution | Use Case |
+|------|--------|---------|------------|----------|
+| **1 — Bundled** | `res://` | `res://addons/gonodes/shaders/noise.gdshader` | `ResourceLoader.load()` | Built-in resources shipped with the editor/export |
+| **2 — Project** | `project://` | `project://textures/logo.png` | Resolve against `project_dir` → absolute path, then filesystem APIs | User assets stored alongside the `.gnpatch` file |
+| **3 — Absolute** | `/` or `C:\` | `C:\Users\me\Desktop\photo.jpg` | Direct filesystem access | Quick one-off references (not portable — shown with ⚠ warning) |
+
+### Project Folder Convention
+
+When a user saves `MyPatch.gnpatch`, `GNProjectManager` creates a sibling folder `MyPatch_data/` with standard subfolders:
+
+```
+MyPatch.gnpatch
+MyPatch_data/
+├── textures/
+├── fonts/
+├── video/
+├── audio/
+├── models/
+├── shaders/
+├── presets/
+├── scripts/
+└── data/
+```
+
+Users place media assets into the appropriate subfolder. The file param dropdown scans these folders automatically.
+
+### Data Flow: project_dir Injection
+
+```
+GNProjectManager.set_from_patch_path(path)
+    │
+    ├── Creates MyPatch_data/ folder + subfolders (if needed)
+    └── Sets project_dir = "C:/path/to/MyPatch_data"
+           │
+           ▼
+GNCookEngine.project_dir = project_dir
+           │
+           ▼ (each cook frame, for every node)
+GNNode.project_dir = cook_engine.project_dir
+           │
+           ▼ (inside operator _cook())
+GNResourceLoader.load_texture(file_path, project_dir)
+```
+
+The editor sets `project_dir` during save, load, new, setup, and auto-restore operations via `gn_editor.gd`.
+
+### GNResourceLoader API
+
+All methods are **static** — no instance needed.
+
+| Method | Signature | Returns | Notes |
+|--------|-----------|---------|-------|
+| `classify` | `(path: String) → PathTier` | PathTier enum | Checks `res://`, `project://`, or absolute |
+| `resolve` | `(path: String, project_dir: String) → String` | Absolute filesystem path | project:// → project_dir + relative; res:// and absolute pass through |
+| `to_project_relative` | `(abs_path: String, project_dir: String) → String` | `project://...` or original | Converts absolute into project-relative if under project_dir |
+| `to_saveable` | `(abs_path: String, project_dir: String) → String` | Best portable path | Prefers project:// > res:// > absolute |
+| `exists` | `(path: String, project_dir: String) → bool` | bool | Works across all three tiers |
+| `load_texture` | `(path, project_dir) → Texture2D` | Texture2D or null | res:// → ResourceLoader; filesystem → Image.load_from_file() + ImageTexture |
+| `load_image` | `(path, project_dir) → Image` | Image or null | res:// → ResourceLoader + get_image(); filesystem → Image.load_from_file() |
+| `load_font` | `(path, project_dir) → Font` | Font or null | res:// → ResourceLoader; filesystem → FontFile.load_dynamic_font() |
+| `load_audio` | `(path, project_dir) → AudioStream` | AudioStream or null | res:// → ResourceLoader; filesystem → format-specific buffer loading (OGG, WAV, MP3) |
+| `load_shader` | `(path, project_dir) → Shader` | Shader or null | res:// → ResourceLoader; filesystem → Shader.new() + code from FileAccess |
+| `load_video` | `(path, project_dir) → VideoStream` | VideoStream or null | res:// → ResourceLoader; filesystem → VideoStreamTheora.file = path |
+| `load_any` | `(path, project_dir) → Resource` | Resource or null | Tries ResourceLoader.load() for res://, delegates to type-specific for others |
+| `scan_directory` | `(dir_path, extensions) → Array[String]` | File paths | Lists matching files, supports res:// via DirAccess |
+
+### File Param UI (Three-Tier Dropdown)
+
+The `FILE` parameter type in `gn_param_row.gd` renders as:
+
+```
+[OptionButton ▼ dropdown]  [… Browse]  [↻ Refresh]  [X Clear]
+```
+
+The OptionButton dropdown is populated with three sections:
+
+```
+── Bundled ──
+  res://addons/gonodes/shaders/noise.gdshader
+  res://addons/gonodes/shaders/blur.gdshader
+── Project ──
+  project://textures/logo.png
+  project://fonts/custom.ttf
+── External ──
+  ⚠ C:\Users\me\Desktop\photo.jpg
+```
+
+- **Browse "…"** opens a native `FileDialog`. If the selected file is inside the project folder, it's auto-converted to `project://` relative path.
+- **Refresh "↻"** re-scans both bundled and project directories.
+- **Clear "X"** resets the parameter to empty string.
+- External files show a ⚠ warning icon — they are not portable across machines.
+
+### Operator Migration Summary
+
+All operators that load external files were migrated from raw `ResourceLoader.load()` to type-specific `GNResourceLoader` methods:
+
+| Operator | Family | Old Method | New Method |
+|----------|--------|-----------|------------|
+| AudioFileInCHOP | CHOP | `ResourceLoader.load(path)` | `GNResourceLoader.load_audio(path, project_dir)` |
+| MovieFileInTOP | TOP | `ResourceLoader.load(path)` | `GNResourceLoader.load_video(path, project_dir)` |
+| TextTOP | TOP | `ResourceLoader.load(path)` | `GNResourceLoader.load_font(path, project_dir)` |
+| ShaderMAT | MAT | `ResourceLoader.load(path)` | `GNResourceLoader.load_shader(path, project_dir)` |
+| ImageFileInIMG | IMG | `ResourceLoader.load(path)` | `GNResourceLoader.load_image(path, project_dir)` |
+| ImageSequenceIMG | IMG | `ResourceLoader.load(path)` | `GNResourceLoader.load_image()` + `resolve()` + `exists()` |
+| FFmpegInTOP | TOP (ext) | `_create_ffmpeg_stream(path)` | `GNResourceLoader.resolve(path, project_dir)` then `_create_ffmpeg_stream()` |
+
+**Not migrated** (write-only, use STRING params): FileSaveTOP, FileSaveDAT, RecordCHOP, MovieOutIMG, FFmpegOutIMG.
 
 ---
 

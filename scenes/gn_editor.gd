@@ -36,6 +36,9 @@ var _viewer_node_id: String = ""
 ## Path to the currently loaded/saved patch file (empty = unsaved).
 var _current_file_path: String = ""
 
+## Project manager — manages project folder, path resolution, scanning.
+var _project: GNProjectManager = GNProjectManager.new()
+
 ## FileDialogs for save and load.
 var _save_dialog: FileDialog = null
 var _load_dialog: FileDialog = null
@@ -121,6 +124,7 @@ func _setup_network() -> void:
 		var err := network.load_from_file(last_path)
 		if err == OK:
 			_current_file_path = last_path
+			_project.set_from_patch_path(last_path)
 			print("[GONODES] Restored last patch: %s" % last_path)
 		else:
 			print("[GONODES] Failed to restore '%s' — starting empty" % last_path)
@@ -133,6 +137,7 @@ func _setup_cook_engine() -> void:
 	cook_engine = GNCookEngine.new()
 	cook_engine.name = "CookEngine"
 	cook_engine.network = network
+	cook_engine.project_dir = _project.project_dir
 	add_child(cook_engine)
 
 	cook_engine.frame_cooked.connect(_on_frame_cooked)
@@ -623,6 +628,8 @@ func _on_new_pressed() -> void:
 	# Create fresh network
 	network = GNNetwork.new()
 	_current_file_path = ""
+	_project.clear()
+	cook_engine.project_dir = ""
 
 	# Rebind everything
 	graph_editor.bind_network(network)
@@ -668,6 +675,10 @@ func _on_load_file_selected(path: String) -> void:
 
 ## Saves the current network to the given path.
 func _save_to_path(path: String) -> void:
+	# Ensure project folder exists for this patch
+	_project.set_from_patch_path(path)
+	cook_engine.project_dir = _project.project_dir
+
 	var err := network.save_to_file(path)
 	if err == OK:
 		_current_file_path = path
@@ -700,6 +711,10 @@ func _load_from_path(path: String) -> void:
 
 	_current_file_path = path
 	_save_setting("last_patch_path", path)
+
+	# Set up project folder for this patch
+	_project.set_from_patch_path(path)
+	cook_engine.project_dir = _project.project_dir
 
 	# Rebind everything — cook engine will adopt nodes on next frame
 	graph_editor.bind_network(network)

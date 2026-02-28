@@ -64,8 +64,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var shader_code: String = ""
 	var shader_file: String = get_param_value("shader_file")
 
-	if not shader_file.is_empty() and ResourceLoader.exists(shader_file):
-		var loaded: Resource = ResourceLoader.load(shader_file)
+	if not shader_file.is_empty():
+		var loaded: Shader = GNResourceLoader.load_shader(shader_file, project_dir)
 		if loaded is Shader:
 			# Use an externally loaded shader directly
 			if _material.shader != loaded:

@@ -14,6 +14,11 @@ extends Node
 ## The network this engine operates on.
 var network: GNNetwork = null
 
+## Absolute path to the project folder for resolving project:// paths.
+## Set by the editor via GNProjectManager whenever a patch is saved/opened.
+## Injected into each GNNode.project_dir before cooking.
+var project_dir: String = ""
+
 # ─── Frame State ───────────────────────────────────────────────────────────────
 
 ## Current frame number (increments each cook cycle).
@@ -385,6 +390,7 @@ func cook_frame(delta: float) -> void:
 		node.current_delta = current_delta
 		node.elapsed_time = elapsed_time
 		node.current_frame = frame_count
+		node.project_dir = project_dir
 
 		# Resolve parameters (expressions, binds) before cooking
 		_resolve_node_parameters(node)

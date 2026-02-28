@@ -170,7 +170,16 @@ func _apply_video_file(file_path: String) -> void:
 		return
 
 	# Try creating an FFmpegVideoStream explicitly — guarantees FFmpeg decode path.
-	var stream := _create_ffmpeg_stream(file_path)
+	# Resolve project:// and absolute paths for the FFmpeg backend.
+	var resolved := GNResourceLoader.resolve(file_path, project_dir)
+	if resolved.is_empty():
+		GNLogger.warn("FFmpegInTOP",
+			"'%s' cannot resolve path: %s" % [id, file_path])
+		_video_player.stop()
+		_video_player.stream = null
+		return
+
+	var stream := _create_ffmpeg_stream(resolved)
 	if stream != null:
 		_video_player.stream = stream
 		_awaiting_video_size = true

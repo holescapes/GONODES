@@ -154,13 +154,9 @@ func _load_audio(file_path: String) -> void:
 	if file_path.is_empty():
 		return
 
-	if not ResourceLoader.exists(file_path):
-		push_warning("AudioFileInCHOP: file not found — '%s'" % file_path)
-		return
-
-	var res = ResourceLoader.load(file_path)
-	if res is AudioStream:
-		_audio_stream = res as AudioStream
+	var stream := GNResourceLoader.load_audio(file_path, project_dir)
+	if stream != null:
+		_audio_stream = stream
 		# Set loop property based on stream type
 		_apply_loop(_audio_stream, get_param_value("loop"))
 		_start_capture()

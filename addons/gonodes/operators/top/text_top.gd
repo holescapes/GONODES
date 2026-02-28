@@ -113,17 +113,12 @@ func _apply_font(font_path: String) -> void:
 		_label.remove_theme_font_override("font")
 		GNLogger.debug("TextTOP", "'%s' reverted to default font" % id)
 		return
-	if not ResourceLoader.exists(font_path):
-		GNLogger.warn("TextTOP", "'%s' font not found: %s" % [id, font_path])
-		_loaded_font = null
-		_label.remove_theme_font_override("font")
-		return
-	var res := ResourceLoader.load(font_path)
-	if res is Font:
-		_loaded_font = res as Font
+	var loaded_font := GNResourceLoader.load_font(font_path, project_dir)
+	if loaded_font != null:
+		_loaded_font = loaded_font
 		_label.add_theme_font_override("font", _loaded_font)
 		GNLogger.info("TextTOP", "'%s' loaded font: %s" % [id, font_path])
 	else:
-		GNLogger.warn("TextTOP", "'%s' resource is not a Font: %s" % [id, font_path])
+		GNLogger.warn("TextTOP", "'%s' font not found or invalid: %s" % [id, font_path])
 		_loaded_font = null
 		_label.remove_theme_font_override("font")

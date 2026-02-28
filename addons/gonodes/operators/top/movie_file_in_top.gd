@@ -132,27 +132,21 @@ func _apply_video_file(file_path: String) -> void:
 		GNLogger.debug("MovieFileInTOP", "'%s' cleared video" % id)
 		return
 
-	if not ResourceLoader.exists(file_path):
+	var loaded_stream := GNResourceLoader.load_video(file_path, project_dir)
+	if loaded_stream == null:
 		GNLogger.warn("MovieFileInTOP", "'%s' video file not found: %s" % [id, file_path])
 		_video_player.stop()
 		_video_player.stream = null
 		_stream = null
 		return
 
-	var loaded := ResourceLoader.load(file_path)
-	if loaded is VideoStream:
-		_stream = loaded as VideoStream
-		_video_player.stream = _stream
-		_awaiting_video_size = true  # Will read dimensions from first decoded frame
-		var do_play: bool = get_param_value("play")
-		if do_play:
-			_video_player.play()
-		GNLogger.info("MovieFileInTOP", "'%s' loaded video: %s" % [id, file_path])
-	else:
-		GNLogger.warn("MovieFileInTOP", "'%s' resource is not a VideoStream: %s" % [id, file_path])
-		_video_player.stop()
-		_video_player.stream = null
-		_stream = null
+	_stream = loaded_stream
+	_video_player.stream = _stream
+	_awaiting_video_size = true  # Will read dimensions from first decoded frame
+	var do_play: bool = get_param_value("play")
+	if do_play:
+		_video_player.play()
+	GNLogger.info("MovieFileInTOP", "'%s' loaded video: %s" % [id, file_path])
 
 
 func _on_video_finished() -> void:

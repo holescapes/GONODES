@@ -110,14 +110,17 @@ func _discover_sequence(file_path: String, do_preload: bool) -> void:
 	if file_path.is_empty():
 		return
 
-	if not ResourceLoader.exists(file_path):
+	if not GNResourceLoader.exists(file_path, project_dir):
 		GNLogger.warn("ImageSequenceIMG",
 			"'%s': file not found: %s" % [id, file_path])
 		return
 
+	# Resolve to absolute for directory scanning.
+	var resolved_path := GNResourceLoader.resolve(file_path, project_dir)
+
 	# Parse filename to extract prefix, digit count, and extension.
-	var dir_path := file_path.get_base_dir()
-	var file_name := file_path.get_file()
+	var dir_path := resolved_path.get_base_dir()
+	var file_name := resolved_path.get_file()
 	var ext := file_path.get_extension()
 	var base := file_name.get_basename()
 
@@ -202,16 +205,7 @@ func _get_frame_image(idx: int) -> Image:
 		return _frame_cache[idx] as Image
 
 	var path: String = _frame_paths[idx]
-	if not ResourceLoader.exists(path):
-		return null
-
-	var loaded := ResourceLoader.load(path)
-	var img: Image = null
-
-	if loaded is Image:
-		img = loaded as Image
-	elif loaded is Texture2D:
-		img = (loaded as Texture2D).get_image()
+	var img := GNResourceLoader.load_image(path, project_dir)
 
 	if img != null:
 		_frame_cache[idx] = img

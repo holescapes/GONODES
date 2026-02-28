@@ -62,6 +62,12 @@ var elapsed_time: float = 0.0
 ## Current frame number.
 var current_frame: int = 0
 
+# ─── Project Context (set by GNCookEngine each frame) ──────────────────────────
+
+## Absolute path to the project folder for resolving project:// paths.
+## Empty when the patch is untitled/unsaved.  Set by the cook engine.
+var project_dir: String = ""
+
 # ─── UI Metadata ───────────────────────────────────────────────────────────────
 
 ## Position of this node in the graph editor (stored for serialization).

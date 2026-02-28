@@ -83,31 +83,12 @@ func _load_image(file_path: String) -> Image:
 	if file_path.is_empty():
 		return null
 
-	if not ResourceLoader.exists(file_path):
-		GNLogger.warn("ImageFileInIMG",
-			"'%s': file not found: %s" % [id, file_path])
-		return null
-
-	var loaded := ResourceLoader.load(file_path)
-
-	if loaded is Image:
+	var img := GNResourceLoader.load_image(file_path, project_dir)
+	if img != null:
 		GNLogger.info("ImageFileInIMG",
 			"'%s': loaded Image: %s (%dx%d)" % [
-				id, file_path, loaded.get_width(), loaded.get_height()])
-		return loaded as Image
-
-	if loaded is Texture2D:
-		var tex := loaded as Texture2D
-		var img := tex.get_image()
-		if img != null:
-			GNLogger.info("ImageFileInIMG",
-				"'%s': loaded Texture2D → Image: %s (%dx%d)" % [
-					id, file_path, img.get_width(), img.get_height()])
-			return img
+				id, file_path, img.get_width(), img.get_height()])
+	else:
 		GNLogger.warn("ImageFileInIMG",
-			"'%s': Texture2D.get_image() returned null: %s" % [id, file_path])
-		return null
-
-	GNLogger.warn("ImageFileInIMG",
-		"'%s': resource is not Image or Texture2D: %s" % [id, file_path])
-	return null
+			"'%s': file not found or invalid: %s" % [id, file_path])
+	return img
