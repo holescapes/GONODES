@@ -53,7 +53,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material_h.set_shader_parameter("quality", quality_val)
 
 	# Vertical pass: reads horizontal pass output
-	_material_v.set_shader_parameter("source_tex", _viewport_h.get_texture())
+	var h_tex: ViewportTexture = _viewport_h.get_texture()
+	_canvas_v.texture = h_tex                       # TextureRect needs a texture to draw
+	_material_v.set_shader_parameter("source_tex", h_tex)
 	_material_v.set_shader_parameter("direction", Vector2(0.0, 1.0))
 	_material_v.set_shader_parameter("blur_size", blur_size)
 	_material_v.set_shader_parameter("quality", quality_val)

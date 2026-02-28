@@ -194,6 +194,20 @@ func _on_connection_changed(_arg: Variant = null) -> void:
 	_consumer_counts_dirty = true
 
 
+## Reorders this node's children so that GNNode instances appear in topological
+## order.  Godot renders SubViewports in scene-tree (child-index) order, so
+## upstream TOPs must be earlier children than downstream TOPs for their
+## viewport textures to be available in the same render frame.
+func _reorder_children_to_topo(topo_order: Array[GNNode]) -> void:
+	var idx := 0
+	for node in topo_order:
+		if node.get_parent() != self:
+			continue
+		if node.get_index() != idx:
+			move_child(node, idx)
+		idx += 1
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Active Chain Cooking
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -344,6 +358,11 @@ func cook_frame(delta: float) -> void:
 		_active_set = _compute_active_set()
 		for node in topo_order:
 			node.is_active = _active_set.has(node.id)
+		# Reorder scene-tree children to match topological order so that
+		# upstream TOPs' SubViewports render before downstream ones within
+		# the same frame.  Without this, viewports read stale/blank textures
+		# when the creation order doesn't match the dependency order.
+		_reorder_children_to_topo(topo_order)
 		_active_set_dirty = false
 
 	# Step 3c: Rebuild consumer counts when topology changed.

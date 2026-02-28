@@ -1454,7 +1454,14 @@ Exception: `process_mode = PROCESS_MODE_ALWAYS` is acceptable for media-playback
 Each TOP node owns a `SubViewport` for rendering its output texture. The infrastructure lives in **GNTopBase**:
 
 - **Creation:** `_create_viewport()` factory produces a SubViewport with `UPDATE_DISABLED`, `gui_disable_input = true`, and optional transparency / 3D. Higher-level helpers `_ensure_viewport()` and `_init_shader_viewport()` build upon it.
-- **Canvas:** A `ColorRect` (generators) or `TextureRect` (filters) with `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` auto-fills the viewport — no manual `_canvas.size` management (see Hard Rule 25.16).
+- **Canvas:** A `ColorRect` or `TextureRect` with `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` auto-fills the viewport — no manual `_canvas.size` management (see Hard Rule 25.16).
+
+  **ColorRect vs TextureRect — the decision rule and why it matters:**
+  - **ColorRect** → **generators** and **multi-input compositors** (Noise, Ramp, Rectangle, Circle, Cross, Composite, Displace, Feedback, Lookup). These either produce pixels from pure math/uniforms (no input texture) or blend multiple inputs passed entirely as `uniform sampler2D` shader parameters. A ColorRect always draws regardless — it needs no `.texture` property.
+  - **TextureRect** → **single-input filters** (Level, Edge, Flip, Crop, Threshold, Tile, Transform, Blur vertical pass). These transform one upstream texture. Each cook sets `(_canvas as TextureRect).texture = tex_in.texture`, which (a) ensures the canvas draws — **a TextureRect with null `.texture` skips `_draw()` entirely**, so the shader material never executes and the viewport renders blank — and (b) makes the input available as the built-in `TEXTURE` sampler in the shader, in addition to any explicit `uniform sampler2D`.
+  - **Rule:** no input or multiple inputs → `ColorRect`; single-input filter → `TextureRect`. The `_init_shader_viewport()` helper's `use_texture_rect` parameter controls this (`false` = ColorRect, `true` = TextureRect).
+  - **Gotcha:** Forgetting to set `.texture` on a TextureRect canvas produces a silent blank viewport — no error, no warning, just transparent pixels. This was the root cause of the BlurTOP sporadic blank output bug (the vertical-pass TextureRect was never given its `.texture`).
+
 - **Resolution:** Generator TOPs pass `get_param_value("resolution")` as the viewport size. Filter TOPs pass `tex_in.resolution` (matching their input). No hardcoded sizes.
 - **Render lifecycle:** Viewports are created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` on every child SubViewport after `_cook()` sets uniforms/textures, so each TOP renders **exactly once per cook cycle** — no wasted GPU passes on non-dirty frames.
 - **Input textures** are passed as shader uniforms (zero-copy GPU references).
