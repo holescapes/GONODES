@@ -34,7 +34,7 @@ time * 10.0
 
 ## Cross-Node References
 
-Three functions let you read values from other nodes in the network.
+Four functions let you read values from other nodes in the network.
 They are called as methods, not variables — just type them directly.
 
 ### `chop(node_id, channel, index)`
@@ -107,6 +107,66 @@ top("noise1", "aspect")
 # Match another TOP's resolution on one axis
 top("render1", "resolution").x
 ```
+
+### `par(param_name)` or `par(node_id, param_name)`
+
+Reads a parameter value from own node (self-reference) or another node.
+This is the Houdini `ch()` equivalent.
+
+| Argument     | Type   | Required | Description                                   |
+|--------------|--------|----------|-----------------------------------------------|
+| `param_name` | String | yes      | Parameter name (e.g. `"scale"`, `"speed"`)    |
+| `node_id`    | String | no       | Node ID for cross-node reference. Omit for self. |
+
+**Typed variants** for guaranteed return types:
+- `parf(...)` → guaranteed `float`
+- `pari(...)` → guaranteed `int`
+- `pars(...)` → guaranteed `String`
+
+```gdscript
+# Self-reference: read own node's parameter
+par("scale")
+par("offset_x") + par("offset_y")
+
+# Cross-node: read another node's parameter
+par("noise1", "scale")
+par("noise1", "speed") * 2.0
+
+# Hierarchical path
+par("../lfo1", "frequency")
+
+# Typed: guaranteed float return even if param is int
+parf("noise1", "scale")
+
+# Typed: guaranteed int
+pari("noise1", "seed")
+
+# Typed: guaranteed string
+pars("noise1", "file")
+
+# Math with self-references
+par("base_freq") * 2.0  # e.g., in 'overtone_freq' param
+```
+
+> **Circular dependency protection:** If param A references param B which
+> references param A, the engine detects the cycle and returns B's fallback
+> value with a warning. No infinite loops.
+
+### Copy Reference Workflow
+
+Instead of typing references manually, you can copy them from the UI:
+
+- **Right-click a node** in the graph → **"Copy Node Path"** copies `op("node_id")`
+- **Right-click a node** → **"Copy Output Ref"** copies a family-appropriate reference:
+  - CHOP: `chop("name", "out")`
+  - TOP: `top("name")`
+  - Other: `op("name")`
+- **Right-click a parameter name** in the inspector →
+  - "Copy Self Ref" → `par("param_name")`
+  - "Copy Cross Ref" → `par("node_id", "param_name")`
+  - "Copy op() Ref" → `op("node_id", "param_name")`
+
+Paste the copied reference directly into any expression field.
 
 ---
 
@@ -260,11 +320,15 @@ me.cook_valid
    field). They don't recompile every frame — only `execute()` runs per cook.
 2. **Use `chop()` for animation**, not raw `time`. LFO, Noise, and Math CHOPs
    give you shaped, controllable signals you can reference from any parameter.
-3. **Per-component expressions return floats.** Don't return a Vector2 from a
+3. **Use `par()` for self-references.** `par("scale")` reads your own node's
+   scale param — much cleaner than `op("my_node_name", "scale")`.
+4. **Per-component expressions return floats.** Don't return a Vector2 from a
    single component's expression — the engine expects a scalar per component.
-4. **Node IDs are case-sensitive.** `chop("LFO1", "out")` won't find `lfo1`.
-5. **Renaming a node** automatically updates all expression strings across the
+5. **Node IDs are case-sensitive.** `chop("LFO1", "out")` won't find `lfo1`.
+6. **Renaming a node** automatically updates all expression strings across the
    network that reference the old name.
+7. **Right-click to copy references.** Right-click a node → Copy Node Path, or
+   right-click a param name → Copy Self/Cross Ref. Much faster than typing.
 
 ---
 
@@ -376,7 +440,7 @@ The expression editor's **Snippets ▾** dropdown provides ready-to-use template
 | **Remapping** | Fit to range, Fit to 0-1, Sin to 0-1, Smoothstep, Step threshold |
 | **Smoothing** | Smooth follow, Lag (asymmetric), Trigger detect |
 | **Noise & Random** | Noise 1D, Noise 2D, Random [0,1], Random range |
-| **Node References** | Read CHOP channel, Read parameter, TOP resolution, TOP aspect |
+| **Node References** | Read CHOP channel, Read parameter, Self-reference par(), TOP resolution, TOP aspect, Copy reference workflow |
 | **Math Patterns** | Sine + offset, Exponential decay, Power curve, Circular motion, Quantize |
 
 Snippets are inserted at the cursor position, or replace the entire editor if empty.

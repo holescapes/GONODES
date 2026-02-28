@@ -30,7 +30,7 @@ var patch_path: String = ""
 
 
 ## Standard subfolders created in every project.
-const SUBFOLDERS: PackedStringArray = PackedStringArray([
+const SUBFOLDERS: Array[String] = [
 	"textures",
 	"fonts",
 	"video",
@@ -40,7 +40,7 @@ const SUBFOLDERS: PackedStringArray = PackedStringArray([
 	"presets",
 	"scripts",
 	"data",
-])
+]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

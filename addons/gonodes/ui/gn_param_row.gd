@@ -62,6 +62,9 @@ const _GNCodeEditorScript := preload("res://addons/gonodes/ui/gn_code_editor.gd"
 ## Lazily-created windowed code editor for Script/Shader params.
 var _code_editor: Window = null
 
+## Context popup for right-clicking the parameter name label.
+var _param_context_menu: PopupMenu = null
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Construction
@@ -91,9 +94,10 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 	_name_label.size_flags_horizontal = 0
 	_name_label.add_theme_font_size_override("font_size", 12)
 	_name_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	_name_label.mouse_filter = Control.MOUSE_FILTER_STOP
 	if not param.description.is_empty():
 		_name_label.tooltip_text = param.description
-		_name_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	_name_label.gui_input.connect(_on_name_label_input)
 	add_child(_name_label)
 
 	# Value container — holds either the value control or the expression editor
@@ -1054,3 +1058,58 @@ func cleanup() -> void:
 			param.value_changed.disconnect(_on_param_value_changed)
 		if param.mode_changed.is_connected(_on_param_mode_changed):
 			param.mode_changed.disconnect(_on_param_mode_changed)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Copy Parameter Reference (right-click on param name label)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Handles right-click on the parameter name label to show copy reference popup.
+func _on_name_label_input(event: InputEvent) -> void:
+	if not event is InputEventMouseButton:
+		return
+	var mb: InputEventMouseButton = event as InputEventMouseButton
+	if mb.button_index != MOUSE_BUTTON_RIGHT or not mb.pressed:
+		return
+	_show_param_context_menu(mb.global_position)
+
+
+## Shows the parameter context menu with Copy Reference options.
+func _show_param_context_menu(screen_pos: Vector2) -> void:
+	if _param_context_menu == null:
+		_param_context_menu = PopupMenu.new()
+		_param_context_menu.id_pressed.connect(_on_param_context_id)
+		add_child(_param_context_menu)
+	_param_context_menu.clear()
+
+	var node_id := owner_node.id if owner_node else ""
+	var p_name := param.param_name if param else ""
+
+	# Self-reference: par("param_name") — for use on the same node
+	_param_context_menu.add_item('Copy Self Ref  par("%s")' % p_name, 0)
+
+	# Cross-node reference: par("node_id", "param_name") — for use from other nodes
+	_param_context_menu.add_item('Copy Cross Ref  par("%s", "%s")' % [node_id, p_name], 1)
+
+	# op() style: op("node_id", "param_name")
+	_param_context_menu.add_item('Copy op() Ref  op("%s", "%s")' % [node_id, p_name], 2)
+
+	_param_context_menu.position = Vector2i(screen_pos)
+	_param_context_menu.reset_size()
+	_param_context_menu.popup()
+
+
+## Handles param context menu item selection.
+func _on_param_context_id(id: int) -> void:
+	var node_id := owner_node.id if owner_node else ""
+	var p_name := param.param_name if param else ""
+	var ref: String = ""
+	match id:
+		0:
+			ref = 'par("%s")' % p_name
+		1:
+			ref = 'par("%s", "%s")' % [node_id, p_name]
+		2:
+			ref = 'op("%s", "%s")' % [node_id, p_name]
+	if not ref.is_empty():
+		DisplayServer.clipboard_set(ref)

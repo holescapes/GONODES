@@ -77,6 +77,15 @@ var _lag_state: Dictionary = {}
 ## Per-key state for the trigger() expression function.
 var _trigger_state: Dictionary = {}
 
+## The node currently being evaluated for expressions.
+## Set before each expression eval so par() can resolve self-references.
+var _current_eval_node: GNNode = null
+
+## Guard set for circular parameter references.
+## Keys are "node_id:param_name" strings currently being evaluated.
+## If par() hits a key already in this set → cycle detected → return fallback.
+var _evaluating_params: Dictionary = {}
+
 ## Cached map of node_id → number of downstream consumers.
 ## Rebuilt when topology changes (_active_set_dirty also triggers rebuild).
 var _consumer_counts: Dictionary = {}
@@ -540,7 +549,7 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 
 	# Build the context array matching the input variable names:
 	# ["me", "time", "frame", "dt"]
-	# chop(), op(), top() are called as methods on the base_instance (self).
+	# chop(), op(), top(), par() are called as methods on the base_instance (self).
 	var context := [
 		node,           # me — the current node
 		elapsed_time,   # time — seconds since start
@@ -548,8 +557,13 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 		current_delta,  # dt — delta time this frame
 	]
 
+	# Track current node for par() self-references and set circular guard
+	_current_eval_node = node
+	var guard_key := "%s:%s" % [node.id, param.param_name]
+	_evaluating_params[guard_key] = true
+
 	# Pass self (CookEngine) as base_instance so Expression can call
-	# our chop(), op(), top() methods directly.
+	# our chop(), op(), top(), par() methods directly.
 	var _t0 := Time.get_ticks_usec()
 	var result = expr.execute(context, self)
 	var _t1 := Time.get_ticks_usec()
@@ -557,6 +571,9 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 	param.expression_eval_usec = eval_usec
 	param.expression_eval_avg_usec = lerpf(param.expression_eval_avg_usec, eval_usec,
 		GNParameter._PROFILE_ALPHA) if param.expression_eval_avg_usec > 0.0 else eval_usec
+
+	# Clear circular guard
+	_evaluating_params.erase(guard_key)
 
 	if expr.has_execute_failed():
 		GNLogger.error("CookEngine", "Expression error on %s.%s — %s" % [
@@ -590,6 +607,11 @@ func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
 		for ci in range(count):
 			param.component_expression_eval_usec[ci] = 0.0
 
+	# Track current node for par() self-references
+	_current_eval_node = node
+	var guard_key := "%s:%s" % [node.id, param.param_name]
+	_evaluating_params[guard_key] = true
+
 	for i in range(count):
 		if param.component_modes[i] == GNParameter.Mode.EXPRESSION:
 			var expr: Expression = param.get_compiled_component_expression(i)
@@ -611,6 +633,9 @@ func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
 		else:
 			# CONSTANT — use stored component value
 			components[i] = param.get_component_value(i)
+
+	# Clear circular guard
+	_evaluating_params.erase(guard_key)
 
 	# Assemble the final value from components
 	match param.value_type:
@@ -757,7 +782,92 @@ func top(node_name: String, property: String = "") -> Variant:
 	return _make_top_proxy(node_name, property)
 
 
+## Read a parameter value (self or cross-node). Houdini-style ch() equivalent.
+## Usage:
+##   par("scale")                  → own node's 'scale' param (self-reference)
+##   par("noise1", "scale")        → cross-node param reference
+##   par("../lfo1", "frequency")   → hierarchical path
+func par(name_or_node: String, param_name: String = "") -> Variant:
+	return _make_par_proxy(name_or_node, param_name)
+
+
+## Read a parameter as float. Guaranteed float return.
+func parf(name_or_node: String, param_name: String = "") -> float:
+	var v: Variant = _make_par_proxy(name_or_node, param_name)
+	if v is float:
+		return v
+	if v is int:
+		return float(v)
+	return 0.0
+
+
+## Read a parameter as int. Guaranteed int return.
+func pari(name_or_node: String, param_name: String = "") -> int:
+	var v: Variant = _make_par_proxy(name_or_node, param_name)
+	if v is int:
+		return v
+	if v is float:
+		return int(v)
+	return 0
+
+
+## Read a parameter as string. Guaranteed String return.
+func pars(name_or_node: String, param_name: String = "") -> String:
+	var v: Variant = _make_par_proxy(name_or_node, param_name)
+	return str(v)
+
+
 # ─── Internal proxy implementations ─────────────────────────────────────────────
+
+
+## Resolves a parameter reference with circular dependency protection.
+## When called with one arg: self-reference (reads from _current_eval_node).
+## When called with two args: cross-node reference.
+func _make_par_proxy(name_or_node: String, param_name: String = "") -> Variant:
+	var target_node: GNNode = null
+	var target_param_name: String = ""
+
+	if param_name.is_empty():
+		# Single arg → self-reference: par("scale") reads own node
+		target_node = _current_eval_node
+		target_param_name = name_or_node
+	else:
+		# Two args → cross-node: par("noise1", "scale")
+		target_node = resolve_node(name_or_node)
+		target_param_name = param_name
+
+	if target_node == null:
+		GNLogger.warn("CookEngine", "par() — node not found: '%s'" % name_or_node)
+		return 0.0
+
+	var p: GNParameter = target_node.parameters.get(target_param_name, null)
+	if p == null:
+		GNLogger.warn("CookEngine", "par() — param '%s' not found on '%s'" % [
+			target_param_name, target_node.id])
+		return 0.0
+
+	# ── Circular dependency guard ──
+	var guard_key := "%s:%s" % [target_node.id, target_param_name]
+	if _evaluating_params.has(guard_key):
+		GNLogger.warn("CookEngine",
+			"par() — circular reference detected: '%s' (returning fallback)" % guard_key)
+		return p.fallback_value
+
+	# If the target param is an expression that hasn't been evaluated yet this
+	# frame, evaluate it now (demand-driven).  For CONSTANT mode, get_resolved_value()
+	# just returns the stored value — no recursion risk.
+	if p.mode == GNParameter.Mode.EXPRESSION:
+		# Push guard and evaluate
+		_evaluating_params[guard_key] = true
+		var prev_node := _current_eval_node
+		if p.is_multi_component() and p.has_any_component_expression():
+			_evaluate_component_expressions(target_node, p)
+		else:
+			_evaluate_expression(target_node, p)
+		_current_eval_node = prev_node
+		_evaluating_params.erase(guard_key)
+
+	return p.get_resolved_value()
 
 
 ## Returns a proxy dictionary for the given node (used inside expressions as op("name")).

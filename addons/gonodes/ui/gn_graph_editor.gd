@@ -55,6 +55,8 @@ enum _CtxID {
 	AUTO_LAYOUT,
 	EXPORT_OUTPUT,
 	GROUP_SELECTED,
+	COPY_NODE_PATH,
+	COPY_OUTPUT_REF,
 }
 
 ## Undo/redo history for graph operations.
@@ -1806,6 +1808,32 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item("Export Output…", _CtxID.EXPORT_OUTPUT)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.EXPORT_OUTPUT), not can_export)
 
+	# Copy Reference submenu — copies expression-ready path to clipboard
+	_context_menu.add_separator()
+	var single_selected := selected_ids.size() == 1
+	var sel_node_name := ""
+	var sel_node_family_str := ""
+	if single_selected and network != null:
+		var sn: GNNode = network.get_node_by_id(selected_ids[0])
+		if sn != null:
+			sel_node_name = sn.id
+			sel_node_family_str = GNFamily.get_family_name(sn.family).to_lower()
+
+	_context_menu.add_item('Copy Node Path  op("%s")' % sel_node_name if single_selected else "Copy Node Path", _CtxID.COPY_NODE_PATH)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_NODE_PATH), not single_selected)
+
+	var output_ref_label := "Copy Output Ref"
+	if single_selected and not sel_node_family_str.is_empty():
+		match sel_node_family_str:
+			"chop":
+				output_ref_label = 'Copy Output  chop("%s", "out")' % sel_node_name
+			"top":
+				output_ref_label = 'Copy Output  top("%s")' % sel_node_name
+			_:
+				output_ref_label = 'Copy Output  op("%s")' % sel_node_name
+	_context_menu.add_item(output_ref_label, _CtxID.COPY_OUTPUT_REF)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_OUTPUT_REF), not single_selected)
+
 	_context_menu.position = Vector2i(screen_pos)
 	_context_menu.reset_size()
 	_context_menu.popup()
@@ -1863,6 +1891,52 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			_begin_export_output()
 		_CtxID.GROUP_SELECTED:
 			group_selected_into_subnet()
+		_CtxID.COPY_NODE_PATH:
+			_copy_node_path_to_clipboard()
+		_CtxID.COPY_OUTPUT_REF:
+			_copy_output_ref_to_clipboard()
+
+
+## Copies an expression-ready op("node_id") path for the selected node.
+func _copy_node_path_to_clipboard() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node == null:
+		return
+	var ref := 'op("%s")' % node.id
+	DisplayServer.clipboard_set(ref)
+	GNLogger.info("GraphEditor", "Copied node path: %s" % ref)
+
+
+## Copies a family-appropriate output reference for the selected node.
+## CHOP → chop("name", "out"), TOP → top("name"), other → op("name").
+func _copy_output_ref_to_clipboard() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node == null:
+		return
+	var family_str := GNFamily.get_family_name(node.family).to_lower()
+	var ref: String
+	match family_str:
+		"chop":
+			# Default to first channel name if available, else "out"
+			var chan := "out"
+			if node.cached_output is GNChannelData:
+				var ch_data: GNChannelData = node.cached_output as GNChannelData
+				var names := ch_data.get_channel_names()
+				if not names.is_empty():
+					chan = names[0]
+			ref = 'chop("%s", "%s")' % [node.id, chan]
+		"top":
+			ref = 'top("%s")' % node.id
+		_:
+			ref = 'op("%s")' % node.id
+	DisplayServer.clipboard_set(ref)
+	GNLogger.info("GraphEditor", "Copied output ref: %s" % ref)
 
 
 ## Helper: creates a Shortcut with a single InputEventKey for menu display.

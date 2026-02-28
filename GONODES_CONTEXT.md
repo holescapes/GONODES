@@ -691,7 +691,8 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
   - **Ghost wire**: semi-transparent line drawn from the source port to the drop point while the palette is open, cleared on palette close/select
   - Pending connection and ghost wire state stored in `_pending_connection` / `_ghost_wire` dicts, cleared on palette close
 - **Right-click context menu** (`PopupMenu`) with contextual options:
-  - Add Node… (opens palette), Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo
+  - Add Node…, Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo
+  - Copy Node Path → `op("name")`, Copy Output Ref → family-appropriate reference (chop/top/op)
   - Items grayed out when not applicable (e.g., no selection → copy/cut/delete disabled)
   - Shortcut hints displayed in menu items
 - Emits `operator_selected` / `operator_deselected` signals
@@ -1221,6 +1222,7 @@ GONODES/
   - [x] Expression presets / snippets — Snippets ▾ dropdown in expression editor with 30+ templates across 6 categories (Time, Remapping, Smoothing, Noise, Node References, Math Patterns).
   - [x] Expression profiling — per-expression eval time (µs) tracked on `GNParameter.expression_eval_usec/avg_usec`, shown in expression field tooltip + editor info bar. Per-component timing independent.
   - [x] Built-in utility functions on CookEngine: `fit()`, `fit01()`, `smooth()`, `lag()`, `pulse()`, `step()`, `smoothstep()`, `cycle()`, `bounce()`, `noise1()`, `noise2()`, `trigger()`. Stateful functions use per-key state dicts.
+  - [x] **`par()` / `parf()` / `pari()` / `pars()`** — parameter-to-parameter references (Houdini `ch()` equivalent). Self-reference with 1 arg, cross-node with 2 args. Typed variants guarantee return type. Circular dependency guard via `_evaluating_params` set. Demand-driven evaluation for EXPRESSION-mode targets.
   - [x] Windowed code editor for Script operators & CustomShaderTOP — `GNCodeEditor` (extends `GNBaseCodeEditor`) with CodeEdit, mode-adaptive syntax highlighting (GDScript for Script ops, GLSL for shaders), preset load/save via GNScriptHelper, reference cheatsheet, Ctrl+Enter confirm. Opened via "Edit ↗" button in GNParamRow. Both `GNCodeEditor` and `GNExpressionEditor` share a common base class (`GNBaseCodeEditor`) providing Window layout, CodeEdit configuration, key bindings, and status bar.
   - Reference: `help/expressions_guide.md` for complete expression system docs.
 - [x] **File output / save-to-disk operators** — all implemented with `is_sink = true` and `active` toggle:
@@ -1352,6 +1354,36 @@ GONODES/
   - `_open_file_browse_dialog()`: Native FileDialog, auto-converts to project:// if file is inside project folder.
 - [x] **Editor wired to GNProjectManager**: save/load/new/setup/auto-restore all update `_project` and `cook_engine.project_dir`.
 - [x] File output operators (FileSaveTOP, FileSaveDAT, RecordCHOP, MovieOutIMG, FFmpegOutIMG) confirmed write-only, use STRING params — not affected by resource loader migration.
+
+### Phase 7.6: Parameter References & Copy Path ✅
+- [x] **`par()` expression function** — Houdini-style `ch()` equivalent for parameter-to-parameter references:
+  - Self-reference: `par("scale")` reads own node's param (most common, like Houdini's `ch("scale")`)
+  - Cross-node: `par("noise1", "scale")` reads another node's param
+  - Hierarchical: `par("../lfo1", "frequency")` with path resolution
+  - Typed variants: `parf()` (guaranteed float), `pari()` (guaranteed int), `pars()` (guaranteed String)
+  - Implementation: methods on GNCookEngine, `_current_eval_node` tracks which node's expression is being evaluated, single-arg `par()` resolves against self
+- [x] **Circular dependency guard** (simple guard, Option A):
+  - `_evaluating_params: Dictionary` tracks `"node_id:param_name"` keys currently being evaluated
+  - If `par()` encounters a key already in the set → cycle detected → returns `fallback_value` + warns
+  - Guard keys are pushed before eval and erased after, covering both scalar and component expressions
+  - Demand-driven: if target param is EXPRESSION mode and not yet evaluated this frame, evaluates it inline with guard protection
+  - **Future: Full Parameter DAG** — build a mini topological sort of all parameter dependencies per cook frame for optimal evaluation order and guaranteed cycle detection. Current simple guard handles the 99% case; full DAG would also enable lazy re-evaluation (only re-eval params whose deps changed).
+- [x] **Copy Node Path** (right-click context menu on graph editor):
+  - "Copy Node Path" → copies `op("node_id")` to clipboard
+  - "Copy Output Ref" → copies family-appropriate reference:
+    - CHOP: `chop("name", "out")` (uses first channel name if available)
+    - TOP: `top("name")`
+    - Other: `op("name")`
+  - Both require exactly one node selected; disabled otherwise
+  - Menu items show the actual reference string that will be copied
+- [x] **Copy Parameter Reference** (right-click on param name label in inspector):
+  - Three options per parameter:
+    - "Copy Self Ref" → `par("param_name")` (for expressions on the same node)
+    - "Copy Cross Ref" → `par("node_id", "param_name")` (for expressions on other nodes)
+    - "Copy op() Ref" → `op("node_id", "param_name")` (alternative syntax)
+  - Right-click the parameter name label → popup with all three options
+  - Selected reference is copied to system clipboard for paste into expression fields
+  - Files modified: `gn_cook_engine.gd`, `gn_graph_editor.gd`, `gn_param_row.gd`
 
 ### Near-term
 - [x] SOP family (procedural geometry: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch)
@@ -1817,26 +1849,40 @@ After cooking a CHOP node with exports:
 Inside any parameter's expression field, users can write references:
 
 ```gdscript
-# Reference another node's parameter value
-op("noise1").par.scale          # Get the 'scale' parameter value of node 'noise1'
-op("lfo1").par.frequency         # Get LFO's frequency param
+# Reference own node's parameters (self-reference, Houdini ch() style)
+par("scale")                      # Own 'scale' param (most common pattern)
+par("offset_x") + par("offset_y") # Combine own params
+parf("scale")                      # Guaranteed float return
+pari("seed")                       # Guaranteed int return
+pars("file")                       # Guaranteed string return
+
+# Reference another node's parameter
+par("noise1", "scale")            # Cross-node param reference
+par("../lfo1", "frequency")       # Hierarchical path
+op("noise1", "scale")             # Alternative syntax (same result)
 
 # Reference CHOP channel values
-chop("lfo1").value("out")        # Last sample of channel 'out' from CHOP 'lfo1'
-chop("noise_chop1").value("tx")  # Last sample of channel 'tx'
-chop("math1").value("out", 5)    # Sample at index 5
+chop("lfo1", "out")               # Last sample of channel 'out' from CHOP 'lfo1'
+chop("noise_chop1", "tx")         # Last sample of channel 'tx'
+chop("math1", "out", 5)           # Sample at index 5
 
 # Reference TOP properties
-top("noise1").resolution.x       # Width of TOP output
-top("noise1").resolution.y       # Height of TOP output
+top("noise1", "resolution").x     # Width of TOP output
+top("noise1", "resolution").y     # Height of TOP output
 
 # Math with references
-chop("lfo1").value("out") * 10.0 + op("ctrl").par.offset
-sin(time * op("speed").par.rate)
+chop("lfo1", "out") * 10.0 + par("offset")
+sin(time * par("noise1", "rate"))
 
 # Ternary / conditional
-1.0 if chop("toggle").value("out") > 0.5 else 0.0
+1.0 if chop("toggle", "out") > 0.5 else 0.0
 ```
+
+#### Copy Reference Workflow
+Right-click a node in the graph → "Copy Node Path" or "Copy Output Ref" to get an expression-ready string in the clipboard. Right-click a parameter name in the inspector → "Copy Self Ref", "Copy Cross Ref", or "Copy op() Ref". Paste directly into any expression field.
+
+#### Circular Dependency Protection
+If `par("a")` references `par("b")` which references `par("a")`, the engine detects the cycle at runtime and returns the fallback value with a warning. No infinite loops or stack overflows.
 
 ### 17.3 Reference Proxies by Family
 
@@ -1844,11 +1890,24 @@ Each family has its own reference proxy with family-specific accessors. **MVP im
 
 #### `op(name)` — Generic (all families)
 ```gdscript
-op("any_node").par.<param_name>   # Resolved parameter value (any family)
+op("any_node", "param_name")     # Resolved parameter value (2-arg shortcut)
+op("any_node").par.<param_name>   # Resolved parameter value (proxy dict)
 op("any_node").family             # GNFamily enum
 op("any_node").cook_time          # Last cook duration in ms
 op("any_node").valid              # Whether node cooked successfully
 ```
+
+#### `par(name)` / `par(node, name)` — Parameter Reference (Houdini ch() equivalent) ✅
+```gdscript
+par("scale")                      # Self-reference: own node's 'scale' param
+par("offset_x") * 2.0             # Self-reference with math
+par("noise1", "scale")            # Cross-node: noise1's 'scale' param
+par("../lfo1", "frequency")       # Hierarchical cross-node reference
+parf("noise1", "scale")           # Cross-node, guaranteed float
+pari("noise1", "seed")            # Cross-node, guaranteed int
+pars("noise1", "file")            # Cross-node, guaranteed string
+```
+**Features:** Self-reference via single arg, cross-node via two args, typed variants (parf/pari/pars), circular dependency guard, demand-driven evaluation.
 
 #### `chop(name)` — CHOP Proxy (MVP)
 ```gdscript
