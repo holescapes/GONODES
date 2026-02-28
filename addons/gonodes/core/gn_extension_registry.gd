@@ -8,7 +8,10 @@ extends RefCounted
 ## Architecture
 ## ────────────
 ## • Core operators are registered at startup via `_register_core_operators()`.
-## • Extensions live under `res://addons/gn_ext_<name>/` and contain a
+# Sub-network types — explicit preload for cold-cache robustness.
+const _PreloadSubNetworkNode = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
+const _PreloadInTunnel = preload("res://addons/gonodes/operators/comp/in_tunnel.gd")
+const _PreloadOutTunnel = preload("res://addons/gonodes/operators/comp/out_tunnel.gd")## • Extensions live under `res://addons/gn_ext_<name>/` and contain a
 ##   `gn_extension.cfg` manifest (ConfigFile) listing operator scripts,
 ##   families, descriptions, and optional ClassDB dependency guards.
 ## • `scan_extensions()` discovers and loads manifest-declared operators.
@@ -603,6 +606,14 @@ func _register_core_operators() -> void:
 		"Light3D wrapper (Directional, Omni, Spot) for scene illumination.")
 	_reg("MergeCOMP",       "COMP", MergeCOMP,
 		"Merge multiple COMPs into a single scene group with group transform.")
+
+	# ── COMPs: Sub-Networks ─────────────────────────────────────────────
+	_reg("SubNetworkNode",  "COMP", _PreloadSubNetworkNode,
+		"Sub-network — contains a nested node graph with InTunnel/OutTunnel ports.")
+	_reg("InTunnel",        "COMP", _PreloadInTunnel,
+		"Input tunnel — bridges data from parent sub-network into inner graph.")
+	_reg("OutTunnel",       "COMP", _PreloadOutTunnel,
+		"Output tunnel — bridges data from inner graph to parent sub-network.")
 
 	# ── MATs ────────────────────────────────────────────────────────────
 	_reg("PBR_MAT",         "MAT", PBR_MAT,

@@ -5,6 +5,11 @@ extends GraphEdit
 ## Handles node views, wire connections, deletion, and syncs
 ## UI actions back to the GNNetwork model.
 
+# Sub-network types — explicit preload for cold-cache robustness.
+const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
+const _InTunnelScript = preload("res://addons/gonodes/operators/comp/in_tunnel.gd")
+const _OutTunnelScript = preload("res://addons/gonodes/operators/comp/out_tunnel.gd")
+
 ## The network this editor visualizes and edits.
 var network: GNNetwork = null
 
@@ -49,6 +54,7 @@ enum _CtxID {
 	ALIGN_V,
 	AUTO_LAYOUT,
 	EXPORT_OUTPUT,
+	GROUP_SELECTED,
 }
 
 ## Undo/redo history for graph operations.
@@ -103,6 +109,10 @@ signal open_viewer_requested(node_id: String)
 
 ## Signal emitted when help is requested for a node (? button or context menu).
 signal help_requested(node_id: String)
+
+## Signal emitted when the user wants to dive into a SubNetworkNode
+## (Enter key or double-click on the node body).
+signal dive_into_requested(node_id: String)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -194,6 +204,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 		elif not event.ctrl_pressed and not event.alt_pressed:
 			match event.keycode:
+				KEY_ENTER, KEY_KP_ENTER:
+					_try_dive_into_selected()
+					get_viewport().set_input_as_handled()
+				KEY_BACKSPACE:
+					# Dive out is handled by the editor via breadcrumb —
+					# but we emit a signal so it can be routed there too.
+					pass
 				KEY_B:
 					_toggle_selected_bypass()
 					get_viewport().set_input_as_handled()
@@ -337,6 +354,7 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	view.setup(node)
 	view.rename_requested.connect(_on_node_rename_requested)
 	view.help_requested.connect(func(nid: String) -> void: help_requested.emit(nid))
+	view.dive_into_requested.connect(func(nid: String) -> void: dive_into_requested.emit(nid))
 	add_child(view)
 	_node_views[node.id] = view
 
@@ -1198,6 +1216,15 @@ func _deselect_all() -> void:
 			view.selected = false
 
 
+## Attempts to dive into the selected SubNetworkNode (if exactly one is selected).
+func _try_dive_into_selected() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node is _SubNetworkNodeScript:
+		dive_into_requested.emit(selected[0])
+
 ## Copies selected nodes and their internal connections to the clipboard.
 func copy_selected() -> void:
 	if network == null:
@@ -1757,6 +1784,12 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.AUTO_LAYOUT), _shortcut(KEY_L, true), true)
 
 	_context_menu.add_separator()
+
+	_context_menu.add_item("Group into Sub-Network", _CtxID.GROUP_SELECTED)
+	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.GROUP_SELECTED), _shortcut(KEY_G, true), true)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.GROUP_SELECTED), not has_selection)
+
+	_context_menu.add_separator()
 	_context_menu.add_item("Node Help", _CtxID.NODE_HELP)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.NODE_HELP), selected_ids.size() != 1)
 
@@ -1828,6 +1861,8 @@ func _on_context_menu_id_pressed(id: int) -> void:
 				help_requested.emit(selected[0])
 		_CtxID.EXPORT_OUTPUT:
 			_begin_export_output()
+		_CtxID.GROUP_SELECTED:
+			group_selected_into_subnet()
 
 
 ## Helper: creates a Shortcut with a single InputEventKey for menu display.
@@ -2254,3 +2289,269 @@ func _ur_set_positions(positions: Dictionary) -> void:
 func _ur_rename(old_id: String, new_id: String) -> void:
 	if network:
 		network.rename_node(old_id, new_id)
+
+
+## Replaces ALL connections in the current network with the given snapshot.
+## Each entry is [from_node, from_port, to_node, to_port].
+func _ur_set_connections(conn_data: Array) -> void:
+	if network == null:
+		return
+	network.connections.clear()
+	for cd in conn_data:
+		network.connections.append(
+			GNConnection.create(cd[0], cd[1], cd[2], cd[3]))
+	network._invalidate_topo()
+	network.graph_changed.emit()
+
+
+## Redo helper for group-into-subnet: removes original nodes, adds subnet,
+## and restores the post-group connection state.
+func _ur_do_group_subnet(removed_ids: Array, subnet_id: String,
+		subnet_dict: Dictionary, post_conns: Array) -> void:
+	if network == null:
+		return
+	# Remove the original selected nodes
+	for nid in removed_ids:
+		_ur_remove_node(nid)
+	# Add the SubNetworkNode (including its inner network via from_dict)
+	_ur_add_node(subnet_id, subnet_dict)
+	# Restore connections to the post-group state
+	_ur_set_connections(post_conns)
+
+
+## Undo helper for group-into-subnet: removes subnet, restores original
+## nodes, and restores the pre-group connection state.
+func _ur_undo_group_subnet(subnet_id: String, nodes_snapshot: Array,
+		pre_conns: Array) -> void:
+	if network == null:
+		return
+	# Remove the SubNetworkNode
+	_ur_remove_node(subnet_id)
+	# Restore the original nodes
+	for nd in nodes_snapshot:
+		_ur_add_node(nd[0], nd[1])
+	# Restore connections to the pre-group state
+	_ur_set_connections(pre_conns)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Group Selected → Sub-Network
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Moves the selected nodes into a new SubNetworkNode.
+## Auto-creates InTunnel/OutTunnel nodes for wires crossing the group boundary.
+##
+## Algorithm:
+## 1. Identify the selected node set.
+## 2. Classify all connections as internal, incoming (external→selected),
+##    or outgoing (selected→external).
+## 3. Create a SubNetworkNode at the centroid of the selection.
+## 4. For each unique incoming wire endpoint: create an InTunnel in the inner
+##    network and add a matching input port to the SubNetworkNode.
+## 5. For each unique outgoing wire source: create an OutTunnel in the inner
+##    network and add a matching output port to the SubNetworkNode.
+## 6. Move selected nodes into the inner network, remapping connections.
+## 7. Remove old nodes and wires from the parent network.
+## 8. Reconnect external wires to the SubNetworkNode's ports.
+func group_selected_into_subnet() -> void:
+	if network == null:
+		return
+	var selected := _get_selected_node_ids()
+	if selected.is_empty():
+		return
+
+	# ── Snapshot for undo ───────────────────────────────────────────────
+	var pre_nodes_snapshot: Array = []
+	for nid in selected:
+		var node: GNNode = network.nodes.get(nid, null)
+		if node:
+			pre_nodes_snapshot.append([nid, node.to_dict()])
+	var pre_conns_snapshot: Array = []
+	for conn in network.connections:
+		pre_conns_snapshot.append([conn.from_node, conn.from_port,
+				conn.to_node, conn.to_port])
+
+	var selected_set: Dictionary = {}
+	for nid in selected:
+		selected_set[nid] = true
+
+	# ── Classify connections ────────────────────────────────────────────
+	var internal_conns: Array[GNConnection] = []
+	var incoming_conns: Array[GNConnection] = []   # external → selected
+	var outgoing_conns: Array[GNConnection] = []   # selected → external
+
+	for conn in network.connections:
+		var from_in := selected_set.has(conn.from_node)
+		var to_in := selected_set.has(conn.to_node)
+		if from_in and to_in:
+			internal_conns.append(conn)
+		elif not from_in and to_in:
+			incoming_conns.append(conn)
+		elif from_in and not to_in:
+			outgoing_conns.append(conn)
+		# else: both external — not our concern
+
+	# ── Compute centroid ────────────────────────────────────────────────
+	var centroid := Vector2.ZERO
+	for nid in selected:
+		var node: GNNode = network.get_node_by_id(nid)
+		if node:
+			centroid += node.graph_position
+	centroid /= float(selected.size())
+
+	# ── Create SubNetworkNode ───────────────────────────────────────────
+	var subnet = GNExtensionRegistry.instance().create_instance("SubNetworkNode")
+	var subnet_id := network.generate_unique_id("subnet")
+	subnet.initialize(subnet_id)
+	subnet.graph_position = centroid
+	subnet._ensure_inner_network()
+
+	# ── Create InTunnels for incoming wires ─────────────────────────────
+	# Deduplicate by (from_node, from_port) — multiple wires from the same
+	# source become one InTunnel.
+	var in_tunnel_map: Dictionary = {}  # "from_node:from_port" → InTunnel
+	var in_tunnel_index: int = 0
+	for conn in incoming_conns:
+		var key := "%s:%d" % [conn.from_node, conn.from_port]
+		if in_tunnel_map.has(key):
+			continue
+		var source_node: GNNode = network.get_node_by_id(conn.from_node)
+		var source_port: GNPort = source_node.get_output_port(conn.from_port) if source_node else null
+		var port_family: GNFamily.Type = source_port.family if source_port else GNFamily.Type.TOP
+
+		var tunnel := _InTunnelScript.new()
+		tunnel.tunnel_index = in_tunnel_index
+		tunnel.tunnel_family = port_family
+		tunnel.tunnel_label = "in%d" % in_tunnel_index
+		var tunnel_id: String = subnet.inner_network.generate_unique_id("in_tunnel")
+		tunnel.initialize(tunnel_id)
+		tunnel.graph_position = Vector2(-300, in_tunnel_index * 150)
+		# Rebuild output port to match family
+		tunnel.output_ports.clear()
+		tunnel.add_output("out", port_family, "Data from parent input %d" % in_tunnel_index)
+		subnet.inner_network.add_node(tunnel)
+		in_tunnel_map[key] = tunnel
+		in_tunnel_index += 1
+
+	# ── Create OutTunnels for outgoing wires ────────────────────────────
+	# Deduplicate by (from_node, from_port) — one OutTunnel per unique source
+	# inside the group.
+	var out_tunnel_map: Dictionary = {}  # "from_node:from_port" → OutTunnel
+	var out_tunnel_index: int = 0
+	for conn in outgoing_conns:
+		var key := "%s:%d" % [conn.from_node, conn.from_port]
+		if out_tunnel_map.has(key):
+			continue
+		var source_node: GNNode = network.get_node_by_id(conn.from_node)
+		var source_port: GNPort = source_node.get_output_port(conn.from_port) if source_node else null
+		var port_family: GNFamily.Type = source_port.family if source_port else GNFamily.Type.TOP
+
+		var tunnel := _OutTunnelScript.new()
+		tunnel.tunnel_index = out_tunnel_index
+		tunnel.tunnel_family = port_family
+		tunnel.tunnel_label = "out%d" % out_tunnel_index
+		var tunnel_id: String = subnet.inner_network.generate_unique_id("out_tunnel")
+		tunnel.initialize(tunnel_id)
+		tunnel.graph_position = Vector2(600, out_tunnel_index * 150)
+		# Rebuild input port to match family
+		tunnel.input_ports.clear()
+		tunnel.add_input("in", port_family, false, "Data to send to parent output %d" % out_tunnel_index)
+		subnet.inner_network.add_node(tunnel)
+		out_tunnel_map[key] = tunnel
+		out_tunnel_index += 1
+
+	# ── Move selected nodes into inner network ──────────────────────────
+	# We need to: remove from parent scene tree, add to inner network.
+	for nid in selected:
+		var node: GNNode = network.get_node_by_id(nid)
+		if node == null:
+			continue
+		# Recenter positions relative to centroid
+		node.graph_position = node.graph_position - centroid + Vector2(150, 0)
+		# Detach from parent network's scene tree and data model
+		# (direct dict manipulation to avoid signaling and queue_free)
+		network.nodes.erase(nid)
+		if node.is_inside_tree():
+			node.get_parent().remove_child(node)
+		# Add to inner network
+		subnet.inner_network.nodes[nid] = node
+
+	# ── Remap internal connections ──────────────────────────────────────
+	for conn in internal_conns:
+		# Remove from parent
+		network.connections.erase(conn)
+		# Add to inner network
+		subnet.inner_network.connections.append(conn)
+
+	# ── Remap incoming connections ──────────────────────────────────────
+	for conn in incoming_conns:
+		var key := "%s:%d" % [conn.from_node, conn.from_port]
+		var tunnel = in_tunnel_map[key]
+		# Remove old wire from parent
+		network.connections.erase(conn)
+		# Wire: InTunnel output → original target inside inner network
+		var inner_conn := GNConnection.create(tunnel.id, 0, conn.to_node, conn.to_port)
+		subnet.inner_network.connections.append(inner_conn)
+
+	# ── Remap outgoing connections ──────────────────────────────────────
+	# Store external targets to reconnect after subnet is added
+	var external_rewires: Array[Dictionary] = []  # [{from_tunnel_idx, to_node, to_port}]
+	for conn in outgoing_conns:
+		var key := "%s:%d" % [conn.from_node, conn.from_port]
+		var tunnel = out_tunnel_map[key]
+		# Remove old wire from parent
+		network.connections.erase(conn)
+		# Wire: source inside inner network → OutTunnel input
+		var inner_conn := GNConnection.create(conn.from_node, conn.from_port, tunnel.id, 0)
+		subnet.inner_network.connections.append(inner_conn)
+		# Remember external target for reconnection
+		external_rewires.append({
+			"from_tunnel_idx": tunnel.tunnel_index,
+			"to_node": conn.to_node,
+			"to_port": conn.to_port,
+		})
+
+	# ── Invalidate inner network topology ───────────────────────────────
+	subnet.inner_network._invalidate_topo()
+
+	# ── Sync external ports from tunnels ────────────────────────────────
+	subnet.sync_ports_from_tunnels()
+
+	# ── Add SubNetworkNode to parent network ────────────────────────────
+	network.add_node(subnet)
+
+	# ── Reconnect external incoming wires to SubNetworkNode inputs ──────
+	for conn in incoming_conns:
+		var key := "%s:%d" % [conn.from_node, conn.from_port]
+		var tunnel = in_tunnel_map[key]
+		network.connect_nodes(conn.from_node, conn.from_port, subnet_id, tunnel.tunnel_index)
+
+	# ── Reconnect external outgoing wires from SubNetworkNode outputs ───
+	for rw in external_rewires:
+		network.connect_nodes(subnet_id, rw["from_tunnel_idx"], rw["to_node"], rw["to_port"])
+
+	# ── Emit node_removed for each selected node (updates views) ────────
+	for nid in selected:
+		network.node_removed.emit(nid)
+
+	# ── Invalidate parent topology ──────────────────────────────────────
+	network._invalidate_topo()
+	network.graph_changed.emit()
+
+	# ── Record undo action ──────────────────────────────────────────────
+	var post_conns_snapshot: Array = []
+	for conn in network.connections:
+		post_conns_snapshot.append([conn.from_node, conn.from_port,
+				conn.to_node, conn.to_port])
+
+	_undo_redo.create_action("Group %d node(s) into Sub-Network" % selected.size())
+	_undo_redo.add_do_method(
+		_ur_do_group_subnet.bind(selected, subnet_id,
+				subnet.to_dict(), post_conns_snapshot))
+	_undo_redo.add_undo_method(
+		_ur_undo_group_subnet.bind(subnet_id, pre_nodes_snapshot,
+				pre_conns_snapshot))
+	_undo_redo.commit_action(false)
+
+	GNLogger.info("GraphEditor", "Grouped %d nodes into sub-network '%s' (%d in, %d out)" % [
+		selected.size(), subnet_id, in_tunnel_map.size(), out_tunnel_map.size()])

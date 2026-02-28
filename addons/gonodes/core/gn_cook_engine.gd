@@ -48,6 +48,12 @@ var non_realtime_fps: float = 30.0
 ## Can be used to throttle heavy patches on low-end hardware.
 var max_cooks_per_frame: int = 0
 
+# ─── Hierarchy ─────────────────────────────────────────────────────────────────
+
+## Parent cook engine (set by SubNetworkNode for inner cook engines).
+## Enables `../` path resolution in expressions like `op("../lfo1")`.
+var parent_engine: GNCookEngine = null
+
 # ─── Expression Context ───────────────────────────────────────────────────────
 
 ## Tracks whether network nodes have been adopted into the scene tree.
@@ -314,6 +320,12 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 func cook_frame(delta: float) -> void:
 	var frame_start := Time.get_ticks_usec()
 
+	# Ensure all network nodes are adopted into the scene tree.
+	# This is critical for sub-network inner cook engines where _process()
+	# is disabled (cooking_enabled = false) and cook_frame() is called directly.
+	if not _nodes_adopted:
+		_adopt_network_nodes()
+
 	# Step 1: Pre-cook pass — let time-dependent nodes mark themselves dirty
 	_pre_cook_pass(delta)
 
@@ -461,8 +473,10 @@ func _gather_inputs(node: GNNode) -> Array[GNData]:
 
 	for conn in network.get_input_connections(node.id):
 		var upstream: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream and upstream.cached_output and conn.to_port < inputs.size():
-			inputs[conn.to_port] = upstream.cached_output
+		if upstream and conn.to_port < inputs.size():
+			var data: GNData = upstream.get_output_data(conn.from_port)
+			if data != null:
+				inputs[conn.to_port] = data
 	return inputs
 
 
@@ -626,6 +640,78 @@ func _process_export_mappings() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Hierarchical Node Resolution
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Resolves a node path that may be hierarchical.
+##
+## Supported path forms:
+##   "lfo1"                  → flat lookup in current network
+##   "subnet1/noise1"        → dive into subnet1's inner network → noise1
+##   "../lfo1"               → parent network → lfo1
+##   "../../foo/bar"         → two levels up → into foo → bar
+##   "/lfo1"                 → absolute path from root network
+##
+## Returns null if any segment cannot be resolved.
+func resolve_node(path: String) -> GNNode:
+	if path.is_empty() or network == null:
+		return null
+
+	# ── Absolute path: start from root engine ───────────────────────────
+	if path.begins_with("/"):
+		var root_engine := _get_root_engine()
+		return root_engine.resolve_node(path.substr(1))
+
+	var segments := path.split("/")
+	var current_net: GNNetwork = network
+	var current_eng: GNCookEngine = self
+
+	for i in range(segments.size()):
+		var seg: String = segments[i]
+		if seg == "..":
+			# Go up to parent
+			if current_eng.parent_engine == null:
+				GNLogger.warn("CookEngine", "resolve_node('%s') — no parent at segment %d" % [path, i])
+				return null
+			current_eng = current_eng.parent_engine
+			current_net = current_eng.network
+		elif seg == "." or seg == "":
+			# Current level — skip
+			continue
+		else:
+			var node: GNNode = current_net.nodes.get(seg, null)
+			if node == null:
+				GNLogger.warn("CookEngine", "resolve_node('%s') — '%s' not found at segment %d" % [path, seg, i])
+				return null
+			# If this is the last segment, return the node
+			if i == segments.size() - 1:
+				return node
+# Otherwise, the node must own an inner_network to continue traversal.
+			# Use duck typing to avoid cyclic class dependency with SubNetworkNode.
+			if "inner_network" in node and "_inner_cook_engine" in node:
+				var inner_net: GNNetwork = node.get("inner_network")
+				var inner_eng: GNCookEngine = node.get("_inner_cook_engine")
+				if inner_net == null or inner_eng == null:
+					GNLogger.warn("CookEngine", "resolve_node('%s') — '%s' has no inner network" % [path, seg])
+					return null
+				current_net = inner_net
+				current_eng = inner_eng
+			else:
+				GNLogger.warn("CookEngine", "resolve_node('%s') — '%s' is not a sub-network" % [path, seg])
+				return null
+
+	return null  # Should not reach here unless path is empty after parsing
+
+
+## Walks the parent_engine chain to find the root cook engine.
+func _get_root_engine() -> GNCookEngine:
+	var eng: GNCookEngine = self
+	while eng.parent_engine != null:
+		eng = eng.parent_engine
+	return eng
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Expression Helper Methods — called by Expression base_instance
 # These are real methods so Godot's Expression class can call them
 # directly: chop("lfo1", "out"), op("noise1", "scale"), etc.
@@ -651,14 +737,14 @@ func top(node_name: String, property: String = "") -> Variant:
 
 ## Returns a proxy dictionary for the given node (used inside expressions as op("name")).
 ## Can also be called as op("name", "param") to get a parameter value directly.
+## Supports hierarchical paths: op("subnet1/noise1"), op("../lfo1"), op("/root_node").
 func _make_op_proxy(node_name: String, param_name: String = "") -> Variant:
 	if network == null:
 		if not param_name.is_empty():
 			return 0.0
 		return {}
-	var node: GNNode = network.nodes.get(node_name, null)
+	var node: GNNode = resolve_node(node_name)
 	if node == null:
-		GNLogger.warn("CookEngine", "op('%s') — node not found" % node_name)
 		if not param_name.is_empty():
 			return 0.0
 		return {}
@@ -689,9 +775,8 @@ func _make_chop_proxy(node_name: String, channel: String = "", index: int = -1) 
 		if not channel.is_empty():
 			return 0.0
 		return {}
-	var node: GNNode = network.nodes.get(node_name, null)
+	var node: GNNode = resolve_node(node_name)
 	if node == null:
-		GNLogger.warn("CookEngine", "chop('%s') — node not found" % node_name)
 		if not channel.is_empty():
 			return 0.0
 		return {}
@@ -721,9 +806,8 @@ func _make_top_proxy(node_name: String, property: String = "") -> Variant:
 		if not property.is_empty():
 			return 0.0
 		return {}
-	var node: GNNode = network.nodes.get(node_name, null)
+	var node: GNNode = resolve_node(node_name)
 	if node == null:
-		GNLogger.warn("CookEngine", "top('%s') — node not found" % node_name)
 		if not property.is_empty():
 			return 0.0
 		return {}

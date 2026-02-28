@@ -1290,10 +1290,20 @@ GONODES/
     ├── comp/
     └── mat/
     ```
-- [ ] **Node grouping / sub-networks**:
-  - Select multiple nodes → group into a collapsed sub-network node.
-  - Double-click to dive into sub-network. Breadcrumb navigation.
-  - Input/output tunnel nodes for wiring between levels.
+- [x] **Node grouping / sub-networks** — **Done: SubNetworkNode, InTunnel, OutTunnel, hierarchical op() paths, undo/redo, copy/paste, help**:
+  - Select multiple nodes → Ctrl+G "Group into Sub-Network" creates SubNetworkNode with auto-generated tunnels.
+  - Double-click body or press Enter to dive into sub-network. Backspace or breadcrumb click to dive out.
+  - Breadcrumb bar above graph editor shows navigation stack (root > subnet1 > ...).
+  - InTunnel/OutTunnel pseudo-nodes bridge data between parent and inner networks.
+  - Inner cook engine runs recursively — injected data into InTunnels, reads OutTunnel results.
+  - Multi-output support via `get_output_data(port_index)` virtual in GNNode, overridden in SubNetworkNode.
+  - Hierarchical expression paths: `op("subnet1/noise1")`, `chop("../lfo1", "out")`, `top("/root_node")`.
+  - Full serialization via nested `inner_network.to_dict()` / `from_dict()`.
+  - **Undo/redo**: Group-into-subnet is a single UndoRedo action — Ctrl+Z restores original nodes and connections.
+  - **Cross-level clipboard**: Copy/paste works across sub-network levels (clipboard persists during navigation). Undo history cleared on level change to prevent cross-level replay.
+  - **Help tooltips**: SubNetworkNode, InTunnel, OutTunnel have rich node_description with usage hints. SubNetworkNode tooltip shows inner node count.
+  - **Cold-cache robustness**: All files referencing sub-network types use explicit `preload()` constants instead of bare `class_name` for reliable first-import on fresh projects.
+  - Files: `in_tunnel.gd`, `out_tunnel.gd`, `sub_network_node.gd` (COMP family). Modified: `gn_cook_engine.gd`, `gn_node.gd`, `gn_graph_editor.gd`, `gn_node_view.gd`, `gn_editor.gd`, `gn_extension_registry.gd`.
 - [x] **Minimap**:
   - Built-in GraphEdit minimap (200×150px). Toggle with M key or toolbar CheckButton.
   - Click to navigate. Viewport rectangle shows current zoom region.

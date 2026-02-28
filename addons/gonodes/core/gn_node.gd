@@ -375,6 +375,14 @@ func clear_dirty() -> void:
 	dirty = false
 
 
+## Returns the cooked output data for a specific output port index.
+## Most nodes have a single output and always return [member cached_output].
+## Override in multi-output nodes (e.g., SubNetworkNode) to route different
+## ports to different data objects.
+func get_output_data(port_index: int) -> GNData:
+	return cached_output
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Cook Execution (called by GNCookEngine, not directly by users)
 # ═══════════════════════════════════════════════════════════════════════════════

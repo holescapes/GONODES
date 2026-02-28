@@ -5,6 +5,9 @@ extends GraphNode
 ## Double-click the title bar to rename the node.
 ## One GNNodeView per GNNode in the network.
 
+# Sub-network type — explicit preload for cold-cache robustness.
+const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
+
 ## The GNNode this view represents.
 var gn_node: GNNode = null
 
@@ -16,6 +19,9 @@ signal rename_requested(old_id: String, new_id: String)
 
 ## Emitted when the user clicks the help (?) button on a node.
 signal help_requested(node_id: String)
+
+## Emitted when the user double-clicks the body of a SubNetworkNode to dive in.
+signal dive_into_requested(node_id: String)
 
 ## The inline LineEdit used during rename (null when not renaming).
 var _rename_edit: LineEdit = null
@@ -41,6 +47,11 @@ func setup(node: GNNode) -> void:
 	title = node.id
 	position_offset = node.graph_position
 	tooltip_text = "%s (%s)" % [node.node_type, GNFamily.get_family_name(node.family)]
+
+	# Sub-network tooltip: show inner node count + dive-in hint
+	if gn_node is _SubNetworkNodeScript and gn_node.inner_network != null:
+		var inner_count: int = gn_node.inner_network.get_node_count()
+		tooltip_text += "\n%d inner node(s) — double-click to dive in" % inner_count
 
 	# Apply family color to title bar via theme override
 	var family_color := GNFamily.get_color(node.family)
@@ -384,12 +395,17 @@ func update_bypass_lock_visuals() -> void:
 # Inline Rename
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Detect double-click on the title bar to start renaming.
+## Detect double-click on the title bar to start renaming,
+## or on the body to dive into a sub-network.
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.double_click and event.button_index == MOUSE_BUTTON_LEFT:
-		# Only trigger if clicking within the title bar area (top portion of the node)
+		# Title bar area — start rename
 		if event.position.y <= 30.0:
 			_start_rename()
+			accept_event()
+		# Body area — dive into sub-network (if applicable)
+		elif gn_node is _SubNetworkNodeScript:
+			dive_into_requested.emit(gn_node.id)
 			accept_event()
 
 

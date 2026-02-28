@@ -6,6 +6,7 @@ extends Control
 ## Supports save/load of patches as `.gnpatch` JSON files.
 
 const GNHelpWindowScene := preload("res://addons/gonodes/ui/gn_help_window.gd")
+const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
 
 @onready var graph_editor: GNGraphEditor = $HSplit/GraphPanel/GraphEditor
 @onready var viewer: TextureRect = $HSplit/RightPanel/ViewerPanel/Viewer
@@ -48,6 +49,23 @@ var _help_windows: Array = []
 ## Settings file path for persisting editor state (last opened patch, etc.).
 const _SETTINGS_PATH := "user://gonodes_settings.cfg"
 
+# ─── Sub-Network Navigation ───────────────────────────────────────────────────
+
+## Entry in the navigation stack — one per nesting level.
+class _NavEntry:
+	var network: GNNetwork       ## The GNNetwork at this level
+	var subnet_node_id: String   ## The SubNetworkNode ID we dived into ("" for root)
+	var scroll_offset: Vector2   ## Saved GraphEdit scroll position
+	var zoom: float              ## Saved GraphEdit zoom level
+	var viewer_node_id: String   ## Saved viewer target at this level
+
+## Stack of navigation entries — bottom is root, top is current level.
+## When at root, the stack has exactly one entry.
+var _nav_stack: Array[_NavEntry] = []
+
+## Breadcrumb bar (HBoxContainer with clickable labels).
+var _breadcrumb_bar: HBoxContainer = null
+
 
 func _ready() -> void:
 	# Wire log toggle early so extension scan results are visible
@@ -76,12 +94,17 @@ func _ready() -> void:
 	graph_editor.operator_deselected.connect(_on_graph_selection_cleared)
 	graph_editor.open_viewer_requested.connect(_on_open_viewer_requested)
 	graph_editor.help_requested.connect(_on_help_requested)
+	graph_editor.dive_into_requested.connect(_on_dive_into_requested)
 
 	# Bind inspector to network
 	inspector.network = network
 
 	# Track node renames so viewer target stays correct
 	network.node_renamed.connect(_on_node_renamed)
+
+	# Initialize sub-network navigation with root level
+	_setup_breadcrumb_bar()
+	_init_nav_stack()
 
 	# Print display info
 	var displays := WindowTOP.get_display_info()
@@ -558,7 +581,7 @@ func _setup_toolbar() -> void:
 	info_bar.move_child(nrt_fps_spin, 16)
 
 
-## Keyboard shortcuts for file operations.
+## Keyboard shortcuts for file operations and sub-network navigation.
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.ctrl_pressed:
@@ -575,6 +598,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				KEY_N:
 					_on_new_pressed()
 					get_viewport().set_input_as_handled()
+		# Backspace — dive out of sub-network (when not renaming)
+		elif event.keycode == KEY_BACKSPACE and _nav_stack.size() > 1:
+			var focus_owner := get_viewport().gui_get_focus_owner()
+			if focus_owner is LineEdit or focus_owner is TextEdit:
+				return
+			_navigate_to_depth(_nav_stack.size() - 2)
+			get_viewport().set_input_as_handled()
 
 
 ## New patch — clears everything and starts fresh.
@@ -1137,3 +1167,194 @@ func _restore_ui_state() -> void:
 
 	var saved_vsplit: int = _load_setting("vsplit_offset", 0)
 	right_panel.split_offset = saved_vsplit
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Sub-Network Navigation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Creates the breadcrumb bar above the graph editor inside GraphPanel.
+func _setup_breadcrumb_bar() -> void:
+	_breadcrumb_bar = HBoxContainer.new()
+	_breadcrumb_bar.name = "BreadcrumbBar"
+
+	# Style: dark background, small padding
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.12, 0.12, 0.14, 0.95)
+	sb.content_margin_left = 8.0
+	sb.content_margin_right = 8.0
+	sb.content_margin_top = 4.0
+	sb.content_margin_bottom = 4.0
+
+	var panel := PanelContainer.new()
+	panel.name = "BreadcrumbPanel"
+	panel.add_theme_stylebox_override("panel", sb)
+	panel.add_child(_breadcrumb_bar)
+
+	# Insert at top of GraphPanel (before GraphEditor) using a VBoxContainer
+	var graph_panel: PanelContainer = $HSplit/GraphPanel
+	var vbox := VBoxContainer.new()
+	vbox.name = "GraphVBox"
+
+	# Reparent GraphEditor into the VBox
+	graph_panel.remove_child(graph_editor)
+	graph_panel.add_child(vbox)
+	vbox.add_child(panel)
+	vbox.add_child(graph_editor)
+	graph_editor.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	# Start hidden — only show when inside a sub-network
+	panel.visible = false
+
+
+## Initializes the navigation stack with the root network.
+func _init_nav_stack() -> void:
+	_nav_stack.clear()
+	var root := _NavEntry.new()
+	root.network = network
+	root.subnet_node_id = ""
+	root.scroll_offset = graph_editor.scroll_offset
+	root.zoom = graph_editor.zoom
+	root.viewer_node_id = _viewer_node_id
+	_nav_stack.append(root)
+
+
+## Called when the user wants to dive into a SubNetworkNode.
+func _on_dive_into_requested(node_id: String) -> void:
+	var node: GNNode = _current_network().get_node_by_id(node_id)
+	if not node is _SubNetworkNodeScript:
+		return
+	var subnet = node
+	subnet._ensure_inner_network()
+
+	# Save current view state
+	var current := _nav_stack.back() as _NavEntry
+	current.scroll_offset = graph_editor.scroll_offset
+	current.zoom = graph_editor.zoom
+	current.viewer_node_id = _viewer_node_id
+
+	# Push new level onto the stack
+	var entry := _NavEntry.new()
+	entry.network = subnet.inner_network
+	entry.subnet_node_id = node_id
+	entry.scroll_offset = Vector2.ZERO
+	entry.zoom = 0.8
+	entry.viewer_node_id = ""
+	_nav_stack.append(entry)
+
+	# Switch the graph editor to the inner network
+	_switch_to_network(subnet.inner_network)
+
+	# Reset viewer
+	_viewer_node_id = ""
+	viewer.texture = null
+
+	# Update breadcrumb
+	_update_breadcrumb()
+
+	GNLogger.info("Editor", "Dived into sub-network '%s' (depth %d)" % [
+		node_id, _nav_stack.size() - 1])
+
+
+## Navigates back to a specific depth in the navigation stack.
+## depth=0 is root, depth=1 is first sub-network, etc.
+func _navigate_to_depth(target_depth: int) -> void:
+	if target_depth < 0 or target_depth >= _nav_stack.size():
+		return
+	if target_depth == _nav_stack.size() - 1:
+		return  # Already there
+
+	# Save current view state before leaving
+	var current := _nav_stack.back() as _NavEntry
+	current.scroll_offset = graph_editor.scroll_offset
+	current.zoom = graph_editor.zoom
+	current.viewer_node_id = _viewer_node_id
+
+	# Sync ports on every sub-network we are leaving so parent views
+	# show up-to-date input/output ports after the user edited tunnels.
+	for i in range(_nav_stack.size() - 1, target_depth, -1):
+		var leaving: _NavEntry = _nav_stack[i] as _NavEntry
+		if not leaving.subnet_node_id.is_empty():
+			# Find the SubNetworkNode in the PARENT level's network
+			var parent_entry: _NavEntry = _nav_stack[i - 1] as _NavEntry
+			var subnet_node: GNNode = parent_entry.network.get_node_by_id(
+				leaving.subnet_node_id)
+			if subnet_node and subnet_node is _SubNetworkNodeScript:
+				subnet_node.sync_ports_from_tunnels()
+
+	# Pop entries until we reach target depth
+	while _nav_stack.size() > target_depth + 1:
+		_nav_stack.pop_back()
+
+	# Restore target level
+	var target := _nav_stack.back() as _NavEntry
+	_switch_to_network(target.network)
+
+	# Restore view state
+	graph_editor.scroll_offset = target.scroll_offset
+	graph_editor.zoom = target.zoom
+	_viewer_node_id = target.viewer_node_id
+	if not _viewer_node_id.is_empty():
+		_push_active_sinks()
+
+	# Update breadcrumb
+	_update_breadcrumb()
+
+	GNLogger.info("Editor", "Navigated to depth %d" % target_depth)
+
+
+## Returns the network currently being displayed.
+func _current_network() -> GNNetwork:
+	if _nav_stack.is_empty():
+		return network
+	return (_nav_stack.back() as _NavEntry).network
+
+
+## Switches the graph editor and inspector to a different network.
+## Clears undo history to prevent cross-level undo which would operate
+## on the wrong network reference.
+func _switch_to_network(net: GNNetwork) -> void:
+	graph_editor.clear_undo_history()
+	graph_editor.bind_network(net)
+	inspector.network = net
+
+
+## Rebuilds the breadcrumb bar labels from the navigation stack.
+func _update_breadcrumb() -> void:
+	# Clear existing breadcrumb children
+	for child in _breadcrumb_bar.get_children():
+		child.queue_free()
+
+	# Find the panel wrapper to show/hide
+	var panel: PanelContainer = _breadcrumb_bar.get_parent() as PanelContainer
+	if panel:
+		panel.visible = _nav_stack.size() > 1
+
+	for i in range(_nav_stack.size()):
+		var entry: _NavEntry = _nav_stack[i] as _NavEntry
+
+		# Separator
+		if i > 0:
+			var sep := Label.new()
+			sep.text = " / "
+			sep.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+			sep.add_theme_font_size_override("font_size", 13)
+			_breadcrumb_bar.add_child(sep)
+
+		# Clickable label
+		var btn := Button.new()
+		btn.flat = true
+		btn.add_theme_font_size_override("font_size", 13)
+		if i == 0:
+			btn.text = "root"
+		else:
+			btn.text = entry.subnet_node_id
+		# Highlight current level
+		if i == _nav_stack.size() - 1:
+			btn.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+			btn.disabled = true
+		else:
+			btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.9))
+			var depth := i
+			btn.pressed.connect(_navigate_to_depth.bind(depth))
+		_breadcrumb_bar.add_child(btn)

@@ -73,7 +73,7 @@ func _build_bottom_bar(bar: HBoxContainer) -> void:
 	bar.add_child(presets_btn)
 
 	var ref_label := Label.new()
-	ref_label.text = "Vars: me, time, frame, dt  |  Funcs: chop(), op(), top(), fit(), smooth()"
+	ref_label.text = "Vars: me, time, frame, dt  |  Funcs: chop(), op(), top(), fit(), smooth()  |  Paths: ../node, subnet/node"
 	ref_label.add_theme_font_size_override("font_size", 10)
 	ref_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 	bar.add_child(ref_label)
