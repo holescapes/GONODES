@@ -65,6 +65,9 @@ Rebuild the templates whenever you:
 
 # Build both Player and Editor for all platforms, clean first
 .\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe" -Platforms "all" -IncludeEditor -Clean
+
+# Shortcut: build everything (Player + Editor, all platforms)
+.\scripts\build_templates.ps1 -BuildAll -Clean
 ```
 
 ### Linux / macOS (Bash)
@@ -78,6 +81,9 @@ Rebuild the templates whenever you:
 
 # Build both Player and Editor for all platforms, clean first
 ./scripts/build_templates.sh --godot /path/to/godot --platforms all --include-editor --clean
+
+# Shortcut: build everything (Player + Editor, all platforms)
+./scripts/build_templates.sh --build-all --clean
 ```
 
 
@@ -91,6 +97,7 @@ Rebuild the templates whenever you:
 | `-ProjectPath`         | script's parent  | GONODES project root (contains `project.godot`)    |
 | `-OutputDir`           | `<project>/templates` | Where templates are written                   |
 | `-Platforms`           | host platform    | Comma-separated list, or `"all"`                   |
+| `-BuildAll`            | off              | Shortcut: Player + Editor for all platforms        |
 | `-IncludeEditor`       | off              | Also build Editor binaries                         |
 | `-GDExtensions`        | `auto`           | GDExtension handling mode: `auto`, `all`, `none`, or addon names |
 | `-Clean`               | off              | Remove templates/ before building                  |
@@ -104,6 +111,7 @@ Rebuild the templates whenever you:
 | `--project PATH`   | script's parent  | GONODES project root                              |
 | `--output PATH`    | `<project>/templates` | Where templates are written                  |
 | `--platforms LIST`  | host platform    | Comma-separated list, or `all`                   |
+| `--build-all`      | off              | Shortcut: Player + Editor for all platforms       |
 | `--include-editor` | off              | Also build Editor binaries                        |
 | `--gdext MODE`     | `auto`           | GDExtension handling mode: `auto`, `all`, `none`, or addon names |
 | `--clean`          | off              | Remove templates/ before building                 |

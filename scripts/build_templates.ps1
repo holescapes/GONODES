@@ -50,6 +50,11 @@
     Default: auto-detected from host OS/architecture
     Use "all" to build everything.
 
+.PARAMETER BuildAll
+    Convenience shortcut: build both Player and Editor for ALL platforms.
+    Equivalent to -Platforms "all" -IncludeEditor.
+    Default: false
+
 .PARAMETER IncludeEditor
     Also build the Editor binary for each platform (uses the editor main scene).
     Default: false (Player only)
@@ -91,6 +96,12 @@
     .\build_templates.ps1 -Platforms "windows_x86_64,linux_x86_64" -Clean
 
 .EXAMPLE
+    .\build_templates.ps1 -BuildAll
+
+.EXAMPLE
+    .\build_templates.ps1 -BuildAll -Clean
+
+.EXAMPLE
     .\build_templates.ps1 -RestoreOnly
 
 .NOTES
@@ -104,6 +115,7 @@ param(
     [string]$ProjectPath = "",
     [string]$OutputDir = "",
     [string[]]$Platforms = @(),
+    [switch]$BuildAll,
     [switch]$IncludeEditor,
     [string]$GDExtensions = "auto",
     [switch]$Clean,
@@ -585,6 +597,14 @@ if (-not (Test-GodotVersion $godot)) { exit 1 }
 if (-not $OutputDir) { $OutputDir = Join-Path $ProjectPath "templates" }
 
 # Auto-detect host platform if none specified
+# -- BuildAll shortcut ----------------------------------------------------------
+
+if ($BuildAll) {
+    $Platforms = @("all")
+    $IncludeEditor = $true
+    Write-Ok "BuildAll: building Player + Editor for all platforms"
+}
+
 if ($Platforms.Count -eq 0) {
     $Platforms = @(Get-HostPlatform)
     Write-Ok "Auto-detected host platform: $($Platforms[0])"

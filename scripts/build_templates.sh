@@ -34,6 +34,7 @@ PLAYER_MAIN_SCENE='res://scenes/player_main.tscn'
 GODOT_PATH=""
 PROJECT_PATH=""
 OUTPUT_DIR=""
+BUILD_ALL=false
 INCLUDE_EDITOR=false
 GDEXT_MODE="auto"
 CLEAN=false
@@ -126,6 +127,8 @@ Options:
   --platforms LIST     Comma-separated: windows_x86_64,windows_arm64,
                        linux_x86_64,linux_arm64,macos   or "all"
                        (default: auto-detect host platform)
+  --build-all          Build Player + Editor for ALL platforms
+                       (shortcut for --platforms all --include-editor)
   --include-editor     Also build Editor binaries
   --gdext MODE         GDExtension handling mode (default: auto)
                          auto   Smart filter: keep entries for existing files,
@@ -148,6 +151,7 @@ while [[ $# -gt 0 ]]; do
         --project)        PROJECT_PATH="$2"; shift 2 ;;
         --output)         OUTPUT_DIR="$2"; shift 2 ;;
         --platforms)      PLATFORMS="$2"; shift 2 ;;
+        --build-all)      BUILD_ALL=true; shift ;;
         --include-editor) INCLUDE_EDITOR=true; shift ;;
         --include-gdext)  GDEXT_MODE="all"; shift ;;   # compat alias
         --gdext)          GDEXT_MODE="$2"; shift 2 ;;
@@ -561,6 +565,14 @@ check_godot_version "$GODOT"
 
 if [[ -z "$OUTPUT_DIR" ]]; then
     OUTPUT_DIR="$PROJECT_PATH/templates"
+fi
+
+# -- BuildAll shortcut ----------------------------------------------------------
+
+if $BUILD_ALL; then
+    PLATFORMS="all"
+    INCLUDE_EDITOR=true
+    ok "BuildAll: building Player + Editor for all platforms"
 fi
 
 # Expand "all"
