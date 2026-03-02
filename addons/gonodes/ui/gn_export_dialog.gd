@@ -2,9 +2,11 @@ class_name GNExportDialog
 extends Window
 ## Export dialog for building standalone GONODES applications.
 ##
-## Presents a form with output settings (renderer, window size, fullscreen,
-## VSync, FPS limit) and an output directory picker.  Kicks off a Quick Build
-## via GNPatchExporter and displays progress + result.
+## Presents an output directory picker and kicks off a Quick Build via
+## GNPatchExporter.  All runtime settings (renderer, VSync, window layout)
+## are automatic — renderer uses Forward+ with OpenGL fallback, and each
+## WindowTOP in the patch controls its own display window.
+## Displays progress + result.
 
 const _GNPatchExporterScript = preload("res://addons/gonodes/core/gn_patch_exporter.gd")
 
@@ -12,18 +14,7 @@ const _GNPatchExporterScript = preload("res://addons/gonodes/core/gn_patch_expor
 signal export_requested(settings: Dictionary)
 
 
-# ─── Renderer constants (same as gn_editor.gd) ─────────────────────────────
-const _RENDERER_KEYS: PackedStringArray = ["forward_plus", "mobile", "gl_compatibility"]
-const _RENDERER_LABELS: PackedStringArray = ["Forward+", "Mobile", "Compatibility"]
-
 # ─── Controls ──────────────────────────────────────────────────────────────────
-var _renderer_option: OptionButton
-var _width_spin: SpinBox
-var _height_spin: SpinBox
-var _fullscreen_check: CheckButton
-var _vsync_check: CheckButton
-var _fps_spin: SpinBox
-var _title_edit: LineEdit
 var _output_dir_edit: LineEdit
 var _browse_btn: Button
 var _build_btn: Button
@@ -40,7 +31,7 @@ var patch_path: String = ""
 
 func _ready() -> void:
 	title = "Export Patch — Quick Build"
-	size = Vector2i(480, 460)
+	size = Vector2i(480, 200)
 	exclusive = true
 	unresizable = false
 
@@ -55,54 +46,6 @@ func _ready() -> void:
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 10)
 	margin.add_child(vbox)
-
-	# ── Renderer ─────────────────────────────────────────────────────────
-	vbox.add_child(_make_label("Renderer"))
-	_renderer_option = OptionButton.new()
-	for lbl in _RENDERER_LABELS:
-		_renderer_option.add_item(lbl)
-	_renderer_option.selected = 0
-	vbox.add_child(_renderer_option)
-
-	# ── Window Title ─────────────────────────────────────────────────────
-	vbox.add_child(_make_label("Window Title"))
-	_title_edit = LineEdit.new()
-	_title_edit.text = "GONODES Output"
-	_title_edit.placeholder_text = "Window title for the exported app"
-	vbox.add_child(_title_edit)
-
-	# ── Resolution ───────────────────────────────────────────────────────
-	vbox.add_child(_make_label("Resolution"))
-	var res_hbox := HBoxContainer.new()
-	res_hbox.add_theme_constant_override("separation", 6)
-	_width_spin = _make_int_spin(1920, 128, 7680, "Width")
-	_height_spin = _make_int_spin(1080, 128, 4320, "Height")
-	res_hbox.add_child(_width_spin)
-	var x_label := Label.new()
-	x_label.text = "×"
-	res_hbox.add_child(x_label)
-	res_hbox.add_child(_height_spin)
-	vbox.add_child(res_hbox)
-
-	# ── Toggles row ──────────────────────────────────────────────────────
-	var toggle_hbox := HBoxContainer.new()
-	toggle_hbox.add_theme_constant_override("separation", 20)
-	_fullscreen_check = CheckButton.new()
-	_fullscreen_check.text = "Fullscreen"
-	toggle_hbox.add_child(_fullscreen_check)
-	_vsync_check = CheckButton.new()
-	_vsync_check.text = "VSync"
-	_vsync_check.button_pressed = true
-	toggle_hbox.add_child(_vsync_check)
-	vbox.add_child(toggle_hbox)
-
-	# ── FPS Limit ────────────────────────────────────────────────────────
-	var fps_hbox := HBoxContainer.new()
-	fps_hbox.add_theme_constant_override("separation", 6)
-	fps_hbox.add_child(_make_label("FPS Limit (0 = unlimited)"))
-	_fps_spin = _make_int_spin(0, 0, 240, "FPS")
-	fps_hbox.add_child(_fps_spin)
-	vbox.add_child(fps_hbox)
 
 	# ── Output Directory ─────────────────────────────────────────────────
 	vbox.add_child(_make_label("Output Directory"))
@@ -163,13 +106,6 @@ func show_for_patch(p_patch_path: String) -> void:
 		var default_dir := patch_path.get_base_dir().path_join(stem + "_build")
 		_output_dir_edit.text = default_dir
 
-	# Sync renderer dropdown to current project setting
-	var current: String = ProjectSettings.get_setting(
-		"rendering/renderer/rendering_method", "forward_plus")
-	var idx := _RENDERER_KEYS.find(current)
-	if idx >= 0:
-		_renderer_option.selected = idx
-
 	_progress_label.text = ""
 	_build_btn.disabled = false
 	popup_centered()
@@ -178,12 +114,6 @@ func show_for_patch(p_patch_path: String) -> void:
 ## Returns the current settings as a Dictionary.
 func get_export_settings() -> Dictionary:
 	return {
-		"renderer": _RENDERER_KEYS[_renderer_option.selected],
-		"window_title": _title_edit.text,
-		"window_size": Vector2i(int(_width_spin.value), int(_height_spin.value)),
-		"fullscreen": _fullscreen_check.button_pressed,
-		"vsync": _vsync_check.button_pressed,
-		"fps_limit": int(_fps_spin.value),
 		"output_dir": _output_dir_edit.text,
 	}
 
@@ -221,14 +151,6 @@ func _on_build_pressed() -> void:
 	_exporter = _GNPatchExporterScript.new()
 	_exporter.patch_path = patch_path
 	_exporter.output_dir = out_dir
-
-	var settings := get_export_settings()
-	_exporter.renderer = settings["renderer"]
-	_exporter.window_title = settings["window_title"]
-	_exporter.window_size = settings["window_size"]
-	_exporter.fullscreen = settings["fullscreen"]
-	_exporter.vsync = settings["vsync"]
-	_exporter.fps_limit = settings["fps_limit"]
 
 	_exporter.progress.connect(_on_export_progress)
 	_exporter.completed.connect(_on_export_completed)

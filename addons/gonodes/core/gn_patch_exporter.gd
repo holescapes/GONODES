@@ -13,7 +13,6 @@ extends RefCounted
 ##   var exporter := GNPatchExporter.new()
 ##   exporter.patch_path = "/path/to/MyShow.gnpatch"
 ##   exporter.output_dir = "/path/to/build/"
-##   exporter.renderer = "forward_plus"
 ##   var err := exporter.quick_build()
 
 
@@ -29,24 +28,6 @@ var patch_path: String = ""
 
 ## Absolute path to the output directory.  Will be created if it doesn't exist.
 var output_dir: String = ""
-
-## Rendering method for the exported app: "forward_plus", "mobile", "gl_compatibility".
-var renderer: String = "forward_plus"
-
-## Window title for the exported app.
-var window_title: String = "GONODES Output"
-
-## Initial window size.
-var window_size: Vector2i = Vector2i(1920, 1080)
-
-## Whether the exported app starts fullscreen.
-var fullscreen: bool = false
-
-## Enable VSync in the exported app.
-var vsync: bool = true
-
-## FPS limit (0 = unlimited).
-var fps_limit: int = 0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -185,12 +166,6 @@ func _get_player_exe_name() -> String:
 func _write_config(config_path: String, patch_filename: String) -> Error:
 	var config := {
 		"patch": patch_filename,
-		"renderer": renderer,
-		"window_title": window_title,
-		"window_size": [window_size.x, window_size.y],
-		"fullscreen": fullscreen,
-		"vsync": vsync,
-		"fps_limit": fps_limit,
 	}
 
 	var json_string := JSON.stringify(config, "\t")

@@ -26,12 +26,6 @@ var perf_toggle: CheckButton
 var vram_toggle: CheckButton
 var nrt_toggle: CheckButton
 var nrt_fps_spin: SpinBox
-var renderer_dropdown: OptionButton
-
-## Renderer names as they appear in Godot's ProjectSettings.
-const _RENDERER_KEYS: PackedStringArray = ["forward_plus", "mobile", "gl_compatibility"]
-## Human-readable labels matching the index order.
-const _RENDERER_LABELS: PackedStringArray = ["Forward+", "Mobile", "Compatibility"]
 
 ## VRAM budget monitoring (opt-in via toolbar toggle).
 var _vram_enabled: bool = false
@@ -81,13 +75,6 @@ var _breadcrumb_bar: HBoxContainer = null
 
 
 func _ready() -> void:
-	# ── Renderer self-relaunch check ──────────────────────────────────────────
-	# In a standalone (exported) app, project.godot is baked into the .pck and
-	# cannot be modified.  Instead, if the saved renderer setting differs from
-	# the active one, we relaunch the process with --rendering-method <method>
-	# so Godot creates the window with the correct backend.
-	_check_renderer_relaunch()
-
 	# Wire log toggle early so extension scan results are visible
 	log_toggle.toggled.connect(_on_log_toggled)
 	GNLogger.enabled = log_toggle.button_pressed
@@ -330,89 +317,6 @@ func _on_build_pressed() -> void:
 	_export_dialog.show_for_patch(_current_file_path)
 
 
-## Changes the rendering backend.  Persists the choice in editor settings.
-## In dev mode (running inside Godot editor), also writes project.godot.
-## In standalone mode, the change takes effect via self-relaunch on next startup.
-## Either way, a restart is required — the renderer is baked at window creation.
-func _on_renderer_selected(idx: int) -> void:
-	if idx < 0 or idx >= _RENDERER_KEYS.size():
-		return
-	var method: String = _RENDERER_KEYS[idx]
-	var current: String = _get_active_renderer()
-	if method == current:
-		return  # No change
-
-	# Always persist in our own settings file (works in both dev + standalone).
-	_save_setting("renderer", method)
-
-	# In dev mode (not exported), also update project.godot directly.
-	if not OS.has_feature("standalone"):
-		ProjectSettings.set_setting("rendering/renderer/rendering_method", method)
-		ProjectSettings.save()
-
-	GNLogger.info("Editor",
-		"Renderer changed to '%s'. Restart required to take effect." % _RENDERER_LABELS[idx])
-
-	# Show a restart-required notice
-	var dlg := AcceptDialog.new()
-	dlg.title = "Renderer Changed"
-	dlg.dialog_text = (
-		"Rendering backend changed to %s.\n\n" % _RENDERER_LABELS[idx]
-		+ "A restart is required for this to take effect.")
-	dlg.confirmed.connect(func(): dlg.queue_free())
-	dlg.canceled.connect(func(): dlg.queue_free())
-	add_child(dlg)
-	dlg.popup_centered()
-
-
-## Returns the currently active rendering method string.
-func _get_active_renderer() -> String:
-	return ProjectSettings.get_setting(
-		"rendering/renderer/rendering_method", "forward_plus")
-
-
-## Checks if the saved renderer preference differs from the active one.
-## If so, relaunches the process with --rendering-method to apply it.
-## Only relevant for standalone (exported) builds — in dev mode, project.godot
-## is modified directly and Godot picks it up on next launch.
-func _check_renderer_relaunch() -> void:
-	var saved: String = _load_setting("renderer", "")
-	if saved.is_empty():
-		return  # No preference saved yet
-	var current: String = _get_active_renderer()
-	if saved == current:
-		return  # Already running the correct renderer
-
-	# Only self-relaunch in exported (standalone) builds.  In dev mode,
-	# project.godot was already written by _on_renderer_selected.
-	if not OS.has_feature("standalone"):
-		return
-
-	# Relaunch with the correct renderer flag.
-	var exe: String = OS.get_executable_path()
-	var args: PackedStringArray = OS.get_cmdline_args()
-	# Remove any existing --rendering-method arg to avoid duplicates.
-	var clean_args: PackedStringArray = []
-	var skip_next := false
-	for a in args:
-		if skip_next:
-			skip_next = false
-			continue
-		if a == "--rendering-method":
-			skip_next = true  # skip the value that follows
-			continue
-		if a.begins_with("--rendering-method="):
-			continue
-		clean_args.append(a)
-	clean_args.append("--rendering-method")
-	clean_args.append(saved)
-
-	GNLogger.info("Editor",
-		"Relaunching with renderer '%s'..." % saved)
-	OS.create_process(exe, clean_args)
-	get_tree().quit()
-
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # Viewer Windows
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -559,123 +463,49 @@ func _setup_file_dialogs() -> void:
 
 ## Adds New / Open / Save buttons to the InfoBar.
 func _setup_toolbar() -> void:
-	var info_bar: HBoxContainer = $InfoBar
+	var info_bar := $InfoBar as VBoxContainer
+	info_bar.add_theme_constant_override("separation", 2)
 
-	# Add a separator and buttons BEFORE the info label (insert at front)
+	# ── Row 1: File & Project ────────────────────────────────────────────
+	var row1 := HBoxContainer.new()
+	row1.add_theme_constant_override("separation", 4)
+	info_bar.add_child(row1)
+	info_bar.move_child(row1, 0)
+
 	var btn_new := Button.new()
 	btn_new.text = "New"
 	btn_new.tooltip_text = "New patch (Ctrl+N)"
 	btn_new.pressed.connect(_on_new_pressed)
-	info_bar.add_child(btn_new)
-	info_bar.move_child(btn_new, 0)
+	row1.add_child(btn_new)
 
 	var btn_open := Button.new()
 	btn_open.text = "Open"
 	btn_open.tooltip_text = "Open patch (Ctrl+O)"
 	btn_open.pressed.connect(_on_open_pressed)
-	info_bar.add_child(btn_open)
-	info_bar.move_child(btn_open, 1)
+	row1.add_child(btn_open)
 
 	var btn_save := Button.new()
 	btn_save.text = "Save"
 	btn_save.tooltip_text = "Save patch (Ctrl+S)"
 	btn_save.pressed.connect(_on_save_pressed)
-	info_bar.add_child(btn_save)
-	info_bar.move_child(btn_save, 2)
+	row1.add_child(btn_save)
 
 	var btn_save_as := Button.new()
 	btn_save_as.text = "Save As"
 	btn_save_as.tooltip_text = "Save patch as… (Ctrl+Shift+S)"
 	btn_save_as.pressed.connect(_on_save_as_pressed)
-	info_bar.add_child(btn_save_as)
-	info_bar.move_child(btn_save_as, 3)
+	row1.add_child(btn_save_as)
 
-	# Separator between buttons and info label
-	var sep := VSeparator.new()
-	info_bar.add_child(sep)
-	info_bar.move_child(sep, 4)
+	row1.add_child(VSeparator.new())
 
-	# Preview toggle
-	preview_toggle = CheckButton.new()
-	preview_toggle.text = "Previews"
-	preview_toggle.tooltip_text = "Show / hide inline node previews"
-	preview_toggle.button_pressed = true
-	preview_toggle.toggled.connect(_on_preview_toggled)
-	info_bar.add_child(preview_toggle)
-	info_bar.move_child(preview_toggle, 5)
+	# Build button — opens the export dialog for Quick Build
+	var btn_build := Button.new()
+	btn_build.text = "Build"
+	btn_build.tooltip_text = "Export patch as a standalone application (Quick Build)"
+	btn_build.pressed.connect(_on_build_pressed)
+	row1.add_child(btn_build)
 
-	# Performance overlay toggle
-	perf_toggle = CheckButton.new()
-	perf_toggle.text = "Perf"
-	perf_toggle.tooltip_text = "Show / hide per-node cook time overlay"
-	perf_toggle.button_pressed = false
-	perf_toggle.toggled.connect(_on_perf_toggled)
-	info_bar.add_child(perf_toggle)
-	info_bar.move_child(perf_toggle, 6)
-
-	# VRAM monitoring toggle
-	vram_toggle = CheckButton.new()
-	vram_toggle.text = "VRAM"
-	vram_toggle.tooltip_text = "Show GPU memory usage in the info bar (opt-in — reads RenderingServer stats each frame when enabled)"
-	vram_toggle.button_pressed = false
-	vram_toggle.toggled.connect(func(on: bool): _vram_enabled = on)
-	info_bar.add_child(vram_toggle)
-	info_bar.move_child(vram_toggle, 7)
-
-	# Open Viewer button
-	var btn_viewer := Button.new()
-	btn_viewer.text = "+ Viewer"
-	btn_viewer.tooltip_text = "Open a floating viewer window for the selected TOP node"
-	btn_viewer.pressed.connect(func(): open_viewer_window())
-	info_bar.add_child(btn_viewer)
-	info_bar.move_child(btn_viewer, 8)
-
-	# Stress Test button
-	var btn_stress := Button.new()
-	btn_stress.text = "Stress Test"
-	btn_stress.tooltip_text = "Build a 55+ node network for performance testing"
-	btn_stress.pressed.connect(_on_stress_test_pressed)
-	info_bar.add_child(btn_stress)
-	info_bar.move_child(btn_stress, 9)
-
-	# Separator before graph-view tools
-	var sep2 := VSeparator.new()
-	info_bar.add_child(sep2)
-	info_bar.move_child(sep2, 10)
-
-	# Minimap toggle
-	var minimap_toggle := CheckButton.new()
-	minimap_toggle.text = "Minimap"
-	minimap_toggle.tooltip_text = "Show / hide minimap (M)"
-	minimap_toggle.button_pressed = graph_editor.minimap_enabled
-	minimap_toggle.toggled.connect(func(on: bool):
-		graph_editor.minimap_enabled = on)
-	info_bar.add_child(minimap_toggle)
-	info_bar.move_child(minimap_toggle, 11)
-
-	# Wire style OptionButton
-	var wire_opt := OptionButton.new()
-	wire_opt.tooltip_text = "Wire style (W to cycle)"
-	for wn in GNGraphEditor._WIRE_STYLE_NAMES:
-		wire_opt.add_item(wn)
-	wire_opt.selected = 0
-	wire_opt.item_selected.connect(func(wire_idx: int):
-		graph_editor.set_wire_style(wire_idx))
-	info_bar.add_child(wire_opt)
-	info_bar.move_child(wire_opt, 12)
-
-	# Auto-layout button
-	var btn_layout := Button.new()
-	btn_layout.text = "Layout"
-	btn_layout.tooltip_text = "Auto-layout all nodes (Ctrl+L)"
-	btn_layout.pressed.connect(func(): graph_editor.auto_layout())
-	info_bar.add_child(btn_layout)
-	info_bar.move_child(btn_layout, 13)
-
-	# Separator before Non-Realtime controls
-	var sep3 := VSeparator.new()
-	info_bar.add_child(sep3)
-	info_bar.move_child(sep3, 14)
+	row1.add_child(VSeparator.new())
 
 	# Non-Realtime toggle
 	nrt_toggle = CheckButton.new()
@@ -683,8 +513,7 @@ func _setup_toolbar() -> void:
 	nrt_toggle.tooltip_text = "Non-Realtime mode — fixed timestep for deterministic, frame-perfect recording"
 	nrt_toggle.button_pressed = false
 	nrt_toggle.toggled.connect(_on_nrt_toggled)
-	info_bar.add_child(nrt_toggle)
-	info_bar.move_child(nrt_toggle, 15)
+	row1.add_child(nrt_toggle)
 
 	# Non-Realtime FPS SpinBox
 	nrt_fps_spin = SpinBox.new()
@@ -697,38 +526,94 @@ func _setup_toolbar() -> void:
 	nrt_fps_spin.editable = true
 	nrt_fps_spin.custom_minimum_size.x = 90
 	nrt_fps_spin.value_changed.connect(_on_nrt_fps_changed)
-	info_bar.add_child(nrt_fps_spin)
-	info_bar.move_child(nrt_fps_spin, 16)
+	row1.add_child(nrt_fps_spin)
 
-	# Separator before renderer selector
-	var sep4 := VSeparator.new()
-	info_bar.add_child(sep4)
-	info_bar.move_child(sep4, 17)
+	# Spacer pushes InfoLabel + LogToggle to the right
+	var spacer1 := Control.new()
+	spacer1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row1.add_child(spacer1)
 
-	# Renderer selection dropdown
-	renderer_dropdown = OptionButton.new()
-	renderer_dropdown.tooltip_text = "Rendering backend — changing requires restart"
-	for lbl in _RENDERER_LABELS:
-		renderer_dropdown.add_item(lbl)
-	# Detect the active renderer and select it
-	var current_method: String = ProjectSettings.get_setting(
-		"rendering/renderer/rendering_method", "forward_plus")
-	var idx := _RENDERER_KEYS.find(current_method)
-	renderer_dropdown.selected = idx if idx >= 0 else 0
-	renderer_dropdown.item_selected.connect(_on_renderer_selected)
-	info_bar.add_child(renderer_dropdown)
-	info_bar.move_child(renderer_dropdown, 18)
+	# Reparent scene-defined InfoLabel and LogToggle into row 1
+	info_label.reparent(row1, false)
+	info_label.size_flags_horizontal = Control.SIZE_SHRINK_END
+	log_toggle.reparent(row1, false)
 
-	# Build button — opens the export dialog for Quick Build
-	var btn_build := Button.new()
-	btn_build.text = "Build"
-	btn_build.tooltip_text = "Export patch as a standalone application (Quick Build)"
-	btn_build.pressed.connect(_on_build_pressed)
-	info_bar.add_child(btn_build)
-	info_bar.move_child(btn_build, 19)
+	# ── Row 2: View & Graph ──────────────────────────────────────────────
+	var row2 := HBoxContainer.new()
+	row2.add_theme_constant_override("separation", 4)
+	info_bar.add_child(row2)
+
+	# Preview toggle
+	preview_toggle = CheckButton.new()
+	preview_toggle.text = "Previews"
+	preview_toggle.tooltip_text = "Show / hide inline node previews"
+	preview_toggle.button_pressed = true
+	preview_toggle.toggled.connect(_on_preview_toggled)
+	row2.add_child(preview_toggle)
+
+	# Performance overlay toggle
+	perf_toggle = CheckButton.new()
+	perf_toggle.text = "Perf"
+	perf_toggle.tooltip_text = "Show / hide per-node cook time overlay"
+	perf_toggle.button_pressed = false
+	perf_toggle.toggled.connect(_on_perf_toggled)
+	row2.add_child(perf_toggle)
+
+	# VRAM monitoring toggle
+	vram_toggle = CheckButton.new()
+	vram_toggle.text = "VRAM"
+	vram_toggle.tooltip_text = "Show GPU memory usage in the info bar"
+	vram_toggle.button_pressed = false
+	vram_toggle.toggled.connect(func(on: bool): _vram_enabled = on)
+	row2.add_child(vram_toggle)
+
+	row2.add_child(VSeparator.new())
+
+	# Open Viewer button
+	var btn_viewer := Button.new()
+	btn_viewer.text = "+ Viewer"
+	btn_viewer.tooltip_text = "Open a floating viewer window for the selected TOP node"
+	btn_viewer.pressed.connect(func(): open_viewer_window())
+	row2.add_child(btn_viewer)
+
+	# Stress Test button
+	var btn_stress := Button.new()
+	btn_stress.text = "Stress Test"
+	btn_stress.tooltip_text = "Build a 55+ node network for performance testing"
+	btn_stress.pressed.connect(_on_stress_test_pressed)
+	row2.add_child(btn_stress)
+
+	row2.add_child(VSeparator.new())
+
+	# Minimap toggle
+	var minimap_toggle := CheckButton.new()
+	minimap_toggle.text = "Minimap"
+	minimap_toggle.tooltip_text = "Show / hide minimap (M)"
+	minimap_toggle.button_pressed = graph_editor.minimap_enabled
+	minimap_toggle.toggled.connect(func(on: bool):
+		graph_editor.minimap_enabled = on)
+	row2.add_child(minimap_toggle)
+
+	# Wire style OptionButton
+	var wire_opt := OptionButton.new()
+	wire_opt.tooltip_text = "Wire style (W to cycle)"
+	for wn in GNGraphEditor._WIRE_STYLE_NAMES:
+		wire_opt.add_item(wn)
+	wire_opt.selected = 0
+	wire_opt.item_selected.connect(func(wire_idx: int):
+		graph_editor.set_wire_style(wire_idx))
+	row2.add_child(wire_opt)
+
+	# Auto-layout button
+	var btn_layout := Button.new()
+	btn_layout.text = "Layout"
+	btn_layout.tooltip_text = "Auto-layout all nodes (Ctrl+L)"
+	btn_layout.pressed.connect(func(): graph_editor.auto_layout())
+	row2.add_child(btn_layout)
 
 	# Create the export dialog (hidden until needed)
 	_export_dialog = _GNExportDialogScript.new()
+	_export_dialog.visible = false
 	add_child(_export_dialog)
 
 
@@ -1321,14 +1206,6 @@ func _restore_ui_state() -> void:
 	nrt_fps_spin.set_value_no_signal(saved_nrt_fps)
 	if cook_engine != null:
 		cook_engine.non_realtime_fps = saved_nrt_fps
-
-	# Renderer dropdown — restore from last saved preference
-	var saved_renderer: String = _load_setting("renderer", "")
-	if not saved_renderer.is_empty():
-		var r_idx := _RENDERER_KEYS.find(saved_renderer)
-		if r_idx >= 0 and renderer_dropdown != null:
-			renderer_dropdown.set_item_disabled(r_idx, false)  # ensure enabled
-			renderer_dropdown.selected = r_idx
 
 	# Split container offsets
 	var saved_hsplit: int = _load_setting("hsplit_offset", -400)

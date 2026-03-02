@@ -38,7 +38,7 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 | Dev Strategy           | GDScript-first, GDExtension for perf optimization   |
 | Editor Platforms       | Windows, macOS, Linux (no ARM devices for editor)    |
 | Export Targets         | All Godot-supported platforms (incl. mobile/web)     |
-| Renderer Selection     | User-selectable in editor (Forward+, Mobile, Compat) |
+| Renderer Selection     | Automatic: Forward+ with fallback to Compatibility   |
 | Param References       | Cross-node parameter/data referencing (like TD)      |
 
 ---
@@ -1240,13 +1240,11 @@ GONODES/
   - Implemented in `_pre_cook()`: calls `mark_dirty()` then `set_param_value("cook_once", false)`.
   - Flexible in combination with `time_dependent`: TD=OFF + cook_once = cook exactly when pulsed.
 - [x] **Renderer selection UI**:
-  - OptionButton in editor toolbar: Forward+, Mobile, Compatibility.
-  - Reads current renderer from `ProjectSettings.get_setting("rendering/renderer/rendering_method")`.
-  - On change: updates `ProjectSettings`, calls `ProjectSettings.save()` (writes `project.godot`), persists choice in editor settings, shows "restart required" dialog.
-  - **Renderer cannot be switched live** — Godot bakes the renderer at window-context creation. Change takes effect on next launch.
-  - Restore: `_restore_ui_state()` syncs dropdown to saved preference.
-  - Constants: `_RENDERER_KEYS` (`forward_plus`, `mobile`, `gl_compatibility`), `_RENDERER_LABELS` (human-readable).
-  - For Player export: saved renderer goes into `config.json`, applied via `--rendering-method` CLI flag.
+  - **Automatic renderer with fallback**: `fallback_to_opengl3 = true` in project.godot.
+  - Both editor and Player try Forward+ (Vulkan/D3D12) first, fall back to Compatibility (OpenGL 3.3) if the GPU doesn't support Vulkan.
+  - No manual selection UI in the editor or Build dialog — fully automatic.
+  - Power users can force a renderer via CLI: `--rendering-method mobile` or `--rendering-method gl_compatibility`.
+  - Works cross-platform: Windows (D3D12/OpenGL), macOS (MoltenVK/OpenGL), Linux (Vulkan/OpenGL).
 - [x] **Patch export to standalone apps** — **Phase 8: Quick Build implemented**:
   - **Two export modes** (both share the same generated project structure):
     - **Quick Build (Player copy)** ✅: Ship a pre-built `GONODESPlayer.exe` alongside the editor — copies Player + `.gnpatch` + assets to output folder. Instant, no setup required. Supports patch hot-swap (edit `.gnpatch` in-place, restart Player). Desktop only (Win/Mac/Linux).
@@ -1261,21 +1259,20 @@ GONODES/
     - `addons/gonodes/core/gn_patch_exporter.gd` — Quick Build logic:
       - `quick_build()` → copies Player binary + `.pck` + `.gnpatch` + project folder + `config.json` to output dir.
       - Player binary discovery: searches next to exe, project root, `player/`, `build/` subdirs.
-      - `config.json` format: patch, renderer, window_title, window_size, fullscreen, vsync, fps_limit.
+      - `config.json` format: just `patch` filename.  No renderer/VSync/FPS — all automatic via fallback + WindowTOPs.
       - Recursive directory copy for project assets (skips hidden dirs).
       - Progress + completed signals for UI feedback.
     - `addons/gonodes/ui/gn_export_dialog.gd` — export dialog Window:
-      - Form: renderer dropdown, window title, resolution, fullscreen/vsync toggles, FPS limit, output directory picker.
+      - Form: output directory picker only.  All runtime settings are automatic.
       - Default output dir: `<patch_stem>_build/` sibling to the `.gnpatch`.
       - Progress label shows real-time build status. Green checkmark on success, red on failure.
       - "Build" button starts Quick Build, "Cancel" closes dialog.
     - `gn_editor.gd` wiring:
-      - "Build" toolbar button (after renderer dropdown). Requires saved patch (prompts if unsaved).
-      - Preloads `_GNExportDialogScript`, creates dialog as child window.
+      - "Build" toolbar button. Requires saved patch (prompts if unsaved).
+      - Preloads `_GNExportDialogScript`, creates dialog as hidden child window.
   - **Renderer in standalone apps:**
-    - Dev mode: writes `project.godot` directly via `ProjectSettings.save()`.
-    - Standalone (exported): self-relaunch with `--rendering-method` CLI flag on mismatch.
-    - `OS.has_feature("standalone")` gates which path runs.
+    - Automatic via `fallback_to_opengl3 = true` baked into project.godot / `.pck`.
+    - No self-relaunch logic needed. Power users can override with `--rendering-method` CLI flag.
   - **Extension distribution for exported apps**: When GONODES ships as a
     standalone application (not running inside the Godot editor), users will need
     a way to install extensions without touching `res://addons/`. Design a

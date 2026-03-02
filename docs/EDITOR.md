@@ -1,0 +1,133 @@
+# GONODES Editor
+
+The GONODES Editor is a full Godot 4.6 application that provides a visual
+node-based programming environment inspired by TouchDesigner.
+
+
+## Launching
+
+Run the project in the Godot editor or launch the exported editor binary.
+The main scene is `scenes/gn_editor.tscn`.
+
+
+## Rendering Backend
+
+The editor always launches with **Forward+** (Vulkan / D3D12) for the best
+preview quality.  If the GPU or driver doesn't support Vulkan, Godot
+automatically falls back to **Compatibility** (OpenGL 3.3) thanks to the
+`fallback_to_opengl3 = true` project setting.
+
+| Platform | Primary      | Fallback          |
+|----------|-------------|-------------------|
+| Windows  | D3D12       | OpenGL 3.3        |
+| macOS    | MoltenVK    | OpenGL 3.3        |
+| Linux    | Vulkan      | OpenGL 3.3        |
+
+There is no manual renderer selection in the editor — it is fully automatic.
+Power users can force a specific renderer from the command line:
+
+```
+godot --rendering-method mobile
+godot --rendering-method gl_compatibility
+```
+
+
+## Toolbar Layout
+
+The bottom toolbar is split into **two rows** for readability:
+
+### Row 1 — File & Project
+
+| Control     | Description                                |
+|-------------|--------------------------------------------|
+| New         | New empty patch (Ctrl+N)                   |
+| Open        | Open a `.gnpatch` file (Ctrl+O)            |
+| Save        | Save current patch (Ctrl+S)                |
+| Save As     | Save as new file (Ctrl+Shift+S)            |
+| Build       | Open the Quick Build dialog                |
+| NRT         | Toggle Non-Realtime mode                   |
+| FPS spin    | NRT target frame rate (1–240)              |
+| InfoLabel   | Status / frame info (right-aligned)        |
+| Debug Log   | Toggle the debug log panel                 |
+
+### Row 2 — View & Graph
+
+| Control     | Description                                |
+|-------------|--------------------------------------------|
+| Previews    | Show/hide inline node texture previews     |
+| Perf        | Show/hide per-node cook-time overlay       |
+| VRAM        | Show GPU memory usage in the info bar      |
+| + Viewer    | Open a floating viewer for the selected TOP|
+| Stress Test | Generate a 55+ node stress-test network    |
+| Minimap     | Toggle GraphEdit minimap (M)               |
+| Wire Style  | Cycle wire rendering style (W)             |
+| Layout      | Auto-layout all nodes (Ctrl+L)             |
+
+
+## Keyboard Shortcuts
+
+| Key              | Action                                     |
+|------------------|--------------------------------------------|
+| Ctrl+N           | New patch                                  |
+| Ctrl+O           | Open patch                                 |
+| Ctrl+S           | Save patch                                 |
+| Ctrl+Shift+S     | Save patch as…                             |
+| Ctrl+L           | Auto-layout nodes                          |
+| M                | Toggle minimap                             |
+| W                | Cycle wire style                           |
+| Backspace        | Navigate out of sub-network                |
+| Tab              | Open operator palette                      |
+| Right-click      | Context menu (on node or canvas)           |
+
+
+## Quick Build (Export Dialog)
+
+Press **Build** in the toolbar to open the export dialog.  It contains:
+
+| Setting            | Description                                      |
+|--------------------|--------------------------------------------------|
+| Output Directory   | Folder where the build is written                |
+
+The dialog defaults the output directory to `<patch_name>_build/` next to
+the `.gnpatch` file.
+
+**What Build does:**
+
+1. Locates the pre-built `GONODESPlayer` binary
+2. Copies it + its `.pck` to the output folder
+3. Copies the `.gnpatch` file
+4. Copies the project assets folder (if one exists)
+5. Writes `config.json` with the patch filename
+6. Reports success or failure in the progress label
+
+### Why there's no renderer / VSync / FPS limit in the Build dialog
+
+All runtime settings are handled automatically:
+
+- **Renderer**: Forward+ with automatic fallback to Compatibility (OpenGL 3.3).
+  Baked into the Player's `.pck` via `fallback_to_opengl3 = true`.
+- **VSync / FPS**: Controlled per-window by each WindowTOP in the patch.
+  Each WindowTOP has its own `vsync` and frame-rate parameters.
+
+
+## Settings Persistence
+
+Editor state is saved to `user://gonodes_settings.cfg` via
+`_save_setting()` / `_load_setting()`.  Persisted values include:
+
+- Toggle states (Previews, Perf, Log, NRT)
+- NRT target FPS
+- Split container offsets (panel sizes)
+- Last opened patch path
+
+
+## File Structure
+
+| File                                     | Purpose                         |
+|------------------------------------------|---------------------------------|
+| `scenes/gn_editor.gd`                   | Main editor logic               |
+| `scenes/gn_editor.tscn`                 | Editor scene layout             |
+| `addons/gonodes/ui/gn_graph_editor.gd`  | Graph canvas (GraphEdit)        |
+| `addons/gonodes/ui/gn_param_inspector.gd`| Right-panel parameter inspector|
+| `addons/gonodes/ui/gn_export_dialog.gd` | Quick Build dialog              |
+| `addons/gonodes/core/gn_patch_exporter.gd`| Build/copy logic              |

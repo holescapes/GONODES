@@ -8,18 +8,17 @@ extends Control
 ## Usage:
 ##   GONODESPlayer.exe                     — looks for config.json next to exe
 ##   GONODESPlayer.exe --patch path.gnpatch — explicit patch path
-##   GONODESPlayer.exe --rendering-method mobile  — override renderer
+##   GONODESPlayer.exe --rendering-method mobile  — force renderer (power users)
 ##
 ## config.json format:
 ##   {
-##     "patch": "MyShow.gnpatch",
-##     "renderer": "forward_plus",
-##     "window_title": "GONODES Output",
-##     "window_size": [1920, 1080],
-##     "fullscreen": false,
-##     "vsync": true,
-##     "fps_limit": 0
+##     "patch": "MyShow.gnpatch"
 ##   }
+##
+## Rendering backend is automatic — Forward+ with fallback to Compatibility
+## (OpenGL 3.3) via the fallback_to_opengl3 project setting baked into the .pck.
+## Power users can override with --rendering-method on the command line.
+## VSync and window settings are controlled by each WindowTOP in the patch.
 
 const _CONFIG_FILE := "config.json"
 
@@ -37,6 +36,9 @@ var _config: Dictionary = {}
 
 ## Info label (shown only if no WindowTOP opens — fallback display).
 var _info_label: Label = null
+
+## Whether the debug info overlay is visible.  Toggle with F1.
+var _debug_visible: bool = false
 
 
 func _ready() -> void:
@@ -92,30 +94,20 @@ func _parse_config() -> void:
 				_patch_path = exe_dir.path_join(p)
 
 
-## Applies window settings from config to the main window.
+## Applies startup settings to the main window.
+## VSync, display settings, and window layout are handled by each WindowTOP
+## node in the patch — not by config.json.
 func _apply_window_settings() -> void:
 	var win := get_window()
 	if win == null:
 		return
 
-	var title: String = _config.get("window_title", "GONODES Player")
-	win.title = title
-
-	var win_size: Variant = _config.get("window_size", null)
-	if win_size is Array and win_size.size() >= 2:
-		win.size = Vector2i(int(win_size[0]), int(win_size[1]))
-
-	var fullscreen: bool = _config.get("fullscreen", false)
-	if fullscreen:
-		win.mode = Window.MODE_FULLSCREEN
-
-	var vsync_on: bool = _config.get("vsync", true)
-	DisplayServer.window_set_vsync_mode(
-		DisplayServer.VSYNC_ENABLED if vsync_on else DisplayServer.VSYNC_DISABLED)
-
-	var fps_limit: int = _config.get("fps_limit", 0)
-	if fps_limit > 0:
-		Engine.max_fps = fps_limit
+	# Auto-title from patch filename (e.g. "GONODES — MyShow")
+	var patch_name: String = _config.get("patch", "")
+	if not patch_name.is_empty():
+		win.title = "GONODES — %s" % patch_name.get_basename()
+	else:
+		win.title = "GONODES Player"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -144,6 +136,10 @@ func _load_and_run() -> void:
 	cook_engine.frame_cooked.connect(_on_frame_cooked)
 	cook_engine.cook_error.connect(_on_cook_error)
 
+	# Force all WindowTOPs open — in the editor the user toggles "open" manually,
+	# but in the Player every display window should appear automatically.
+	_force_open_window_tops()
+
 	# In player mode, all structural sinks (WindowTOP, file outputs, etc.) are
 	# auto-detected by the cook engine via GNNode.is_sink.  No UI sinks needed.
 	cook_engine.set_active_sinks([])
@@ -170,19 +166,49 @@ func _on_cook_error(node_id: String, error_message: String) -> void:
 	push_warning("[GONODES Player] Cook error on '%s': %s" % [node_id, error_message])
 
 
-## Handle Escape key to quit the player.
+## Handle hotkeys:
+##   Escape — quit the player
+##   F1     — toggle debug info overlay
+##   F11    — toggle fullscreen
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_ESCAPE:
-			print("[GONODES Player] Escape pressed — quitting.")
-			get_tree().quit()
+		match event.keycode:
+			KEY_ESCAPE:
+				print("[GONODES Player] Escape pressed — quitting.")
+				get_tree().quit()
+			KEY_F1:
+				_debug_visible = not _debug_visible
+				if _info_label != null:
+					_info_label.visible = _debug_visible
+			KEY_F11:
+				var win := get_window()
+				if win != null:
+					if win.mode == Window.MODE_FULLSCREEN:
+						win.mode = Window.MODE_WINDOWED
+					else:
+						win.mode = Window.MODE_FULLSCREEN
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # UI Helpers (minimal — player has almost no UI)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Sets up a minimal info label in case no WindowTOP opens its own window.
+## Force every WindowTOP in the network to open automatically.
+## In the editor the user toggles "open" manually; in the Player all display
+## windows should appear immediately on launch.
+func _force_open_window_tops() -> void:
+	if network == null:
+		return
+	var count: int = 0
+	for node: GNNode in network.nodes.values():
+		if node.node_type == "window":
+			node.set_param_value("open", true)
+			count += 1
+	if count > 0:
+		print("[GONODES Player] Auto-opened %d WindowTOP(s)." % count)
+
+
+## Sets up a minimal info label for debug overlay (hidden by default, F1 to show).
 func _setup_info_display() -> void:
 	_info_label = Label.new()
 	_info_label.name = "InfoLabel"
@@ -192,6 +218,7 @@ func _setup_info_display() -> void:
 	_info_label.add_theme_font_size_override("font_size", 14)
 	_info_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	_info_label.text = "Loading patch..."
+	_info_label.visible = _debug_visible
 	add_child(_info_label)
 
 
