@@ -1239,16 +1239,43 @@ GONODES/
   - New `cook_once` bool param (default OFF). Toggle ON → forces one cook, auto-resets to OFF.
   - Implemented in `_pre_cook()`: calls `mark_dirty()` then `set_param_value("cook_once", false)`.
   - Flexible in combination with `time_dependent`: TD=OFF + cook_once = cook exactly when pulsed.
-- [ ] **Renderer selection UI**:
-  - Dropdown in toolbar: Forward+, Mobile, Compatibility.
-  - Applies to RenderTOP SubViewport and WindowTOP output.
-  - Enables previewing how patches will look on different target platforms.
-- [ ] **Patch export to standalone apps**:
-  - **Pre-built Player approach**: Ship a `GONODESPlayer.exe` alongside the editor —
-    a minimal runtime that loads a `.gnpatch`, runs the cook engine + WindowTOP
-    output only (no editor UI). "Build" button copies Player + patch + assets → output folder.
-  - Player entry scene (`player_main.tscn`): loads patch, starts cook, opens WindowTOPs.
-  - Later: Godot export templates for desktop (Windows/macOS/Linux), web export (Compatibility renderer).
+- [x] **Renderer selection UI**:
+  - OptionButton in editor toolbar: Forward+, Mobile, Compatibility.
+  - Reads current renderer from `ProjectSettings.get_setting("rendering/renderer/rendering_method")`.
+  - On change: updates `ProjectSettings`, calls `ProjectSettings.save()` (writes `project.godot`), persists choice in editor settings, shows "restart required" dialog.
+  - **Renderer cannot be switched live** — Godot bakes the renderer at window-context creation. Change takes effect on next launch.
+  - Restore: `_restore_ui_state()` syncs dropdown to saved preference.
+  - Constants: `_RENDERER_KEYS` (`forward_plus`, `mobile`, `gl_compatibility`), `_RENDERER_LABELS` (human-readable).
+  - For Player export: saved renderer goes into `config.json`, applied via `--rendering-method` CLI flag.
+- [x] **Patch export to standalone apps** — **Phase 8: Quick Build implemented**:
+  - **Two export modes** (both share the same generated project structure):
+    - **Quick Build (Player copy)** ✅: Ship a pre-built `GONODESPlayer.exe` alongside the editor — copies Player + `.gnpatch` + assets to output folder. Instant, no setup required. Supports patch hot-swap (edit `.gnpatch` in-place, restart Player). Desktop only (Win/Mac/Linux).
+    - **Full Export (Godot export pipeline)**: (future) Generates a minimal Godot project from the patch, then invokes `godot --export-release` to produce a single self-contained binary or web/mobile package. Requires Godot export templates installed (~500MB one-time download). Supports all Godot platforms including web (WASM) and mobile (Android/iOS). **Required for web/mobile** — no filesystem access means patches must be baked into `.pck`.
+  - **Runtime performance is identical** between both modes — once the patch is loaded and nodes are in VRAM, the cook engine runs the same code path. Quick Build adds only ~10-50ms startup overhead for filesystem I/O vs `.pck` memory-mapped loading.
+  - **Implementation:**
+    - `scenes/player_main.gd` + `scenes/player_main.tscn` — minimal Player runtime:
+      - Loads `config.json` + `.gnpatch`, boots GNCookEngine, WindowTOPs auto-open their OS windows.
+      - CLI args: `--patch <path>`, `--rendering-method <method>`. Escape key quits.
+      - Minimal info label as fallback display (shown when no WindowTOP opens).
+      - No editor UI — pure cook engine + output.
+    - `addons/gonodes/core/gn_patch_exporter.gd` — Quick Build logic:
+      - `quick_build()` → copies Player binary + `.pck` + `.gnpatch` + project folder + `config.json` to output dir.
+      - Player binary discovery: searches next to exe, project root, `player/`, `build/` subdirs.
+      - `config.json` format: patch, renderer, window_title, window_size, fullscreen, vsync, fps_limit.
+      - Recursive directory copy for project assets (skips hidden dirs).
+      - Progress + completed signals for UI feedback.
+    - `addons/gonodes/ui/gn_export_dialog.gd` — export dialog Window:
+      - Form: renderer dropdown, window title, resolution, fullscreen/vsync toggles, FPS limit, output directory picker.
+      - Default output dir: `<patch_stem>_build/` sibling to the `.gnpatch`.
+      - Progress label shows real-time build status. Green checkmark on success, red on failure.
+      - "Build" button starts Quick Build, "Cancel" closes dialog.
+    - `gn_editor.gd` wiring:
+      - "Build" toolbar button (after renderer dropdown). Requires saved patch (prompts if unsaved).
+      - Preloads `_GNExportDialogScript`, creates dialog as child window.
+  - **Renderer in standalone apps:**
+    - Dev mode: writes `project.godot` directly via `ProjectSettings.save()`.
+    - Standalone (exported): self-relaunch with `--rendering-method` CLI flag on mismatch.
+    - `OS.has_feature("standalone")` gates which path runs.
   - **Extension distribution for exported apps**: When GONODES ships as a
     standalone application (not running inside the Godot editor), users will need
     a way to install extensions without touching `res://addons/`. Design a

@@ -7,6 +7,7 @@ extends Control
 
 const GNHelpWindowScene := preload("res://addons/gonodes/ui/gn_help_window.gd")
 const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
+const _GNExportDialogScript = preload("res://addons/gonodes/ui/gn_export_dialog.gd")
 
 @onready var graph_editor: GNGraphEditor = $HSplit/GraphPanel/GraphEditor
 @onready var viewer: TextureRect = $HSplit/RightPanel/ViewerPanel/Viewer
@@ -25,6 +26,12 @@ var perf_toggle: CheckButton
 var vram_toggle: CheckButton
 var nrt_toggle: CheckButton
 var nrt_fps_spin: SpinBox
+var renderer_dropdown: OptionButton
+
+## Renderer names as they appear in Godot's ProjectSettings.
+const _RENDERER_KEYS: PackedStringArray = ["forward_plus", "mobile", "gl_compatibility"]
+## Human-readable labels matching the index order.
+const _RENDERER_LABELS: PackedStringArray = ["Forward+", "Mobile", "Compatibility"]
 
 ## VRAM budget monitoring (opt-in via toolbar toggle).
 var _vram_enabled: bool = false
@@ -49,6 +56,9 @@ var _viewer_windows: Array[GNViewerWindow] = []
 ## Floating help windows.
 var _help_windows: Array = []
 
+## Export dialog for building standalone apps.
+var _export_dialog: Window = null
+
 ## Settings file path for persisting editor state (last opened patch, etc.).
 const _SETTINGS_PATH := "user://gonodes_settings.cfg"
 
@@ -71,6 +81,13 @@ var _breadcrumb_bar: HBoxContainer = null
 
 
 func _ready() -> void:
+	# ── Renderer self-relaunch check ──────────────────────────────────────────
+	# In a standalone (exported) app, project.godot is baked into the .pck and
+	# cannot be modified.  Instead, if the saved renderer setting differs from
+	# the active one, we relaunch the process with --rendering-method <method>
+	# so Godot creates the window with the correct backend.
+	_check_renderer_relaunch()
+
 	# Wire log toggle early so extension scan results are visible
 	log_toggle.toggled.connect(_on_log_toggled)
 	GNLogger.enabled = log_toggle.button_pressed
@@ -296,6 +313,104 @@ func _on_nrt_fps_changed(value: float) -> void:
 	if cook_engine != null:
 		cook_engine.non_realtime_fps = value
 	_save_setting("nrt_fps", value)
+
+
+## Opens the export dialog for Quick Build.
+func _on_build_pressed() -> void:
+	if _current_file_path.is_empty():
+		# Must save first — can't build an unsaved patch
+		var dlg := AcceptDialog.new()
+		dlg.title = "Save Required"
+		dlg.dialog_text = "Please save your patch before building.\nUse File > Save (Ctrl+S)."
+		dlg.confirmed.connect(func(): dlg.queue_free())
+		dlg.canceled.connect(func(): dlg.queue_free())
+		add_child(dlg)
+		dlg.popup_centered()
+		return
+	_export_dialog.show_for_patch(_current_file_path)
+
+
+## Changes the rendering backend.  Persists the choice in editor settings.
+## In dev mode (running inside Godot editor), also writes project.godot.
+## In standalone mode, the change takes effect via self-relaunch on next startup.
+## Either way, a restart is required — the renderer is baked at window creation.
+func _on_renderer_selected(idx: int) -> void:
+	if idx < 0 or idx >= _RENDERER_KEYS.size():
+		return
+	var method: String = _RENDERER_KEYS[idx]
+	var current: String = _get_active_renderer()
+	if method == current:
+		return  # No change
+
+	# Always persist in our own settings file (works in both dev + standalone).
+	_save_setting("renderer", method)
+
+	# In dev mode (not exported), also update project.godot directly.
+	if not OS.has_feature("standalone"):
+		ProjectSettings.set_setting("rendering/renderer/rendering_method", method)
+		ProjectSettings.save()
+
+	GNLogger.info("Editor",
+		"Renderer changed to '%s'. Restart required to take effect." % _RENDERER_LABELS[idx])
+
+	# Show a restart-required notice
+	var dlg := AcceptDialog.new()
+	dlg.title = "Renderer Changed"
+	dlg.dialog_text = (
+		"Rendering backend changed to %s.\n\n" % _RENDERER_LABELS[idx]
+		+ "A restart is required for this to take effect.")
+	dlg.confirmed.connect(func(): dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+	add_child(dlg)
+	dlg.popup_centered()
+
+
+## Returns the currently active rendering method string.
+func _get_active_renderer() -> String:
+	return ProjectSettings.get_setting(
+		"rendering/renderer/rendering_method", "forward_plus")
+
+
+## Checks if the saved renderer preference differs from the active one.
+## If so, relaunches the process with --rendering-method to apply it.
+## Only relevant for standalone (exported) builds — in dev mode, project.godot
+## is modified directly and Godot picks it up on next launch.
+func _check_renderer_relaunch() -> void:
+	var saved: String = _load_setting("renderer", "")
+	if saved.is_empty():
+		return  # No preference saved yet
+	var current: String = _get_active_renderer()
+	if saved == current:
+		return  # Already running the correct renderer
+
+	# Only self-relaunch in exported (standalone) builds.  In dev mode,
+	# project.godot was already written by _on_renderer_selected.
+	if not OS.has_feature("standalone"):
+		return
+
+	# Relaunch with the correct renderer flag.
+	var exe: String = OS.get_executable_path()
+	var args: PackedStringArray = OS.get_cmdline_args()
+	# Remove any existing --rendering-method arg to avoid duplicates.
+	var clean_args: PackedStringArray = []
+	var skip_next := false
+	for a in args:
+		if skip_next:
+			skip_next = false
+			continue
+		if a == "--rendering-method":
+			skip_next = true  # skip the value that follows
+			continue
+		if a.begins_with("--rendering-method="):
+			continue
+		clean_args.append(a)
+	clean_args.append("--rendering-method")
+	clean_args.append(saved)
+
+	GNLogger.info("Editor",
+		"Relaunching with renderer '%s'..." % saved)
+	OS.create_process(exe, clean_args)
+	get_tree().quit()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -544,8 +659,8 @@ func _setup_toolbar() -> void:
 	for wn in GNGraphEditor._WIRE_STYLE_NAMES:
 		wire_opt.add_item(wn)
 	wire_opt.selected = 0
-	wire_opt.item_selected.connect(func(idx: int):
-		graph_editor.set_wire_style(idx))
+	wire_opt.item_selected.connect(func(wire_idx: int):
+		graph_editor.set_wire_style(wire_idx))
 	info_bar.add_child(wire_opt)
 	info_bar.move_child(wire_opt, 12)
 
@@ -584,6 +699,37 @@ func _setup_toolbar() -> void:
 	nrt_fps_spin.value_changed.connect(_on_nrt_fps_changed)
 	info_bar.add_child(nrt_fps_spin)
 	info_bar.move_child(nrt_fps_spin, 16)
+
+	# Separator before renderer selector
+	var sep4 := VSeparator.new()
+	info_bar.add_child(sep4)
+	info_bar.move_child(sep4, 17)
+
+	# Renderer selection dropdown
+	renderer_dropdown = OptionButton.new()
+	renderer_dropdown.tooltip_text = "Rendering backend — changing requires restart"
+	for lbl in _RENDERER_LABELS:
+		renderer_dropdown.add_item(lbl)
+	# Detect the active renderer and select it
+	var current_method: String = ProjectSettings.get_setting(
+		"rendering/renderer/rendering_method", "forward_plus")
+	var idx := _RENDERER_KEYS.find(current_method)
+	renderer_dropdown.selected = idx if idx >= 0 else 0
+	renderer_dropdown.item_selected.connect(_on_renderer_selected)
+	info_bar.add_child(renderer_dropdown)
+	info_bar.move_child(renderer_dropdown, 18)
+
+	# Build button — opens the export dialog for Quick Build
+	var btn_build := Button.new()
+	btn_build.text = "Build"
+	btn_build.tooltip_text = "Export patch as a standalone application (Quick Build)"
+	btn_build.pressed.connect(_on_build_pressed)
+	info_bar.add_child(btn_build)
+	info_bar.move_child(btn_build, 19)
+
+	# Create the export dialog (hidden until needed)
+	_export_dialog = _GNExportDialogScript.new()
+	add_child(_export_dialog)
 
 
 ## Keyboard shortcuts for file operations and sub-network navigation.
@@ -1175,6 +1321,14 @@ func _restore_ui_state() -> void:
 	nrt_fps_spin.set_value_no_signal(saved_nrt_fps)
 	if cook_engine != null:
 		cook_engine.non_realtime_fps = saved_nrt_fps
+
+	# Renderer dropdown — restore from last saved preference
+	var saved_renderer: String = _load_setting("renderer", "")
+	if not saved_renderer.is_empty():
+		var r_idx := _RENDERER_KEYS.find(saved_renderer)
+		if r_idx >= 0 and renderer_dropdown != null:
+			renderer_dropdown.set_item_disabled(r_idx, false)  # ensure enabled
+			renderer_dropdown.selected = r_idx
 
 	# Split container offsets
 	var saved_hsplit: int = _load_setting("hsplit_offset", -400)
