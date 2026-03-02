@@ -142,7 +142,8 @@ Each WindowTOP controls VSync independently via its own `vsync` parameter.
 Use the **Build** button in the GONODES editor toolbar.  This performs a
 "Quick Build" that copies:
 
-1. The Player binary + `.pck`
+1. The Player binary + `.pck` (from `templates/<platform>/` or other
+   standard locations)
 2. Your `.gnpatch` file
 3. The project assets folder (images, videos, etc.)
 4. A generated `config.json`
@@ -150,7 +151,27 @@ Use the **Build** button in the GONODES editor toolbar.  This performs a
 To the output directory you specify.  The result is a self-contained
 folder you can zip and distribute.
 
-See [EDITOR.md](EDITOR.md) for details on the Build dialog.
+### Preparing Templates
+
+Before the first Quick Build (or after upgrading Godot / making a GONODES
+release), run the template builder:
+
+```powershell
+# Windows (PowerShell)
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe"
+```
+```bash
+# Linux / macOS (Bash)
+./scripts/build_templates.sh --godot /path/to/godot
+```
+
+This exports Player binaries into `templates/` for each target platform.
+The `.pck` file is platform-agnostic — only the binary differs.
+
+> **Important:** Rebuild templates whenever you change Godot versions.
+> A Player binary built with Godot 4.6.1 won't load a `.pck` from 4.7.
+
+See [BUILD.md](BUILD.md) for the complete build system documentation.
 
 
 ## File Structure

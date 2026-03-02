@@ -132,7 +132,13 @@ func _find_player_binary() -> String:
 	var project_root := ProjectSettings.globalize_path("res://")
 	search_dirs.append(project_root)
 
-	# 3. Explicit "player" or "build" subdirectories
+	# 3. templates/<platform>/ subfolder (produced by build_templates.ps1)
+	var templates_subdir := _get_templates_platform_dir()
+	if not templates_subdir.is_empty():
+		search_dirs.append(project_root.path_join("templates").path_join(templates_subdir))
+		search_dirs.append(exe_dir.path_join("templates").path_join(templates_subdir))
+
+	# 4. Explicit "player" or "build" subdirectories
 	search_dirs.append(project_root.path_join("player"))
 	search_dirs.append(project_root.path_join("build"))
 	search_dirs.append(exe_dir.path_join("player"))
@@ -143,6 +149,26 @@ func _find_player_binary() -> String:
 			return candidate
 
 	return ""
+
+
+## Returns the templates/ subfolder name for the current OS + architecture.
+func _get_templates_platform_dir() -> String:
+	var os_name := OS.get_name()
+	match os_name:
+		"Windows":
+			var arch := Engine.get_architecture_name()  # e.g. "x86_64", "arm64"
+			if arch.contains("arm") or arch.contains("aarch"):
+				return "windows_arm64"
+			return "windows_x86_64"
+		"Linux", "FreeBSD":
+			var arch := Engine.get_architecture_name()
+			if arch.contains("arm") or arch.contains("aarch"):
+				return "linux_arm64"
+			return "linux_x86_64"
+		"macOS":
+			return "macos"
+		_:
+			return ""
 
 
 ## Returns the expected Player binary filename for the current OS.

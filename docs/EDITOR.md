@@ -138,12 +138,31 @@ the `.gnpatch` file.
 
 **What Build does:**
 
-1. Locates the pre-built `GONODESPlayer` binary
+1. Locates the pre-built `GONODESPlayer` binary (searches `templates/<platform>/`,
+   the exe directory, project root, `player/`, and `build/` subfolders)
 2. Copies it + its `.pck` to the output folder
 3. Copies the `.gnpatch` file
 4. Copies the project assets folder (if one exists)
 5. Writes `config.json` with the patch filename
 6. Reports success or failure in the progress label
+
+### Building Templates
+
+Player binaries are built ahead of time using the build scripts and stored
+in `templates/<platform>/`.  Re-run whenever you upgrade Godot or make a
+GONODES release.
+
+```powershell
+# Windows (PowerShell)
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe" -Platforms "all"
+```
+```bash
+# Linux / macOS (Bash)
+./scripts/build_templates.sh --godot /path/to/godot --platforms all
+```
+
+See [BUILD.md](BUILD.md) for the full Build System documentation, including
+release-build optimizations, CI setup, and troubleshooting.
 
 ### Why there's no renderer / VSync / FPS limit in the Build dialog
 
