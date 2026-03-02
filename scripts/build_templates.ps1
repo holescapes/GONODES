@@ -54,6 +54,15 @@
     Also build the Editor binary for each platform (uses the editor main scene).
     Default: false (Player only)
 
+.PARAMETER IncludeGDExtensions
+    Include third-party GDExtension native libraries in the export.
+    Default: false -- GDExtension files are temporarily disabled so that the
+    base GONODES project always builds cleanly regardless of which native
+    addons are present or whether their platform binaries exist.
+    When enabled, GDExtension files are left in place and Godot will attempt
+    to bundle them.  If a library is missing for a target platform, that
+    platform's export will fail.
+
 .PARAMETER Clean
     Remove existing templates/ folder before building.
 
@@ -85,6 +94,7 @@ param(
     [string]$OutputDir = "",
     [string[]]$Platforms = @(),
     [switch]$IncludeEditor,
+    [switch]$IncludeGDExtensions,
     [switch]$Clean,
     [switch]$RestoreOnly
 )
@@ -209,6 +219,127 @@ function Get-CurrentMainScene([string]$projectGodot) {
     return ""
 }
 
+# --- Pre-Build Hygiene ---------------------------------------------------------
+
+function Remove-TempFiles([string]$project) {
+    # Windows antivirus, file indexers, and Godot itself can leave ~*.TMP files
+    # next to DLLs.  These confuse Godot's export file-copy step because it
+    # sees them in directory listings but can't open them.  Clean them up.
+    $addonsDir = Join-Path $project "addons"
+    if (-not (Test-Path $addonsDir)) { return }
+
+    $tempFiles = Get-ChildItem $addonsDir -Recurse -Force -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match '^~' -or $_.Name -match '\.TMP$' }
+
+    foreach ($f in $tempFiles) {
+        try {
+            Remove-Item $f.FullName -Force -ErrorAction Stop
+            Write-Ok "Cleaned temp file: $($f.Name)"
+        } catch {
+            Write-Warn "Could not remove temp file (may be locked): $($f.Name)"
+            Write-Warn "Close Godot and any antivirus file locks, then retry."
+        }
+    }
+}
+
+function Test-GDExtensions([string]$project, [string[]]$platforms) {
+    # Scan all .gdextension files and check whether the libraries they
+    # reference for each target platform actually exist on disk.  Godot's
+    # export will fail if a referenced library is missing.  We warn early
+    # so the user knows which platforms may have issues.
+    $gdextFiles = Get-ChildItem (Join-Path $project "addons") -Recurse -Filter "*.gdextension" -ErrorAction SilentlyContinue
+    if (-not $gdextFiles) { return }
+
+    # Map our platform names to .gdextension [libraries] key prefixes
+    $platPrefixes = @{
+        "windows_x86_64" = @("windows.release.x86_64", "windows.debug.x86_64")
+        "windows_arm64"  = @("windows.release.arm64",  "windows.debug.arm64")
+        "linux_x86_64"   = @("linux.release.x86_64",   "linux.debug.x86_64")
+        "linux_arm64"    = @("linux.release.arm64",    "linux.debug.arm64")
+        "macos"          = @("macos.release",          "macos.debug")
+    }
+
+    foreach ($extFile in $gdextFiles) {
+        $extName = $extFile.Directory.Name + "/" + $extFile.Name
+        $content = Get-Content $extFile.FullName -Raw -Encoding UTF8
+
+        foreach ($plat in $platforms) {
+            $prefixes = $platPrefixes[$plat]
+            if (-not $prefixes) { continue }
+
+            foreach ($prefix in $prefixes) {
+                # Match: prefix = "res://path/to/lib.dll"
+                if ($content -match "(?m)^\s*$([regex]::Escape($prefix))\s*=\s*`"(res://[^`"]+)`"") {
+                    $resPath = $Matches[1]
+                    $diskPath = $resPath -replace '^res://', ''
+                    $fullPath = Join-Path $project $diskPath
+                    if (-not (Test-Path $fullPath)) {
+                        Write-Warn "GDExtension '$extName' references missing library for $plat"
+                        Write-Warn "  Expected: $diskPath"
+                        Write-Warn "  Export for $plat may fail -- the extension will not be included."
+                    }
+                }
+            }
+        }
+    }
+}
+
+# --- GDExtension Disable / Restore --------------------------------------------
+# When -IncludeGDExtensions is NOT set, we temporarily rename all .gdextension
+# files so Godot ignores them during export.  This guarantees the base GONODES
+# project always builds regardless of which native addons are present.
+
+$script:DisabledGDExtFiles = @()
+
+function Disable-GDExtensions([string]$project) {
+    $addonsDir = Join-Path $project "addons"
+    if (-not (Test-Path $addonsDir)) { return }
+
+    $gdextFiles = Get-ChildItem $addonsDir -Recurse -Filter "*.gdextension" -ErrorAction SilentlyContinue
+    if (-not $gdextFiles) {
+        Write-Ok "No GDExtension files found -- nothing to disable."
+        return
+    }
+
+    foreach ($f in $gdextFiles) {
+        $disabledPath = $f.FullName + ".disabled"
+        try {
+            Rename-Item -Path $f.FullName -NewName ($f.Name + ".disabled") -Force -ErrorAction Stop
+            $script:DisabledGDExtFiles += $f.FullName
+            Write-Ok "Disabled: $($f.Directory.Name)/$($f.Name)"
+
+            # Also disable the .uid sidecar if present (Godot 4.6+)
+            $uidPath = $f.FullName + ".uid"
+            if (Test-Path $uidPath) {
+                Rename-Item -Path $uidPath -NewName ($f.Name + ".uid.disabled") -Force -ErrorAction Stop
+            }
+        } catch {
+            Write-Warn "Could not disable $($f.Name): $_"
+        }
+    }
+}
+
+function Restore-GDExtensions {
+    foreach ($origPath in $script:DisabledGDExtFiles) {
+        $disabledPath = $origPath + ".disabled"
+        if (Test-Path $disabledPath) {
+            try {
+                Rename-Item -Path $disabledPath -NewName (Split-Path -Leaf $origPath) -Force -ErrorAction Stop
+            } catch {
+                Write-Warn "Could not restore $(Split-Path -Leaf $origPath): $_"
+            }
+        }
+        # Restore .uid sidecar
+        $uidDisabled = $origPath + ".uid.disabled"
+        if (Test-Path $uidDisabled) {
+            try {
+                Rename-Item -Path $uidDisabled -NewName ((Split-Path -Leaf $origPath) + ".uid") -Force -ErrorAction Stop
+            } catch { }
+        }
+    }
+    $script:DisabledGDExtFiles = @()
+}
+
 # --- Godot Export --------------------------------------------------------------
 
 function Invoke-GodotExport([string]$godot, [string]$project, [string]$presetName, [string]$outputPath) {
@@ -219,37 +350,30 @@ function Invoke-GodotExport([string]$godot, [string]$project, [string]$presetNam
         New-Item -ItemType Directory -Path $outDir -Force | Out-Null
     }
 
-    $exportArgs = @(
-        "--headless",
-        "--path", "`"$project`"",
-        "--export-release", "`"$presetName`"",
-        "`"$outputPath`""
-    )
-
-    $stdoutLog = Join-Path $outDir "export_stdout.log"
     $stderrLog = Join-Path $outDir "export_stderr.log"
 
-    $proc = Start-Process -FilePath $godot -ArgumentList $exportArgs `
-        -NoNewWindow -Wait -PassThru `
-        -RedirectStandardOutput $stdoutLog `
-        -RedirectStandardError  $stderrLog
+    # Use direct invocation (&) instead of Start-Process to inherit the
+    # current user's environment (APPDATA, etc.).  On domain-joined Windows
+    # machines, Start-Process can resolve the user profile differently,
+    # causing Godot to look for export templates in the wrong location.
+    & $godot --headless --path "$project" --export-release "$presetName" "$outputPath" 2> $stderrLog | Out-Null
+    $exitCode = $LASTEXITCODE
 
     # macOS exports produce a .app folder, others a file
     $exists = (Test-Path $outputPath)
 
-    if ($proc.ExitCode -eq 0 -and $exists) {
+    if ($exitCode -eq 0 -and $exists) {
         if (Test-Path $outputPath -PathType Container) {
             Write-Ok "$($outputPath | Split-Path -Leaf)  (app bundle)"
         } else {
             $sizeMB = [math]::Round((Get-Item $outputPath).Length / 1MB, 1)
             Write-Ok "$($outputPath | Split-Path -Leaf)  ($sizeMB MB)"
         }
-        Remove-Item $stdoutLog -ErrorAction SilentlyContinue
         Remove-Item $stderrLog -ErrorAction SilentlyContinue
         return $true
     }
 
-    Write-Fail "Export failed (exit code $($proc.ExitCode))"
+    Write-Fail "Export failed (exit code $exitCode)"
     if (Test-Path $stderrLog) {
         $err = Get-Content $stderrLog -ErrorAction SilentlyContinue | Select-Object -First 8
         if ($err) { $err | ForEach-Object { Write-Fail "    $_" } }
@@ -330,7 +454,9 @@ foreach ($plat in $Platforms) {
 
 Write-Ok "Output:  $OutputDir"
 Write-Ok "Targets: $($Platforms -join ', ')"
-if ($IncludeEditor) { Write-Ok "Include Editor: yes" }
+if ($IncludeEditor)       { Write-Ok "Include Editor: yes" }
+if ($IncludeGDExtensions) { Write-Ok "GDExtensions:  included" }
+else                      { Write-Ok "GDExtensions:  excluded (use -IncludeGDExtensions to bundle native addons)" }
 
 # -- Clean ---------------------------------------------------------------------
 
@@ -338,6 +464,23 @@ if ($Clean -and (Test-Path $OutputDir)) {
     Write-Step "Cleaning existing templates..."
     Remove-Item -Recurse -Force $OutputDir
     Write-Ok "Removed $OutputDir"
+}
+
+# ==============================================================================
+# Pre-Build Checks
+# ==============================================================================
+
+Write-Step "Pre-build cleanup..."
+Remove-TempFiles $ProjectPath
+
+# -- GDExtension handling ------------------------------------------------------
+
+if ($IncludeGDExtensions) {
+    Write-Step "Checking GDExtension libraries..."
+    Test-GDExtensions $ProjectPath $Platforms
+} else {
+    Write-Step "Disabling GDExtensions for clean base build..."
+    Disable-GDExtensions $ProjectPath
 }
 
 # ==============================================================================
@@ -404,6 +547,14 @@ catch {
     $failCount++
 }
 finally {
+    # Always restore GDExtension files first (before main scene, in case
+    # the user opens Godot immediately after).
+    if ($script:DisabledGDExtFiles.Count -gt 0) {
+        Write-Step "Restoring GDExtension files..."
+        Restore-GDExtensions
+        Write-Ok "GDExtension files restored."
+    }
+
     # Always restore the Editor main scene, even after errors / Ctrl-C.
     $current = Get-CurrentMainScene $projectGodot
     if ($current -ne $EDITOR_MAIN_SCENE) {

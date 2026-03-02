@@ -35,6 +35,7 @@ GODOT_PATH=""
 PROJECT_PATH=""
 OUTPUT_DIR=""
 INCLUDE_EDITOR=false
+INCLUDE_GDEXT=false
 CLEAN=false
 RESTORE_ONLY=false
 
@@ -126,6 +127,9 @@ Options:
                        linux_x86_64,linux_arm64,macos   or "all"
                        (default: auto-detect host platform)
   --include-editor     Also build Editor binaries
+  --include-gdext      Include third-party GDExtension native libraries.
+                       Default: off -- extensions are disabled so the base
+                       GONODES project always builds cleanly.
   --clean              Remove templates/ before building
   --restore-only       Recovery: restore project.godot main scene
   -h, --help           Show this help
@@ -140,6 +144,7 @@ while [[ $# -gt 0 ]]; do
         --output)         OUTPUT_DIR="$2"; shift 2 ;;
         --platforms)      PLATFORMS="$2"; shift 2 ;;
         --include-editor) INCLUDE_EDITOR=true; shift ;;
+        --include-gdext)  INCLUDE_GDEXT=true; shift ;;
         --clean)          CLEAN=true; shift ;;
         --restore-only)   RESTORE_ONLY=true; shift ;;
         -h|--help)        usage ;;
@@ -221,6 +226,117 @@ set_main_scene() {
     fi
     fail "Could not find run/main_scene in project.godot"
     return 1
+}
+
+# ─── Pre-Build Hygiene ─────────────────────────────────────────────────────────
+
+remove_temp_files() {
+    local project="$1"
+    local addons_dir="$project/addons"
+    [[ -d "$addons_dir" ]] || return 0
+
+    # Windows antivirus, file indexers, and Godot itself can leave ~*.TMP files
+    # next to DLLs.  These confuse Godot's export file-copy step.
+    local found=0
+    while IFS= read -r -d '' tmpfile; do
+        if rm -f "$tmpfile" 2>/dev/null; then
+            ok "Cleaned temp file: $(basename "$tmpfile")"
+        else
+            warn "Could not remove temp file (may be locked): $(basename "$tmpfile")"
+        fi
+        found=1
+    done < <(find "$addons_dir" -name '~*' -o -name '*.TMP' -print0 2>/dev/null || true)
+}
+
+check_gdextensions() {
+    local project="$1"
+    shift
+    local platforms=("$@")
+    local addons_dir="$project/addons"
+    [[ -d "$addons_dir" ]] || return 0
+
+    # Scan .gdextension files and check if referenced libraries exist
+    while IFS= read -r -d '' ext_file; do
+        local ext_name
+        ext_name="$(basename "$(dirname "$ext_file")")/$(basename "$ext_file")"
+
+        for plat in "${platforms[@]}"; do
+            local prefixes
+            case "$plat" in
+                windows_x86_64) prefixes="windows.release.x86_64 windows.debug.x86_64" ;;
+                windows_arm64)  prefixes="windows.release.arm64 windows.debug.arm64" ;;
+                linux_x86_64)   prefixes="linux.release.x86_64 linux.debug.x86_64" ;;
+                linux_arm64)    prefixes="linux.release.arm64 linux.debug.arm64" ;;
+                macos)          prefixes="macos.release macos.debug" ;;
+                *)              continue ;;
+            esac
+
+            for prefix in $prefixes; do
+                # Match: prefix = "res://path/to/lib"
+                local res_path
+                res_path="$(grep -oP "^\s*${prefix//./\\.}\s*=\s*\"\Kres://[^\"]+" "$ext_file" 2>/dev/null || true)"
+                if [[ -n "$res_path" ]]; then
+                    local disk_path="${res_path#res://}"
+                    local full_path="$project/$disk_path"
+                    if [[ ! -e "$full_path" ]]; then
+                        warn "GDExtension '$ext_name' references missing library for $plat"
+                        warn "  Expected: $disk_path"
+                        warn "  Export for $plat may fail -- the extension will not be included."
+                    fi
+                fi
+            done
+        done
+    done < <(find "$addons_dir" -name '*.gdextension' -print0 2>/dev/null || true)
+}
+
+# --- GDExtension Disable / Restore --------------------------------------------
+# When --include-gdext is NOT set, temporarily rename .gdextension files so
+# Godot ignores them.  This guarantees the base project always builds.
+
+DISABLED_GDEXT_FILES=()
+
+disable_gdextensions() {
+    local project="$1"
+    local addons_dir="$project/addons"
+    [[ -d "$addons_dir" ]] || return 0
+
+    while IFS= read -r -d '' ext_file; do
+        local dir_name base_name
+        dir_name="$(dirname "$ext_file")"
+        base_name="$(basename "$ext_file")"
+
+        if mv "$ext_file" "${ext_file}.disabled" 2>/dev/null; then
+            DISABLED_GDEXT_FILES+=("$ext_file")
+            ok "Disabled: $(basename "$dir_name")/$base_name"
+
+            # Also disable .uid sidecar if present (Godot 4.6+)
+            if [[ -f "${ext_file}.uid" ]]; then
+                mv "${ext_file}.uid" "${ext_file}.uid.disabled" 2>/dev/null || true
+            fi
+        else
+            warn "Could not disable $base_name"
+        fi
+    done < <(find "$addons_dir" -name '*.gdextension' -not -name '*.disabled' -print0 2>/dev/null || true)
+
+    if [[ ${#DISABLED_GDEXT_FILES[@]} -eq 0 ]]; then
+        ok "No GDExtension files found -- nothing to disable."
+    fi
+}
+
+restore_gdextensions() {
+    for orig_path in "${DISABLED_GDEXT_FILES[@]}"; do
+        local disabled_path="${orig_path}.disabled"
+        if [[ -f "$disabled_path" ]]; then
+            mv "$disabled_path" "$orig_path" 2>/dev/null || \
+                warn "Could not restore $(basename "$orig_path")"
+        fi
+        # Restore .uid sidecar
+        local uid_disabled="${orig_path}.uid.disabled"
+        if [[ -f "$uid_disabled" ]]; then
+            mv "$uid_disabled" "${orig_path}.uid" 2>/dev/null || true
+        fi
+    done
+    DISABLED_GDEXT_FILES=()
 }
 
 # ─── Godot Export ──────────────────────────────────────────────────────────────
@@ -341,6 +457,11 @@ done
 ok "Output:  $OUTPUT_DIR"
 ok "Targets: ${PLATFORM_LIST[*]}"
 if $INCLUDE_EDITOR; then ok "Include Editor: yes"; fi
+if $INCLUDE_GDEXT; then
+    ok "GDExtensions:  included"
+else
+    ok "GDExtensions:  excluded (use --include-gdext to bundle native addons)"
+fi
 
 # ── Clean ─────────────────────────────────────────────────────────────────────
 
@@ -348,6 +469,23 @@ if $CLEAN && [[ -d "$OUTPUT_DIR" ]]; then
     step "Cleaning existing templates..."
     rm -rf "$OUTPUT_DIR"
     ok "Removed $OUTPUT_DIR"
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Pre-Build Checks
+# ═══════════════════════════════════════════════════════════════════════════════
+
+step "Pre-build cleanup..."
+remove_temp_files "$PROJECT_PATH"
+
+# -- GDExtension handling ------------------------------------------------------
+
+if $INCLUDE_GDEXT; then
+    step "Checking GDExtension libraries..."
+    check_gdextensions "$PROJECT_PATH" "${PLATFORM_LIST[@]}"
+else
+    step "Disabling GDExtensions for clean base build..."
+    disable_gdextensions "$PROJECT_PATH"
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -359,6 +497,13 @@ FAIL_COUNT=0
 
 # Trap: always restore main scene on exit (normal, error, or signal)
 cleanup() {
+    # Restore GDExtension files first
+    if [[ ${#DISABLED_GDEXT_FILES[@]} -gt 0 ]]; then
+        step "Restoring GDExtension files..."
+        restore_gdextensions
+        ok "GDExtension files restored."
+    fi
+
     local current
     current="$(get_main_scene "$PROJECT_GODOT")"
     if [[ "$current" != "$EDITOR_MAIN_SCENE" ]]; then

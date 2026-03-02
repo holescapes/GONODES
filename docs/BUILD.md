@@ -85,15 +85,16 @@ Rebuild the templates whenever you:
 
 ### PowerShell (`build_templates.ps1`)
 
-| Parameter        | Default          | Description                                        |
-|------------------|------------------|----------------------------------------------------|
-| `-GodotPath`     | auto-detect      | Path to the Godot editor executable                |
-| `-ProjectPath`   | script's parent  | GONODES project root (contains `project.godot`)    |
-| `-OutputDir`     | `<project>/templates` | Where templates are written                   |
-| `-Platforms`     | host platform    | Comma-separated list, or `"all"`                   |
-| `-IncludeEditor` | off              | Also build Editor binaries                         |
-| `-Clean`         | off              | Remove templates/ before building                  |
-| `-RestoreOnly`   | off              | Recovery: restore `project.godot` after interruption|
+| Parameter              | Default          | Description                                        |
+|------------------------|------------------|----------------------------------------------------||
+| `-GodotPath`           | auto-detect      | Path to the Godot editor executable                |
+| `-ProjectPath`         | script's parent  | GONODES project root (contains `project.godot`)    |
+| `-OutputDir`           | `<project>/templates` | Where templates are written                   |
+| `-Platforms`           | host platform    | Comma-separated list, or `"all"`                   |
+| `-IncludeEditor`       | off              | Also build Editor binaries                         |
+| `-IncludeGDExtensions` | off              | Bundle third-party GDExtension native libraries    |
+| `-Clean`               | off              | Remove templates/ before building                  |
+| `-RestoreOnly`         | off              | Recovery: restore `project.godot` after interruption|
 
 ### Bash (`build_templates.sh`)
 
@@ -104,6 +105,7 @@ Rebuild the templates whenever you:
 | `--output PATH`    | `<project>/templates` | Where templates are written                  |
 | `--platforms LIST`  | host platform    | Comma-separated list, or `all`                   |
 | `--include-editor` | off              | Also build Editor binaries                        |
+| `--include-gdext`  | off              | Bundle third-party GDExtension native libraries   |
 | `--clean`          | off              | Remove templates/ before building                 |
 | `--restore-only`   | off              | Recovery: restore `project.godot`                 |
 
@@ -209,6 +211,42 @@ Only the **binary** (the Godot runtime) differs per platform.  This is why
 the Quick Build paradigm works: copy the right binary, share the `.pck`.
 
 
+## GDExtension Handling
+
+GDExtensions are third-party native libraries (C/C++/Rust plugins) that ship
+as `.dll` / `.so` / `.dylib` files alongside a `.gdextension` manifest.  Not
+every addon provides binaries for every platform, and missing binaries will
+cause Godot's export to fail.
+
+To keep the **base GONODES project** always buildable, the build scripts
+**disable GDExtensions by default**.  Before export, all `.gdextension` files
+are temporarily renamed to `.gdextension.disabled` so Godot ignores them.
+They are always restored after (even on Ctrl+C / error).
+
+If you want to include native addons in your build, opt in explicitly:
+
+```powershell
+# PowerShell
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe" -IncludeGDExtensions
+```
+
+```bash
+# Bash
+./scripts/build_templates.sh --godot /path/to/godot --include-gdext
+```
+
+With the flag enabled, the script runs a pre-flight check that scans every
+`.gdextension` file and verifies the referenced libraries exist for each
+target platform.  Missing libraries are reported as warnings before export
+begins.  Exports continue for other platforms even if one fails.
+
+### Pre-Build Cleanup
+
+Both scripts also automatically clean up stale `~*.TMP` temp files in
+`addons/` before exporting.  These are left behind by Windows antivirus,
+file indexers, or Godot itself and can cause confusing export errors.
+
+
 ## How the Main-Scene Swap Works
 
 Godot's export always uses `project.godot`'s `run/main_scene`.  The Editor
@@ -289,6 +327,8 @@ For GitHub Actions:
 | macOS export on non-Mac              | Works for unsigned builds. Code-signing and notarization require a Mac + Apple Developer account |
 | Binary + .pck version mismatch      | Rebuild both after any Godot version change |
 | First-frame stutter in Player        | Verify `shader_baker/enabled=true` in the preset — should be set on all presets |
+| GDExtension DLL error during export  | Run the build without `-IncludeGDExtensions` (default) or ensure the addon has binaries for each target platform |
+| `~*.TMP` file errors during export   | Close Godot, antivirus, and retry — the script auto-cleans these but locked files need manual attention |
 
 
 ## File Reference
