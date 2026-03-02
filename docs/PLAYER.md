@@ -161,6 +161,24 @@ See [EDITOR.md](EDITOR.md) for details on the Build dialog.
 | `scenes/player_main.tscn`   | Player scene (Control root)          |
 | `addons/gonodes/core/gn_patch_exporter.gd` | Quick Build copy logic  |
 
+## Headless / Windowless Operation
+
+The Player doesn't require WindowTOP nodes.  Patches that only use
+file-save nodes (FileSaveTOP, FileSaveDAT, MovieOutIMG, FFmpegOutIMG,
+RecordCHOP) or network-output nodes (OSCOutCHOP) run headless — the
+cook engine keeps their chains alive via `is_sink = true`.
+
+For **Script operators** with side effects (HTTP, hardware control, etc.),
+enable the **Force Active** toggle so the script acts as a sink:
+
+```
+ScriptCHOP  →  Force Active = ON,  Time Dependent = ON
+```
+
+This makes the script cook every frame without needing any downstream
+WindowTOP, perfect for headless automation or data-processing pipelines.
+
+
 ## Troubleshooting
 
 | Problem                       | Solution                              |

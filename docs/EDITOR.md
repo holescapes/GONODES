@@ -80,6 +80,51 @@ The bottom toolbar is split into **two rows** for readability:
 | Right-click      | Context menu (on node or canvas)           |
 
 
+## Expression Value Preview
+
+When a parameter is in **Expression mode** (the "E" badge), a green
+`→ value` label appears to the right of the expression text field,
+showing the current resolved value in real time.
+
+- Updates every cook frame
+- Shows `→ err` in red if the expression has an error
+- Hover the label for the full untruncated value
+- Works for both scalar parameters and per-component expressions
+  (Vector2, Vector3, Color, etc.)
+
+This makes it easy to verify what your expression evaluates to without
+needing to wire up a debug viewer.
+
+**Expression text is preserved** when you toggle a parameter from
+Expression → Constant → Expression.  Switching to Constant only changes
+the mode — the expression string stays intact and is restored (and
+recompiled) when you switch back.  Only an explicit **Reset** clears
+the expression.
+
+
+## Script Operators — Force Active
+
+All four Script operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG)
+have a **Force Active** toggle.  When enabled, the script becomes a
+structural sink — the cook engine keeps its upstream chain alive even
+without a downstream WindowTOP or file-save node.
+
+This is essential for **headless / side-effect scripts** that:
+
+- Send OSC, HTTP, or MIDI messages
+- Write files or control external hardware
+- Run in the Player without any display windows
+
+| Parameter        | Default | Description                                          |
+|------------------|---------|------------------------------------------------------|
+| Time Dependent   | Off     | Re-cook every frame                                  |
+| Cook Once        | Off     | Pulse: cook once then auto-reset                     |
+| Force Active     | Off     | Keep chain alive without a downstream sink            |
+
+Combine `Force Active` + `Time Dependent` for a script that fires every
+frame regardless of what else is in the patch.
+
+
 ## Quick Build (Export Dialog)
 
 Press **Build** in the toolbar to open the export dialog.  It contains:

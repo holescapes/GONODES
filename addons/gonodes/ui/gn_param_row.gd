@@ -53,6 +53,12 @@ var _expand_btn: Button = null
 ## Per-component expand buttons for opening the expression editor.
 var _comp_expand_btns: Array[Button] = []
 
+## Per-component resolved-value labels (shown when component is in Expression mode).
+var _comp_resolved_labels: Array[Label] = []
+
+## Resolved-value label shown next to the expression LineEdit (scalar params).
+var _resolved_label: Label = null
+
 ## Direct reference to the code TextEdit when inside a code-editor wrapper VBox.
 var _code_edit: TextEdit = null
 
@@ -125,6 +131,17 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 		_expr_edit.focus_exited.connect(_on_expression_focus_lost)
 		_expr_edit.visible = false
 		_value_container.add_child(_expr_edit)
+
+		# Resolved value preview (shown in expression mode: "→ 0.523")
+		_resolved_label = Label.new()
+		_resolved_label.custom_minimum_size = Vector2(60, 0)
+		_resolved_label.add_theme_font_size_override("font_size", 10)
+		_resolved_label.add_theme_color_override("font_color", Color(0.55, 0.75, 0.55))
+		_resolved_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		_resolved_label.clip_text = true
+		_resolved_label.visible = false
+		_resolved_label.mouse_filter = Control.MOUSE_FILTER_PASS
+		_value_container.add_child(_resolved_label)
 
 		# Expand button to open multi-line expression editor
 		_expand_btn = Button.new()
@@ -221,6 +238,18 @@ func _build_multi_component_ui() -> void:
 		expr_edit.focus_exited.connect(func() -> void: _on_comp_expr_focus_lost(expr_idx))
 		row.add_child(expr_edit)
 		_comp_expr_edits.append(expr_edit)
+
+		# Per-component resolved value label
+		var comp_res_label := Label.new()
+		comp_res_label.custom_minimum_size = Vector2(50, 0)
+		comp_res_label.add_theme_font_size_override("font_size", 10)
+		comp_res_label.add_theme_color_override("font_color", Color(0.55, 0.75, 0.55))
+		comp_res_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		comp_res_label.clip_text = true
+		comp_res_label.visible = false
+		comp_res_label.mouse_filter = Control.MOUSE_FILTER_PASS
+		row.add_child(comp_res_label)
+		_comp_resolved_labels.append(comp_res_label)
 
 		# Per-component expand button for multi-line editor
 		var expand_btn := Button.new()
@@ -797,6 +826,12 @@ func _update_comp_mode_display(idx: int) -> void:
 				expr_edit.tooltip_text = ""
 		if idx < _comp_expand_btns.size():
 			_comp_expand_btns[idx].visible = true
+		# Show resolved component value
+		if idx < _comp_resolved_labels.size():
+			_comp_resolved_labels[idx].visible = true
+			var comp_val := _get_resolved_component(idx)
+			_comp_resolved_labels[idx].text = "→ " + _format_resolved_value(comp_val)
+			_comp_resolved_labels[idx].tooltip_text = str(comp_val)
 	else:
 		btn.text = "C"
 		btn.modulate = Color(0.5, 0.8, 0.5)  # Green
@@ -804,9 +839,12 @@ func _update_comp_mode_display(idx: int) -> void:
 		expr_edit.visible = false
 		if idx < _comp_expand_btns.size():
 			_comp_expand_btns[idx].visible = false
+		if idx < _comp_resolved_labels.size():
+			_comp_resolved_labels[idx].visible = false
 
 
-## Updates per-component expression error indicators (called per-cook).
+## Updates per-component expression error indicators and resolved-value
+## previews (called per-cook).
 func _update_comp_expression_status() -> void:
 	for i in range(mini(_comp_expr_edits.size(), param.component_expression_errors.size())):
 		var expr_edit := _comp_expr_edits[i]
@@ -816,6 +854,10 @@ func _update_comp_expression_status() -> void:
 		if not err.is_empty():
 			expr_edit.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
 			expr_edit.tooltip_text = err
+			if i < _comp_resolved_labels.size() and _comp_resolved_labels[i].visible:
+				_comp_resolved_labels[i].text = "→ err"
+				_comp_resolved_labels[i].add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+				_comp_resolved_labels[i].tooltip_text = err
 		else:
 			expr_edit.remove_theme_color_override("font_color")
 			# Show per-component profiling info
@@ -824,6 +866,12 @@ func _update_comp_expression_status() -> void:
 				expr_edit.tooltip_text = "Eval: %.1f\u00b5s" % param.component_expression_eval_usec[i]
 			else:
 				expr_edit.tooltip_text = ""
+			# Update resolved component value
+			if i < _comp_resolved_labels.size() and _comp_resolved_labels[i].visible:
+				var comp_val := _get_resolved_component(i)
+				_comp_resolved_labels[i].text = "→ " + _format_resolved_value(comp_val)
+				_comp_resolved_labels[i].add_theme_color_override("font_color", Color(0.55, 0.75, 0.55))
+				_comp_resolved_labels[i].tooltip_text = str(comp_val)
 
 
 ## Syncs per-component spinbox values from the parameter model.
@@ -844,11 +892,11 @@ func _update_comp_value_display() -> void:
 
 func _on_mode_toggle() -> void:
 	if param.mode == GNParameter.Mode.CONSTANT:
-		# Switch to expression mode
+		# Switch to expression mode — restore saved expression and recompile
 		_expr_edit.text = param.expression
-		param.mode = GNParameter.Mode.EXPRESSION
+		param.set_expression(param.expression)
 	else:
-		# Switch back to constant mode
+		# Switch back to constant mode (expression text is preserved)
 		param.set_constant()
 	_update_mode_display()
 
@@ -867,6 +915,8 @@ func _update_mode_display() -> void:
 				_control.visible = true
 			_expr_edit.visible = false
 			_set_expand_btn_visible(false)
+			if _resolved_label:
+				_resolved_label.visible = false
 		GNParameter.Mode.EXPRESSION:
 			_mode_btn.text = "E"
 			_mode_btn.modulate = Color(0.8, 0.6, 0.2)  # Orange tint
@@ -874,6 +924,10 @@ func _update_mode_display() -> void:
 				_control.visible = false
 			_expr_edit.visible = true
 			_set_expand_btn_visible(true)
+			if _resolved_label:
+				_resolved_label.visible = true
+				_resolved_label.text = "→ " + _format_resolved_value(param.get_resolved_value())
+				_resolved_label.tooltip_text = str(param.get_resolved_value())
 			# Only set text if the user is NOT currently editing
 			if not _expr_edit.has_focus():
 				_expr_edit.text = param.expression
@@ -891,8 +945,8 @@ func _update_mode_display() -> void:
 			_mode_btn.text = "X"
 			_mode_btn.modulate = Color(0.8, 0.3, 0.3)  # Red tint
 
-## Updates only the expression error/tooltip indicator (called per-cook).
-## Does NOT touch _expr_edit.text to avoid destroying user edits.
+## Updates expression error/tooltip indicator AND resolved-value preview
+## (called per-cook). Does NOT touch _expr_edit.text to avoid destroying edits.
 func update_expression_status() -> void:
 	if param == null:
 		return
@@ -904,6 +958,10 @@ func update_expression_status() -> void:
 	if not param.expression_error.is_empty():
 		_expr_edit.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
 		_expr_edit.tooltip_text = param.expression_error
+		if _resolved_label and _resolved_label.visible:
+			_resolved_label.text = "→ err"
+			_resolved_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+			_resolved_label.tooltip_text = param.expression_error
 	else:
 		_expr_edit.remove_theme_color_override("font_color")
 		# Show profiling info in tooltip when no error
@@ -912,6 +970,12 @@ func update_expression_status() -> void:
 				param.expression_eval_usec, param.expression_eval_avg_usec]
 		else:
 			_expr_edit.tooltip_text = ""
+		# Update resolved-value preview
+		if _resolved_label and _resolved_label.visible:
+			var rv = param.get_resolved_value()
+			_resolved_label.text = "→ " + _format_resolved_value(rv)
+			_resolved_label.add_theme_color_override("font_color", Color(0.55, 0.75, 0.55))
+			_resolved_label.tooltip_text = str(rv)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Model → UI Sync (external updates reflected in controls)
@@ -1113,3 +1177,62 @@ func _on_param_context_id(id: int) -> void:
 			ref = 'op("%s", "%s")' % [node_id, p_name]
 	if not ref.is_empty():
 		DisplayServer.clipboard_set(ref)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Resolved Value Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Formats a resolved value into a compact display string (e.g. "0.52", "true").
+## Keeps floats to 3 decimal places; vectors/colors show abbreviated form.
+func _format_resolved_value(val: Variant) -> String:
+	if val == null:
+		return "null"
+	if val is float:
+		return _compact_float(val)
+	if val is int:
+		return str(val)
+	if val is bool:
+		return "true" if val else "false"
+	if val is Vector2:
+		return "(%s, %s)" % [_compact_float(val.x), _compact_float(val.y)]
+	if val is Vector2i:
+		return "(%d, %d)" % [val.x, val.y]
+	if val is Vector3:
+		return "(%s, %s, %s)" % [_compact_float(val.x), _compact_float(val.y), _compact_float(val.z)]
+	if val is Vector4:
+		return "(%s, %s, %s, %s)" % [_compact_float(val.x), _compact_float(val.y), _compact_float(val.z), _compact_float(val.w)]
+	if val is Color:
+		return "(%.2f, %.2f, %.2f, %.2f)" % [val.r, val.g, val.b, val.a]
+	if val is String:
+		var s: String = val
+		if s.length() > 16:
+			return '"%s…"' % s.left(14)
+		return '"%s"' % s
+	return str(val).left(20)
+
+
+## Formats a float compactly: trims trailing zeros, caps at 3 decimals.
+func _compact_float(v: float) -> String:
+	if absf(v) >= 1000.0:
+		return "%.0f" % v
+	if absf(v) >= 100.0:
+		return "%.1f" % v
+	if absf(v) >= 10.0:
+		return "%.2f" % v
+	return "%.3f" % v
+
+
+## Extracts a single component's resolved value from the parameter's resolved_value.
+## Used for per-component expression labels.
+func _get_resolved_component(idx: int) -> float:
+	var rv = param.resolved_value
+	if rv is Vector2 or rv is Vector2i:
+		return rv.x if idx == 0 else rv.y
+	if rv is Vector3:
+		return [rv.x, rv.y, rv.z][idx] if idx < 3 else 0.0
+	if rv is Vector4:
+		return [rv.x, rv.y, rv.z, rv.w][idx] if idx < 4 else 0.0
+	if rv is Color:
+		return [rv.r, rv.g, rv.b, rv.a][idx] if idx < 4 else 0.0
+	return 0.0

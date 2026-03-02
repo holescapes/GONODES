@@ -503,15 +503,15 @@ func set_component_expression(component_idx: int, expr_text: String) -> void:
 
 
 ## Sets a single component back to CONSTANT mode.
+## The expression text is preserved so the user can toggle back to Expression
+## mode without losing their work.
 func set_component_constant(component_idx: int) -> void:
 	_ensure_component_arrays()
 	if component_idx < 0 or component_idx >= component_modes.size():
 		return
 	component_modes[component_idx] = Mode.CONSTANT
-	component_expressions[component_idx] = ""
-	_compiled_component_expressions[component_idx] = null
-	_component_expression_valid[component_idx] = false
-	component_expression_errors[component_idx] = ""
+	# NOTE: component_expressions[idx] is intentionally NOT cleared —
+	# the text is preserved so toggling back to Expression restores it.
 	# Check if ALL components are back to constant
 	var all_constant := true
 	for m in component_modes:

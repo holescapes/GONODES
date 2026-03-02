@@ -200,7 +200,7 @@ func _force_open_window_tops() -> void:
 	if network == null:
 		return
 	var count: int = 0
-	for node: GNNode in network.nodes.values():
+	for node in network.nodes.values():
 		if node.node_type == "window":
 			node.set_param_value("open", true)
 			count += 1
