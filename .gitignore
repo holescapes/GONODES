@@ -4,3 +4,7 @@
 
 # Built Player/Editor templates (large binaries — rebuild with scripts/build_templates.ps1)
 /templates/
+
+# GDExtension backup files (created during build, restored automatically)
+*.gdextension.bak
+*.gdextension.uid.bak

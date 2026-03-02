@@ -92,7 +92,7 @@ Rebuild the templates whenever you:
 | `-OutputDir`           | `<project>/templates` | Where templates are written                   |
 | `-Platforms`           | host platform    | Comma-separated list, or `"all"`                   |
 | `-IncludeEditor`       | off              | Also build Editor binaries                         |
-| `-IncludeGDExtensions` | off              | Bundle third-party GDExtension native libraries    |
+| `-GDExtensions`        | `auto`           | GDExtension handling mode: `auto`, `all`, `none`, or addon names |
 | `-Clean`               | off              | Remove templates/ before building                  |
 | `-RestoreOnly`         | off              | Recovery: restore `project.godot` after interruption|
 
@@ -105,7 +105,7 @@ Rebuild the templates whenever you:
 | `--output PATH`    | `<project>/templates` | Where templates are written                  |
 | `--platforms LIST`  | host platform    | Comma-separated list, or `all`                   |
 | `--include-editor` | off              | Also build Editor binaries                        |
-| `--include-gdext`  | off              | Bundle third-party GDExtension native libraries   |
+| `--gdext MODE`     | `auto`           | GDExtension handling mode: `auto`, `all`, `none`, or addon names |
 | `--clean`          | off              | Remove templates/ before building                 |
 | `--restore-only`   | off              | Recovery: restore `project.godot`                 |
 
@@ -218,24 +218,45 @@ as `.dll` / `.so` / `.dylib` files alongside a `.gdextension` manifest.  Not
 every addon provides binaries for every platform, and missing binaries will
 cause Godot's export to fail.
 
-To keep the **base GONODES project** always buildable, the build scripts
-**disable GDExtensions by default**.  Before export, all `.gdextension` files
-are temporarily renamed to `.gdextension.disabled` so Godot ignores them.
-They are always restored after (even on Ctrl+C / error).
+The build scripts control GDExtension handling via the `-GDExtensions` /
+`--gdext` parameter, which accepts four modes:
 
-If you want to include native addons in your build, opt in explicitly:
+| Mode               | Behaviour |
+|--------------------|----------|
+| `auto` (default)   | Smart filter: keeps each `.gdextension` library entry whose file exists on disk, comments out missing entries.  If **all** entries are missing the extension is deleted entirely so Godot doesn't attempt to load it. |
+| `all`              | Leave everything as-is.  If a referenced library is missing for a target platform that export will fail. |
+| `none`             | Delete every `.gdextension` file during the build.  Zero native dependencies; base GONODES always builds cleanly. |
+| `name,name,...`    | Named addons (matched by folder name under `addons/`) get `auto` treatment; everything else is deleted. |
+
+Original files are always restored after the build (even on Ctrl+C / error).
+The scripts also delete `.godot/uid_cache.bin` before and after changes so
+Godot never chokes on stale UID references.
+
+### Examples
 
 ```powershell
-# PowerShell
-.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe" -IncludeGDExtensions
+# Default (auto): host-platform libs kept, missing platform entries removed
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe"
+
+# Include all GDExtension libraries as-is
+.\scripts\build_templates.ps1 -GDExtensions "all"
+
+# Disable everything (zero native addons)
+.\scripts\build_templates.ps1 -GDExtensions "none"
+
+# Include only the ffmpeg addon, disable all others
+.\scripts\build_templates.ps1 -GDExtensions "ffmpeg"
 ```
 
 ```bash
-# Bash
-./scripts/build_templates.sh --godot /path/to/godot --include-gdext
+# Bash equivalents
+./scripts/build_templates.sh --gdext auto     # default
+./scripts/build_templates.sh --gdext all
+./scripts/build_templates.sh --gdext none
+./scripts/build_templates.sh --gdext ffmpeg
 ```
 
-With the flag enabled, the script runs a pre-flight check that scans every
+With `all` mode the script runs a pre-flight check that scans every
 `.gdextension` file and verifies the referenced libraries exist for each
 target platform.  Missing libraries are reported as warnings before export
 begins.  Exports continue for other platforms even if one fails.
@@ -327,7 +348,7 @@ For GitHub Actions:
 | macOS export on non-Mac              | Works for unsigned builds. Code-signing and notarization require a Mac + Apple Developer account |
 | Binary + .pck version mismatch      | Rebuild both after any Godot version change |
 | First-frame stutter in Player        | Verify `shader_baker/enabled=true` in the preset — should be set on all presets |
-| GDExtension DLL error during export  | Run the build without `-IncludeGDExtensions` (default) or ensure the addon has binaries for each target platform |
+| GDExtension DLL error during export  | Use `-GDExtensions "auto"` (default) or `"none"` to exclude the addon, or ensure it has binaries for each target platform |
 | `~*.TMP` file errors during export   | Close Godot, antivirus, and retry — the script auto-cleans these but locked files need manual attention |
 
 
