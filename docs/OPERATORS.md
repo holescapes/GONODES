@@ -382,10 +382,11 @@ Resize a texture to a different resolution.
 
 #### RenderTOP
 
-Renders a 3D scene from COMPs into a 2D texture. This is the bridge between the COMP/SOP pipeline and the TOP pipeline.
+Renders a 3D scene from COMPs into a 2D texture with integrated post-processing. This is the bridge between the COMP/SOP pipeline and the TOP pipeline.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
+| **Scene** | | | | |
 | resolution | Vector2i | 1280×720 | — | Render resolution |
 | bg_color | Color | (0.1, 0.1, 0.12) | — | Background color |
 | transparent_bg | Bool | false | — | Transparent background |
@@ -393,10 +394,65 @@ Renders a 3D scene from COMPs into a 2D texture. This is the bridge between the 
 | ambient_energy | Float | 0.3 | 0.0–4.0 | Ambient light intensity |
 | ambient_color | Color | (0.3, 0.3, 0.4) | — | Ambient light color |
 | anti_aliasing | Enum | 4x MSAA | Off, 2x, 4x, 8x | MSAA quality |
+| **Shadows** | | | | |
+| shadow_atlas_size | Enum | 4096 | 1024, 2048, 4096, 8192 | Positional shadow atlas resolution |
+| dir_shadow_size | Enum | 4096 | 1024, 2048, 4096, 8192 | Directional shadow map resolution |
+| shadow_filter | Enum | Soft Medium | Hard, Soft Low/Med/High/Ultra | Shadow filter quality (PCF) |
+| **Tonemap** | | | | |
+| tonemap_mode | Enum | ACES | Linear, Reinhard, Filmic, ACES | Tone mapping algorithm |
+| tonemap_exposure | Float | 1.0 | 0.1–8.0 | Exposure multiplier |
+| tonemap_white | Float | 1.0 | 0.1–16.0 | White reference point |
+| **Glow (Bloom)** | | | | |
+| glow_enabled | Bool | false | — | Enable glow/bloom |
+| glow_intensity | Float | 0.8 | 0.0–4.0 | Overall glow strength |
+| glow_strength | Float | 1.0 | 0.0–2.0 | Per-level glow contribution |
+| glow_bloom | Float | 0.0 | 0.0–1.0 | Screen-wide bloom amount |
+| glow_hdr_threshold | Float | 1.0 | 0.0–4.0 | Brightness threshold for glow |
+| glow_blend_mode | Enum | Additive | Additive, Screen, Softlight, Replace, Mix | Glow compositing mode |
+| **Depth of Field** | | | | |
+| dof_far_enabled | Bool | false | — | Enable far DOF blur |
+| dof_far_distance | Float | 10.0 | 0.1–200.0 | Far focus distance |
+| dof_far_transition | Float | 5.0 | 0.1–50.0 | Far transition width |
+| dof_near_enabled | Bool | false | — | Enable near DOF blur |
+| dof_near_distance | Float | 2.0 | 0.1–50.0 | Near focus distance |
+| dof_near_transition | Float | 1.0 | 0.1–20.0 | Near transition width |
+| dof_bokeh_size | Float | 4.0 | 0.5–10.0 | Blur disc radius |
+| dof_bokeh_shape | Enum | Circle | Box, Hexagon, Circle | Bokeh shape |
+| **SSAO** | | | | |
+| ssao_enabled | Bool | false | — | Enable ambient occlusion |
+| ssao_radius | Float | 1.0 | 0.01–16.0 | Sampling radius |
+| ssao_intensity | Float | 2.0 | 0.0–10.0 | Darkening strength |
+| ssao_power | Float | 1.5 | 0.1–10.0 | Falloff exponent |
+| **SSIL** | | | | |
+| ssil_enabled | Bool | false | — | Enable indirect lighting |
+| ssil_radius | Float | 5.0 | 0.01–16.0 | Sampling radius |
+| ssil_intensity | Float | 1.0 | 0.0–10.0 | Contribution strength |
+| ssil_sharpness | Float | 0.98 | 0.0–1.0 | Edge-aware blur sharpness |
+| ssil_normal_rejection | Float | 1.0 | 0.0–1.0 | Normal rejection factor |
+| **SSR** | | | | |
+| ssr_enabled | Bool | false | — | Enable screen-space reflections |
+| ssr_max_steps | Int | 64 | 1–512 | Ray march steps |
+| ssr_fade_in | Float | 0.15 | 0.0–2.0 | Reflection fade-in distance |
+| ssr_fade_out | Float | 2.0 | 0.0–8.0 | Reflection fade-out distance |
+| ssr_depth_tolerance | Float | 0.2 | 0.01–4.0 | Depth comparison tolerance |
+| **Adjustments** | | | | |
+| adj_enabled | Bool | false | — | Enable color adjustments |
+| adj_brightness | Float | 1.0 | 0.01–4.0 | Brightness multiplier |
+| adj_contrast | Float | 1.0 | 0.01–4.0 | Contrast |
+| adj_saturation | Float | 1.0 | 0.0–4.0 | Color saturation |
+| **Volumetric Fog** | | | | |
+| fog_enabled | Bool | false | — | Enable volumetric fog |
+| fog_density | Float | 0.05 | 0.0–1.0 | Base fog density |
+| fog_albedo | Color | (1, 1, 1) | — | Fog scatter color |
+| fog_emission | Color | (0, 0, 0) | — | Fog self-emission color |
+| fog_emission_energy | Float | 1.0 | 0.0–16.0 | Fog emission intensity |
+| fog_length | Float | 64.0 | 1.0–1024.0 | Volumetric fog distance |
 
 **Inputs:** `comp_in` — accepts multiple COMP connections (multi-input port).
 
-**How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, and LightCOMP nodes and adopts their 3D nodes (MeshInstance3D, Camera3D, Light3D) into the viewport's scene tree. Creates a `WorldEnvironment` with configurable ambient lighting. If no CameraCOMP is connected, a default perspective camera is placed at (0, 2, 5) looking at origin. The viewport's texture becomes the TOP output. Time-dependent — re-populates the scene each frame.
+**How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, LightCOMP, and MergeCOMP nodes and adopts their 3D nodes into the viewport's scene tree. Creates a `WorldEnvironment` with configurable ambient lighting and post-processing via Godot's `Environment` resource. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera (from CameraCOMP or default). Time-dependent — re-populates the scene each frame.
+
+**Performance:** When all post-processing toggles are off and tonemap is at defaults, the post-processing path early-exits with a single boolean check — zero overhead for vanilla 3D renders.
 
 ---
 
