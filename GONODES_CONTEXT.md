@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
-> **Last updated:** 2026-02-28
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 102 operators across 7 families (28 TOP, 14 IMG, 24 CHOP, 14 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node).
+> **Last updated:** 2026-03-03
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 102 operators across 7 families (28 TOP, 14 IMG, 24 CHOP, 14 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP.
 
 ---
 
@@ -288,7 +288,7 @@ Seven intermediate base classes sit between GNNode and the individual operators.
 **Class Hierarchy:**
 ```
 GNNode (type-agnostic base)
-├── GNTopBase (29 TOP operators)
+├── GNTopBase (30 TOP operators)
 ├── GNImgBase (7 IMG operators)
 ├── GNChopBase (23 CHOP operators, incl. DATtoCHOP bridge, RampCHOP)
 ├── GNDatBase (13 DAT operators)
@@ -1164,7 +1164,7 @@ GONODES/
   - `GNGraphEditor.update_previews()` iterates ALL node views each cook frame (skipped when hidden).
   - Extensible: any operator can override `create_preview_control()` for operator-specific rendering.
 - [x] **Family base classes** — 6 intermediate bases between GNNode and operators:
-  - `GNTopBase` (29 TOPs), `GNImgBase` (7 IMGs), `GNChopBase` (23 CHOPs), `GNDatBase` (13 DATs), `GNSopBase` (15 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
+  - `GNTopBase` (30 TOPs), `GNImgBase` (7 IMGs), `GNChopBase` (23 CHOPs), `GNDatBase` (13 DATs), `GNSopBase` (15 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
   - Each sets family, provides cached data helpers, and overrides preview methods.
   - All 102 operators migrated. GNNode is now fully type-agnostic.
 - [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
@@ -1199,6 +1199,7 @@ GONODES/
 - [x] **Shadow system** — per-light and global shadow controls:
   - LightCOMP: shadow_bias, shadow_normal_bias, shadow_blur, shadow_opacity, directional shadow mode (Orthogonal/PSSM2/PSSM4).
   - RenderTOP: shadow atlas size, directional shadow size, shadow filter quality.
+  - RenderTOP: integrated post-processing (tonemap, glow/bloom, DOF near+far with bokeh, SSAO, SSIL, SSR, adjustments, volumetric fog) applied directly to the render viewport's Environment and active camera.
   - GeometryCOMP: cast_shadow mode (Off/On/Double-Sided/Shadows Only).
 - [x] **Bug fixes** — family assignment (`_init()` override without `super()`), expression re-cook (`_pre_cook` detection + `mode_changed` signal), torus Y-axis rotation visibility.
 - [x] **Multiple viewer windows** — floating viewer windows pinned to any TOP node:
@@ -1555,6 +1556,27 @@ GONODES/
   - Selected reference is copied to system clipboard for paste into expression fields
   - Files modified: `gn_cook_engine.gd`, `gn_graph_editor.gd`, `gn_param_row.gd`
 
+### Phase 7.8: Wire Replacement, Palette Sections & Camera Post-Processing ✅
+- [x] **Wire replacement UX** — connecting to an already-occupied input auto-disconnects the old wire and connects the new one. Compound undo action (remove old + add new). `GNNetwork.connect_nodes()` detects existing connections, removes old, emits `connection_removed`, then connects new. `GNGraphEditor._on_connection_request()` snapshots old connection for undo.
+- [x] **Operator palette sections** — sub-sections within family groups in the node palette:
+  - `OperatorEntry.section` field; `register_operator()` accepts optional section parameter.
+  - `get_operator_registry_sectioned()` and `get_section()` query APIs.
+  - `GNNodePalette._populate_tree()` renders section sub-headings (non-selectable, lighter colour).
+- [x] **Extension-level auto-sections** — `[extension]` header in `gn_extension.cfg` supports `section=` key. All operators from that extension inherit the section (per-operator override still possible). Defaults to extension name.
+  - Shadertoy manifest: `section="Shadertoy"` at extension level (removed per-operator overrides).
+  - FFmpeg manifest: `section="FFmpeg"` at extension level.
+- [x] **RenderTOP integrated post-processing** — camera/environment post-processing FX built into RenderTOP (no separate operator needed):
+  - Applied directly to RenderTOP's 3D SubViewport `Environment` and active camera.
+  - **Glow/Bloom:** intensity, strength, bloom, HDR threshold, 5 blend modes.
+  - **Depth of Field:** near + far blur with distance/transition, bokeh size + shape (box/hex/circle).
+  - **Tonemap:** Linear, Reinhard, Filmic, ACES with exposure and white point.
+  - **SSAO:** radius, intensity, power.
+  - **SSIL:** radius, intensity, sharpness, normal rejection.
+  - **SSR:** max steps, fade in/out, depth tolerance.
+  - **Adjustments:** brightness, contrast, saturation.
+  - **Volumetric Fog:** density, albedo, emission, energy, length.
+  - DOF applied to the active camera (CameraCOMP or default) via `_apply_dof_to_active_camera()`.
+
 ### Near-term
 - [x] SOP family (procedural geometry: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch)
 - [x] DAT family (Constant, Text, Select, Merge, Transpose, Sort, Evaluate, Switch, bridges)
@@ -1608,6 +1630,19 @@ GONODES/
   - **OpenCV was considered and rejected:** no production-ready Godot 4 GDExtension exists, and `cv::VideoCapture` just wraps FFmpeg internally anyway — massive dependency for nothing extra.
 - [x] Custom GLSL shader TOP (user-editable shader code) — **Done: CustomShaderTOP**
 - [ ] ComputeShaderTOP (user-editable GPU compute shader — see Section 27)
+- [ ] **CompositorEffectTOP** — custom render-pipeline FX with access to depth/normal/roughness buffers:
+  - Uses Godot 4.3+ `CompositorEffect` API for compute-shader-based spatial effects.
+  - Access to `depth_texture`, `normal_roughness_texture`, `screen_texture` as RD textures.
+  - Enables custom DOF algorithms, god rays, outline from depth edges, custom SSAO, etc.
+  - Attaches to the RenderTOP viewport's `Compositor` resource.
+  - User-editable GLSL compute shader code (similar to ComputeShaderTOP but with render-pipeline integration).
+  - **Depends on:** Godot's `RenderingDevice` API and Forward+ renderer.
+- [ ] **Multi-buffer RenderTOP** — auxiliary render buffer outputs from the 3D viewport:
+  - RenderTOP gains additional TOP outputs: depth, normals, velocity (motion vectors).
+  - Downstream canvas_item shader TOPs can use depth+color as two texture inputs.
+  - Enables hybrid 2D post-processing chains fed by 3D scene data (e.g., DOF TOP = color + depth).
+  - Implementation: second SubViewport pass with `Viewport.DEBUG_DRAW_*` or custom shader pass extracting buffers.
+  - Lower barrier to entry than CompositorEffectTOP — works with existing canvas_item shader infrastructure.
 
 ### Performance & GPU Optimizations (Post-Phase 7)
 - [ ] Multi-threaded cook engine

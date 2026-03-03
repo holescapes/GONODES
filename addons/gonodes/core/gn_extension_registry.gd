@@ -417,7 +417,7 @@ func _register_core_operators() -> void:
 
 	# ── TOPs: 3D Rendering ──────────────────────────────────────────────
 	_reg("RenderTOP",       "TOP", RenderTOP,
-		"Renders a 3D COMP scene into a 2D texture.")
+		"Renders a 3D COMP scene into a 2D texture with integrated post-processing.")
 
 	# ── TOPs: Utility ───────────────────────────────────────────────────
 	_reg("NullTOP",         "TOP", NullTOP,
