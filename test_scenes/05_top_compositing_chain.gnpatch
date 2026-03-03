@@ -1,0 +1,78 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_TEST",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"noise_type": {"value": 0},
+				"scale": {"value": 4.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"noise2": {
+			"type": "NoiseTOP",
+			"position": [100, 350],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"noise_type": {"value": 2},
+				"scale": {"value": 6.0},
+				"monochrome": {"value": true}
+			}
+		},
+		"comp_add": {
+			"type": "CompositeTOP",
+			"position": [450, 100],
+			"parameters": {
+				"operation": {"value": 0},
+				"opacity": {"value": 0.5}
+			}
+		},
+		"hsv1": {
+			"type": "HSVAdjustTOP",
+			"position": [750, 100],
+			"parameters": {
+				"hue_offset": {"value": 0.3},
+				"saturation": {"value": 1.5}
+			}
+		},
+		"edge1": {
+			"type": "EdgeTOP",
+			"position": [450, 350],
+			"parameters": {}
+		},
+		"comp_screen": {
+			"type": "CompositeTOP",
+			"position": [1050, 200],
+			"parameters": {
+				"operation": {"value": 3},
+				"opacity": {"value": 0.8}
+			}
+		},
+		"level1": {
+			"type": "LevelTOP",
+			"position": [1350, 200],
+			"parameters": {
+				"brightness": {"value": 1.2},
+				"contrast": {"value": 1.1}
+			}
+		},
+		"null_final": {
+			"type": "NullTOP",
+			"position": [1650, 200],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "comp_add", "to_port": 0},
+		{"from": "noise2", "from_port": 0, "to": "comp_add", "to_port": 1},
+		{"from": "comp_add", "from_port": 0, "to": "hsv1", "to_port": 0},
+		{"from": "noise2", "from_port": 0, "to": "edge1", "to_port": 0},
+		{"from": "hsv1", "from_port": 0, "to": "comp_screen", "to_port": 0},
+		{"from": "edge1", "from_port": 0, "to": "comp_screen", "to_port": 1},
+		{"from": "comp_screen", "from_port": 0, "to": "level1", "to_port": 0},
+		{"from": "level1", "from_port": 0, "to": "null_final", "to_port": 0}
+	]
+}

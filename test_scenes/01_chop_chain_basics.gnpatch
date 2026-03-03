@@ -1,0 +1,81 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_TEST",
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": [100, 100],
+			"parameters": {
+				"waveform": {"value": 0},
+				"frequency": {"value": 0.5},
+				"amplitude": {"value": 1.0},
+				"offset": {"value": 0.0}
+			}
+		},
+		"const1": {
+			"type": "ConstantCHOP",
+			"position": [100, 300],
+			"parameters": {
+				"name0": {"value": "scale"},
+				"value0": {"value": 2.0}
+			}
+		},
+		"math_mul": {
+			"type": "MathCHOP",
+			"position": [400, 100],
+			"parameters": {
+				"operation": {"value": 2}
+			}
+		},
+		"math_add": {
+			"type": "MathCHOP",
+			"position": [700, 100],
+			"parameters": {
+				"operation": {"value": 0},
+				"operand": {"value": 0.5}
+			}
+		},
+		"null_out": {
+			"type": "NullCHOP",
+			"position": [1000, 100],
+			"parameters": {}
+		},
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 500],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"noise_type": {"value": 0},
+				"monochrome": {"value": true},
+				"scale": {
+					"mode": "EXPRESSION",
+					"expression": "chop(\"null_out\", \"out\") * 5.0 + 3.0",
+					"value": 5.0
+				}
+			}
+		},
+		"text1": {
+			"type": "TextTOP",
+			"position": [100, 800],
+			"parameters": {
+				"text": {
+					"mode": "EXPRESSION",
+					"expression": "pars(\"null_out\", \"out\")",
+					"value": "CHOP → TOP Test"
+				},
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 128}},
+				"font_size": {"value": 48},
+				"font_color": {"value": {"_type": "Color", "r": 1.0, "g": 1.0, "b": 0.0, "a": 1.0}},
+				"bg_color": {"value": {"_type": "Color", "r": 0.1, "g": 0.1, "b": 0.1, "a": 1.0}},
+				"align_h": {"value": 1},
+				"align_v": {"value": 1}
+			}
+		}
+	},
+	"connections": [
+		{"from": "lfo1", "from_port": 0, "to": "math_mul", "to_port": 0},
+		{"from": "const1", "from_port": 0, "to": "math_mul", "to_port": 1},
+		{"from": "math_mul", "from_port": 0, "to": "math_add", "to_port": 0},
+		{"from": "math_add", "from_port": 0, "to": "null_out", "to_port": 0}
+	]
+}

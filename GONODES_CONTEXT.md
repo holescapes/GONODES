@@ -1,6 +1,6 @@
 # GONODES — LLM Context File
 
-> **Last updated:** 2026-02-26
+> **Last updated:** 2026-02-27
 > **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 101 operators across 7 families (28 TOP, 14 IMG, 23 CHOP, 14 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead.
 
 ---
@@ -1531,6 +1531,33 @@ tests/
 **What's tested (core logic, no GPU):** GNParameter, GNCookEngine expression eval, GNNetwork graph model, GNChannelData, GNParamPresetManager.
 
 **What's NOT tested (deferred):** UI widgets, GPU TOPs (need SubViewport), hardware I/O (MIDI, OSC, audio, webcam), file-based preset save/load (needs user:// filesystem).
+
+### Integration Tests (Automated)
+
+Full cook-cycle tests that exercise the entire `cook_frame()` pipeline through real multi-node networks, running headless alongside the unit tests.
+
+```
+tests/integration/
+├── test_chop_chains.gd        # 13 tests — Constant→Math→Null chains, merge, bypass, expressions, dirty propagation, diamond topology
+├── test_script_chop.gd        # 7 tests — ScriptCHOP generator/filter, @param annotations, time var, syntax error recovery, script→math chain
+├── test_network_roundtrip.gd  # 6 tests — Serialization round-trip: empty network, params, connections, expression mode, cook-after-deserialize
+```
+
+**Total automated tests:** 144 (118 unit + 26 integration) — all passing.
+
+### Manual Test Scenes
+
+Pre-built `.gnpatch` networks for visual / interactive testing inside the editor. Located in `test_scenes/` with a `README.md` containing per-scene checklists.
+
+```
+test_scenes/
+├── README.md                          # Pass/fail checklists for every scene
+├── 01_chop_chain_basics.gnpatch       # LFO→Math→Null chain, expression-driven NoiseTOP + TextTOP
+├── 02_script_chop.gnpatch             # Generator + filter ScriptCHOPs with @param annotations
+├── 03_custom_shader_top.gnpatch       # Generator shader, filter shader, multi-input blend shader
+├── 04_expression_animation.gnpatch    # LFO CHOPs → CircleTOP Lissajous via chop() expressions
+├── 05_top_compositing_chain.gnpatch   # Noise→Composite→HSV→Edge→Screen→Level→Null TOP pipeline
+```
 
 ---
 
