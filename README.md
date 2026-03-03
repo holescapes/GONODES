@@ -53,8 +53,8 @@ Any parameter on any node can reference data from other nodes:
 ```
 chop("lfo1", "out") * 10.0           # Drive a value with an LFO
 op("noise1", "scale")                # Read another node's parameter
-sin(time * 2.0) + 0.5                # Math expressions with time
-```
+sin(time * 2.0) + 0.5                # Math expressions with timeramp(\"falloff\", 0.5)                 # Sample a ramp parameter curve at t=0.5
+chop(\"ramp1\", \"falloff\")             # Read a RampCHOP channel as a float```
 
 You can also **bind** parameters directly (zero-overhead link) or use **CHOP export** to push one signal to many parameters at once.
 
@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 Complete — Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowTOP open/close toggle. 3D pipeline live. 82 operators across 6 families. Phases 1–6 complete.**
+**Phase 6 Complete — Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowTOP open/close toggle. 3D pipeline live. 82 operators across 6 families. RAMP parameter type with curve editor. RampCHOP (dynamic 1–16 ramp slots). Canvas annotations (network boxes, sticky notes). 176 tests passing. Phases 1–6 complete.**
 
 ### Completed
 
@@ -91,7 +91,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 | Family | Count | Operators |
 |--------|-------|-----------|
 | **TOP** | 29 | Noise, Composite, Level, Blur, Ramp, Circle, Rectangle, Constant, Text, ImageFileIn, MovieFileIn, ImageSequence, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render |
-| **CHOP** | 21 | LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP |
+| **CHOP** | 22 | LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP, Ramp |
 | **DAT** | 12 | Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn (stub) |
 | **SOP** | 14 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch |
 | **MAT** | 2 | PBR, Shader |
@@ -247,6 +247,7 @@ addons/gonodes/help/
 - [ ] Renderer selection UI (Forward+/Mobile/Compatibility dropdown)
 - [ ] Patch export to standalone apps (desktop/web via Godot export templates)
 - [ ] Node grouping / sub-networks (collapse → dive → breadcrumbs)
+- [ ] Spare Parameters (Houdini-style add-any-param-to-any-node)
 - [ ] Minimap navigation
 - [ ] Node bookmarks (quick-jump 1-9)
 - [ ] Auto-layout (topological + layer assignment)
@@ -317,6 +318,7 @@ git clone https://github.com/your-username/gonodes.git
 GONODES is built directly on Godot's native systems — SubViewports for texture processing, compute shaders for GPU particle work, GraphEdit for the node editor, Resource serialization for patches. No abstraction layers, no engine-agnostic wrappers. This keeps the codebase lean and ensures patches export cleanly to every platform Godot targets.
 
 **Key design principles:**
+- **Demand-driven flat-pass cooking** — achieves the same lazy evaluation as pull-based systems (Houdini, TouchDesigner) without recursive descent. Only dirty + active nodes cook each frame. Inactive subgraphs are skipped entirely via active-chain BFS from sinks. Single linear topo-sorted pass — no deep recursion, predictable timing, correct GPU render ordering.
 - **Consolidate shared infrastructure in family base classes** — common members (`_viewport`, `_material`, `_cached_tex_data`, etc.) and lifecycle helpers live in `GNTopBase`, `GNChopBase`, `GNDatBase`, etc., not duplicated across operators.
 - **Prefer Godot built-in classes** — `SubViewport`, `ShaderMaterial`, `ArrayMesh`, `RefCounted`, `Resource` — over custom abstractions.
 - **Render only when needed** — SubViewports use `UPDATE_DISABLED` + `UPDATE_ONCE` per cook cycle, not `UPDATE_ALWAYS`.
@@ -357,7 +359,7 @@ GONODES/
 │   │   └── gn_logger.gd            # Centralized logging
 │   ├── operators/                   # Built-in operators organized by family
 │   │   ├── top/                     # 26 TOPs: Noise, Level, Composite, Blur, Ramp, Circle, Rectangle, Constant, Text, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render
-│   │   ├── chop/                    # 21 CHOPs: LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP
+│   │   ├── chop/                    # 22 CHOPs: LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP, Ramp
 │   │   ├── dat/                     # 12 DATs: Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn
 │   │   ├── sop/                     # 14 SOPs: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch
 │   │   ├── mat/                     # 2 MATs: PBR, Shader
@@ -383,7 +385,7 @@ GONODES/
 │   ├── gn_editor.gd                 # Editor wiring script
 │   ├── test_phase2.tscn             # Phase 2 test scene (legacy)
 │   └── test_phase2.gd               # Phase 2 test script
-└── tests/                           # Unit tests (future)
+└── tests/                           # Unit & integration tests (176 tests)
 ```
 
 ---

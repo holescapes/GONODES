@@ -24,6 +24,7 @@ enum ValueType {
 	COLOR,
 	ENUM,
 	FILE,  ## Project resource file path (res://…) — shown as a file picker button
+	RAMP,  ## Curve / ramp — stores an Array of keypoints [{pos, value, left_tangent, right_tangent}]
 }
 
 # ─── Identity ──────────────────────────────────────────────────────────────────
@@ -298,6 +299,75 @@ static func create_file(p_name: String, p_default: String,
 	param.fallback_value = p_default
 	param.resolved_value = p_default
 	return param
+
+
+## Factory method to create a RAMP parameter (curve/gradient editor).
+## The ramp value is stored as an Array of keypoint Dictionaries:
+##   [{"pos": 0.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
+##    {"pos": 1.0, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0}]
+## Position range is 0..1, value range is 0..1.
+## [param p_default_keys] defaults to a linear ramp (0→0, 1→1).
+static func create_ramp(p_name: String,
+		p_default_keys: Array = [],
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
+	var param := GNParameter.new()
+	param.param_name = p_name
+	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
+	param.value_type = ValueType.RAMP
+	# Default linear ramp: bottom-left to top-right
+	var keys: Array = p_default_keys if p_default_keys.size() >= 2 else [
+		{"pos": 0.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
+		{"pos": 1.0, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0},
+	]
+	param.default_value = keys.duplicate(true)
+	param.value = keys.duplicate(true)
+	param.fallback_value = keys.duplicate(true)
+	param.resolved_value = keys.duplicate(true)
+	return param
+
+
+## Evaluates a ramp parameter at position [param t] (0.0–1.0).
+## Uses cubic Hermite interpolation between adjacent keypoints.
+## Returns the interpolated value (0.0–1.0).
+static func sample_ramp(keys: Array, t: float) -> float:
+	if keys.is_empty():
+		return 0.0
+	# Clamp t to [0, 1]
+	t = clampf(t, 0.0, 1.0)
+	# Single key — return its value
+	if keys.size() == 1:
+		return float(keys[0].get("value", 0.0))
+	# Find the segment: keys must be sorted by pos
+	var last_idx := keys.size() - 1
+	# Before first key
+	if t <= float(keys[0].get("pos", 0.0)):
+		return float(keys[0].get("value", 0.0))
+	# After last key
+	if t >= float(keys[last_idx].get("pos", 1.0)):
+		return float(keys[last_idx].get("value", 1.0))
+	# Find segment
+	for i in range(last_idx):
+		var p0: float = float(keys[i].get("pos", 0.0))
+		var p1: float = float(keys[i + 1].get("pos", 1.0))
+		if t >= p0 and t <= p1:
+			var span := p1 - p0
+			if span < 1e-8:
+				return float(keys[i].get("value", 0.0))
+			var local_t := (t - p0) / span
+			var v0: float = float(keys[i].get("value", 0.0))
+			var v1: float = float(keys[i + 1].get("value", 0.0))
+			var m0: float = float(keys[i].get("right_tangent", 0.0)) * span
+			var m1: float = float(keys[i + 1].get("left_tangent", 0.0)) * span
+			# Cubic Hermite
+			var t2 := local_t * local_t
+			var t3 := t2 * local_t
+			return (2.0 * t3 - 3.0 * t2 + 1.0) * v0 \
+				+ (t3 - 2.0 * t2 + local_t) * m0 \
+				+ (-2.0 * t3 + 3.0 * t2) * v1 \
+				+ (t3 - t2) * m1
+	return float(keys[last_idx].get("value", 1.0))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -646,6 +716,9 @@ static func _variant_to_json(val: Variant) -> Variant:
 		return {"_type": "Vector4", "x": val.x, "y": val.y, "z": val.z, "w": val.w}
 	if val is Color:
 		return {"_type": "Color", "r": val.r, "g": val.g, "b": val.b, "a": val.a}
+	# Ramp keypoints: Array of Dicts — already JSON-safe
+	if val is Array:
+		return {"_type": "Ramp", "keys": val}
 	# float, int, bool, String → JSON-native
 	return val
 
@@ -664,6 +737,12 @@ static func _json_to_variant(json_val: Variant, target_type: ValueType) -> Varia
 				return Vector4(json_val["x"], json_val["y"], json_val["z"], json_val["w"])
 			"Color":
 				return Color(json_val["r"], json_val["g"], json_val["b"], json_val["a"])
+	# Ramp data — stored as {"_type": "Ramp", "keys": [...]}
+	if json_val is Dictionary and json_val.get("_type") == "Ramp":
+		return json_val.get("keys", [])
+	# For RAMP target type, accept raw arrays too (forward-compat)
+	if target_type == ValueType.RAMP and json_val is Array:
+		return json_val
 	# For numeric types, ensure correct cast
 	match target_type:
 		ValueType.FLOAT:

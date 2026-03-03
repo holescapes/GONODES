@@ -367,6 +367,7 @@ func _suggest_general() -> void:
 		["noise2(", "2D value noise: noise2(x, y)"],
 		["trigger(\"", "Trigger on threshold cross: trigger(key, value, threshold)"],
 		["fn(\"", "Call custom function: fn(name, arg1, arg2, ...)"],
+		["ramp(\"", "Sample ramp curve: ramp(param_name, t) or ramp(node, param, t)"],
 	]
 	for fn_entry in builtin_funcs:
 		_code_edit.add_code_completion_option(
@@ -440,6 +441,8 @@ const PRESETS := {
 		["Read parameter", "op(\"node_id\", \"param\")"],
 		["TOP resolution X", "top(\"node_id\", \"resolution\").x"],
 		["TOP aspect ratio", "top(\"node_id\", \"aspect\")"],
+		["Sample ramp (self)", "ramp(\"ramp_param\", time)"],
+		["Sample ramp (cross-node)", "ramp(\"node_id\", \"ramp_param\", time)"],
 	],
 	"Math Patterns": [
 		["Sine + offset", "sin(time * TAU * 1.0) * 0.5 + 0.5"],

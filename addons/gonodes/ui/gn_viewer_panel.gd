@@ -623,8 +623,8 @@ func _ensure_mat_viewport() -> void:
 	_mat_camera = Camera3D.new()
 	_mat_camera.name = "Camera"
 	_mat_camera.position = Vector3(0, 0, 2.5)
-	_mat_camera.look_at(Vector3.ZERO)
 	_mat_viewport.add_child(_mat_camera)
+	_mat_camera.look_at(Vector3.ZERO)
 
 	# Light
 	_mat_light = DirectionalLight3D.new()

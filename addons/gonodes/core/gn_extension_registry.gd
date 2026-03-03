@@ -412,6 +412,8 @@ func _register_core_operators() -> void:
 		"Multi-sample pattern (ramp, sine, step, random, constant).")
 	_reg("TimerCHOP",       "CHOP", TimerCHOP,
 		"Countdown/count-up timer with loop and speed controls.")
+	_reg("RampCHOP",        "CHOP", RampCHOP,
+		"Dynamic ramp curves → CHOP channels (1–16 user-editable ramps).")
 
 	# ── CHOPs: Filters (1 input) ────────────────────────────────────────
 	_reg("MathCHOP",        "CHOP", MathCHOP,

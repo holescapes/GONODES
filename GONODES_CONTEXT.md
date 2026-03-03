@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
-> **Last updated:** 2026-02-27
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 101 operators across 7 families (28 TOP, 14 IMG, 23 CHOP, 14 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead.
+> **Last updated:** 2026-02-28
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 102 operators across 7 families (28 TOP, 14 IMG, 24 CHOP, 14 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node).
 
 ---
 
@@ -290,7 +290,7 @@ Seven intermediate base classes sit between GNNode and the individual operators.
 GNNode (type-agnostic base)
 ├── GNTopBase (29 TOP operators)
 ├── GNImgBase (7 IMG operators)
-├── GNChopBase (22 CHOP operators, incl. DATtoCHOP bridge)
+├── GNChopBase (23 CHOP operators, incl. DATtoCHOP bridge, RampCHOP)
 ├── GNDatBase (13 DAT operators)
 ├── GNSopBase (15 SOP operators)
 ├── GNCompBase (4 COMP operators)
@@ -394,7 +394,23 @@ func get_downstream_nodes(id: String) -> Array[GNNode]
 func has_cycle() -> bool
 func generate_unique_id(base_type: String) -> String
 func prune_stale_connections(node_id: String) -> void
+
+# Canvas annotations (network boxes & sticky notes)
+var annotations: Array[Dictionary] = []
+signal annotations_changed()
+
+func add_annotation(ann_type: String, position: Vector2,
+    size: Vector2, text: String, color: Color) -> String
+func get_annotation(ann_id: String) -> Variant
+func update_annotation(ann_id: String, changes: Dictionary) -> void
+func remove_annotation(ann_id: String) -> bool
 ```
+
+**Annotations** provide canvas-level organization (like TouchDesigner's network boxes and sticky notes). Each annotation is a Dictionary with `{id, type, position, size, text, color}`. Serialized in `.gnpatch` files as `annotations` array. Counter-based unique IDs (`ann_1`, `ann_2`, …) restored on load to avoid collisions.
+
+**`GNNetworkBox`** (extends Control) — colored rectangle drawn behind graph nodes (`z_index = -10`) for visual grouping. Title bar with inline edit (double-click), drag-move, bottom-right resize handle, right-click context menu (Rename, Change Color, Delete). Signals: `box_changed`, `text_changed`, `delete_requested`, `color_changed`.
+
+**`GNStickyNote`** (extends Control) — editable text note on the canvas (`z_index = -9`). Multi-line text display, inline TextEdit (double-click), drag-move, resize, right-click context menu (Edit Text, Change Color, Delete). Default yellow color. Signals: `note_changed`, `text_changed`, `delete_requested`, `color_changed`.
 
 **`rename_node()` updates:** nodes dictionary key, `GNNode.id`, `GNNode.name`, all `GNConnection.from_node`/`to_node` references, expression strings across all parameters in the network (simple `"old_id"` -> `"new_id"` replacement). Validates: alphanumeric/underscore only, no duplicates, no empty. Emits `node_renamed` then `graph_changed`.
 
@@ -461,6 +477,31 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 #   node.parameter_changed  → _active_set_dirty = true (per-node)
 #   set_active_sinks()      → _active_set_dirty = true (from editor)
 ```
+
+### Cook Architecture: Demand-Driven Flat Pass
+
+GONODES uses a **demand-driven flat-pass** cook model — a hybrid that achieves the lazy semantics of pull-based systems (Houdini, TouchDesigner) while executing as a single linear sweep instead of recursive descent.
+
+**Comparison with other systems:**
+
+| Feature | Pure Push (vvvv) | Pure Pull (Houdini/TD) | **GONODES** |
+|---------|-----------------|------------------------|-------------|
+| Cook trigger | Any input change | Sink demands output | Frame tick (like TD) |
+| What gets cooked | Everything downstream | Only upstream of requester | **Only dirty + active nodes** |
+| Inactive subgraphs | Cooked anyway | Never touched | **Skipped** (active chain) |
+| Clean nodes | Re-cooked | Skipped | **Skipped** (dirty flag) |
+| Time-dependent | All re-cook | Only if demanded | Only if `is_time_dependent` |
+| Execution model | Event cascade | Recursive descent | **Linear topo-sorted pass** |
+
+**Why not pure pull?** In a pull system, each node's `_cook()` recursively calls `input.cook()` on demand — the call stack depth mirrors the dependency chain length. GONODES instead does a single linear pass over the topo-sorted dirty+active list. Advantages:
+
+- **No deep recursion** — pull systems can stack-overflow on deep chains (hundreds of nodes). Linear pass has O(1) stack depth.
+- **Predictable timing** — one pass, no re-entrant cook calls, easier to profile.
+- **Batch-friendly** — all SubViewport renders happen in topo order within the same frame (`_reorder_children_to_topo` ensures GPU render order matches dependency order).
+
+**Why not pure push?** Push systems (vvvv, early dataflow engines) propagate immediately on any input change, cooking every downstream node whether its output is consumed or not. GONODES avoids this via the active chain — only nodes feeding a live sink (viewer, WindowTOP, `is_sink` operator) are cooked. Disconnected subgraphs are completely inert.
+
+**The result:** GONODES achieves the same work-avoidance as a pull system (skip inactive, skip clean, skip non-time-dependent) but with the execution simplicity and GPU-friendliness of a flat forward pass.
 
 ### Cook Semantics
 - **Time-dependent nodes** (LFO, Noise with `time` param) are always dirty.
@@ -692,21 +733,23 @@ Family-aware viewer panel that displays any node family's output. Only one visua
 |--------|---------------|-------------|
 | **TOP** | TextureRect + pan/zoom | Full-resolution display. Left-click or middle-click drag to pan, scroll wheel to zoom. Shift+F to fit, Home for 1:1. |
 | **IMG** | TextureRect + pan/zoom | Same as TOP — uploads `Image` → `ImageTexture` on-the-fly |
-| **CHOP** | GNWaveformView (`_draw()`) | GPU-accelerated polylines, auto-scaling, multi-channel with legends |
+| **CHOP** | GNWaveformView (`_draw()`) | GPU-accelerated polylines, fixed-scale grid, zoom/pan, multi-channel with legends |
 | **DAT** | Tree (spreadsheet) | Column headers, scrollable rows, selection highlight |
-| **SOP** | SubViewport + Camera3D (lazy) | Orbit camera (middle-click), zoom (scroll), dark environment |
-| **MAT** | SubViewport + preview sphere (lazy) | Material applied to sphere mesh, 3D lit |
-| **COMP** | Info label | Shows component type name |
+| **SOP** | SubViewport + Camera3D | Orbit camera (left/middle-click drag), zoom (scroll), XYZ axis gizmo, dark environment |
+| **MAT** | SubViewport + preview sphere | Material applied to sphere mesh, 3D lit, orbit controls |
+| **COMP** | Info label | Shows component type — COMPs have no visual output (navigate into them instead) |
 
 **Key design decisions:**
 - SubViewports only for SOP/MAT (3D rendering). TOP/IMG/CHOP/DAT use lighter-weight approaches.
-- 3D SubViewports are **lazily created** — no SubViewport allocated until a SOP/MAT is actually viewed.
+- **Docked viewer** (`eager_3d = true`): 3D SubViewports pre-created via `call_deferred("_warm_up_3d")` after `_ready()` — no hitch on first SOP/MAT click.
+- **Floating viewers** (`eager_3d = false`, default): 3D SubViewports lazily created on first view. Small one-time hitch per window, acceptable for secondary viewers.
 - SubViewport sizes snapped to 64px boundaries to avoid resize churn during panel drag.
-- Pan/zoom state resets when switching to a different node.
+- Pan/zoom/orbit state resets when switching to a different node.
+- **XYZ axis gizmo** in SOP viewer: `ImmediateMesh` lines at origin — X=red, Y=green, Z=blue (unshaded `StandardMaterial3D`, always visible).
 
 **Cook-frame update strategy:**
 - `update_from_node()` is called every cook frame by the editor.
-- **Fast-path optimisation:** `_show_texture()` compares the incoming `Texture2D` pointer against the currently displayed one. If unchanged, it returns immediately (one pointer comparison, ~nanoseconds) without hiding/re-showing Controls or re-laying out the display. This preserves in-progress pan/zoom drags.
+- **Fast-path optimisation:** `_show_texture()`, `_show_3d_mesh()`, `_show_waveform()`, and `_show_material()` all compare incoming state against the current display. If unchanged, they return immediately without hiding/re-showing Controls or re-laying out. This preserves in-progress pan/zoom/orbit drags across cook frames.
 - When the texture *does* change (e.g., the TOP re-cooks with new content), a full layout + `_fit_to_panel()` is triggered.
 - **Future optimisation:** replace per-frame polling with an event-driven model — the cook engine would emit `node_output_changed(node_id)` only for nodes that actually re-cooked, and the viewer would subscribe. Eliminates the per-frame function call entirely, but current cost is negligible.
 
@@ -745,7 +788,7 @@ Every node has an eye icon (👁) in its title bar (next to the ? help button).
 - All pin highlights reset on New / Load / Dive-into-subnet via `update_viewer_pin_highlights("")`
 
 ### GNViewerWindow (Floating)
-`GNViewerWindow` now embeds a full `GNViewerPanel` — same family-aware display as docked viewer.
+`GNViewerWindow` now embeds a full `GNViewerPanel` (`eager_3d = false`) — same family-aware display as docked viewer, with lazy 3D SubViewport creation.
 - Right-click → "Open Viewer" opens for any family (not just TOPs)
 - Each window pinned to a node ID, updated each cook frame via `update_from_node()`
 
@@ -762,6 +805,7 @@ Every node has an eye icon (👁) in its title bar (next to the ? help button).
   - Pending connection and ghost wire state stored in `_pending_connection` / `_ghost_wire` dicts, cleared on palette close
 - **Right-click context menu** (`PopupMenu`) with contextual options:
   - Add Node…, Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo
+  - Add Network Box, Add Sticky Note — canvas annotation tools
   - Copy Node Path → `op("name")`, Copy Output Ref → family-appropriate reference (chop/top/op)
   - Items grayed out when not applicable (e.g., no selection → copy/cut/delete disabled)
   - Shortcut hints displayed in menu items
@@ -809,6 +853,7 @@ Every node has an eye icon (👁) in its title bar (next to the ? help button).
   - enum → OptionButton
   - bool → CheckBox
   - String → LineEdit
+  - RAMP → GNRampEditor (custom `_draw()` curve editor with add/remove/drag keypoints, tangent handles, auto-smooth toggle)
 - Expression toggle: switch from value to expression mode
 - **Per-component expressions** (TD-style): multi-dimensional types (Vector2, Vector2i, Vector3, Vector4, Color) have independent C/E toggles per component (X/Y/Z/W or R/G/B/A). Each component can independently be a constant or an expression. Managed by `GNParameter.component_modes[]`, `component_expressions[]`, serialized in `to_dict()`/`from_dict()`, evaluated per-component in `GNCookEngine._evaluate_component_expressions()`.
 
@@ -860,8 +905,9 @@ GONODES/
 │       │   │   ├── level_top.gd
 │       │   │   └── render_top.gd        # RenderTOP — 3D SubViewport bridge (COMP→TOP)
 │       │   ├── chop/
-│       │   │   ├── lfo_chop.gd          # + 19 more CHOPs (wave, pattern, filter, etc.)
+│       │   │   ├── lfo_chop.gd          # + 20 more CHOPs (wave, pattern, filter, ramp, etc.)
 │       │   │   ├── math_chop.gd
+│       │   │   ├── ramp_chop.gd          # Dynamic ramp curves → CHOP channels (1–16 slots)
 │       │   │   └── noise_chop.gd
 │       │   ├── dat/
 │       │   │   ├── constant_dat.gd      # 4×4 editable table
@@ -911,6 +957,9 @@ GONODES/
 │       │   ├── gn_viewer.tscn
 │       │   ├── gn_node_palette.gd
 │       │   ├── gn_node_palette.tscn
+│       │   ├── gn_ramp_editor.gd    # GNRampEditor — custom _draw() curve editor for RAMP parameters
+│       │   ├── gn_network_box.gd    # GNNetworkBox — canvas annotation: colored grouping rectangle
+│       │   ├── gn_sticky_note.gd    # GNStickyNote — canvas annotation: editable text note
 │       │   └── gn_main_editor.tscn # Main layout scene
 │       ├── shaders/
 │       │   ├── noise_simplex.gdshader
@@ -1097,9 +1146,9 @@ GONODES/
   - `GNGraphEditor.update_previews()` iterates ALL node views each cook frame (skipped when hidden).
   - Extensible: any operator can override `create_preview_control()` for operator-specific rendering.
 - [x] **Family base classes** — 6 intermediate bases between GNNode and operators:
-  - `GNTopBase` (29 TOPs), `GNImgBase` (7 IMGs), `GNChopBase` (22 CHOPs), `GNDatBase` (13 DATs), `GNSopBase` (15 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
+  - `GNTopBase` (29 TOPs), `GNImgBase` (7 IMGs), `GNChopBase` (23 CHOPs), `GNDatBase` (13 DATs), `GNSopBase` (15 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
   - Each sets family, provides cached data helpers, and overrides preview methods.
-  - All 101 operators migrated. GNNode is now fully type-agnostic.
+  - All 102 operators migrated. GNNode is now fully type-agnostic.
 - [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
   - `GNGraphEditor.previews_visible` flag controls whether `update_previews()` processes updates.
   - `GNGraphEditor.set_previews_visible(enabled)` shows/hides all preview controls on existing views.
@@ -1495,6 +1544,20 @@ GONODES/
 - [x] COMP family (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP + RenderTOP bridge)
 - [x] Keyboard shortcuts and workflow polish (Alt+A palette, context menu shortcuts, per-node preview toggle)
 
+### Phase 7.7: Ramp Parameters & Canvas Annotations ✅
+- [x] **RAMP parameter type** — new `ValueType.RAMP` (index 12) in GNParameter. Data: Array of keypoint dicts `[{pos, value, left_tangent, right_tangent}]`. `create_ramp()` factory with default linear ramp (0→0, 1→1). `sample_ramp()` static method with cubic Hermite interpolation.
+- [x] **GNRampEditor widget** (`gn_ramp_editor.gd`, ~290 lines) — custom `_draw()` curve editor. Grid background, curve rendering, filled area, draggable keypoints, tangent handles, add/remove points, Ctrl+click smooth toggle.
+- [x] **RAMP in inspector** — `_create_ramp_control()` in GNParamRow, wired into dispatch and `_update_value_display()`.
+- [x] **RAMP serialization** — `_variant_to_json()` wraps as `{"_type": "Ramp", "keys": [...]}`, `_json_to_variant()` unwraps (with raw array fallback). Full `to_dict()`/`from_dict()` round-trip.
+- [x] **`ramp()` expression function** on CookEngine — `ramp("param", t)` (self-ref) or `ramp("node", "param", t)` (cross-node). Delegates to `GNParameter.sample_ramp()`.
+- [x] **Expression editor** — `ramp()` added to autocomplete, two snippet presets (self + cross-node).
+- [x] **Network annotations** — `GNNetwork.annotations` Array[Dictionary] with CRUD methods (add/get/update/remove), `annotations_changed` signal. Counter-based unique IDs.
+- [x] **GNNetworkBox** (`gn_network_box.gd`, ~200 lines) — colored grouping rectangle, z_index=-10, title edit, drag/resize, context menu.
+- [x] **GNStickyNote** (`gn_sticky_note.gd`, ~195 lines) — editable text note, z_index=-9, drag/resize, context menu, default yellow.
+- [x] **Annotation integration** — context menu items in GNGraphEditor, view lifecycle management, serialization in `.gnpatch` files.
+- [x] **23 new tests** in `test_ramp_and_annotations.gd` — ramp factory, sampling, serialization, annotation CRUD, round-trip. All 167 tests passing.
+- [x] **RampCHOP** (`ramp_chop.gd`, ~120 lines) — dynamic ramp curve → CHOP channel operator. `count` param (1–16) dynamically creates/removes `nameN`/`rampN` parameter pairs at cook time, triggering `parameters_changed` for live inspector rebuild. `samples` param (1–4096) controls curve evaluation resolution (1 = scalar for `chop()` reads). `from_dict()` override restores dynamic slot count before base-class param restore. 9 new tests in `test_ramp_chop.gd`. All 176 tests passing.
+
 ### Medium-term
 - [x] File output operators (FileSaveIMG, FileSaveTOP, FileSaveDAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP + TOPtoIMG bridge)
 - [ ] POP family (GPU point/particle operators — see Section 18)
@@ -1549,6 +1612,13 @@ GONODES/
   - Could share infrastructure with ComputeShaderTOP (user-editable compute).
 
 ### Long-term
+- [ ] **Spare Parameters** — Houdini-style "add any parameter type to any node" system:
+  - Right-click → "Add Spare Parameter" dialog with type picker (FLOAT, INT, STRING, RAMP, COLOR, etc.)
+  - Dynamic parameter storage separate from `_init_parameters()` (spare vs. native params)
+  - Inspector UI renders spare params alongside native ones (collapsible "Spare" section)
+  - Serialization/deserialization in `.gnpatch` format (spare params saved per-node)
+  - Undo/redo support for add/remove spare params
+  - Enables user-defined ramps, colors, toggles on any node without operator code changes
 - [ ] NDI video streaming
 - [ ] FxPlug / FFGL plugin export (for VDMX, Resolume)
 - [ ] Generic ScriptNode (family-less, multi-type output via `# @output` annotations)
@@ -1588,6 +1658,8 @@ tests/
 ├── test_network.gd         # GNNetwork: add/remove nodes, connect/disconnect, topo sort, cycle detection, dirty propagation, rename, serialization structure
 ├── test_channel_data.gd    # GNChannelData: single/multi-sample channels, index bounds, invalidate, duplicate_data deep copy
 ├── test_preset_manager.gd  # GNParamPresetManager: clipboard copy/paste, type mismatch rejection, reset to defaults
+├── test_ramp_and_annotations.gd  # RAMP parameter: factory, sampling, serialization round-trip. Annotations: CRUD, serialization round-trip
+├── test_ramp_chop.gd        # RampCHOP: default init, single/multi-sample output, dynamic count, custom curves, serialization round-trip, chop() expression integration
 └── README.md
 ```
 
@@ -1598,7 +1670,7 @@ tests/
 - Assertions: non-throwing — failures are recorded, allowing multiple assertions per test
 - Runner adds test instances to the scene tree root so `add_child()` works (needed for GNCookEngine, GNNetwork tests)
 
-**What's tested (core logic, no GPU):** GNParameter, GNCookEngine expression eval, GNNetwork graph model, GNChannelData, GNParamPresetManager.
+**What's tested (core logic, no GPU):** GNParameter (incl. RAMP type), GNCookEngine expression eval (incl. ramp()), GNNetwork graph model (incl. annotations), GNChannelData, GNParamPresetManager, RampCHOP (dynamic slots, serialization, cook engine integration).
 
 **What's NOT tested (deferred):** UI widgets, GPU TOPs (need SubViewport), hardware I/O (MIDI, OSC, audio, webcam), file-based preset save/load (needs user:// filesystem).
 
@@ -1613,7 +1685,7 @@ tests/integration/
 ├── test_network_roundtrip.gd  # 6 tests — Serialization round-trip: empty network, params, connections, expression mode, cook-after-deserialize
 ```
 
-**Total automated tests:** 144 (118 unit + 26 integration) — all passing.
+**Total automated tests:** 176 (141 unit + 9 RampCHOP + 26 integration) — all passing.
 
 ### Manual Test Scenes
 
@@ -2031,6 +2103,18 @@ pari("noise1", "seed")            # Cross-node, guaranteed int
 pars("noise1", "file")            # Cross-node, guaranteed string
 ```
 **Features:** Self-reference via single arg, cross-node via two args, typed variants (parf/pari/pars), circular dependency guard, demand-driven evaluation.
+
+#### `ramp(param, t)` — Ramp Sampling ✅
+```gdscript
+ramp("falloff", 0.5)               # Sample own 'falloff' RAMP param at t=0.5
+ramp("falloff", chop("lfo1","out")) # Animate ramp lookup with a CHOP
+ramp("noise1", "gradient", 0.75)    # Cross-node: sample noise1's 'gradient' RAMP at t=0.75
+```
+**Features:** Self-reference (2 args) or cross-node (3 args). Cubic Hermite interpolation between keypoints. Clamps `t` to 0–1. Returns float 0–1. Implementation: `GNParameter.sample_ramp()` static method.
+
+**Ramp data structure:** Array of keypoint dictionaries `[{"pos": float, "value": float, "left_tangent": float, "right_tangent": float}]`. Sorted by `pos`. JSON-native serialization (no Godot Curve resource).
+
+**GNRampEditor widget:** Custom `_draw()` curve editor for RAMP parameters in the inspector. Grid background (0.25 increments), draggable keypoints with tangent handles, left-click to add point, right-click to remove, Ctrl+click to toggle smooth/linear tangents.
 
 #### `chop(name)` — CHOP Proxy (MVP)
 ```gdscript
@@ -2997,9 +3081,12 @@ The parameter inspector is a right-side panel that shows all parameters for the 
 
 | File | Class | Purpose |
 |------|-------|---------|
-| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard. ↗ expand buttons open multi-line editor. Code params get "Edit ↗" button opening GNCodeEditor. Profiling tooltip. |
+| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker, RAMP: GNRampEditor curve editor). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard. ↗ expand buttons open multi-line editor. Code params get "Edit ↗" button opening GNCodeEditor. Profiling tooltip. |
 | `addons/gonodes/ui/gn_base_code_editor.gd` | `GNBaseCodeEditor` | Abstract base class (extends Window) for modal code-editing windows. Provides shared layout: MarginContainer → VBox → info label → toolbar hook → CodeEdit (line numbers, auto-indent, brace completion, word wrap) → status label → Cancel/OK buttons. Key bindings (Ctrl+Enter, Escape). Virtual hooks: `_build_toolbar()`, `_setup_code_edit()`, `_build_bottom_bar()`, `_on_ok()`. Helper methods: `_focus_end()`, `_set_status()`. |
 | `addons/gonodes/ui/gn_expression_editor.gd` | `GNExpressionEditor` | Extends GNBaseCodeEditor. Expression editing with code completion (node IDs, channels, params, custom funcs), live validation, Snippets ▾ dropdown (30+ built-in + user snippets persisted to disk), reference cheatsheet. |
+| `addons/gonodes/ui/gn_ramp_editor.gd` | `GNRampEditor` | Custom `_draw()` curve editor for RAMP parameters. Grid background (0.25 increments), cubic Hermite curve rendering, draggable keypoints with tangent handles, left-click to add point, right-click to remove (min 2), Ctrl+click to toggle smooth/linear tangents. Signal: `ramp_changed(keys)`. |
+| `addons/gonodes/ui/gn_network_box.gd` | `GNNetworkBox` | Canvas annotation: colored rectangle behind graph nodes (z_index=-10) for visual grouping. Title bar with inline edit (double-click), drag-move, bottom-right resize, right-click context menu. Signals: `box_changed`, `text_changed`, `delete_requested`, `color_changed`. |
+| `addons/gonodes/ui/gn_sticky_note.gd` | `GNStickyNote` | Canvas annotation: editable text note (z_index=-9). Multi-line TextEdit (double-click), drag-move, resize, right-click context menu. Default yellow. Signals: `note_changed`, `text_changed`, `delete_requested`, `color_changed`. |
 | `addons/gonodes/ui/gn_code_editor.gd` | `GNCodeEditor` | Extends GNBaseCodeEditor. Script operator / CustomShaderTOP code editing with GDScript or GLSL syntax highlighting (mode-adaptive), preset load/save toolbar (via GNScriptHelper), save-preset dialog, reference cheatsheet. |
 | `addons/gonodes/ui/gn_param_inspector.gd` | `GNParamInspector` | PanelContainer with family color bar, header (node ID, type, cook time), scrollable GNParamRow list, placeholder label when nothing selected |
 

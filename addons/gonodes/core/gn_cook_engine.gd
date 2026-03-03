@@ -1036,6 +1036,46 @@ func fn(func_name: String, a = null, b = null, c = null,
 	return GNExpressionFunctions.call_func(func_name, args)
 
 
+## Evaluates a ramp parameter at position t (0.0–1.0).
+## Usage in expressions:
+##   ramp("falloff", 0.5)                   → samples own node's "falloff" ramp at 0.5
+##   ramp("noise1", "gradient", 0.5)        → samples cross-node "noise1"'s "gradient" ramp
+## Returns the interpolated float value from the ramp curve.
+func ramp(name_or_node: String, param_or_t = null, t_val = null) -> float:
+	var target_node: GNNode = null
+	var target_param_name: String = ""
+	var sample_t: float = 0.0
+
+	if t_val != null:
+		# Three args: ramp("node_id", "param_name", t)
+		target_node = resolve_node(name_or_node)
+		target_param_name = str(param_or_t)
+		sample_t = float(t_val)
+	else:
+		# Two args: ramp("param_name", t) — self reference
+		target_node = _current_eval_node
+		target_param_name = name_or_node
+		sample_t = float(param_or_t) if param_or_t != null else 0.0
+
+	if target_node == null:
+		GNLogger.warn("CookEngine", "ramp() — node not found: '%s'" % name_or_node)
+		return 0.0
+
+	var p: GNParameter = target_node.parameters.get(target_param_name, null)
+	if p == null:
+		GNLogger.warn("CookEngine", "ramp() — param '%s' not found on '%s'" % [
+			target_param_name, target_node.id])
+		return 0.0
+
+	var keys: Variant = p.value if p.mode == GNParameter.Mode.CONSTANT else p.resolved_value
+	if not keys is Array:
+		GNLogger.warn("CookEngine", "ramp() — param '%s' on '%s' is not a RAMP type" % [
+			target_param_name, target_node.id])
+		return 0.0
+
+	return GNParameter.sample_ramp(keys as Array, sample_t)
+
+
 # ─── Noise Helpers (internal) ────────────────────────────────────────────────
 
 func _hash1(n: float) -> float:

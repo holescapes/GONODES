@@ -152,6 +152,35 @@ par("base_freq") * 2.0  # e.g., in 'overtone_freq' param
 > references param A, the engine detects the cycle and returns B's fallback
 > value with a warning. No infinite loops.
 
+### `ramp(param_name, t)` or `ramp(node_id, param_name, t)`
+
+Samples a RAMP parameter's curve at position `t` (0.0–1.0).
+
+| Argument     | Type   | Required | Description                                    |
+|--------------|--------|----------|------------------------------------------------|
+| `param_name` | String | yes      | Name of a RAMP-type parameter                  |
+| `node_id`    | String | no       | Node ID for cross-node. Omit for self-reference.|
+| `t`          | float  | yes      | Evaluation position along the curve (0.0–1.0)  |
+
+```gdscript
+# Sample own node's ramp at t=0.5
+ramp("falloff", 0.5)
+
+# Sample another node's ramp
+ramp("noise1", "gradient", time % 1.0)
+
+# Use ramp as a remapping curve
+ramp("ease", chop("lfo1", "out") * 0.5 + 0.5)
+```
+
+> **Tip:** For multiple user-editable ramps, use a **RampCHOP** instead of
+> adding ramp params to operators. The RampCHOP supports 1–16 dynamic ramp
+> slots and outputs them as CHOP channels, readable via `chop()`:
+> ```gdscript
+> chop("ramp1", "falloff")      # scalar read (samples=1)
+> chop("ramp1", "falloff", 42)  # specific sample index (samples>1)
+> ```
+
 ### Copy Reference Workflow
 
 Instead of typing references manually, you can copy them from the UI:

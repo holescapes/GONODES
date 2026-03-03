@@ -174,6 +174,33 @@ All runtime settings are handled automatically:
   Each WindowTOP has its own `vsync` and frame-rate parameters.
 
 
+## Cook Model
+
+GONODES uses a **demand-driven flat-pass** cook architecture — a hybrid of
+push and pull that avoids unnecessary work while keeping execution simple.
+
+Each frame, the cook engine:
+
+1. Marks time-dependent nodes dirty
+2. Propagates dirty flags downstream in one pass
+3. Computes the **active chain** — only nodes feeding a live sink (viewer,
+   WindowTOP, `is_sink` operator) via BFS upstream from sinks
+4. Cooks dirty + active nodes in topological order (single linear pass)
+5. Skips everything else — inactive subgraphs and clean nodes are untouched
+
+This achieves the same lazy evaluation as pull-based systems (Houdini,
+TouchDesigner) without recursive descent — no deep call stacks, predictable
+timing, and correct GPU render ordering in a single frame.
+
+| Scenario | Cooked? |
+|----------|--------|
+| Node feeding a viewer | Yes (if dirty) |
+| Disconnected subgraph | No (not in active chain) |
+| Clean node (no inputs changed) | No (dirty = false) |
+| Non-time-dependent, no param change | No (not marked dirty) |
+| Bypassed node | Pass-through only (no `_cook()`) |
+
+
 ## Settings Persistence
 
 Editor state is saved to `user://gonodes_settings.cfg` via

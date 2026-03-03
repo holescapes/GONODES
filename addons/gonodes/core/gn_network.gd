@@ -12,6 +12,16 @@ var nodes: Dictionary = {}
 ## All wire connections between node ports.
 var connections: Array[GNConnection] = []
 
+## Canvas annotations — network boxes and sticky notes for organization.
+## Each entry is a Dictionary with keys:
+##   "id": String (unique), "type": "box"|"note",
+##   "position": Vector2, "size": Vector2,
+##   "text": String, "color": Color
+var annotations: Array[Dictionary] = []
+
+## Counter for generating unique annotation IDs.
+var _annotation_counter: int = 0
+
 ## Cached topological order — invalidated when graph structure changes.
 var _topo_cache: Array[GNNode] = []
 var _topo_dirty: bool = true
@@ -506,6 +516,63 @@ func propagate_dirty(from_node_id: String) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Annotation Management (Network Boxes & Sticky Notes)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Signal emitted when an annotation is added, removed, or changed.
+signal annotations_changed()
+
+## Creates a new annotation and returns its unique ID.
+## [param ann_type] is "box" or "note".
+func add_annotation(ann_type: String, position: Vector2,
+		size: Vector2 = Vector2(300, 200), text: String = "",
+		color: Color = Color(0.15, 0.35, 0.65, 0.7)) -> String:
+	_annotation_counter += 1
+	var ann_id := "ann_%d" % _annotation_counter
+	var ann := {
+		"id": ann_id,
+		"type": ann_type,
+		"position": position,
+		"size": size,
+		"text": text,
+		"color": color,
+	}
+	annotations.append(ann)
+	GNLogger.info("Network", "Added %s annotation '%s'" % [ann_type, ann_id])
+	annotations_changed.emit()
+	return ann_id
+
+
+## Returns the annotation Dictionary with the given ID, or null.
+func get_annotation(ann_id: String) -> Variant:
+	for ann in annotations:
+		if ann.get("id", "") == ann_id:
+			return ann
+	return null
+
+
+## Updates an annotation's properties. Pass only the keys you want to change.
+func update_annotation(ann_id: String, changes: Dictionary) -> void:
+	for ann in annotations:
+		if ann.get("id", "") == ann_id:
+			for key in changes:
+				ann[key] = changes[key]
+			annotations_changed.emit()
+			return
+
+
+## Removes an annotation by ID.
+func remove_annotation(ann_id: String) -> bool:
+	for i in range(annotations.size()):
+		if annotations[i].get("id", "") == ann_id:
+			annotations.remove_at(i)
+			GNLogger.info("Network", "Removed annotation '%s'" % ann_id)
+			annotations_changed.emit()
+			return true
+	return false
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Serialization Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -544,6 +611,33 @@ func to_dict() -> Dictionary:
 			"to_port": conn.to_port,
 		})
 	d["connections"] = conns_array
+
+	# Serialize annotations (network boxes & sticky notes)
+	if not annotations.is_empty():
+		var ann_array: Array = []
+		for ann in annotations:
+			var ann_d: Dictionary = {
+				"id": ann.get("id", ""),
+				"type": ann.get("type", ""),
+				"text": ann.get("text", ""),
+			}
+			var pos: Variant = ann.get("position", Vector2.ZERO)
+			if pos is Vector2:
+				ann_d["position"] = [pos.x, pos.y]
+			else:
+				ann_d["position"] = [0.0, 0.0]
+			var sz: Variant = ann.get("size", Vector2(200, 150))
+			if sz is Vector2:
+				ann_d["size"] = [sz.x, sz.y]
+			else:
+				ann_d["size"] = [200.0, 150.0]
+			var col: Variant = ann.get("color", Color.WHITE)
+			if col is Color:
+				ann_d["color"] = [col.r, col.g, col.b, col.a]
+			else:
+				ann_d["color"] = [1.0, 1.0, 1.0, 1.0]
+			ann_array.append(ann_d)
+		d["annotations"] = ann_array
 
 	return d
 
@@ -615,6 +709,46 @@ func from_dict(d: Dictionary) -> bool:
 
 	GNLogger.info("Network", "Loaded patch: %d nodes, %d connections" % [
 		nodes.size(), connections.size()])
+
+	# ── Reconstruct annotations (network boxes & sticky notes) ──
+	annotations.clear()
+	_annotation_counter = 0
+	if d.has("annotations"):
+		var ann_array: Array = d["annotations"]
+		for ad in ann_array:
+			var ann_id: String = ad.get("id", "")
+			var ann_type: String = ad.get("type", "")
+			var ann_text: String = ad.get("text", "")
+			var pos_arr: Variant = ad.get("position", [0.0, 0.0])
+			var sz_arr: Variant = ad.get("size", [200.0, 150.0])
+			var col_arr: Variant = ad.get("color", [1.0, 1.0, 1.0, 1.0])
+			var pos := Vector2.ZERO
+			var sz := Vector2(200, 150)
+			var col := Color.WHITE
+			if pos_arr is Array and pos_arr.size() >= 2:
+				pos = Vector2(float(pos_arr[0]), float(pos_arr[1]))
+			if sz_arr is Array and sz_arr.size() >= 2:
+				sz = Vector2(float(sz_arr[0]), float(sz_arr[1]))
+			if col_arr is Array and col_arr.size() >= 4:
+				col = Color(float(col_arr[0]), float(col_arr[1]), float(col_arr[2]), float(col_arr[3]))
+			elif col_arr is Array and col_arr.size() >= 3:
+				col = Color(float(col_arr[0]), float(col_arr[1]), float(col_arr[2]))
+			var ann := {
+				"id": ann_id,
+				"type": ann_type,
+				"position": pos,
+				"size": sz,
+				"text": ann_text,
+				"color": col,
+			}
+			annotations.append(ann)
+			# Track counter to ensure unique IDs for new annotations
+			if ann_id.begins_with("ann_"):
+				var num_part := ann_id.substr(4)
+				if num_part.is_valid_int():
+					_annotation_counter = maxi(_annotation_counter, int(num_part))
+		GNLogger.info("Network", "Loaded %d annotation(s)" % annotations.size())
+
 	return true
 
 
@@ -673,6 +807,8 @@ func load_from_file(file_path: String) -> Error:
 ## Used internally by from_dict() — emits graph_changed once at the end.
 func _clear_all() -> void:
 	connections.clear()
+	annotations.clear()
+	_annotation_counter = 0
 	for node_id in nodes:
 		var node: GNNode = nodes[node_id]
 		if node.is_inside_tree():

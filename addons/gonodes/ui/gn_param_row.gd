@@ -293,6 +293,8 @@ func _create_value_control() -> Control:
 			return _create_vector2_control()
 		GNParameter.ValueType.FILE:
 			return _create_file_control()
+		GNParameter.ValueType.RAMP:
+			return _create_ramp_control()
 		_:
 			var lbl := Label.new()
 			lbl.text = str(param.value)
@@ -511,6 +513,19 @@ func _create_file_control() -> Control:
 	return hbox
 
 
+## Creates a ramp/curve editor control for RAMP parameters.
+func _create_ramp_control() -> Control:
+	var ramp_editor := GNRampEditor.new()
+	ramp_editor.size_flags_horizontal = SIZE_EXPAND_FILL
+	ramp_editor.custom_minimum_size = Vector2(0, 100)
+	# Initialize with current param value (Array of key dicts)
+	var current_keys: Array = param.value if param.value is Array else []
+	ramp_editor.set_keys(current_keys)
+	# Wire change signal back to the parameter model
+	ramp_editor.ramp_changed.connect(_on_ramp_changed)
+	return ramp_editor
+
+
 ## Populates the OptionButton dropdown with files from all tiers:
 ## Tier 1 (bundled res://), Tier 2 (project folder), and any Tier 3 current value.
 func _populate_file_dropdown(option: OptionButton) -> void:
@@ -723,6 +738,14 @@ func _on_file_clear_pressed() -> void:
 		var option: OptionButton = hbox.get_child(0) as OptionButton
 		if option:
 			option.selected = 0
+
+
+func _on_ramp_changed(new_keys: Array) -> void:
+	if _updating:
+		return
+	param.set_value(new_keys)
+	if owner_node:
+		owner_node.mark_dirty()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1054,6 +1077,11 @@ func _update_value_display() -> void:
 					if not found and not file_path.is_empty():
 						# File not in dropdown — rescan then try again
 						_populate_file_dropdown(option)
+		GNParameter.ValueType.RAMP:
+			var ramp_editor := _control as GNRampEditor
+			if ramp_editor:
+				var current_keys: Array = param.get_resolved_value() if param.get_resolved_value() is Array else []
+				ramp_editor.set_keys(current_keys)
 
 	_updating = false
 
