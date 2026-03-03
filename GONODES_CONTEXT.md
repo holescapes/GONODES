@@ -976,6 +976,24 @@ GONODES/
 │       ├── README.md
 │       └── operators/top/
 │           └── ffmpeg_in_top.gd        # FFmpegInTOP — dynamic ClassDB.instantiate("FFmpegVideoStream")
+│   └── gn_ext_shadertoy/              # ← Shadertoy shader pack extension
+│       ├── gn_extension.cfg            # Manifest: 11 operators (5 gen + 5 fx + 1 runtime)
+│       ├── README.md
+│       ├── shadertoy_translator.gd     # ShadertoyTranslator — GLSL→Godot shader converter
+│       ├── shaders/                    # 10 pre-converted .gdshader files
+│       └── operators/top/
+│           ├── shadertoy_base_top.gd   # Abstract base for pre-baked Shadertoy TOPs
+│           ├── shadertoy_url_top.gd    # ShadertoyURLTOP — runtime paste/fetch translator
+│           ├── st_seascape_top.gd      # Generator: procedural ocean
+│           ├── st_voronoi_fire_top.gd  # Generator: Voronoi fire
+│           ├── st_creation_top.gd      # Generator: demoscene colour field
+│           ├── st_star_nest_top.gd     # Generator: space fractal
+│           ├── st_plasma_top.gd        # Generator: retro plasma
+│           ├── st_crt_top.gd           # Effect: CRT barrel distortion
+│           ├── st_chromatic_ab_top.gd  # Effect: chromatic aberration
+│           ├── st_pixelate_top.gd      # Effect: mosaic pixelation
+│           ├── st_film_grain_top.gd    # Effect: animated film grain
+│           └── st_halftone_top.gd      # Effect: CMYK halftone dots
 ├── scenes/
 │   └── main.tscn                   # Application entry scene
 ├── tests/
@@ -3722,6 +3740,7 @@ Before loading an extension's operators, the registry checks `ClassDB.class_exis
 | Extension | Folder | Dependencies | Operators | Status |
 |-----------|--------|-------------|-----------|--------|
 | FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | ✅ Done |
+| Shadertoy | `gn_ext_shadertoy` | — | 5 generator TOPs, 5 effect TOPs, ShadertoyURLTOP | ✅ Done |
 | Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned |
 | NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned |
 | Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP | Planned |

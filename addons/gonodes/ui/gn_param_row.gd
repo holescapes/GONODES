@@ -354,6 +354,11 @@ func _create_string_control() -> Control:
 	edit.custom_minimum_size = Vector2(0, 80)
 	edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 	edit.scroll_fit_content_height = false
+	if param.read_only:
+		edit.editable = false
+		edit.custom_minimum_size = Vector2(0, 48)
+		edit.add_theme_color_override("font_readonly_color", Color(0.7, 0.7, 0.7, 0.8))
+		return edit
 	edit.focus_exited.connect(_on_string_focus_lost.bind(edit))
 
 	# If this is a code param (Script operators or CustomShaderTOP), add Edit ↗ button

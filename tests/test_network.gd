@@ -124,10 +124,10 @@ func test_get_input_connections() -> void:
 	_network.add_node(c)
 	_network.connect_nodes("a", 0, "c", 0)
 	_network.connect_nodes("b", 0, "c", 0)
-	# Note: connect_nodes may reject the second one if port 0 is already taken.
-	# Let's just check we get at least one.
+	# Wire replacement: b→c:0 replaces a→c:0 — only 1 connection remains.
 	var inputs := _network.get_input_connections("c")
-	GNTestAssert.assert_gt(inputs.size(), 0, "c should have inputs")
+	GNTestAssert.assert_eq(inputs.size(), 1, "c should have exactly 1 input after replacement")
+	GNTestAssert.assert_eq(inputs[0].from_node, "b", "surviving wire should be from b")
 
 
 func test_remove_node_cleans_connections() -> void:
@@ -350,3 +350,63 @@ func test_to_dict_empty_network() -> void:
 	GNTestAssert.assert_eq(nodes_dict.size(), 0, "empty")
 	var conns: Array = d["connections"]
 	GNTestAssert.assert_eq(conns.size(), 0, "no connections")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Wire Replacement (auto-disconnect old wire when connecting to occupied input)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_wire_replacement_succeeds() -> void:
+	## Connecting to an already-occupied input should succeed (replace the old wire).
+	var a := _make_node("a")
+	var b := _make_node("b")
+	var c := _make_node("c")
+	_network.add_node(a)
+	_network.add_node(b)
+	_network.add_node(c)
+	_network.connect_nodes("a", 0, "c", 0)
+	var ok := _network.connect_nodes("b", 0, "c", 0)
+	GNTestAssert.assert_true(ok, "replacement should succeed")
+
+
+func test_wire_replacement_removes_old() -> void:
+	## After replacement, the old connection should no longer exist.
+	var a := _make_node("a")
+	var b := _make_node("b")
+	var c := _make_node("c")
+	_network.add_node(a)
+	_network.add_node(b)
+	_network.add_node(c)
+	_network.connect_nodes("a", 0, "c", 0)
+	_network.connect_nodes("b", 0, "c", 0)
+	GNTestAssert.assert_eq(_network.get_connection_count(), 1, "only 1 connection after replacement")
+	var conn := _network.get_connection_at_input("c", 0)
+	GNTestAssert.assert_not_null(conn, "connection should exist")
+	GNTestAssert.assert_eq(conn.from_node, "b", "new wire from b")
+
+
+func test_wire_replacement_emits_signals() -> void:
+	## Replacement should emit connection_removed for the old wire
+	## and connection_added for the new wire.
+	var a := _make_node("a")
+	var b := _make_node("b")
+	var c := _make_node("c")
+	_network.add_node(a)
+	_network.add_node(b)
+	_network.add_node(c)
+	_network.connect_nodes("a", 0, "c", 0)
+
+	# Use arrays so lambdas can mutate the contents (GDScript int capture is by-value)
+	var counts := { "removed": 0, "added": 0 }
+	var on_removed := func(_conn: GNConnection) -> void: counts["removed"] += 1
+	var on_added := func(_conn: GNConnection) -> void: counts["added"] += 1
+	_network.connection_removed.connect(on_removed)
+	_network.connection_added.connect(on_added)
+
+	_network.connect_nodes("b", 0, "c", 0)
+
+	GNTestAssert.assert_eq(counts["removed"], 1, "connection_removed emitted once")
+	GNTestAssert.assert_eq(counts["added"], 1, "connection_added emitted once")
+
+	_network.connection_removed.disconnect(on_removed)
+	_network.connection_added.disconnect(on_added)

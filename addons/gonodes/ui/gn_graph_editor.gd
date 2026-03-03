@@ -469,7 +469,14 @@ func _on_connection_request(from_node: StringName, from_port: int,
 	var fn := String(from_node)
 	var tn := String(to_node)
 
+	# Snapshot any existing connection on the target input (for undo)
+	var old_conn: GNConnection = network.get_connection_at_input(tn, to_port)
+	var had_old := old_conn != null
+	var old_from_id := old_conn.from_node if had_old else ""
+	var old_from_port := old_conn.from_port if had_old else 0
+
 	# Let the network validate (type check, cycle check, etc.)
+	# If the input is occupied the network auto-disconnects the old wire first.
 	var success := network.connect_nodes(fn, from_port, tn, to_port)
 
 	if not success:
@@ -477,10 +484,17 @@ func _on_connection_request(from_node: StringName, from_port: int,
 			fn, from_port, tn, to_port])
 		return
 
-	# Record for undo
-	_undo_redo.create_action("Connect %s → %s" % [fn, tn])
-	_undo_redo.add_do_method(_ur_connect.bind(fn, from_port, tn, to_port))
-	_undo_redo.add_undo_method(_ur_disconnect.bind(fn, from_port, tn, to_port))
+	# Record for undo — if we replaced a wire, undo must restore the old one
+	if had_old:
+		_undo_redo.create_action("Replace connection → %s:%d" % [tn, to_port])
+		_undo_redo.add_do_method(_ur_disconnect.bind(old_from_id, old_from_port, tn, to_port))
+		_undo_redo.add_do_method(_ur_connect.bind(fn, from_port, tn, to_port))
+		_undo_redo.add_undo_method(_ur_disconnect.bind(fn, from_port, tn, to_port))
+		_undo_redo.add_undo_method(_ur_connect.bind(old_from_id, old_from_port, tn, to_port))
+	else:
+		_undo_redo.create_action("Connect %s → %s" % [fn, tn])
+		_undo_redo.add_do_method(_ur_connect.bind(fn, from_port, tn, to_port))
+		_undo_redo.add_undo_method(_ur_disconnect.bind(fn, from_port, tn, to_port))
 	_undo_redo.commit_action(false)
 
 

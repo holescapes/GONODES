@@ -214,11 +214,28 @@ func connect_nodes(from_id: String, from_port: int,
 			GNFamily.get_family_name(out_port.family), GNFamily.get_family_name(in_port.family)])
 		return false
 
-	# Each input port accepts exactly one connection
+	# Each input port accepts exactly one connection — auto-replace any existing wire
+	var replaced_conn: GNConnection = null
 	for conn in connections:
 		if conn.to_node == to_id and conn.to_port == to_port:
-			push_warning("GNNetwork.connect: input port %d on '%s' already connected" % [to_port, to_id])
-			return false
+			replaced_conn = conn
+			break
+
+	if replaced_conn != null:
+		# Disconnect the old wire so the new one can take its place
+		connections.erase(replaced_conn)
+		_invalidate_topo()
+		var old_to_node: GNNode = nodes.get(to_id, null)
+		if old_to_node:
+			old_to_node.mark_dirty()
+		GNLogger.info("Network", "Auto-replaced connection %s:%d → %s:%d" % [
+			replaced_conn.from_node, replaced_conn.from_port,
+			replaced_conn.to_node, replaced_conn.to_port])
+		connection_removed.emit(replaced_conn)
+
+		# Auto-shrink dynamic inputs after removing the old wire
+		if old_to_node and old_to_node._dynamic_input:
+			_update_dynamic_node_inputs(to_id)
 
 	# Check for duplicate connection
 	for conn in connections:

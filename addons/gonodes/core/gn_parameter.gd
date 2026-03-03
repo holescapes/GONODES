@@ -77,6 +77,10 @@ var fallback_value: Variant = 0.0
 ## Each entry is a wildcard pattern, e.g., "*.ttf", "*.otf", "*.png".
 @export var file_filters: PackedStringArray = PackedStringArray()
 
+## When true, the parameter is displayed in the inspector but cannot be edited
+## by the user.  Useful for metadata fields (URLs, credits, etc.).
+@export var read_only: bool = false
+
 # ─── Expression Mode (MVP) ────────────────────────────────────────────────────
 
 ## The expression string (GDScript syntax), e.g.: chop("lfo1").value("out") * 10.0
@@ -780,6 +784,10 @@ func to_dict() -> Dictionary:
 			})
 		d["component_expressions"] = comp_data
 
+	# Persist the read-only flag so credit/metadata fields survive save/load
+	if read_only:
+		d["read_only"] = true
+
 	return d
 
 
@@ -828,5 +836,9 @@ func from_dict(d: Dictionary) -> void:
 			component_expressions[i] = cd.get("expression", "")
 			if component_modes[i] == Mode.EXPRESSION and not component_expressions[i].is_empty():
 				_compile_component_expression(i)
+
+	# Restore read-only flag (credit / metadata params)
+	if d.has("read_only"):
+		read_only = d["read_only"]
 
 	# Legacy bind info is handled above in the mode restore block

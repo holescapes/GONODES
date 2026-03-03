@@ -79,49 +79,85 @@ func popup_at_filtered(global_pos: Vector2, allowed: PackedStringArray) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Builds or rebuilds the tree, optionally filtering by search text.
+## Operators with a non-empty section get grouped under a sub-heading within
+## their family (e.g. TOP → Shadertoy → STSeascapeTOP).
 func _populate_tree(filter: String) -> void:
 	_tree.clear()
 	var root := _tree.create_item()
-	var registry := GNGraphEditor.get_operator_registry()
+	var reg := GNExtensionRegistry.instance()
+	var registry_sectioned := reg.get_operator_registry_sectioned()
 	var filter_lower := filter.to_lower()
 
 	# Iterate families in enum order (driven by GNFamily.FAMILY_NAMES).
 	# No hardcoded list — new families are picked up automatically.
 	for family_enum: GNFamily.Type in GNFamily.FAMILY_NAMES:
 		var family_name: String = GNFamily.FAMILY_NAMES[family_enum]
-		if not registry.has(family_name):
+		if not registry_sectioned.has(family_name):
 			continue
 
-		var ops: Array = registry[family_name]
-		var filtered_ops: Array[String] = []
+		var sections: Dictionary = registry_sectioned[family_name]
+		var family_color: Color = GNFamily.get_color(family_enum)
 
-		for op_name in ops:
-			# Apply connection-drop family filter (empty = show all)
-			if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
-				continue
-			if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
-				filtered_ops.append(op_name)
-
-		if filtered_ops.is_empty():
+		# Pre-filter all ops across all sections to decide if the family header
+		# should appear at all.
+		var any_visible := false
+		for sec_name in sections:
+			for op_name in sections[sec_name]:
+				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
+					continue
+				if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+					any_visible = true
+					break
+			if any_visible:
+				break
+		if not any_visible:
 			continue
 
 		# Create family group
 		var family_item := _tree.create_item(root)
 		family_item.set_text(0, family_name)
 		family_item.set_selectable(0, false)
+		family_item.set_custom_color(0, family_color)
 
-		# Color the family header
-		family_item.set_custom_color(0, GNFamily.get_color(family_enum))
+		# Sort section keys: unsectioned ("") first, then alphabetical
+		var sec_keys: Array = sections.keys()
+		sec_keys.sort()
+		if sec_keys.has(""):
+			sec_keys.erase("")
+			sec_keys.insert(0, "")
 
-		# Add operators under the family
-		for op_name in filtered_ops:
-			var op_item := _tree.create_item(family_item)
-			op_item.set_text(0, op_name)
-			op_item.set_metadata(0, op_name)
-			# Show node description as tooltip if available
-			var desc := _get_operator_description(op_name)
-			if not desc.is_empty():
-				op_item.set_tooltip_text(0, desc)
+		for sec_name in sec_keys:
+			var ops: Array = sections[sec_name]
+			var filtered_ops: Array[String] = []
+
+			for op_name in ops:
+				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
+					continue
+				if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+					filtered_ops.append(op_name)
+
+			if filtered_ops.is_empty():
+				continue
+
+			# Determine the parent for operator items
+			var parent_item: TreeItem = family_item
+			if not sec_name.is_empty():
+				# Create a section sub-heading under the family
+				var sec_item := _tree.create_item(family_item)
+				sec_item.set_text(0, sec_name)
+				sec_item.set_selectable(0, false)
+				# Dim the section header slightly relative to the family color
+				sec_item.set_custom_color(0, family_color.lerp(Color.WHITE, 0.35))
+				parent_item = sec_item
+
+			# Add operators under the parent (family or section)
+			for op_name in filtered_ops:
+				var op_item := _tree.create_item(parent_item)
+				op_item.set_text(0, op_name)
+				op_item.set_metadata(0, op_name)
+				var desc := _get_operator_description(op_name)
+				if not desc.is_empty():
+					op_item.set_tooltip_text(0, desc)
 
 	# Auto-select first selectable item if filtering
 	if not filter_lower.is_empty():

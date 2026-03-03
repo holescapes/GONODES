@@ -25,10 +25,7 @@ const _PreloadOutTunnel = preload("res://addons/gonodes/operators/comp/out_tunne
 ##   author = "Your Name"
 ##   description = "H.264/VP9/HAP video codecs for MovieFileInTOP."
 ##   dependencies = ["FFmpegFrameDecoder"]   ; ClassDB classes that must exist
-##
-##   [operators]
-##   ; key = class_name, value = {family, script, description}
-##   ; family values: TOP, CHOP, SOP, DAT, MAT, COMP, POP
+##   section = "FFmpeg"  ; palette sub-heading (defaults to name)
 ##
 ##   [operator.HAPMovieTOP]
 ##   family = "TOP"
@@ -39,6 +36,9 @@ const _PreloadOutTunnel = preload("res://addons/gonodes/operators/comp/out_tunne
 ##   family = "TOP"
 ##   script = "res://addons/gn_ext_ffmpeg/operators/ffmpeg_movie_top.gd"
 ##   description = "H.264/VP9/AV1 video via FFmpeg GDExtension."
+##
+## All operators from an extension inherit the extension-level section.
+## Per-operator `section` can still override if needed.
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -67,13 +67,15 @@ class OperatorEntry:
 	var op_script: GDScript     ## Preloaded GDScript class (has .new())
 	var description: String     ## One-line tooltip text
 	var source: String          ## "core" or the extension name that provided it
+	var section: String         ## Optional sub-section within the family (e.g. "Shadertoy")
 
 	func _init(p_family: String, p_script: GDScript, p_desc: String,
-			p_source: String = "core") -> void:
+			p_source: String = "core", p_section: String = "") -> void:
 		family = p_family
 		op_script = p_script
 		description = p_desc
 		source = p_source
+		section = p_section
 
 
 ## class_name → OperatorEntry
@@ -89,8 +91,8 @@ var _loaded_extensions: PackedStringArray = []
 
 ## Register a single operator.  Overwrites any existing entry with the same key.
 func register_operator(class_name_key: String, family: String, op_script: GDScript,
-		description: String, source: String = "core") -> void:
-	_operators[class_name_key] = OperatorEntry.new(family, op_script, description, source)
+		description: String, source: String = "core", section: String = "") -> void:
+	_operators[class_name_key] = OperatorEntry.new(family, op_script, description, source, section)
 	_invalidate_port_cache()
 
 
@@ -135,6 +137,31 @@ func get_operator_registry() -> Dictionary:
 			result[entry.family] = []
 		result[entry.family].append(op_name)
 	return result
+
+
+## Returns the operator registry grouped by family AND section.
+## { "TOP": { "": ["NoiseTOP", ...], "Shadertoy": ["STSeascapeTOP", ...] }, ... }
+## Operators with no section go under the "" (empty string) key.
+func get_operator_registry_sectioned() -> Dictionary:
+	var result: Dictionary = {}
+	for op_name in _operators:
+		var entry: OperatorEntry = _operators[op_name]
+		if not result.has(entry.family):
+			result[entry.family] = {}
+		var sections: Dictionary = result[entry.family]
+		var sec: String = entry.section
+		if not sections.has(sec):
+			sections[sec] = []
+		sections[sec].append(op_name)
+	return result
+
+
+## Returns the section string for an operator, or "".
+func get_section(class_name_key: String) -> String:
+	var entry: OperatorEntry = _operators.get(class_name_key, null)
+	if entry:
+		return entry.section
+	return ""
 
 
 ## Returns the description for a single operator, or "".
@@ -281,6 +308,10 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 
 	var ext_name: String = cfg.get_value("extension", "name", folder_name)
 
+	# Extension-level palette section — defaults to the extension name.
+	# All operators inherit this; per-operator "section" key overrides.
+	var ext_section: String = cfg.get_value("extension", "section", ext_name)
+
 	# ── Dependency check ──
 	var deps: Array = cfg.get_value("extension", "dependencies", [])
 	for dep_class in deps:
@@ -299,6 +330,7 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 		var family: String = cfg.get_value(section, "family", "")
 		var script_path: String = cfg.get_value(section, "script", "")
 		var desc: String = cfg.get_value(section, "description", "")
+		var op_section: String = cfg.get_value(section, "section", ext_section)
 
 		if family.is_empty() or script_path.is_empty():
 			print("[ExtRegistry] Extension '%s': operator '%s' missing family or script" % [ext_name, op_class])
@@ -314,7 +346,7 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 			print("[ExtRegistry] Extension '%s': failed to load script '%s'" % [ext_name, script_path])
 			continue
 
-		register_operator(op_class, family, loaded_script, desc, ext_name)
+		register_operator(op_class, family, loaded_script, desc, ext_name, op_section)
 		registered_count += 1
 
 	_loaded_extensions.append(folder_name)
