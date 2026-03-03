@@ -12,9 +12,6 @@ var nodes: Dictionary = {}
 ## All wire connections between node ports.
 var connections: Array[GNConnection] = []
 
-## Export mappings (CHOP export mode, post-MVP).
-var export_mappings: Array = []  # Array[GNExportMapping] — defined in cook engine for now
-
 ## Cached topological order — invalidated when graph structure changes.
 var _topo_cache: Array[GNNode] = []
 var _topo_dirty: bool = true

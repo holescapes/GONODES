@@ -447,10 +447,7 @@ func cook_frame(delta: float) -> void:
 		if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
 			break
 
-	# Step 5: Process export mappings (post-MVP, CHOP exports push values)
-	_process_export_mappings()
-
-	# Step 6: Frame bookkeeping
+	# Step 5: Frame bookkeeping
 	frame_count += 1
 	var frame_end := Time.get_ticks_usec()
 	frame_cook_time_ms = (frame_end - frame_start) / 1000.0
@@ -532,11 +529,6 @@ func _resolve_node_parameters(node: GNNode) -> void:
 					_evaluate_component_expressions(node, param)
 				else:
 					_evaluate_expression(node, param)
-			GNParameter.Mode.BIND:
-				_resolve_bind(node, param)
-			GNParameter.Mode.EXPORT:
-				# Export values are pushed by _process_export_mappings — just read .value
-				pass
 
 
 ## Evaluates an expression parameter and stores the resolved value.
@@ -650,43 +642,6 @@ func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
 		GNParameter.ValueType.COLOR:
 			param.resolved_value = Color(components[0], components[1], components[2], components[3])
 	param.fallback_value = param.resolved_value
-
-
-## Resolves a bind-mode parameter by reading the source parameter's value.
-func _resolve_bind(_node: GNNode, param: GNParameter) -> void:
-	if param.bind_source_node.is_empty() or param.bind_source_param.is_empty():
-		param.resolved_value = param.fallback_value
-		return
-
-	var source_node: GNNode = network.nodes.get(param.bind_source_node, null)
-	if source_node == null:
-		GNLogger.warn("CookEngine", "Bind source node '%s' not found" % param.bind_source_node)
-		param.resolved_value = param.fallback_value
-		return
-
-	var source_param: GNParameter = source_node.parameters.get(param.bind_source_param, null)
-	if source_param == null:
-		GNLogger.warn("CookEngine", "Bind source param '%s.%s' not found" % [
-			param.bind_source_node, param.bind_source_param])
-		param.resolved_value = param.fallback_value
-		return
-
-	var value: Variant = source_param.get_resolved_value()
-	if param.bind_transform.is_valid():
-		value = param.bind_transform.call(value)
-	param.resolved_value = value
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Export Mappings (Post-MVP stub)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-## Processes CHOP export mappings — pushes channel values to target parameters.
-func _process_export_mappings() -> void:
-	for mapping in network.export_mappings:
-		# Each mapping: { source_node, source_channel, target_node, target_param, scale, offset, ... }
-		# Post-MVP implementation — stub for now
-		pass
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

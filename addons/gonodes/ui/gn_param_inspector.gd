@@ -21,6 +21,15 @@ var _family_bar: ColorRect = null
 var _status_label: Label = null
 var _no_selection_label: Label = null
 
+## Preset toolbar elements
+var _preset_bar: HBoxContainer = null
+var _copy_btn: Button = null
+var _paste_btn: Button = null
+var _reset_btn: Button = null
+var _presets_btn: MenuButton = null
+var _save_preset_dialog: AcceptDialog = null
+var _save_preset_line_edit: LineEdit = null
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Lifecycle
@@ -61,6 +70,45 @@ func _ready() -> void:
 	_status_label.add_theme_font_size_override("font_size", 11)
 	_status_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	header_box.add_child(_status_label)
+
+	# Preset toolbar (copy / paste / reset / presets dropdown)
+	_preset_bar = HBoxContainer.new()
+	_preset_bar.add_theme_constant_override("separation", 4)
+	_preset_bar.visible = false  # Hidden until a node is inspected
+	header_box.add_child(_preset_bar)
+
+	_copy_btn = Button.new()
+	_copy_btn.text = "Copy"
+	_copy_btn.tooltip_text = "Copy all parameters to clipboard"
+	_copy_btn.add_theme_font_size_override("font_size", 11)
+	_copy_btn.custom_minimum_size = Vector2(50, 0)
+	_copy_btn.pressed.connect(_on_copy_pressed)
+	_preset_bar.add_child(_copy_btn)
+
+	_paste_btn = Button.new()
+	_paste_btn.text = "Paste"
+	_paste_btn.tooltip_text = "Paste parameters from clipboard (same operator type)"
+	_paste_btn.add_theme_font_size_override("font_size", 11)
+	_paste_btn.custom_minimum_size = Vector2(50, 0)
+	_paste_btn.pressed.connect(_on_paste_pressed)
+	_preset_bar.add_child(_paste_btn)
+
+	_reset_btn = Button.new()
+	_reset_btn.text = "Reset"
+	_reset_btn.tooltip_text = "Reset all parameters to factory defaults"
+	_reset_btn.add_theme_font_size_override("font_size", 11)
+	_reset_btn.custom_minimum_size = Vector2(50, 0)
+	_reset_btn.pressed.connect(_on_reset_pressed)
+	_preset_bar.add_child(_reset_btn)
+
+	_presets_btn = MenuButton.new()
+	_presets_btn.text = "Presets ▾"
+	_presets_btn.tooltip_text = "Save / load parameter presets"
+	_presets_btn.add_theme_font_size_override("font_size", 11)
+	_presets_btn.flat = false
+	_presets_btn.get_popup().id_pressed.connect(_on_preset_menu_id_pressed)
+	_presets_btn.get_popup().about_to_popup.connect(_rebuild_presets_menu)
+	_preset_bar.add_child(_presets_btn)
 
 	# Separator
 	var sep := HSeparator.new()
@@ -134,6 +182,10 @@ func inspect(node: GNNode) -> void:
 
 	# Hide placeholder
 	_no_selection_label.get_parent().visible = false
+
+	# Show preset toolbar and update paste button
+	_preset_bar.visible = true
+	_paste_btn.disabled = not GNParamPresetManager.can_paste(node)
 
 	# Build parameter rows in definition order
 	var param_names := node.get_parameter_names()
@@ -264,6 +316,7 @@ func _clear_rows() -> void:
 func _show_empty_state() -> void:
 	_header_label.text = "Inspector"
 	_status_label.text = "No node selected"
+	_preset_bar.visible = false
 
 
 ## Enables or disables parameter rows based on the node's locked state.
@@ -291,3 +344,149 @@ func _set_children_mouse_filter(node: Control, filter: Control.MouseFilter) -> v
 			_set_children_mouse_filter(child, filter)
 	_family_bar.color = Color(0.3, 0.3, 0.3)
 	_no_selection_label.get_parent().visible = true
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Preset Toolbar Handlers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Copy all parameters of the current node to the preset clipboard.
+func _on_copy_pressed() -> void:
+	if _current_node == null:
+		return
+	GNParamPresetManager.copy_params(_current_node)
+	# Update paste button — may now be pastable
+	_paste_btn.disabled = not GNParamPresetManager.can_paste(_current_node)
+
+
+## Paste parameters from clipboard onto the current node.
+func _on_paste_pressed() -> void:
+	if _current_node == null:
+		return
+	var applied := GNParamPresetManager.paste_params(_current_node)
+	if applied > 0:
+		_current_node.parameters_changed.emit(_current_node.id)
+
+
+## Reset all parameters to factory defaults.
+func _on_reset_pressed() -> void:
+	if _current_node == null:
+		return
+	var count := GNParamPresetManager.reset_to_defaults(_current_node)
+	if count > 0:
+		_current_node.parameters_changed.emit(_current_node.id)
+
+
+## Populates and handles the Presets dropdown menu.
+func _on_preset_menu_id_pressed(id: int) -> void:
+	if _current_node == null:
+		return
+	const SAVE_ID := 0
+	const LOAD_BASE := 100
+	const DELETE_BASE := 1000
+
+	if id == SAVE_ID:
+		_show_save_preset_dialog()
+		return
+
+	if id >= DELETE_BASE:
+		# Delete a user preset
+		var preset_idx: int = id - DELETE_BASE
+		var op_type: String = _current_node.get_script().get_global_name()
+		var presets := GNParamPresetManager.get_preset_list(op_type)
+		if preset_idx >= 0 and preset_idx < presets.size():
+			GNParamPresetManager.delete_preset(presets[preset_idx]["path"])
+		return
+
+	if id >= LOAD_BASE:
+		# Load a preset
+		var preset_idx: int = id - LOAD_BASE
+		var op_type: String = _current_node.get_script().get_global_name()
+		var presets := GNParamPresetManager.get_preset_list(op_type)
+		if preset_idx >= 0 and preset_idx < presets.size():
+			var applied := GNParamPresetManager.load_preset(
+				_current_node, presets[preset_idx]["path"])
+			if applied > 0:
+				_current_node.parameters_changed.emit(_current_node.id)
+
+
+## Called when the Presets MenuButton is about to show — populates items dynamically.
+func _rebuild_presets_menu() -> void:
+	if _current_node == null:
+		return
+	var popup: PopupMenu = _presets_btn.get_popup()
+	popup.clear()
+
+	const SAVE_ID := 0
+	const LOAD_BASE := 100
+	const DELETE_BASE := 1000
+
+	popup.add_item("Save Preset…", SAVE_ID)
+	popup.add_separator()
+
+	var op_type: String = _current_node.get_script().get_global_name()
+	var presets := GNParamPresetManager.get_preset_list(op_type)
+	if presets.is_empty():
+		popup.add_item("(no saved presets)", -1)
+		popup.set_item_disabled(popup.item_count - 1, true)
+	else:
+		for i in range(presets.size()):
+			var entry: Dictionary = presets[i]
+			var label: String = entry["name"]
+			if entry["is_factory"]:
+				label += "  [factory]"
+			popup.add_item(label, LOAD_BASE + i)
+
+		# Add delete section for user presets
+		var has_user := false
+		for entry in presets:
+			if not entry["is_factory"]:
+				has_user = true
+				break
+		if has_user:
+			popup.add_separator("Delete")
+			for i in range(presets.size()):
+				var entry: Dictionary = presets[i]
+				if not entry["is_factory"]:
+					popup.add_item("Delete: %s" % entry["name"], DELETE_BASE + i)
+
+
+## Shows the save-preset name dialog.
+func _show_save_preset_dialog() -> void:
+	if _current_node == null:
+		return
+	if _save_preset_dialog == null:
+		_save_preset_dialog = AcceptDialog.new()
+		_save_preset_dialog.title = "Save Parameter Preset"
+		_save_preset_dialog.ok_button_text = "Save"
+		_save_preset_dialog.size = Vector2i(360, 120)
+
+		var vbox := VBoxContainer.new()
+		vbox.add_theme_constant_override("separation", 8)
+
+		var lbl := Label.new()
+		lbl.text = "Preset name:"
+		vbox.add_child(lbl)
+
+		_save_preset_line_edit = LineEdit.new()
+		_save_preset_line_edit.placeholder_text = "My Preset"
+		_save_preset_line_edit.select_all_on_focus = true
+		vbox.add_child(_save_preset_line_edit)
+
+		_save_preset_dialog.add_child(vbox)
+		_save_preset_dialog.confirmed.connect(_on_save_preset_confirmed)
+		add_child(_save_preset_dialog)
+
+	var op_type: String = _current_node.get_script().get_global_name()
+	_save_preset_dialog.title = "Save Param Preset — %s" % op_type
+	_save_preset_line_edit.text = ""
+	_save_preset_line_edit.grab_focus.call_deferred()
+	_save_preset_dialog.popup_centered()
+
+
+## Confirms saving the named preset.
+func _on_save_preset_confirmed() -> void:
+	var preset_name: String = _save_preset_line_edit.text.strip_edges()
+	if preset_name.is_empty() or _current_node == null:
+		return
+	GNParamPresetManager.save_preset(_current_node, preset_name)

@@ -1342,10 +1342,19 @@ GONODES/
   - Ctrl+L or toolbar "Layout" button. Topological BFS layering (sources at left, sinks at right).
   - Configurable spacing (280px horizontal, 100px vertical). Undoable via Ctrl+Z.
   - Context menu entry "Auto-Layout All" with Ctrl+L shortcut.
-- [ ] **Parameter presets**:
-  - Save/load named parameter snapshots per operator instance.
-  - Copy parameters between nodes of the same type.
-  - Global preset library for reusable configurations.
+- [x] **Parameter presets**:
+  - **GNParamPresetManager** (`gn_param_preset_manager.gd`) — static utility class for parameter snapshot management:
+    - **Copy / Paste**: In-memory clipboard. `copy_params(node)` serializes all params via `GNParameter.to_dict()`. `paste_params(node)` applies only to same operator type (matched by `get_script().get_global_name()`). `can_paste(node)` gate.
+    - **Named Snapshots**: `save_preset(node, name)` writes JSON to `user://gonodes_param_presets/<OperatorType>/<name>.json`. `load_preset(node, path)` reads JSON and applies matching params. `get_preset_list(operator_type)` scans both factory (`res://addons/gonodes/presets/params/`) and user dirs.
+    - **Delete**: `delete_preset(path)` removes user presets (factory presets protected). **Reset**: `reset_to_defaults(node)` constructs a temp default instance and copies initial values.
+    - JSON format: `{ operator_type, preset_name, version, params: { name → GNParameter.to_dict() } }`.
+  - **Context menu** — 5 new entries in `_CtxID` enum (`COPY_PARAMS`, `PASTE_PARAMS`, `RESET_PARAMS`, `SAVE_PARAM_PRESET`, `LOAD_PARAM_PRESET_BASE`):
+    - Copy/Paste/Reset enabled when single node selected. Paste gated on clipboard type match.
+    - "Load Param Preset" is a dynamic submenu populated from `get_preset_list()`.
+    - "Save Param Preset…" opens a name-input dialog.
+  - **Inspector toolbar** — `GNParamInspector` header gains Copy / Paste / Reset buttons + "Presets ▾" `MenuButton`:
+    - Presets dropdown dynamically lists saved presets with "Save Preset…" at top and "Delete: name" for user presets.
+    - All actions trigger `node.parameters_changed` signal → inspector auto-rebuilds rows.
 
 ### Phase 7.5: Three-Tier Resource System ✅
 - [x] **GNResourceLoader** (`gn_resource_loader.gd`) — unified resource loading abstraction:
@@ -1768,14 +1777,12 @@ One of TouchDesigner's most powerful features is referencing parameters and data
 
 ### 17.1 Parameter Modes
 
-TouchDesigner has 4 parameter modes. GONODES implements all 4, but only **Constant** and **Expression** are in the MVP. **Bind** and **Export** are designed now for architecture compatibility and implemented post-MVP.
+GONODES uses a **two-mode** parameter system: **Constant** and **Expression**. All cross-node referencing (parameter binds, CHOP channel reads, math, conditionals) is handled through expression functions rather than separate mode machinery.
 
 ```
 GNParameter.Mode:
-├── CONSTANT     ← MVP   — Direct literal value. No evaluation overhead.
-├── EXPRESSION   ← MVP   — String evaluated each cook frame. Flexible, some overhead.
-├── BIND         ← Later — Direct link to another parameter. Zero-overhead relay, no string parsing.
-└── EXPORT       ← Later — Driven externally by a CHOP Export operator. Parameter is passive (push model).
+├── CONSTANT     — Direct literal value. No evaluation overhead.
+└── EXPRESSION   — String evaluated each cook frame. Handles par(), chop(), op(), top() references.
 ```
 
 #### Mode 1: CONSTANT (MVP)
@@ -1787,86 +1794,38 @@ offset = (0.5, 0.3)  # Just a Vector2
 No per-frame evaluation. Cheapest mode. Node is only dirty when user changes the value via the inspector.
 
 #### Mode 2: EXPRESSION (MVP)
-A string evaluated every cook frame (or when dependencies change). This is where cross-node referencing lives.
+A string evaluated every cook frame (or when dependencies change). This is where **all** cross-node referencing lives — parameter binds, CHOP channel reads, math, conditionals, everything.
 ```
-scale = chop("lfo1").value("out") * 10.0
-offset.x = sin(time * 2.0)
+scale = chop("lfo1", "out") * 10.0        # CHOP channel reference (replaces old EXPORT mode)
+offset.x = par("ctrl_panel", "master_x")  # Parameter reference (replaces old BIND mode)
 ```
-Has per-frame evaluation cost (string parsing + execution). See Section 17.2 for full expression syntax.
+Has per-frame evaluation cost (pre-compiled Expression + execution). See Section 17.2 for full expression syntax.
 
-#### Mode 3: BIND (Post-MVP)
-A direct pointer/link from one parameter to another parameter on a different node. No string evaluation — the cook engine just copies the value.
-```
-[NoiseTOP.scale] --BIND--> [ControlPanel.master_scale]
-```
-**Implementation:**
-```gdscript
-# GNParameter in BIND mode:
-var bind_source_node: String    # e.g., "ctrl_panel"
-var bind_source_param: String   # e.g., "master_scale"
-var bind_transform: Callable    # Optional: transform function (e.g., * 2.0, clamp)
-```
-**Why it matters:**
-- 10x faster than expression — no string evaluation, just a direct value copy
-- Clearer in the UI — shows as a visible line/link between parameters
-- Useful for control panels: one slider drives many parameters
-- TD's equivalent: the small arrows drawn between parameter fields
+#### Why Only Two Modes (Architecture Decision)
 
-**Dependency tracking:**
-- Bind creates an implicit edge in the dependency DAG (same as expression deps)
-- Source param changes → mark bound param's node dirty
+Previous versions had four modes: CONSTANT, EXPRESSION, BIND, and EXPORT.  BIND and EXPORT were removed because:
 
-#### Mode 4: EXPORT (Post-MVP)
-A CHOP node **pushes** its channel values into parameters of target nodes. The receiving parameter is passive. This is the inverse of Expression mode (pull → push).
+1. **Expressions already cover both use cases** with identical performance:
+   - Old BIND mode: `param.set_bind("ctrl_panel", "master_scale")` → now: `par("ctrl_panel", "master_scale")`
+   - Old EXPORT mode: CHOP push mapping → now: `chop("lfo1", "out") * 10.0`
 
-**In TouchDesigner, this works via the Export CHOP or by enabling "export" on any CHOP.** The CHOP's channels are mapped to target parameters by name or explicit assignment.
+2. **Expressions are strictly better**:
+   - Same-frame evaluation (EXPORT had 1-frame lag since it ran after all nodes cooked)
+   - Composable with math (`chop("lfo1", "out") * 2.0 + 1.0` vs. separate scale/offset fields)
+   - No separate mapping infrastructure to maintain
+   - ~300 fewer lines of code in the engine
 
-```
-LFO_CHOP "lfo1"
-  channels: ["out"]
-  export targets:
-    "out" → noise1.par.scale
-    "out" → noise2.par.scale
-    "out" → level1.par.brightness
-```
+3. **Houdini precedent**: Houdini uses expressions for everything — `ch("../lfo1/tx")` is simultaneously a "bind" and a "reference". No separate bind/export modes.
 
-**Why it matters vs. expressions:**
-- One CHOP drives 20 parameters with one export declaration, vs. writing 20 separate expressions
-- More performant: the CHOP cooks once, values are pushed in bulk
-- Cleaner patch: no expressions cluttering every parameter field
-- Natural for VJing: "this LFO controls all the brightness sliders"
+4. **TD forum consensus**: [Multiple](https://forum.derivative.ca/t/exporting-chop-vs-chop-reference/4636/2) [threads](https://forum.derivative.ca/t/export-chop-vs-relative-reference/2848) confirm exports vs. references are nearly identical in performance and interchangeable.
 
-**Implementation:**
-```gdscript
-class_name GNExportMapping extends Resource
+**UX sugar** ensures users who don't want to type expressions still get a good experience:
+- **Right-click any parameter** → "Insert Parameter Reference…" or "Insert CHOP Reference…" → dialog picks source → auto-generates the `par()` or `chop()` expression
+- **Right-click a CHOP node** in the graph → "Insert CHOP Reference…" → dialog picks channel + target param → writes expression
+- **Copy Reference** context menu entries put expression-ready strings on the clipboard
+- `GNParameter.set_param_reference()` and `GNParameter.set_chop_reference()` convenience methods for code-level use
 
-var source_node: String          # CHOP node ID
-var source_channel: String       # Channel name (e.g., "out")
-var target_node: String          # Target node ID
-var target_param: String         # Target parameter name
-var scale: float = 1.0           # Multiply before applying
-var offset: float = 0.0          # Add after scaling
-var clamp_min: float = -INF      # Optional clamp range
-var clamp_max: float = INF
-
-# Stored in GNNetwork.export_mappings: Array[GNExportMapping]
-```
-
-**Cook engine behavior:**
-```
-After cooking a CHOP node with exports:
-  1. Read the CHOP's output channels
-  2. For each export mapping targeting this CHOP:
-     a. Get channel value
-     b. Apply scale/offset/clamp
-     c. Set target parameter value directly (bypassing mode check)
-     d. Mark target node dirty
-```
-
-**UI:**
-- In the inspector, a parameter in Export mode shows: `← lfo1:out` with a small CHOP icon
-- The source CHOP shows export lines/indicators pointing to its targets
-- Users can set up exports via: right-click CHOP → "Export to..." → pick target param
+**Legacy migration**: Saved patches with old BIND-mode params are automatically converted to `par()` expressions on load. Old EXPORT-mode params revert to CONSTANT (users should re-create as `chop()` expressions).
 
 ### 17.2 Expression Syntax (Detail)
 
@@ -1904,6 +1863,13 @@ sin(time * par("noise1", "rate"))
 
 #### Copy Reference Workflow
 Right-click a node in the graph → "Copy Node Path" or "Copy Output Ref" to get an expression-ready string in the clipboard. Right-click a parameter name in the inspector → "Copy Self Ref", "Copy Cross Ref", or "Copy op() Ref". Paste directly into any expression field.
+
+#### Insert Reference Workflow (no-typing UX)
+For users who prefer not to type expressions:
+- **Right-click any parameter label** → "Insert Parameter Reference…" → dialog picks source node + param → auto-generates `par("node", "param")` expression and switches to EXPRESSION mode.
+- **Right-click any parameter label** → "Insert CHOP Reference…" → dialog picks CHOP node + channel + optional scale/offset → auto-generates `chop("lfo1", "out") * 2.0 + 1.0` expression.
+- **Right-click a CHOP node** in the graph → "Insert CHOP Reference…" → same dialog but pre-filled with the CHOP node ID and channels from its cached output.
+- **Programmatic:** `param.set_param_reference("ctrl_panel", "master_scale")` and `param.set_chop_reference("lfo1", "out", 2.0, 1.0)` generate expressions automatically.
 
 #### Circular Dependency Protection
 If `par("a")` references `par("b")` which references `par("a")`, the engine detects the cycle at runtime and returns the fallback value with a warning. No infinite loops or stack overflows.
@@ -2046,32 +2012,16 @@ func resolve_parameter(node: GNNode, param_name: String) -> Variant:
             return param.value
         GNParameter.Mode.EXPRESSION:
             return _evaluate_expression(node, param_name, param)
-        GNParameter.Mode.BIND:
-            return _resolve_bind(node, param)
-        GNParameter.Mode.EXPORT:
-            return param.value  # Export sets value directly, just read it
     return param.value
 
 func _evaluate_expression(node: GNNode, param_name: String, param: GNParameter) -> Variant:
     var expr: Expression = _get_or_compile(node.id, param_name, param.expression)
-    var result = expr.execute(_build_context(node), node)
+    var result = expr.execute(_build_context(node), self)  # self = CookEngine (provides chop/par/op/top)
     if expr.has_execute_failed():
         push_warning("Expression error on %s.%s: %s" % [node.id, param_name, expr.get_error_text()])
         return param.fallback_value  # Return last good value or default
     param.resolved_value = result    # Cache for UI tooltip display
     return result
-
-func _resolve_bind(node: GNNode, param: GNParameter) -> Variant:
-    var source_node: GNNode = network.nodes.get(param.bind_source_node, null)
-    if not source_node:
-        return param.fallback_value
-    var source_param: GNParameter = source_node.parameters.get(param.bind_source_param, null)
-    if not source_param:
-        return param.fallback_value
-    var value: Variant = resolve_parameter(source_node, param.bind_source_param)
-    if param.bind_transform:
-        value = param.bind_transform.call(value)
-    return value
 
 func _build_context(node: GNNode) -> Array:
     # Build the bindings array for Expression.execute()
@@ -2100,17 +2050,11 @@ Wire dependencies (explicit, via connections):
 
 Expression dependencies (implicit, via param references):
     LFO_CHOP ··expr··► CompositeTOP    (CompositeTOP.opacity expression reads chop("lfo1"))
-
-Bind dependencies (implicit, direct):
-    ControlPanel ··bind··► NoiseTOP    (NoiseTOP.scale BIND to ctrl.master_scale)
-
-Export dependencies (implicit, push):
-    LFO_CHOP ··export··► NoiseTOP     (LFO exports "out" → noise1.par.scale)
-             ··export··► LevelTOP     (LFO exports "out" → level1.par.brightness)
+    ControlPanel ··expr··► NoiseTOP    (NoiseTOP.scale has expression par("ctrl", "master_scale"))
 ```
 
-**All dependency types** feed into the same DAG for topological sort and cycle detection. The cook engine treats them uniformly:
-1. Collect all edges: wire connections + expression deps + bind deps + export deps
+**Both dependency types** feed into the same DAG for topological sort and cycle detection. The cook engine treats them uniformly:
+1. Collect all edges: wire connections + expression deps
 2. Topological sort the full graph
 3. Detect cycles (reject if found)
 4. Cook in order
@@ -2118,16 +2062,13 @@ Export dependencies (implicit, push):
 **Dirty propagation:**
 - Wire: upstream cooks → downstream marked dirty (standard)
 - Expression: referenced node parameter changes → mark this node dirty
-- Bind: source parameter changes → mark bound node dirty
-- Export: CHOP cooks → push values to all export targets → mark them dirty
 
 ### 17.7 Circular Reference Protection
-- All reference types (expression, bind, export) add edges to the dependency DAG
+- All expression references add edges to the dependency DAG
 - If adding a reference would create a cycle, it is rejected immediately
 - Expression mode: error shown inline in the expression text field
-- Bind mode: bind cannot be created (UI shows "would create circular dependency")
-- Export mode: export mapping rejected (CHOP shows warning)
 - Self-references via `me.par.X` within the same parameter are always rejected
+- Runtime guard: `_evaluating_params` dictionary in cook engine prevents infinite recursion; if a param is already being evaluated, the guard returns the fallback value instead of recursing
 
 ### 17.8 UI Integration
 
@@ -2137,10 +2078,8 @@ Export dependencies (implicit, push):
 |------------|------------------------------------------------------|------------|-----------------------------|
 | CONSTANT   | Standard input control (slider, spinner, color, etc.) | None       | None                        |
 | EXPRESSION | Text field with syntax highlighting. Resolved value shown on hover. | `fx`       | None (expression is invisible in graph) |
-| BIND       | Read-only display: `← ctrl.master_scale`. Click to select source. | `→`        | Dashed line from source param to target param |
-| EXPORT     | Read-only display: `← lfo1:out`. Dimmed, locked.    | `◄`        | Dotted line from CHOP to target param |
 
-**Mode switching:** Right-click any parameter → Set Mode → Constant / Expression / Bind / Export
+**Mode switching:** Click the C/E toggle button on any parameter row, or right-click → "Insert Parameter Reference…" / "Insert CHOP Reference…" to auto-generate an expression.
 
 **Autocomplete (planned for MVP):**
 - When typing `op("` in an expression field, show dropdown of available node names
@@ -2148,10 +2087,10 @@ Export dependencies (implicit, push):
 - After `chop("lfo1").value("`, show dropdown of channel names
 - Provides discoverability without memorizing node/param names
 
-**Drag-and-drop parameter linking:**
+**Drag-and-drop parameter linking (planned):**
 - Drag a parameter label from one node's inspector to another node's parameter field
-- Automatically creates a BIND connection
-- Hold Ctrl while dragging to create an EXPRESSION with `op("source").par.param` pre-filled
+- Automatically creates an EXPRESSION with `par("source", "param")` pre-filled
+- Hold Ctrl while dragging to create a `chop()` reference if source is a CHOP
 
 ---
 

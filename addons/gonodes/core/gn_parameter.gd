@@ -1,16 +1,14 @@
 class_name GNParameter
 extends Resource
-## A typed parameter on a GNNode with four value modes:
-## CONSTANT, EXPRESSION, BIND, and EXPORT (last two are post-MVP).
-## Handles value storage, mode switching, expression compilation, and
-## bind/export metadata.
+## A typed parameter on a GNNode with two value modes:
+## CONSTANT and EXPRESSION.  Cross-node references (parameter binds,
+## CHOP channel reads) are handled via expression functions — par(),
+## chop(), etc. — rather than separate mode machinery.
 
-## The four parameter modes — how the parameter's runtime value is determined.
+## The two parameter modes — how the parameter's runtime value is determined.
 enum Mode {
 	CONSTANT,    ## User-set literal value (slider, spinbox, color picker, etc.)
 	EXPRESSION,  ## GDScript expression string evaluated every cook frame
-	BIND,        ## Direct pointer to another node's parameter (no string eval)
-	EXPORT,      ## Value pushed from a CHOP's export mapping (passive)
 }
 
 ## Supported value types for parameters.
@@ -47,17 +45,17 @@ enum ValueType {
 
 # ─── Value Storage ─────────────────────────────────────────────────────────────
 
-## The stored value (for CONSTANT mode, or the last-set value for EXPORT mode).
+## The stored value (for CONSTANT mode, or the last-set value).
 @export var value: Variant = 0.0
 
 ## Default value used for reset and initial state.
 @export var default_value: Variant = 0.0
 
-## Last successfully resolved value (from expression, bind, or export).
+## Last successfully resolved value (from expression evaluation).
 ## Used as a fallback if the next evaluation fails.
 var resolved_value: Variant = 0.0
 
-## Fallback value returned when expression or bind evaluation fails.
+## Fallback value returned when expression evaluation fails.
 var fallback_value: Variant = 0.0
 
 # ─── Constraints ───────────────────────────────────────────────────────────────
@@ -128,18 +126,6 @@ var component_expression_eval_usec: Array = []  # Array[float]
 
 ## Number of samples used for the rolling average.
 const _PROFILE_ALPHA: float = 0.1  # Exponential moving average smoothing
-
-# ─── Bind Mode (Post-MVP) ─────────────────────────────────────────────────────
-
-## Node ID of the bind source (e.g., "ctrl_panel").
-@export var bind_source_node: String = ""
-
-## Parameter name on the source node (e.g., "master_scale").
-@export var bind_source_param: String = ""
-
-## Optional transform applied after reading the bound value.
-var bind_transform: Callable = Callable()
-
 
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
@@ -327,7 +313,7 @@ func set_value(new_value: Variant) -> void:
 		value_changed.emit(param_name, value)
 
 
-## Returns the current effective value (constant, resolved expression, bound, or exported).
+## Returns the current effective value (constant or resolved expression).
 func get_resolved_value() -> Variant:
 	if mode == Mode.CONSTANT:
 		return value
@@ -343,9 +329,6 @@ func reset() -> void:
 	_compiled_expression = null
 	_expression_valid = false
 	expression_error = ""
-	bind_source_node = ""
-	bind_source_param = ""
-	bind_transform = Callable()
 	# Reset per-component expressions
 	for i in range(component_modes.size()):
 		component_modes[i] = Mode.CONSTANT
@@ -375,20 +358,24 @@ func set_expression(expr_text: String) -> void:
 	mode_changed.emit(param_name, mode)
 
 
-## Switches to BIND mode pointing at [param source_node].[param source_param].
-func set_bind(source_node: String, source_param: String,
-		transform: Callable = Callable()) -> void:
-	mode = Mode.BIND
-	bind_source_node = source_node
-	bind_source_param = source_param
-	bind_transform = transform
-	mode_changed.emit(param_name, mode)
+## Convenience: sets expression mode with a par() reference to another node's parameter.
+## Equivalent to the old BIND mode but uses the expression engine instead.
+func set_param_reference(source_node: String, source_param: String) -> void:
+	var expr_text := 'par("%s", "%s")' % [source_node, source_param]
+	set_expression(expr_text)
 
 
-## Switches to EXPORT mode (passive — value is written by the cook engine's export pass).
-func set_export_mode() -> void:
-	mode = Mode.EXPORT
-	mode_changed.emit(param_name, mode)
+## Convenience: sets expression mode with a chop() reference to a CHOP channel.
+## Equivalent to the old EXPORT mode but uses the expression engine instead.
+func set_chop_reference(source_node: String, channel: String,
+		scale: float = 1.0, offset: float = 0.0) -> void:
+	var expr_text := 'chop("%s", "%s")' % [source_node, channel]
+	if not is_equal_approx(scale, 1.0):
+		expr_text += " * %s" % str(scale)
+	if not is_equal_approx(offset, 0.0):
+		var sign_str := " + " if offset >= 0.0 else " - "
+		expr_text += sign_str + str(absf(offset))
+	set_expression(expr_text)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -698,7 +685,7 @@ func to_dict() -> Dictionary:
 
 	# Save mode if not CONSTANT
 	if mode != Mode.CONSTANT:
-		d["mode"] = Mode.keys()[mode]  # "EXPRESSION", "BIND", "EXPORT"
+		d["mode"] = Mode.keys()[mode]  # "EXPRESSION"
 
 	# Save expression text if in expression mode
 	if mode == Mode.EXPRESSION and not expression.is_empty():
@@ -714,13 +701,6 @@ func to_dict() -> Dictionary:
 			})
 		d["component_expressions"] = comp_data
 
-	# Save bind info if in bind mode
-	if mode == Mode.BIND:
-		if not bind_source_node.is_empty():
-			d["bind_source_node"] = bind_source_node
-		if not bind_source_param.is_empty():
-			d["bind_source_param"] = bind_source_param
-
 	return d
 
 
@@ -733,9 +713,16 @@ func from_dict(d: Dictionary) -> void:
 		"EXPRESSION":
 			mode = Mode.EXPRESSION
 		"BIND":
-			mode = Mode.BIND
+			# Legacy migration: convert old BIND to expression par() reference
+			mode = Mode.EXPRESSION
+			var bsn: String = d.get("bind_source_node", "")
+			var bsp: String = d.get("bind_source_param", "")
+			if not bsn.is_empty() and not bsp.is_empty():
+				expression = 'par("%s", "%s")' % [bsn, bsp]
 		"EXPORT":
-			mode = Mode.EXPORT
+			# Legacy migration: EXPORT params revert to CONSTANT;
+			# users should re-create as chop() expressions.
+			mode = Mode.CONSTANT
 		_:
 			mode = Mode.CONSTANT
 
@@ -763,8 +750,4 @@ func from_dict(d: Dictionary) -> void:
 			if component_modes[i] == Mode.EXPRESSION and not component_expressions[i].is_empty():
 				_compile_component_expression(i)
 
-	# Restore bind info
-	if d.has("bind_source_node"):
-		bind_source_node = d["bind_source_node"]
-	if d.has("bind_source_param"):
-		bind_source_param = d["bind_source_param"]
+	# Legacy bind info is handled above in the mode restore block

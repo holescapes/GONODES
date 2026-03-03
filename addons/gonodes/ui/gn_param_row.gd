@@ -891,13 +891,14 @@ func _update_comp_value_display() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _on_mode_toggle() -> void:
-	if param.mode == GNParameter.Mode.CONSTANT:
-		# Switch to expression mode — restore saved expression and recompile
-		_expr_edit.text = param.expression
-		param.set_expression(param.expression)
-	else:
-		# Switch back to constant mode (expression text is preserved)
-		param.set_constant()
+	match param.mode:
+		GNParameter.Mode.CONSTANT:
+			# C → E
+			_expr_edit.text = param.expression
+			param.set_expression(param.expression)
+		GNParameter.Mode.EXPRESSION:
+			# E → C
+			param.set_constant()
 	_update_mode_display()
 
 
@@ -911,6 +912,7 @@ func _update_mode_display() -> void:
 		GNParameter.Mode.CONSTANT:
 			_mode_btn.text = "C"
 			_mode_btn.modulate = Color(0.5, 0.8, 0.5)  # Green tint
+			_mode_btn.tooltip_text = "CONSTANT mode — direct literal value. Click to cycle mode."
 			if _control:
 				_control.visible = true
 			_expr_edit.visible = false
@@ -920,6 +922,7 @@ func _update_mode_display() -> void:
 		GNParameter.Mode.EXPRESSION:
 			_mode_btn.text = "E"
 			_mode_btn.modulate = Color(0.8, 0.6, 0.2)  # Orange tint
+			_mode_btn.tooltip_text = "EXPRESSION mode — evaluated each frame. Click to cycle mode."
 			if _control:
 				_control.visible = false
 			_expr_edit.visible = true
@@ -938,12 +941,6 @@ func _update_mode_display() -> void:
 			else:
 				_expr_edit.remove_theme_color_override("font_color")
 				_expr_edit.tooltip_text = ""
-		GNParameter.Mode.BIND:
-			_mode_btn.text = "B"
-			_mode_btn.modulate = Color(0.4, 0.6, 0.9)  # Blue tint
-		GNParameter.Mode.EXPORT:
-			_mode_btn.text = "X"
-			_mode_btn.modulate = Color(0.8, 0.3, 0.3)  # Red tint
 
 ## Updates expression error/tooltip indicator AND resolved-value preview
 ## (called per-cook). Does NOT touch _expr_edit.text to avoid destroying edits.
@@ -1158,6 +1155,12 @@ func _show_param_context_menu(screen_pos: Vector2) -> void:
 	# op() style: op("node_id", "param_name")
 	_param_context_menu.add_item('Copy op() Ref  op("%s", "%s")' % [node_id, p_name], 2)
 
+	_param_context_menu.add_separator()
+
+	# Insert reference pickers (set expression and switch to expression mode)
+	_param_context_menu.add_item("Insert Parameter Reference…", 10)
+	_param_context_menu.add_item("Insert CHOP Reference…", 11)
+
 	_param_context_menu.position = Vector2i(screen_pos)
 	_param_context_menu.reset_size()
 	_param_context_menu.popup()
@@ -1175,6 +1178,12 @@ func _on_param_context_id(id: int) -> void:
 			ref = 'par("%s", "%s")' % [node_id, p_name]
 		2:
 			ref = 'op("%s", "%s")' % [node_id, p_name]
+		10:
+			_show_param_reference_picker()
+			return
+		11:
+			_show_chop_reference_picker()
+			return
 	if not ref.is_empty():
 		DisplayServer.clipboard_set(ref)
 
@@ -1236,3 +1245,145 @@ func _get_resolved_component(idx: int) -> float:
 	if rv is Color:
 		return [rv.r, rv.g, rv.b, rv.a][idx] if idx < 4 else 0.0
 	return 0.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Insert Reference Pickers (right-click → "Insert Parameter/CHOP Reference…")
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Shows a dialog to insert a par() expression referencing another node's parameter.
+## On confirm, switches this param to EXPRESSION mode with the generated expression.
+func _show_param_reference_picker() -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title = "Insert Parameter Reference → '%s'" % param.param_name
+	dialog.ok_button_text = "Insert"
+	dialog.size = Vector2i(420, 160)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 6)
+
+	var node_lbl := Label.new()
+	node_lbl.text = "Source node ID:"
+	vbox.add_child(node_lbl)
+	var node_edit := LineEdit.new()
+	node_edit.placeholder_text = "e.g., ctrl_panel"
+	vbox.add_child(node_edit)
+
+	var param_lbl := Label.new()
+	param_lbl.text = "Source parameter name:"
+	vbox.add_child(param_lbl)
+	var param_edit := LineEdit.new()
+	param_edit.placeholder_text = "e.g., master_scale"
+	vbox.add_child(param_edit)
+
+	dialog.add_child(vbox)
+
+	dialog.confirmed.connect(func() -> void:
+		var src_node: String = node_edit.text.strip_edges()
+		var src_param_name: String = param_edit.text.strip_edges()
+		if not src_node.is_empty() and not src_param_name.is_empty():
+			param.set_param_reference(src_node, src_param_name)
+			_expr_edit.text = param.expression
+			_update_mode_display()
+			if owner_node:
+				owner_node.mark_dirty()
+		dialog.queue_free()
+	)
+	dialog.canceled.connect(func() -> void:
+		dialog.queue_free()
+	)
+
+	var root := get_tree().root if get_tree() else null
+	if root:
+		root.add_child(dialog)
+		dialog.popup_centered()
+	else:
+		dialog.queue_free()
+
+
+## Shows a dialog to insert a chop() expression referencing a CHOP channel.
+## On confirm, switches this param to EXPRESSION mode with the generated expression.
+func _show_chop_reference_picker() -> void:
+	# Gather available CHOP nodes from the network for hints
+	var chop_names: PackedStringArray = []
+	if network != null:
+		for nid in network.nodes:
+			var n: GNNode = network.nodes[nid]
+			if n.family == GNFamily.Type.CHOP:
+				chop_names.append(nid)
+
+	var dialog := AcceptDialog.new()
+	dialog.title = "Insert CHOP Reference → '%s'" % param.param_name
+	dialog.ok_button_text = "Insert"
+	dialog.size = Vector2i(420, 220)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 6)
+
+	var node_lbl := Label.new()
+	node_lbl.text = "CHOP node ID:"
+	vbox.add_child(node_lbl)
+	var node_edit := LineEdit.new()
+	node_edit.placeholder_text = "e.g., lfo1"
+	vbox.add_child(node_edit)
+	if not chop_names.is_empty():
+		var hint := Label.new()
+		hint.text = "Available CHOPs: %s" % ", ".join(chop_names)
+		hint.add_theme_font_size_override("font_size", 10)
+		hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		vbox.add_child(hint)
+
+	var ch_lbl := Label.new()
+	ch_lbl.text = "Channel name:"
+	vbox.add_child(ch_lbl)
+	var ch_edit := LineEdit.new()
+	ch_edit.text = "out"
+	ch_edit.placeholder_text = "e.g., out"
+	vbox.add_child(ch_edit)
+
+	# Optional scale / offset
+	var opts := HBoxContainer.new()
+	opts.add_theme_constant_override("separation", 8)
+	var sc_lbl := Label.new()
+	sc_lbl.text = "Scale:"
+	opts.add_child(sc_lbl)
+	var sc_spin := SpinBox.new()
+	sc_spin.value = 1.0
+	sc_spin.min_value = -1000.0
+	sc_spin.max_value = 1000.0
+	sc_spin.step = 0.01
+	opts.add_child(sc_spin)
+	var off_lbl := Label.new()
+	off_lbl.text = "Offset:"
+	opts.add_child(off_lbl)
+	var off_spin := SpinBox.new()
+	off_spin.value = 0.0
+	off_spin.min_value = -10000.0
+	off_spin.max_value = 10000.0
+	off_spin.step = 0.01
+	opts.add_child(off_spin)
+	vbox.add_child(opts)
+
+	dialog.add_child(vbox)
+
+	dialog.confirmed.connect(func() -> void:
+		var src_node: String = node_edit.text.strip_edges()
+		var channel: String = ch_edit.text.strip_edges()
+		if not src_node.is_empty() and not channel.is_empty():
+			param.set_chop_reference(src_node, channel, sc_spin.value, off_spin.value)
+			_expr_edit.text = param.expression
+			_update_mode_display()
+			if owner_node:
+				owner_node.mark_dirty()
+		dialog.queue_free()
+	)
+	dialog.canceled.connect(func() -> void:
+		dialog.queue_free()
+	)
+
+	var root := get_tree().root if get_tree() else null
+	if root:
+		root.add_child(dialog)
+		dialog.popup_centered()
+	else:
+		dialog.queue_free()

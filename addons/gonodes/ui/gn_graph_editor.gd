@@ -57,6 +57,14 @@ enum _CtxID {
 	GROUP_SELECTED,
 	COPY_NODE_PATH,
 	COPY_OUTPUT_REF,
+	COPY_PARAMS,
+	PASTE_PARAMS,
+	RESET_PARAMS,
+	SAVE_PARAM_PRESET,
+	ADD_CHOP_EXPORT,  # Legacy — now "Insert CHOP Reference"
+	INSERT_CHOP_REF,
+	## Dynamic IDs for preset loading start here (100+).
+	LOAD_PARAM_PRESET_BASE = 100,
 }
 
 ## Undo/redo history for graph operations.
@@ -67,6 +75,21 @@ var _export_dialog: FileDialog = null
 
 ## The node whose output is being exported (set before dialog opens).
 var _export_target_node: GNNode = null
+
+## Cached preset list for the "Load Param Preset" submenu (populated on context open).
+var _param_preset_list: Array = []
+
+## Submenu for loading parameter presets.
+var _param_preset_submenu: PopupMenu = null
+
+## Save-preset dialog (name input).
+var _save_preset_dialog: AcceptDialog = null
+var _save_preset_line_edit: LineEdit = null
+var _save_preset_target_node: GNNode = null
+
+## Insert CHOP Reference dialog.
+var _chop_ref_dialog: AcceptDialog = null
+var _chop_ref_source_node: GNNode = null
 
 ## Snapshot of selected node positions before a drag move begins.
 var _pre_move_positions: Dictionary = {}
@@ -1808,8 +1831,18 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item("Export Output…", _CtxID.EXPORT_OUTPUT)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.EXPORT_OUTPUT), not can_export)
 
-	# Copy Reference submenu — copies expression-ready path to clipboard
+	# Insert CHOP Reference — enabled when exactly one CHOP node is selected
+	var is_single_chop := false
+	if selected_ids.size() == 1 and network != null:
+		var chop_node: GNNode = network.get_node_by_id(selected_ids[0])
+		if chop_node != null and chop_node.family == GNFamily.Type.CHOP:
+			is_single_chop = true
+	_context_menu.add_item("Insert CHOP Reference…", _CtxID.INSERT_CHOP_REF)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.INSERT_CHOP_REF), not is_single_chop)
+
+	# ── Parameter Preset actions ──────────────────────────────────────
 	_context_menu.add_separator()
+
 	var single_selected := selected_ids.size() == 1
 	var sel_node_name := ""
 	var sel_node_family_str := ""
@@ -1818,6 +1851,55 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 		if sn != null:
 			sel_node_name = sn.id
 			sel_node_family_str = GNFamily.get_family_name(sn.family).to_lower()
+
+	# Copy / Paste Params — single node selected, same-type clipboard
+	_context_menu.add_item("Copy Parameters", _CtxID.COPY_PARAMS)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_PARAMS), not single_selected)
+
+	var can_paste_params := false
+	if single_selected and network != null:
+		var paste_node: GNNode = network.get_node_by_id(selected_ids[0])
+		can_paste_params = GNParamPresetManager.can_paste(paste_node)
+	_context_menu.add_item("Paste Parameters", _CtxID.PASTE_PARAMS)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.PASTE_PARAMS), not can_paste_params)
+
+	_context_menu.add_item("Reset to Defaults", _CtxID.RESET_PARAMS)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.RESET_PARAMS), not single_selected)
+
+	_context_menu.add_item("Save Param Preset…", _CtxID.SAVE_PARAM_PRESET)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.SAVE_PARAM_PRESET), not single_selected)
+
+	# Load Param Preset submenu — populated dynamically
+	if single_selected and network != null:
+		var preset_node: GNNode = network.get_node_by_id(selected_ids[0])
+		if preset_node != null:
+			var op_type: String = preset_node.get_script().get_global_name()
+			_param_preset_list = GNParamPresetManager.get_preset_list(op_type)
+	else:
+		_param_preset_list = []
+
+	if _param_preset_submenu != null:
+		_param_preset_submenu.queue_free()
+	_param_preset_submenu = PopupMenu.new()
+	_param_preset_submenu.name = "ParamPresetSubmenu"
+	if _param_preset_list.is_empty():
+		_param_preset_submenu.add_item("(no presets)", -1)
+		_param_preset_submenu.set_item_disabled(0, true)
+	else:
+		for i in range(_param_preset_list.size()):
+			var entry: Dictionary = _param_preset_list[i]
+			var label: String = entry["name"]
+			if entry["is_factory"]:
+				label += "  [factory]"
+			_param_preset_submenu.add_item(label, _CtxID.LOAD_PARAM_PRESET_BASE + i)
+		_param_preset_submenu.id_pressed.connect(_on_context_menu_id_pressed)
+	_context_menu.add_child(_param_preset_submenu)
+	_context_menu.add_submenu_node_item("Load Param Preset", _param_preset_submenu)
+	_context_menu.set_item_disabled(
+		_context_menu.item_count - 1, not single_selected or _param_preset_list.is_empty())
+
+	# ── Copy Reference ────────────────────────────────────────────────
+	_context_menu.add_separator()
 
 	_context_menu.add_item('Copy Node Path  op("%s")' % sel_node_name if single_selected else "Copy Node Path", _CtxID.COPY_NODE_PATH)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_NODE_PATH), not single_selected)
@@ -1895,6 +1977,21 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			_copy_node_path_to_clipboard()
 		_CtxID.COPY_OUTPUT_REF:
 			_copy_output_ref_to_clipboard()
+		_CtxID.COPY_PARAMS:
+			_copy_selected_params()
+		_CtxID.PASTE_PARAMS:
+			_paste_selected_params()
+		_CtxID.RESET_PARAMS:
+			_reset_selected_params()
+		_CtxID.SAVE_PARAM_PRESET:
+			_show_save_preset_dialog()
+		_CtxID.ADD_CHOP_EXPORT, _CtxID.INSERT_CHOP_REF:
+			_show_insert_chop_ref_dialog()
+		_:
+			# Dynamic preset load IDs
+			if id >= _CtxID.LOAD_PARAM_PRESET_BASE:
+				var preset_idx: int = id - _CtxID.LOAD_PARAM_PRESET_BASE
+				_load_param_preset(preset_idx)
 
 
 ## Copies an expression-ready op("node_id") path for the selected node.
@@ -2629,3 +2726,235 @@ func group_selected_into_subnet() -> void:
 
 	GNLogger.info("GraphEditor", "Grouped %d nodes into sub-network '%s' (%d in, %d out)" % [
 		selected.size(), subnet_id, in_tunnel_map.size(), out_tunnel_map.size()])
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Parameter Presets — Copy / Paste / Save / Load / Reset
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Copies parameters of the single selected node to the param clipboard.
+func _copy_selected_params() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node == null:
+		return
+	GNParamPresetManager.copy_params(node)
+
+
+## Pastes param clipboard onto the single selected node (same operator type).
+func _paste_selected_params() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node == null:
+		return
+	var applied := GNParamPresetManager.paste_params(node)
+	if applied > 0:
+		# Trigger inspector rebuild to reflect new values
+		node.parameters_changed.emit(node.id)
+
+
+## Resets all parameters on the single selected node to defaults.
+func _reset_selected_params() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node == null:
+		return
+	var count := GNParamPresetManager.reset_to_defaults(node)
+	if count > 0:
+		node.parameters_changed.emit(node.id)
+
+
+## Shows a dialog to name and save a param preset for the selected node.
+func _show_save_preset_dialog() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	_save_preset_target_node = network.get_node_by_id(selected[0])
+	if _save_preset_target_node == null:
+		return
+
+	if _save_preset_dialog == null:
+		_save_preset_dialog = AcceptDialog.new()
+		_save_preset_dialog.title = "Save Parameter Preset"
+		_save_preset_dialog.ok_button_text = "Save"
+		_save_preset_dialog.size = Vector2i(360, 120)
+
+		var vbox := VBoxContainer.new()
+		vbox.add_theme_constant_override("separation", 8)
+
+		var lbl := Label.new()
+		lbl.text = "Preset name:"
+		vbox.add_child(lbl)
+
+		_save_preset_line_edit = LineEdit.new()
+		_save_preset_line_edit.placeholder_text = "My Preset"
+		_save_preset_line_edit.select_all_on_focus = true
+		vbox.add_child(_save_preset_line_edit)
+
+		_save_preset_dialog.add_child(vbox)
+		_save_preset_dialog.confirmed.connect(_on_save_preset_confirmed)
+		add_child(_save_preset_dialog)
+
+	var op_type: String = _save_preset_target_node.get_script().get_global_name()
+	_save_preset_dialog.title = "Save Param Preset — %s" % op_type
+	_save_preset_line_edit.text = ""
+	_save_preset_line_edit.grab_focus.call_deferred()
+	_save_preset_dialog.popup_centered()
+
+
+## Called when the user confirms the save preset dialog.
+func _on_save_preset_confirmed() -> void:
+	var preset_name: String = _save_preset_line_edit.text.strip_edges()
+	if preset_name.is_empty():
+		GNLogger.warn("GraphEditor", "Cannot save preset with empty name")
+		return
+	if _save_preset_target_node == null:
+		return
+	var ok := GNParamPresetManager.save_preset(_save_preset_target_node, preset_name)
+	if ok:
+		GNLogger.info("GraphEditor", "Parameter preset '%s' saved" % preset_name)
+	_save_preset_target_node = null
+
+
+## Loads a parameter preset by index from the cached preset list.
+func _load_param_preset(preset_idx: int) -> void:
+	if preset_idx < 0 or preset_idx >= _param_preset_list.size():
+		return
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node == null:
+		return
+	var entry: Dictionary = _param_preset_list[preset_idx]
+	var applied := GNParamPresetManager.load_preset(node, entry["path"])
+	if applied > 0:
+		node.parameters_changed.emit(node.id)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Insert CHOP Reference
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Shows a dialog to insert a chop() expression reference from the selected CHOP
+## node into a target parameter on any node.  Replaces the old "Add CHOP Export"
+## workflow — instead of a separate export mapping, this writes a chop() expression
+## directly into the target parameter (same-frame, composable with math).
+func _show_insert_chop_ref_dialog() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	_chop_ref_source_node = network.get_node_by_id(selected[0])
+	if _chop_ref_source_node == null or _chop_ref_source_node.family != GNFamily.Type.CHOP:
+		return
+
+	# Gather available channel names from the CHOP's cached output
+	var channel_names: PackedStringArray = []
+	if _chop_ref_source_node.cached_output is GNChannelData:
+		channel_names = (_chop_ref_source_node.cached_output as GNChannelData).get_channel_names()
+
+	var dialog := AcceptDialog.new()
+	dialog.title = "Insert CHOP Reference — %s" % _chop_ref_source_node.id
+	dialog.ok_button_text = "Insert Reference"
+	dialog.size = Vector2i(420, 280)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 6)
+
+	# Source channel
+	var ch_lbl := Label.new()
+	ch_lbl.text = "Source channel:"
+	vbox.add_child(ch_lbl)
+	var ch_edit := LineEdit.new()
+	ch_edit.text = "out" if channel_names.is_empty() else channel_names[0]
+	ch_edit.placeholder_text = "e.g., out"
+	vbox.add_child(ch_edit)
+	if not channel_names.is_empty():
+		var hint := Label.new()
+		hint.text = "Available: %s" % ", ".join(channel_names)
+		hint.add_theme_font_size_override("font_size", 10)
+		hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		vbox.add_child(hint)
+
+	# Target node
+	var tn_lbl := Label.new()
+	tn_lbl.text = "Target node ID:"
+	vbox.add_child(tn_lbl)
+	var tn_edit := LineEdit.new()
+	tn_edit.placeholder_text = "e.g., noise1"
+	vbox.add_child(tn_edit)
+
+	# Target param
+	var tp_lbl := Label.new()
+	tp_lbl.text = "Target parameter:"
+	vbox.add_child(tp_lbl)
+	var tp_edit := LineEdit.new()
+	tp_edit.placeholder_text = "e.g., scale"
+	vbox.add_child(tp_edit)
+
+	# Scale / offset (optional, baked into the expression)
+	var opts := HBoxContainer.new()
+	opts.add_theme_constant_override("separation", 8)
+	var sc_lbl := Label.new()
+	sc_lbl.text = "Scale:"
+	opts.add_child(sc_lbl)
+	var sc_spin := SpinBox.new()
+	sc_spin.value = 1.0
+	sc_spin.min_value = -1000.0
+	sc_spin.max_value = 1000.0
+	sc_spin.step = 0.01
+	opts.add_child(sc_spin)
+	var off_lbl := Label.new()
+	off_lbl.text = "Offset:"
+	opts.add_child(off_lbl)
+	var off_spin := SpinBox.new()
+	off_spin.value = 0.0
+	off_spin.min_value = -10000.0
+	off_spin.max_value = 10000.0
+	off_spin.step = 0.01
+	opts.add_child(off_spin)
+	vbox.add_child(opts)
+
+	dialog.add_child(vbox)
+
+	var source_id: String = _chop_ref_source_node.id
+	dialog.confirmed.connect(func() -> void:
+		var channel: String = ch_edit.text.strip_edges()
+		var target_node_id: String = tn_edit.text.strip_edges()
+		var target_param_name: String = tp_edit.text.strip_edges()
+		if channel.is_empty() or target_node_id.is_empty() or target_param_name.is_empty():
+			GNLogger.warn("GraphEditor", "Insert CHOP Ref: all fields required")
+			dialog.queue_free()
+			return
+
+		var target: GNNode = network.nodes.get(target_node_id, null)
+		if target == null:
+			GNLogger.warn("GraphEditor", "Insert CHOP Ref: target node '%s' not found" % target_node_id)
+			dialog.queue_free()
+			return
+		var p: GNParameter = target.parameters.get(target_param_name, null)
+		if p == null:
+			GNLogger.warn("GraphEditor", "Insert CHOP Ref: target param '%s.%s' not found" % [
+				target_node_id, target_param_name])
+			dialog.queue_free()
+			return
+
+		# Use set_chop_reference() which generates the expression and switches to EXPRESSION mode
+		p.set_chop_reference(source_id, channel, sc_spin.value, off_spin.value)
+		target.mark_dirty()
+
+		GNLogger.info("GraphEditor", "Inserted CHOP reference: %s → %s.%s  expr='%s'" % [
+			source_id, target_node_id, target_param_name, p.expression])
+		dialog.queue_free()
+	)
+	dialog.canceled.connect(func() -> void:
+		dialog.queue_free()
+	)
+	add_child(dialog)
+	dialog.popup_centered()
