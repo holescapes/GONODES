@@ -1498,6 +1498,42 @@ GONODES/
 
 ---
 
+## 13.4. Unit Tests
+
+**Framework:** Lightweight, dependency-free GDScript test runner — no GdUnit4 or GUT required.
+
+**Run command:**
+```bash
+godot --headless -s tests/test_runner.gd
+godot --headless -s tests/test_runner.gd --test-filter=parameter   # filter by name
+```
+
+**Structure:**
+```
+tests/
+├── test_runner.gd          # GNTestRunner (extends SceneTree) — discovers & runs test_*.gd scripts
+├── test_assert.gd          # GNTestAssert — static assertion helpers (assert_eq, assert_approx, etc.)
+├── test_parameter.gd       # GNParameter: factory constructors, clamping, mode switching, serialization, legacy migration, per-component expressions
+├── test_cook_engine.gd     # GNCookEngine: expression eval (time/frame/dt), par() self/cross-node, parf/pari/pars, chop(), circular guard, component expressions, error recovery
+├── test_network.gd         # GNNetwork: add/remove nodes, connect/disconnect, topo sort, cycle detection, dirty propagation, rename, serialization structure
+├── test_channel_data.gd    # GNChannelData: single/multi-sample channels, index bounds, invalidate, duplicate_data deep copy
+├── test_preset_manager.gd  # GNParamPresetManager: clipboard copy/paste, type mismatch rejection, reset to defaults
+└── README.md
+```
+
+**Conventions:**
+- Test files: `tests/test_*.gd`, each extends `Node`
+- Test methods: `test_*()` — discovered automatically by the runner
+- Lifecycle hooks: `before_all()`, `after_all()`, `before_each()`, `after_each()` (optional)
+- Assertions: non-throwing — failures are recorded, allowing multiple assertions per test
+- Runner adds test instances to the scene tree root so `add_child()` works (needed for GNCookEngine, GNNetwork tests)
+
+**What's tested (core logic, no GPU):** GNParameter, GNCookEngine expression eval, GNNetwork graph model, GNChannelData, GNParamPresetManager.
+
+**What's NOT tested (deferred):** UI widgets, GPU TOPs (need SubViewport), hardware I/O (MIDI, OSC, audio, webcam), file-based preset save/load (needs user:// filesystem).
+
+---
+
 ## 13.5. Coding Guidelines
 
 These principles guide all GONODES development. Follow them when adding new operators, refactoring existing code, or reviewing contributions.

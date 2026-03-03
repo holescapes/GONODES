@@ -251,7 +251,7 @@ static func reset_to_defaults(node: GNNode) -> int:
 	if temp_node == null:
 		GNLogger.error("PresetManager", "Cannot instantiate '%s' for defaults" % operator_type)
 		return 0
-	temp_node.initialize()
+	temp_node.initialize("__temp_defaults__")
 
 	var reset_count := 0
 	for p_name in temp_node.parameters:
