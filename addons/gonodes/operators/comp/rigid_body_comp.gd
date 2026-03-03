@@ -1,0 +1,283 @@
+class_name RigidBodyCOMP
+extends GNCompBase
+## Wraps a RigidBody3D with CollisionShape3D for Jolt physics simulation.
+##
+## Takes SOP geometry input and auto-generates a collision shape from the mesh.
+## Supports Dynamic, Kinematic, and Static freeze modes plus full physics
+## property control (mass, friction, bounce, damping, axis locking).
+##
+## Optional CHOP input applies per-frame forces/impulses from upstream data.
+##
+## Architecture:
+##   SOP → RigidBodyCOMP → MergeCOMP → RenderTOP
+##                ↑ (optional)
+##            CHOP (forces)
+
+var _rigid_body: RigidBody3D = null
+var _collision_shape: CollisionShape3D = null
+var _mesh_instance: MeshInstance3D = null
+var _fallback_material: StandardMaterial3D = null
+## Tracks which collision shape type is currently applied.
+var _current_shape_type: int = -1
+## Cached mesh reference to detect when SOP input changes.
+var _last_mesh: ArrayMesh = null
+
+
+func _init() -> void:
+	node_type = "rigid_body"
+	node_description = "RigidBody3D with collision shape — dynamic physics object."
+
+
+func _init_ports() -> void:
+	add_input("geo_in", GNFamily.Type.SOP, false, "SOP geometry input")
+	add_input("mat_in", GNFamily.Type.MAT, false, "Material input (optional)")
+	add_input("force_in", GNFamily.Type.CHOP, false, "Force/impulse CHOP input (optional)")
+	add_output("out", GNFamily.Type.COMP, "RigidBody component")
+
+
+func _init_parameters() -> void:
+	# ── Transform (initial) ──────────────────────────────────────────────
+	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "Initial X position"))
+	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Initial Y position"))
+	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Initial Z position"))
+	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Initial rotation X (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Initial rotation Y (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Initial rotation Z (degrees)"))
+	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Scale X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Scale Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Scale Z"))
+
+	# ── Physics Mode ─────────────────────────────────────────────────────
+	add_parameter(GNParameter.create_enum("mode",
+		PackedStringArray(["Dynamic", "Kinematic", "Static"]), 0,
+		"Mode", "Physics body mode"))
+
+	# ── Physics Properties ───────────────────────────────────────────────
+	add_parameter(GNParameter.create_float("mass", 1.0, 0.001, 1000.0, 0.1,
+		"Mass", "Body mass in kg"))
+	add_parameter(GNParameter.create_float("gravity_scale", 1.0, -10.0, 10.0, 0.1,
+		"Gravity Scale", "Gravity multiplier (0 = weightless, negative = floats up)"))
+	add_parameter(GNParameter.create_float("friction", 1.0, 0.0, 2.0, 0.01,
+		"Friction", "Surface friction coefficient"))
+	add_parameter(GNParameter.create_float("bounce", 0.0, 0.0, 1.0, 0.01,
+		"Bounce", "Restitution / bounciness"))
+	add_parameter(GNParameter.create_float("linear_damp", 0.0, 0.0, 100.0, 0.1,
+		"Linear Damp", "Linear velocity damping"))
+	add_parameter(GNParameter.create_float("angular_damp", 0.0, 0.0, 100.0, 0.1,
+		"Angular Damp", "Angular velocity damping"))
+
+	# ── Initial Velocity ─────────────────────────────────────────────────
+	add_parameter(GNParameter.create_float("init_vel_x", 0.0, null, null, 0.1,
+		"Init Vel X", "Initial linear velocity X"))
+	add_parameter(GNParameter.create_float("init_vel_y", 0.0, null, null, 0.1,
+		"Init Vel Y", "Initial linear velocity Y"))
+	add_parameter(GNParameter.create_float("init_vel_z", 0.0, null, null, 0.1,
+		"Init Vel Z", "Initial linear velocity Z"))
+
+	# ── Axis Locking ─────────────────────────────────────────────────────
+	add_parameter(GNParameter.create_bool("lock_rot_x", false,
+		"Lock Rot X", "Lock rotation around X axis"))
+	add_parameter(GNParameter.create_bool("lock_rot_y", false,
+		"Lock Rot Y", "Lock rotation around Y axis"))
+	add_parameter(GNParameter.create_bool("lock_rot_z", false,
+		"Lock Rot Z", "Lock rotation around Z axis"))
+
+	# ── Collision Shape ──────────────────────────────────────────────────
+	add_parameter(GNParameter.create_enum("collision_shape",
+		PackedStringArray(["Convex Hull", "Box", "Sphere", "Capsule", "Trimesh"]), 0,
+		"Collision Shape", "Collision shape type (Convex Hull auto-generated from mesh)"))
+
+	# ── Continuous Collision Detection ───────────────────────────────────
+	add_parameter(GNParameter.create_bool("ccd", false,
+		"CCD", "Continuous collision detection (prevents tunnelling for fast objects)"))
+
+	# ── Visual ───────────────────────────────────────────────────────────
+	add_parameter(GNParameter.create_color("albedo_color", Color.WHITE,
+		"Albedo Color", "Surface base colour (fallback PBR)"))
+	add_parameter(GNParameter.create_float("metallic", 0.0, 0.0, 1.0, 0.01,
+		"Metallic", "Metallic factor"))
+	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01,
+		"Roughness", "Surface roughness"))
+	add_parameter(GNParameter.create_bool("visible", true,
+		"Visible", "Show or hide the mesh"))
+	add_parameter(GNParameter.create_enum("cast_shadow",
+		PackedStringArray(["Off", "On", "Double-Sided", "Shadows Only"]), 1,
+		"Cast Shadow", "Shadow casting mode"))
+
+
+func _cook(inputs: Array[GNData]) -> GNData:
+	var geo_in: GNGeoData = inputs[0] as GNGeoData if inputs.size() > 0 and inputs[0] is GNGeoData else null
+	var mat_in: GNMaterialData = inputs[1] as GNMaterialData if inputs.size() > 1 and inputs[1] is GNMaterialData else null
+	var force_in: GNChannelData = inputs[2] as GNChannelData if inputs.size() > 2 and inputs[2] is GNChannelData else null
+
+	_ensure_body()
+
+	# ── Physics mode ─────────────────────────────────────────────────────
+	var mode_idx: int = get_param_value("mode")
+	match mode_idx:
+		0:  # Dynamic
+			_rigid_body.freeze = false
+		1:  # Kinematic
+			_rigid_body.freeze = true
+			_rigid_body.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
+		2:  # Static
+			_rigid_body.freeze = true
+			_rigid_body.freeze_mode = RigidBody3D.FREEZE_MODE_STATIC
+
+	# ── Physics properties ───────────────────────────────────────────────
+	_rigid_body.mass = get_param_value("mass")
+	_rigid_body.gravity_scale = get_param_value("gravity_scale")
+
+	# Physics material
+	if _rigid_body.physics_material_override == null:
+		_rigid_body.physics_material_override = PhysicsMaterial.new()
+	_rigid_body.physics_material_override.friction = get_param_value("friction")
+	_rigid_body.physics_material_override.bounce = get_param_value("bounce")
+
+	_rigid_body.linear_damp = get_param_value("linear_damp")
+	_rigid_body.angular_damp = get_param_value("angular_damp")
+	_rigid_body.continuous_cd = get_param_value("ccd")
+
+	# ── Axis locking ─────────────────────────────────────────────────────
+	_rigid_body.axis_lock_angular_x = get_param_value("lock_rot_x")
+	_rigid_body.axis_lock_angular_y = get_param_value("lock_rot_y")
+	_rigid_body.axis_lock_angular_z = get_param_value("lock_rot_z")
+
+	# ── Transform (applied only when not simulating dynamic) ─────────────
+	if mode_idx != 0:  # Kinematic or Static — user controls transform
+		_rigid_body.position = Vector3(
+			get_param_value("tx"), get_param_value("ty"), get_param_value("tz"))
+		_rigid_body.rotation_degrees = Vector3(
+			get_param_value("rx"), get_param_value("ry"), get_param_value("rz"))
+	_rigid_body.scale = Vector3(
+		get_param_value("sx"), get_param_value("sy"), get_param_value("sz"))
+
+	# ── Mesh + collision shape ───────────────────────────────────────────
+	if geo_in != null and geo_in.has_geometry():
+		_mesh_instance.mesh = geo_in.mesh
+		_update_collision_shape(geo_in.mesh)
+	else:
+		_mesh_instance.mesh = null
+
+	# ── Material ─────────────────────────────────────────────────────────
+	if mat_in != null and mat_in.material != null:
+		_mesh_instance.material_override = mat_in.material
+	else:
+		if _fallback_material == null:
+			_fallback_material = StandardMaterial3D.new()
+		_mesh_instance.material_override = _fallback_material
+		_fallback_material.albedo_color = get_param_value("albedo_color")
+		_fallback_material.metallic = get_param_value("metallic")
+		_fallback_material.roughness = get_param_value("roughness")
+
+	_mesh_instance.visible = get_param_value("visible")
+
+	# Shadow casting
+	var shadow_mode: int = get_param_value("cast_shadow")
+	match shadow_mode:
+		0: _mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		1: _mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		2: _mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
+		3: _mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+
+	# ── CHOP force input ─────────────────────────────────────────────────
+	if force_in != null and mode_idx == 0:
+		_apply_forces(force_in)
+
+	return null
+
+
+## Lazily creates the RigidBody3D hierarchy: body → collision_shape + mesh_instance.
+func _ensure_body() -> void:
+	if _rigid_body != null:
+		return
+
+	_rigid_body = RigidBody3D.new()
+	_rigid_body.name = id + "_rigid"
+	_scene_node = _rigid_body
+
+	_collision_shape = CollisionShape3D.new()
+	_collision_shape.name = "CollisionShape"
+	_rigid_body.add_child(_collision_shape)
+
+	_mesh_instance = MeshInstance3D.new()
+	_mesh_instance.name = "MeshVis"
+	_rigid_body.add_child(_mesh_instance)
+
+	# Apply initial velocity (only once on creation)
+	_rigid_body.linear_velocity = Vector3(
+		get_param_value("init_vel_x"),
+		get_param_value("init_vel_y"),
+		get_param_value("init_vel_z"))
+
+	# Set initial transform
+	_rigid_body.position = Vector3(
+		get_param_value("tx"), get_param_value("ty"), get_param_value("tz"))
+	_rigid_body.rotation_degrees = Vector3(
+		get_param_value("rx"), get_param_value("ry"), get_param_value("rz"))
+
+
+## Generates or updates the collision shape from the mesh.
+func _update_collision_shape(mesh: ArrayMesh) -> void:
+	var shape_idx: int = get_param_value("collision_shape")
+	if shape_idx == _current_shape_type and mesh == _last_mesh:
+		return  # No change needed
+
+	_current_shape_type = shape_idx
+	_last_mesh = mesh
+
+	match shape_idx:
+		0:  # Convex Hull
+			var shape := ConvexPolygonShape3D.new()
+			shape.points = mesh.get_faces()
+			_collision_shape.shape = shape
+		1:  # Box
+			var aabb: AABB = mesh.get_aabb()
+			var box := BoxShape3D.new()
+			box.size = aabb.size
+			_collision_shape.shape = box
+			_collision_shape.position = aabb.get_center()
+		2:  # Sphere
+			var aabb2: AABB = mesh.get_aabb()
+			var sphere := SphereShape3D.new()
+			sphere.radius = aabb2.get_longest_axis_size() * 0.5
+			_collision_shape.shape = sphere
+			_collision_shape.position = aabb2.get_center()
+		3:  # Capsule
+			var aabb3: AABB = mesh.get_aabb()
+			var capsule := CapsuleShape3D.new()
+			capsule.height = aabb3.size.y
+			capsule.radius = maxf(aabb3.size.x, aabb3.size.z) * 0.5
+			_collision_shape.shape = capsule
+			_collision_shape.position = aabb3.get_center()
+		4:  # Trimesh (concave — for complex static-like geometry)
+			var shape := ConcavePolygonShape3D.new()
+			shape.set_faces(mesh.get_faces())
+			_collision_shape.shape = shape
+
+
+## Applies force/impulse channels from CHOP input.
+## Recognized channels: force_x/y/z, impulse_x/y/z, torque_x/y/z.
+func _apply_forces(chop_data: GNChannelData) -> void:
+	var fx: float = chop_data.get_value("force_x") if chop_data.channels.has("force_x") else 0.0
+	var fy: float = chop_data.get_value("force_y") if chop_data.channels.has("force_y") else 0.0
+	var fz: float = chop_data.get_value("force_z") if chop_data.channels.has("force_z") else 0.0
+	if fx != 0.0 or fy != 0.0 or fz != 0.0:
+		_rigid_body.apply_central_force(Vector3(fx, fy, fz))
+
+	var ix: float = chop_data.get_value("impulse_x") if chop_data.channels.has("impulse_x") else 0.0
+	var iy: float = chop_data.get_value("impulse_y") if chop_data.channels.has("impulse_y") else 0.0
+	var iz: float = chop_data.get_value("impulse_z") if chop_data.channels.has("impulse_z") else 0.0
+	if ix != 0.0 or iy != 0.0 or iz != 0.0:
+		_rigid_body.apply_central_impulse(Vector3(ix, iy, iz))
+
+	var tqx: float = chop_data.get_value("torque_x") if chop_data.channels.has("torque_x") else 0.0
+	var tqy: float = chop_data.get_value("torque_y") if chop_data.channels.has("torque_y") else 0.0
+	var tqz: float = chop_data.get_value("torque_z") if chop_data.channels.has("torque_z") else 0.0
+	if tqx != 0.0 or tqy != 0.0 or tqz != 0.0:
+		_rigid_body.apply_torque(Vector3(tqx, tqy, tqz))
+
+
+## Returns the RigidBody3D node.
+func get_rigid_body() -> RigidBody3D:
+	return _rigid_body

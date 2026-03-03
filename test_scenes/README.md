@@ -74,6 +74,34 @@ checklist items below.
 
 ---
 
+## 06 — Physics: Rigid Bodies
+**File:** `06_physics_rigid_bodies.gnpatch`
+
+| # | What to check | Pass? |
+|---|---------------|-------|
+| 1 | Red box (RigidBodyCOMP) and blue sphere fall under gravity | ☐ |
+| 2 | Both objects bounce off the gray static ground plane | ☐ |
+| 3 | PhysicsCHOP shows live tx/ty/tz, rx/ry/rz, vel_x/y/z, speed channels | ☐ |
+| 4 | MergeCOMP collects rigid + ground into one scene group | ☐ |
+| 5 | RenderTOP displays the full 3D physics scene correctly | ☐ |
+| 6 | Adjusting `mass` or `bounce` on rigid bodies changes simulation behaviour | ☐ |
+
+---
+
+## 07 — Physics: Joints, Soft Body & Area
+**File:** `07_physics_joints_soft_area.gnpatch`
+
+| # | What to check | Pass? |
+|---|---------------|-------|
+| 1 | HingeJoint constrains the rigid box pendulum to the static anchor | ☐ |
+| 2 | Pendulum swings within ±90° hinge limits | ☐ |
+| 3 | SoftBodyCOMP grid deforms under gravity (cloth drape) | ☐ |
+| 4 | AreaCOMP wind pushes objects sideways (visible on pendulum or cloth) | ☐ |
+| 5 | Area debug visualization sphere is visible in the render | ☐ |
+| 6 | All objects land on or interact with the static ground plane | ☐ |
+
+---
+
 ### How to run
 1. Launch the GONODES editor scene (`scenes/gn_editor.tscn`).
 2. **File → Open** and select a `.gnpatch` file from `test_scenes/`.

@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-03-03
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 102 operators across 7 families (28 TOP, 14 IMG, 24 CHOP, 14 DAT, 15 SOP, 4 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP.
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 108 operators across 7 families (28 TOP, 14 IMG, 25 CHOP, 14 DAT, 15 SOP, 9 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass.
 
 ---
 
@@ -1091,9 +1091,17 @@ GONODES/
   - GeometryCOMP: wraps MeshInstance3D, applies SOP geometry + StandardMaterial3D + TOP texture
   - CameraCOMP: wraps Camera3D, perspective/ortho, look-at mode
   - LightCOMP: wraps DirectionalLight3D / OmniLight3D / SpotLight3D with shadow control
+- [x] **5 Physics COMP operators:** RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP
+  - RigidBodyCOMP: RigidBody3D with auto collision shape from mesh, CHOP force input, axis locking
+  - StaticBodyCOMP: StaticBody3D for immovable colliders (floor, walls)
+  - SoftBodyCOMP: SoftBody3D for deformable mesh physics (cloth, jelly)
+  - AreaCOMP: Area3D force field with gravity/damping overrides, debug visualization
+  - JointCOMP: Joint3D subtypes (Pin, Hinge, Slider, ConeTwist, 6DOF) with network-walked body connections
+- [x] **PhysicsCHOP** — readback bridge (COMP → CHOP) for physics state (position, rotation, velocity, sleeping)
 - [x] **RenderTOP** — 3D SubViewport bridge (COMP → TOP texture pipeline)
-  - Own `World3D` per viewport (isolated 3D scene)
+  - Own `World3D` per viewport (isolated 3D scene + physics space)
   - Walks network connections to adopt GeometryCOMP/CameraCOMP/LightCOMP nodes
+  - Generic COMP fallback: any GNCompBase subclass (including physics COMPs) is adopted via `get_scene_node()`
   - Default camera fallback if no CameraCOMP connected
   - WorldEnvironment with configurable ambient/background
   - MSAA control (Off/2x/4x/8x), transparent background option
@@ -1166,7 +1174,7 @@ GONODES/
 - [x] **Family base classes** — 6 intermediate bases between GNNode and operators:
   - `GNTopBase` (30 TOPs), `GNImgBase` (7 IMGs), `GNChopBase` (23 CHOPs), `GNDatBase` (13 DATs), `GNSopBase` (15 SOPs), `GNCompBase` (4 COMPs), `GNMatBase` (2 MATs).
   - Each sets family, provides cached data helpers, and overrides preview methods.
-  - All 102 operators migrated. GNNode is now fully type-agnostic.
+  - All 108 operators migrated. GNNode is now fully type-agnostic.
 - [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
   - `GNGraphEditor.previews_visible` flag controls whether `update_previews()` processes updates.
   - `GNGraphEditor.set_previews_visible(enabled)` shows/hides all preview controls on existing views.
@@ -1582,6 +1590,7 @@ GONODES/
 - [x] DAT family (Constant, Text, Select, Merge, Transpose, Sort, Evaluate, Switch, bridges)
 - [x] MAT family (PBR_MAT, Shader_MAT)
 - [x] COMP family (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP + RenderTOP bridge)
+- [x] Physics COMPs (RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP + PhysicsCHOP readback)
 - [x] Keyboard shortcuts and workflow polish (Alt+A palette, context menu shortcuts, per-node preview toggle)
 
 ### Phase 7.7: Ramp Parameters & Canvas Annotations ✅

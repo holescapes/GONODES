@@ -484,6 +484,8 @@ func _register_core_operators() -> void:
 	# ── CHOPs: Bridge ───────────────────────────────────────────────────
 	_reg("DATtoCHOP",       "CHOP", DATtoCHOP,
 		"Convert DAT table to CHOP channels.")
+	_reg("PhysicsCHOP",     "CHOP", PhysicsCHOP,
+		"Read transform & velocity channels from a physics body COMP.")
 
 	# ── CHOPs: Scripting ────────────────────────────────────────────────
 	_reg("ScriptCHOP",      "CHOP", ScriptCHOP,
@@ -640,6 +642,18 @@ func _register_core_operators() -> void:
 		"Light3D wrapper (Directional, Omni, Spot) for scene illumination.")
 	_reg("MergeCOMP",       "COMP", MergeCOMP,
 		"Merge multiple COMPs into a single scene group with group transform.")
+
+	# ── COMPs: Physics ──────────────────────────────────────────────────
+	_reg("RigidBodyCOMP",   "COMP", RigidBodyCOMP,
+		"RigidBody3D with collision shape — dynamic physics object.")
+	_reg("StaticBodyCOMP",  "COMP", StaticBodyCOMP,
+		"StaticBody3D with collision shape — immovable collider.")
+	_reg("SoftBodyCOMP",    "COMP", SoftBodyCOMP,
+		"SoftBody3D — deformable mesh with spring-mass physics.")
+	_reg("AreaCOMP",        "COMP", AreaCOMP,
+		"Area3D force field — gravity zones, wind, attract/repel regions.")
+	_reg("JointCOMP",       "COMP", JointCOMP,
+		"Joint3D constraint between two physics bodies (Pin, Hinge, Slider, ConeTwist, 6DOF).")
 
 	# ── COMPs: Sub-Networks ─────────────────────────────────────────────
 	_reg("SubNetworkNode",  "COMP", _PreloadSubNetworkNode,

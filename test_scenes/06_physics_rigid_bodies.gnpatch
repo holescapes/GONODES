@@ -1,0 +1,153 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_TEST",
+	"nodes": {
+		"box_sop": {
+			"type": "BoxSOP",
+			"position": [100, 100],
+			"parameters": {
+				"size_x": {"value": 1.0},
+				"size_y": {"value": 1.0},
+				"size_z": {"value": 1.0}
+			}
+		},
+		"mat_red": {
+			"type": "PBR_MAT",
+			"position": [100, 300],
+			"parameters": {
+				"albedo_color": {"value": {"_type": "Color", "r": 0.9, "g": 0.2, "b": 0.15, "a": 1.0}},
+				"roughness": {"value": 0.4},
+				"metallic": {"value": 0.1}
+			}
+		},
+		"rigid1": {
+			"type": "RigidBodyCOMP",
+			"position": [400, 100],
+			"parameters": {
+				"ty": {"value": 5.0},
+				"mass": {"value": 2.0},
+				"bounce": {"value": 0.6},
+				"friction": {"value": 0.8},
+				"collision_shape": {"value": 1}
+			}
+		},
+		"sphere_sop": {
+			"type": "SphereSOP",
+			"position": [100, 500],
+			"parameters": {
+				"radius": {"value": 0.5},
+				"rings": {"value": 16},
+				"radial_segments": {"value": 16}
+			}
+		},
+		"mat_blue": {
+			"type": "PBR_MAT",
+			"position": [100, 700],
+			"parameters": {
+				"albedo_color": {"value": {"_type": "Color", "r": 0.15, "g": 0.3, "b": 0.9, "a": 1.0}},
+				"roughness": {"value": 0.3},
+				"metallic": {"value": 0.5}
+			}
+		},
+		"rigid2": {
+			"type": "RigidBodyCOMP",
+			"position": [400, 500],
+			"parameters": {
+				"tx": {"value": 0.3},
+				"ty": {"value": 8.0},
+				"mass": {"value": 1.0},
+				"bounce": {"value": 0.8},
+				"friction": {"value": 0.5},
+				"collision_shape": {"value": 2}
+			}
+		},
+		"ground_sop": {
+			"type": "BoxSOP",
+			"position": [100, 900],
+			"parameters": {
+				"size_x": {"value": 20.0},
+				"size_y": {"value": 0.5},
+				"size_z": {"value": 20.0}
+			}
+		},
+		"mat_gray": {
+			"type": "PBR_MAT",
+			"position": [100, 1100],
+			"parameters": {
+				"albedo_color": {"value": {"_type": "Color", "r": 0.4, "g": 0.4, "b": 0.45, "a": 1.0}},
+				"roughness": {"value": 0.9},
+				"metallic": {"value": 0.0}
+			}
+		},
+		"ground": {
+			"type": "StaticBodyCOMP",
+			"position": [400, 900],
+			"parameters": {
+				"ty": {"value": -1.0},
+				"friction": {"value": 1.0},
+				"bounce": {"value": 0.3},
+				"collision_shape": {"value": 1}
+			}
+		},
+		"physics_chop": {
+			"type": "PhysicsCHOP",
+			"position": [700, 100],
+			"parameters": {
+				"position": {"value": true},
+				"rotation": {"value": true},
+				"linear_vel": {"value": true},
+				"speed": {"value": true}
+			}
+		},
+		"merge1": {
+			"type": "MergeCOMP",
+			"position": [700, 500],
+			"parameters": {}
+		},
+		"camera1": {
+			"type": "CameraCOMP",
+			"position": [700, 800],
+			"parameters": {
+				"tx": {"value": 5.0},
+				"ty": {"value": 4.0},
+				"tz": {"value": 8.0},
+				"rx": {"value": -20.0},
+				"ry": {"value": 30.0}
+			}
+		},
+		"light1": {
+			"type": "LightCOMP",
+			"position": [700, 1050],
+			"parameters": {
+				"light_type": {"value": 0},
+				"rx": {"value": -45.0},
+				"ry": {"value": 30.0},
+				"energy": {"value": 1.5}
+			}
+		},
+		"render1": {
+			"type": "RenderTOP",
+			"position": [1050, 500],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+				"bg_color": {"value": {"_type": "Color", "r": 0.05, "g": 0.05, "b": 0.08, "a": 1.0}},
+				"ambient_energy": {"value": 0.4}
+			}
+		}
+	},
+	"connections": [
+		{"from": "box_sop", "from_port": 0, "to": "rigid1", "to_port": 0},
+		{"from": "mat_red", "from_port": 0, "to": "rigid1", "to_port": 1},
+		{"from": "sphere_sop", "from_port": 0, "to": "rigid2", "to_port": 0},
+		{"from": "mat_blue", "from_port": 0, "to": "rigid2", "to_port": 1},
+		{"from": "ground_sop", "from_port": 0, "to": "ground", "to_port": 0},
+		{"from": "mat_gray", "from_port": 0, "to": "ground", "to_port": 1},
+		{"from": "rigid1", "from_port": 0, "to": "physics_chop", "to_port": 0},
+		{"from": "rigid1", "from_port": 0, "to": "merge1", "to_port": 0},
+		{"from": "rigid2", "from_port": 0, "to": "merge1", "to_port": 1},
+		{"from": "ground", "from_port": 0, "to": "merge1", "to_port": 2},
+		{"from": "merge1", "from_port": 0, "to": "render1", "to_port": 0},
+		{"from": "camera1", "from_port": 0, "to": "render1", "to_port": 1},
+		{"from": "light1", "from_port": 0, "to": "render1", "to_port": 2}
+	]
+}

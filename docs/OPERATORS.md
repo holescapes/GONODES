@@ -901,6 +901,26 @@ Converts a DAT table to CHOP channels. Lives in the `dat/` folder but produces C
 
 ---
 
+#### PhysicsCHOP *(Bridge — COMP → CHOP)*
+
+Reads transform, velocity, and state from an upstream physics body COMP and outputs them as CHOP channels.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| position | Bool | true | Output `tx`, `ty`, `tz` channels |
+| rotation | Bool | true | Output `rx`, `ry`, `rz` channels (degrees) |
+| scale | Bool | false | Output `sx`, `sy`, `sz` channels |
+| linear_vel | Bool | true | Output `vel_x`, `vel_y`, `vel_z` channels |
+| angular_vel | Bool | false | Output `ang_vel_x`, `ang_vel_y`, `ang_vel_z` channels |
+| speed | Bool | false | Output `speed` channel (velocity magnitude) |
+| sleeping | Bool | false | Output `sleeping` channel (1.0 = asleep) |
+
+**Input:** `comp_in` (COMP — a physics body such as RigidBodyCOMP).
+
+**How it works:** Walks the network to find the upstream COMP's scene node (`RigidBody3D`, `StaticBody3D`, etc.) and reads its current transform and physics state. Each enabled parameter group adds the corresponding channels to the output. Position and rotation use global coordinates when the node is inside a scene tree. Velocity and sleeping state are only meaningful for `RigidBody3D` nodes; other body types output zeros for those channels.
+
+---
+
 ## DAT — Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
@@ -1299,7 +1319,7 @@ COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNDat
 
 COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Godot's 3D rendering engine.
 
-**Total: 3 operators.**
+**Total: 8 operators.**
 
 ---
 
@@ -1366,6 +1386,132 @@ Wraps a `Light3D`. Provides scene illumination in a RenderTOP.
 
 ---
 
+#### RigidBodyCOMP
+
+Wraps a `RigidBody3D` with `CollisionShape3D` for dynamic physics simulation. Auto-generates collision shapes from SOP mesh input.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| tx, ty, tz | Float | 0.0 | — | Initial position |
+| rx, ry, rz | Float | 0.0 | -360–360 | Initial rotation in degrees |
+| sx, sy, sz | Float | 1.0 | 0.001–100.0 | Scale |
+| mode | Enum | Dynamic | Dynamic, Kinematic, Static | Physics body mode |
+| mass | Float | 1.0 | 0.001–1000.0 | Body mass in kg |
+| gravity_scale | Float | 1.0 | -10.0–10.0 | Gravity multiplier |
+| friction | Float | 1.0 | 0.0–2.0 | Surface friction |
+| bounce | Float | 0.0 | 0.0–1.0 | Restitution / bounciness |
+| linear_damp | Float | 0.0 | 0.0–100.0 | Linear velocity damping |
+| angular_damp | Float | 0.0 | 0.0–100.0 | Angular velocity damping |
+| init_vel_x/y/z | Float | 0.0 | — | Initial linear velocity |
+| lock_rot_x/y/z | Bool | false | — | Lock rotation axes |
+| collision_shape | Enum | Convex Hull | Convex, Box, Sphere, Capsule, Trimesh | Collision shape type |
+| ccd | Bool | false | — | Continuous collision detection |
+| visible | Bool | true | — | Show/hide mesh |
+| albedo_color | Color | White | — | Fallback material color |
+| metallic | Float | 0.0 | 0.0–1.0 | Fallback metallic |
+| roughness | Float | 0.5 | 0.0–1.0 | Fallback roughness |
+| cast_shadow | Enum | On | Off, On, DoubleSided, ShadowsOnly | Shadow casting mode |
+
+**Inputs:** `geo_in` (SOP), `mat_in` (MAT, optional), `force_in` (CHOP, optional — channels: `force_x/y/z`, `impulse_x/y/z`, `torque_x/y/z`).
+
+**How it works:** Creates a `RigidBody3D` → `CollisionShape3D` + `MeshInstance3D` hierarchy. In Dynamic mode, Godot's physics engine (Jolt) controls the transform. Transform params are only applied for Kinematic/Static modes. Collision shape is auto-generated from the mesh. CHOP force input is applied every cook (Dynamic mode only).
+
+---
+
+#### StaticBodyCOMP
+
+Wraps a `StaticBody3D` — an immovable collider for floors, walls, and obstacles.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| tx, ty, tz | Float | 0.0 | — | Position |
+| rx, ry, rz | Float | 0.0 | -360–360 | Rotation in degrees |
+| sx, sy, sz | Float | 1.0 | 0.001–100.0 | Scale |
+| friction | Float | 1.0 | 0.0–2.0 | Surface friction |
+| bounce | Float | 0.0 | 0.0–1.0 | Restitution |
+| collision_shape | Enum | Trimesh | Convex, Box, Sphere, Capsule, Trimesh | Collision shape type |
+| visible | Bool | true | — | Show/hide mesh |
+| albedo_color | Color | White | — | Fallback material color |
+| cast_shadow | Enum | On | Off, On, DoubleSided, ShadowsOnly | Shadow casting |
+
+**Inputs:** `geo_in` (SOP), `mat_in` (MAT, optional).
+
+**How it works:** Creates a `StaticBody3D` → `CollisionShape3D` + `MeshInstance3D` hierarchy. Defaults to Trimesh collision (accurate for complex static geometry). Transform is applied every cook.
+
+---
+
+#### SoftBodyCOMP
+
+Wraps a `SoftBody3D` for deformable mesh physics (cloth, jelly, rubber).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| tx, ty, tz | Float | 0.0 | — | Position |
+| rx, ry, rz | Float | 0.0 | -360–360 | Rotation |
+| sx, sy, sz | Float | 1.0 | 0.001–100.0 | Scale |
+| simulation_precision | Int | 5 | 1–20 | Solver iterations |
+| total_mass | Float | 1.0 | 0.01–100.0 | Total body mass |
+| linear_stiffness | Float | 0.5 | 0.0–1.0 | Spring stiffness |
+| pressure_coefficient | Float | 0.0 | -100.0–100.0 | Internal pressure |
+| damping_coefficient | Float | 0.01 | 0.0–1.0 | Motion damping |
+| drag_coefficient | Float | 0.0 | 0.0–1.0 | Air drag |
+| visible | Bool | true | — | Show/hide |
+| albedo_color | Color | White | — | Fallback color |
+
+**Inputs:** `geo_in` (SOP), `mat_in` (MAT, optional).
+
+**How it works:** Creates a `SoftBody3D`. The mesh is assigned **once** (SoftBody3D doesn't support live mesh swapping). Physics parameters are updated every cook. High `linear_stiffness` = rigid cloth; high `pressure_coefficient` = inflated balloon.
+
+---
+
+#### AreaCOMP
+
+Wraps an `Area3D` for force fields, gravity zones, and wind effects.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| tx, ty, tz | Float | 0.0 | — | Position |
+| rx, ry, rz | Float | 0.0 | -360–360 | Rotation |
+| gravity_direction_x/y/z | Float | 0,-1,0 | -1.0–1.0 | Gravity direction |
+| gravity_strength | Float | 9.8 | 0.0–100.0 | Gravity magnitude |
+| gravity_point | Bool | false | — | Point gravity (toward center) |
+| damping | Float | 0.0 | 0.0–100.0 | Linear damping override |
+| priority | Int | 0 | 0–128 | Area priority |
+| shape | Enum | Box | Box, Sphere | Built-in shape |
+| shape_size_x/y/z | Float | 2.0 | 0.01–1000.0 | Box half-extents |
+| shape_radius | Float | 2.0 | 0.01–1000.0 | Sphere radius |
+| debug_vis | Bool | false | — | Show translucent debug shape |
+
+**Inputs:** `geo_in` (SOP, optional — custom collision shape).
+
+**How it works:** Creates an `Area3D` with `SPACE_OVERRIDE_REPLACE`. When a rigid body enters the area, the area's gravity and damping override the world defaults. SOP input replaces the built-in shape with a convex hull collision shape. Debug visualization adds a translucent mesh to see the area bounds in the render.
+
+---
+
+#### JointCOMP
+
+Wraps a `Joint3D` constraint between two physics bodies.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| joint_type | Enum | Pin | Pin, Hinge, Slider, ConeTwist, 6DOF | Joint type |
+| tx, ty, tz | Float | 0.0 | — | Joint anchor position |
+| rx, ry, rz | Float | 0.0 | -360–360 | Joint rotation |
+| hinge_use_limit | Bool | false | — | Enable hinge angle limits |
+| hinge_limit_lower/upper | Float | -180/180 | -180–180 | Hinge angle limits |
+| hinge_motor_enable | Bool | false | — | Enable hinge motor |
+| hinge_motor_speed | Float | 1.0 | -100–100 | Motor target speed |
+| hinge_motor_max_impulse | Float | 1.0 | 0–1000 | Motor max impulse |
+| slider_limit_lower/upper | Float | -1/1 | -100–100 | Slider linear limits |
+| cone_swing_span | Float | 45.0 | 0–180 | Cone twist swing span |
+| cone_twist_span | Float | 45.0 | 0–180 | Cone twist twist span |
+
+**Inputs:** `body_a` (COMP), `body_b` (COMP).
+
+**How it works:** Creates the appropriate Joint3D subtype (PinJoint3D, HingeJoint3D, etc.). Walks the network to find Body A and Body B COMP nodes, then sets `node_a` / `node_b` NodePaths. If the joint type changes, the old joint is freed and a new one is created. Both bodies must be in the same scene tree (typically via MergeCOMP → RenderTOP).
+
+---
+
 ## Output Operators
 
 Output operators are terminal/sink nodes that display results. They have inputs but no data outputs.
@@ -1399,9 +1545,9 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 | Family | Count | Operators |
 |--------|-------|-----------|
 | **TOP** | 25 | Noise, Ramp, Circle, Rectangle, Constant, Text, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, Null, Switch |
-| **CHOP** | 20 | LFO, Wave, Noise, Constant, Pattern, Timer, Filter, Lag, Limit, Trigger, Hold, Speed, Count, Select, Math, Merge, Cross, Logic, Null, Switch (+DATtoCHOP bridge) |
+| **CHOP** | 21 | LFO, Wave, Noise, Constant, Pattern, Timer, Filter, Lag, Limit, Trigger, Hold, Speed, Count, Select, Math, Merge, Cross, Logic, Null, Switch, Physics (+DATtoCHOP bridge) |
 | **DAT** | 13 | Constant, Text, Info, OscIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, DATtoCHOP |
 | **SOP** | 14 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch |
-| **COMP** | 3 | Geometry, Camera, Light |
+| **COMP** | 8 | Geometry, Camera, Light, RigidBody, StaticBody, SoftBody, Area, Joint |
 | **Output** | 1 | Window |
-| **Total** | **76** | |
+| **Total** | **82** | |

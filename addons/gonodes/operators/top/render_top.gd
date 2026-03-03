@@ -293,6 +293,15 @@ func _populate_scene_from_network() -> void:
 			if light != null:
 				_adopt_scene_node(light)
 
+		elif upstream_node is GNCompBase:
+			# Generic fallback — handles physics COMPs and any future COMP types
+			var scene_nd: Node3D = (upstream_node as GNCompBase).get_scene_node()
+			if scene_nd != null:
+				_adopt_scene_node(scene_nd)
+				if scene_nd is Camera3D:
+					(scene_nd as Camera3D).current = true
+					has_camera = true
+
 	# If no camera COMP is connected, create a default camera
 	if not has_camera:
 		_ensure_default_camera()
