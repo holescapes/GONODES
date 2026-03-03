@@ -322,10 +322,12 @@ func set_viewer_active(active: bool) -> void:
 		return
 	if active:
 		_viewer_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.9))
-		_viewer_btn.text = "👁"
+		_viewer_btn.text = "�"
+		_viewer_btn.tooltip_text = "Pinned to viewer (click to unpin)"
 	else:
 		_viewer_btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 		_viewer_btn.text = "👁"
+		_viewer_btn.tooltip_text = "Pin to viewer"
 
 
 ## Updates the preview from the GNNode's current state.

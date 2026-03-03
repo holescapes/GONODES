@@ -105,6 +105,11 @@ var _info_label: Label = null
 
 var _info_bar: Label = null
 
+## When true, 3D SubViewports (SOP/MAT) are pre-allocated via call_deferred
+## in _ready() to avoid a hitch on first view.  Set to true for the docked
+## viewer; floating viewer windows leave this false (lazy creation).
+var eager_3d: bool = false
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Setup
@@ -172,10 +177,20 @@ func _ready() -> void:
 	# Default: show nothing
 	_hide_all_displays()
 
+	# Deferred warm-up: pre-create 3D viewports so first SOP/MAT click has no hitch
+	if eager_3d:
+		call_deferred("_warm_up_3d")
+
 
 ## Content area rect (below toolbar, above info bar).
 func _get_content_rect() -> Rect2:
 	return Rect2(0, 26, size.x, maxf(size.y - 44, 1))
+
+
+## Pre-creates the SOP and MAT SubViewports off the main frame to avoid a hitch.
+func _warm_up_3d() -> void:
+	_ensure_3d_viewport()
+	_ensure_mat_viewport()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -198,17 +213,18 @@ func _create_texture_display() -> void:
 	# Wire input events for pan/zoom
 	_tex_clip.gui_input.connect(_on_tex_gui_input)
 	_tex_clip.resized.connect(_on_tex_clip_resized)
+	_tex_clip.mouse_exited.connect(func() -> void: _panning = false)
 
 
 func _on_tex_clip_resized() -> void:
 	_apply_tex_transform()
 
 
-## Handles mouse input for pan (middle-click drag) and zoom (scroll wheel).
+## Handles mouse input for pan (left-click or middle-click drag) and zoom (scroll wheel).
 func _on_tex_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_MIDDLE:
+		if mb.button_index == MOUSE_BUTTON_LEFT or mb.button_index == MOUSE_BUTTON_MIDDLE:
 			if mb.pressed:
 				_panning = true
 				_pan_start = mb.position
@@ -274,7 +290,14 @@ func _update_zoom_label() -> void:
 
 
 ## Updates the TOP/IMG texture display with the given texture.
+## If the same texture is already displayed, just updates the info text
+## without resetting layout (preserves pan/zoom during cook updates).
 func _show_texture(tex: Texture2D, info_text: String = "") -> void:
+	# Fast path: if we're already showing this texture, just refresh info
+	if _tex_clip.visible and _tex_display.texture == tex:
+		_info_bar.text = info_text
+		return
+
 	_hide_all_displays()
 	_tex_clip.visible = true
 	_fit_btn.visible = true
@@ -287,8 +310,8 @@ func _show_texture(tex: Texture2D, info_text: String = "") -> void:
 
 	_tex_display.texture = tex
 
-	# First time or texture changed size — auto-fit
-	_apply_tex_transform()
+	# New texture — auto-fit
+	_fit_to_panel()
 	_info_bar.text = info_text
 
 
@@ -299,11 +322,18 @@ func _show_texture(tex: Texture2D, info_text: String = "") -> void:
 func _create_waveform_display() -> void:
 	_waveform = GNWaveformView.new()
 	_waveform.visible = false
-	_waveform.mouse_filter = MOUSE_FILTER_IGNORE
+	_waveform.mouse_filter = MOUSE_FILTER_STOP
+	_waveform.mouse_exited.connect(func() -> void: _waveform._dragging = false)
 	add_child(_waveform)
 
 
 func _show_waveform(ch_data: GNChannelData) -> void:
+	# Fast path — if already showing waveform, just update data (preserve zoom/pan)
+	if _waveform.visible:
+		_waveform.set_channel_data(ch_data)
+		_update_waveform_info(ch_data)
+		return
+
 	_hide_all_displays()
 	_waveform.visible = true
 	_fit_btn.visible = false
@@ -313,8 +343,10 @@ func _show_waveform(ch_data: GNChannelData) -> void:
 	_waveform.position = content.position
 	_waveform.size = content.size
 	_waveform.set_channel_data(ch_data)
+	_update_waveform_info(ch_data)
 
-	# Info bar
+
+func _update_waveform_info(ch_data: GNChannelData) -> void:
 	var ch_count := ch_data.channels.size()
 	var sample_info := "%d ch" % ch_count
 	if ch_data.length > 1:
@@ -452,12 +484,30 @@ func _ensure_3d_viewport() -> void:
 	add_child(_3d_display)
 
 	_3d_display.gui_input.connect(_on_3d_gui_input)
+	_3d_display.mouse_exited.connect(func() -> void: _orbit_dragging = false)
+
+	# Axis gizmo — small lines at origin showing X (red), Y (green), Z (blue)
+	_create_axis_gizmo(_3d_viewport)
 
 	_update_orbit_camera()
 
 
 func _show_3d_mesh(geo_data: GNGeoData) -> void:
 	_ensure_3d_viewport()
+
+	# Fast path — if already showing 3D, just update mesh (preserve orbit state)
+	if _3d_display.visible:
+		if geo_data.mesh != null:
+			_3d_mesh_instance.mesh = geo_data.mesh
+		else:
+			_3d_mesh_instance.mesh = null
+		var content := _get_content_rect()
+		_3d_viewport.size = _snap_size(content.size)
+		_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		_info_bar.text = "%d verts, %d surfaces" % [geo_data.vertex_count,
+			geo_data.mesh.get_surface_count() if geo_data.mesh else 0]
+		return
+
 	_hide_all_displays()
 	_3d_display.visible = true
 	_fit_btn.visible = false
@@ -484,11 +534,11 @@ func _show_3d_mesh(geo_data: GNGeoData) -> void:
 		geo_data.mesh.get_surface_count() if geo_data.mesh else 0]
 
 
-## Orbit camera input on the 3D display.
+## Orbit camera input on the 3D display (left-click or middle-click to orbit).
 func _on_3d_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_MIDDLE:
+		if mb.button_index == MOUSE_BUTTON_LEFT or mb.button_index == MOUSE_BUTTON_MIDDLE:
 			if mb.pressed:
 				_orbit_dragging = true
 				_orbit_start = mb.position
@@ -525,6 +575,32 @@ func _update_orbit_camera() -> void:
 	)
 	_3d_camera.position = offset
 	_3d_camera.look_at(Vector3.ZERO)
+
+
+## Creates XYZ axis lines at the origin: X=red, Y=green, Z=blue.
+func _create_axis_gizmo(viewport: SubViewport) -> void:
+	var axis_length: float = 0.5
+	var axes := [
+		{"dir": Vector3(axis_length, 0, 0), "color": Color.RED},
+		{"dir": Vector3(0, axis_length, 0), "color": Color.GREEN},
+		{"dir": Vector3(0, 0, axis_length), "color": Color.BLUE},
+	]
+	for axis in axes:
+		var im := ImmediateMesh.new()
+		im.surface_begin(Mesh.PRIMITIVE_LINES)
+		im.surface_set_color(axis["color"])
+		im.surface_add_vertex(Vector3.ZERO)
+		im.surface_set_color(axis["color"])
+		im.surface_add_vertex(axis["dir"])
+		im.surface_end()
+		var mi := MeshInstance3D.new()
+		mi.mesh = im
+		# Unshaded material so axes are always visible
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.vertex_color_use_as_albedo = true
+		mi.material_override = mat
+		viewport.add_child(mi)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -686,9 +762,13 @@ func set_target(p_node_id: String) -> void:
 	# Reset pan/zoom when switching nodes
 	_zoom = 1.0
 	_pan = Vector2.ZERO
+	_panning = false
 	_orbit_yaw = 45.0
 	_orbit_pitch = -30.0
 	_orbit_distance = 3.0
+	_orbit_dragging = false
+	if _waveform:
+		_waveform.reset_view()
 
 
 ## Main update entry point — called each cook frame by the editor.

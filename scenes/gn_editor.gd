@@ -33,6 +33,9 @@ var _vram_budget_mb: float = 0.0   ## User-configurable budget (0 = no limit war
 ## Which node's output to display in the viewer (click to select).
 var _viewer_node_id: String = ""
 
+## When true, selection changes do NOT override the viewer target.
+var _viewer_pinned: bool = false
+
 ## Path to the currently loaded/saved patch file (empty = unsaved).
 var _current_file_path: String = ""
 
@@ -169,6 +172,7 @@ func _setup_viewer_panel() -> void:
 
 	viewer_panel = GNViewerPanel.new()
 	viewer_panel.name = "Viewer"
+	viewer_panel.eager_3d = true  # Pre-create 3D SubViewports to avoid first-click hitch
 	viewer_panel.size_flags_horizontal = SIZE_EXPAND_FILL
 	viewer_panel.size_flags_vertical = SIZE_EXPAND_FILL
 	viewer_container.add_child(viewer_panel)
@@ -262,6 +266,10 @@ func _on_graph_node_selected(node_id: String) -> void:
 	# Always show inspector for any node type
 	inspector.inspect_node(node_id)
 
+	# If the viewer is pinned, don't switch the viewer target on selection
+	if _viewer_pinned:
+		return
+
 	# Route viewer to any family (not just TOPs)
 	var node: GNNode = network.get_node_by_id(node_id)
 	if node:
@@ -269,7 +277,6 @@ func _on_graph_node_selected(node_id: String) -> void:
 		if viewer_panel:
 			viewer_panel.set_target(node_id)
 		_push_active_sinks()
-		graph_editor.update_viewer_pin_highlights(_viewer_node_id)
 		GNLogger.info("Editor", "Viewer → '%s' (%s)" % [node_id, GNFamily.get_family_name(node.family)])
 
 
@@ -282,18 +289,28 @@ func _on_open_viewer_requested(node_id: String) -> void:
 	open_viewer_window(node_id)
 
 
-## Eye button on a node — pin it to the docked viewer (any family).
+## Eye button on a node — toggle pin to the docked viewer (any family).
+## Clicking the same pinned node again unpins it (returns to follow-selection).
 func _on_viewer_pin_requested(node_id: String) -> void:
 	var node: GNNode = network.get_node_by_id(node_id)
 	if node == null:
 		return
-	_viewer_node_id = node_id
-	if viewer_panel:
-		viewer_panel.set_target(node_id)
-	_push_active_sinks()
-	graph_editor.update_viewer_pin_highlights(_viewer_node_id)
-	GNLogger.info("Editor", "Pinned viewer → '%s' (%s)" % [
-		node_id, GNFamily.get_family_name(node.family)])
+
+	# Toggle: if the same node is already pinned, unpin it
+	if _viewer_pinned and _viewer_node_id == node_id:
+		_viewer_pinned = false
+		GNLogger.info("Editor", "Unpinned viewer from '%s'" % node_id)
+	else:
+		_viewer_pinned = true
+		_viewer_node_id = node_id
+		if viewer_panel:
+			viewer_panel.set_target(node_id)
+		_push_active_sinks()
+		GNLogger.info("Editor", "Pinned viewer → '%s' (%s)" % [
+			node_id, GNFamily.get_family_name(node.family)])
+
+	graph_editor.update_viewer_pin_highlights(
+		_viewer_node_id if _viewer_pinned else "")
 
 
 ## Keep viewer target in sync when a node is renamed.
@@ -680,6 +697,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 ## New patch — clears everything and starts fresh.
 func _on_new_pressed() -> void:
 	_viewer_node_id = ""
+	_viewer_pinned = false
 	if viewer_panel:
 		viewer_panel.clear()
 	_close_all_viewer_windows()
@@ -705,6 +723,7 @@ func _on_new_pressed() -> void:
 
 	network.node_renamed.connect(_on_node_renamed)
 	graph_editor.clear_undo_history()
+	graph_editor.update_viewer_pin_highlights("")
 
 	_push_active_sinks()
 	_update_title()
@@ -758,6 +777,7 @@ func _save_to_path(path: String) -> void:
 ## Loads a network from the given path.
 func _load_from_path(path: String) -> void:
 	_viewer_node_id = ""
+	_viewer_pinned = false
 	if viewer_panel:
 		viewer_panel.clear()
 	_close_all_viewer_windows()
@@ -791,6 +811,7 @@ func _load_from_path(path: String) -> void:
 
 	network.node_renamed.connect(_on_node_renamed)
 	graph_editor.clear_undo_history()
+	graph_editor.update_viewer_pin_highlights("")
 
 	_push_active_sinks()
 	_update_title()
@@ -1329,6 +1350,7 @@ func _on_dive_into_requested(node_id: String) -> void:
 
 	# Reset viewer
 	_viewer_node_id = ""
+	_viewer_pinned = false
 	if viewer_panel:
 		viewer_panel.clear()
 

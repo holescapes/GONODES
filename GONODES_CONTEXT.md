@@ -690,7 +690,7 @@ Family-aware viewer panel that displays any node family's output. Only one visua
 
 | Family | Display Widget | Description |
 |--------|---------------|-------------|
-| **TOP** | TextureRect + pan/zoom | Full-resolution display. Middle-click drag to pan, scroll wheel to zoom. Shift+F to fit, Home for 1:1. |
+| **TOP** | TextureRect + pan/zoom | Full-resolution display. Left-click or middle-click drag to pan, scroll wheel to zoom. Shift+F to fit, Home for 1:1. |
 | **IMG** | TextureRect + pan/zoom | Same as TOP — uploads `Image` → `ImageTexture` on-the-fly |
 | **CHOP** | GNWaveformView (`_draw()`) | GPU-accelerated polylines, auto-scaling, multi-channel with legends |
 | **DAT** | Tree (spreadsheet) | Column headers, scrollable rows, selection highlight |
@@ -704,6 +704,19 @@ Family-aware viewer panel that displays any node family's output. Only one visua
 - SubViewport sizes snapped to 64px boundaries to avoid resize churn during panel drag.
 - Pan/zoom state resets when switching to a different node.
 
+**Cook-frame update strategy:**
+- `update_from_node()` is called every cook frame by the editor.
+- **Fast-path optimisation:** `_show_texture()` compares the incoming `Texture2D` pointer against the currently displayed one. If unchanged, it returns immediately (one pointer comparison, ~nanoseconds) without hiding/re-showing Controls or re-laying out the display. This preserves in-progress pan/zoom drags.
+- When the texture *does* change (e.g., the TOP re-cooks with new content), a full layout + `_fit_to_panel()` is triggered.
+- **Future optimisation:** replace per-frame polling with an event-driven model — the cook engine would emit `node_output_changed(node_id)` only for nodes that actually re-cooked, and the viewer would subscribe. Eliminates the per-frame function call entirely, but current cost is negligible.
+
+**Viewer pin behaviour:**
+- `_viewer_pinned` flag in `gn_editor.gd` — when `true`, node selection only updates the inspector, NOT the viewer target.
+- Clicking the eye icon toggles pin on/off (same node = unpin, different node = re-pin).
+- Pinned node's eye icon shows 📌 (teal); unpinned nodes show 👁 (gray).
+- Pin state + highlights reset on New, Load, and Dive-into-subnet operations.
+- `update_viewer_pin_highlights("")` is called after `bind_network()` on load/new to ensure all eye icons start in unpinned state.
+
 **Toolbar:** Family icon + node name + Fit button + zoom percentage label
 **Info bar:** Resolution (TOP/IMG), channel count + sample rate (CHOP), row × col (DAT), vert/surface count (SOP)
 
@@ -711,16 +724,25 @@ Family-aware viewer panel that displays any node family's output. Only one visua
 Custom `Control._draw()` that renders CHOP channel data as waveform polylines.
 - Uses Godot's GPU-accelerated `draw_polyline()` — no SubViewport needed.
 - 8 per-channel colors (green, cyan, yellow, magenta, orange, lavender, teal, red)
-- Auto-scaling Y range across all channels, grid lines with value labels, zero line highlight
+- **Fixed-scale grid:** Y-axis range is computed once on first data (with 10% headroom, snapped to a "nice" number like 1/2/5×10^n). Grid lines and value labels stay **static** — the data is plotted within the fixed context.
+- **Y zoom:** Scroll wheel changes the visible Y half-range. Grid labels update to match the new scale.
+- **X zoom:** Shift+scroll changes the visible time window (sample range).
+- **Pan:** Left-click or middle-click drag to pan vertically (Y center) and horizontally (X offset).
+- View resets (`reset_view()`) when switching to a different node target; preserved during per-frame cook updates.
+- `_snap_to_nice()` rounds grid step sizes to 1/2/5×10^n for clean labels.
 - Channel name + current value legend
 - Single-sample (scalar) channels rendered as horizontal lines
+- **Future upgrade path:** Replace `_draw()` polylines with a SubViewport + shader for glow, trail persistence, and oscilloscope-style phosphor decay effects. Not needed for V1.
 
-### Viewer Pin Button (Eye Icon 👁)
+### Viewer Pin Button (Eye Icon 👁 / 📌)
 Every node has an eye icon (👁) in its title bar (next to the ? help button).
-- Click → pins that node to the **docked viewer panel** (any family, not just TOPs)
-- Active-pinned node's eye button highlighted in teal
+- Click → **toggles pin** for that node to the docked viewer panel (any family, not just TOPs)
+- Click same pinned node again → **unpins** (returns to follow-selection mode)
+- Pinned state: 📌 (teal) — "Pinned to viewer (click to unpin)"
+- Unpinned state: 👁 (gray) — "Pin to viewer"
+- When pinned, selecting other nodes does NOT switch the viewer — only the inspector updates
 - Signal: `GNNodeView.viewer_pin_requested` → `GNGraphEditor.viewer_pin_requested` → `gn_editor._on_viewer_pin_requested()`
-- Clicking any node still auto-routes the viewer (selection = viewer routing for all families)
+- All pin highlights reset on New / Load / Dive-into-subnet via `update_viewer_pin_highlights("")`
 
 ### GNViewerWindow (Floating)
 `GNViewerWindow` now embeds a full `GNViewerPanel` — same family-aware display as docked viewer.
