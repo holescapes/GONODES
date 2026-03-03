@@ -10,7 +10,6 @@ const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_n
 const _GNExportDialogScript = preload("res://addons/gonodes/ui/gn_export_dialog.gd")
 
 @onready var graph_editor: GNGraphEditor = $HSplit/GraphPanel/GraphEditor
-@onready var viewer: TextureRect = $HSplit/RightPanel/ViewerPanel/Viewer
 @onready var inspector: GNParamInspector = $HSplit/RightPanel/InspectorPanel
 @onready var info_label: Label = $InfoBar/InfoLabel
 @onready var log_toggle: CheckButton = $InfoBar/LogToggle
@@ -46,6 +45,9 @@ var _load_dialog: FileDialog = null
 
 ## Floating viewer windows — each pinned to a specific node's output.
 var _viewer_windows: Array[GNViewerWindow] = []
+
+## Docked viewer panel (replaces the old TextureRect).
+var viewer_panel: GNViewerPanel = null
 
 ## Floating help windows.
 var _help_windows: Array = []
@@ -102,6 +104,10 @@ func _ready() -> void:
 	graph_editor.open_viewer_requested.connect(_on_open_viewer_requested)
 	graph_editor.help_requested.connect(_on_help_requested)
 	graph_editor.dive_into_requested.connect(_on_dive_into_requested)
+	graph_editor.viewer_pin_requested.connect(_on_viewer_pin_requested)
+
+	# Replace the scene's TextureRect Viewer with a GNViewerPanel
+	_setup_viewer_panel()
 
 	# Bind inspector to network
 	inspector.network = network
@@ -152,6 +158,22 @@ func _setup_cook_engine() -> void:
 	_push_active_sinks()
 
 
+## Replaces the scene's placeholder TextureRect with a GNViewerPanel.
+func _setup_viewer_panel() -> void:
+	var viewer_container: PanelContainer = $HSplit/RightPanel/ViewerPanel
+	# Remove the old TextureRect if it exists
+	var old_viewer: Node = viewer_container.get_node_or_null("Viewer")
+	if old_viewer:
+		viewer_container.remove_child(old_viewer)
+		old_viewer.queue_free()
+
+	viewer_panel = GNViewerPanel.new()
+	viewer_panel.name = "Viewer"
+	viewer_panel.size_flags_horizontal = SIZE_EXPAND_FILL
+	viewer_panel.size_flags_vertical = SIZE_EXPAND_FILL
+	viewer_container.add_child(viewer_panel)
+
+
 ## Builds the UI-level sink list and pushes it to the cook engine.
 ## Called only when viewer targets actually change (not per-frame).
 ## Structural sinks (is_sink nodes) are auto-detected by the engine.
@@ -178,13 +200,13 @@ func _push_active_sinks() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
-	# Update viewer with selected node's output
-	if not _viewer_node_id.is_empty():
+	# Update docked viewer panel with selected node's output (any family)
+	if not _viewer_node_id.is_empty() and viewer_panel != null:
 		var view_node: GNNode = network.get_node_by_id(_viewer_node_id)
-		if view_node and view_node.cached_output is GNTextureData:
-			var tex_data: GNTextureData = view_node.cached_output as GNTextureData
-			if tex_data.texture:
-				viewer.texture = tex_data.texture
+		if view_node != null:
+			viewer_panel.update_from_node(view_node)
+		else:
+			viewer_panel.clear()
 
 	# Update all floating viewer windows
 	_update_viewer_windows()
@@ -235,18 +257,20 @@ func _on_cook_error(node_id: String, error_msg: String) -> void:
 # Graph Editor Callbacks
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## User clicked a node — show its output in the viewer (if it's a TOP)
-## and inspect its parameters.
+## User clicked a node — show its output in the viewer and inspect its parameters.
 func _on_graph_node_selected(node_id: String) -> void:
 	# Always show inspector for any node type
 	inspector.inspect_node(node_id)
 
-	# Route viewer to TOPs only
+	# Route viewer to any family (not just TOPs)
 	var node: GNNode = network.get_node_by_id(node_id)
-	if node and node.family == GNFamily.Type.TOP:
+	if node:
 		_viewer_node_id = node_id
+		if viewer_panel:
+			viewer_panel.set_target(node_id)
 		_push_active_sinks()
-		GNLogger.info("Editor", "Viewer → '%s'" % node_id)
+		graph_editor.update_viewer_pin_highlights(_viewer_node_id)
+		GNLogger.info("Editor", "Viewer → '%s' (%s)" % [node_id, GNFamily.get_family_name(node.family)])
 
 
 func _on_graph_selection_cleared() -> void:
@@ -256,6 +280,20 @@ func _on_graph_selection_cleared() -> void:
 ## Context menu "Open Viewer" — spawn a floating viewer window for the node.
 func _on_open_viewer_requested(node_id: String) -> void:
 	open_viewer_window(node_id)
+
+
+## Eye button on a node — pin it to the docked viewer (any family).
+func _on_viewer_pin_requested(node_id: String) -> void:
+	var node: GNNode = network.get_node_by_id(node_id)
+	if node == null:
+		return
+	_viewer_node_id = node_id
+	if viewer_panel:
+		viewer_panel.set_target(node_id)
+	_push_active_sinks()
+	graph_editor.update_viewer_pin_highlights(_viewer_node_id)
+	GNLogger.info("Editor", "Pinned viewer → '%s' (%s)" % [
+		node_id, GNFamily.get_family_name(node.family)])
 
 
 ## Keep viewer target in sync when a node is renamed.
@@ -345,17 +383,13 @@ func _on_viewer_window_closed(vw: GNViewerWindow) -> void:
 	_push_active_sinks()
 
 
-## Updates all floating viewer windows with their pinned node's texture.
+## Updates all floating viewer windows with their pinned node's output.
 func _update_viewer_windows() -> void:
 	for vw in _viewer_windows:
 		if not is_instance_valid(vw):
 			continue
 		var node: GNNode = network.get_node_by_id(vw.node_id)
-		if node != null and node.cached_output is GNTextureData:
-			var tex_data: GNTextureData = node.cached_output as GNTextureData
-			vw.update_texture(tex_data.texture)
-		else:
-			vw.update_texture(null)
+		vw.update_from_node(node)
 
 
 ## Closes all floating viewer windows.
@@ -646,7 +680,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 ## New patch — clears everything and starts fresh.
 func _on_new_pressed() -> void:
 	_viewer_node_id = ""
-	viewer.texture = null
+	if viewer_panel:
+		viewer_panel.clear()
 	_close_all_viewer_windows()
 	_close_all_help_windows()
 	inspector.clear_inspection()
@@ -723,7 +758,8 @@ func _save_to_path(path: String) -> void:
 ## Loads a network from the given path.
 func _load_from_path(path: String) -> void:
 	_viewer_node_id = ""
-	viewer.texture = null
+	if viewer_panel:
+		viewer_panel.clear()
 	_close_all_viewer_windows()
 	_close_all_help_windows()
 	inspector.clear_inspection()
@@ -1293,7 +1329,8 @@ func _on_dive_into_requested(node_id: String) -> void:
 
 	# Reset viewer
 	_viewer_node_id = ""
-	viewer.texture = null
+	if viewer_panel:
+		viewer_panel.clear()
 
 	# Update breadcrumb
 	_update_breadcrumb()

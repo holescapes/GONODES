@@ -20,6 +20,9 @@ signal rename_requested(old_id: String, new_id: String)
 ## Emitted when the user clicks the help (?) button on a node.
 signal help_requested(node_id: String)
 
+## Emitted when the user clicks the eye (viewer pin) button on a node.
+signal viewer_pin_requested(node_id: String)
+
 ## Emitted when the user double-clicks the body of a SubNetworkNode to dive in.
 signal dive_into_requested(node_id: String)
 
@@ -31,6 +34,9 @@ var _preview: Control = null
 
 ## Performance overlay label (cook time + status badge).
 var _perf_label: Label = null
+
+## Viewer pin (eye) button in the title bar.
+var _viewer_btn: Button = null
 
 ## Thumbnail height in pixels (width stretches to fit the node).
 const THUMBNAIL_HEIGHT := 80
@@ -117,6 +123,9 @@ func setup(node: GNNode) -> void:
 
 	# Add help (?) button to the title bar
 	_setup_help_button()
+
+	# Add viewer pin (eye) button to the title bar
+	_setup_viewer_button()
 
 	# Track position changes
 	position_offset_changed.connect(_on_position_changed)
@@ -284,6 +293,39 @@ func _setup_help_button() -> void:
 	btn.add_theme_constant_override("outline_size", 3)
 	btn.pressed.connect(func(): help_requested.emit(gn_node.id))
 	titlebar.add_child(btn)
+
+
+## Adds a small eye button to the GraphNode title bar for pinning to the viewer.
+func _setup_viewer_button() -> void:
+	var titlebar: HBoxContainer = get_titlebar_hbox()
+	if titlebar == null:
+		return
+
+	_viewer_btn = Button.new()
+	_viewer_btn.text = "👁"
+	_viewer_btn.tooltip_text = "Pin to viewer"
+	_viewer_btn.custom_minimum_size = Vector2(24, 24)
+	_viewer_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_viewer_btn.add_theme_font_size_override("font_size", 12)
+	_viewer_btn.flat = true
+	_viewer_btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	_viewer_btn.add_theme_color_override("font_hover_color", Color(0.3, 1.0, 0.9))
+	_viewer_btn.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.5))
+	_viewer_btn.add_theme_constant_override("outline_size", 3)
+	_viewer_btn.pressed.connect(func(): viewer_pin_requested.emit(gn_node.id))
+	titlebar.add_child(_viewer_btn)
+
+
+## Sets the viewer pin button to active (highlighted) or inactive.
+func set_viewer_active(active: bool) -> void:
+	if _viewer_btn == null:
+		return
+	if active:
+		_viewer_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.9))
+		_viewer_btn.text = "👁"
+	else:
+		_viewer_btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+		_viewer_btn.text = "👁"
 
 
 ## Updates the preview from the GNNode's current state.

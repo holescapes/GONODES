@@ -139,6 +139,9 @@ signal help_requested(node_id: String)
 ## (Enter key or double-click on the node body).
 signal dive_into_requested(node_id: String)
 
+## Signal emitted when the user clicks the eye (viewer pin) button on a node.
+signal viewer_pin_requested(node_id: String)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Lifecycle
@@ -380,6 +383,7 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	view.rename_requested.connect(_on_node_rename_requested)
 	view.help_requested.connect(func(nid: String) -> void: help_requested.emit(nid))
 	view.dive_into_requested.connect(func(nid: String) -> void: dive_into_requested.emit(nid))
+	view.viewer_pin_requested.connect(func(nid: String) -> void: viewer_pin_requested.emit(nid))
 	add_child(view)
 	_node_views[node.id] = view
 
@@ -833,6 +837,14 @@ func set_previews_visible(enabled: bool) -> void:
 			view.show_preview()
 		else:
 			view.hide_preview()
+
+
+## Updates the viewer pin (eye) highlight on all node views.
+## [param active_id] is the node currently pinned to the docked viewer.
+func update_viewer_pin_highlights(active_id: String) -> void:
+	for view_name in _node_views:
+		var view: GNNodeView = _node_views[view_name]
+		view.set_viewer_active(view_name == active_id)
 
 
 ## Toggles preview_enabled on all selected nodes and shows/hides accordingly.
@@ -1754,16 +1766,12 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.REDO), _shortcut(KEY_Y, true), true)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.REDO), not _undo_redo.has_redo())
 
-	# Viewer window — enabled when exactly one TOP node is selected
+	# Viewer window — enabled when exactly one node is selected (any family)
 	var selected_ids := _get_selected_node_ids()
-	var single_top_selected := false
-	if selected_ids.size() == 1 and network != null:
-		var sel_node: GNNode = network.get_node_by_id(selected_ids[0])
-		if sel_node != null and sel_node.family == GNFamily.Type.TOP:
-			single_top_selected = true
+	var single_node_selected := selected_ids.size() == 1
 	_context_menu.add_separator()
 	_context_menu.add_item("Open Viewer", _CtxID.OPEN_VIEWER)
-	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.OPEN_VIEWER), not single_top_selected)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.OPEN_VIEWER), not single_node_selected)
 
 	# Per-node preview toggle — label reflects current state of first selected node
 	var preview_label := "Toggle Preview"

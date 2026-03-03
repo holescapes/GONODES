@@ -661,11 +661,15 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 │  GraphPanel (stretch 2x)    ├────────────────────┤
 │  └─ GraphEdit               │  ViewerPanel       │
 │     + Node Palette popup    │  (stretch 1.5)     │
-│                             │  └─ TextureRect    │
-│     ┌───┐    ┌───┐          │    KEEP_ASPECT_CTR │
-│     │LFO│───▶│NOI│          │    IGNORE_SIZE    │
-│     │   │    │SE │          ├────────────────────┤
-│     └───┘    └───┘          │  InspectorPanel   │
+│                             │  └─ GNViewerPanel  │
+│     ┌───┐    ┌───┐          │    Family-aware:   │
+│     │LFO│───▶│NOI│          │    TOP → pan/zoom  │
+│     │ 👁│    │SE │          │    CHOP → waveform │
+│     └───┘    └───┘          │    DAT → spreadsht │
+│                             │    SOP → 3D orbit  │
+│                             │    MAT → 3D sphere │
+│                             ├────────────────────┤
+│                             │  InspectorPanel   │
 │                             │  (stretch 1.0)     │
 │                             │  └─ GNParamInsp.  │
 │                             │    260px min width │
@@ -675,9 +679,53 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 ```
 
 **Scene file:** `scenes/gn_editor.tscn`
-- Viewer TextureRect: `stretch_mode = KEEP_ASPECT_CENTERED`, `expand_mode = IGNORE_SIZE` (texture aspect doesn't force panel width)
+- **GNViewerPanel** (replaces old TextureRect): family-aware viewer that switches visualization mode based on the pinned node's family
 - Both panels: `clip_contents = true`, `custom_minimum_size.y = 40` (freely resizable via VSplit splitter)
 - Window stretch: `canvas_items` mode, `expand` aspect (set in `project.godot`)
+
+### GNViewerPanel (`addons/gonodes/ui/gn_viewer_panel.gd`)
+Family-aware viewer panel that displays any node family's output. Only one visualization mode is active at a time.
+
+**Visualization modes:**
+
+| Family | Display Widget | Description |
+|--------|---------------|-------------|
+| **TOP** | TextureRect + pan/zoom | Full-resolution display. Middle-click drag to pan, scroll wheel to zoom. Shift+F to fit, Home for 1:1. |
+| **IMG** | TextureRect + pan/zoom | Same as TOP — uploads `Image` → `ImageTexture` on-the-fly |
+| **CHOP** | GNWaveformView (`_draw()`) | GPU-accelerated polylines, auto-scaling, multi-channel with legends |
+| **DAT** | Tree (spreadsheet) | Column headers, scrollable rows, selection highlight |
+| **SOP** | SubViewport + Camera3D (lazy) | Orbit camera (middle-click), zoom (scroll), dark environment |
+| **MAT** | SubViewport + preview sphere (lazy) | Material applied to sphere mesh, 3D lit |
+| **COMP** | Info label | Shows component type name |
+
+**Key design decisions:**
+- SubViewports only for SOP/MAT (3D rendering). TOP/IMG/CHOP/DAT use lighter-weight approaches.
+- 3D SubViewports are **lazily created** — no SubViewport allocated until a SOP/MAT is actually viewed.
+- SubViewport sizes snapped to 64px boundaries to avoid resize churn during panel drag.
+- Pan/zoom state resets when switching to a different node.
+
+**Toolbar:** Family icon + node name + Fit button + zoom percentage label
+**Info bar:** Resolution (TOP/IMG), channel count + sample rate (CHOP), row × col (DAT), vert/surface count (SOP)
+
+### GNWaveformView (`addons/gonodes/ui/gn_waveform_view.gd`)
+Custom `Control._draw()` that renders CHOP channel data as waveform polylines.
+- Uses Godot's GPU-accelerated `draw_polyline()` — no SubViewport needed.
+- 8 per-channel colors (green, cyan, yellow, magenta, orange, lavender, teal, red)
+- Auto-scaling Y range across all channels, grid lines with value labels, zero line highlight
+- Channel name + current value legend
+- Single-sample (scalar) channels rendered as horizontal lines
+
+### Viewer Pin Button (Eye Icon 👁)
+Every node has an eye icon (👁) in its title bar (next to the ? help button).
+- Click → pins that node to the **docked viewer panel** (any family, not just TOPs)
+- Active-pinned node's eye button highlighted in teal
+- Signal: `GNNodeView.viewer_pin_requested` → `GNGraphEditor.viewer_pin_requested` → `gn_editor._on_viewer_pin_requested()`
+- Clicking any node still auto-routes the viewer (selection = viewer routing for all families)
+
+### GNViewerWindow (Floating)
+`GNViewerWindow` now embeds a full `GNViewerPanel` — same family-aware display as docked viewer.
+- Right-click → "Open Viewer" opens for any family (not just TOPs)
+- Each window pinned to a node ID, updated each cook frame via `update_from_node()`
 
 ### GNGraphEditor (extends GraphEdit)
 - Renders GNNetwork as GraphNode instances

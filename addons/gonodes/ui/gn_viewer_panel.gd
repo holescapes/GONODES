@@ -1,0 +1,799 @@
+class_name GNViewerPanel
+extends Control
+## Family-aware viewer panel that displays the output of any node family.
+##
+## Replaces the old TextureRect-only viewer. Switches visualization mode
+## based on the pinned node's family:
+##   • TOP  — Full-resolution TextureRect with pan/zoom (1:1 pixel mode)
+##   • IMG  — Same as TOP (uploads Image → ImageTexture)
+##   • CHOP — GNWaveformView (GPU-accelerated _draw() polylines)
+##   • DAT  — Tree spreadsheet widget (scrollable, column headers)
+##   • SOP  — SubViewport with Camera3D + MeshInstance3D (lazy, 3D)
+##   • MAT  — SubViewport with preview sphere (lazy, 3D)
+##   • COMP — Info label (shows inner node count)
+##
+## Only one child visualization is visible at a time.
+## The 3D SubViewport is allocated lazily — if you never view a SOP or MAT,
+## no SubViewport is created.
+
+## Background color for the panel.
+const BG_COLOR := Color(0.06, 0.06, 0.08)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Members
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## The node ID currently targeted by this viewer.
+var node_id: String = ""
+
+## The family of the currently viewed node (cached for mode switching).
+var _current_family: GNFamily.Type = GNFamily.Type.TOP
+
+## Toolbar
+var _toolbar: HBoxContainer = null
+var _family_label: Label = null
+var _node_label: Label = null
+var _resolution_label: Label = null
+var _zoom_label: Label = null
+var _fit_btn: Button = null
+
+## Background
+var _bg: ColorRect = null
+
+# ─── TOP / IMG display (pan + zoom) ──────────────────────────────────────────
+
+## Container that clips the texture display area.
+var _tex_clip: Control = null
+
+## The texture rect displayed at native resolution, repositioned by pan/zoom.
+var _tex_display: TextureRect = null
+
+## Current zoom level (1.0 = 1:1 pixel).
+var _zoom: float = 1.0
+
+## Pan offset in pixels (relative to the center of _tex_clip).
+var _pan: Vector2 = Vector2.ZERO
+
+## Whether a pan drag is active.
+var _panning: bool = false
+
+## Last mouse position during pan drag.
+var _pan_start: Vector2 = Vector2.ZERO
+
+## Minimum / maximum zoom.
+const ZOOM_MIN := 0.1
+const ZOOM_MAX := 16.0
+const ZOOM_STEP := 0.1
+
+# ─── CHOP display ────────────────────────────────────────────────────────────
+
+var _waveform: GNWaveformView = null
+
+# ─── DAT display (spreadsheet) ───────────────────────────────────────────────
+
+var _spreadsheet: Tree = null
+
+# ─── SOP display (3D viewport) ───────────────────────────────────────────────
+
+var _3d_viewport: SubViewport = null
+var _3d_camera: Camera3D = null
+var _3d_mesh_instance: MeshInstance3D = null
+var _3d_light: DirectionalLight3D = null
+var _3d_display: TextureRect = null   ## Shows the SubViewport output
+
+## Orbit camera state
+var _orbit_yaw: float = 45.0
+var _orbit_pitch: float = -30.0
+var _orbit_distance: float = 3.0
+var _orbit_dragging: bool = false
+var _orbit_start: Vector2 = Vector2.ZERO
+
+# ─── MAT display (material preview sphere) ────────────────────────────────────
+
+var _mat_viewport: SubViewport = null
+var _mat_camera: Camera3D = null
+var _mat_sphere: MeshInstance3D = null
+var _mat_light: DirectionalLight3D = null
+var _mat_display: TextureRect = null
+
+# ─── Fallback info label ─────────────────────────────────────────────────────
+
+var _info_label: Label = null
+
+# ─── Info bar (bottom) ────────────────────────────────────────────────────────
+
+var _info_bar: Label = null
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Setup
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _ready() -> void:
+	clip_contents = true
+
+	# Background
+	_bg = ColorRect.new()
+	_bg.color = BG_COLOR
+	_bg.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_bg.mouse_filter = MOUSE_FILTER_IGNORE
+	add_child(_bg)
+
+	# Toolbar (top)
+	_toolbar = HBoxContainer.new()
+	_toolbar.set_anchors_and_offsets_preset(PRESET_TOP_WIDE)
+	_toolbar.offset_bottom = 24.0
+	_toolbar.add_theme_constant_override("separation", 6)
+	add_child(_toolbar)
+
+	_family_label = Label.new()
+	_family_label.add_theme_font_size_override("font_size", 11)
+	_family_label.text = ""
+	_toolbar.add_child(_family_label)
+
+	_node_label = Label.new()
+	_node_label.add_theme_font_size_override("font_size", 11)
+	_node_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	_node_label.text = ""
+	_node_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	_toolbar.add_child(_node_label)
+
+	_fit_btn = Button.new()
+	_fit_btn.text = "Fit"
+	_fit_btn.tooltip_text = "Fit to panel (Shift+F)"
+	_fit_btn.flat = true
+	_fit_btn.add_theme_font_size_override("font_size", 10)
+	_fit_btn.pressed.connect(_fit_to_panel)
+	_toolbar.add_child(_fit_btn)
+
+	_zoom_label = Label.new()
+	_zoom_label.add_theme_font_size_override("font_size", 10)
+	_zoom_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	_zoom_label.text = ""
+	_toolbar.add_child(_zoom_label)
+
+	# Info bar (bottom)
+	_info_bar = Label.new()
+	_info_bar.set_anchors_and_offsets_preset(PRESET_BOTTOM_WIDE)
+	_info_bar.offset_top = -18.0
+	_info_bar.add_theme_font_size_override("font_size", 10)
+	_info_bar.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	_info_bar.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_info_bar.mouse_filter = MOUSE_FILTER_IGNORE
+	add_child(_info_bar)
+
+	# Create all display modes (hidden by default)
+	_create_texture_display()
+	_create_waveform_display()
+	_create_spreadsheet_display()
+	_create_info_label()
+
+	# Default: show nothing
+	_hide_all_displays()
+
+
+## Content area rect (below toolbar, above info bar).
+func _get_content_rect() -> Rect2:
+	return Rect2(0, 26, size.x, maxf(size.y - 44, 1))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TOP / IMG — Full Resolution Pan + Zoom
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _create_texture_display() -> void:
+	_tex_clip = Control.new()
+	_tex_clip.clip_contents = true
+	_tex_clip.mouse_filter = MOUSE_FILTER_STOP
+	_tex_clip.visible = false
+	add_child(_tex_clip)
+
+	_tex_display = TextureRect.new()
+	_tex_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_tex_display.stretch_mode = TextureRect.STRETCH_SCALE
+	_tex_display.mouse_filter = MOUSE_FILTER_IGNORE
+	_tex_clip.add_child(_tex_display)
+
+	# Wire input events for pan/zoom
+	_tex_clip.gui_input.connect(_on_tex_gui_input)
+	_tex_clip.resized.connect(_on_tex_clip_resized)
+
+
+func _on_tex_clip_resized() -> void:
+	_apply_tex_transform()
+
+
+## Handles mouse input for pan (middle-click drag) and zoom (scroll wheel).
+func _on_tex_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_MIDDLE:
+			if mb.pressed:
+				_panning = true
+				_pan_start = mb.position
+			else:
+				_panning = false
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
+			_zoom_at(mb.position, ZOOM_STEP)
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
+			_zoom_at(mb.position, -ZOOM_STEP)
+	elif event is InputEventMouseMotion and _panning:
+		var mm: InputEventMouseMotion = event
+		_pan += mm.relative
+		_apply_tex_transform()
+
+
+## Zooms toward/away from the mouse cursor position.
+func _zoom_at(mouse_pos: Vector2, delta: float) -> void:
+	var old_zoom := _zoom
+	_zoom = clampf(_zoom + delta * _zoom, ZOOM_MIN, ZOOM_MAX)
+	if is_equal_approx(old_zoom, _zoom):
+		return
+
+	# Adjust pan so the point under the cursor stays fixed
+	var ratio: float = _zoom / old_zoom
+	var clip_center := _tex_clip.size * 0.5
+	_pan = clip_center + (_pan - clip_center + (mouse_pos - clip_center)) * ratio - (mouse_pos - clip_center)
+
+	_apply_tex_transform()
+	_update_zoom_label()
+
+
+## Applies the current pan + zoom to the TextureRect.
+func _apply_tex_transform() -> void:
+	if _tex_display == null or _tex_display.texture == null:
+		return
+	var tex_size := Vector2(_tex_display.texture.get_size())
+	var display_size := tex_size * _zoom
+	var clip_center := _tex_clip.size * 0.5
+	var pos := clip_center + _pan - display_size * 0.5
+	_tex_display.position = pos
+	_tex_display.size = display_size
+
+
+## Fits the texture to the panel (like the old STRETCH_KEEP_ASPECT_CENTERED).
+func _fit_to_panel() -> void:
+	if _tex_display == null or _tex_display.texture == null:
+		return
+	var tex_size := Vector2(_tex_display.texture.get_size())
+	if tex_size.x <= 0 or tex_size.y <= 0:
+		return
+	var content := _get_content_rect()
+	var scale_x := content.size.x / tex_size.x
+	var scale_y := content.size.y / tex_size.y
+	_zoom = minf(scale_x, scale_y)
+	_pan = Vector2.ZERO
+	_apply_tex_transform()
+	_update_zoom_label()
+
+
+func _update_zoom_label() -> void:
+	if _zoom_label:
+		_zoom_label.text = "%d%%" % int(_zoom * 100.0)
+
+
+## Updates the TOP/IMG texture display with the given texture.
+func _show_texture(tex: Texture2D, info_text: String = "") -> void:
+	_hide_all_displays()
+	_tex_clip.visible = true
+	_fit_btn.visible = true
+	_zoom_label.visible = true
+
+	# Layout the clip area to the content rect
+	var content := _get_content_rect()
+	_tex_clip.position = content.position
+	_tex_clip.size = content.size
+
+	_tex_display.texture = tex
+
+	# First time or texture changed size — auto-fit
+	_apply_tex_transform()
+	_info_bar.text = info_text
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CHOP — Waveform Display
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _create_waveform_display() -> void:
+	_waveform = GNWaveformView.new()
+	_waveform.visible = false
+	_waveform.mouse_filter = MOUSE_FILTER_IGNORE
+	add_child(_waveform)
+
+
+func _show_waveform(ch_data: GNChannelData) -> void:
+	_hide_all_displays()
+	_waveform.visible = true
+	_fit_btn.visible = false
+	_zoom_label.visible = false
+
+	var content := _get_content_rect()
+	_waveform.position = content.position
+	_waveform.size = content.size
+	_waveform.set_channel_data(ch_data)
+
+	# Info bar
+	var ch_count := ch_data.channels.size()
+	var sample_info := "%d ch" % ch_count
+	if ch_data.length > 1:
+		sample_info += " × %d samples" % ch_data.length
+	sample_info += " @ %.0f Hz" % ch_data.sample_rate
+	_info_bar.text = sample_info
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DAT — Spreadsheet Display
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _create_spreadsheet_display() -> void:
+	_spreadsheet = Tree.new()
+	_spreadsheet.visible = false
+	_spreadsheet.columns = 1
+	_spreadsheet.select_mode = Tree.SELECT_ROW
+	_spreadsheet.hide_root = true
+	_spreadsheet.allow_reselect = false
+	_spreadsheet.set_column_expand(0, true)
+	add_child(_spreadsheet)
+
+
+func _show_spreadsheet(tbl: GNTableData) -> void:
+	_hide_all_displays()
+	_spreadsheet.visible = true
+	_fit_btn.visible = false
+	_zoom_label.visible = false
+
+	var content := _get_content_rect()
+	_spreadsheet.position = content.position
+	_spreadsheet.size = content.size
+
+	# Clear and rebuild
+	_spreadsheet.clear()
+
+	if tbl.table.is_empty():
+		_info_bar.text = "(empty table)"
+		return
+
+	# Determine column count from the first row
+	var col_count: int = 0
+	for row in tbl.table:
+		if row.size() > col_count:
+			col_count = row.size()
+	if col_count == 0:
+		_info_bar.text = "(empty table)"
+		return
+
+	_spreadsheet.columns = col_count
+	for c in col_count:
+		_spreadsheet.set_column_expand(c, true)
+		_spreadsheet.set_column_clip_content(c, true)
+
+	# Header row
+	var root := _spreadsheet.create_item()
+	var data_start: int = 0
+	if tbl.has_header and tbl.table.size() > 0:
+		var header_row: Array = tbl.table[0]
+		for c in col_count:
+			if c < header_row.size():
+				_spreadsheet.set_column_title(c, str(header_row[c]))
+			else:
+				_spreadsheet.set_column_title(c, "")
+		_spreadsheet.set_column_titles_visible(true)
+		data_start = 1
+	else:
+		_spreadsheet.set_column_titles_visible(false)
+
+	# Data rows
+	for r in range(data_start, tbl.table.size()):
+		var row: Array = tbl.table[r]
+		var item := _spreadsheet.create_item(root)
+		for c in col_count:
+			if c < row.size():
+				item.set_text(c, str(row[c]))
+			else:
+				item.set_text(c, "")
+
+	var row_count: int = tbl.table.size() - data_start
+	_info_bar.text = "%d rows × %d cols" % [row_count, col_count]
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SOP — 3D Viewport (Lazy)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _ensure_3d_viewport() -> void:
+	if _3d_viewport != null:
+		return
+
+	_3d_viewport = SubViewport.new()
+	_3d_viewport.name = "SOP_Viewer_VP"
+	_3d_viewport.transparent_bg = false
+	_3d_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_3d_viewport.disable_3d = false
+	_3d_viewport.size = _snap_size(_get_content_rect().size)
+	add_child(_3d_viewport)
+
+	# Camera
+	_3d_camera = Camera3D.new()
+	_3d_camera.name = "Camera"
+	_3d_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	_3d_camera.fov = 45.0
+	_3d_viewport.add_child(_3d_camera)
+
+	# Light
+	_3d_light = DirectionalLight3D.new()
+	_3d_light.name = "Light"
+	_3d_light.rotation_degrees = Vector3(-45, 30, 0)
+	_3d_viewport.add_child(_3d_light)
+
+	# Mesh instance (updated each frame with the SOP's mesh)
+	_3d_mesh_instance = MeshInstance3D.new()
+	_3d_mesh_instance.name = "MeshPreview"
+	_3d_viewport.add_child(_3d_mesh_instance)
+
+	# Environment for dark background
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.1, 0.1, 0.12)
+	env.ambient_light_color = Color(0.2, 0.2, 0.25)
+	env.ambient_light_energy = 0.5
+	var world := World3D.new()
+	world.environment = env
+	_3d_viewport.world_3d = world
+
+	# Display TextureRect
+	_3d_display = TextureRect.new()
+	_3d_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_3d_display.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_3d_display.texture = _3d_viewport.get_texture()
+	_3d_display.mouse_filter = MOUSE_FILTER_STOP
+	_3d_display.visible = false
+	add_child(_3d_display)
+
+	_3d_display.gui_input.connect(_on_3d_gui_input)
+
+	_update_orbit_camera()
+
+
+func _show_3d_mesh(geo_data: GNGeoData) -> void:
+	_ensure_3d_viewport()
+	_hide_all_displays()
+	_3d_display.visible = true
+	_fit_btn.visible = false
+	_zoom_label.visible = false
+
+	var content := _get_content_rect()
+	_3d_display.position = content.position
+	_3d_display.size = content.size
+
+	# Resize SubViewport to match content
+	_3d_viewport.size = _snap_size(content.size)
+
+	# Update mesh
+	if geo_data.mesh != null:
+		_3d_mesh_instance.mesh = geo_data.mesh
+	else:
+		_3d_mesh_instance.mesh = null
+
+	# Render one frame
+	_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+	# Info
+	_info_bar.text = "%d verts, %d surfaces" % [geo_data.vertex_count,
+		geo_data.mesh.get_surface_count() if geo_data.mesh else 0]
+
+
+## Orbit camera input on the 3D display.
+func _on_3d_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_MIDDLE:
+			if mb.pressed:
+				_orbit_dragging = true
+				_orbit_start = mb.position
+			else:
+				_orbit_dragging = false
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
+			_orbit_distance = maxf(_orbit_distance - 0.3, 0.5)
+			_update_orbit_camera()
+			if _3d_viewport:
+				_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
+			_orbit_distance = minf(_orbit_distance + 0.3, 20.0)
+			_update_orbit_camera()
+			if _3d_viewport:
+				_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	elif event is InputEventMouseMotion and _orbit_dragging:
+		var mm: InputEventMouseMotion = event
+		_orbit_yaw += mm.relative.x * 0.5
+		_orbit_pitch = clampf(_orbit_pitch - mm.relative.y * 0.5, -89.0, 89.0)
+		_update_orbit_camera()
+		if _3d_viewport:
+			_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
+func _update_orbit_camera() -> void:
+	if _3d_camera == null:
+		return
+	var yaw_rad := deg_to_rad(_orbit_yaw)
+	var pitch_rad := deg_to_rad(_orbit_pitch)
+	var offset := Vector3(
+		_orbit_distance * cos(pitch_rad) * sin(yaw_rad),
+		_orbit_distance * sin(pitch_rad),
+		_orbit_distance * cos(pitch_rad) * cos(yaw_rad)
+	)
+	_3d_camera.position = offset
+	_3d_camera.look_at(Vector3.ZERO)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MAT — Material Preview Sphere (Lazy)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _ensure_mat_viewport() -> void:
+	if _mat_viewport != null:
+		return
+
+	_mat_viewport = SubViewport.new()
+	_mat_viewport.name = "MAT_Viewer_VP"
+	_mat_viewport.transparent_bg = false
+	_mat_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_mat_viewport.disable_3d = false
+	_mat_viewport.size = _snap_size(_get_content_rect().size)
+	add_child(_mat_viewport)
+
+	# Camera
+	_mat_camera = Camera3D.new()
+	_mat_camera.name = "Camera"
+	_mat_camera.position = Vector3(0, 0, 2.5)
+	_mat_camera.look_at(Vector3.ZERO)
+	_mat_viewport.add_child(_mat_camera)
+
+	# Light
+	_mat_light = DirectionalLight3D.new()
+	_mat_light.name = "Light"
+	_mat_light.rotation_degrees = Vector3(-45, 30, 0)
+	_mat_viewport.add_child(_mat_light)
+
+	# Preview sphere
+	_mat_sphere = MeshInstance3D.new()
+	_mat_sphere.name = "PreviewSphere"
+	var sphere_mesh := SphereMesh.new()
+	sphere_mesh.radius = 0.8
+	sphere_mesh.height = 1.6
+	sphere_mesh.radial_segments = 64
+	sphere_mesh.rings = 32
+	_mat_sphere.mesh = sphere_mesh
+	_mat_viewport.add_child(_mat_sphere)
+
+	# Environment
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.15, 0.15, 0.18)
+	env.ambient_light_color = Color(0.3, 0.3, 0.35)
+	env.ambient_light_energy = 0.5
+	var world := World3D.new()
+	world.environment = env
+	_mat_viewport.world_3d = world
+
+	# Display
+	_mat_display = TextureRect.new()
+	_mat_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_mat_display.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_mat_display.texture = _mat_viewport.get_texture()
+	_mat_display.mouse_filter = MOUSE_FILTER_IGNORE
+	_mat_display.visible = false
+	add_child(_mat_display)
+
+
+func _show_material(mat_data: GNMaterialData) -> void:
+	_ensure_mat_viewport()
+	_hide_all_displays()
+	_mat_display.visible = true
+	_fit_btn.visible = false
+	_zoom_label.visible = false
+
+	var content := _get_content_rect()
+	_mat_display.position = content.position
+	_mat_display.size = content.size
+	_mat_viewport.size = _snap_size(content.size)
+
+	# Apply material to sphere
+	if mat_data.material != null:
+		_mat_sphere.material_override = mat_data.material
+	else:
+		_mat_sphere.material_override = null
+
+	_mat_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+	var mat_name := ""
+	if mat_data.material != null:
+		mat_name = mat_data.material.get_class()
+	_info_bar.text = "Material: %s" % mat_name
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COMP / Fallback Info Label
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _create_info_label() -> void:
+	_info_label = Label.new()
+	_info_label.visible = false
+	_info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_info_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_info_label.add_theme_font_size_override("font_size", 14)
+	_info_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	_info_label.mouse_filter = MOUSE_FILTER_IGNORE
+	add_child(_info_label)
+
+
+func _show_info(text: String, info_bar_text: String = "") -> void:
+	_hide_all_displays()
+	_info_label.visible = true
+	_fit_btn.visible = false
+	_zoom_label.visible = false
+
+	var content := _get_content_rect()
+	_info_label.position = content.position
+	_info_label.size = content.size
+	_info_label.text = text
+	_info_bar.text = info_bar_text
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Display Management
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _hide_all_displays() -> void:
+	if _tex_clip:
+		_tex_clip.visible = false
+	if _waveform:
+		_waveform.visible = false
+	if _spreadsheet:
+		_spreadsheet.visible = false
+	if _3d_display:
+		_3d_display.visible = false
+	if _mat_display:
+		_mat_display.visible = false
+	if _info_label:
+		_info_label.visible = false
+	if _fit_btn:
+		_fit_btn.visible = false
+	if _zoom_label:
+		_zoom_label.visible = false
+	if _info_bar:
+		_info_bar.text = ""
+
+
+## Snaps a size to the nearest 64px boundary (avoids SubViewport resize churn).
+func _snap_size(s: Vector2) -> Vector2i:
+	return Vector2i(
+		maxi(64, snappedi(int(s.x), 64)),
+		maxi(64, snappedi(int(s.y), 64))
+	)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Public API
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Sets the node being viewed.  Call _before_ update_from_node().
+func set_target(p_node_id: String) -> void:
+	if node_id == p_node_id:
+		return
+	node_id = p_node_id
+	# Reset pan/zoom when switching nodes
+	_zoom = 1.0
+	_pan = Vector2.ZERO
+	_orbit_yaw = 45.0
+	_orbit_pitch = -30.0
+	_orbit_distance = 3.0
+
+
+## Main update entry point — called each cook frame by the editor.
+## Reads the node's cached_output and routes to the correct display mode.
+func update_from_node(node: GNNode) -> void:
+	if node == null:
+		_hide_all_displays()
+		_update_toolbar("", "")
+		return
+
+	var family := node.family
+	_current_family = family
+	var family_name := GNFamily.get_family_name(family)
+	var family_color := GNFamily.get_color(family)
+	_update_toolbar(family_name, node.id, family_color)
+
+	var output: GNData = node.cached_output
+
+	match family:
+		GNFamily.Type.TOP:
+			if output is GNTextureData:
+				var tex_data: GNTextureData = output as GNTextureData
+				if tex_data.texture:
+					_show_texture(tex_data.texture,
+						"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
+					_update_zoom_label()
+					return
+			_show_info("No TOP output", "")
+
+		GNFamily.Type.IMG:
+			if output is GNImageData:
+				var img_data: GNImageData = output as GNImageData
+				if img_data.image != null and not img_data.image.is_empty():
+					var tex := ImageTexture.create_from_image(img_data.image)
+					_show_texture(tex,
+						"%dx%d" % [img_data.resolution.x, img_data.resolution.y])
+					_update_zoom_label()
+					return
+			_show_info("No IMG output", "")
+
+		GNFamily.Type.CHOP:
+			if output is GNChannelData:
+				var ch_data: GNChannelData = output as GNChannelData
+				_show_waveform(ch_data)
+				return
+			_show_info("No CHOP output", "")
+
+		GNFamily.Type.DAT:
+			if output is GNTableData:
+				var tbl: GNTableData = output as GNTableData
+				_show_spreadsheet(tbl)
+				return
+			_show_info("No DAT output", "")
+
+		GNFamily.Type.SOP:
+			if output is GNGeoData:
+				var geo: GNGeoData = output as GNGeoData
+				_show_3d_mesh(geo)
+				return
+			_show_info("No SOP output", "")
+
+		GNFamily.Type.MAT:
+			if output is GNMaterialData:
+				var mat: GNMaterialData = output as GNMaterialData
+				_show_material(mat)
+				return
+			_show_info("No MAT output", "")
+
+		GNFamily.Type.COMP:
+			_show_info("COMP: %s" % node.node_type, "Component operator")
+
+		_:
+			_show_info("Unsupported family", "")
+
+
+## Clears the viewer display.
+func clear() -> void:
+	node_id = ""
+	_hide_all_displays()
+	_update_toolbar("", "")
+
+
+func _update_toolbar(family_name: String, p_node_id: String,
+		family_color: Color = Color.WHITE) -> void:
+	if _family_label:
+		_family_label.text = family_name
+		_family_label.add_theme_color_override("font_color", family_color)
+	if _node_label:
+		_node_label.text = p_node_id
+
+
+## Keyboard shortcut handler.
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event is InputEventKey and event.pressed:
+		var key: InputEventKey = event
+		# Shift+F = Fit to panel
+		if key.keycode == KEY_F and key.shift_pressed and not key.ctrl_pressed:
+			_fit_to_panel()
+			get_viewport().set_input_as_handled()
+		# Home = reset zoom to 1:1
+		elif key.keycode == KEY_HOME and not key.ctrl_pressed:
+			_zoom = 1.0
+			_pan = Vector2.ZERO
+			_apply_tex_transform()
+			_update_zoom_label()
+			get_viewport().set_input_as_handled()
