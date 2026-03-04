@@ -618,18 +618,15 @@ Smooth procedural noise channels.
 
 #### ConstantCHOP
 
-Static named values.
+Static named values with a dynamic number of channel slots.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| name0 | String | "chan1" | — | Channel 1 name |
-| value0 | Float | 0.0 | — | Channel 1 value |
-| name1 | String | "" | — | Channel 2 name (empty = skip) |
-| value1 | Float | 0.0 | — | Channel 2 value |
-| name2 | String | "" | — | Channel 3 name (empty = skip) |
-| value2 | Float | 0.0 | — | Channel 3 value |
+| count | Int | 1 | 1–32 | Number of channel slots |
+| nameN | String | "chan1" (slot 0) / "" | — | Channel name (empty = skip) |
+| valueN | Float | 0.0 | — | Constant value for channel |
 
-**How it works:** Builds up to 3 named single-value channels. Skips channels with empty names. Useful for constants, UI controls, and reference values.
+**How it works:** The **count** parameter controls how many name/value pairs appear in the inspector (1–32). Changing count at runtime dynamically adds or removes parameter slots — existing values are preserved when growing. Skips channels with empty names. Useful for constants, UI controls, and reference values.
 
 ---
 
@@ -814,10 +811,11 @@ Arithmetic operations between channels.
 |-----------|------|---------|-------|-------------|
 | operation | Enum | Add | Add, Subtract, Multiply, Divide, Abs, Sin, Cos, Pow | Math operation |
 | operand | Float | 0.0 | — | Value for single-input operations |
+| channel_name | String | "" | — | Pick a specific in2 channel (empty = auto-match) |
 
 **Inputs:** `in1` (CHOP), `in2` (CHOP, optional).
 
-**How it works:** With 2 inputs, applies binary operation per-sample on matching channels. With 1 input, uses `operand` parameter for binary ops or applies unary ops (Abs, Sin, Cos). Pow uses second input or operand as exponent.
+**How it works:** With 2 inputs, applies binary operation per-sample on matching channels. With 1 input, uses `operand` parameter for binary ops or applies unary ops (Abs, Sin, Cos). Pow uses second input or operand as exponent. When `channel_name` is set, the named channel from `in2` is used as the second operand for every `in1` channel. When empty, channels are matched automatically: by name first, then single-channel broadcast, then index position.
 
 ---
 
@@ -883,6 +881,22 @@ Select one of up to 4 inputs by index.
 | index | Int | 0 | 0–3 | Which input to output |
 
 **Inputs:** `in0`, `in1`, `in2`, `in3` (all CHOP).
+
+---
+
+#### RenameCHOP
+
+Rename input channels with explicit from→to mapping. Channels not matched by any rename row pass through with their original name. Empty from/to fields are skipped.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| renames | Int | 1 | 1–32 | Number of rename rows |
+| fromN | String | "" | — | Source channel name for row N (0-based) |
+| toN | String | "" | — | Target channel name for row N (0-based) |
+
+**Input:** `in` (CHOP).
+
+**How it works:** For each channel in the input, checks if its name matches any `fromN` value. If matched, the channel is output under the corresponding `toN` name. Unmatched channels are copied unchanged. The number of from/to pairs is controlled by the `renames` parameter and can be changed dynamically.
 
 ---
 

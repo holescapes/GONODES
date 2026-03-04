@@ -38,7 +38,7 @@
 			"text": "03 — Custom Shader TOP\n\nGenerator shader: animated sine-bar pattern (no inputs).\nFilter shader: wave distortion applied to shader1 output.\nMulti-input shader: blends shader1 + NoiseTOP via gn_tex0/gn_tex1.\n\nDemonstrates writing custom GLSL inside ShaderTOP with\ngenerator, filter, and multi-input modes.",
 			"position": [-150.0, -250.0],
 			"size": [460.0, 190.0],
-			"color": [0.15, 0.35, 0.65, 0.85]
+			"color": [1.0, 1.0, 1.0, 0.8]
 		}
 	],
 	"generator": "GONODES",

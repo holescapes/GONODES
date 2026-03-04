@@ -157,7 +157,7 @@
 			"text": "06 — Physics: Rigid Bodies\n\nA red box and blue sphere fall under gravity, bouncing\noff a static ground plane. PhysicsCHOP reads back live\nposition, rotation, and velocity channels from rigid1.\n\nSOP + MAT → RigidBodyCOMP / StaticBodyCOMP → MergeCOMP\n→ RenderTOP with Camera and Light.\n\nDemonstrates Jolt physics, COMP operators, and 3D rendering.",
 			"position": [-150.0, -250.0],
 			"size": [460.0, 210.0],
-			"color": [0.15, 0.35, 0.65, 0.85]
+			"color": [1.0, 1.0, 1.0, 0.8]
 		}
 	]
 }

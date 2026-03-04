@@ -187,8 +187,12 @@ func inspect(node: GNNode) -> void:
 	_preset_bar.visible = true
 	_paste_btn.disabled = not GNParamPresetManager.can_paste(node)
 
-	# Build parameter rows in definition order
+	# Build parameter rows in definition order.
+	# Consecutive params sharing a non-empty display_group are placed
+	# side-by-side inside a shared HBoxContainer.
 	var param_names := node.get_parameter_names()
+	var current_group: String = ""
+	var group_hbox: HBoxContainer = null
 	for p_name in param_names:
 		var param: GNParameter = node.get_parameter(p_name)
 		if param == null:
@@ -197,7 +201,25 @@ func inspect(node: GNNode) -> void:
 		var row := GNParamRow.new()
 		row.network = network
 		row.setup(param, node)
-		_vbox.add_child(row)
+
+		if param.display_group != "" and param.display_group == current_group:
+			# Continue the existing group row
+			row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			group_hbox.add_child(row)
+		elif param.display_group != "":
+			# Start a new group row
+			current_group = param.display_group
+			group_hbox = HBoxContainer.new()
+			group_hbox.add_theme_constant_override("separation", 4)
+			row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			group_hbox.add_child(row)
+			_vbox.add_child(group_hbox)
+		else:
+			# Ungrouped — normal full-width row
+			current_group = ""
+			group_hbox = null
+			_vbox.add_child(row)
+
 		_param_rows[p_name] = row
 
 	# Apply lock state — disable all param rows when node is locked

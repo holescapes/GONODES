@@ -171,6 +171,7 @@ Tests `GNCookEngine` expression evaluation and parameter resolution in isolation
 | Expression eval | 6 | Constant values, `time`/`frame`/`dt` variables, arithmetic, math functions (`sin`, `abs`, `sqrt`) |
 | `par()` functions | 6 | Self-reference, self-reference with math, cross-node reference, expression target, `parf()` float cast, `pari()` int cast, `pars()` string cast |
 | `chop()` function | 2 | Read channel value, nonexistent channel returns 0.0 |
+| `chops()`/`chopf()`/`chopi()` | — | Typed CHOP variants (string, float, int) |
 | Circular guards | 2 | Self-referencing expression, mutual reference cycle — both resolve safely |
 | Component expressions | 2 | Vector2 `.x`/`.y` per-component, Color `.r`/`.g`/`.b` per-component |
 | Error recovery | 2 | Invalid expression falls back to constant, valid expression updates fallback |
@@ -315,7 +316,7 @@ Manual test scenes are pre-built `.gnpatch` network patches in `test_scenes/`. T
 
 | Scene | File | What it tests |
 |-------|------|---------------|
-| **01 — CHOP Chain Basics** | `01_chop_chain_basics.gnpatch` | LFO → Math → Null chain, expression-driven NoiseTOP scale, TextTOP via `pars()` expression, live parameter tweaking |
+| **01 — CHOP Chain Basics** | `01_chop_chain_basics.gnpatch` | LFO → Math → Null chain, expression-driven NoiseTOP scale, TextTOP via `chops()` expression, live parameter tweaking |
 | **02 — ScriptCHOP** | `02_script_chop.gnpatch` | Generator ScriptCHOP with `@param` annotations (3 sine channels), filter ScriptCHOP reading upstream input and producing `abs()` channels |
 | **03 — Custom Shader TOP** | `03_custom_shader_top.gnpatch` | Generator shader (animated sine bars), filter shader (wave distortion), multi-input shader (texture blend via `gn_tex0`/`gn_tex1`), dynamic uniform → parameter creation |
 | **04 — Expression Animation** | `04_expression_animation.gnpatch` | Two LFO CHOPs driving CircleTOP center position via `chop()` expressions (Lissajous pattern), RampTOP background, CompositeTOP blending, TextTOP overlay |
@@ -442,7 +443,7 @@ func test_my_chain() -> void:
 ### Covered by automated tests
 
 - **GNParameter** — all 8 type constructors, value clamping, mode switching (CONSTANT / EXPRESSION), signal emission, per-component expressions, serialization round-trip, legacy mode migration, variant helpers
-- **GNCookEngine** — expression evaluation with `time`/`frame`/`dt` variables, `par()`/`parf()`/`pari()`/`pars()` functions, `chop()` data references, circular reference guards, component expression resolution, error recovery with fallback values, node path resolution
+- **GNCookEngine** — expression evaluation with `time`/`frame`/`dt` variables, `par()`/`parf()`/`pari()`/`pars()` functions, `chop()`/`chopf()`/`chopi()`/`chops()` data references, circular reference guards, component expression resolution, error recovery with fallback values, node path resolution
 - **GNNetwork** — node add/remove, connection management, topological sort, cycle detection, dirty propagation, rename with connection update, unique ID generation, serialization structure
 - **GNChannelData** — channel I/O, index bounds behavior, missing data handling, metadata tracking, deep copy, family identity
 - **GNParamPresetManager** — clipboard lifecycle, type-safe paste, reset to defaults, null safety

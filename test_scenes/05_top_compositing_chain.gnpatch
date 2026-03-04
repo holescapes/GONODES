@@ -82,7 +82,7 @@
 			"text": "05 — TOP Compositing Chain\n\nTwo NoiseTOPs → Composite(Add) → HSVAdjust → Composite(Screen) → Level → Null.\nEdgeTOP extracts edges from noise2 and blends into the screen pass.\n\nDemonstrates a multi-stage 2D image-processing pipeline\nusing compositing, colour correction, and edge detection.",
 			"position": [-150.0, -200.0],
 			"size": [480.0, 170.0],
-			"color": [0.15, 0.35, 0.65, 0.85]
+			"color": [1.0, 1.0, 1.0, 0.8]
 		}
 	]
 }

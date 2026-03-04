@@ -211,8 +211,8 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 - **Parameter types**: Float, Int, Bool, String, Enum, Vector2, Vector2i, Vector3, Vector4, Color, File
 - **Expression language**: GDScript expressions evaluated by Godot's `Expression` class
-- **Reference syntax**: `par("param")` (self), `par("node", "param")` (cross), `chop("node")["chan"]`, `top("node")`, `op("node")`
-- **Typed variants**: `parf()`, `pari()`, `pars()` — guarantee return type
+- **Reference syntax**: `par("param")` (self), `par("node", "param")` (cross), `chop("node", "chan")`, `top("node")`, `op("node")`
+- **Typed variants**: `parf()`, `pari()`, `pars()` for params; `chopf()`, `chopi()`, `chops()` for CHOP channels — guarantee return type
 - **Per-component expressions**: Vector2/3/4 and Color have independent C/E toggle per component
 - **Parameter presets**: Copy/paste/save/load per-operator type
 - **Circular guard**: Simple evaluating-set guard (not a full parameter DAG)

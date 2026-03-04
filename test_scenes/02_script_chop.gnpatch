@@ -41,7 +41,7 @@
 			"text": "02 — ScriptCHOP\n\nGenerator ScriptCHOP produces 3 sine-wave channels\nwith @param annotations for speed, channels, and spread.\nA Filter ScriptCHOP reads the upstream input and\noutputs the absolute values of each channel.\n\nDemonstrates user-written GDScript inside a CHOP.",
 			"position": [-150.0, -200.0],
 			"size": [420.0, 170.0],
-			"color": [0.15, 0.35, 0.65, 0.85]
+			"color": [1.0, 1.0, 1.0, 0.8]
 		}
 	]
 }

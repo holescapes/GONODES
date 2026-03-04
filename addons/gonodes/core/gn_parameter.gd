@@ -81,6 +81,10 @@ var fallback_value: Variant = 0.0
 ## by the user.  Useful for metadata fields (URLs, credits, etc.).
 @export var read_only: bool = false
 
+## Optional display group tag.  Consecutive parameters sharing the same
+## non-empty display_group are rendered side-by-side in one inspector row.
+@export var display_group: String = ""
+
 # ─── Expression Mode (MVP) ────────────────────────────────────────────────────
 
 ## The expression string (GDScript syntax), e.g.: chop("lfo1").value("out") * 10.0

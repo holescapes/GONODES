@@ -312,7 +312,7 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 	# Lazy-init regex (same pattern as GNGraphEditor's overlay scanner)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:chop|op|top|sop|dat|mat)\\s*\\(\\s*\"([^\"]+)\"")
+		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for param_name in node.parameters:
 		var param: GNParameter = node.parameters[param_name]
@@ -725,6 +725,37 @@ func _get_root_engine() -> GNCookEngine:
 ## Read a CHOP channel value. Called by Expression as chop("lfo1", "out").
 func chop(node_name: String, channel: String = "", index: int = -1) -> Variant:
 	return _make_chop_proxy(node_name, channel, index)
+
+
+## Read a CHOP channel value as float. Guaranteed float return.
+## Usage: chopf("lfo1", "out")
+func chopf(node_name: String, channel: String = "", index: int = -1) -> float:
+	var v: Variant = _make_chop_proxy(node_name, channel, index)
+	if v is float:
+		return v
+	if v is int:
+		return float(v)
+	return 0.0
+
+
+## Read a CHOP channel value as int. Guaranteed int return.
+## Usage: chopi("lfo1", "out")
+func chopi(node_name: String, channel: String = "", index: int = -1) -> int:
+	var v: Variant = _make_chop_proxy(node_name, channel, index)
+	if v is int:
+		return v
+	if v is float:
+		return int(v)
+	return 0
+
+
+## Read a CHOP channel value as string. Guaranteed String return.
+## Usage: chops("lfo1", "out")  →  "0.735"
+func chops(node_name: String, channel: String = "", index: int = -1) -> String:
+	var v: Variant = _make_chop_proxy(node_name, channel, index)
+	if v is float:
+		return "%.4f" % v
+	return str(v)
 
 
 ## Read a node's parameter. Called by Expression as op("noise1", "scale").

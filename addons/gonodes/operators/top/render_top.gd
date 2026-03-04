@@ -19,6 +19,10 @@ var _world_env: WorldEnvironment = null
 ## Track which scene nodes are currently in the viewport
 var _managed_children: Array[Node3D] = []
 
+## Previous frame's managed children — used for stable diff so physics
+## bodies stay in the scene tree between frames.
+var _prev_managed: Array[Node3D] = []
+
 
 func _init() -> void:
 	node_type = "render"
@@ -202,13 +206,18 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# ── Post-Processing ──────────────────────────────────────────────────
 	_apply_post_processing()
 
-	# Remove previously managed children that are no longer connected
-	_clear_managed_children()
+	# Stable scene population — nodes that haven't changed stay in the
+	# viewport so physics bodies keep simulating between frames.
+	_prev_managed = _managed_children.duplicate()
+	_managed_children.clear()
 
 	# Scan inputs for COMP nodes and add their 3D nodes to the viewport
 	# The cook engine passes upstream cached_output via inputs, but we need
 	# to access the actual COMP nodes to get their MeshInstance3D/Camera3D/Light3D.
 	_populate_scene_from_network()
+
+	# Remove any previously managed nodes that were not re-adopted this frame
+	_remove_stale_children()
 
 	# Apply DOF after scene population so we target the active camera
 	_apply_dof_to_active_camera()
@@ -308,16 +317,27 @@ func _populate_scene_from_network() -> void:
 
 
 ## Adds a 3D node to the viewport if not already there.
+## Always tracks the node in _managed_children for stable diff.
 func _adopt_scene_node(node_3d: Node3D) -> void:
-	if node_3d.get_parent() == _viewport:
-		return  # Already in our viewport
-	if node_3d.get_parent() != null:
-		node_3d.get_parent().remove_child(node_3d)
-	_viewport.add_child(node_3d)
+	if node_3d.get_parent() != _viewport:
+		if node_3d.get_parent() != null:
+			node_3d.get_parent().remove_child(node_3d)
+		_viewport.add_child(node_3d)
 	_managed_children.append(node_3d)
 
 
-## Removes all managed children from the viewport before re-populating.
+## Removes previously managed children that were NOT re-adopted this frame.
+## Nodes that are still in _managed_children stay in the viewport — this is
+## essential for physics bodies that must remain in the scene tree.
+func _remove_stale_children() -> void:
+	for child in _prev_managed:
+		if child != null and is_instance_valid(child) and not _managed_children.has(child):
+			if child.get_parent() == _viewport:
+				_viewport.remove_child(child)
+	_prev_managed.clear()
+
+
+## Removes all managed children from the viewport (used during cleanup).
 func _clear_managed_children() -> void:
 	for child in _managed_children:
 		if child != null and is_instance_valid(child) and child.get_parent() == _viewport:

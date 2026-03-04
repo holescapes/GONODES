@@ -60,7 +60,7 @@
 			"parameters": {
 				"text": {
 					"mode": "EXPRESSION",
-					"expression": "pars(\"null_out\", \"out\")",
+					"expression": "chops(\"null_out\", \"out\")",
 					"value": "CHOP → TOP Test"
 				},
 				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 128}},
@@ -82,10 +82,10 @@
 		{
 			"id": "ann_1",
 			"type": "note",
-			"text": "01 — CHOP Chain Basics\n\nLFO → Math(Multiply) → Math(Add) → Null.\nDemonstrates a basic CHOP processing chain.\nThe Null output also drives a NoiseTOP scale\nand a TextTOP string via chop() / pars() expressions.\n\nCross-family data flow: CHOP → TOP.",
+			"text": "01 — CHOP Chain Basics\n\nLFO → Math(Multiply) → Math(Add) → Null.\nDemonstrates a basic CHOP processing chain.\nThe Null output also drives a NoiseTOP scale\nand a TextTOP string via chop() / chops() expressions.\n\nCross-family data flow: CHOP → TOP.",
 			"position": [-150.0, -200.0],
 			"size": [420.0, 180.0],
-			"color": [0.15, 0.35, 0.65, 0.85]
+			"color": [1.0, 1.0, 1.0, 0.8]
 		}
 	]
 }

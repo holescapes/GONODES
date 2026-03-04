@@ -57,11 +57,10 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		get_param_value("sx"), get_param_value("sy"), get_param_value("sz"))
 	_group_node.visible = get_param_value("visible")
 
-	# Detach previously managed children so we can re-adopt from fresh input list
-	_release_children()
-
-	# Collect scene nodes from connected COMP inputs via the network
-	_populate_from_network()
+	# Stable child sync — only add/remove nodes that actually changed.
+	# This keeps RigidBody3D / StaticBody3D in the tree so the physics
+	# engine preserves velocity, contacts, and accumulated state.
+	_sync_children_from_network()
 
 	return null  # RenderTOP reads scene nodes via get_scene_node() / get_children()
 
@@ -73,10 +72,9 @@ func get_group_node() -> Node3D:
 
 
 ## Populates the group node with children from upstream COMP connections.
-## Walks the network to find connected COMP nodes and reparents their scene nodes.
-## Children are ordered by input port index (port 0 = first child, port 1 = second, …),
-## giving the user deterministic control over the scene hierarchy via port wiring.
-func _populate_from_network() -> void:
+## Uses a stable diff so nodes that haven't changed stay parented — critical
+## for physics bodies that must remain in the scene tree to keep simulating.
+func _sync_children_from_network() -> void:
 	if _group_node == null:
 		return
 
@@ -91,21 +89,31 @@ func _populate_from_network() -> void:
 	conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
 		return a.to_port < b.to_port)
 
+	# Build the expected child list from current connections
+	var expected: Array[Node3D] = []
 	for conn in conns:
 		var upstream: GNNode = network.nodes.get(conn.from_node, null)
 		if upstream == null or not (upstream is GNCompBase):
 			continue
 		var comp: GNCompBase = upstream as GNCompBase
 		var scene_nd: Node3D = comp.get_scene_node()
-		if scene_nd == null:
-			continue
+		if scene_nd != null:
+			expected.append(scene_nd)
 
-		# Reparent into our group
-		if scene_nd.get_parent() != _group_node:
-			if scene_nd.get_parent() != null:
-				scene_nd.get_parent().remove_child(scene_nd)
-			_group_node.add_child(scene_nd)
-			_managed_children.append(scene_nd)
+	# Remove managed children that are no longer in the expected set
+	for old_child in _managed_children:
+		if old_child != null and is_instance_valid(old_child) and not expected.has(old_child):
+			if old_child.get_parent() == _group_node:
+				_group_node.remove_child(old_child)
+
+	# Adopt expected children that aren't already in the group
+	_managed_children.clear()
+	for child in expected:
+		if child.get_parent() != _group_node:
+			if child.get_parent() != null:
+				child.get_parent().remove_child(child)
+			_group_node.add_child(child)
+		_managed_children.append(child)
 
 
 ## Releases all children back out of the group (detach without freeing).

@@ -88,7 +88,7 @@
 			"text": "04 — Expression Animation\n\nTwo LFO CHOPs drive the center of a CircleTOP via a\nwhole-parameter Vector2 expression using chop().\nThe circle moves in a smooth Lissajous pattern over\na radial RampTOP background, composited together.\n\nDemonstrates expressions, dashed reference lines,\nand cross-family CHOP → TOP data flow.",
 			"position": [-150.0, -200.0],
 			"size": [420.0, 190.0],
-			"color": [0.15, 0.35, 0.65, 0.85]
+			"color": [1.0, 1.0, 1.0, 0.8]
 		}
 	]
 }

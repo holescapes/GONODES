@@ -346,6 +346,7 @@ func test_multi_channel_math() -> void:
 	## ConstantCHOP with 2 channels → MathCHOP(Abs)
 	## Both channels should be processed.
 	var c := _make_node(ConstantCHOP, "const1")
+	c.set_param_value("count", 2)
 	c.set_param_value("name0", "a")
 	c.set_param_value("value0", -3.0)
 	c.set_param_value("name1", "b")
@@ -421,12 +422,14 @@ func test_binary_math_mismatched_names_index_match() -> void:
 	## in1 has "x"=6, "y"=8.  in2 has "a"=2, "b"=3.
 	## Names don't match, so index-based: x*a=12, y*b=24.
 	var a := _make_node(ConstantCHOP, "constA")
+	a.set_param_value("count", 2)
 	a.set_param_value("name0", "x")
 	a.set_param_value("value0", 6.0)
 	a.set_param_value("name1", "y")
 	a.set_param_value("value1", 8.0)
 
 	var b := _make_node(ConstantCHOP, "constB")
+	b.set_param_value("count", 2)
 	b.set_param_value("name0", "a")
 	b.set_param_value("value0", 2.0)
 	b.set_param_value("name1", "b")
@@ -444,3 +447,35 @@ func test_binary_math_mismatched_names_index_match() -> void:
 	GNTestAssert.assert_not_null(output, "index-matched output exists")
 	GNTestAssert.assert_approx(output.get_value("x"), 12.0, 0.001, "6 * 2 = 12 (index 0)")
 	GNTestAssert.assert_approx(output.get_value("y"), 24.0, 0.001, "8 * 3 = 24 (index 1)")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Binary MathCHOP — channel_name Selector
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_binary_math_channel_name_selector() -> void:
+	## in1 has "x"=5.  in2 has "a"=2, "b"=10.
+	## channel_name="b" should force using in2's "b" channel (10) → 5*10=50.
+	var a := _make_node(ConstantCHOP, "constA")
+	a.set_param_value("name0", "x")
+	a.set_param_value("value0", 5.0)
+
+	var b := _make_node(ConstantCHOP, "constB")
+	b.set_param_value("count", 2)
+	b.set_param_value("name0", "a")
+	b.set_param_value("value0", 2.0)
+	b.set_param_value("name1", "b")
+	b.set_param_value("value1", 10.0)
+
+	var m := _make_node(MathCHOP, "math1")
+	m.set_param_value("operation", 2)  # Multiply
+	m.set_param_value("channel_name", "b")
+	_network.connect_nodes("constA", 0, "math1", 0)
+	_network.connect_nodes("constB", 0, "math1", 1)
+
+	_cook_one_frame()
+
+	var output := _get_output(m)
+	GNTestAssert.assert_not_null(output, "channel_name selector output exists")
+	GNTestAssert.assert_approx(output.get_value("x"), 50.0, 0.001,
+		"5 * 10 = 50 (selected channel 'b' from in2)")

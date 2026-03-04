@@ -480,6 +480,8 @@ func _register_core_operators() -> void:
 		"Pass-through.")
 	_reg("SwitchCHOP",      "CHOP", SwitchCHOP,
 		"Select one of up to 4 channel inputs by index.")
+	_reg("RenameCHOP",      "CHOP", RenameCHOP,
+		"Rename input channels with explicit from→to mapping.")
 
 	# ── CHOPs: Bridge ───────────────────────────────────────────────────
 	_reg("DATtoCHOP",       "CHOP", DATtoCHOP,

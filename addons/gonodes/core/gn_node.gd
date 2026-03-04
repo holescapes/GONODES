@@ -201,13 +201,6 @@ func initialize(p_id: String) -> void:
 	process_mode = PROCESS_MODE_DISABLED
 	_init_ports()
 	_init_parameters()
-	# Wire parameter change signals to mark this node dirty
-	for param_name in parameters:
-		var param: GNParameter = parameters[param_name]
-		if not param.value_changed.is_connected(_on_parameter_changed):
-			param.value_changed.connect(_on_parameter_changed)
-		if not param.mode_changed.is_connected(_on_parameter_mode_changed):
-			param.mode_changed.connect(_on_parameter_mode_changed)
 	GNLogger.debug("GNNode", "Initialized '%s' (%s/%s) — %d in, %d out, %d params" % [
 		id, GNFamily.get_family_name(family), node_type,
 		input_ports.size(), output_ports.size(), parameters.size()])
@@ -327,9 +320,17 @@ func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
 # Parameter Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Registers a parameter under its name.  Called during [method _init_parameters].
+## Registers a parameter under its name.  Called during [method _init_parameters]
+## or at runtime for dynamic parameter creation (e.g. ConstantCHOP, RampCHOP).
+## Automatically wires [signal GNParameter.value_changed] and
+## [signal GNParameter.mode_changed] so the node marks dirty on edits.
 func add_parameter(param: GNParameter) -> void:
 	parameters[param.param_name] = param
+	# Wire dirty-marking signals — safe to call on already-connected params
+	if not param.value_changed.is_connected(_on_parameter_changed):
+		param.value_changed.connect(_on_parameter_changed)
+	if not param.mode_changed.is_connected(_on_parameter_mode_changed):
+		param.mode_changed.connect(_on_parameter_mode_changed)
 
 
 ## Returns the raw GNParameter object, or null if not found.
