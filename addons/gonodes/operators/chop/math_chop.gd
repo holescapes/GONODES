@@ -3,6 +3,8 @@ extends GNChopBase
 ## Performs per-sample math operations on CHOP channel data.
 ## With 1 input: applies unary operation (Abs, Sin, Cos) or uses operand parameter.
 ## With 2 inputs: applies binary operation channel-by-channel.
+## Channel matching priority: (1) same name, (2) single-channel broadcast,
+## (3) index-based positional match.
 
 enum Operation { ADD, SUBTRACT, MULTIPLY, DIVIDE, ABS, SIN, COS, POW }
 
@@ -43,23 +45,48 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_cached_channel_data.length = 0
 	_cached_channel_data.sample_rate = in1.sample_rate
 
+	# Pre-compute a fallback channel from in2 when channel names don't match.
+	# If in2 has exactly one channel, use it as a universal second operand.
+	# Otherwise build an index-ordered list for positional matching.
+	var in2_single_samples: PackedFloat32Array = PackedFloat32Array()
+	var in2_keys_ordered: Array[String] = []
+	if in2 != null:
+		in2_keys_ordered.assign(in2.channels.keys())
+		if in2_keys_ordered.size() == 1:
+			in2_single_samples = in2.channels[in2_keys_ordered[0]]
+
+	var ch_idx: int = 0
 	for ch_name in in1.channels:
 		var samples_a: PackedFloat32Array = in1.channels[ch_name]
 		var out_samples := PackedFloat32Array()
 		out_samples.resize(samples_a.size())
 
-		if in2 != null and in2.channels.has(ch_name):
-			# Binary operation with matching channel from input 2
-			var samples_b: PackedFloat32Array = in2.channels[ch_name]
-			for i in range(samples_a.size()):
-				var b_val: float = samples_b[i] if i < samples_b.size() else 0.0
-				out_samples[i] = _apply_binary(op_idx, samples_a[i], b_val)
+		if in2 != null:
+			# Resolve the second-input samples for this channel:
+			#  1) Matching channel name  2) Single-channel broadcast  3) Index match
+			var samples_b: PackedFloat32Array = PackedFloat32Array()
+			if in2.channels.has(ch_name):
+				samples_b = in2.channels[ch_name]
+			elif in2_single_samples.size() > 0:
+				samples_b = in2_single_samples
+			elif ch_idx < in2_keys_ordered.size():
+				samples_b = in2.channels[in2_keys_ordered[ch_idx]]
+
+			if samples_b.size() > 0:
+				for i in range(samples_a.size()):
+					var b_val: float = samples_b[i] if i < samples_b.size() else samples_b[samples_b.size() - 1]
+					out_samples[i] = _apply_binary(op_idx, samples_a[i], b_val)
+			else:
+				# in2 connected but no usable channel — fall back to operand param
+				for i in range(samples_a.size()):
+					out_samples[i] = _apply_unary(op_idx, samples_a[i], operand_val)
 		else:
-			# Unary operation or binary with operand parameter
+			# No second input — unary operation or binary with operand parameter
 			for i in range(samples_a.size()):
 				out_samples[i] = _apply_unary(op_idx, samples_a[i], operand_val)
 
 		_cached_channel_data.set_channel(ch_name, out_samples)
+		ch_idx += 1
 
 	return _cached_channel_data
 

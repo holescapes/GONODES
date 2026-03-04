@@ -182,5 +182,15 @@
 		{"from": "merge1", "from_port": 0, "to": "render1", "to_port": 0},
 		{"from": "camera1", "from_port": 0, "to": "render1", "to_port": 1},
 		{"from": "light1", "from_port": 0, "to": "render1", "to_port": 2}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "07 — Physics: Joints, Soft Body & Area\n\nHingeJoint constrains a rigid pendulum to a static anchor.\nSoftBodyCOMP drapes a cloth-like grid under gravity.\nAreaCOMP applies a sideways wind force field.\n\nDemonstrates JointCOMP, SoftBodyCOMP, AreaCOMP,\nand the full SOP+MAT → COMP → Merge → Render pipeline.",
+			"position": [-150.0, -250.0],
+			"size": [450.0, 180.0],
+			"color": [0.15, 0.35, 0.65, 0.85]
+		}
 	]
 }

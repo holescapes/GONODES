@@ -381,3 +381,66 @@ func test_time_expression_in_cook() -> void:
 	GNTestAssert.assert_not_null(output, "time expression output")
 	GNTestAssert.assert_approx(output.get_value("t"), 20.0, 0.001,
 		"time=2.0, expression=time*10 → 20")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Binary MathCHOP — Mismatched Channel Names (Single-Channel Broadcast)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_binary_math_mismatched_names_single_broadcast() -> void:
+	## ConstantCHOP("out"=4) → in1, ConstantCHOP("chan1"=3) → in2
+	## Channel names differ, but in2 has only 1 channel so it broadcasts.
+	## Multiply should produce 4 * 3 = 12 (not 4 * operand).
+	var a := _make_node(ConstantCHOP, "constA")
+	a.set_param_value("name0", "out")
+	a.set_param_value("value0", 4.0)
+
+	var b := _make_node(ConstantCHOP, "constB")
+	b.set_param_value("name0", "chan1")
+	b.set_param_value("value0", 3.0)
+
+	var m := _make_node(MathCHOP, "math1")
+	m.set_param_value("operation", 2)  # Multiply
+	m.set_param_value("operand", 999.0)  # Should NOT be used
+	_network.connect_nodes("constA", 0, "math1", 0)
+	_network.connect_nodes("constB", 0, "math1", 1)
+
+	_cook_one_frame()
+
+	var output := _get_output(m)
+	GNTestAssert.assert_not_null(output, "binary math output exists")
+	GNTestAssert.assert_approx(output.get_value("out"), 12.0, 0.001,
+		"4 * 3 = 12 (broadcast, not operand)")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Binary MathCHOP — Mismatched Names, Multi-Channel Index Match
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_binary_math_mismatched_names_index_match() -> void:
+	## in1 has "x"=6, "y"=8.  in2 has "a"=2, "b"=3.
+	## Names don't match, so index-based: x*a=12, y*b=24.
+	var a := _make_node(ConstantCHOP, "constA")
+	a.set_param_value("name0", "x")
+	a.set_param_value("value0", 6.0)
+	a.set_param_value("name1", "y")
+	a.set_param_value("value1", 8.0)
+
+	var b := _make_node(ConstantCHOP, "constB")
+	b.set_param_value("name0", "a")
+	b.set_param_value("value0", 2.0)
+	b.set_param_value("name1", "b")
+	b.set_param_value("value1", 3.0)
+
+	var m := _make_node(MathCHOP, "math1")
+	m.set_param_value("operation", 2)  # Multiply
+	m.set_param_value("operand", 999.0)  # Should NOT be used
+	_network.connect_nodes("constA", 0, "math1", 0)
+	_network.connect_nodes("constB", 0, "math1", 1)
+
+	_cook_one_frame()
+
+	var output := _get_output(m)
+	GNTestAssert.assert_not_null(output, "index-matched output exists")
+	GNTestAssert.assert_approx(output.get_value("x"), 12.0, 0.001, "6 * 2 = 12 (index 0)")
+	GNTestAssert.assert_approx(output.get_value("y"), 24.0, 0.001, "8 * 3 = 24 (index 1)")

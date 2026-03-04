@@ -4,6 +4,10 @@ These `.gnpatch` files are pre-built networks for visual / interactive testing
 inside the GONODES editor. Open each file through **File → Open** and verify the
 checklist items below.
 
+> **Sticky Notes** — Every test scene includes a blue sticky-note annotation in
+> the upper-left area of the graph that summarises what the patch demonstrates.
+> These notes are visible as soon as the file is loaded.
+
 ---
 
 ## 01 — CHOP Chain Basics
