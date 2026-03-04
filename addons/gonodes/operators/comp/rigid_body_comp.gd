@@ -194,6 +194,7 @@ func _ensure_body() -> void:
 
 	_rigid_body = RigidBody3D.new()
 	_rigid_body.name = id + "_rigid"
+	_rigid_body.can_sleep = false  # Keep body awake so gravity always acts
 	_scene_node = _rigid_body
 
 	_collision_shape = CollisionShape3D.new()

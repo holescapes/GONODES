@@ -23,6 +23,23 @@ var _managed_children: Array[Node3D] = []
 ## bodies stay in the scene tree between frames.
 var _prev_managed: Array[Node3D] = []
 
+## Set to true when _adopt_scene_node actually adds a new child this frame.
+## Used to gate the physics-body registration walk so it costs zero on
+## steady-state frames where the scene composition hasn't changed.
+var _new_nodes_adopted: bool = false
+
+
+## Override execute_cook: for 3D viewports the render mode must stay at
+## UPDATE_ALWAYS so the physics simulation is captured every frame.
+## The base GNTopBase.execute_cook sets UPDATE_ONCE, which is correct
+## for 2D TOPs but wrong for a 3D render with physics.
+func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
+	var result := super.execute_cook(inputs, frame)
+	# Restore UPDATE_ALWAYS — the parent just set UPDATE_ONCE on our viewport.
+	if _viewport != null:
+		_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	return result
+
 
 func _init() -> void:
 	node_type = "render"
@@ -210,6 +227,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# viewport so physics bodies keep simulating between frames.
 	_prev_managed = _managed_children.duplicate()
 	_managed_children.clear()
+	_new_nodes_adopted = false
 
 	# Scan inputs for COMP nodes and add their 3D nodes to the viewport
 	# The cook engine passes upstream cached_output via inputs, but we need
@@ -218,6 +236,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# Remove any previously managed nodes that were not re-adopted this frame
 	_remove_stale_children()
+
+	# Safety net: force-register any physics bodies that ended up with
+	# space=RID(0) — only runs when new nodes were adopted this frame,
+	# so steady-state frames pay zero cost.
+	if _new_nodes_adopted:
+		_force_register_physics_bodies()
 
 	# Apply DOF after scene population so we target the active camera
 	_apply_dof_to_active_camera()
@@ -228,12 +252,39 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 ## Lazily creates the 3D SubViewport and environment.
+## IMPORTANT: The SubViewport is fully configured (own_world_3d, world_3d) BEFORE
+## being added to the tree.  This ensures that any CollisionObject3D nodes added
+## later receive the correct physics space in their NOTIFICATION_ENTER_WORLD.
 func _setup_viewport() -> void:
 	if _viewport != null:
 		return
 
-	_viewport = _create_viewport("VP3D_%s" % id, get_param_value("resolution"), false, false)
-	_viewport.own_world_3d = true  # Isolated 3D world
+	# Build the SubViewport manually instead of _create_viewport() so we can
+	# assign own_world_3d + World3D BEFORE the viewport enters the tree.
+	# _create_viewport() calls add_child() immediately, which means
+	# own_world_3d/world_3d would be set AFTER the viewport is in the tree,
+	# and descendant CollisionObject3D nodes would not register with the
+	# correct physics space on ENTER_WORLD.
+	var res: Vector2i = get_param_value("resolution")
+	_viewport = SubViewport.new()
+	_viewport.name = "VP3D_%s" % id
+	_viewport.size = res
+	_viewport.transparent_bg = false
+	_viewport.disable_3d = false
+	_viewport.gui_disable_input = true
+	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+
+	# Set world BEFORE entering tree — physics bodies entering later will
+	# find this World3D via find_world_3d() and register with its space.
+	_viewport.own_world_3d = true
+	_viewport.world_3d = World3D.new()
+
+	# NOW add to tree — world is fully configured
+	add_child(_viewport)
+
+	# Activate the physics space so Jolt steps it each physics frame
+	var space_rid: RID = _viewport.world_3d.space
+	PhysicsServer3D.space_set_active(space_rid, true)
 
 	# Create environment for the scene
 	_environment = Environment.new()
@@ -323,7 +374,33 @@ func _adopt_scene_node(node_3d: Node3D) -> void:
 		if node_3d.get_parent() != null:
 			node_3d.get_parent().remove_child(node_3d)
 		_viewport.add_child(node_3d)
+		_new_nodes_adopted = true
 	_managed_children.append(node_3d)
+
+
+## Force-register any physics bodies not yet in the viewport's physics space.
+## Godot normally handles this via NOTIFICATION_ENTER_WORLD, but SubViewport
+## + custom World3D can miss bodies depending on add_child ordering.  This
+## walk runs once per cook after scene population as a safety net.
+func _force_register_physics_bodies() -> void:
+	if _viewport == null or _viewport.world_3d == null:
+		return
+	var target_space: RID = _viewport.world_3d.space
+	if not target_space.is_valid():
+		return
+	_recursive_register_bodies(_viewport, target_space)
+
+
+func _recursive_register_bodies(parent: Node, target_space: RID) -> void:
+	for child in parent.get_children():
+		if child is PhysicsBody3D:
+			var body_rid: RID = child.get_rid()
+			if body_rid.is_valid():
+				var current_space: RID = PhysicsServer3D.body_get_space(body_rid)
+				if current_space != target_space:
+					PhysicsServer3D.body_set_space(body_rid, target_space)
+		if child.get_child_count() > 0:
+			_recursive_register_bodies(child, target_space)
 
 
 ## Removes previously managed children that were NOT re-adopted this frame.

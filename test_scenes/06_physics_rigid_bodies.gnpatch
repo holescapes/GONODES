@@ -1,163 +1,1019 @@
 {
-	"version": "1.0.0",
-	"generator": "GONODES_TEST",
-	"nodes": {
-		"box_sop": {
-			"type": "BoxSOP",
-			"position": [100, 100],
-			"parameters": {
-				"size_x": {"value": 1.0},
-				"size_y": {"value": 1.0},
-				"size_z": {"value": 1.0}
-			}
-		},
-		"mat_red": {
-			"type": "PBR_MAT",
-			"position": [100, 300],
-			"parameters": {
-				"albedo_color": {"value": {"_type": "Color", "r": 0.9, "g": 0.2, "b": 0.15, "a": 1.0}},
-				"roughness": {"value": 0.4},
-				"metallic": {"value": 0.1}
-			}
-		},
-		"rigid1": {
-			"type": "RigidBodyCOMP",
-			"position": [400, 100],
-			"parameters": {
-				"ty": {"value": 5.0},
-				"mass": {"value": 2.0},
-				"bounce": {"value": 0.6},
-				"friction": {"value": 0.8},
-				"collision_shape": {"value": 1}
-			}
-		},
-		"sphere_sop": {
-			"type": "SphereSOP",
-			"position": [100, 500],
-			"parameters": {
-				"radius": {"value": 0.5},
-				"rings": {"value": 16},
-				"radial_segments": {"value": 16}
-			}
-		},
-		"mat_blue": {
-			"type": "PBR_MAT",
-			"position": [100, 700],
-			"parameters": {
-				"albedo_color": {"value": {"_type": "Color", "r": 0.15, "g": 0.3, "b": 0.9, "a": 1.0}},
-				"roughness": {"value": 0.3},
-				"metallic": {"value": 0.5}
-			}
-		},
-		"rigid2": {
-			"type": "RigidBodyCOMP",
-			"position": [400, 500],
-			"parameters": {
-				"tx": {"value": 0.3},
-				"ty": {"value": 8.0},
-				"mass": {"value": 1.0},
-				"bounce": {"value": 0.8},
-				"friction": {"value": 0.5},
-				"collision_shape": {"value": 2}
-			}
-		},
-		"ground_sop": {
-			"type": "BoxSOP",
-			"position": [100, 900],
-			"parameters": {
-				"size_x": {"value": 20.0},
-				"size_y": {"value": 0.5},
-				"size_z": {"value": 20.0}
-			}
-		},
-		"mat_gray": {
-			"type": "PBR_MAT",
-			"position": [100, 1100],
-			"parameters": {
-				"albedo_color": {"value": {"_type": "Color", "r": 0.4, "g": 0.4, "b": 0.45, "a": 1.0}},
-				"roughness": {"value": 0.9},
-				"metallic": {"value": 0.0}
-			}
-		},
-		"ground": {
-			"type": "StaticBodyCOMP",
-			"position": [400, 900],
-			"parameters": {
-				"ty": {"value": -1.0},
-				"friction": {"value": 1.0},
-				"bounce": {"value": 0.3},
-				"collision_shape": {"value": 1}
-			}
-		},
-		"physics_chop": {
-			"type": "PhysicsCHOP",
-			"position": [700, 100],
-			"parameters": {
-				"position": {"value": true},
-				"rotation": {"value": true},
-				"linear_vel": {"value": true},
-				"speed": {"value": true}
-			}
-		},
-		"merge1": {
-			"type": "MergeCOMP",
-			"position": [700, 500],
-			"parameters": {}
-		},
-		"camera1": {
-			"type": "CameraCOMP",
-			"position": [700, 800],
-			"parameters": {
-				"tx": {"value": 5.0},
-				"ty": {"value": 4.0},
-				"tz": {"value": 8.0},
-				"rx": {"value": -20.0},
-				"ry": {"value": 30.0}
-			}
-		},
-		"light1": {
-			"type": "LightCOMP",
-			"position": [700, 1050],
-			"parameters": {
-				"light_type": {"value": 0},
-				"rx": {"value": -45.0},
-				"ry": {"value": 30.0},
-				"energy": {"value": 1.5}
-			}
-		},
-		"render1": {
-			"type": "RenderTOP",
-			"position": [1050, 500],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
-				"bg_color": {"value": {"_type": "Color", "r": 0.05, "g": 0.05, "b": 0.08, "a": 1.0}},
-				"ambient_energy": {"value": 0.4}
-			}
-		}
-	},
-	"connections": [
-		{"from": "box_sop", "from_port": 0, "to": "rigid1", "to_port": 0},
-		{"from": "mat_red", "from_port": 0, "to": "rigid1", "to_port": 1},
-		{"from": "sphere_sop", "from_port": 0, "to": "rigid2", "to_port": 0},
-		{"from": "mat_blue", "from_port": 0, "to": "rigid2", "to_port": 1},
-		{"from": "ground_sop", "from_port": 0, "to": "ground", "to_port": 0},
-		{"from": "mat_gray", "from_port": 0, "to": "ground", "to_port": 1},
-		{"from": "rigid1", "from_port": 0, "to": "physics_chop", "to_port": 0},
-		{"from": "rigid1", "from_port": 0, "to": "merge1", "to_port": 0},
-		{"from": "rigid2", "from_port": 0, "to": "merge1", "to_port": 1},
-		{"from": "ground", "from_port": 0, "to": "merge1", "to_port": 2},
-		{"from": "merge1", "from_port": 0, "to": "render1", "to_port": 0},
-		{"from": "camera1", "from_port": 0, "to": "render1", "to_port": 1},
-		{"from": "light1", "from_port": 0, "to": "render1", "to_port": 2}
-	],
 	"annotations": [
 		{
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.800000011920929
+			],
 			"id": "ann_1",
-			"type": "note",
+			"position": [
+				-150.0,
+				-250.0
+			],
+			"size": [
+				460.0,
+				210.0
+			],
 			"text": "06 — Physics: Rigid Bodies\n\nA red box and blue sphere fall under gravity, bouncing\noff a static ground plane. PhysicsCHOP reads back live\nposition, rotation, and velocity channels from rigid1.\n\nSOP + MAT → RigidBodyCOMP / StaticBodyCOMP → MergeCOMP\n→ RenderTOP with Camera and Light.\n\nDemonstrates Jolt physics, COMP operators, and 3D rendering.",
-			"position": [-150.0, -250.0],
-			"size": [460.0, 210.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
+			"type": "note"
 		}
-	]
+	],
+	"connections": [
+		{
+			"from": "box_sop",
+			"from_port": 0,
+			"to": "rigid1",
+			"to_port": 0
+		},
+		{
+			"from": "mat_red",
+			"from_port": 0,
+			"to": "rigid1",
+			"to_port": 1
+		},
+		{
+			"from": "sphere_sop",
+			"from_port": 0,
+			"to": "rigid2",
+			"to_port": 0
+		},
+		{
+			"from": "mat_blue",
+			"from_port": 0,
+			"to": "rigid2",
+			"to_port": 1
+		},
+		{
+			"from": "ground_sop",
+			"from_port": 0,
+			"to": "ground",
+			"to_port": 0
+		},
+		{
+			"from": "mat_gray",
+			"from_port": 0,
+			"to": "ground",
+			"to_port": 1
+		},
+		{
+			"from": "rigid1",
+			"from_port": 0,
+			"to": "physics_chop",
+			"to_port": 0
+		},
+		{
+			"from": "rigid1",
+			"from_port": 0,
+			"to": "merge1",
+			"to_port": 0
+		},
+		{
+			"from": "rigid2",
+			"from_port": 0,
+			"to": "merge1",
+			"to_port": 1
+		},
+		{
+			"from": "ground",
+			"from_port": 0,
+			"to": "merge1",
+			"to_port": 2
+		},
+		{
+			"from": "merge1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 0
+		},
+		{
+			"from": "camera1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 1
+		},
+		{
+			"from": "light1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 2
+		}
+	],
+	"generator": "GONODES",
+	"nodes": {
+		"box_sop": {
+			"parameters": {
+				"size_x": {
+					"value": 1.0
+				},
+				"size_y": {
+					"value": 1.0
+				},
+				"size_z": {
+					"value": 1.0
+				},
+				"subdivide_d": {
+					"value": 0
+				},
+				"subdivide_h": {
+					"value": 0
+				},
+				"subdivide_w": {
+					"value": 0
+				}
+			},
+			"position": [
+				100.0,
+				100.0
+			],
+			"type": "BoxSOP"
+		},
+		"camera1": {
+			"parameters": {
+				"clear_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.100000001490116,
+						"g": 0.100000001490116,
+						"r": 0.100000001490116
+					}
+				},
+				"far": {
+					"value": 100.0
+				},
+				"fov": {
+					"value": 75.0
+				},
+				"look_at_x": {
+					"value": 0.0
+				},
+				"look_at_y": {
+					"value": 0.0
+				},
+				"look_at_z": {
+					"value": 0.0
+				},
+				"near": {
+					"value": 0.05
+				},
+				"ortho_size": {
+					"value": 10.0
+				},
+				"projection": {
+					"value": 0
+				},
+				"rx": {
+					"value": -20.0
+				},
+				"ry": {
+					"value": 30.0
+				},
+				"rz": {
+					"value": 0.0
+				},
+				"tx": {
+					"value": 5.0
+				},
+				"ty": {
+					"value": 4.0
+				},
+				"tz": {
+					"value": 8.0
+				},
+				"use_look_at": {
+					"value": false
+				}
+			},
+			"position": [
+				700.0,
+				800.0
+			],
+			"type": "CameraCOMP"
+		},
+		"ground": {
+			"parameters": {
+				"albedo_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.449999988079071,
+						"g": 0.400000005960464,
+						"r": 0.400000005960464
+					}
+				},
+				"bounce": {
+					"value": 0.3
+				},
+				"cast_shadow": {
+					"value": 1
+				},
+				"collision_shape": {
+					"value": 1
+				},
+				"friction": {
+					"value": 1.0
+				},
+				"metallic": {
+					"value": 0.0
+				},
+				"roughness": {
+					"value": 0.8
+				},
+				"rx": {
+					"value": 0.0
+				},
+				"ry": {
+					"value": 0.0
+				},
+				"rz": {
+					"value": 0.0
+				},
+				"sx": {
+					"value": 1.0
+				},
+				"sy": {
+					"value": 1.0
+				},
+				"sz": {
+					"value": 1.0
+				},
+				"tx": {
+					"value": 0.0
+				},
+				"ty": {
+					"value": -1.0
+				},
+				"tz": {
+					"value": 0.0
+				},
+				"visible": {
+					"value": true
+				}
+			},
+			"position": [
+				400.0,
+				900.0
+			],
+			"type": "StaticBodyCOMP"
+		},
+		"ground_sop": {
+			"parameters": {
+				"size_x": {
+					"value": 20.0
+				},
+				"size_y": {
+					"value": 0.5
+				},
+				"size_z": {
+					"value": 20.0
+				},
+				"subdivide_d": {
+					"value": 0
+				},
+				"subdivide_h": {
+					"value": 0
+				},
+				"subdivide_w": {
+					"value": 0
+				}
+			},
+			"position": [
+				100.0,
+				900.0
+			],
+			"type": "BoxSOP"
+		},
+		"light1": {
+			"parameters": {
+				"color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"dir_shadow_mode": {
+					"value": 2
+				},
+				"energy": {
+					"value": 1.5
+				},
+				"omni_range": {
+					"value": 10.0
+				},
+				"rx": {
+					"value": -45.0
+				},
+				"ry": {
+					"value": 30.0
+				},
+				"rz": {
+					"value": 0.0
+				},
+				"shadow_bias": {
+					"value": 0.1
+				},
+				"shadow_blur": {
+					"value": 1.0
+				},
+				"shadow_normal_bias": {
+					"value": 1.0
+				},
+				"shadow_opacity": {
+					"value": 1.0
+				},
+				"shadows": {
+					"value": true
+				},
+				"spot_angle": {
+					"value": 45.0
+				},
+				"spot_range": {
+					"value": 10.0
+				},
+				"tx": {
+					"value": 0.0
+				},
+				"ty": {
+					"value": 3.0
+				},
+				"type": {
+					"value": 0
+				},
+				"tz": {
+					"value": 2.0
+				}
+			},
+			"position": [
+				700.0,
+				1050.0
+			],
+			"type": "LightCOMP"
+		},
+		"mat_blue": {
+			"parameters": {
+				"albedo_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.899999976158142,
+						"g": 0.300000011920929,
+						"r": 0.150000005960464
+					}
+				},
+				"alpha_scissor_threshold": {
+					"value": 0.5
+				},
+				"cull_mode": {
+					"value": 0
+				},
+				"emission_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"emission_enabled": {
+					"value": false
+				},
+				"emission_energy": {
+					"value": 1.0
+				},
+				"metallic": {
+					"value": 0.5
+				},
+				"normal_scale": {
+					"value": 1.0
+				},
+				"roughness": {
+					"value": 0.3
+				},
+				"specular": {
+					"value": 0.5
+				},
+				"transparency": {
+					"value": 0
+				},
+				"uv1_triplanar": {
+					"value": false
+				}
+			},
+			"position": [
+				100.0,
+				700.0
+			],
+			"type": "PBR_MAT"
+		},
+		"mat_gray": {
+			"parameters": {
+				"albedo_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.449999988079071,
+						"g": 0.400000005960464,
+						"r": 0.400000005960464
+					}
+				},
+				"alpha_scissor_threshold": {
+					"value": 0.5
+				},
+				"cull_mode": {
+					"value": 0
+				},
+				"emission_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"emission_enabled": {
+					"value": false
+				},
+				"emission_energy": {
+					"value": 1.0
+				},
+				"metallic": {
+					"value": 0.0
+				},
+				"normal_scale": {
+					"value": 1.0
+				},
+				"roughness": {
+					"value": 0.9
+				},
+				"specular": {
+					"value": 0.5
+				},
+				"transparency": {
+					"value": 0
+				},
+				"uv1_triplanar": {
+					"value": false
+				}
+			},
+			"position": [
+				100.0,
+				1100.0
+			],
+			"type": "PBR_MAT"
+		},
+		"mat_red": {
+			"parameters": {
+				"albedo_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.150000005960464,
+						"g": 0.200000002980232,
+						"r": 0.899999976158142
+					}
+				},
+				"alpha_scissor_threshold": {
+					"value": 0.5
+				},
+				"cull_mode": {
+					"value": 0
+				},
+				"emission_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"emission_enabled": {
+					"value": false
+				},
+				"emission_energy": {
+					"value": 1.0
+				},
+				"metallic": {
+					"value": 0.1
+				},
+				"normal_scale": {
+					"value": 1.0
+				},
+				"roughness": {
+					"value": 0.4
+				},
+				"specular": {
+					"value": 0.5
+				},
+				"transparency": {
+					"value": 0
+				},
+				"uv1_triplanar": {
+					"value": false
+				}
+			},
+			"position": [
+				100.0,
+				300.0
+			],
+			"type": "PBR_MAT"
+		},
+		"merge1": {
+			"dynamic_input_count": 4,
+			"parameters": {
+				"rx": {
+					"value": 0.0
+				},
+				"ry": {
+					"value": 0.0
+				},
+				"rz": {
+					"value": 0.0
+				},
+				"sx": {
+					"value": 1.0
+				},
+				"sy": {
+					"value": 1.0
+				},
+				"sz": {
+					"value": 1.0
+				},
+				"tx": {
+					"value": 0.0
+				},
+				"ty": {
+					"value": 0.0
+				},
+				"tz": {
+					"value": 0.0
+				},
+				"visible": {
+					"value": true
+				}
+			},
+			"position": [
+				700.0,
+				500.0
+			],
+			"type": "MergeCOMP"
+		},
+		"physics_chop": {
+			"parameters": {
+				"angular_vel": {
+					"value": false
+				},
+				"linear_vel": {
+					"value": true
+				},
+				"position": {
+					"value": true
+				},
+				"rotation": {
+					"value": true
+				},
+				"scale": {
+					"value": false
+				},
+				"sleeping": {
+					"value": false
+				},
+				"speed": {
+					"value": true
+				}
+			},
+			"position": [
+				700.0,
+				100.0
+			],
+			"type": "PhysicsCHOP"
+		},
+		"render1": {
+			"dynamic_input_count": 4,
+			"parameters": {
+				"adj_brightness": {
+					"value": 1.0
+				},
+				"adj_contrast": {
+					"value": 1.0
+				},
+				"adj_enabled": {
+					"value": false
+				},
+				"adj_saturation": {
+					"value": 1.0
+				},
+				"ambient_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.400000005960464,
+						"g": 0.300000011920929,
+						"r": 0.300000011920929
+					}
+				},
+				"ambient_energy": {
+					"value": 0.4
+				},
+				"anti_aliasing": {
+					"value": 2
+				},
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0799999982118607,
+						"g": 0.0500000007450581,
+						"r": 0.0500000007450581
+					}
+				},
+				"dir_shadow_size": {
+					"value": 2
+				},
+				"dof_bokeh_shape": {
+					"value": 2
+				},
+				"dof_bokeh_size": {
+					"value": 4.0
+				},
+				"dof_far_distance": {
+					"value": 10.0
+				},
+				"dof_far_enabled": {
+					"value": false
+				},
+				"dof_far_transition": {
+					"value": 5.0
+				},
+				"dof_near_distance": {
+					"value": 2.0
+				},
+				"dof_near_enabled": {
+					"value": false
+				},
+				"dof_near_transition": {
+					"value": 1.0
+				},
+				"fog_albedo": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"fog_density": {
+					"value": 0.05
+				},
+				"fog_emission": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"fog_emission_energy": {
+					"value": 1.0
+				},
+				"fog_enabled": {
+					"value": false
+				},
+				"fog_length": {
+					"value": 64.0
+				},
+				"glow_blend_mode": {
+					"value": 0
+				},
+				"glow_bloom": {
+					"value": 0.0
+				},
+				"glow_enabled": {
+					"value": false
+				},
+				"glow_hdr_threshold": {
+					"value": 1.0
+				},
+				"glow_intensity": {
+					"value": 0.8
+				},
+				"glow_strength": {
+					"value": 1.0
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 1280,
+						"y": 720
+					}
+				},
+				"shadow_atlas_size": {
+					"value": 2
+				},
+				"shadow_filter": {
+					"value": 2
+				},
+				"ssao_enabled": {
+					"value": false
+				},
+				"ssao_intensity": {
+					"value": 2.0
+				},
+				"ssao_power": {
+					"value": 1.5
+				},
+				"ssao_radius": {
+					"value": 1.0
+				},
+				"ssil_enabled": {
+					"value": false
+				},
+				"ssil_intensity": {
+					"value": 1.0
+				},
+				"ssil_normal_rejection": {
+					"value": 1.0
+				},
+				"ssil_radius": {
+					"value": 5.0
+				},
+				"ssil_sharpness": {
+					"value": 0.98
+				},
+				"ssr_depth_tolerance": {
+					"value": 0.2
+				},
+				"ssr_enabled": {
+					"value": false
+				},
+				"ssr_fade_in": {
+					"value": 0.15
+				},
+				"ssr_fade_out": {
+					"value": 2.0
+				},
+				"ssr_max_steps": {
+					"value": 64
+				},
+				"tonemap_exposure": {
+					"value": 1.0
+				},
+				"tonemap_mode": {
+					"value": 3
+				},
+				"tonemap_white": {
+					"value": 1.0
+				},
+				"transparent_bg": {
+					"value": false
+				},
+				"use_environment": {
+					"value": true
+				}
+			},
+			"position": [
+				1050.0,
+				500.0
+			],
+			"type": "RenderTOP"
+		},
+		"rigid1": {
+			"parameters": {
+				"albedo_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"angular_damp": {
+					"value": 0.0
+				},
+				"bounce": {
+					"value": 0.6
+				},
+				"cast_shadow": {
+					"value": 1
+				},
+				"ccd": {
+					"value": false
+				},
+				"collision_shape": {
+					"value": 1
+				},
+				"friction": {
+					"value": 0.8
+				},
+				"gravity_scale": {
+					"value": 1.0
+				},
+				"init_vel_x": {
+					"value": 0.0
+				},
+				"init_vel_y": {
+					"value": 0.0
+				},
+				"init_vel_z": {
+					"value": 0.0
+				},
+				"linear_damp": {
+					"value": 0.0
+				},
+				"lock_rot_x": {
+					"value": false
+				},
+				"lock_rot_y": {
+					"value": false
+				},
+				"lock_rot_z": {
+					"value": false
+				},
+				"mass": {
+					"value": 2.0
+				},
+				"metallic": {
+					"value": 0.0
+				},
+				"mode": {
+					"value": 0
+				},
+				"roughness": {
+					"value": 0.5
+				},
+				"rx": {
+					"value": 0.0
+				},
+				"ry": {
+					"value": 0.0
+				},
+				"rz": {
+					"value": 0.0
+				},
+				"sx": {
+					"value": 1.0
+				},
+				"sy": {
+					"value": 1.0
+				},
+				"sz": {
+					"value": 1.0
+				},
+				"tx": {
+					"value": 0.0
+				},
+				"ty": {
+					"value": 5.0
+				},
+				"tz": {
+					"value": 0.0
+				},
+				"visible": {
+					"value": true
+				}
+			},
+			"position": [
+				400.0,
+				100.0
+			],
+			"type": "RigidBodyCOMP"
+		},
+		"rigid2": {
+			"parameters": {
+				"albedo_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"angular_damp": {
+					"value": 0.0
+				},
+				"bounce": {
+					"value": 0.8
+				},
+				"cast_shadow": {
+					"value": 1
+				},
+				"ccd": {
+					"value": false
+				},
+				"collision_shape": {
+					"value": 2
+				},
+				"friction": {
+					"value": 0.5
+				},
+				"gravity_scale": {
+					"value": 1.0
+				},
+				"init_vel_x": {
+					"value": 0.0
+				},
+				"init_vel_y": {
+					"value": 0.0
+				},
+				"init_vel_z": {
+					"value": 0.0
+				},
+				"linear_damp": {
+					"value": 0.0
+				},
+				"lock_rot_x": {
+					"value": false
+				},
+				"lock_rot_y": {
+					"value": false
+				},
+				"lock_rot_z": {
+					"value": false
+				},
+				"mass": {
+					"value": 1.0
+				},
+				"metallic": {
+					"value": 0.0
+				},
+				"mode": {
+					"value": 0
+				},
+				"roughness": {
+					"value": 0.5
+				},
+				"rx": {
+					"value": 0.0
+				},
+				"ry": {
+					"value": 0.0
+				},
+				"rz": {
+					"value": 0.0
+				},
+				"sx": {
+					"value": 1.0
+				},
+				"sy": {
+					"value": 1.0
+				},
+				"sz": {
+					"value": 1.0
+				},
+				"tx": {
+					"value": 0.3
+				},
+				"ty": {
+					"value": 8.0
+				},
+				"tz": {
+					"value": 0.0
+				},
+				"visible": {
+					"value": true
+				}
+			},
+			"position": [
+				400.0,
+				500.0
+			],
+			"type": "RigidBodyCOMP"
+		},
+		"sphere_sop": {
+			"parameters": {
+				"height": {
+					"value": 1.0
+				},
+				"is_hemisphere": {
+					"value": false
+				},
+				"radial_segments": {
+					"value": 16
+				},
+				"radius": {
+					"value": 0.5
+				},
+				"rings": {
+					"value": 16
+				}
+			},
+			"position": [
+				100.0,
+				500.0
+			],
+			"type": "SphereSOP"
+		}
+	},
+	"version": "1.0.0"
 }

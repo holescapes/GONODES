@@ -4,7 +4,7 @@ These `.gnpatch` files are pre-built networks for visual / interactive testing
 inside the GONODES editor. Open each file through **File → Open** and verify the
 checklist items below.
 
-> **Sticky Notes** — Every test scene includes a blue sticky-note annotation in
+> **Sticky Notes** — Every test scene includes a white sticky-note annotation in
 > the upper-left area of the graph that summarises what the patch demonstrates.
 > These notes are visible as soon as the file is loaded.
 
@@ -92,17 +92,32 @@ checklist items below.
 
 ---
 
-## 07 — Physics: Joints, Soft Body & Area
-**File:** `07_physics_joints_soft_area.gnpatch`
+## 07 — Physics: Forces & Properties
+**File:** `07_physics_forces_properties.gnpatch`
 
 | # | What to check | Pass? |
 |---|---------------|-------|
-| 1 | HingeJoint constrains the rigid box pendulum to the static anchor | ☐ |
+| 1 | Green cylinder rises via ConstantCHOP force_y=12 fed into `force_in` | ☐ |
+| 2 | Yellow sphere launches with init_vel_x=5, init_vel_y=3 (parabolic arc) | ☐ |
+| 3 | Orange box floats (gravity_scale=0) with lock_rot_x/y=true | ☐ |
+| 4 | Purple torus bounces (bounce=0.95) with CCD enabled | ☐ |
+| 5 | PhysicsCHOPs show live channels for monitored bodies | ☐ |
+| 6 | Adjusting ConstantCHOP force values changes cylinder behaviour live | ☐ |
+
+---
+
+## 08 — Physics: Joints, Area & Soft Body
+**File:** `08_physics_joints_area_softbody.gnpatch`
+
+| # | What to check | Pass? |
+|---|---------------|-------|
+| 1 | Hinge joint constrains the red box pendulum to the static anchor | ☐ |
 | 2 | Pendulum swings within ±90° hinge limits | ☐ |
-| 3 | SoftBodyCOMP grid deforms under gravity (cloth drape) | ☐ |
-| 4 | AreaCOMP wind pushes objects sideways (visible on pendulum or cloth) | ☐ |
+| 3 | Pin joint tethers the green sphere like a 3D ball-and-socket | ☐ |
+| 4 | AreaCOMP upward-gravity zone (blue sphere) lifts the orange box | ☐ |
 | 5 | Area debug visualization sphere is visible in the render | ☐ |
-| 6 | All objects land on or interact with the static ground plane | ☐ |
+| 6 | SoftBodyCOMP grid drapes under gravity (cloth sim) | ☐ |
+| 7 | All objects interact with the static ground plane | ☐ |
 
 ---
 
