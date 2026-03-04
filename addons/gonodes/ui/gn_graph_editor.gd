@@ -308,6 +308,10 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			_spawn_position = (get_local_mouse_position() + scroll_offset) / zoom
+
+			# Select the node under the cursor so the context menu targets it.
+			_select_node_under_cursor(_spawn_position)
+
 			_show_context_menu(get_screen_position() + get_local_mouse_position())
 			accept_event()
 
@@ -1308,6 +1312,34 @@ func _deselect_all() -> void:
 		var view: GNNodeView = _node_views[view_name]
 		if view.selected:
 			view.selected = false
+
+
+## Returns the node-view ID under the given graph-space position, or "" if none.
+func _get_node_id_at(graph_pos: Vector2) -> String:
+	for view_name in _node_views:
+		var view: GNNodeView = _node_views[view_name]
+		var rect := Rect2(view.position_offset, view.size)
+		if rect.has_point(graph_pos):
+			return view_name
+	return ""
+
+
+## If a node is under the given graph-space position and it is not already
+## selected, deselect everything else and select just that node.  This ensures
+## the right-click context menu always targets the node under the cursor.
+func _select_node_under_cursor(graph_pos: Vector2) -> void:
+	var hit_id := _get_node_id_at(graph_pos)
+	if hit_id.is_empty():
+		return  # Clicked on empty canvas — leave selection as-is
+	var view: GNNodeView = _node_views.get(hit_id, null)
+	if view == null:
+		return
+	if view.selected:
+		return  # Already selected — keep current (possibly multi-) selection
+	_deselect_all()
+	view.selected = true
+	if view.gn_node:
+		operator_selected.emit(view.gn_node.id)
 
 
 ## Attempts to dive into the selected SubNetworkNode (if exactly one is selected).

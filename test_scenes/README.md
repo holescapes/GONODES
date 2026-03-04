@@ -106,5 +106,5 @@ checklist items below.
 1. Launch the GONODES editor scene (`scenes/gn_editor.tscn`).
 2. **File → Open** and select a `.gnpatch` file from `test_scenes/`.
 3. The network loads — verify nodes appear and connections are wired.
-4. Press **Play** (or ensure cooking is enabled) and check each item above.
+4. The network cooks automatically — verify each item below.
 5. Mark ☐ → ☑ as you verify each item.

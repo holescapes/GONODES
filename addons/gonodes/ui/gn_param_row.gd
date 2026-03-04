@@ -44,6 +44,10 @@ var _comp_expr_edits: Array[LineEdit] = []
 ## Whether this row uses per-component expression UI.
 var _is_multi_component: bool = false
 
+## The VBox that wraps per-component rows (multi-component params only).
+## Hidden when a whole-parameter expression overrides all components.
+var _comp_vbox: VBoxContainer = null
+
 ## The shared expression editor popup (created lazily).
 var _expr_editor: GNExpressionEditor = null
 
@@ -85,13 +89,14 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 	size_flags_horizontal = SIZE_EXPAND_FILL
 	add_theme_constant_override("separation", 4)
 
-	if not _is_multi_component:
-		# ── Scalar parameter: single C/E button, value control, expression edit ──
-		_mode_btn = Button.new()
-		_mode_btn.custom_minimum_size = Vector2(24, 24)
-		_mode_btn.tooltip_text = "Click to toggle CONSTANT / EXPRESSION mode"
-		_mode_btn.pressed.connect(_on_mode_toggle)
-		add_child(_mode_btn)
+	# Master C/E mode button — all parameter types get one.
+	# For scalar params it toggles whole-param mode; for multi-component params
+	# it toggles a unified whole-parameter expression that overrides per-component values.
+	_mode_btn = Button.new()
+	_mode_btn.custom_minimum_size = Vector2(24, 24)
+	_mode_btn.tooltip_text = "Click to toggle CONSTANT / EXPRESSION mode"
+	_mode_btn.pressed.connect(_on_mode_toggle)
+	add_child(_mode_btn)
 
 	# Parameter name label
 	_name_label = Label.new()
@@ -170,22 +175,56 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 ## Builds per-component rows inside _value_container.
 ## Each component gets: [C/E button] [SpinBox] [LineEdit (hidden)]
 ## For Color params, an additional ColorPickerButton is shown for visual editing.
+## Also creates whole-parameter expression controls (hidden by default) that
+## override per-component rows when a unified expression is active.
 func _build_multi_component_ui() -> void:
 	param._ensure_component_arrays()
 	var count := param.get_component_count()
 	var labels := param.get_component_labels()
 	var is_color := param.value_type == GNParameter.ValueType.COLOR
 
-	# Use a VBoxContainer so components stack vertically
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 2)
-	_value_container.add_child(vbox)
+	# ── Whole-parameter expression UI (shown when a unified expression overrides
+	#    all components, e.g. "Vector2(chop(...), chop(...))") ──
+	_expr_edit = LineEdit.new()
+	_expr_edit.placeholder_text = "expression…"
+	_expr_edit.size_flags_horizontal = SIZE_EXPAND_FILL
+	_expr_edit.add_theme_font_size_override("font_size", 11)
+	_expr_edit.text = param.expression
+	_expr_edit.text_submitted.connect(_on_expression_submitted)
+	_expr_edit.focus_exited.connect(_on_expression_focus_lost)
+	_expr_edit.visible = false
+	_value_container.add_child(_expr_edit)
+
+	_resolved_label = Label.new()
+	_resolved_label.custom_minimum_size = Vector2(60, 0)
+	_resolved_label.add_theme_font_size_override("font_size", 10)
+	_resolved_label.add_theme_color_override("font_color", Color(0.55, 0.75, 0.55))
+	_resolved_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_resolved_label.clip_text = true
+	_resolved_label.visible = false
+	_resolved_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	_value_container.add_child(_resolved_label)
+
+	_expand_btn = Button.new()
+	_expand_btn.text = "\u2197"  # ↗
+	_expand_btn.tooltip_text = "Open multi-line expression editor"
+	_expand_btn.custom_minimum_size = Vector2(24, 24)
+	_expand_btn.add_theme_font_size_override("font_size", 12)
+	_expand_btn.flat = true
+	_expand_btn.visible = false
+	_expand_btn.pressed.connect(func() -> void: _open_expression_editor(-1))
+	_value_container.add_child(_expand_btn)
+
+	# ── Per-component UI (hidden when whole-param expression is active) ──
+	_comp_vbox = VBoxContainer.new()
+	_comp_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+	_comp_vbox.add_theme_constant_override("separation", 2)
+	_value_container.add_child(_comp_vbox)
 
 	# If it's a color, add a picker at the top for quick visual editing
 	if is_color:
 		_control = _create_color_control()
-		vbox.add_child(_control)
+		_comp_vbox.add_child(_control)
 
 	for i in range(count):
 		var row := HBoxContainer.new()
@@ -264,7 +303,7 @@ func _build_multi_component_ui() -> void:
 		row.add_child(expand_btn)
 		_comp_expand_btns.append(expand_btn)
 
-		vbox.add_child(row)
+		_comp_vbox.add_child(row)
 
 	# Restore any existing per-component expression state
 	_update_comp_mode_displays()
@@ -919,23 +958,132 @@ func _update_comp_value_display() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _on_mode_toggle() -> void:
-	match param.mode:
-		GNParameter.Mode.CONSTANT:
-			# C → E
-			_expr_edit.text = param.expression
-			param.set_expression(param.expression)
-		GNParameter.Mode.EXPRESSION:
-			# E → C
-			param.set_constant()
+	if _is_multi_component:
+		# For multi-component params the master button cycles between:
+		#   C  →  E (whole-parameter expression)
+		#   E  →  C (revert to constant, but preserve expression text)
+		var has_whole_expr := (param.mode == GNParameter.Mode.EXPRESSION
+				and not param.expression.is_empty())
+		if has_whole_expr:
+			# ── Whole expression active → revert to CONSTANT ──
+			# Preserve param.expression so the user can toggle back without
+			# losing their work.  Only reset the compiled state / mode.
+			param.mode = GNParameter.Mode.CONSTANT
+			param._compiled_expression = null
+			param._expression_valid = false
+			param.expression_error = ""
+			param.mode_changed.emit(param.param_name, param.mode)
+		elif param.mode == GNParameter.Mode.EXPRESSION and param.expression.is_empty():
+			# Per-component expressions active (or stuck empty-expression state)
+			# → revert to CONSTANT as well
+			param.mode = GNParameter.Mode.CONSTANT
+			param.mode_changed.emit(param.param_name, param.mode)
+		else:
+			# ── CONSTANT → switch to whole expression ──
+			# Re-enable the preserved expression text (may be empty for first use)
+			if _expr_edit:
+				_expr_edit.text = param.expression
+			if param.expression.is_empty():
+				# No previous expression — just flip mode so the LineEdit appears
+				param.mode = GNParameter.Mode.EXPRESSION
+				param.mode_changed.emit(param.param_name, param.mode)
+			else:
+				# Re-compile the preserved expression text
+				param.set_expression(param.expression)
+	else:
+		# Scalar parameter toggle
+		match param.mode:
+			GNParameter.Mode.CONSTANT:
+				# C → E
+				_expr_edit.text = param.expression
+				param.set_expression(param.expression)
+			GNParameter.Mode.EXPRESSION:
+				# E → C
+				param.set_constant()
 	_update_mode_display()
 
 
 func _update_mode_display() -> void:
-	if _is_multi_component:
-		_update_comp_mode_displays()
-		return
 	if _mode_btn == null:
 		return
+
+	if _is_multi_component:
+		# Multi-component params support two expression modes:
+		# 1) Whole-parameter expression — overrides all components with a single
+		#    expression returning Vector2/3/4/Color.
+		# 2) Per-component expressions — individual X/Y/Z/W channels have their own.
+		#
+		# The master button shows E when either:
+		#   a) A whole-param expression is active/being entered, OR
+		#   b) At least one per-component expression is active.
+		#
+		# We show the whole-expression LineEdit when mode==EXPRESSION and there
+		# are NO per-component expressions active (i.e. the user is working with
+		# a unified expression, even if it's empty and they're about to type it).
+		var is_whole_expr_mode := (param.mode == GNParameter.Mode.EXPRESSION
+				and not param.has_any_component_expression())
+		# Also show whole-expr UI if expression text exists even when components
+		# also have expressions (whole takes priority over per-component).
+		if not is_whole_expr_mode and param.mode == GNParameter.Mode.EXPRESSION \
+				and not param.expression.is_empty():
+			is_whole_expr_mode = true
+
+		if is_whole_expr_mode:
+			# ── Whole-parameter expression active (or empty, awaiting user input) ──
+			_mode_btn.text = "E"
+			_mode_btn.modulate = Color(0.8, 0.6, 0.2)  # Orange
+			_mode_btn.tooltip_text = "EXPRESSION mode — unified expression for all components. Click to revert to CONSTANT."
+			# Show whole-expression UI, hide per-component rows
+			if _expr_edit:
+				_expr_edit.visible = true
+				if not _expr_edit.has_focus():
+					_expr_edit.text = param.expression
+				if not param.expression_error.is_empty():
+					_expr_edit.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
+					_expr_edit.tooltip_text = param.expression_error
+				else:
+					_expr_edit.remove_theme_color_override("font_color")
+					_expr_edit.tooltip_text = ""
+			_set_expand_btn_visible(true)
+			if _resolved_label:
+				if param.expression.is_empty():
+					_resolved_label.visible = false
+				else:
+					_resolved_label.visible = true
+					_resolved_label.text = "→ " + _format_resolved_value(param.get_resolved_value())
+					_resolved_label.tooltip_text = str(param.get_resolved_value())
+			if _comp_vbox:
+				_comp_vbox.visible = false
+		elif param.mode == GNParameter.Mode.EXPRESSION:
+			# ── Per-component expressions active ──
+			_mode_btn.text = "E"
+			_mode_btn.modulate = Color(0.8, 0.6, 0.2)
+			_mode_btn.tooltip_text = "Per-component expressions active. Click to enable unified expression."
+			if _expr_edit:
+				_expr_edit.visible = false
+			_set_expand_btn_visible(false)
+			if _resolved_label:
+				_resolved_label.visible = false
+			if _comp_vbox:
+				_comp_vbox.visible = true
+			_update_comp_mode_displays()
+		else:
+			# ── CONSTANT mode ──
+			_mode_btn.text = "C"
+			_mode_btn.modulate = Color(0.5, 0.8, 0.5)
+			_mode_btn.tooltip_text = "CONSTANT mode. Click to enter a unified expression."
+			# Hide whole-expression UI, show per-component rows
+			if _expr_edit:
+				_expr_edit.visible = false
+			_set_expand_btn_visible(false)
+			if _resolved_label:
+				_resolved_label.visible = false
+			if _comp_vbox:
+				_comp_vbox.visible = true
+			_update_comp_mode_displays()
+		return
+
+	# ── Scalar parameter ──
 	match param.mode:
 		GNParameter.Mode.CONSTANT:
 			_mode_btn.text = "C"
@@ -976,7 +1124,34 @@ func update_expression_status() -> void:
 	if param == null:
 		return
 	if _is_multi_component:
-		_update_comp_expression_status()
+		# Check for whole-parameter expression first (same logic as _update_mode_display)
+		var is_whole_expr_mode := (param.mode == GNParameter.Mode.EXPRESSION
+				and not param.has_any_component_expression())
+		if not is_whole_expr_mode and param.mode == GNParameter.Mode.EXPRESSION \
+				and not param.expression.is_empty():
+			is_whole_expr_mode = true
+		if is_whole_expr_mode and _expr_edit != null and not param.expression.is_empty():
+			if not param.expression_error.is_empty():
+				_expr_edit.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
+				_expr_edit.tooltip_text = param.expression_error
+				if _resolved_label and _resolved_label.visible:
+					_resolved_label.text = "→ err"
+					_resolved_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+					_resolved_label.tooltip_text = param.expression_error
+			else:
+				_expr_edit.remove_theme_color_override("font_color")
+				if param.expression_eval_usec > 0.0:
+					_expr_edit.tooltip_text = "Eval: %.1f\u00b5s (avg: %.1f\u00b5s)" % [
+						param.expression_eval_usec, param.expression_eval_avg_usec]
+				else:
+					_expr_edit.tooltip_text = ""
+				if _resolved_label and _resolved_label.visible:
+					var rv = param.get_resolved_value()
+					_resolved_label.text = "→ " + _format_resolved_value(rv)
+					_resolved_label.add_theme_color_override("font_color", Color(0.55, 0.75, 0.55))
+					_resolved_label.tooltip_text = str(rv)
+		else:
+			_update_comp_expression_status()
 		return
 	if _expr_edit == null:
 		return

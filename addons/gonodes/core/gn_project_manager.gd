@@ -48,9 +48,11 @@ const SUBFOLDERS: Array[String] = [
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Sets the project directory based on a .gnpatch file path.
-## Creates the project folder and subfolders if they don't exist.
+## Does NOT create any directories — the project folder and subfolders are
+## created lazily by [method get_subfolder_path] or [method ensure_ready]
+## when an operator actually needs to write.
 ## [param p_patch_path] — absolute path to the .gnpatch file.
-## Returns OK if the project folder is ready, or an error code.
+## Returns OK always.
 func set_from_patch_path(p_patch_path: String) -> Error:
 	if p_patch_path.is_empty():
 		project_dir = ""
@@ -65,15 +67,8 @@ func set_from_patch_path(p_patch_path: String) -> Error:
 	var stem := p_patch_path.get_file().get_basename()
 	project_dir = base_dir.path_join(stem)
 
-	# Create the project folder and subfolders
-	var err := _ensure_project_structure()
-	if err != OK:
-		GNLogger.error("ProjectManager",
-			"Failed to create project folder: %s (error %d)" % [project_dir, err])
-		return err
-
 	GNLogger.info("ProjectManager",
-		"Project folder ready: %s" % project_dir)
+		"Project path set: %s" % project_dir)
 	project_changed.emit(project_dir)
 	return OK
 
@@ -139,15 +134,23 @@ func scan_all_subfolders(extensions: Array[String]) -> Array[String]:
 	return results
 
 
-## Returns the absolute path to a project subfolder, creating it if needed.
+## Returns the absolute path to a project subfolder, creating the root
+## project directory and the subfolder on disk if they don't yet exist.
 ## Returns "" if no project is active.
 func get_subfolder_path(subfolder: String) -> String:
 	if project_dir.is_empty():
 		return ""
+	_ensure_project_structure()
 	var path := project_dir.path_join(subfolder)
 	if not DirAccess.dir_exists_absolute(path):
 		DirAccess.make_dir_recursive_absolute(path)
 	return path
+
+
+## Ensures the root project directory exists on disk.
+## Call this before any write operation (save, export).
+func ensure_ready() -> Error:
+	return _ensure_project_structure()
 
 
 ## Returns true if a project folder is active (patch has been saved).
@@ -159,7 +162,9 @@ func has_project() -> bool:
 # Internals
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates the project directory and all standard subfolders.
+## Creates only the root project directory.
+## Subfolders (textures, audio, etc.) are created lazily by
+## [method get_subfolder_path] when an operator actually needs one.
 func _ensure_project_structure() -> Error:
 	if project_dir.is_empty():
 		return ERR_INVALID_PARAMETER
@@ -169,12 +174,4 @@ func _ensure_project_structure() -> Error:
 		if err != OK:
 			return err
 
-	for subfolder in SUBFOLDERS:
-		var sub_path := project_dir.path_join(subfolder)
-		if not DirAccess.dir_exists_absolute(sub_path):
-			var err := DirAccess.make_dir_recursive_absolute(sub_path)
-			if err != OK:
-				GNLogger.warn("ProjectManager",
-					"Failed to create subfolder: %s" % sub_path)
-				# Non-fatal — continue creating other subfolders
 	return OK

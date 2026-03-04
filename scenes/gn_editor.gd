@@ -20,6 +20,7 @@ var network: GNNetwork
 var cook_engine: GNCookEngine
 
 ## Toolbar toggles (created in _setup_toolbar, stored for state persistence).
+var play_button: Button
 var preview_toggle: CheckButton
 var perf_toggle: CheckButton
 var vram_toggle: CheckButton
@@ -138,6 +139,7 @@ func _setup_network() -> void:
 		if err == OK:
 			_current_file_path = last_path
 			_project.set_from_patch_path(last_path)
+			_update_title()
 			print("[GONODES] Restored last patch: %s" % last_path)
 		else:
 			print("[GONODES] Failed to restore '%s' — starting empty" % last_path)
@@ -340,6 +342,14 @@ func _on_preview_toggled(pressed: bool) -> void:
 func _on_perf_toggled(pressed: bool) -> void:
 	graph_editor.set_perf_overlay_visible(pressed)
 	_save_setting("perf_enabled", pressed)
+
+
+## Toggles cooking on/off (play/pause).
+func _on_play_pause_toggled(paused: bool) -> void:
+	if cook_engine != null:
+		cook_engine.cooking_enabled = not paused
+	play_button.text = "Play  ▶" if paused else "Pause  ⏸"
+	GNLogger.info("Editor", "Cooking %s" % ("PAUSED" if paused else "RESUMED"))
 
 
 ## Toggles non-realtime mode on the cook engine.
@@ -558,6 +568,17 @@ func _setup_toolbar() -> void:
 
 	row1.add_child(VSeparator.new())
 
+	# Play / Pause button
+	play_button = Button.new()
+	play_button.text = "Pause  ⏸"
+	play_button.tooltip_text = "Pause / Resume cooking (Space)"
+	play_button.toggle_mode = true
+	play_button.button_pressed = false  # false = playing (not paused)
+	play_button.toggled.connect(_on_play_pause_toggled)
+	row1.add_child(play_button)
+
+	row1.add_child(VSeparator.new())
+
 	# Non-Realtime toggle
 	nrt_toggle = CheckButton.new()
 	nrt_toggle.text = "NRT"
@@ -686,6 +707,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 					_on_new_pressed()
 					get_viewport().set_input_as_handled()
 		# Backspace — dive out of sub-network (when not renaming)
+		elif event.keycode == KEY_SPACE:
+			var focus_owner := get_viewport().gui_get_focus_owner()
+			if focus_owner is LineEdit or focus_owner is TextEdit or focus_owner is SpinBox:
+				return
+			play_button.button_pressed = not play_button.button_pressed
+			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_BACKSPACE and _nav_stack.size() > 1:
 			var focus_owner := get_viewport().gui_get_focus_owner()
 			if focus_owner is LineEdit or focus_owner is TextEdit:
@@ -762,6 +789,7 @@ func _on_load_file_selected(path: String) -> void:
 func _save_to_path(path: String) -> void:
 	# Ensure project folder exists for this patch
 	_project.set_from_patch_path(path)
+	_project.ensure_ready()
 	cook_engine.project_dir = _project.project_dir
 
 	var err := network.save_to_file(path)

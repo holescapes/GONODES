@@ -92,7 +92,7 @@ func quick_build() -> Error:
 	# 6. Copy the project folder (assets) if it exists
 	var project_mgr := GNProjectManager.new()
 	project_mgr.set_from_patch_path(patch_path)
-	if project_mgr.has_project():
+	if project_mgr.has_project() and DirAccess.dir_exists_absolute(project_mgr.project_dir):
 		progress.emit("Copying project assets...")
 		var assets_source := project_mgr.project_dir
 		var assets_dest := output_dir.path_join(assets_source.get_file())
