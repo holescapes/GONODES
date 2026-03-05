@@ -1,0 +1,33 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"del1": {
+			"type": "DeleteDAT",
+			"position": [300, 100],
+			"parameters": {
+				"mode": {"value": 0},
+				"start_index": {"value": 0},
+				"end_index": {"value": 0}
+			}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "del1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Delete DAT — Remove Rows/Columns\n\nDeletes the first row from the table.\nSet start/end index for range deletion.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

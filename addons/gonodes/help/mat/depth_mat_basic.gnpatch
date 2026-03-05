@@ -1,0 +1,26 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"depth1": {
+			"type": "DepthMAT",
+			"position": [200, 100],
+			"parameters": {
+				"near_val": {"value": 0.1},
+				"far_val": {"value": 50.0},
+				"invert": {"value": false}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Depth MAT — Depth Visualization\n\nLinearizes fragment depth to grayscale.\nNear = white, far = black (or inverted).",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

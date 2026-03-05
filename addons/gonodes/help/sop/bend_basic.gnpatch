@@ -1,0 +1,33 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"cyl1": {
+			"type": "CylinderSOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"bend1": {
+			"type": "BendSOP",
+			"position": [300, 100],
+			"parameters": {
+				"angle": {"value": 90.0},
+				"axis": {"value": 1},
+				"origin": {"value": 0.0}
+			}
+		}
+	},
+	"connections": [
+		{"from": "cyl1", "from_port": 0, "to": "bend1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Bend SOP — Arc Deformation\n\n90° bend along Y axis.\nWorks best on subdivided geometry.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"div1": {
+			"type": "DivideSOP",
+			"position": [300, 100],
+			"parameters": {
+				"mode": {"value": 0},
+				"remove_degenerate": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "box1", "from_port": 0, "to": "div1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Divide SOP — Triangulate Mesh\n\nEnsures all faces are triangulated.\nRemoves degenerate zero-area triangles.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

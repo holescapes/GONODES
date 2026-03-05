@@ -1,0 +1,36 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [0, 100],
+			"parameters": {
+				"subdivide_w": {"value": 4},
+				"subdivide_h": {"value": 8},
+				"subdivide_d": {"value": 4}
+			}
+		},
+		"twist1": {
+			"type": "TwistSOP",
+			"position": [300, 100],
+			"parameters": {
+				"angle": {"value": 180.0},
+				"axis": {"value": 1}
+			}
+		}
+	},
+	"connections": [
+		{"from": "box1", "from_port": 0, "to": "twist1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Twist SOP — Rotational Deform\n\n180° twist around Y axis.\nMore subdivisions = smoother twist.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

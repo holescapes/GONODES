@@ -1,0 +1,25 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"kbd1": {
+			"type": "KeyboardInCHOP",
+			"position": [200, 100],
+			"parameters": {
+				"keys": {"value": "w a s d space"},
+				"mode": {"value": 1}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Keyboard In CHOP — Key States\n\nOutputs 1/0 per tracked key.\nMomentary mode: pressed = 1, released = 0.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

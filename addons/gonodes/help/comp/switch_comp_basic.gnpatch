@@ -1,0 +1,37 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"geo1": {
+			"type": "GeometryCOMP",
+			"position": [0, 50],
+			"parameters": {}
+		},
+		"geo2": {
+			"type": "GeometryCOMP",
+			"position": [0, 200],
+			"parameters": {}
+		},
+		"sw1": {
+			"type": "SwitchCOMP",
+			"position": [350, 125],
+			"parameters": {
+				"index": {"value": 0}
+			}
+		}
+	},
+	"connections": [
+		{"from": "geo1", "from_port": 0, "to": "sw1", "to_port": 0},
+		{"from": "geo2", "from_port": 0, "to": "sw1", "to_port": 1}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Switch COMP — Select Input\n\nSelects one of up to 8 component inputs.\nChange 'index' to switch between scenes.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

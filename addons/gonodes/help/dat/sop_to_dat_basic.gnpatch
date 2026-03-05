@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"s2d1": {
+			"type": "SOPtoDAT",
+			"position": [300, 100],
+			"parameters": {
+				"attribute": {"value": 0},
+				"max_points": {"value": 100}
+			}
+		}
+	},
+	"connections": [
+		{"from": "box1", "from_port": 0, "to": "s2d1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "SOP to DAT — Geometry Info\n\nExtracts vertex data as a table.\nPoints mode: position, normal, UV per vertex.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

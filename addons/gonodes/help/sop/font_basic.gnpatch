@@ -1,0 +1,27 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"font1": {
+			"type": "FontSOP",
+			"position": [200, 100],
+			"parameters": {
+				"text": {"value": "GONODES"},
+				"font_size": {"value": 2.0},
+				"depth": {"value": 0.2},
+				"horizontal_align": {"value": 1}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Font SOP — 3D Text\n\nGenerate 3D text mesh using Godot's TextMesh.\nConfigurable size, depth, and alignment.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

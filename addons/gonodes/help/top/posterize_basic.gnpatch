@@ -1,0 +1,31 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"post1": {
+			"type": "PosterizeTOP",
+			"position": [300, 100],
+			"parameters": {
+				"levels": {"value": 6}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "post1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Posterize TOP — Color Quantization\n\nReduce to 6 color levels per channel.\nAdjust 'Levels' from 2 (harsh) to 256 (subtle).",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

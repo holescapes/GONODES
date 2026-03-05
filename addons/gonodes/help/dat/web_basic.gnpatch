@@ -1,0 +1,26 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"web1": {
+			"type": "WebDAT",
+			"position": [200, 100],
+			"parameters": {
+				"url": {"value": "https://httpbin.org/get"},
+				"method": {"value": 0},
+				"auto_parse": {"value": true}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Web DAT — HTTP GET\n\nFetches data from a URL via HTTP.\nAuto-parses JSON responses into tables.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

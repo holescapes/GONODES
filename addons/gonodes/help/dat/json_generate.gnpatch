@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"json1": {
+			"type": "JSONDAT",
+			"position": [300, 100],
+			"parameters": {
+				"mode": {"value": 1},
+				"pretty": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "json1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "JSON DAT — Generate Mode\n\nConverts a table into a JSON string.\nOutputs as text-mode DAT.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

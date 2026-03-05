@@ -1,0 +1,35 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"sub1": {
+			"type": "SubstituteDAT",
+			"position": [300, 100],
+			"parameters": {
+				"find": {"value": "hello"},
+				"replace_with": {"value": "world"},
+				"use_regex": {"value": false},
+				"case_sensitive": {"value": false},
+				"scope": {"value": 0}
+			}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "sub1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Substitute DAT — Find & Replace\n\nReplace text in all cells (case-insensitive).\nSupports regex patterns.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

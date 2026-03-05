@@ -1,0 +1,26 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"mouse1": {
+			"type": "MouseInCHOP",
+			"position": [200, 100],
+			"parameters": {
+				"normalized": {"value": true},
+				"buttons": {"value": true},
+				"scroll": {"value": true}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Mouse In CHOP — Position & Buttons\n\nOutputs tx, ty (normalized), dx, dy (delta),\nlmb, rmb, mmb, scroll channels.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

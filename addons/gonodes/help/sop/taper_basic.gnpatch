@@ -1,0 +1,34 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"cyl1": {
+			"type": "CylinderSOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"taper1": {
+			"type": "TaperSOP",
+			"position": [300, 100],
+			"parameters": {
+				"scale_start": {"value": 1.0},
+				"scale_end": {"value": 0.2},
+				"axis": {"value": 1},
+				"profile": {"value": 1}
+			}
+		}
+	},
+	"connections": [
+		{"from": "cyl1", "from_port": 0, "to": "taper1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Taper SOP — Scale Along Axis\n\nSmooth taper from full size to 20%.\nLinear or smoothstep profile.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

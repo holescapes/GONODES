@@ -1,0 +1,34 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"ins1": {
+			"type": "InsertDAT",
+			"position": [300, 100],
+			"parameters": {
+				"mode": {"value": 0},
+				"index": {"value": 1},
+				"count": {"value": 2},
+				"fill_value": {"value": "new"}
+			}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "ins1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Insert DAT — Add Rows/Columns\n\nInserts 2 rows at index 1 filled with 'new'.\nAlso supports column insertion.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

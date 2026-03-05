@@ -483,6 +483,20 @@ func _register_core_operators() -> void:
 	_reg("FileSaveTOP",     "TOP", FileSaveTOP,
 		"Save GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write.")
 
+	# ── TOPs: Filters (matte, premultiply, posterize, radial blur, anti-alias, palette) ──
+	_reg("MatteTOP",        "TOP", MatteTOP,
+		"Apply alpha from a second texture (luma/R/G/B/A source, invert, premultiply).")
+	_reg("PremultiplyTOP",  "TOP", PremultiplyTOP,
+		"Premultiply or unpremultiply RGB by alpha.")
+	_reg("PosterizeTOP",    "TOP", PosterizeTOP,
+		"Reduce color depth to N discrete levels (2-256).")
+	_reg("RadialBlurTOP",   "TOP", RadialBlurTOP,
+		"Zoom / radial blur from a configurable center point.")
+	_reg("AntiAliasTOP",    "TOP", AntiAliasTOP,
+		"Simplified FXAA-style anti-aliasing with luma edge detection.")
+	_reg("PaletteTOP",      "TOP", PaletteTOP,
+		"Quantize colors to a palette texture with optional Bayer dithering.")
+
 	# ── CHOPs: Generators ───────────────────────────────────────────────
 	_reg("LFO_CHOP",        "CHOP", LFO_CHOP,
 		"Low-frequency oscillator (sine, triangle, square, saw, pulse).")
@@ -562,6 +576,24 @@ func _register_core_operators() -> void:
 	# ── CHOPs: Output / Sinks ───────────────────────────────────────────
 	_reg("RecordCHOP",      "CHOP", RecordCHOP,
 		"Record CHOP channels over time to buffer. Save to CSV/JSON.")
+
+	# ── CHOPs: Input Devices ────────────────────────────────────────────
+	_reg("KeyboardInCHOP",  "CHOP", KeyboardInCHOP,
+		"Keyboard key states as CHOP channels (toggle or momentary mode).")
+	_reg("MouseInCHOP",     "CHOP", MouseInCHOP,
+		"Mouse position, delta, buttons, and scroll as CHOP channels.")
+	_reg("GamepadCHOP",     "CHOP", GamepadCHOP,
+		"Gamepad sticks, triggers, and buttons with deadzone control.")
+
+	# ── CHOPs: Bridge (new) ─────────────────────────────────────────────
+	_reg("ParameterCHOP",   "CHOP", ParameterCHOP,
+		"Read another node's parameter values as CHOP channels.")
+	_reg("TrailCHOP",       "CHOP", TrailCHOP,
+		"Scrolling buffer recording input values over time (oscilloscope).")
+	_reg("SOPtoCHOP",       "CHOP", SOPtoCHOP,
+		"Extract SOP vertex positions/normals/UVs as CHOP channels.")
+	_reg("TOPtoCHOP",       "CHOP", TOPtoCHOP,
+		"Sample TOP texture pixel values (average, center, row, column).")
 
 	# ── CHOPs: Generators (new) ─────────────────────────────────────────
 	_reg("ClockCHOP",       "CHOP", ClockCHOP,
@@ -691,6 +723,26 @@ func _register_core_operators() -> void:
 	_reg("SkinSOP",         "SOP", SkinSOP,
 		"Skin (loft) multiple cross-sections into a surface mesh.")
 
+	# ── SOPs: Deformers (new) ──────────────────────────────────────────
+	_reg("BendSOP",         "SOP", BendSOP,
+		"Bend geometry along an axis using circular arc deformation.")
+	_reg("TwistSOP",        "SOP", TwistSOP,
+		"Twist vertices around an axis proportional to position.")
+	_reg("TaperSOP",        "SOP", TaperSOP,
+		"Taper geometry by scaling perpendicular axes along a profile.")
+
+	# ── SOPs: Generators (new 2) ───────────────────────────────────────
+	_reg("FontSOP",         "SOP", FontSOP,
+		"Generate 3D text mesh using Godot TextMesh.")
+
+	# ── SOPs: Filters (new 2) ─────────────────────────────────────────
+	_reg("TrailSOP",        "SOP", TrailSOP,
+		"Record centroid over time as a line strip trail.")
+	_reg("UVProjectSOP",    "SOP", UVProjectSOP,
+		"Assign UVs via planar, cylindrical, or spherical projection.")
+	_reg("DivideSOP",       "SOP", DivideSOP,
+		"Triangulate mesh and remove degenerate triangles.")
+
 	# ── DATs: Generators ────────────────────────────────────────────────
 	_reg("ConstantDAT",     "DAT", ConstantDAT,
 		"Manually editable 4x4 table with column headers.")
@@ -734,6 +786,32 @@ func _register_core_operators() -> void:
 	# ── DATs: Output / Sinks ────────────────────────────────────────────
 	_reg("FileSaveDAT",     "DAT", FileSaveDAT,
 		"Export table/text to disk (CSV, TSV, JSON, plain text).")
+
+	# ── DATs: Input / IO (new) ──────────────────────────────────────────
+	_reg("FileInDAT",       "DAT", FileInDAT,
+		"Read a file (CSV, TSV, JSON, text) from disk into a table.")
+	_reg("JSONDAT",         "DAT", JSONDAT,
+		"Parse JSON string to table or generate JSON from table.")
+	_reg("WebDAT",          "DAT", WebDAT,
+		"Fetch data from a URL via HTTP GET/POST.")
+
+	# ── DATs: Filters (new) ─────────────────────────────────────────────
+	_reg("SubstituteDAT",   "DAT", SubstituteDAT,
+		"Find and replace text in table cells or text (regex supported).")
+	_reg("InsertDAT",       "DAT", InsertDAT,
+		"Insert rows or columns into a table at a given position.")
+	_reg("DeleteDAT",       "DAT", DeleteDAT,
+		"Delete rows or columns from a table by index range.")
+	_reg("FIFODAT",         "DAT", FIFODAT,
+		"First-in-first-out rolling row buffer with max row limit.")
+
+	# ── DATs: Bridge (new) ──────────────────────────────────────────────
+	_reg("SOPtoDAT",        "DAT", SOPtoDAT,
+		"Convert SOP vertex data or mesh summary to a DAT table.")
+	_reg("TOPtoDAT",        "DAT", TOPtoDAT,
+		"Convert TOP texture info or pixel data to a DAT table.")
+	_reg("OPFindDAT",       "DAT", OPFindDAT,
+		"Search the network for operators by family and name pattern.")
 
 	# ── IMGs: Generators ─────────────────────────────────────────────────
 	_reg("NoiseIMG",        "IMG", NoiseIMG,
@@ -805,11 +883,27 @@ func _register_core_operators() -> void:
 	_reg("OutTunnel",       "COMP", _PreloadOutTunnel,
 		"Output tunnel — bridges data from inner graph to parent sub-network.")
 
+	# ── COMPs: Utility (new) ────────────────────────────────────────────
+	_reg("NullCOMP",        "COMP", NullCOMP,
+		"Pass-through component for wire organization.")
+	_reg("SwitchCOMP",      "COMP", SwitchCOMP,
+		"Select one of up to 8 component inputs by index.")
+
 	# ── MATs ────────────────────────────────────────────────────────────
 	_reg("PBR_MAT",         "MAT", PBR_MAT,
 		"Standard PBR material (StandardMaterial3D) with albedo, metallic, roughness, emission.")
 	_reg("Shader_MAT",      "MAT", Shader_MAT,
 		"Custom shader material (ShaderMaterial) with code/file input and uniforms.")
+
+	# ── MATs (new) ──────────────────────────────────────────────────────
+	_reg("ConstantMAT",     "MAT", ConstantMAT,
+		"Flat unlit (constant) material — no lighting applied.")
+	_reg("WireframeMAT",    "MAT", WireframeMAT,
+		"Wireframe rendering material using spatial wireframe render mode.")
+	_reg("PointSpriteMAT",  "MAT", PointSpriteMAT,
+		"Point sprite material — renders vertices as sized point sprites.")
+	_reg("DepthMAT",        "MAT", DepthMAT,
+		"Visualize scene depth as grayscale with near/far controls.")
 
 	GNLogger.info("ExtRegistry",
 		"Registered %d core operators" % _operators.size())

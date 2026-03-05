@@ -1,0 +1,35 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"t2c1": {
+			"type": "TOPtoCHOP",
+			"position": [300, 100],
+			"parameters": {
+				"mode": {"value": 0},
+				"channel_r": {"value": true},
+				"channel_g": {"value": true},
+				"channel_b": {"value": true},
+				"channel_a": {"value": false}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "t2c1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "TOP to CHOP — Texture to Channels\n\nSamples average RGB from a texture as channels.\nAlso supports center pixel, row, or column modes.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

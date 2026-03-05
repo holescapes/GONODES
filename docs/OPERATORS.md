@@ -891,13 +891,96 @@ Select one of up to 4 inputs by index.
 
 ---
 
+### Filters (New — Matte, Premultiply, Posterize, Radial Blur, Anti-Alias, Palette)
+
+---
+
+#### MatteTOP
+
+Apply alpha from a second texture. Configurable source channel (Luma, R, G, B, A), invert, and premultiply options.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| source | Enum | Luma | Luma/R/G/B/A | Which channel of the matte input drives alpha |
+| invert | Bool | false | — | Invert the matte |
+| premultiply | Bool | true | — | Premultiply RGB by new alpha |
+
+**Inputs:** `in` (TOP — source), `matte` (TOP — alpha source). **Shader:** `matte.gdshader`.
+
+---
+
+#### PremultiplyTOP
+
+Premultiply or unpremultiply RGB by alpha. Essential for correct compositing workflows.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Premultiply | Premultiply/Unpremultiply | Operation mode |
+
+**Input:** `in` (TOP). **Shader:** `premultiply.gdshader`.
+
+---
+
+#### PosterizeTOP
+
+Reduce color depth to N discrete levels per channel.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| levels | Int | 8 | 2–256 | Number of color levels |
+
+**Input:** `in` (TOP). **Shader:** `posterize.gdshader`.
+
+---
+
+#### RadialBlurTOP
+
+Zoom / radial blur effect radiating from a configurable center point.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 0.1 | 0–1 | Blur intensity |
+| center_x | Float | 0.5 | 0–1 | Blur center X |
+| center_y | Float | 0.5 | 0–1 | Blur center Y |
+| samples | Int | 16 | 4–64 | Number of samples (quality) |
+
+**Input:** `in` (TOP). **Shader:** `radial_blur.gdshader`.
+
+---
+
+#### AntiAliasTOP
+
+Simplified FXAA-style anti-aliasing with luma-based edge detection.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 1.0 | 0–2 | AA blending strength |
+| edge_threshold | Float | 0.125 | 0.01–0.5 | Minimum edge contrast to trigger AA |
+
+**Input:** `in` (TOP). **Shader:** `anti_alias.gdshader`.
+
+---
+
+#### PaletteTOP
+
+Quantize image colors to a palette texture with optional Bayer dithering.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| palette_size | Int | 16 | 2–256 | Number of palette colors to use |
+| dithering | Bool | false | — | Enable 4×4 Bayer dithering |
+
+**Inputs:** `in` (TOP — source), `palette` (TOP — palette texture). **Shader:** `palette.gdshader`.
+
+---
+
 ## CHOP — Channel Operators
 
 CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Array` with a name (e.g., "tx", "ty", "tz", "out"). Single-sample CHOPs act as real-time control signals. Multi-sample CHOPs carry waveform data, audio, or patterns.
 
 All CHOP data flows as `GNChannelData` — a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 45 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management.
+**Total: 52 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge.
 
 ### Generators
 
@@ -1578,11 +1661,111 @@ Delete channels by name pattern, index, or keep-only mode.
 
 ---
 
+### Input Devices (New)
+
+---
+
+#### KeyboardInCHOP
+
+Outputs keyboard key states as CHOP channels. Each tracked key becomes a channel with value 1.0 (pressed) or 0.0 (released).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| keys | String | "w a s d space" | Space-separated key names |
+| mode | Enum | Momentary | Toggle (flip on press), Momentary (held = 1) |
+
+**Time-dependent.** Uses `Input.is_key_pressed()`.
+
+---
+
+#### MouseInCHOP
+
+Outputs mouse position, delta, buttons, and scroll as CHOP channels.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| normalized | Bool | true | Normalize position to 0–1 by viewport size |
+| buttons | Bool | true | Output lmb, rmb, mmb channels |
+| scroll | Bool | true | Output scroll channel |
+
+**Channels:** `tx`, `ty`, `dx`, `dy`, `lmb`, `rmb`, `mmb`, `scroll`. **Time-dependent.**
+
+---
+
+#### GamepadCHOP
+
+Outputs gamepad/controller stick, trigger, and button states.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| device | Int | 0 | Gamepad device index (0–7) |
+| deadzone | Float | 0.1 | Stick deadzone threshold |
+
+**Channels:** `lx`, `ly`, `rx`, `ry` (sticks), `lt`, `rt` (triggers), `a`, `b`, `x`, `y`, `lb`, `rb`, `start`, `select`, d-pad. **Time-dependent.**
+
+---
+
+### Bridge (New)
+
+---
+
+#### ParameterCHOP
+
+Reads another node's parameter values as CHOP channels.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| node_path | String | "" | Target node ID |
+| parameters | String | "" | Space-separated param names (empty = all) |
+
+**How it works:** Walks up to the GNNetwork, finds the target node by ID, reads parameter values. Each float parameter becomes a single-value channel.
+
+---
+
+#### TrailCHOP
+
+Scrolling buffer that records input channel values over time (oscilloscope trace).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| length | Int | 120 | 2–3600 | Number of frames to record |
+| active | Bool | true | — | Enable recording |
+
+**Input:** `in` (CHOP). **Time-dependent.** Maintains ring buffers per channel.
+
+---
+
+#### SOPtoCHOP
+
+Extracts SOP vertex data as CHOP channels.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| attribute | Enum | Position | Position, Normal, UV |
+| max_points | Int | 1000 | Max vertices to read |
+
+**Input:** `in` (SOP). **Channels:** `px`/`py`/`pz` (position), `nx`/`ny`/`nz` (normal), or `u`/`v` (UV).
+
+---
+
+#### TOPtoCHOP
+
+Samples pixel values from a TOP texture as CHOP channels.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Average | Average, CenterPixel, RowAverage, ColumnAverage |
+| channel_r/g/b/a | Bool | true/true/true/false | Which color channels to output |
+
+**Input:** `in` (TOP). Uses `tex.get_image()` for GPU readback.
+
+---
+
 ## DAT — Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
 
-**Total: 13 operators** — 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges.
+**Total: 24 operators** — 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges.
 
 ### Generators
 
@@ -1758,11 +1941,166 @@ See [DATtoCHOP in the CHOP section](#dattochop-bridge--dat--chop) — this opera
 
 ---
 
+### I/O (New)
+
+---
+
+#### FileInDAT
+
+Read a file from disk (CSV, TSV, JSON, or text) into a table.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| filepath | String | "" | Path to file (res:// or user://) |
+| mode | Enum | Auto | Auto, CSV, TSV, JSON, Text |
+| has_header | Bool | true | First row is header |
+
+**How it works:** Auto-detects format from extension. JSON arrays-of-objects become rows with dict keys as headers. CSV/TSV split by delimiter.
+
+---
+
+#### JSONDAT
+
+Parse JSON to table or generate JSON from table.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Parse | Parse, Generate |
+| json_string | String | "" | JSON string for parse mode |
+| pretty | Bool | true | Pretty-print generated JSON |
+
+**Input:** `in` (DAT, optional — for Generate mode).
+
+---
+
+#### WebDAT
+
+Fetch data from a URL via HTTP GET/POST.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| url | String | "" | Target URL |
+| method | Enum | GET | GET, POST |
+| body | String | "" | POST request body |
+| content_type | String | "application/json" | Content type header |
+| auto_parse | Bool | true | Auto-parse JSON responses |
+
+**How it works:** Uses Godot's HTTPRequest node. Returns cached last response (async fetch triggered per cook).
+
+---
+
+### Filters (New)
+
+---
+
+#### SubstituteDAT
+
+Find and replace text in table cells or text mode.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| find | String | "" | Search string or regex |
+| replace_with | String | "" | Replacement text |
+| use_regex | Bool | false | Use regex matching |
+| case_sensitive | Bool | true | Case-sensitive search |
+| scope | Enum | All | All, Column, Row |
+| scope_index | Int | 0 | Column/row index for scoped replace |
+
+**Input:** `in` (DAT).
+
+---
+
+#### InsertDAT
+
+Insert rows or columns into a table.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Row | Row, Column |
+| index | Int | 0 | Where to insert |
+| count | Int | 1 | Number of rows/columns to insert |
+| fill_value | String | "" | Fill value for new cells |
+
+**Input:** `in` (DAT).
+
+---
+
+#### DeleteDAT
+
+Delete rows or columns from a table by index range.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Row | Row, Column |
+| start_index | Int | 0 | First row/column to delete |
+| end_index | Int | 0 | Last row/column to delete (inclusive) |
+
+**Input:** `in` (DAT).
+
+---
+
+#### FIFODAT
+
+Rolling row buffer — accumulates rows over time, dropping oldest when full.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| max_rows | Int | 100 | 1–10000 | Maximum rows in buffer |
+| active | Bool | true | — | Enable accumulation |
+
+**Input:** `in` (DAT). **Time-dependent.** Maintains internal buffer across cooks.
+
+---
+
+### Bridges (New)
+
+---
+
+#### SOPtoDAT
+
+Convert SOP geometry to a DAT table.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| attribute | Enum | Points | Points, Summary |
+| max_points | Int | 1000 | Max vertices (Points mode) |
+
+**Input:** `in` (SOP). Points mode: headers `px, py, pz, nx, ny, nz, u, v`. Summary mode: vertex count, surface count, AABB.
+
+---
+
+#### TOPtoDAT
+
+Convert TOP texture info or pixel data to a DAT table.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Info | Info, Pixels |
+| max_pixels | Int | 100 | Max pixels to read (Pixels mode) |
+
+**Input:** `in` (TOP). Info mode: width, height, format. Pixels mode: x, y, r, g, b, a per pixel.
+
+---
+
+#### OPFindDAT
+
+Search the current network for operators matching criteria.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| family_filter | Enum | All | All, CHOP, TOP, DAT, SOP, COMP, MAT |
+| name_pattern | String | "*" | Glob pattern for operator names |
+| include_type | Bool | true | Include type column in output |
+
+**Output:** Table with columns: `name, id, family, type, num_inputs, num_outputs`.
+
+---
+
 ## SOP — Surface Operators
 
 SOPs produce and manipulate 3D geometry. The output type is `GNGeoData`, which wraps Godot's native `ArrayMesh`. SOPs leverage Godot's built-in mesh primitives (`BoxMesh`, `SphereMesh`, etc.) and `SurfaceTool` for procedural generation. Geometry flows through SOP chains and ultimately reaches a GeometryCOMP for 3D scene placement.
 
-**Total: 32 operators** — 8 generators, 16 filters, 6 combiners, 2 utility.
+**Total: 39 operators** — 9 generators, 20 filters, 6 combiners, 2 utility, 2 deformers.
 
 ### Generators
 
@@ -2245,6 +2583,117 @@ Skin (loft) multiple cross-sections into a surface mesh.
 
 ---
 
+### Deformers (New)
+
+---
+
+#### BendSOP
+
+Bend geometry along an axis using circular arc deformation.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| angle | Float | 0.0 | -360–360 | Bend angle in degrees |
+| axis | Enum | Y | X, Y, Z | Bend axis |
+| origin | Float | 0.0 | -10–10 | Center of bend along axis |
+| length_val | Float | 0.0 | — | Region length (0 = auto from bounds) |
+
+**Input:** `in` (SOP). Works best on subdivided geometry.
+
+---
+
+#### TwistSOP
+
+Rotates vertices around an axis proportional to their position along that axis.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| angle | Float | 0.0 | -720–720 | Total twist in degrees |
+| axis | Enum | Y | X, Y, Z | Twist axis |
+
+**Input:** `in` (SOP). More subdivisions = smoother twist.
+
+---
+
+#### TaperSOP
+
+Scale perpendicular axes as a function of position along the taper axis.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| scale_start | Float | 1.0 | 0–10 | Scale at bottom |
+| scale_end | Float | 0.5 | 0–10 | Scale at top |
+| axis | Enum | Y | X, Y, Z | Taper axis |
+| profile | Enum | Linear | Linear, Smooth | Interpolation profile |
+
+**Input:** `in` (SOP). Smooth uses smoothstep interpolation.
+
+---
+
+### Generators (New 2)
+
+---
+
+#### FontSOP
+
+Generate 3D text mesh using Godot's TextMesh.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| text | String | "Hello" | — | Text to render |
+| font_size | Float | 1.0 | 0.1–100 | Font size multiplier |
+| depth | Float | 0.1 | 0–10 | Extrusion depth |
+| horizontal_align | Enum | Center | Left, Center, Right | Horizontal alignment |
+
+No input needed. Uses Godot's built-in TextMesh for high-quality 3D text.
+
+---
+
+### Filters (New 2)
+
+---
+
+#### TrailSOP
+
+Records the centroid of input geometry over time as a line strip trail.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| length | Int | 60 | 2–3600 | Number of frames to record |
+| active | Bool | true | — | Enable recording |
+
+**Input:** `in` (SOP). **Time-dependent.** Computes centroid of input and appends to ring buffer.
+
+---
+
+#### UVProjectSOP
+
+Assign UV coordinates via planar, cylindrical, or spherical projection.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Planar | Planar, Cylindrical, Spherical |
+| axis | Enum | Y | X, Y, Z |
+| scale_u | Float | 1.0 | UV scale in U |
+| scale_v | Float | 1.0 | UV scale in V |
+
+**Input:** `in` (SOP). Maps vertex positions to UV coordinates based on projection mode and AABB bounds.
+
+---
+
+#### DivideSOP
+
+Triangulate mesh and remove degenerate triangles.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Triangulate | Triangulate, ConvexDecompose |
+| remove_degenerate | Bool | true | Remove zero-area triangles |
+
+**Input:** `in` (SOP). Ensures clean triangulated topology for downstream operators.
+
+---
+
 ## COMP — Component Operators
 
 COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output — instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
@@ -2441,6 +2890,92 @@ Wraps a `Joint3D` constraint between two physics bodies.
 
 ---
 
+### Utility (New)
+
+---
+
+#### NullCOMP
+
+Pass-through component for wire organization. Forwards input component unchanged.
+
+**Input:** `in` (COMP). No parameters.
+
+---
+
+#### SwitchCOMP
+
+Select one of up to 8 component inputs by index.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| index | Int | 0 | 0–7 | Which input to pass through |
+
+**Inputs:** `in0`–`in7` (COMP).
+
+---
+
+## MAT — Material Operators
+
+MATs produce materials for COMP use. Output type is `GNMaterialData`, wrapping Godot's `Material` base class. MATs connect to GeometryCOMP's material input to override the default PBR.
+
+**Total: 6 operators** — 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth.
+
+---
+
+#### ConstantMAT
+
+Flat unlit material — no lighting or shading applied.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| color | Color | White | Surface color |
+| alpha | Float | 1.0 | Opacity |
+| cull_mode | Enum | Back | Back, Front, Disabled |
+
+**Input:** `color_tex` (TOP, optional). Uses `SHADING_MODE_UNSHADED`.
+
+---
+
+#### WireframeMAT
+
+Wireframe rendering material using Godot's spatial `render_mode wireframe`.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| color | Color | Green | Wire color |
+| alpha | Float | 1.0 | Wire opacity |
+
+Uses ShaderMaterial with inline spatial shader.
+
+---
+
+#### PointSpriteMAT
+
+Renders geometry vertices as sized point sprites.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| color | Color | White | — | Point color |
+| point_size | Float | 4.0 | 1–64 | Point size in pixels |
+
+**Input:** `tex_in` (TOP, optional — sprite texture). Uses `POINT_SIZE` vertex shader output and `POINT_COORD` in fragment.
+
+---
+
+#### DepthMAT
+
+Visualize scene depth as grayscale.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| near_val | Float | 0.1 | 0.001–100 | Near depth (white) |
+| far_val | Float | 100.0 | 1–10000 | Far depth (black) |
+| invert | Bool | false | — | Swap near/far mapping |
+
+Uses ShaderMaterial that linearizes FRAGCOORD.z.
+
+---
+
 ## Output Operators
 
 Output operators are terminal/sink nodes that display results. They have inputs but no data outputs.
@@ -2473,10 +3008,12 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 25 | Noise, Ramp, Circle, Rectangle, Constant, Text, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, Null, Switch |
-| **CHOP** | 21 | LFO, Wave, Noise, Constant, Pattern, Timer, Filter, Lag, Limit, Trigger, Hold, Speed, Count, Select, Math, Merge, Cross, Logic, Null, Switch, Physics (+DATtoCHOP bridge) |
-| **DAT** | 13 | Constant, Text, Info, OscIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, DATtoCHOP |
-| **SOP** | 14 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch |
-| **COMP** | 8 | Geometry, Camera, Light, RigidBody, StaticBody, SoftBody, Area, Joint |
+| **TOP** | 57 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, FileSave, Null, Switch, Window, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette |
+| **CHOP** | 52 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, OscOut, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, Record, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP |
+| **DAT** | 24 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, FileSave, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind |
+| **SOP** | 39 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide |
+| **COMP** | 11 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch |
+| **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
+| **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, FileSave, MovieOut, FFmpegOut |
 | **Output** | 1 | Window |
-| **Total** | **82** | |
+| **Total** | **204** | |

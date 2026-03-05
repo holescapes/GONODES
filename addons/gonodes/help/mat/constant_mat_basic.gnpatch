@@ -1,0 +1,26 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantMAT",
+			"position": [200, 100],
+			"parameters": {
+				"color": {"value": {"_type": "Color", "r": 0.2, "g": 0.8, "b": 0.4, "a": 1.0}},
+				"alpha": {"value": 1.0},
+				"cull_mode": {"value": 0}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Constant MAT — Flat Unlit\n\nNo lighting or shading applied.\nPure flat color — great for UI or debug views.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

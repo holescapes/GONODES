@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"info1": {
+			"type": "InfoDAT",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"fifo1": {
+			"type": "FIFODAT",
+			"position": [300, 100],
+			"parameters": {
+				"max_rows": {"value": 50},
+				"active": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "info1", "from_port": 0, "to": "fifo1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "FIFO DAT — Rolling Row Buffer\n\nAccumulates rows over time (max 50).\nOldest rows drop off when full.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

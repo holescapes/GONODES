@@ -1,0 +1,30 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"param1": {
+			"type": "ParameterCHOP",
+			"position": [300, 100],
+			"parameters": {
+				"node_path": {"value": "lfo1"},
+				"parameters": {"value": "frequency amplitude"}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Parameter CHOP — Read Node Params\n\nReads parameter values from another node as channels.\nSpecify node ID and parameter names.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

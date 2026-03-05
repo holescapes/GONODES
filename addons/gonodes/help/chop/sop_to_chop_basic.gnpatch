@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"s2c1": {
+			"type": "SOPtoCHOP",
+			"position": [300, 100],
+			"parameters": {
+				"attribute": {"value": 0},
+				"max_points": {"value": 100}
+			}
+		}
+	},
+	"connections": [
+		{"from": "sphere1", "from_port": 0, "to": "s2c1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "SOP to CHOP — Geometry to Channels\n\nExtracts vertex positions as px, py, pz channels.\nAlso supports normals and UVs.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

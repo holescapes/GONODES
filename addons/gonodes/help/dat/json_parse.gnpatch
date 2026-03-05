@@ -1,0 +1,26 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"json1": {
+			"type": "JSONDAT",
+			"position": [200, 100],
+			"parameters": {
+				"mode": {"value": 0},
+				"json_string": {"value": "[{\"name\":\"Alice\",\"score\":95},{\"name\":\"Bob\",\"score\":87}]"},
+				"pretty": {"value": true}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "JSON DAT — Parse Mode\n\nParses a JSON array-of-objects into table rows.\nEach key becomes a column header.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

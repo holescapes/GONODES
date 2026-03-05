@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [0, 100],
+			"parameters": {}
+		},
+		"rblur1": {
+			"type": "RadialBlurTOP",
+			"position": [300, 100],
+			"parameters": {
+				"strength": {"value": 0.3},
+				"samples": {"value": 16}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "rblur1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Radial Blur TOP — Zoom Blur\n\nBlur radiating from a center point.\nIncrease strength and samples for heavier effect.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}
