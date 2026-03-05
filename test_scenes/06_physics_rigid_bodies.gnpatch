@@ -16,47 +16,11 @@
 				460.0,
 				210.0
 			],
-			"text": "06 — Physics: Rigid Bodies\n\nA red box and blue sphere fall under gravity, bouncing\noff a static ground plane. PhysicsCHOP reads back live\nposition, rotation, and velocity channels from rigid1.\n\nSOP + MAT → RigidBodyCOMP / StaticBodyCOMP → MergeCOMP\n→ RenderTOP with Camera and Light.\n\nDemonstrates Jolt physics, COMP operators, and 3D rendering.",
+			"text": "06 — Physics: Rigid Bodies\n\nA red box and blue sphere fall under gravity, bouncing\noff a static ground plane. PhysicsCHOP reads back live\nposition, rotation, and velocity channels from rigid1.\n\nSOP + MAT → GeometryCOMP → RigidBodyCOMP / StaticBodyCOMP\n→ MergeCOMP → RenderTOP with Camera and Light.\n\nDemonstrates Jolt physics, COMP operators, and 3D rendering.",
 			"type": "note"
 		}
 	],
 	"connections": [
-		{
-			"from": "box_sop",
-			"from_port": 0,
-			"to": "rigid1",
-			"to_port": 0
-		},
-		{
-			"from": "mat_red",
-			"from_port": 0,
-			"to": "rigid1",
-			"to_port": 1
-		},
-		{
-			"from": "sphere_sop",
-			"from_port": 0,
-			"to": "rigid2",
-			"to_port": 0
-		},
-		{
-			"from": "mat_blue",
-			"from_port": 0,
-			"to": "rigid2",
-			"to_port": 1
-		},
-		{
-			"from": "ground_sop",
-			"from_port": 0,
-			"to": "ground",
-			"to_port": 0
-		},
-		{
-			"from": "mat_gray",
-			"from_port": 0,
-			"to": "ground",
-			"to_port": 1
-		},
 		{
 			"from": "rigid1",
 			"from_port": 0,
@@ -98,6 +62,60 @@
 			"from_port": 0,
 			"to": "render1",
 			"to_port": 2
+		},
+		{
+			"from": "ground_sop",
+			"from_port": 0,
+			"to": "geo_ground",
+			"to_port": 0
+		},
+		{
+			"from": "mat_gray",
+			"from_port": 0,
+			"to": "geo_ground",
+			"to_port": 1
+		},
+		{
+			"from": "geo_ground",
+			"from_port": 0,
+			"to": "ground",
+			"to_port": 0
+		},
+		{
+			"from": "box_sop",
+			"from_port": 0,
+			"to": "geo_rigid1",
+			"to_port": 0
+		},
+		{
+			"from": "mat_red",
+			"from_port": 0,
+			"to": "geo_rigid1",
+			"to_port": 1
+		},
+		{
+			"from": "geo_rigid1",
+			"from_port": 0,
+			"to": "rigid1",
+			"to_port": 0
+		},
+		{
+			"from": "sphere_sop",
+			"from_port": 0,
+			"to": "geo_rigid2",
+			"to_port": 0
+		},
+		{
+			"from": "mat_blue",
+			"from_port": 0,
+			"to": "geo_rigid2",
+			"to_port": 1
+		},
+		{
+			"from": "geo_rigid2",
+			"from_port": 0,
+			"to": "rigid2",
+			"to_port": 0
 		}
 	],
 	"generator": "GONODES",
@@ -194,32 +212,14 @@
 		},
 		"ground": {
 			"parameters": {
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"a": 1.0,
-						"b": 0.449999988079071,
-						"g": 0.400000005960464,
-						"r": 0.400000005960464
-					}
-				},
 				"bounce": {
 					"value": 0.3
-				},
-				"cast_shadow": {
-					"value": 1
 				},
 				"collision_shape": {
 					"value": 1
 				},
 				"friction": {
 					"value": 1.0
-				},
-				"metallic": {
-					"value": 0.0
-				},
-				"roughness": {
-					"value": 0.8
 				},
 				"rx": {
 					"value": 0.0
@@ -247,9 +247,6 @@
 				},
 				"tz": {
 					"value": 0.0
-				},
-				"visible": {
-					"value": true
 				}
 			},
 			"position": [
@@ -788,23 +785,11 @@
 		},
 		"rigid1": {
 			"parameters": {
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"a": 1.0,
-						"b": 1.0,
-						"g": 1.0,
-						"r": 1.0
-					}
-				},
 				"angular_damp": {
 					"value": 0.0
 				},
 				"bounce": {
 					"value": 0.6
-				},
-				"cast_shadow": {
-					"value": 1
 				},
 				"ccd": {
 					"value": false
@@ -842,14 +827,8 @@
 				"mass": {
 					"value": 2.0
 				},
-				"metallic": {
-					"value": 0.0
-				},
 				"mode": {
 					"value": 0
-				},
-				"roughness": {
-					"value": 0.5
 				},
 				"rx": {
 					"value": 0.0
@@ -877,9 +856,6 @@
 				},
 				"tz": {
 					"value": 0.0
-				},
-				"visible": {
-					"value": true
 				}
 			},
 			"position": [
@@ -890,23 +866,11 @@
 		},
 		"rigid2": {
 			"parameters": {
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"a": 1.0,
-						"b": 1.0,
-						"g": 1.0,
-						"r": 1.0
-					}
-				},
 				"angular_damp": {
 					"value": 0.0
 				},
 				"bounce": {
 					"value": 0.8
-				},
-				"cast_shadow": {
-					"value": 1
 				},
 				"ccd": {
 					"value": false
@@ -944,14 +908,8 @@
 				"mass": {
 					"value": 1.0
 				},
-				"metallic": {
-					"value": 0.0
-				},
 				"mode": {
 					"value": 0
-				},
-				"roughness": {
-					"value": 0.5
 				},
 				"rx": {
 					"value": 0.0
@@ -979,9 +937,6 @@
 				},
 				"tz": {
 					"value": 0.0
-				},
-				"visible": {
-					"value": true
 				}
 			},
 			"position": [
@@ -1013,6 +968,30 @@
 				500.0
 			],
 			"type": "SphereSOP"
+		},
+		"geo_ground": {
+			"parameters": {},
+			"position": [
+				250.0,
+				900.0
+			],
+			"type": "GeometryCOMP"
+		},
+		"geo_rigid1": {
+			"parameters": {},
+			"position": [
+				250.0,
+				100.0
+			],
+			"type": "GeometryCOMP"
+		},
+		"geo_rigid2": {
+			"parameters": {},
+			"position": [
+				250.0,
+				500.0
+			],
+			"type": "GeometryCOMP"
 		}
 	},
 	"version": "1.0.0"

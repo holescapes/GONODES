@@ -119,6 +119,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return geo_in
 
 
+## Destroys the scene node and resets geometry state so the
+## next cook recreates the MeshInstance3D from scratch.
+func destroy_scene_node() -> void:
+	super.destroy_scene_node()
+	_mesh_instance = null
+	_fallback_material = null
+
+
 ## Returns the MeshInstance3D for this geometry component.
 ## Called by RenderTOP to place it into the 3D SubViewport.
 func get_mesh_instance() -> MeshInstance3D:

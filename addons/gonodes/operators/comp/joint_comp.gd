@@ -135,6 +135,14 @@ func _create_joint(joint_type: int) -> void:
 		_scene_node = _joint
 
 
+## Destroys the scene node and resets joint state so the
+## next cook recreates the Joint3D from scratch.
+func destroy_scene_node() -> void:
+	super.destroy_scene_node()
+	_joint = null
+	_current_joint_type = -1
+
+
 ## Walks the network to find Body A and Body B and set their NodePaths.
 func _connect_bodies() -> void:
 	if _joint == null:

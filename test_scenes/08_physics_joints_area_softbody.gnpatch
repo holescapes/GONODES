@@ -22,30 +22,6 @@
 	],
 	"connections": [
 		{
-			"from": "box_pendulum_sop",
-			"from_port": 0,
-			"to": "rigid_pendulum",
-			"to_port": 0
-		},
-		{
-			"from": "mat_red",
-			"from_port": 0,
-			"to": "rigid_pendulum",
-			"to_port": 1
-		},
-		{
-			"from": "box_anchor_sop",
-			"from_port": 0,
-			"to": "static_anchor",
-			"to_port": 0
-		},
-		{
-			"from": "mat_dark",
-			"from_port": 0,
-			"to": "static_anchor",
-			"to_port": 1
-		},
-		{
 			"from": "rigid_pendulum",
 			"from_port": 0,
 			"to": "hinge_joint",
@@ -55,30 +31,6 @@
 			"from": "static_anchor",
 			"from_port": 0,
 			"to": "hinge_joint",
-			"to_port": 1
-		},
-		{
-			"from": "sphere_pin_sop",
-			"from_port": 0,
-			"to": "rigid_pin",
-			"to_port": 0
-		},
-		{
-			"from": "mat_green",
-			"from_port": 0,
-			"to": "rigid_pin",
-			"to_port": 1
-		},
-		{
-			"from": "box_pin_anchor_sop",
-			"from_port": 0,
-			"to": "static_pin_anchor",
-			"to_port": 0
-		},
-		{
-			"from": "mat_dark",
-			"from_port": 0,
-			"to": "static_pin_anchor",
 			"to_port": 1
 		},
 		{
@@ -94,46 +46,10 @@
 			"to_port": 1
 		},
 		{
-			"from": "box_area_sop",
-			"from_port": 0,
-			"to": "rigid_area_box",
-			"to_port": 0
-		},
-		{
-			"from": "mat_orange",
-			"from_port": 0,
-			"to": "rigid_area_box",
-			"to_port": 1
-		},
-		{
 			"from": "grid_sop",
 			"from_port": 0,
 			"to": "subdivide1",
 			"to_port": 0
-		},
-		{
-			"from": "subdivide1",
-			"from_port": 0,
-			"to": "soft_cloth",
-			"to_port": 0
-		},
-		{
-			"from": "mat_cyan",
-			"from_port": 0,
-			"to": "soft_cloth",
-			"to_port": 1
-		},
-		{
-			"from": "ground_sop",
-			"from_port": 0,
-			"to": "ground",
-			"to_port": 0
-		},
-		{
-			"from": "mat_gray",
-			"from_port": 0,
-			"to": "ground",
-			"to_port": 1
 		},
 		{
 			"from": "hinge_joint",
@@ -212,6 +128,132 @@
 			"from_port": 0,
 			"to": "render1",
 			"to_port": 2
+		},
+		{
+			"from": "box_pendulum_sop",
+			"from_port": 0,
+			"to": "geo_rigid_pendulum",
+			"to_port": 0
+		},
+		{
+			"from": "mat_red",
+			"from_port": 0,
+			"to": "geo_rigid_pendulum",
+			"to_port": 1
+		},
+		{
+			"from": "geo_rigid_pendulum",
+			"from_port": 0,
+			"to": "rigid_pendulum",
+			"to_port": 0
+		},
+		{
+			"from": "box_anchor_sop",
+			"from_port": 0,
+			"to": "geo_static_anchor",
+			"to_port": 0
+		},
+		{
+			"from": "mat_dark",
+			"from_port": 0,
+			"to": "geo_static_anchor",
+			"to_port": 1
+		},
+		{
+			"from": "geo_static_anchor",
+			"from_port": 0,
+			"to": "static_anchor",
+			"to_port": 0
+		},
+		{
+			"from": "sphere_pin_sop",
+			"from_port": 0,
+			"to": "geo_rigid_pin",
+			"to_port": 0
+		},
+		{
+			"from": "mat_green",
+			"from_port": 0,
+			"to": "geo_rigid_pin",
+			"to_port": 1
+		},
+		{
+			"from": "geo_rigid_pin",
+			"from_port": 0,
+			"to": "rigid_pin",
+			"to_port": 0
+		},
+		{
+			"from": "box_pin_anchor_sop",
+			"from_port": 0,
+			"to": "geo_static_pin_anchor",
+			"to_port": 0
+		},
+		{
+			"from": "mat_dark",
+			"from_port": 0,
+			"to": "geo_static_pin_anchor",
+			"to_port": 1
+		},
+		{
+			"from": "geo_static_pin_anchor",
+			"from_port": 0,
+			"to": "static_pin_anchor",
+			"to_port": 0
+		},
+		{
+			"from": "box_area_sop",
+			"from_port": 0,
+			"to": "geo_rigid_area_box",
+			"to_port": 0
+		},
+		{
+			"from": "mat_orange",
+			"from_port": 0,
+			"to": "geo_rigid_area_box",
+			"to_port": 1
+		},
+		{
+			"from": "geo_rigid_area_box",
+			"from_port": 0,
+			"to": "rigid_area_box",
+			"to_port": 0
+		},
+		{
+			"from": "subdivide1",
+			"from_port": 0,
+			"to": "geo_soft_cloth",
+			"to_port": 0
+		},
+		{
+			"from": "mat_cyan",
+			"from_port": 0,
+			"to": "geo_soft_cloth",
+			"to_port": 1
+		},
+		{
+			"from": "geo_soft_cloth",
+			"from_port": 0,
+			"to": "soft_cloth",
+			"to_port": 0
+		},
+		{
+			"from": "ground_sop",
+			"from_port": 0,
+			"to": "geo_ground",
+			"to_port": 0
+		},
+		{
+			"from": "mat_gray",
+			"from_port": 0,
+			"to": "geo_ground",
+			"to_port": 1
+		},
+		{
+			"from": "geo_ground",
+			"from_port": 0,
+			"to": "ground",
+			"to_port": 0
 		}
 	],
 	"generator": "GONODES",
@@ -826,27 +868,6 @@
 				},
 				"ccd": {
 					"value": false
-				},
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"r": 1.0,
-						"g": 1.0,
-						"b": 1.0,
-						"a": 1.0
-					}
-				},
-				"metallic": {
-					"value": 0.0
-				},
-				"roughness": {
-					"value": 0.5
-				},
-				"visible": {
-					"value": true
-				},
-				"cast_shadow": {
-					"value": 1
 				}
 			},
 			"position": [
@@ -891,27 +912,6 @@
 					"value": 0.0
 				},
 				"collision_shape": {
-					"value": 1
-				},
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"r": 1.0,
-						"g": 1.0,
-						"b": 1.0,
-						"a": 1.0
-					}
-				},
-				"metallic": {
-					"value": 0.0
-				},
-				"roughness": {
-					"value": 0.5
-				},
-				"visible": {
-					"value": true
-				},
-				"cast_shadow": {
 					"value": 1
 				}
 			},
@@ -1081,27 +1081,6 @@
 				},
 				"ccd": {
 					"value": false
-				},
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"r": 1.0,
-						"g": 1.0,
-						"b": 1.0,
-						"a": 1.0
-					}
-				},
-				"metallic": {
-					"value": 0.0
-				},
-				"roughness": {
-					"value": 0.5
-				},
-				"visible": {
-					"value": true
-				},
-				"cast_shadow": {
-					"value": 1
 				}
 			},
 			"position": [
@@ -1146,27 +1125,6 @@
 					"value": 0.0
 				},
 				"collision_shape": {
-					"value": 1
-				},
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"r": 1.0,
-						"g": 1.0,
-						"b": 1.0,
-						"a": 1.0
-					}
-				},
-				"metallic": {
-					"value": 0.0
-				},
-				"roughness": {
-					"value": 0.5
-				},
-				"visible": {
-					"value": true
-				},
-				"cast_shadow": {
 					"value": 1
 				}
 			},
@@ -1423,27 +1381,6 @@
 				},
 				"ccd": {
 					"value": false
-				},
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"r": 1.0,
-						"g": 1.0,
-						"b": 1.0,
-						"a": 1.0
-					}
-				},
-				"metallic": {
-					"value": 0.0
-				},
-				"roughness": {
-					"value": 0.5
-				},
-				"visible": {
-					"value": true
-				},
-				"cast_shadow": {
-					"value": 1
 				}
 			},
 			"position": [
@@ -1501,27 +1438,6 @@
 				},
 				"ray_pickable": {
 					"value": false
-				},
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"r": 1.0,
-						"g": 1.0,
-						"b": 1.0,
-						"a": 1.0
-					}
-				},
-				"metallic": {
-					"value": 0.0
-				},
-				"roughness": {
-					"value": 0.5
-				},
-				"visible": {
-					"value": true
-				},
-				"cast_shadow": {
-					"value": 1
 				}
 			},
 			"position": [
@@ -1566,27 +1482,6 @@
 					"value": 0.3
 				},
 				"collision_shape": {
-					"value": 1
-				},
-				"albedo_color": {
-					"value": {
-						"_type": "Color",
-						"r": 0.4,
-						"g": 0.4,
-						"b": 0.45,
-						"a": 1.0
-					}
-				},
-				"metallic": {
-					"value": 0.0
-				},
-				"roughness": {
-					"value": 0.8
-				},
-				"visible": {
-					"value": true
-				},
-				"cast_shadow": {
 					"value": 1
 				}
 			},
@@ -1958,6 +1853,62 @@
 				700.0
 			],
 			"type": "RenderTOP"
+		},
+		"geo_rigid_pendulum": {
+			"parameters": {},
+			"position": [
+				-50.0,
+				100.0
+			],
+			"type": "GeometryCOMP"
+		},
+		"geo_static_anchor": {
+			"parameters": {},
+			"position": [
+				-50.0,
+				350.0
+			],
+			"type": "GeometryCOMP"
+		},
+		"geo_rigid_pin": {
+			"parameters": {},
+			"position": [
+				-50.0,
+				600.0
+			],
+			"type": "GeometryCOMP"
+		},
+		"geo_static_pin_anchor": {
+			"parameters": {},
+			"position": [
+				-50.0,
+				850.0
+			],
+			"type": "GeometryCOMP"
+		},
+		"geo_rigid_area_box": {
+			"parameters": {},
+			"position": [
+				-50.0,
+				1175.0
+			],
+			"type": "GeometryCOMP"
+		},
+		"geo_soft_cloth": {
+			"parameters": {},
+			"position": [
+				75.0,
+				1400.0
+			],
+			"type": "GeometryCOMP"
+		},
+		"geo_ground": {
+			"parameters": {},
+			"position": [
+				-50.0,
+				1700.0
+			],
+			"type": "GeometryCOMP"
 		}
 	},
 	"version": "1.0.0"

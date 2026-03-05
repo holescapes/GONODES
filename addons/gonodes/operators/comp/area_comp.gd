@@ -202,6 +202,16 @@ func _update_debug_visual() -> void:
 		_mesh_instance.mesh = box_mesh
 
 
+## Destroys the scene node and resets area state so the
+## next cook recreates the Area3D from scratch.
+func destroy_scene_node() -> void:
+	super.destroy_scene_node()
+	_area = null
+	_collision_shape = null
+	_mesh_instance = null
+	_fallback_material = null
+
+
 ## Returns the Area3D node.
 func get_area() -> Area3D:
 	return _area

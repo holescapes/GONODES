@@ -1402,7 +1402,7 @@ Wraps a `Light3D`. Provides scene illumination in a RenderTOP.
 
 #### RigidBodyCOMP
 
-Wraps a `RigidBody3D` with `CollisionShape3D` for dynamic physics simulation. Auto-generates collision shapes from SOP mesh input.
+Wraps a `RigidBody3D` with `CollisionShape3D` for dynamic physics simulation. Takes a COMP input (typically GeometryCOMP) for mesh, material, and collision shape — this node only owns physics properties.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -1420,21 +1420,18 @@ Wraps a `RigidBody3D` with `CollisionShape3D` for dynamic physics simulation. Au
 | lock_rot_x/y/z | Bool | false | — | Lock rotation axes |
 | collision_shape | Enum | Convex Hull | Convex, Box, Sphere, Capsule, Trimesh | Collision shape type |
 | ccd | Bool | false | — | Continuous collision detection |
-| visible | Bool | true | — | Show/hide mesh |
-| albedo_color | Color | White | — | Fallback material color |
-| metallic | Float | 0.0 | 0.0–1.0 | Fallback metallic |
-| roughness | Float | 0.5 | 0.0–1.0 | Fallback roughness |
-| cast_shadow | Enum | On | Off, On, DoubleSided, ShadowsOnly | Shadow casting mode |
 
-**Inputs:** `geo_in` (SOP), `mat_in` (MAT, optional), `force_in` (CHOP, optional — channels: `force_x/y/z`, `impulse_x/y/z`, `torque_x/y/z`).
+**Inputs:** `comp_in` (COMP — typically GeometryCOMP providing mesh + material), `force_in` (CHOP, optional — channels: `force_x/y/z`, `impulse_x/y/z`, `torque_x/y/z`).
 
-**How it works:** Creates a `RigidBody3D` → `CollisionShape3D` + `MeshInstance3D` hierarchy. In Dynamic mode, Godot's physics engine (Jolt) controls the transform. Transform params are only applied for Kinematic/Static modes. Collision shape is auto-generated from the mesh. CHOP force input is applied every cook (Dynamic mode only).
+**Architecture:** `SOP → GeometryCOMP → RigidBodyCOMP → MergeCOMP → RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+
+**How it works:** Resolves the upstream COMP's `MeshInstance3D` and mirrors its mesh, material, visibility, and shadow settings onto an internal `MeshInstance3D`. Collision shape is auto-generated from the upstream mesh. In Dynamic mode, Godot's physics engine (Jolt) controls the transform. CHOP force input is applied every cook (Dynamic mode only).
 
 ---
 
 #### StaticBodyCOMP
 
-Wraps a `StaticBody3D` — an immovable collider for floors, walls, and obstacles.
+Wraps a `StaticBody3D` — an immovable collider for floors, walls, and obstacles. Takes a COMP input (typically GeometryCOMP) — this node only owns collision and physics-material properties.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -1444,37 +1441,37 @@ Wraps a `StaticBody3D` — an immovable collider for floors, walls, and obstacle
 | friction | Float | 1.0 | 0.0–2.0 | Surface friction |
 | bounce | Float | 0.0 | 0.0–1.0 | Restitution |
 | collision_shape | Enum | Trimesh | Convex, Box, Sphere, Capsule, Trimesh | Collision shape type |
-| visible | Bool | true | — | Show/hide mesh |
-| albedo_color | Color | White | — | Fallback material color |
-| cast_shadow | Enum | On | Off, On, DoubleSided, ShadowsOnly | Shadow casting |
 
-**Inputs:** `geo_in` (SOP), `mat_in` (MAT, optional).
+**Inputs:** `comp_in` (COMP — typically GeometryCOMP providing mesh + material).
 
-**How it works:** Creates a `StaticBody3D` → `CollisionShape3D` + `MeshInstance3D` hierarchy. Defaults to Trimesh collision (accurate for complex static geometry). Transform is applied every cook.
+**Architecture:** `SOP → GeometryCOMP → StaticBodyCOMP → MergeCOMP → RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+
+**How it works:** Resolves the upstream COMP's `MeshInstance3D` and mirrors its mesh, material, visibility, and shadow settings onto an internal `MeshInstance3D`. Defaults to Trimesh collision (accurate for complex static geometry). Transform is applied every cook.
 
 ---
 
 #### SoftBodyCOMP
 
-Wraps a `SoftBody3D` for deformable mesh physics (cloth, jelly, rubber).
+Wraps a `SoftBody3D` for deformable mesh physics (cloth, jelly, rubber). Takes a COMP input (typically GeometryCOMP) — this node only owns soft-body physics properties.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | tx, ty, tz | Float | 0.0 | — | Position |
 | rx, ry, rz | Float | 0.0 | -360–360 | Rotation |
 | sx, sy, sz | Float | 1.0 | 0.001–100.0 | Scale |
-| simulation_precision | Int | 5 | 1–20 | Solver iterations |
-| total_mass | Float | 1.0 | 0.01–100.0 | Total body mass |
+| simulation_precision | Int | 5 | 1–40 | Solver iterations |
+| total_mass | Float | 1.0 | 0.01–1000.0 | Total body mass |
 | linear_stiffness | Float | 0.5 | 0.0–1.0 | Spring stiffness |
 | pressure_coefficient | Float | 0.0 | -100.0–100.0 | Internal pressure |
 | damping_coefficient | Float | 0.01 | 0.0–1.0 | Motion damping |
 | drag_coefficient | Float | 0.0 | 0.0–1.0 | Air drag |
-| visible | Bool | true | — | Show/hide |
-| albedo_color | Color | White | — | Fallback color |
+| ray_pickable | Bool | false | — | Ray picking support |
 
-**Inputs:** `geo_in` (SOP), `mat_in` (MAT, optional).
+**Inputs:** `comp_in` (COMP — typically GeometryCOMP providing mesh + material).
 
-**How it works:** Creates a `SoftBody3D`. The mesh is assigned **once** (SoftBody3D doesn't support live mesh swapping). Physics parameters are updated every cook. High `linear_stiffness` = rigid cloth; high `pressure_coefficient` = inflated balloon.
+**Architecture:** `SOP → GeometryCOMP → SoftBodyCOMP → MergeCOMP → RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+
+**How it works:** Resolves the upstream COMP's `MeshInstance3D` and copies its mesh, material, visibility, and shadow settings. The mesh is assigned **once** (SoftBody3D doesn't support live mesh swapping). Physics parameters are updated every cook. High `linear_stiffness` = rigid cloth; high `pressure_coefficient` = inflated balloon.
 
 ---
 

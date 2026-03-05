@@ -56,6 +56,17 @@ func get_scene_node() -> Node3D:
 	return _scene_node
 
 
+## Destroys the runtime scene node and resets this COMP to its pre-first-cook
+## state.  The next cook will lazily recreate everything via _ensure_body() /
+## lazy init.  Override in subclasses to nil out additional internal state.
+func destroy_scene_node() -> void:
+	if _scene_node != null:
+		if _scene_node.get_parent() != null:
+			_scene_node.get_parent().remove_child(_scene_node)
+		_scene_node.queue_free()
+		_scene_node = null
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Preview
 # ═══════════════════════════════════════════════════════════════════════════════

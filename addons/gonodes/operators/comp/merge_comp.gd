@@ -65,6 +65,15 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	return null  # RenderTOP reads scene nodes via get_scene_node() / get_children()
 
 
+## Detaches children first (they belong to their own COMPs), then
+## destroys the group node so the next cook rebuilds the merge tree.
+func destroy_scene_node() -> void:
+	_release_children()
+	super.destroy_scene_node()
+	_group_node = null
+	_managed_children.clear()
+
+
 ## Returns the group Node3D.  RenderTOP adopts this into its SubViewport,
 ## which brings all children along automatically.
 func get_group_node() -> Node3D:

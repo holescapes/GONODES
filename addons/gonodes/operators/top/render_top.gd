@@ -252,18 +252,19 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 ## Lazily creates the 3D SubViewport and environment.
-## IMPORTANT: The SubViewport is fully configured (own_world_3d, world_3d) BEFORE
-## being added to the tree.  This ensures that any CollisionObject3D nodes added
-## later receive the correct physics space in their NOTIFICATION_ENTER_WORLD.
+## IMPORTANT: The SubViewport is fully configured with its own World3D BEFORE
+## being added to the tree.  This ensures that any CollisionObject3D or
+## SoftBody3D nodes added later receive the correct physics space in their
+## NOTIFICATION_ENTER_WORLD.
 func _setup_viewport() -> void:
 	if _viewport != null:
 		return
 
 	# Build the SubViewport manually instead of _create_viewport() so we can
-	# assign own_world_3d + World3D BEFORE the viewport enters the tree.
+	# assign a dedicated World3D BEFORE the viewport enters the tree.
 	# _create_viewport() calls add_child() immediately, which means
-	# own_world_3d/world_3d would be set AFTER the viewport is in the tree,
-	# and descendant CollisionObject3D nodes would not register with the
+	# world_3d would be set AFTER the viewport is in the tree,
+	# and descendant physics nodes would not register with the
 	# correct physics space on ENTER_WORLD.
 	var res: Vector2i = get_param_value("resolution")
 	_viewport = SubViewport.new()
@@ -274,9 +275,13 @@ func _setup_viewport() -> void:
 	_viewport.gui_disable_input = true
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
-	# Set world BEFORE entering tree — physics bodies entering later will
-	# find this World3D via find_world_3d() and register with its space.
-	_viewport.own_world_3d = true
+	# Set an explicit World3D BEFORE entering tree.  Do NOT set
+	# own_world_3d = true — that causes Godot to create a DUPLICATE
+	# World3D internally, so child nodes see a different World3D (and
+	# different physics space) than the one we activate below.  By
+	# setting world_3d directly, find_world_3d() returns the same
+	# World3D we reference here, and all physics bodies register with
+	# the activated space.
 	_viewport.world_3d = World3D.new()
 
 	# NOW add to tree — world is fully configured
@@ -399,6 +404,14 @@ func _recursive_register_bodies(parent: Node, target_space: RID) -> void:
 				var current_space: RID = PhysicsServer3D.body_get_space(body_rid)
 				if current_space != target_space:
 					PhysicsServer3D.body_set_space(body_rid, target_space)
+		elif child is SoftBody3D:
+			# SoftBody3D extends MeshInstance3D (NOT PhysicsBody3D) and uses
+			# a separate soft_body_* API on PhysicsServer3D.
+			var soft_rid: RID = child.get_physics_rid()
+			if soft_rid.is_valid():
+				var current_space: RID = PhysicsServer3D.soft_body_get_space(soft_rid)
+				if current_space != target_space:
+					PhysicsServer3D.soft_body_set_space(soft_rid, target_space)
 		if child.get_child_count() > 0:
 			_recursive_register_bodies(child, target_space)
 
@@ -420,6 +433,15 @@ func _clear_managed_children() -> void:
 		if child != null and is_instance_valid(child) and child.get_parent() == _viewport:
 			_viewport.remove_child(child)
 	_managed_children.clear()
+
+
+## Resets the viewport tracking state so the next cook adopts all COMP scene
+## nodes fresh.  Called by the editor Stop button after all COMPs have
+## destroyed their scene nodes.
+func reset_viewport() -> void:
+	_clear_managed_children()
+	_prev_managed.clear()
+	_new_nodes_adopted = false
 
 
 ## Creates a default camera if none is provided by a CameraCOMP.

@@ -81,6 +81,13 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	return null
 
 
+## Destroys the scene node and resets camera state so the
+## next cook recreates the Camera3D from scratch.
+func destroy_scene_node() -> void:
+	super.destroy_scene_node()
+	_camera = null
+
+
 ## Returns the Camera3D node. Called by RenderTOP.
 func get_camera() -> Camera3D:
 	return _camera

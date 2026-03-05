@@ -80,6 +80,7 @@ checklist items below.
 
 ## 06 — Physics: Rigid Bodies
 **File:** `06_physics_rigid_bodies.gnpatch`
+**Architecture:** `SOP + PBR_MAT → GeometryCOMP → RigidBodyCOMP / StaticBodyCOMP → MergeCOMP → RenderTOP`
 
 | # | What to check | Pass? |
 |---|---------------|-------|
@@ -94,6 +95,7 @@ checklist items below.
 
 ## 07 — Physics: Forces & Properties
 **File:** `07_physics_forces_properties.gnpatch`
+**Architecture:** `SOP + PBR_MAT → GeometryCOMP → RigidBodyCOMP / StaticBodyCOMP → MergeCOMP → RenderTOP`
 
 | # | What to check | Pass? |
 |---|---------------|-------|
@@ -108,6 +110,7 @@ checklist items below.
 
 ## 08 — Physics: Joints, Area & Soft Body
 **File:** `08_physics_joints_area_softbody.gnpatch`
+**Architecture:** `SOP + PBR_MAT → GeometryCOMP → PhysicsCOMP → MergeCOMP → RenderTOP` (AreaCOMP takes SOP directly for collision shape)
 
 | # | What to check | Pass? |
 |---|---------------|-------|

@@ -108,6 +108,14 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	return null
 
 
+## Destroys the scene node and resets light state so the
+## next cook recreates the Light3D from scratch.
+func destroy_scene_node() -> void:
+	super.destroy_scene_node()
+	_light = null
+	_current_type = -1
+
+
 ## Returns the Light3D node. Called by RenderTOP.
 func get_light() -> Light3D:
 	return _light

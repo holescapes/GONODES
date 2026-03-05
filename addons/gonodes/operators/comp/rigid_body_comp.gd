@@ -2,25 +2,22 @@ class_name RigidBodyCOMP
 extends GNCompBase
 ## Wraps a RigidBody3D with CollisionShape3D for Jolt physics simulation.
 ##
-## Takes SOP geometry input and auto-generates a collision shape from the mesh.
-## Supports Dynamic, Kinematic, and Static freeze modes plus full physics
-## property control (mass, friction, bounce, damping, axis locking).
-##
-## Optional CHOP input applies per-frame forces/impulses from upstream data.
+## Takes a COMP input (typically GeometryCOMP) and adds physics behaviour.
+## The upstream COMP provides the mesh and material — this node only owns
+## physics properties (mass, friction, bounce, damping, axis locking, forces).
 ##
 ## Architecture:
-##   SOP → RigidBodyCOMP → MergeCOMP → RenderTOP
-##                ↑ (optional)
-##            CHOP (forces)
+##   SOP → GeometryCOMP → RigidBodyCOMP → MergeCOMP → RenderTOP
+##              ↑                ↑ (optional)
+##          PBR_MAT          CHOP (forces)
 
 var _rigid_body: RigidBody3D = null
 var _collision_shape: CollisionShape3D = null
 var _mesh_instance: MeshInstance3D = null
-var _fallback_material: StandardMaterial3D = null
 ## Tracks which collision shape type is currently applied.
 var _current_shape_type: int = -1
-## Cached mesh reference to detect when SOP input changes.
-var _last_mesh: ArrayMesh = null
+## Cached mesh reference to detect when upstream mesh changes.
+var _last_mesh: Mesh = null
 
 
 func _init() -> void:
@@ -29,8 +26,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo_in", GNFamily.Type.SOP, false, "SOP geometry input")
-	add_input("mat_in", GNFamily.Type.MAT, false, "Material input (optional)")
+	add_input("comp_in", GNFamily.Type.COMP, false, "Geometry COMP input (mesh + material)")
 	add_input("force_in", GNFamily.Type.CHOP, false, "Force/impulse CHOP input (optional)")
 	add_output("out", GNFamily.Type.COMP, "RigidBody component")
 
@@ -91,26 +87,14 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("ccd", false,
 		"CCD", "Continuous collision detection (prevents tunnelling for fast objects)"))
 
-	# ── Visual ───────────────────────────────────────────────────────────
-	add_parameter(GNParameter.create_color("albedo_color", Color.WHITE,
-		"Albedo Color", "Surface base colour (fallback PBR)"))
-	add_parameter(GNParameter.create_float("metallic", 0.0, 0.0, 1.0, 0.01,
-		"Metallic", "Metallic factor"))
-	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01,
-		"Roughness", "Surface roughness"))
-	add_parameter(GNParameter.create_bool("visible", true,
-		"Visible", "Show or hide the mesh"))
-	add_parameter(GNParameter.create_enum("cast_shadow",
-		PackedStringArray(["Off", "On", "Double-Sided", "Shadows Only"]), 1,
-		"Cast Shadow", "Shadow casting mode"))
-
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var geo_in: GNGeoData = inputs[0] as GNGeoData if inputs.size() > 0 and inputs[0] is GNGeoData else null
-	var mat_in: GNMaterialData = inputs[1] as GNMaterialData if inputs.size() > 1 and inputs[1] is GNMaterialData else null
-	var force_in: GNChannelData = inputs[2] as GNChannelData if inputs.size() > 2 and inputs[2] is GNChannelData else null
+	var force_in: GNChannelData = inputs[1] as GNChannelData if inputs.size() > 1 and inputs[1] is GNChannelData else null
 
 	_ensure_body()
+
+	# ── Resolve upstream COMP (mesh + material) ──────────────────────────
+	var upstream_mesh: MeshInstance3D = _resolve_upstream_mesh()
 
 	# ── Physics mode ─────────────────────────────────────────────────────
 	var mode_idx: int = get_param_value("mode")
@@ -152,36 +136,18 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_rigid_body.scale = Vector3(
 		get_param_value("sx"), get_param_value("sy"), get_param_value("sz"))
 
-	# ── Mesh + collision shape ───────────────────────────────────────────
-	if geo_in != null and geo_in.has_geometry():
-		_mesh_instance.mesh = geo_in.mesh
-		_update_collision_shape(geo_in.mesh)
+	# ── Mesh + collision shape from upstream COMP ────────────────────────
+	if upstream_mesh != null and upstream_mesh.mesh != null:
+		_mesh_instance.mesh = upstream_mesh.mesh
+		_mesh_instance.material_override = upstream_mesh.material_override
+		_mesh_instance.visible = upstream_mesh.visible
+		_mesh_instance.cast_shadow = upstream_mesh.cast_shadow
+		_update_collision_shape(upstream_mesh.mesh)
 	else:
 		_mesh_instance.mesh = null
 
-	# ── Material ─────────────────────────────────────────────────────────
-	if mat_in != null and mat_in.material != null:
-		_mesh_instance.material_override = mat_in.material
-	else:
-		if _fallback_material == null:
-			_fallback_material = StandardMaterial3D.new()
-		_mesh_instance.material_override = _fallback_material
-		_fallback_material.albedo_color = get_param_value("albedo_color")
-		_fallback_material.metallic = get_param_value("metallic")
-		_fallback_material.roughness = get_param_value("roughness")
-
-	_mesh_instance.visible = get_param_value("visible")
-
-	# Shadow casting
-	var shadow_mode: int = get_param_value("cast_shadow")
-	match shadow_mode:
-		0: _mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		1: _mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-		2: _mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
-		3: _mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
-
-	# ── CHOP force input ─────────────────────────────────────────────────
-	if force_in != null and mode_idx == 0:
+	# ── CHOP force input (requires physics space — skip until adopted) ───
+	if force_in != null and mode_idx == 0 and _rigid_body.is_inside_tree():
 		_apply_forces(force_in)
 
 	return null
@@ -219,7 +185,7 @@ func _ensure_body() -> void:
 
 
 ## Generates or updates the collision shape from the mesh.
-func _update_collision_shape(mesh: ArrayMesh) -> void:
+func _update_collision_shape(mesh: Mesh) -> void:
 	var shape_idx: int = get_param_value("collision_shape")
 	if shape_idx == _current_shape_type and mesh == _last_mesh:
 		return  # No change needed
@@ -279,6 +245,51 @@ func _apply_forces(chop_data: GNChannelData) -> void:
 		_rigid_body.apply_torque(Vector3(tqx, tqy, tqz))
 
 
+## Destroys the scene node and resets all internal physics state so the
+## next cook recreates the RigidBody3D from scratch.
+func destroy_scene_node() -> void:
+	super.destroy_scene_node()
+	_rigid_body = null
+	_collision_shape = null
+	_mesh_instance = null
+	_current_shape_type = -1
+	_last_mesh = null
+
+
 ## Returns the RigidBody3D node.
 func get_rigid_body() -> RigidBody3D:
 	return _rigid_body
+
+
+## Walks the network to find the upstream COMP connected to the comp_in port.
+func _resolve_upstream_comp() -> GNCompBase:
+	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	if engine == null or engine.network == null:
+		return null
+	var network: GNNetwork = engine.network
+	for conn in network.get_input_connections(id):
+		if conn.to_port != 0:
+			continue
+		var upstream: GNNode = network.nodes.get(conn.from_node, null)
+		if upstream is GNCompBase:
+			return upstream as GNCompBase
+	return null
+
+
+## Resolves the MeshInstance3D from the upstream COMP.
+## GeometryCOMP provides direct typed access; for other COMPs, walks children.
+func _resolve_upstream_mesh() -> MeshInstance3D:
+	var comp: GNCompBase = _resolve_upstream_comp()
+	if comp == null:
+		return null
+	if comp is GeometryCOMP:
+		return (comp as GeometryCOMP).get_mesh_instance()
+	var sn: Node3D = comp.get_scene_node()
+	if sn == null:
+		return null
+	if sn is MeshInstance3D:
+		return sn as MeshInstance3D
+	for child in sn.get_children():
+		if child is MeshInstance3D:
+			return child as MeshInstance3D
+	return null

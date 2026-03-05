@@ -2,16 +2,34 @@ class_name SoftBodyCOMP
 extends GNCompBase
 ## Wraps a SoftBody3D for deformable mesh physics (cloth, jelly, soft objects).
 ##
-## Takes SOP geometry input and creates a soft body simulation.  Godot's SoftBody3D
-## deforms the mesh vertices with spring-mass physics in real time.
+## Takes a COMP input (typically GeometryCOMP) and creates a soft body simulation.
+## The upstream COMP provides the mesh and material — this node only owns
+## soft-body physics properties.
 ##
 ## Architecture:
-##   SOP → SoftBodyCOMP → MergeCOMP → RenderTOP
+##   SOP → GeometryCOMP → SoftBodyCOMP → MergeCOMP → RenderTOP
+##              ↑
+##          PBR_MAT
+##
+## Implementation note — tree-first strategy:
+##   Jolt Physics errors on set_transform when a SoftBody3D has no physics
+##   space.  Rather than creating intermediate wrappers or moving the body
+##   between spaces, we let Godot's natural adoption chain handle the tree
+##   entry.  On the first cook, SoftBodyCOMP creates the SoftBody3D and
+##   pre-assigns the mesh, but does NOT set any transform or physics params
+##   (the node is not yet in a tree).  MergeCOMP and RenderTOP then adopt
+##   the node into the SubViewport during the same topological pass.  When
+##   the SubViewport gets add_child(group_node), all descendants — including
+##   this SoftBody3D — receive NOTIFICATION_ENTER_WORLD with the SubViewport's
+##   World3D, so Jolt registers the body in the correct physics space.
+##   On the next cook (deferred), the body is safely in the tree and we set
+##   all transform, material, and physics properties.
 
 var _soft_body: SoftBody3D = null
-var _fallback_material: StandardMaterial3D = null
-## Tracks whether we've assigned the initial mesh (SoftBody3D can only set mesh once).
+## Tracks whether we've assigned the initial mesh.
 var _mesh_assigned: bool = false
+## True once initial transform + physics params have been applied.
+var _initial_config_done: bool = false
 
 
 func _init() -> void:
@@ -20,8 +38,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo_in", GNFamily.Type.SOP, false, "SOP geometry input (triangle mesh)")
-	add_input("mat_in", GNFamily.Type.MAT, false, "Material input (optional)")
+	add_input("comp_in", GNFamily.Type.COMP, false, "Geometry COMP input (mesh + material)")
 	add_output("out", GNFamily.Type.COMP, "SoftBody component")
 
 
@@ -55,81 +72,132 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("ray_pickable", false,
 		"Ray Pickable", "Can be selected by ray picking"))
 
-	# ── Visual ───────────────────────────────────────────────────────────
-	add_parameter(GNParameter.create_color("albedo_color", Color.WHITE,
-		"Albedo Color", "Surface base colour (fallback PBR)"))
-	add_parameter(GNParameter.create_float("metallic", 0.0, 0.0, 1.0, 0.01,
-		"Metallic", "Metallic factor"))
-	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01,
-		"Roughness", "Surface roughness"))
-	add_parameter(GNParameter.create_bool("visible", true,
-		"Visible", "Show or hide the mesh"))
-	add_parameter(GNParameter.create_enum("cast_shadow",
-		PackedStringArray(["Off", "On", "Double-Sided", "Shadows Only"]), 1,
-		"Cast Shadow", "Shadow casting mode"))
 
+func _cook(_inputs: Array[GNData]) -> GNData:
+	# ── Phase 1: create an EMPTY SoftBody3D ─────────────────────────────
+	#    No mesh, no transform.  MergeCOMP / RenderTOP adopt this node into
+	#    the SubViewport.  Jolt registers a body shell on ENTER_WORLD.
+	if _soft_body == null:
+		_soft_body = SoftBody3D.new()
+		_soft_body.name = id + "_soft"
+		_scene_node = _soft_body
+		call_deferred("mark_dirty")
+		return null
 
-func _cook(inputs: Array[GNData]) -> GNData:
-	var geo_in: GNGeoData = inputs[0] as GNGeoData if inputs.size() > 0 and inputs[0] is GNGeoData else null
-	var mat_in: GNMaterialData = inputs[1] as GNMaterialData if inputs.size() > 1 and inputs[1] is GNMaterialData else null
+	# ── Phase 2: body must be inside the tree ────────────────────────────
+	if not _soft_body.is_inside_tree():
+		call_deferred("mark_dirty")
+		return null
 
-	_ensure_body()
+	# ── Phase 3 (one-shot): assign mesh + cycle physics space ───────────
+	#    Jolt only creates a soft body during set_space / ENTER_WORLD when
+	#    a mesh is present.  Phase 1 entered the tree empty.  Now:
+	#    1) Assign mesh (may trigger non-fatal set_transform error)
+	#    2) Cycle the physics space: remove → re-add.  This forces Jolt's
+	#       set_space() to see the mesh and create the simulation body.
+	#    3) Enable internal physics processing for simulation stepping.
+	if not _mesh_assigned:
+		var upstream_mesh: MeshInstance3D = _resolve_upstream_mesh()
+		if upstream_mesh != null and upstream_mesh.mesh != null:
+			# 1) Assign mesh (non-fatal Jolt error expected)
+			_soft_body.mesh = upstream_mesh.mesh
+			_soft_body.material_override = upstream_mesh.material_override
+			_soft_body.visible = upstream_mesh.visible
+			_soft_body.cast_shadow = upstream_mesh.cast_shadow
 
-	# ── Mesh (set once — SoftBody3D doesn't support live mesh swapping) ──
-	if not _mesh_assigned and geo_in != null and geo_in.has_geometry():
-		_soft_body.mesh = geo_in.mesh
-		_mesh_assigned = true
+			# 2) Cycle physics space — forces Jolt to re-create body with mesh
+			var soft_rid: RID = _soft_body.get_physics_rid()
+			var vp: Viewport = _soft_body.get_viewport()
+			if soft_rid.is_valid() and vp != null and vp.world_3d != null:
+				var target_space: RID = vp.world_3d.space
+				PhysicsServer3D.soft_body_set_space(soft_rid, RID())
+				PhysicsServer3D.soft_body_set_space(soft_rid, target_space)
 
-	# ── Transform ────────────────────────────────────────────────────────
-	_soft_body.position = Vector3(
-		get_param_value("tx"), get_param_value("ty"), get_param_value("tz"))
-	_soft_body.rotation_degrees = Vector3(
-		get_param_value("rx"), get_param_value("ry"), get_param_value("rz"))
-	_soft_body.scale = Vector3(
-		get_param_value("sx"), get_param_value("sy"), get_param_value("sz"))
+			# 3) Force-enable internal physics processing
+			_soft_body.set_physics_process_internal(true)
 
-	# ── Soft body physics ────────────────────────────────────────────────
-	_soft_body.simulation_precision = get_param_value("simulation_precision")
-	_soft_body.total_mass = get_param_value("total_mass")
-	_soft_body.linear_stiffness = get_param_value("linear_stiffness")
-	_soft_body.pressure_coefficient = get_param_value("pressure_coefficient")
-	_soft_body.damping_coefficient = get_param_value("damping_coefficient")
-	_soft_body.drag_coefficient = get_param_value("drag_coefficient")
-	_soft_body.ray_pickable = get_param_value("ray_pickable")
+			_mesh_assigned = true
+			call_deferred("mark_dirty")
+			return null
+		else:
+			call_deferred("mark_dirty")
+			return null
 
-	# ── Material ─────────────────────────────────────────────────────────
-	if mat_in != null and mat_in.material != null:
-		_soft_body.material_override = mat_in.material
-	else:
-		if _fallback_material == null:
-			_fallback_material = StandardMaterial3D.new()
-		_soft_body.material_override = _fallback_material
-		_fallback_material.albedo_color = get_param_value("albedo_color")
-		_fallback_material.metallic = get_param_value("metallic")
-		_fallback_material.roughness = get_param_value("roughness")
+	# ── Phase 4: per-frame updates ──────────────────────────────────────
 
-	_soft_body.visible = get_param_value("visible")
+	# Material / visibility (safe to update every frame — visual only)
+	var upstream_mesh: MeshInstance3D = _resolve_upstream_mesh()
+	if upstream_mesh != null:
+		_soft_body.material_override = upstream_mesh.material_override
+		_soft_body.visible = upstream_mesh.visible
+		_soft_body.cast_shadow = upstream_mesh.cast_shadow
 
-	# Shadow casting
-	var shadow_mode: int = get_param_value("cast_shadow")
-	match shadow_mode:
-		0: _soft_body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		1: _soft_body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-		2: _soft_body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
-		3: _soft_body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	# Initial transform + physics params (ONE-TIME only).
+	# Setting position every frame would teleport the body back to its
+	# start, fighting the physics simulation.  We set it once and then
+	# let gravity / collisions handle the rest.
+	if not _initial_config_done:
+		_soft_body.position = Vector3(
+			get_param_value("tx"), get_param_value("ty"), get_param_value("tz"))
+		_soft_body.rotation_degrees = Vector3(
+			get_param_value("rx"), get_param_value("ry"), get_param_value("rz"))
+		_soft_body.scale = Vector3(
+			get_param_value("sx"), get_param_value("sy"), get_param_value("sz"))
+
+		_soft_body.simulation_precision = get_param_value("simulation_precision")
+		_soft_body.total_mass = get_param_value("total_mass")
+		_soft_body.linear_stiffness = get_param_value("linear_stiffness")
+		_soft_body.pressure_coefficient = get_param_value("pressure_coefficient")
+		_soft_body.damping_coefficient = get_param_value("damping_coefficient")
+		_soft_body.drag_coefficient = get_param_value("drag_coefficient")
+		_soft_body.ray_pickable = get_param_value("ray_pickable")
+
+		_initial_config_done = true
 
 	return null
 
 
-func _ensure_body() -> void:
-	if _soft_body != null:
-		return
-
-	_soft_body = SoftBody3D.new()
-	_soft_body.name = id + "_soft"
-	_scene_node = _soft_body
+## Resets state so the next cook recreates the SoftBody3D from scratch.
+func destroy_scene_node() -> void:
+	_soft_body = null
+	_mesh_assigned = false
+	_initial_config_done = false
+	super.destroy_scene_node()  # removes from parent, frees, nulls _scene_node
 
 
 ## Returns the SoftBody3D node.
 func get_soft_body() -> SoftBody3D:
 	return _soft_body
+
+
+## Walks the network to find the upstream COMP connected to the comp_in port.
+func _resolve_upstream_comp() -> GNCompBase:
+	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	if engine == null or engine.network == null:
+		return null
+	var network: GNNetwork = engine.network
+	for conn in network.get_input_connections(id):
+		if conn.to_port != 0:
+			continue
+		var upstream: GNNode = network.nodes.get(conn.from_node, null)
+		if upstream is GNCompBase:
+			return upstream as GNCompBase
+	return null
+
+
+## Resolves the MeshInstance3D from the upstream COMP.
+func _resolve_upstream_mesh() -> MeshInstance3D:
+	var comp: GNCompBase = _resolve_upstream_comp()
+	if comp == null:
+		return null
+	if comp is GeometryCOMP:
+		return (comp as GeometryCOMP).get_mesh_instance()
+	var sn: Node3D = comp.get_scene_node()
+	if sn == null:
+		return null
+	if sn is MeshInstance3D:
+		return sn as MeshInstance3D
+	for child in sn.get_children():
+		if child is MeshInstance3D:
+			return child as MeshInstance3D
+	return null

@@ -21,6 +21,7 @@ var cook_engine: GNCookEngine
 
 ## Toolbar toggles (created in _setup_toolbar, stored for state persistence).
 var play_button: Button
+var reset_button: Button
 var preview_toggle: CheckButton
 var perf_toggle: CheckButton
 var vram_toggle: CheckButton
@@ -352,6 +353,42 @@ func _on_play_pause_toggled(paused: bool) -> void:
 	GNLogger.info("Editor", "Cooking %s" % ("PAUSED" if paused else "RESUMED"))
 
 
+## Resets the cook engine: time/frame back to 0, destroys all runtime scene
+## nodes (physics bodies, meshes, etc.), and re-cooks from scratch so the
+## patch restarts from its initial state.
+func _on_reset_pressed() -> void:
+	if cook_engine == null:
+		return
+
+	# 1. Pause cooking so nothing fires while we tear down
+	cook_engine.cooking_enabled = false
+
+	# 2. Reset engine counters (frame, time, internal state maps)
+	cook_engine.reset()
+
+	# 3. Destroy every operator's runtime scene node so physics bodies,
+	#    soft bodies, joints, etc. are freed and recreated cleanly.
+	#    Then reset any RenderTOP viewports so they re-adopt nodes fresh.
+	if network != null:
+		for node_id in network.nodes:
+			var node: GNNode = network.nodes[node_id]
+			if node.has_method("destroy_scene_node"):
+				node.destroy_scene_node()
+		for node_id in network.nodes:
+			var node: GNNode = network.nodes[node_id]
+			if node.has_method("reset_viewport"):
+				node.reset_viewport()
+
+	# 4. Resume cooking — the next cook_frame will rebuild everything
+	cook_engine.cooking_enabled = true
+
+	# 5. Sync play button back to "playing" state
+	play_button.button_pressed = false  # false = playing (not paused)
+	play_button.text = "Pause  ⏸"
+
+	GNLogger.info("Editor", "Patch reset — restarting from frame 0")
+
+
 ## Toggles non-realtime mode on the cook engine.
 func _on_nrt_toggled(pressed: bool) -> void:
 	if cook_engine != null:
@@ -577,6 +614,13 @@ func _setup_toolbar() -> void:
 	play_button.toggled.connect(_on_play_pause_toggled)
 	row1.add_child(play_button)
 
+	# Reset button
+	reset_button = Button.new()
+	reset_button.text = "Reset  ⏮"
+	reset_button.tooltip_text = "Reset the patch back to frame 0 (Escape)"
+	reset_button.pressed.connect(_on_reset_pressed)
+	row1.add_child(reset_button)
+
 	row1.add_child(VSeparator.new())
 
 	# Non-Realtime toggle
@@ -712,6 +756,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			if focus_owner is LineEdit or focus_owner is TextEdit or focus_owner is SpinBox:
 				return
 			play_button.button_pressed = not play_button.button_pressed
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_ESCAPE:
+			var focus_owner := get_viewport().gui_get_focus_owner()
+			if focus_owner is LineEdit or focus_owner is TextEdit or focus_owner is SpinBox:
+				return
+			_on_reset_pressed()
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_BACKSPACE and _nav_stack.size() > 1:
 			var focus_owner := get_viewport().gui_get_focus_owner()

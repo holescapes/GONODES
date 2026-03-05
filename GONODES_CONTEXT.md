@@ -2753,7 +2753,7 @@ SOP Chain (geometry)    MAT Layer        COMP Layer (3D scene)              TOP 
 
 1. **Godot-native 3D nodes** — GeometryCOMP creates a real `MeshInstance3D`, CameraCOMP creates a real `Camera3D`, LightCOMP creates a real `DirectionalLight3D`/`OmniLight3D`/`SpotLight3D`. No custom rendering abstraction.
 
-2. **Isolated World3D** — Each RenderTOP creates a `SubViewport` with `own_world_3d = true`, giving it a separate 3D scene. This prevents 3D content from appearing in the main editor viewport and allows multiple independent 3D scenes in one network.
+2. **Isolated World3D** — Each RenderTOP creates a `SubViewport` with an explicit `world_3d = World3D.new()` assigned before tree entry, giving it a separate 3D scene. This prevents 3D content from appearing in the main editor viewport and allows multiple independent 3D scenes in one network.
 
 3. **Scene population via network walk** — RenderTOP's `_populate_scene_from_network()` walks upstream connections to discover COMP nodes, then reparents their Node3D children into the RenderTOP's viewport. This means the 3D scene is defined by network wiring, not by Godot scene tree structure.
 
@@ -3260,9 +3260,9 @@ These are non-negotiable constraints discovered during development. **Never viol
 - The cook engine must suppress null-output warnings for `GNFamily.COMP` nodes
 - RenderTOP accesses COMP nodes by walking the network graph, not by reading cook output
 
-### 25.12 SubViewport own_world_3d for Isolated 3D Scenes
+### 25.12 SubViewport World3D for Isolated 3D Scenes
 
-- RenderTOP uses `SubViewport.own_world_3d = true` to create an isolated 3D world
+- RenderTOP assigns `SubViewport.world_3d = World3D.new()` before tree entry to create an isolated 3D world (without `own_world_3d = true`, which caused a duplicate World3D bug with Jolt Physics)
 - Without this, 3D content from RenderTOP would appear in the main editor viewport
 - Each RenderTOP has its own Environment/WorldEnvironment for independent lighting/sky
 
@@ -3376,7 +3376,19 @@ These are non-negotiable constraints discovered during development. **Never viol
 
 ## 26. Known Bugs
 
-### 26.1 WindowTOP: ESC to Exit Fullscreen Not Working
+### 26.1 SoftBodyCOMP: Cloth Simulation Not Running with Jolt Physics
+
+- **Issue:** SoftBody3D cloth mesh renders at the correct position but does not simulate (no draping under gravity). Jolt's `is_physics_processing_internal()` remains `false` and `set_transform` errors fire intermittently.
+- **Root cause:** Jolt Physics only builds simulation geometry and enables internal physics processing during `NOTIFICATION_ENTER_WORLD` when a mesh is already assigned. In GONODES' deferred cook architecture, the SoftBody3D either (a) has no mesh when it enters the tree (so Jolt skips simulation init) or (b) has a mesh but enters the wrong physics space (triggering `set_transform` errors). Space cycling via `PhysicsServer3D.soft_body_set_space()` + `set_physics_process_internal(true)` achieves `phys_int=true` but Jolt's C++ `in_space()` flag remains false.
+- **Affects:** Test scene `08_physics_joints_area_softbody.gnpatch` check #6, and likely test scene `07_physics_forces_properties.gnpatch`
+- **Current state:** RenderTOP `own_world_3d` duplication bug was fixed (world/space now match), multi-phase cook defers mesh assignment + space cycling, but Jolt still won't step the soft body. All other physics nodes (RigidBody, StaticBody, Area, Joints) work correctly.
+- **What has been tried:** Wrapper Node3D pattern, pre-assign mesh before tree, empty entry + late mesh, remove+re-add for fresh ENTER_WORLD, manual `soft_body_set_space()` cycling, `set_physics_process_internal(true)` force-enable — none produce a fully working simulation.
+- **Possible next steps:** (1) Test with Godot's built-in physics engine instead of Jolt to confirm it's Jolt-specific. (2) File a Jolt Physics issue about `set_transform` requiring `in_space()` even when space RID is valid. (3) Try `_soft_body.notification(NOTIFICATION_ENTER_WORLD)` to manually trigger Jolt's init path after mesh assignment.
+- **Priority:** Medium — soft body is a secondary physics feature; rigid/static bodies, joints, and areas all work
+
+---
+
+### 26.2 WindowTOP: ESC to Exit Fullscreen Not Working
 
 - **Issue:** When the output window is in Fullscreen or Borderless mode with Always On Top enabled, the user cannot escape back to windowed mode
 - **Root cause:** Input events in a child `Window` node stay in that window's viewport tree. `Input.is_action_just_pressed()` polled from the parent node's `_process()` never sees them. Attempts with `gui_input` on a focusable `TextureRect` inside the window also failed to trigger
