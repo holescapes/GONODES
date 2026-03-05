@@ -1,7 +1,13 @@
 # TouchDesigner vs Houdini vs GONODES — Architecture Deep Dive
 
+> **Audience:** Core developers and architecture reviewers.  
 > **Date:** 2026-03-03  
 > **Purpose:** Comprehensive comparison of cooking models, data flow, engine architecture, and UI patterns across all three systems — with actionable improvement recommendations for GONODES.
+>
+> Several recommendations from this document have been implemented:
+> - ✅ Ramp parameter type with curve editor (§11.2.B)
+> - ✅ Network boxes + sticky notes (§11.2.F)
+> - Remaining items tracked in GONODES_CONTEXT.md roadmap
 
 ---
 

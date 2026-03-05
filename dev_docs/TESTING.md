@@ -1,5 +1,6 @@
 # GONODES Testing Guide
 
+> **Audience:** Contributors writing or running tests.  
 > **Last updated:** 2026-03-03  
 > **Total automated tests:** 144 (118 unit + 26 integration) — all passing
 

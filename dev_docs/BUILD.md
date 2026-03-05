@@ -1,7 +1,11 @@
 # GONODES Build System
 
-This document describes how to build GONODES Player (and optionally Editor)
-binaries for all desktop platforms.
+> **Audience:** Contributors, CI/release engineers, advanced users.  
+> **User-facing version:** `addons/gonodes/help/building.md` (accessible via in-editor Help window)
+
+This document is the complete build system reference with internals-level
+detail: export preset tuning, release optimizations, GDExtension handling
+mechanics, main-scene swap implementation, and CI pipeline setup.
 
 
 ## Overview

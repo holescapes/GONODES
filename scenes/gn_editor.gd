@@ -6,6 +6,7 @@ extends Control
 ## Supports save/load of patches as `.gnpatch` JSON files.
 
 const GNHelpWindowScene := preload("res://addons/gonodes/ui/gn_help_window.gd")
+const _GNMainHelpWindowScript = preload("res://addons/gonodes/ui/gn_main_help_window.gd")
 const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
 const _GNExportDialogScript = preload("res://addons/gonodes/ui/gn_export_dialog.gd")
 
@@ -59,6 +60,9 @@ var _help_windows: Array = []
 
 ## Export dialog for building standalone apps.
 var _export_dialog: Window = null
+
+## Main help reference window (singleton — toggled on/off).
+var _main_help_window: GNMainHelpWindow = null
 
 ## Settings file path for persisting editor state (last opened patch, etc.).
 const _SETTINGS_PATH := "user://gonodes_settings.cfg"
@@ -535,6 +539,18 @@ func _close_all_help_windows() -> void:
 	_help_windows.clear()
 
 
+## Toggles the main help reference window (singleton — created on first use).
+func _toggle_main_help_window() -> void:
+	if _main_help_window != null and is_instance_valid(_main_help_window):
+		_main_help_window.visible = not _main_help_window.visible
+		if _main_help_window.visible:
+			_main_help_window.grab_focus()
+		return
+	_main_help_window = _GNMainHelpWindowScript.new()
+	add_child(_main_help_window)
+	_main_help_window.popup_centered()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Save / Load
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -728,6 +744,15 @@ func _setup_toolbar() -> void:
 	btn_layout.pressed.connect(func(): graph_editor.auto_layout())
 	row2.add_child(btn_layout)
 
+	row2.add_child(VSeparator.new())
+
+	# Help button
+	var btn_help := Button.new()
+	btn_help.text = "📖 Help"
+	btn_help.tooltip_text = "Open the help reference hub (F1)"
+	btn_help.pressed.connect(_toggle_main_help_window)
+	row2.add_child(btn_help)
+
 	# Create the export dialog (hidden until needed)
 	_export_dialog = _GNExportDialogScript.new()
 	_export_dialog.visible = false
@@ -769,6 +794,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			if focus_owner is LineEdit or focus_owner is TextEdit:
 				return
 			_navigate_to_depth(_nav_stack.size() - 2)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F1:
+			_toggle_main_help_window()
 			get_viewport().set_input_as_handled()
 
 

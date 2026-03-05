@@ -1,4 +1,8 @@
-# GONODES — Operator Reference
+# GONODES — Operator Reference (Static Snapshot)
+
+> **⚠️ This is a static snapshot and may be outdated.** The live operator reference is auto-generated in the in-editor Help window (F1 → Operators Reference) from actual operator metadata.  
+> **Audience:** Contributors needing implementation details ("How it works" per operator).  
+> **Current operator count:** 207 operators across 8 families (this snapshot documents 131).
 
 > **131 operators** across 8 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, and Output.
 

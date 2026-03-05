@@ -318,7 +318,7 @@ Duplicated nodes automatically receive an `_copy` suffix (e.g., `lfo1` → `lfo1
 - Help windows show: description, parameters table, inputs/outputs, tips,
   example expressions, and related nodes
 - The help window can be left open and updates when a different node is queried
-- See also: `help/expressions_guide.md` for expression system documentation
+- See also: `help/guides/expressions.md` for expression system documentation
 
 ---
 

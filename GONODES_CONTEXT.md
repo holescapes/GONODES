@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
-> **Last updated:** 2026-03-04
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 204 operators across 7 families (57 TOP, 14 IMG, 52 CHOP, 25 DAT, 39 SOP, 13 COMP, 6 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** — 204 `.gnpatch` example files across all 6 help families (59 CHOP, 58 TOP, 38 SOP, 16 COMP, 28 DAT, 7 MAT) providing 1–2 visual demos per operator. `test_scenes/` deprecated — help patches replace manual test scenes as the primary visual verification method. **New: 23 additional TOPs** — AnalyzeTOP, CacheTOP, TimeMachineTOP, ChannelMixTOP, ChromaKeyTOP, ColorMapTOP, DepthTOP, FitTOP, LayoutTOP, MonoTOP, NormalMapTOP, SharpenTOP, ConvolutionTOP, CornerPinTOP, DilateErodeTOP, LensDistortTOP, LumaBlurTOP, PatternTOP, ProjectionTOP, RemapTOP, SlopeTOP, SVGTOP, TriangleTOP — closing the TouchDesigner TOP gap. **New: 20 additional CHOPs** — SmoothCHOP, SpringCHOP, DelayCHOP, EnvelopeCHOP, AnalyzeCHOP, ClockCHOP, InterpolateCHOP, LookupCHOP, StretchCHOP, ResampleCHOP, TrimCHOP, ExtendCHOP, JoinCHOP, ShuffleCHOP, SplitCHOP, FanCHOP, DeleteCHOP, CopyCHOP, CompositeCHOP, ExpressionCHOP — signal processing, time manipulation, and channel management. **New: 17 additional SOPs** — NormalSOP, ReverseSOP, PeakSOP, SortSOP, FacetSOP, DeleteSOP, ScatterSOP, MirrorSOP, ClipSOP, ExtrudeSOP, CopySOP, PointSOP, AttributeSOP, BooleanSOP, TubeSOP, SweepSOP, SkinSOP — closing the TouchDesigner SOP/CHOP gap. All utilize Godot features (SurfaceTool, CSGMesh3D, Expression class, RandomNumberGenerator, parallel transport frames). **New: 36 additional operators closing the final TouchDesigner gap** — 6 TOPs (MatteTOP, PremultiplyTOP, PosterizeTOP, RadialBlurTOP, AntiAliasTOP, PaletteTOP), 7 CHOPs (KeyboardInCHOP, MouseInCHOP, GamepadCHOP, ParameterCHOP, TrailCHOP, SOPtoCHOP, TOPtoCHOP), 10 DATs (FileInDAT, JSONDAT, WebDAT, SubstituteDAT, InsertDAT, DeleteDAT, FIFODAT, SOPtoDAT, TOPtoDAT, OPFindDAT), 7 SOPs (BendSOP, TwistSOP, TaperSOP, FontSOP, TrailSOP, UVProjectSOP, DivideSOP), 2 COMPs (NullCOMP, SwitchCOMP), 4 MATs (ConstantMAT, WireframeMAT, PointSpriteMAT, DepthMAT). Total: 204 operators. 7 complex operators deferred to roadmap (ScreenGrabTOP, InstanceCOMP, AnimationCOMP, SpringSOP, ParticleSOP, AudioDeviceOutCHOP). **New: EnvironmentCOMP** — dedicated environment/post-processing COMP (background, ambient, tonemap, glow, SSAO, SSIL, SSR, adjustments, volumetric fog) extracted from RenderTOP. RenderTOP keeps lightweight fallback env (bg color + ambient) when no EnvironmentCOMP is connected; full post-processing requires EnvironmentCOMP. Total: 205 operators (12 COMP). 6 complex operators remain deferred. **New: Advanced Scripting Infrastructure** — GenericScriptNode (family-less multi-output via `# @output` annotations, extends GNNode directly, COMP family for gray color), CallbackDAT (event-driven scripting — observes upstream node signals: `on_start`, `on_cook`, `on_value_change`, `on_create` with rolling event log table), `set_par()` writable parameter references (2-arg self / 3-arg cross-node, auto-dirty-propagation), Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) for procedural graph construction from scripts. All new functions injected into GNScriptHelper preamble — available in every Script operator. Total: 207 operators (13 COMP, 25 DAT). 6 complex operators remain deferred.
+> **Last updated:** 2026-03-05
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 204 operators across 7 families (57 TOP, 14 IMG, 52 CHOP, 25 DAT, 39 SOP, 13 COMP, 6 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** — 204 `.gnpatch` example files across all 6 help families (59 CHOP, 58 TOP, 38 SOP, 16 COMP, 28 DAT, 7 MAT) providing 1–2 visual demos per operator. `test_scenes/` deprecated — help patches replace manual test scenes as the primary visual verification method. **New: 23 additional TOPs** — AnalyzeTOP, CacheTOP, TimeMachineTOP, ChannelMixTOP, ChromaKeyTOP, ColorMapTOP, DepthTOP, FitTOP, LayoutTOP, MonoTOP, NormalMapTOP, SharpenTOP, ConvolutionTOP, CornerPinTOP, DilateErodeTOP, LensDistortTOP, LumaBlurTOP, PatternTOP, ProjectionTOP, RemapTOP, SlopeTOP, SVGTOP, TriangleTOP — closing the TouchDesigner TOP gap. **New: 20 additional CHOPs** — SmoothCHOP, SpringCHOP, DelayCHOP, EnvelopeCHOP, AnalyzeCHOP, ClockCHOP, InterpolateCHOP, LookupCHOP, StretchCHOP, ResampleCHOP, TrimCHOP, ExtendCHOP, JoinCHOP, ShuffleCHOP, SplitCHOP, FanCHOP, DeleteCHOP, CopyCHOP, CompositeCHOP, ExpressionCHOP — signal processing, time manipulation, and channel management. **New: 17 additional SOPs** — NormalSOP, ReverseSOP, PeakSOP, SortSOP, FacetSOP, DeleteSOP, ScatterSOP, MirrorSOP, ClipSOP, ExtrudeSOP, CopySOP, PointSOP, AttributeSOP, BooleanSOP, TubeSOP, SweepSOP, SkinSOP — closing the TouchDesigner SOP/CHOP gap. All utilize Godot features (SurfaceTool, CSGMesh3D, Expression class, RandomNumberGenerator, parallel transport frames). **New: 36 additional operators closing the final TouchDesigner gap** — 6 TOPs (MatteTOP, PremultiplyTOP, PosterizeTOP, RadialBlurTOP, AntiAliasTOP, PaletteTOP), 7 CHOPs (KeyboardInCHOP, MouseInCHOP, GamepadCHOP, ParameterCHOP, TrailCHOP, SOPtoCHOP, TOPtoCHOP), 10 DATs (FileInDAT, JSONDAT, WebDAT, SubstituteDAT, InsertDAT, DeleteDAT, FIFODAT, SOPtoDAT, TOPtoDAT, OPFindDAT), 7 SOPs (BendSOP, TwistSOP, TaperSOP, FontSOP, TrailSOP, UVProjectSOP, DivideSOP), 2 COMPs (NullCOMP, SwitchCOMP), 4 MATs (ConstantMAT, WireframeMAT, PointSpriteMAT, DepthMAT). Total: 204 operators. 7 complex operators deferred to roadmap (ScreenGrabTOP, InstanceCOMP, AnimationCOMP, SpringSOP, ParticleSOP, AudioDeviceOutCHOP). **New: EnvironmentCOMP** — dedicated environment/post-processing COMP (background, ambient, tonemap, glow, SSAO, SSIL, SSR, adjustments, volumetric fog) extracted from RenderTOP. RenderTOP keeps lightweight fallback env (bg color + ambient) when no EnvironmentCOMP is connected; full post-processing requires EnvironmentCOMP. Total: 205 operators (12 COMP). 6 complex operators remain deferred. **New: Advanced Scripting Infrastructure** — GenericScriptNode (family-less multi-output via `# @output` annotations, extends GNNode directly, COMP family for gray color), CallbackDAT (event-driven scripting — observes upstream node signals: `on_start`, `on_cook`, `on_value_change`, `on_create` with rolling event log table), `set_par()` writable parameter references (2-arg self / 3-arg cross-node, auto-dirty-propagation), Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) for procedural graph construction from scripts. All new functions injected into GNScriptHelper preamble — available in every Script operator. Total: 207 operators (13 COMP, 25 DAT). 6 complex operators remain deferred. **New: Main Help Window + Help System Improvements** — (1) GNMainHelpWindow centralized reference hub (sidebar Tree + content pane, Markdown→BBCode via GNMarkdownRenderer), opened via "📖 Help" toolbar button or F1 key, 5 guide .md files in `help/`. (2) Code editor integration fixed for GenericScriptNode + CallbackDAT. (3) 35 preset examples across 7 script/shader categories. (4) CustomShaderTOP GLSL preset folder. (5) Help patch naming convention fixed. (6) Help .md files at `help/` root — folders reserved for operator .gnpatch files. (7) Added Player and Building help sections from dev_docs/ folder content. (8) Renamed `docs/` to `dev_docs/` — developer/advanced docs refocused for contributors. Total: 7 help .md files.
 
 ---
 
@@ -1371,7 +1371,7 @@ GONODES/
   - [x] **`par()` / `parf()` / `pari()` / `pars()`** — parameter-to-parameter references (Houdini `ch()` equivalent). Self-reference with 1 arg, cross-node with 2 args. Typed variants guarantee return type. Circular dependency guard via `_evaluating_params` set. Demand-driven evaluation for EXPRESSION-mode targets.
   - [x] **`chop()` / `chopf()` / `chopi()` / `chops()`** — CHOP channel value references. `chop()` returns raw Variant, typed variants guarantee float/int/String. `chops()` formats floats to 4 decimal places.
   - [x] Windowed code editor for Script operators & CustomShaderTOP — `GNCodeEditor` (extends `GNBaseCodeEditor`) with CodeEdit, mode-adaptive syntax highlighting (GDScript for Script ops, GLSL for shaders), preset load/save via GNScriptHelper, reference cheatsheet, Ctrl+Enter confirm. Opened via "Edit ↗" button in GNParamRow. Both `GNCodeEditor` and `GNExpressionEditor` share a common base class (`GNBaseCodeEditor`) providing Window layout, CodeEdit configuration, key bindings, and status bar.
-  - Reference: `help/expressions_guide.md` for complete expression system docs.
+  - Reference: `help/expressions.md` for complete expression system docs.
 - [x] **File output / save-to-disk operators** — all implemented with `is_sink = true` and `active` toggle:
   - **FileSaveIMG** (IMG family) — saves CPU Image to disk (PNG, WebP, EXR). Auto-numbering for sequences.
   - **FileSaveTOP** (TOP family) — GPU→CPU readback via `get_image()`, saves to disk (PNG, WebP, EXR). Auto-numbering.
@@ -1450,6 +1450,10 @@ GONODES/
   - Implementation: `GNHelpWindow` class (`addons/gonodes/ui/gn_help_window.gd`),
     `?` button via `_setup_help_button()` in `GNNodeView`, `NODE_HELP` context
     menu item in `GNGraphEditor`, wired through `gn_editor.gd`.
+  - **Main Help Window**: `GNMainHelpWindow` (`addons/gonodes/ui/gn_main_help_window.gd`) —
+    centralized reference hub with sidebar Tree + content pane. Opened via "📖 Help" toolbar
+    button or F1 key. Uses `GNMarkdownRenderer` (`addons/gonodes/ui/gn_markdown_renderer.gd`)
+    for Markdown→BBCode conversion. See Section 29 for full details.
   - **108 example patches** across all 6 help families (see Hard Rule 25.21):
     - CHOP: 32 patches covering all 31 node types (lfo, noise, constant, math, wave, pattern, filter, lag, cross, merge, hold, speed, count, trigger, timer, logic, limit, switch, select, rename, ramp, recordchop, physics, scriptchop, audiofilein, audioin, audiospectrum, midiin, oscin, oscout, null)
     - TOP: 29 patches covering all 28 node types (noise, blur, circle, composite, constant, crop, cross, displace, edge, feedback, flip, hsv_adjust, level, lookup, ramp, rectangle, text, threshold, tile, transform, resolution, switch, null, filesavetop, moviefilein, glsl, postprocess, render)
@@ -3195,6 +3199,8 @@ The parameter inspector is a right-side panel that shows all parameters for the 
 | `addons/gonodes/ui/gn_network_box.gd` | `GNNetworkBox` | Canvas annotation: colored rectangle behind graph nodes (z_index=-10) for visual grouping. Title bar with inline edit (double-click), drag-move, bottom-right resize, right-click context menu. Signals: `box_changed`, `text_changed`, `delete_requested`, `color_changed`. |
 | `addons/gonodes/ui/gn_sticky_note.gd` | `GNStickyNote` | Canvas annotation: editable text note (z_index=-9). Multi-line TextEdit (double-click), drag-move, resize, right-click context menu. Default yellow. Signals: `note_changed`, `text_changed`, `delete_requested`, `color_changed`. |
 | `addons/gonodes/ui/gn_code_editor.gd` | `GNCodeEditor` | Extends GNBaseCodeEditor. Script operator / CustomShaderTOP code editing with GDScript or GLSL syntax highlighting (mode-adaptive), preset load/save toolbar (via GNScriptHelper), save-preset dialog, reference cheatsheet. |
+| `addons/gonodes/ui/gn_main_help_window.gd` | `GNMainHelpWindow` | Main help reference hub. HSplitContainer: sidebar Tree (search bar + expandable sections/families/operators) + ScrollContainer>RichTextLabel. Loads .md files from `help/` via GNMarkdownRenderer, generates operator docs from registry metadata. Singleton toggled via toolbar or F1. |
+| `addons/gonodes/ui/gn_markdown_renderer.gd` | `GNMarkdownRenderer` | Static utility (extends RefCounted) converting Markdown to BBCode. Handles headers, bold, italic, inline code, code blocks, tables, lists, blockquotes, horizontal rules, links. Used by GNMainHelpWindow. |
 | `addons/gonodes/ui/gn_param_inspector.gd` | `GNParamInspector` | PanelContainer with family color bar, header (node ID, type, cook time), scrollable GNParamRow list, placeholder label when nothing selected |
 
 ### Key Design Decisions
@@ -3989,3 +3995,152 @@ badge should indicate when frames are dropped during audio recording.
 - `GNParamRow` creates a `CodeEdit` instead of `LineEdit` for CODE-type params
 - `CodeEdit` supports syntax highlighting for `.gdshader` and `.gd` automatically
 - Apply-on-blur or explicit "Compile" button to avoid recompiling on every keystroke
+
+## 29. Main Help Window (GNMainHelpWindow)
+
+### Purpose
+An organized in-editor reference hub that provides centralized access to all GONODES documentation. Opened via the **📖 Help** toolbar button or **F1** key. Singleton window — created on first use, toggled visible/hidden thereafter.
+
+### Architecture
+- **GNMainHelpWindow** (`addons/gonodes/ui/gn_main_help_window.gd`) — extends `Window`. HSplitContainer layout: sidebar Tree (left, 240px) + ScrollContainer>RichTextLabel (right). Dark background matching per-node help windows (Color 0.10, 0.10, 0.12).
+- **GNMarkdownRenderer** (`addons/gonodes/ui/gn_markdown_renderer.gd`) — static utility class (`extends RefCounted`) that converts Markdown to BBCode for RichTextLabel display. Handles `#/##/###` headers, `**bold**`, `*italic*`, `` `inline code` ``, triple-backtick code blocks, `| tables |`, `- bullet lists`, `1. ordered lists`, `> blockquotes`, `---` horizontal rules, and `[link](url)` links.
+
+### Sidebar Sections
+1. **📖 Getting Started** — `help/getting_started.md` — overview, families, first-patch walkthrough
+2. **🔧 Editor Guide** — `help/editor.md` — keyboard shortcuts, mouse, toolbar, inspector
+3. **📐 Expressions & Scripting** — `help/expressions.md` — expression language, cross-node refs, set_par, Network API
+4. **📋 Operators Reference** — dynamic from `GNExtensionRegistry.get_operator_registry_sectioned()` — expandable tree: Family → Section → Operator. Clicking a family shows an overview listing; clicking an operator shows auto-generated docs (ports, params, description) + optional per-operator `.md` file from `help/<family>/<op_name>.md`
+5. **⚙️ Cook Engine** — `help/cook_engine.md` — how cooking works, dirty propagation, active chains, NRT mode
+6. **🎮 Player** — `help/player.md` — standalone runtime, config.json, hotkeys, window management, headless mode
+7. **🏗️ Building** — `help/building.md` — build scripts, Quick Build, export presets, GDExtension handling
+8. **🔌 Extensions** — `help/extensions.md` — extension structure, manifest format, writing operators, dependency guards
+
+### Features
+- **Search bar** — filters sidebar tree items by text match (recursive, auto-expands matching parents)
+- **Lazy loading** — markdown files loaded and rendered to BBCode only when a section is clicked; results cached in `_content_cache` dictionary
+- **Operator auto-docs** — operators are instantiated temporarily to read their ports/params metadata (same technique as GNHelpWindow per-node help). Tables show port names/families/descriptions and parameter names/types/defaults/descriptions.
+- **Fallback generators** — sections without .md files get inline BBCode content from generator functions
+- **Keyboard shortcuts** — **Escape** to close, **Ctrl+F** to focus the search bar
+
+### Editor Integration
+- `gn_editor.gd` preloads `_GNMainHelpWindowScript` and stores `_main_help_window: GNMainHelpWindow`
+- **Toolbar**: "📖 Help" button added to Row 2 of `_setup_toolbar()` (after Layout, before export dialog)
+- **F1 key**: handled in `_unhandled_key_input()` — calls `_toggle_main_help_window()`
+- **Toggle function**: `_toggle_main_help_window()` creates the window on first call, shows/hides on subsequent calls
+
+### Help Content Files
+| File | Section | Source |
+|------|---------|--------|
+| `help/getting_started.md` | Getting Started | New |
+| `help/editor.md` | Editor Guide | Existing (renamed from ui_guide.md) |
+| `help/expressions.md` | Expressions & Scripting | Existing (renamed from expressions_guide.md) |
+| `help/cook_engine.md` | Cook Engine | New |
+| `help/player.md` | Player | New (from dev_docs/PLAYER.md) |
+| `help/building.md` | Building | New (from dev_docs/BUILD.md) |
+| `help/extensions.md` | Extensions | New |
+
+## 30. Session Changelog — 2026-03-04 / 2026-03-05
+
+Comprehensive session covering code editor integration fixes, preset creation, help system improvements, and the Main Help Window feature.
+
+### 30.1 Code Editor Integration Fixes
+
+**Problem:** GenericScriptNode and CallbackDAT lacked "Edit ↗" code editor buttons in the inspector.
+
+- **`gn_param_row.gd`** — `_is_code_editor_param()` only matched `node_type.begins_with("script")`. GenericScriptNode uses `node_type = "genericscript"` (doesn't start with "script"), and CallbackDAT's callback params (`on_start`, `on_cook`, `on_value_change`, `on_create`) weren't recognized.
+  - Added `_is_script_node()` helper returning true for `begins_with("script")` OR `== "genericscript"`
+  - Expanded `_is_code_editor_param()` to recognize genericscript's `"code"` param and callbackdat's callback params
+- **`gn_code_editor.gd`** — `_get_preset_folder()` returned "" for genericscript/callbackdat/shader_code.
+  - Added returns: `"genericscript"`, `"callbackdat"`, `"glsl"` for CustomShaderTOP's `shader_code` param
+  - Added syntax highlighting keywords: `@output`, `outputs`, `target`, `event`, `event_param`, `set_par`, `network_*`
+
+### 30.2 Preset Coverage (35 presets across 7 folders)
+
+Created 22 new presets + verified 13 existing, bringing all 7 script/shader categories to 5+ presets each:
+
+| Folder | New Presets | Total |
+|--------|-------------|-------|
+| `presets/scriptchop/` | additive_harmonics.gd, envelope_follower.gd | 5 |
+| `presets/scriptdat/` | fibonacci_table.gd, json_parser.gd, random_table.gd, system_info.gd | 6 |
+| `presets/scriptsop/` | fibonacci_sphere.gd, ring_mesh.gd, parametric_column.gd | 5 |
+| `presets/scriptimg/` | fractal_noise.gd, concentric_rings.gd, color_correct.gd | 5 |
+| `presets/genericscript/` | triple_output_oscillator.gd, signal_analyzer.gd, network_inspector.gd | 5 |
+| `presets/callbackdat/` | on_create_init.gd, param_guard.gd, cook_profiler.gd | 5 |
+| `presets/glsl/` (NEW) | plasma.gdshader, voronoi.gdshader, radial_warp.gdshader, kaleidoscope.gdshader, gradient_map.gdshader | 5 |
+
+- **`gn_script_helper.gd`** — `_scan_preset_dir()` updated to accept `.gdshader` alongside `.gd`
+
+### 30.3 Help Patch Naming Fix
+
+4 help patches had broken names that didn't match the `<node_type>_<label>.gnpatch` convention:
+
+| Old Name | New Name | Now shows on |
+|----------|----------|--------------|
+| `set_par_demo.gnpatch` | `scriptchop_set_par.gnpatch` | ScriptCHOP |
+| `network_api_demo.gnpatch` | `scriptdat_network_api.gnpatch` | ScriptDAT |
+| `generic_script_multi_output.gnpatch` | `genericscript_multi_output.gnpatch` | GenericScriptNode |
+| `callback_dat_basic.gnpatch` | `callbackdat_basic.gnpatch` | CallbackDAT |
+
+### 30.4 Main Help Window (GNMainHelpWindow)
+
+Built a centralized in-editor reference hub — new feature accessible via toolbar "📖 Help" button or F1 key.
+
+**New files created:**
+- `addons/gonodes/ui/gn_main_help_window.gd` — Window with HSplitContainer: sidebar Tree (240px, searchable) + ScrollContainer>RichTextLabel content pane. Dark theme matching per-node help windows.
+- `addons/gonodes/ui/gn_markdown_renderer.gd` — Static Markdown→BBCode converter. Handles `#/##/###` headers, `**bold**`, `*italic*`, `` `code` ``, triple-backtick code blocks, `| tables |`, `- bullet lists`, `1. ordered lists`, `> blockquotes`, `---` rules, `[links](url)`.
+
+**New help content .md files:**
+- `help/getting_started.md` — families overview, first-patch walkthrough, key concepts
+- `help/cook_engine.md` — dirty propagation, active chains, topological sort, NRT mode, bypass/lock
+- `help/extensions.md` — manifest format, writing operators, dependency guards, loaded extensions list
+
+**Editor integration (`gn_editor.gd`):**
+- Added `_GNMainHelpWindowScript` preload + `_main_help_window` variable
+- "📖 Help" button in toolbar Row 2
+- F1 key handler in `_unhandled_key_input()`
+- `_toggle_main_help_window()` — singleton create-on-first-use, toggle visibility thereafter
+
+**Sidebar sections:**
+1. 📖 Getting Started → `help/getting_started.md`
+2. 🔧 Editor Guide → `help/editor.md`
+3. 📐 Expressions & Scripting → `help/expressions.md`
+4. 📋 Operators Reference → dynamic per-family/per-operator tree from GNExtensionRegistry
+5. ⚙️ Cook Engine → `help/cook_engine.md`
+6. 🎮 Player → `help/player.md`
+7. 🏗️ Building → `help/building.md`
+8. 🔌 Extensions → `help/extensions.md`
+
+### 30.5 Help File Reorganization
+
+Renamed 5 guide `.md` files for consistency and placed at `help/` root (folders reserved for operator `.gnpatch` files):
+
+| Before | After |
+|--------|-------|
+| `help/ui_guide.md` | `help/editor.md` |
+| `help/expressions_guide.md` | `help/expressions.md` |
+| `help/cook_engine_guide.md` | `help/cook_engine.md` |
+| `help/extensions_guide.md` | `help/extensions.md` |
+| `help/getting_started.md` | `help/getting_started.md` (unchanged) |
+
+Updated all references in `gn_main_help_window.gd` (`_SECTION_FILES`), `GONODES_CONTEXT.md`, and internal cross-references in `editor.md`.
+
+### Help directory structure (final)
+
+```
+addons/gonodes/help/
+  getting_started.md         ← Guide .md files at root (7 files)
+  editor.md
+  expressions.md
+  cook_engine.md
+  player.md
+  building.md
+  extensions.md
+  chop/                      ← CHOP .gnpatch example patches (61 files)
+  top/                       ← TOP .gnpatch example patches (58 files)
+  dat/                       ← DAT .gnpatch example patches (28 files)
+  sop/                       ← SOP .gnpatch example patches (39 files)
+  comp/                      ← COMP .gnpatch example patches (17 files)
+  mat/                       ← MAT .gnpatch example patches (7 files)
+```
+
+
