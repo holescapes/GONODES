@@ -1,0 +1,43 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [100, 100],
+			"parameters": {
+				"radius": {"value": 1.0},
+				"radial_segments": {"value": 24},
+				"rings": {"value": 12}
+			}
+		},
+		"transform1": {
+			"type": "TransformSOP",
+			"position": [450, 100],
+			"parameters": {
+				"tx": {"value": 0.0},
+				"ty": {"value": 1.5},
+				"tz": {"value": 0.0},
+				"rx": {"value": 0.0},
+				"ry": {"value": 45.0},
+				"rz": {"value": 0.0},
+				"sx": {"value": 1.0},
+				"sy": {"value": 2.0},
+				"sz": {"value": 1.0}
+			}
+		}
+	},
+	"connections": [
+		{"from": "sphere1", "from_port": 0, "to": "transform1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Transform SOP — Translate, Rotate, Scale\n\nMoves sphere up 1.5, rotates 45° on Y,\nscales Y×2 to make an egg shape.\nTransform order: Scale → Rotate → Translate.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

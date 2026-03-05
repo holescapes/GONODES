@@ -1,0 +1,35 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"audiofile1": {
+			"type": "AudioFileInCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"play": {"value": false},
+				"loop": {"value": true},
+				"volume": {"value": 0.0},
+				"buffer_size": {"value": 1024},
+				"stereo": {"value": true}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "audiofile1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Audio File In CHOP — Player\n\nLoads a WAV or OGG audio file.\nSet the 'file' parameter and enable 'play'.\nOutputs stereo waveform data as channels.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 110.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

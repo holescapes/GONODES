@@ -1,0 +1,29 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"pbr1": {
+			"type": "PBR_MAT",
+			"position": [200, 100],
+			"parameters": {
+				"albedo_color": {"value": {"_type": "Color", "r": 0.8, "g": 0.2, "b": 0.1, "a": 1.0}},
+				"metallic": {"value": 0.9},
+				"roughness": {"value": 0.15},
+				"specular": {"value": 0.5},
+				"emission_enabled": {"value": false},
+				"cull_mode": {"value": 0}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "PBR MAT — Metallic Red\n\nPhysically-based material: polished red metal.\nHigh metallic (0.9), low roughness (0.15).\nConnect to GeometryCOMP MAT input.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

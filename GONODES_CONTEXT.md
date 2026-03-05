@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
-> **Last updated:** 2026-03-03
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 108 operators across 7 families (28 TOP, 14 IMG, 25 CHOP, 14 DAT, 15 SOP, 9 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass.
+> **Last updated:** 2026-03-04
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 108 operators across 7 families (28 TOP, 14 IMG, 25 CHOP, 14 DAT, 15 SOP, 9 COMP, 2 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** — 108 `.gnpatch` example files across all 6 help families (32 CHOP, 29 TOP, 15 SOP, 13 COMP, 16 DAT, 3 MAT) providing 1–2 visual demos per operator. `test_scenes/` deprecated — help patches replace manual test scenes as the primary visual verification method.
 
 ---
 
@@ -1442,29 +1442,56 @@ GONODES/
   - Template: family-colored header, description, inputs table, outputs table,
     parameters table (with type/default/range), properties section.
   - **Example patches**: `.gnpatch` files in `help/<family>/` whose filename starts
-    with `<node_type>_` are auto-discovered via directory scan (e.g., `noise_top_example.gnpatch`,
-    `noise_top_feedback.gnpatch`). Multiple examples per node supported — each gets its own button.
+    with `<node_type>_` are auto-discovered via directory scan (e.g., `noise_color.gnpatch`,
+    `noise_simple.gnpatch`). Multiple examples per node supported — each gets its own button.
   - Discovery is lazy (scans when help is opened), no manifest or startup registration needed.
   - "Open Example Patch" buttons at bottom of help page open the patch in a new
     floating editor window (current work stays untouched).
   - Implementation: `GNHelpWindow` class (`addons/gonodes/ui/gn_help_window.gd`),
     `?` button via `_setup_help_button()` in `GNNodeView`, `NODE_HELP` context
     menu item in `GNGraphEditor`, wired through `gn_editor.gd`.
+  - **108 example patches** across all 6 help families (see Hard Rule 25.21):
+    - CHOP: 32 patches covering all 31 node types (lfo, noise, constant, math, wave, pattern, filter, lag, cross, merge, hold, speed, count, trigger, timer, logic, limit, switch, select, rename, ramp, recordchop, physics, scriptchop, audiofilein, audioin, audiospectrum, midiin, oscin, oscout, null)
+    - TOP: 29 patches covering all 28 node types (noise, blur, circle, composite, constant, crop, cross, displace, edge, feedback, flip, hsv_adjust, level, lookup, ramp, rectangle, text, threshold, tile, transform, resolution, switch, null, filesavetop, moviefilein, glsl, postprocess, render)
+    - SOP: 15 patches covering all 15 node types (box, circle, cylinder, grid, line, sphere, torus, noise, transform, merge, subdivide, wireframe, null, switch, scriptsop)
+    - COMP: 13 patches covering all 12 node types (camera×2, geo, light, rigid_body, static_body, joint, area, soft_body, merge_comp, subnet, in_tunnel, out_tunnel)
+    - DAT: 16 patches covering all 16 node types (constant, text, scriptdat, sort, transpose, select, merge, evaluate, chop_to_dat, dat_to_chop, null, switch, info, filesavedat, midiin, oscin)
+    - MAT: 3 patches covering all 2 node types (pbr×2, shader)
   - Folder structure:
     ```
     addons/gonodes/help/
-    ├── top/
-    │   ├── noise_top.md                  # Custom help (optional)
-    │   ├── noise_top_example.gnpatch     # Example patch
-    │   ├── noise_top_feedback.gnpatch    # Another example
-    │   ├── blur_top.md
+    ├── top/                               # 29 patches
+    │   ├── noise_simple.gnpatch           # NoiseTOP basic demo
+    │   ├── noise_color.gnpatch            # NoiseTOP color mode
+    │   ├── blur_basic.gnpatch
+    │   ├── render_scene.gnpatch
     │   └── ...
-    ├── chop/
-    ├── dat/
-    ├── sop/
-    ├── comp/
-    └── mat/
+    ├── chop/                              # 32 patches
+    │   ├── lfo_basic.gnpatch
+    │   ├── lfo_waveforms.gnpatch
+    │   ├── math_operations.gnpatch
+    │   └── ...
+    ├── sop/                               # 15 patches
+    │   ├── box_basic.gnpatch
+    │   ├── noise_terrain.gnpatch
+    │   └── ...
+    ├── comp/                              # 13 patches
+    │   ├── camera_basic.gnpatch
+    │   ├── light_setup.gnpatch
+    │   └── ...
+    ├── dat/                               # 16 patches
+    │   ├── constant_basic.gnpatch
+    │   ├── scriptdat_table.gnpatch
+    │   └── ...
+    └── mat/                               # 3 patches
+        ├── pbr_metallic.gnpatch
+        ├── pbr_emissive.gnpatch
+        └── shader_gradient.gnpatch
     ```
+  - **Extension help patches**: GN extensions (`gn_ext_*`) should ship their own
+    help patches in `res://addons/gn_ext_<name>/help/<family>/`. The help window
+    currently scans only `res://addons/gonodes/help/<family>/` — extending this to
+    also scan extension help dirs is a future enhancement (see §28.10).
 - [x] **Node grouping / sub-networks** — **Done: SubNetworkNode, InTunnel, OutTunnel, hierarchical op() paths, undo/redo, copy/paste, help**:
   - Select multiple nodes → Ctrl+G "Group into Sub-Network" creates SubNetworkNode with auto-generated tunnels.
   - Double-click body or press Enter to dive into sub-network. Backspace or breadcrumb click to dive out.
@@ -1752,17 +1779,26 @@ tests/integration/
 
 ### Manual Test Scenes
 
-Pre-built `.gnpatch` networks for visual / interactive testing inside the editor. Located in `test_scenes/` with a `README.md` containing per-scene checklists.
+**DEPRECATED — replaced by help example patches.** Legacy test scenes remain in `test_scenes/` for reference but are no longer the primary visual verification method. The 108 help example patches in `addons/gonodes/help/<family>/` provide the same per-operator visual coverage and are accessible directly from the `?` help button on each node.
 
 ```
-test_scenes/
-├── README.md                          # Pass/fail checklists for every scene
-├── 01_chop_chain_basics.gnpatch       # LFO→Math→Null chain, expression-driven NoiseTOP + TextTOP
-├── 02_script_chop.gnpatch             # Generator + filter ScriptCHOPs with @param annotations
-├── 03_custom_shader_top.gnpatch       # Generator shader, filter shader, multi-input blend shader
-├── 04_expression_animation.gnpatch    # LFO CHOPs → CircleTOP Lissajous via chop() expressions
-├── 05_top_compositing_chain.gnpatch   # Noise→Composite→HSV→Edge→Screen→Level→Null TOP pipeline
+test_scenes/                           # ⚠️ DEPRECATED — use help patches instead
+├── README.md                          # Legacy checklists (kept for reference)
+├── 01_chop_chain_basics.gnpatch       # → covered by chop/ help patches
+├── 02_script_chop.gnpatch             # → covered by scriptchop_generator.gnpatch
+├── 03_custom_shader_top.gnpatch       # → covered by glsl_radial_wave.gnpatch
+├── 04_expression_animation.gnpatch    # → covered by lfo_basic + circle_basic patches
+├── 05_top_compositing_chain.gnpatch   # → covered by composite_blend + edge_detect + level patches
+├── 06_physics_rigid_bodies.gnpatch    # → covered by rigid_body_basic + static_body_floor patches
+├── 07_physics_forces_properties.gnpatch # → covered by comp/ help patches
+└── 08_physics_joints_area_softbody.gnpatch # → covered by joint_hinge + area_gravity patches
 ```
+
+**Why help patches replace test_scenes:**
+- Help patches are discoverable from the node's `?` button — no need to remember file names
+- One-to-one per-operator coverage (108 patches vs 8 test scenes that each test multi-node combos)
+- New operators automatically get help patch coverage as part of the new operator checklist (Hard Rule 25.21)
+- Test scenes tested integration scenarios; help patches test individual operators — integration testing is better served by automated tests in `tests/integration/`
 
 ---
 
@@ -3372,6 +3408,24 @@ These are non-negotiable constraints discovered during development. **Never viol
 - **Verified clean:** No file in `core/` or `operators/` uses `preload()`/`load()` on any `ui/` path. No operator references `GNNodeView`, `GNGraphEditor`, `GNParamInspector`, or any UI class.
 - **Cache building** (`_build_input_family_cache`): instantiates operators via `.new()` + `_init_ports()` only. Operator `_init()` methods set trivial string/bool fields — no viewports, shaders, textures, or Controls created. Nodes freed immediately after inspection.
 
+### 25.21 Help Example Patches Required for Every New Operator
+
+- **Rule:** Every new operator MUST ship with at least one `.gnpatch` example file in `addons/gonodes/help/<family>/`.
+- **Naming:** `<node_type>_<descriptive_label>.gnpatch` where `<node_type>` is the lowercase node type string (e.g. `noise`, `lfo`, `box`). The label should be a short, descriptive slug (e.g. `basic`, `color`, `waveforms`, `metallic`).
+- **Content requirements:**
+  - The patch's `type` field in each node must use the operator's `class_name` (e.g. `"NoiseTOP"`, `"LFOCHOP"`).
+  - Must demonstrate the operator's primary functionality with non-default parameter values that produce a visually interesting result.
+  - Should be self-contained (no external file dependencies) unless the operator is specifically a file-input operator.
+  - Keep patch complexity low — ideally 1–4 nodes. Users should understand what the operator does at a glance.
+- **Multiple patches encouraged:** For operators with distinct modes or use cases, create 2 patches (e.g. `pbr_metallic.gnpatch` + `pbr_emissive.gnpatch`). Maximum ~3 per operator to keep help manageable.
+- **New operator checklist:** When implementing a new operator, the PR/change must include:
+  1. The operator script in `operators/<family>/`
+  2. Registration in `_register_core_operators()` (or in the extension's `gn_extension.cfg`)
+  3. At least one help example patch in `help/<family>/`
+  4. A `node_description` string and tooltip descriptions on all parameters (Hard Rule 25.14)
+- **Extension operators:** GN extensions (`gn_ext_*`) must include help patches in their own `help/<family>/` subdirectory (see §28.10). Until the help window is extended to scan extension dirs, extension help patches can temporarily be placed in `addons/gonodes/help/<family>/`.
+- **Validation:** Help patches are discovered at runtime via directory scan — no manifest needed. To verify coverage, compare operator names from the registry against filenames in `help/<family>/`.
+
 ---
 
 ## 26. Known Bugs
@@ -3802,6 +3856,52 @@ Before loading an extension's operators, the registry checks `ClassDB.class_exis
 | NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned |
 | Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP | Planned |
 | MIDI | `gn_ext_midi` | — | MidiInCHOP, MidiOutCHOP | Planned |
+
+### 28.10 Extension Help Patches
+
+**Status: 🔲 Planned (convention defined, code enhancement pending)**
+
+GN extensions should ship their own help example patches alongside their operator scripts.
+
+**Convention:**
+
+```
+addons/gn_ext_<name>/
+├── gn_extension.cfg
+├── operators/
+│   └── <family>/
+│       └── <operator>.gd
+└── help/                              # Extension help patches
+    └── <family>/
+        ├── <node_type>_basic.gnpatch
+        └── <node_type>_advanced.gnpatch
+```
+
+Example for `gn_ext_shadertoy`:
+```
+addons/gn_ext_shadertoy/
+├── gn_extension.cfg
+├── operators/top/
+│   ├── shadertoy_fire_top.gd
+│   ├── shadertoy_plasma_top.gd
+│   └── ...
+└── help/
+    └── top/
+        ├── shadertoy_fire_basic.gnpatch
+        ├── shadertoy_plasma_audio.gnpatch
+        └── ...
+```
+
+**Help window enhancement needed:**
+- Currently `GNHelpWindow` scans only `HELP_DIR = "res://addons/gonodes/help"`.
+- Future: also scan `res://addons/gn_ext_*/help/<family>/` for each loaded extension.
+- `GNExtensionRegistry.get_loaded_extensions()` already provides the extension folder list.
+- Discovery logic: after scanning core help dir, iterate loaded extensions and scan their `help/` subdirs.
+- Extension patches appear alongside core patches in the help window — no distinction needed in UI.
+
+**Interim workaround:** Until the help window is extended, extension help patches can be placed directly in `addons/gonodes/help/<family>/` with the extension operator's node type prefix (e.g. `shadertoy_fire_basic.gnpatch`). This works today with zero code changes.
+
+---
 
 ### 28.9 Audio Recording & Muxing (Roadmap)
 

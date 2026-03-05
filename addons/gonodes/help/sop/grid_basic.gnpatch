@@ -1,0 +1,28 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"grid1": {
+			"type": "GridSOP",
+			"position": [200, 100],
+			"parameters": {
+				"size_x": {"value": 4.0},
+				"size_z": {"value": 4.0},
+				"rows": {"value": 16},
+				"cols": {"value": 16},
+				"orientation": {"value": 1}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Grid SOP — Plane\n\n4×4 unit grid with 16×16 subdivisions.\nHigh subdivision makes it ideal for noise deformation.\nOrientation Y-up (XZ plane).",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

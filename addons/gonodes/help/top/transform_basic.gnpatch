@@ -1,0 +1,38 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"scale": {"value": 3.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"transform1": {
+			"type": "TransformTOP",
+			"position": [450, 100],
+			"parameters": {
+				"translate": {"value": {"_type": "Vector2", "x": 0.1, "y": 0.0}},
+				"rotate": {"value": 15.0},
+				"scale": {"value": {"_type": "Vector2", "x": 0.8, "y": 0.8}},
+				"extend": {"value": 2}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "transform1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Transform TOP — 2D Transform\n\nTranslate, rotate (15°), and scale (80%) a texture.\nExtend mode Mirror wraps edges seamlessly.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

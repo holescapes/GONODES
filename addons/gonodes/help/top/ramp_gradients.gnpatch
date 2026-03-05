@@ -1,0 +1,37 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"ramp_h": {
+			"type": "RampTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"type": {"value": 0},
+				"color_a": {"value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 1.0}},
+				"color_b": {"value": {"_type": "Color", "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0}}
+			}
+		},
+		"ramp_radial": {
+			"type": "RampTOP",
+			"position": [100, 350],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"type": {"value": 2},
+				"color_a": {"value": {"_type": "Color", "r": 1.0, "g": 0.8, "b": 0.0, "a": 1.0}},
+				"color_b": {"value": {"_type": "Color", "r": 0.2, "g": 0.0, "b": 0.6, "a": 1.0}}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Ramp TOP — Gradients\n\nTop: horizontal black→white gradient.\nBottom: radial gold→purple gradient.\nTypes: Horizontal, Vertical, Radial, Circular.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

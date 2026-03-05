@@ -1,0 +1,44 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": [100, 100],
+			"parameters": {
+				"waveform": {"value": 2},
+				"frequency": {"value": 1.0},
+				"amplitude": {"value": 1.0}
+			}
+		},
+		"trigger1": {
+			"type": "TriggerCHOP",
+			"position": [450, 100],
+			"parameters": {
+				"threshold": {"value": 0.5},
+				"attack": {"value": 0.01},
+				"peak": {"value": 1.0},
+				"decay": {"value": 0.3}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "lfo1", "from_port": 0, "to": "trigger1", "to_port": 0},
+		{"from": "trigger1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Trigger CHOP — Pulse\n\nSquare wave → Trigger with fast attack (0.01s)\nand 0.3s decay. Generates envelope pulses\non each rising edge of the input.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 110.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

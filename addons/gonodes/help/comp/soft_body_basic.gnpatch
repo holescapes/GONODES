@@ -1,0 +1,26 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"soft1": {
+			"type": "SoftBodyCOMP",
+			"position": [200, 100],
+			"parameters": {
+				"tx": {"value": 0.0},
+				"ty": {"value": 3.0},
+				"tz": {"value": 0.0}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Soft Body COMP — Deformable Physics\n\nSoft-body simulation (cloth, jelly).\nConnect a SOP for the deformable mesh.\nNote: SoftBody3D requires Jolt Physics\n(Known Bug 26.1 — may need workarounds).",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 120.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

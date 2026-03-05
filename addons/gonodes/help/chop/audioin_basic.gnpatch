@@ -1,0 +1,34 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"audioin1": {
+			"type": "AudioInCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"active": {"value": false},
+				"buffer_size": {"value": 1024},
+				"stereo": {"value": false},
+				"gain": {"value": 1.0}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "audioin1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Audio In CHOP — Microphone\n\nCaptures microphone input.\nSet 'active' to true to start recording.\nOutputs audio waveform samples as channels.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,22 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"osc1": {
+			"type": "OscInDAT",
+			"position": [200, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "OSC In DAT — OSC Messages as Table\n\nReceives OSC messages and shows them as rows.\nAddress, args, and types displayed per message.\nSend OSC data from another app to see results.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

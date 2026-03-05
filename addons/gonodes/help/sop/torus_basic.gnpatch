@@ -1,0 +1,27 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"torus1": {
+			"type": "TorusSOP",
+			"position": [200, 100],
+			"parameters": {
+				"inner_radius": {"value": 0.3},
+				"outer_radius": {"value": 1.0},
+				"rings": {"value": 32},
+				"ring_segments": {"value": 16}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Torus SOP — Donut\n\nTorus with inner radius 0.3, outer 1.0.\n32 rings × 16 segments for smooth surface.",
+			"position": [-100.0, -150.0],
+			"size": [360.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

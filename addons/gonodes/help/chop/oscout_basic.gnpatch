@@ -1,0 +1,37 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": [100, 100],
+			"parameters": {
+				"waveform": {"value": 0},
+				"frequency": {"value": 0.5}
+			}
+		},
+		"oscout1": {
+			"type": "OscOutCHOP",
+			"position": [450, 100],
+			"parameters": {
+				"host": {"value": "127.0.0.1"},
+				"port": {"value": 9001},
+				"active": {"value": false},
+				"prefix": {"value": "/gonodes"}
+			}
+		}
+	},
+	"connections": [
+		{"from": "lfo1", "from_port": 0, "to": "oscout1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "OSC Out CHOP — Sender\n\nSends LFO values as OSC messages to localhost:9001.\nEach channel becomes an OSC address under /gonodes.\nSet 'active' to true to start sending.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 110.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,30 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"cyl1": {
+			"type": "CylinderSOP",
+			"position": [200, 100],
+			"parameters": {
+				"top_radius": {"value": 0.5},
+				"bottom_radius": {"value": 1.0},
+				"height": {"value": 2.0},
+				"radial_segments": {"value": 24},
+				"rings": {"value": 4},
+				"cap_top": {"value": true},
+				"cap_bottom": {"value": true}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Cylinder SOP — Tapered Cone\n\nTapered cylinder (bottom=1.0, top=0.5).\n24 radial segments, 4 rings along height.\nBoth caps enabled.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

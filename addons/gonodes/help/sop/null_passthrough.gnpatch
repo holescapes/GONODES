@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [100, 100],
+			"parameters": {
+				"radius": {"value": 1.0},
+				"radial_segments": {"value": 24}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "sphere1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Null SOP — Passthrough\n\nPasses geometry unchanged. Use as a stable\nreference point for expressions and downstream nodes.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

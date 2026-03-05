@@ -1,0 +1,48 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"noise_type": {"value": 0},
+				"scale": {"value": 4.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"ramp1": {
+			"type": "RampTOP",
+			"position": [100, 350],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"type": {"value": 2},
+				"color_a": {"value": {"_type": "Color", "r": 1.0, "g": 0.5, "b": 0.0, "a": 1.0}},
+				"color_b": {"value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.5, "a": 1.0}}
+			}
+		},
+		"comp1": {
+			"type": "CompositeTOP",
+			"position": [450, 200],
+			"parameters": {
+				"operation": {"value": 2},
+				"opacity": {"value": 0.7}
+			}
+		}
+	},
+	"connections": [
+		{"from": "ramp1", "from_port": 0, "to": "comp1", "to_port": 0},
+		{"from": "noise1", "from_port": 0, "to": "comp1", "to_port": 1}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Composite TOP — Over Blend\n\nRadial ramp + noise composited with Over mode.\nOpacity 0.7 blends the foreground partially.\nTry Add, Multiply, Screen modes too.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 110.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

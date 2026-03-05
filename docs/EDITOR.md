@@ -212,6 +212,46 @@ Editor state is saved to `user://gonodes_settings.cfg` via
 - Last opened patch path
 
 
+## Help System & Example Patches
+
+Every operator has built-in help accessible via the **`?` button** in the
+node header or through right-click → **Help**.
+
+### Help Window
+
+The help window displays:
+
+- **Description** — auto-generated from the operator's `node_description`
+- **Inputs / Outputs** — port names, types, and descriptions
+- **Parameters** — full table with type, default, range, and tooltip
+- **Example Patches** — buttons to open `.gnpatch` demos in a floating editor
+
+### Example Patches (108 total)
+
+Every operator ships with 1–2 example `.gnpatch` files that demonstrate its
+primary functionality. Click "Open Example Patch" at the bottom of the help
+window to load it in a separate floating editor (your current work is
+untouched).
+
+| Family | Patches | Coverage |
+|--------|---------|----------|
+| CHOP   | 32      | All 31 node types |
+| TOP    | 29      | All 28 node types |
+| SOP    | 15      | All 15 node types |
+| COMP   | 13      | All 12 node types |
+| DAT    | 16      | All 16 node types |
+| MAT    | 3       | All 2 node types  |
+
+Patches are stored in `addons/gonodes/help/<family>/` and discovered
+automatically at runtime — no configuration or manifest needed.
+
+### New Operator Requirement
+
+Every new operator must include at least one help example patch
+(Hard Rule 25.21 in `GONODES_CONTEXT.md`). Extensions should include
+their own help patches too (see §28.10 in the context file).
+
+
 ## File Structure
 
 | File                                     | Purpose                         |

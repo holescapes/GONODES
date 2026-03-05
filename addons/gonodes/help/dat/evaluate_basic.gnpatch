@@ -1,0 +1,34 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [100, 100],
+			"parameters": {
+				"col0": {"value": "x"},
+				"col1": {"value": "y"},
+				"r0c0": {"value": "1.0"},
+				"r0c1": {"value": "2.0"}
+			}
+		},
+		"eval1": {
+			"type": "EvaluateDAT",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "eval1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Evaluate DAT — Expression Evaluator\n\nEvaluates cell values as expressions.\nLiteral numbers pass through, expressions compute.\nUseful for formula-driven tables.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

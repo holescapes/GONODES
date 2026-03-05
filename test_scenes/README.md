@@ -1,5 +1,12 @@
 # GONODES Manual Test Scenes
 
+> **⚠️ DEPRECATED** — Per-operator visual testing has moved to **help example patches**
+> (108 `.gnpatch` files in `addons/gonodes/help/<family>/`). Click the `?` button
+> on any node to access its examples. These legacy test scenes are retained for
+> reference but are no longer the primary visual verification method.
+>
+> See [TESTING.md](../docs/TESTING.md) §6.1 for the new workflow.
+
 These `.gnpatch` files are pre-built networks for visual / interactive testing
 inside the GONODES editor. Open each file through **File → Open** and verify the
 checklist items below.

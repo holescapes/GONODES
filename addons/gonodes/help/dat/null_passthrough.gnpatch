@@ -1,0 +1,33 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [100, 100],
+			"parameters": {
+				"col0": {"value": "data"},
+				"r0c0": {"value": "hello"},
+				"r1c0": {"value": "world"}
+			}
+		},
+		"null1": {
+			"type": "NullDAT",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Null DAT — Passthrough\n\nPasses table data unchanged. Stable reference\npoint for expressions like dat(\"null1\", r, c).",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

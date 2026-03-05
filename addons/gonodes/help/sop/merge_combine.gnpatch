@@ -1,0 +1,43 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [100, 100],
+			"parameters": {
+				"radius": {"value": 0.6},
+				"radial_segments": {"value": 16},
+				"rings": {"value": 8}
+			}
+		},
+		"box1": {
+			"type": "BoxSOP",
+			"position": [100, 350],
+			"parameters": {
+				"size_x": {"value": 1.5},
+				"size_y": {"value": 0.3},
+				"size_z": {"value": 1.5}
+			}
+		},
+		"merge1": {
+			"type": "MergeSOP",
+			"position": [450, 200],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "sphere1", "from_port": 0, "to": "merge1", "to_port": 0},
+		{"from": "box1", "from_port": 0, "to": "merge1", "to_port": 1}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Merge SOP — Combine Geometry\n\nCombines a sphere and a flat box into one mesh.\nUseful for building complex shapes from primitives.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

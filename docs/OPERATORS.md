@@ -1,17 +1,21 @@
 # GONODES — Operator Reference
 
-> **78 operators** across 6 categories: TOP, CHOP, DAT, SOP, COMP, and Output.
+> **108 operators** across 8 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, and Output.
 
 ---
 
 ## Table of Contents
 
 - [TOP — Texture Operators](#top--texture-operators)
+- [IMG — Image Operators](#img--image-operators)
 - [CHOP — Channel Operators](#chop--channel-operators)
 - [DAT — Data Operators](#dat--data-operators)
 - [SOP — Surface Operators](#sop--surface-operators)
 - [COMP — Component Operators](#comp--component-operators)
+- [MAT — Material Operators](#mat--material-operators)
 - [Output Operators](#output-operators)
+
+> **Help example patches:** Every operator has 1–2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (108 patches).
 
 ---
 

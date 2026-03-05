@@ -1,0 +1,29 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"in1": {
+			"type": "InTunnel",
+			"position": [100, 100],
+			"parameters": {}
+		},
+		"out1": {
+			"type": "OutTunnel",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "in1", "from_port": 0, "to": "out1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "In/Out Tunnels — SubNetwork I/O\n\nIn Tunnel receives data from parent network.\nOut Tunnel sends results back up.\nPlace inside a SubNetwork to define its ports.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

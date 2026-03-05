@@ -303,26 +303,35 @@ Network serialization (`to_dict()` / `from_dict()`) round-trip fidelity.
 
 ## 6. Manual Test Scenes
 
-Manual test scenes are pre-built `.gnpatch` network patches in `test_scenes/`. They are designed for **visual verification** of GPU rendering, shader compilation, interactive parameter behavior, and cross-family expression animation — things that cannot be verified headlessly.
+> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (108 `.gnpatch` files in `addons/gonodes/help/<family>/`). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §6.1 below.
 
-### How to use
+### 6.1 Help Example Patches (Replacement)
 
-1. Launch the GONODES editor (`scenes/gn_editor.tscn`)
-2. **File → Open** → select a `.gnpatch` from `test_scenes/`
-3. Verify the network loads with all nodes and connections intact
-4. Enable cooking and work through the checklist in `test_scenes/README.md`
+Every operator now ships with 1–2 `.gnpatch` example files accessible via the `?` help button on each node. These patches provide the same visual verification that manual test scenes provided, but with these advantages:
 
-### Scene inventory
+- **Per-operator coverage** — 108 patches vs 8 multi-node test scenes
+- **Discoverable** — click `?` on any node to see its examples
+- **Required for new operators** — Hard Rule 25.21 mandates help patches for every new node
+- **Self-contained** — each patch tests one operator in isolation
 
-| Scene | File | What it tests |
-|-------|------|---------------|
-| **01 — CHOP Chain Basics** | `01_chop_chain_basics.gnpatch` | LFO → Math → Null chain, expression-driven NoiseTOP scale, TextTOP via `chops()` expression, live parameter tweaking |
-| **02 — ScriptCHOP** | `02_script_chop.gnpatch` | Generator ScriptCHOP with `@param` annotations (3 sine channels), filter ScriptCHOP reading upstream input and producing `abs()` channels |
-| **03 — Custom Shader TOP** | `03_custom_shader_top.gnpatch` | Generator shader (animated sine bars), filter shader (wave distortion), multi-input shader (texture blend via `gn_tex0`/`gn_tex1`), dynamic uniform → parameter creation |
-| **04 — Expression Animation** | `04_expression_animation.gnpatch` | Two LFO CHOPs driving CircleTOP center position via `chop()` expressions (Lissajous pattern), RampTOP background, CompositeTOP blending, TextTOP overlay |
-| **05 — TOP Compositing Chain** | `05_top_compositing_chain.gnpatch` | Two NoiseTOPs → Composite(Add) → HSVAdjust → Edge → Composite(Screen) → Level → Null — full TOP processing pipeline with 8 nodes |
+How to use:
+1. Open the GONODES editor
+2. Place any operator node on the canvas
+3. Click the `?` button in the node header (or right-click → Help)
+4. Click "Open Example Patch" at the bottom of the help window
+5. The example loads in a floating editor — enable cooking to see the visual result
 
-Each scene in `test_scenes/README.md` has a pass/fail checklist with 5–7 items to verify.
+### 6.2 Legacy Test Scenes (Deprecated)
+
+The following scenes in `test_scenes/` tested multi-node integration workflows. They remain in the repo for reference but are superseded by help patches for per-operator verification.
+
+| Scene | File | What it tested | Replacement |
+|-------|------|----------------|-------------|
+| **01 — CHOP Chain Basics** | `01_chop_chain_basics.gnpatch` | LFO → Math → Null chain, expression-driven TOPs | `chop/lfo_*.gnpatch`, `chop/math_*.gnpatch` |
+| **02 — ScriptCHOP** | `02_script_chop.gnpatch` | Generator + filter ScriptCHOPs | `chop/scriptchop_generator.gnpatch` |
+| **03 — Custom Shader TOP** | `03_custom_shader_top.gnpatch` | Generator/filter/multi-input shaders | `top/glsl_radial_wave.gnpatch` |
+| **04 — Expression Animation** | `04_expression_animation.gnpatch` | LFO → CircleTOP Lissajous animation | `chop/lfo_*.gnpatch`, `top/circle_basic.gnpatch` |
+| **05 — TOP Compositing Chain** | `05_top_compositing_chain.gnpatch` | Full TOP processing pipeline | `top/composite_*.gnpatch`, `top/edge_detect.gnpatch` |
 
 ---
 
@@ -451,13 +460,21 @@ func test_my_chain() -> void:
 - **ScriptCHOP runtime** — dynamic GDScript compilation, `@param` annotation parsing, upstream input reading, multi-channel output, syntax error handling
 - **Network serialization** — `to_dict()` / `from_dict()` round-trip fidelity for nodes, connections, parameters, and expressions; cook correctness after deserialization
 
-### Covered by manual test scenes
+### Covered by help example patches (108 patches)
 
-- **GPU rendering** — TOP operators that use SubViewport (NoiseTOP, TextTOP, CircleTOP, RampTOP, CompositeTOP, HSVAdjustTOP, EdgeTOP, LevelTOP, NullTOP)
-- **Shader compilation** — CustomShaderTOP with `shader_type canvas_item` source, generator/filter/multi-input modes
-- **Dynamic uniform scanning** — CustomShaderTOP auto-creates parameters from shader uniform declarations
-- **Dynamic port creation** — `gn_tex0`/`gn_tex1` uniforms auto-create input ports
+- **GPU rendering** — All 28 TOP operators have visual example patches
+- **Shader compilation** — `glsl_radial_wave.gnpatch` demonstrates CustomShaderTOP
+- **3D scene pipeline** — `render_scene.gnpatch`, `camera_*.gnpatch`, `light_setup.gnpatch`
+- **Physics simulation** — `rigid_body_basic.gnpatch`, `joint_hinge.gnpatch`, `area_gravity.gnpatch`
+- **CHOP signal processing** — All 31 CHOP node types with basic + advanced examples
+- **DAT table operations** — All 16 DAT node types with data manipulation examples
+- **SOP geometry** — All 15 SOP node types with mesh generation/processing examples
+- **MAT materials** — PBR metallic/emissive + programmable shader examples
+
+### Covered by legacy manual test scenes (deprecated)
+
 - **Cross-family expression animation** — CHOP values driving TOP parameters in real-time via `chop()` expressions
+- **Multi-node integration workflows** — complex chains testing operator interoperability
 - **Interactive parameter tweaking** — live parameter changes propagating through the network
 - **Visual output correctness** — rendered images match expected patterns (sine bars, noise, gradients, composites)
 
@@ -505,11 +522,19 @@ tests/
     ├── test_script_chop.gd                 #  7 tests — ScriptCHOP runtime
     └── test_network_roundtrip.gd           #  6 tests — serialization round-trip
 
-test_scenes/
-├── README.md                               # Visual verification checklists
-├── 01_chop_chain_basics.gnpatch            # LFO → Math → Null + expression cross-refs
-├── 02_script_chop.gnpatch                  # Generator + filter ScriptCHOPs
-├── 03_custom_shader_top.gnpatch            # Generator, filter, multi-input shaders
-├── 04_expression_animation.gnpatch         # LFO → CircleTOP Lissajous animation
-└── 05_top_compositing_chain.gnpatch        # Full TOP processing pipeline
+addons/gonodes/help/                        # 🆕 Help example patches (108 total)
+├── chop/                                   # 32 patches — all 31 CHOP node types
+├── top/                                    # 29 patches — all 28 TOP node types
+├── sop/                                    # 15 patches — all 15 SOP node types
+├── comp/                                   # 13 patches — all 12 COMP node types
+├── dat/                                    # 16 patches — all 16 DAT node types
+└── mat/                                    #  3 patches — all 2 MAT node types
+
+test_scenes/                                # ⚠️ DEPRECATED — superseded by help patches
+├── README.md                               # Legacy visual verification checklists
+├── 01_chop_chain_basics.gnpatch
+├── 02_script_chop.gnpatch
+├── 03_custom_shader_top.gnpatch
+├── 04_expression_animation.gnpatch
+└── 05_top_compositing_chain.gnpatch
 ```

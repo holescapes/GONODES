@@ -1,0 +1,25 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"script1": {
+			"type": "ScriptDAT",
+			"position": [200, 100],
+			"parameters": {
+				"time_dependent": {"value": false},
+				"code": {"value": "# ScriptDAT — Generate a table\n# 'table' is a 2D array (list of rows), 'frame' is current frame\n\ntable.clear()\ntable.append([\"index\", \"square\", \"cube\"])\nfor i in range(1, 6):\n\ttable.append([str(i), str(i*i), str(i*i*i)])"}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Script DAT — Procedural Table\n\nGenerates a 5-row table of squares and cubes.\n'table' is a 2D array you populate in code.\n'frame' is available for time-dependent data.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

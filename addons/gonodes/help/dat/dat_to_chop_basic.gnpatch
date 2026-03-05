@@ -1,0 +1,38 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [100, 100],
+			"parameters": {
+				"col0": {"value": "chan"},
+				"col1": {"value": "value"},
+				"r0c0": {"value": "tx"},
+				"r0c1": {"value": "1.5"},
+				"r1c0": {"value": "ty"},
+				"r1c1": {"value": "2.0"},
+				"r2c0": {"value": "tz"},
+				"r2c1": {"value": "0.5"}
+			}
+		},
+		"dat_to_chop1": {
+			"type": "DATtoCHOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "dat_to_chop1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "DAT to CHOP — Table as Channels\n\nConverts DAT table rows into CHOP channels.\nChannel names from col 0, values from col 1.\nBridge between table data and motion control.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

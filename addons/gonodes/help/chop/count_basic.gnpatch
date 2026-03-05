@@ -1,0 +1,44 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": [100, 100],
+			"parameters": {
+				"waveform": {"value": 0},
+				"frequency": {"value": 2.0},
+				"amplitude": {"value": 1.0}
+			}
+		},
+		"count1": {
+			"type": "CountCHOP",
+			"position": [450, 100],
+			"parameters": {
+				"threshold": {"value": 0.0},
+				"step": {"value": 1.0},
+				"limit_max": {"value": 100.0},
+				"overflow": {"value": 1}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "lfo1", "from_port": 0, "to": "count1", "to_port": 0},
+		{"from": "count1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Count CHOP — Edge Counter\n\nCounts rising edges of a 2 Hz LFO.\nLoops at 100, step of 1 per trigger.\nUseful for event counting.",
+			"position": [-100.0, -150.0],
+			"size": [350.0, 110.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

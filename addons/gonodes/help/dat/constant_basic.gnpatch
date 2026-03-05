@@ -1,0 +1,35 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [200, 100],
+			"parameters": {
+				"col0": {"value": "name"},
+				"col1": {"value": "value"},
+				"col2": {"value": "unit"},
+				"r0c0": {"value": "speed"},
+				"r0c1": {"value": "3.14"},
+				"r0c2": {"value": "m/s"},
+				"r1c0": {"value": "mass"},
+				"r1c1": {"value": "1.5"},
+				"r1c2": {"value": "kg"},
+				"r2c0": {"value": "force"},
+				"r2c1": {"value": "9.81"},
+				"r2c2": {"value": "N"}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Constant DAT — Spreadsheet\n\n3×3 table with headers: name, value, unit.\nUp to 4 columns × 4 rows of static data.\nGreat for configuration and lookup tables.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

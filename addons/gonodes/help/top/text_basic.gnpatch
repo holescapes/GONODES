@@ -1,0 +1,30 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"text1": {
+			"type": "TextTOP",
+			"position": [100, 100],
+			"parameters": {
+				"text": {"value": "Hello GONODES!"},
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 256}},
+				"font_size": {"value": 64},
+				"font_color": {"value": {"_type": "Color", "r": 1.0, "g": 0.9, "b": 0.0, "a": 1.0}},
+				"bg_color": {"value": {"_type": "Color", "r": 0.1, "g": 0.05, "b": 0.2, "a": 1.0}},
+				"align_h": {"value": 1},
+				"align_v": {"value": 1}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Text TOP — Basic\n\nRenders text to a texture. Font size, color,\nand alignment are configurable. Text can also\nbe driven by expressions: chops() etc.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

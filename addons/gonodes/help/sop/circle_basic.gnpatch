@@ -1,0 +1,27 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"circle1": {
+			"type": "CircleSOP",
+			"position": [200, 100],
+			"parameters": {
+				"radius": {"value": 1.0},
+				"segments": {"value": 32},
+				"type": {"value": 0},
+				"orientation": {"value": 1}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Circle SOP — Ring\n\n32-segment circle on the XZ plane.\ntype=0 is polygon ring, type=1 is filled disc.",
+			"position": [-100.0, -150.0],
+			"size": [360.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

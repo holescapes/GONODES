@@ -1,0 +1,37 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"count": {"value": 3},
+				"name0": {"value": "x"},
+				"value0": {"value": 1.0},
+				"name1": {"value": "y"},
+				"value1": {"value": 2.5},
+				"name2": {"value": "z"},
+				"value2": {"value": -0.5}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Constant CHOP — Basic\n\nDefines 3 named channels with fixed values.\nUseful for setting up static data or expressions.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

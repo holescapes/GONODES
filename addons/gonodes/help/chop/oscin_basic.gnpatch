@@ -1,0 +1,34 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"oscin1": {
+			"type": "OscInCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"port": {"value": 9000},
+				"active": {"value": true},
+				"normalize_names": {"value": true},
+				"max_channels": {"value": 64}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "oscin1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "OSC In CHOP — Receiver\n\nListens for OSC messages on UDP port 9000.\nReceived addresses become channel names.\nUse with TouchOSC, MaxMSP, etc.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

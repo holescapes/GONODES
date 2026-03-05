@@ -1,0 +1,27 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [200, 100],
+			"parameters": {
+				"radius": {"value": 1.0},
+				"radial_segments": {"value": 32},
+				"rings": {"value": 16},
+				"is_hemisphere": {"value": false}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Sphere SOP — UV Sphere\n\n32×16 segment UV sphere.\nSmooth enough for clean renders.\nSet is_hemisphere=true for dome shape.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,39 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [100, 100],
+			"parameters": {
+				"col0": {"value": "key"},
+				"col1": {"value": "value"},
+				"r0c0": {"value": "setting_a"},
+				"r0c1": {"value": "42"},
+				"r1c0": {"value": "setting_b"},
+				"r1c1": {"value": "hello"}
+			}
+		},
+		"filesave1": {
+			"type": "FileSaveDAT",
+			"position": [450, 100],
+			"parameters": {
+				"active": {"value": false},
+				"file_path": {"value": "user://output/data.csv"}
+			}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "filesave1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "File Save DAT — Export Table\n\nSaves input table to a CSV file.\nSet 'active' to true to trigger save.\nPath supports user:// and res:// schemes.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,24 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"text1": {
+			"type": "TextDAT",
+			"position": [200, 100],
+			"parameters": {
+				"text": {"value": "Hello from GONODES!\n\nThis TextDAT holds multi-line text data.\nUseful for shader code, scripts, or notes."}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Text DAT — Text Storage\n\nStores arbitrary multi-line text.\nUse for shader source, configs, or documentation.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

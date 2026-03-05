@@ -1,0 +1,37 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}},
+				"scale": {"value": 3.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"tile1": {
+			"type": "TileTOP",
+			"position": [450, 100],
+			"parameters": {
+				"repeat": {"value": {"_type": "Vector2", "x": 3.0, "y": 3.0}},
+				"mirror_x": {"value": true},
+				"mirror_y": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "tile1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Tile TOP — Repeat & Mirror\n\n3×3 tiled noise with mirroring on both axes.\nCreates seamless kaleidoscope-like patterns.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

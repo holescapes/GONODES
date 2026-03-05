@@ -1,0 +1,25 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"script1": {
+			"type": "ScriptSOP",
+			"position": [200, 100],
+			"parameters": {
+				"time_dependent": {"value": true},
+				"code": {"value": "# ScriptSOP — Procedural Point Cloud\n# 'mesh' is an ImmediateMesh, 'frame' is current frame\n\nmesh.clear_surfaces()\nmesh.surface_begin(Mesh.PRIMITIVE_POINTS)\nvar t = frame / 60.0\nfor i in range(100):\n\tvar a = i * 0.0628 + t\n\tvar r = 0.5 + 0.3 * sin(a * 3.0)\n\tvar x = r * cos(a)\n\tvar y = 0.5 * sin(a * 2.0 + t)\n\tvar z = r * sin(a)\n\tmesh.surface_add_vertex(Vector3(x, y, z))\nmesh.surface_end()\n"}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Script SOP — Procedural Code\n\nGenerates a 100-point animated spiral.\nUses ImmediateMesh API for custom geometry.\n'mesh' and 'frame' are provided automatically.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

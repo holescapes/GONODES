@@ -1,0 +1,36 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"scale": {"value": 3.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"edge1": {
+			"type": "EdgeTOP",
+			"position": [450, 100],
+			"parameters": {
+				"strength": {"value": 2.0},
+				"grayscale": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "edge1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Edge TOP — Detection\n\nExtracts edges from a noise texture.\nStrength=2 amplifies detected edges.\nGrayscale mode outputs single-channel.",
+			"position": [-100.0, -150.0],
+			"size": [360.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

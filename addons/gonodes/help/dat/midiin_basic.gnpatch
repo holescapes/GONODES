@@ -1,0 +1,22 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"midi1": {
+			"type": "MidiInDAT",
+			"position": [200, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "MIDI In DAT — MIDI Messages\n\nCaptures incoming MIDI messages as table rows.\nShows channel, type, note, velocity, CC values.\nConnect a MIDI controller to see live data.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

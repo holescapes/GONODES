@@ -1,0 +1,34 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"torus1": {
+			"type": "TorusSOP",
+			"position": [100, 100],
+			"parameters": {
+				"inner_radius": {"value": 0.3},
+				"outer_radius": {"value": 1.0},
+				"rings": {"value": 24},
+				"ring_segments": {"value": 12}
+			}
+		},
+		"wireframe1": {
+			"type": "WireframeSOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "torus1", "from_port": 0, "to": "wireframe1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Wireframe SOP — Edge Display\n\nConverts torus mesh to wireframe edges.\nUseful for technical or stylized visuals.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

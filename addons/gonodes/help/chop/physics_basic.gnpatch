@@ -1,0 +1,34 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"physics1": {
+			"type": "PhysicsCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"position": {"value": true},
+				"rotation": {"value": true},
+				"linear_vel": {"value": true},
+				"speed": {"value": true}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "physics1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Physics CHOP — Body Data\n\nOutputs position, rotation, velocity, and speed\nfrom a connected physics COMP (RigidBody, etc.).\nConnect a COMP input to read its physics state.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 110.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

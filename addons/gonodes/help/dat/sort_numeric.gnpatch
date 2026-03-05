@@ -1,0 +1,44 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const1": {
+			"type": "ConstantDAT",
+			"position": [100, 100],
+			"parameters": {
+				"col0": {"value": "name"},
+				"col1": {"value": "score"},
+				"r0c0": {"value": "Alice"},
+				"r0c1": {"value": "85"},
+				"r1c0": {"value": "Charlie"},
+				"r1c1": {"value": "72"},
+				"r2c0": {"value": "Bob"},
+				"r2c1": {"value": "93"},
+				"r3c0": {"value": "Dana"},
+				"r3c1": {"value": "68"}
+			}
+		},
+		"sort1": {
+			"type": "SortDAT",
+			"position": [450, 100],
+			"parameters": {
+				"sort_col": {"value": 1},
+				"order": {"value": 1},
+				"sort_type": {"value": 1}
+			}
+		}
+	},
+	"connections": [
+		{"from": "const1", "from_port": 0, "to": "sort1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Sort DAT — Sort by Column\n\nSorts a score table by column 1 (score).\norder=1 descending, sort_type=1 numeric.\nHighest score appears first.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

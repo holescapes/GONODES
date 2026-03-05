@@ -1,0 +1,45 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"const_a": {
+			"type": "ConstantDAT",
+			"position": [100, 100],
+			"parameters": {
+				"col0": {"value": "name"},
+				"r0c0": {"value": "A"},
+				"r1c0": {"value": "B"}
+			}
+		},
+		"const_b": {
+			"type": "ConstantDAT",
+			"position": [100, 350],
+			"parameters": {
+				"col0": {"value": "name"},
+				"r0c0": {"value": "X"},
+				"r1c0": {"value": "Y"}
+			}
+		},
+		"switch1": {
+			"type": "SwitchDAT",
+			"position": [450, 200],
+			"parameters": {
+				"index": {"value": 0}
+			}
+		}
+	},
+	"connections": [
+		{"from": "const_a", "from_port": 0, "to": "switch1", "to_port": 0},
+		{"from": "const_b", "from_port": 0, "to": "switch1", "to_port": 1}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Switch DAT — Select Input\n\nindex=0 passes table A, index=1 passes table B.\nUseful for A/B testing data pipelines.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

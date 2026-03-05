@@ -1,0 +1,36 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"scale": {"value": 4.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"flip1": {
+			"type": "FlipTOP",
+			"position": [450, 100],
+			"parameters": {
+				"flip_x": {"value": true},
+				"flip_y": {"value": false}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "flip1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Flip TOP — Mirror\n\nFlips the image horizontally (X axis).\nEnable flip_y for vertical, or both\nfor a 180° rotation.",
+			"position": [-100.0, -150.0],
+			"size": [350.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,29 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [200, 100],
+			"parameters": {
+				"size_x": {"value": 1.0},
+				"size_y": {"value": 1.0},
+				"size_z": {"value": 1.0},
+				"subdivide_w": {"value": 2},
+				"subdivide_h": {"value": 2},
+				"subdivide_d": {"value": 2}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Box SOP — Subdivided Cube\n\nUnit cube with 2 subdivisions per axis.\nGreat starting geometry for noise deformations.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 80.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

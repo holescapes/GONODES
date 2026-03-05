@@ -1,0 +1,22 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"subnet1": {
+			"type": "SubNetworkNode",
+			"position": [200, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "SubNetwork — Container\n\nA collapsible container for organizing nodes.\nDouble-click to enter and build sub-networks.\nUse In/Out Tunnels for input/output ports.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

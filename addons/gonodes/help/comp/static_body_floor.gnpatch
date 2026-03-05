@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"static_floor": {
+			"type": "StaticBodyCOMP",
+			"position": [200, 100],
+			"parameters": {
+				"tx": {"value": 0.0},
+				"ty": {"value": 0.0},
+				"tz": {"value": 0.0},
+				"sx": {"value": 10.0},
+				"sy": {"value": 0.1},
+				"sz": {"value": 10.0},
+				"friction": {"value": 0.8},
+				"bounce": {"value": 0.1},
+				"collision_shape": {"value": 0}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Static Body COMP — Ground Plane\n\nFlat 10×0.1×10 static body as a floor.\nHigh friction (0.8), low bounce (0.1).\nRigid bodies will collide and rest here.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

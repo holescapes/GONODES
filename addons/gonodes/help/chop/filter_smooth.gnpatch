@@ -1,0 +1,42 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"num_channels": {"value": 1},
+				"roughness": {"value": 0.8},
+				"period": {"value": 0.5}
+			}
+		},
+		"filter1": {
+			"type": "FilterCHOP",
+			"position": [450, 100],
+			"parameters": {
+				"type": {"value": 0},
+				"cutoff": {"value": 0.05}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "filter1", "to_port": 0},
+		{"from": "filter1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Filter CHOP — Smoothing\n\nJittery noise → low-pass filter with low cutoff.\nRemoves high-frequency noise for smooth output.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,35 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"num_channels": {"value": 3},
+				"channel_names": {"value": "tx,ty,tz"},
+				"roughness": {"value": 0.5},
+				"period": {"value": 2.0},
+				"seed": {"value": 0}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Noise CHOP — Basic\n\nGenerates 3 smooth noise channels (tx, ty, tz).\nUseful for organic motion and random animation.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

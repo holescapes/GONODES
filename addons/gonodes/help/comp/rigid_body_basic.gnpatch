@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"rb1": {
+			"type": "RigidBodyCOMP",
+			"position": [200, 100],
+			"parameters": {
+				"tx": {"value": 0.0},
+				"ty": {"value": 5.0},
+				"tz": {"value": 0.0},
+				"mode": {"value": 0},
+				"mass": {"value": 1.0},
+				"gravity_scale": {"value": 1.0},
+				"friction": {"value": 0.5},
+				"bounce": {"value": 0.3},
+				"collision_shape": {"value": 0}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Rigid Body COMP — Physics Object\n\nDynamic body at y=5 with box collider.\nWill fall under gravity when simulation runs.\nConnect SOP mesh and add to RenderTOP scene.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}
