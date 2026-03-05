@@ -515,6 +515,7 @@ func _on_example_patch_requested(patch_path: String) -> void:
 	win.size = Vector2i(1280, 720)
 	win.min_size = Vector2i(800, 500)
 	win.wrap_controls = true
+	win.close_requested.connect(win.queue_free)
 
 	var editor_instance: Control = editor_scene.instantiate()
 	win.add_child(editor_instance)
