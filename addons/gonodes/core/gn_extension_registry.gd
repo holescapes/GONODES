@@ -730,10 +730,20 @@ func _register_core_operators() -> void:
 		"Twist vertices around an axis proportional to position.")
 	_reg("TaperSOP",        "SOP", TaperSOP,
 		"Taper geometry by scaling perpendicular axes along a profile.")
+	_reg("MagnetSOP",       "SOP", MagnetSOP,
+		"Deform geometry by attracting/repelling vertices toward attractor points.")
 
 	# ── SOPs: Generators (new 2) ───────────────────────────────────────
 	_reg("FontSOP",         "SOP", FontSOP,
 		"Generate 3D text mesh using Godot TextMesh.")
+	_reg("LSystemSOP",      "SOP", LSystemSOP,
+		"L-System turtle-graphics geometry generator (fractal plants, trees, curves).")
+	_reg("MetaballSOP",     "SOP", MetaballSOP,
+		"Metaball implicit surface via marching cubes from point cloud blobs.")
+	_reg("IsoSurfaceSOP",   "SOP", IsoSurfaceSOP,
+		"Analytic implicit surface via marching cubes (Gyroid, Schwarz-P, Torus, custom).")
+	_reg("ParticleSOP",     "SOP", ParticleSOP,
+		"CPU particle emitter from SOP surface with forces, collision, and attributes.")
 
 	# ── SOPs: Filters (new 2) ─────────────────────────────────────────
 	_reg("TrailSOP",        "SOP", TrailSOP,
@@ -742,6 +752,18 @@ func _register_core_operators() -> void:
 		"Assign UVs via planar, cylindrical, or spherical projection.")
 	_reg("DivideSOP",       "SOP", DivideSOP,
 		"Triangulate mesh and remove degenerate triangles.")
+	_reg("CarveSOP",        "SOP", CarveSOP,
+		"Trim mesh by parametric U range (reveal, slice, carve animations).")
+	_reg("PolyReduceSOP",   "SOP", PolyReduceSOP,
+		"Mesh decimation via quadric error metric edge collapse.")
+
+	# ── SOPs: Bridge (cross-family conversion) ─────────────────────────
+	_reg("CHOPtoSOP",       "SOP", CHOPtoSOP,
+		"Convert CHOP channels to SOP points, lines, or trail geometry.")
+	_reg("DATtoSOP",        "SOP", DATtoSOP,
+		"Convert DAT table rows to SOP point positions.")
+	_reg("TOPtoSOP",        "SOP", TOPtoSOP,
+		"Convert TOP texture to SOP heightfield, point cloud, or normal map mesh.")
 
 	# ── DATs: Generators ────────────────────────────────────────────────
 	_reg("ConstantDAT",     "DAT", ConstantDAT,
@@ -847,6 +869,10 @@ func _register_core_operators() -> void:
 	_reg("TOPtoIMG",        "IMG", TOPtoIMG,
 		"Convert TOP (GPU Texture) to IMG (CPU Image). Bridge operator (GPU readback).")
 
+	# ── TOPs: Bridge (cross-family conversion) ─────────────────────────
+	_reg("CHOPtoTOP",       "TOP", CHOPtoTOP,
+		"Render CHOP channels as a texture (waveform, heatmap, or graph).")
+
 	# ── IMGs: Output / Sinks ────────────────────────────────────────────
 	_reg("FileSaveIMG",     "IMG", FileSaveIMG,
 		"Save CPU Image to disk (PNG, WebP, EXR). Toggle 'active' to write.")
@@ -892,6 +918,8 @@ func _register_core_operators() -> void:
 		"Select one of up to 8 component inputs by index.")
 	_reg("EnvironmentCOMP",  "COMP", EnvironmentCOMP,
 		"Environment settings for 3D rendering — background, lighting, post-processing.")
+	_reg("InstanceCOMP",    "COMP", InstanceCOMP,
+		"MultiMeshInstance3D instancing — thousands of geometry copies in one draw call.")
 
 	# ── COMPs: Scripting ────────────────────────────────────────────────
 	_reg("GenericScriptNode", "COMP", GenericScriptNode,

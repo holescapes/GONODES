@@ -1,0 +1,46 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [100, 100],
+			"parameters": {
+				"radius": {"value": 1.0},
+				"radial_segments": {"value": 48},
+				"rings": {"value": 24}
+			}
+		},
+		"magnet1": {
+			"type": "MagnetSOP",
+			"position": [400, 100],
+			"parameters": {
+				"strength": {"value": 1.5},
+				"radius": {"value": 2.0},
+				"falloff": {"value": 1},
+				"att_x": {"value": 0.0},
+				"att_y": {"value": 1.0},
+				"att_z": {"value": 0.0}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [700, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "sphere1", "from_port": 0, "to": "magnet1", "to_port": 0},
+		{"from": "magnet1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Magnet SOP — Pull Deformation\n\nPulls sphere vertices toward a point above (Y=1).\nSmooth falloff gives organic deformation.\nNegative strength repels instead of attracts.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

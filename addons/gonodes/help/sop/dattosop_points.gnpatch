@@ -1,0 +1,41 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"constant1": {
+			"type": "ConstantDAT",
+			"position": [100, 100],
+			"parameters": {
+				"rows": {"value": 5},
+				"cols": {"value": 3}
+			}
+		},
+		"dattosop1": {
+			"type": "DATtoSOP",
+			"position": [400, 100],
+			"parameters": {
+				"mode": {"value": 0},
+				"max_rows": {"value": 10000}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [700, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "constant1", "from_port": 0, "to": "dattosop1", "to_port": 0},
+		{"from": "dattosop1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "DATtoSOP — Table to Points\n\nConverts DAT table rows into SOP point geometry.\nColumns x,y,z (or col 0,1,2) map to vertex positions.\nMode = Points creates individual vertices; Lines connects them.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

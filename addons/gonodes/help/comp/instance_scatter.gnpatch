@@ -1,0 +1,55 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [100, 100],
+			"parameters": {
+				"size_x": {"value": 0.2},
+				"size_y": {"value": 0.2},
+				"size_z": {"value": 0.2}
+			}
+		},
+		"grid1": {
+			"type": "GridSOP",
+			"position": [100, 300],
+			"parameters": {
+				"rows": {"value": 6},
+				"cols": {"value": 6}
+			}
+		},
+		"scatter1": {
+			"type": "ScatterSOP",
+			"position": [400, 300],
+			"parameters": {
+				"count": {"value": 80}
+			}
+		},
+		"instance1": {
+			"type": "InstanceCOMP",
+			"position": [700, 200],
+			"parameters": {
+				"align_to_normal": {"value": true},
+				"scale_rand": {"value": 0.3},
+				"rotation_rand": {"value": 45.0},
+				"albedo_color": {"value": [0.8, 0.3, 0.1, 1.0]}
+			}
+		}
+	},
+	"connections": [
+		{"from": "box1", "from_port": 0, "to": "instance1", "to_port": 0},
+		{"from": "grid1", "from_port": 0, "to": "scatter1", "to_port": 0},
+		{"from": "scatter1", "from_port": 0, "to": "instance1", "to_port": 1}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Instance COMP — Scatter Instancing\n\nPlaces 80 small cubes at scattered points via MultiMesh.\nRandom scale/rotation variation adds natural feel.\nConnect a MAT to input 3 for material override.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

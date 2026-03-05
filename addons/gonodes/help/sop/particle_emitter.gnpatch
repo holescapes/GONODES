@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [100, 100],
+			"parameters": {
+				"radius": {"value": 0.5},
+				"radial_segments": {"value": 16},
+				"rings": {"value": 8}
+			}
+		},
+		"particle1": {
+			"type": "ParticleSOP",
+			"position": [400, 100],
+			"parameters": {
+				"rate": {"value": 200.0},
+				"max_particles": {"value": 5000},
+				"life": {"value": 3.0},
+				"emit_speed": {"value": 2.0},
+				"spread": {"value": 30.0},
+				"gravity": {"value": -9.8},
+				"turbulence": {"value": 1.0}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [700, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "sphere1", "from_port": 0, "to": "particle1", "to_port": 0},
+		{"from": "particle1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Particle SOP — Fountain Emitter\n\nEmits 200 particles/sec from a sphere surface.\nParticles fly outward along normals with spread, then fall by gravity.\nTurbulence adds random drift for organic movement.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,39 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"lsystem1": {
+			"type": "LSystemSOP",
+			"position": [100, 100],
+			"parameters": {
+				"axiom": {"value": "F"},
+				"rule_a": {"value": "F=F[+F]F[-F]F"},
+				"iterations": {"value": 4},
+				"step_size": {"value": 0.5},
+				"angle": {"value": 25.7},
+				"tube_radius": {"value": 0.05},
+				"tube_sides": {"value": 6},
+				"taper": {"value": 0.7},
+				"gravity": {"value": 0.1}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [400, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "lsystem1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "L-System SOP — Fractal Tree\n\nGenerates branching tree geometry from grammar rules.\nTube radius > 0 gives solid branch tubes with taper.\nGravity adds downward tropism for organic droop.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

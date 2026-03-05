@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [100, 100],
+			"parameters": {
+				"size_x": {"value": 2.0},
+				"size_y": {"value": 2.0},
+				"size_z": {"value": 2.0},
+				"subdivide_w": {"value": 10},
+				"subdivide_h": {"value": 10},
+				"subdivide_d": {"value": 10}
+			}
+		},
+		"carve1": {
+			"type": "CarveSOP",
+			"position": [400, 100],
+			"parameters": {
+				"first_u": {"value": 0.0},
+				"second_u": {"value": 0.6},
+				"axis": {"value": 1},
+				"use_position": {"value": true}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [700, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "box1", "from_port": 0, "to": "carve1", "to_port": 0},
+		{"from": "carve1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Carve SOP — Trim by Position\n\nSlices a subdivided box along the Y axis, keeping the lower 60%.\nAnimate second_u for a reveal/wipe effect.\nSet extract = true to invert the selection.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

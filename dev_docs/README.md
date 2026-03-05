@@ -11,6 +11,7 @@ This folder contains architecture references, build internals, testing infrastru
 
 | File | Audience | Contents |
 |------|----------|----------|
+| [CONTRIBUTING.md](CONTRIBUTING.md) | **All contributors** | **Start here.** Contribution rules, new operator checklist, code style, help system requirements, PR checklist, hard rules summary, common pitfalls |
 | [BUILD.md](BUILD.md) | Contributors, CI/release engineers | Full build system internals — export presets, release optimizations, GDExtension handling modes, main-scene swap mechanics, CI pipelines, static linking discussion. Condensed user version: `help/building.md` |
 | [EDITOR.md](EDITOR.md) | Contributors, plugin developers | Editor internals — architecture, code file map, cook model deep dive, settings persistence implementation, Force Active mechanics. User version: `help/editor.md` |
 | [OPERATORS.md](OPERATORS.md) | Contributors | Static operator reference snapshot (may be outdated). Live reference is auto-generated in the Help window's Operators section. Useful for implementation details ("How it works" per operator) |

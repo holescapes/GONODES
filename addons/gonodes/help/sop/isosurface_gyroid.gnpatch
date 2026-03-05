@@ -1,0 +1,35 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"isosurface1": {
+			"type": "IsoSurfaceSOP",
+			"position": [100, 100],
+			"parameters": {
+				"surface_type": {"value": 0},
+				"resolution": {"value": 50},
+				"bounds_size": {"value": 6.28},
+				"threshold": {"value": 0.0},
+				"frequency": {"value": 1.0}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [400, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "isosurface1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "IsoSurface SOP — Gyroid\n\nGenerates a Gyroid triply-periodic minimal surface.\nChange surface_type for Schwarz-P, Schwarz-D, Torus, or Custom.\nFrequency and threshold sculpt the surface detail.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}
