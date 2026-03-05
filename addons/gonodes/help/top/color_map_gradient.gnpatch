@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"scale": {"value": 4.0},
+				"monochrome": {"value": true}
+			}
+		},
+		"ramp1": {
+			"type": "RampTOP",
+			"position": [100, 350],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 32}},
+				"type": {"value": 0},
+				"color_a": {"value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 1.0, "a": 1.0}},
+				"color_b": {"value": {"_type": "Color", "r": 1.0, "g": 0.2, "b": 0.0, "a": 1.0}}
+			}
+		},
+		"cmap1": {
+			"type": "ColorMapTOP",
+			"position": [450, 200],
+			"parameters": {
+				"luma_mode": {"value": 0},
+				"intensity": {"value": 1.0}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "cmap1", "to_port": 0},
+		{"from": "ramp1", "from_port": 0, "to": "cmap1", "to_port": 1}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Color Map TOP — Gradient Remap\n\nMaps grayscale noise through a blue-to-orange ramp.\nInput 0 = source, Input 1 = gradient LUT.\nIntensity blends between original and mapped.",
+			"position": [-100.0, -150.0],
+			"size": [420.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

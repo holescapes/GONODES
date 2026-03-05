@@ -1,0 +1,36 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"scale": {"value": 3.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"mono1": {
+			"type": "MonoTOP",
+			"position": [450, 100],
+			"parameters": {
+				"method": {"value": 0},
+				"mix": {"value": 1.0}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "mono1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Mono TOP — Grayscale Conversion\n\nConverts colour noise to grayscale using Rec.709.\nMethods: 0=Rec.709, 1=Rec.601, 2=Average, 3=Desaturate.\nMix blends between original and mono output.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

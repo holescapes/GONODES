@@ -1,0 +1,38 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"scale": {"value": 3.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"lens1": {
+			"type": "LensDistortTOP",
+			"position": [450, 100],
+			"parameters": {
+				"k1": {"value": 0.5},
+				"k2": {"value": 0.0},
+				"chromatic_aberration": {"value": 1.5},
+				"bg_color": {"value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 1.0}}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "lens1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Lens Distort TOP — Barrel + Chromatic Ab.\n\nK1=0.5 gives barrel distortion.\nChromatic aberration=1.5 separates RGB channels.\nNegative K1 = pincushion distortion.",
+			"position": [-100.0, -150.0],
+			"size": [420.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

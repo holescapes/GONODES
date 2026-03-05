@@ -1,0 +1,36 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"circle1": {
+			"type": "CircleTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"radius": {"value": 0.25},
+				"fill_color": {"value": {"_type": "Color", "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0}}
+			}
+		},
+		"dilate1": {
+			"type": "DilateErodeTOP",
+			"position": [450, 100],
+			"parameters": {
+				"mode": {"value": 0},
+				"radius": {"value": 5}
+			}
+		}
+	},
+	"connections": [
+		{"from": "circle1", "from_port": 0, "to": "dilate1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Dilate/Erode TOP — Morphological Ops\n\nDilate (mode 0) expands white circle outward.\nErode (mode 1) shrinks bright areas inward.\nRadius controls footprint size (1–16 pixels).",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

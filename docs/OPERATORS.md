@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **108 operators** across 8 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, and Output.
+> **131 operators** across 8 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, and Output.
 
 ---
 
@@ -15,7 +15,7 @@
 - [MAT — Material Operators](#mat--material-operators)
 - [Output Operators](#output-operators)
 
-> **Help example patches:** Every operator has 1–2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (108 patches).
+> **Help example patches:** Every operator has 1–2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (131 patches).
 
 ---
 
@@ -23,7 +23,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 27 operators** — 9 generators, 13 filters, 3 combiners, 2 utility.
+**Total: 50 operators** — 12 generators, 26 filters, 7 combiners, 3 temporal/buffer, 2 utility.
 
 ### Generators
 
@@ -217,6 +217,54 @@ User-editable GPU shader with live recompilation.
 **Built-in uniforms:** `gn_resolution` (vec2), Godot's built-in `TIME`.
 
 **How it works:** User provides a complete `shader_type canvas_item;` shader string. The operator compiles it into a `Shader` resource and applies it. On compilation failure, the last working shader is kept. Recompilation only happens when the code text changes. Time-dependent — `TIME` uniform updates automatically.
+
+---
+
+#### PatternTOP
+
+Procedural pattern generator: stripes, checkerboard, concentric circles, grids, and dots.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output resolution |
+| type | Enum | Stripes | Stripes, Checkerboard, Concentric, Grid, Dots | Pattern type |
+| frequency | Float | 8.0 | 0.1–100.0 | Pattern repetition frequency |
+| duty_cycle | Float | 0.5 | 0.0–1.0 | Width ratio of primary shape |
+| color_a | Color | White | — | Primary colour |
+| color_b | Color | Black | — | Secondary / background colour |
+| rotation | Float | 0.0 | — | Rotation in radians |
+| softness | Float | 0.02 | 0.0–0.2 | Edge anti-aliasing |
+
+---
+
+#### TriangleTOP
+
+SDF 2D primitives: triangle, line, pentagon.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output resolution |
+| shape | Enum | Triangle | Triangle, Line, Pentagon | Shape type |
+| size | Float | 0.4 | 0.01–0.5 | Shape radius in UV space |
+| fill_color | Color | White | — | Shape interior colour |
+| bg_color | Color | Black | — | Background colour |
+| border_width | Float | 0.02 | 0.0–0.1 | Border thickness (0 = none) |
+| border_color | Color | White | — | Border colour |
+| rotation | Float | 0.0 | — | Shape rotation in radians |
+| softness | Float | 0.005 | 0.0–0.05 | Edge anti-aliasing |
+
+---
+
+#### SVGTOP
+
+Render SVG vector graphics to a texture at arbitrary resolution.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output resolution |
+| svg_path | String | *(empty)* | — | Path to .svg file (res:// or user://) |
+
+**How it works:** Loads and rasterises the SVG via Godot's Image loader. Re-rasterises only when path or resolution changes. No shader — pure CPU rasterisation.
 
 ---
 
@@ -460,6 +508,204 @@ Renders a 3D scene from COMPs into a 2D texture with integrated post-processing.
 
 ---
 
+#### AnalyzeTOP
+
+Per-pixel statistics: min, max, average, or sum over a configurable kernel.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Average | Min, Max, Average, Sum | Statistic to compute |
+| kernel_size | Int | 3 | 1–15 | Neighbourhood size (must be odd) |
+
+**Inputs:** `in` (TOP). **How it works:** Samples NxN neighbourhood and outputs per-pixel statistic.
+
+---
+
+#### MonoTOP
+
+Convert a colour texture to grayscale.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| method | Enum | Rec.709 | Rec.709, Rec.601, Average, Desaturate | Greyscale formula |
+| mix | Float | 1.0 | 0.0–1.0 | Blend between original and mono |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### SharpenTOP
+
+Unsharp-mask sharpening.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 1.0 | 0.0–10.0 | Sharpening strength |
+| radius | Float | 1.0 | 0.1–10.0 | Blur kernel radius |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### NormalMapTOP
+
+Generate tangent-space normal map from a height/bump texture.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 1.0 | 0.1–20.0 | Bump amplification |
+| invert_y | Bool | false | — | Flip green channel for DirectX convention |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### DepthTOP
+
+Pseudo-depth extraction via luminance mapping.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| near | Float | 0.1 | 0.01–100.0 | Near-plane luminance mapping |
+| far | Float | 100.0 | 0.1–10000.0 | Far-plane luminance mapping |
+| invert | Bool | false | — | Flip near↔far |
+
+**Inputs:** `in` (TOP). **How it works:** Maps input luminance through near/far range to produce a grayscale depth proxy.
+
+---
+
+#### ChannelMixTOP
+
+Swap and remap RGBA channels with per-channel gain.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| r_source | Enum | Red | R, G, B, A, Luma, Zero, One | Source for red channel |
+| g_source | Enum | Green | R, G, B, A, Luma, Zero, One | Source for green channel |
+| b_source | Enum | Blue | R, G, B, A, Luma, Zero, One | Source for blue channel |
+| a_source | Enum | Alpha | R, G, B, A, Luma, Zero, One | Source for alpha channel |
+| r_gain–a_gain | Float | 1.0 | 0.0–2.0 | Per-channel gain |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### ConvolutionTOP
+
+Custom NxN kernel convolution with presets.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| preset | Enum | Emboss | Custom, Emboss, Sharpen, Edge Detect, Ridge, Gaussian Blur, Box Blur | Kernel preset |
+| kernel_size | Int | 3 | 3–7 | Kernel dimension (odd) |
+| divisor | Float | 1.0 | 0.001–100.0 | Divide result |
+| bias | Float | 0.0 | −1.0–1.0 | Add after division |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### DilateErodeTOP
+
+Morphological dilation (expand bright) and erosion (shrink bright).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Dilate | Dilate, Erode | Operation |
+| radius | Int | 2 | 1–16 | Kernel radius in pixels |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### LensDistortTOP
+
+Barrel / pincushion lens distortion with chromatic aberration.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| k1 | Float | 0.2 | −2.0–2.0 | Radial distortion (+ barrel, − pincushion) |
+| k2 | Float | 0.0 | −1.0–1.0 | Higher-order radial distortion |
+| chromatic_aberration | Float | 0.0 | 0.0–5.0 | RGB channel separation |
+| bg_color | Color | Transparent | — | Fill outside distortion |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### LumaBlurTOP
+
+Luminance-weighted selective blur.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| blur_size | Float | 4.0 | 0.0–50.0 | Max blur radius |
+| quality | Int | 4 | 1–8 | Samples per direction |
+| luma_threshold | Float | 0.5 | 0.0–1.0 | Luminance cutoff |
+| blur_bright | Bool | true | — | true = blur brights, false = blur darks |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### SlopeTOP
+
+Image gradient / derivative.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| output | Enum | Magnitude | Magnitude, Horizontal (dx), Vertical (dy) | Gradient component |
+| strength | Float | 1.0 | 0.1–20.0 | Amplification |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### CornerPinTOP
+
+4-point perspective warp for projection mapping and keystone correction.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| top_left | Vector2 | (0, 0) | — | Top-left corner UV |
+| top_right | Vector2 | (1, 0) | — | Top-right corner UV |
+| bottom_left | Vector2 | (0, 1) | — | Bottom-left corner UV |
+| bottom_right | Vector2 | (1, 1) | — | Bottom-right corner UV |
+| bg_color | Color | Transparent | — | Fill outside warp |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### ProjectionTOP
+
+UV projection mapping: planar, cylindrical, or spherical.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Planar | Planar, Cylindrical, Spherical | Projection type |
+| uv_offset | Vector2 | (0, 0) | — | UV translation |
+| uv_scale | Vector2 | (1, 1) | — | UV scale |
+| rotation | Float | 0.0 | — | UV rotation in radians |
+
+**Inputs:** `in` (TOP).
+
+---
+
+#### FitTOP
+
+Aspect-aware resize with letterbox / fill / stretch.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| fit_mode | Enum | Fit | Fit, Fill, Stretch, Letterbox | Resize strategy |
+| resolution | Vector2i | 512×512 | — | Target resolution |
+| border_color | Color | Black | — | Letterbox / border fill colour |
+
+**Inputs:** `in` (TOP).
+
+---
+
 ### Combiners
 
 These TOPs take two texture inputs and combine them.
@@ -522,6 +768,99 @@ Color remapping via lookup table texture.
 **Inputs:** `source` (TOP — image to remap), `ramp` (TOP — color lookup table).
 
 **How it works:** Shader computes the index value from the source (luminance or single channel), then samples the ramp texture at that position. Output color comes from the ramp.
+
+---
+
+#### ColorMapTOP
+
+Remap luminance to a gradient texture.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| luma_mode | Enum | Rec.709 | Rec.709, Average, Luminosity | How to compute luminance |
+| intensity | Float | 1.0 | 0.0–2.0 | Blend between original and mapped |
+
+**Inputs:** `in` (TOP — source), `gradient` (TOP — gradient/LUT). **How it works:** Computes luminance from source, samples gradient texture at that value.
+
+---
+
+#### RemapTOP
+
+UV displacement remap or 1D LUT value remap.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | UV Remap | UV Remap, Value Remap (LUT) | Remap method |
+| strength | Float | 1.0 | 0.0–2.0 | Remap intensity |
+
+**Inputs:** `in` (TOP — source), `map` (TOP — UV displacement or LUT). **How it works:** UV Remap uses map's RG as new UV coordinates; Value Remap uses luminance as LUT index.
+
+---
+
+#### LayoutTOP
+
+Tile up to 8 input textures into a grid mosaic.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| columns | Int | 2 | 1–8 | Grid columns |
+| bg_color | Color | Black | — | Background fill |
+
+**Inputs:** Up to 8 dynamic TOP inputs (auto-grow/shrink). **How it works:** Shader tiles N inputs into a grid. Rows auto-calculated from input count and columns.
+
+---
+
+#### ChromaKeyTOP
+
+Chroma / luma key (green-screen) with spill suppression.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| key_mode | Enum | Chroma | Chroma, Luma | Keying method |
+| key_color | Color | Green | — | Key target colour |
+| threshold | Float | 0.3 | 0.0–1.0 | Tolerance |
+| smoothness | Float | 0.1 | 0.0–0.5 | Edge softness |
+| spill_reduction | Float | 0.5 | 0.0–1.0 | Green fringe suppression |
+
+**Inputs:** `in` (TOP).
+
+---
+
+### Temporal / Buffer
+
+These TOPs store frames over time for delay, scrubbing, and playback control.
+
+---
+
+#### CacheTOP
+
+Ring buffer — stores N frames with delay and freeze controls.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| length | Int | 30 | 1–300 | Buffer length in frames |
+| delay | Int | 0 | 0–299 | Output frame offset into the past |
+| freeze | Bool | false | — | Pause recording |
+| reset | Bool (pulse) | false | — | Clear the buffer |
+
+**Inputs:** `in` (TOP). **How it works:** Captures each input frame as an ImageTexture (GPU→CPU→GPU roundtrip). Ring buffer advances each cook. Delay outputs a past frame.
+
+---
+
+#### TimeMachineTOP
+
+Playback controller over a frame buffer with speed, scrub, and wrap modes.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| speed | Float | 1.0 | −10.0–10.0 | Playback speed |
+| position | Float | 0.0 | 0.0–1.0 | Normalised scrub position |
+| use_position | Bool | false | — | Override speed with position scrub |
+| wrap_mode | Enum | Clamp | Clamp, Loop, Ping-Pong | End-of-buffer behaviour |
+| freeze | Bool | false | — | Pause playback |
+| reset | Bool (pulse) | false | — | Reset playback head |
+
+**Inputs:** `in` (TOP — typically from CacheTOP). **How it works:** Reads from input CacheTOP's buffer. Speed/position controls which stored frame to output.
 
 ---
 

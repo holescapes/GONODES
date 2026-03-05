@@ -1,0 +1,41 @@
+class_name NormalMapTOP
+extends GNTopBase
+## Generates a tangent-space normal map from a height/displacement map input.
+
+
+func _init() -> void:
+	node_type = "normal_map"
+	node_description = "Generate a tangent-space normal map from a height/displacement texture."
+
+
+func _init_ports() -> void:
+	add_input("in", GNFamily.Type.TOP, false, "Height map / displacement texture")
+	add_output("out", GNFamily.Type.TOP, "Normal map texture (tangent space)")
+
+
+func _init_parameters() -> void:
+	add_parameter(GNParameter.create_float("strength", 1.0, 0.01, 20.0, 0.1, "",
+		"Height scale / normal intensity"))
+	add_parameter(GNParameter.create_bool("invert_y", false, "Invert Y",
+		"Flip green channel (DirectX vs OpenGL normal map convention)"))
+
+
+func _cook(inputs: Array[GNData]) -> GNData:
+	var tex_in: GNTextureData = _get_input_top(inputs, 0)
+	if tex_in == null:
+		GNLogger.warn("NormalMapTOP", "'%s' — no valid input" % id)
+		return null
+
+	var res: Vector2i = tex_in.resolution
+	_init_shader_viewport("res://addons/gonodes/shaders/normal_map.gdshader", true, true, res)
+
+	if _viewport.size != res:
+		_viewport.size = res
+
+	(_canvas as TextureRect).texture = tex_in.texture
+	_material.set_shader_parameter("source_tex", tex_in.texture)
+	_material.set_shader_parameter("strength", get_param_value("strength"))
+	_material.set_shader_parameter("invert_y", get_param_value("invert_y"))
+
+	_cached_tex_data.resolution = res
+	return _cached_tex_data

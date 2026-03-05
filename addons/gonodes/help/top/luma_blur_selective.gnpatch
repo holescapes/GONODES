@@ -1,0 +1,38 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"scale": {"value": 3.0},
+				"monochrome": {"value": false}
+			}
+		},
+		"lblur1": {
+			"type": "LumaBlurTOP",
+			"position": [450, 100],
+			"parameters": {
+				"blur_size": {"value": 8.0},
+				"quality": {"value": 4},
+				"luma_threshold": {"value": 0.4},
+				"blur_bright": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "lblur1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Luma Blur TOP — Selective Blur\n\nBright areas (above threshold 0.4) get blurred.\nDark areas stay sharp. Great for soft glow effects.\nToggle blur_bright to blur dark areas instead.",
+			"position": [-100.0, -150.0],
+			"size": [420.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

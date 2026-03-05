@@ -1,0 +1,38 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"rect1": {
+			"type": "RectangleTOP",
+			"position": [100, 100],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"fill_color": {"value": {"_type": "Color", "r": 0.9, "g": 0.3, "b": 0.1, "a": 1.0}}
+			}
+		},
+		"cpin1": {
+			"type": "CornerPinTOP",
+			"position": [450, 100],
+			"parameters": {
+				"top_left": {"value": {"_type": "Vector2", "x": 0.1, "y": 0.05}},
+				"top_right": {"value": {"_type": "Vector2", "x": 0.85, "y": 0.1}},
+				"bottom_left": {"value": {"_type": "Vector2", "x": 0.0, "y": 1.0}},
+				"bottom_right": {"value": {"_type": "Vector2", "x": 1.0, "y": 0.95}},
+				"bg_color": {"value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 0.0}}
+			}
+		}
+	},
+	"connections": [
+		{"from": "rect1", "from_port": 0, "to": "cpin1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Corner Pin TOP — Perspective Warp\n\nWarps a rectangle with 4 draggable corners.\nUseful for projection mapping and keystone correction.\nBg colour fills areas outside the warp.",
+			"position": [-100.0, -150.0],
+			"size": [420.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

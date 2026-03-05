@@ -410,6 +410,58 @@ func _register_core_operators() -> void:
 		"Distort one texture using another as a displacement map.")
 	_reg("LookupTOP",       "TOP", LookupTOP,
 		"Remap colors via a lookup table / ramp texture.")
+	_reg("ColorMapTOP",     "TOP", ColorMapTOP,
+		"Remap luminance to a gradient texture (source + gradient inputs).")
+	_reg("RemapTOP",        "TOP", RemapTOP,
+		"UV displacement remap or 1D LUT value remap via map texture.")
+	_reg("LayoutTOP",       "TOP", LayoutTOP,
+		"Tile up to 8 input textures into a grid mosaic (dynamic ports).")
+	_reg("ChromaKeyTOP",    "TOP", ChromaKeyTOP,
+		"Chroma / luma key (green-screen) with spill suppression.")
+
+	# ── TOPs: Generators (new) ──────────────────────────────────────────
+	_reg("PatternTOP",      "TOP", PatternTOP,
+		"Procedural patterns: stripes, checkerboard, concentric, grid, dots.")
+	_reg("TriangleTOP",     "TOP", TriangleTOP,
+		"SDF 2D primitives: triangle, line, pentagon with fill/border.")
+	_reg("SVGTOP",          "TOP", SVGTOP,
+		"Render SVG vector graphics to a texture at arbitrary resolution.")
+
+	# ── TOPs: Filters (new) ─────────────────────────────────────────────
+	_reg("AnalyzeTOP",      "TOP", AnalyzeTOP,
+		"Per-pixel statistics: min, max, average, or sum over a kernel.")
+	_reg("MonoTOP",         "TOP", MonoTOP,
+		"Convert to grayscale (Rec.709, Rec.601, Average, Desaturate).")
+	_reg("SharpenTOP",      "TOP", SharpenTOP,
+		"Unsharp-mask sharpening with strength and radius.")
+	_reg("NormalMapTOP",    "TOP", NormalMapTOP,
+		"Generate a tangent-space normal map from a height/bump texture.")
+	_reg("DepthTOP",        "TOP", DepthTOP,
+		"Pseudo-depth extraction via luminance (near/far/invert controls).")
+	_reg("ChannelMixTOP",   "TOP", ChannelMixTOP,
+		"Swap and remap RGBA channels with per-channel gain.")
+	_reg("ConvolutionTOP",  "TOP", ConvolutionTOP,
+		"Custom NxN kernel convolution with Emboss/Sharpen/Edge presets.")
+	_reg("DilateErodeTOP",  "TOP", DilateErodeTOP,
+		"Morphological dilate (expand) or erode (shrink) with circular footprint.")
+	_reg("LensDistortTOP",  "TOP", LensDistortTOP,
+		"Barrel / pincushion lens distortion with chromatic aberration.")
+	_reg("LumaBlurTOP",     "TOP", LumaBlurTOP,
+		"Luminance-weighted selective blur (bright or dark areas blurred more).")
+	_reg("SlopeTOP",        "TOP", SlopeTOP,
+		"Image gradient / derivative: horizontal, vertical, or magnitude.")
+	_reg("CornerPinTOP",    "TOP", CornerPinTOP,
+		"4-point perspective warp for projection mapping and keystone correction.")
+	_reg("ProjectionTOP",   "TOP", ProjectionTOP,
+		"UV projection mapping: planar, cylindrical, or spherical.")
+	_reg("FitTOP",          "TOP", FitTOP,
+		"Aspect-aware resize: fit, fill, stretch, or letterbox with border colour.")
+
+	# ── TOPs: Temporal / Buffer ─────────────────────────────────────────
+	_reg("CacheTOP",        "TOP", CacheTOP,
+		"Ring buffer that stores N frames with delay and freeze controls.")
+	_reg("TimeMachineTOP",  "TOP", TimeMachineTOP,
+		"Playback controller over a frame buffer with speed, scrub, and wrap modes.")
 
 	# ── TOPs: Scripting ─────────────────────────────────────────────────
 	_reg("CustomShaderTOP",  "TOP", CustomShaderTOP,
