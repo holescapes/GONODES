@@ -1,0 +1,39 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"num_channels": {"value": 4}
+			}
+		},
+		"shuffle1": {
+			"type": "ShuffleCHOP",
+			"position": [500, 100],
+			"parameters": {
+				"mode": {"value": 0}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "shuffle1", "to_port": 0},
+		{"from": "shuffle1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Shuffle CHOP — Reorder Channels\n\nReverses the order of 4 noise channels.\nModes: reverse, sort by name, sort by value,\nrandom (Fisher-Yates).",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

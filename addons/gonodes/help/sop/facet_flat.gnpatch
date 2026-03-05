@@ -1,0 +1,37 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [0, 0],
+			"parameters": {}
+		},
+		"facet1": {
+			"type": "FacetSOP",
+			"position": [250, 0],
+			"parameters": {
+				"mode": {"value": 0}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [500, 0],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "sphere1", "from_port": 0, "to": "facet1", "to_port": 0},
+		{"from": "facet1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Facet SOP — Flat Shading\n\nUnshares all vertices so each triangle gets\nits own face normal (flat/faceted look).\nConsolidate mode merges nearby vertices.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

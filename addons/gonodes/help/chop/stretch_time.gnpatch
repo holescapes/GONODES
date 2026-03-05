@@ -1,0 +1,45 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"pattern1": {
+			"type": "PatternCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"type": {"value": 0},
+				"length": {"value": 50},
+				"channels": {"value": 1},
+				"from_value": {"value": 0.0},
+				"to_value": {"value": 1.0}
+			}
+		},
+		"stretch1": {
+			"type": "StretchCHOP",
+			"position": [450, 100],
+			"parameters": {
+				"mode": {"value": 1},
+				"length": {"value": 200},
+				"interpolate": {"value": 1}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "pattern1", "from_port": 0, "to": "stretch1", "to_port": 0},
+		{"from": "stretch1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Stretch CHOP — Time Stretch\n\nStretches a 50-sample ramp to 200 samples.\nCatmull-Rom interpolation for smoothness.\nUseful for retiming animation curves.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

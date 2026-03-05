@@ -1,0 +1,43 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"grid1": {
+			"type": "GridSOP",
+			"position": [0, 0],
+			"parameters": {
+				"rows": {"value": 16},
+				"cols": {"value": 16}
+			}
+		},
+		"delete1": {
+			"type": "DeleteSOP",
+			"position": [250, 0],
+			"parameters": {
+				"entity": {"value": 0},
+				"mode": {"value": 2},
+				"percent": {"value": 50.0},
+				"seed": {"value": 7}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [500, 0],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "grid1", "from_port": 0, "to": "delete1", "to_port": 0},
+		{"from": "delete1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Delete SOP — Random Face Removal\n\nDeletes 50% of faces randomly from a grid.\nCreates a dissolved/holey appearance.\nModes: range, bounding box, random percent.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

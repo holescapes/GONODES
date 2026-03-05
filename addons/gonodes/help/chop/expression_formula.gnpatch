@@ -1,0 +1,40 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": [100, 100],
+			"parameters": {
+				"freq": {"value": 0.5},
+				"waveform": {"value": 0}
+			}
+		},
+		"expression1": {
+			"type": "ExpressionCHOP",
+			"position": [500, 100],
+			"parameters": {
+				"expr0": {"value": "sin(v * 3.14159) * 0.5 + i * 0.01"}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "lfo1", "from_port": 0, "to": "expression1", "to_port": 0},
+		{"from": "expression1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Expression CHOP — Formula Eval\n\nApplies sin(v*PI)*0.5 + i*0.01 per sample.\nVariables: v (value), i (index), n (count),\nt (time), dt (delta), ch (channel map).",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

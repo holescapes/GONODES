@@ -563,6 +563,54 @@ func _register_core_operators() -> void:
 	_reg("RecordCHOP",      "CHOP", RecordCHOP,
 		"Record CHOP channels over time to buffer. Save to CSV/JSON.")
 
+	# ── CHOPs: Generators (new) ─────────────────────────────────────────
+	_reg("ClockCHOP",       "CHOP", ClockCHOP,
+		"System time, frame count, elapsed time, and BPM beat channels.")
+	_reg("ExpressionCHOP",  "CHOP", ExpressionCHOP,
+		"Per-channel GDScript expression evaluation with time variables.")
+
+	# ── CHOPs: Filters (new) ────────────────────────────────────────────
+	_reg("SmoothCHOP",      "CHOP", SmoothCHOP,
+		"Biquad Butterworth IIR filter (low-pass, high-pass, band-pass).")
+	_reg("SpringCHOP",      "CHOP", SpringCHOP,
+		"Damped harmonic oscillator — channels spring toward input values.")
+	_reg("DelayCHOP",       "CHOP", DelayCHOP,
+		"Delay channels by N frames using a ring buffer.")
+	_reg("EnvelopeCHOP",    "CHOP", EnvelopeCHOP,
+		"Envelope follower — RMS, peak, or average-abs with window size.")
+	_reg("AnalyzeCHOP",     "CHOP", AnalyzeCHOP,
+		"Per-channel statistics: min, max, average, RMS, sum, range, count.")
+	_reg("LookupCHOP",      "CHOP", LookupCHOP,
+		"Index into a sample array using another channel as lookup position.")
+	_reg("StretchCHOP",     "CHOP", StretchCHOP,
+		"Time-stretch samples with Catmull-Rom cubic interpolation.")
+	_reg("ResampleCHOP",    "CHOP", ResampleCHOP,
+		"Resample channels to a new sample count or sample rate.")
+	_reg("TrimCHOP",        "CHOP", TrimCHOP,
+		"Extract a sub-range of samples from channels.")
+	_reg("ExtendCHOP",      "CHOP", ExtendCHOP,
+		"Pad samples before/after with hold, cycle, mirror, slope, or zero.")
+
+	# ── CHOPs: Combiners (new) ──────────────────────────────────────────
+	_reg("InterpolateCHOP", "CHOP", InterpolateCHOP,
+		"Blend between two channel sets with easing curves.")
+	_reg("JoinCHOP",        "CHOP", JoinCHOP,
+		"Concatenate samples from multiple inputs with optional crossfade.")
+	_reg("CompositeCHOP",   "CHOP", CompositeCHOP,
+		"Weighted blend from multiple inputs (avg, add, max, min).")
+	_reg("CopyCHOP",        "CHOP", CopyCHOP,
+		"Copy channels from B onto A (overwrite, add, subtract, multiply).")
+
+	# ── CHOPs: Channel Management (new) ────────────────────────────────
+	_reg("ShuffleCHOP",     "CHOP", ShuffleCHOP,
+		"Reorder, reverse, sort, or randomize channel order.")
+	_reg("SplitCHOP",       "CHOP", SplitCHOP,
+		"Select one channel or group of N channels from input.")
+	_reg("FanCHOP",         "CHOP", FanCHOP,
+		"Fan a single channel into multiple copies with offset spread.")
+	_reg("DeleteCHOP",      "CHOP", DeleteCHOP,
+		"Delete channels by name pattern, index, or keep-only mode.")
+
 	# ── SOPs: Generators ────────────────────────────────────────────────
 	_reg("GridSOP",         "SOP", GridSOP,
 		"Subdivided plane with configurable orientation.")
@@ -602,6 +650,46 @@ func _register_core_operators() -> void:
 	# ── SOPs: Scripting ─────────────────────────────────────────────────
 	_reg("ScriptSOP",       "SOP", ScriptSOP,
 		"User-scripted SOP. Write GDScript to generate or transform 3D geometry.")
+
+	# ── SOPs: Generators (new) ──────────────────────────────────────────
+	_reg("TubeSOP",         "SOP", TubeSOP,
+		"Tube or pipe generator with inner/outer walls and caps.")
+
+	# ── SOPs: Filters (new) ────────────────────────────────────────────
+	_reg("NormalSOP",       "SOP", NormalSOP,
+		"Recompute smooth normals, flip normals, or generate flat (faceted) normals.")
+	_reg("ReverseSOP",      "SOP", ReverseSOP,
+		"Reverse face winding order and flip normals.")
+	_reg("PeakSOP",         "SOP", PeakSOP,
+		"Push vertices along their normals by a distance.")
+	_reg("SortSOP",         "SOP", SortSOP,
+		"Sort vertices by axis, distance from origin, or randomly.")
+	_reg("FacetSOP",        "SOP", FacetSOP,
+		"Unique points (flat shading) or consolidate close vertices.")
+	_reg("DeleteSOP",       "SOP", DeleteSOP,
+		"Delete faces or points by range, bounding box, or random percentage.")
+	_reg("PointSOP",        "SOP", PointSOP,
+		"Per-vertex position modification via GDScript expressions.")
+	_reg("AttributeSOP",    "SOP", AttributeSOP,
+		"Create or modify per-vertex point attributes from expressions or presets.")
+	_reg("ClipSOP",         "SOP", ClipSOP,
+		"Clip geometry by an axis-aligned plane with triangle splitting.")
+	_reg("MirrorSOP",       "SOP", MirrorSOP,
+		"Reflect geometry across a plane with optional merge.")
+	_reg("ExtrudeSOP",      "SOP", ExtrudeSOP,
+		"Per-triangle face extrusion with front, back, and side walls.")
+
+	# ── SOPs: Combiners (new) ──────────────────────────────────────────
+	_reg("CopySOP",         "SOP", CopySOP,
+		"Instance template geometry onto each point of the target mesh.")
+	_reg("ScatterSOP",      "SOP", ScatterSOP,
+		"Scatter random points on mesh surface (area-weighted sampling).")
+	_reg("BooleanSOP",      "SOP", BooleanSOP,
+		"Boolean operations (union, intersect, subtract) via CSG.")
+	_reg("SweepSOP",        "SOP", SweepSOP,
+		"Sweep a cross-section along a backbone curve (parallel transport frames).")
+	_reg("SkinSOP",         "SOP", SkinSOP,
+		"Skin (loft) multiple cross-sections into a surface mesh.")
 
 	# ── DATs: Generators ────────────────────────────────────────────────
 	_reg("ConstantDAT",     "DAT", ConstantDAT,

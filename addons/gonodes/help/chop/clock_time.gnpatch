@@ -1,0 +1,33 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"clock1": {
+			"type": "ClockCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"bpm": {"value": 120.0},
+				"time_channels": {"value": true},
+				"beat_channels": {"value": true}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [450, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "clock1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Clock CHOP — System Time & BPM\n\nOutputs system hours, minutes, seconds,\nframe count, elapsed time, and BPM beats.\nBeat channels sync to 120 BPM.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

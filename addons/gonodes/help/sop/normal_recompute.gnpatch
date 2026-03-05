@@ -1,0 +1,45 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [0, 0],
+			"parameters": {}
+		},
+		"noise1": {
+			"type": "NoiseSOP",
+			"position": [250, 0],
+			"parameters": {
+				"amplitude": {"value": 0.3}
+			}
+		},
+		"normal1": {
+			"type": "NormalSOP",
+			"position": [500, 0],
+			"parameters": {
+				"mode": {"value": 0}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [750, 0],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "box1", "from_port": 0, "to": "noise1", "to_port": 0},
+		{"from": "noise1", "from_port": 0, "to": "normal1", "to_port": 0},
+		{"from": "normal1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Normal SOP — Recompute Normals\n\nDeforms a box with noise, then recomputes\nsmooth normals via SurfaceTool.\nAlso supports flip and flat-faceted modes.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

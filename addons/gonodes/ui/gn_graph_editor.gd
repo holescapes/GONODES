@@ -314,6 +314,13 @@ func _gui_input(event: InputEvent) -> void:
 
 			_show_context_menu(get_screen_position() + get_local_mouse_position())
 			accept_event()
+		elif event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
+			# Double left-click on empty space → open add node palette
+			var graph_pos: Vector2 = (get_local_mouse_position() + scroll_offset) / zoom
+			if not _is_node_at_position(get_local_mouse_position()):
+				_spawn_position = graph_pos
+				_palette.popup_at(get_global_mouse_position())
+				accept_event()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1322,6 +1329,12 @@ func _get_node_id_at(graph_pos: Vector2) -> String:
 		if rect.has_point(graph_pos):
 			return view_name
 	return ""
+
+
+## Returns true if any node view occupies the given graph-space position.
+func _is_node_at_position(local_pos: Vector2) -> bool:
+	var graph_pos: Vector2 = (local_pos + scroll_offset) / zoom
+	return not _get_node_id_at(graph_pos).is_empty()
 
 
 ## If a node is under the given graph-space position and it is not already

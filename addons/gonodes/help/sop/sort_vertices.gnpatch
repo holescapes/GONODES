@@ -1,0 +1,41 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"grid1": {
+			"type": "GridSOP",
+			"position": [0, 0],
+			"parameters": {
+				"rows": {"value": 8},
+				"cols": {"value": 8}
+			}
+		},
+		"sort1": {
+			"type": "SortSOP",
+			"position": [250, 0],
+			"parameters": {
+				"mode": {"value": 2},
+				"seed": {"value": 42}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [500, 0],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "grid1", "from_port": 0, "to": "sort1", "to_port": 0},
+		{"from": "sort1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Sort SOP — Randomize Vertex Order\n\nRandomly shuffles all vertices in a grid.\nModes: by axis (X/Y/Z), distance, random.\nUseful for vertex-order-dependent effects.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,42 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": [100, 100],
+			"parameters": {
+				"freq": {"value": 1.0},
+				"waveform": {"value": 0}
+			}
+		},
+		"fan1": {
+			"type": "FanCHOP",
+			"position": [500, 100],
+			"parameters": {
+				"copies": {"value": 5},
+				"spread": {"value": 0.2},
+				"operation": {"value": 0}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "lfo1", "from_port": 0, "to": "fan1", "to_port": 0},
+		{"from": "fan1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Fan CHOP — Spread Single Channel\n\nFans 1 sine into 5 copies with 0.2 add offset.\nCreates staggered/spread channel sets.\nOperations: add, multiply, phase shift.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

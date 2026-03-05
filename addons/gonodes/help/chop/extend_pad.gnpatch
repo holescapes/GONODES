@@ -1,0 +1,43 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"pattern1": {
+			"type": "PatternCHOP",
+			"position": [100, 100],
+			"parameters": {
+				"type": {"value": 0},
+				"length": {"value": 50}
+			}
+		},
+		"extend1": {
+			"type": "ExtendCHOP",
+			"position": [500, 100],
+			"parameters": {
+				"before_mode": {"value": 4},
+				"after_mode": {"value": 1},
+				"before_length": {"value": 20},
+				"after_length": {"value": 40}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "pattern1", "from_port": 0, "to": "extend1", "to_port": 0},
+		{"from": "extend1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Extend CHOP — Pad Samples\n\nPads a 50-sample ramp: 20 zero samples before,\n40 cycled samples after.\nModes: hold, cycle, mirror, slope, zero.",
+			"position": [-100.0, -150.0],
+			"size": [380.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

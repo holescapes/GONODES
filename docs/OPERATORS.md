@@ -897,7 +897,7 @@ CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Arr
 
 All CHOP data flows as `GNChannelData` — a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 20 operators** — 5 generators, 9 filters, 3 combiners, 3 utility.
+**Total: 45 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management.
 
 ### Generators
 
@@ -1278,6 +1278,306 @@ Reads transform, velocity, and state from an upstream physics body COMP and outp
 
 ---
 
+### Generators (New)
+
+---
+
+#### ClockCHOP
+
+System time, frame count, elapsed time, and BPM beat channels.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| bpm | Float | 120.0 | Beats per minute for beat channels |
+| time_channels | Bool | true | Output hours, minutes, seconds |
+| beat_channels | Bool | true | Output beat, bar, beat_frac |
+
+**How it works:** Uses `Engine.get_frames_drawn()`, `Time.get_time_dict_from_system()`, and `elapsed_time` from the cook engine. BPM channels derive beat position from elapsed time.
+
+---
+
+#### ExpressionCHOP
+
+Per-channel GDScript expression evaluation with time variables.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| channels | Int | 1 | Number of output channels |
+| exprN | String | "v" | Expression for channel N |
+
+**Input:** `in` (CHOP, optional).
+
+**How it works:** Uses Godot's `Expression` class. Variables: `v` (input value), `i` (sample index), `n` (sample count), `t` (elapsed time), `dt` (delta), `ch` (channel dictionary). Evaluated per-sample per-channel.
+
+---
+
+### Filters (New)
+
+---
+
+#### SmoothCHOP
+
+Biquad Butterworth IIR filter (low-pass, high-pass, band-pass).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| type | Enum | Low Pass | Low Pass, High Pass, Band Pass |
+| cutoff | Float | 0.5 | Normalized cutoff frequency (0–1) |
+| q | Float | 0.707 | Resonance / quality factor |
+
+**Input:** `in` (CHOP).
+
+**How it works:** Implements a biquad filter with Butterworth coefficient calculation. Maintains 4 state variables per channel (_x1, _x2, _y1, _y2) for proper IIR feedback.
+
+---
+
+#### SpringCHOP
+
+Damped harmonic oscillator — channels spring toward input values.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| stiffness | Float | 10.0 | Spring stiffness constant |
+| damping | Float | 0.5 | Damping ratio (0 = no damping, 1 = critical) |
+
+**Input:** `in` (CHOP).
+
+**How it works:** Semi-implicit Euler integration of `F = -k(pos - target) - d*vel`. Maintains per-channel position and velocity dictionaries. Creates bouncy, springy motion following input.
+
+---
+
+#### DelayCHOP
+
+Delay channels by N frames using a ring buffer.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| frames | Int | 10 | Number of frames to delay |
+
+**Input:** `in` (CHOP).
+
+**How it works:** Maintains a ring buffer of past frame values per channel. Reads from `(write_idx - frames) % buffer_size` for delayed output.
+
+---
+
+#### EnvelopeCHOP
+
+Envelope follower — RMS, peak, or average-abs with window size.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | RMS | RMS, Peak, Average Absolute |
+| window | Int | 30 | Sliding window size in frames |
+
+**Input:** `in` (CHOP).
+
+**How it works:** Maintains a sliding ring buffer per channel. Computes the selected statistic over the window for smooth envelope tracking.
+
+---
+
+#### AnalyzeCHOP
+
+Per-channel statistics: single output value per channel.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| function | Enum | Average | Average, Min, Max, Sum, RMS, Range, Count |
+
+**Input:** `in` (CHOP).
+
+**How it works:** Reduces each channel's sample array to a single summary value.
+
+---
+
+#### LookupCHOP
+
+Index into a sample array using another channel as lookup position.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| interpolate | Enum | Linear | Nearest, Linear |
+| extend | Enum | Clamp | Clamp, Cycle, Mirror |
+
+**Inputs:** `table` (CHOP — lookup data), `index` (CHOP — lookup positions 0–1).
+
+**How it works:** Normalizes index values to the table's sample range. Reads interpolated values from the table at the indexed position.
+
+---
+
+#### StretchCHOP
+
+Time-stretch samples with Catmull-Rom cubic interpolation.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | To Length | To Length, By Factor |
+| target | Int | 100 | Target sample count (To Length mode) |
+| factor | Float | 2.0 | Stretch factor (By Factor mode) |
+| interpolate | Enum | Linear | Linear, Cubic (Catmull-Rom) |
+
+**Input:** `in` (CHOP).
+
+**How it works:** Resamples channels to a new length. Catmull-Rom mode uses 4-point cubic interpolation for smooth results.
+
+---
+
+#### ResampleCHOP
+
+Resample channels to a new sample count or sample rate.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| method | Enum | To Samples | To Samples, To Rate |
+| samples | Int | 100 | Target sample count |
+| rate | Float | 60.0 | Target sample rate |
+
+**Input:** `in` (CHOP).
+
+**How it works:** Linear interpolation to resize sample arrays. Rate mode calculates target length from current length and rate ratio.
+
+---
+
+#### TrimCHOP
+
+Extract a sub-range of samples from channels.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| unit | Enum | Samples | Samples, Fraction, From End |
+| start | Int | 0 | Start position |
+| end | Int | -1 | End position (-1 = last sample) |
+
+**Input:** `in` (CHOP).
+
+---
+
+#### ExtendCHOP
+
+Pad samples before/after with selectable extend modes.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| before_mode | Enum | Hold | Hold, Cycle, Mirror, Slope, Zero |
+| after_mode | Enum | Hold | Hold, Cycle, Mirror, Slope, Zero |
+| before_length | Int | 0 | Samples to add before |
+| after_length | Int | 0 | Samples to add after |
+
+**Input:** `in` (CHOP).
+
+---
+
+### Combiners (New)
+
+---
+
+#### InterpolateCHOP
+
+Blend between two channel sets with easing curves.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| blend | Float | 0.5 | Blend factor (0 = input A, 1 = input B) |
+| curve | Enum | Linear | Linear, Ease In, Ease Out, Ease In-Out, Smooth Step |
+
+**Inputs:** `a` (CHOP), `b` (CHOP).
+
+---
+
+#### JoinCHOP
+
+Concatenate samples from multiple inputs with optional crossfade.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| overlap | Int | 0 | Crossfade overlap in samples |
+
+**Inputs:** Dynamic (auto-grow). Each input's samples are appended end-to-end.
+
+---
+
+#### CompositeCHOP
+
+Weighted blend from multiple dynamic inputs.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| method | Enum | Average | Average, Add, Max, Min |
+
+**Inputs:** Dynamic (auto-grow).
+
+---
+
+#### CopyCHOP
+
+Copy channels from input B onto input A.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| operation | Enum | Overwrite | Overwrite, Add, Subtract, Multiply |
+
+**Inputs:** `a` (CHOP), `b` (CHOP).
+
+---
+
+### Channel Management (New)
+
+---
+
+#### ShuffleCHOP
+
+Reorder, reverse, sort, or randomize channel order.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Reverse | Reverse, Sort by Name, Sort by Value, Random |
+| seed | Int | 0 | Random seed (Random mode) |
+
+**Input:** `in` (CHOP).
+
+---
+
+#### SplitCHOP
+
+Select one channel or group of N channels from input.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Single | Single, Group |
+| index | Int | 0 | Channel index to select |
+| group_size | Int | 1 | Group size (Group mode) |
+
+**Input:** `in` (CHOP).
+
+---
+
+#### FanCHOP
+
+Fan a single channel into multiple copies with offset spread.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| copies | Int | 3 | Number of output copies |
+| spread | Float | 0.1 | Offset per copy |
+| operation | Enum | Add | Add, Multiply, Phase Shift |
+
+**Input:** `in` (CHOP).
+
+---
+
+#### DeleteCHOP
+
+Delete channels by name pattern, index, or keep-only mode.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | By Pattern | By Pattern, By Index, Keep Only |
+| pattern | String | "" | Space-separated patterns (wildcards: * ?) |
+| index | Int | 0 | Channel index (By Index mode) |
+
+**Input:** `in` (CHOP).
+
+---
+
 ## DAT — Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
@@ -1462,7 +1762,7 @@ See [DATtoCHOP in the CHOP section](#dattochop-bridge--dat--chop) — this opera
 
 SOPs produce and manipulate 3D geometry. The output type is `GNGeoData`, which wraps Godot's native `ArrayMesh`. SOPs leverage Godot's built-in mesh primitives (`BoxMesh`, `SphereMesh`, etc.) and `SurfaceTool` for procedural generation. Geometry flows through SOP chains and ultimately reaches a GeometryCOMP for 3D scene placement.
 
-**Total: 14 operators** — 7 generators, 5 filters, 1 combiner, 1 utility (+ Switch).
+**Total: 32 operators** — 8 generators, 16 filters, 6 combiners, 2 utility.
 
 ### Generators
 
@@ -1667,6 +1967,281 @@ Select one of 2 inputs by index.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | index | Int | 0 | 0–1 | Which input to output |
+
+---
+
+### Generators (New)
+
+---
+
+#### TubeSOP
+
+Tube or pipe generator with inner/outer walls and caps.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| outer_radius | Float | 0.5 | Outer radius |
+| inner_radius | Float | 0.0 | Inner radius (0 = solid tube) |
+| height | Float | 1.0 | Tube height |
+| rows | Int | 4 | Height subdivisions |
+| columns | Int | 16 | Radial segments |
+| caps | Bool | true | Generate end caps |
+| orientation | Enum | Y | X, Y, Z axis |
+
+**How it works:** Generates vertices in concentric rings using SurfaceTool. When `inner_radius > 0`, creates both outer and inner walls forming a hollow pipe. Caps are annular rings connecting inner and outer edges.
+
+---
+
+### Filters (New)
+
+---
+
+#### NormalSOP
+
+Recompute smooth normals, flip normals, or generate flat (faceted) normals.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Recompute Smooth | Recompute Smooth, Flip, Flat Faceted |
+
+**Input:** `in` (SOP).
+
+**How it works:** Recompute mode uses `SurfaceTool.generate_normals()`. Flip negates all normals. Flat mode unshares vertices so each triangle gets its own face normal.
+
+---
+
+#### ReverseSOP
+
+Reverse face winding order and flip normals.
+
+**Input:** `in` (SOP).
+
+**How it works:** Swaps the 2nd and 3rd vertex of each triangle to reverse winding. Negates all normals.
+
+---
+
+#### PeakSOP
+
+Push vertices along their normals by a distance.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| distance | Float | 0.1 | Distance to push (negative = shrink) |
+| recompute | Bool | true | Recompute normals after displacement |
+
+**Input:** `in` (SOP).
+
+---
+
+#### SortSOP
+
+Sort vertices by axis, distance from origin, or randomly.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | X Axis | X, Y, Z Axis, Distance, Random |
+| seed | Int | 0 | Random seed (Random mode) |
+
+**Input:** `in` (SOP).
+
+**How it works:** Builds a sort-index array, sorts it, then remaps all vertex arrays (positions, normals, UVs, tangents) and triangle indices through an inverse map.
+
+---
+
+#### FacetSOP
+
+Unique points (flat shading) or consolidate close vertices.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Unique Points | Unique Points, Consolidate |
+| distance | Float | 0.001 | Merge distance (Consolidate mode) |
+
+**Input:** `in` (SOP).
+
+**How it works:** Unique mode unshares every vertex so triangles have independent normals. Consolidate merges vertices within the distance threshold using O(n²) proximity search.
+
+---
+
+#### DeleteSOP
+
+Delete faces or points by range, bounding box, or random percentage.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| entity | Enum | Faces | Faces, Points |
+| mode | Enum | Range | Range, Bounding Box, Random |
+| start | Int | 0 | Start index (Range) |
+| end | Int | 10 | End index (Range) |
+| percent | Float | 50.0 | Percentage to delete (Random) |
+| invert | Bool | false | Invert selection |
+| seed | Int | 0 | Random seed |
+| bbox_min | Vector3 | (-0.5,-0.5,-0.5) | Bounding box minimum |
+| bbox_max | Vector3 | (0.5,0.5,0.5) | Bounding box maximum |
+
+**Input:** `in` (SOP).
+
+---
+
+#### PointSOP
+
+Per-vertex position modification via GDScript expressions.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| expr_x | String | "px" | X position expression |
+| expr_y | String | "py" | Y position expression |
+| expr_z | String | "pz" | Z position expression |
+
+**Input:** `in` (SOP).
+
+**How it works:** Uses Godot's `Expression` class. Variables: `px`, `py`, `pz` (position), `nx`, `ny`, `nz` (normal), `u`, `v` (UV), `i` (vertex index), `n` (count), `t` (time).
+
+---
+
+#### AttributeSOP
+
+Create or modify per-vertex point attributes from expressions or presets.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| attrib_name | String | "Cd" | Attribute name |
+| components | Int | 3 | Values per vertex (1–4) |
+| source | Enum | Constant | Constant, Expression, Position, Normal, UV, Random |
+
+**Input:** `in` (SOP).
+
+**How it works:** Stores results in `GNGeoData.point_attribs` dictionary — a dictionary of name → `PackedFloat32Array` with `components` values per vertex.
+
+---
+
+#### ClipSOP
+
+Clip geometry by an axis-aligned plane with triangle splitting.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| axis | Enum | Y | X, Y, Z |
+| origin | Float | 0.0 | Plane position along axis |
+| keep_above | Bool | true | Keep above or below the plane |
+
+**Input:** `in` (SOP).
+
+**How it works:** Classifies each triangle vertex as above/below the clip plane. Triangles fully on the kept side pass through. Crossing triangles are split: edges are interpolated at the intersection point, producing 1 or 2 output triangles. Vertex attributes (positions, normals, UVs) are properly interpolated at split points.
+
+---
+
+#### MirrorSOP
+
+Reflect geometry across a plane with optional merge.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| axis | Enum | X | X, Y, Z |
+| merge | Bool | true | Merge reflected with original |
+
+**Input:** `in` (SOP).
+
+**How it works:** Reflects positions across the plane (`p - 2 * dot(p, axis) * axis`). Reverses triangle winding on the reflected copy. Negates the mirror axis component of normals.
+
+---
+
+#### ExtrudeSOP
+
+Per-triangle face extrusion with front, back, and side walls.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| distance | Float | 0.3 | Extrusion distance along face normal |
+| front | Bool | true | Generate front (extruded) face |
+| sides | Bool | true | Generate side walls |
+| back | Bool | false | Generate back (original) face |
+
+**Input:** `in` (SOP).
+
+**How it works:** For each triangle, computes face normal and offsets vertices by `distance * normal`. Builds up to 3 quads for the side walls connecting original and extruded edges.
+
+---
+
+### Combiners (New)
+
+---
+
+#### CopySOP
+
+Instance template geometry onto each point of the target mesh.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| align_normals | Bool | true | Orient instances to target surface normals |
+
+**Inputs:** `template` (SOP — geometry to copy), `target` (SOP — points to copy onto).
+
+**How it works:** Extracts target point positions and normals. For each point, builds a transform basis from the normal and copies all template vertices, applying the transform. Supports `pscale` point attribute for per-instance scaling.
+
+---
+
+#### ScatterSOP
+
+Scatter random points on mesh surface (area-weighted sampling).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| count | Int | 100 | Number of points to scatter |
+| seed | Int | 0 | Random seed |
+
+**Input:** `in` (SOP).
+
+**How it works:** Computes per-triangle area, builds a CDF (cumulative distribution function), then uses binary search to select triangles proportional to their area. Random barycentric coordinates place points within each selected triangle. Outputs a point cloud with interpolated normals and UVs.
+
+---
+
+#### BooleanSOP
+
+Boolean operations (union, intersect, subtract) via Godot's CSG system.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| operation | Enum | Union | Union, Intersect, Subtract |
+
+**Inputs:** `a` (SOP), `b` (SOP).
+
+**How it works:** Creates temporary `CSGCombiner3D` and `CSGMesh3D` nodes in the scene tree. Assigns input meshes, performs the boolean operation, extracts the result via `get_meshes()`, then removes the temporary nodes.
+
+---
+
+#### SweepSOP
+
+Sweep a cross-section along a backbone curve (parallel transport frames).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| scale | Float | 0.1 | Profile cross-section scale |
+| profile_segs | Int | 12 | Circle segments (no profile input) |
+| close_profile | Bool | true | Close the profile ring |
+| close_backbone | Bool | false | Loop the backbone |
+| end_caps | Bool | false | Generate end caps |
+
+**Inputs:** `backbone` (SOP — line strip), `profile` (SOP, optional — cross-section; uses circle if absent).
+
+**How it works:** Computes rotation-minimizing frames (RMF) along the backbone using the double-reflection method. Places the scaled profile at each frame position, then connects consecutive rings with quad strips. This prevents the twisting artifacts that occur with simpler Frenet frames.
+
+---
+
+#### SkinSOP
+
+Skin (loft) multiple cross-sections into a surface mesh.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| close_u | Bool | true | Close each cross-section ring |
+| close_v | Bool | false | Loop along V (connect last to first section) |
+| end_caps | Bool | false | Cap ends with fan triangles |
+| recompute_normals | Bool | true | Recompute smooth normals |
+
+**Inputs:** Dynamic (auto-grow). Each input provides a cross-section polyline.
+
+**How it works:** Collects vertex arrays from each input. Resamples shorter sections to match the longest. Connects corresponding vertices between consecutive sections with quad strips to form the skin surface.
 
 ---
 

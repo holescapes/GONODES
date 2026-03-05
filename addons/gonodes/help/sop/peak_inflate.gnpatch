@@ -1,0 +1,39 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [0, 0],
+			"parameters": {
+				"radius": {"value": 0.5}
+			}
+		},
+		"peak1": {
+			"type": "PeakSOP",
+			"position": [250, 0],
+			"parameters": {
+				"distance": {"value": 0.2}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [500, 0],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "sphere1", "from_port": 0, "to": "peak1", "to_port": 0},
+		{"from": "peak1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Peak SOP — Push Along Normals\n\nInflates a sphere by pushing vertices 0.2\nalong their normals. Negative values shrink.\nOptional normal recomputation after move.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -1,0 +1,66 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"circle1": {
+			"type": "CircleSOP",
+			"position": [100, 100],
+			"parameters": {
+				"radius": {"value": 0.5},
+				"points": {"value": 16}
+			}
+		},
+		"transform1": {
+			"type": "TransformSOP",
+			"position": [300, 100],
+			"parameters": {
+				"ty": {"value": 0.0}
+			}
+		},
+		"circle2": {
+			"type": "CircleSOP",
+			"position": [100, 250],
+			"parameters": {
+				"radius": {"value": 0.3},
+				"points": {"value": 16}
+			}
+		},
+		"transform2": {
+			"type": "TransformSOP",
+			"position": [300, 250],
+			"parameters": {
+				"ty": {"value": 1.0}
+			}
+		},
+		"skin1": {
+			"type": "SkinSOP",
+			"position": [600, 150],
+			"parameters": {
+				"close_u": {"value": true},
+				"end_caps": {"value": true}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [900, 150],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "circle1", "from_port": 0, "to": "transform1", "to_port": 0},
+		{"from": "transform1", "from_port": 0, "to": "skin1", "to_port": 0},
+		{"from": "circle2", "from_port": 0, "to": "transform2", "to_port": 0},
+		{"from": "transform2", "from_port": 0, "to": "skin1", "to_port": 1},
+		{"from": "skin1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Skin SOP — Loft Cross-Sections\n\nLofts two circles at different heights/radii\ninto a tapered surface (frustum shape).\nDynamic inputs allow any number of sections.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

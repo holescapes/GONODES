@@ -1,0 +1,41 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"grid1": {
+			"type": "GridSOP",
+			"position": [0, 0],
+			"parameters": {
+				"rows": {"value": 4},
+				"cols": {"value": 4}
+			}
+		},
+		"scatter1": {
+			"type": "ScatterSOP",
+			"position": [250, 0],
+			"parameters": {
+				"count": {"value": 200},
+				"seed": {"value": 1}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [500, 0],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "grid1", "from_port": 0, "to": "scatter1", "to_port": 0},
+		{"from": "scatter1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Scatter SOP — Random Surface Points\n\nScatters 200 points on the grid surface.\nArea-weighted sampling for uniform density.\nOutputs point cloud with normals and UVs.",
+			"position": [-100.0, -150.0],
+			"size": [400.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}
