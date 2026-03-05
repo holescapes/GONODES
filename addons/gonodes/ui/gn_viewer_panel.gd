@@ -89,6 +89,15 @@ var _orbit_distance: float = 3.0
 var _orbit_dragging: bool = false
 var _orbit_start: Vector2 = Vector2.ZERO
 
+## Wireframe toggle
+var _wireframe_mode: bool = false
+var _wireframe_btn: Button = null
+
+
+## Axis gizmo root — rescaled each frame to keep constant screen size
+var _gizmo_root: Node3D = null
+const GIZMO_SCREEN_FRACTION := 0.08  ## Fraction of orbit distance for gizmo size
+
 # ─── MAT display (material preview sphere) ────────────────────────────────────
 
 var _mat_viewport: SubViewport = null
@@ -151,6 +160,16 @@ func _ready() -> void:
 	_fit_btn.add_theme_font_size_override("font_size", 10)
 	_fit_btn.pressed.connect(_fit_to_panel)
 	_toolbar.add_child(_fit_btn)
+
+	_wireframe_btn = Button.new()
+	_wireframe_btn.text = "Wire"
+	_wireframe_btn.tooltip_text = "Toggle wireframe view (W)"
+	_wireframe_btn.flat = true
+	_wireframe_btn.toggle_mode = true
+	_wireframe_btn.add_theme_font_size_override("font_size", 10)
+	_wireframe_btn.toggled.connect(_on_wireframe_toggled)
+	_wireframe_btn.visible = false
+	_toolbar.add_child(_wireframe_btn)
 
 	_zoom_label = Label.new()
 	_zoom_label.add_theme_font_size_override("font_size", 10)
@@ -501,6 +520,8 @@ func _show_3d_mesh(geo_data: GNGeoData) -> void:
 			_3d_mesh_instance.mesh = geo_data.mesh
 		else:
 			_3d_mesh_instance.mesh = null
+		_apply_wireframe_mode()
+		_update_gizmo_scale()
 		var content := _get_content_rect()
 		_3d_viewport.size = _snap_size(content.size)
 		_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
@@ -512,6 +533,7 @@ func _show_3d_mesh(geo_data: GNGeoData) -> void:
 	_3d_display.visible = true
 	_fit_btn.visible = false
 	_zoom_label.visible = false
+	_wireframe_btn.visible = true
 
 	var content := _get_content_rect()
 	_3d_display.position = content.position
@@ -525,6 +547,9 @@ func _show_3d_mesh(geo_data: GNGeoData) -> void:
 		_3d_mesh_instance.mesh = geo_data.mesh
 	else:
 		_3d_mesh_instance.mesh = null
+
+	_apply_wireframe_mode()
+	_update_gizmo_scale()
 
 	# Render one frame
 	_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
@@ -575,15 +600,22 @@ func _update_orbit_camera() -> void:
 	)
 	_3d_camera.position = offset
 	_3d_camera.look_at(Vector3.ZERO)
+	_update_gizmo_scale()
 
 
 ## Creates XYZ axis lines at the origin: X=red, Y=green, Z=blue.
+## Lines are parented to a shared Node3D root so the gizmo can be uniformly
+## scaled to maintain constant screen size regardless of zoom/orbit distance.
 func _create_axis_gizmo(viewport: SubViewport) -> void:
-	var axis_length: float = 0.5
+	_gizmo_root = Node3D.new()
+	_gizmo_root.name = "AxisGizmo"
+	viewport.add_child(_gizmo_root)
+
+	# Unit-length axes — actual visual size comes from _gizmo_root.scale
 	var axes := [
-		{"dir": Vector3(axis_length, 0, 0), "color": Color.RED},
-		{"dir": Vector3(0, axis_length, 0), "color": Color.GREEN},
-		{"dir": Vector3(0, 0, axis_length), "color": Color.BLUE},
+		{"dir": Vector3(1, 0, 0), "color": Color.RED},
+		{"dir": Vector3(0, 1, 0), "color": Color.GREEN},
+		{"dir": Vector3(0, 0, 1), "color": Color.BLUE},
 	]
 	for axis in axes:
 		var im := ImmediateMesh.new()
@@ -595,12 +627,45 @@ func _create_axis_gizmo(viewport: SubViewport) -> void:
 		im.surface_end()
 		var mi := MeshInstance3D.new()
 		mi.mesh = im
-		# Unshaded material so axes are always visible
+		# Unshaded material so axes are always visible, rendered on top
 		var mat := StandardMaterial3D.new()
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mat.vertex_color_use_as_albedo = true
+		mat.no_depth_test = true
+		mat.render_priority = 10
 		mi.material_override = mat
-		viewport.add_child(mi)
+		_gizmo_root.add_child(mi)
+
+	_update_gizmo_scale()
+
+
+## Rescales the axis gizmo so it occupies a constant fraction of the screen
+## regardless of orbit distance.  Called after every camera move / zoom.
+func _update_gizmo_scale() -> void:
+	if _gizmo_root == null:
+		return
+	var s: float = _orbit_distance * GIZMO_SCREEN_FRACTION
+	_gizmo_root.scale = Vector3(s, s, s)
+
+
+## Toggles between solid mesh and wireframe rendering.
+func _on_wireframe_toggled(pressed: bool) -> void:
+	_wireframe_mode = pressed
+	_apply_wireframe_mode()
+	if _3d_viewport:
+		_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
+## Toggles wireframe rendering via the SubViewport debug-draw mode.
+func _apply_wireframe_mode() -> void:
+	if _3d_viewport == null:
+		return
+	if _wireframe_mode:
+		_3d_viewport.debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
+	else:
+		_3d_viewport.debug_draw = Viewport.DEBUG_DRAW_DISABLED
+	# Kick a render so the change is visible immediately.
+	_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -738,6 +803,8 @@ func _hide_all_displays() -> void:
 		_fit_btn.visible = false
 	if _zoom_label:
 		_zoom_label.visible = false
+	if _wireframe_btn:
+		_wireframe_btn.visible = false
 	if _info_bar:
 		_info_bar.text = ""
 
@@ -767,6 +834,9 @@ func set_target(p_node_id: String) -> void:
 	_orbit_pitch = -30.0
 	_orbit_distance = 3.0
 	_orbit_dragging = false
+	_wireframe_mode = false
+	if _wireframe_btn:
+		_wireframe_btn.button_pressed = false
 	if _waveform:
 		_waveform.reset_view()
 
@@ -877,3 +947,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_apply_tex_transform()
 			_update_zoom_label()
 			get_viewport().set_input_as_handled()
+		# W = toggle wireframe (SOP viewer)
+		elif key.keycode == KEY_W and not key.ctrl_pressed and not key.shift_pressed:
+			if _3d_display != null and _3d_display.visible and _wireframe_btn != null:
+				_wireframe_btn.button_pressed = not _wireframe_btn.button_pressed
+				get_viewport().set_input_as_handled()

@@ -888,6 +888,8 @@ func _register_core_operators() -> void:
 		"Pass-through component for wire organization.")
 	_reg("SwitchCOMP",      "COMP", SwitchCOMP,
 		"Select one of up to 8 component inputs by index.")
+	_reg("EnvironmentCOMP",  "COMP", EnvironmentCOMP,
+		"Environment settings for 3D rendering — background, lighting, post-processing.")
 
 	# ── MATs ────────────────────────────────────────────────────────────
 	_reg("PBR_MAT",         "MAT", PBR_MAT,

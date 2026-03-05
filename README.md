@@ -273,7 +273,6 @@ addons/gonodes/help/
 ### Deferred Operators (known algorithms, need research/complexity)
 
 - **ScreenGrabTOP** — capture viewport contents as texture (viewport-only, no OS-level grab)
-- **EnvironmentCOMP** — WorldEnvironment wrapper (sky, fog, tonemap, ambient light)
 - **InstanceCOMP** — MultiMeshInstance3D-based instancing for massive geometry duplication
 - **AnimationCOMP** — AnimationPlayer wrapper for keyframe animation on COMP properties
 - **SpringSOP** — mass-spring soft body deformer (CPU vertex simulation)

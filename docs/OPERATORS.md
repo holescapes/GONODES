@@ -2702,6 +2702,9 @@ COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Go
 
 **Total: 8 operators.**
 
+> Note: SubNetworkNode, InTunnel, OutTunnel are internal system nodes.
+> NullCOMP, SwitchCOMP, and EnvironmentCOMP are utility nodes.
+
 ---
 
 #### GeometryCOMP
@@ -2911,6 +2914,58 @@ Select one of up to 8 component inputs by index.
 | index | Int | 0 | 0–7 | Which input to pass through |
 
 **Inputs:** `in0`–`in7` (COMP).
+
+---
+
+#### EnvironmentCOMP
+
+Defines the rendering environment for a 3D scene — background, ambient light, tone mapping, and all post-processing effects. Connect to a RenderTOP COMP input alongside Geometry/Camera/Light COMPs.
+
+Separating environment from rendering allows one environment shared across multiple RenderTOPs, CHOP-animated post-processing, and cleaner networks.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| bg_mode | Enum | Color | Background mode (Color, Sky, Canvas, Keep) |
+| bg_color | Color | (0.1,0.1,0.12) | Background clear color |
+| bg_energy | Float | 1.0 | Background energy multiplier |
+| ambient_enabled | Bool | true | Enable ambient light |
+| ambient_color | Color | (0.3,0.3,0.4) | Ambient light color |
+| ambient_energy | Float | 0.3 | Ambient light intensity |
+| tonemap_mode | Enum | ACES | Tone mapping (Linear, Reinhard, Filmic, ACES) |
+| tonemap_exposure | Float | 1.0 | Exposure multiplier |
+| tonemap_white | Float | 1.0 | White point |
+| glow_enabled | Bool | false | Enable glow/bloom |
+| glow_intensity | Float | 0.8 | Glow strength |
+| glow_strength | Float | 1.0 | Per-level contribution |
+| glow_bloom | Float | 0.0 | Screen-wide bloom |
+| glow_hdr_threshold | Float | 1.0 | HDR brightness threshold |
+| glow_blend_mode | Enum | Additive | Glow composite mode |
+| ssao_enabled | Bool | false | Screen-space ambient occlusion |
+| ssao_radius | Float | 1.0 | Occlusion radius |
+| ssao_intensity | Float | 2.0 | Occlusion strength |
+| ssao_power | Float | 1.5 | Falloff exponent |
+| ssil_enabled | Bool | false | Screen-space indirect lighting |
+| ssil_radius | Float | 5.0 | Indirect light radius |
+| ssil_intensity | Float | 1.0 | Indirect light strength |
+| ssil_sharpness | Float | 0.98 | Edge-aware blur |
+| ssil_normal_rejection | Float | 1.0 | Normal rejection |
+| ssr_enabled | Bool | false | Screen-space reflections |
+| ssr_max_steps | Int | 64 | Ray march steps |
+| ssr_fade_in | Float | 0.15 | Fade in distance |
+| ssr_fade_out | Float | 2.0 | Fade out distance |
+| ssr_depth_tolerance | Float | 0.2 | Depth tolerance |
+| adj_enabled | Bool | false | Color adjustments |
+| adj_brightness | Float | 1.0 | Brightness multiplier |
+| adj_contrast | Float | 1.0 | Contrast |
+| adj_saturation | Float | 1.0 | Saturation |
+| fog_enabled | Bool | false | Volumetric fog |
+| fog_density | Float | 0.05 | Fog density |
+| fog_albedo | Color | White | Fog scatter colour |
+| fog_emission | Color | Black | Fog emission colour |
+| fog_emission_energy | Float | 1.0 | Emission intensity |
+| fog_length | Float | 64.0 | Fog distance |
+
+**Output:** `out` (COMP). When connected to RenderTOP, overrides the fallback environment.
 
 ---
 
