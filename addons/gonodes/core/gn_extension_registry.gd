@@ -782,6 +782,8 @@ func _register_core_operators() -> void:
 	# ── DATs: Scripting ─────────────────────────────────────────────────
 	_reg("ScriptDAT",       "DAT", ScriptDAT,
 		"User-scripted DAT. Write GDScript to generate or transform table/text data.")
+	_reg("CallbackDAT",     "DAT", CallbackDAT,
+		"Event-driven callback DAT. Named scripts fire on target node events (onCook, onValueChange, onStart).")
 
 	# ── DATs: Output / Sinks ────────────────────────────────────────────
 	_reg("FileSaveDAT",     "DAT", FileSaveDAT,
@@ -890,6 +892,10 @@ func _register_core_operators() -> void:
 		"Select one of up to 8 component inputs by index.")
 	_reg("EnvironmentCOMP",  "COMP", EnvironmentCOMP,
 		"Environment settings for 3D rendering — background, lighting, post-processing.")
+
+	# ── COMPs: Scripting ────────────────────────────────────────────────
+	_reg("GenericScriptNode", "COMP", GenericScriptNode,
+		"Multi-output scripting node. @output annotations produce any mix of data types.")
 
 	# ── MATs ────────────────────────────────────────────────────────────
 	_reg("PBR_MAT",         "MAT", PBR_MAT,

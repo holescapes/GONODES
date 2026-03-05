@@ -150,16 +150,20 @@ func _setup_gdscript_highlighter() -> void:
 	# Comments
 	h.add_color_region("#", "", Color(0.45, 0.45, 0.45), true)
 
-	# Annotation keywords (@param, @input)
+	# Annotation keywords (@param, @input, @output)
 	h.add_keyword_color("@param", Color(0.6, 0.85, 0.4))
 	h.add_keyword_color("@input", Color(0.6, 0.85, 0.4))
+	h.add_keyword_color("@output", Color(0.6, 0.85, 0.4))
 
 	# GONODES context variables
-	for kw in ["me", "inputs", "op", "time", "frame", "dt"]:
+	for kw in ["me", "inputs", "op", "outputs", "time", "frame", "dt",
+			"target", "event", "event_param"]:
 		h.add_keyword_color(kw, Color(0.55, 0.8, 1.0))
 
 	# GONODES helper functions
-	for fn in ["par", "chop", "op_ref", "top", "sop", "dat"]:
+	for fn in ["par", "chop", "op_ref", "top", "sop", "dat", "set_par",
+			"network_add_node", "network_remove_node", "network_connect",
+			"network_disconnect", "network_node_ids", "network_node_info"]:
 		h.add_keyword_color(fn, Color(0.4, 0.9, 0.5))
 
 	# GDScript keywords
@@ -263,10 +267,18 @@ func _setup_shader_highlighter() -> void:
 func _get_preset_folder() -> String:
 	if _owner_node == null:
 		return ""
-	# Script operators: node_type is "scriptimg", "scriptchop", etc.
+	# Per-family Script operators: node_type is "scriptimg", "scriptchop", etc.
 	if _owner_node.node_type.begins_with("script"):
 		return _owner_node.node_type
-	# CustomShaderTOP: no preset folder convention yet
+	# GenericScriptNode preset folder
+	if _owner_node.node_type == "genericscript":
+		return "genericscript"
+	# CallbackDAT — share one preset folder for all callback params
+	if _owner_node.node_type == "callbackdat":
+		return "callbackdat"
+	# CustomShaderTOP (node_type == "glsl")
+	if _param_name == "shader_code":
+		return "glsl"
 	return ""
 
 

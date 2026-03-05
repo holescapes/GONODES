@@ -421,14 +421,31 @@ func _create_string_control() -> Control:
 
 
 ## Returns true if this row represents a code parameter that should get the
-## windowed code-editor UI:  "code" on Script operators, or "shader_code" on
-## CustomShaderTOP (node_type == "glsl").
+## windowed code-editor UI:  "code" on Script operators / GenericScriptNode,
+## callback params on CallbackDAT, or "shader_code" on CustomShaderTOP.
 func _is_code_editor_param() -> bool:
 	if owner_node == null or param == null:
 		return false
-	if param.param_name == "code" and owner_node.node_type.begins_with("script"):
+	# Per-family Script operators + GenericScriptNode
+	if param.param_name == "code" and _is_script_node():
+		return true
+	# CallbackDAT callback code params
+	if owner_node.node_type == "callbackdat" and param.param_name in [
+		"on_start", "on_cook", "on_value_change", "on_create"]:
 		return true
 	if param.param_name == "shader_code":
+		return true
+	return false
+
+
+## Returns true if this node is any kind of script operator (ScriptCHOP,
+## ScriptDAT, ScriptSOP, ScriptIMG, GenericScriptNode).
+func _is_script_node() -> bool:
+	if owner_node == null:
+		return false
+	if owner_node.node_type.begins_with("script"):
+		return true
+	if owner_node.node_type == "genericscript":
 		return true
 	return false
 

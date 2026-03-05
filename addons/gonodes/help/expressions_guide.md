@@ -199,6 +199,135 @@ Paste the copied reference directly into any expression field.
 
 ---
 
+## Writable References — `set_par()`
+
+All Script operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG, GenericScriptNode,
+CallbackDAT) can **write** parameter values on other nodes, not just read them.
+
+### `set_par(node_id, param_name, value)` or `set_par(param_name, value)`
+
+Sets a parameter's constant value on another node (or self). The target node is
+automatically marked dirty so it re-cooks next frame. Returns `true` on success.
+
+| Argument     | Type    | Required | Description                                   |
+|--------------|---------|----------|-----------------------------------------------|
+| `node_id`    | String  | no       | Target node ID. Omit for self-reference.       |
+| `param_name` | String  | yes      | Parameter name on the target node               |
+| `value`      | Variant | yes      | New value (must be compatible with param type)  |
+
+```gdscript
+# Cross-node: set another node's parameter
+set_par("noise1", "scale", 2.5)
+
+# Self-reference: set own parameter
+set_par("speed", par("speed") * 2.0)
+
+# Drive a parameter from a CHOP value
+set_par("render1", "bg_color", Color(chop("lfo1", "out"), 0.5, 0.5))
+
+# Conditional parameter override
+if chop("audio1", "level") > 0.8:
+    set_par("glow_comp", "glow_intensity", 2.0)
+else:
+    set_par("glow_comp", "glow_intensity", 0.5)
+```
+
+> **Safety:** `set_par()` sets the value immediately and marks the target dirty.
+> If you set a parameter on a node that hasn't cooked yet this frame, it will
+> pick up the new value when it cooks. Be mindful of circular dependencies.
+
+---
+
+## Network API — Procedural Graph Construction
+
+Script operators can manipulate the node graph programmatically — adding nodes,
+creating connections, and removing elements. This is the GONODES equivalent of
+TouchDesigner's "modify the editor" Python API.
+
+### `network_add_node(operator_type, node_id)`
+
+Creates a new node and adds it to the network.
+
+| Argument        | Type   | Required | Description                                    |
+|-----------------|--------|----------|------------------------------------------------|
+| `operator_type` | String | yes      | Registry class name (e.g. `"NoiseTOP"`, `"LFOCHOP"`) |
+| `node_id`       | String | no       | Custom ID. Auto-generated if omitted.           |
+
+Returns the new node's ID string, or `""` on failure.
+
+```gdscript
+# Create nodes
+var noise_id = network_add_node("NoiseTOP")
+var lfo_id = network_add_node("LFOCHOP", "my_lfo")
+```
+
+### `network_remove_node(node_id)`
+
+Removes a node and all its connections. Returns `true` on success.
+
+```gdscript
+network_remove_node("old_noise1")
+```
+
+### `network_connect(from_id, from_port, to_id, to_port)`
+
+Creates a wire between two nodes. Port indices are 0-based. Returns `true` on success.
+
+```gdscript
+# Connect noise1's output 0 to composite1's input 1
+network_connect("noise1", 0, "composite1", 1)
+```
+
+### `network_disconnect(from_id, from_port, to_id, to_port)`
+
+Removes a specific wire. Returns `true` on success.
+
+```gdscript
+network_disconnect("noise1", 0, "composite1", 1)
+```
+
+### `network_node_ids()`
+
+Returns a `PackedStringArray` of all node IDs in the current network.
+
+```gdscript
+for nid in network_node_ids():
+    print(nid, " — ", network_node_info(nid).get("type", ""))
+```
+
+### `network_node_info(node_id)`
+
+Returns a dictionary: `{ "type": "NoiseTOP", "family": "TOP", "valid": true, "position": Vector2(100, 200) }`.
+
+```gdscript
+var info = network_node_info("noise1")
+if info.get("valid", false):
+    print("noise1 is cooking correctly")
+```
+
+### Complete Example — Procedural Graph Building
+
+```gdscript
+# In a ScriptCHOP or GenericScriptNode with cook_once = true:
+func cook():
+    # Build a noise → level → composite chain
+    var n1 = network_add_node("NoiseTOP")
+    var n2 = network_add_node("LevelTOP")
+    var n3 = network_add_node("CompositeTOP")
+
+    set_par(n1, "resolution", Vector2i(512, 512))
+    set_par(n2, "brightness", 1.5)
+    set_par(n3, "operation", 0)  # Add mode
+
+    network_connect(n1, 0, n2, 0)
+    network_connect(n2, 0, n3, 0)
+```
+
+> **Tip:** Use `cook_once = true` for one-shot graph construction scripts.
+> The script runs once and then stops, leaving the constructed graph in place.
+
+---
+
 ## Per-Component Expressions
 
 Multi-dimensional parameters (**Vector2**, **Vector2i**, **Vector3**, **Vector4**,

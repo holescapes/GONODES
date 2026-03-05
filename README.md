@@ -62,7 +62,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 Complete — Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowTOP open/close toggle. 3D pipeline live. 82 operators across 6 families. RAMP parameter type with curve editor. RampCHOP (dynamic 1–16 ramp slots). Canvas annotations (network boxes, sticky notes). 176 tests passing. Phases 1–6 complete.**
+**Phase 6 Complete — Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowTOP open/close toggle. 3D pipeline live. 207 operators across 7 families. RAMP parameter type with curve editor. RampCHOP (dynamic 1–16 ramp slots). Canvas annotations (network boxes, sticky notes). Advanced scripting: GenericScriptNode (multi-output), CallbackDAT (event-driven), set_par() writable refs, Network API (procedural graph construction). 176 tests passing. Phases 1–6 complete.**
 
 ### Completed
 
@@ -88,14 +88,25 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ### Operator Library
 
-| Family | Count | Operators |
+| Family | Count | Highlights |
 |--------|-------|-----------|
-| **TOP** | 29 | Noise, Composite, Level, Blur, Ramp, Circle, Rectangle, Constant, Text, ImageFileIn, MovieFileIn, ImageSequence, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Cross, Displace, Lookup, Null, Switch, CustomShader, Window, Render |
-| **CHOP** | 22 | LFO, Noise, Math, Constant, Wave, Pattern, Timer, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Logic, Merge, Cross, Null, Switch, DATtoCHOP, Ramp |
-| **DAT** | 12 | Constant, Text, Null, Select, Merge, Transpose, Sort, Evaluate, Switch, CHOPtoDAT, InfoDAT, OscIn (stub) |
-| **SOP** | 14 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch |
-| **MAT** | 2 | PBR, Shader |
-| **COMP** | 4 | Geometry, Camera, Light, Merge |
+| **TOP** | 57 | Noise, Composite, Level, Blur, Ramp, Text, ImageFileIn, MovieFileIn, FFmpegIn, Transform, CustomShader, Render, Window, Feedback, Displace, ChromaKey, AnalyzeTOP, TimeMachine, and more |
+| **IMG** | 14 | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP, TOPtoIMG, FileSaveIMG, MovieOutIMG, FFmpegOutIMG, WebcamIMG, ImageFileInIMG, ImageSequenceIMG, ScriptIMG |
+| **CHOP** | 52 | LFO, Noise, Math, Constant, Wave, Filter, Lag, Timer, Trigger, Speed, Smooth, Spring, Delay, Envelope, Ramp, Expression, Keyboard/Mouse/Gamepad input, and more |
+| **DAT** | 25 | Constant, Text, JSONDAT, WebDAT, FileInDAT, ScriptDAT, **CallbackDAT**, OPFindDAT, Evaluate, CHOPtoDAT, SOPtoDAT, TOPtoDAT, and more |
+| **SOP** | 39 | Grid, Box, Sphere, Torus, Transform, Noise, Subdivide, Boolean, Extrude, Sweep, Skin, Bend, Twist, Font, ScriptSOP, and more |
+| **COMP** | 13 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Environment, Null, Switch, **GenericScriptNode** |
+| **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
+| **Output** | 1 | OutputTOP |
+
+### Advanced Scripting
+
+All Script operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG, GenericScriptNode, CallbackDAT) share a common runtime GDScript compilation engine with these features:
+
+- **`set_par()`** — writable parameter references: modify params on self or any reachable node with auto dirty-propagation
+- **Network API** — procedural graph construction: `network_add_node()`, `network_remove_node()`, `network_connect()`, `network_disconnect()`, `network_node_ids()`, `network_node_info()`
+- **GenericScriptNode** — family-less multi-output node using `# @output chop/top/dat/sop/img/mat` annotations to create typed output ports dynamically
+- **CallbackDAT** — event-driven scripting that observes an upstream node and fires callbacks on cook, parameter change, creation, or startup
 
 ### 3D Scene Pipeline
 

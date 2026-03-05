@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"script1": {
+			"type": "ScriptDAT",
+			"position": [200, 100],
+			"parameters": {
+				"code": {"value": "# Network API — Procedural Graph Construction\n# This script builds a mini signal chain at runtime.\n\nfunc cook():\n\t# List current nodes\n\tvar ids = network_node_ids()\n\top.set_headers(PackedStringArray([\"action\", \"detail\"]))\n\top.append_row(PackedStringArray([\"existing\", str(ids.size()) + \" nodes\"]))\n\n\t# Create an LFO and a MathCHOP\n\tvar lfo_id = network_add_node(\"LfoCHOP\", \"auto_lfo\")\n\top.append_row(PackedStringArray([\"created\", lfo_id]))\n\n\tvar math_id = network_add_node(\"MathCHOP\", \"auto_math\")\n\top.append_row(PackedStringArray([\"created\", math_id]))\n\n\t# Wire them: LFO → Math\n\tnetwork_connect(lfo_id, 0, math_id, 0)\n\top.append_row(PackedStringArray([\"connected\", lfo_id + \" → \" + math_id]))\n\n\t# Inspect the new math node\n\tvar info = network_node_info(math_id)\n\tfor key in info:\n\t\top.append_row(PackedStringArray([key, str(info[key])]))"}
+			}
+		}
+	},
+	"connections": [],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Network API — Procedural Graph Building\n\nAll Script operators expose:\n  network_add_node(type, id) → id\n  network_remove_node(id)\n  network_connect(from, fp, to, tp)\n  network_disconnect(from, fp, to, tp)\n  network_node_ids() → PackedStringArray\n  network_node_info(id) → Dictionary\n\nNodes are created via GNExtensionRegistry.",
+			"position": [-100.0, -150.0],
+			"size": [500.0, 130.0],
+			"color": [0.6, 0.8, 1.0, 0.8]
+		},
+		{
+			"id": "ann_2",
+			"type": "note",
+			"text": "WARNING: Avoid creating infinite loops!\nGuard with frame checks or one-shot flags\nwhen building graphs procedurally.",
+			"position": [500.0, -150.0],
+			"size": [300.0, 80.0],
+			"color": [1.0, 0.7, 0.7, 0.8]
+		}
+	]
+}

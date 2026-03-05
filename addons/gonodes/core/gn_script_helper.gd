@@ -24,6 +24,10 @@ static var _param_regex: RegEx = null
 ## Groups: 1=family, 2=description (optional)
 static var _input_regex: RegEx = null
 
+## Output annotation regex:  # @output <family> <description...>
+## Groups: 1=family, 2=description (optional)
+static var _output_regex: RegEx = null
+
 ## Maps annotation type names to GNParameter.ValueType.
 const _TYPE_MAP: Dictionary = {
 	"float":  GNParameter.ValueType.FLOAT,
@@ -55,6 +59,7 @@ const _PREAMBLE := """extends RefCounted
 var me: GNNode = null
 var inputs: Array = []
 var op = null
+var outputs: Array = []
 var time: float = 0.0
 var frame: int = 0
 var dt: float = 0.0
@@ -89,6 +94,41 @@ func dat(id: String, row = null, col = null) -> Variant:
 	if _engine == null:
 		return null
 	return _engine.dat(id, row, col)
+
+func set_par(name_or_node: String, param_or_value = null, value_arg = null) -> bool:
+	if _engine == null:
+		return false
+	return _engine.set_par(name_or_node, param_or_value, value_arg)
+
+func network_add_node(operator_type: String, node_id: String = \"\") -> String:
+	if _engine == null:
+		return \"\"
+	return _engine.network_add_node(operator_type, node_id)
+
+func network_remove_node(node_id: String) -> bool:
+	if _engine == null:
+		return false
+	return _engine.network_remove_node(node_id)
+
+func network_connect(from_id: String, from_port: int, to_id: String, to_port: int) -> bool:
+	if _engine == null:
+		return false
+	return _engine.network_connect(from_id, from_port, to_id, to_port)
+
+func network_disconnect(from_id: String, from_port: int, to_id: String, to_port: int) -> bool:
+	if _engine == null:
+		return false
+	return _engine.network_disconnect(from_id, from_port, to_id, to_port)
+
+func network_node_ids() -> PackedStringArray:
+	if _engine == null:
+		return PackedStringArray()
+	return _engine.network_node_ids()
+
+func network_node_info(node_id: String) -> Dictionary:
+	if _engine == null:
+		return {}
+	return _engine.network_node_info(node_id)
 
 # ─── USER CODE BELOW ──────────────────────────────────────
 """
@@ -136,6 +176,10 @@ static func _ensure_regex() -> void:
 		_input_regex = RegEx.new()
 		# Groups: 1=family, 2=description
 		_input_regex.compile("^#\\s*@input\\s+(\\w+)(?:\\s+(.*))?$")
+	if _output_regex == null:
+		_output_regex = RegEx.new()
+		# Groups: 1=family, 2=description
+		_output_regex.compile("^#\\s*@output\\s+(\\w+)(?:\\s+(.*))?$")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -361,6 +405,64 @@ static func parse_input_annotations(code: String) -> Array:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Annotation Parsing — @output
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Parsed output annotation record (used by GenericScriptNode for multi-output).
+class OutputAnnotation:
+	var family: GNFamily.Type
+	var description: String
+
+	func _init(p_family: GNFamily.Type, p_desc: String) -> void:
+		family = p_family
+		description = p_desc
+
+
+## Parses @output annotations from user code.
+## Returns Array[OutputAnnotation] in declaration order.
+static func parse_output_annotations(code: String) -> Array:
+	_ensure_regex()
+	var result: Array = []
+	for line in code.split("\n"):
+		var stripped := line.strip_edges()
+		var m := _output_regex.search(stripped)
+		if m == null:
+			continue
+		var family_name: String = m.get_string(1).to_lower()
+		var desc: String = m.get_string(2).strip_edges() if m.get_string(2) != "" else ""
+
+		if not _FAMILY_MAP.has(family_name):
+			GNLogger.warn("ScriptHelper", "Unknown @output family '%s'" % family_name)
+			continue
+
+		var family_type: GNFamily.Type = _FAMILY_MAP[family_name]
+		if desc.is_empty():
+			desc = "%s output %d" % [family_name.to_upper(), result.size()]
+
+		result.append(OutputAnnotation.new(family_type, desc))
+	return result
+
+
+## Creates a fresh GNData subclass instance for the given family type.
+## Used by GenericScriptNode to pre-populate multi-output data objects.
+static func create_data_for_family(family: GNFamily.Type) -> GNData:
+	match family:
+		GNFamily.Type.CHOP:
+			return GNChannelData.new()
+		GNFamily.Type.TOP:
+			return GNTextureData.new()
+		GNFamily.Type.SOP:
+			return GNGeoData.new()
+		GNFamily.Type.DAT:
+			return GNTableData.new()
+		GNFamily.Type.IMG:
+			return GNImageData.new()
+		GNFamily.Type.MAT:
+			return GNMaterialData.new()
+	return GNData.new()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Dynamic Parameter Rebuild
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -521,7 +623,7 @@ static func get_preset_list(family_folder: String) -> Array:
 	return result
 
 
-## Scans a directory for .gd preset files.
+## Scans a directory for .gd and .gdshader preset files.
 static func _scan_preset_dir(dir_path: String, is_factory: bool, result: Array) -> void:
 	var dir := DirAccess.open(dir_path)
 	if dir == null:
@@ -529,7 +631,7 @@ static func _scan_preset_dir(dir_path: String, is_factory: bool, result: Array) 
 	dir.list_dir_begin()
 	var fname := dir.get_next()
 	while fname != "":
-		if not dir.current_is_dir() and fname.ends_with(".gd"):
+		if not dir.current_is_dir() and (fname.ends_with(".gd") or fname.ends_with(".gdshader")):
 			var preset_name := fname.get_basename()
 			result.append({
 				"name": preset_name,

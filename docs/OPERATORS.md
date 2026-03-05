@@ -2096,6 +2096,60 @@ Search the current network for operators matching criteria.
 
 ---
 
+### Scripting (New)
+
+---
+
+#### CallbackDAT
+
+Event-driven callback DAT. Holds named GDScript snippets that fire automatically when events occur on a **target node** connected to its input.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| time_dependent | Bool | true | Re-cook every frame to poll events |
+| active | Bool | true | Enable/disable all callbacks |
+| log_events | Bool | true | Output event execution log as DAT table |
+| on_start | String | (template) | Script that runs once on first cook frame |
+| on_cook | String | (template) | Script that runs after target node cooks |
+| on_value_change | String | (template) | Script that runs when target parameter changes |
+| on_create | String | (template) | Script that runs once when CallbackDAT is first cooked |
+
+**Input:** `target` (any family) — the node to observe.
+**Output:** `out` (DAT) — event log table with columns: `time, event, status, target`.
+
+**Callback context variables:** Same as Script operators (`me`, `inputs`, `time`, `frame`, `dt`, `par()`, `chop()`, `top()`, `sop()`, `dat()`, `set_par()`, `network_*()`) plus:
+- `target` — the GNNode connected to input 0
+- `event` — String name of the callback (e.g. "onCook")
+- `event_param` — for onValueChange, the parameter name that changed
+
+**Supported events:**
+
+| Event | Trigger | Use Case |
+|-------|---------|----------|
+| `onStart` | First cook frame | Initialize params, build graph |
+| `onCreate` | First cook of this CallbackDAT | One-time setup |
+| `onCook` | Target node finishes cooking | React to output changes |
+| `onValueChange` | Target node param changes | Mirror params, trigger side effects |
+
+**Example — mirror a parameter:**
+
+```gdscript
+# onValueChange callback
+if event_param == "speed":
+    set_par("other_lfo", "speed", par(target.id, "speed") * 2.0)
+```
+
+**Example — procedural graph building:**
+
+```gdscript
+# onCreate callback
+var nid = network_add_node("NoiseTOP")
+set_par(nid, "resolution", Vector2i(512, 512))
+network_connect(nid, 0, "composite1", 1)
+```
+
+---
+
 ## SOP — Surface Operators
 
 SOPs produce and manipulate 3D geometry. The output type is `GNGeoData`, which wraps Godot's native `ArrayMesh`. SOPs leverage Godot's built-in mesh primitives (`BoxMesh`, `SphereMesh`, etc.) and `SurfaceTool` for procedural generation. Geometry flows through SOP chains and ultimately reaches a GeometryCOMP for 3D scene placement.
@@ -2700,10 +2754,10 @@ COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNDat
 
 COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Godot's 3D rendering engine.
 
-**Total: 8 operators.**
+**Total: 10 operators.**
 
 > Note: SubNetworkNode, InTunnel, OutTunnel are internal system nodes.
-> NullCOMP, SwitchCOMP, and EnvironmentCOMP are utility nodes.
+> NullCOMP, SwitchCOMP, EnvironmentCOMP, and GenericScriptNode are utility nodes.
 
 ---
 
@@ -2969,6 +3023,52 @@ Separating environment from rendering allows one environment shared across multi
 
 ---
 
+### Scripting (New)
+
+---
+
+#### GenericScriptNode
+
+Multi-output scripting node. Unlike per-family Script operators which produce a single output of their family type, GenericScriptNode can output **any combination** of data types simultaneously via `# @output` annotations.
+
+Extends `GNNode` directly (not a family base class). Uses COMP family for neutral gray color in the graph.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| time_dependent | Bool | false | Re-cook every frame |
+| cook_once | Bool | false | Pulse: force single cook, auto-resets |
+| force_active | Bool | false | Keep active without downstream sink |
+| code | String | (default) | GDScript with cook(), @output, @input, @param annotations |
+
+**Annotations:**
+
+```
+# @input <family>  <description>   — dynamic input port
+# @output <family> <description>   — dynamic output port (chop, top, sop, dat, img, mat)
+# @param <type> <name> <default> <description>  — inspector parameter
+```
+
+**Context variables:** `me`, `inputs`, `outputs` (Array of pre-populated typed data objects, one per @output), `op` (alias for outputs[0]), `time`, `frame`, `dt`, `par()`, `chop()`, `top()`, `sop()`, `dat()`, `op_ref()`, `set_par()`, `network_add_node()`, `network_connect()`, `network_disconnect()`, `network_remove_node()`, `network_node_ids()`, `network_node_info()`.
+
+**Example:**
+
+```gdscript
+# @input chop  Signal source
+# @output chop Modified signal
+# @output dat  Signal info
+# @param float gain 1.0 Output gain
+
+func cook():
+    if inputs[0] != null:
+        for ch in inputs[0].get_channel_names():
+            var v = inputs[0].get_value(ch) * par("gain")
+            outputs[0].set_single_value(ch, v)
+    outputs[1].set_headers(PackedStringArray(["key", "value"]))
+    outputs[1].append_row(PackedStringArray(["time", "%.3f" % time]))
+```
+
+---
+
 ## MAT — Material Operators
 
 MATs produce materials for COMP use. Output type is `GNMaterialData`, wrapping Godot's `Material` base class. MATs connect to GeometryCOMP's material input to override the default PBR.
@@ -3065,10 +3165,10 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 |--------|-------|-----------|
 | **TOP** | 57 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, FileSave, Null, Switch, Window, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette |
 | **CHOP** | 52 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, OscOut, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, Record, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP |
-| **DAT** | 24 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, FileSave, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind |
+| **DAT** | 25 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileSave, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind |
 | **SOP** | 39 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide |
-| **COMP** | 11 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch |
+| **COMP** | 13 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript |
 | **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
 | **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, FileSave, MovieOut, FFmpegOut |
 | **Output** | 1 | Window |
-| **Total** | **204** | |
+| **Total** | **207** | |

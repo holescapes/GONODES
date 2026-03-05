@@ -803,6 +803,42 @@ func pars(name_or_node: String, param_name: String = "") -> String:
 	return str(v)
 
 
+## Write a parameter value on another node (or self).  Returns true on success.
+## Usage in scripts:
+##   set_par("noise1", "scale", 2.5)    → set cross-node param
+##   set_par("scale", 2.5)               → set own param (self-reference)
+## The target node is automatically marked dirty so it re-cooks next frame.
+func set_par(name_or_node: String, param_or_value = null, value_arg = null) -> bool:
+	var target_node: GNNode = null
+	var target_param_name: String = ""
+	var new_value: Variant = null
+
+	if value_arg != null:
+		# Three args: set_par("node_id", "param_name", value)
+		target_node = resolve_node(name_or_node)
+		target_param_name = str(param_or_value)
+		new_value = value_arg
+	else:
+		# Two args: set_par("param_name", value) — self-reference
+		target_node = _current_eval_node
+		target_param_name = name_or_node
+		new_value = param_or_value
+
+	if target_node == null:
+		GNLogger.warn("CookEngine", "set_par() — node not found: '%s'" % name_or_node)
+		return false
+
+	var p: GNParameter = target_node.parameters.get(target_param_name, null)
+	if p == null:
+		GNLogger.warn("CookEngine", "set_par() — param '%s' not found on '%s'" % [
+			target_param_name, target_node.id])
+		return false
+
+	p.set_value(new_value)
+	target_node.mark_dirty()
+	return true
+
+
 # ─── Internal proxy implementations ─────────────────────────────────────────────
 
 
@@ -945,6 +981,91 @@ func _make_top_proxy(node_name: String, property: String = "") -> Variant:
 	if not property.is_empty():
 		return info.get(property, 0.0)
 	return info
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Scripting Network API — Procedural Graph Manipulation
+# ═══════════════════════════════════════════════════════════════════════════════
+# These methods are exposed to Script operators via the preamble so user code
+# can add, remove, and connect/disconnect nodes programmatically.
+
+## Creates a new node of [param operator_type] (registry class name, e.g.
+## "NoiseTOP", "LFOCHOP") and adds it to the network.  The node is
+## initialized with the given [param node_id] (or auto-generated from the
+## type name if empty).  Returns the new node's ID, or "" on failure.
+##
+## Usage in scripts:
+##   var nid = network_add_node("LFOCHOP")
+##   var nid2 = network_add_node("NoiseTOP", "my_noise")
+func network_add_node(operator_type: String, node_id: String = "") -> String:
+	if network == null:
+		GNLogger.warn("CookEngine", "network_add_node() — no network")
+		return ""
+	var registry := GNExtensionRegistry.instance()
+	var node: GNNode = registry.create_instance(operator_type)
+	if node == null:
+		GNLogger.warn("CookEngine", "network_add_node() — unknown operator '%s'" % operator_type)
+		return ""
+	var final_id: String = node_id if not node_id.is_empty() \
+		else network.generate_unique_id(node.node_type)
+	node.initialize(final_id)
+	if not network.add_node(node):
+		node.queue_free()
+		return ""
+	# Re-parent into the engine's scene tree so TOPs get SubViewport hosting
+	add_child(node)
+	return final_id
+
+
+## Removes a node (and all its connections) from the network.
+## Returns true on success.
+func network_remove_node(node_id: String) -> bool:
+	if network == null:
+		return false
+	return network.remove_node(node_id)
+
+
+## Creates a connection between two nodes' ports.  Returns true on success.
+## [param from_port] and [param to_port] are 0-based port indices.
+func network_connect(from_id: String, from_port: int,
+		to_id: String, to_port: int) -> bool:
+	if network == null:
+		return false
+	return network.connect_nodes(from_id, from_port, to_id, to_port)
+
+
+## Removes a specific connection.  Returns true on success.
+func network_disconnect(from_id: String, from_port: int,
+		to_id: String, to_port: int) -> bool:
+	if network == null:
+		return false
+	return network.disconnect_nodes(from_id, from_port, to_id, to_port)
+
+
+## Returns an array of all node IDs in the current network.
+func network_node_ids() -> PackedStringArray:
+	if network == null:
+		return PackedStringArray()
+	var ids := PackedStringArray()
+	for nid in network.nodes:
+		ids.append(nid)
+	return ids
+
+
+## Returns a dictionary of info about a node: { "type", "family", "valid", "position" }.
+## Returns an empty dict if the node doesn't exist.
+func network_node_info(node_id: String) -> Dictionary:
+	if network == null:
+		return {}
+	var node: GNNode = network.nodes.get(node_id, null)
+	if node == null:
+		return {}
+	return {
+		"type": node.get_script().get_global_name(),
+		"family": GNFamily.get_family_name(node.family),
+		"valid": node.cook_valid,
+		"position": node.graph_position,
+	}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
