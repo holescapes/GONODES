@@ -257,6 +257,9 @@ func _populate_scene_from_network() -> void:
 			var group_node: Node3D = (upstream_node as MergeCOMP).get_group_node()
 			if group_node != null:
 				_adopt_scene_node(group_node)
+				# Scan the merge group for cameras so we don't create a default
+				if not has_camera:
+					has_camera = _activate_camera_in_subtree(group_node)
 
 		elif upstream_node is GeometryCOMP:
 			var mesh_inst: MeshInstance3D = (upstream_node as GeometryCOMP).get_mesh_instance()
@@ -292,6 +295,23 @@ func _populate_scene_from_network() -> void:
 	# If no camera COMP is connected, create a default camera
 	if not has_camera:
 		_ensure_default_camera()
+	elif _default_camera != null:
+		_default_camera.current = false
+
+
+## Recursively searches a subtree for Camera3D nodes and activates the first
+## one found.  Returns true if a camera was found, false otherwise.
+## This is needed when CameraCOMP goes through MergeCOMP — the camera ends
+## up as a child of the merge group node rather than being a direct input.
+func _activate_camera_in_subtree(root: Node3D) -> bool:
+	for child in root.get_children():
+		if child is Camera3D:
+			(child as Camera3D).current = true
+			return true
+		if child is Node3D and child.get_child_count() > 0:
+			if _activate_camera_in_subtree(child as Node3D):
+				return true
+	return false
 
 
 ## Adds a 3D node to the viewport if not already there.

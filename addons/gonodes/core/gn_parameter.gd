@@ -751,6 +751,17 @@ static func _json_to_variant(json_val: Variant, target_type: ValueType) -> Varia
 	# For RAMP target type, accept raw arrays too (forward-compat)
 	if target_type == ValueType.RAMP and json_val is Array:
 		return json_val
+	# Bare dict without _type — reconstruct from target_type hint
+	if json_val is Dictionary:
+		match target_type:
+			ValueType.VECTOR2I:
+				return Vector2i(int(json_val.get("x", 0)), int(json_val.get("y", 0)))
+			ValueType.VECTOR2:
+				return Vector2(float(json_val.get("x", 0)), float(json_val.get("y", 0)))
+			ValueType.VECTOR3:
+				return Vector3(float(json_val.get("x", 0)), float(json_val.get("y", 0)), float(json_val.get("z", 0)))
+			ValueType.COLOR:
+				return Color(float(json_val.get("r", 0)), float(json_val.get("g", 0)), float(json_val.get("b", 0)), float(json_val.get("a", 1)))
 	# For numeric types, ensure correct cast
 	match target_type:
 		ValueType.FLOAT:

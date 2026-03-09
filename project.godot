@@ -8,10 +8,6 @@
 
 config_version=5
 
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/gonodes/plugin.cfg")
-
 [application]
 
 config/name="GONODES"
@@ -21,8 +17,11 @@ config/icon="res://icon.svg"
 
 [display]
 
-window/stretch/mode="disabled"
 window/subwindows/embed_subwindows=false
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gonodes/plugin.cfg")
 
 [physics]
 
@@ -31,5 +30,4 @@ window/subwindows/embed_subwindows=false
 [rendering]
 
 rendering_device/driver.windows="d3d12"
-rendering_device/fallback_to_opengl3=true
 textures/vram_compression/import_etc2_astc=true

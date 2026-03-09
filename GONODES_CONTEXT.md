@@ -3607,15 +3607,21 @@ These are non-negotiable constraints discovered during development. **Never viol
 
 ## 26. Known Bugs
 
-### 26.1 SoftBodyCOMP: Cloth Simulation Not Running with Jolt Physics
+### 26.1 SoftBodyCOMP: Jolt SoftBody3D Incompatible with SubViewport — Replaced with CPU Verlet
 
-- **Issue:** SoftBody3D cloth mesh renders at the correct position but does not simulate (no draping under gravity). Jolt's `is_physics_processing_internal()` remains `false` and `set_transform` errors fire intermittently.
-- **Root cause:** Jolt Physics only builds simulation geometry and enables internal physics processing during `NOTIFICATION_ENTER_WORLD` when a mesh is already assigned. In GONODES' deferred cook architecture, the SoftBody3D either (a) has no mesh when it enters the tree (so Jolt skips simulation init) or (b) has a mesh but enters the wrong physics space (triggering `set_transform` errors). Space cycling via `PhysicsServer3D.soft_body_set_space()` + `set_physics_process_internal(true)` achieves `phys_int=true` but Jolt's C++ `in_space()` flag remains false.
-- **Affects:** Test scene `08_physics_joints_area_softbody.gnpatch` check #6, and likely test scene `07_physics_forces_properties.gnpatch`
-- **Current state:** RenderTOP `own_world_3d` duplication bug was fixed (world/space now match), multi-phase cook defers mesh assignment + space cycling, but Jolt still won't step the soft body. All other physics nodes (RigidBody, StaticBody, Area, Joints) work correctly.
-- **What has been tried:** Wrapper Node3D pattern, pre-assign mesh before tree, empty entry + late mesh, remove+re-add for fresh ENTER_WORLD, manual `soft_body_set_space()` cycling, `set_physics_process_internal(true)` force-enable — none produce a fully working simulation.
-- **Possible next steps:** (1) Test with Godot's built-in physics engine instead of Jolt to confirm it's Jolt-specific. (2) File a Jolt Physics issue about `set_transform` requiring `in_space()` even when space RID is valid. (3) Try `_soft_body.notification(NOTIFICATION_ENTER_WORLD)` to manually trigger Jolt's init path after mesh assignment.
-- **Priority:** Medium — soft body is a secondary physics feature; rigid/static bodies, joints, and areas all work
+- **Issue:** SoftBody3D cloth mesh rendered at the correct position but did not simulate (no draping under gravity). Jolt's `set_transform` error: `Condition "!in_space()" is true` at `jolt_soft_body_3d.cpp:564`.
+- **Root cause (confirmed via diagnostics):** Jolt's internal C++ `in_space()` flag returns `false` even when `PhysicsServer3D.soft_body_get_space()` returns the correct space RID. This only occurs with SubViewport + custom World3D — the standard Jolt viewport path works. GDScript diagnostics confirmed: `in_tree=true`, valid `physics_rid`, matching space RIDs, mesh assigned, `phys_process_internal=true` — but Jolt's C++ side disagrees. **Unfixable from GDScript.**
+- **Fix applied:** Complete rewrite of `soft_body_comp.gd` to use CPU-side Verlet position-based dynamics, bypassing Jolt/SoftBody3D entirely:
+  1. Extracts vertex positions, indices, UVs, normals from upstream GeometryCOMP mesh.
+  2. Transforms vertices to world space using the operator's transform.
+  3. Builds unique edge constraints from the triangle index buffer.
+  4. Computes vertex pinning based on bounding-box relative position (pin modes: None, Top Edge, Top Corners, All Edges).
+  5. Per-frame `_cook()`: Verlet integration (pos + velocity * damping + gravity * dt²), iterative distance constraint solving, floor plane collision, mesh rebuild with normal recomputation.
+  6. Uses `MeshInstance3D` (not SoftBody3D) — no physics engine dependency.
+  7. `time_dependent = true` ensures per-frame cooking.
+- **Parameters:** `iterations` (constraint solver passes), `gravity`, `damping`, `stiffness`, `floor_collision`/`floor_y`, `pin_mode`/`pin_threshold`.
+- **Also cleaned up:** RenderTOP's `_recursive_register_bodies` no longer force-enables `set_physics_process_internal` on SoftBody3D (legacy Jolt workaround removed).
+- **Test patches:** `soft_body_cloth.gnpatch` (20×20 cloth draping onto floor with camera/light), `soft_body_basic.gnpatch` (minimal grid → cloth example).
 
 ---
 
