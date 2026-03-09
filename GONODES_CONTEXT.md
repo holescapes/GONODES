@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-03-05
-> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 204 operators across 7 families (57 TOP, 14 IMG, 52 CHOP, 25 DAT, 39 SOP, 13 COMP, 6 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** — 204 `.gnpatch` example files across all 6 help families (59 CHOP, 58 TOP, 38 SOP, 16 COMP, 28 DAT, 7 MAT) providing 1–2 visual demos per operator. `test_scenes/` deprecated — help patches replace manual test scenes as the primary visual verification method. **New: 23 additional TOPs** — AnalyzeTOP, CacheTOP, TimeMachineTOP, ChannelMixTOP, ChromaKeyTOP, ColorMapTOP, DepthTOP, FitTOP, LayoutTOP, MonoTOP, NormalMapTOP, SharpenTOP, ConvolutionTOP, CornerPinTOP, DilateErodeTOP, LensDistortTOP, LumaBlurTOP, PatternTOP, ProjectionTOP, RemapTOP, SlopeTOP, SVGTOP, TriangleTOP — closing the TouchDesigner TOP gap. **New: 20 additional CHOPs** — SmoothCHOP, SpringCHOP, DelayCHOP, EnvelopeCHOP, AnalyzeCHOP, ClockCHOP, InterpolateCHOP, LookupCHOP, StretchCHOP, ResampleCHOP, TrimCHOP, ExtendCHOP, JoinCHOP, ShuffleCHOP, SplitCHOP, FanCHOP, DeleteCHOP, CopyCHOP, CompositeCHOP, ExpressionCHOP — signal processing, time manipulation, and channel management. **New: 17 additional SOPs** — NormalSOP, ReverseSOP, PeakSOP, SortSOP, FacetSOP, DeleteSOP, ScatterSOP, MirrorSOP, ClipSOP, ExtrudeSOP, CopySOP, PointSOP, AttributeSOP, BooleanSOP, TubeSOP, SweepSOP, SkinSOP — closing the TouchDesigner SOP/CHOP gap. All utilize Godot features (SurfaceTool, CSGMesh3D, Expression class, RandomNumberGenerator, parallel transport frames). **New: 36 additional operators closing the final TouchDesigner gap** — 6 TOPs (MatteTOP, PremultiplyTOP, PosterizeTOP, RadialBlurTOP, AntiAliasTOP, PaletteTOP), 7 CHOPs (KeyboardInCHOP, MouseInCHOP, GamepadCHOP, ParameterCHOP, TrailCHOP, SOPtoCHOP, TOPtoCHOP), 10 DATs (FileInDAT, JSONDAT, WebDAT, SubstituteDAT, InsertDAT, DeleteDAT, FIFODAT, SOPtoDAT, TOPtoDAT, OPFindDAT), 7 SOPs (BendSOP, TwistSOP, TaperSOP, FontSOP, TrailSOP, UVProjectSOP, DivideSOP), 2 COMPs (NullCOMP, SwitchCOMP), 4 MATs (ConstantMAT, WireframeMAT, PointSpriteMAT, DepthMAT). Total: 204 operators. 7 complex operators deferred to roadmap (ScreenGrabTOP, InstanceCOMP, AnimationCOMP, SpringSOP, ParticleSOP, AudioDeviceOutCHOP). **New: EnvironmentCOMP** — dedicated environment/post-processing COMP (background, ambient, tonemap, glow, SSAO, SSIL, SSR, adjustments, volumetric fog) extracted from RenderTOP. RenderTOP keeps lightweight fallback env (bg color + ambient) when no EnvironmentCOMP is connected; full post-processing requires EnvironmentCOMP. Total: 205 operators (12 COMP). 6 complex operators remain deferred. **New: Advanced Scripting Infrastructure** — GenericScriptNode (family-less multi-output via `# @output` annotations, extends GNNode directly, COMP family for gray color), CallbackDAT (event-driven scripting — observes upstream node signals: `on_start`, `on_cook`, `on_value_change`, `on_create` with rolling event log table), `set_par()` writable parameter references (2-arg self / 3-arg cross-node, auto-dirty-propagation), Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) for procedural graph construction from scripts. All new functions injected into GNScriptHelper preamble — available in every Script operator. Total: 207 operators (13 COMP, 25 DAT). 6 complex operators remain deferred. **New: Main Help Window + Help System Improvements** — (1) GNMainHelpWindow centralized reference hub (sidebar Tree + content pane, Markdown→BBCode via GNMarkdownRenderer), opened via "📖 Help" toolbar button or F1 key, 5 guide .md files in `help/`. (2) Code editor integration fixed for GenericScriptNode + CallbackDAT. (3) 35 preset examples across 7 script/shader categories. (4) CustomShaderTOP GLSL preset folder. (5) Help patch naming convention fixed. (6) Help .md files at `help/` root — folders reserved for operator .gnpatch files. (7) Added Player and Building help sections from dev_docs/ folder content. (8) Renamed `docs/` to `dev_docs/` — developer/advanced docs refocused for contributors. Total: 7 help .md files. **New: 13 advanced operators** — 4 SOP generators (LSystemSOP, MetaballSOP, IsoSurfaceSOP, ParticleSOP), 3 SOP deformers (MagnetSOP, CarveSOP, PolyReduceSOP), 4 cross-family bridges (CHOPtoSOP, DATtoSOP, TOPtoSOP, CHOPtoTOP), 1 COMP (InstanceCOMP — MultiMesh instancing). LSystemSOP: L-System grammar turtle geometry with tube extrusion and taper. MetaballSOP + IsoSurfaceSOP: marching cubes implicit surfaces (shared MC lookup tables). ParticleSOP: CPU particle system with emitter surface, gravity, turbulence, floor collision, attractor. MagnetSOP: vertex attraction/repulsion deformer with 4 falloff modes. CarveSOP: parametric U-range mesh trimming for reveal/wipe. PolyReduceSOP: quadric error metric edge-collapse decimation. CHOPtoSOP/DATtoSOP/TOPtoSOP: cross-family data conversion to geometry. CHOPtoTOP: CPU-rendered waveform/heatmap/graph visualisation. InstanceCOMP: MultiMeshInstance3D instancing with point cloud placement, CHOP animation, per-instance randomisation. InstanceCOMP and ParticleSOP moved from deferred roadmap to implemented. Total: 220 operators (58 TOP, 14 IMG, 52 CHOP, 25 DAT, 50 SOP, 14 COMP, 6 MAT, 1 output). 4 complex operators remain deferred (ScreenGrabTOP, AnimationCOMP, SpringSOP, AudioDeviceOutCHOP). 12 new help `.gnpatch` example files added for all new operators.
+> **Status:** Phase 6 Complete — Phase 7 in progress. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 204 operators across 7 families (57 TOP, 14 IMG, 52 CHOP, 25 DAT, 39 SOP, 13 COMP, 6 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** — 204 `.gnpatch` example files across all 6 help families (59 CHOP, 58 TOP, 38 SOP, 16 COMP, 28 DAT, 7 MAT) providing 1–2 visual demos per operator. `test_scenes/` deprecated — help patches replace manual test scenes as the primary visual verification method. **New: 23 additional TOPs** — AnalyzeTOP, CacheTOP, TimeMachineTOP, ChannelMixTOP, ChromaKeyTOP, ColorMapTOP, DepthTOP, FitTOP, LayoutTOP, MonoTOP, NormalMapTOP, SharpenTOP, ConvolutionTOP, CornerPinTOP, DilateErodeTOP, LensDistortTOP, LumaBlurTOP, PatternTOP, ProjectionTOP, RemapTOP, SlopeTOP, SVGTOP, TriangleTOP — closing the TouchDesigner TOP gap. **New: 20 additional CHOPs** — SmoothCHOP, SpringCHOP, DelayCHOP, EnvelopeCHOP, AnalyzeCHOP, ClockCHOP, InterpolateCHOP, LookupCHOP, StretchCHOP, ResampleCHOP, TrimCHOP, ExtendCHOP, JoinCHOP, ShuffleCHOP, SplitCHOP, FanCHOP, DeleteCHOP, CopyCHOP, CompositeCHOP, ExpressionCHOP — signal processing, time manipulation, and channel management. **New: 17 additional SOPs** — NormalSOP, ReverseSOP, PeakSOP, SortSOP, FacetSOP, DeleteSOP, ScatterSOP, MirrorSOP, ClipSOP, ExtrudeSOP, CopySOP, PointSOP, AttributeSOP, BooleanSOP, TubeSOP, SweepSOP, SkinSOP — closing the TouchDesigner SOP/CHOP gap. All utilize Godot features (SurfaceTool, CSGMesh3D, Expression class, RandomNumberGenerator, parallel transport frames). **New: 36 additional operators closing the final TouchDesigner gap** — 6 TOPs (MatteTOP, PremultiplyTOP, PosterizeTOP, RadialBlurTOP, AntiAliasTOP, PaletteTOP), 7 CHOPs (KeyboardInCHOP, MouseInCHOP, GamepadCHOP, ParameterCHOP, TrailCHOP, SOPtoCHOP, TOPtoCHOP), 10 DATs (FileInDAT, JSONDAT, WebDAT, SubstituteDAT, InsertDAT, DeleteDAT, FIFODAT, SOPtoDAT, TOPtoDAT, OPFindDAT), 7 SOPs (BendSOP, TwistSOP, TaperSOP, FontSOP, TrailSOP, UVProjectSOP, DivideSOP), 2 COMPs (NullCOMP, SwitchCOMP), 4 MATs (ConstantMAT, WireframeMAT, PointSpriteMAT, DepthMAT). Total: 204 operators. 7 complex operators deferred to roadmap (ScreenGrabTOP, InstanceCOMP, AnimationCOMP, SpringSOP, ParticleSOP, AudioDeviceOutCHOP). **New: EnvironmentCOMP** — dedicated environment/post-processing COMP (background, ambient, tonemap, glow, SSAO, SSIL, SSR, adjustments, volumetric fog) extracted from RenderTOP. RenderTOP keeps lightweight fallback env (bg color + ambient) when no EnvironmentCOMP is connected; full post-processing requires EnvironmentCOMP. Total: 205 operators (12 COMP). 6 complex operators remain deferred. **New: Advanced Scripting Infrastructure** — GenericScriptNode (family-less multi-output via `# @output` annotations, extends GNNode directly, COMP family for gray color), CallbackDAT (event-driven scripting — observes upstream node signals: `on_start`, `on_cook`, `on_value_change`, `on_create` with rolling event log table), `set_par()` writable parameter references (2-arg self / 3-arg cross-node, auto-dirty-propagation), Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) for procedural graph construction from scripts. All new functions injected into GNScriptHelper preamble — available in every Script operator. Total: 207 operators (13 COMP, 25 DAT). 6 complex operators remain deferred. **New: Main Help Window + Help System Improvements** — (1) GNMainHelpWindow centralized reference hub (sidebar Tree + content pane, Markdown→BBCode via GNMarkdownRenderer), opened via "📖 Help" toolbar button or F1 key, 5 guide .md files in `help/`. (2) Code editor integration fixed for GenericScriptNode + CallbackDAT. (3) 35 preset examples across 7 script/shader categories. (4) CustomShaderTOP GLSL preset folder. (5) Help patch naming convention fixed. (6) Help .md files at `help/` root — folders reserved for operator .gnpatch files. (7) Added Player and Building help sections from dev_docs/ folder content. (8) Renamed `docs/` to `dev_docs/` — developer/advanced docs refocused for contributors. Total: 7 help .md files. **New: 13 advanced operators** — 4 SOP generators (LSystemSOP, MetaballSOP, IsoSurfaceSOP, ParticleSOP), 3 SOP deformers (MagnetSOP, CarveSOP, PolyReduceSOP), 4 cross-family bridges (CHOPtoSOP, DATtoSOP, TOPtoSOP, CHOPtoTOP), 1 COMP (InstanceCOMP — MultiMesh instancing). LSystemSOP: L-System grammar turtle geometry with tube extrusion and taper. MetaballSOP + IsoSurfaceSOP: marching cubes implicit surfaces (shared MC lookup tables). ParticleSOP: CPU particle system with emitter surface, gravity, turbulence, floor collision, attractor. MagnetSOP: vertex attraction/repulsion deformer with 4 falloff modes. CarveSOP: parametric U-range mesh trimming for reveal/wipe. PolyReduceSOP: quadric error metric edge-collapse decimation. CHOPtoSOP/DATtoSOP/TOPtoSOP: cross-family data conversion to geometry. CHOPtoTOP: CPU-rendered waveform/heatmap/graph visualisation. InstanceCOMP: MultiMeshInstance3D instancing with point cloud placement, CHOP animation, per-instance randomisation. InstanceCOMP and ParticleSOP moved from deferred roadmap to implemented. Total: 220 operators (58 TOP, 14 IMG, 52 CHOP, 25 DAT, 50 SOP, 14 COMP, 6 MAT, 1 output). 4 complex operators remain deferred (ScreenGrabTOP, AnimationCOMP, SpringSOP, AudioDeviceOutCHOP). 12 new help `.gnpatch` example files added for all new operators. **Roadmap: GPU Particles (POP family)** — SSBO-based GPU particle system planned as new operator family (`GNPopBase`). Primary storage in `RDStorageBuffer` (not textures) for natural 1D indexing and arbitrary struct layout. CPU↔GPU attribute bridge via existing `GNGeoData.point_attribs`. Scatter/gather pattern for spatial filtering (SSBO→3D texture→blur/filter→3D texture→SSBO) only when needed. `ParticleStateTOP` bridge for TOP-chain visualization. **Roadmap: Volumetric 3D Textures (gn_ext_vol3d)** — T3D-inspired extension for 3D texture operations (noise, add, blur, displace, fluid sim, surface extraction, volume rendering). Each operator wraps a GLSL compute shader dispatched via `RenderingDevice`. Godot 4 3D texture support confirmed suitable (`TEXTURE_TYPE_3D`, `sampler3D`, `image3D`, R32F/RGBA32F formats). Fluid sim via Navier-Stokes (semi-Lagrangian advection, Jacobi pressure solve). GPU marching cubes for iso-surface extraction. Raymarcher for volumetric density rendering. POP↔VOL3D interaction: advect particles by velocity field, scatter particles into density grid.
 
 ---
 
@@ -102,7 +102,8 @@ Embedding Model (Future):
 | TOP (Texture OP)      | `GNTopBase` — SubViewport + ShaderMaterial (infra in base class) |
 | CHOP (Channel OP)     | `GNChopNode` — processes named float arrays              |
 | SOP (Surface OP)      | `GNSopNode` — produces ArrayMesh via GNGeoData           |
-| POP (Point OP)        | `GNPopNode` — GPU particle/point cloud system (future)   |
+| POP (Point OP)        | `GNPopBase` — GPU particle/point cloud via SSBO compute (future) |
+| VOL3D (Volume OP)     | `GNVol3DData` — 3D texture ops via compute shaders (future, ext) |
 | DAT (Data OP)         | `GNDatNode` — tables/text via GNTableData                |
 | MAT (Material OP)     | `GNMatNode` — PBR or custom ShaderMaterial               |
 | COMP (Component OP)   | `GNCompNode` — 3D scene components (Camera, Light, Geo)  |
@@ -1737,6 +1738,168 @@ GONODES/
     `send_cc()`, `send_pitchbend()`, etc. RtMidi is header-only with a permissive license.
   - Map CHOP channels (`note`, `velocity`, `cc:N`, `pitchbend`) to outgoing MIDI messages each frame.
   - Only relevant for hardware control surfaces, lighting rigs, or synth triggering — lower priority.
+
+### GPU Particles (POP Family) — Roadmap
+
+**Status: 🔲 Planned — Medium-term**
+
+CPU ParticleSOP exists for basic point-cloud emission. A GPU-native POP family
+would enable millions of particles in real time using Godot's `RenderingDevice`
+compute pipeline.
+
+**Architecture decisions (from design review):**
+
+- **Primary storage: SSBOs (Shader Storage Buffer Objects)**, not textures.
+  Particle state (position, velocity, age, life, id, pscale, Cd, etc.) stored as
+  flat `RDStorageBuffer` arrays on the GPU. Rationale:
+  - Godot 4's `RenderingDevice` API is buffer-centric — creating/binding SSBOs is
+    simpler than managing 3D render targets.
+  - Particles are a 1D list, not a 2D grid — no awkward `idx → (x, y)` mapping.
+  - Arbitrary struct layout — one buffer can hold interleaved per-particle data, or
+    use struct-of-arrays for cache-friendly access patterns.
+  - No texture dimension limits (max 16384×16384 ≈ 268M pixels, awkward for
+    non-power-of-2 particle counts).
+
+- **Attribute bridge: `GNGeoData.point_attribs` ↔ GPU.**(CPU↔GPU attribute bridge)
+  The existing CPU-side `point_attribs` dictionary (`String → PackedFloat32Array`)
+  on `GNGeoData` serves as the abstraction layer. For GPU POPs:
+  - **Upload:** pack `point_attribs` into `RDStorageBuffer` when crossing into GPU
+    compute (e.g., SOP→POP conversion).
+  - **Readback:** download SSBO data back into `point_attribs` for downstream CPU
+    nodes (e.g., POP→SOP for rendering via InstanceCOMP).
+  - This keeps the existing SOP attribute workflow (AttributeSOP setting `pscale`,
+    `Cd`, etc.) fully compatible with GPU particles.
+
+- **Texture bridge for spatial operations.**
+  While SSBOs are the primary storage, some operations benefit from hardware
+  texture filtering (bilinear interpolation, blur, mip-maps). The design uses
+  a **scatter/gather** pattern when spatial convolution is needed:
+  ```
+  [SSBO particle state] → scatter → [3D texture grid]
+                                          ↓
+                                     blur / filter / diffuse (texture ops)
+                                          ↓
+  [SSBO particle state] ← gather ← [3D texture grid]
+  ```
+  Scatter/gather is one compute dispatch each, only invoked when a spatial-filter
+  node is in the chain. No filter node → pure SSBO path, zero overhead.
+
+- **TOP output via `ParticleStateTOP`.**
+  A dedicated bridge operator reads the SSBO and writes particle data into a 2D
+  texture (RGBA32F — RGB=position, A=age, or similar encoding). This feeds the
+  existing TOP chain for visualization, compositing, or feedback without special
+  plumbing.
+
+**Planned POP operators:**
+
+| Operator | Description |
+|----------|-------------|
+| `EmitterPOP` | Emit particles from SOP surface, points, or volume |
+| `ForcePOP` | Apply forces: gravity, wind, attractors, turbulence |
+| `CollisionPOP` | SDF or mesh-based collision response |
+| `AgePOP` | Kill by age, life ratio, bounds, or expression |
+| `AdvectPOP` | Move particles by a velocity field (VOL3D input) |
+| `SpritePOP` | Render particles as camera-facing quads (instanced) |
+| `PointCloudPOP` | Render as point cloud (GL_POINTS or MultiMesh) |
+| `ParticleStateTOP` | SSBO → TOP texture bridge for visualization |
+| `SOPtoPOP` | Upload SOP point cloud + attribs to GPU buffers |
+| `POPtoSOP` | Download GPU particle state back to CPU GNGeoData |
+
+**Godot implementation details:**
+- Each POP operator wraps a compute shader dispatched via `RenderingDevice`.
+- Double-buffered SSBOs for simulation (read buffer A → write buffer B → swap).
+- Shared `GNPopData` resource holding buffer RIDs, particle count, attribute layout.
+- `GNPopBase` family base class (extends GNNode) — handles buffer lifecycle,
+  dispatch helpers, attribute upload/download.
+
+### Volumetric 3D Textures (VOL3D Extension) — Roadmap
+
+**Status: 🔲 Planned — Medium-term**
+
+Inspired by Josef Pelz's T3D plugin for TouchDesigner, a volumetric 3D texture
+extension would bring surfaces, volumetrics, fluid simulation, and abstract
+spatial data to GONODES — all without users writing GLSL.
+
+**Background:** T3D provides a family of operators that work on 3D textures
+(voxel grids where each position stores up to RGBA float values). Operators
+mirror standard 2D TOP operations (add, blur, noise, displace) but in 3D.
+Rendering operators extract iso-surfaces (marching cubes) or render volumetric
+density via raymarching. A fluid simulator (`fluidT3D`) enables real-time
+Navier-Stokes smoke/liquid simulation with a few node connections.
+
+In TD, T3D was built as compute shaders hidden inside glslTOPs with extensive
+OP Create dialog hacks. GONODES has a clean extension architecture that makes
+this more straightforward — `gn_ext_vol3d/` with `gn_extension.cfg` registration.
+
+**Extension structure:**
+
+```
+addons/gn_ext_vol3d/
+├── gn_extension.cfg
+├── README.md
+├── core/
+│   └── gn_vol3d_data.gd            # GNVol3DData — wraps 3D texture RID
+├── operators/
+│   ├── noise_vol3d.gd              # 3D noise field (Perlin, simplex, Voronoi)
+│   ├── constant_vol3d.gd           # Uniform density/color fill
+│   ├── sdf_vol3d.gd                # SOP → signed distance field
+│   ├── add_vol3d.gd                # Add/subtract/multiply two 3D fields
+│   ├── blur_vol3d.gd               # 3D Gaussian/box blur
+│   ├── displace_vol3d.gd           # Warp field by vector field
+│   ├── level_vol3d.gd              # Brightness/contrast/gamma on 3D field
+│   ├── feedback_vol3d.gd           # Previous frame's volume (sim loops)
+│   ├── fluid_vol3d.gd              # Navier-Stokes (advection + pressure + diffusion)
+│   ├── surface_vol3d.gd            # Marching cubes → SOP mesh output
+│   └── volume_render_vol3d.gd      # Raymarcher → renders to TOP (2D image)
+├── shaders/
+│   ├── noise3d.glsl
+│   ├── add3d.glsl
+│   ├── blur3d.glsl
+│   ├── level3d.glsl
+│   ├── displace3d.glsl
+│   ├── advect.glsl                 # Semi-Lagrangian advection
+│   ├── divergence.glsl             # Velocity divergence
+│   ├── pressure_jacobi.glsl        # Jacobi pressure solve
+│   ├── projection.glsl             # Velocity projection (div-free)
+│   ├── sdf_from_mesh.glsl          # Mesh → SDF voxelization
+│   ├── marching_cubes.glsl         # GPU iso-surface extraction
+│   └── raymarch.glsl               # Volumetric density raymarcher
+└── help/
+    └── vol3d/
+        ├── noise_vol3d_basic.gnpatch
+        ├── fluid_smoke.gnpatch
+        └── surface_extract.gnpatch
+```
+
+**Godot 3D texture capabilities (confirmed suitable):**
+- `RDTextureFormat` with `texture_type = TEXTURE_TYPE_3D` — arbitrary resolution,
+  R32F / RGBA32F / RGBA16F formats.
+- `layout(set, binding, r32f) uniform image3D` for compute shader write access.
+- `uniform sampler3D` for filtered read access (hardware bilinear interpolation).
+- Compute dispatch with `(res/8, res/8, res/8)` work groups for per-voxel ops.
+- No built-in 3D render targets or automatic mip-gen — manual compute passes needed.
+- No `SubViewport` for 3D slices — all 3D texture writes via compute only.
+
+**Data type:** `GNVol3DData` (extends `GNData`) wrapping:
+- 3D texture `RID` on `RenderingDevice`
+- Resolution (`Vector3i`), format, grid bounds (AABB)
+- Helper methods: `create(res, format)`, `destroy()`, `get_rd_rid()`
+
+**Key technical challenges:**
+1. **Fluid sim** — Navier-Stokes: semi-Lagrangian advection, divergence compute,
+   Jacobi iteration pressure solve, velocity projection. Each step = one compute
+   dispatch. Vorticity confinement and buoyancy for realistic smoke behavior.
+2. **GPU marching cubes** — Variable triangle output requires atomic counter +
+   pre-allocated output buffer (Godot RD supports atomics but not append buffers).
+3. **Volume raymarcher** — Step size tuning, jittered sampling to prevent banding,
+   early termination, density-to-color transfer function.
+4. **Noise/blur/add/displace** — Straightforward single-pass compute shaders,
+   a few dozen GLSL lines each.
+
+**POP ↔ VOL3D interaction:**
+- `AdvectPOP` reads a VOL3D velocity field to move particles.
+- Scatter POP positions into a VOL3D density grid for fluid-coupled particles.
+- VOL3D `surface_vol3d` extracts a mesh that POP particles can collide with.
 
 ---
 
