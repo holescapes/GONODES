@@ -115,6 +115,10 @@ func _ensure_window() -> void:
 	_window.min_size = Vector2i(160, 120)
 	# Prevent the window from stealing main window focus on close
 	_window.close_requested.connect(_on_window_close_requested)
+	# ESC key exits fullscreen/borderless back to windowed mode.
+	# Input events in a child Window stay in that window's viewport tree,
+	# so we must listen directly on the Window rather than from _process().
+	_window.window_input.connect(_on_window_input)
 
 	# Create TextureRect stretching to fill the window
 	_display_rect = TextureRect.new()
@@ -213,6 +217,17 @@ func _on_window_close_requested() -> void:
 		_window.visible = false
 		set_param_value("open", false)
 		GNLogger.info("WindowTOP", "'%s' output window hidden by user" % id)
+
+
+## Called for input events inside the output window.
+## ESC reverts fullscreen/borderless back to windowed mode.
+func _on_window_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		var mode_idx: int = get_param_value("window_mode")
+		if mode_idx != WindowMode.WINDOWED:
+			set_param_value("window_mode", WindowMode.WINDOWED)
+			_window_params_dirty = true
+			GNLogger.info("WindowTOP", "'%s' ESC — switched to windowed mode" % id)
 
 
 ## Override: mark window params dirty when our own parameters change.

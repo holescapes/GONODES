@@ -68,14 +68,17 @@ class OperatorEntry:
 	var description: String     ## One-line tooltip text
 	var source: String          ## "core" or the extension name that provided it
 	var section: String         ## Optional sub-section within the family (e.g. "Shadertoy")
+	var extension_dir: String   ## Extension base dir (e.g. "res://addons/gn_ext_shadertoy") or "" for core
 
 	func _init(p_family: String, p_script: GDScript, p_desc: String,
-			p_source: String = "core", p_section: String = "") -> void:
+			p_source: String = "core", p_section: String = "",
+			p_ext_dir: String = "") -> void:
 		family = p_family
 		op_script = p_script
 		description = p_desc
 		source = p_source
 		section = p_section
+		extension_dir = p_ext_dir
 
 
 ## class_name → OperatorEntry
@@ -91,8 +94,9 @@ var _loaded_extensions: PackedStringArray = []
 
 ## Register a single operator.  Overwrites any existing entry with the same key.
 func register_operator(class_name_key: String, family: String, op_script: GDScript,
-		description: String, source: String = "core", section: String = "") -> void:
-	_operators[class_name_key] = OperatorEntry.new(family, op_script, description, source, section)
+		description: String, source: String = "core", section: String = "",
+		extension_dir: String = "") -> void:
+	_operators[class_name_key] = OperatorEntry.new(family, op_script, description, source, section, extension_dir)
 	_invalidate_port_cache()
 
 
@@ -175,6 +179,23 @@ func get_description(class_name_key: String) -> String:
 ## Returns true if the operator is registered.
 func has_operator(class_name_key: String) -> bool:
 	return _operators.has(class_name_key)
+
+
+## Returns the full OperatorEntry for a registered operator, or null.
+func get_entry(class_name_key: String) -> OperatorEntry:
+	return _operators.get(class_name_key, null)
+
+
+## Returns the OperatorEntry whose script matches the given node's script.
+## Linear scan — only used by help window, not per-frame.
+func get_entry_by_script(script: GDScript) -> OperatorEntry:
+	if script == null:
+		return null
+	for key in _operators:
+		var entry: OperatorEntry = _operators[key]
+		if entry.op_script == script:
+			return entry
+	return null
 
 
 ## Returns the total number of registered operators.
@@ -306,6 +327,7 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 		print("[ExtRegistry] Failed to load manifest: %s (error %d)" % [cfg_path, err])
 		return
 
+	var ext_dir: String = cfg_path.get_base_dir()  # e.g. "res://addons/gn_ext_shadertoy"
 	var ext_name: String = cfg.get_value("extension", "name", folder_name)
 
 	# Extension-level palette section — defaults to the extension name.
@@ -346,7 +368,7 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 			print("[ExtRegistry] Extension '%s': failed to load script '%s'" % [ext_name, script_path])
 			continue
 
-		register_operator(op_class, family, loaded_script, desc, ext_name, op_section)
+		register_operator(op_class, family, loaded_script, desc, ext_name, op_section, ext_dir)
 		registered_count += 1
 
 	_loaded_extensions.append(folder_name)
@@ -466,6 +488,8 @@ func _register_core_operators() -> void:
 	# ── TOPs: Scripting ─────────────────────────────────────────────────
 	_reg("CustomShaderTOP",  "TOP", CustomShaderTOP,
 		"User-editable GLSL shader with 4 texture inputs and uniforms.")
+	_reg("ComputeShaderTOP", "TOP", ComputeShaderTOP,
+		"GPU compute shader (GLSL 450) with storage image output and auto-detected parameters.")
 
 	# ── TOPs: 3D Rendering ──────────────────────────────────────────────
 	_reg("RenderTOP",       "TOP", RenderTOP,

@@ -248,23 +248,35 @@ func _build_help_content() -> void:
 ## Returns an array of matching file paths (may be empty).
 func _find_example_patches(family_dir: String) -> Array[String]:
 	var results: Array[String] = []
-	var dir_path := "%s/%s" % [HELP_DIR, family_dir]
+	var prefix := gn_node.node_type  # e.g. "noise_top"
+
+	# Scan core help directory
+	_scan_dir_for_patches("%s/%s" % [HELP_DIR, family_dir], prefix, results)
+
+	# Scan extension help directory (if this operator comes from an extension)
+	var registry := GNExtensionRegistry.instance()
+	var entry: GNExtensionRegistry.OperatorEntry = registry.get_entry_by_script(gn_node.get_script())
+	if entry != null and not entry.extension_dir.is_empty():
+		_scan_dir_for_patches(entry.extension_dir + "/help", prefix, results)
+
+	results.sort()
+	return results
+
+
+## Scans a single directory for .gnpatch files matching the node_type prefix.
+func _scan_dir_for_patches(dir_path: String, prefix: String, results: Array[String]) -> void:
 	var dir := DirAccess.open(dir_path)
 	if dir == null:
-		return results
-	var prefix := gn_node.node_type  # e.g. "noise_top"
+		return
 	dir.list_dir_begin()
 	var file_name := dir.get_next()
 	while not file_name.is_empty():
 		if not dir.current_is_dir() and file_name.ends_with(".gnpatch"):
-			# Match: filename starts with node_type followed by '_', '.', or is exactly node_type.gnpatch
-			var base := file_name.get_basename()  # strip .gnpatch
+			var base := file_name.get_basename()
 			if base == prefix or base.begins_with(prefix + "_"):
 				results.append("%s/%s" % [dir_path, file_name])
 		file_name = dir.get_next()
 	dir.list_dir_end()
-	results.sort()
-	return results
 
 
 ## Emits the example patch request when the user clicks an example button.
