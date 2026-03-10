@@ -600,6 +600,8 @@ func _register_core_operators() -> void:
 	# ── CHOPs: Output / Sinks ───────────────────────────────────────────
 	_reg("RecordCHOP",      "CHOP", RecordCHOP,
 		"Record CHOP channels over time to buffer. Save to CSV/JSON.")
+	_reg("AudioDeviceOutCHOP", "CHOP", AudioDeviceOutCHOP,
+		"Output CHOP channels to audio device as PCM audio.")
 
 	# ── CHOPs: Input Devices ────────────────────────────────────────────
 	_reg("KeyboardInCHOP",  "CHOP", KeyboardInCHOP,
@@ -748,6 +750,8 @@ func _register_core_operators() -> void:
 		"Skin (loft) multiple cross-sections into a surface mesh.")
 
 	# ── SOPs: Deformers (new) ──────────────────────────────────────────
+	_reg("SpringSOP",       "SOP", SpringSOP,
+		"Damped spring vertex deformer — vertices spring toward input positions.")
 	_reg("BendSOP",         "SOP", BendSOP,
 		"Bend geometry along an axis using circular arc deformation.")
 	_reg("TwistSOP",        "SOP", TwistSOP,
@@ -874,6 +878,8 @@ func _register_core_operators() -> void:
 		"Plays a numbered image sequence as animated CPU Image frames.")
 	_reg("WebcamIMG",       "IMG", WebcamIMG,
 		"Live webcam/camera feed as CPU Image. Chain → ImgToTOP for GPU.")
+	_reg("ScreenGrabIMG",   "IMG", ScreenGrabIMG,
+		"Capture viewport contents as CPU Image. Chain → ImgToTOP for GPU.")
 
 	# ── IMGs: Filters ───────────────────────────────────────────────────
 	_reg("BlurIMG",         "IMG", BlurIMG,
@@ -944,6 +950,10 @@ func _register_core_operators() -> void:
 		"Environment settings for 3D rendering — background, lighting, post-processing.")
 	_reg("InstanceCOMP",    "COMP", InstanceCOMP,
 		"MultiMeshInstance3D instancing — thousands of geometry copies in one draw call.")
+
+	# ── COMPs: Animation ────────────────────────────────────────────────
+	_reg("AnimationCOMP",   "COMP", AnimationCOMP,
+		"AnimationPlayer wrapper for keyframe animation on COMP transform properties.")
 
 	# ── COMPs: Scripting ────────────────────────────────────────────────
 	_reg("GenericScriptNode", "COMP", GenericScriptNode,

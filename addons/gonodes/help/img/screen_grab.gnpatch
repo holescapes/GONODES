@@ -1,0 +1,40 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"screengrab1": {
+			"type": "ScreenGrabIMG",
+			"position": [0, 100],
+			"parameters": {
+				"source": {"value": 0},
+				"res_x": {"value": 512},
+				"res_y": {"value": 512},
+				"active": {"value": true}
+			}
+		},
+		"imgtotop1": {
+			"type": "ImgToTOP",
+			"position": [400, 100],
+			"parameters": {}
+		},
+		"null1": {
+			"type": "NullTOP",
+			"position": [800, 100],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{"from": "screengrab1", "from_port": 0, "to": "imgtotop1", "to_port": 0},
+		{"from": "imgtotop1", "from_port": 0, "to": "null1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "ScreenGrabIMG\n\nCaptures the main viewport (or editor viewport) as a CPU Image.\nViewport-only — no OS-level desktop grab.\n\nChain → ImgToTOP to convert to GPU texture for the TOP pipeline.\nSet Source to 'Main Viewport' or 'Editor Viewport'.\nResolution controls the output size (resized from viewport).",
+			"position": [-50.0, -150.0],
+			"size": [550.0, 110.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

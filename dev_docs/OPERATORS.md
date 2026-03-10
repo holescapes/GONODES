@@ -999,13 +999,30 @@ Quantize image colors to a palette texture with optional Bayer dithering.
 
 ---
 
+#### ScreenGrabIMG
+
+Captures the main viewport (or editor viewport) as a CPU-side Image. Viewport-only — no OS-level desktop capture. Chain → ImgToTOP for GPU texture.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| source | Menu | Main Viewport | Main/Editor | Which viewport to capture |
+| res_x | Int | 512 | 1–4096 | Output width |
+| res_y | Int | 512 | 1–4096 | Output height |
+| active | Bool | true | — | Enable/disable capture |
+
+**No inputs.** Grabs viewport via `Viewport.get_texture().get_image()`, resizes on CPU. `time_dependent = true` — recooks every frame.
+
+**File:** `operators/img/screen_grab_img.gd`
+
+---
+
 ## CHOP — Channel Operators
 
 CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Array` with a name (e.g., "tx", "ty", "tz", "out"). Single-sample CHOPs act as real-time control signals. Multi-sample CHOPs carry waveform data, audio, or patterns.
 
 All CHOP data flows as `GNChannelData` — a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 52 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge.
+**Total: 53 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 1 audio output.
 
 ### Generators
 
@@ -1786,6 +1803,23 @@ Samples pixel values from a TOP texture as CHOP channels.
 
 ---
 
+#### AudioDeviceOutCHOP
+
+Outputs CHOP channel data to the audio system as PCM audio. Uses `AudioStreamGenerator` + `AudioStreamGeneratorPlayback` to push sample frames to speakers.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| active | Bool | false | — | Enable/disable audio output |
+| gain | Float | 1.0 | 0–10 | Output gain multiplier |
+| mix_rate | Float | 44100 | 8000–96000 | Audio sample rate (Hz) |
+| buffer_length | Float | 0.1 | 0.01–1 | Generator buffer length (seconds) |
+
+**Input:** `in` (CHOP — audio samples). Channels named `left`/`right` map to stereo; otherwise first 1–2 channels are used. Creates a dedicated AudioServer bus routed to Master. `time_dependent = true`.
+
+**File:** `operators/chop/audio_device_out_chop.gd`
+
+---
+
 ## DAT — Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
@@ -2179,7 +2213,7 @@ network_connect(nid, 0, "composite1", 1)
 
 SOPs produce and manipulate 3D geometry. The output type is `GNGeoData`, which wraps Godot's native `ArrayMesh`. SOPs leverage Godot's built-in mesh primitives (`BoxMesh`, `SphereMesh`, etc.) and `SurfaceTool` for procedural generation. Geometry flows through SOP chains and ultimately reaches a GeometryCOMP for 3D scene placement.
 
-**Total: 39 operators** — 9 generators, 20 filters, 6 combiners, 2 utility, 2 deformers.
+**Total: 40 operators** — 9 generators, 20 filters, 6 combiners, 2 utility, 3 deformers.
 
 ### Generators
 
@@ -2666,6 +2700,24 @@ Skin (loft) multiple cross-sections into a surface mesh.
 
 ---
 
+#### SpringSOP
+
+Damped spring vertex deformer. Each vertex maintains spring state (position + velocity) and oscillates toward the input rest positions. Creates "jelly" or lag-based vertex animation.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| stiffness | Float | 20.0 | 0.1–500 | Spring constant (higher = snappier) |
+| damping | Float | 4.0 | 0–50 | Damping coefficient (higher = less overshoot) |
+| mass | Float | 1.0 | 0.01–10 | Vertex mass (higher = slower) |
+| reset | Bool | false | — | Reset spring state |
+| max_displacement | Float | 10.0 | 0.01–100 | Clamp max displacement from target |
+
+**Input:** `in` (SOP). Uses semi-implicit Euler integration per vertex. Recalculates normals from deformed positions. `time_dependent = true`. Physics reference: `SpringCHOP`.
+
+**File:** `operators/sop/spring_sop.gd`
+
+---
+
 #### BendSOP
 
 Bend geometry along an axis using circular arc deformation.
@@ -2779,7 +2831,7 @@ COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNDat
 
 COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Godot's 3D rendering engine.
 
-**Total: 10 operators.**
+**Total: 11 operators.**
 
 > Note: SubNetworkNode, InTunnel, OutTunnel are internal system nodes.
 > NullCOMP, SwitchCOMP, EnvironmentCOMP, and GenericScriptNode are utility nodes.
@@ -3094,6 +3146,26 @@ func cook():
 
 ---
 
+#### AnimationCOMP
+
+AnimationPlayer wrapper for keyframe animation on COMP transform properties. Takes a COMP input, attaches an AnimationPlayer to its scene node, and drives start→end keyframe animation on position, rotation, and scale.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| active | Bool | true | — | Enable/disable animation |
+| speed | Float | 1.0 | -10–10 | Playback speed multiplier |
+| duration | Float | 2.0 | 0.01–600 | Animation length (seconds) |
+| loop_mode | Menu | Linear | None, Linear, Ping-Pong | Loop mode |
+| tx/ty/tz_start/end | Float | 0 | -100–100 | Translation keyframes |
+| rx/ry/rz_start/end | Float | 0/360 | -360–360 | Rotation keyframes (degrees) |
+| sx/sy/sz_start/end | Float | 1 | 0.001–100 | Scale keyframes |
+
+**Input:** `comp` (COMP). Creates Animation with position, rotation (quaternion), and scale tracks. Seeks to `current_time * speed` each cook. Rebuilds animation on parameter change (hash-based change detection). `time_dependent = true`.
+
+**File:** `operators/comp/animation_comp.gd`
+
+---
+
 ## MAT — Material Operators
 
 MATs produce materials for COMP use. Output type is `GNMaterialData`, wrapping Godot's `Material` base class. MATs connect to GeometryCOMP's material input to override the default PBR.
@@ -3189,11 +3261,11 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 | Family | Count | Operators |
 |--------|-------|-----------|
 | **TOP** | 59 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, ComputeShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, CHOPtoTOP, FileSave, Null, Switch, Window, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette |
-| **CHOP** | 52 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, OscOut, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, Record, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP |
+| **CHOP** | 53 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, OscOut, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioDeviceOut, Record, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP |
 | **DAT** | 25 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileSave, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind |
-| **SOP** | 50 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP |
-| **COMP** | 14 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance |
+| **SOP** | 51 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Spring, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP |
+| **COMP** | 15 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Animation |
 | **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
-| **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, FileSave, MovieOut, FFmpegOut |
+| **IMG** | 15 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, ScreenGrab, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, FileSave, MovieOut, FFmpegOut |
 | **Output** | 1 | Window |
-| **Total** | **221** | |
+| **Total** | **225** | |
