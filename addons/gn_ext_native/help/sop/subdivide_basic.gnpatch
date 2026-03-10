@@ -1,0 +1,68 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "subdivide1": {
+            "type": "SubdivideSOPNative",
+            "position": [450, 100],
+            "parameters": {
+                "iterations": {"value": 2}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [800, 300],
+            "parameters": {
+                "tx": {"value": 0},
+                "ty": {"value": 1},
+                "tz": {"value": 4}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowTOP",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "box1", "from_port": 0, "to": "subdivide1", "to_port": 0},
+        {"from": "subdivide1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Subdivide SOP (Native) — Uniform Subdivision\n\nEach triangle is split into 4 at edge midpoints.\n2 iterations on a box smooths it toward a sphere.\nNative C++ handles the combinatorial explosion.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

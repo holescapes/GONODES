@@ -1,0 +1,72 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lsystem1": {
+            "type": "LSystemSOPNative",
+            "position": [100, 100],
+            "parameters": {
+                "axiom": {"value": "F"},
+                "rule_a": {"value": "F=F[+F]F[-F]F"},
+                "rule_b": {"value": ""},
+                "rule_c": {"value": ""},
+                "iterations": {"value": 3},
+                "step_size": {"value": 1.0},
+                "angle": {"value": 25.7},
+                "tube_radius": {"value": 0.05},
+                "tube_sides": {"value": 6},
+                "taper": {"value": 0.7},
+                "gravity": {"value": 0.0}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [450, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [450, 300],
+            "parameters": {
+                "tx": {"value": 0},
+                "ty": {"value": 4},
+                "tz": {"value": 12}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [800, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowTOP",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lsystem1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "L-System SOP (Native) — Branching Tree\n\nClassic fractal branching with tube geometry.\nSet tube_radius to 0 for line primitives instead.\nTry different rules, e.g. F=FF+[+F-F-F]-[-F+F+F].",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

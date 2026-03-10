@@ -1,0 +1,72 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 100],
+            "parameters": {
+                "rows": {"value": 12},
+                "columns": {"value": 12}
+            }
+        },
+        "facet1": {
+            "type": "FacetSOPNative",
+            "position": [450, 100],
+            "parameters": {
+                "mode": {"value": 0},
+                "recompute_normals": {"value": true}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [800, 300],
+            "parameters": {
+                "tx": {"value": 0},
+                "ty": {"value": 0},
+                "tz": {"value": 4}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowTOP",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "sphere1", "from_port": 0, "to": "facet1", "to_port": 0},
+        {"from": "facet1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Facet SOP (Native) — Unique Points (Flat Shading)\n\nExpands shared vertices so every face gets its own\npoints and flat normals, giving a faceted look.\nSwitch mode to 'Consolidate' to merge nearby points.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

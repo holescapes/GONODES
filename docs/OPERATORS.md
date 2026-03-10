@@ -3459,7 +3459,9 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 
 ## Native Acceleration Extension (Optional)
 
-The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 6 CPU-heavy operators. These appear as separate operators in the palette under a "Native" section when the C++ binaries are compiled. Each native operator has an identical parameter interface to its GDScript counterpart and includes a pure-GDScript fallback for when the C++ library is unavailable.
+The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 16 CPU-heavy operators across two phases. These appear as separate operators in the palette under a "Native" section when the C++ binaries are compiled. Each native operator has an identical parameter interface to its GDScript counterpart and includes a pure-GDScript fallback for when the C++ library is unavailable.
+
+### Phase 1 — Core Operators (6)
 
 | Native Operator | Replaces | Family | C++ Class |
 |----------------|----------|--------|-----------|
@@ -3469,5 +3471,20 @@ The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 6
 | ParticleSOPNative | ParticleSOP | SOP | GNNativeParticle |
 | MetaballSOPNative | MetaballSOP | SOP | GNNativeMetaball |
 | PolyReduceSOPNative | PolyReduceSOP | SOP | GNNativePolyReduce |
+
+### Phase 2 — Extended Operators (10)
+
+| Native Operator | Replaces | Family | C++ Class | Algorithm |
+|----------------|----------|--------|-----------|-----------|
+| IsoSurfaceSOPNative | IsoSurfaceSOP | SOP | GNNativeIsoSurface | Marching cubes with 5 implicit field types (Gyroid, Schwarz-P/D, Sphere, Torus) |
+| RaySOPNative | RaySOP | SOP | GNNativeRay | Möller–Trumbore ray-triangle intersection, 7 direction modes |
+| FacetSOPNative | FacetSOP | SOP | GNNativeFacet | Unique points (flat shading) / spatial-hash consolidate |
+| FuseSOPNative | FuseSOP | SOP | GNNativeFuse | Spatial-hash vertex welding within threshold |
+| SubdivideSOPNative | SubdivideSOP | SOP | GNNativeSubdivide | Uniform triangle 1→4 subdivision (1-4 iterations) |
+| CopySOPNative | CopySOP | SOP | GNNativeCopy | Copy-to-points instancing with normal alignment + pscale |
+| LSystemSOPNative | LSystemSOP | SOP | GNNativeLSystem | Grammar rewriting + turtle interpretation, line or tube mesh |
+| SpringSOPNative | SpringSOP | SOP | GNNativeSpring | Semi-implicit Euler damped spring per-vertex deformer |
+| EdgeDetectIMGNative | EdgeDetectIMG | IMG | GNNativeEdgeDetect | Sobel/Prewitt 3×3 convolution, gradient direction color mode |
+| SmoothCHOPNative | SmoothCHOP | CHOP | GNNativeSmooth | Biquad Butterworth IIR filter (LP/HP/BP) with per-channel state |
 
 **Build requirement:** Compile with `scons platform=<os> target=template_debug` in `addons/gn_native/` (requires godot-cpp). Rename `gn_native.gdextension.disabled` → `gn_native.gdextension` after building. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and skips the extension if they're missing.

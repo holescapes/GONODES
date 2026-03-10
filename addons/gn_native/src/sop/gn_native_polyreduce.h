@@ -30,8 +30,8 @@ public:
                        bool preserve_boundary,
                        double boundary_weight);
 
-private:
     // Symmetric 4×4 quadric stored as 10 doubles (upper triangle row-major)
+    // Must be public so free helper functions in the .cpp can use it by name.
     struct Quadric {
         double q[10] = {};
         void add(const Quadric &o) {
@@ -51,8 +51,7 @@ private:
             return qr;
         }
     };
-
-    static int _resolve(int v, int *remap);
+private:    static int _resolve(int v, int *remap);
     static uint64_t _edge_key(int a, int b);
 };
 

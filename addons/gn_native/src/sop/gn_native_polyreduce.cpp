@@ -113,8 +113,8 @@ Dictionary GNNativePolyReduce::process(const PackedVector3Array &p_positions,
     PackedInt32Array triangles;
 
     if (p_indices.size() >= 3) {
-        positions = p_positions.duplicate();
-        triangles = p_indices.duplicate();
+        positions = p_positions;
+        triangles = p_indices;
     } else {
         // Non-indexed — weld
         WeldResult wr = _weld_vertices(p_positions);

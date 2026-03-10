@@ -21,7 +21,7 @@ env = SConscript("godot-cpp/SConstruct")
 # ------------------------------------------------------------------
 env.Append(CPPPATH=["src/"])
 
-sources = Glob("src/*.cpp") + Glob("src/sop/*.cpp") + Glob("src/img/*.cpp")
+sources = Glob("src/*.cpp") + Glob("src/sop/*.cpp") + Glob("src/img/*.cpp") + Glob("src/chop/*.cpp")
 
 # ------------------------------------------------------------------
 # Output library

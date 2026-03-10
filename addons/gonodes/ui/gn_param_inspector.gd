@@ -175,8 +175,11 @@ func inspect(node: GNNode) -> void:
 	var family_name := GNFamily.get_family_name(node.family)
 	var family_color := GNFamily.get_color(node.family)
 	_header_label.text = "%s" % node.id
-	_status_label.text = "%s  |  %s  |  %din %dout" % [
+	var _script := node.get_script()
+	var _is_native := _script != null and (_script as GDScript).resource_path.contains("gn_ext_native")
+	_status_label.text = "%s  |  %s%s  |  %din %dout" % [
 		family_name, node.node_type,
+		" [native]" if _is_native else "",
 		node.input_ports.size(), node.output_ports.size()]
 	_family_bar.color = family_color
 

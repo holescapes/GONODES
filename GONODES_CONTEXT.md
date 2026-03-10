@@ -984,24 +984,40 @@ GONODES/
 │       ├── shaders/                    # 10 pre-converted .gdshader files
 │       └── operators/top/
 │   └── gn_ext_native/                 # ← Native Acceleration extension (GDScript wrappers)
-│       ├── gn_extension.cfg            # Manifest: 6 operators, depends on all 6 C++ classes
+│       ├── gn_extension.cfg            # Manifest: 16 operators (Phase 1 + Phase 2)
 │       ├── README.md
+│       ├── help/
+│       │   ├── img/                         # Help patches for IMG native ops
+│       │   ├── sop/                         # Help patches for SOP native ops
+│       │   └── chop/                        # Help patches for CHOP native ops
 │       └── operators/
 │           ├── img/
 │           │   ├── blur_img_native.gd       # BlurIMGNative — delegates to GNNativeBlur
 │           │   ├── noise_img_native.gd      # NoiseIMGNative — delegates to GNNativeNoise
-│           │   └── pixel_sort_img_native.gd # PixelSortIMGNative — delegates to GNNativePixelSort
-│           └── sop/
-│               ├── particle_sop_native.gd   # ParticleSOPNative — delegates to GNNativeParticle
-│               ├── metaball_sop_native.gd   # MetaballSOPNative — delegates to GNNativeMetaball
-│               └── polyreduce_sop_native.gd # PolyReduceSOPNative — delegates to GNNativePolyReduce
+│           │   ├── pixel_sort_img_native.gd # PixelSortIMGNative — delegates to GNNativePixelSort
+│           │   └── edge_detect_img_native.gd # EdgeDetectIMGNative — delegates to GNNativeEdgeDetect
+│           ├── sop/
+│           │   ├── particle_sop_native.gd   # ParticleSOPNative — delegates to GNNativeParticle
+│           │   ├── metaball_sop_native.gd   # MetaballSOPNative — delegates to GNNativeMetaball
+│           │   ├── polyreduce_sop_native.gd # PolyReduceSOPNative — delegates to GNNativePolyReduce
+│           │   ├── isosurface_sop_native.gd # IsoSurfaceSOPNative — delegates to GNNativeIsoSurface
+│           │   ├── ray_sop_native.gd        # RaySOPNative — delegates to GNNativeRay
+│           │   ├── facet_sop_native.gd      # FacetSOPNative — delegates to GNNativeFacet
+│           │   ├── fuse_sop_native.gd       # FuseSOPNative — delegates to GNNativeFuse
+│           │   ├── subdivide_sop_native.gd  # SubdivideSOPNative — delegates to GNNativeSubdivide
+│           │   ├── copy_sop_native.gd       # CopySOPNative — delegates to GNNativeCopy
+│           │   ├── lsystem_sop_native.gd    # LSystemSOPNative — delegates to GNNativeLSystem
+│           │   └── spring_sop_native.gd     # SpringSOPNative — delegates to GNNativeSpring
+│           └── chop/
+│               └── smooth_chop_native.gd    # SmoothCHOPNative — delegates to GNNativeSmooth
 │   └── gn_native/                     # ← C++ GDExtension source (requires godot-cpp + scons build)
 │       ├── gn_native.gdextension.disabled  # Renamed until binaries are compiled
 │       ├── SConstruct                      # SCons build file
 │       └── src/
-│           ├── register_types.cpp/.h        # Entry point registering all 6 C++ classes
-│           ├── img/                         # GNNativeBlur, GNNativeNoise, GNNativePixelSort
-│           └── sop/                         # GNNativeParticle, GNNativeMetaball, GNNativePolyReduce
+│           ├── register_types.cpp/.h        # Entry point registering all 16 C++ classes
+│           ├── img/                         # GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
+│           ├── sop/                         # GNNativeParticle, GNNativeMetaball, GNNativePolyReduce + 8 Phase 2 SOPs
+│           └── chop/                        # GNNativeSmooth
 │           ├── shadertoy_base_top.gd   # Abstract base for pre-baked Shadertoy TOPs
 │           ├── shadertoy_url_top.gd    # ShadertoyURLTOP — runtime paste/fetch translator
 │           ├── st_seascape_top.gd      # Generator: procedural ocean
@@ -1707,9 +1723,11 @@ GONODES/
 ### Performance & GPU Optimizations (Post-Phase 7)
 - [ ] Multi-threaded cook engine
 - [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
-- [x] **GDExtension (C++) hot-path migration — Phase 1 complete** (source written, binaries not yet compiled):
+- [x] **GDExtension (C++) hot-path migration — Phase 1 & 2 complete** (source written, binaries not yet compiled):
   - **Architecture:** C++ GDExtension provides `RefCounted` processor classes (e.g., `GNNativeBlur`) with `process()` methods. GDScript wrapper operators (e.g., `BlurIMGNative`) delegate hot loops to C++ when available, falling back to pure GDScript otherwise. Extension pattern: `addons/gn_native/` for C++ source, `addons/gn_ext_native/` for GDScript wrappers + `gn_extension.cfg`.
-  - **6 operators ported (source):** 3 IMG (GNNativeBlur, GNNativeNoise, GNNativePixelSort) + 3 SOP (GNNativeParticle, GNNativeMetaball, GNNativePolyReduce). Each has `.cpp` + `.h` files in `addons/gn_native/src/img/` and `src/sop/`.
+  - **Phase 1 — 6 operators ported (source):** 3 IMG (GNNativeBlur, GNNativeNoise, GNNativePixelSort) + 3 SOP (GNNativeParticle, GNNativeMetaball, GNNativePolyReduce). Each has `.cpp` + `.h` files in `addons/gn_native/src/img/` and `src/sop/`.
+  - **Phase 2 — 10 operators ported (source):** 8 SOP (GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring) + 1 IMG (GNNativeEdgeDetect) + 1 CHOP (GNNativeSmooth). Files in `src/sop/`, `src/img/`, `src/chop/`.
+  - **Total: 16 native operators** across 3 families (4 IMG, 11 SOP, 1 CHOP), 16 help patches.
   - **Build:** Requires godot-cpp submodule + `scons platform=<os> target=template_debug`. `.gdextension` file renamed to `.disabled` until binaries exist.
   - **IMG operators (highest priority):** Pixel loops (`get_pixel`/`set_pixel` over 262K+ pixels) are the biggest GDScript bottleneck. BlurIMG, EdgeDetectIMG, PixelSortIMG, NoiseIMG all iterate every pixel. Port `_cook()` internals to C++ with direct `uint8_t*` pointer arithmetic. Alternative: rewrite as GPU compute shaders (even faster than C++ for batch pixel ops).
   - **SOP operators (high priority):** Vertex-heavy mesh construction (SubdivideSOP, NoiseSOP, BooleanSOP) scales with vertex count. SurfaceTool overhead in GDScript is significant at 10K+ verts. Port vertex loops to C++ via GDExtension.
@@ -4128,7 +4146,7 @@ Before loading an extension's operators, the registry checks `ClassDB.class_exis
 |-----------|--------|-------------|-----------|--------|
 | FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | ✅ Done |
 | Shadertoy | `gn_ext_shadertoy` | — | 5 generator TOPs, 5 effect TOPs, ShadertoyURLTOP | ✅ Done |
-| Native Accel | `gn_ext_native` + `gn_native` | GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeParticle, GNNativeMetaball, GNNativePolyReduce | BlurIMGNative, NoiseIMGNative, PixelSortIMGNative, ParticleSOPNative, MetaballSOPNative, PolyReduceSOPNative | ✅ Source done, binaries not compiled |
+| Native Accel | `gn_ext_native` + `gn_native` | 16 C++ processor classes | 16 native operators (4 IMG, 11 SOP, 1 CHOP) | ✅ Source done (Phase 1 + 2), binaries not compiled |
 | Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned |
 | NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned |
 | Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP | Planned |
@@ -4417,25 +4435,39 @@ Deep comparison of GONODES vs TouchDesigner operator inventory:
 
 ### 32.3 C++ GDExtension Native Acceleration Extension
 
-Built a complete C++ GDExtension source tree for 6 CPU-heavy operators, plus GDScript wrapper operators with automatic fallback.
+Built a complete C++ GDExtension source tree for 16 CPU-heavy operators (Phase 1 + Phase 2), plus GDScript wrapper operators with automatic fallback.
 
 **C++ source (`addons/gn_native/`):**
 - `SConstruct` — SCons build file using godot-cpp
-- `src/register_types.cpp` + `.h` — entry point registering 6 classes: GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeParticle, GNNativeMetaball, GNNativePolyReduce
-- `src/img/` — 3 IMG processors (`gn_native_blur.cpp/.h`, `gn_native_noise.cpp/.h`, `gn_native_pixel_sort.cpp/.h`)
-- `src/sop/` — 3 SOP processors (`gn_native_particle.cpp/.h`, `gn_native_metaball.cpp/.h`, `gn_native_polyreduce.cpp/.h`)
+- `src/register_types.cpp` + `.h` — entry point registering 16 classes across 3 families
+- `src/img/` — 4 IMG processors: GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
+- `src/sop/` — 11 SOP processors: GNNativeParticle, GNNativeMetaball, GNNativePolyReduce, GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring
+- `src/chop/` — 1 CHOP processor: GNNativeSmooth
 - `.gdextension` renamed to `.gdextension.disabled` to suppress missing binary errors until compiled
 
-**GDScript wrappers (`addons/gn_ext_native/`):**
-- `gn_extension.cfg` — registers 6 operators under "Native" section, depends on all 6 C++ classes
-- `operators/img/blur_img_native.gd` (BlurIMGNative) — delegates to `GNNativeBlur.process()`, GDScript fallback
-- `operators/img/noise_img_native.gd` (NoiseIMGNative) — delegates to `GNNativeNoise.process()`, GDScript fallback
-- `operators/img/pixel_sort_img_native.gd` (PixelSortIMGNative) — delegates to `GNNativePixelSort.process()`, GDScript fallback
-- `operators/sop/particle_sop_native.gd` (ParticleSOPNative) — stateful: `set_emitter()` + `step()`, GDScript fallback
-- `operators/sop/metaball_sop_native.gd` (MetaballSOPNative) — delegates to `GNNativeMetaball.process()`, GDScript fallback
-- `operators/sop/polyreduce_sop_native.gd` (PolyReduceSOPNative) — delegates to `GNNativePolyReduce.process()`, GDScript fallback
+**Phase 1 GDScript wrappers (6):**
+- `operators/img/blur_img_native.gd` (BlurIMGNative) — delegates to `GNNativeBlur.process()`
+- `operators/img/noise_img_native.gd` (NoiseIMGNative) — delegates to `GNNativeNoise.process()`
+- `operators/img/pixel_sort_img_native.gd` (PixelSortIMGNative) — delegates to `GNNativePixelSort.process()`
+- `operators/sop/particle_sop_native.gd` (ParticleSOPNative) — stateful: `set_emitter()` + `step()`
+- `operators/sop/metaball_sop_native.gd` (MetaballSOPNative) — delegates to `GNNativeMetaball.process()`
+- `operators/sop/polyreduce_sop_native.gd` (PolyReduceSOPNative) — delegates to `GNNativePolyReduce.process()`
 
-**Architecture pattern:** C++ `RefCounted` processor classes bound via `ClassDB::bind_method`. GDScript wrappers check `ClassDB.class_exists("GNNativeBlur")` at init — if available, instantiate and delegate; otherwise, run equivalent GDScript logic. Extension registry dependency guards skip the entire `gn_ext_native` extension when C++ isn't compiled.
+**Phase 2 GDScript wrappers (10):**
+- `operators/sop/isosurface_sop_native.gd` (IsoSurfaceSOPNative) — marching cubes iso-surface with 5 field types
+- `operators/sop/ray_sop_native.gd` (RaySOPNative) — Möller–Trumbore ray-cast projection
+- `operators/sop/facet_sop_native.gd` (FacetSOPNative) — unique/consolidate with spatial hash
+- `operators/sop/fuse_sop_native.gd` (FuseSOPNative) — vertex welding within threshold
+- `operators/sop/subdivide_sop_native.gd` (SubdivideSOPNative) — uniform 1→4 subdivision
+- `operators/sop/copy_sop_native.gd` (CopySOPNative) — copy-to-points with normal alignment + pscale
+- `operators/sop/lsystem_sop_native.gd` (LSystemSOPNative) — grammar rewriting + turtle, line/tube mesh
+- `operators/sop/spring_sop_native.gd` (SpringSOPNative) — semi-implicit Euler spring deformer
+- `operators/img/edge_detect_img_native.gd` (EdgeDetectIMGNative) — Sobel/Prewitt convolution
+- `operators/chop/smooth_chop_native.gd` (SmoothCHOPNative) — biquad Butterworth IIR filter
+
+**Help patches:** 16 `.gnpatch` files in `help/sop/`, `help/img/`, `help/chop/` — one per operator.
+
+**Architecture pattern:** C++ `RefCounted` processor classes bound via `ClassDB::bind_method`. GDScript wrappers check `ClassDB.class_exists("GNNativeXxx")` at init — if available, instantiate and delegate; otherwise, return null for fallback to core GDScript operator. Extension manifest (`gn_extension.cfg`) registers all 16 operators under "Native" section.
 
 **Bugs fixed during implementation:**
 - `create_menu()` does not exist on GNParameter — fixed to `create_int()` in NoiseIMGNative and PixelSortIMGNative

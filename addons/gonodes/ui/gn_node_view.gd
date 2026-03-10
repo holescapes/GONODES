@@ -52,7 +52,10 @@ func setup(node: GNNode) -> void:
 	name = node.id
 	title = node.id
 	position_offset = node.graph_position
-	tooltip_text = "%s (%s)" % [node.node_type, GNFamily.get_family_name(node.family)]
+	var _script := node.get_script()
+	var _is_native := _script != null and (_script as GDScript).resource_path.contains("gn_ext_native")
+	tooltip_text = "%s (%s)%s" % [node.node_type, GNFamily.get_family_name(node.family),
+		" [Native]" if _is_native else ""]
 
 	# Sub-network tooltip: show inner node count + dive-in hint
 	if gn_node is _SubNetworkNodeScript and gn_node.inner_network != null:

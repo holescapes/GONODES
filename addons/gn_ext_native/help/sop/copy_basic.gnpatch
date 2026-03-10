@@ -1,0 +1,84 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [100, 100],
+            "parameters": {
+                "sizex": {"value": 0.5},
+                "sizey": {"value": 0.5},
+                "sizez": {"value": 0.5}
+            }
+        },
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 300],
+            "parameters": {
+                "rows": {"value": 8},
+                "columns": {"value": 8},
+                "radius": {"value": 2.0}
+            }
+        },
+        "copy1": {
+            "type": "CopySOPNative",
+            "position": [450, 100],
+            "parameters": {
+                "align_to_normal": {"value": true},
+                "scale": {"value": 1.0},
+                "use_point_scale": {"value": false}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [800, 300],
+            "parameters": {
+                "tx": {"value": 0},
+                "ty": {"value": 1},
+                "tz": {"value": 6}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowTOP",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "box1", "from_port": 0, "to": "copy1", "to_port": 0},
+        {"from": "sphere1", "from_port": 0, "to": "copy1", "to_port": 1},
+        {"from": "copy1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Copy SOP (Native) — Boxes on Sphere Vertices\n\nSmall boxes instanced onto each vertex of a sphere,\naligned to sphere normals. Toggle 'align_to_normal'\noff for axis-aligned copies.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}
