@@ -1,27 +1,147 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"joint1": {
-			"type": "JointCOMP",
-			"position": [200, 100],
-			"parameters": {
-				"tx": {"value": 0.0},
-				"ty": {"value": 3.0},
-				"tz": {"value": 0.0},
-				"joint_type": {"value": 1}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Joint COMP — Hinge Constraint\n\nHinge joint at (0, 3, 0).\njoint_type: 0=Pin, 1=Hinge, 2=Slider,\n3=ConeTwist, 4=6DOF.\nConnect to RigidBody COMPs as inputs.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 120.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "joint1":  {
+                                 "type":  "JointCOMP",
+                                 "position":  [
+                                                  200,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "tx":  {
+                                                               "value":  0.0
+                                                           },
+                                                    "ty":  {
+                                                               "value":  3.0
+                                                           },
+                                                    "tz":  {
+                                                               "value":  0.0
+                                                           },
+                                                    "joint_type":  {
+                                                                       "value":  1
+                                                                   }
+                                                }
+                             },
+                  "window1":  {
+                                  "position":  [
+                                                   1450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "box_view":  {
+                                   "type":  "BoxSOP",
+                                   "position":  [
+                                                    500,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1100,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    800,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "box_view",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Joint COMP — Hinge Constraint\n\nHinge joint at (0, 3, 0).\njoint_type: 0=Pin, 1=Hinge, 2=Slider,\n3=ConeTwist, 4=6DOF.\nConnect to RigidBody COMPs as inputs.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         120.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

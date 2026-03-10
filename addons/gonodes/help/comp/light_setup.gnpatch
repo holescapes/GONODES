@@ -1,43 +1,198 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"light_dir": {
-			"type": "LightCOMP",
-			"position": [200, 100],
-			"parameters": {
-				"type": {"value": 0},
-				"rx": {"value": -45.0},
-				"ry": {"value": 30.0},
-				"color": {"value": {"_type": "Color", "r": 1.0, "g": 0.95, "b": 0.85, "a": 1.0}},
-				"energy": {"value": 1.5},
-				"shadows": {"value": true}
-			}
-		},
-		"light_omni": {
-			"type": "LightCOMP",
-			"position": [200, 350],
-			"parameters": {
-				"type": {"value": 1},
-				"tx": {"value": 2.0},
-				"ty": {"value": 3.0},
-				"tz": {"value": 0.0},
-				"color": {"value": {"_type": "Color", "r": 0.5, "g": 0.7, "b": 1.0, "a": 1.0}},
-				"energy": {"value": 3.0},
-				"omni_range": {"value": 10.0},
-				"shadows": {"value": true}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Light COMP — Directional + Omni\n\nWarm directional sun light (angled, shadows on).\nBlue omni point light at (2, 3, 0) with range 10.\ntype 0=Directional, 1=Omni, 2=Spot.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "light_dir":  {
+                                    "type":  "LightCOMP",
+                                    "position":  [
+                                                     200,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "type":  {
+                                                                    "value":  0
+                                                                },
+                                                       "rx":  {
+                                                                  "value":  -45.0
+                                                              },
+                                                       "ry":  {
+                                                                  "value":  30.0
+                                                              },
+                                                       "color":  {
+                                                                     "value":  {
+                                                                                   "_type":  "Color",
+                                                                                   "r":  1.0,
+                                                                                   "g":  0.95,
+                                                                                   "b":  0.85,
+                                                                                   "a":  1.0
+                                                                               }
+                                                                 },
+                                                       "energy":  {
+                                                                      "value":  1.5
+                                                                  },
+                                                       "shadows":  {
+                                                                       "value":  true
+                                                                   }
+                                                   }
+                                },
+                  "light_omni":  {
+                                     "type":  "LightCOMP",
+                                     "position":  [
+                                                      200,
+                                                      350
+                                                  ],
+                                     "parameters":  {
+                                                        "type":  {
+                                                                     "value":  1
+                                                                 },
+                                                        "tx":  {
+                                                                   "value":  2.0
+                                                               },
+                                                        "ty":  {
+                                                                   "value":  3.0
+                                                               },
+                                                        "tz":  {
+                                                                   "value":  0.0
+                                                               },
+                                                        "color":  {
+                                                                      "value":  {
+                                                                                    "_type":  "Color",
+                                                                                    "r":  0.5,
+                                                                                    "g":  0.7,
+                                                                                    "b":  1.0,
+                                                                                    "a":  1.0
+                                                                                }
+                                                                  },
+                                                        "energy":  {
+                                                                       "value":  3.0
+                                                                   },
+                                                        "omni_range":  {
+                                                                           "value":  10.0
+                                                                       },
+                                                        "shadows":  {
+                                                                        "value":  true
+                                                                    }
+                                                    }
+                                 },
+                  "window1":  {
+                                  "position":  [
+                                                   1450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "box_view":  {
+                                   "type":  "BoxSOP",
+                                   "position":  [
+                                                    500,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1100,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    800,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "box_view",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Light COMP — Directional + Omni\n\nWarm directional sun light (angled, shadows on).\nBlue omni point light at (2, 3, 0) with range 10.\ntype 0=Directional, 1=Omni, 2=Spot.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

@@ -1,26 +1,100 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"web1": {
-			"type": "WebDAT",
-			"position": [200, 100],
-			"parameters": {
-				"url": {"value": "https://httpbin.org/get"},
-				"method": {"value": 0},
-				"auto_parse": {"value": true}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Web DAT — HTTP GET\n\nFetches data from a URL via HTTP.\nAuto-parses JSON responses into tables.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 80.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "web1":  {
+                               "type":  "WebDAT",
+                               "position":  [
+                                                200,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "url":  {
+                                                              "value":  "https://httpbin.org/get"
+                                                          },
+                                                  "method":  {
+                                                                 "value":  0
+                                                             },
+                                                  "auto_parse":  {
+                                                                     "value":  true
+                                                                 }
+                                              }
+                           },
+                  "window1":  {
+                                  "position":  [
+                                                   900,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "text_view":  {
+                                    "type":  "TextTOP",
+                                    "position":  [
+                                                     550,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "resolution":  {
+                                                                          "value":  {
+                                                                                        "_type":  "Vector2i",
+                                                                                        "x":  512,
+                                                                                        "y":  512
+                                                                                    }
+                                                                      },
+                                                       "text":  {
+                                                                    "value":  "WebDAT output"
+                                                                },
+                                                       "font_size":  {
+                                                                         "value":  24
+                                                                     }
+                                                   }
+                                }
+              },
+    "connections":  [
+                        {
+                            "from":  "web1",
+                            "from_port":  0,
+                            "to":  "text_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "text_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Web DAT — HTTP GET\n\nFetches data from a URL via HTTP.\nAuto-parses JSON responses into tables.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         80.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

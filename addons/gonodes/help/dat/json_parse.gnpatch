@@ -1,26 +1,100 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"json1": {
-			"type": "JSONDAT",
-			"position": [200, 100],
-			"parameters": {
-				"mode": {"value": 0},
-				"json_string": {"value": "[{\"name\":\"Alice\",\"score\":95},{\"name\":\"Bob\",\"score\":87}]"},
-				"pretty": {"value": true}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "JSON DAT — Parse Mode\n\nParses a JSON array-of-objects into table rows.\nEach key becomes a column header.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 80.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "json1":  {
+                                "type":  "JSONDAT",
+                                "position":  [
+                                                 200,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "mode":  {
+                                                                "value":  0
+                                                            },
+                                                   "json_string":  {
+                                                                       "value":  "[{\"name\":\"Alice\",\"score\":95},{\"name\":\"Bob\",\"score\":87}]"
+                                                                   },
+                                                   "pretty":  {
+                                                                  "value":  true
+                                                              }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   900,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "text_view":  {
+                                    "type":  "TextTOP",
+                                    "position":  [
+                                                     550,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "resolution":  {
+                                                                          "value":  {
+                                                                                        "_type":  "Vector2i",
+                                                                                        "x":  512,
+                                                                                        "y":  512
+                                                                                    }
+                                                                      },
+                                                       "text":  {
+                                                                    "value":  "JSONDAT output"
+                                                                },
+                                                       "font_size":  {
+                                                                         "value":  24
+                                                                     }
+                                                   }
+                                }
+              },
+    "connections":  [
+                        {
+                            "from":  "json1",
+                            "from_port":  0,
+                            "to":  "text_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "text_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "JSON DAT — Parse Mode\n\nParses a JSON array-of-objects into table rows.\nEach key becomes a column header.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         80.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

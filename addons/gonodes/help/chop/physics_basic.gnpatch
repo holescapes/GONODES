@@ -1,34 +1,113 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"physics1": {
-			"type": "PhysicsCHOP",
-			"position": [100, 100],
-			"parameters": {
-				"position": {"value": true},
-				"rotation": {"value": true},
-				"linear_vel": {"value": true},
-				"speed": {"value": true}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [450, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "physics1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Physics CHOP — Body Data\n\nOutputs position, rotation, velocity, and speed\nfrom a connected physics COMP (RigidBody, etc.).\nConnect a COMP input to read its physics state.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 110.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "physics1":  {
+                                   "type":  "PhysicsCHOP",
+                                   "position":  [
+                                                    100,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "position":  {
+                                                                       "value":  true
+                                                                   },
+                                                      "rotation":  {
+                                                                       "value":  true
+                                                                   },
+                                                      "linear_vel":  {
+                                                                         "value":  true
+                                                                     },
+                                                      "speed":  {
+                                                                    "value":  true
+                                                                }
+                                                  }
+                               },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "physics1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Physics CHOP — Body Data\n\nOutputs position, rotation, velocity, and speed\nfrom a connected physics COMP (RigidBody, etc.).\nConnect a COMP input to read its physics state.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         110.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

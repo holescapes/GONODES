@@ -1,32 +1,107 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"ramp1": {
-			"type": "RampCHOP",
-			"position": [100, 100],
-			"parameters": {
-				"samples": {"value": 100},
-				"count": {"value": 2}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [450, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "ramp1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Ramp CHOP — Curve Evaluation\n\nEvaluates 2 ramp curves over 100 samples.\nEdit the ramp widgets to shape custom curves.\nUseful for lookup tables and animation profiles.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 110.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "ramp1":  {
+                                "type":  "RampCHOP",
+                                "position":  [
+                                                 100,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "samples":  {
+                                                                   "value":  100
+                                                               },
+                                                   "count":  {
+                                                                 "value":  2
+                                                             }
+                                               }
+                            },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "ramp1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Ramp CHOP — Curve Evaluation\n\nEvaluates 2 ramp curves over 100 samples.\nEdit the ramp widgets to shape custom curves.\nUseful for lookup tables and animation profiles.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         110.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

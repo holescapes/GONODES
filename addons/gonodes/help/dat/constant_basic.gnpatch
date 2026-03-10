@@ -1,35 +1,127 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"const1": {
-			"type": "ConstantDAT",
-			"position": [200, 100],
-			"parameters": {
-				"col0": {"value": "name"},
-				"col1": {"value": "value"},
-				"col2": {"value": "unit"},
-				"r0c0": {"value": "speed"},
-				"r0c1": {"value": "3.14"},
-				"r0c2": {"value": "m/s"},
-				"r1c0": {"value": "mass"},
-				"r1c1": {"value": "1.5"},
-				"r1c2": {"value": "kg"},
-				"r2c0": {"value": "force"},
-				"r2c1": {"value": "9.81"},
-				"r2c2": {"value": "N"}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Constant DAT — Spreadsheet\n\n3×3 table with headers: name, value, unit.\nUp to 4 columns × 4 rows of static data.\nGreat for configuration and lookup tables.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "const1":  {
+                                 "type":  "ConstantDAT",
+                                 "position":  [
+                                                  200,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "col0":  {
+                                                                 "value":  "name"
+                                                             },
+                                                    "col1":  {
+                                                                 "value":  "value"
+                                                             },
+                                                    "col2":  {
+                                                                 "value":  "unit"
+                                                             },
+                                                    "r0c0":  {
+                                                                 "value":  "speed"
+                                                             },
+                                                    "r0c1":  {
+                                                                 "value":  "3.14"
+                                                             },
+                                                    "r0c2":  {
+                                                                 "value":  "m/s"
+                                                             },
+                                                    "r1c0":  {
+                                                                 "value":  "mass"
+                                                             },
+                                                    "r1c1":  {
+                                                                 "value":  "1.5"
+                                                             },
+                                                    "r1c2":  {
+                                                                 "value":  "kg"
+                                                             },
+                                                    "r2c0":  {
+                                                                 "value":  "force"
+                                                             },
+                                                    "r2c1":  {
+                                                                 "value":  "9.81"
+                                                             },
+                                                    "r2c2":  {
+                                                                 "value":  "N"
+                                                             }
+                                                }
+                             },
+                  "window1":  {
+                                  "position":  [
+                                                   900,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "text_view":  {
+                                    "type":  "TextTOP",
+                                    "position":  [
+                                                     550,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "resolution":  {
+                                                                          "value":  {
+                                                                                        "_type":  "Vector2i",
+                                                                                        "x":  512,
+                                                                                        "y":  512
+                                                                                    }
+                                                                      },
+                                                       "text":  {
+                                                                    "value":  "ConstantDAT output"
+                                                                },
+                                                       "font_size":  {
+                                                                         "value":  24
+                                                                     }
+                                                   }
+                                }
+              },
+    "connections":  [
+                        {
+                            "from":  "const1",
+                            "from_port":  0,
+                            "to":  "text_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "text_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Constant DAT — Spreadsheet\n\n3×3 table with headers: name, value, unit.\nUp to 4 columns × 4 rows of static data.\nGreat for configuration and lookup tables.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

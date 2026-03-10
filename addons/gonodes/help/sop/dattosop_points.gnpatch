@@ -1,41 +1,168 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"constant1": {
-			"type": "ConstantDAT",
-			"position": [100, 100],
-			"parameters": {
-				"rows": {"value": 5},
-				"cols": {"value": 3}
-			}
-		},
-		"dattosop1": {
-			"type": "DATtoSOP",
-			"position": [400, 100],
-			"parameters": {
-				"mode": {"value": 0},
-				"max_rows": {"value": 10000}
-			}
-		},
-		"null1": {
-			"type": "NullSOP",
-			"position": [700, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "constant1", "from_port": 0, "to": "dattosop1", "to_port": 0},
-		{"from": "dattosop1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "DATtoSOP — Table to Points\n\nConverts DAT table rows into SOP point geometry.\nColumns x,y,z (or col 0,1,2) map to vertex positions.\nMode = Points creates individual vertices; Lines connects them.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "constant1":  {
+                                    "type":  "ConstantDAT",
+                                    "position":  [
+                                                     100,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "rows":  {
+                                                                    "value":  5
+                                                                },
+                                                       "cols":  {
+                                                                    "value":  3
+                                                                }
+                                                   }
+                                },
+                  "dattosop1":  {
+                                    "type":  "DATtoSOP",
+                                    "position":  [
+                                                     400,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "mode":  {
+                                                                    "value":  0
+                                                                },
+                                                       "max_rows":  {
+                                                                        "value":  10000
+                                                                    }
+                                                   }
+                                },
+                  "null1":  {
+                                "type":  "NullSOP",
+                                "position":  [
+                                                 700,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1650,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    1000,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    1000,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1300,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  }
+              },
+    "connections":  [
+                        {
+                            "from":  "constant1",
+                            "from_port":  0,
+                            "to":  "dattosop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "dattosop1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "DATtoSOP — Table to Points\n\nConverts DAT table rows into SOP point geometry.\nColumns x,y,z (or col 0,1,2) map to vertex positions.\nMode = Points creates individual vertices; Lines connects them.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

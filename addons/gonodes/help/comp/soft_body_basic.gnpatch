@@ -1,51 +1,182 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"grid1": {
-			"type": "GridSOP",
-			"position": [-200, 100],
-			"parameters": {
-				"size_x": {"value": 3.0},
-				"size_y": {"value": 3.0},
-				"rows": {"value": 12},
-				"columns": {"value": 12}
-			}
-		},
-		"geo1": {
-			"type": "GeometryCOMP",
-			"position": [100, 100],
-			"parameters": {}
-		},
-		"soft1": {
-			"type": "SoftBodyCOMP",
-			"position": [400, 100],
-			"parameters": {
-				"ty": {"value": 2.0},
-				"rx": {"value": -90.0},
-				"iterations": {"value": 8},
-				"gravity": {"value": -9.8},
-				"damping": {"value": 0.98},
-				"stiffness": {"value": 0.5},
-				"floor_collision": {"value": true},
-				"floor_y": {"value": 0.0},
-				"pin_mode": {"value": 1},
-				"pin_threshold": {"value": 0.02}
-			}
-		}
-	},
-	"connections": [
-		{"from": "grid1", "from_port": 0, "to": "geo1", "to_port": 0},
-		{"from": "geo1", "from_port": 0, "to": "soft1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Soft Body COMP — Basic\n\nGrid → GeometryCOMP → SoftBodyCOMP.\nThe cloth drapes under CPU Verlet gravity.\nAdjust stiffness, damping, and iterations\nto control deformation behaviour.",
-			"position": [-250.0, -100.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "grid1":  {
+                                "type":  "GridSOP",
+                                "position":  [
+                                                 -200,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "size_x":  {
+                                                                  "value":  3.0
+                                                              },
+                                                   "size_y":  {
+                                                                  "value":  3.0
+                                                              },
+                                                   "rows":  {
+                                                                "value":  12
+                                                            },
+                                                   "columns":  {
+                                                                   "value":  12
+                                                               }
+                                               }
+                            },
+                  "geo1":  {
+                               "type":  "GeometryCOMP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+
+                                              }
+                           },
+                  "soft1":  {
+                                "type":  "SoftBodyCOMP",
+                                "position":  [
+                                                 400,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "ty":  {
+                                                              "value":  2.0
+                                                          },
+                                                   "rx":  {
+                                                              "value":  -90.0
+                                                          },
+                                                   "iterations":  {
+                                                                      "value":  8
+                                                                  },
+                                                   "gravity":  {
+                                                                   "value":  -9.8
+                                                               },
+                                                   "damping":  {
+                                                                   "value":  0.98
+                                                               },
+                                                   "stiffness":  {
+                                                                     "value":  0.5
+                                                                 },
+                                                   "floor_collision":  {
+                                                                           "value":  true
+                                                                       },
+                                                   "floor_y":  {
+                                                                   "value":  0.0
+                                                               },
+                                                   "pin_mode":  {
+                                                                    "value":  1
+                                                                },
+                                                   "pin_threshold":  {
+                                                                         "value":  0.02
+                                                                     }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1050,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       700,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    400,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "grid1",
+                            "from_port":  0,
+                            "to":  "geo1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo1",
+                            "from_port":  0,
+                            "to":  "soft1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "soft1",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Soft Body COMP — Basic\n\nGrid → GeometryCOMP → SoftBodyCOMP.\nThe cloth drapes under CPU Verlet gravity.\nAdjust stiffness, damping, and iterations\nto control deformation behaviour.",
+                            "position":  [
+                                             -250.0,
+                                             -100.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

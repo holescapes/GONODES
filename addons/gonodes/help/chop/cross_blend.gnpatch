@@ -1,51 +1,152 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"lfo_a": {
-			"type": "LFO_CHOP",
-			"position": [100, 100],
-			"parameters": {
-				"waveform": {"value": 0},
-				"frequency": {"value": 0.5},
-				"amplitude": {"value": 1.0}
-			}
-		},
-		"lfo_b": {
-			"type": "LFO_CHOP",
-			"position": [100, 300],
-			"parameters": {
-				"waveform": {"value": 2},
-				"frequency": {"value": 1.0},
-				"amplitude": {"value": 1.0}
-			}
-		},
-		"cross1": {
-			"type": "CrossCHOP",
-			"position": [450, 200],
-			"parameters": {
-				"cross": {"value": 0.5}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [800, 200],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "lfo_a", "from_port": 0, "to": "cross1", "to_port": 0},
-		{"from": "lfo_b", "from_port": 0, "to": "cross1", "to_port": 1},
-		{"from": "cross1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Cross CHOP — Blend\n\nBlends between a sine and a square LFO.\ncross=0.5 gives a 50/50 mix.\nAdjust cross from 0 (input A) to 1 (input B).",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 110.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "lfo_a":  {
+                                "type":  "LFO_CHOP",
+                                "position":  [
+                                                 100,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "waveform":  {
+                                                                    "value":  0
+                                                                },
+                                                   "frequency":  {
+                                                                     "value":  0.5
+                                                                 },
+                                                   "amplitude":  {
+                                                                     "value":  1.0
+                                                                 }
+                                               }
+                            },
+                  "lfo_b":  {
+                                "type":  "LFO_CHOP",
+                                "position":  [
+                                                 100,
+                                                 300
+                                             ],
+                                "parameters":  {
+                                                   "waveform":  {
+                                                                    "value":  2
+                                                                },
+                                                   "frequency":  {
+                                                                     "value":  1.0
+                                                                 },
+                                                   "amplitude":  {
+                                                                     "value":  1.0
+                                                                 }
+                                               }
+                            },
+                  "cross1":  {
+                                 "type":  "CrossCHOP",
+                                 "position":  [
+                                                  450,
+                                                  200
+                                              ],
+                                 "parameters":  {
+                                                    "cross":  {
+                                                                  "value":  0.5
+                                                              }
+                                                }
+                             },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 800,
+                                                 200
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1500,
+                                                   200
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    1150,
+                                                    200
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "lfo_a",
+                            "from_port":  0,
+                            "to":  "cross1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "lfo_b",
+                            "from_port":  0,
+                            "to":  "cross1",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "cross1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Cross CHOP — Blend\n\nBlends between a sine and a square LFO.\ncross=0.5 gives a 50/50 mix.\nAdjust cross from 0 (input A) to 1 (input B).",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         110.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

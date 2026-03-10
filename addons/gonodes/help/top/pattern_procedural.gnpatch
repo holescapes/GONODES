@@ -1,42 +1,143 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"pat1": {
-			"type": "PatternTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"type": {"value": 1},
-				"frequency": {"value": 8.0},
-				"duty_cycle": {"value": 0.5},
-				"color_a": {"value": {"_type": "Color", "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0}},
-				"color_b": {"value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 1.0}},
-				"softness": {"value": 0.01}
-			}
-		},
-		"pat2": {
-			"type": "PatternTOP",
-			"position": [100, 400],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"type": {"value": 4},
-				"frequency": {"value": 12.0},
-				"color_a": {"value": {"_type": "Color", "r": 0.9, "g": 0.2, "b": 0.3, "a": 1.0}},
-				"color_b": {"value": {"_type": "Color", "r": 0.1, "g": 0.1, "b": 0.2, "a": 1.0}},
-				"softness": {"value": 0.03}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Pattern TOP — Procedural Shapes\n\nTwo generators: checkerboard (type 1) & dots (type 4).\nTypes: 0=Stripes, 1=Checkerboard, 2=Concentric, 3=Grid, 4=Dots.\nFrequency, colours, rotation, and softness are all adjustable.",
-			"position": [-100.0, -150.0],
-			"size": [440.0, 110.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "pat1":  {
+                               "type":  "PatternTOP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "resolution":  {
+                                                                     "value":  {
+                                                                                   "_type":  "Vector2i",
+                                                                                   "x":  512,
+                                                                                   "y":  512
+                                                                               }
+                                                                 },
+                                                  "type":  {
+                                                               "value":  1
+                                                           },
+                                                  "frequency":  {
+                                                                    "value":  8.0
+                                                                },
+                                                  "duty_cycle":  {
+                                                                     "value":  0.5
+                                                                 },
+                                                  "color_a":  {
+                                                                  "value":  {
+                                                                                "_type":  "Color",
+                                                                                "r":  1.0,
+                                                                                "g":  1.0,
+                                                                                "b":  1.0,
+                                                                                "a":  1.0
+                                                                            }
+                                                              },
+                                                  "color_b":  {
+                                                                  "value":  {
+                                                                                "_type":  "Color",
+                                                                                "r":  0.0,
+                                                                                "g":  0.0,
+                                                                                "b":  0.0,
+                                                                                "a":  1.0
+                                                                            }
+                                                              },
+                                                  "softness":  {
+                                                                   "value":  0.01
+                                                               }
+                                              }
+                           },
+                  "pat2":  {
+                               "type":  "PatternTOP",
+                               "position":  [
+                                                100,
+                                                400
+                                            ],
+                               "parameters":  {
+                                                  "resolution":  {
+                                                                     "value":  {
+                                                                                   "_type":  "Vector2i",
+                                                                                   "x":  512,
+                                                                                   "y":  512
+                                                                               }
+                                                                 },
+                                                  "type":  {
+                                                               "value":  4
+                                                           },
+                                                  "frequency":  {
+                                                                    "value":  12.0
+                                                                },
+                                                  "color_a":  {
+                                                                  "value":  {
+                                                                                "_type":  "Color",
+                                                                                "r":  0.9,
+                                                                                "g":  0.2,
+                                                                                "b":  0.3,
+                                                                                "a":  1.0
+                                                                            }
+                                                              },
+                                                  "color_b":  {
+                                                                  "value":  {
+                                                                                "_type":  "Color",
+                                                                                "r":  0.1,
+                                                                                "g":  0.1,
+                                                                                "b":  0.2,
+                                                                                "a":  1.0
+                                                                            }
+                                                              },
+                                                  "softness":  {
+                                                                   "value":  0.03
+                                                               }
+                                              }
+                           },
+                  "window1":  {
+                                  "position":  [
+                                                   450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "pat1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Pattern TOP — Procedural Shapes\n\nTwo generators: checkerboard (type 1) \u0026 dots (type 4).\nTypes: 0=Stripes, 1=Checkerboard, 2=Concentric, 3=Grid, 4=Dots.\nFrequency, colours, rotation, and softness are all adjustable.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         440.0,
+                                         110.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

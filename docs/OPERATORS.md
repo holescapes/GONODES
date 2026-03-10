@@ -15,7 +15,14 @@
 - [MAT — Material Operators](#mat--material-operators)
 - [Output Operators](#output-operators)
 
-> **Help example patches:** Every operator has 1–2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (143 patches).
+> **Help example patches:** Every operator has 1–2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set.
+>
+> ### Help Patch Hard Rule
+> Every help example patch **MUST**:
+> 1. **Be meaningful** — Simply placing a node with no connections is not a valid example. The patch should demonstrate a realistic, useful workflow that shows what the operator does in context.
+> 2. **End with a visible sink** — The chain must terminate at a **WindowTOP** (for TOP/IMG chains) or a **RenderTOP → WindowTOP** (for SOP/COMP/MAT chains) so the user sees output when they open the patch.
+> 3. **WindowTOP settings** — Resolution `512×512`, `"open": true` so the window opens automatically, title set to the example name.
+> 4. For **CHOP/DAT-only** chains that have no visual output, end with a **CHOPtoTOP → WindowTOP** or **NullCHOP/NullDAT** if truly non-visual, but prefer a visual sink whenever possible.
 
 ---
 

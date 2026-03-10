@@ -1,40 +1,125 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseCHOP",
-			"position": [100, 100],
-			"parameters": {
-				"num_channels": {"value": 6}
-			}
-		},
-		"delete1": {
-			"type": "DeleteCHOP",
-			"position": [500, 100],
-			"parameters": {
-				"mode": {"value": 0},
-				"pattern": {"value": "chan2 chan4"}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [800, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "noise1", "from_port": 0, "to": "delete1", "to_port": 0},
-		{"from": "delete1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Delete CHOP — Remove by Pattern\n\nRemoves channels matching 'chan2 chan4'.\nSupports wildcards: chan* removes all.\nModes: by_pattern, by_index, keep_only.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseCHOP",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "num_channels":  {
+                                                                         "value":  6
+                                                                     }
+                                                }
+                             },
+                  "delete1":  {
+                                  "type":  "DeleteCHOP",
+                                  "position":  [
+                                                   500,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "mode":  {
+                                                                  "value":  0
+                                                              },
+                                                     "pattern":  {
+                                                                     "value":  "chan2 chan4"
+                                                                 }
+                                                 }
+                              },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 800,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1500,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    1150,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "delete1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "delete1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Delete CHOP — Remove by Pattern\n\nRemoves channels matching \u0027chan2 chan4\u0027.\nSupports wildcards: chan* removes all.\nModes: by_pattern, by_index, keep_only.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

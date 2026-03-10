@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "audioin1": {
+      "type": "AudioSpectrumCHOP",
+      "position": [100, 200],
+      "parameters": {}
+    },
+    "beat1": {
+      "type": "BeatCHOP",
+      "position": [450, 200],
+      "parameters": {
+        "sensitivity": {"value": 1.5},
+        "decay": {"value": 0.95},
+        "min_interval": {"value": 0.2}
+      }
+    },
+    "noise1": {
+      "type": "NoiseTOP",
+      "position": [450, 450],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "monochrome": {"value": false}
+      }
+    },
+    "level1": {
+      "type": "LevelTOP",
+      "position": [800, 350],
+      "parameters": {
+        "brightness": {"value": 1.0}
+      }
+    },
+    "window1": {
+      "type": "WindowTOP",
+      "position": [1150, 350],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "open": {"value": true}
+      }
+    }
+  },
+  "connections": [
+    {"from": "audioin1", "from_port": 0, "to": "beat1", "to_port": 0},
+    {"from": "noise1", "from_port": 0, "to": "level1", "to_port": 0},
+    {"from": "level1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Beat CHOP — Audio Beat Detection\n\nAudio spectrum feeds into BeatCHOP which detects onsets\nvia RMS energy analysis. Outputs beat, energy, and onset\nchannels. Use the beat channel to drive visuals reactively.",
+      "position": [50.0, -50.0],
+      "size": [600.0, 110.0],
+      "color": [1.0, 1.0, 1.0, 0.8]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseTOP",
+      "position": [100, 100],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}},
+        "monochrome": {"value": false}
+      }
+    },
+    "ramp1": {
+      "type": "RampTOP",
+      "position": [100, 350],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}},
+        "type": {"value": 0}
+      }
+    },
+    "circle1": {
+      "type": "CircleTOP",
+      "position": [100, 600],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}
+      }
+    },
+    "text1": {
+      "type": "TextTOP",
+      "position": [100, 850],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}},
+        "text": {"value": "GLUE"},
+        "font_size": {"value": 48}
+      }
+    },
+    "glue1": {
+      "type": "GlueTOP",
+      "position": [500, 400],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "layout": {"value": 3},
+        "padding": {"value": 4}
+      }
+    },
+    "window1": {
+      "type": "WindowTOP",
+      "position": [850, 400],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "open": {"value": true}
+      }
+    }
+  },
+  "connections": [
+    {"from": "noise1", "from_port": 0, "to": "glue1", "to_port": 0},
+    {"from": "ramp1", "from_port": 0, "to": "glue1", "to_port": 1},
+    {"from": "circle1", "from_port": 0, "to": "glue1", "to_port": 2},
+    {"from": "text1", "from_port": 0, "to": "glue1", "to_port": 3},
+    {"from": "glue1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Glue TOP — Texture Atlas\n\nFour textures (noise, ramp, circle, text) are packed into\na 2×2 grid atlas. Useful for debug views, texture sheets,\nor combining multiple sources into a single output.",
+      "position": [50.0, -50.0],
+      "size": [600.0, 110.0],
+      "color": [1.0, 1.0, 1.0, 0.8]
+    }
+  ]
+}

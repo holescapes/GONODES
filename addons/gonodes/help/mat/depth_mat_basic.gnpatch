@@ -1,26 +1,150 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"depth1": {
-			"type": "DepthMAT",
-			"position": [200, 100],
-			"parameters": {
-				"near_val": {"value": 0.1},
-				"far_val": {"value": 50.0},
-				"invert": {"value": false}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Depth MAT — Depth Visualization\n\nLinearizes fragment depth to grayscale.\nNear = white, far = black (or inverted).",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 80.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "depth1":  {
+                                 "type":  "DepthMAT",
+                                 "position":  [
+                                                  200,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "near_val":  {
+                                                                     "value":  0.1
+                                                                 },
+                                                    "far_val":  {
+                                                                    "value":  50.0
+                                                                },
+                                                    "invert":  {
+                                                                   "value":  false
+                                                               }
+                                                }
+                             },
+                  "window1":  {
+                                  "position":  [
+                                                   1450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "box_view":  {
+                                   "type":  "BoxSOP",
+                                   "position":  [
+                                                    500,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    800,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1100,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  }
+              },
+    "connections":  [
+                        {
+                            "from":  "depth1",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "box_view",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Depth MAT — Depth Visualization\n\nLinearizes fragment depth to grayscale.\nNear = white, far = black (or inverted).",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         80.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

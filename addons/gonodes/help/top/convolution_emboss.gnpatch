@@ -1,38 +1,103 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"scale": {"value": 4.0},
-				"monochrome": {"value": false}
-			}
-		},
-		"conv1": {
-			"type": "ConvolutionTOP",
-			"position": [450, 100],
-			"parameters": {
-				"preset": {"value": 1},
-				"kernel_size": {"value": 3},
-				"divisor": {"value": 1.0},
-				"bias": {"value": 0.0}
-			}
-		}
-	},
-	"connections": [
-		{"from": "noise1", "from_port": 0, "to": "conv1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Convolution TOP — Emboss Preset\n\nApplies 3×3 Emboss kernel to colour noise.\nPresets: Custom, Emboss, Sharpen, Edge, Ridge, Gaussian, Box.\nDivisor normalises results; Bias shifts them.",
-			"position": [-100.0, -150.0],
-			"size": [420.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseTOP",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "resolution":  {
+                                                                       "value":  {
+                                                                                     "_type":  "Vector2i",
+                                                                                     "x":  512,
+                                                                                     "y":  512
+                                                                                 }
+                                                                   },
+                                                    "scale":  {
+                                                                  "value":  4.0
+                                                              },
+                                                    "monochrome":  {
+                                                                       "value":  false
+                                                                   }
+                                                }
+                             },
+                  "conv1":  {
+                                "type":  "ConvolutionTOP",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "preset":  {
+                                                                  "value":  1
+                                                              },
+                                                   "kernel_size":  {
+                                                                       "value":  3
+                                                                   },
+                                                   "divisor":  {
+                                                                   "value":  1.0
+                                                               },
+                                                   "bias":  {
+                                                                "value":  0.0
+                                                            }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   800,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "conv1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "conv1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Convolution TOP — Emboss Preset\n\nApplies 3×3 Emboss kernel to colour noise.\nPresets: Custom, Emboss, Sharpen, Edge, Ridge, Gaussian, Box.\nDivisor normalises results; Bias shifts them.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         420.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

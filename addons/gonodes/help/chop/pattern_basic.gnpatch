@@ -1,52 +1,156 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"pattern1": {
-			"type": "PatternCHOP",
-			"position": [100, 100],
-			"parameters": {
-				"type": {"value": 0},
-				"length": {"value": 100},
-				"channels": {"value": 1},
-				"from_value": {"value": 0.0},
-				"to_value": {"value": 1.0},
-				"cycles": {"value": 1.0}
-			}
-		},
-		"pattern_sine": {
-			"type": "PatternCHOP",
-			"position": [100, 300],
-			"parameters": {
-				"type": {"value": 1},
-				"length": {"value": 100},
-				"channels": {"value": 1},
-				"cycles": {"value": 3.0}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [450, 100],
-			"parameters": {}
-		},
-		"null2": {
-			"type": "NullCHOP",
-			"position": [450, 300],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "pattern1", "from_port": 0, "to": "null1", "to_port": 0},
-		{"from": "pattern_sine", "from_port": 0, "to": "null2", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Pattern CHOP — Basic\n\nTop: linear ramp 0→1 over 100 samples.\nBottom: 3 sine cycles over 100 samples.\nStatic waveform generators useful as lookup tables.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 110.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "pattern1":  {
+                                   "type":  "PatternCHOP",
+                                   "position":  [
+                                                    100,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "type":  {
+                                                                   "value":  0
+                                                               },
+                                                      "length":  {
+                                                                     "value":  100
+                                                                 },
+                                                      "channels":  {
+                                                                       "value":  1
+                                                                   },
+                                                      "from_value":  {
+                                                                         "value":  0.0
+                                                                     },
+                                                      "to_value":  {
+                                                                       "value":  1.0
+                                                                   },
+                                                      "cycles":  {
+                                                                     "value":  1.0
+                                                                 }
+                                                  }
+                               },
+                  "pattern_sine":  {
+                                       "type":  "PatternCHOP",
+                                       "position":  [
+                                                        100,
+                                                        300
+                                                    ],
+                                       "parameters":  {
+                                                          "type":  {
+                                                                       "value":  1
+                                                                   },
+                                                          "length":  {
+                                                                         "value":  100
+                                                                     },
+                                                          "channels":  {
+                                                                           "value":  1
+                                                                       },
+                                                          "cycles":  {
+                                                                         "value":  3.0
+                                                                     }
+                                                      }
+                                   },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "null2":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 450,
+                                                 300
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "pattern1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "pattern_sine",
+                            "from_port":  0,
+                            "to":  "null2",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Pattern CHOP — Basic\n\nTop: linear ramp 0→1 over 100 samples.\nBottom: 3 sine cycles over 100 samples.\nStatic waveform generators useful as lookup tables.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         110.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

@@ -1,41 +1,128 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseCHOP",
-			"position": [100, 100],
-			"parameters": {
-				"num_channels": {"value": 4},
-				"channel_names": {"value": "tx,ty,tz,rz"},
-				"roughness": {"value": 0.5}
-			}
-		},
-		"select1": {
-			"type": "SelectCHOP",
-			"position": [450, 100],
-			"parameters": {
-				"pattern": {"value": "t*"}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [800, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "noise1", "from_port": 0, "to": "select1", "to_port": 0},
-		{"from": "select1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Select CHOP — Filter Channels\n\n4-channel noise → Select with pattern \"t*\".\nOnly channels starting with 't' pass through\n(tx, ty, tz — rz is filtered out).",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 110.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseCHOP",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "num_channels":  {
+                                                                         "value":  4
+                                                                     },
+                                                    "channel_names":  {
+                                                                          "value":  "tx,ty,tz,rz"
+                                                                      },
+                                                    "roughness":  {
+                                                                      "value":  0.5
+                                                                  }
+                                                }
+                             },
+                  "select1":  {
+                                  "type":  "SelectCHOP",
+                                  "position":  [
+                                                   450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "pattern":  {
+                                                                     "value":  "t*"
+                                                                 }
+                                                 }
+                              },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 800,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1500,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    1150,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "select1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "select1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Select CHOP — Filter Channels\n\n4-channel noise → Select with pattern \"t*\".\nOnly channels starting with \u0027t\u0027 pass through\n(tx, ty, tz — rz is filtered out).",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         110.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

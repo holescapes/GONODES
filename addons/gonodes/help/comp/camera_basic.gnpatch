@@ -1,33 +1,147 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"cam1": {
-			"type": "CameraCOMP",
-			"position": [200, 100],
-			"parameters": {
-				"tx": {"value": 0.0},
-				"ty": {"value": 1.0},
-				"tz": {"value": 5.0},
-				"rx": {"value": -10.0},
-				"ry": {"value": 0.0},
-				"rz": {"value": 0.0},
-				"projection": {"value": 0},
-				"fov": {"value": 60.0},
-				"near": {"value": 0.05},
-				"far": {"value": 100.0}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Camera COMP — Perspective View\n\nCamera at (0, 1, 5) looking slightly down.\n60° FOV, perspective projection.\nConnect to RenderTOP for 3D rendering.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "cam1":  {
+                               "type":  "CameraCOMP",
+                               "position":  [
+                                                200,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "tx":  {
+                                                             "value":  0.0
+                                                         },
+                                                  "ty":  {
+                                                             "value":  1.0
+                                                         },
+                                                  "tz":  {
+                                                             "value":  5.0
+                                                         },
+                                                  "rx":  {
+                                                             "value":  -10.0
+                                                         },
+                                                  "ry":  {
+                                                             "value":  0.0
+                                                         },
+                                                  "rz":  {
+                                                             "value":  0.0
+                                                         },
+                                                  "projection":  {
+                                                                     "value":  0
+                                                                 },
+                                                  "fov":  {
+                                                              "value":  60.0
+                                                          },
+                                                  "near":  {
+                                                               "value":  0.05
+                                                           },
+                                                  "far":  {
+                                                              "value":  100.0
+                                                          }
+                                              }
+                           },
+                  "window1":  {
+                                  "position":  [
+                                                   1450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "box_view":  {
+                                   "type":  "BoxSOP",
+                                   "position":  [
+                                                    500,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1100,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  }
+              },
+    "connections":  [
+                        {
+                            "from":  "box_view",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam1",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Camera COMP — Perspective View\n\nCamera at (0, 1, 5) looking slightly down.\n60° FOV, perspective projection.\nConnect to RenderTOP for 3D rendering.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

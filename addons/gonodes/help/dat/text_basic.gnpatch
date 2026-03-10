@@ -1,24 +1,94 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"text1": {
-			"type": "TextDAT",
-			"position": [200, 100],
-			"parameters": {
-				"text": {"value": "Hello from GONODES!\n\nThis TextDAT holds multi-line text data.\nUseful for shader code, scripts, or notes."}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Text DAT — Text Storage\n\nStores arbitrary multi-line text.\nUse for shader source, configs, or documentation.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 80.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "text1":  {
+                                "type":  "TextDAT",
+                                "position":  [
+                                                 200,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "text":  {
+                                                                "value":  "Hello from GONODES!\n\nThis TextDAT holds multi-line text data.\nUseful for shader code, scripts, or notes."
+                                                            }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   900,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "text_view":  {
+                                    "type":  "TextTOP",
+                                    "position":  [
+                                                     550,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "resolution":  {
+                                                                          "value":  {
+                                                                                        "_type":  "Vector2i",
+                                                                                        "x":  512,
+                                                                                        "y":  512
+                                                                                    }
+                                                                      },
+                                                       "text":  {
+                                                                    "value":  "TextDAT output"
+                                                                },
+                                                       "font_size":  {
+                                                                         "value":  24
+                                                                     }
+                                                   }
+                                }
+              },
+    "connections":  [
+                        {
+                            "from":  "text1",
+                            "from_port":  0,
+                            "to":  "text_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "text_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Text DAT — Text Storage\n\nStores arbitrary multi-line text.\nUse for shader source, configs, or documentation.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         80.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

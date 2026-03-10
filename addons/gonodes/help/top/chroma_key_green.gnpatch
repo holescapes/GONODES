@@ -1,38 +1,115 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"const1": {
-			"type": "ConstantTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"color": {"value": {"_type": "Color", "r": 0.0, "g": 0.8, "b": 0.2, "a": 1.0}}
-			}
-		},
-		"chkey1": {
-			"type": "ChromaKeyTOP",
-			"position": [450, 100],
-			"parameters": {
-				"key_mode": {"value": 0},
-				"key_color": {"value": {"_type": "Color", "r": 0.0, "g": 1.0, "b": 0.0, "a": 1.0}},
-				"threshold": {"value": 0.3},
-				"smoothness": {"value": 0.15},
-				"spill_reduction": {"value": 0.5}
-			}
-		}
-	},
-	"connections": [
-		{"from": "const1", "from_port": 0, "to": "chkey1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Chroma Key TOP — Green Screen\n\nRemoves green background via chroma key.\nThreshold controls tolerance, Smoothness softens edges.\nSpill reduction neutralises green fringing.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "const1":  {
+                                 "type":  "ConstantTOP",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "resolution":  {
+                                                                       "value":  {
+                                                                                     "_type":  "Vector2i",
+                                                                                     "x":  512,
+                                                                                     "y":  512
+                                                                                 }
+                                                                   },
+                                                    "color":  {
+                                                                  "value":  {
+                                                                                "_type":  "Color",
+                                                                                "r":  0.0,
+                                                                                "g":  0.8,
+                                                                                "b":  0.2,
+                                                                                "a":  1.0
+                                                                            }
+                                                              }
+                                                }
+                             },
+                  "chkey1":  {
+                                 "type":  "ChromaKeyTOP",
+                                 "position":  [
+                                                  450,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "key_mode":  {
+                                                                     "value":  0
+                                                                 },
+                                                    "key_color":  {
+                                                                      "value":  {
+                                                                                    "_type":  "Color",
+                                                                                    "r":  0.0,
+                                                                                    "g":  1.0,
+                                                                                    "b":  0.0,
+                                                                                    "a":  1.0
+                                                                                }
+                                                                  },
+                                                    "threshold":  {
+                                                                      "value":  0.3
+                                                                  },
+                                                    "smoothness":  {
+                                                                       "value":  0.15
+                                                                   },
+                                                    "spill_reduction":  {
+                                                                            "value":  0.5
+                                                                        }
+                                                }
+                             },
+                  "window1":  {
+                                  "position":  [
+                                                   800,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "const1",
+                            "from_port":  0,
+                            "to":  "chkey1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "chkey1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Chroma Key TOP — Green Screen\n\nRemoves green background via chroma key.\nThreshold controls tolerance, Smoothness softens edges.\nSpill reduction neutralises green fringing.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

@@ -1,49 +1,186 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"box1": {
-			"type": "BoxSOP",
-			"position": [100, 100],
-			"parameters": {
-				"size_x": {"value": 1.0},
-				"size_y": {"value": 1.0},
-				"size_z": {"value": 1.0}
-			}
-		},
-		"sphere1": {
-			"type": "SphereSOP",
-			"position": [100, 250],
-			"parameters": {
-				"radius": {"value": 0.6}
-			}
-		},
-		"boolean1": {
-			"type": "BooleanSOP",
-			"position": [500, 150],
-			"parameters": {
-				"operation": {"value": 2}
-			}
-		},
-		"null1": {
-			"type": "NullSOP",
-			"position": [800, 150],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "box1", "from_port": 0, "to": "boolean1", "to_port": 0},
-		{"from": "sphere1", "from_port": 0, "to": "boolean1", "to_port": 1},
-		{"from": "boolean1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Boolean SOP — CSG Subtract\n\nSubtracts a sphere from a box using CSG.\nOperations: union (0), intersect (1), subtract (2).\nUses Godot's CSGMesh3D under the hood.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "box1":  {
+                               "type":  "BoxSOP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "size_x":  {
+                                                                 "value":  1.0
+                                                             },
+                                                  "size_y":  {
+                                                                 "value":  1.0
+                                                             },
+                                                  "size_z":  {
+                                                                 "value":  1.0
+                                                             }
+                                              }
+                           },
+                  "sphere1":  {
+                                  "type":  "SphereSOP",
+                                  "position":  [
+                                                   100,
+                                                   250
+                                               ],
+                                  "parameters":  {
+                                                     "radius":  {
+                                                                    "value":  0.6
+                                                                }
+                                                 }
+                              },
+                  "boolean1":  {
+                                   "type":  "BooleanSOP",
+                                   "position":  [
+                                                    500,
+                                                    150
+                                                ],
+                                   "parameters":  {
+                                                      "operation":  {
+                                                                        "value":  2
+                                                                    }
+                                                  }
+                               },
+                  "null1":  {
+                                "type":  "NullSOP",
+                                "position":  [
+                                                 800,
+                                                 150
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1750,
+                                                   150
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    1100,
+                                                    150
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    1100,
+                                                    350
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1400,
+                                                       150
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  }
+              },
+    "connections":  [
+                        {
+                            "from":  "box1",
+                            "from_port":  0,
+                            "to":  "boolean1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "sphere1",
+                            "from_port":  0,
+                            "to":  "boolean1",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "boolean1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Boolean SOP — CSG Subtract\n\nSubtracts a sphere from a box using CSG.\nOperations: union (0), intersect (1), subtract (2).\nUses Godot\u0027s CSGMesh3D under the hood.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

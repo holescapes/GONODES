@@ -1,26 +1,76 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"glsl1": {
-			"type": "CustomShaderTOP",
-			"position": [200, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"time_dependent": {"value": true},
-				"shader_code": {"value": "shader_type canvas_item;\nuniform float time_sec;\n\nvoid fragment() {\n    vec2 uv = UV * 2.0 - 1.0;\n    float d = length(uv);\n    float wave = sin(d * 10.0 - time_sec * 3.0) * 0.5 + 0.5;\n    vec3 col = mix(vec3(0.1, 0.0, 0.4), vec3(1.0, 0.4, 0.0), wave);\n    COLOR = vec4(col, 1.0);\n}"}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Custom Shader TOP — GLSL Generator\n\nAnimated radial wave using a custom canvas_item shader.\ntime_sec uniform is auto-injected.\nEdit shader_code to write any Godot shader.",
-			"position": [-100.0, -150.0],
-			"size": [420.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "glsl1":  {
+                                "type":  "CustomShaderTOP",
+                                "position":  [
+                                                 200,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "resolution":  {
+                                                                      "value":  {
+                                                                                    "_type":  "Vector2i",
+                                                                                    "x":  512,
+                                                                                    "y":  512
+                                                                                }
+                                                                  },
+                                                   "time_dependent":  {
+                                                                          "value":  true
+                                                                      },
+                                                   "shader_code":  {
+                                                                       "value":  "shader_type canvas_item;\nuniform float time_sec;\n\nvoid fragment() {\n    vec2 uv = UV * 2.0 - 1.0;\n    float d = length(uv);\n    float wave = sin(d * 10.0 - time_sec * 3.0) * 0.5 + 0.5;\n    vec3 col = mix(vec3(0.1, 0.0, 0.4), vec3(1.0, 0.4, 0.0), wave);\n    COLOR = vec4(col, 1.0);\n}"
+                                                                   }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   550,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "glsl1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Custom Shader TOP — GLSL Generator\n\nAnimated radial wave using a custom canvas_item shader.\ntime_sec uniform is auto-injected.\nEdit shader_code to write any Godot shader.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         420.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

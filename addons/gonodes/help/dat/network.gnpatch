@@ -1,0 +1,59 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "table1": {
+      "type": "TableDAT",
+      "position": [100, 200],
+      "parameters": {
+        "rows": {"value": 1},
+        "cols": {"value": 2},
+        "headers": {"value": "type,message"},
+        "data": {"value": "ping,hello world"}
+      }
+    },
+    "network1": {
+      "type": "NetworkDAT",
+      "position": [450, 200],
+      "parameters": {
+        "protocol": {"value": 1},
+        "mode": {"value": 0},
+        "address": {"value": "127.0.0.1"},
+        "port": {"value": 7000},
+        "active": {"value": true},
+        "max_lines": {"value": 50}
+      }
+    },
+    "text1": {
+      "type": "TextTOP",
+      "position": [800, 200],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "text": {"value": "NetworkDAT — UDP on port 7000"},
+        "font_size": {"value": 20}
+      }
+    },
+    "window1": {
+      "type": "WindowTOP",
+      "position": [1150, 200],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "open": {"value": true}
+      }
+    }
+  },
+  "connections": [
+    {"from": "table1", "from_port": 0, "to": "network1", "to_port": 0},
+    {"from": "text1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Network DAT — UDP Client\n\nSends table data as UDP packets to localhost:7000.\nSupports TCP and UDP with Client/Listen modes.\nReceived messages appear in the output table.",
+      "position": [50.0, -50.0],
+      "size": [600.0, 110.0],
+      "color": [1.0, 1.0, 1.0, 0.8]
+    }
+  ]
+}

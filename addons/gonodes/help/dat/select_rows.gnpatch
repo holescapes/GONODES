@@ -1,46 +1,151 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"const1": {
-			"type": "ConstantDAT",
-			"position": [100, 100],
-			"parameters": {
-				"col0": {"value": "item"},
-				"col1": {"value": "value"},
-				"r0c0": {"value": "alpha"},
-				"r0c1": {"value": "10"},
-				"r1c0": {"value": "beta"},
-				"r1c1": {"value": "20"},
-				"r2c0": {"value": "gamma"},
-				"r2c1": {"value": "30"},
-				"r3c0": {"value": "delta"},
-				"r3c1": {"value": "40"}
-			}
-		},
-		"select1": {
-			"type": "SelectDAT",
-			"position": [450, 100],
-			"parameters": {
-				"row_start": {"value": 1},
-				"row_end": {"value": 2},
-				"col_start": {"value": 0},
-				"col_end": {"value": 1},
-				"include_header": {"value": true}
-			}
-		}
-	},
-	"connections": [
-		{"from": "const1", "from_port": 0, "to": "select1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Select DAT — Row/Column Filter\n\nExtracts rows 1-2 from the input table.\nKeeps header row. Use to slice subsets of data.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 80.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "const1":  {
+                                 "type":  "ConstantDAT",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "col0":  {
+                                                                 "value":  "item"
+                                                             },
+                                                    "col1":  {
+                                                                 "value":  "value"
+                                                             },
+                                                    "r0c0":  {
+                                                                 "value":  "alpha"
+                                                             },
+                                                    "r0c1":  {
+                                                                 "value":  "10"
+                                                             },
+                                                    "r1c0":  {
+                                                                 "value":  "beta"
+                                                             },
+                                                    "r1c1":  {
+                                                                 "value":  "20"
+                                                             },
+                                                    "r2c0":  {
+                                                                 "value":  "gamma"
+                                                             },
+                                                    "r2c1":  {
+                                                                 "value":  "30"
+                                                             },
+                                                    "r3c0":  {
+                                                                 "value":  "delta"
+                                                             },
+                                                    "r3c1":  {
+                                                                 "value":  "40"
+                                                             }
+                                                }
+                             },
+                  "select1":  {
+                                  "type":  "SelectDAT",
+                                  "position":  [
+                                                   450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "row_start":  {
+                                                                       "value":  1
+                                                                   },
+                                                     "row_end":  {
+                                                                     "value":  2
+                                                                 },
+                                                     "col_start":  {
+                                                                       "value":  0
+                                                                   },
+                                                     "col_end":  {
+                                                                     "value":  1
+                                                                 },
+                                                     "include_header":  {
+                                                                            "value":  true
+                                                                        }
+                                                 }
+                              },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "text_view":  {
+                                    "type":  "TextTOP",
+                                    "position":  [
+                                                     800,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "resolution":  {
+                                                                          "value":  {
+                                                                                        "_type":  "Vector2i",
+                                                                                        "x":  512,
+                                                                                        "y":  512
+                                                                                    }
+                                                                      },
+                                                       "text":  {
+                                                                    "value":  "SelectDAT output"
+                                                                },
+                                                       "font_size":  {
+                                                                         "value":  24
+                                                                     }
+                                                   }
+                                }
+              },
+    "connections":  [
+                        {
+                            "from":  "const1",
+                            "from_port":  0,
+                            "to":  "select1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "select1",
+                            "from_port":  0,
+                            "to":  "text_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "text_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Select DAT — Row/Column Filter\n\nExtracts rows 1-2 from the input table.\nKeeps header row. Use to slice subsets of data.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         80.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

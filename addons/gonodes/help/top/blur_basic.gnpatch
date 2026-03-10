@@ -1,37 +1,100 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"noise_type": {"value": 0},
-				"scale": {"value": 4.0},
-				"monochrome": {"value": true}
-			}
-		},
-		"blur1": {
-			"type": "BlurTOP",
-			"position": [450, 100],
-			"parameters": {
-				"size": {"value": 8.0},
-				"quality": {"value": 4}
-			}
-		}
-	},
-	"connections": [
-		{"from": "noise1", "from_port": 0, "to": "blur1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Blur TOP — Gaussian\n\nNoise → Gaussian blur with size 8.\nIncreasing size creates a softer image.\nQuality controls the number of blur passes.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseTOP",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "resolution":  {
+                                                                       "value":  {
+                                                                                     "_type":  "Vector2i",
+                                                                                     "x":  512,
+                                                                                     "y":  512
+                                                                                 }
+                                                                   },
+                                                    "noise_type":  {
+                                                                       "value":  0
+                                                                   },
+                                                    "scale":  {
+                                                                  "value":  4.0
+                                                              },
+                                                    "monochrome":  {
+                                                                       "value":  true
+                                                                   }
+                                                }
+                             },
+                  "blur1":  {
+                                "type":  "BlurTOP",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "size":  {
+                                                                "value":  8.0
+                                                            },
+                                                   "quality":  {
+                                                                   "value":  4
+                                                               }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   800,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "blur1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "blur1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Blur TOP — Gaussian\n\nNoise → Gaussian blur with size 8.\nIncreasing size creates a softer image.\nQuality controls the number of blur passes.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

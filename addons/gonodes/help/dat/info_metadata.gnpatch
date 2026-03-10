@@ -1,31 +1,110 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"lfo1": {
-			"type": "LFO_CHOP",
-			"position": [100, 100],
-			"parameters": {
-				"frequency": {"value": 1.0}
-			}
-		},
-		"info1": {
-			"type": "InfoDAT",
-			"position": [450, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "lfo1", "from_port": 0, "to": "info1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Info DAT — Node Metadata\n\nReturns metadata about the input node:\ncook time, channels, sample count, etc.\nUseful for debugging and profiling.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "lfo1":  {
+                               "type":  "LFO_CHOP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "frequency":  {
+                                                                    "value":  1.0
+                                                                }
+                                              }
+                           },
+                  "info1":  {
+                                "type":  "InfoDAT",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "text_view":  {
+                                    "type":  "TextTOP",
+                                    "position":  [
+                                                     800,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "resolution":  {
+                                                                          "value":  {
+                                                                                        "_type":  "Vector2i",
+                                                                                        "x":  512,
+                                                                                        "y":  512
+                                                                                    }
+                                                                      },
+                                                       "text":  {
+                                                                    "value":  "InfoDAT output"
+                                                                },
+                                                       "font_size":  {
+                                                                         "value":  24
+                                                                     }
+                                                   }
+                                }
+              },
+    "connections":  [
+                        {
+                            "from":  "lfo1",
+                            "from_port":  0,
+                            "to":  "info1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "info1",
+                            "from_port":  0,
+                            "to":  "text_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "text_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Info DAT — Node Metadata\n\nReturns metadata about the input node:\ncook time, channels, sample count, etc.\nUseful for debugging and profiling.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

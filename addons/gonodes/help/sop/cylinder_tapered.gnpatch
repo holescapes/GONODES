@@ -1,30 +1,146 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"cyl1": {
-			"type": "CylinderSOP",
-			"position": [200, 100],
-			"parameters": {
-				"top_radius": {"value": 0.5},
-				"bottom_radius": {"value": 1.0},
-				"height": {"value": 2.0},
-				"radial_segments": {"value": 24},
-				"rings": {"value": 4},
-				"cap_top": {"value": true},
-				"cap_bottom": {"value": true}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Cylinder SOP — Tapered Cone\n\nTapered cylinder (bottom=1.0, top=0.5).\n24 radial segments, 4 rings along height.\nBoth caps enabled.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "cyl1":  {
+                               "type":  "CylinderSOP",
+                               "position":  [
+                                                200,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "top_radius":  {
+                                                                     "value":  0.5
+                                                                 },
+                                                  "bottom_radius":  {
+                                                                        "value":  1.0
+                                                                    },
+                                                  "height":  {
+                                                                 "value":  2.0
+                                                             },
+                                                  "radial_segments":  {
+                                                                          "value":  24
+                                                                      },
+                                                  "rings":  {
+                                                                "value":  4
+                                                            },
+                                                  "cap_top":  {
+                                                                  "value":  true
+                                                              },
+                                                  "cap_bottom":  {
+                                                                     "value":  true
+                                                                 }
+                                              }
+                           },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    500,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    500,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       800,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  }
+              },
+    "connections":  [
+                        {
+                            "from":  "cyl1",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Cylinder SOP — Tapered Cone\n\nTapered cylinder (bottom=1.0, top=0.5).\n24 radial segments, 4 rings along height.\nBoth caps enabled.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

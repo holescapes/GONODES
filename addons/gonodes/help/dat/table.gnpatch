@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "table1": {
+      "type": "TableDAT",
+      "position": [100, 200],
+      "parameters": {
+        "rows": {"value": 3},
+        "cols": {"value": 3},
+        "headers": {"value": "name,x,y"},
+        "data": {"value": "point_a,100,200\npoint_b,300,150\npoint_c,250,400"}
+      }
+    },
+    "text1": {
+      "type": "TextTOP",
+      "position": [450, 200],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "text": {"value": "TableDAT outputs data tables"},
+        "font_size": {"value": 24}
+      }
+    },
+    "window1": {
+      "type": "WindowTOP",
+      "position": [800, 200],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "open": {"value": true}
+      }
+    }
+  },
+  "connections": [
+    {"from": "text1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Table DAT — Manual Data Table\n\nA 3×3 table with comma-separated headers and data rows.\nGreat for storing configuration, lookup values, or\ndriving ReplicatorCOMP with per-instance overrides.",
+      "position": [50.0, -50.0],
+      "size": [600.0, 110.0],
+      "color": [1.0, 1.0, 1.0, 0.8]
+    }
+  ]
+}

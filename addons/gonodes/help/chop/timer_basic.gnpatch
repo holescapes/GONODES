@@ -1,34 +1,113 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"timer1": {
-			"type": "TimerCHOP",
-			"position": [100, 100],
-			"parameters": {
-				"length": {"value": 5.0},
-				"loop": {"value": true},
-				"auto_start": {"value": true},
-				"speed": {"value": 1.0}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [450, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "timer1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Timer CHOP — Looping\n\nA 5-second looping timer that auto-starts.\nOutputs fraction (0→1), elapsed, and done channels.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "timer1":  {
+                                 "type":  "TimerCHOP",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "length":  {
+                                                                   "value":  5.0
+                                                               },
+                                                    "loop":  {
+                                                                 "value":  true
+                                                             },
+                                                    "auto_start":  {
+                                                                       "value":  true
+                                                                   },
+                                                    "speed":  {
+                                                                  "value":  1.0
+                                                              }
+                                                }
+                             },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "timer1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Timer CHOP — Looping\n\nA 5-second looping timer that auto-starts.\nOutputs fraction (0→1), elapsed, and done channels.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

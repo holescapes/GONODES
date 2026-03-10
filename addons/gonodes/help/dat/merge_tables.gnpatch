@@ -1,51 +1,160 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"const_a": {
-			"type": "ConstantDAT",
-			"position": [100, 100],
-			"parameters": {
-				"col0": {"value": "name"},
-				"col1": {"value": "val"},
-				"r0c0": {"value": "A"},
-				"r0c1": {"value": "1"},
-				"r1c0": {"value": "B"},
-				"r1c1": {"value": "2"}
-			}
-		},
-		"const_b": {
-			"type": "ConstantDAT",
-			"position": [100, 350],
-			"parameters": {
-				"col0": {"value": "name"},
-				"col1": {"value": "val"},
-				"r0c0": {"value": "C"},
-				"r0c1": {"value": "3"},
-				"r1c0": {"value": "D"},
-				"r1c1": {"value": "4"}
-			}
-		},
-		"merge1": {
-			"type": "MergeDAT",
-			"position": [450, 200],
-			"parameters": {
-				"mode": {"value": 0}
-			}
-		}
-	},
-	"connections": [
-		{"from": "const_a", "from_port": 0, "to": "merge1", "to_port": 0},
-		{"from": "const_b", "from_port": 0, "to": "merge1", "to_port": 1}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Merge DAT — Combine Tables\n\nAppends rows from table B after table A.\nmode=0 appends rows, other modes vary.\nBoth tables share the same column structure.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "const_a":  {
+                                  "type":  "ConstantDAT",
+                                  "position":  [
+                                                   100,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "col0":  {
+                                                                  "value":  "name"
+                                                              },
+                                                     "col1":  {
+                                                                  "value":  "val"
+                                                              },
+                                                     "r0c0":  {
+                                                                  "value":  "A"
+                                                              },
+                                                     "r0c1":  {
+                                                                  "value":  "1"
+                                                              },
+                                                     "r1c0":  {
+                                                                  "value":  "B"
+                                                              },
+                                                     "r1c1":  {
+                                                                  "value":  "2"
+                                                              }
+                                                 }
+                              },
+                  "const_b":  {
+                                  "type":  "ConstantDAT",
+                                  "position":  [
+                                                   100,
+                                                   350
+                                               ],
+                                  "parameters":  {
+                                                     "col0":  {
+                                                                  "value":  "name"
+                                                              },
+                                                     "col1":  {
+                                                                  "value":  "val"
+                                                              },
+                                                     "r0c0":  {
+                                                                  "value":  "C"
+                                                              },
+                                                     "r0c1":  {
+                                                                  "value":  "3"
+                                                              },
+                                                     "r1c0":  {
+                                                                  "value":  "D"
+                                                              },
+                                                     "r1c1":  {
+                                                                  "value":  "4"
+                                                              }
+                                                 }
+                              },
+                  "merge1":  {
+                                 "type":  "MergeDAT",
+                                 "position":  [
+                                                  450,
+                                                  200
+                                              ],
+                                 "parameters":  {
+                                                    "mode":  {
+                                                                 "value":  0
+                                                             }
+                                                }
+                             },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   200
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "text_view":  {
+                                    "type":  "TextTOP",
+                                    "position":  [
+                                                     800,
+                                                     200
+                                                 ],
+                                    "parameters":  {
+                                                       "resolution":  {
+                                                                          "value":  {
+                                                                                        "_type":  "Vector2i",
+                                                                                        "x":  512,
+                                                                                        "y":  512
+                                                                                    }
+                                                                      },
+                                                       "text":  {
+                                                                    "value":  "MergeDAT output"
+                                                                },
+                                                       "font_size":  {
+                                                                         "value":  24
+                                                                     }
+                                                   }
+                                }
+              },
+    "connections":  [
+                        {
+                            "from":  "const_a",
+                            "from_port":  0,
+                            "to":  "merge1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "const_b",
+                            "from_port":  0,
+                            "to":  "merge1",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "merge1",
+                            "from_port":  0,
+                            "to":  "text_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "text_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Merge DAT — Combine Tables\n\nAppends rows from table B after table A.\nmode=0 appends rows, other modes vary.\nBoth tables share the same column structure.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

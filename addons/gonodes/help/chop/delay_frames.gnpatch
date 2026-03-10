@@ -1,41 +1,128 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"lfo1": {
-			"type": "LFO_CHOP",
-			"position": [100, 100],
-			"parameters": {
-				"frequency": {"value": 0.5},
-				"waveform": {"value": 0},
-				"amplitude": {"value": 1.0}
-			}
-		},
-		"delay1": {
-			"type": "DelayCHOP",
-			"position": [450, 100],
-			"parameters": {
-				"frames": {"value": 30}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [800, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "lfo1", "from_port": 0, "to": "delay1", "to_port": 0},
-		{"from": "delay1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Delay CHOP — Frame Delay\n\nDelays a sine LFO by 30 frames.\nUseful for staggered animation chains.\nRing buffer stores past frame values.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "lfo1":  {
+                               "type":  "LFO_CHOP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "frequency":  {
+                                                                    "value":  0.5
+                                                                },
+                                                  "waveform":  {
+                                                                   "value":  0
+                                                               },
+                                                  "amplitude":  {
+                                                                    "value":  1.0
+                                                                }
+                                              }
+                           },
+                  "delay1":  {
+                                 "type":  "DelayCHOP",
+                                 "position":  [
+                                                  450,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "frames":  {
+                                                                   "value":  30
+                                                               }
+                                                }
+                             },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 800,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1500,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    1150,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "lfo1",
+                            "from_port":  0,
+                            "to":  "delay1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "delay1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Delay CHOP — Frame Delay\n\nDelays a sine LFO by 30 frames.\nUseful for staggered animation chains.\nRing buffer stores past frame values.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

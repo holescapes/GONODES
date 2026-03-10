@@ -1,32 +1,141 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"area1": {
-			"type": "AreaCOMP",
-			"position": [200, 100],
-			"parameters": {
-				"tx": {"value": 0.0},
-				"ty": {"value": 2.0},
-				"tz": {"value": 0.0},
-				"sx": {"value": 5.0},
-				"sy": {"value": 5.0},
-				"sz": {"value": 5.0},
-				"gravity_override": {"value": true},
-				"gravity_direction": {"value": {"_type": "Vector3", "x": 0.0, "y": 1.0, "z": 0.0}},
-				"gravity_strength": {"value": 5.0}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Area COMP — Reverse Gravity Zone\n\nA 5×5×5 area at y=2 with upward gravity.\nPhysics bodies entering this zone float upward.\nUse for force fields, triggers, and zones.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "area1":  {
+                                "type":  "AreaCOMP",
+                                "position":  [
+                                                 200,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "tx":  {
+                                                              "value":  0.0
+                                                          },
+                                                   "ty":  {
+                                                              "value":  2.0
+                                                          },
+                                                   "tz":  {
+                                                              "value":  0.0
+                                                          },
+                                                   "sx":  {
+                                                              "value":  5.0
+                                                          },
+                                                   "sy":  {
+                                                              "value":  5.0
+                                                          },
+                                                   "sz":  {
+                                                              "value":  5.0
+                                                          },
+                                                   "gravity_override":  {
+                                                                            "value":  true
+                                                                        },
+                                                   "gravity_direction":  {
+                                                                             "value":  {
+                                                                                           "_type":  "Vector3",
+                                                                                           "x":  0.0,
+                                                                                           "y":  1.0,
+                                                                                           "z":  0.0
+                                                                                       }
+                                                                         },
+                                                   "gravity_strength":  {
+                                                                            "value":  5.0
+                                                                        }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   850,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       500,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    200,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "area1",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Area COMP — Reverse Gravity Zone\n\nA 5×5×5 area at y=2 with upward gravity.\nPhysics bodies entering this zone float upward.\nUse for force fields, triggers, and zones.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

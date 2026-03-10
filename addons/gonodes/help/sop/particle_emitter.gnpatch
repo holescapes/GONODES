@@ -1,47 +1,186 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"sphere1": {
-			"type": "SphereSOP",
-			"position": [100, 100],
-			"parameters": {
-				"radius": {"value": 0.5},
-				"radial_segments": {"value": 16},
-				"rings": {"value": 8}
-			}
-		},
-		"particle1": {
-			"type": "ParticleSOP",
-			"position": [400, 100],
-			"parameters": {
-				"rate": {"value": 200.0},
-				"max_particles": {"value": 5000},
-				"life": {"value": 3.0},
-				"emit_speed": {"value": 2.0},
-				"spread": {"value": 30.0},
-				"gravity": {"value": -9.8},
-				"turbulence": {"value": 1.0}
-			}
-		},
-		"null1": {
-			"type": "NullSOP",
-			"position": [700, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "sphere1", "from_port": 0, "to": "particle1", "to_port": 0},
-		{"from": "particle1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Particle SOP — Fountain Emitter\n\nEmits 200 particles/sec from a sphere surface.\nParticles fly outward along normals with spread, then fall by gravity.\nTurbulence adds random drift for organic movement.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "sphere1":  {
+                                  "type":  "SphereSOP",
+                                  "position":  [
+                                                   100,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "radius":  {
+                                                                    "value":  0.5
+                                                                },
+                                                     "radial_segments":  {
+                                                                             "value":  16
+                                                                         },
+                                                     "rings":  {
+                                                                   "value":  8
+                                                               }
+                                                 }
+                              },
+                  "particle1":  {
+                                    "type":  "ParticleSOP",
+                                    "position":  [
+                                                     400,
+                                                     100
+                                                 ],
+                                    "parameters":  {
+                                                       "rate":  {
+                                                                    "value":  200.0
+                                                                },
+                                                       "max_particles":  {
+                                                                             "value":  5000
+                                                                         },
+                                                       "life":  {
+                                                                    "value":  3.0
+                                                                },
+                                                       "emit_speed":  {
+                                                                          "value":  2.0
+                                                                      },
+                                                       "spread":  {
+                                                                      "value":  30.0
+                                                                  },
+                                                       "gravity":  {
+                                                                       "value":  -9.8
+                                                                   },
+                                                       "turbulence":  {
+                                                                          "value":  1.0
+                                                                      }
+                                                   }
+                                },
+                  "null1":  {
+                                "type":  "NullSOP",
+                                "position":  [
+                                                 700,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1650,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    1000,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    1000,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1300,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  }
+              },
+    "connections":  [
+                        {
+                            "from":  "sphere1",
+                            "from_port":  0,
+                            "to":  "particle1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "particle1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Particle SOP — Fountain Emitter\n\nEmits 200 particles/sec from a sphere surface.\nParticles fly outward along normals with spread, then fall by gravity.\nTurbulence adds random drift for organic movement.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

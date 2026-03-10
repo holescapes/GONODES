@@ -1,29 +1,101 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"rect1": {
-			"type": "RectangleTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"fill_color": {"value": {"_type": "Color", "r": 1.0, "g": 0.4, "b": 0.2, "a": 1.0}},
-				"bg_color": {"value": {"_type": "Color", "r": 0.05, "g": 0.05, "b": 0.1, "a": 1.0}},
-				"size": {"value": {"_type": "Vector2", "x": 0.5, "y": 0.3}},
-				"corner_radius": {"value": 0.05},
-				"softness": {"value": 0.01}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Rectangle TOP — Rounded\n\nAn orange rounded rectangle on a dark bg.\nCorner radius and softness control the shape.\nCenter and size can be expression-driven.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "rect1":  {
+                                "type":  "RectangleTOP",
+                                "position":  [
+                                                 100,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "resolution":  {
+                                                                      "value":  {
+                                                                                    "_type":  "Vector2i",
+                                                                                    "x":  512,
+                                                                                    "y":  512
+                                                                                }
+                                                                  },
+                                                   "fill_color":  {
+                                                                      "value":  {
+                                                                                    "_type":  "Color",
+                                                                                    "r":  1.0,
+                                                                                    "g":  0.4,
+                                                                                    "b":  0.2,
+                                                                                    "a":  1.0
+                                                                                }
+                                                                  },
+                                                   "bg_color":  {
+                                                                    "value":  {
+                                                                                  "_type":  "Color",
+                                                                                  "r":  0.05,
+                                                                                  "g":  0.05,
+                                                                                  "b":  0.1,
+                                                                                  "a":  1.0
+                                                                              }
+                                                                },
+                                                   "size":  {
+                                                                "value":  {
+                                                                              "_type":  "Vector2",
+                                                                              "x":  0.5,
+                                                                              "y":  0.3
+                                                                          }
+                                                            },
+                                                   "corner_radius":  {
+                                                                         "value":  0.05
+                                                                     },
+                                                   "softness":  {
+                                                                    "value":  0.01
+                                                                }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "rect1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Rectangle TOP — Rounded\n\nAn orange rounded rectangle on a dark bg.\nCorner radius and softness control the shape.\nCenter and size can be expression-driven.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

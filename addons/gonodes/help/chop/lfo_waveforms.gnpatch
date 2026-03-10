@@ -1,63 +1,182 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"sine": {
-			"type": "LFO_CHOP",
-			"position": [100, 100],
-			"parameters": {
-				"waveform": {"value": 0},
-				"frequency": {"value": 0.5},
-				"amplitude": {"value": 1.0}
-			}
-		},
-		"triangle": {
-			"type": "LFO_CHOP",
-			"position": [100, 280],
-			"parameters": {
-				"waveform": {"value": 1},
-				"frequency": {"value": 0.5},
-				"amplitude": {"value": 1.0}
-			}
-		},
-		"square": {
-			"type": "LFO_CHOP",
-			"position": [100, 460],
-			"parameters": {
-				"waveform": {"value": 2},
-				"frequency": {"value": 0.5},
-				"amplitude": {"value": 1.0}
-			}
-		},
-		"sawtooth": {
-			"type": "LFO_CHOP",
-			"position": [100, 640],
-			"parameters": {
-				"waveform": {"value": 3},
-				"frequency": {"value": 0.5},
-				"amplitude": {"value": 1.0}
-			}
-		},
-		"merge1": {
-			"type": "MergeCHOP",
-			"position": [450, 370],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "sine", "from_port": 0, "to": "merge1", "to_port": 0},
-		{"from": "triangle", "from_port": 0, "to": "merge1", "to_port": 1},
-		{"from": "square", "from_port": 0, "to": "merge1", "to_port": 2},
-		{"from": "sawtooth", "from_port": 0, "to": "merge1", "to_port": 3}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "LFO CHOP — Waveforms\n\nFour LFOs demonstrating Sine, Triangle, Square,\nand Sawtooth waveforms merged into one output.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "sine":  {
+                               "type":  "LFO_CHOP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "waveform":  {
+                                                                   "value":  0
+                                                               },
+                                                  "frequency":  {
+                                                                    "value":  0.5
+                                                                },
+                                                  "amplitude":  {
+                                                                    "value":  1.0
+                                                                }
+                                              }
+                           },
+                  "triangle":  {
+                                   "type":  "LFO_CHOP",
+                                   "position":  [
+                                                    100,
+                                                    280
+                                                ],
+                                   "parameters":  {
+                                                      "waveform":  {
+                                                                       "value":  1
+                                                                   },
+                                                      "frequency":  {
+                                                                        "value":  0.5
+                                                                    },
+                                                      "amplitude":  {
+                                                                        "value":  1.0
+                                                                    }
+                                                  }
+                               },
+                  "square":  {
+                                 "type":  "LFO_CHOP",
+                                 "position":  [
+                                                  100,
+                                                  460
+                                              ],
+                                 "parameters":  {
+                                                    "waveform":  {
+                                                                     "value":  2
+                                                                 },
+                                                    "frequency":  {
+                                                                      "value":  0.5
+                                                                  },
+                                                    "amplitude":  {
+                                                                      "value":  1.0
+                                                                  }
+                                                }
+                             },
+                  "sawtooth":  {
+                                   "type":  "LFO_CHOP",
+                                   "position":  [
+                                                    100,
+                                                    640
+                                                ],
+                                   "parameters":  {
+                                                      "waveform":  {
+                                                                       "value":  3
+                                                                   },
+                                                      "frequency":  {
+                                                                        "value":  0.5
+                                                                    },
+                                                      "amplitude":  {
+                                                                        "value":  1.0
+                                                                    }
+                                                  }
+                               },
+                  "merge1":  {
+                                 "type":  "MergeCHOP",
+                                 "position":  [
+                                                  450,
+                                                  370
+                                              ],
+                                 "parameters":  {
+
+                                                }
+                             },
+                  "window1":  {
+                                  "position":  [
+                                                   1150,
+                                                   370
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    800,
+                                                    370
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "sine",
+                            "from_port":  0,
+                            "to":  "merge1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "triangle",
+                            "from_port":  0,
+                            "to":  "merge1",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "square",
+                            "from_port":  0,
+                            "to":  "merge1",
+                            "to_port":  2
+                        },
+                        {
+                            "from":  "sawtooth",
+                            "from_port":  0,
+                            "to":  "merge1",
+                            "to_port":  3
+                        },
+                        {
+                            "from":  "merge1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "LFO CHOP — Waveforms\n\nFour LFOs demonstrating Sine, Triangle, Square,\nand Sawtooth waveforms merged into one output.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

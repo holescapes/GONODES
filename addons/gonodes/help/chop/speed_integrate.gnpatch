@@ -1,44 +1,137 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"lfo1": {
-			"type": "LFO_CHOP",
-			"position": [100, 100],
-			"parameters": {
-				"waveform": {"value": 0},
-				"frequency": {"value": 0.5},
-				"amplitude": {"value": 1.0}
-			}
-		},
-		"speed1": {
-			"type": "SpeedCHOP",
-			"position": [450, 100],
-			"parameters": {
-				"scale": {"value": 1.0},
-				"clamp": {"value": true},
-				"min": {"value": -5.0},
-				"max": {"value": 5.0}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [800, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "lfo1", "from_port": 0, "to": "speed1", "to_port": 0},
-		{"from": "speed1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Speed CHOP — Integrate\n\nAccumulates the LFO value over time.\nClamped to -5..5 range to prevent overflow.\nIntegration turns velocity into position.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 110.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "lfo1":  {
+                               "type":  "LFO_CHOP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "waveform":  {
+                                                                   "value":  0
+                                                               },
+                                                  "frequency":  {
+                                                                    "value":  0.5
+                                                                },
+                                                  "amplitude":  {
+                                                                    "value":  1.0
+                                                                }
+                                              }
+                           },
+                  "speed1":  {
+                                 "type":  "SpeedCHOP",
+                                 "position":  [
+                                                  450,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "scale":  {
+                                                                  "value":  1.0
+                                                              },
+                                                    "clamp":  {
+                                                                  "value":  true
+                                                              },
+                                                    "min":  {
+                                                                "value":  -5.0
+                                                            },
+                                                    "max":  {
+                                                                "value":  5.0
+                                                            }
+                                                }
+                             },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 800,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1500,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    1150,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "lfo1",
+                            "from_port":  0,
+                            "to":  "speed1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "speed1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Speed CHOP — Integrate\n\nAccumulates the LFO value over time.\nClamped to -5..5 range to prevent overflow.\nIntegration turns velocity into position.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         110.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

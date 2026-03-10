@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "table1": {
+      "type": "TableDAT",
+      "position": [100, 200],
+      "parameters": {
+        "rows": {"value": 3},
+        "cols": {"value": 2},
+        "headers": {"value": "tx,tz"},
+        "data": {"value": "-2,0\n0,0\n2,0"}
+      }
+    },
+    "replicator1": {
+      "type": "ReplicatorCOMP",
+      "position": [450, 200],
+      "parameters": {
+        "count": {"value": 3},
+        "template_type": {"value": "GeometryCOMP"},
+        "prefix": {"value": "replica_"},
+        "active": {"value": true}
+      }
+    },
+    "text1": {
+      "type": "TextTOP",
+      "position": [800, 200],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "text": {"value": "ReplicatorCOMP creates 3 instances\nwith per-row parameter overrides"},
+        "font_size": {"value": 20}
+      }
+    },
+    "window1": {
+      "type": "WindowTOP",
+      "position": [1150, 200],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "open": {"value": true}
+      }
+    }
+  },
+  "connections": [
+    {"from": "table1", "from_port": 0, "to": "replicator1", "to_port": 0},
+    {"from": "text1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Replicator COMP — Table-Driven Instancing\n\nA TableDAT drives 3 replicas of GeometryCOMP.\nEach row sets tx and tz, spacing copies along X.\nReplicas are created/destroyed by the network API.",
+      "position": [50.0, -50.0],
+      "size": [600.0, 110.0],
+      "color": [1.0, 1.0, 1.0, 0.8]
+    }
+  ]
+}

@@ -1,38 +1,111 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"scale": {"value": 3.0},
-				"monochrome": {"value": false}
-			}
-		},
-		"proj1": {
-			"type": "ProjectionTOP",
-			"position": [450, 100],
-			"parameters": {
-				"mode": {"value": 1},
-				"uv_offset": {"value": {"_type": "Vector2", "x": 0.0, "y": 0.0}},
-				"uv_scale": {"value": {"_type": "Vector2", "x": 2.0, "y": 1.0}},
-				"rotation": {"value": 0.0}
-			}
-		}
-	},
-	"connections": [
-		{"from": "noise1", "from_port": 0, "to": "proj1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Projection TOP — Cylindrical UV\n\nRe-projects noise with cylindrical UV mapping.\nModes: 0=Planar, 1=Cylindrical, 2=Spherical.\nUV Scale 2×1 tiles the projection horizontally.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseTOP",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "resolution":  {
+                                                                       "value":  {
+                                                                                     "_type":  "Vector2i",
+                                                                                     "x":  512,
+                                                                                     "y":  512
+                                                                                 }
+                                                                   },
+                                                    "scale":  {
+                                                                  "value":  3.0
+                                                              },
+                                                    "monochrome":  {
+                                                                       "value":  false
+                                                                   }
+                                                }
+                             },
+                  "proj1":  {
+                                "type":  "ProjectionTOP",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+                                                   "mode":  {
+                                                                "value":  1
+                                                            },
+                                                   "uv_offset":  {
+                                                                     "value":  {
+                                                                                   "_type":  "Vector2",
+                                                                                   "x":  0.0,
+                                                                                   "y":  0.0
+                                                                               }
+                                                                 },
+                                                   "uv_scale":  {
+                                                                    "value":  {
+                                                                                  "_type":  "Vector2",
+                                                                                  "x":  2.0,
+                                                                                  "y":  1.0
+                                                                              }
+                                                                },
+                                                   "rotation":  {
+                                                                    "value":  0.0
+                                                                }
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   800,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "proj1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "proj1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Projection TOP — Cylindrical UV\n\nRe-projects noise with cylindrical UV mapping.\nModes: 0=Planar, 1=Cylindrical, 2=Spherical.\nUV Scale 2×1 tiles the projection horizontally.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

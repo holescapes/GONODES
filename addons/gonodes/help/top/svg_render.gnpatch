@@ -1,25 +1,73 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"svg1": {
-			"type": "SVGTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"svg_path": {"value": "res://icon.svg"}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "SVG TOP — Vector Rendering\n\nRenders the project icon.svg at 512×512.\nSupports any res:// or user:// SVG path.\nRasterised via Godot at arbitrary resolution.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "svg1":  {
+                               "type":  "SVGTOP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "resolution":  {
+                                                                     "value":  {
+                                                                                   "_type":  "Vector2i",
+                                                                                   "x":  512,
+                                                                                   "y":  512
+                                                                               }
+                                                                 },
+                                                  "svg_path":  {
+                                                                   "value":  "res://icon.svg"
+                                                               }
+                                              }
+                           },
+                  "window1":  {
+                                  "position":  [
+                                                   450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "svg1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "SVG TOP — Vector Rendering\n\nRenders the project icon.svg at 512×512.\nSupports any res:// or user:// SVG path.\nRasterised via Godot at arbitrary resolution.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

@@ -1,38 +1,101 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseTOP",
-			"position": [0, 100],
-			"parameters": {}
-		},
-		"ramp1": {
-			"type": "RampTOP",
-			"position": [0, 250],
-			"parameters": {}
-		},
-		"pal1": {
-			"type": "PaletteTOP",
-			"position": [300, 150],
-			"parameters": {
-				"dithering": {"value": true},
-				"palette_size": {"value": 8}
-			}
-		}
-	},
-	"connections": [
-		{"from": "noise1", "from_port": 0, "to": "pal1", "to_port": 0},
-		{"from": "ramp1", "from_port": 0, "to": "pal1", "to_port": 1}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Palette TOP — Color Quantization\n\nQuantize image to palette colors with Bayer dithering.\nPalette from second input, size limits color count.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 80.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseTOP",
+                                 "position":  [
+                                                  0,
+                                                  100
+                                              ],
+                                 "parameters":  {
+
+                                                }
+                             },
+                  "ramp1":  {
+                                "type":  "RampTOP",
+                                "position":  [
+                                                 0,
+                                                 250
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "pal1":  {
+                               "type":  "PaletteTOP",
+                               "position":  [
+                                                300,
+                                                150
+                                            ],
+                               "parameters":  {
+                                                  "dithering":  {
+                                                                    "value":  true
+                                                                },
+                                                  "palette_size":  {
+                                                                       "value":  8
+                                                                   }
+                                              }
+                           },
+                  "window1":  {
+                                  "position":  [
+                                                   650,
+                                                   150
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "pal1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "ramp1",
+                            "from_port":  0,
+                            "to":  "pal1",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "pal1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Palette TOP — Color Quantization\n\nQuantize image to palette colors with Bayer dithering.\nPalette from second input, size limits color count.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         80.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

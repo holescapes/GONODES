@@ -1,54 +1,201 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"sphere1": {
-			"type": "SphereSOP",
-			"position": [-400, 0],
-			"parameters": {
-				"radius": {"value": 1.0},
-				"segments": {"value": 32},
-				"rings": {"value": 16}
-			}
-		},
-		"noise1": {
-			"type": "NoiseSOP",
-			"position": [0, 0],
-			"parameters": {
-				"amplitude": {"value": 0.5},
-				"frequency": {"value": 2.0},
-				"animate": {"value": true}
-			}
-		},
-		"spring1": {
-			"type": "SpringSOP",
-			"position": [400, 0],
-			"parameters": {
-				"stiffness": {"value": 15.0},
-				"damping": {"value": 3.0},
-				"mass": {"value": 1.0},
-				"max_displacement": {"value": 5.0}
-			}
-		},
-		"null1": {
-			"type": "NullSOP",
-			"position": [800, 0],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "sphere1", "from_port": 0, "to": "noise1", "to_port": 0},
-		{"from": "noise1", "from_port": 0, "to": "spring1", "to_port": 0},
-		{"from": "spring1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "SpringSOP — Vertex Spring Deformer\n\nVertices spring toward input positions with damped oscillation.\nNoiseSOP animates the sphere, SpringSOP adds jelly follow lag.\n\nTry adjusting stiffness (higher = snappier) and\ndamping (higher = less overshoot) to change the feel.",
-			"position": [-450.0, -170.0],
-			"size": [550.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "sphere1":  {
+                                  "type":  "SphereSOP",
+                                  "position":  [
+                                                   -400,
+                                                   0
+                                               ],
+                                  "parameters":  {
+                                                     "radius":  {
+                                                                    "value":  1.0
+                                                                },
+                                                     "segments":  {
+                                                                      "value":  32
+                                                                  },
+                                                     "rings":  {
+                                                                   "value":  16
+                                                               }
+                                                 }
+                              },
+                  "noise1":  {
+                                 "type":  "NoiseSOP",
+                                 "position":  [
+                                                  0,
+                                                  0
+                                              ],
+                                 "parameters":  {
+                                                    "amplitude":  {
+                                                                      "value":  0.5
+                                                                  },
+                                                    "frequency":  {
+                                                                      "value":  2.0
+                                                                  },
+                                                    "animate":  {
+                                                                    "value":  true
+                                                                }
+                                                }
+                             },
+                  "spring1":  {
+                                  "type":  "SpringSOP",
+                                  "position":  [
+                                                   400,
+                                                   0
+                                               ],
+                                  "parameters":  {
+                                                     "stiffness":  {
+                                                                       "value":  15.0
+                                                                   },
+                                                     "damping":  {
+                                                                     "value":  3.0
+                                                                 },
+                                                     "mass":  {
+                                                                  "value":  1.0
+                                                              },
+                                                     "max_displacement":  {
+                                                                              "value":  5.0
+                                                                          }
+                                                 }
+                              },
+                  "null1":  {
+                                "type":  "NullSOP",
+                                "position":  [
+                                                 800,
+                                                 0
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1750,
+                                                   0
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    1100,
+                                                    0
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    1100,
+                                                    200
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1400,
+                                                       0
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  }
+              },
+    "connections":  [
+                        {
+                            "from":  "sphere1",
+                            "from_port":  0,
+                            "to":  "noise1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "spring1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "spring1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "SpringSOP — Vertex Spring Deformer\n\nVertices spring toward input positions with damped oscillation.\nNoiseSOP animates the sphere, SpringSOP adds jelly follow lag.\n\nTry adjusting stiffness (higher = snappier) and\ndamping (higher = less overshoot) to change the feel.",
+                            "position":  [
+                                             -450.0,
+                                             -170.0
+                                         ],
+                            "size":  [
+                                         550.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

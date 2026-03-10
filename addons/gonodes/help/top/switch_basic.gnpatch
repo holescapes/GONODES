@@ -1,46 +1,125 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise_a": {
-			"type": "NoiseTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"noise_type": {"value": 0},
-				"scale": {"value": 3.0}
-			}
-		},
-		"noise_b": {
-			"type": "NoiseTOP",
-			"position": [100, 350],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"noise_type": {"value": 2},
-				"scale": {"value": 5.0}
-			}
-		},
-		"switch1": {
-			"type": "SwitchTOP",
-			"position": [450, 200],
-			"parameters": {
-				"index": {"value": 0},
-				"blend": {"value": false}
-			}
-		}
-	},
-	"connections": [
-		{"from": "noise_a", "from_port": 0, "to": "switch1", "to_port": 0},
-		{"from": "noise_b", "from_port": 0, "to": "switch1", "to_port": 1}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Switch TOP — Select Input\n\nSwitches between Simplex and Voronoi noise.\nindex=0 selects first input, 1 selects second.\nEnable blend for smooth crossfade transitions.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise_a":  {
+                                  "type":  "NoiseTOP",
+                                  "position":  [
+                                                   100,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512,
+                                                                                      "y":  512
+                                                                                  }
+                                                                    },
+                                                     "noise_type":  {
+                                                                        "value":  0
+                                                                    },
+                                                     "scale":  {
+                                                                   "value":  3.0
+                                                               }
+                                                 }
+                              },
+                  "noise_b":  {
+                                  "type":  "NoiseTOP",
+                                  "position":  [
+                                                   100,
+                                                   350
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512,
+                                                                                      "y":  512
+                                                                                  }
+                                                                    },
+                                                     "noise_type":  {
+                                                                        "value":  2
+                                                                    },
+                                                     "scale":  {
+                                                                   "value":  5.0
+                                                               }
+                                                 }
+                              },
+                  "switch1":  {
+                                  "type":  "SwitchTOP",
+                                  "position":  [
+                                                   450,
+                                                   200
+                                               ],
+                                  "parameters":  {
+                                                     "index":  {
+                                                                   "value":  0
+                                                               },
+                                                     "blend":  {
+                                                                   "value":  false
+                                                               }
+                                                 }
+                              },
+                  "window1":  {
+                                  "position":  [
+                                                   800,
+                                                   200
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise_a",
+                            "from_port":  0,
+                            "to":  "switch1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "noise_b",
+                            "from_port":  0,
+                            "to":  "switch1",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "switch1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Switch TOP — Select Input\n\nSwitches between Simplex and Voronoi noise.\nindex=0 selects first input, 1 selects second.\nEnable blend for smooth crossfade transitions.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

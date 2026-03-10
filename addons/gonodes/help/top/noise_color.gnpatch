@@ -1,27 +1,79 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"noise_type": {"value": 0},
-				"scale": {"value": 5.0},
-				"monochrome": {"value": false}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Noise TOP — Color\n\nSimplex noise at 512×512 in color mode.\nAdjust scale for finer or coarser detail.",
-			"position": [-100.0, -150.0],
-			"size": [360.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseTOP",
+                                 "position":  [
+                                                  100,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "resolution":  {
+                                                                       "value":  {
+                                                                                     "_type":  "Vector2i",
+                                                                                     "x":  512,
+                                                                                     "y":  512
+                                                                                 }
+                                                                   },
+                                                    "noise_type":  {
+                                                                       "value":  0
+                                                                   },
+                                                    "scale":  {
+                                                                  "value":  5.0
+                                                              },
+                                                    "monochrome":  {
+                                                                       "value":  false
+                                                                   }
+                                                }
+                             },
+                  "window1":  {
+                                  "position":  [
+                                                   450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Noise TOP — Color\n\nSimplex noise at 512×512 in color mode.\nAdjust scale for finer or coarser detail.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         360.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

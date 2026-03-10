@@ -521,6 +521,14 @@ func _register_core_operators() -> void:
 	_reg("PaletteTOP",      "TOP", PaletteTOP,
 		"Quantize colors to a palette texture with optional Bayer dithering.")
 
+	# ── TOPs: New (Tier 1 + 2) ──────────────────────────────────────────
+	_reg("OpticalFlowTOP",  "TOP", OpticalFlowTOP,
+		"Horn-Schunck optical flow motion vector estimation.")
+	_reg("GlueTOP",         "TOP", GlueTOP,
+		"Pack multiple textures into a grid atlas layout.")
+	_reg("EmbossTOP",       "TOP", EmbossTOP,
+		"Emboss relief filter with adjustable angle and strength.")
+
 	# ── CHOPs: Generators ───────────────────────────────────────────────
 	_reg("LFO_CHOP",        "CHOP", LFO_CHOP,
 		"Low-frequency oscillator (sine, triangle, square, saw, pulse).")
@@ -648,6 +656,14 @@ func _register_core_operators() -> void:
 		"Extract a sub-range of samples from channels.")
 	_reg("ExtendCHOP",      "CHOP", ExtendCHOP,
 		"Pad samples before/after with hold, cycle, mirror, slope, or zero.")
+
+	# ── CHOPs: New (Tier 1 + 2) ────────────────────────────────────────
+	_reg("BeatCHOP",        "CHOP", BeatCHOP,
+		"Energy-based beat/onset detection for music-reactive visuals.")
+	_reg("IKCHOP",          "CHOP", IKCHOP,
+		"FABRIK inverse kinematics chain solver with joint position output.")
+	_reg("WarpCHOP",        "CHOP", WarpCHOP,
+		"Time-warp / retime channel data with speed, offset, or warp curve.")
 
 	# ── CHOPs: Combiners (new) ──────────────────────────────────────────
 	_reg("InterpolateCHOP", "CHOP", InterpolateCHOP,
@@ -785,6 +801,20 @@ func _register_core_operators() -> void:
 	_reg("PolyReduceSOP",   "SOP", PolyReduceSOP,
 		"Mesh decimation via quadric error metric edge collapse.")
 
+	# ── SOPs: New (Tier 1 + 2) ─────────────────────────────────────────
+	_reg("FuseSOP",         "SOP", FuseSOP,
+		"Merge coincident vertices within a distance threshold.")
+	_reg("RaySOP",          "SOP", RaySOP,
+		"Project vertices onto a target surface via raycasting.")
+	_reg("CapSOP",          "SOP", CapSOP,
+		"Close open boundary holes with triangle fan caps.")
+	_reg("LatticeSOP",      "SOP", LatticeSOP,
+		"Free-form deformation via control-point lattice.")
+	_reg("PolyLoftSOP",     "SOP", PolyLoftSOP,
+		"Loft polygon surface between cross-section rings.")
+	_reg("MountainSOP",     "SOP", MountainSOP,
+		"Noise-based vertex displacement along normals.")
+
 	# ── SOPs: Bridge (cross-family conversion) ─────────────────────────
 	_reg("CHOPtoSOP",       "SOP", CHOPtoSOP,
 		"Convert CHOP channels to SOP points, lines, or trail geometry.")
@@ -864,6 +894,12 @@ func _register_core_operators() -> void:
 		"Convert TOP texture info or pixel data to a DAT table.")
 	_reg("OPFindDAT",       "DAT", OPFindDAT,
 		"Search the network for operators by family and name pattern.")
+
+	# ── DATs: New (Tier 2) ─────────────────────────────────────────────
+	_reg("TableDAT",        "DAT", TableDAT,
+		"Manual editable data table (CSV-style).")
+	_reg("NetworkDAT",      "DAT", NetworkDAT,
+		"TCP/UDP network send/receive with protocol mode toggle.")
 
 	# ── IMGs: Generators ─────────────────────────────────────────────────
 	_reg("NoiseIMG",        "IMG", NoiseIMG,
@@ -954,6 +990,8 @@ func _register_core_operators() -> void:
 	# ── COMPs: Animation ────────────────────────────────────────────────
 	_reg("AnimationCOMP",   "COMP", AnimationCOMP,
 		"AnimationPlayer wrapper for keyframe animation on COMP transform properties.")
+	_reg("ReplicatorCOMP",  "COMP", ReplicatorCOMP,
+		"Table-driven replicator — create N copies of a template with per-instance overrides.")
 
 	# ── COMPs: Scripting ────────────────────────────────────────────────
 	_reg("GenericScriptNode", "COMP", GenericScriptNode,

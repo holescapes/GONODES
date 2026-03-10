@@ -1,37 +1,116 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"circle1": {
-			"type": "CircleTOP",
-			"position": [100, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"radius": {"value": 0.3},
-				"fill_color": {"value": {"_type": "Color", "r": 1.0, "g": 0.4, "b": 0.1, "a": 1.0}}
-			}
-		},
-		"fit1": {
-			"type": "FitTOP",
-			"position": [450, 100],
-			"parameters": {
-				"fit_mode": {"value": 0},
-				"resolution": {"value": {"_type": "Vector2i", "x": 800, "y": 400}},
-				"border_color": {"value": {"_type": "Color", "r": 0.1, "g": 0.1, "b": 0.1, "a": 1.0}}
-			}
-		}
-	},
-	"connections": [
-		{"from": "circle1", "from_port": 0, "to": "fit1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Fit TOP — Aspect-Aware Resize\n\nFits a 512×512 circle into 800×400 with letterbox.\nModes: 0=Fit, 1=Fill, 2=Stretch, 3=Letterbox.\nBorder colour fills the unused area.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "circle1":  {
+                                  "type":  "CircleTOP",
+                                  "position":  [
+                                                   100,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512,
+                                                                                      "y":  512
+                                                                                  }
+                                                                    },
+                                                     "radius":  {
+                                                                    "value":  0.3
+                                                                },
+                                                     "fill_color":  {
+                                                                        "value":  {
+                                                                                      "_type":  "Color",
+                                                                                      "r":  1.0,
+                                                                                      "g":  0.4,
+                                                                                      "b":  0.1,
+                                                                                      "a":  1.0
+                                                                                  }
+                                                                    }
+                                                 }
+                              },
+                  "fit1":  {
+                               "type":  "FitTOP",
+                               "position":  [
+                                                450,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "fit_mode":  {
+                                                                   "value":  0
+                                                               },
+                                                  "resolution":  {
+                                                                     "value":  {
+                                                                                   "_type":  "Vector2i",
+                                                                                   "x":  800,
+                                                                                   "y":  400
+                                                                               }
+                                                                 },
+                                                  "border_color":  {
+                                                                       "value":  {
+                                                                                     "_type":  "Color",
+                                                                                     "r":  0.1,
+                                                                                     "g":  0.1,
+                                                                                     "b":  0.1,
+                                                                                     "a":  1.0
+                                                                                 }
+                                                                   }
+                                              }
+                           },
+                  "window1":  {
+                                  "position":  [
+                                                   800,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "circle1",
+                            "from_port":  0,
+                            "to":  "fit1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "fit1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Fit TOP — Aspect-Aware Resize\n\nFits a 512×512 circle into 800×400 with letterbox.\nModes: 0=Fit, 1=Fill, 2=Stretch, 3=Letterbox.\nBorder colour fills the unused area.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

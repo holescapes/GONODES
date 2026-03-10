@@ -1,42 +1,113 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseTOP",
-			"position": [-200, 100],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-				"noise_type": {"value": 0},
-				"scale": {"value": 4.0}
-			}
-		},
-		"compute1": {
-			"type": "ComputeShaderTOP",
-			"position": [200, 100],
-			"parameters": {
-				"time_dependent": {"value": true},
-				"shader_code": {"value": "#version 450\n\nlayout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\nlayout(set = 1, binding = 0) uniform sampler2D gn_tex0;\n\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\tfloat strength;  // = 2.0\n} pc;\n\nvoid main() {\n\tivec2 coords = ivec2(gl_GlobalInvocationID.xy);\n\tivec2 size = imageSize(gn_output);\n\tif (coords.x >= size.x || coords.y >= size.y) return;\n\n\tvec2 uv = (vec2(coords) + 0.5) / vec2(size);\n\tvec2 px = 1.0 / vec2(size);\n\n\t// Sobel edge detection\n\tvec3 tl = texture(gn_tex0, uv + vec2(-px.x,  px.y)).rgb;\n\tvec3 tc = texture(gn_tex0, uv + vec2( 0.0,   px.y)).rgb;\n\tvec3 tr = texture(gn_tex0, uv + vec2( px.x,  px.y)).rgb;\n\tvec3 ml = texture(gn_tex0, uv + vec2(-px.x,  0.0 )).rgb;\n\tvec3 mr = texture(gn_tex0, uv + vec2( px.x,  0.0 )).rgb;\n\tvec3 bl = texture(gn_tex0, uv + vec2(-px.x, -px.y)).rgb;\n\tvec3 bc = texture(gn_tex0, uv + vec2( 0.0,  -px.y)).rgb;\n\tvec3 br = texture(gn_tex0, uv + vec2( px.x, -px.y)).rgb;\n\n\tvec3 gx = -tl - 2.0*ml - bl + tr + 2.0*mr + br;\n\tvec3 gy = -tl - 2.0*tc - tr + bl + 2.0*bc + br;\n\tvec3 edge = sqrt(gx * gx + gy * gy) * pc.strength;\n\n\timageStore(gn_output, coords, vec4(edge, 1.0));\n}"}
-			}
-		},
-		"null1": {
-			"type": "NullTOP",
-			"position": [600, 100],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "noise1", "from_port": 0, "to": "compute1", "to_port": 0},
-		{"from": "compute1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Compute Shader TOP — Sobel Edge Filter\n\nReads an input texture (gn_tex0) via sampler2D and writes\nSobel edge-detected output to the storage image.\n\nThe 'strength' push constant becomes an inspector parameter.\nResolution is inherited from the input NoiseTOP automatically.",
-			"position": [-250.0, -170.0],
-			"size": [500.0, 120.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseTOP",
+                                 "position":  [
+                                                  -200,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "resolution":  {
+                                                                       "value":  {
+                                                                                     "_type":  "Vector2i",
+                                                                                     "x":  512,
+                                                                                     "y":  512
+                                                                                 }
+                                                                   },
+                                                    "noise_type":  {
+                                                                       "value":  0
+                                                                   },
+                                                    "scale":  {
+                                                                  "value":  4.0
+                                                              }
+                                                }
+                             },
+                  "compute1":  {
+                                   "type":  "ComputeShaderTOP",
+                                   "position":  [
+                                                    200,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "time_dependent":  {
+                                                                             "value":  true
+                                                                         },
+                                                      "shader_code":  {
+                                                                          "value":  "#version 450\n\nlayout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\nlayout(set = 1, binding = 0) uniform sampler2D gn_tex0;\n\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\tfloat strength;  // = 2.0\n} pc;\n\nvoid main() {\n\tivec2 coords = ivec2(gl_GlobalInvocationID.xy);\n\tivec2 size = imageSize(gn_output);\n\tif (coords.x \u003e= size.x || coords.y \u003e= size.y) return;\n\n\tvec2 uv = (vec2(coords) + 0.5) / vec2(size);\n\tvec2 px = 1.0 / vec2(size);\n\n\t// Sobel edge detection\n\tvec3 tl = texture(gn_tex0, uv + vec2(-px.x,  px.y)).rgb;\n\tvec3 tc = texture(gn_tex0, uv + vec2( 0.0,   px.y)).rgb;\n\tvec3 tr = texture(gn_tex0, uv + vec2( px.x,  px.y)).rgb;\n\tvec3 ml = texture(gn_tex0, uv + vec2(-px.x,  0.0 )).rgb;\n\tvec3 mr = texture(gn_tex0, uv + vec2( px.x,  0.0 )).rgb;\n\tvec3 bl = texture(gn_tex0, uv + vec2(-px.x, -px.y)).rgb;\n\tvec3 bc = texture(gn_tex0, uv + vec2( 0.0,  -px.y)).rgb;\n\tvec3 br = texture(gn_tex0, uv + vec2( px.x, -px.y)).rgb;\n\n\tvec3 gx = -tl - 2.0*ml - bl + tr + 2.0*mr + br;\n\tvec3 gy = -tl - 2.0*tc - tr + bl + 2.0*bc + br;\n\tvec3 edge = sqrt(gx * gx + gy * gy) * pc.strength;\n\n\timageStore(gn_output, coords, vec4(edge, 1.0));\n}"
+                                                                      }
+                                                  }
+                               },
+                  "null1":  {
+                                "type":  "NullTOP",
+                                "position":  [
+                                                 600,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   950,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "compute1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "compute1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Compute Shader TOP — Sobel Edge Filter\n\nReads an input texture (gn_tex0) via sampler2D and writes\nSobel edge-detected output to the storage image.\n\nThe \u0027strength\u0027 push constant becomes an inspector parameter.\nResolution is inherited from the input NoiseTOP automatically.",
+                            "position":  [
+                                             -250.0,
+                                             -170.0
+                                         ],
+                            "size":  [
+                                         500.0,
+                                         120.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

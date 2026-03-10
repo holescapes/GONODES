@@ -1,31 +1,82 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseTOP",
-			"position": [0, 100],
-			"parameters": {}
-		},
-		"premult1": {
-			"type": "PremultiplyTOP",
-			"position": [300, 100],
-			"parameters": {
-				"mode": {"value": 0}
-			}
-		}
-	},
-	"connections": [
-		{"from": "noise1", "from_port": 0, "to": "premult1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Premultiply TOP — Alpha Handling\n\nPremultiply or unpremultiply RGB by alpha.\nEssential for correct compositing.",
-			"position": [-100.0, -150.0],
-			"size": [380.0, 80.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseTOP",
+                                 "position":  [
+                                                  0,
+                                                  100
+                                              ],
+                                 "parameters":  {
+
+                                                }
+                             },
+                  "premult1":  {
+                                   "type":  "PremultiplyTOP",
+                                   "position":  [
+                                                    300,
+                                                    100
+                                                ],
+                                   "parameters":  {
+                                                      "mode":  {
+                                                                   "value":  0
+                                                               }
+                                                  }
+                               },
+                  "window1":  {
+                                  "position":  [
+                                                   650,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "premult1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "premult1",
+                            "to":  "window1",
+                            "to_port":  0,
+                            "from_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Premultiply TOP — Alpha Handling\n\nPremultiply or unpremultiply RGB by alpha.\nEssential for correct compositing.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         380.0,
+                                         80.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

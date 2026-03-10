@@ -1,26 +1,162 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"shader1": {
-			"type": "Shader_MAT",
-			"position": [200, 100],
-			"parameters": {
-				"shader_code": {"value": "shader_type spatial;\n\nuniform vec4 color0 : source_color = vec4(0.2, 0.5, 1.0, 1.0);\nuniform vec4 color1 : source_color = vec4(1.0, 0.3, 0.1, 1.0);\n\nvoid fragment() {\n    float t = UV.y;\n    ALBEDO = mix(color0.rgb, color1.rgb, t);\n    METALLIC = 0.3;\n    ROUGHNESS = 0.5;\n}"},
-				"color0": {"value": {"_type": "Color", "r": 0.2, "g": 0.5, "b": 1.0, "a": 1.0}},
-				"color1": {"value": {"_type": "Color", "r": 1.0, "g": 0.3, "b": 0.1, "a": 1.0}}
-			}
-		}
-	},
-	"connections": [],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "Shader MAT — Custom Spatial Shader\n\nGradient material blending two colors via UV.y.\nUniforms color0/color1 exposed as parameters.\nWrite any Godot spatial shader code.",
-			"position": [-100.0, -150.0],
-			"size": [400.0, 100.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "shader1":  {
+                                  "type":  "Shader_MAT",
+                                  "position":  [
+                                                   200,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "shader_code":  {
+                                                                         "value":  "shader_type spatial;\n\nuniform vec4 color0 : source_color = vec4(0.2, 0.5, 1.0, 1.0);\nuniform vec4 color1 : source_color = vec4(1.0, 0.3, 0.1, 1.0);\n\nvoid fragment() {\n    float t = UV.y;\n    ALBEDO = mix(color0.rgb, color1.rgb, t);\n    METALLIC = 0.3;\n    ROUGHNESS = 0.5;\n}"
+                                                                     },
+                                                     "color0":  {
+                                                                    "value":  {
+                                                                                  "_type":  "Color",
+                                                                                  "r":  0.2,
+                                                                                  "g":  0.5,
+                                                                                  "b":  1.0,
+                                                                                  "a":  1.0
+                                                                              }
+                                                                },
+                                                     "color1":  {
+                                                                    "value":  {
+                                                                                  "_type":  "Color",
+                                                                                  "r":  1.0,
+                                                                                  "g":  0.3,
+                                                                                  "b":  0.1,
+                                                                                  "a":  1.0
+                                                                              }
+                                                                }
+                                                 }
+                              },
+                  "window1":  {
+                                  "position":  [
+                                                   1450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "box_view":  {
+                                   "type":  "BoxSOP",
+                                   "position":  [
+                                                    500,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "geo_view":  {
+                                   "type":  "GeometryCOMP",
+                                   "position":  [
+                                                    800,
+                                                    100
+                                                ],
+                                   "parameters":  {
+
+                                                  }
+                               },
+                  "cam_view":  {
+                                   "type":  "CameraCOMP",
+                                   "position":  [
+                                                    800,
+                                                    300
+                                                ],
+                                   "parameters":  {
+                                                      "tx":  {
+                                                                 "value":  0
+                                                             },
+                                                      "ty":  {
+                                                                 "value":  0.5
+                                                             },
+                                                      "tz":  {
+                                                                 "value":  3
+                                                             }
+                                                  }
+                               },
+                  "render_view":  {
+                                      "type":  "RenderTOP",
+                                      "position":  [
+                                                       1100,
+                                                       100
+                                                   ],
+                                      "parameters":  {
+                                                         "resolution":  {
+                                                                            "value":  {
+                                                                                          "_type":  "Vector2i",
+                                                                                          "x":  512,
+                                                                                          "y":  512
+                                                                                      }
+                                                                        }
+                                                     }
+                                  }
+              },
+    "connections":  [
+                        {
+                            "from":  "shader1",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "box_view",
+                            "from_port":  0,
+                            "to":  "geo_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam_view",
+                            "from_port":  0,
+                            "to":  "render_view",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "render_view",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "Shader MAT — Custom Spatial Shader\n\nGradient material blending two colors via UV.y.\nUniforms color0/color1 exposed as parameters.\nWrite any Godot spatial shader code.",
+                            "position":  [
+                                             -100.0,
+                                             -150.0
+                                         ],
+                            "size":  [
+                                         400.0,
+                                         100.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

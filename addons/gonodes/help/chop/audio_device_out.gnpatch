@@ -1,45 +1,140 @@
-{
-	"version": "1.0.0",
-	"generator": "GONODES",
-	"nodes": {
-		"wave1": {
-			"type": "WaveCHOP",
-			"position": [-400, 0],
-			"parameters": {
-				"wave_type": {"value": 0},
-				"frequency": {"value": 440.0},
-				"amplitude": {"value": 0.3},
-				"length": {"value": 1024}
-			}
-		},
-		"audioout1": {
-			"type": "AudioDeviceOutCHOP",
-			"position": [0, 0],
-			"parameters": {
-				"active": {"value": false},
-				"gain": {"value": 0.5},
-				"mix_rate": {"value": 44100.0},
-				"buffer_length": {"value": 0.1}
-			}
-		},
-		"null1": {
-			"type": "NullCHOP",
-			"position": [400, 0],
-			"parameters": {}
-		}
-	},
-	"connections": [
-		{"from": "wave1", "from_port": 0, "to": "audioout1", "to_port": 0},
-		{"from": "audioout1", "from_port": 0, "to": "null1", "to_port": 0}
-	],
-	"annotations": [
-		{
-			"id": "ann_1",
-			"type": "note",
-			"text": "AudioDeviceOutCHOP\n\nOutputs CHOP channels as PCM audio to speakers.\nUses AudioStreamGenerator + AudioStreamGeneratorPlayback.\n\nToggle 'Active' to start/stop audio output.\nWARNING: Set gain low first — audio starts immediately!\n\nChannels named 'left'/'right' map to stereo. Otherwise\nfirst channel = left, second = right (or mono).",
-			"position": [-450.0, -200.0],
-			"size": [550.0, 130.0],
-			"color": [1.0, 1.0, 1.0, 0.8]
-		}
-	]
+﻿{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "wave1":  {
+                                "type":  "WaveCHOP",
+                                "position":  [
+                                                 -400,
+                                                 0
+                                             ],
+                                "parameters":  {
+                                                   "wave_type":  {
+                                                                     "value":  0
+                                                                 },
+                                                   "frequency":  {
+                                                                     "value":  440.0
+                                                                 },
+                                                   "amplitude":  {
+                                                                     "value":  0.3
+                                                                 },
+                                                   "length":  {
+                                                                  "value":  1024
+                                                              }
+                                               }
+                            },
+                  "audioout1":  {
+                                    "type":  "AudioDeviceOutCHOP",
+                                    "position":  [
+                                                     0,
+                                                     0
+                                                 ],
+                                    "parameters":  {
+                                                       "active":  {
+                                                                      "value":  false
+                                                                  },
+                                                       "gain":  {
+                                                                    "value":  0.5
+                                                                },
+                                                       "mix_rate":  {
+                                                                        "value":  44100.0
+                                                                    },
+                                                       "buffer_length":  {
+                                                                             "value":  0.1
+                                                                         }
+                                                   }
+                                },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 400,
+                                                 0
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
+                  "window1":  {
+                                  "position":  [
+                                                   1100,
+                                                   0
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "y":  512,
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 },
+                                  "type":  "WindowTOP"
+                              },
+                  "choptop1":  {
+                                   "type":  "CHOPtoTOP",
+                                   "position":  [
+                                                    750,
+                                                    0
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     }
+                                                  }
+                               }
+              },
+    "connections":  [
+                        {
+                            "from":  "wave1",
+                            "from_port":  0,
+                            "to":  "audioout1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "audioout1",
+                            "from_port":  0,
+                            "to":  "null1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "null1",
+                            "from_port":  0,
+                            "to":  "choptop1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "choptop1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  [
+                        {
+                            "id":  "ann_1",
+                            "type":  "note",
+                            "text":  "AudioDeviceOutCHOP\n\nOutputs CHOP channels as PCM audio to speakers.\nUses AudioStreamGenerator + AudioStreamGeneratorPlayback.\n\nToggle \u0027Active\u0027 to start/stop audio output.\nWARNING: Set gain low first — audio starts immediately!\n\nChannels named \u0027left\u0027/\u0027right\u0027 map to stereo. Otherwise\nfirst channel = left, second = right (or mono).",
+                            "position":  [
+                                             -450.0,
+                                             -200.0
+                                         ],
+                            "size":  [
+                                         550.0,
+                                         130.0
+                                     ],
+                            "color":  [
+                                          1.0,
+                                          1.0,
+                                          1.0,
+                                          0.8
+                                      ]
+                        }
+                    ]
 }

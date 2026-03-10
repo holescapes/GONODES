@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "const1": {
+      "type": "ConstantCHOP",
+      "position": [100, 200],
+      "parameters": {
+        "value0": {"value": 2.0},
+        "name0": {"value": "tx"},
+        "value1": {"value": 1.5},
+        "name1": {"value": "ty"},
+        "value2": {"value": 0.0},
+        "name2": {"value": "tz"}
+      }
+    },
+    "ik1": {
+      "type": "IKCHOP",
+      "position": [450, 200],
+      "parameters": {
+        "num_joints": {"value": 4},
+        "bone_length": {"value": 0.8},
+        "iterations": {"value": 10},
+        "constrain_y": {"value": false}
+      }
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [800, 200],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+      }
+    },
+    "window1": {
+      "type": "WindowTOP",
+      "position": [1150, 200],
+      "parameters": {
+        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+        "open": {"value": true}
+      }
+    }
+  },
+  "connections": [
+    {"from": "const1", "from_port": 0, "to": "ik1", "to_port": 0},
+    {"from": "ik1", "from_port": 0, "to": "choptop1", "to_port": 0},
+    {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "IK CHOP — FABRIK Inverse Kinematics\n\nA 4-joint chain reaches toward the target position (2.0, 1.5, 0).\nFABRIK iteratively solves IK, outputting joint positions\n(jN_tx/ty/tz) and bone rotation angles (jN_rx/ry).",
+      "position": [50.0, -50.0],
+      "size": [600.0, 110.0],
+      "color": [1.0, 1.0, 1.0, 0.8]
+    }
+  ]
+}
