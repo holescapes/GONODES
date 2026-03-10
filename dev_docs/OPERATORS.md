@@ -218,6 +218,27 @@ User-editable GPU shader with live recompilation.
 
 **Inputs:** Up to 4 texture inputs available as `gn_tex0`–`gn_tex3` in the shader.
 
+---
+
+#### ComputeShaderTOP
+
+GPU compute shader (GLSL 450) with storage image output via Godot's RenderingDevice API.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output resolution (generator mode; inherited from input in filter mode) |
+| shader_code | String | *(template)* | — | GLSL 450 compute shader source |
+| time_dependent | Bool | true | — | Re-cook every frame |
+| cook_once | Bool | false | — | Pulse: force a single cook |
+| *(dynamic)* | Float/Int | *(from shader)* | — | Push constant fields become inspector params |
+
+**Binding layout:**
+- `set 0, binding 0` — `image2D gn_output` (rgba8 storage, write)
+- `set 1, binding N` — `sampler2D gn_tex<N>` (input textures, read)
+- `push_constant` — `PushConstants` struct with auto-bound `gn_time`, `gn_frame`, `gn_res_x`, `gn_res_y`; additional `float`/`int` fields become inspector parameters
+
+**Inputs:** Up to 8 texture inputs via `sampler2D gn_tex<N>` declarations (auto-detected).
+
 **Built-in uniforms:** `gn_resolution` (vec2), Godot's built-in `TIME`.
 
 **How it works:** User provides a complete `shader_type canvas_item;` shader string. The operator compiles it into a `Shader` resource and applies it. On compilation failure, the last working shader is kept. Recompilation only happens when the code text changes. Time-dependent — `TIME` uniform updates automatically.
@@ -3167,12 +3188,12 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 57 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, FileSave, Null, Switch, Window, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette |
+| **TOP** | 59 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, ComputeShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, CHOPtoTOP, FileSave, Null, Switch, Window, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette |
 | **CHOP** | 52 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, OscOut, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, Record, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP |
 | **DAT** | 25 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileSave, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind |
-| **SOP** | 39 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide |
-| **COMP** | 13 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript |
+| **SOP** | 50 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP |
+| **COMP** | 14 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance |
 | **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
 | **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, FileSave, MovieOut, FFmpegOut |
 | **Output** | 1 | Window |
-| **Total** | **207** | |
+| **Total** | **221** | |

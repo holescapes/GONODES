@@ -1493,10 +1493,9 @@ GONODES/
         ├── pbr_emissive.gnpatch
         └── shader_gradient.gnpatch
     ```
-  - **Extension help patches**: GN extensions (`gn_ext_*`) should ship their own
+  - **Extension help patches**: GN extensions (`gn_ext_*`) ship their own
     help patches in `res://addons/gn_ext_<name>/help/<family>/`. The help window
-    currently scans only `res://addons/gonodes/help/<family>/` — extending this to
-    also scan extension help dirs is a future enhancement (see §28.10).
+    scans both core help dirs and extension help dirs automatically (see §28.10).
 - [x] **Node grouping / sub-networks** — **Done: SubNetworkNode, InTunnel, OutTunnel, hierarchical op() paths, undo/redo, copy/paste, help**:
   - Select multiple nodes → Ctrl+G "Group into Sub-Network" creates SubNetworkNode with auto-generated tunnels.
   - Double-click body or press Enter to dive into sub-network. Backspace or breadcrumb click to dive out.
@@ -3600,7 +3599,7 @@ These are non-negotiable constraints discovered during development. **Never viol
   2. Registration in `_register_core_operators()` (or in the extension's `gn_extension.cfg`)
   3. At least one help example patch in `help/<family>/`
   4. A `node_description` string and tooltip descriptions on all parameters (Hard Rule 25.14)
-- **Extension operators:** GN extensions (`gn_ext_*`) must include help patches in their own `help/<family>/` subdirectory (see §28.10). Until the help window is extended to scan extension dirs, extension help patches can temporarily be placed in `addons/gonodes/help/<family>/`.
+- **Extension operators:** GN extensions (`gn_ext_*`) include help patches in their own `help/<family>/` subdirectory. The help window scans extension dirs automatically (see §28.10).
 - **Validation:** Help patches are discovered at runtime via directory scan — no manifest needed. To verify coverage, compare operator names from the registry against filenames in `help/<family>/`.
 
 ---
@@ -4095,9 +4094,9 @@ Before loading an extension's operators, the registry checks `ClassDB.class_exis
 
 ### 28.10 Extension Help Patches
 
-**Status: 🔲 Planned (convention defined, code enhancement pending)**
+**Status: ✅ Done**
 
-GN extensions should ship their own help example patches alongside their operator scripts.
+GN extensions ship their own help example patches alongside their operator scripts.
 
 **Convention:**
 
@@ -4128,14 +4127,14 @@ addons/gn_ext_shadertoy/
         └── ...
 ```
 
-**Help window enhancement needed:**
-- Currently `GNHelpWindow` scans only `HELP_DIR = "res://addons/gonodes/help"`.
-- Future: also scan `res://addons/gn_ext_*/help/<family>/` for each loaded extension.
-- `GNExtensionRegistry.get_loaded_extensions()` already provides the extension folder list.
-- Discovery logic: after scanning core help dir, iterate loaded extensions and scan their `help/` subdirs.
+**Implementation:**
+- `OperatorEntry` in `GNExtensionRegistry` now stores `extension_dir` (base dir of the extension, e.g. `res://addons/gn_ext_shadertoy/`).
+- `GNExtensionRegistry.get_entry_by_script(script)` — linear scan lookup by GDScript reference (handles operators without `class_name`).
+- `GNHelpWindow._find_example_patches()` scans both core help dir AND `<extension_dir>/help/` for the operator's family.
+- Shared `_scan_dir_for_patches()` helper deduplicates scanning logic.
 - Extension patches appear alongside core patches in the help window — no distinction needed in UI.
 
-**Interim workaround:** Until the help window is extended, extension help patches can be placed directly in `addons/gonodes/help/<family>/` with the extension operator's node type prefix (e.g. `shadertoy_fire_basic.gnpatch`). This works today with zero code changes.
+**Files:** `gn_extension_registry.gd` (OperatorEntry.extension_dir, get_entry_by_script), `gn_help_window.gd` (_find_example_patches, _scan_dir_for_patches)
 
 ---
 
