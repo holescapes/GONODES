@@ -1,0 +1,114 @@
+{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "sphere1":  {
+                                  "type":  "SphereSOP",
+                                  "position":  [
+                                                   -400,
+                                                   0
+                                               ],
+                                  "parameters":  {
+                                                     "rings":  {
+                                                                   "value":  32
+                                                               },
+                                                     "columns":  {
+                                                                     "value":  32
+                                                                 }
+                                                 }
+                              },
+                  "geo1":  {
+                               "type":  "GeometryCOMP",
+                               "position":  [
+                                                0,
+                                                0
+                                            ],
+                               "parameters":  {
+
+                                              }
+                           },
+                  "cam1":  {
+                               "type":  "CameraCOMP",
+                               "position":  [
+                                                0,
+                                                280
+                                            ],
+                               "parameters":  {
+                                                  "tx":  {
+                                                             "value":  0
+                                                         },
+                                                  "ty":  {
+                                                             "value":  0.5
+                                                         },
+                                                  "tz":  {
+                                                             "value":  4
+                                                         }
+                                              }
+                           },
+                  "gbuffer1":  {
+                                   "type":  "GeometryBufferTOP",
+                                   "position":  [
+                                                    400,
+                                                    0
+                                                ],
+                                   "parameters":  {
+                                                      "resolution":  {
+                                                                         "value":  {
+                                                                                       "_type":  "Vector2i",
+                                                                                       "x":  512,
+                                                                                       "y":  512
+                                                                                   }
+                                                                     },
+                                                      "buffer_mode":  {
+                                                                          "value":  2
+                                                                      }
+                                                  }
+                               },
+                  "window1":  {
+                                  "type":  "WindowTOP",
+                                  "position":  [
+                                                   800,
+                                                   0
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512,
+                                                                                      "y":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 }
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "sphere1",
+                            "from_port":  0,
+                            "to":  "geo1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "geo1",
+                            "from_port":  0,
+                            "to":  "gbuffer1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "cam1",
+                            "from_port":  0,
+                            "to":  "gbuffer1",
+                            "to_port":  1
+                        },
+                        {
+                            "from":  "gbuffer1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  []
+}

@@ -1,0 +1,101 @@
+{
+    "version":  "1.0.0",
+    "generator":  "GONODES",
+    "nodes":  {
+                  "noise1":  {
+                                 "type":  "NoiseCHOP",
+                                 "position":  [
+                                                  0,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "num_channels":  {
+                                                                         "value":  2
+                                                                     },
+                                                    "roughness":  {
+                                                                      "value":  0.6
+                                                                  },
+                                                    "period":  {
+                                                                   "value":  2.0
+                                                               }
+                                                }
+                             },
+                  "slope1":  {
+                                 "type":  "SlopeCHOP",
+                                 "position":  [
+                                                  350,
+                                                  100
+                                              ],
+                                 "parameters":  {
+                                                    "order":  {
+                                                                  "value":  0
+                                                              },
+                                                    "normalize":  {
+                                                                      "value":  true
+                                                                  },
+                                                    "multiply":  {
+                                                                     "value":  1.0
+                                                                 }
+                                                }
+                             },
+                  "chop_to_top1":  {
+                                       "type":  "CHOPtoTOP",
+                                       "position":  [
+                                                        700,
+                                                        100
+                                                    ],
+                                       "parameters":  {
+                                                          "mode":  {
+                                                                       "value":  2
+                                                                   },
+                                                          "resolution":  {
+                                                                             "value":  {
+                                                                                           "_type":  "Vector2i",
+                                                                                           "x":  512,
+                                                                                           "y":  512
+                                                                                       }
+                                                                         }
+                                                      }
+                                   },
+                  "window1":  {
+                                  "type":  "WindowTOP",
+                                  "position":  [
+                                                   1050,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "resolution":  {
+                                                                        "value":  {
+                                                                                      "_type":  "Vector2i",
+                                                                                      "x":  512,
+                                                                                      "y":  512
+                                                                                  }
+                                                                    },
+                                                     "open":  {
+                                                                  "value":  true
+                                                              }
+                                                 }
+                              }
+              },
+    "connections":  [
+                        {
+                            "from":  "noise1",
+                            "from_port":  0,
+                            "to":  "slope1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "slope1",
+                            "from_port":  0,
+                            "to":  "chop_to_top1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "chop_to_top1",
+                            "from_port":  0,
+                            "to":  "window1",
+                            "to_port":  0
+                        }
+                    ],
+    "annotations":  []
+}

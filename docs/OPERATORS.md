@@ -3487,4 +3487,4 @@ The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 1
 | EdgeDetectIMGNative | EdgeDetectIMG | IMG | GNNativeEdgeDetect | Sobel/Prewitt 3×3 convolution, gradient direction color mode |
 | SmoothCHOPNative | SmoothCHOP | CHOP | GNNativeSmooth | Biquad Butterworth IIR filter (LP/HP/BP) with per-channel state |
 
-**Build requirement:** Compile with `scons platform=<os> target=template_debug` in `addons/gn_native/` (requires godot-cpp). Rename `gn_native.gdextension.disabled` → `gn_native.gdextension` after building. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and skips the extension if they're missing.
+**Build status:** Windows x86_64 binary compiled and active (`bin/win64/libgn_native.windows.template_debug.x86_64.dll`, 677 KB). Linux/macOS builds require running `scons platform=linux|macos target=template_debug` on those platforms. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and falls back to pure GDScript if the library is missing.

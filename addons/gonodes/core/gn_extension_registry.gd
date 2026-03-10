@@ -8,10 +8,7 @@ extends RefCounted
 ## Architecture
 ## ────────────
 ## • Core operators are registered at startup via `_register_core_operators()`.
-# Sub-network types — explicit preload for cold-cache robustness.
-const _PreloadSubNetworkNode = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
-const _PreloadInTunnel = preload("res://addons/gonodes/operators/comp/in_tunnel.gd")
-const _PreloadOutTunnel = preload("res://addons/gonodes/operators/comp/out_tunnel.gd")## • Extensions live under `res://addons/gn_ext_<name>/` and contain a
+## • Extensions live under `res://addons/gn_ext_<name>/` and contain a
 ##   `gn_extension.cfg` manifest (ConfigFile) listing operator scripts,
 ##   families, descriptions, and optional ClassDB dependency guards.
 ## • `scan_extensions()` discovers and loads manifest-declared operators.
@@ -529,6 +526,12 @@ func _register_core_operators() -> void:
 	_reg("EmbossTOP",       "TOP", EmbossTOP,
 		"Emboss relief filter with adjustable angle and strength.")
 
+	# ── TOPs: 3D Render Variants ────────────────────────────────────────
+	_reg("GeometryBufferTOP",      "TOP", GeometryBufferTOP,
+		"Render 3D scene with debug buffer output: Color, Unshaded, Normal Buffer, or Wireframe.")
+	_reg("CompositorEffectTOP",    "TOP", CompositorEffectTOP,
+		"Render 3D scene with a pipeline-level CompositorEffect: Outline, Depth Fog, or Depth View.")
+
 	# ── CHOPs: Generators ───────────────────────────────────────────────
 	_reg("LFO_CHOP",        "CHOP", LFO_CHOP,
 		"Low-frequency oscillator (sine, triangle, square, saw, pulse).")
@@ -664,6 +667,12 @@ func _register_core_operators() -> void:
 		"FABRIK inverse kinematics chain solver with joint position output.")
 	_reg("WarpCHOP",        "CHOP", WarpCHOP,
 		"Time-warp / retime channel data with speed, offset, or warp curve.")
+
+	# ── CHOPs: Signal Analysis & Dynamics ──────────────────────────────
+	_reg("SlopeCHOP",           "CHOP", SlopeCHOP,
+		"1st/2nd derivative (rate-of-change) of input channels — velocity, acceleration.")
+	_reg("AudioDynamicsCHOP",   "CHOP", AudioDynamicsCHOP,
+		"Compressor / Limiter / Expander / Gate dynamics processor for audio-rate CHOPs.")
 
 	# ── CHOPs: Combiners (new) ──────────────────────────────────────────
 	_reg("InterpolateCHOP", "CHOP", InterpolateCHOP,
@@ -815,6 +824,10 @@ func _register_core_operators() -> void:
 	_reg("MountainSOP",     "SOP", MountainSOP,
 		"Noise-based vertex displacement along normals.")
 
+	# ── SOPs: Filter / Selection ────────────────────────────────────────
+	_reg("SelectSOP",       "SOP", SelectSOP,
+		"Keep geometry matching a criterion: range, bounding box, expression, or every Nth.")
+
 	# ── SOPs: Bridge (cross-family conversion) ─────────────────────────
 	_reg("CHOPtoSOP",       "SOP", CHOPtoSOP,
 		"Convert CHOP channels to SOP points, lines, or trail geometry.")
@@ -900,6 +913,8 @@ func _register_core_operators() -> void:
 		"Manual editable data table (CSV-style).")
 	_reg("NetworkDAT",      "DAT", NetworkDAT,
 		"TCP/UDP network send/receive with protocol mode toggle.")
+	_reg("XMLDAT",          "DAT", XMLDAT,
+		"Parse XML document into a flat path/attribute/value table.")
 
 	# ── IMGs: Generators ─────────────────────────────────────────────────
 	_reg("NoiseIMG",        "IMG", NoiseIMG,
@@ -970,11 +985,11 @@ func _register_core_operators() -> void:
 		"Joint3D constraint between two physics bodies (Pin, Hinge, Slider, ConeTwist, 6DOF).")
 
 	# ── COMPs: Sub-Networks ─────────────────────────────────────────────
-	_reg("SubNetworkNode",  "COMP", _PreloadSubNetworkNode,
+	_reg("SubNetworkNode",  "COMP", SubNetworkNode,
 		"Sub-network — contains a nested node graph with InTunnel/OutTunnel ports.")
-	_reg("InTunnel",        "COMP", _PreloadInTunnel,
+	_reg("InTunnel",        "COMP", InTunnel,
 		"Input tunnel — bridges data from parent sub-network into inner graph.")
-	_reg("OutTunnel",       "COMP", _PreloadOutTunnel,
+	_reg("OutTunnel",       "COMP", OutTunnel,
 		"Output tunnel — bridges data from inner graph to parent sub-network.")
 
 	# ── COMPs: Utility (new) ────────────────────────────────────────────
@@ -992,6 +1007,8 @@ func _register_core_operators() -> void:
 		"AnimationPlayer wrapper for keyframe animation on COMP transform properties.")
 	_reg("ReplicatorCOMP",  "COMP", ReplicatorCOMP,
 		"Table-driven replicator — create N copies of a template with per-instance overrides.")
+	_reg("EnginesCOMP",     "COMP", EnginesCOMP,
+		"Cook throttle — Live, Snapshot, or Interval update modes for performance isolation.")
 
 	# ── COMPs: Scripting ────────────────────────────────────────────────
 	_reg("GenericScriptNode", "COMP", GenericScriptNode,

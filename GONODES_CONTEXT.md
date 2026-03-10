@@ -1011,7 +1011,8 @@ GONODES/
 │           └── chop/
 │               └── smooth_chop_native.gd    # SmoothCHOPNative — delegates to GNNativeSmooth
 │   └── gn_native/                     # ← C++ GDExtension source (requires godot-cpp + scons build)
-│       ├── gn_native.gdextension.disabled  # Renamed until binaries are compiled
+│       ├── gn_native.gdextension              # Active — Windows DLL compiled
+│       ├── bin/win64/libgn_native.windows.template_debug.x86_64.dll  # 677 KB
 │       ├── SConstruct                      # SCons build file
 │       └── src/
 │           ├── register_types.cpp/.h        # Entry point registering all 16 C++ classes
@@ -1723,12 +1724,12 @@ GONODES/
 ### Performance & GPU Optimizations (Post-Phase 7)
 - [ ] Multi-threaded cook engine
 - [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
-- [x] **GDExtension (C++) hot-path migration — Phase 1 & 2 complete** (source written, binaries not yet compiled):
+- [x] **GDExtension (C++) hot-path migration — Phase 1 & 2 complete** (source written and compiled — Windows x86_64 binary live):
   - **Architecture:** C++ GDExtension provides `RefCounted` processor classes (e.g., `GNNativeBlur`) with `process()` methods. GDScript wrapper operators (e.g., `BlurIMGNative`) delegate hot loops to C++ when available, falling back to pure GDScript otherwise. Extension pattern: `addons/gn_native/` for C++ source, `addons/gn_ext_native/` for GDScript wrappers + `gn_extension.cfg`.
   - **Phase 1 — 6 operators ported (source):** 3 IMG (GNNativeBlur, GNNativeNoise, GNNativePixelSort) + 3 SOP (GNNativeParticle, GNNativeMetaball, GNNativePolyReduce). Each has `.cpp` + `.h` files in `addons/gn_native/src/img/` and `src/sop/`.
   - **Phase 2 — 10 operators ported (source):** 8 SOP (GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring) + 1 IMG (GNNativeEdgeDetect) + 1 CHOP (GNNativeSmooth). Files in `src/sop/`, `src/img/`, `src/chop/`.
   - **Total: 16 native operators** across 3 families (4 IMG, 11 SOP, 1 CHOP), 16 help patches.
-  - **Build:** Requires godot-cpp submodule + `scons platform=<os> target=template_debug`. `.gdextension` file renamed to `.disabled` until binaries exist.
+  - **Build:** godot-cpp submodule present at `addons/gn_native/godot-cpp/`. Windows x86_64 compiled with `scons platform=windows target=template_debug arch=x86_64` → `bin/win64/libgn_native.windows.template_debug.x86_64.dll` (677 KB). `gn_native.gdextension` is active. Linux/macOS builds require running scons on those platforms (or CI).
   - **IMG operators (highest priority):** Pixel loops (`get_pixel`/`set_pixel` over 262K+ pixels) are the biggest GDScript bottleneck. BlurIMG, EdgeDetectIMG, PixelSortIMG, NoiseIMG all iterate every pixel. Port `_cook()` internals to C++ with direct `uint8_t*` pointer arithmetic. Alternative: rewrite as GPU compute shaders (even faster than C++ for batch pixel ops).
   - **SOP operators (high priority):** Vertex-heavy mesh construction (SubdivideSOP, NoiseSOP, BooleanSOP) scales with vertex count. SurfaceTool overhead in GDScript is significant at 10K+ verts. Port vertex loops to C++ via GDExtension.
   - **CHOP operators (medium priority, audio-rate only):** Control-rate CHOPs (few hundred samples) are fine in GDScript. Audio-rate CHOPs (44.1K samples: AudioInCHOP, AudioSpectrumCHOP) need native inner loops.
@@ -4146,7 +4147,7 @@ Before loading an extension's operators, the registry checks `ClassDB.class_exis
 |-----------|--------|-------------|-----------|--------|
 | FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | ✅ Done |
 | Shadertoy | `gn_ext_shadertoy` | — | 5 generator TOPs, 5 effect TOPs, ShadertoyURLTOP | ✅ Done |
-| Native Accel | `gn_ext_native` + `gn_native` | 16 C++ processor classes | 16 native operators (4 IMG, 11 SOP, 1 CHOP) | ✅ Source done (Phase 1 + 2), binaries not compiled |
+| Native Accel | `gn_ext_native` + `gn_native` | 16 C++ processor classes | 16 native operators (4 IMG, 11 SOP, 1 CHOP) | ✅ Built & active (Windows x86_64); Linux/macOS pending |
 | Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned |
 | NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned |
 | Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP | Planned |
@@ -4443,7 +4444,7 @@ Built a complete C++ GDExtension source tree for 16 CPU-heavy operators (Phase 1
 - `src/img/` — 4 IMG processors: GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
 - `src/sop/` — 11 SOP processors: GNNativeParticle, GNNativeMetaball, GNNativePolyReduce, GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring
 - `src/chop/` — 1 CHOP processor: GNNativeSmooth
-- `.gdextension` renamed to `.gdextension.disabled` to suppress missing binary errors until compiled
+- `gn_native.gdextension` is **active**; `bin/win64/libgn_native.windows.template_debug.x86_64.dll` compiled (677 KB, 2026-03-10). Linux/macOS require building on those platforms.
 
 **Phase 1 GDScript wrappers (6):**
 - `operators/img/blur_img_native.gd` (BlurIMGNative) — delegates to `GNNativeBlur.process()`
@@ -4472,6 +4473,13 @@ Built a complete C++ GDExtension source tree for 16 CPU-heavy operators (Phase 1
 **Bugs fixed during implementation:**
 - `create_menu()` does not exist on GNParameter — fixed to `create_int()` in NoiseIMGNative and PixelSortIMGNative
 - `GNNativePolyreduce` → `GNNativePolyReduce` casing fix in `register_types.cpp`
+
+**Compile errors fixed on first build (Phase 2 code, 2026-03-10):**
+- `Quadric` struct declared `private` in `gn_native_polyreduce.h` — moved to `public` so the free helper `_compute_collapse()` in the `.cpp` could access `GNNativePolyReduce::Quadric` by name
+- `p_positions.duplicate()` / `p_indices.duplicate()` on `const&` parameters in `polyreduce.cpp` — `.duplicate()` is non-const in godot-cpp; replaced with plain copy assignment (`positions = p_positions`)
+- Same `.duplicate()` issue in `spring.cpp` (`_positions = target_positions.duplicate()` → `_positions = target_positions`)
+- Missing `#include <vector>` in `gn_native_particle.h` (needed for `std::vector<Triangle> _triangles`)
+- Missing `#include <vector>` in `gn_native_edge_detect.cpp` (needed for `std::vector<float> lum`)
 
 ### 32.4 Viewer Panel IMG Stability Fix
 
