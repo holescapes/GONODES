@@ -20,9 +20,17 @@
 > ### Help Patch Hard Rule
 > Every help example patch **MUST**:
 > 1. **Be meaningful** — Simply placing a node with no connections is not a valid example. The patch should demonstrate a realistic, useful workflow that shows what the operator does in context.
-> 2. **End with a visible sink** — The chain must terminate at a **WindowTOP** (for TOP/IMG chains) or a **RenderTOP → WindowTOP** (for SOP/COMP/MAT chains) so the user sees output when they open the patch.
-> 3. **WindowTOP settings** — Resolution `512×512`, `"open": true` so the window opens automatically, title set to the example name.
-> 4. For **CHOP/DAT-only** chains that have no visual output, end with a **CHOPtoTOP → WindowTOP** or **NullCHOP/NullDAT** if truly non-visual, but prefer a visual sink whenever possible.
+> 2. **End with a visible sink via family-appropriate chain** — The demonstrated operator must feed into WindowTOP through a chain that respects port family compatibility:
+>    - **TOP** → WindowTOP (direct)
+>    - **IMG** → ImgToTOP → WindowTOP
+>    - **CHOP** → CHOPtoTOP → WindowTOP (waveform visualization)
+>    - **SOP** → GeometryCOMP + CameraCOMP → RenderTOP → WindowTOP
+>    - **COMP (scene)** → RenderTOP + CameraCOMP → WindowTOP
+>    - **COMP (pass-through: Null, Switch, Animation)** → Route data *through* the COMP to RenderTOP — never bypass it with a direct connection, or the cook engine won't cook it (dead-end branches are skipped)
+>    - **DAT** → TextTOP → WindowTOP
+>    - **MAT** → GeometryCOMP (MAT on port 1) + CameraCOMP → RenderTOP → WindowTOP
+> 3. **WindowTOP settings** — Resolution `512×512`, `"open": true` so the window opens automatically.
+> 4. **Pass-through COMPs** must be in the active cook chain, not dead-end branches. The cook engine only cooks nodes upstream of sinks — an orphaned COMP node never cooks and appears broken.
 
 ---
 
