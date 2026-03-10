@@ -2,6 +2,16 @@
     "version":  "1.0.0",
     "generator":  "GONODES",
     "nodes":  {
+                  "box1":  {
+                               "type":  "BoxSOP",
+                               "position":  [
+                                                -300,
+                                                100
+                                            ],
+                               "parameters":  {
+
+                                              }
+                           },
                   "geo1":  {
                                "type":  "GeometryCOMP",
                                "position":  [
@@ -78,13 +88,19 @@
               },
     "connections":  [
                         {
+                            "from":  "box1",
+                            "from_port":  0,
+                            "to":  "geo1",
+                            "to_port":  0
+                        },
+                        {
                             "from":  "geo1",
                             "from_port":  0,
                             "to":  "null1",
                             "to_port":  0
                         },
                         {
-                            "from":  "geo1",
+                            "from":  "null1",
                             "from_port":  0,
                             "to":  "render_view",
                             "to_port":  0

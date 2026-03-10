@@ -2,6 +2,26 @@
     "version":  "1.0.0",
     "generator":  "GONODES",
     "nodes":  {
+                  "box1":  {
+                               "type":  "BoxSOP",
+                               "position":  [
+                                                -300,
+                                                50
+                                            ],
+                               "parameters":  {
+
+                                              }
+                           },
+                  "sphere1":  {
+                               "type":  "SphereSOP",
+                               "position":  [
+                                                -300,
+                                                200
+                                            ],
+                               "parameters":  {
+
+                                              }
+                           },
                   "geo1":  {
                                "type":  "GeometryCOMP",
                                "position":  [
@@ -90,6 +110,18 @@
               },
     "connections":  [
                         {
+                            "from":  "box1",
+                            "from_port":  0,
+                            "to":  "geo1",
+                            "to_port":  0
+                        },
+                        {
+                            "from":  "sphere1",
+                            "from_port":  0,
+                            "to":  "geo2",
+                            "to_port":  0
+                        },
+                        {
                             "from":  "geo1",
                             "from_port":  0,
                             "to":  "sw1",
@@ -102,7 +134,7 @@
                             "to_port":  1
                         },
                         {
-                            "from":  "geo2",
+                            "from":  "sw1",
                             "from_port":  0,
                             "to":  "render_view",
                             "to_port":  0

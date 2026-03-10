@@ -131,7 +131,7 @@
                             "to_port":  0
                         },
                         {
-                            "from":  "geo1",
+                            "from":  "anim1",
                             "from_port":  0,
                             "to":  "render_view",
                             "to_port":  0

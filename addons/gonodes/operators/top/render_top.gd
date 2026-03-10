@@ -228,6 +228,44 @@ func _setup_viewport() -> void:
 	_cached_tex_data.resolution = _viewport.size
 
 
+## Resolves a COMP's scene node, walking upstream through pass-through COMPs
+## (NullCOMP, SwitchCOMP, AnimationCOMP, etc.) that don't own a scene node.
+func _resolve_comp_scene_node(comp: GNCompBase, net: GNNetwork,
+		visited: Dictionary = {}) -> Node3D:
+	var scene_nd: Node3D = comp.get_scene_node()
+	if scene_nd != null:
+		return scene_nd
+	# Cycle guard
+	if visited.has(comp.id):
+		return null
+	visited[comp.id] = true
+	# Walk upstream through this COMP's inputs
+	for conn in net.get_input_connections(comp.id):
+		var upstream: GNNode = net.nodes.get(conn.from_node, null)
+		if upstream is GeometryCOMP:
+			var mi: MeshInstance3D = (upstream as GeometryCOMP).get_mesh_instance()
+			if mi != null:
+				return mi
+		elif upstream is CameraCOMP:
+			var cam: Camera3D = (upstream as CameraCOMP).get_camera()
+			if cam != null:
+				return cam
+		elif upstream is LightCOMP:
+			var lt: Light3D = (upstream as LightCOMP).get_light()
+			if lt != null:
+				return lt
+		elif upstream is MergeCOMP:
+			var grp: Node3D = (upstream as MergeCOMP).get_group_node()
+			if grp != null:
+				return grp
+		elif upstream is GNCompBase:
+			var resolved: Node3D = _resolve_comp_scene_node(
+				upstream as GNCompBase, net, visited)
+			if resolved != null:
+				return resolved
+	return null
+
+
 ## Populates the 3D viewport with scene nodes from connected COMPs.
 ## Iterates connections sorted by input port index for deterministic ordering.
 func _populate_scene_from_network() -> void:
@@ -284,8 +322,11 @@ func _populate_scene_from_network() -> void:
 			_env_comp = upstream_node as EnvironmentCOMP
 
 		elif upstream_node is GNCompBase:
-			# Generic fallback — handles physics COMPs and any future COMP types
-			var scene_nd: Node3D = (upstream_node as GNCompBase).get_scene_node()
+			# Generic fallback — handles physics COMPs, pass-through COMPs
+			# (NullCOMP, SwitchCOMP, AnimationCOMP), and any future types.
+			# Walk upstream if this COMP has no scene node (pass-through).
+			var scene_nd: Node3D = _resolve_comp_scene_node(
+				upstream_node as GNCompBase, network)
 			if scene_nd != null:
 				_adopt_scene_node(scene_nd)
 				if scene_nd is Camera3D:

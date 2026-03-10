@@ -91,6 +91,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if target_node == null:
 		return null
 
+	# Expose the upstream scene node so RenderTOP can find it via get_scene_node()
+	_scene_node = target_node
+
 	var active: bool = get_param_value("active")
 	if not active:
 		# Pass through without animating
@@ -225,7 +228,9 @@ func destroy_scene_node() -> void:
 		_anim_player = null
 	_anim_library = null
 	_anim = null
-	super.destroy_scene_node()
+	# Clear _scene_node WITHOUT freeing it — we don't own it (it belongs to
+	# the upstream COMP).  super.destroy_scene_node() would queue_free() it.
+	_scene_node = null
 
 
 func _notification(what: int) -> void:
@@ -234,3 +239,4 @@ func _notification(what: int) -> void:
 			if _anim_player.get_parent() != null:
 				_anim_player.get_parent().remove_child(_anim_player)
 			_anim_player.queue_free()
+		# Don't touch _scene_node — we don't own it (upstream COMP does)
