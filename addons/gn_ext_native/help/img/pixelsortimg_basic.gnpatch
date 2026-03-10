@@ -1,0 +1,62 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseIMGNative",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "type": {"value": 0},
+                "scale": {"value": 5.0},
+                "octaves": {"value": 4},
+                "persistence": {"value": 0.5},
+                "seed": {"value": 7},
+                "monochrome": {"value": false}
+            }
+        },
+        "pixelsort1": {
+            "type": "PixelSortIMGNative",
+            "position": [500, 100],
+            "parameters": {
+                "direction": {"value": 0},
+                "sort_mode": {"value": 0},
+                "threshold_low": {"value": 0.2},
+                "threshold_high": {"value": 0.75},
+                "reverse": {"value": false}
+            }
+        },
+        "imgtotop1": {
+            "type": "ImgToTOP",
+            "position": [850, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowTOP",
+            "position": [1200, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "pixelsort1", "to_port": 0},
+        {"from": "pixelsort1", "from_port": 0, "to": "imgtotop1", "to_port": 0},
+        {"from": "imgtotop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Pixel Sort IMG (Native) — Horizontal Luminance Sort\n\nSorts pixels horizontally by luminance within\nthreshold range [0.2 – 0.75]. Feed any image\nfor a glitch-art effect.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

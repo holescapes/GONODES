@@ -3454,3 +3454,20 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 | **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, FileSave, MovieOut, FFmpegOut |
 | **Output** | 1 | Window |
 | **Total** | **220** | |
+
+---
+
+## Native Acceleration Extension (Optional)
+
+The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 6 CPU-heavy operators. These appear as separate operators in the palette under a "Native" section when the C++ binaries are compiled. Each native operator has an identical parameter interface to its GDScript counterpart and includes a pure-GDScript fallback for when the C++ library is unavailable.
+
+| Native Operator | Replaces | Family | C++ Class |
+|----------------|----------|--------|-----------|
+| BlurIMGNative | BlurIMG | IMG | GNNativeBlur |
+| NoiseIMGNative | NoiseIMG | IMG | GNNativeNoise |
+| PixelSortIMGNative | PixelSortIMG | IMG | GNNativePixelSort |
+| ParticleSOPNative | ParticleSOP | SOP | GNNativeParticle |
+| MetaballSOPNative | MetaballSOP | SOP | GNNativeMetaball |
+| PolyReduceSOPNative | PolyReduceSOP | SOP | GNNativePolyReduce |
+
+**Build requirement:** Compile with `scons platform=<os> target=template_debug` in `addons/gn_native/` (requires godot-cpp). Rename `gn_native.gdextension.disabled` → `gn_native.gdextension` after building. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and skips the extension if they're missing.

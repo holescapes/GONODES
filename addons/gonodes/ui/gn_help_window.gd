@@ -257,7 +257,7 @@ func _find_example_patches(family_dir: String) -> Array[String]:
 	var registry := GNExtensionRegistry.instance()
 	var entry: GNExtensionRegistry.OperatorEntry = registry.get_entry_by_script(gn_node.get_script())
 	if entry != null and not entry.extension_dir.is_empty():
-		_scan_dir_for_patches(entry.extension_dir + "/help", prefix, results)
+		_scan_dir_for_patches("%s/help/%s" % [entry.extension_dir, family_dir], prefix, results)
 
 	results.sort()
 	return results

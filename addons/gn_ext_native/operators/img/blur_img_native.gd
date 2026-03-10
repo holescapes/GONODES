@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "blur"
+	node_type = "blurimg"
 	node_description = "Box blur (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeBlur"):
 		_processor = ClassDB.instantiate("GNNativeBlur")
