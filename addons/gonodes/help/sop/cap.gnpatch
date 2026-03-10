@@ -51,7 +51,7 @@
       }
     },
     "window1": {
-      "type": "WindowTOP",
+      "type": "WindowOUT",
       "position": [1600, 200],
       "parameters": {
         "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
@@ -71,7 +71,7 @@
     {
       "id": "ann_1",
       "type": "note",
-      "text": "Cap SOP — Close Open Holes\n\nAn open-ended cylinder is clipped, leaving a hole.\nCapSOP detects the boundary edge loop and fills it\nwith a triangle fan, closing the geometry.",
+      "text": "Cap SOP â€” Close Open Holes\n\nAn open-ended cylinder is clipped, leaving a hole.\nCapSOP detects the boundary edge loop and fills it\nwith a triangle fan, closing the geometry.",
       "position": [50.0, -50.0],
       "size": [600.0, 110.0],
       "color": [1.0, 1.0, 1.0, 0.8]

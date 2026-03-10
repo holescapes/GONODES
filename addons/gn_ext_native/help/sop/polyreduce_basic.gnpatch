@@ -44,7 +44,7 @@
             }
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1500, 100],
             "parameters": {
                 "resolution": {
@@ -65,7 +65,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Poly Reduce SOP (Native) — Sphere Decimation\n\nReduces a 32-ring sphere to 25% of its triangles\nusing QEM edge-collapse. Boundary edges are preserved\nwith weight 10. Shows low-poly faceted result.",
+            "text": "Poly Reduce SOP (Native) â€” Sphere Decimation\n\nReduces a 32-ring sphere to 25% of its triangles\nusing QEM edge-collapse. Boundary edges are preserved\nwith weight 10. Shows low-poly faceted result.",
             "position": [-100.0, -150.0],
             "size": [420.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

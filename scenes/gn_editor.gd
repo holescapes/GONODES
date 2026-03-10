@@ -129,7 +129,7 @@ func _ready() -> void:
 	_init_nav_stack()
 
 	# Print display info
-	var displays := WindowTOP.get_display_info()
+	var displays := WindowOUT.get_display_info()
 	for d in displays:
 		print("Display %d: %s at %s" % [d["index"], d["size"], d["position"]])
 	print("GONODES Editor running (%d display(s))" % displays.size())

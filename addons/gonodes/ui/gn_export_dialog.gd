@@ -5,7 +5,7 @@ extends Window
 ## Presents an output directory picker and kicks off a Quick Build via
 ## GNPatchExporter.  All runtime settings (renderer, VSync, window layout)
 ## are automatic — renderer uses Forward+ with OpenGL fallback, and each
-## WindowTOP in the patch controls its own display window.
+## WindowOUT in the patch controls its own display window.
 ## Displays progress + result.
 
 const _GNPatchExporterScript = preload("res://addons/gonodes/core/gn_patch_exporter.gd")

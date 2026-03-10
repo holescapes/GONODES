@@ -1,0 +1,34 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}
+            }
+        },
+        "toptoimg1": {
+            "type": "TOPtoIMG",
+            "position": [400, 100]
+        },
+        "movieout1": {
+            "type": "MovieOUT",
+            "position": [700, 100],
+            "parameters": {
+                "active": {"value": false},
+                "output_folder": {"value": "user://output/sequence"},
+                "file_prefix": {"value": "frame"},
+                "format": {"value": 0},
+                "start_frame": {"value": 0},
+                "frame_padding": {"value": 4}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "to": "toptoimg1", "from_port": 0, "to_port": 0},
+        {"from": "toptoimg1", "to": "movieout1", "from_port": 0, "to_port": 0}
+    ],
+    "description": "MovieOUT — Save image sequence to disk as numbered PNG/WebP frames. Toggle 'active' to record."
+}

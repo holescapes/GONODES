@@ -54,7 +54,7 @@
             }
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1500, 100],
             "parameters": {
                 "resolution": {
@@ -76,7 +76,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Ray SOP (Native) — Project Sphere Onto Box\n\nSphere vertices are ray-cast toward the origin and\nsnapped onto the box surface. Try different direction\nmodes (Y-axis, Normal, etc.) and toggle use_hit_normal.",
+            "text": "Ray SOP (Native) â€” Project Sphere Onto Box\n\nSphere vertices are ray-cast toward the origin and\nsnapped onto the box surface. Try different direction\nmodes (Y-axis, Normal, etc.) and toggle use_hit_normal.",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

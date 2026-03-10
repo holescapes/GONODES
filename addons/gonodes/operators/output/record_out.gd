@@ -1,14 +1,10 @@
-class_name RecordCHOP
-extends GNChopBase
+class_name RecordOUT
+extends GNOutBase
 ## Accumulates channel samples over time into an internal buffer.
 ##
-## This is a **sink** operator with `is_sink = true`.  When "active" is on,
-## each cook appends the current input channel values as a new row.
-## When stopped, the buffer can be saved to CSV or JSON via the "save" pulse,
-## or cleared via the "reset" pulse.
-##
-## The accumulated data is also output as a multi-sample CHOP so downstream
-## nodes can read the recorded history in real-time.
+## When "active" is on, each cook appends the current input channel values
+## as a new row.  When stopped, the buffer can be saved to CSV or JSON
+## via the "save" pulse, or cleared via the "reset" pulse.
 
 ## Internal recording buffer: channel_name → PackedFloat32Array of samples.
 var _buffer: Dictionary = {}
@@ -27,14 +23,12 @@ var _prev_reset: bool = false
 
 
 func _init() -> void:
-	node_type = "recordchop"
-	is_sink = true
+	node_type = "recordout"
 	node_description = "Record CHOP channels over time to buffer. Save to CSV/JSON."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.CHOP, false, "Channels to record")
-	add_output("out", GNFamily.Type.CHOP, "Recorded channel history (all samples)")
 
 
 func _init_parameters() -> void:
@@ -62,7 +56,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_buffer.clear()
 		_channel_order.clear()
 		_sample_count = 0
-		GNLogger.debug("RecordCHOP", "'%s': Buffer cleared" % id)
+		GNLogger.debug("RecordOUT", "'%s': Buffer cleared" % id)
 	_prev_reset = do_reset
 
 	# Record if active and we have input
@@ -100,21 +94,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_save_to_disk()
 	_prev_save = do_save
 
-	# Output the full buffer as a multi-sample CHOP
-	var out := _prepare_output()
-	for ch_name in _channel_order:
-		if _buffer.has(ch_name):
-			out.set_channel(ch_name, _buffer[ch_name].duplicate())
-	out.length = _sample_count
-
-	return out
+	return null
 
 
 # ─── Save Helpers ──────────────────────────────────────────────────────────────
 
 func _save_to_disk() -> void:
 	if _sample_count == 0:
-		GNLogger.warn("RecordCHOP", "'%s': Nothing to save (buffer empty)" % id)
+		GNLogger.warn("RecordOUT", "'%s': Nothing to save (buffer empty)" % id)
 		return
 
 	var base_path: String = get_param_value("file_path")
@@ -140,13 +127,13 @@ func _save_to_disk() -> void:
 
 	var file := FileAccess.open(full_path, FileAccess.WRITE)
 	if file == null:
-		GNLogger.warn("RecordCHOP",
+		GNLogger.warn("RecordOUT",
 			"'%s': Cannot open '%s' (error %d)" % [id, full_path, FileAccess.get_open_error()])
 		return
 
 	file.store_string(content)
 	file.close()
-	GNLogger.info("RecordCHOP",
+	GNLogger.info("RecordOUT",
 		"'%s': Saved %d samples to '%s'" % [id, _sample_count, full_path])
 
 
@@ -176,3 +163,16 @@ func _buffer_to_json() -> String:
 				arr.append(v)
 			data[ch_name] = arr
 	return JSON.stringify(data, "\t")
+
+
+## Override preview to show recording status.
+func update_preview_control(control: Control) -> void:
+	if control is Label:
+		var label: Label = control as Label
+		var active: bool = get_param_value("active")
+		if active:
+			label.text = "REC ● %d" % _sample_count
+		elif _sample_count > 0:
+			label.text = "STOPPED\n%d samples" % _sample_count
+		else:
+			label.text = "idle"

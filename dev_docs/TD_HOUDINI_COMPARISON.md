@@ -1,12 +1,12 @@
-# TouchDesigner vs Houdini vs GONODES — Architecture Deep Dive
+# TouchDesigner vs Houdini vs GONODES â€” Architecture Deep Dive
 
 > **Audience:** Core developers and architecture reviewers.  
 > **Date:** 2026-03-03  
-> **Purpose:** Comprehensive comparison of cooking models, data flow, engine architecture, and UI patterns across all three systems — with actionable improvement recommendations for GONODES.
+> **Purpose:** Comprehensive comparison of cooking models, data flow, engine architecture, and UI patterns across all three systems â€” with actionable improvement recommendations for GONODES.
 >
 > Several recommendations from this document have been implemented:
-> - ✅ Ramp parameter type with curve editor (§11.2.B)
-> - ✅ Network boxes + sticky notes (§11.2.F)
+> - âœ… Ramp parameter type with curve editor (Â§11.2.B)
+> - âœ… Network boxes + sticky notes (Â§11.2.F)
 > - Remaining items tracked in GONODES_CONTEXT.md roadmap
 
 ---
@@ -35,7 +35,7 @@
 | **Cook paradigm** | Pull-based, demand-driven per frame | Pull-based, demand-driven on dependency change | Push-based, topo-sorted per frame |
 | **Engine language** | C++ (operators), Python (scripting) | C++ (HDK), VEX (shaders/wrangles), Python/HScript | GDScript (operators), GDScript (scripting) |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan (GLSL/HLSL) | Karma (CPU/GPU), OpenGL viewport, Vulkan (Houdini 20+) | Godot renderer (Vulkan/OpenGL via SubViewport + GLSL) |
-| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, COMP, MAT |
+| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT |
 | **Typical network size** | Dozens to hundreds of nodes | Hundreds to thousands of nodes | Dozens to hundreds of nodes |
 | **Hierarchy model** | COMPs contain networks (infinite nesting) | Subnet OTLs, HDA assets (infinite nesting) | SubNetworkNode with InTunnel/OutTunnel |
 | **Open source / cost** | Commercial ($2,200+ / $600 non-comm.) | Commercial ($4,495+ / free non-comm.) | Open source (Godot 4.6 + GDScript) |
@@ -49,37 +49,37 @@
 TD uses a **pull-based, demand-driven** cook model:
 
 - Each operator has a **cook flag** (dirty bit). When an output is requested by a downstream consumer, the operator checks its dirty state, recursively requests inputs if needed, cooks, caches the result, and clears the dirty flag.
-- **Time-sliced cooking**: TD divides each frame's cook budget across operators. If the frame overruns, it drops frames or reduces quality — the engine prioritizes maintaining the target FPS.
+- **Time-sliced cooking**: TD divides each frame's cook budget across operators. If the frame overruns, it drops frames or reduces quality â€” the engine prioritizes maintaining the target FPS.
 - **Viewer-driven demand**: Only operators whose output is currently *visible* (in a viewer, exported via Syphon/NDI, or feeding an output) are demanded. Disconnected subgraphs never cook.
 - **Frame-independent operators**: Some operators (like MovieFileIn, AudioDeviceIn) have their own internal clock and can cook asynchronously.
-- **Cook dependency chain**: TOP→TOP follows GPU pipeline order. CHOPs are CPU-cook. SOPs are CPU-cook. The engine handles cross-family dependencies (e.g., a CHOP export driving a TOP parameter) by ensuring the CHOP cooks before the TOP in the same frame.
+- **Cook dependency chain**: TOPâ†’TOP follows GPU pipeline order. CHOPs are CPU-cook. SOPs are CPU-cook. The engine handles cross-family dependencies (e.g., a CHOP export driving a TOP parameter) by ensuring the CHOP cooks before the TOP in the same frame.
 - **Parallel cook**: TD cooks multiple independent TOP chains on separate GPU threads/streams. CPU operators (CHOP, SOP, DAT) run on the main thread but can use the Thread CHOP for parallel CPU work.
 - **Export CHOP**: A special mechanism where CHOP channels are "exported" to target parameters, bypassing the normal pull chain. This creates a side-channel that runs after the main cook.
-- **Pulse cook**: Operators like Script CHOP can be set to "Cook Type: Manual" and only cook when explicitly pulsed — not every frame.
+- **Pulse cook**: Operators like Script CHOP can be set to "Cook Type: Manual" and only cook when explicitly pulsed â€” not every frame.
 
 **Key behaviors:**
 - An operator never cooks unless something downstream *wants* its output.
 - Time-dependent operators (LFO, Noise, Audio) mark themselves dirty every frame.
-- Parameter changes propagate dirty upstream→downstream via the dependency graph.
-- GPU TOPs leverage the GPU command queue — multiple TOPs can be submitted in a batch.
+- Parameter changes propagate dirty upstreamâ†’downstream via the dependency graph.
+- GPU TOPs leverage the GPU command queue â€” multiple TOPs can be submitted in a batch.
 
 ### 2.2 Houdini
 
 Houdini uses a more sophisticated **pull-based, demand-driven** cook model, but with a fundamentally different philosophy:
 
-- **Cook-on-demand**: Nodes only cook when their output is explicitly requested — typically by the viewport, a ROP (render output), or a downstream node. Unrequested nodes remain uncalculated.
+- **Cook-on-demand**: Nodes only cook when their output is explicitly requested â€” typically by the viewport, a ROP (render output), or a downstream node. Unrequested nodes remain uncalculated.
 - **Time dependency is explicit**: Each node declares whether it depends on `$T` (time), `$F` (frame), or other time-varying variables. Only time-dependent nodes recook on frame change. Non-time-dependent nodes cache indefinitely until an input or parameter changes.
-- **Expression dependency tracking**: Houdini builds a fine-grained dependency graph at the *parameter* level, not just the node level. If parameter A references parameter B via `ch("../node/param")`, Houdini knows that changing B invalidates only paramA → nodeA, not the entire downstream tree. This is more precise than whole-node dirty propagation.
-- **Cooking is not per-frame**: Houdini cooks *on change*. In the viewport, moving the timeline triggers a cook. Editing a parameter triggers a cook. But if nothing changes, nothing cooks — even time-dependent SOPs only recook when the frame changes.
+- **Expression dependency tracking**: Houdini builds a fine-grained dependency graph at the *parameter* level, not just the node level. If parameter A references parameter B via `ch("../node/param")`, Houdini knows that changing B invalidates only paramA â†’ nodeA, not the entire downstream tree. This is more precise than whole-node dirty propagation.
+- **Cooking is not per-frame**: Houdini cooks *on change*. In the viewport, moving the timeline triggers a cook. Editing a parameter triggers a cook. But if nothing changes, nothing cooks â€” even time-dependent SOPs only recook when the frame changes.
 - **Compiled cook**: SOPs (geometry) use a "compiled" cook optimization: Houdini can analyze a chain of SOPs and fuse their operations into a single compiled block, executing them as one unit without intermediate geometry allocation. This is critical for large procedural networks.
-- **PDG/TOPs (Task Operator Graph)**: Houdini's "TOP" family (confusingly named, different from TD's TOPs) is a **task dependency graph** for batch processing. It's not real-time — it's a job scheduler for farm rendering, simulation caching, etc.
+- **PDG/TOPs (Task Operator Graph)**: Houdini's "TOP" family (confusingly named, different from TD's TOPs) is a **task dependency graph** for batch processing. It's not real-time â€” it's a job scheduler for farm rendering, simulation caching, etc.
 - **Multi-threaded SOP cook**: Many SOPs (wrangle, VDB operations, polyreduce) are internally multi-threaded. The cook engine itself is single-threaded, but individual node cooks can spawn worker threads.
 - **Lock/Bypass/Template**: Each node can be locked (cached, won't recook), bypassed (passes input through), or templated (visible in viewport but not passed downstream).
 
 **Key behaviors:**
-- Parameter-level dependency is the foundation — far more granular than TD or GONODES.
+- Parameter-level dependency is the foundation â€” far more granular than TD or GONODES.
 - Non-time-dependent networks are essentially "computed once, cached forever" until you touch a parameter.
-- The compiled SOP block is a massive performance feature — fusing 20 SOPs into one compiled unit.
+- The compiled SOP block is a massive performance feature â€” fusing 20 SOPs into one compiled unit.
 - Cook events propagate *up* the chain (pull) rather than *down* (push).
 
 ### 2.3 GONODES
@@ -87,11 +87,11 @@ Houdini uses a more sophisticated **pull-based, demand-driven** cook model, but 
 GONODES uses a **push-based, topography-sorted per-frame** cook model:
 
 - Every frame, `cook_frame(delta)` runs: marks time-dependent nodes dirty, topo-sorts, propagates dirty downstream (BFS), cooks all dirty+active nodes in topo order.
-- **Active chain cooking** limits work to subgraphs feeding live sinks (viewers, WindowTOP, RecordCHOP, etc.).
-- Inactive nodes keep `cached_output` frozen — **similar to TD's demand-driven model**.
-- Cook is **synchronous, single-threaded, main-thread** — no parallel cook lanes.
+- **Active chain cooking** limits work to subgraphs feeding live sinks (viewers, WindowOUT, RecordOUT, etc.).
+- Inactive nodes keep `cached_output` frozen â€” **similar to TD's demand-driven model**.
+- Cook is **synchronous, single-threaded, main-thread** â€” no parallel cook lanes.
 - Parameter resolution (expression eval) happens inline before each node cooks.
-- TOPs push GPU work via SubViewport `UPDATE_ONCE` — Godot's renderer handles the actual GPU submission.
+- TOPs push GPU work via SubViewport `UPDATE_ONCE` â€” Godot's renderer handles the actual GPU submission.
 
 ### 2.4 Comparison Table
 
@@ -117,30 +117,30 @@ TD has **six operator families**, each with a dedicated data type:
 
 | Family | Data | Typical size | Transfer |
 |--------|------|-------------|----------|
-| TOP | GPU texture (FBO) | 1920×1080 RGBA32F | GPU→GPU (zero-copy, texture handle) |
-| CHOP | Named float channels | 1–1000 samples × 1–100 channels | CPU, pass-by-reference |
-| SOP | Polygonal geometry + attributes | 100–1M points | CPU, shared memory |
-| DAT | String tables / text | Unbounded rows × cols | CPU, pass-by-reference |
+| TOP | GPU texture (FBO) | 1920Ã—1080 RGBA32F | GPUâ†’GPU (zero-copy, texture handle) |
+| CHOP | Named float channels | 1â€“1000 samples Ã— 1â€“100 channels | CPU, pass-by-reference |
+| SOP | Polygonal geometry + attributes | 100â€“1M points | CPU, shared memory |
+| DAT | String tables / text | Unbounded rows Ã— cols | CPU, pass-by-reference |
 | COMP | Container / 3D scene | N/A (hierarchy) | N/A |
 | MAT | Material definition | N/A (parameter bundle) | N/A |
 
 **Key data flow patterns:**
-- **GPU→GPU (TOPs)**: Textures stay on the GPU. A CompositeTOP reads texture handles from two upstream TOPs and composites them in a single GPU pass. No CPU readback unless explicitly requested (TOPtoCHOP, TOPtoSOP).
-- **Cross-family bridges**: CHOPtoTOP, TOPtoCHOP, SOPtoCHOP, etc. — explicit conversion operators.
+- **GPUâ†’GPU (TOPs)**: Textures stay on the GPU. A CompositeTOP reads texture handles from two upstream TOPs and composites them in a single GPU pass. No CPU readback unless explicitly requested (TOPtoCHOP, TOPtoSOP).
+- **Cross-family bridges**: CHOPtoTOP, TOPtoCHOP, SOPtoCHOP, etc. â€” explicit conversion operators.
 - **Parameter exports**: CHOP Export mechanism pushes channel values directly into any parameter on any operator. This is a one-way data path that doesn't create a visible wire.
 - **Select / In / Out operators**: Allow referencing data from anywhere in the network hierarchy without wires.
 - **No implicit type coercion**: You cannot wire a CHOP output into a TOP input. The type system is strict.
 
 ### 3.2 Houdini
 
-Houdini's type system is **attribute-centric** — data is geometry with arbitrary named attributes:
+Houdini's type system is **attribute-centric** â€” data is geometry with arbitrary named attributes:
 
 | Family | Data | Key concept |
 |--------|------|-------------|
 | SOP | Geometry (points, prims, verts, detail) + arbitrary attributes | Point/prim/vertex/detail attributes |
 | DOP | Simulation state (geometry + forces + constraints) | Object/data/relationship hierarchy |
 | COP | Pixels (image planes) | Multi-plane images (C, A, depth, normal, etc.) |
-| CHOP | Channel data (float arrays) | Named channels × samples |
+| CHOP | Channel data (float arrays) | Named channels Ã— samples |
 | VOP | Shader graph (compiled to VEX/RSL/GLSL) | Visual shader programming |
 | ROP | Render output (driver) | Invokes mantra, karma, file cache |
 | LOP | USD scene description | USD prims, properties, layers |
@@ -149,10 +149,10 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 **Key data flow patterns:**
 - **Everything is attributes**: A SOP point has `P` (position), `N` (normal), `Cd` (color), and any number of user-defined attributes. Wrangles and VOPs read/write these attributes directly.
 - **Geometry streaming**: Data flows as geometry containers. Even CHOPs can be converted to geometry attributes and vice versa.
-- **Named outputs**: Some SOPs have multiple named outputs (e.g., Boolean SOP outputs A∩B, A−B, B−A on different output ports).
-- **Spare parameters + channel references**: Any parameter can reference any other parameter via `ch()`, `chs()`, `chf()` — creating implicit data flows.
+- **Named outputs**: Some SOPs have multiple named outputs (e.g., Boolean SOP outputs Aâˆ©B, Aâˆ’B, Bâˆ’A on different output ports).
+- **Spare parameters + channel references**: Any parameter can reference any other parameter via `ch()`, `chs()`, `chf()` â€” creating implicit data flows.
 - **Contexts are strict**: SOPs produce geometry, COPs produce images, CHOPs produce channels. No implicit coercion, but bridge nodes exist (attribfrommap, choptosop, etc.).
-- **Copy-on-write with reference counting**: Houdini's `GU_Detail` (geometry container) uses COW — multiple nodes sharing the same unmodified input don't duplicate memory.
+- **Copy-on-write with reference counting**: Houdini's `GU_Detail` (geometry container) uses COW â€” multiple nodes sharing the same unmodified input don't duplicate memory.
 
 ### 3.3 GONODES
 
@@ -168,9 +168,9 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 **Key data flow patterns:**
 - **COW (Copy-on-Write)**: `_mutable_input()` duplicates data only when `_shared = true` (fan-out). Single-consumer chains are zero-copy.
-- **TOPs are GPU-resident**: SubViewport textures are sampled by downstream shaders — inherently read-only, no COW needed.
-- **Cross-family expressions**: `chop("lfo1")["out"]`, `top("noise1")`, `par("node", "param")` — expression-based references rather than explicit bridge operators.
-- **Bridge operators**: ImgToTOP, TOPtoIMG, CHOPtoDAT, DATtoCHOP — explicit conversion.
+- **TOPs are GPU-resident**: SubViewport textures are sampled by downstream shaders â€” inherently read-only, no COW needed.
+- **Cross-family expressions**: `chop("lfo1")["out"]`, `top("noise1")`, `par("node", "param")` â€” expression-based references rather than explicit bridge operators.
+- **Bridge operators**: ImgToTOP, TOPtoIMG, CHOPtoDAT, DATtoCHOP â€” explicit conversion.
 
 ### 3.4 Comparison Table
 
@@ -198,27 +198,27 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 - **Parameter ranges**: Min/max/clamp per parameter.
 - **Custom parameters**: Operators (especially COMPs and Scripts) can define user-created custom parameters visible in the inspector.
 - **Bind mode**: Parameters can be "bound" to external references (CHOP, DAT, COMP).
-- **Parameter execute DAT**: A special DAT that fires callbacks when specific parameters change — event-driven scripting.
+- **Parameter execute DAT**: A special DAT that fires callbacks when specific parameters change â€” event-driven scripting.
 
 ### 4.2 Houdini
 
 - **Parameter types**: Float, Int, String, Toggle, Menu, Color, Button, Ramp (curve editor!), Separator, Label, Folder, MultiParm (dynamically instanced groups), OP Path
 - **Expression languages**: HScript expressions (`ch()`, `$F`, `$T`, etc.) AND VEX expressions (faster, compiled)
-- **Reference syntax**: `ch("../node/param")`, `chs()`, `chf()`, `chi()` — typed channel references
+- **Reference syntax**: `ch("../node/param")`, `chs()`, `chf()`, `chi()` â€” typed channel references
 - **Parameter dependency graph**: Houdini builds a fine-grained dependency graph at the parameter level. Changing one parameter only invalidates the exact nodes/parameters that depend on it.
 - **Ramp parameter**: A full curve editor (spline/linear/constant interpolation) built into the parameter system. This is a first-class type, not a workaround. VEX can evaluate ramps directly via `chramp()`.
 - **Multiparm blocks**: Dynamic lists of parameter groups that the user can add/remove (e.g., a list of point groups, each with name + color + weight). These are parameterized templates.
 - **Spare parameters**: User-created parameters on any node, visible in the inspector. Often used for controller interfaces on HDAs.
 - **Keyframe animation**: Any parameter can have keyframe animation curves with handles and interpolation modes.
-- **Channel references with relative paths**: `ch("../other_node/scale")`, `ch("./child_subnet/param")` — full hierarchy navigation.
-- **VEX parameter functions**: `chf()`, `chi()`, `chs()`, `chv()` (vector), `chramp()` (ramp curve), `ch4()` (4×4 matrix).
+- **Channel references with relative paths**: `ch("../other_node/scale")`, `ch("./child_subnet/param")` â€” full hierarchy navigation.
+- **VEX parameter functions**: `chf()`, `chi()`, `chs()`, `chv()` (vector), `chramp()` (ramp curve), `ch4()` (4Ã—4 matrix).
 
 ### 4.3 GONODES
 
 - **Parameter types**: Float, Int, Bool, String, Enum, Vector2, Vector2i, Vector3, Vector4, Color, File
 - **Expression language**: GDScript expressions evaluated by Godot's `Expression` class
 - **Reference syntax**: `par("param")` (self), `par("node", "param")` (cross), `chop("node", "chan")`, `top("node")`, `op("node")`
-- **Typed variants**: `parf()`, `pari()`, `pars()` for params; `chopf()`, `chopi()`, `chops()` for CHOP channels — guarantee return type
+- **Typed variants**: `parf()`, `pari()`, `pars()` for params; `chopf()`, `chopi()`, `chops()` for CHOP channels â€” guarantee return type
 - **Per-component expressions**: Vector2/3/4 and Color have independent C/E toggle per component
 - **Parameter presets**: Copy/paste/save/load per-operator type
 - **Circular guard**: Simple evaluating-set guard (not a full parameter DAG)
@@ -228,15 +228,15 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
-| Expression language | Python | HScript + VEX | GDScript Expression | ✓ adequate |
+| Expression language | Python | HScript + VEX | GDScript Expression | âœ“ adequate |
 | Parameter-level deps | Partial (CHOP export) | Full dependency DAG | None (node-level dirty) | **GAP** |
 | Ramp parameter type | No (workaround via LookupTOP) | Yes (first-class, `chramp()`) | No | **GAP** |
 | Multiparm / dynamic groups | No | Yes | No | Gap (minor) |
 | Keyframe animation | Yes (basic timeline) | Yes (full animation editor) | No | **GAP** |
 | Custom user parameters | Yes (on COMPs) | Yes (spare params, HDAs) | `@param` in Script ops only | Gap (minor) |
-| Demand-driven expression eval | Yes | Yes | Inline per cook frame | ✓ adequate |
-| Autocomplete | Yes (Python) | Yes (HScript, VEX) | Yes (CodeEdit) | ✓ |
-| Profiling per param | No | No | Yes (µs per expression) | GONODES advantage |
+| Demand-driven expression eval | Yes | Yes | Inline per cook frame | âœ“ adequate |
+| Autocomplete | Yes (Python) | Yes (HScript, VEX) | Yes (CodeEdit) | âœ“ |
+| Profiling per param | No | No | Yes (Âµs per expression) | GONODES advantage |
 
 ---
 
@@ -246,7 +246,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 - **Flat + Hierarchical**: The top-level "project" contains COMPs. Each COMP contains its own network of TOPs, CHOPs, SOPs, DATs. This creates a tree of networks.
 - **Evaluation order**: Pull-based. When a viewer requests output from a TOP, that TOP pulls from its inputs, which pull from theirs, etc. The Cook Manager resolves order implicitly.
-- **Cross-network references**: `op('/project1/comp1/noise1')` — full path addressing. Relative paths also supported: `op('../other_comp/lfo1')`.
+- **Cross-network references**: `op('/project1/comp1/noise1')` â€” full path addressing. Relative paths also supported: `op('../other_comp/lfo1')`.
 - **No explicit topo sort needed**: The pull model naturally resolves dependencies.
 - **Cycle prevention**: TD prevents cycles at connection time (cannot create a loop). FeedbackTOP is a special operator that reads from the *previous frame's* output, breaking the cycle.
 
@@ -296,20 +296,20 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 ### 6.2 Houdini
 
 - **C++ core**: All SOPs are C++ (HDK). VEX compiles to machine code via LLVM.
-- **VEX JIT compilation**: VEX (Houdini's expression/wrangle language) is compiled to optimized machine code — not interpreted. Wrangles running VEX on millions of points can match hand-written C++.
+- **VEX JIT compilation**: VEX (Houdini's expression/wrangle language) is compiled to optimized machine code â€” not interpreted. Wrangles running VEX on millions of points can match hand-written C++.
 - **OpenCL acceleration**: Some SOPs (pyrosolver, volume operations) use OpenCL for GPU acceleration.
 - **Compiled SOP blocks**: Fuses chains of SOPs into a single compiled unit, eliminating intermediate geometry allocation and enabling whole-chain optimization.
-- **PDG parallel processing**: Task-level parallelism via PDG — distributes work items across cores, machines, or render farms.
+- **PDG parallel processing**: Task-level parallelism via PDG â€” distributes work items across cores, machines, or render farms.
 - **Memory**: Geometry COW with reference counting. Packed primitives for instancing (millions of instances sharing geometry).
 - **Performance monitor**: Built-in cook time profiler, memory usage, dependency graph viewer.
 
 ### 6.3 GONODES
 
-- **GDScript core**: All operators are GDScript. Inner loops (pixel ops, vertex ops) are GDScript — the primary bottleneck.
-- **Godot renderer**: TOPs leverage Godot's Vulkan/OpenGL renderer via SubViewport — GPU-accelerated.
+- **GDScript core**: All operators are GDScript. Inner loops (pixel ops, vertex ops) are GDScript â€” the primary bottleneck.
+- **Godot renderer**: TOPs leverage Godot's Vulkan/OpenGL renderer via SubViewport â€” GPU-accelerated.
 - **Single-threaded cook**: Main thread only. No parallel cook lanes.
 - **Active chain cooking**: Only cooks subgraphs feeding live sinks (equivalent to TD's demand-driven).
-- **UPDATE_ONCE**: SubViewport renders exactly once per dirty cycle — eliminates redundant GPU work.
+- **UPDATE_ONCE**: SubViewport renders exactly once per dirty cycle â€” eliminates redundant GPU work.
 - **COW data sharing**: `_mutable_input()` avoids unnecessary copies at fan-out points.
 - **Planned**: Multi-threaded cook, GDExtension C++ hot-paths, GPU compute shaders.
 
@@ -323,8 +323,8 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 | Expression compilation | Python (interpreted) | VEX (JIT compiled) | GDScript Expression (interpreted) | Minor gap |
 | Compiled blocks | No | Yes (SOP compile) | No | Not applicable (real-time) |
 | Instancing | Yes (SOP/COMP) | Yes (packed prims) | Godot MultiMeshInstance3D (usable but not integrated) | Gap (minor) |
-| Profiling | Per-node + Performance DAT | Performance monitor + dependency viewer | Per-node cook time + expression µs + VRAM display | ✓ Good |
-| Memory optimization | Texture pooling, GPU mem management | COW geometry, packed prims | COW data, lazy viewport, active chain | ✓ Adequate |
+| Profiling | Per-node + Performance DAT | Performance monitor + dependency viewer | Per-node cook time + expression Âµs + VRAM display | âœ“ Good |
+| Memory optimization | Texture pooling, GPU mem management | COW geometry, packed prims | COW data, lazy viewport, active chain | âœ“ Adequate |
 
 ---
 
@@ -336,7 +336,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 - **GLSL**: Custom shader TOPs with GLSL (vertex + fragment + compute).
 - **Extensions**: Python classes can extend COMPs with custom behavior.
 - **tdu module**: TouchDesigner utility functions available in Python (`tdu.clamp`, `tdu.remap`, module access).
-- **Callbacks**: Parameter Execute DAT, Panel Execute DAT — event-driven scripting.
+- **Callbacks**: Parameter Execute DAT, Panel Execute DAT â€” event-driven scripting.
 - **No plugin SDK**: You cannot write C++ operators for TD (unlike Houdini's HDK). Python is the only extension path.
 
 ### 7.2 Houdini
@@ -344,7 +344,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 - **VEX**: Purpose-built shading/geometry language. JIT-compiled, runs on millions of points at native speed. The primary way users write custom logic.
 - **Python**: Full Python 3 with `hou` module for scene access, UI scripting, and pipeline tools.
 - **HDK (C++ SDK)**: Full C++ API for writing custom SOPs, DOPs, ROPs, etc. This is how studios build proprietary tools.
-- **HDA (Houdini Digital Asset)**: Package a subnet into a reusable, distributable asset with a custom parameter interface. This is Houdini's primary extension model — artists create HDAs, not C++ plugins.
+- **HDA (Houdini Digital Asset)**: Package a subnet into a reusable, distributable asset with a custom parameter interface. This is Houdini's primary extension model â€” artists create HDAs, not C++ plugins.
 - **OSL (Open Shading Language)**: For material/shader authoring in the LOP/Karma context.
 - **HScript**: Legacy expression language, still supported but VEX is preferred for performance.
 
@@ -361,11 +361,11 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
-| User scripting | Python | VEX + Python | GDScript | ✓ Adequate |
+| User scripting | Python | VEX + Python | GDScript | âœ“ Adequate |
 | Shader authoring | GLSL (frag/vert/compute) | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item shader) | Minor gap (no compute) |
-| C++ plugin SDK | No | Yes (HDK) | GDExtension (planned) | ✓ Architecture ready |
-| Asset packaging | No (Projects only) | HDA (full asset package) | SubNetworkNode + .gnpatch | **GAP** (see §11) |
-| Dynamic annotations | No | Spare params, HDA interface | `@param`/`@input` in scripts | ✓ Good |
+| C++ plugin SDK | No | Yes (HDK) | GDExtension (planned) | âœ“ Architecture ready |
+| Asset packaging | No (Projects only) | HDA (full asset package) | SubNetworkNode + .gnpatch | **GAP** (see Â§11) |
+| Dynamic annotations | No | Spare params, HDA interface | `@param`/`@input` in scripts | âœ“ Good |
 | Extension marketplace | No | Orbolt, SideFX Labs | Planned | Future |
 
 ---
@@ -418,13 +418,13 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
 | Multi-pane layout | Limited (COMP-based) | Full multi-pane | Single pane + float windows | Gap (minor) |
-| Inline previews | Rich (textures, graphs) | Basic (wireframe) | Labels + textures | ✓ Good |
+| Inline previews | Rich (textures, graphs) | Basic (wireframe) | Labels + textures | âœ“ Good |
 | Data spreadsheet | Grid-like viewer | Full spreadsheet | No | **GAP** |
 | Network boxes / annotations | No | Yes (color boxes + stickies) | No | **GAP** |
 | Dot/routing nodes | No | Yes | No | Gap (minor) |
 | Viewport handles | Limited | Full 3D handles | No | Gap (not real-time relevant) |
-| Node badges | Some (error, cook flag) | Rich (warnings, time dep, bypass, lock, HDA badge) | Bypass ⏩, Lock 🔒, Perf ms, Bookmark # | ✓ Good |
-| Quick-add | Tab search | Tab search + radial | Tab search + drop-wire filter | ✓ Good |
+| Node badges | Some (error, cook flag) | Rich (warnings, time dep, bypass, lock, HDA badge) | Bypass â©, Lock ðŸ”’, Perf ms, Bookmark # | âœ“ Good |
+| Quick-add | Tab search | Tab search + radial | Tab search + drop-wire filter | âœ“ Good |
 | Expression overlays | No | No | Yes (dashed cyan reference lines) | GONODES advantage |
 
 ---
@@ -435,7 +435,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 - **COMPs are containers**: Every COMP (Geometry, Base, Container, etc.) contains its own network. This is the only hierarchy mechanism.
 - **In/Out operators**: Pass data between parent and child networks.
-- **Custom COMPs**: Clone a Base COMP, define custom parameters, add internal network — acts as a reusable "module."
+- **Custom COMPs**: Clone a Base COMP, define custom parameters, add internal network â€” acts as a reusable "module."
 - **No formal asset system**: No equivalent to Houdini's HDA. Modules are shared as `.tox` files (COMP exports).
 - **Parameters on COMPs**: COMPs can expose custom parameters that internal nodes reference via `parent().par.X`.
 
@@ -452,14 +452,14 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
   - Menu scripts, callback scripts
   - Custom icon, custom color, custom shape
 - **Dive in/dive out**: Double-click to enter any subnet/HDA. Breadcrumb navigation.
-- **OTL libraries**: `.hda` files that act as shared libraries of node types — studios maintain libraries of custom HDAs used across all projects.
+- **OTL libraries**: `.hda` files that act as shared libraries of node types â€” studios maintain libraries of custom HDAs used across all projects.
 - **Distributed as files**: HDAs are single files that can be installed by dropping into `$HOUDINI_PATH/otls/`.
 
 ### 9.3 GONODES
 
 - **SubNetworkNode**: Single grouping mechanism. InTunnel/OutTunnel for data bridging.
 - **Dive in/out**: Double-click to enter, Backspace or breadcrumb to exit.
-- **Inner cook engine**: Recursive cooking — injected data into InTunnels, reads OutTunnel results.
+- **Inner cook engine**: Recursive cooking â€” injected data into InTunnels, reads OutTunnel results.
 - **Hierarchical expressions**: `op("subnet/node")`, `op("../node")`, `op("/root_node")`.
 - **No formal asset packaging**: SubNetworkNodes are serialized inline in `.gnpatch`. No standalone distributable format.
 
@@ -467,12 +467,12 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
-| Basic sub-networks | Yes (COMPs) | Yes (subnets) | Yes (SubNetworkNode) | ✓ |
+| Basic sub-networks | Yes (COMPs) | Yes (subnets) | Yes (SubNetworkNode) | âœ“ |
 | Reusable asset format | `.tox` (COMP export) | `.hda` (full asset) | None (inline in .gnpatch) | **GAP** |
 | Custom parameter interface | Yes (COMP params) | Yes (HDA type properties) | Partial (`@param` scripts) | **GAP** |
 | Version control | No | Yes (HDA versioning) | No | Gap (minor) |
-| Named I/O with labels | Yes (In/Out operators) | Yes (named inputs/outputs) | Yes (InTunnel/OutTunnel) | ✓ |
-| Asset distribution | File sharing | OTL libraries + Orbolt | Extension system (gn_ext_*) | ✓ Architecture exists |
+| Named I/O with labels | Yes (In/Out operators) | Yes (named inputs/outputs) | Yes (InTunnel/OutTunnel) | âœ“ |
+| Asset distribution | File sharing | OTL libraries + Orbolt | Extension system (gn_ext_*) | âœ“ Architecture exists |
 
 ---
 
@@ -480,7 +480,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 | Protocol | TouchDesigner | Houdini | GONODES |
 |----------|--------------|---------|---------|
-| OSC | Built-in (In/Out) | Basic (via Python) | Built-in (OscInCHOP, OscOutCHOP, OscInDAT) |
+| OSC | Built-in (In/Out) | Basic (via Python) | Built-in (OscInCHOP, OscOUT, OscInDAT) |
 | MIDI | Built-in (In/Out) | No | Input only (MidiInCHOP, MidiInDAT). Output planned. |
 | NDI | Built-in | No | Planned |
 | Syphon/Spout | Built-in | No | Planned |
@@ -501,21 +501,21 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 Based on the comparison, here are the most impactful improvements GONODES could adopt, ordered by estimated value:
 
-### 11.1 HIGH PRIORITY — Architectural Improvements
+### 11.1 HIGH PRIORITY â€” Architectural Improvements
 
 #### A. Parameter-Level Dependency Tracking
 
-**Gap**: GONODES propagates dirty flags at the node level. If `nodeA.paramX` changes, all of `nodeA` is dirty and everything downstream recooks. Houdini tracks dependencies at the parameter level — only nodes whose parameters actually reference the changed parameter are invalidated.
+**Gap**: GONODES propagates dirty flags at the node level. If `nodeA.paramX` changes, all of `nodeA` is dirty and everything downstream recooks. Houdini tracks dependencies at the parameter level â€” only nodes whose parameters actually reference the changed parameter are invalidated.
 
 **Impact**: In a large network where one node has 20 parameters and only `scale` changed, GONODES recooks the full downstream tree. With parameter-level deps, only nodes that reference `scale` (directly or transitively) would recook.
 
-**Recommendation**: Build a parameter dependency mini-graph during `_resolve_node_parameters()`. Each expression evaluation records which parameters were read. On parameter change, only invalidate nodes whose expressions touched that specific parameter. This is the "Full Parameter DAG" mentioned in your roadmap (§7.6). The existing `_evaluating_params` guard is the seed — extend it to record a `reads_from` set per expression.
+**Recommendation**: Build a parameter dependency mini-graph during `_resolve_node_parameters()`. Each expression evaluation records which parameters were read. On parameter change, only invalidate nodes whose expressions touched that specific parameter. This is the "Full Parameter DAG" mentioned in your roadmap (Â§7.6). The existing `_evaluating_params` guard is the seed â€” extend it to record a `reads_from` set per expression.
 
 **Complexity**: Medium. The infrastructure (`_evaluating_params`) exists. Main work is recording reads during `par()`/`chop()` calls and using them to narrow dirty propagation.
 
 #### B. Ramp / Curve Parameter Type
 
-**Gap**: Houdini's ramp parameter is a first-class type — a curve editor built into the parameter UI. This is transformative for procedural workflows: color gradients, falloff curves, animation curves, noise shaping, and any value-over-domain mapping. Neither TD nor GONODES has this as a built-in parameter type.
+**Gap**: Houdini's ramp parameter is a first-class type â€” a curve editor built into the parameter UI. This is transformative for procedural workflows: color gradients, falloff curves, animation curves, noise shaping, and any value-over-domain mapping. Neither TD nor GONODES has this as a built-in parameter type.
 
 **Impact**: Currently GONODES users who want a color gradient over an animation cycle must either:
 - Chain multiple ConstantTOPs with CrossTOP (clunky)
@@ -524,7 +524,7 @@ Based on the comparison, here are the most impactful improvements GONODES could 
 
 A ramp parameter would let them draw a gradient curve directly in the inspector and evaluate it via `ramp("param_name", t)` in expressions or `chramp()` in scripts.
 
-**Recommendation**: Add `ValueType.RAMP` to `GNParameter`. Data model: array of `{position: float, value: Color or float, interpolation: enum}` control points. UI: custom `Control` with draggable handles and interpolation mode per segment. Expression function: `ramp("name", t)` returns interpolated value at position `t ∈ [0,1]`. Serialize as JSON array of keyframes.
+**Recommendation**: Add `ValueType.RAMP` to `GNParameter`. Data model: array of `{position: float, value: Color or float, interpolation: enum}` control points. UI: custom `Control` with draggable handles and interpolation mode per segment. Expression function: `ramp("name", t)` returns interpolated value at position `t âˆˆ [0,1]`. Serialize as JSON array of keyframes.
 
 **Complexity**: Medium-high. The parameter system supports custom types well. Main work is the curve editor UI widget and the interpolation math.
 
@@ -532,7 +532,7 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 
 **Gap**: Houdini's HDA system lets artists package subnet networks into distributable, versioned assets with custom parameter UIs. GONODES has SubNetworkNode but no way to export one as a reusable, distributable type. TD has `.tox` but it's more limited than HDA.
 
-**Impact**: Without an asset format, sharing custom node types requires copy-pasting SubNetworks or writing GDScript operators. An asset format would enable a community ecosystem — artists share useful node setups without coding.
+**Impact**: Without an asset format, sharing custom node types requires copy-pasting SubNetworks or writing GDScript operators. An asset format would enable a community ecosystem â€” artists share useful node setups without coding.
 
 **Recommendation**: Define a `.gnasset` format: a JSON file containing the inner network definition + a parameter interface definition (which inner params are "promoted" to the subnet's inspector). `GNExtensionRegistry` can load `.gnasset` files alongside `gn_ext_*` extensions. Users drag-and-drop `.gnasset` files into a library folder. The SubNetworkNode's parameter interface would be defined by the asset author.
 
@@ -544,15 +544,15 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 
 **Impact**: For networks with independent branches (e.g., two parallel CHOP chains feeding different TOPs), the branches could cook simultaneously.
 
-**Recommendation**: This is already on your roadmap. The architecture supports it — each node's `_cook()` only reads its `inputs` array and writes to `cached_output`. Independent branches in the topo order can be identified and dispatched to Godot's `WorkerThreadPool`. The main complexity is thread-safety for shared state (expressions reading other nodes' params, CHOP exports, etc.) and Godot's scene-tree thread affinity for SubViewports.
+**Recommendation**: This is already on your roadmap. The architecture supports it â€” each node's `_cook()` only reads its `inputs` array and writes to `cached_output`. Independent branches in the topo order can be identified and dispatched to Godot's `WorkerThreadPool`. The main complexity is thread-safety for shared state (expressions reading other nodes' params, CHOP exports, etc.) and Godot's scene-tree thread affinity for SubViewports.
 
 **Complexity**: High. Godot's rendering is main-thread-affine for SubViewport operations.
 
-### 11.2 MEDIUM PRIORITY — Workflow Improvements
+### 11.2 MEDIUM PRIORITY â€” Workflow Improvements
 
 #### E. Data Spreadsheet / Table Viewer
 
-**Gap**: Houdini's geometry spreadsheet is one of its most loved features — you can inspect every point, primitive, and attribute value in a table. TD has grid viewers for CHOPs and DATs. GONODES shows data only as text labels in node previews.
+**Gap**: Houdini's geometry spreadsheet is one of its most loved features â€” you can inspect every point, primitive, and attribute value in a table. TD has grid viewers for CHOPs and DATs. GONODES shows data only as text labels in node previews.
 
 **Impact**: Debugging data flow (especially CHOPs and DATs) without a spreadsheet means adding print statements or NullDATs to inspect values. A spreadsheet viewer would dramatically improve workflow.
 
@@ -568,13 +568,13 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 
 **Recommendation**: Add `GNNetworkBox` (colored rectangle with label, serialized in .gnpatch) and `GNStickyNote` (text annotation on the canvas). Both are non-cooking, purely organizational. Render as GraphEdit child controls behind nodes.
 
-**Complexity**: Low. No cook engine changes needed — purely UI. Serialize as additional arrays in the `.gnpatch` format.
+**Complexity**: Low. No cook engine changes needed â€” purely UI. Serialize as additional arrays in the `.gnpatch` format.
 
 #### G. Keyframe Animation System
 
 **Gap**: Both TD and Houdini support keyframe animation on parameters. Houdini has a full animation editor with curves, handles, and interpolation modes. TD has a simpler timeline. GONODES has no animation system beyond time-dependent expressions.
 
-**Impact**: For motion graphics and pre-rendered content, keyframe animation is essential. Currently users must write math expressions to animate parameters — viable but tedious for complex animations.
+**Impact**: For motion graphics and pre-rendered content, keyframe animation is essential. Currently users must write math expressions to animate parameters â€” viable but tedious for complex animations.
 
 **Recommendation**: Add a timeline panel and keyframe data model. Each `GNParameter` optionally stores an animation curve (`Array[{frame: int, value: Variant, interpolation: enum}]`). A new parameter mode `ANIMATED` plays back keyframe curves. The timeline panel shows a mini curve editor. Expression mode remains available for procedural animation.
 
@@ -582,19 +582,19 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 
 #### H. CHOP Viewer Graph (Waveform Display)
 
-**Gap**: TD shows live waveform graphs on CHOP node thumbnails — you can see oscillating signals at a glance. GONODES shows CHOP values as text labels.
+**Gap**: TD shows live waveform graphs on CHOP node thumbnails â€” you can see oscillating signals at a glance. GONODES shows CHOP values as text labels.
 
 **Impact**: For audio, LFO, noise, and signal processing workflows, a visual waveform is far more informative than a number. This would make GONODES' CHOP development experience match TD's.
 
-**Recommendation**: Override `GNChopBase.create_preview_control()` to return a custom `Control` that draws a mini line graph of the channel data. Use `_draw()` with `draw_polyline()` — render at 120×80px per node. Color by channel, scale Y to data range, show most recent N samples.
+**Recommendation**: Override `GNChopBase.create_preview_control()` to return a custom `Control` that draws a mini line graph of the channel data. Use `_draw()` with `draw_polyline()` â€” render at 120Ã—80px per node. Color by channel, scale Y to data range, show most recent N samples.
 
 **Complexity**: Low. Custom `Control._draw()` with `draw_polyline()`. Data is already in `_cached_channel_data.channels`. No cook engine changes.
 
-### 11.3 LOW PRIORITY — Nice to Have
+### 11.3 LOW PRIORITY â€” Nice to Have
 
 #### I. Named Output Ports
 
-**Gap**: Houdini SOPs frequently have named outputs (Boolean → "Intersect", "A minus B", "B just B"). GONODES uses indexed ports only.
+**Gap**: Houdini SOPs frequently have named outputs (Boolean â†’ "Intersect", "A minus B", "B just B"). GONODES uses indexed ports only.
 
 **Recommendation**: Add optional `port_label: String` to `GNPort`. Show in tooltip and palette. Low effort, improves readability for multi-output nodes.
 
@@ -602,13 +602,13 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 
 **Gap**: Houdini's dot nodes let you route wires cleanly for readability.
 
-**Recommendation**: A "DotNode" that passes data through unchanged, with no parameter UI — purely for wire routing.
+**Recommendation**: A "DotNode" that passes data through unchanged, with no parameter UI â€” purely for wire routing.
 
 #### K. Takes / Parameter Layer Overrides
 
 **Gap**: Houdini's Take system lets you save named parameter states and switch between configurations non-destructively.
 
-**Recommendation**: Low priority — parameter presets partially cover this use case. Could extend `GNParamPresetManager` with "take" semantics (apply an override layer, revert to base).
+**Recommendation**: Low priority â€” parameter presets partially cover this use case. Could extend `GNParamPresetManager` with "take" semantics (apply an override layer, revert to base).
 
 ---
 
@@ -616,10 +616,10 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 
 | # | Recommendation | Effort | Value | Rationale |
 |---|---------------|--------|-------|-----------|
-| 1 | **Ramp parameter type** with curve editor | Medium | Very High | Unlocks gradients, falloff curves, animation curves — transformative for procedural/motion graphics |
-| 2 | **CHOP waveform preview** (mini line graph) | Low | High | Makes CHOP debugging visual instead of numerical — matches TD's core UX |
-| 3 | **Data spreadsheet viewer** | Low-Med | High | Essential debugging tool for CHOPs, DATs, and SOPs — Houdini's most loved feature |
-| 4 | **Network boxes + sticky notes** | Low | Medium | Canvas organization for complex networks — near-universal in DCC tools |
-| 5 | **Parameter-level dependency tracking** | Medium | High | Reduces unnecessary recooks in large networks — Houdini's key optimization |
+| 1 | **Ramp parameter type** with curve editor | Medium | Very High | Unlocks gradients, falloff curves, animation curves â€” transformative for procedural/motion graphics |
+| 2 | **CHOP waveform preview** (mini line graph) | Low | High | Makes CHOP debugging visual instead of numerical â€” matches TD's core UX |
+| 3 | **Data spreadsheet viewer** | Low-Med | High | Essential debugging tool for CHOPs, DATs, and SOPs â€” Houdini's most loved feature |
+| 4 | **Network boxes + sticky notes** | Low | Medium | Canvas organization for complex networks â€” near-universal in DCC tools |
+| 5 | **Parameter-level dependency tracking** | Medium | High | Reduces unnecessary recooks in large networks â€” Houdini's key optimization |
 
 GONODES is already remarkably well-aligned with both TD and Houdini's core architecture. The active chain cooking, COW data model, expression system, per-component expressions, preview system, and sub-network hierarchy put it in strong competitive territory. The gaps are mostly in **power-user workflow tools** (spreadsheet, ramp, annotations) rather than fundamental architecture holes.

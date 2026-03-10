@@ -1,11 +1,11 @@
-class_name WindowTOP
-extends GNTopBase
+class_name WindowOUT
+extends GNOutBase
 ## Displays a TOP texture input in a standalone OS window.
 ## Supports multiple monitors, fullscreen/borderless/windowed modes,
 ## and positioning on any connected display.
 ##
-## This is a terminal node (no output ports) — it's a display sink.
-## Multiple WindowTOP instances create multiple output windows.
+## This is a terminal sink (no output ports) — display only.
+## Multiple WindowOUT instances create multiple output windows.
 ## The Window node is a child of this GNNode in the scene tree —
 ## freed automatically when the node is removed.
 ##
@@ -31,13 +31,11 @@ var _window_params_dirty: bool = true
 
 func _init() -> void:
 	node_type = "window"
-	is_sink = true
 	node_description = "Display a texture in a standalone OS window (VJ output)."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.TOP, false, "Texture to display in the window")
-	# No outputs — this is a display sink
 
 
 func _init_parameters() -> void:
@@ -60,7 +58,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
+	var tex_in: GNTextureData = _get_input_top(inputs, 0)
 
 	_ensure_window()
 
@@ -69,7 +67,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if _window != null and _window.visible != should_open:
 		_window.visible = should_open
 		if should_open:
-			GNLogger.info("WindowTOP", "'%s' output window re-opened via parameter" % id)
+			GNLogger.info("WindowOUT", "'%s' output window re-opened via parameter" % id)
 
 	# Apply lightweight params every frame (title, texture)
 	if _window != null:
@@ -88,7 +86,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if tex_in != null and tex_in.texture != null:
 		if _display_rect.texture != tex_in.texture:
 			_display_rect.texture = tex_in.texture
-			GNLogger.debug("WindowTOP", "'%s' texture assigned (zero-copy GPU)" % id)
+			GNLogger.debug("WindowOUT", "'%s' texture assigned (zero-copy GPU)" % id)
 		# Force the output window to present this frame's content immediately.
 		# Without this, the separate Window viewport may not redraw every frame
 		# because Godot only auto-redraws when it detects a property change on
@@ -98,7 +96,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	else:
 		_display_rect.visible = false
 
-	# WindowTOP has no output — it's a display sink
 	return null
 
 
@@ -135,7 +132,7 @@ func _ensure_window() -> void:
 	add_child(_window)
 
 	_window_created = true
-	GNLogger.info("WindowTOP", "'%s' output window created: '%s'" % [id, _window.title])
+	GNLogger.info("WindowOUT", "'%s' output window created: '%s'" % [id, _window.title])
 
 
 ## Applies current parameter values to the Window node.
@@ -216,7 +213,7 @@ func _on_window_close_requested() -> void:
 	if _window:
 		_window.visible = false
 		set_param_value("open", false)
-		GNLogger.info("WindowTOP", "'%s' output window hidden by user" % id)
+		GNLogger.info("WindowOUT", "'%s' output window hidden by user" % id)
 
 
 ## Called for input events inside the output window.
@@ -227,7 +224,7 @@ func _on_window_input(event: InputEvent) -> void:
 		if mode_idx != WindowMode.WINDOWED:
 			set_param_value("window_mode", WindowMode.WINDOWED)
 			_window_params_dirty = true
-			GNLogger.info("WindowTOP", "'%s' ESC — switched to windowed mode" % id)
+			GNLogger.info("WindowOUT", "'%s' ESC — switched to windowed mode" % id)
 
 
 ## Override: mark window params dirty when our own parameters change.

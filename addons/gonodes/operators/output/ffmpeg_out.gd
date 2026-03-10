@@ -1,5 +1,5 @@
-class_name FFmpegOutIMG
-extends GNImgBase
+class_name FFmpegOUT
+extends GNOutBase
 ## Encodes an IMG image sequence into a video file using the FFmpeg CLI.
 ##
 ## **Requires `ffmpeg` on the system PATH.**  If FFmpeg is not found, the
@@ -10,8 +10,6 @@ extends GNImgBase
 ##   2. Toggle "active" ON → frames accumulate to a temp folder.
 ##   3. Toggle "active" OFF → FFmpeg encodes the temp frames into a video.
 ##   4. Temp frames are cleaned up after a successful encode.
-##
-## This is a **sink** operator (`is_sink = true`).
 ##
 ## Supported codecs:
 ##   - H.264 (.mp4) — best compatibility
@@ -42,14 +40,12 @@ var _ffmpeg_checked: bool = false
 
 
 func _init() -> void:
-	node_type = "ffmpegoutimg"
-	is_sink = true
+	node_type = "ffmpegout"
 	node_description = "Encode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, ProRes)."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.IMG, false, "Image frames to encode")
-	# No output — this is a file sink.
 
 
 func _init_parameters() -> void:
@@ -69,18 +65,14 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var img_in: GNImageData = _get_input_img(inputs, 0)
 	if img_in == null or img_in.image == null:
-		return img_in
-
-	# Pass-through for preview
-	var out := _prepare_image()
-	out.set_image(img_in.image)
+		return null
 
 	# Check FFmpeg availability (once)
 	if not _ffmpeg_checked:
 		_ffmpeg_checked = true
 		_ffmpeg_available = _check_ffmpeg()
 		if not _ffmpeg_available:
-			GNLogger.warn("FFmpegOutIMG",
+			GNLogger.warn("FFmpegOUT",
 				"'%s': ffmpeg not found on PATH. Video encoding unavailable." % id)
 
 	var active: bool = get_param_value("active")
@@ -90,26 +82,26 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		if _ffmpeg_available and _total_captured > 0:
 			_encode_video()
 		elif not _ffmpeg_available:
-			GNLogger.warn("FFmpegOutIMG",
+			GNLogger.warn("FFmpegOUT",
 				"'%s': Cannot encode — ffmpeg not on PATH" % id)
 		_was_active = false
-		return out
+		return null
 
 	# Rising edge: activate → set up temp dir
 	if active and not _was_active:
 		_frame_counter = 0
 		_total_captured = 0
 		_temp_dir = _create_temp_dir()
-		GNLogger.info("FFmpegOutIMG",
+		GNLogger.info("FFmpegOUT",
 			"'%s': Recording started → %s" % [id, _temp_dir])
 
 	_was_active = active
 
 	if not active:
-		return out
+		return null
 
 	if not _ffmpeg_available:
-		return out
+		return null
 
 	# Save frame to temp dir as PNG (lossless intermediate)
 	var frame_path: String = _temp_dir.path_join("frame_%06d.png" % _frame_counter)
@@ -118,10 +110,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_frame_counter += 1
 		_total_captured += 1
 	else:
-		GNLogger.warn("FFmpegOutIMG",
+		GNLogger.warn("FFmpegOUT",
 			"'%s': Failed to save temp frame (error %d)" % [id, err])
 
-	return out
+	return null
 
 
 # ─── FFmpeg Helpers ────────────────────────────────────────────────────────────
@@ -190,23 +182,23 @@ func _encode_video() -> void:
 	args.append_array(codec_args)
 	args.append(ProjectSettings.globalize_path(output_path))
 
-	GNLogger.info("FFmpegOutIMG",
+	GNLogger.info("FFmpegOUT",
 		"'%s': Encoding %d frames → '%s'" % [id, _total_captured, output_path])
 
 	var output: Array = []
 	var exit_code: int = OS.execute("ffmpeg", args, output, true)
 
 	if exit_code == 0:
-		GNLogger.info("FFmpegOutIMG",
+		GNLogger.info("FFmpegOUT",
 			"'%s': Encoding complete → '%s'" % [id, output_path])
 		# Clean up temp frames
 		_cleanup_temp_dir()
 	else:
-		GNLogger.warn("FFmpegOutIMG",
+		GNLogger.warn("FFmpegOUT",
 			"'%s': FFmpeg exited with code %d. Temp frames kept at '%s'" % [
 				id, exit_code, _temp_dir])
 		if output.size() > 0:
-			GNLogger.warn("FFmpegOutIMG", "FFmpeg output: %s" % str(output[0]).substr(0, 500))
+			GNLogger.warn("FFmpegOUT", "FFmpeg output: %s" % str(output[0]).substr(0, 500))
 
 	_encoding = false
 

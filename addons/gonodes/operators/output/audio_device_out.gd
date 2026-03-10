@@ -1,13 +1,13 @@
-class_name AudioDeviceOutCHOP
-extends GNChopBase
+class_name AudioDeviceOUT
+extends GNOutBase
 ## Outputs CHOP channel data to the audio system as PCM audio.
 ##
 ## Uses AudioStreamGenerator + AudioStreamGeneratorPlayback to push
 ## sample data from CHOP channels to the speakers.  Input channels named
 ## "left" and "right" (or the first 1-2 channels) are mapped to stereo.
 ##
-## Typical chain:  WaveCHOP → AudioDeviceOutCHOP
-##                 AudioFileInCHOP → MathCHOP (gain) → AudioDeviceOutCHOP
+## Typical chain:  WaveCHOP → AudioDeviceOUT
+##                 AudioFileInCHOP → MathCHOP (gain) → AudioDeviceOUT
 
 var _bus_name: String = ""
 var _bus_idx: int = -1
@@ -25,7 +25,6 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.CHOP, false, "Audio samples to output")
-	add_output("out", GNFamily.Type.CHOP, "Pass-through of input channels")
 
 
 func _init_parameters() -> void:
@@ -49,16 +48,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	elif not want_active and _active:
 		_stop_output()
 
-	# Pass-through output: return input data even if not active
-	var out: GNChannelData = _prepare_output(
-		in_data.sample_rate if in_data != null else 44100.0)
-
-	if in_data != null:
-		for ch_name: String in in_data.channels:
-			out.set_channel(ch_name, in_data.channels[ch_name])
-
 	if not _active or _playback == null or in_data == null:
-		return out
+		return null
 
 	# Resolve left/right channels from input
 	var left_samples: PackedFloat32Array = _resolve_channel(in_data, "left", 0)
@@ -67,7 +58,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		right_samples = left_samples  # Mono → duplicate to both channels
 
 	if left_samples.is_empty():
-		return out
+		return null
 
 	# Push samples to the audio generator
 	var frames_available: int = _playback.get_frames_available()
@@ -78,7 +69,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		var r: float = right_samples[mini(i, right_samples.size() - 1)] * gain
 		_playback.push_frame(Vector2(l, r))
 
-	return out
+	return null
 
 
 func _resolve_channel(data: GNChannelData, preferred_name: String,
@@ -123,7 +114,7 @@ func _start_output() -> void:
 	_playback = _stream_player.get_stream_playback() as AudioStreamGeneratorPlayback
 
 	_active = true
-	GNLogger.info("AudioDeviceOutCHOP", "Audio output started on bus '%s' @ %.0f Hz" % [_bus_name, mix_rate])
+	GNLogger.info("AudioDeviceOUT", "Audio output started on bus '%s' @ %.0f Hz" % [_bus_name, mix_rate])
 
 
 func _stop_output() -> void:
@@ -146,7 +137,7 @@ func _stop_output() -> void:
 
 	_bus_idx = -1
 	_active = false
-	GNLogger.info("AudioDeviceOutCHOP", "Audio output stopped")
+	GNLogger.info("AudioDeviceOUT", "Audio output stopped")
 
 
 func _notification(what: int) -> void:

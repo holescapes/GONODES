@@ -28,7 +28,7 @@
       }
     },
     "window1": {
-      "type": "WindowTOP",
+      "type": "WindowOUT",
       "position": [1150, 200],
       "parameters": {
         "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
@@ -45,7 +45,7 @@
     {
       "id": "ann_1",
       "type": "note",
-      "text": "Warp CHOP — Time Remap\n\nA sine pattern is time-warped at 0.5× speed, stretching\n120 samples to 240 with linear interpolation.\nUse speed < 1 for slow-mo, > 1 for fast-forward,\nor connect a warp curve input for custom retiming.",
+      "text": "Warp CHOP â€” Time Remap\n\nA sine pattern is time-warped at 0.5Ã— speed, stretching\n120 samples to 240 with linear interpolation.\nUse speed < 1 for slow-mo, > 1 for fast-forward,\nor connect a warp curve input for custom retiming.",
       "position": [50.0, -50.0],
       "size": [600.0, 110.0],
       "color": [1.0, 1.0, 1.0, 0.8]

@@ -1,5 +1,5 @@
-class_name OscOutCHOP
-extends GNChopBase
+class_name OscOUT
+extends GNOutBase
 ## Sends CHOP channel values as OSC messages over UDP.
 ##
 ## Each channel becomes an OSC message:
@@ -7,7 +7,6 @@ extends GNChopBase
 ##   args    = [float value]
 ##
 ## Alternatively, set "bundle" mode to send all channels in a single OSC bundle.
-## The node is a sink (is_sink = true) — it keeps its upstream chain alive.
 
 # ─── Networking ────────────────────────────────────────────────────────────────
 
@@ -26,13 +25,11 @@ enum SendMode { INDIVIDUAL, BUNDLE }
 func _init() -> void:
 	node_type = "oscout"
 	time_dependent = true
-	is_sink = true
 	node_description = "Send CHOP channels as OSC messages over UDP."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.CHOP, false, "Channel data to send")
-	add_output("out", GNFamily.Type.CHOP, "Pass-through of input")
 
 
 func _init_parameters() -> void:
@@ -57,14 +54,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var chop: GNChannelData = _get_input_chop(inputs, 0)
 	if chop == null:
 		_close_udp()
-		return _prepare_output()
+		return null
 
 	var active: bool = get_param_value("active")
 	if not active:
 		_close_udp()
-		# Pass through input even when inactive
-		_cached_channel_data = chop
-		return chop
+		return null
 
 	var host: String = get_param_value("host")
 	var port: int = get_param_value("port")
@@ -81,9 +76,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		else:
 			_send_individual(chop, names, prefix)
 
-	# Pass through input
-	_cached_channel_data = chop
-	return chop
+	return null
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -120,7 +113,7 @@ func _ensure_udp(host: String, port: int) -> void:
 	_udp.set_dest_address(host, port)
 	_current_host = host
 	_current_port = port
-	GNLogger.info("OscOutCHOP", "Sending to %s:%d" % [host, port])
+	GNLogger.info("OscOUT", "Sending to %s:%d" % [host, port])
 
 
 func _close_udp() -> void:

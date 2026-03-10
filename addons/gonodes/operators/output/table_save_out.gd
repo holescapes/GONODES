@@ -1,22 +1,19 @@
-class_name FileSaveDAT
-extends GNDatBase
+class_name TableSaveOUT
+extends GNOutBase
 ## Exports a DAT table or text to disk as CSV, TSV, JSON, or plain text.
 ##
-## This is a **sink** operator — no output ports.  Activate the "active"
-## toggle to start writing.  The input data passes through as cached_output.
+## Activate the "active" toggle to start writing.
 
 enum Format { CSV, TSV, JSON, TEXT }
 
 
 func _init() -> void:
-	node_type = "filesavedat"
-	is_sink = true
+	node_type = "tablesave"
 	node_description = "Export table/text to disk (CSV, TSV, JSON, plain text). Activate the toggle to write."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.DAT, false, "Table or text to save")
-	# No output — this is a file sink.
 
 
 func _init_parameters() -> void:
@@ -34,14 +31,11 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var dat_in: GNTableData = _get_input_dat(inputs, 0)
 	if dat_in == null:
-		return dat_in
-
-	# Pass-through
-	_cached_table = dat_in
+		return null
 
 	var active: bool = get_param_value("active")
 	if not active:
-		return _cached_table
+		return null
 
 	var base_path: String = get_param_value("file_path")
 	var fmt: int = get_param_value("format")
@@ -75,15 +69,15 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# Write file
 	var file := FileAccess.open(full_path, FileAccess.WRITE)
 	if file == null:
-		GNLogger.warn("FileSaveDAT",
+		GNLogger.warn("TableSaveOUT",
 			"'%s': Cannot open '%s' for writing (error %d)" % [id, full_path, FileAccess.get_open_error()])
-		return _cached_table
+		return null
 
 	file.store_string(content)
 	file.close()
-	GNLogger.debug("FileSaveDAT", "'%s': Saved '%s'" % [id, full_path])
+	GNLogger.debug("TableSaveOUT", "'%s': Saved '%s'" % [id, full_path])
 
-	return _cached_table
+	return null
 
 
 # ─── Format Helpers ────────────────────────────────────────────────────────────

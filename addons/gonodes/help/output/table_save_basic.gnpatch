@@ -1,4 +1,4 @@
-﻿{
+{
     "version":  "1.0.0",
     "generator":  "GONODES",
     "nodes":  {
@@ -30,7 +30,7 @@
                                                 }
                              },
                   "filesave1":  {
-                                    "type":  "FileSaveDAT",
+                                    "type":  "TableSaveOUT",
                                     "position":  [
                                                      450,
                                                      100
@@ -61,7 +61,7 @@
                                                                   "value":  true
                                                               }
                                                  },
-                                  "type":  "WindowTOP"
+                                  "type":  "WindowOUT"
                               },
                   "text_view":  {
                                     "type":  "TextTOP",
@@ -78,7 +78,7 @@
                                                                                     }
                                                                       },
                                                        "text":  {
-                                                                    "value":  "FileSaveDAT output"
+                                                                    "value":  "TableSaveOUT output"
                                                                 },
                                                        "font_size":  {
                                                                          "value":  24

@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}
+            }
+        },
+        "toptoimg1": {
+            "type": "TOPtoIMG",
+            "position": [400, 100]
+        },
+        "imagesave1": {
+            "type": "ImageSaveOUT",
+            "position": [700, 100],
+            "parameters": {
+                "active": {"value": false},
+                "file_path": {"value": "user://output/frame"},
+                "format": {"value": 0},
+                "auto_number": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "to": "toptoimg1", "from_port": 0, "to_port": 0},
+        {"from": "toptoimg1", "to": "imagesave1", "from_port": 0, "to_port": 0}
+    ],
+    "description": "ImageSaveOUT — Save a CPU Image to disk (PNG, WebP, EXR). Toggle 'active' to write."
+}

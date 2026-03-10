@@ -43,7 +43,7 @@
             }
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1150, 100],
             "parameters": {
                 "resolution": {
@@ -63,7 +63,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "L-System SOP (Native) — Branching Tree\n\nClassic fractal branching with tube geometry.\nSet tube_radius to 0 for line primitives instead.\nTry different rules, e.g. F=FF+[+F-F-F]-[-F+F+F].",
+            "text": "L-System SOP (Native) â€” Branching Tree\n\nClassic fractal branching with tube geometry.\nSet tube_radius to 0 for line primitives instead.\nTry different rules, e.g. F=FF+[+F-F-F]-[-F+F+F].",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

@@ -37,7 +37,7 @@
             }
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1150, 100],
             "parameters": {
                 "resolution": {
@@ -57,7 +57,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "IsoSurface SOP (Native) — Gyroid Surface\n\nMarching-cubes extraction of a Gyroid implicit surface.\nTry switching surface_type to Schwarz-P, Schwarz-D,\nSphere, or Torus. Increase resolution for finer detail.",
+            "text": "IsoSurface SOP (Native) â€” Gyroid Surface\n\nMarching-cubes extraction of a Gyroid implicit surface.\nTry switching surface_type to Schwarz-P, Schwarz-D,\nSphere, or Torus. Increase resolution for finer detail.",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

@@ -27,7 +27,7 @@
 ## 1. Before You Start
 
 - Read `GONODES_CONTEXT.md` at the project root — it is the single source of truth for architecture, conventions, and hard rules.
-- Skim the operator family you plan to work in (TOP, CHOP, DAT, SOP, COMP, MAT, IMG) by reading 2–3 existing operators in `addons/gonodes/operators/<family>/`.
+- Skim the operator family you plan to work in (TOP, CHOP, DAT, SOP, COMP, MAT, IMG, OUT) by reading 2–3 existing operators in `addons/gonodes/operators/<family>/`.
 - Run the test suite to confirm a clean baseline (see [§9](#9-testing-requirements)).
 - Check the roadmap section in `GONODES_CONTEXT.md` (§28.8) for planned work — avoid duplicating effort.
 

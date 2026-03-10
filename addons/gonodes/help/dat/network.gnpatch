@@ -29,12 +29,12 @@
       "position": [800, 200],
       "parameters": {
         "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-        "text": {"value": "NetworkDAT — UDP on port 7000"},
+        "text": {"value": "NetworkDAT â€” UDP on port 7000"},
         "font_size": {"value": 20}
       }
     },
     "window1": {
-      "type": "WindowTOP",
+      "type": "WindowOUT",
       "position": [1150, 200],
       "parameters": {
         "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
@@ -50,7 +50,7 @@
     {
       "id": "ann_1",
       "type": "note",
-      "text": "Network DAT — UDP Client\n\nSends table data as UDP packets to localhost:7000.\nSupports TCP and UDP with Client/Listen modes.\nReceived messages appear in the output table.",
+      "text": "Network DAT â€” UDP Client\n\nSends table data as UDP packets to localhost:7000.\nSupports TCP and UDP with Client/Listen modes.\nReceived messages appear in the output table.",
       "position": [50.0, -50.0],
       "size": [600.0, 110.0],
       "color": [1.0, 1.0, 1.0, 0.8]

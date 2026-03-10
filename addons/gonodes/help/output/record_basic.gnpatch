@@ -1,54 +1,42 @@
-﻿{
+{
     "version":  "1.0.0",
     "generator":  "GONODES",
     "nodes":  {
-                  "wave1":  {
-                                "type":  "WaveCHOP",
-                                "position":  [
-                                                 -400,
-                                                 0
-                                             ],
-                                "parameters":  {
-                                                   "wave_type":  {
-                                                                     "value":  0
-                                                                 },
-                                                   "frequency":  {
-                                                                     "value":  440.0
-                                                                 },
-                                                   "amplitude":  {
-                                                                     "value":  0.3
-                                                                 },
-                                                   "length":  {
-                                                                  "value":  1024
-                                                              }
-                                               }
-                            },
-                  "audioout1":  {
-                                    "type":  "AudioDeviceOutCHOP",
-                                    "position":  [
-                                                     0,
-                                                     0
-                                                 ],
-                                    "parameters":  {
-                                                       "active":  {
-                                                                      "value":  false
-                                                                  },
-                                                       "gain":  {
-                                                                    "value":  0.5
+                  "lfo1":  {
+                               "type":  "LFO_CHOP",
+                               "position":  [
+                                                100,
+                                                100
+                                            ],
+                               "parameters":  {
+                                                  "waveform":  {
+                                                                   "value":  0
+                                                               },
+                                                  "frequency":  {
+                                                                    "value":  1.0
+                                                                }
+                                              }
+                           },
+                  "record1":  {
+                                  "type":  "RecordOUT",
+                                  "position":  [
+                                                   450,
+                                                   100
+                                               ],
+                                  "parameters":  {
+                                                     "active":  {
+                                                                    "value":  true
                                                                 },
-                                                       "mix_rate":  {
-                                                                        "value":  44100.0
-                                                                    },
-                                                       "buffer_length":  {
-                                                                             "value":  0.1
-                                                                         }
-                                                   }
-                                },
+                                                     "max_samples":  {
+                                                                         "value":  500
+                                                                     }
+                                                 }
+                              },
                   "null1":  {
                                 "type":  "NullCHOP",
                                 "position":  [
-                                                 400,
-                                                 0
+                                                 800,
+                                                 100
                                              ],
                                 "parameters":  {
 
@@ -56,8 +44,8 @@
                             },
                   "window1":  {
                                   "position":  [
-                                                   1100,
-                                                   0
+                                                   1500,
+                                                   100
                                                ],
                                   "parameters":  {
                                                      "resolution":  {
@@ -71,13 +59,13 @@
                                                                   "value":  true
                                                               }
                                                  },
-                                  "type":  "WindowTOP"
+                                  "type":  "WindowOUT"
                               },
                   "choptop1":  {
                                    "type":  "CHOPtoTOP",
                                    "position":  [
-                                                    750,
-                                                    0
+                                                    1150,
+                                                    100
                                                 ],
                                    "parameters":  {
                                                       "resolution":  {
@@ -92,13 +80,13 @@
               },
     "connections":  [
                         {
-                            "from":  "wave1",
+                            "from":  "lfo1",
                             "from_port":  0,
-                            "to":  "audioout1",
+                            "to":  "record1",
                             "to_port":  0
                         },
                         {
-                            "from":  "audioout1",
+                            "from":  "record1",
                             "from_port":  0,
                             "to":  "null1",
                             "to_port":  0
@@ -120,14 +108,14 @@
                         {
                             "id":  "ann_1",
                             "type":  "note",
-                            "text":  "AudioDeviceOutCHOP\n\nOutputs CHOP channels as PCM audio to speakers.\nUses AudioStreamGenerator + AudioStreamGeneratorPlayback.\n\nToggle \u0027Active\u0027 to start/stop audio output.\nWARNING: Set gain low first — audio starts immediately!\n\nChannels named \u0027left\u0027/\u0027right\u0027 map to stereo. Otherwise\nfirst channel = left, second = right (or mono).",
+                            "text":  "Record CHOP — Buffer\n\nRecords LFO output into a rolling buffer\nof up to 500 samples. Toggle \u0027active\u0027\nto start/stop recording.",
                             "position":  [
-                                             -450.0,
-                                             -200.0
+                                             -100.0,
+                                             -150.0
                                          ],
                             "size":  [
-                                         550.0,
-                                         130.0
+                                         380.0,
+                                         100.0
                                      ],
                             "color":  [
                                           1.0,

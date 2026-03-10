@@ -1,4 +1,4 @@
-﻿{
+{
     "version":  "1.0.0",
     "generator":  "GONODES",
     "nodes":  {
@@ -51,7 +51,7 @@
                                                                   "value":  true
                                                               }
                                                  },
-                                  "type":  "WindowTOP"
+                                  "type":  "WindowOUT"
                               }
               },
     "connections":  [

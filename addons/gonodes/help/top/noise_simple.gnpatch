@@ -1,4 +1,4 @@
-﻿{
+{
     "connections":  [
                         {
                             "from":  "noise1",
@@ -129,7 +129,7 @@
                                                                   "value":  true
                                                               }
                                                  },
-                                  "type":  "WindowTOP"
+                                  "type":  "WindowOUT"
                               }
               },
     "version":  "1.0.0"

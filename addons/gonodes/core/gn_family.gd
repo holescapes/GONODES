@@ -12,6 +12,7 @@ enum Type {
 	DAT,   ## Data Operators — tables, text, scripts
 	MAT,   ## Material Operators — shader/material assignment
 	COMP,  ## Component Operators — containers, sub-networks, UI
+	OUT,   ## Output Operators — terminal sinks (display, file save, audio out)
 }
 
 ## Family display names for UI.
@@ -24,6 +25,7 @@ const FAMILY_NAMES: Dictionary = {
 	Type.DAT:  "DAT",
 	Type.MAT:  "MAT",
 	Type.COMP: "COMP",
+	Type.OUT:  "OUT",
 }
 
 ## Family colors for port/wire rendering in the graph editor.
@@ -36,6 +38,7 @@ const FAMILY_COLORS: Dictionary = {
 	Type.DAT:  Color(0.9, 0.8, 0.2),    # Yellow
 	Type.MAT:  Color(0.9, 0.4, 0.2),    # Red/Orange
 	Type.COMP: Color(0.5, 0.5, 0.5),    # Gray
+	Type.OUT:  Color(0.9, 0.3, 0.3),    # Red — terminal sink
 }
 
 

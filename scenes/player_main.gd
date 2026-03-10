@@ -2,7 +2,7 @@ extends Control
 ## GONODES Player — Minimal runtime for exported patches.
 ##
 ## Loads a .gnpatch file + config.json, boots the cook engine, and runs the
-## patch headlessly (no editor UI).  WindowTOP nodes open their own OS windows
+## patch headlessly (no editor UI).  WindowOUT nodes open their own OS windows
 ## for display output.
 ##
 ## Usage:
@@ -18,7 +18,7 @@ extends Control
 ## Rendering backend is automatic — Forward+ with fallback to Compatibility
 ## (OpenGL 3.3) via the fallback_to_opengl3 project setting baked into the .pck.
 ## Power users can override with --rendering-method on the command line.
-## VSync and window settings are controlled by each WindowTOP in the patch.
+## VSync and window settings are controlled by each WindowOUT in the patch.
 
 const _CONFIG_FILE := "config.json"
 
@@ -34,7 +34,7 @@ var _project: GNProjectManager = GNProjectManager.new()
 ## Parsed config dictionary.
 var _config: Dictionary = {}
 
-## Info label (shown only if no WindowTOP opens — fallback display).
+## Info label (shown only if no WindowOUT opens — fallback display).
 var _info_label: Label = null
 
 ## Whether the debug info overlay is visible.  Toggle with F1.
@@ -95,7 +95,7 @@ func _parse_config() -> void:
 
 
 ## Applies startup settings to the main window.
-## VSync, display settings, and window layout are handled by each WindowTOP
+## VSync, display settings, and window layout are handled by each WindowOUT
 ## node in the patch — not by config.json.
 func _apply_window_settings() -> void:
 	var win := get_window()
@@ -136,11 +136,11 @@ func _load_and_run() -> void:
 	cook_engine.frame_cooked.connect(_on_frame_cooked)
 	cook_engine.cook_error.connect(_on_cook_error)
 
-	# Force all WindowTOPs open — in the editor the user toggles "open" manually,
+	# Force all WindowOUTs open — in the editor the user toggles "open" manually,
 	# but in the Player every display window should appear automatically.
 	_force_open_window_tops()
 
-	# In player mode, all structural sinks (WindowTOP, file outputs, etc.) are
+	# In player mode, all structural sinks (WindowOUT, file outputs, etc.) are
 	# auto-detected by the cook engine via GNNode.is_sink.  No UI sinks needed.
 	cook_engine.set_active_sinks([])
 
@@ -193,7 +193,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 # UI Helpers (minimal — player has almost no UI)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Force every WindowTOP in the network to open automatically.
+## Force every WindowOUT in the network to open automatically.
 ## In the editor the user toggles "open" manually; in the Player all display
 ## windows should appear immediately on launch.
 func _force_open_window_tops() -> void:
@@ -205,7 +205,7 @@ func _force_open_window_tops() -> void:
 			node.set_param_value("open", true)
 			count += 1
 	if count > 0:
-		print("[GONODES Player] Auto-opened %d WindowTOP(s)." % count)
+		print("[GONODES Player] Auto-opened %d WindowOUT(s)." % count)
 
 
 ## Sets up a minimal info label for debug overlay (hidden by default, F1 to show).

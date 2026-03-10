@@ -35,7 +35,7 @@
             }
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1500, 100],
             "parameters": {
                 "resolution": {
@@ -55,7 +55,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Smooth CHOP (Native) — Low-Pass on Random LFO\n\nBiquad Butterworth low-pass at cutoff 0.15 smooths\na random LFO waveform. Try switching to High Pass\nor Band Pass and varying Q.",
+            "text": "Smooth CHOP (Native) â€” Low-Pass on Random LFO\n\nBiquad Butterworth low-pass at cutoff 0.15 smooths\na random LFO waveform. Try switching to High Pass\nor Band Pass and varying Q.",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

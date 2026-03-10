@@ -1,4 +1,4 @@
-﻿{
+{
     "annotations":  [
                         {
                             "color":  [
@@ -593,7 +593,7 @@
                                                                   "value":  true
                                                               }
                                                  },
-                                  "type":  "WindowTOP"
+                                  "type":  "WindowOUT"
                               }
               },
     "version":  "1.0.0"

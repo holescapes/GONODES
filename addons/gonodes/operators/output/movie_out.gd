@@ -1,17 +1,16 @@
-class_name MovieOutIMG
-extends GNImgBase
+class_name MovieOUT
+extends GNOutBase
 ## Saves an IMG image sequence to disk as numbered frames (PNG or WebP).
 ##
-## This is a **sink** operator — `is_sink = true`.  When "active" is on,
-## each cook saves the input Image as a numbered file.  Use this for
-## frame-by-frame image sequence export.
+## When "active" is on, each cook saves the input Image as a numbered file.
+## Use this for frame-by-frame image sequence export.
 ##
-## For video container encoding, use FFmpegOutIMG instead (requires
+## For video container encoding, use FFmpegOUT instead (requires
 ## EIRTeam.FFmpeg GDExtension).
 ##
 ## Workflow:
-##   NoiseTOP → TOPtoIMG → MovieOutIMG  (GPU → CPU → disk)
-##   ScriptIMG → MovieOutIMG             (CPU → disk directly)
+##   NoiseTOP → TOPtoIMG → MovieOUT  (GPU → CPU → disk)
+##   ScriptIMG → MovieOUT             (CPU → disk directly)
 
 enum Format { PNG, WEBP }
 
@@ -26,14 +25,12 @@ var _total_written: int = 0
 
 
 func _init() -> void:
-	node_type = "movieoutimg"
-	is_sink = true
+	node_type = "movieout"
 	node_description = "Save image sequence to disk (numbered PNG/WebP frames)."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.IMG, false, "Image to save as frame")
-	# No output — this is a file sink.
 
 
 func _init_parameters() -> void:
@@ -57,11 +54,7 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var img_in: GNImageData = _get_input_img(inputs, 0)
 	if img_in == null or img_in.image == null:
-		return img_in
-
-	# Pass-through cached output for preview
-	var out := _prepare_image()
-	out.set_image(img_in.image)
+		return null
 
 	var active: bool = get_param_value("active")
 
@@ -72,7 +65,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_was_active = active
 
 	if not active:
-		return out
+		return null
 
 	# Build path: folder/prefix_NNNN.ext
 	var folder: String = get_param_value("output_folder")
@@ -98,13 +91,13 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			err = img_in.image.save_webp(full_path, quality < 1.0, quality)
 
 	if err != OK:
-		GNLogger.warn("MovieOutIMG",
+		GNLogger.warn("MovieOUT",
 			"'%s': Failed to save frame '%s' (error %d)" % [id, full_path, err])
 	else:
 		_total_written += 1
 		_frame_counter += 1
 
-	return out
+	return null
 
 
 ## Override preview to show recording status.

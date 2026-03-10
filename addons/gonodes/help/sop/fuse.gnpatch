@@ -49,7 +49,7 @@
       }
     },
     "window1": {
-      "type": "WindowTOP",
+      "type": "WindowOUT",
       "position": [1600, 200],
       "parameters": {
         "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
@@ -69,7 +69,7 @@
     {
       "id": "ann_1",
       "type": "note",
-      "text": "Fuse SOP — Merge Coincident Vertices\n\nNoise displaces a sphere, then FuseSOP merges vertices\ncloser than the threshold. This welds seams and reduces\nvertex count after deformation.",
+      "text": "Fuse SOP â€” Merge Coincident Vertices\n\nNoise displaces a sphere, then FuseSOP merges vertices\ncloser than the threshold. This welds seams and reduces\nvertex count after deformation.",
       "position": [50.0, -50.0],
       "size": [600.0, 110.0],
       "color": [1.0, 1.0, 1.0, 0.8]

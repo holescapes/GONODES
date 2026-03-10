@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}
+            }
+        },
+        "toptoimg1": {
+            "type": "TOPtoIMG",
+            "position": [400, 100]
+        },
+        "ffmpegout1": {
+            "type": "FFmpegOUT",
+            "position": [700, 100],
+            "parameters": {
+                "active": {"value": false},
+                "output_file": {"value": "user://output/video"},
+                "codec": {"value": 0},
+                "framerate": {"value": 30},
+                "crf": {"value": 23}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "to": "toptoimg1", "from_port": 0, "to_port": 0},
+        {"from": "toptoimg1", "to": "ffmpegout1", "from_port": 0, "to_port": 0}
+    ],
+    "description": "FFmpegOUT — Encode image sequence to video via FFmpeg CLI. Toggle 'active' ON to capture, OFF to encode."
+}

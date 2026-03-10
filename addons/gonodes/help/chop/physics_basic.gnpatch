@@ -1,4 +1,4 @@
-﻿{
+{
     "version":  "1.0.0",
     "generator":  "GONODES",
     "nodes":  {
@@ -50,7 +50,7 @@
                                                                   "value":  true
                                                               }
                                                  },
-                                  "type":  "WindowTOP"
+                                  "type":  "WindowOUT"
                               },
                   "choptop1":  {
                                    "type":  "CHOPtoTOP",

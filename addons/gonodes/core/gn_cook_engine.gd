@@ -262,7 +262,7 @@ func _compute_active_set() -> Dictionary:
 
 	# Auto-detect structural sinks inside the engine (editor-independent).
 	# Any operator that sets is_sink = true in its _init() is included.
-	# This covers WindowTOP, SpoutOut, MIDIOut, OSCOut, NDIOut, etc.
+	# This covers WindowOUT, SpoutOut, MIDIOut, OscOUT, NDIOut, etc.
 	for node_id in network.nodes:
 		if active.has(node_id):
 			continue
@@ -437,7 +437,7 @@ func cook_frame(delta: float) -> void:
 
 		if result == null and node.output_ports.size() > 0 and node.family != GNFamily.Type.COMP:
 			# Only warn for non-COMP nodes with output ports.
-			# Sink nodes (e.g., WindowTOP) legitimately return null.
+			# Sink nodes (e.g., WindowOUT) legitimately return null.
 			# COMPs (Camera, Light) return null — their outputs are scene graph nodes, not data.
 			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
 			cook_error.emit(node.id, "cook returned null")

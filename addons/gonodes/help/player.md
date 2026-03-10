@@ -1,23 +1,23 @@
 # GONODES Player
 
-The GONODES Player is a minimal standalone runtime that loads and runs `.gnpatch` files without the editor UI. It boots the cook engine, processes the node graph, and WindowTOP nodes open their own OS windows for visual output.
+The GONODES Player is a minimal standalone runtime that loads and runs `.gnpatch` files without the editor UI. It boots the cook engine, processes the node graph, and WindowOUT nodes open their own OS windows for visual output.
 
 
 ## How It Works
 
 ```
 GONODESPlayer.exe
-  ├── config.json        ← settings (patch path)
-  ├── MyShow.gnpatch     ← the patch file
-  └── MyShow/            ← project assets folder (optional)
+  â”œâ”€â”€ config.json        â† settings (patch path)
+  â”œâ”€â”€ MyShow.gnpatch     â† the patch file
+  â””â”€â”€ MyShow/            â† project assets folder (optional)
 ```
 
 1. On launch, the Player reads `config.json` from next to the executable.
 2. Resolves the `.gnpatch` path (relative to the exe directory).
-3. **Auto-opens all WindowTOPs** — the Player forces `open = true` on every WindowTOP in the network so all display windows appear immediately, regardless of how the patch was saved in the editor.
+3. **Auto-opens all WindowOUTs** â€” the Player forces `open = true` on every WindowOUT in the network so all display windows appear immediately, regardless of how the patch was saved in the editor.
 4. Boots the cook engine with the loaded network.
-5. WindowTOP nodes open their own OS windows with their configured title, resolution, fullscreen mode, and monitor.
-6. If no WindowTOP exists, a fallback info label is shown in the main window.
+5. WindowOUT nodes open their own OS windows with their configured title, resolution, fullscreen mode, and monitor.
+6. If no WindowOUT exists, a fallback info label is shown in the main window.
 
 
 ## config.json
@@ -32,7 +32,7 @@ GONODESPlayer.exe
 |---------|--------|---------|---------------------------------------|
 | `patch` | string | `""`    | Path to the `.gnpatch` relative to exe|
 
-All other runtime settings (renderer, VSync, window layout) are automatic. The renderer falls back from Forward+ to Compatibility if needed. VSync and display parameters are controlled by each WindowTOP in the patch.
+All other runtime settings (renderer, VSync, window layout) are automatic. The renderer falls back from Forward+ to Compatibility if needed. VSync and display parameters are controlled by each WindowOUT in the patch.
 
 
 ## Command-Line Arguments
@@ -82,23 +82,23 @@ GONODESPlayer.exe --rendering-method gl_compatibility
 
 ## Window Management
 
-The Player does **not** manage display windows directly. Each **WindowTOP** node in the patch controls its own OS window.
+The Player does **not** manage display windows directly. Each **WindowOUT** node in the patch controls its own OS window.
 
-On launch, the Player automatically forces every WindowTOP to open, regardless of its saved `open` parameter.
+On launch, the Player automatically forces every WindowOUT to open, regardless of its saved `open` parameter.
 
-| WindowTOP Parameter | What it controls              |
+| WindowOUT Parameter | What it controls              |
 |---------------------|-------------------------------|
 | `title`             | Window title bar text         |
-| `resolution`        | Window size (width × height)  |
+| `resolution`        | Window size (width Ã— height)  |
 | `window_mode`       | Windowed / Fullscreen / Borderless |
 | `monitor`           | Which display to open on      |
 | `position`          | Window position on screen     |
 | `always_on_top`     | Keep window above others      |
 | `vsync`             | Per-window VSync override     |
 
-A single patch can have **multiple WindowTOPs**, each opening its own independent window — useful for multi-display installations.
+A single patch can have **multiple WindowOUTs**, each opening its own independent window â€” useful for multi-display installations.
 
-> VSync and frame-rate are per-window settings (not global). There's no VSync in config.json because each WindowTOP controls it independently.
+> VSync and frame-rate are per-window settings (not global). There's no VSync in config.json because each WindowOUT controls it independently.
 
 
 ## Quick Build (Creating a Player Package)
@@ -117,7 +117,7 @@ See the **Building** help section for how to prepare Player templates.
 
 ## Headless / Windowless Operation
 
-The Player doesn't require WindowTOP nodes. Patches that only use file-save operators (FileSaveIMG, FileSaveTOP, FileSaveDAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP) or network-output nodes (OSCOutCHOP) run headless — the cook engine keeps their chains alive via `is_sink = true`.
+The Player doesn't require WindowOUT nodes. Patches that only use file-save operators (ImageSaveOUT, TextureSaveOUT, TableSaveOUT, MovieOUT, FFmpegOUT, RecordOUT) or network-output nodes (OscOUT) run headless â€” the cook engine keeps their chains alive via `is_sink = true`.
 
 For **Script operators** with side effects (HTTP, hardware control, etc.), enable the **Force Active** toggle so the script acts as a sink:
 
@@ -126,7 +126,7 @@ For **Script operators** with side effects (HTTP, hardware control, etc.), enabl
 | Force Active   | ON      | Keep chain alive without downstream sink |
 | Time Dependent | ON      | Re-cook every frame                      |
 
-This makes the script cook every frame without needing any downstream WindowTOP — perfect for headless automation or data-processing pipelines.
+This makes the script cook every frame without needing any downstream WindowOUT â€” perfect for headless automation or data-processing pipelines.
 
 
 ## Key Files

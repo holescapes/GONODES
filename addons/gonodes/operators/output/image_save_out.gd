@@ -1,13 +1,10 @@
-class_name FileSaveIMG
-extends GNImgBase
-## Saves a CPU-side Image to disk as PNG, WebP, EXR, or HDR.
+class_name ImageSaveOUT
+extends GNOutBase
+## Saves a CPU-side Image to disk as PNG, WebP, or EXR.
 ##
-## This is a **sink** operator — no output ports.  Activate the "active"
-## toggle to start writing.  Supports optional auto-numbering for
-## image sequences (e.g. frame_0001.png, frame_0002.png).
-##
-## The incoming image passes through as cached_output so downstream nodes
-## (if any) can still read it.
+## Activate the "active" toggle to start writing.
+## Supports optional auto-numbering for image sequences
+## (e.g. frame_0001.png, frame_0002.png).
 
 enum Format { PNG, WEBP, EXR }
 
@@ -19,14 +16,12 @@ var _was_active: bool = false
 
 
 func _init() -> void:
-	node_type = "filesaveimg"
-	is_sink = true
+	node_type = "imagesave"
 	node_description = "Save CPU Image to disk (PNG, WebP, EXR). Activate the toggle to write."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.IMG, false, "Image to save")
-	# No output — this is a file sink.
 
 
 func _init_parameters() -> void:
@@ -48,11 +43,7 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var img_in: GNImageData = _get_input_img(inputs, 0)
 	if img_in == null or img_in.image == null:
-		return img_in
-
-	# Pass-through: cache the input so preview and downstream work
-	var out := _prepare_image()
-	out.set_image(img_in.image)
+		return null
 
 	var active: bool = get_param_value("active")
 
@@ -62,7 +53,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_was_active = active
 
 	if not active:
-		return out
+		return null
 
 	# Build the full save path
 	var base_path: String = get_param_value("file_path")
@@ -97,8 +88,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			err = img_in.image.save_exr(full_path, false)
 
 	if err != OK:
-		GNLogger.warn("FileSaveIMG", "'%s': Failed to save '%s' (error %d)" % [id, full_path, err])
+		GNLogger.warn("ImageSaveOUT", "'%s': Failed to save '%s' (error %d)" % [id, full_path, err])
 	else:
-		GNLogger.debug("FileSaveIMG", "'%s': Saved '%s'" % [id, full_path])
+		GNLogger.debug("ImageSaveOUT", "'%s': Saved '%s'" % [id, full_path])
 
-	return out
+	return null

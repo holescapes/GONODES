@@ -34,7 +34,7 @@
             "parameters": {}
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1200, 100],
             "parameters": {
                 "resolution": {
@@ -53,7 +53,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Pixel Sort IMG (Native) — Horizontal Luminance Sort\n\nSorts pixels horizontally by luminance within\nthreshold range [0.2 – 0.75]. Feed any image\nfor a glitch-art effect.",
+            "text": "Pixel Sort IMG (Native) â€” Horizontal Luminance Sort\n\nSorts pixels horizontally by luminance within\nthreshold range [0.2 â€“ 0.75]. Feed any image\nfor a glitch-art effect.",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

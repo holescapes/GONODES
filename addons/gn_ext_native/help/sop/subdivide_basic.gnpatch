@@ -38,7 +38,7 @@
             }
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1500, 100],
             "parameters": {
                 "resolution": {
@@ -59,7 +59,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Subdivide SOP (Native) — Uniform Subdivision\n\nEach triangle is split into 4 at edge midpoints.\n2 iterations on a box smooths it toward a sphere.\nNative C++ handles the combinatorial explosion.",
+            "text": "Subdivide SOP (Native) â€” Uniform Subdivision\n\nEach triangle is split into 4 at edge midpoints.\n2 iterations on a box smooths it toward a sphere.\nNative C++ handles the combinatorial explosion.",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

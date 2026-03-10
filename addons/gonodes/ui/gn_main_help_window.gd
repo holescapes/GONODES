@@ -627,7 +627,7 @@ func _generate_cook_engine_guide() -> String:
 	bb += "1. [b]Dirty Propagation[/b] — When a parameter changes or an input updates, "
 	bb += "the node is marked 'dirty'. Dirtiness propagates downstream to all connected nodes.\n\n"
 	bb += "2. [b]Active Chain Resolution[/b] — Not all nodes cook every frame. The engine "
-	bb += "traces backward from output sinks (OutputTOP, RenderTOP, WindowTOP, etc.) to find "
+	bb += "traces backward from output sinks (OutputTOP, RenderTOP, WindowOUT, etc.) to find "
 	bb += "all nodes that feed them. Only these 'active' nodes are evaluated.\n\n"
 	bb += "3. [b]Topological Sort[/b] — Active dirty nodes are sorted so upstream nodes "
 	bb += "cook first. This guarantees inputs are ready before a node reads them.\n\n"

@@ -44,7 +44,7 @@
             }
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1500, 100],
             "parameters": {
                 "resolution": {
@@ -65,7 +65,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Spring SOP (Native) — Vertex Springs on Sphere\n\nVertices lag behind target positions via damped springs.\nAnimate the input sphere (e.g. with TransformSOP) to\nsee the springy follow-through effect.",
+            "text": "Spring SOP (Native) â€” Vertex Springs on Sphere\n\nVertices lag behind target positions via damped springs.\nAnimate the input sphere (e.g. with TransformSOP) to\nsee the springy follow-through effect.",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

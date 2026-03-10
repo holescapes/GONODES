@@ -1,7 +1,7 @@
-# GONODES — LLM Context File
+﻿# GONODES â€” LLM Context File
 
 > **Last updated:** 2026-03-10
-> **Status:** Phase 6 Complete — Phase 7 in progress. **New: Native Acceleration GDExtension** (`gn_ext_native`) — C++ GDExtension source for 6 CPU-heavy operators (BlurIMG, NoiseIMG, PixelSortIMG, ParticleSOP, MetaballSOP, PolyReduceSOP) with GDScript wrapper operators that auto-fallback to pure GDScript when C++ binaries are unavailable. **Viewer panel IMG stability fix** — cached ImageTexture reuse prevents per-frame texture recreation flicker. **COW viewer-aware consumer counts** — cook engine now counts viewer sinks as additional consumers so in-place operators (BlurIMG, PixelSortIMG) properly duplicate upstream data when viewed. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowTOP open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 204 operators across 7 families (57 TOP, 14 IMG, 52 CHOP, 25 DAT, 39 SOP, 13 COMP, 6 MAT, 1 output). New: file save/export operators (FileSaveIMG/TOP/DAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** — 204 `.gnpatch` example files across all 6 help families (59 CHOP, 58 TOP, 38 SOP, 16 COMP, 28 DAT, 7 MAT) providing 1–2 visual demos per operator. `test_scenes/` deprecated — help patches replace manual test scenes as the primary visual verification method. **New: 23 additional TOPs** — AnalyzeTOP, CacheTOP, TimeMachineTOP, ChannelMixTOP, ChromaKeyTOP, ColorMapTOP, DepthTOP, FitTOP, LayoutTOP, MonoTOP, NormalMapTOP, SharpenTOP, ConvolutionTOP, CornerPinTOP, DilateErodeTOP, LensDistortTOP, LumaBlurTOP, PatternTOP, ProjectionTOP, RemapTOP, SlopeTOP, SVGTOP, TriangleTOP — closing the TouchDesigner TOP gap. **New: 20 additional CHOPs** — SmoothCHOP, SpringCHOP, DelayCHOP, EnvelopeCHOP, AnalyzeCHOP, ClockCHOP, InterpolateCHOP, LookupCHOP, StretchCHOP, ResampleCHOP, TrimCHOP, ExtendCHOP, JoinCHOP, ShuffleCHOP, SplitCHOP, FanCHOP, DeleteCHOP, CopyCHOP, CompositeCHOP, ExpressionCHOP — signal processing, time manipulation, and channel management. **New: 17 additional SOPs** — NormalSOP, ReverseSOP, PeakSOP, SortSOP, FacetSOP, DeleteSOP, ScatterSOP, MirrorSOP, ClipSOP, ExtrudeSOP, CopySOP, PointSOP, AttributeSOP, BooleanSOP, TubeSOP, SweepSOP, SkinSOP — closing the TouchDesigner SOP/CHOP gap. All utilize Godot features (SurfaceTool, CSGMesh3D, Expression class, RandomNumberGenerator, parallel transport frames). **New: 36 additional operators closing the final TouchDesigner gap** — 6 TOPs (MatteTOP, PremultiplyTOP, PosterizeTOP, RadialBlurTOP, AntiAliasTOP, PaletteTOP), 7 CHOPs (KeyboardInCHOP, MouseInCHOP, GamepadCHOP, ParameterCHOP, TrailCHOP, SOPtoCHOP, TOPtoCHOP), 10 DATs (FileInDAT, JSONDAT, WebDAT, SubstituteDAT, InsertDAT, DeleteDAT, FIFODAT, SOPtoDAT, TOPtoDAT, OPFindDAT), 7 SOPs (BendSOP, TwistSOP, TaperSOP, FontSOP, TrailSOP, UVProjectSOP, DivideSOP), 2 COMPs (NullCOMP, SwitchCOMP), 4 MATs (ConstantMAT, WireframeMAT, PointSpriteMAT, DepthMAT). Total: 204 operators. 7 complex operators deferred to roadmap (ScreenGrabTOP, InstanceCOMP, AnimationCOMP, SpringSOP, ParticleSOP, AudioDeviceOutCHOP). **New: EnvironmentCOMP** — dedicated environment/post-processing COMP (background, ambient, tonemap, glow, SSAO, SSIL, SSR, adjustments, volumetric fog) extracted from RenderTOP. RenderTOP keeps lightweight fallback env (bg color + ambient) when no EnvironmentCOMP is connected; full post-processing requires EnvironmentCOMP. Total: 205 operators (12 COMP). 6 complex operators remain deferred. **New: Advanced Scripting Infrastructure** — GenericScriptNode (family-less multi-output via `# @output` annotations, extends GNNode directly, COMP family for gray color), CallbackDAT (event-driven scripting — observes upstream node signals: `on_start`, `on_cook`, `on_value_change`, `on_create` with rolling event log table), `set_par()` writable parameter references (2-arg self / 3-arg cross-node, auto-dirty-propagation), Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) for procedural graph construction from scripts. All new functions injected into GNScriptHelper preamble — available in every Script operator. Total: 207 operators (13 COMP, 25 DAT). 6 complex operators remain deferred. **New: Main Help Window + Help System Improvements** — (1) GNMainHelpWindow centralized reference hub (sidebar Tree + content pane, Markdown→BBCode via GNMarkdownRenderer), opened via "📖 Help" toolbar button or F1 key, 5 guide .md files in `help/`. (2) Code editor integration fixed for GenericScriptNode + CallbackDAT. (3) 35 preset examples across 7 script/shader categories. (4) CustomShaderTOP GLSL preset folder. (5) Help patch naming convention fixed. (6) Help .md files at `help/` root — folders reserved for operator .gnpatch files. (7) Added Player and Building help sections from dev_docs/ folder content. (8) Renamed `docs/` to `dev_docs/` — developer/advanced docs refocused for contributors. Total: 7 help .md files. **New: 13 advanced operators** — 4 SOP generators (LSystemSOP, MetaballSOP, IsoSurfaceSOP, ParticleSOP), 3 SOP deformers (MagnetSOP, CarveSOP, PolyReduceSOP), 4 cross-family bridges (CHOPtoSOP, DATtoSOP, TOPtoSOP, CHOPtoTOP), 1 COMP (InstanceCOMP — MultiMesh instancing). LSystemSOP: L-System grammar turtle geometry with tube extrusion and taper. MetaballSOP + IsoSurfaceSOP: marching cubes implicit surfaces (shared MC lookup tables). ParticleSOP: CPU particle system with emitter surface, gravity, turbulence, floor collision, attractor. MagnetSOP: vertex attraction/repulsion deformer with 4 falloff modes. CarveSOP: parametric U-range mesh trimming for reveal/wipe. PolyReduceSOP: quadric error metric edge-collapse decimation. CHOPtoSOP/DATtoSOP/TOPtoSOP: cross-family data conversion to geometry. CHOPtoTOP: CPU-rendered waveform/heatmap/graph visualisation. InstanceCOMP: MultiMeshInstance3D instancing with point cloud placement, CHOP animation, per-instance randomisation. InstanceCOMP and ParticleSOP moved from deferred roadmap to implemented. Total: 221 operators (59 TOP, 14 IMG, 52 CHOP, 25 DAT, 50 SOP, 14 COMP, 6 MAT, 1 output). All 4 previously-deferred operators now implemented: ScreenGrabIMG (viewport capture → CPU Image), AnimationCOMP (AnimationPlayer wrapper for keyframe animation on COMP transforms), SpringSOP (damped spring vertex deformer), AudioDeviceOutCHOP (CHOP → AudioStreamGenerator PCM output). Total: 225 operators (59 TOP, 15 IMG, 53 CHOP, 25 DAT, 51 SOP, 15 COMP, 6 MAT, 1 output). Zero deferred operators remain. 16 new help `.gnpatch` example files added for all new operators. **New: 15 TD-parity operators (Tier 1+2)** — 3 TOPs (OpticalFlowTOP Horn-Schunck motion vectors, GlueTOP grid atlas packer, EmbossTOP relief filter shader), 3 CHOPs (BeatCHOP energy-based onset detection, IKCHOP FABRIK inverse kinematics, WarpCHOP time-warp retime), 6 SOPs (FuseSOP spatial-hash vertex merge, RaySOP Möller-Trumbore raycast projection, CapSOP boundary-hole triangle fan cap, LatticeSOP FFD trilinear lattice deformer, PolyLoftSOP cross-section lofting, MountainSOP noise vertex displacement), 2 DATs (TableDAT manual CSV editor, NetworkDAT TCP/UDP via Godot StreamPeerTCP/PacketPeerUDP), 1 COMP (ReplicatorCOMP table-driven replicator with hash change detection). Total: 249 operators (62 TOP, 15 IMG, 63 CHOP, 28 DAT, 56 SOP, 19 COMP, 6 MAT). 244 help `.gnpatch` example files (64 CHOP, 64 TOP, 56 SOP, 30 DAT, 22 COMP, 7 MAT) — ALL patches now end with WindowTOP (512×512, open=true) via meaningful family-appropriate visualization chains per Hard Rule 25.22. Zero deferred operators remain. **RenderTOP pass-through COMP resolution** — `_resolve_comp_scene_node()` walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP) to find scene nodes; AnimationCOMP now sets `_scene_node` from upstream during cook. **TouchDesigner parity: ~80% surface coverage** — deep audit confirmed many "gaps" are false (GONODES operators cover multiple TD equivalents under different names). Key equivalences: CompositeTOP covers Under/Multiply/Screen/Overlay/Add/etc. (blend modes), ChannelMixTOP covers Reorder (channel swizzle), LevelTOP covers Threshold/Contrast/Gamma, BlurTOP covers DirectionalBlur via kernel_size param, ResampleCHOP covers Speed (playback rate), MergeCHOP covers Join (concatenation mode). **Roadmap: GPU Particles (POP family)** — SSBO-based GPU particle system planned as new operator family (`GNPopBase`). Primary storage in `RDStorageBuffer` (not textures) for natural 1D indexing and arbitrary struct layout. CPU↔GPU attribute bridge via existing `GNGeoData.point_attribs`. Scatter/gather pattern for spatial filtering (SSBO→3D texture→blur/filter→3D texture→SSBO) only when needed. `ParticleStateTOP` bridge for TOP-chain visualization. **Roadmap: Volumetric 3D Textures (gn_ext_vol3d)** — T3D-inspired extension for 3D texture operations (noise, add, blur, displace, fluid sim, surface extraction, volume rendering). Each operator wraps a GLSL compute shader dispatched via `RenderingDevice`. Godot 4 3D texture support confirmed suitable (`TEXTURE_TYPE_3D`, `sampler3D`, `image3D`, R32F/RGBA32F formats). Fluid sim via Navier-Stokes (semi-Lagrangian advection, Jacobi pressure solve). GPU marching cubes for iso-surface extraction. Raymarcher for volumetric density rendering. POP↔VOL3D interaction: advect particles by velocity field, scatter particles into density grid.
+> **Status:** Phase 6 Complete â€” Phase 7 in progress. **New: Native Acceleration GDExtension** (`gn_ext_native`) â€” C++ GDExtension source for 6 CPU-heavy operators (BlurIMG, NoiseIMG, PixelSortIMG, ParticleSOP, MetaballSOP, PolyReduceSOP) with GDScript wrapper operators that auto-fallback to pure GDScript when C++ binaries are unavailable. **Viewer panel IMG stability fix** â€” cached ImageTexture reuse prevents per-frame texture recreation flicker. **COW viewer-aware consumer counts** â€” cook engine now counts viewer sinks as additional consumers so in-place operators (BlurIMG, PixelSortIMG) properly duplicate upstream data when viewed. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOPâ†’MATâ†’COMPâ†’RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowOUT open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas â†’ filtered palette (only compatible operators) â†’ auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit â†—" button in param row. Phases 1â€“6 complete. 204 operators across 8 families (57 TOP, 14 IMG, 52 CHOP, 25 DAT, 39 SOP, 13 COMP, 6 MAT, 1 OUT). New: file save/export operators (ImageSaveOUT/TOP/DAT, MovieOUT, FFmpegOUT, RecordOUT), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation â€” headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** â€” network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** â€” dynamic ramp curve CHOP with 1â€“16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** â€” connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** â€” sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** â€” camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** â€” RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** â€” 204 `.gnpatch` example files across all 6 help families (59 CHOP, 58 TOP, 38 SOP, 16 COMP, 28 DAT, 7 MAT) providing 1â€“2 visual demos per operator. `test_scenes/` deprecated â€” help patches replace manual test scenes as the primary visual verification method. **New: 23 additional TOPs** â€” AnalyzeTOP, CacheTOP, TimeMachineTOP, ChannelMixTOP, ChromaKeyTOP, ColorMapTOP, DepthTOP, FitTOP, LayoutTOP, MonoTOP, NormalMapTOP, SharpenTOP, ConvolutionTOP, CornerPinTOP, DilateErodeTOP, LensDistortTOP, LumaBlurTOP, PatternTOP, ProjectionTOP, RemapTOP, SlopeTOP, SVGTOP, TriangleTOP â€” closing the TouchDesigner TOP gap. **New: 20 additional CHOPs** â€” SmoothCHOP, SpringCHOP, DelayCHOP, EnvelopeCHOP, AnalyzeCHOP, ClockCHOP, InterpolateCHOP, LookupCHOP, StretchCHOP, ResampleCHOP, TrimCHOP, ExtendCHOP, JoinCHOP, ShuffleCHOP, SplitCHOP, FanCHOP, DeleteCHOP, CopyCHOP, CompositeCHOP, ExpressionCHOP â€” signal processing, time manipulation, and channel management. **New: 17 additional SOPs** â€” NormalSOP, ReverseSOP, PeakSOP, SortSOP, FacetSOP, DeleteSOP, ScatterSOP, MirrorSOP, ClipSOP, ExtrudeSOP, CopySOP, PointSOP, AttributeSOP, BooleanSOP, TubeSOP, SweepSOP, SkinSOP â€” closing the TouchDesigner SOP/CHOP gap. All utilize Godot features (SurfaceTool, CSGMesh3D, Expression class, RandomNumberGenerator, parallel transport frames). **New: 36 additional operators closing the final TouchDesigner gap** â€” 6 TOPs (MatteTOP, PremultiplyTOP, PosterizeTOP, RadialBlurTOP, AntiAliasTOP, PaletteTOP), 7 CHOPs (KeyboardInCHOP, MouseInCHOP, GamepadCHOP, ParameterCHOP, TrailCHOP, SOPtoCHOP, TOPtoCHOP), 10 DATs (FileInDAT, JSONDAT, WebDAT, SubstituteDAT, InsertDAT, DeleteDAT, FIFODAT, SOPtoDAT, TOPtoDAT, OPFindDAT), 7 SOPs (BendSOP, TwistSOP, TaperSOP, FontSOP, TrailSOP, UVProjectSOP, DivideSOP), 2 COMPs (NullCOMP, SwitchCOMP), 4 MATs (ConstantMAT, WireframeMAT, PointSpriteMAT, DepthMAT). Total: 204 operators. 7 complex operators deferred to roadmap (ScreenGrabTOP, InstanceCOMP, AnimationCOMP, SpringSOP, ParticleSOP, AudioDeviceOUT). **New: EnvironmentCOMP** â€” dedicated environment/post-processing COMP (background, ambient, tonemap, glow, SSAO, SSIL, SSR, adjustments, volumetric fog) extracted from RenderTOP. RenderTOP keeps lightweight fallback env (bg color + ambient) when no EnvironmentCOMP is connected; full post-processing requires EnvironmentCOMP. Total: 205 operators (12 COMP). 6 complex operators remain deferred. **New: Advanced Scripting Infrastructure** â€” GenericScriptNode (family-less multi-output via `# @output` annotations, extends GNNode directly, COMP family for gray color), CallbackDAT (event-driven scripting â€” observes upstream node signals: `on_start`, `on_cook`, `on_value_change`, `on_create` with rolling event log table), `set_par()` writable parameter references (2-arg self / 3-arg cross-node, auto-dirty-propagation), Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) for procedural graph construction from scripts. All new functions injected into GNScriptHelper preamble â€” available in every Script operator. Total: 207 operators (13 COMP, 25 DAT). 6 complex operators remain deferred. **New: Main Help Window + Help System Improvements** â€” (1) GNMainHelpWindow centralized reference hub (sidebar Tree + content pane, Markdownâ†’BBCode via GNMarkdownRenderer), opened via "ðŸ“– Help" toolbar button or F1 key, 5 guide .md files in `help/`. (2) Code editor integration fixed for GenericScriptNode + CallbackDAT. (3) 35 preset examples across 7 script/shader categories. (4) CustomShaderTOP GLSL preset folder. (5) Help patch naming convention fixed. (6) Help .md files at `help/` root â€” folders reserved for operator .gnpatch files. (7) Added Player and Building help sections from dev_docs/ folder content. (8) Renamed `docs/` to `dev_docs/` â€” developer/advanced docs refocused for contributors. Total: 7 help .md files. **New: 13 advanced operators** â€” 4 SOP generators (LSystemSOP, MetaballSOP, IsoSurfaceSOP, ParticleSOP), 3 SOP deformers (MagnetSOP, CarveSOP, PolyReduceSOP), 4 cross-family bridges (CHOPtoSOP, DATtoSOP, TOPtoSOP, CHOPtoTOP), 1 COMP (InstanceCOMP â€” MultiMesh instancing). LSystemSOP: L-System grammar turtle geometry with tube extrusion and taper. MetaballSOP + IsoSurfaceSOP: marching cubes implicit surfaces (shared MC lookup tables). ParticleSOP: CPU particle system with emitter surface, gravity, turbulence, floor collision, attractor. MagnetSOP: vertex attraction/repulsion deformer with 4 falloff modes. CarveSOP: parametric U-range mesh trimming for reveal/wipe. PolyReduceSOP: quadric error metric edge-collapse decimation. CHOPtoSOP/DATtoSOP/TOPtoSOP: cross-family data conversion to geometry. CHOPtoTOP: CPU-rendered waveform/heatmap/graph visualisation. InstanceCOMP: MultiMeshInstance3D instancing with point cloud placement, CHOP animation, per-instance randomisation. InstanceCOMP and ParticleSOP moved from deferred roadmap to implemented. Total: 221 operators (59 TOP, 14 IMG, 52 CHOP, 25 DAT, 50 SOP, 14 COMP, 6 MAT, 1 output). All 4 previously-deferred operators now implemented: ScreenGrabIMG (viewport capture â†’ CPU Image), AnimationCOMP (AnimationPlayer wrapper for keyframe animation on COMP transforms), SpringSOP (damped spring vertex deformer), AudioDeviceOUT (CHOP â†’ AudioStreamGenerator PCM output). Total: 225 operators (59 TOP, 15 IMG, 53 CHOP, 25 DAT, 51 SOP, 15 COMP, 6 MAT, 1 output). Zero deferred operators remain. 16 new help `.gnpatch` example files added for all new operators. **New: 15 TD-parity operators (Tier 1+2)** â€” 3 TOPs (OpticalFlowTOP Horn-Schunck motion vectors, GlueTOP grid atlas packer, EmbossTOP relief filter shader), 3 CHOPs (BeatCHOP energy-based onset detection, IKCHOP FABRIK inverse kinematics, WarpCHOP time-warp retime), 6 SOPs (FuseSOP spatial-hash vertex merge, RaySOP MÃ¶ller-Trumbore raycast projection, CapSOP boundary-hole triangle fan cap, LatticeSOP FFD trilinear lattice deformer, PolyLoftSOP cross-section lofting, MountainSOP noise vertex displacement), 2 DATs (TableDAT manual CSV editor, NetworkDAT TCP/UDP via Godot StreamPeerTCP/PacketPeerUDP), 1 COMP (ReplicatorCOMP table-driven replicator with hash change detection). Total: 256 operators (62 TOP, 12 IMG, 61 CHOP, 29 DAT, 57 SOP, 20 COMP, 6 MAT, 9 OUT). 255 core help `.gnpatch` example files (63 CHOP, 65 TOP, 57 SOP, 30 DAT, 23 COMP, 7 MAT, 1 IMG, 9 OUT) + 16 native extension patches â€” ALL patches now end with WindowOUT (512Ã—512, open=true) via meaningful family-appropriate visualization chains per Hard Rule 25.22. Zero deferred operators remain. **RenderTOP pass-through COMP resolution** â€” `_resolve_comp_scene_node()` walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP) to find scene nodes; AnimationCOMP now sets `_scene_node` from upstream during cook. **TouchDesigner parity: ~80% surface coverage** â€” deep audit confirmed many "gaps" are false (GONODES operators cover multiple TD equivalents under different names). Key equivalences: CompositeTOP covers Under/Multiply/Screen/Overlay/Add/etc. (blend modes), ChannelMixTOP covers Reorder (channel swizzle), LevelTOP covers Threshold/Contrast/Gamma, BlurTOP covers DirectionalBlur via kernel_size param, ResampleCHOP covers Speed (playback rate), MergeCHOP covers Join (concatenation mode). **Roadmap: GPU Particles (POP family)** â€” SSBO-based GPU particle system planned as new operator family (`GNPopBase`). Primary storage in `RDStorageBuffer` (not textures) for natural 1D indexing and arbitrary struct layout. CPUâ†”GPU attribute bridge via existing `GNGeoData.point_attribs`. Scatter/gather pattern for spatial filtering (SSBOâ†’3D textureâ†’blur/filterâ†’3D textureâ†’SSBO) only when needed. `ParticleStateTOP` bridge for TOP-chain visualization. **Roadmap: Volumetric 3D Textures (gn_ext_vol3d)** â€” T3D-inspired extension for 3D texture operations (noise, add, blur, displace, fluid sim, surface extraction, volume rendering). Each operator wraps a GLSL compute shader dispatched via `RenderingDevice`. Godot 4 3D texture support confirmed suitable (`TEXTURE_TYPE_3D`, `sampler3D`, `image3D`, R32F/RGBA32F formats). Fluid sim via Navier-Stokes (semi-Lagrangian advection, Jacobi pressure solve). GPU marching cubes for iso-surface extraction. Raymarcher for volumetric density rendering. POPâ†”VOL3D interaction: advect particles by velocity field, scatter particles into density grid.
 
 ---
 
@@ -32,8 +32,8 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 | Target Use Case        | Visual/generative art, VJing                        |
 | Priority OP Families   | TOPs (textures) and CHOPs (channels/signals) first  |
 | MVP Scope              | Node graph UI + LFO CHOP driving a Noise TOP        |
-| MVP Timeline           | 4–6 weeks                                           |
-| I/O Protocols (Future) | Syphon/Spout, OSC, NDI — not in MVP                 |
+| MVP Timeline           | 4â€“6 weeks                                           |
+| I/O Protocols (Future) | Syphon/Spout, OSC, NDI â€” not in MVP                 |
 | Runtime Model          | Standalone app + LibGodot embedding in host apps     |
 | Dev Strategy           | GDScript-first, GDExtension for perf optimization   |
 | Editor Platforms       | Windows, macOS, Linux (no ARM devices for editor)    |
@@ -46,75 +46,75 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 ## 3. High-Level Architecture
 
 ```
-┌──────────────────────────────────────────────────┐
-│  GONODES Editor (Godot 4.6 Application)          │
-│                                                  │
-│  ┌─────────────────────────────────────────────┐ │
-│  │  UI Layer                                   │ │
-│  │  GraphEdit canvas, Inspector panel,         │ │
-│  │  Viewer windows, Node palette, Timeline     │ │
-│  ├─────────────────────────────────────────────┤ │
-│  │  GNExtensionRegistry                        │ │
-│  │  Core operators + gn_ext_* addon operators  │ │
-│  │  Dynamic factory, descriptions, manifests   │ │
-│  ├─────────────────────────────────────────────┤ │
-│  │  Operator Library                           │ │
-│  │  Built-in TOPs, CHOPs, SOPs, DATs, MATs     │ │
-│  │  Each is a GNNode subclass with cook()      │ │
-│  ├─────────────────────────────────────────────┤ │
-│  │  Cook Engine                                │ │
-│  │  DAG traversal, dirty propagation,          │ │
-│  │  lazy evaluation, caching                   │ │
-│  ├─────────────────────────────────────────────┤ │
-│  │  Node Graph Model                           │ │
-│  │  GNNetwork, GNNode, GNConnection, GNPort    │ │
-│  │  Type system, serialization                 │ │
-│  ├─────────────────────────────────────────────┤ │
-│  │  Data Types                                 │ │
-│  │  GNTextureData, GNChannelData, GNGeoData,   │ │
-│  │  GNTableData, GNMaterialData                │ │
-│  ├─────────────────────────────────────────────┤ │
-│  │  Godot Engine (renderer, audio, compute)    │ │
-│  └─────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  GONODES Editor (Godot 4.6 Application)          â”‚
+â”‚                                                  â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚  â”‚  UI Layer                                   â”‚ â”‚
+â”‚  â”‚  GraphEdit canvas, Inspector panel,         â”‚ â”‚
+â”‚  â”‚  Viewer windows, Node palette, Timeline     â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  GNExtensionRegistry                        â”‚ â”‚
+â”‚  â”‚  Core operators + gn_ext_* addon operators  â”‚ â”‚
+â”‚  â”‚  Dynamic factory, descriptions, manifests   â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  Operator Library                           â”‚ â”‚
+â”‚  â”‚  Built-in TOPs, CHOPs, SOPs, DATs, MATs     â”‚ â”‚
+â”‚  â”‚  Each is a GNNode subclass with cook()      â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  Cook Engine                                â”‚ â”‚
+â”‚  â”‚  DAG traversal, dirty propagation,          â”‚ â”‚
+â”‚  â”‚  lazy evaluation, caching                   â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  Node Graph Model                           â”‚ â”‚
+â”‚  â”‚  GNNetwork, GNNode, GNConnection, GNPort    â”‚ â”‚
+â”‚  â”‚  Type system, serialization                 â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  Data Types                                 â”‚ â”‚
+â”‚  â”‚  GNTextureData, GNChannelData, GNGeoData,   â”‚ â”‚
+â”‚  â”‚  GNTableData, GNMaterialData                â”‚ â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
+â”‚  â”‚  Godot Engine (renderer, audio, compute)    â”‚ â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 Embedding Model (Future):
-┌──────────────────────────┐
-│  Host App (VDMX, etc.)   │
-│  ┌────────────────────┐  │
-│  │ LibGodot (embedded) │  │
-│  │  + GONODES Framework│  │
-│  │  (GDExtension)     │  │
-│  └────────────────────┘  │
-│  Host feeds data in →    │
-│  ← reads textures out    │
-│  Loads .GNNode patches   │
-└──────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Host App (VDMX, etc.)   â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+â”‚  â”‚ LibGodot (embedded) â”‚  â”‚
+â”‚  â”‚  + GONODES Frameworkâ”‚  â”‚
+â”‚  â”‚  (GDExtension)     â”‚  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+â”‚  Host feeds data in â†’    â”‚
+â”‚  â† reads textures out    â”‚
+â”‚  Loads .GNNode patches   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
 
-## 4. TouchDesigner → GONODES Concept Mapping
+## 4. TouchDesigner â†’ GONODES Concept Mapping
 
 | TouchDesigner         | GONODES Implementation                                   |
 |-----------------------|----------------------------------------------------------|
 | Operator (OP)         | `GNNode` (Node subclass) with `cook()` method             |
-| TOP (Texture OP)      | `GNTopBase` — SubViewport + ShaderMaterial (infra in base class) |
-| CHOP (Channel OP)     | `GNChopNode` — processes named float arrays              |
-| SOP (Surface OP)      | `GNSopNode` — produces ArrayMesh via GNGeoData           |
-| POP (Point OP)        | `GNPopBase` — GPU particle/point cloud via SSBO compute (future) |
-| VOL3D (Volume OP)     | `GNVol3DData` — 3D texture ops via compute shaders (future, ext) |
-| DAT (Data OP)         | `GNDatNode` — tables/text via GNTableData                |
-| MAT (Material OP)     | `GNMatNode` — PBR or custom ShaderMaterial               |
-| COMP (Component OP)   | `GNCompNode` — 3D scene components (Camera, Light, Geo)  |
+| TOP (Texture OP)      | `GNTopBase` â€” SubViewport + ShaderMaterial (infra in base class) |
+| CHOP (Channel OP)     | `GNChopNode` â€” processes named float arrays              |
+| SOP (Surface OP)      | `GNSopNode` â€” produces ArrayMesh via GNGeoData           |
+| POP (Point OP)        | `GNPopBase` â€” GPU particle/point cloud via SSBO compute (future) |
+| VOL3D (Volume OP)     | `GNVol3DData` â€” 3D texture ops via compute shaders (future, ext) |
+| DAT (Data OP)         | `GNDatNode` â€” tables/text via GNTableData                |
+| MAT (Material OP)     | `GNMatNode` â€” PBR or custom ShaderMaterial               |
+| COMP (Component OP)   | `GNCompNode` â€” 3D scene components (Camera, Light, Geo)  |
 | Network / Canvas      | `GNNetwork` (Resource) displayed in `GraphEdit`          |
-| Wire / Connection     | `GNConnection` — typed, family-checked                   |
-| Cook / Evaluate       | `GNCookEngine` — topological DAG walk + dirty flags      |
+| Wire / Connection     | `GNConnection` â€” typed, family-checked                   |
+| Cook / Evaluate       | `GNCookEngine` â€” topological DAG walk + dirty flags      |
 | Parameter Reference   | GDScript expression evaluated at cook time               |
 | Timeline              | Godot `_process()` driving cook engine each frame        |
-| Parameter             | `GNParameter` — typed value with optional expression     |
+| Parameter             | `GNParameter` â€” typed value with optional expression     |
 | Param References      | `op("name").par.X` / `chop("name").value("ch")` syntax   |
-| Patch Export           | Godot export system → standalone runnable per platform   |
+| Patch Export           | Godot export system â†’ standalone runnable per platform   |
 
 ---
 
@@ -123,75 +123,75 @@ Embedding Model (Future):
 ### GNData (Base)
 ```
 GNData (RefCounted)
-├── valid: bool
-├── timestamp: int (cook frame)
-├── _shared: bool (set by cook engine — true when output feeds 2+ consumers)
-└── type() -> GNFamily
+â”œâ”€â”€ valid: bool
+â”œâ”€â”€ timestamp: int (cook frame)
+â”œâ”€â”€ _shared: bool (set by cook engine â€” true when output feeds 2+ consumers)
+â””â”€â”€ type() -> GNFamily
 ```
 
-**Copy-on-Write (COW) data sharing:** Node outputs are shared by reference. When a node's output feeds multiple downstream consumers (fan-out), the cook engine sets `_shared = true` on the output data. Operators that need to **mutate** input data must call `_mutable_input(data)` (on GNNode) which duplicates only when `_shared` is true — zero-copy for single-consumer chains. The `_consumer_counts` dictionary in GNCookEngine is rebuilt from connection topology only when wires or viewer targets change (not per-frame). **Viewer-aware consumer counts:** The viewer panel reads `cached_output` outside the data-flow graph — effectively an invisible consumer. `_rebuild_consumer_counts()` now also counts each viewer sink's upstream inputs as additional consumers, ensuring `_shared = true` when a node is being viewed *and* its output is consumed by a downstream in-place operator. Without this, operators like PixelSortIMG would mutate NoiseIMG's `cached_output` in-place (since the wire-only consumer count = 1), causing the viewer to show the same mutated image regardless of which node is selected.
+**Copy-on-Write (COW) data sharing:** Node outputs are shared by reference. When a node's output feeds multiple downstream consumers (fan-out), the cook engine sets `_shared = true` on the output data. Operators that need to **mutate** input data must call `_mutable_input(data)` (on GNNode) which duplicates only when `_shared` is true â€” zero-copy for single-consumer chains. The `_consumer_counts` dictionary in GNCookEngine is rebuilt from connection topology only when wires or viewer targets change (not per-frame). **Viewer-aware consumer counts:** The viewer panel reads `cached_output` outside the data-flow graph â€” effectively an invisible consumer. `_rebuild_consumer_counts()` now also counts each viewer sink's upstream inputs as additional consumers, ensuring `_shared = true` when a node is being viewed *and* its output is consumed by a downstream in-place operator. Without this, operators like PixelSortIMG would mutate NoiseIMG's `cached_output` in-place (since the wire-only consumer count = 1), causing the viewer to show the same mutated image regardless of which node is selected.
 
-**Example — BlurIMG:** A NoiseIMG fans out to both BlurIMG and PixelSortIMG. BlurIMG needs to modify pixels in-place (sliding-window accumulator). It calls `_mutable_input(src)` which sees `_shared = true` (two consumers) and returns a duplicate — BlurIMG blurs its own copy, PixelSortIMG gets the original untouched. If NoiseIMG only fed BlurIMG (no fan-out), `_mutable_input()` returns the original — zero copy, BlurIMG modifies it directly.
+**Example â€” BlurIMG:** A NoiseIMG fans out to both BlurIMG and PixelSortIMG. BlurIMG needs to modify pixels in-place (sliding-window accumulator). It calls `_mutable_input(src)` which sees `_shared = true` (two consumers) and returns a duplicate â€” BlurIMG blurs its own copy, PixelSortIMG gets the original untouched. If NoiseIMG only fed BlurIMG (no fan-out), `_mutable_input()` returns the original â€” zero copy, BlurIMG modifies it directly.
 
-**TOPs are immune:** Each TOP renders into its own SubViewport, producing a fresh GPU texture every cook. Downstream TOPs sample that texture via shader `uniform sampler2D` — inherently read-only. No downstream TOP can mutate an upstream TOP's framebuffer, so COW is unnecessary for the GPU pipeline.
+**TOPs are immune:** Each TOP renders into its own SubViewport, producing a fresh GPU texture every cook. Downstream TOPs sample that texture via shader `uniform sampler2D` â€” inherently read-only. No downstream TOP can mutate an upstream TOP's framebuffer, so COW is unnecessary for the GPU pipeline.
 
-**Affected families:** IMG (Image pixels), SOP (mesh arrays), CHOP (channel arrays), DAT (table rows), MAT (Material properties) — all CPU-side heap objects passed by reference in GDScript.
+**Affected families:** IMG (Image pixels), SOP (mesh arrays), CHOP (channel arrays), DAT (table rows), MAT (Material properties) â€” all CPU-side heap objects passed by reference in GDScript.
 
-**Built-in operators** use `_mutable_input()` when they need to modify input data (e.g., BlurIMG, PixelSortIMG). **Script operators** do NOT auto-copy — if user code mutates `inputs[0]` directly at a fan-out point, it will corrupt upstream data. Users must `duplicate()` manually (see §27.3.3).
+**Built-in operators** use `_mutable_input()` when they need to modify input data (e.g., BlurIMG, PixelSortIMG). **Script operators** do NOT auto-copy â€” if user code mutates `inputs[0]` directly at a fan-out point, it will corrupt upstream data. Users must `duplicate()` manually (see Â§27.3.3).
 
 ### GNTextureData (TOP output)
 ```
 GNTextureData extends GNData (RefCounted)
-├── texture: Texture2D (result of SubViewport rendering)
-├── viewport: SubViewport (owned by the TOP node)
-├── resolution: Vector2i
-└── format: Image.Format
+â”œâ”€â”€ texture: Texture2D (result of SubViewport rendering)
+â”œâ”€â”€ viewport: SubViewport (owned by the TOP node)
+â”œâ”€â”€ resolution: Vector2i
+â””â”€â”€ format: Image.Format
 ```
 
 ### GNChannelData (CHOP output)
 ```
 GNChannelData extends GNData (RefCounted)
-├── channels: Dictionary[String, PackedFloat32Array]
-│   e.g., {"tx": [0.0, 0.1, ...], "ty": [...], "tz": [...]}
-├── sample_rate: float
-├── length: int (number of samples)
-└── get_channel(name: String) -> PackedFloat32Array
-└── get_value(channel: String, index: int = -1) -> float
+â”œâ”€â”€ channels: Dictionary[String, PackedFloat32Array]
+â”‚   e.g., {"tx": [0.0, 0.1, ...], "ty": [...], "tz": [...]}
+â”œâ”€â”€ sample_rate: float
+â”œâ”€â”€ length: int (number of samples)
+â””â”€â”€ get_channel(name: String) -> PackedFloat32Array
+â””â”€â”€ get_value(channel: String, index: int = -1) -> float
     (index=-1 returns last sample, useful for single-value CHOPs)
 ```
 
 ### GNTableData (DAT output)
 ```
 GNTableData extends GNData (RefCounted)
-├── is_table: bool           # true = 2D table mode, false = plain text mode
-├── headers: PackedStringArray
-├── rows: Array[PackedStringArray]
-├── text: String             # Plain text content (text mode only)
-├── cell(row, col) -> String
-├── cell_by_name(row, col_name) -> String
-├── cell_as_float(row, col) -> float
-├── set_headers(headers: PackedStringArray)
-├── append_row(row: PackedStringArray)
-├── set_text(text: String)
-├── to_tsv() -> String       # Export as tab-separated values
-└── from_tsv(tsv: String)    # Import from tab-separated values
+â”œâ”€â”€ is_table: bool           # true = 2D table mode, false = plain text mode
+â”œâ”€â”€ headers: PackedStringArray
+â”œâ”€â”€ rows: Array[PackedStringArray]
+â”œâ”€â”€ text: String             # Plain text content (text mode only)
+â”œâ”€â”€ cell(row, col) -> String
+â”œâ”€â”€ cell_by_name(row, col_name) -> String
+â”œâ”€â”€ cell_as_float(row, col) -> float
+â”œâ”€â”€ set_headers(headers: PackedStringArray)
+â”œâ”€â”€ append_row(row: PackedStringArray)
+â”œâ”€â”€ set_text(text: String)
+â”œâ”€â”€ to_tsv() -> String       # Export as tab-separated values
+â””â”€â”€ from_tsv(tsv: String)    # Import from tab-separated values
 ```
 
 ### GNGeoData (SOP output)
 ```
 GNGeoData extends GNData (RefCounted)
-├── mesh: ArrayMesh          # Godot native mesh — the actual geometry
-├── transform: Transform3D   # Object-space transform
-├── bounds: AABB             # Bounding box
-├── vertex_count: int
-├── point_attribs: Dictionary # Custom per-point attributes
-├── set_surface_arrays(arrays: Array, primitive: Mesh.PrimitiveType)
-├── set_from_surface_tool(st: SurfaceTool)
-├── set_mesh(primitive_mesh: PrimitiveMesh)  # Copy from Godot PrimitiveMesh
-├── get_positions() -> PackedVector3Array
-├── get_normals() -> PackedVector3Array
-├── get_uvs() -> PackedVector2Array
-└── has_geometry() -> bool
+â”œâ”€â”€ mesh: ArrayMesh          # Godot native mesh â€” the actual geometry
+â”œâ”€â”€ transform: Transform3D   # Object-space transform
+â”œâ”€â”€ bounds: AABB             # Bounding box
+â”œâ”€â”€ vertex_count: int
+â”œâ”€â”€ point_attribs: Dictionary # Custom per-point attributes
+â”œâ”€â”€ set_surface_arrays(arrays: Array, primitive: Mesh.PrimitiveType)
+â”œâ”€â”€ set_from_surface_tool(st: SurfaceTool)
+â”œâ”€â”€ set_mesh(primitive_mesh: PrimitiveMesh)  # Copy from Godot PrimitiveMesh
+â”œâ”€â”€ get_positions() -> PackedVector3Array
+â”œâ”€â”€ get_normals() -> PackedVector3Array
+â”œâ”€â”€ get_uvs() -> PackedVector2Array
+â””â”€â”€ has_geometry() -> bool
 ```
 
 GNGeoData wraps Godot's native `ArrayMesh`, leveraging Godot's built-in mesh types (`BoxMesh`, `SphereMesh`, `CylinderMesh`, `TorusMesh`) via `set_mesh()` and Godot's `SurfaceTool` for procedural generation.
@@ -199,11 +199,11 @@ GNGeoData wraps Godot's native `ArrayMesh`, leveraging Godot's built-in mesh typ
 ### GNMaterialData (MAT output)
 ```
 GNMaterialData extends GNData (RefCounted)
-├── material: Material       # Godot Material base class (StandardMaterial3D, ShaderMaterial, etc.)
-├── material_label: String   # Human-readable label for UI preview (e.g., "PBR", "Shader: custom_toon")
-├── get_family() -> MAT
-├── invalidate()             # Clears material and label
-└── duplicate_data() -> GNData  # Deep-copies Material resource
+â”œâ”€â”€ material: Material       # Godot Material base class (StandardMaterial3D, ShaderMaterial, etc.)
+â”œâ”€â”€ material_label: String   # Human-readable label for UI preview (e.g., "PBR", "Shader: custom_toon")
+â”œâ”€â”€ get_family() -> MAT
+â”œâ”€â”€ invalidate()             # Clears material and label
+â””â”€â”€ duplicate_data() -> GNData  # Deep-copies Material resource
 ```
 
 GNMaterialData wraps Godot's `Material` base class, allowing any material type (StandardMaterial3D, ShaderMaterial, ORMMaterial3D) to flow through the graph. MAT operators produce GNMaterialData, which GeometryCOMP consumes as an optional material override.
@@ -214,7 +214,7 @@ GNMaterialData wraps Godot's `Material` base class, allowing any material type (
 
 ### GNNode (Root Base)
 
-GNNode is **fully type-agnostic** — it contains no references to any family-specific data types. Preview methods are virtual no-ops that return null; family base classes (see below) override them.
+GNNode is **fully type-agnostic** â€” it contains no references to any family-specific data types. Preview methods are virtual no-ops that return null; family base classes (see below) override them.
 
 ```gdscript
 class_name GNNode extends Node
@@ -241,7 +241,7 @@ var cook_valid: bool = false
 var time_dependent: bool = false    # Always dirty each frame (LFO, Noise, etc.)
 
 # Active chain cooking
-var is_sink: bool = false           # True for output operators (WindowTOP, SpoutOut, MIDIOut, etc.)
+var is_sink: bool = false           # True for output operators (WindowOUT, SpoutOut, MIDIOut, etc.)
                                     # Set by operator in _init(). Engine auto-detects these as sinks.
 var is_active: bool = true          # Set by cook engine per frame. False = skip cooking.
                                     # Inactive nodes keep cached_output frozen.
@@ -262,12 +262,12 @@ func _mutable_input(data: GNData) -> GNData: ...  # COW: duplicates only if data
 func get_input(index: int) -> GNData: ...  # Resolved by cook engine
 func mark_dirty() -> void: ...             # Propagates downstream
 
-# Preview (virtual — overridden by family base classes)
+# Preview (virtual â€” overridden by family base classes)
 func create_preview_control() -> Control:  return null   # No-op
 func update_preview_control(ctrl: Control) -> void: pass  # No-op
 ```
 
-# Preview (virtual — overridden by family base classes)
+# Preview (virtual â€” overridden by family base classes)
 func create_preview_control() -> Control:  return null   # No-op
 func update_preview_control(ctrl: Control) -> void: pass  # No-op
 ```
@@ -289,44 +289,44 @@ Seven intermediate base classes sit between GNNode and the individual operators.
 **Class Hierarchy:**
 ```
 GNNode (type-agnostic base)
-├── GNTopBase (30 TOP operators)
-├── GNImgBase (7 IMG operators)
-├── GNChopBase (23 CHOP operators, incl. DATtoCHOP bridge, RampCHOP)
-├── GNDatBase (13 DAT operators)
-├── GNSopBase (15 SOP operators)
-├── GNCompBase (4 COMP operators)
-└── GNMatBase (6 MAT operators)
+â”œâ”€â”€ GNTopBase (30 TOP operators)
+â”œâ”€â”€ GNImgBase (7 IMG operators)
+â”œâ”€â”€ GNChopBase (23 CHOP operators, incl. DATtoCHOP bridge, RampCHOP)
+â”œâ”€â”€ GNDatBase (13 DAT operators)
+â”œâ”€â”€ GNSopBase (15 SOP operators)
+â”œâ”€â”€ GNCompBase (4 COMP operators)
+â””â”€â”€ GNMatBase (6 MAT operators)
 ```
 
 **GNTopBase** provides the shared viewport/texture infrastructure used by all TOP operators:
-- **`_viewport: SubViewport`** — primary render viewport (null until first cook).
-- **`_material: ShaderMaterial`** — shader material applied to the canvas (null for non-shader TOPs like Text, Movie).
-- **`_canvas: Control`** — a `ColorRect` (generators) or `TextureRect` (filters) that fills the viewport.
-- **`_cached_tex_data: GNTextureData`** — reusable output data wrapping the viewport texture.
-- **`_create_viewport()`** — factory that creates a SubViewport with `UPDATE_DISABLED` and sensible defaults.
-- **`_ensure_viewport(size)`** — lazily creates `_viewport` + `_cached_tex_data`. Used by custom TOPs (Constant, Text, Blur, etc.).
-- **`_init_shader_viewport(shader_path, transparent_bg, use_texture_rect, size)`** — full pipeline setup: SubViewport → ShaderMaterial → canvas → GNTextureData. Used by the 17 standard shader TOPs.
-- **`execute_cook()`** — overrides GNNode to trigger `UPDATE_ONCE` on all child SubViewports after `_cook()` completes, eliminating wasted GPU work on non-dirty frames.
+- **`_viewport: SubViewport`** â€” primary render viewport (null until first cook).
+- **`_material: ShaderMaterial`** â€” shader material applied to the canvas (null for non-shader TOPs like Text, Movie).
+- **`_canvas: Control`** â€” a `ColorRect` (generators) or `TextureRect` (filters) that fills the viewport.
+- **`_cached_tex_data: GNTextureData`** â€” reusable output data wrapping the viewport texture.
+- **`_create_viewport()`** â€” factory that creates a SubViewport with `UPDATE_DISABLED` and sensible defaults.
+- **`_ensure_viewport(size)`** â€” lazily creates `_viewport` + `_cached_tex_data`. Used by custom TOPs (Constant, Text, Blur, etc.).
+- **`_init_shader_viewport(shader_path, transparent_bg, use_texture_rect, size)`** â€” full pipeline setup: SubViewport â†’ ShaderMaterial â†’ canvas â†’ GNTextureData. Used by the 17 standard shader TOPs.
+- **`execute_cook()`** â€” overrides GNNode to trigger `UPDATE_ONCE` on all child SubViewports after `_cook()` completes, eliminating wasted GPU work on non-dirty frames.
 
 Generator TOPs pass `get_param_value("resolution")` as the viewport size. Filter TOPs pass `tex_in.resolution` (matching their input). No hardcoded sizes.
 
 **GNImgBase** provides the CPU-side image infrastructure used by all IMG operators:
-- **`_cached_image_data: GNImageData`** — reusable output data wrapping the CPU Image.
-- **`_prepare_image()`** — lazily creates `_cached_image_data`. Operators write a new Image into it via `set_image()`.
-- **`_get_input_img(inputs, port)`** — safely extracts `GNImageData` from inputs.
-- **Preview** — creates `TextureRect`, uploads Image to `ImageTexture` on-the-fly during `update_preview_control()`.
-- **No SubViewport** — no `execute_cook()` override needed, uses GNNode's default cook cycle.
+- **`_cached_image_data: GNImageData`** â€” reusable output data wrapping the CPU Image.
+- **`_prepare_image()`** â€” lazily creates `_cached_image_data`. Operators write a new Image into it via `set_image()`.
+- **`_get_input_img(inputs, port)`** â€” safely extracts `GNImageData` from inputs.
+- **Preview** â€” creates `TextureRect`, uploads Image to `ImageTexture` on-the-fly during `update_preview_control()`.
+- **No SubViewport** â€” no `execute_cook()` override needed, uses GNNode's default cook cycle.
 
 **ImgToTOP** extends `GNTopBase` (not GNImgBase) because its output is TOP texture data. Overrides `execute_cook()` to skip the SubViewport render logic.
 
 **DATtoCHOP** extends `GNChopBase` (not GNDatBase) because its output is CHOP channel data.
 
 ### Node Lifecycle
-- `_init()` — set `node_type`, `family`, `time_dependent`, `is_sink` (runs before entering tree)
-- `initialize(id)` — sets `name = id`, `process_mode = DISABLED`, calls `_init_ports()` / `_init_parameters()`
-- Processing is disabled on GNNodes — only the cook engine drives cooking
-- TOPs add SubViewport as `add_child()` during first `_cook()` — auto-freed on removal
-- `execute_cook()` (GNTopBase override) — after `_cook()` completes, sets `UPDATE_ONCE` on all child SubViewports so they render exactly once per cook cycle
+- `_init()` â€” set `node_type`, `family`, `time_dependent`, `is_sink` (runs before entering tree)
+- `initialize(id)` â€” sets `name = id`, `process_mode = DISABLED`, calls `_init_ports()` / `_init_parameters()`
+- Processing is disabled on GNNodes â€” only the cook engine drives cooking
+- TOPs add SubViewport as `add_child()` during first `_cook()` â€” auto-freed on removal
+- `execute_cook()` (GNTopBase override) â€” after `_cook()` completes, sets `UPDATE_ONCE` on all child SubViewports so they render exactly once per cook cycle
 - CookEngine adopts all network nodes as children via `add_child()` in `_ready()`
 - During adoption, CookEngine connects `parameter_changed` signal per node + topology signals (`node_added`, `node_removed`, `connection_added`, `connection_removed`) to invalidate the active chain set
 - `queue_free()` cascades to SubViewport/Window children (no manual cleanup needed)
@@ -342,15 +342,15 @@ var port_name: String
 var family: GNNode.GNFamily    # Type of data this port accepts/produces
 var index: int                 # Port index on the node
 var is_input: bool
-var multi_input: bool = false  # DEPRECATED — use dynamic input ports instead
+var multi_input: bool = false  # DEPRECATED â€” use dynamic input ports instead
 ```
 
 ### Connection Rules
-- Ports can only connect within the same family (TOP→TOP, CHOP→CHOP)
+- Ports can only connect within the same family (TOPâ†’TOP, CHOPâ†’CHOP)
 - Exception: Bridge operators (CHOPtoTOP, TOPtoCHOP) have mixed port types
 - One output can connect to many inputs (fan-out)
 - Each input port accepts exactly one connection
-- **Dynamic input ports** — Operators like MergeCOMP, MergeSOP, and RenderTOP use auto-growing numbered ports: connecting to the last empty port automatically adds a new empty slot; disconnecting collapses trailing empties
+- **Dynamic input ports** â€” Operators like MergeCOMP, MergeSOP, and RenderTOP use auto-growing numbered ports: connecting to the last empty port automatically adds a new empty slot; disconnecting collapses trailing empties
 - No cycles allowed (DAG enforcement)
 
 ### Family Colors (UI)
@@ -407,11 +407,11 @@ func update_annotation(ann_id: String, changes: Dictionary) -> void
 func remove_annotation(ann_id: String) -> bool
 ```
 
-**Annotations** provide canvas-level organization (like TouchDesigner's network boxes and sticky notes). Each annotation is a Dictionary with `{id, type, position, size, text, color}`. Serialized in `.gnpatch` files as `annotations` array. Counter-based unique IDs (`ann_1`, `ann_2`, …) restored on load to avoid collisions.
+**Annotations** provide canvas-level organization (like TouchDesigner's network boxes and sticky notes). Each annotation is a Dictionary with `{id, type, position, size, text, color}`. Serialized in `.gnpatch` files as `annotations` array. Counter-based unique IDs (`ann_1`, `ann_2`, â€¦) restored on load to avoid collisions.
 
-**`GNNetworkBox`** (extends Control) — colored rectangle drawn behind graph nodes (`z_index = -10`) for visual grouping. Title bar with inline edit (double-click), drag-move, bottom-right resize handle, right-click context menu (Rename, Change Color, Delete). Signals: `box_changed`, `text_changed`, `delete_requested`, `color_changed`.
+**`GNNetworkBox`** (extends Control) â€” colored rectangle drawn behind graph nodes (`z_index = -10`) for visual grouping. Title bar with inline edit (double-click), drag-move, bottom-right resize handle, right-click context menu (Rename, Change Color, Delete). Signals: `box_changed`, `text_changed`, `delete_requested`, `color_changed`.
 
-**`GNStickyNote`** (extends Control) — editable text note on the canvas (`z_index = -9`). Multi-line text display, inline TextEdit (double-click), drag-move, resize, right-click context menu (Edit Text, Change Color, Delete). Default yellow color. Signals: `note_changed`, `text_changed`, `delete_requested`, `color_changed`.
+**`GNStickyNote`** (extends Control) â€” editable text note on the canvas (`z_index = -9`). Multi-line text display, inline TextEdit (double-click), drag-move, resize, right-click context menu (Edit Text, Change Color, Delete). Default yellow color. Signals: `note_changed`, `text_changed`, `delete_requested`, `color_changed`.
 
 **`rename_node()` updates:** nodes dictionary key, `GNNode.id`, `GNNode.name`, all `GNConnection.from_node`/`to_node` references, expression strings across all parameters in the network (simple `"old_id"` -> `"new_id"` replacement). Validates: alphanumeric/underscore only, no duplicates, no empty. Emits `node_renamed` then `graph_changed`.
 
@@ -434,7 +434,7 @@ var frame_count: int = 0
 
 # Active chain cooking state
 var active_sinks: Array[String] = []    # UI-level sinks (viewer, floating windows)
-var _active_set: Dictionary = {}        # { node_id: true } — cached active node set
+var _active_set: Dictionary = {}        # { node_id: true } â€” cached active node set
 var _active_set_dirty: bool = true      # Recompute on next cook frame
 static var _expr_ref_regex: RegEx       # Regex for chop()/op()/top()/sop()/dat()/mat() refs
 
@@ -442,7 +442,7 @@ func _process(delta: float) -> void:
     cook_frame(delta)
 
 func cook_frame(delta: float) -> void:
-    # 1. _pre_cook_pass — mark time-dependent nodes dirty
+    # 1. _pre_cook_pass â€” mark time-dependent nodes dirty
     # 2. Get topological order (Kahn's BFS, cached by GNNetwork)
     # 3. Propagate dirty flags downstream in one BFS pass
     # 3b. If _active_set_dirty: recompute active set, stamp node.is_active
@@ -453,15 +453,15 @@ func cook_frame(delta: float) -> void:
     #    - Handle bypass (pass-through first input)
     #    - Call node.execute_cook(inputs, frame)
     # 5. Process export mappings (CHOP exports, post-MVP stub)
-    # 6. Frame bookkeeping — increment frame_count, emit frame_cooked
+    # 6. Frame bookkeeping â€” increment frame_count, emit frame_cooked
 
-# Active chain cooking — finds all nodes feeding live sinks
+# Active chain cooking â€” finds all nodes feeding live sinks
 func _compute_active_set() -> Dictionary:
     # 1. Seed queue with active_sinks (UI viewers)
     # 2. Auto-detect structural sinks (node.is_sink == true)
     # 3. Fallback: if no sinks found, all nodes are active
     # 4. BFS upstream following:
-    #    a. Wire connections (get_input_connections — cached adjacency)
+    #    a. Wire connections (get_input_connections â€” cached adjacency)
     #    b. Expression references (chop/op/top/sop/dat/mat regex scan)
     # Returns { node_id: true } dict
 
@@ -472,16 +472,16 @@ func _get_expression_refs(node_id: String) -> Array[String]:
     # Returns list of referenced node IDs (excludes self-references)
 
 # Invalidation signals (wired during _adopt_network_nodes):
-#   network.node_added      → _active_set_dirty = true + adopt
-#   network.node_removed    → _active_set_dirty = true
-#   network.connection_added/removed → _active_set_dirty = true
-#   node.parameter_changed  → _active_set_dirty = true (per-node)
-#   set_active_sinks()      → _active_set_dirty = true (from editor)
+#   network.node_added      â†’ _active_set_dirty = true + adopt
+#   network.node_removed    â†’ _active_set_dirty = true
+#   network.connection_added/removed â†’ _active_set_dirty = true
+#   node.parameter_changed  â†’ _active_set_dirty = true (per-node)
+#   set_active_sinks()      â†’ _active_set_dirty = true (from editor)
 ```
 
 ### Cook Architecture: Demand-Driven Flat Pass
 
-GONODES uses a **demand-driven flat-pass** cook model — a hybrid that achieves the lazy semantics of pull-based systems (Houdini, TouchDesigner) while executing as a single linear sweep instead of recursive descent.
+GONODES uses a **demand-driven flat-pass** cook model â€” a hybrid that achieves the lazy semantics of pull-based systems (Houdini, TouchDesigner) while executing as a single linear sweep instead of recursive descent.
 
 **Comparison with other systems:**
 
@@ -494,13 +494,13 @@ GONODES uses a **demand-driven flat-pass** cook model — a hybrid that achieves
 | Time-dependent | All re-cook | Only if demanded | Only if `is_time_dependent` |
 | Execution model | Event cascade | Recursive descent | **Linear topo-sorted pass** |
 
-**Why not pure pull?** In a pull system, each node's `_cook()` recursively calls `input.cook()` on demand — the call stack depth mirrors the dependency chain length. GONODES instead does a single linear pass over the topo-sorted dirty+active list. Advantages:
+**Why not pure pull?** In a pull system, each node's `_cook()` recursively calls `input.cook()` on demand â€” the call stack depth mirrors the dependency chain length. GONODES instead does a single linear pass over the topo-sorted dirty+active list. Advantages:
 
-- **No deep recursion** — pull systems can stack-overflow on deep chains (hundreds of nodes). Linear pass has O(1) stack depth.
-- **Predictable timing** — one pass, no re-entrant cook calls, easier to profile.
-- **Batch-friendly** — all SubViewport renders happen in topo order within the same frame (`_reorder_children_to_topo` ensures GPU render order matches dependency order).
+- **No deep recursion** â€” pull systems can stack-overflow on deep chains (hundreds of nodes). Linear pass has O(1) stack depth.
+- **Predictable timing** â€” one pass, no re-entrant cook calls, easier to profile.
+- **Batch-friendly** â€” all SubViewport renders happen in topo order within the same frame (`_reorder_children_to_topo` ensures GPU render order matches dependency order).
 
-**Why not pure push?** Push systems (vvvv, early dataflow engines) propagate immediately on any input change, cooking every downstream node whether its output is consumed or not. GONODES avoids this via the active chain — only nodes feeding a live sink (viewer, WindowTOP, `is_sink` operator) are cooked. Disconnected subgraphs are completely inert.
+**Why not pure push?** Push systems (vvvv, early dataflow engines) propagate immediately on any input change, cooking every downstream node whether its output is consumed or not. GONODES avoids this via the active chain â€” only nodes feeding a live sink (viewer, WindowOUT, `is_sink` operator) are cooked. Disconnected subgraphs are completely inert.
 
 **The result:** GONODES achieves the same work-avoidance as a pull system (skip inactive, skip clean, skip non-time-dependent) but with the execution simplicity and GPU-friendliness of a flat forward pass.
 
@@ -508,11 +508,11 @@ GONODES uses a **demand-driven flat-pass** cook model — a hybrid that achieves
 - **Time-dependent nodes** (LFO, Noise with `time` param) are always dirty.
 - **Parameter-changed nodes** are marked dirty when a parameter changes.
 - **Input-changed nodes** are marked dirty via `propagate_dirty()`.
-- **Nodes only cook when dirty AND active** — lazy evaluation + active chain cooking.
-- **Each node cooks at most once per frame** — results are cached.
+- **Nodes only cook when dirty AND active** â€” lazy evaluation + active chain cooking.
+- **Each node cooks at most once per frame** â€” results are cached.
 - **Cook order** = topological sort of the dirty subgraph.
 - **Inactive nodes** (not feeding any sink) keep `cached_output` frozen and skip cooking entirely.
-- **Active set** is event-driven — recomputed only when graph topology, sinks, or expressions change.
+- **Active set** is event-driven â€” recomputed only when graph topology, sinks, or expressions change.
 
 ### Non-Realtime Mode (NRT)
 
@@ -522,9 +522,9 @@ advances virtual time by exactly `1.0 / non_realtime_fps` seconds, regardless of
 how long the frame actually takes to compute.
 
 ```gdscript
-# GNCookEngine — new NRT state
+# GNCookEngine â€” new NRT state
 var non_realtime: bool = false       # Global toggle (toolbar "NRT" CheckButton)
-var non_realtime_fps: float = 30.0   # Target FPS (toolbar SpinBox, 1–240)
+var non_realtime_fps: float = 30.0   # Target FPS (toolbar SpinBox, 1â€“240)
 
 func _process(delta: float) -> void:
     # ...
@@ -541,14 +541,14 @@ func _process(delta: float) -> void:
 
 | Aspect | Realtime (default) | Non-Realtime |
 |--------|-------------------|--------------|
-| Delta source | Godot's `_process(delta)` — wall clock | Fixed: `1.0 / non_realtime_fps` |
+| Delta source | Godot's `_process(delta)` â€” wall clock | Fixed: `1.0 / non_realtime_fps` |
 | Time advancement | Real wall-clock time | Virtual: `elapsed_time += fixed_delta` |
-| Frame drops | Possible under load | Impossible — every frame cooks fully |
+| Frame drops | Possible under load | Impossible â€” every frame cooks fully |
 | Use case | Live performance, interactive | Offline recording, heavy FX render |
 
-**Workflow:** Enable NRT via toolbar "NRT" toggle → set target FPS via the adjacent
-SpinBox → activate a recording sink (FileSaveIMG, MovieOutIMG, FFmpegOutIMG) →
-play the timeline.  Every frame is captured at the exact specified interval — no
+**Workflow:** Enable NRT via toolbar "NRT" toggle â†’ set target FPS via the adjacent
+SpinBox â†’ activate a recording sink (ImageSaveOUT, MovieOUT, FFmpegOUT) â†’
+play the timeline.  Every frame is captured at the exact specified interval â€” no
 drops, no jitter, deterministic output regardless of scene complexity.
 
 **Persisted:** NRT enabled state and FPS value are saved/restored via
@@ -557,18 +557,18 @@ drops, no jitter, deterministic output regardless of scene complexity.
 ### Right-Click Export Output
 
 Any node's cached output can be exported to disk via the context menu.  Right-click
-a single node → **Export Output…** opens a FileDialog with family-appropriate
+a single node â†’ **Export Outputâ€¦** opens a FileDialog with family-appropriate
 format filters.  The menu item is disabled when no node is selected, multiple nodes
 are selected, or the selected node has no valid `cached_output` (exception: COMP
 nodes with a live `get_scene_node()` are also exportable even when `cached_output`
-is null — this covers LightCOMP and CameraCOMP which return null data but own
+is null â€” this covers LightCOMP and CameraCOMP which return null data but own
 a Light3D / Camera3D).
 
 **Format mapping by family:**
 
 | Data Type | Family | Formats | Notes |
 |-----------|--------|---------|-------|
-| `GNTextureData` | TOP | PNG, WebP, EXR | GPU→CPU readback via `texture.get_image()` |
+| `GNTextureData` | TOP | PNG, WebP, EXR | GPUâ†’CPU readback via `texture.get_image()` |
 | `GNImageData` | IMG | PNG, WebP, EXR | Direct CPU Image save |
 | `GNGeoData` | SOP | glTF Binary (.glb) | Bare mesh, no material |
 | Any COMP | COMP | glTF Binary (.glb) | Full scene graph via `get_scene_node().duplicate()` + `GLTFDocument` |
@@ -583,7 +583,7 @@ a Light3D / Camera3D).
 | GeometryCOMP | `MeshInstance3D` + `material_override` | Mesh + material + transform |
 | LightCOMP | `DirectionalLight3D` / `OmniLight3D` / `SpotLight3D` | glTF KHR_lights_punctual extension |
 | CameraCOMP | `Camera3D` | glTF camera node (perspective or orthographic) |
-| MergeCOMP | `Node3D` group with children | Full subtree — meshes, lights, cameras, transforms |
+| MergeCOMP | `Node3D` group with children | Full subtree â€” meshes, lights, cameras, transforms |
 
 Exporting a MergeCOMP that combines GeometryCOMPs, LightCOMPs, and a CameraCOMP
 produces a complete .glb scene ready to import in Blender, Unity, Unreal, or
@@ -592,16 +592,16 @@ any glTF-compatible tool.
 **Implementation:**
 
 - `_CtxID.EXPORT_OUTPUT` added to context menu enum
-- `_begin_export_output()` — validates selection (checks `cached_output` OR `get_scene_node()` for COMPs), lazy-inits `FileDialog`, sets filters
-- `_on_export_file_selected(path)` — dispatches to family-specific export functions
+- `_begin_export_output()` â€” validates selection (checks `cached_output` OR `get_scene_node()` for COMPs), lazy-inits `FileDialog`, sets filters
+- `_on_export_file_selected(path)` â€” dispatches to family-specific export functions
 - `_export_texture()`, `_export_image()`, `_export_geo_glb()`, `_export_comp_glb()`,
   `_export_channel()`, `_export_table()`, `_export_material()`
-- `_export_comp_glb()` — deep-clones via `get_scene_node().duplicate()`, works for any COMP type
-- `_write_gltf_scene()` — shared helper: parents clone under tmp root, calls `_set_owner_recursive()` so GLTFDocument traverses the full subtree, then `append_from_scene()` + `write_to_filesystem()`
-- `_set_owner_recursive()` — sets `owner` on all descendants (required for GLTFDocument to see children)
+- `_export_comp_glb()` â€” deep-clones via `get_scene_node().duplicate()`, works for any COMP type
+- `_write_gltf_scene()` â€” shared helper: parents clone under tmp root, calls `_set_owner_recursive()` so GLTFDocument traverses the full subtree, then `append_from_scene()` + `write_to_filesystem()`
+- `_set_owner_recursive()` â€” sets `owner` on all descendants (required for GLTFDocument to see children)
 
 **COMP vs SOP glTF export:** SOP exports a bare mesh (no material).  COMP
-nodes export from the scene graph level — GeometryCOMP provides mesh + material,
+nodes export from the scene graph level â€” GeometryCOMP provides mesh + material,
 LightCOMP provides light nodes, CameraCOMP provides camera, and MergeCOMP
 exports entire hierarchies.  This mirrors how 3D DCC tools work: the COMP layer
 is the "scene" while SOP is raw geometry data.
@@ -616,7 +616,7 @@ is the "scene" while SOP is raw geometry data.
 - **Outputs:** 1 texture (SubViewport render)
 - **Inputs:** 0
 - **Parameters:**
-  - `resolution`: Vector2i (default 512×512)
+  - `resolution`: Vector2i (default 512Ã—512)
   - `noise_type`: enum (Simplex, Perlin, Voronoi, White)
   - `scale`: float (default 4.0)
   - `offset`: Vector2 (default 0,0)
@@ -631,7 +631,7 @@ is the "scene" while SOP is raw geometry data.
 - **Inputs:** 2 textures (A and B)
 - **Parameters:**
   - `operation`: enum (Add, Multiply, Over, Screen, Subtract, Difference)
-  - `opacity`: float (0–1, default 1.0)
+  - `opacity`: float (0â€“1, default 1.0)
 - **Implementation:** SubViewport + shader that samples both inputs
 
 #### LevelTOP
@@ -660,7 +660,7 @@ is the "scene" while SOP is raw geometry data.
 
 #### MathCHOP
 - **Outputs:** 1 channel set
-- **Inputs:** 1–2 channel sets
+- **Inputs:** 1â€“2 channel sets
 - **Parameters:**
   - `operation`: enum (Add, Subtract, Multiply, Divide, Abs, Sin, Cos, Pow)
   - `operand`: float (for single-input operations)
@@ -679,7 +679,7 @@ is the "scene" while SOP is raw geometry data.
 ### Bridge Operators
 
 #### CHOPtoTOP (Parameter Reference Bridge)
-This is not a traditional operator — it's a mechanism for CHOP channels to drive TOP parameters.
+This is not a traditional operator â€” it's a mechanism for CHOP channels to drive TOP parameters.
 
 **Implementation approach for MVP:**
 Parameter expressions on any GNNode can reference CHOP outputs:
@@ -696,28 +696,28 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 
 ### Main Editor Layout
 ```
-┌──────────────────────────────────────────────────┐
-│  HSplitContainer                                │
-├─────────────────────────────┬────────────────────┤
-│                             │  VSplitContainer   │
-│  GraphPanel (stretch 2x)    ├────────────────────┤
-│  └─ GraphEdit               │  ViewerPanel       │
-│     + Node Palette popup    │  (stretch 1.5)     │
-│                             │  └─ GNViewerPanel  │
-│     ┌───┐    ┌───┐          │    Family-aware:   │
-│     │LFO│───▶│NOI│          │    TOP → pan/zoom  │
-│     │ 👁│    │SE │          │    CHOP → waveform │
-│     └───┘    └───┘          │    DAT → spreadsht │
-│                             │    SOP → 3D orbit  │
-│                             │    MAT → 3D sphere │
-│                             ├────────────────────┤
-│                             │  InspectorPanel   │
-│                             │  (stretch 1.0)     │
-│                             │  └─ GNParamInsp.  │
-│                             │    260px min width │
-├─────────────────────────────┴────────────────────┤
-│  InfoBar: FPS | Frame | Cook | Viewing: nodeID  │
-└──────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  HSplitContainer                                â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                             â”‚  VSplitContainer   â”‚
+â”‚  GraphPanel (stretch 2x)    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  â””â”€ GraphEdit               â”‚  ViewerPanel       â”‚
+â”‚     + Node Palette popup    â”‚  (stretch 1.5)     â”‚
+â”‚                             â”‚  â””â”€ GNViewerPanel  â”‚
+â”‚     â”Œâ”€â”€â”€â”    â”Œâ”€â”€â”€â”          â”‚    Family-aware:   â”‚
+â”‚     â”‚LFOâ”‚â”€â”€â”€â–¶â”‚NOIâ”‚          â”‚    TOP â†’ pan/zoom  â”‚
+â”‚     â”‚ ðŸ‘â”‚    â”‚SE â”‚          â”‚    CHOP â†’ waveform â”‚
+â”‚     â””â”€â”€â”€â”˜    â””â”€â”€â”€â”˜          â”‚    DAT â†’ spreadsht â”‚
+â”‚                             â”‚    SOP â†’ 3D orbit  â”‚
+â”‚                             â”‚    MAT â†’ 3D sphere â”‚
+â”‚                             â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                             â”‚  InspectorPanel   â”‚
+â”‚                             â”‚  (stretch 1.0)     â”‚
+â”‚                             â”‚  â””â”€ GNParamInsp.  â”‚
+â”‚                             â”‚    260px min width â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  InfoBar: FPS | Frame | Cook | Viewing: nodeID  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Scene file:** `scenes/gn_editor.tscn`
@@ -733,64 +733,64 @@ Family-aware viewer panel that displays any node family's output. Only one visua
 | Family | Display Widget | Description |
 |--------|---------------|-------------|
 | **TOP** | TextureRect + pan/zoom | Full-resolution display. Left-click or middle-click drag to pan, scroll wheel to zoom. Shift+F to fit, Home for 1:1. |
-| **IMG** | TextureRect + pan/zoom | Same as TOP — uploads `Image` → `ImageTexture` on-the-fly |
+| **IMG** | TextureRect + pan/zoom | Same as TOP â€” uploads `Image` â†’ `ImageTexture` on-the-fly |
 | **CHOP** | GNWaveformView (`_draw()`) | GPU-accelerated polylines, fixed-scale grid, zoom/pan, multi-channel with legends |
 | **DAT** | Tree (spreadsheet) | Column headers, scrollable rows, selection highlight |
 | **SOP** | SubViewport + Camera3D | Orbit camera (left/middle-click drag), zoom (scroll), XYZ axis gizmo, dark environment |
 | **MAT** | SubViewport + preview sphere | Material applied to sphere mesh, 3D lit, orbit controls |
-| **COMP** | Info label | Shows component type — COMPs have no visual output (navigate into them instead) |
+| **COMP** | Info label | Shows component type â€” COMPs have no visual output (navigate into them instead) |
 
 **Key design decisions:**
 - SubViewports only for SOP/MAT (3D rendering). TOP/IMG/CHOP/DAT use lighter-weight approaches.
-- **Docked viewer** (`eager_3d = true`): 3D SubViewports pre-created via `call_deferred("_warm_up_3d")` after `_ready()` — no hitch on first SOP/MAT click.
+- **Docked viewer** (`eager_3d = true`): 3D SubViewports pre-created via `call_deferred("_warm_up_3d")` after `_ready()` â€” no hitch on first SOP/MAT click.
 - **Floating viewers** (`eager_3d = false`, default): 3D SubViewports lazily created on first view. Small one-time hitch per window, acceptable for secondary viewers.
 - SubViewport sizes snapped to 64px boundaries to avoid resize churn during panel drag.
 - Pan/zoom/orbit state resets when switching to a different node.
-- **XYZ axis gizmo** in SOP viewer: `ImmediateMesh` lines at origin — X=red, Y=green, Z=blue (unshaded `StandardMaterial3D`, always visible).
+- **XYZ axis gizmo** in SOP viewer: `ImmediateMesh` lines at origin â€” X=red, Y=green, Z=blue (unshaded `StandardMaterial3D`, always visible).
 
 **Cook-frame update strategy:**
 - `update_from_node()` is called every cook frame by the editor.
 - **Fast-path optimisation:** `_show_texture()`, `_show_3d_mesh()`, `_show_waveform()`, and `_show_material()` all compare incoming state against the current display. If unchanged, they return immediately without hiding/re-showing Controls or re-laying out. This preserves in-progress pan/zoom/orbit drags across cook frames.
 - When the texture *does* change (e.g., the TOP re-cooks with new content), a full layout + `_fit_to_panel()` is triggered.
-- **Future optimisation:** replace per-frame polling with an event-driven model — the cook engine would emit `node_output_changed(node_id)` only for nodes that actually re-cooked, and the viewer would subscribe. Eliminates the per-frame function call entirely, but current cost is negligible.
+- **Future optimisation:** replace per-frame polling with an event-driven model â€” the cook engine would emit `node_output_changed(node_id)` only for nodes that actually re-cooked, and the viewer would subscribe. Eliminates the per-frame function call entirely, but current cost is negligible.
 
 **Viewer pin behaviour:**
-- `_viewer_pinned` flag in `gn_editor.gd` — when `true`, node selection only updates the inspector, NOT the viewer target.
+- `_viewer_pinned` flag in `gn_editor.gd` â€” when `true`, node selection only updates the inspector, NOT the viewer target.
 - Clicking the eye icon toggles pin on/off (same node = unpin, different node = re-pin).
-- Pinned node's eye icon shows 📌 (teal); unpinned nodes show 👁 (gray).
+- Pinned node's eye icon shows ðŸ“Œ (teal); unpinned nodes show ðŸ‘ (gray).
 - Pin state + highlights reset on New, Load, and Dive-into-subnet operations.
 - `update_viewer_pin_highlights("")` is called after `bind_network()` on load/new to ensure all eye icons start in unpinned state.
 
 **Toolbar:** Family icon + node name + Fit button + zoom percentage label
-**Info bar:** Resolution (TOP/IMG), channel count + sample rate (CHOP), row × col (DAT), vert/surface count (SOP)
+**Info bar:** Resolution (TOP/IMG), channel count + sample rate (CHOP), row Ã— col (DAT), vert/surface count (SOP)
 
 ### GNWaveformView (`addons/gonodes/ui/gn_waveform_view.gd`)
 Custom `Control._draw()` that renders CHOP channel data as waveform polylines.
-- Uses Godot's GPU-accelerated `draw_polyline()` — no SubViewport needed.
+- Uses Godot's GPU-accelerated `draw_polyline()` â€” no SubViewport needed.
 - 8 per-channel colors (green, cyan, yellow, magenta, orange, lavender, teal, red)
-- **Fixed-scale grid:** Y-axis range is computed once on first data (with 10% headroom, snapped to a "nice" number like 1/2/5×10^n). Grid lines and value labels stay **static** — the data is plotted within the fixed context.
+- **Fixed-scale grid:** Y-axis range is computed once on first data (with 10% headroom, snapped to a "nice" number like 1/2/5Ã—10^n). Grid lines and value labels stay **static** â€” the data is plotted within the fixed context.
 - **Y zoom:** Scroll wheel changes the visible Y half-range. Grid labels update to match the new scale.
 - **X zoom:** Shift+scroll changes the visible time window (sample range).
 - **Pan:** Left-click or middle-click drag to pan vertically (Y center) and horizontally (X offset).
 - View resets (`reset_view()`) when switching to a different node target; preserved during per-frame cook updates.
-- `_snap_to_nice()` rounds grid step sizes to 1/2/5×10^n for clean labels.
+- `_snap_to_nice()` rounds grid step sizes to 1/2/5Ã—10^n for clean labels.
 - Channel name + current value legend
 - Single-sample (scalar) channels rendered as horizontal lines
 - **Future upgrade path:** Replace `_draw()` polylines with a SubViewport + shader for glow, trail persistence, and oscilloscope-style phosphor decay effects. Not needed for V1.
 
-### Viewer Pin Button (Eye Icon 👁 / 📌)
-Every node has an eye icon (👁) in its title bar (next to the ? help button).
-- Click → **toggles pin** for that node to the docked viewer panel (any family, not just TOPs)
-- Click same pinned node again → **unpins** (returns to follow-selection mode)
-- Pinned state: 📌 (teal) — "Pinned to viewer (click to unpin)"
-- Unpinned state: 👁 (gray) — "Pin to viewer"
-- When pinned, selecting other nodes does NOT switch the viewer — only the inspector updates
-- Signal: `GNNodeView.viewer_pin_requested` → `GNGraphEditor.viewer_pin_requested` → `gn_editor._on_viewer_pin_requested()`
+### Viewer Pin Button (Eye Icon ðŸ‘ / ðŸ“Œ)
+Every node has an eye icon (ðŸ‘) in its title bar (next to the ? help button).
+- Click â†’ **toggles pin** for that node to the docked viewer panel (any family, not just TOPs)
+- Click same pinned node again â†’ **unpins** (returns to follow-selection mode)
+- Pinned state: ðŸ“Œ (teal) â€” "Pinned to viewer (click to unpin)"
+- Unpinned state: ðŸ‘ (gray) â€” "Pin to viewer"
+- When pinned, selecting other nodes does NOT switch the viewer â€” only the inspector updates
+- Signal: `GNNodeView.viewer_pin_requested` â†’ `GNGraphEditor.viewer_pin_requested` â†’ `gn_editor._on_viewer_pin_requested()`
 - All pin highlights reset on New / Load / Dive-into-subnet via `update_viewer_pin_highlights("")`
 
 ### GNViewerWindow (Floating)
-`GNViewerWindow` now embeds a full `GNViewerPanel` (`eager_3d = false`) — same family-aware display as docked viewer, with lazy 3D SubViewport creation.
-- Right-click → "Open Viewer" opens for any family (not just TOPs)
+`GNViewerWindow` now embeds a full `GNViewerPanel` (`eager_3d = false`) â€” same family-aware display as docked viewer, with lazy 3D SubViewport creation.
+- Right-click â†’ "Open Viewer" opens for any family (not just TOPs)
 - Each window pinned to a node ID, updated each cook frame via `update_from_node()`
 
 ### GNGraphEditor (extends GraphEdit)
@@ -799,33 +799,33 @@ Every node has an eye icon (👁) in its title bar (next to the ? help button).
 - Color-codes connections by family
 - Tab key opens node palette popup (unfiltered)
 - **Drop-wire-to-add-node**: dropping a wire on empty canvas opens a filtered palette showing only compatible operators:
-  - `connection_to_empty` signal (output → canvas): filters to operators accepting that output's family
-  - `connection_from_empty` signal (canvas → input): filters to operators producing that input's family
+  - `connection_to_empty` signal (output â†’ canvas): filters to operators accepting that output's family
+  - `connection_from_empty` signal (canvas â†’ input): filters to operators producing that input's family
   - Selected operator auto-connects to the first compatible port (with undo/redo support)
   - **Ghost wire**: semi-transparent line drawn from the source port to the drop point while the palette is open, cleared on palette close/select
   - Pending connection and ghost wire state stored in `_pending_connection` / `_ghost_wire` dicts, cleared on palette close
 - **Right-click context menu** (`PopupMenu`) with contextual options:
-  - Add Node…, Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo
-  - Add Network Box, Add Sticky Note — canvas annotation tools
-  - Copy Node Path → `op("name")`, Copy Output Ref → family-appropriate reference (chop/top/op)
-  - Items grayed out when not applicable (e.g., no selection → copy/cut/delete disabled)
+  - Add Nodeâ€¦, Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo
+  - Add Network Box, Add Sticky Note â€” canvas annotation tools
+  - Copy Node Path â†’ `op("name")`, Copy Output Ref â†’ family-appropriate reference (chop/top/op)
+  - Items grayed out when not applicable (e.g., no selection â†’ copy/cut/delete disabled)
   - Shortcut hints displayed in menu items
 - Emits `operator_selected` / `operator_deselected` signals
 - Handles node rename: disconnects visual wires under old name, updates view identity, reconnects under new name
 - Connects to `network.node_renamed` signal for model-driven rename updates
-- `previews_visible` flag — controls whether inline previews are shown; respects toggle on newly created views
-- `perf_overlay_visible` flag — controls per-node cook time badge; respects toggle on newly created views
-- `set_previews_visible(enabled)` — shows/hides all existing node preview controls; newly created views auto-hide if `previews_visible` is false
-- `set_perf_overlay_visible(enabled)` — shows/hides all existing perf overlay labels; newly created views auto-show if `perf_overlay_visible` is true
-- `update_previews()` — skips updates when `previews_visible` is false (zero cost when hidden)
-- `update_perf_overlays()` — skips updates when `perf_overlay_visible` is false
+- `previews_visible` flag â€” controls whether inline previews are shown; respects toggle on newly created views
+- `perf_overlay_visible` flag â€” controls per-node cook time badge; respects toggle on newly created views
+- `set_previews_visible(enabled)` â€” shows/hides all existing node preview controls; newly created views auto-hide if `previews_visible` is false
+- `set_perf_overlay_visible(enabled)` â€” shows/hides all existing perf overlay labels; newly created views auto-show if `perf_overlay_visible` is true
+- `update_previews()` â€” skips updates when `previews_visible` is false (zero cost when hidden)
+- `update_perf_overlays()` â€” skips updates when `perf_overlay_visible` is false
 
 ### GNNodePalette (extends Popup)
 - Tree-based operator browser grouped by family, with search filtering
-- Family groups iterate `GNFamily.FAMILY_NAMES` dynamically (not hardcoded) — adding a new family auto-populates the palette
+- Family groups iterate `GNFamily.FAMILY_NAMES` dynamically (not hardcoded) â€” adding a new family auto-populates the palette
 - Operator descriptions fetched from `GNExtensionRegistry.get_description()` for tooltips
 - **Filtered mode** via `popup_at_filtered(global_pos, allowed_operators: PackedStringArray)`: only shows operators in the allowed list. Used by drop-wire-to-add-node.
-- **Unfiltered mode** via `popup_at(global_pos)`: shows all operators (Tab key, right-click → Add Node)
+- **Unfiltered mode** via `popup_at(global_pos)`: shows all operators (Tab key, right-click â†’ Add Node)
 - Filter cleared automatically on `popup_hide` signal
 
 ### GNNodeView (extends GraphNode)
@@ -833,28 +833,28 @@ Every node has an eye icon (👁) in its title bar (next to the ? help button).
 - Shows typed input/output ports with family colors
 - Family-colored title bar via StyleBoxFlat theme overrides
 - Title format: `"nodeId  [FAMILY]"` (e.g., `"noise1  [TOP]"`)
-- **Double-click title bar to rename** — inline LineEdit overlay, commits on Enter or focus-lost
+- **Double-click title bar to rename** â€” inline LineEdit overlay, commits on Enter or focus-lost
 - `rename_requested(old_id, new_id)` signal emitted on commit
 - Dynamic port rebuilding via `rebuild_slots()` + `reset_size()`
 - Port/node tooltips from descriptions
-- **Live preview** via `_setup_preview()` → family base class `create_preview_control()`
-- `show_preview()` / `hide_preview()` — toggle preview control visibility with `reset_size()` to resize the node
-- **Performance overlay** via `_perf_label` (Label): color-coded cook time badge (✓/✗ + ms)
-- `show_perf_overlay()` / `hide_perf_overlay()` / `update_perf_overlay()` — lazy label creation, color-coded by threshold
+- **Live preview** via `_setup_preview()` â†’ family base class `create_preview_control()`
+- `show_preview()` / `hide_preview()` â€” toggle preview control visibility with `reset_size()` to resize the node
+- **Performance overlay** via `_perf_label` (Label): color-coded cook time badge (âœ“/âœ— + ms)
+- `show_perf_overlay()` / `hide_perf_overlay()` / `update_perf_overlay()` â€” lazy label creation, color-coded by threshold
 
 ### GNInspector (GNParamInspector, extends PanelContainer)
 - Shows parameters for the currently selected node
 - Header shows node ID (updates on rename) + status line (family, type, port count, resolution for TOPs)
 - Resolution display for TOPs: `In [in0:512x512, in1:256x256] | Out 512x512`
 - Renders appropriate controls per parameter type:
-  - float → HSlider + SpinBox
-  - int → SpinBox
-  - Vector2 → 2x SpinBox
-  - Color → ColorPickerButton
-  - enum → OptionButton
-  - bool → CheckBox
-  - String → LineEdit
-  - RAMP → GNRampEditor (custom `_draw()` curve editor with add/remove/drag keypoints, tangent handles, auto-smooth toggle)
+  - float â†’ HSlider + SpinBox
+  - int â†’ SpinBox
+  - Vector2 â†’ 2x SpinBox
+  - Color â†’ ColorPickerButton
+  - enum â†’ OptionButton
+  - bool â†’ CheckBox
+  - String â†’ LineEdit
+  - RAMP â†’ GNRampEditor (custom `_draw()` curve editor with add/remove/drag keypoints, tangent handles, auto-smooth toggle)
 - Expression toggle: switch from value to expression mode
 - **Per-component expressions** (TD-style): multi-dimensional types (Vector2, Vector2i, Vector3, Vector4, Color) have independent C/E toggles per component (X/Y/Z/W or R/G/B/A). Each component can independently be a constant or an expression. Managed by `GNParameter.component_modes[]`, `component_expressions[]`, serialized in `to_dict()`/`from_dict()`, evaluated per-component in `GNCookEngine._evaluate_component_expressions()`.
 
@@ -870,181 +870,181 @@ Every node has an eye icon (👁) in its title bar (next to the ? help button).
 
 ```
 GONODES/
-├── project.godot
-├── GONODES_CONTEXT.md              ← This file
-├── addons/
-│   └── gonodes/
-│       ├── plugin.cfg
-│       ├── gonodes_plugin.gd       # EditorPlugin entry (for editor mode)
-│       ├── core/
-│       │   ├── gn_data.gd          # GNData base class (RefCounted)
-│       │   ├── gn_texture_data.gd  # GNTextureData (RefCounted)
-│       │   ├── gn_channel_data.gd  # GNChannelData (RefCounted)
-│       │   ├── gn_table_data.gd    # GNTableData — DAT output (RefCounted)
-│       │   ├── gn_geo_data.gd      # GNGeoData — SOP output, wraps ArrayMesh (RefCounted)
-│       │   ├── gn_node.gd          # GNNode base operator class (Node) — type-agnostic
-│       │   ├── gn_top_base.gd      # GNTopBase — TOP family base (viewport infra, shader pipeline, render-once-per-cook)
-│       │   ├── gn_chop_base.gd     # GNChopBase — CHOP family base (channel data cache, label preview)
-│       │   ├── gn_dat_base.gd      # GNDatBase — DAT family base (table cache, label preview)
-│       │   ├── gn_sop_base.gd      # GNSopBase — SOP family base (geo cache, label preview)
-│       │   ├── gn_comp_base.gd     # GNCompBase — COMP family base (scene node, auto-cleanup)
-│       │   ├── gn_port.gd          # GNPort definition (RefCounted)
-│       │   ├── gn_connection.gd    # GNConnection (RefCounted)
-│       │   ├── gn_network.gd       # GNNetwork (Resource — serialization boundary)
-│       │   ├── gn_cook_engine.gd   # GNCookEngine (Node)
-│       │   ├── gn_parameter.gd     # GNParameter (Resource — typed param with expressions + profiling)
-│       │   ├── gn_expression_functions.gd # GNExpressionFunctions — custom function registry (static)
-│       │   ├── gn_extension_registry.gd # GNExtensionRegistry — dynamic operator registry + extension loader
-│       │   ├── gn_family.gd        # GNFamily enum constants
-│       │   ├── gn_logger.gd        # GNLogger — centralized logging with level filtering
-│       │   ├── gn_resource_loader.gd # GNResourceLoader — three-tier resource loading (res://, project://, absolute)
-│       │   └── gn_project_manager.gd # GNProjectManager — project folder lifecycle & scanning
-│       ├── operators/
-│       │   ├── top/
-│       │   │   ├── noise_top.gd         # + 19 more TOPs (blur, ramp, circle, etc.)
-│       │   │   ├── composite_top.gd
-│       │   │   ├── level_top.gd
-│       │   │   └── render_top.gd        # RenderTOP — 3D SubViewport bridge (COMP→TOP)
-│       │   ├── chop/
-│       │   │   ├── lfo_chop.gd          # + 20 more CHOPs (wave, pattern, filter, ramp, etc.)
-│       │   │   ├── math_chop.gd
-│       │   │   ├── ramp_chop.gd          # Dynamic ramp curves → CHOP channels (1–16 slots)
-│       │   │   └── noise_chop.gd
-│       │   ├── dat/
-│       │   │   ├── constant_dat.gd      # 4×4 editable table
-│       │   │   ├── text_dat.gd          # Plain text
-│       │   │   ├── null_dat.gd          # Passthrough
-│       │   │   ├── select_dat.gd        # Row/col range selection
-│       │   │   ├── merge_dat.gd         # Row or column merge
-│       │   │   ├── transpose_dat.gd     # Transpose rows/cols
-│       │   │   ├── sort_dat.gd          # Sort by column (alpha/numeric)
-│       │   │   ├── evaluate_dat.gd      # Expression cells (=expr)
-│       │   │   ├── switch_dat.gd        # Index-based input select
-│       │   │   ├── chop_to_dat.gd       # CHOP→DAT bridge
-│       │   │   ├── dat_to_chop.gd       # DAT→CHOP bridge (family=CHOP)
-│       │   │   ├── info_dat.gd          # System info table (time-dependent)
-│       │   │   └── osc_in_dat.gd        # OSC input (stub for future UDP)
-│       │   ├── sop/
-│       │   │   ├── grid_sop.gd          # Subdivided plane (SurfaceTool)
-│       │   │   ├── box_sop.gd           # Godot BoxMesh
-│       │   │   ├── sphere_sop.gd        # Godot SphereMesh
-│       │   │   ├── torus_sop.gd         # Godot TorusMesh
-│       │   │   ├── cylinder_sop.gd      # Godot CylinderMesh
-│       │   │   ├── line_sop.gd          # Line strip
-│       │   │   ├── circle_sop.gd        # Filled disc or wire circle
-│       │   │   ├── transform_sop.gd     # TRS with 6 transform orders
-│       │   │   ├── noise_sop.gd         # FastNoiseLite vertex displacement
-│       │   │   ├── subdivide_sop.gd     # Triangle→4 split (up to 4 iterations)
-│       │   │   ├── wireframe_sop.gd     # Triangles→lines (edge dedup)
-│       │   │   ├── merge_sop.gd         # Multi-input surface append
-│       │   │   ├── null_sop.gd          # Passthrough
-│       │   │   └── switch_sop.gd        # Index-based input select
-│       │   ├── comp/
-│       │   │   ├── geometry_comp.gd     # MeshInstance3D wrapper (SOP→3D scene)
-│       │   │   ├── camera_comp.gd       # Camera3D wrapper (perspective/ortho)
-│       │   │   └── light_comp.gd        # Light3D wrapper (dir/omni/spot)
-│       │   ├── bridge/
-│       │   │   └── chop_to_top.gd       # (or parameter expression system)
-│       │   └── output/
-│       │       └── window_top.gd        # WindowTOP — multi-window display output
-│       ├── ui/
-│       │   ├── gn_graph_editor.gd
-│       │   ├── gn_graph_editor.tscn
-│       │   ├── gn_node_view.gd
-│       │   ├── gn_node_view.tscn
-│       │   ├── gn_inspector.gd
-│       │   ├── gn_inspector.tscn
-│       │   ├── gn_viewer.gd
-│       │   ├── gn_viewer.tscn
-│       │   ├── gn_node_palette.gd
-│       │   ├── gn_node_palette.tscn
-│       │   ├── gn_ramp_editor.gd    # GNRampEditor — custom _draw() curve editor for RAMP parameters
-│       │   ├── gn_network_box.gd    # GNNetworkBox — canvas annotation: colored grouping rectangle
-│       │   ├── gn_sticky_note.gd    # GNStickyNote — canvas annotation: editable text note
-│       │   └── gn_main_editor.tscn # Main layout scene
-│       ├── shaders/
-│       │   ├── noise_simplex.gdshader
-│       │   ├── noise_perlin.gdshader
-│       │   ├── noise_voronoi.gdshader
-│       │   ├── composite.gdshader
-│       │   └── levels.gdshader
-│       └── icons/
-│           ├── top_icon.svg
-│           ├── chop_icon.svg
-│           └── ... (per-operator icons)
-│   └── gn_ext_ffmpeg/                  # ← First GNExtension addon (reference impl)
-│       ├── gn_extension.cfg            # Manifest: name, deps, operator list
-│       ├── README.md
-│       └── operators/top/
-│           └── ffmpeg_in_top.gd        # FFmpegInTOP — dynamic ClassDB.instantiate("FFmpegVideoStream")
-│   └── gn_ext_shadertoy/              # ← Shadertoy shader pack extension
-│       ├── gn_extension.cfg            # Manifest: 11 operators (5 gen + 5 fx + 1 runtime)
-│       ├── README.md
-│       ├── shadertoy_translator.gd     # ShadertoyTranslator — GLSL→Godot shader converter
-│       ├── shaders/                    # 10 pre-converted .gdshader files
-│       └── operators/top/
-│   └── gn_ext_native/                 # ← Native Acceleration extension (GDScript wrappers)
-│       ├── gn_extension.cfg            # Manifest: 16 operators (Phase 1 + Phase 2)
-│       ├── README.md
-│       ├── help/
-│       │   ├── img/                         # Help patches for IMG native ops
-│       │   ├── sop/                         # Help patches for SOP native ops
-│       │   └── chop/                        # Help patches for CHOP native ops
-│       └── operators/
-│           ├── img/
-│           │   ├── blur_img_native.gd       # BlurIMGNative — delegates to GNNativeBlur
-│           │   ├── noise_img_native.gd      # NoiseIMGNative — delegates to GNNativeNoise
-│           │   ├── pixel_sort_img_native.gd # PixelSortIMGNative — delegates to GNNativePixelSort
-│           │   └── edge_detect_img_native.gd # EdgeDetectIMGNative — delegates to GNNativeEdgeDetect
-│           ├── sop/
-│           │   ├── particle_sop_native.gd   # ParticleSOPNative — delegates to GNNativeParticle
-│           │   ├── metaball_sop_native.gd   # MetaballSOPNative — delegates to GNNativeMetaball
-│           │   ├── polyreduce_sop_native.gd # PolyReduceSOPNative — delegates to GNNativePolyReduce
-│           │   ├── isosurface_sop_native.gd # IsoSurfaceSOPNative — delegates to GNNativeIsoSurface
-│           │   ├── ray_sop_native.gd        # RaySOPNative — delegates to GNNativeRay
-│           │   ├── facet_sop_native.gd      # FacetSOPNative — delegates to GNNativeFacet
-│           │   ├── fuse_sop_native.gd       # FuseSOPNative — delegates to GNNativeFuse
-│           │   ├── subdivide_sop_native.gd  # SubdivideSOPNative — delegates to GNNativeSubdivide
-│           │   ├── copy_sop_native.gd       # CopySOPNative — delegates to GNNativeCopy
-│           │   ├── lsystem_sop_native.gd    # LSystemSOPNative — delegates to GNNativeLSystem
-│           │   └── spring_sop_native.gd     # SpringSOPNative — delegates to GNNativeSpring
-│           └── chop/
-│               └── smooth_chop_native.gd    # SmoothCHOPNative — delegates to GNNativeSmooth
-│   └── gn_native/                     # ← C++ GDExtension source (requires godot-cpp + scons build)
-│       ├── gn_native.gdextension              # Active — Windows DLL compiled
-│       ├── bin/win64/libgn_native.windows.template_debug.x86_64.dll  # 677 KB
-│       ├── SConstruct                      # SCons build file
-│       └── src/
-│           ├── register_types.cpp/.h        # Entry point registering all 16 C++ classes
-│           ├── img/                         # GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
-│           ├── sop/                         # GNNativeParticle, GNNativeMetaball, GNNativePolyReduce + 8 Phase 2 SOPs
-│           └── chop/                        # GNNativeSmooth
-│           ├── shadertoy_base_top.gd   # Abstract base for pre-baked Shadertoy TOPs
-│           ├── shadertoy_url_top.gd    # ShadertoyURLTOP — runtime paste/fetch translator
-│           ├── st_seascape_top.gd      # Generator: procedural ocean
-│           ├── st_voronoi_fire_top.gd  # Generator: Voronoi fire
-│           ├── st_creation_top.gd      # Generator: demoscene colour field
-│           ├── st_star_nest_top.gd     # Generator: space fractal
-│           ├── st_plasma_top.gd        # Generator: retro plasma
-│           ├── st_crt_top.gd           # Effect: CRT barrel distortion
-│           ├── st_chromatic_ab_top.gd  # Effect: chromatic aberration
-│           ├── st_pixelate_top.gd      # Effect: mosaic pixelation
-│           ├── st_film_grain_top.gd    # Effect: animated film grain
-│           └── st_halftone_top.gd      # Effect: CMYK halftone dots
-├── scenes/
-│   └── main.tscn                   # Application entry scene
-├── tests/
-│   ├── test_cook_engine.gd
-│   ├── test_network.gd
-│   └── test_operators.gd
-└── assets/
+â”œâ”€â”€ project.godot
+â”œâ”€â”€ GONODES_CONTEXT.md              â† This file
+â”œâ”€â”€ addons/
+â”‚   â””â”€â”€ gonodes/
+â”‚       â”œâ”€â”€ plugin.cfg
+â”‚       â”œâ”€â”€ gonodes_plugin.gd       # EditorPlugin entry (for editor mode)
+â”‚       â”œâ”€â”€ core/
+â”‚       â”‚   â”œâ”€â”€ gn_data.gd          # GNData base class (RefCounted)
+â”‚       â”‚   â”œâ”€â”€ gn_texture_data.gd  # GNTextureData (RefCounted)
+â”‚       â”‚   â”œâ”€â”€ gn_channel_data.gd  # GNChannelData (RefCounted)
+â”‚       â”‚   â”œâ”€â”€ gn_table_data.gd    # GNTableData â€” DAT output (RefCounted)
+â”‚       â”‚   â”œâ”€â”€ gn_geo_data.gd      # GNGeoData â€” SOP output, wraps ArrayMesh (RefCounted)
+â”‚       â”‚   â”œâ”€â”€ gn_node.gd          # GNNode base operator class (Node) â€” type-agnostic
+â”‚       â”‚   â”œâ”€â”€ gn_top_base.gd      # GNTopBase â€” TOP family base (viewport infra, shader pipeline, render-once-per-cook)
+â”‚       â”‚   â”œâ”€â”€ gn_chop_base.gd     # GNChopBase â€” CHOP family base (channel data cache, label preview)
+â”‚       â”‚   â”œâ”€â”€ gn_dat_base.gd      # GNDatBase â€” DAT family base (table cache, label preview)
+â”‚       â”‚   â”œâ”€â”€ gn_sop_base.gd      # GNSopBase â€” SOP family base (geo cache, label preview)
+â”‚       â”‚   â”œâ”€â”€ gn_comp_base.gd     # GNCompBase â€” COMP family base (scene node, auto-cleanup)
+â”‚       â”‚   â”œâ”€â”€ gn_port.gd          # GNPort definition (RefCounted)
+â”‚       â”‚   â”œâ”€â”€ gn_connection.gd    # GNConnection (RefCounted)
+â”‚       â”‚   â”œâ”€â”€ gn_network.gd       # GNNetwork (Resource â€” serialization boundary)
+â”‚       â”‚   â”œâ”€â”€ gn_cook_engine.gd   # GNCookEngine (Node)
+â”‚       â”‚   â”œâ”€â”€ gn_parameter.gd     # GNParameter (Resource â€” typed param with expressions + profiling)
+â”‚       â”‚   â”œâ”€â”€ gn_expression_functions.gd # GNExpressionFunctions â€” custom function registry (static)
+â”‚       â”‚   â”œâ”€â”€ gn_extension_registry.gd # GNExtensionRegistry â€” dynamic operator registry + extension loader
+â”‚       â”‚   â”œâ”€â”€ gn_family.gd        # GNFamily enum constants
+â”‚       â”‚   â”œâ”€â”€ gn_logger.gd        # GNLogger â€” centralized logging with level filtering
+â”‚       â”‚   â”œâ”€â”€ gn_resource_loader.gd # GNResourceLoader â€” three-tier resource loading (res://, project://, absolute)
+â”‚       â”‚   â””â”€â”€ gn_project_manager.gd # GNProjectManager â€” project folder lifecycle & scanning
+â”‚       â”œâ”€â”€ operators/
+â”‚       â”‚   â”œâ”€â”€ top/
+â”‚       â”‚   â”‚   â”œâ”€â”€ noise_top.gd         # + 19 more TOPs (blur, ramp, circle, etc.)
+â”‚       â”‚   â”‚   â”œâ”€â”€ composite_top.gd
+â”‚       â”‚   â”‚   â”œâ”€â”€ level_top.gd
+â”‚       â”‚   â”‚   â””â”€â”€ render_top.gd        # RenderTOP â€” 3D SubViewport bridge (COMPâ†’TOP)
+â”‚       â”‚   â”œâ”€â”€ chop/
+â”‚       â”‚   â”‚   â”œâ”€â”€ lfo_chop.gd          # + 20 more CHOPs (wave, pattern, filter, ramp, etc.)
+â”‚       â”‚   â”‚   â”œâ”€â”€ math_chop.gd
+â”‚       â”‚   â”‚   â”œâ”€â”€ ramp_chop.gd          # Dynamic ramp curves â†’ CHOP channels (1â€“16 slots)
+â”‚       â”‚   â”‚   â””â”€â”€ noise_chop.gd
+â”‚       â”‚   â”œâ”€â”€ dat/
+â”‚       â”‚   â”‚   â”œâ”€â”€ constant_dat.gd      # 4Ã—4 editable table
+â”‚       â”‚   â”‚   â”œâ”€â”€ text_dat.gd          # Plain text
+â”‚       â”‚   â”‚   â”œâ”€â”€ null_dat.gd          # Passthrough
+â”‚       â”‚   â”‚   â”œâ”€â”€ select_dat.gd        # Row/col range selection
+â”‚       â”‚   â”‚   â”œâ”€â”€ merge_dat.gd         # Row or column merge
+â”‚       â”‚   â”‚   â”œâ”€â”€ transpose_dat.gd     # Transpose rows/cols
+â”‚       â”‚   â”‚   â”œâ”€â”€ sort_dat.gd          # Sort by column (alpha/numeric)
+â”‚       â”‚   â”‚   â”œâ”€â”€ evaluate_dat.gd      # Expression cells (=expr)
+â”‚       â”‚   â”‚   â”œâ”€â”€ switch_dat.gd        # Index-based input select
+â”‚       â”‚   â”‚   â”œâ”€â”€ chop_to_dat.gd       # CHOPâ†’DAT bridge
+â”‚       â”‚   â”‚   â”œâ”€â”€ dat_to_chop.gd       # DATâ†’CHOP bridge (family=CHOP)
+â”‚       â”‚   â”‚   â”œâ”€â”€ info_dat.gd          # System info table (time-dependent)
+â”‚       â”‚   â”‚   â””â”€â”€ osc_in_dat.gd        # OSC input (stub for future UDP)
+â”‚       â”‚   â”œâ”€â”€ sop/
+â”‚       â”‚   â”‚   â”œâ”€â”€ grid_sop.gd          # Subdivided plane (SurfaceTool)
+â”‚       â”‚   â”‚   â”œâ”€â”€ box_sop.gd           # Godot BoxMesh
+â”‚       â”‚   â”‚   â”œâ”€â”€ sphere_sop.gd        # Godot SphereMesh
+â”‚       â”‚   â”‚   â”œâ”€â”€ torus_sop.gd         # Godot TorusMesh
+â”‚       â”‚   â”‚   â”œâ”€â”€ cylinder_sop.gd      # Godot CylinderMesh
+â”‚       â”‚   â”‚   â”œâ”€â”€ line_sop.gd          # Line strip
+â”‚       â”‚   â”‚   â”œâ”€â”€ circle_sop.gd        # Filled disc or wire circle
+â”‚       â”‚   â”‚   â”œâ”€â”€ transform_sop.gd     # TRS with 6 transform orders
+â”‚       â”‚   â”‚   â”œâ”€â”€ noise_sop.gd         # FastNoiseLite vertex displacement
+â”‚       â”‚   â”‚   â”œâ”€â”€ subdivide_sop.gd     # Triangleâ†’4 split (up to 4 iterations)
+â”‚       â”‚   â”‚   â”œâ”€â”€ wireframe_sop.gd     # Trianglesâ†’lines (edge dedup)
+â”‚       â”‚   â”‚   â”œâ”€â”€ merge_sop.gd         # Multi-input surface append
+â”‚       â”‚   â”‚   â”œâ”€â”€ null_sop.gd          # Passthrough
+â”‚       â”‚   â”‚   â””â”€â”€ switch_sop.gd        # Index-based input select
+â”‚       â”‚   â”œâ”€â”€ comp/
+â”‚       â”‚   â”‚   â”œâ”€â”€ geometry_comp.gd     # MeshInstance3D wrapper (SOPâ†’3D scene)
+â”‚       â”‚   â”‚   â”œâ”€â”€ camera_comp.gd       # Camera3D wrapper (perspective/ortho)
+â”‚       â”‚   â”‚   â””â”€â”€ light_comp.gd        # Light3D wrapper (dir/omni/spot)
+â”‚       â”‚   â”œâ”€â”€ bridge/
+â”‚       â”‚   â”‚   â””â”€â”€ chop_to_top.gd       # (or parameter expression system)
+â”‚       â”‚   â””â”€â”€ output/
+â”‚       â”‚       â””â”€â”€ window_out.gd        # WindowOUT â€” multi-window display output
+â”‚       â”œâ”€â”€ ui/
+â”‚       â”‚   â”œâ”€â”€ gn_graph_editor.gd
+â”‚       â”‚   â”œâ”€â”€ gn_graph_editor.tscn
+â”‚       â”‚   â”œâ”€â”€ gn_node_view.gd
+â”‚       â”‚   â”œâ”€â”€ gn_node_view.tscn
+â”‚       â”‚   â”œâ”€â”€ gn_inspector.gd
+â”‚       â”‚   â”œâ”€â”€ gn_inspector.tscn
+â”‚       â”‚   â”œâ”€â”€ gn_viewer.gd
+â”‚       â”‚   â”œâ”€â”€ gn_viewer.tscn
+â”‚       â”‚   â”œâ”€â”€ gn_node_palette.gd
+â”‚       â”‚   â”œâ”€â”€ gn_node_palette.tscn
+â”‚       â”‚   â”œâ”€â”€ gn_ramp_editor.gd    # GNRampEditor â€” custom _draw() curve editor for RAMP parameters
+â”‚       â”‚   â”œâ”€â”€ gn_network_box.gd    # GNNetworkBox â€” canvas annotation: colored grouping rectangle
+â”‚       â”‚   â”œâ”€â”€ gn_sticky_note.gd    # GNStickyNote â€” canvas annotation: editable text note
+â”‚       â”‚   â””â”€â”€ gn_main_editor.tscn # Main layout scene
+â”‚       â”œâ”€â”€ shaders/
+â”‚       â”‚   â”œâ”€â”€ noise_simplex.gdshader
+â”‚       â”‚   â”œâ”€â”€ noise_perlin.gdshader
+â”‚       â”‚   â”œâ”€â”€ noise_voronoi.gdshader
+â”‚       â”‚   â”œâ”€â”€ composite.gdshader
+â”‚       â”‚   â””â”€â”€ levels.gdshader
+â”‚       â””â”€â”€ icons/
+â”‚           â”œâ”€â”€ top_icon.svg
+â”‚           â”œâ”€â”€ chop_icon.svg
+â”‚           â””â”€â”€ ... (per-operator icons)
+â”‚   â””â”€â”€ gn_ext_ffmpeg/                  # â† First GNExtension addon (reference impl)
+â”‚       â”œâ”€â”€ gn_extension.cfg            # Manifest: name, deps, operator list
+â”‚       â”œâ”€â”€ README.md
+â”‚       â””â”€â”€ operators/top/
+â”‚           â””â”€â”€ ffmpeg_in_top.gd        # FFmpegInTOP â€” dynamic ClassDB.instantiate("FFmpegVideoStream")
+â”‚   â””â”€â”€ gn_ext_shadertoy/              # â† Shadertoy shader pack extension
+â”‚       â”œâ”€â”€ gn_extension.cfg            # Manifest: 11 operators (5 gen + 5 fx + 1 runtime)
+â”‚       â”œâ”€â”€ README.md
+â”‚       â”œâ”€â”€ shadertoy_translator.gd     # ShadertoyTranslator â€” GLSLâ†’Godot shader converter
+â”‚       â”œâ”€â”€ shaders/                    # 10 pre-converted .gdshader files
+â”‚       â””â”€â”€ operators/top/
+â”‚   â””â”€â”€ gn_ext_native/                 # â† Native Acceleration extension (GDScript wrappers)
+â”‚       â”œâ”€â”€ gn_extension.cfg            # Manifest: 16 operators (Phase 1 + Phase 2)
+â”‚       â”œâ”€â”€ README.md
+â”‚       â”œâ”€â”€ help/
+â”‚       â”‚   â”œâ”€â”€ img/                         # Help patches for IMG native ops
+â”‚       â”‚   â”œâ”€â”€ sop/                         # Help patches for SOP native ops
+â”‚       â”‚   â””â”€â”€ chop/                        # Help patches for CHOP native ops
+â”‚       â””â”€â”€ operators/
+â”‚           â”œâ”€â”€ img/
+â”‚           â”‚   â”œâ”€â”€ blur_img_native.gd       # BlurIMGNative â€” delegates to GNNativeBlur
+â”‚           â”‚   â”œâ”€â”€ noise_img_native.gd      # NoiseIMGNative â€” delegates to GNNativeNoise
+â”‚           â”‚   â”œâ”€â”€ pixel_sort_img_native.gd # PixelSortIMGNative â€” delegates to GNNativePixelSort
+â”‚           â”‚   â””â”€â”€ edge_detect_img_native.gd # EdgeDetectIMGNative â€” delegates to GNNativeEdgeDetect
+â”‚           â”œâ”€â”€ sop/
+â”‚           â”‚   â”œâ”€â”€ particle_sop_native.gd   # ParticleSOPNative â€” delegates to GNNativeParticle
+â”‚           â”‚   â”œâ”€â”€ metaball_sop_native.gd   # MetaballSOPNative â€” delegates to GNNativeMetaball
+â”‚           â”‚   â”œâ”€â”€ polyreduce_sop_native.gd # PolyReduceSOPNative â€” delegates to GNNativePolyReduce
+â”‚           â”‚   â”œâ”€â”€ isosurface_sop_native.gd # IsoSurfaceSOPNative â€” delegates to GNNativeIsoSurface
+â”‚           â”‚   â”œâ”€â”€ ray_sop_native.gd        # RaySOPNative â€” delegates to GNNativeRay
+â”‚           â”‚   â”œâ”€â”€ facet_sop_native.gd      # FacetSOPNative â€” delegates to GNNativeFacet
+â”‚           â”‚   â”œâ”€â”€ fuse_sop_native.gd       # FuseSOPNative â€” delegates to GNNativeFuse
+â”‚           â”‚   â”œâ”€â”€ subdivide_sop_native.gd  # SubdivideSOPNative â€” delegates to GNNativeSubdivide
+â”‚           â”‚   â”œâ”€â”€ copy_sop_native.gd       # CopySOPNative â€” delegates to GNNativeCopy
+â”‚           â”‚   â”œâ”€â”€ lsystem_sop_native.gd    # LSystemSOPNative â€” delegates to GNNativeLSystem
+â”‚           â”‚   â””â”€â”€ spring_sop_native.gd     # SpringSOPNative â€” delegates to GNNativeSpring
+â”‚           â””â”€â”€ chop/
+â”‚               â””â”€â”€ smooth_chop_native.gd    # SmoothCHOPNative â€” delegates to GNNativeSmooth
+â”‚   â””â”€â”€ gn_native/                     # â† C++ GDExtension source (requires godot-cpp + scons build)
+â”‚       â”œâ”€â”€ gn_native.gdextension              # Active â€” Windows DLL compiled
+â”‚       â”œâ”€â”€ bin/win64/libgn_native.windows.template_debug.x86_64.dll  # 677 KB
+â”‚       â”œâ”€â”€ SConstruct                      # SCons build file
+â”‚       â””â”€â”€ src/
+â”‚           â”œâ”€â”€ register_types.cpp/.h        # Entry point registering all 16 C++ classes
+â”‚           â”œâ”€â”€ img/                         # GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
+â”‚           â”œâ”€â”€ sop/                         # GNNativeParticle, GNNativeMetaball, GNNativePolyReduce + 8 Phase 2 SOPs
+â”‚           â””â”€â”€ chop/                        # GNNativeSmooth
+â”‚           â”œâ”€â”€ shadertoy_base_top.gd   # Abstract base for pre-baked Shadertoy TOPs
+â”‚           â”œâ”€â”€ shadertoy_url_top.gd    # ShadertoyURLTOP â€” runtime paste/fetch translator
+â”‚           â”œâ”€â”€ st_seascape_top.gd      # Generator: procedural ocean
+â”‚           â”œâ”€â”€ st_voronoi_fire_top.gd  # Generator: Voronoi fire
+â”‚           â”œâ”€â”€ st_creation_top.gd      # Generator: demoscene colour field
+â”‚           â”œâ”€â”€ st_star_nest_top.gd     # Generator: space fractal
+â”‚           â”œâ”€â”€ st_plasma_top.gd        # Generator: retro plasma
+â”‚           â”œâ”€â”€ st_crt_top.gd           # Effect: CRT barrel distortion
+â”‚           â”œâ”€â”€ st_chromatic_ab_top.gd  # Effect: chromatic aberration
+â”‚           â”œâ”€â”€ st_pixelate_top.gd      # Effect: mosaic pixelation
+â”‚           â”œâ”€â”€ st_film_grain_top.gd    # Effect: animated film grain
+â”‚           â””â”€â”€ st_halftone_top.gd      # Effect: CMYK halftone dots
+â”œâ”€â”€ scenes/
+â”‚   â””â”€â”€ main.tscn                   # Application entry scene
+â”œâ”€â”€ tests/
+â”‚   â”œâ”€â”€ test_cook_engine.gd
+â”‚   â”œâ”€â”€ test_network.gd
+â”‚   â””â”€â”€ test_operators.gd
+â””â”€â”€ assets/
 ```
 
 ---
 
 ## 12. Development Phases
 
-### Phase 1: Core Framework (Week 1) ✅
+### Phase 1: Core Framework (Week 1) âœ…
 - [x] Set up Godot 4.6 project structure
 - [x] Implement GNData, GNTextureData, GNChannelData
 - [x] Implement GNPort, GNConnection
@@ -1054,7 +1054,7 @@ GONODES/
 - [x] Implement GNCookEngine (dirty propagation, frame cook loop)
 - [ ] Write unit tests for graph operations and cook order
 
-### Phase 2: First Operators (Week 2) ✅
+### Phase 2: First Operators (Week 2) âœ…
 - [x] Implement NoiseTOP (SubViewport + noise shader)
 - [x] Implement LFO_CHOP (waveform generator)
 - [x] Wire up cook engine to process a test network from code
@@ -1062,42 +1062,42 @@ GONODES/
 - [x] Implement CompositeTOP
 - [x] Implement LevelTOP
 - [x] Implement NoiseCHOP, MathCHOP
-- [x] Implement WindowTOP (multi-window/multi-display output)
+- [x] Implement WindowOUT (multi-window/multi-display output)
 - [x] Implement GNLogger (centralized logging with toggle)
-- [x] Resource → Node/RefCounted migration
+- [x] Resource â†’ Node/RefCounted migration
 - [x] Expression system debugging & rearchitecture (base_instance model)
-- [x] WindowTOP rendering fix (anchors + zero-copy texture routing)
+- [x] WindowOUT rendering fix (anchors + zero-copy texture routing)
 - [x] Cook engine performance optimization (cached adjacency, zero-alloc inputs)
 - [x] Verified: animated noise, movable output window, stable cook times
 
-### Phase 3: Node Graph UI (Week 3) ✅
+### Phase 3: Node Graph UI (Week 3) âœ…
 - [x] Implement GNGraphEditor (GraphEdit wrapper with bidirectional network sync)
 - [x] Implement GNNodeView (GraphNode per operator with family-colored title bar)
 - [x] Port rendering with family colors via `set_slot()` typed port slots
 - [x] Wire connection UI with type checking
 - [x] Add/remove nodes via UI (Tab / right-click palette)
 - [x] Connect/disconnect wires via UI
-- [x] Sync UI ↔ GNNetwork model bidirectionally (signal-driven)
+- [x] Sync UI â†” GNNetwork model bidirectionally (signal-driven)
 - [x] Implement GNNodePalette (popup with search + family grouping)
 - [x] Editor scene (gn_editor.tscn) with HSplit layout: graph + viewer/inspector
 
-### Phase 4: Parameters & Inspector (Week 4) ✅
+### Phase 4: Parameters & Inspector (Week 4) âœ…
 - [x] Implement GNParamInspector panel (family color bar, header, scrollable params)
 - [x] Implement GNParamRow (per-parameter widget with type-specific controls)
 - [x] Render parameter controls by type (FLOAT: slider+spinbox, INT: spinbox, BOOL: checkbox, ENUM: dropdown, COLOR: picker, VECTOR2/2I: dual spinbox, STRING: line edit, FILE: project file picker button with FileDialog)
 - [x] Parameter mode toggle (C=constant green / E=expression orange)
 - [x] Expression inline editor with focus guard (no 60fps text clobbering)
-- [x] Parameter change → mark node dirty → recook
+- [x] Parameter change â†’ mark node dirty â†’ recook
 - [x] GNViewer panel showing TOP output in real-time (VSplit: viewer top, inspector bottom)
 - [x] Expression mode: CHOP channel references in parameter fields
-- [x] Per-component expressions for multi-dimensional params (Vector2, Vector3, Vector4, Color — TD-style independent C/E per component)
+- [x] Per-component expressions for multi-dimensional params (Vector2, Vector3, Vector4, Color â€” TD-style independent C/E per component)
 - [x] Live cook time display per node in inspector header
 - [x] NoiseTOP noise_type enum wired to shader (4 algorithms: Simplex/Perlin/Voronoi/White)
-- [x] WindowTOP `_window_params_dirty` flag — only reconfigures on own param changes, not upstream cook-dirty
+- [x] WindowOUT `_window_params_dirty` flag â€” only reconfigures on own param changes, not upstream cook-dirty
 
-### Phase 5: Polish & More Operators (Week 5) ✅
+### Phase 5: Polish & More Operators (Week 5) âœ…
 - [x] MathCHOP, NoiseCHOP (completed in Phase 2)
-- [x] Massive operator expansion — 20 new TOPs + 17 new CHOPs
+- [x] Massive operator expansion â€” 20 new TOPs + 17 new CHOPs
   - **New TOP generators:** RampTOP, CircleTOP, RectangleTOP, ConstantTOP, TextTOP
   - **New TOP filters:** BlurTOP (2-pass Gaussian), TransformTOP, HSVAdjustTOP, EdgeTOP, ThresholdTOP, FlipTOP, TileTOP, CropTOP, FeedbackTOP, ResolutionTOP
   - **New TOP combiners:** CrossTOP, DisplaceTOP, LookupTOP
@@ -1108,17 +1108,17 @@ GONODES/
   - **New CHOP utility:** NullCHOP, SwitchCHOP
 - [x] 14 new GPU shaders (blur, ramp, circle, rectangle, transform2d, hsv_adjust, edge, threshold, displace, flip, tile, cross, crop, lookup, feedback)
 - [x] All operators registered in palette registry
-- [x] CustomShaderTOP — user-editable GLSL shaders with live recompilation
+- [x] CustomShaderTOP â€” user-editable GLSL shaders with live recompilation
 - [x] Right-click context menu on graph canvas (moved to Phase 6)
 - [x] Copy/paste nodes (moved to Phase 6)
 - [x] Undo/redo (Godot's UndoRedo system) (moved to Phase 6)
 - [x] Mini preview thumbnails on all nodes (moved to Phase 6)
 - [x] Expression reference lines (dashed/stippled cyan overlay with arrowheads between nodes when a parameter references another node via `chop()`/`op()`/`top()`/`sop()`/`dat()`/`mat()` expressions)
 
-### Phase 5.5: DAT, SOP, COMP & 3D Pipeline ✅
-- [x] **GNTableData** — DAT output data type (2D string table + text mode, headers, TSV import/export)
-- [x] **GNGeoData** — SOP output data type wrapping Godot's native `ArrayMesh`
-- [x] **12 DAT operators:** ConstantDAT, TextDAT, NullDAT, SelectDAT, MergeDAT, TransposeDAT, SortDAT, EvaluateDAT, SwitchDAT, CHOPDAT (CHOP→DAT bridge), DATtoCHOP (DAT→CHOP bridge), InfoDAT
+### Phase 5.5: DAT, SOP, COMP & 3D Pipeline âœ…
+- [x] **GNTableData** â€” DAT output data type (2D string table + text mode, headers, TSV import/export)
+- [x] **GNGeoData** â€” SOP output data type wrapping Godot's native `ArrayMesh`
+- [x] **12 DAT operators:** ConstantDAT, TextDAT, NullDAT, SelectDAT, MergeDAT, TransposeDAT, SortDAT, EvaluateDAT, SwitchDAT, CHOPDAT (CHOPâ†’DAT bridge), DATtoCHOP (DATâ†’CHOP bridge), InfoDAT
   - OscInDAT stub for future UDP/OSC input
 - [x] **14 SOP operators:** GridSOP, BoxSOP, SphereSOP, TorusSOP, CylinderSOP, LineSOP, CircleSOP, TransformSOP, NoiseSOP, SubdivideSOP, WireframeSOP, MergeSOP, NullSOP, SwitchSOP
   - SOP generators use Godot native meshes: BoxMesh, SphereMesh, CylinderMesh, TorusMesh
@@ -1134,8 +1134,8 @@ GONODES/
   - SoftBodyCOMP: SoftBody3D for deformable mesh physics (cloth, jelly)
   - AreaCOMP: Area3D force field with gravity/damping overrides, debug visualization
   - JointCOMP: Joint3D subtypes (Pin, Hinge, Slider, ConeTwist, 6DOF) with network-walked body connections
-- [x] **PhysicsCHOP** — readback bridge (COMP → CHOP) for physics state (position, rotation, velocity, sleeping)
-- [x] **RenderTOP** — 3D SubViewport bridge (COMP → TOP texture pipeline)
+- [x] **PhysicsCHOP** â€” readback bridge (COMP â†’ CHOP) for physics state (position, rotation, velocity, sleeping)
+- [x] **RenderTOP** â€” 3D SubViewport bridge (COMP â†’ TOP texture pipeline)
   - Own `World3D` per viewport (isolated 3D scene + physics space)
   - Walks network connections to adopt GeometryCOMP/CameraCOMP/LightCOMP nodes
   - Generic COMP fallback: any GNCompBase subclass (including physics COMPs) is adopted via `get_scene_node()`
@@ -1150,50 +1150,50 @@ GONODES/
   - Fixed PatternCHOP per-frame RNG allocation (moved to member variable)
   - Fixed `_select_first_leaf` recursive tree traversal in palette
 
-### Phase 5.6: UI Polish & Node Renaming ✅
-- [x] **Canvas anchoring fix** — all 21 TOP operators now use `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` for SubViewport canvas sizing (replaces manual `_canvas.size = Vector2(res)`)
-- [x] **Viewer panel sizing fix** — TextureRect `expand_mode = 1` (IGNORE_SIZE), `clip_contents = true` on both ViewerPanel and InspectorPanel, prevents texture aspect ratio from forcing panel width
-- [x] **Node renaming** — double-click title bar to rename nodes inline; full ID update chain: nodes dict, GNNode.id/name, all GNConnection references, expression strings, visual wires
-- [x] **Inspector refresh on rename** — header label updates when re-inspecting a renamed node
-- [x] **Documentation update** — GONODES_CONTEXT.md updated with Hard Rules 25.16–25.18
+### Phase 5.6: UI Polish & Node Renaming âœ…
+- [x] **Canvas anchoring fix** â€” all 21 TOP operators now use `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` for SubViewport canvas sizing (replaces manual `_canvas.size = Vector2(res)`)
+- [x] **Viewer panel sizing fix** â€” TextureRect `expand_mode = 1` (IGNORE_SIZE), `clip_contents = true` on both ViewerPanel and InspectorPanel, prevents texture aspect ratio from forcing panel width
+- [x] **Node renaming** â€” double-click title bar to rename nodes inline; full ID update chain: nodes dict, GNNode.id/name, all GNConnection references, expression strings, visual wires
+- [x] **Inspector refresh on rename** â€” header label updates when re-inspecting a renamed node
+- [x] **Documentation update** â€” GONODES_CONTEXT.md updated with Hard Rules 25.16â€“25.18
 
-### Phase 5.7: File Parameters & Media Input ✅
-- [x] **FILE parameter type** — new `ValueType.FILE` in GNParameter with `file_filters` (PackedStringArray of wildcard patterns). `create_file()` factory method. Stores `res://` paths.
-- [x] **File picker UI** — GNParamRow renders FILE params as a Button (showing filename) + "X" clear button. Opens Godot's native FileDialog scoped to `ACCESS_RESOURCES` (project directory only). Filter extensions from parameter's `file_filters`.
-- [x] **TextTOP font selection** — new `font_file` FILE parameter accepting TTF, OTF, WOFF, WOFF2. Loads via `ResourceLoader`, applies with `add_theme_font_override("font", ...)`. Empty = default theme font.
-- [x] **ImageFileInIMG** — loads image files (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res) as CPU Image. Pure CPU, no SubViewport. Resize param, reload pulse. Chain → ImgToTOP for GPU.
-- [x] **MovieFileInTOP** — plays .ogv Theora video as live GPU texture stream. Uses Godot's native `VideoStreamPlayer`. Play/pause, loop, seek, speed controls. Video decodes internally to GPU — no CPU image access (Godot limitation).
+### Phase 5.7: File Parameters & Media Input âœ…
+- [x] **FILE parameter type** â€” new `ValueType.FILE` in GNParameter with `file_filters` (PackedStringArray of wildcard patterns). `create_file()` factory method. Stores `res://` paths.
+- [x] **File picker UI** â€” GNParamRow renders FILE params as a Button (showing filename) + "X" clear button. Opens Godot's native FileDialog scoped to `ACCESS_RESOURCES` (project directory only). Filter extensions from parameter's `file_filters`.
+- [x] **TextTOP font selection** â€” new `font_file` FILE parameter accepting TTF, OTF, WOFF, WOFF2. Loads via `ResourceLoader`, applies with `add_theme_font_override("font", ...)`. Empty = default theme font.
+- [x] **ImageFileInIMG** â€” loads image files (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res) as CPU Image. Pure CPU, no SubViewport. Resize param, reload pulse. Chain â†’ ImgToTOP for GPU.
+- [x] **MovieFileInTOP** â€” plays .ogv Theora video as live GPU texture stream. Uses Godot's native `VideoStreamPlayer`. Play/pause, loop, seek, speed controls. Video decodes internally to GPU â€” no CPU image access (Godot limitation).
   - **Codec limitations:** Godot's built-in Theora decoder outputs RGB only (no alpha). For alpha video, use image sequences (PNG/WebP).
 
-### Phase 5.8: Extension Registry Architecture ✅
-- [x] **GNExtensionRegistry** — centralized operator registry (`addons/gonodes/core/gn_extension_registry.gd`). Lazy singleton with `instance()`. Replaces the static match-factory in GNGraphEditor and the static description dictionary in GNNodePalette.
+### Phase 5.8: Extension Registry Architecture âœ…
+- [x] **GNExtensionRegistry** â€” centralized operator registry (`addons/gonodes/core/gn_extension_registry.gd`). Lazy singleton with `instance()`. Replaces the static match-factory in GNGraphEditor and the static description dictionary in GNNodePalette.
   - `OperatorEntry` inner class: family, GDScript, description, source ("core" or extension name)
-  - `register_operator()` / `unregister_operator()` — dynamic operator registration API
-  - `create_instance(class_name)` → GNNode — data-driven factory (no more match block)
-  - `get_operator_registry()` → Dictionary grouped by family — same shape as before
-  - `get_description(class_name)` → String — tooltip text for palette
-  - `has_operator()`, `get_operator_count()`, `get_all_operator_names()`, `get_loaded_extensions()` — query API
-- [x] **Extension scanning** — `scan_extensions()` discovers `res://addons/gn_ext_*/gn_extension.cfg` manifest files (ConfigFile format). Each manifest declares:
+  - `register_operator()` / `unregister_operator()` â€” dynamic operator registration API
+  - `create_instance(class_name)` â†’ GNNode â€” data-driven factory (no more match block)
+  - `get_operator_registry()` â†’ Dictionary grouped by family â€” same shape as before
+  - `get_description(class_name)` â†’ String â€” tooltip text for palette
+  - `has_operator()`, `get_operator_count()`, `get_all_operator_names()`, `get_loaded_extensions()` â€” query API
+- [x] **Extension scanning** â€” `scan_extensions()` discovers `res://addons/gn_ext_*/gn_extension.cfg` manifest files (ConfigFile format). Each manifest declares:
   - `[extension]` section: name, version, author, description, dependencies (ClassDB class names)
   - `[operator.<ClassName>]` sections: family, script path, description
-  - Dependency guard via `ClassDB.class_exists()` — skips extensions whose GDExtension deps are missing
-- [x] **Refactored GNGraphEditor** — `_create_operator_instance()` and `get_operator_registry()` now delegate to GNExtensionRegistry (replaced ~230-line match block + ~40-line static dictionary)
-- [x] **Refactored GNNodePalette** — `_get_operator_description()` now delegates to GNExtensionRegistry (replaced ~80-line static dictionary)
-- [x] **Editor startup** — `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()` before network setup
+  - Dependency guard via `ClassDB.class_exists()` â€” skips extensions whose GDExtension deps are missing
+- [x] **Refactored GNGraphEditor** â€” `_create_operator_instance()` and `get_operator_registry()` now delegate to GNExtensionRegistry (replaced ~230-line match block + ~40-line static dictionary)
+- [x] **Refactored GNNodePalette** â€” `_get_operator_description()` now delegates to GNExtensionRegistry (replaced ~80-line static dictionary)
+- [x] **Editor startup** â€” `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()` before network setup
 
-### Phase 6: Integration & Stabilization (Week 6) ✅
-- [x] **Save/load patches** (`.gnpatch` JSON files) — full serialization pipeline:
-  - `GNParameter.to_dict()` / `from_dict()` — serializes value, mode, expression, bind info. Custom `_variant_to_json()` / `_json_to_variant()` handles Vector2, Vector2i, Vector3, Vector4, Color → typed JSON dicts.
-  - `GNNode.to_dict()` / `from_dict()` — serializes operator type, graph position, all parameters.
-  - `GNNetwork.to_dict()` / `from_dict()` — serializes all nodes + connections. Uses `GNExtensionRegistry.create_instance()` for reconstruction.
-  - `GNNetwork.save_to_file(path)` / `load_from_file(path)` — JSON read/write with pretty-printing.
+### Phase 6: Integration & Stabilization (Week 6) âœ…
+- [x] **Save/load patches** (`.gnpatch` JSON files) â€” full serialization pipeline:
+  - `GNParameter.to_dict()` / `from_dict()` â€” serializes value, mode, expression, bind info. Custom `_variant_to_json()` / `_json_to_variant()` handles Vector2, Vector2i, Vector3, Vector4, Color â†’ typed JSON dicts.
+  - `GNNode.to_dict()` / `from_dict()` â€” serializes operator type, graph position, all parameters.
+  - `GNNetwork.to_dict()` / `from_dict()` â€” serializes all nodes + connections. Uses `GNExtensionRegistry.create_instance()` for reconstruction.
+  - `GNNetwork.save_to_file(path)` / `load_from_file(path)` â€” JSON read/write with pretty-printing.
   - Editor UI: New / Open / Save / Save As buttons in bottom bar + Ctrl+N / Ctrl+O / Ctrl+S / Ctrl+Shift+S keyboard shortcuts. FileDialog for file picker. Window title shows current file name.
-- [x] **Node copy/paste** — clipboard-based with ID remapping:
+- [x] **Node copy/paste** â€” clipboard-based with ID remapping:
   - `GNGraphEditor._clipboard` stores serialized nodes + internal connections.
   - Copy (Ctrl+C): serializes selected nodes via `to_dict()`, gathers connections where both endpoints are selected.
   - Paste (Ctrl+V): reconstructs with fresh IDs via `generate_unique_id()`, offsets positions +50/+50, remaps internal connections, auto-selects pasted nodes.
   - Cut (Ctrl+X): copy then delete. Duplicate (Ctrl+D): copy then paste in one step.
-- [x] **Undo/redo** — Godot `UndoRedo` command pattern:
+- [x] **Undo/redo** â€” Godot `UndoRedo` command pattern:
   - Tracks: add node, delete node(s), connect, disconnect, move node(s), rename.
   - Keyboard shortcuts: Ctrl+Z (undo), Ctrl+Y / Ctrl+Shift+Z (redo).
   - `_ur_*` helper methods on GNGraphEditor operate on the network model; network signals update views automatically.
@@ -1202,251 +1202,251 @@ GONODES/
   - Paste/duplicate record compound actions (all pasted nodes removed on undo).
   - History cleared on New/Load to avoid cross-patch undo.
 - [x] **Mini preview thumbnails** on all nodes (generic preview system):
-  - `GNNode.create_preview_control()` — virtual, returns a custom `Control` for family-specific previews. Returns null by default (type-agnostic GNNode).
-  - `GNNode.update_preview_control(control)` — virtual, called each cook frame to update previews. No-op by default.
-  - Family base classes override these: GNTopBase (TextureRect), GNImgBase (Label: resolution/format — no GPU upload), GNChopBase (Label: channel values), GNDatBase (Label: table rows), GNSopBase (Label: mesh stats), GNCompBase (Label: node class), GNMatBase (Label: material type).
-  - `GNNodeView._setup_preview()` — creates preview control via `gn_node.create_preview_control()` (120×80px min size).
+  - `GNNode.create_preview_control()` â€” virtual, returns a custom `Control` for family-specific previews. Returns null by default (type-agnostic GNNode).
+  - `GNNode.update_preview_control(control)` â€” virtual, called each cook frame to update previews. No-op by default.
+  - Family base classes override these: GNTopBase (TextureRect), GNImgBase (Label: resolution/format â€” no GPU upload), GNChopBase (Label: channel values), GNDatBase (Label: table rows), GNSopBase (Label: mesh stats), GNCompBase (Label: node class), GNMatBase (Label: material type).
+  - `GNNodeView._setup_preview()` â€” creates preview control via `gn_node.create_preview_control()` (120Ã—80px min size).
   - `GNGraphEditor.update_previews()` iterates ALL node views each cook frame (skipped when hidden).
   - Extensible: any operator can override `create_preview_control()` for operator-specific rendering.
-- [x] **Family base classes** — 6 intermediate bases between GNNode and operators:
+- [x] **Family base classes** â€” 6 intermediate bases between GNNode and operators:
   - `GNTopBase` (36 TOPs), `GNImgBase` (7 IMGs), `GNChopBase` (30 CHOPs), `GNDatBase` (23 DATs), `GNSopBase` (22 SOPs), `GNCompBase` (6 COMPs), `GNMatBase` (6 MATs).
   - Each sets family, provides cached data helpers, and overrides preview methods.
   - All 108 operators migrated. GNNode is now fully type-agnostic.
-- [x] **Preview toggle** — global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
+- [x] **Preview toggle** â€” global toolbar `CheckButton` ("Previews") to show/hide inline node previews:
   - `GNGraphEditor.previews_visible` flag controls whether `update_previews()` processes updates.
   - `GNGraphEditor.set_previews_visible(enabled)` shows/hides all preview controls on existing views.
   - Newly created views auto-hide their preview if `previews_visible` is false.
   - `GNNodeView.show_preview()` / `hide_preview()` toggle visibility with `reset_size()` to reflow node layout.
-- [x] **Right-click context menu** — contextual `PopupMenu` on graph canvas:
-  - Items: Add Node…, Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo.
+- [x] **Right-click context menu** â€” contextual `PopupMenu` on graph canvas:
+  - Items: Add Nodeâ€¦, Copy, Cut, Paste, Duplicate, Delete, Select All, Undo, Redo.
   - Selection-aware: copy/cut/delete/duplicate grayed out when nothing is selected.
   - Clipboard-aware: paste grayed out when clipboard is empty.
   - Undo/redo state-aware: grayed out when no history available.
   - Shortcut hints displayed beside each item.
-- [x] **Performance profiling overlay** — per-node cook time badge with toolbar toggle:
-  - `GNNodeView._perf_label` (Label) shows `✓ 0.12ms` or `✗ 0.00ms` with color coding.
-  - Color thresholds: green (<1ms), yellow (<5ms), red (≥5ms).
+- [x] **Performance profiling overlay** â€” per-node cook time badge with toolbar toggle:
+  - `GNNodeView._perf_label` (Label) shows `âœ“ 0.12ms` or `âœ— 0.00ms` with color coding.
+  - Color thresholds: green (<1ms), yellow (<5ms), red (â‰¥5ms).
   - Created lazily on first `show_perf_overlay()` call (zero cost when never enabled).
   - `GNGraphEditor.perf_overlay_visible` flag; `set_perf_overlay_visible(enabled)` toggles all views.
   - `GNGraphEditor.update_perf_overlays()` called each cook frame (skipped when hidden).
   - Newly created views auto-show overlay if `perf_overlay_visible` is true.
   - Editor toolbar "Perf" `CheckButton` (off by default) wired to `_on_perf_toggled()`.
-- [x] **MAT family** — material operators with per-object material binding:
+- [x] **MAT family** â€” material operators with per-object material binding:
   - `GNMaterialData` data type wrapping Godot's `Material` base class.
   - `GNMatBase` family base class with `_prepare_output()` helper and material label preview.
-  - `PBR_MAT` — StandardMaterial3D wrapper: albedo color, metallic, roughness, specular, emission (toggle/color/energy), normal scale, transparency mode (Disabled/Alpha/Alpha Scissor/Depth Pre-Pass), alpha scissor threshold, cull mode (Back/Front/Disabled), triplanar UV. 3 optional TOP inputs (albedo texture, normal map, ORM texture).
-  - `Shader_MAT` — ShaderMaterial wrapper: inline shader code (string param) or external `.gdshader` file. 8 float uniforms (u0–u7), 2 color uniforms (color0, color1), 2 optional TOP inputs (tex0, tex1). Lazy shader recompilation (only when source changes).
+  - `PBR_MAT` â€” StandardMaterial3D wrapper: albedo color, metallic, roughness, specular, emission (toggle/color/energy), normal scale, transparency mode (Disabled/Alpha/Alpha Scissor/Depth Pre-Pass), alpha scissor threshold, cull mode (Back/Front/Disabled), triplanar UV. 3 optional TOP inputs (albedo texture, normal map, ORM texture).
+  - `Shader_MAT` â€” ShaderMaterial wrapper: inline shader code (string param) or external `.gdshader` file. 8 float uniforms (u0â€“u7), 2 color uniforms (color0, color1), 2 optional TOP inputs (tex0, tex1). Lazy shader recompilation (only when source changes).
   - GeometryCOMP updated: 3 inputs (SOP, MAT, TOP). MAT input overrides fallback PBR; when disconnected, built-in PBR params still work.
-- [x] **MergeCOMP** — groups multiple COMP scene nodes under a single Node3D parent:
+- [x] **MergeCOMP** â€” groups multiple COMP scene nodes under a single Node3D parent:
   - Dynamic input COMP ports (auto-grow). Full transform params (t/r/s xyz) + visible toggle.
-  - `_populate_from_network()` walks upstream connections, reparents COMP scene nodes **sorted by input port index** (port 0 = first child, port 1 = second, …). Users control hierarchy by which port they wire into.
+  - `_populate_from_network()` walks upstream connections, reparents COMP scene nodes **sorted by input port index** (port 0 = first child, port 1 = second, â€¦). Users control hierarchy by which port they wire into.
   - RenderTOP updated to recognize MergeCOMP and adopt entire group node.
-- [x] **Shadow system** — per-light and global shadow controls:
+- [x] **Shadow system** â€” per-light and global shadow controls:
   - LightCOMP: shadow_bias, shadow_normal_bias, shadow_blur, shadow_opacity, directional shadow mode (Orthogonal/PSSM2/PSSM4).
   - RenderTOP: shadow atlas size, directional shadow size, shadow filter quality.
   - RenderTOP: integrated post-processing (tonemap, glow/bloom, DOF near+far with bokeh, SSAO, SSIL, SSR, adjustments, volumetric fog) applied directly to the render viewport's Environment and active camera.
   - GeometryCOMP: cast_shadow mode (Off/On/Double-Sided/Shadows Only).
-- [x] **Bug fixes** — family assignment (`_init()` override without `super()`), expression re-cook (`_pre_cook` detection + `mode_changed` signal), torus Y-axis rotation visibility.
-- [x] **Multiple viewer windows** — floating viewer windows pinned to any TOP node:
-  - `GNViewerWindow` extends Window — dark background, TextureRect with aspect-preserving display.
+- [x] **Bug fixes** â€” family assignment (`_init()` override without `super()`), expression re-cook (`_pre_cook` detection + `mode_changed` signal), torus Y-axis rotation visibility.
+- [x] **Multiple viewer windows** â€” floating viewer windows pinned to any TOP node:
+  - `GNViewerWindow` extends Window â€” dark background, TextureRect with aspect-preserving display.
   - Each window is pinned to a specific node via `node_id` and updates every cook frame.
   - Spawned via toolbar "+ Viewer" button (uses current viewer target) or right-click "Open Viewer" on a selected TOP node.
   - Windows track node renames automatically and clean up on new/load.
   - Multiple windows can be open simultaneously, each showing a different node's output.
   - Close button frees the window and removes it from the tracked array.
 - [x] Stress test: 50+ node network (59 nodes across all 6 families, toolbar button + auto-report)
-- [x] **Per-node preview toggle** — right-click context menu "Preview: ON/OFF":
+- [x] **Per-node preview toggle** â€” right-click context menu "Preview: ON/OFF":
   - `GNNode.preview_enabled` flag (default true, persists with save/load).
   - Global "Previews" toolbar toggle acts as master switch (sets all per-node flags).
-  - Per-node toggle works independently — turn global off, then selectively re-enable specific nodes.
+  - Per-node toggle works independently â€” turn global off, then selectively re-enable specific nodes.
   - `update_previews()` skips nodes with `preview_enabled = false` (zero cost).
   - TOGGLE_PREVIEW added to `_CtxID` enum. Shows current state in menu label.
-- [x] **WindowTOP open/close toggle** — `open` boolean parameter:
-  - Default `false` (window doesn't pop up on creation). Resolution default changed to 512×512.
+- [x] **WindowOUT open/close toggle** â€” `open` boolean parameter:
+  - Default `false` (window doesn't pop up on creation). Resolution default changed to 512Ã—512.
   - Close button sets `open = false` in inspector. Toggle back to `true` to reopen.
   - `_cook()` syncs `_window.visible` with param each frame.
 - [x] README and basic documentation
 
 ### Phase 7: Creative Tools, Performance & Workflow
-- [x] **ScriptCHOP** — user-editable GDScript for custom channel processing:
+- [x] **ScriptCHOP** â€” user-editable GDScript for custom channel processing:
   - Runtime GDScript compilation via `GDScript.new()` + `reload()`.
   - `cook()` entry point with `me`, `inputs`, `op` (GNChannelData), `time`, `frame`, `dt` context.
   - `@param` annotations for dynamic inspector parameters.
   - `@input` annotations for dynamic multi-family input ports.
   - Optional `setup()` runs once after compilation. Instance reused across frames.
   - `time_dependent` toggle (default off). `from_dict()` override for save/load.
-- [x] **ScriptDAT** — user-editable GDScript for table/text processing:
+- [x] **ScriptDAT** â€” user-editable GDScript for table/text processing:
   - Same architecture as ScriptCHOP. `op` is GNTableData.
   - Default template builds a row table with configurable columns.
-- [x] **ScriptIMG** — CPU-side pixel generation via GDScript:
+- [x] **ScriptIMG** â€” CPU-side pixel generation via GDScript:
   - `op` is GNImageData with `set_image(img)` method.
-  - Extends GNImgBase — no SubViewport, pure CPU Image.
+  - Extends GNImgBase â€” no SubViewport, pure CPU Image.
   - Replaces ScriptTOP (CPU image work separated from GPU TOP pipeline).
   - Use ImgToTOP bridge to convert output to GPU texture.
-- [x] **ScriptSOP** — procedural geometry via GDScript:
+- [x] **ScriptSOP** â€” procedural geometry via GDScript:
   - `op` is GNGeoData. User builds mesh via SurfaceTool then `op.set_from_surface_tool(st)`.
   - Default template scatters random points in a sphere.
-- [x] **GNScriptHelper** — shared static helper class for all 4 Script operators:
+- [x] **GNScriptHelper** â€” shared static helper class for all 4 Script operators:
   - Runtime compilation, annotation parsing, context injection, preset management.
   - Factory presets at `res://addons/gonodes/presets/<family>/`.
-- [x] **IMG family** — CPU-side image processing operators (new family):
+- [x] **IMG family** â€” CPU-side image processing operators (new family):
   - `GNImageData` (wraps Image, no GPU texture) and `GNImgBase` (no SubViewport).
   - Teal color in graph editor. Family enum `GNFamily.Type.IMG`.
   - **Generators:** `NoiseIMG` (value/white noise via FastNoiseLite), `CheckerboardIMG` (configurable grid).
   - **Filters:** `BlurIMG` (separable box blur), `EdgeDetectIMG` (Sobel/Prewitt), `PixelSortIMG` (glitch art).
-  - **Bridge:** `ImgToTOP` — uploads CPU Image to GPU ImageTexture for TOP pipeline. `TOPtoIMG` — GPU→CPU readback (reverse).
-  - **Scripting:** `ScriptIMG` — user GDScript with `@param`/`@input` annotations.
-  - **Sinks:** `FileSaveIMG` (save to disk), `MovieOutIMG` (image sequence), `FFmpegOutIMG` (video encode via CLI).
+  - **Bridge:** `ImgToTOP` â€” uploads CPU Image to GPU ImageTexture for TOP pipeline. `TOPtoIMG` â€” GPUâ†’CPU readback (reverse).
+  - **Scripting:** `ScriptIMG` â€” user GDScript with `@param`/`@input` annotations.
+  - **Sinks:** `ImageSaveOUT` (save to disk), `MovieOUT` (image sequence), `FFmpegOUT` (video encode via CLI).
   - User presets at `user://gonodes_presets/<family>/` (load/save via static methods).
   - Dynamic param rebuild with value preservation (same pattern as CustomShaderTOP).
-- [x] **IMG preview optimization** — changed GNImgBase preview from TextureRect (GPU upload every cook) to lightweight text Label showing “512×320\nRGBA8”. No GPU upload, consistent with SOP/CHOP/DAT label-based previews. Helper `_format_name()` maps `Image.Format` enums to short names.
-- [x] **Dynamic palette family iteration** — GNNodePalette now iterates `GNFamily.FAMILY_NAMES` dynamically instead of a hardcoded array. Adding a new family enum auto-populates the palette with zero code changes. Removed `_family_name_to_enum()` helper.
-- [x] **Drop-wire-to-add-node workflow** — dropping a wire on empty canvas opens a filtered palette:
+- [x] **IMG preview optimization** â€” changed GNImgBase preview from TextureRect (GPU upload every cook) to lightweight text Label showing â€œ512Ã—320\nRGBA8â€. No GPU upload, consistent with SOP/CHOP/DAT label-based previews. Helper `_format_name()` maps `Image.Format` enums to short names.
+- [x] **Dynamic palette family iteration** â€” GNNodePalette now iterates `GNFamily.FAMILY_NAMES` dynamically instead of a hardcoded array. Adding a new family enum auto-populates the palette with zero code changes. Removed `_family_name_to_enum()` helper.
+- [x] **Drop-wire-to-add-node workflow** â€” dropping a wire on empty canvas opens a filtered palette:
   - `GNExtensionRegistry.get_operators_accepting_family(family)` / `get_operators_producing_family(family)` with lazy `_input_family_cache` (built by instantiating all operators + `_init_ports()` to inspect ports, freed immediately).
   - `GNNodePalette.popup_at_filtered(pos, allowed_operators)` shows only compatible operators. Filter cleared on popup hide.
   - `GNGraphEditor` connects `connection_to_empty` / `connection_from_empty` signals. Stores `_pending_connection` dict, opens filtered palette, auto-connects first compatible port on selection (with undo/redo).
   - **Ghost wire**: semi-transparent line from source port to drop point while palette is open, drawn on expression-ref overlay. Stored in `_ghost_wire` dict, cleared on palette close.
 - [x] **OSC input/output operators**:
-  - `OscInCHOP` — receives OSC messages on configurable UDP port, maps numeric args to channels.
-    - Channel naming: `/foo` → channel `foo`, `/bar` with 3 floats → `bar:0`, `bar:1`, `bar:2`.
+  - `OscInCHOP` â€” receives OSC messages on configurable UDP port, maps numeric args to channels.
+    - Channel naming: `/foo` â†’ channel `foo`, `/bar` with 3 floats â†’ `bar:0`, `bar:1`, `bar:2`.
     - Address filter, normalize names, max channels, reset pulse params.
-  - `OscOutCHOP` — sends CHOP channel values as OSC messages to target host:port.
+  - `OscOUT` â€” sends CHOP channel values as OSC messages to target host:port.
     - Individual or bundle send mode. Prefix param. `is_sink = true`.
-  - `OscInDAT` — receives OSC messages and logs as table rows (address, types, arg0-3, timestamp).
+  - `OscInDAT` â€” receives OSC messages and logs as table rows (address, types, arg0-3, timestamp).
     - Replaced stub with actual UDP listener + `GNOscParser` integration. Ring buffer.
-  - **Shared infrastructure:** `GNOscParser` static class (`addons/gonodes/core/gn_osc_parser.gd`) —
+  - **Shared infrastructure:** `GNOscParser` static class (`addons/gonodes/core/gn_osc_parser.gd`) â€”
     lightweight OSC 1.0 binary parser/builder. Handles int32, float32, string, blob, bool, null,
     bundles. All encoding/decoding is pure GDScript using `PacketPeerUDP` for transport.
 - [x] **MIDI input operators**:
-  - `MidiInCHOP` — receives MIDI note/CC/pitch bend via Godot's built-in `InputEventMIDI`.
+  - `MidiInCHOP` â€” receives MIDI note/CC/pitch bend via Godot's built-in `InputEventMIDI`.
     - Channels: note, velocity, gate, channel, pitchbend, aftertouch, cc:N (auto-created per CC number).
     - Device filter, channel filter, normalize (0-1) toggle, reset pulse.
     - Uses `OS.open_midi_inputs()` / `_unhandled_input()` for event capture.
-  - `MidiInDAT` — raw MIDI message log as table rows (type, channel, note, velocity, cc_num, cc_val, pitchbend, pressure, timestamp).
+  - `MidiInDAT` â€” raw MIDI message log as table rows (type, channel, note, velocity, cc_num, cc_val, pitchbend, pressure, timestamp).
     - Same MIDI API, ring buffer with configurable max rows.
   - Device selection parameter (index-based, -1 = all devices).
 - [x] **Audio input CHOP**:
-  - `AudioInCHOP` — microphone capture via `AudioStreamMicrophone` + `AudioEffectCapture` on a
+  - `AudioInCHOP` â€” microphone capture via `AudioStreamMicrophone` + `AudioEffectCapture` on a
     dedicated AudioServer bus. Outputs left/right waveform channels + RMS level.
     - Creates/destroys bus dynamically. Mutes playback bus to prevent feedback.
-  - `AudioSpectrumCHOP` — FFT analysis via Godot's `AudioEffectSpectrumAnalyzer`.
+  - `AudioSpectrumCHOP` â€” FFT analysis via Godot's `AudioEffectSpectrumAnalyzer`.
     - Logarithmic frequency distribution, configurable band count/range/FFT size.
     - Temporal smoothing. Convenience bass/mid/treble aggregate channels.
     - Can analyze any audio bus (Master, or AudioInCHOP's capture bus).
-  - `AudioFileInCHOP` — audio file playback (WAV/OGG) with waveform capture.
+  - `AudioFileInCHOP` â€” audio file playback (WAV/OGG) with waveform capture.
     - Transport: play, stop, seek, loop. Volume (dB), mute toggle.
     - Output channels: left, right, level, pos, length, playing.
     - Dedicated AudioServer bus with capture effect for PCM extraction.
 - [x] **Webcam / video input TOP**:
-  - WebcamIMG — live camera feed via CameraServer as CPU Image. Chain → ImgToTOP for GPU.
+  - WebcamIMG â€” live camera feed via CameraServer as CPU Image. Chain â†’ ImgToTOP for GPU.
   - Device selection (index), resolution, active toggle, horizontal mirror params.
-- [x] **ImageSequenceIMG** — numbered frame playback as CPU Images:
+- [x] **ImageSequenceIMG** â€” numbered frame playback as CPU Images:
   - PNG/WebP/JPG sequences with auto-discovery from any frame in the sequence.
   - Configurable frame range via file path, speed, loop modes (Loop, Hold First, Hold Last, Ping-Pong).
   - Expression-driven frame index for precise sequencing (`index` param, -1 for auto).
   - On-demand frame caching with optional preload-all toggle.
-  - Auto-resolution from first frame. Pure CPU — no SubViewport.
+  - Auto-resolution from first frame. Pure CPU â€” no SubViewport.
 - [x] **Performance: SubViewport UPDATE_ONCE** for non-time-dependent TOPs:
-  - All SubViewports now created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` after each cook — TOPs render exactly once per dirty cycle.
+  - All SubViewports now created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` after each cook â€” TOPs render exactly once per dirty cycle.
   - Time-dependent TOPs (e.g., CustomShaderTOP with `time_dependent` toggle) are re-cooked each frame by the cook engine, so they naturally re-render via the same mechanism.
   - Reduces GPU load significantly for static texture chains.
-- [x] **Performance: Viewport pooling** — **DEFERRED (low value)**:
+- [x] **Performance: Viewport pooling** â€” **DEFERRED (low value)**:
   - Original idea: reuse freed SubViewports instead of creating/destroying. Pool tracks available viewports by resolution to reduce allocation churn.
   - **Analysis concluded this is near-zero net gain.** Arguments:
-    1. **Size mismatch kills reuse.** TOPs have varying resolutions (1024×1024 noise, 512×512 blur, 1920×1080 composite). A pooled viewport only helps if the next requester wants the exact same size. Resizing a SubViewport is just as expensive as creating one — Godot destroys and recreates the internal framebuffer on `size` change.
-    2. **Allocation is infrequent.** Viewports are created once when a TOP first cooks (lazy creation), then persist for the node's lifetime. The churn scenario (rapid create/destroy cycles) rarely happens — users build a patch and run it.
+    1. **Size mismatch kills reuse.** TOPs have varying resolutions (1024Ã—1024 noise, 512Ã—512 blur, 1920Ã—1080 composite). A pooled viewport only helps if the next requester wants the exact same size. Resizing a SubViewport is just as expensive as creating one â€” Godot destroys and recreates the internal framebuffer on `size` change.
+    2. **Allocation is infrequent.** Viewports are created once when a TOP first cooks (lazy creation), then persist for the node's lifetime. The churn scenario (rapid create/destroy cycles) rarely happens â€” users build a patch and run it.
     3. **Active-chain cooking already eliminates the biggest cost.** Inactive TOPs never cook, so their lazily-created viewports never allocate. The pool would only help nodes that *do* cook, and those need their viewports alive anyway.
     4. **Resolution buckets waste VRAM.** Rounding sizes up to power-of-2 buckets (256, 512, 1024, 2048) increases hit rates but trades allocation churn for memory bloat on oversized buffers.
-    5. **Narrow use case.** The only scenario with measurable benefit: a patch with dozens of same-resolution TOPs that gets loaded/unloaded repeatedly (e.g., VJ set with everything at 1920×1080). Real but uncommon.
-  - **Conclusion:** The existing lazy viewport creation + active-chain cooking + UPDATE_ONCE already cover this. Multi-threaded cook, C++ hot-paths, and GPU compute would deliver far greater measurable gains. Not implementing — documented as intentionally deferred.
+    5. **Narrow use case.** The only scenario with measurable benefit: a patch with dozens of same-resolution TOPs that gets loaded/unloaded repeatedly (e.g., VJ set with everything at 1920Ã—1080). Real but uncommon.
+  - **Conclusion:** The existing lazy viewport creation + active-chain cooking + UPDATE_ONCE already cover this. Multi-threaded cook, C++ hot-paths, and GPU compute would deliver far greater measurable gains. Not implementing â€” documented as intentionally deferred.
 - [x] **Performance: Active chain cooking**:
   - Only cook subgraphs that feed into a live sink (viewer, floating window, or any `is_sink` node).
   - Disconnected/orphan subgraphs skip cooking entirely (keep cached_output frozen).
-  - **Engine-level** (editor-independent): structural sinks auto-detected via `GNNode.is_sink` flag — operators set `is_sink = true` in `_init()` (WindowTOP, future SpoutOut, MIDIOut, OSCOut, NDIOut, etc.).
+  - **Engine-level** (editor-independent): structural sinks auto-detected via `GNNode.is_sink` flag â€” operators set `is_sink = true` in `_init()` (WindowOUT, future SpoutOut, MIDIOut, OSCOut, NDIOut, etc.).
   - **Editor-level**: UI sinks (viewer panel, floating windows) passed via `active_sinks`.
-  - BFS follows both wire connections AND expression references (`chop()/op()/top()` calls) — implicit dependencies are tracked.
+  - BFS follows both wire connections AND expression references (`chop()/op()/top()` calls) â€” implicit dependencies are tracked.
   - Event-driven: active set recomputed only when topology, sinks, or expressions change (not per-frame).
   - `GNNode.is_active` flag updated every frame; perf overlay shows "zzz" for inactive nodes.
-  - Always-on (no toggle) — info bar shows "Active: N/M" count.
+  - Always-on (no toggle) â€” info bar shows "Active: N/M" count.
   - Clicking a node routes the viewer to it, making it a sink and instantly activating its chain.
 - [x] **Performance: Lazy viewport creation**:
-  - Viewport creation is deferred to first `_cook()` call — `_init_shader_viewport()` and `_ensure_viewport()` guard with `if _viewport != null: return`.
+  - Viewport creation is deferred to first `_cook()` call â€” `_init_shader_viewport()` and `_ensure_viewport()` guard with `if _viewport != null: return`.
   - Disconnected TOPs have zero GPU footprint until first cook.
 - [x] **Performance: GPU memory budget monitoring**:
-  - **Opt-in toggle** ("VRAM" CheckButton in toolbar, default OFF) — zero overhead when disabled.
+  - **Opt-in toggle** ("VRAM" CheckButton in toolbar, default OFF) â€” zero overhead when disabled.
   - When enabled, reads `RenderingServer.get_rendering_info()` each frame for:
-    - `RENDERING_INFO_TEXTURE_MEM_USED` — texture memory (SubViewport FBOs, imported textures, etc.)
-    - `RENDERING_INFO_BUFFER_MEM_USED` — GPU buffer memory (meshes, particles, SSBOs)
+    - `RENDERING_INFO_TEXTURE_MEM_USED` â€” texture memory (SubViewport FBOs, imported textures, etc.)
+    - `RENDERING_INFO_BUFFER_MEM_USED` â€” GPU buffer memory (meshes, particles, SSBOs)
   - Info bar displays: `VRAM: 142MB (tex 120 + buf 22)`.
-  - Optional budget warning: `_vram_budget_mb` threshold — when exceeded, appends `⚠ >NMB` to the display.
-  - Cost: `get_rendering_info()` reads an internal engine counter — effectively free (no GPU readback, no stall).
+  - Optional budget warning: `_vram_budget_mb` threshold â€” when exceeded, appends `âš  >NMB` to the display.
+  - Cost: `get_rendering_info()` reads an internal engine counter â€” effectively free (no GPU readback, no stall).
     Toggle exists for user peace of mind and to avoid visual clutter, not for performance reasons.
   - **Design rule for all perf metrics:** Always compute if it's free, only gate the *display* if it adds clutter. Any future perf metric that's just reading an engine counter (draw calls, object count, etc.) should follow the same approach: compute always, toggle the display. Only add a compute-level gate if the measurement itself is expensive (e.g., profiling individual node cook times per-frame at scale).
-- [x] **Performance: Resolution downscaling for previews** — **DEFERRED (low value)**:
-  - Original idea: render inline preview thumbnails at ¼ or ½ res; full res only for viewer + sinks.
+- [x] **Performance: Resolution downscaling for previews** â€” **DEFERRED (low value)**:
+  - Original idea: render inline preview thumbnails at Â¼ or Â½ res; full res only for viewer + sinks.
   - **Analysis concluded this is near-zero net gain.** Arguments:
-    1. **Viewport resize = GPU reallocation** — `SubViewport.size = x` destroys and recreates the render buffer; resizing 30 viewports at once causes a visible hitch.
-    2. **Dual viewports per TOP doubles overhead** — the idle full-res viewport still holds VRAM; downstream consumers need full-res input textures as shader uniforms regardless.
-    3. **Snapshot approach (GPU→CPU readback → ImageTexture thumbnail) adds work, not saves it** — the full-res `ViewportTexture` already exists in VRAM for downstream nodes; a TextureRect sampling it at 120×80 during UI draw is essentially free (one texture sample). CPU readback + resize + re-upload is strictly more expensive.
-    4. **The only real case** is leaf TOPs (no downstream, not viewer target, not sink) where the SubViewport could render at ¼ res. But active-chain cooking already **skips these entirely** (they don't cook, so their viewport never renders). The overlap makes the optimization redundant.
-  - **Conclusion:** The big GPU wins (active-chain cooking, UPDATE_ONCE, lazy viewport creation) already cover this. Marked done — not implementing, documented as intentionally deferred.
-- [x] **Keyboard shortcuts & workflow polish** (partial — core features done):
-  - [x] Consistent shortcut reference card (help overlay, '?' key — semi-transparent overlay listing all shortcuts).
-  - [x] Node alignment tools (H key = align horizontal, V key = align vertical) — context menu entries.
+    1. **Viewport resize = GPU reallocation** â€” `SubViewport.size = x` destroys and recreates the render buffer; resizing 30 viewports at once causes a visible hitch.
+    2. **Dual viewports per TOP doubles overhead** â€” the idle full-res viewport still holds VRAM; downstream consumers need full-res input textures as shader uniforms regardless.
+    3. **Snapshot approach (GPUâ†’CPU readback â†’ ImageTexture thumbnail) adds work, not saves it** â€” the full-res `ViewportTexture` already exists in VRAM for downstream nodes; a TextureRect sampling it at 120Ã—80 during UI draw is essentially free (one texture sample). CPU readback + resize + re-upload is strictly more expensive.
+    4. **The only real case** is leaf TOPs (no downstream, not viewer target, not sink) where the SubViewport could render at Â¼ res. But active-chain cooking already **skips these entirely** (they don't cook, so their viewport never renders). The overlap makes the optimization redundant.
+  - **Conclusion:** The big GPU wins (active-chain cooking, UPDATE_ONCE, lazy viewport creation) already cover this. Marked done â€” not implementing, documented as intentionally deferred.
+- [x] **Keyboard shortcuts & workflow polish** (partial â€” core features done):
+  - [x] Consistent shortcut reference card (help overlay, '?' key â€” semi-transparent overlay listing all shortcuts).
+  - [x] Node alignment tools (H key = align horizontal, V key = align vertical) â€” context menu entries.
   - [x] Fit-to-view (F key zooms/pans to selected nodes or entire graph).
-  - [x] Node bypass/disable toggle (B key — node passes input through unchanged, ⏩ indicator, dimmed, cook engine pass-through).
-  - [x] Node lock toggle (L key — prevents parameter changes, 🔒 indicator, inspector dims and disables inputs).
-  - [x] Wire style options (W key to cycle, toolbar dropdown — curved/straight/right-angle via `connection_lines_curvature`).
+  - [x] Node bypass/disable toggle (B key â€” node passes input through unchanged, â© indicator, dimmed, cook engine pass-through).
+  - [x] Node lock toggle (L key â€” prevents parameter changes, ðŸ”’ indicator, inspector dims and disables inputs).
+  - [x] Wire style options (W key to cycle, toolbar dropdown â€” curved/straight/right-angle via `connection_lines_curvature`).
 - [x] **Expression & scripting system refinement**:
-  - [x] Autocomplete / intellisense for expression fields (node IDs, channel names, param names) — via GNExpressionEditor CodeEdit autocomplete.
-  - [x] Expression syntax highlighting (CodeHighlighter in GNExpressionEditor — GONODES keywords green/purple, context vars cyan, math funcs blue, built-in utilities teal, GDScript keywords pink).
-  - [x] Custom user-defined expression functions — `GNExpressionFunctions` registry + `fn()` dispatch on CookEngine. Register via `GNExpressionFunctions.register()`, call via `fn("name", args...)`.
-  - [x] Multi-line expression editor popup — `GNExpressionEditor` (Window) with CodeEdit, syntax highlighting, live validation, autocomplete, Ctrl+Enter confirm, Escape cancel. Opened via ↗ button next to expression fields.
-  - [x] Expression presets / snippets — Snippets ▾ dropdown in expression editor with 30+ templates across 6 categories (Time, Remapping, Smoothing, Noise, Node References, Math Patterns).
-  - [x] Expression profiling — per-expression eval time (µs) tracked on `GNParameter.expression_eval_usec/avg_usec`, shown in expression field tooltip + editor info bar. Per-component timing independent.
+  - [x] Autocomplete / intellisense for expression fields (node IDs, channel names, param names) â€” via GNExpressionEditor CodeEdit autocomplete.
+  - [x] Expression syntax highlighting (CodeHighlighter in GNExpressionEditor â€” GONODES keywords green/purple, context vars cyan, math funcs blue, built-in utilities teal, GDScript keywords pink).
+  - [x] Custom user-defined expression functions â€” `GNExpressionFunctions` registry + `fn()` dispatch on CookEngine. Register via `GNExpressionFunctions.register()`, call via `fn("name", args...)`.
+  - [x] Multi-line expression editor popup â€” `GNExpressionEditor` (Window) with CodeEdit, syntax highlighting, live validation, autocomplete, Ctrl+Enter confirm, Escape cancel. Opened via â†— button next to expression fields.
+  - [x] Expression presets / snippets â€” Snippets â–¾ dropdown in expression editor with 30+ templates across 6 categories (Time, Remapping, Smoothing, Noise, Node References, Math Patterns).
+  - [x] Expression profiling â€” per-expression eval time (Âµs) tracked on `GNParameter.expression_eval_usec/avg_usec`, shown in expression field tooltip + editor info bar. Per-component timing independent.
   - [x] Built-in utility functions on CookEngine: `fit()`, `fit01()`, `smooth()`, `lag()`, `pulse()`, `step()`, `smoothstep()`, `cycle()`, `bounce()`, `noise1()`, `noise2()`, `trigger()`. Stateful functions use per-key state dicts.
-  - [x] **`par()` / `parf()` / `pari()` / `pars()`** — parameter-to-parameter references (Houdini `ch()` equivalent). Self-reference with 1 arg, cross-node with 2 args. Typed variants guarantee return type. Circular dependency guard via `_evaluating_params` set. Demand-driven evaluation for EXPRESSION-mode targets.
-  - [x] **`chop()` / `chopf()` / `chopi()` / `chops()`** — CHOP channel value references. `chop()` returns raw Variant, typed variants guarantee float/int/String. `chops()` formats floats to 4 decimal places.
-  - [x] Windowed code editor for Script operators & CustomShaderTOP — `GNCodeEditor` (extends `GNBaseCodeEditor`) with CodeEdit, mode-adaptive syntax highlighting (GDScript for Script ops, GLSL for shaders), preset load/save via GNScriptHelper, reference cheatsheet, Ctrl+Enter confirm. Opened via "Edit ↗" button in GNParamRow. Both `GNCodeEditor` and `GNExpressionEditor` share a common base class (`GNBaseCodeEditor`) providing Window layout, CodeEdit configuration, key bindings, and status bar.
+  - [x] **`par()` / `parf()` / `pari()` / `pars()`** â€” parameter-to-parameter references (Houdini `ch()` equivalent). Self-reference with 1 arg, cross-node with 2 args. Typed variants guarantee return type. Circular dependency guard via `_evaluating_params` set. Demand-driven evaluation for EXPRESSION-mode targets.
+  - [x] **`chop()` / `chopf()` / `chopi()` / `chops()`** â€” CHOP channel value references. `chop()` returns raw Variant, typed variants guarantee float/int/String. `chops()` formats floats to 4 decimal places.
+  - [x] Windowed code editor for Script operators & CustomShaderTOP â€” `GNCodeEditor` (extends `GNBaseCodeEditor`) with CodeEdit, mode-adaptive syntax highlighting (GDScript for Script ops, GLSL for shaders), preset load/save via GNScriptHelper, reference cheatsheet, Ctrl+Enter confirm. Opened via "Edit â†—" button in GNParamRow. Both `GNCodeEditor` and `GNExpressionEditor` share a common base class (`GNBaseCodeEditor`) providing Window layout, CodeEdit configuration, key bindings, and status bar.
   - Reference: `help/expressions.md` for complete expression system docs.
-- [x] **File output / save-to-disk operators** — all implemented with `is_sink = true` and `active` toggle:
-  - **FileSaveIMG** (IMG family) — saves CPU Image to disk (PNG, WebP, EXR). Auto-numbering for sequences.
-  - **FileSaveTOP** (TOP family) — GPU→CPU readback via `get_image()`, saves to disk (PNG, WebP, EXR). Auto-numbering.
-  - **FileSaveDAT** (DAT family) — exports table/text to disk (CSV, TSV, JSON, plain text). Proper CSV escaping.
-  - **MovieOutIMG** (IMG family / sink) — saves image sequence as numbered frames (PNG/WebP). Configurable prefix, padding, folder.
-  - **FFmpegOutIMG** (IMG family / sink) — records frames to temp dir, encodes to video (H.264/H.265/VP9/ProRes) via `ffmpeg` CLI on deactivation. Requires `ffmpeg` on PATH.
-  - **RecordCHOP** (CHOP family) — accumulates channel samples into buffer, saves to CSV/JSON via rising-edge pulse. Max samples with ring-buffer trim.
+- [x] **File output / save-to-disk operators** â€” all implemented with `is_sink = true` and `active` toggle:
+  - **ImageSaveOUT** (IMG family) â€” saves CPU Image to disk (PNG, WebP, EXR). Auto-numbering for sequences.
+  - **TextureSaveOUT** (TOP family) â€” GPUâ†’CPU readback via `get_image()`, saves to disk (PNG, WebP, EXR). Auto-numbering.
+  - **TableSaveOUT** (DAT family) â€” exports table/text to disk (CSV, TSV, JSON, plain text). Proper CSV escaping.
+  - **MovieOUT** (IMG family / sink) â€” saves image sequence as numbered frames (PNG/WebP). Configurable prefix, padding, folder.
+  - **FFmpegOUT** (IMG family / sink) â€” records frames to temp dir, encodes to video (H.264/H.265/VP9/ProRes) via `ffmpeg` CLI on deactivation. Requires `ffmpeg` on PATH.
+  - **RecordOUT** (CHOP family) â€” accumulates channel samples into buffer, saves to CSV/JSON via rising-edge pulse. Max samples with ring-buffer trim.
   - All output operators set `is_sink = true` so active-chain cooking keeps them alive.
-  - Common UX: `active` bool param — when checked, saving occurs every cook. Toggle off to stop.
-- [x] **TOPtoIMG bridge** — GPU Texture → CPU Image conversion (`Texture2D.get_image()`). Reverse of ImgToTOP.
+  - Common UX: `active` bool param â€” when checked, saving occurs every cook. Toggle off to stop.
+- [x] **TOPtoIMG bridge** â€” GPU Texture â†’ CPU Image conversion (`Texture2D.get_image()`). Reverse of ImgToTOP.
 - [x] **Cook-once pulse** for Script operators (ScriptCHOP/DAT/SOP/IMG) and CustomShaderTOP:
-  - New `cook_once` bool param (default OFF). Toggle ON → forces one cook, auto-resets to OFF.
+  - New `cook_once` bool param (default OFF). Toggle ON â†’ forces one cook, auto-resets to OFF.
   - Implemented in `_pre_cook()`: calls `mark_dirty()` then `set_param_value("cook_once", false)`.
   - Flexible in combination with `time_dependent`: TD=OFF + cook_once = cook exactly when pulsed.
 - [x] **Renderer selection UI**:
   - **Automatic renderer with fallback**: `fallback_to_opengl3 = true` in project.godot.
   - Both editor and Player try Forward+ (Vulkan/D3D12) first, fall back to Compatibility (OpenGL 3.3) if the GPU doesn't support Vulkan.
-  - No manual selection UI in the editor or Build dialog — fully automatic.
+  - No manual selection UI in the editor or Build dialog â€” fully automatic.
   - Power users can force a renderer via CLI: `--rendering-method mobile` or `--rendering-method gl_compatibility`.
   - Works cross-platform: Windows (D3D12/OpenGL), macOS (MoltenVK/OpenGL), Linux (Vulkan/OpenGL).
-- [x] **Patch export to standalone apps** — **Phase 8: Quick Build implemented**:
+- [x] **Patch export to standalone apps** â€” **Phase 8: Quick Build implemented**:
   - **Two export modes** (both share the same generated project structure):
-    - **Quick Build (Player copy)** ✅: Ship a pre-built `GONODESPlayer.exe` alongside the editor — copies Player + `.gnpatch` + assets to output folder. Instant, no setup required. Supports patch hot-swap (edit `.gnpatch` in-place, restart Player). Desktop only (Win/Mac/Linux).
-    - **Full Export (Godot export pipeline)**: (future) Generates a minimal Godot project from the patch, then invokes `godot --export-release` to produce a single self-contained binary or web/mobile package. Requires Godot export templates installed (~500MB one-time download). Supports all Godot platforms including web (WASM) and mobile (Android/iOS). **Required for web/mobile** — no filesystem access means patches must be baked into `.pck`.
-  - **Runtime performance is identical** between both modes — once the patch is loaded and nodes are in VRAM, the cook engine runs the same code path. Quick Build adds only ~10-50ms startup overhead for filesystem I/O vs `.pck` memory-mapped loading.
+    - **Quick Build (Player copy)** âœ…: Ship a pre-built `GONODESPlayer.exe` alongside the editor â€” copies Player + `.gnpatch` + assets to output folder. Instant, no setup required. Supports patch hot-swap (edit `.gnpatch` in-place, restart Player). Desktop only (Win/Mac/Linux).
+    - **Full Export (Godot export pipeline)**: (future) Generates a minimal Godot project from the patch, then invokes `godot --export-release` to produce a single self-contained binary or web/mobile package. Requires Godot export templates installed (~500MB one-time download). Supports all Godot platforms including web (WASM) and mobile (Android/iOS). **Required for web/mobile** â€” no filesystem access means patches must be baked into `.pck`.
+  - **Runtime performance is identical** between both modes â€” once the patch is loaded and nodes are in VRAM, the cook engine runs the same code path. Quick Build adds only ~10-50ms startup overhead for filesystem I/O vs `.pck` memory-mapped loading.
   - **Implementation:**
-    - `scenes/player_main.gd` + `scenes/player_main.tscn` — minimal Player runtime:
-      - Loads `config.json` + `.gnpatch`, boots GNCookEngine, WindowTOPs auto-open their OS windows.
+    - `scenes/player_main.gd` + `scenes/player_main.tscn` â€” minimal Player runtime:
+      - Loads `config.json` + `.gnpatch`, boots GNCookEngine, WindowOUTs auto-open their OS windows.
       - CLI args: `--patch <path>`, `--rendering-method <method>`. Escape key quits.
-      - Minimal info label as fallback display (shown when no WindowTOP opens).
-      - No editor UI — pure cook engine + output.
-    - `addons/gonodes/core/gn_patch_exporter.gd` — Quick Build logic:
-      - `quick_build()` → copies Player binary + `.pck` + `.gnpatch` + project folder + `config.json` to output dir.
+      - Minimal info label as fallback display (shown when no WindowOUT opens).
+      - No editor UI â€” pure cook engine + output.
+    - `addons/gonodes/core/gn_patch_exporter.gd` â€” Quick Build logic:
+      - `quick_build()` â†’ copies Player binary + `.pck` + `.gnpatch` + project folder + `config.json` to output dir.
       - Player binary discovery: searches next to exe, project root, `player/`, `build/` subdirs.
-      - `config.json` format: just `patch` filename.  No renderer/VSync/FPS — all automatic via fallback + WindowTOPs.
+      - `config.json` format: just `patch` filename.  No renderer/VSync/FPS â€” all automatic via fallback + WindowOUTs.
       - Recursive directory copy for project assets (skips hidden dirs).
       - Progress + completed signals for UI feedback.
-    - `addons/gonodes/ui/gn_export_dialog.gd` — export dialog Window:
+    - `addons/gonodes/ui/gn_export_dialog.gd` â€” export dialog Window:
       - Form: output directory picker only.  All runtime settings are automatic.
       - Default output dir: `<patch_stem>_build/` sibling to the `.gnpatch`.
       - Progress label shows real-time build status. Green checkmark on success, red on failure.
@@ -1475,79 +1475,79 @@ GONODES/
   - Custom `.md` docs stored in `res://addons/gonodes/help/<family>/<node_type>.md`.
   - File naming convention: `<node_type>.md` (e.g. `noise_top.md`, `lfo_chop.md`).
   - Auto-generation: builds docs from existing `node_description`, port descriptions,
-    and parameter descriptions already defined in each operator — zero manual authoring.
+    and parameter descriptions already defined in each operator â€” zero manual authoring.
   - Template: family-colored header, description, inputs table, outputs table,
     parameters table (with type/default/range), properties section.
   - **Example patches**: `.gnpatch` files in `help/<family>/` whose filename starts
     with `<node_type>_` are auto-discovered via directory scan (e.g., `noise_color.gnpatch`,
-    `noise_simple.gnpatch`). Multiple examples per node supported — each gets its own button.
+    `noise_simple.gnpatch`). Multiple examples per node supported â€” each gets its own button.
   - Discovery is lazy (scans when help is opened), no manifest or startup registration needed.
   - "Open Example Patch" buttons at bottom of help page open the patch in a new
     floating editor window (current work stays untouched).
   - Implementation: `GNHelpWindow` class (`addons/gonodes/ui/gn_help_window.gd`),
     `?` button via `_setup_help_button()` in `GNNodeView`, `NODE_HELP` context
     menu item in `GNGraphEditor`, wired through `gn_editor.gd`.
-  - **Main Help Window**: `GNMainHelpWindow` (`addons/gonodes/ui/gn_main_help_window.gd`) —
-    centralized reference hub with sidebar Tree + content pane. Opened via "📖 Help" toolbar
+  - **Main Help Window**: `GNMainHelpWindow` (`addons/gonodes/ui/gn_main_help_window.gd`) â€”
+    centralized reference hub with sidebar Tree + content pane. Opened via "ðŸ“– Help" toolbar
     button or F1 key. Uses `GNMarkdownRenderer` (`addons/gonodes/ui/gn_markdown_renderer.gd`)
-    for Markdown→BBCode conversion. See Section 29 for full details.
+    for Markdownâ†’BBCode conversion. See Section 29 for full details.
   - **108 example patches** across all 6 help families (see Hard Rule 25.21):
-    - CHOP: 32 patches covering all 31 node types (lfo, noise, constant, math, wave, pattern, filter, lag, cross, merge, hold, speed, count, trigger, timer, logic, limit, switch, select, rename, ramp, recordchop, physics, scriptchop, audiofilein, audioin, audiospectrum, midiin, oscin, oscout, null)
-    - TOP: 29 patches covering all 28 node types (noise, blur, circle, composite, constant, crop, cross, displace, edge, feedback, flip, hsv_adjust, level, lookup, ramp, rectangle, text, threshold, tile, transform, resolution, switch, null, filesavetop, moviefilein, glsl, postprocess, render)
+    - CHOP: 32 patches covering all 31 node types (lfo, noise, constant, math, wave, pattern, filter, lag, cross, merge, hold, speed, count, trigger, timer, logic, limit, switch, select, rename, ramp, RecordOUT, physics, scriptchop, audiofilein, audioin, audiospectrum, midiin, oscin, oscout, null)
+    - TOP: 29 patches covering all 28 node types (noise, blur, circle, composite, constant, crop, cross, displace, edge, feedback, flip, hsv_adjust, level, lookup, ramp, rectangle, text, threshold, tile, transform, resolution, switch, null, TextureSaveOUT, moviefilein, glsl, postprocess, render)
     - SOP: 15 patches covering all 15 node types (box, circle, cylinder, grid, line, sphere, torus, noise, transform, merge, subdivide, wireframe, null, switch, scriptsop)
-    - COMP: 13 patches covering all 12 node types (camera×2, geo, light, rigid_body, static_body, joint, area, soft_body, merge_comp, subnet, in_tunnel, out_tunnel)
-    - DAT: 16 patches covering all 16 node types (constant, text, scriptdat, sort, transpose, select, merge, evaluate, chop_to_dat, dat_to_chop, null, switch, info, filesavedat, midiin, oscin)
-    - MAT: 3 patches covering all 2 node types (pbr×2, shader)
+    - COMP: 13 patches covering all 12 node types (cameraÃ—2, geo, light, rigid_body, static_body, joint, area, soft_body, merge_comp, subnet, in_tunnel, out_tunnel)
+    - DAT: 16 patches covering all 16 node types (constant, text, scriptdat, sort, transpose, select, merge, evaluate, chop_to_dat, dat_to_chop, null, switch, info, TableSaveOUT, midiin, oscin)
+    - MAT: 3 patches covering all 2 node types (pbrÃ—2, shader)
   - Folder structure:
     ```
     addons/gonodes/help/
-    ├── top/                               # 29 patches
-    │   ├── noise_simple.gnpatch           # NoiseTOP basic demo
-    │   ├── noise_color.gnpatch            # NoiseTOP color mode
-    │   ├── blur_basic.gnpatch
-    │   ├── render_scene.gnpatch
-    │   └── ...
-    ├── chop/                              # 32 patches
-    │   ├── lfo_basic.gnpatch
-    │   ├── lfo_waveforms.gnpatch
-    │   ├── math_operations.gnpatch
-    │   └── ...
-    ├── sop/                               # 15 patches
-    │   ├── box_basic.gnpatch
-    │   ├── noise_terrain.gnpatch
-    │   └── ...
-    ├── comp/                              # 13 patches
-    │   ├── camera_basic.gnpatch
-    │   ├── light_setup.gnpatch
-    │   └── ...
-    ├── dat/                               # 16 patches
-    │   ├── constant_basic.gnpatch
-    │   ├── scriptdat_table.gnpatch
-    │   └── ...
-    └── mat/                               # 3 patches
-        ├── pbr_metallic.gnpatch
-        ├── pbr_emissive.gnpatch
-        └── shader_gradient.gnpatch
+    â”œâ”€â”€ top/                               # 29 patches
+    â”‚   â”œâ”€â”€ noise_simple.gnpatch           # NoiseTOP basic demo
+    â”‚   â”œâ”€â”€ noise_color.gnpatch            # NoiseTOP color mode
+    â”‚   â”œâ”€â”€ blur_basic.gnpatch
+    â”‚   â”œâ”€â”€ render_scene.gnpatch
+    â”‚   â””â”€â”€ ...
+    â”œâ”€â”€ chop/                              # 32 patches
+    â”‚   â”œâ”€â”€ lfo_basic.gnpatch
+    â”‚   â”œâ”€â”€ lfo_waveforms.gnpatch
+    â”‚   â”œâ”€â”€ math_operations.gnpatch
+    â”‚   â””â”€â”€ ...
+    â”œâ”€â”€ sop/                               # 15 patches
+    â”‚   â”œâ”€â”€ box_basic.gnpatch
+    â”‚   â”œâ”€â”€ noise_terrain.gnpatch
+    â”‚   â””â”€â”€ ...
+    â”œâ”€â”€ comp/                              # 13 patches
+    â”‚   â”œâ”€â”€ camera_basic.gnpatch
+    â”‚   â”œâ”€â”€ light_setup.gnpatch
+    â”‚   â””â”€â”€ ...
+    â”œâ”€â”€ dat/                               # 16 patches
+    â”‚   â”œâ”€â”€ constant_basic.gnpatch
+    â”‚   â”œâ”€â”€ scriptdat_table.gnpatch
+    â”‚   â””â”€â”€ ...
+    â””â”€â”€ mat/                               # 3 patches
+        â”œâ”€â”€ pbr_metallic.gnpatch
+        â”œâ”€â”€ pbr_emissive.gnpatch
+        â””â”€â”€ shader_gradient.gnpatch
     ```
   - **Extension help patches**: GN extensions (`gn_ext_*`) ship their own
     help patches in `res://addons/gn_ext_<name>/help/<family>/`. The help window
-    scans both core help dirs and extension help dirs automatically (see §28.10).
-- [x] **Node grouping / sub-networks** — **Done: SubNetworkNode, InTunnel, OutTunnel, hierarchical op() paths, undo/redo, copy/paste, help**:
-  - Select multiple nodes → Ctrl+G "Group into Sub-Network" creates SubNetworkNode with auto-generated tunnels.
+    scans both core help dirs and extension help dirs automatically (see Â§28.10).
+- [x] **Node grouping / sub-networks** â€” **Done: SubNetworkNode, InTunnel, OutTunnel, hierarchical op() paths, undo/redo, copy/paste, help**:
+  - Select multiple nodes â†’ Ctrl+G "Group into Sub-Network" creates SubNetworkNode with auto-generated tunnels.
   - Double-click body or press Enter to dive into sub-network. Backspace or breadcrumb click to dive out.
   - Breadcrumb bar above graph editor shows navigation stack (root > subnet1 > ...).
   - InTunnel/OutTunnel pseudo-nodes bridge data between parent and inner networks.
-  - Inner cook engine runs recursively — injected data into InTunnels, reads OutTunnel results.
+  - Inner cook engine runs recursively â€” injected data into InTunnels, reads OutTunnel results.
   - Multi-output support via `get_output_data(port_index)` virtual in GNNode, overridden in SubNetworkNode.
   - Hierarchical expression paths: `op("subnet1/noise1")`, `chop("../lfo1", "out")`, `top("/root_node")`.
   - Full serialization via nested `inner_network.to_dict()` / `from_dict()`.
-  - **Undo/redo**: Group-into-subnet is a single UndoRedo action — Ctrl+Z restores original nodes and connections.
+  - **Undo/redo**: Group-into-subnet is a single UndoRedo action â€” Ctrl+Z restores original nodes and connections.
   - **Cross-level clipboard**: Copy/paste works across sub-network levels (clipboard persists during navigation). Undo history cleared on level change to prevent cross-level replay.
   - **Help tooltips**: SubNetworkNode, InTunnel, OutTunnel have rich node_description with usage hints. SubNetworkNode tooltip shows inner node count.
   - **Cold-cache robustness**: All files referencing sub-network types use explicit `preload()` constants instead of bare `class_name` for reliable first-import on fresh projects.
   - Files: `in_tunnel.gd`, `out_tunnel.gd`, `sub_network_node.gd` (COMP family). Modified: `gn_cook_engine.gd`, `gn_node.gd`, `gn_graph_editor.gd`, `gn_node_view.gd`, `gn_editor.gd`, `gn_extension_registry.gd`.
 - [x] **Minimap**:
-  - Built-in GraphEdit minimap (200×150px). Toggle with M key or toolbar CheckButton.
+  - Built-in GraphEdit minimap (200Ã—150px). Toggle with M key or toolbar CheckButton.
   - Click to navigate. Viewport rectangle shows current zoom region.
 - [x] **Node bookmarks**:
   - Ctrl+1-9 to set bookmark on selected node. 1-9 to jump to bookmarked node.
@@ -1557,53 +1557,53 @@ GONODES/
   - Configurable spacing (280px horizontal, 100px vertical). Undoable via Ctrl+Z.
   - Context menu entry "Auto-Layout All" with Ctrl+L shortcut.
 - [x] **Parameter presets**:
-  - **GNParamPresetManager** (`gn_param_preset_manager.gd`) — static utility class for parameter snapshot management:
+  - **GNParamPresetManager** (`gn_param_preset_manager.gd`) â€” static utility class for parameter snapshot management:
     - **Copy / Paste**: In-memory clipboard. `copy_params(node)` serializes all params via `GNParameter.to_dict()`. `paste_params(node)` applies only to same operator type (matched by `get_script().get_global_name()`). `can_paste(node)` gate.
     - **Named Snapshots**: `save_preset(node, name)` writes JSON to `user://gonodes_param_presets/<OperatorType>/<name>.json`. `load_preset(node, path)` reads JSON and applies matching params. `get_preset_list(operator_type)` scans both factory (`res://addons/gonodes/presets/params/`) and user dirs.
     - **Delete**: `delete_preset(path)` removes user presets (factory presets protected). **Reset**: `reset_to_defaults(node)` constructs a temp default instance and copies initial values.
-    - JSON format: `{ operator_type, preset_name, version, params: { name → GNParameter.to_dict() } }`.
-  - **Context menu** — 5 new entries in `_CtxID` enum (`COPY_PARAMS`, `PASTE_PARAMS`, `RESET_PARAMS`, `SAVE_PARAM_PRESET`, `LOAD_PARAM_PRESET_BASE`):
+    - JSON format: `{ operator_type, preset_name, version, params: { name â†’ GNParameter.to_dict() } }`.
+  - **Context menu** â€” 5 new entries in `_CtxID` enum (`COPY_PARAMS`, `PASTE_PARAMS`, `RESET_PARAMS`, `SAVE_PARAM_PRESET`, `LOAD_PARAM_PRESET_BASE`):
     - Copy/Paste/Reset enabled when single node selected. Paste gated on clipboard type match.
     - "Load Param Preset" is a dynamic submenu populated from `get_preset_list()`.
-    - "Save Param Preset…" opens a name-input dialog.
-  - **Inspector toolbar** — `GNParamInspector` header gains Copy / Paste / Reset buttons + "Presets ▾" `MenuButton`:
-    - Presets dropdown dynamically lists saved presets with "Save Preset…" at top and "Delete: name" for user presets.
-    - All actions trigger `node.parameters_changed` signal → inspector auto-rebuilds rows.
+    - "Save Param Presetâ€¦" opens a name-input dialog.
+  - **Inspector toolbar** â€” `GNParamInspector` header gains Copy / Paste / Reset buttons + "Presets â–¾" `MenuButton`:
+    - Presets dropdown dynamically lists saved presets with "Save Presetâ€¦" at top and "Delete: name" for user presets.
+    - All actions trigger `node.parameters_changed` signal â†’ inspector auto-rebuilds rows.
 
-### Phase 7.5: Three-Tier Resource System ✅
-- [x] **GNResourceLoader** (`gn_resource_loader.gd`) — unified resource loading abstraction:
+### Phase 7.5: Three-Tier Resource System âœ…
+- [x] **GNResourceLoader** (`gn_resource_loader.gd`) â€” unified resource loading abstraction:
   - Static utility class (~340 lines). Handles all three path tiers transparently.
   - `PathTier` enum: `BUNDLED` (res://), `PROJECT` (project://), `ABSOLUTE`, `EMPTY`.
-  - `classify(path)` → PathTier. `resolve(path, project_dir)` → absolute filesystem path.
-  - `to_project_relative(abs_path, project_dir)` → project:// path. `to_saveable(abs_path, project_dir)` → best portable path.
-  - `exists(path, project_dir)` — works across all tiers.
+  - `classify(path)` â†’ PathTier. `resolve(path, project_dir)` â†’ absolute filesystem path.
+  - `to_project_relative(abs_path, project_dir)` â†’ project:// path. `to_saveable(abs_path, project_dir)` â†’ best portable path.
+  - `exists(path, project_dir)` â€” works across all tiers.
   - Type-specific loaders: `load_texture()`, `load_image()`, `load_font()`, `load_audio()`, `load_shader()`, `load_video()`, `load_any()`.
   - Tier 1 (res://) uses `ResourceLoader.load()`. Tier 2/3 use filesystem APIs: `Image.load_from_file()`, `FontFile.load_dynamic_font()`, `AudioStreamOggVorbis.load_from_buffer()`, `Shader.code = FileAccess.get_as_text()`, `VideoStreamTheora.file = path`.
-  - `scan_directory(dir_path, extensions)` — lists files matching extensions in a given directory.
-- [x] **GNProjectManager** (`gn_project_manager.gd`) — project folder lifecycle:
-  - `set_from_patch_path(path)` — creates sibling folder to `.gnpatch` file with standard subfolders.
+  - `scan_directory(dir_path, extensions)` â€” lists files matching extensions in a given directory.
+- [x] **GNProjectManager** (`gn_project_manager.gd`) â€” project folder lifecycle:
+  - `set_from_patch_path(path)` â€” creates sibling folder to `.gnpatch` file with standard subfolders.
   - `SUBFOLDERS`: textures, fonts, video, audio, models, shaders, presets, scripts, data.
-  - `scan_subfolder()`, `scan_all_subfolders()` — lists project files by category.
-  - `resolve_path(rel)` → absolute. `to_saveable(abs)` → project:// path. `has_project()` → bool.
+  - `scan_subfolder()`, `scan_all_subfolders()` â€” lists project files by category.
+  - `resolve_path(rel)` â†’ absolute. `to_saveable(abs)` â†’ project:// path. `has_project()` â†’ bool.
   - `signal project_changed(project_dir: String)`.
-- [x] **project_dir injection pipeline**: `GNProjectManager` → `GNCookEngine.project_dir` → `GNNode.project_dir` (set each frame alongside `current_delta`, `elapsed_time`, `current_frame`).
+- [x] **project_dir injection pipeline**: `GNProjectManager` â†’ `GNCookEngine.project_dir` â†’ `GNNode.project_dir` (set each frame alongside `current_delta`, `elapsed_time`, `current_frame`).
 - [x] **All 7 file-loading operators migrated** from `ResourceLoader.load()` to `GNResourceLoader`:
-  - `AudioFileInCHOP` → `GNResourceLoader.load_audio()`
-  - `MovieFileInTOP` → `GNResourceLoader.load_video()`
-  - `TextTOP` → `GNResourceLoader.load_font()`
-  - `ShaderMAT` → `GNResourceLoader.load_shader()`
-  - `ImageFileInIMG` → `GNResourceLoader.load_image()`
-  - `ImageSequenceIMG` → `GNResourceLoader.load_image()` + `resolve()` + `exists()`
-  - `FFmpegInTOP` → `GNResourceLoader.resolve()` before `_create_ffmpeg_stream()`
+  - `AudioFileInCHOP` â†’ `GNResourceLoader.load_audio()`
+  - `MovieFileInTOP` â†’ `GNResourceLoader.load_video()`
+  - `TextTOP` â†’ `GNResourceLoader.load_font()`
+  - `ShaderMAT` â†’ `GNResourceLoader.load_shader()`
+  - `ImageFileInIMG` â†’ `GNResourceLoader.load_image()`
+  - `ImageSequenceIMG` â†’ `GNResourceLoader.load_image()` + `resolve()` + `exists()`
+  - `FFmpegInTOP` â†’ `GNResourceLoader.resolve()` before `_create_ffmpeg_stream()`
 - [x] **File param UI updated** to three-tier dropdown:
-  - `_create_file_control()` in `gn_param_row.gd`: OptionButton with Browse "…", Refresh "↻", Clear "X" buttons.
-  - `_populate_file_dropdown()`: Three sections with separators — "── Bundled ──" (res://), "── Project ──" (project folder), "── External ──" (absolute paths with ⚠ warning).
+  - `_create_file_control()` in `gn_param_row.gd`: OptionButton with Browse "â€¦", Refresh "â†»", Clear "X" buttons.
+  - `_populate_file_dropdown()`: Three sections with separators â€” "â”€â”€ Bundled â”€â”€" (res://), "â”€â”€ Project â”€â”€" (project folder), "â”€â”€ External â”€â”€" (absolute paths with âš  warning).
   - `_open_file_browse_dialog()`: Native FileDialog, auto-converts to project:// if file is inside project folder.
 - [x] **Editor wired to GNProjectManager**: save/load/new/setup/auto-restore all update `_project` and `cook_engine.project_dir`.
-- [x] File output operators (FileSaveTOP, FileSaveDAT, RecordCHOP, MovieOutIMG, FFmpegOutIMG) confirmed write-only, use STRING params — not affected by resource loader migration.
+- [x] File output operators (TextureSaveOUT, TableSaveOUT, RecordOUT, MovieOUT, FFmpegOUT) confirmed write-only, use STRING params â€” not affected by resource loader migration.
 
-### Phase 7.6: Parameter References & Copy Path ✅
-- [x] **`par()` expression function** — Houdini-style `ch()` equivalent for parameter-to-parameter references:
+### Phase 7.6: Parameter References & Copy Path âœ…
+- [x] **`par()` expression function** â€” Houdini-style `ch()` equivalent for parameter-to-parameter references:
   - Self-reference: `par("scale")` reads own node's param (most common, like Houdini's `ch("scale")`)
   - Cross-node: `par("noise1", "scale")` reads another node's param
   - Hierarchical: `par("../lfo1", "frequency")` with path resolution
@@ -1611,13 +1611,13 @@ GONODES/
   - Implementation: methods on GNCookEngine, `_current_eval_node` tracks which node's expression is being evaluated, single-arg `par()` resolves against self
 - [x] **Circular dependency guard** (simple guard, Option A):
   - `_evaluating_params: Dictionary` tracks `"node_id:param_name"` keys currently being evaluated
-  - If `par()` encounters a key already in the set → cycle detected → returns `fallback_value` + warns
+  - If `par()` encounters a key already in the set â†’ cycle detected â†’ returns `fallback_value` + warns
   - Guard keys are pushed before eval and erased after, covering both scalar and component expressions
   - Demand-driven: if target param is EXPRESSION mode and not yet evaluated this frame, evaluates it inline with guard protection
-  - **Future: Full Parameter DAG** — build a mini topological sort of all parameter dependencies per cook frame for optimal evaluation order and guaranteed cycle detection. Current simple guard handles the 99% case; full DAG would also enable lazy re-evaluation (only re-eval params whose deps changed).
+  - **Future: Full Parameter DAG** â€” build a mini topological sort of all parameter dependencies per cook frame for optimal evaluation order and guaranteed cycle detection. Current simple guard handles the 99% case; full DAG would also enable lazy re-evaluation (only re-eval params whose deps changed).
 - [x] **Copy Node Path** (right-click context menu on graph editor):
-  - "Copy Node Path" → copies `op("node_id")` to clipboard
-  - "Copy Output Ref" → copies family-appropriate reference:
+  - "Copy Node Path" â†’ copies `op("node_id")` to clipboard
+  - "Copy Output Ref" â†’ copies family-appropriate reference:
     - CHOP: `chop("name", "out")` (uses first channel name if available)
     - TOP: `top("name")`
     - Other: `op("name")`
@@ -1625,23 +1625,23 @@ GONODES/
   - Menu items show the actual reference string that will be copied
 - [x] **Copy Parameter Reference** (right-click on param name label in inspector):
   - Three options per parameter:
-    - "Copy Self Ref" → `par("param_name")` (for expressions on the same node)
-    - "Copy Cross Ref" → `par("node_id", "param_name")` (for expressions on other nodes)
-    - "Copy op() Ref" → `op("node_id", "param_name")` (alternative syntax)
-  - Right-click the parameter name label → popup with all three options
+    - "Copy Self Ref" â†’ `par("param_name")` (for expressions on the same node)
+    - "Copy Cross Ref" â†’ `par("node_id", "param_name")` (for expressions on other nodes)
+    - "Copy op() Ref" â†’ `op("node_id", "param_name")` (alternative syntax)
+  - Right-click the parameter name label â†’ popup with all three options
   - Selected reference is copied to system clipboard for paste into expression fields
   - Files modified: `gn_cook_engine.gd`, `gn_graph_editor.gd`, `gn_param_row.gd`
 
-### Phase 7.8: Wire Replacement, Palette Sections & Camera Post-Processing ✅
-- [x] **Wire replacement UX** — connecting to an already-occupied input auto-disconnects the old wire and connects the new one. Compound undo action (remove old + add new). `GNNetwork.connect_nodes()` detects existing connections, removes old, emits `connection_removed`, then connects new. `GNGraphEditor._on_connection_request()` snapshots old connection for undo.
-- [x] **Operator palette sections** — sub-sections within family groups in the node palette:
+### Phase 7.8: Wire Replacement, Palette Sections & Camera Post-Processing âœ…
+- [x] **Wire replacement UX** â€” connecting to an already-occupied input auto-disconnects the old wire and connects the new one. Compound undo action (remove old + add new). `GNNetwork.connect_nodes()` detects existing connections, removes old, emits `connection_removed`, then connects new. `GNGraphEditor._on_connection_request()` snapshots old connection for undo.
+- [x] **Operator palette sections** â€” sub-sections within family groups in the node palette:
   - `OperatorEntry.section` field; `register_operator()` accepts optional section parameter.
   - `get_operator_registry_sectioned()` and `get_section()` query APIs.
   - `GNNodePalette._populate_tree()` renders section sub-headings (non-selectable, lighter colour).
-- [x] **Extension-level auto-sections** — `[extension]` header in `gn_extension.cfg` supports `section=` key. All operators from that extension inherit the section (per-operator override still possible). Defaults to extension name.
+- [x] **Extension-level auto-sections** â€” `[extension]` header in `gn_extension.cfg` supports `section=` key. All operators from that extension inherit the section (per-operator override still possible). Defaults to extension name.
   - Shadertoy manifest: `section="Shadertoy"` at extension level (removed per-operator overrides).
   - FFmpeg manifest: `section="FFmpeg"` at extension level.
-- [x] **RenderTOP integrated post-processing** — camera/environment post-processing FX built into RenderTOP (no separate operator needed):
+- [x] **RenderTOP integrated post-processing** â€” camera/environment post-processing FX built into RenderTOP (no separate operator needed):
   - Applied directly to RenderTOP's 3D SubViewport `Environment` and active camera.
   - **Glow/Bloom:** intensity, strength, bloom, HDR threshold, 5 blend modes.
   - **Depth of Field:** near + far blur with distance/transition, bokeh size + shape (box/hex/circle).
@@ -1661,128 +1661,128 @@ GONODES/
 - [x] Physics COMPs (RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP + PhysicsCHOP readback)
 - [x] Keyboard shortcuts and workflow polish (Alt+A palette, context menu shortcuts, per-node preview toggle)
 
-### Phase 7.7: Ramp Parameters & Canvas Annotations ✅
-- [x] **RAMP parameter type** — new `ValueType.RAMP` (index 12) in GNParameter. Data: Array of keypoint dicts `[{pos, value, left_tangent, right_tangent}]`. `create_ramp()` factory with default linear ramp (0→0, 1→1). `sample_ramp()` static method with cubic Hermite interpolation.
-- [x] **GNRampEditor widget** (`gn_ramp_editor.gd`, ~290 lines) — custom `_draw()` curve editor. Grid background, curve rendering, filled area, draggable keypoints, tangent handles, add/remove points, Ctrl+click smooth toggle.
-- [x] **RAMP in inspector** — `_create_ramp_control()` in GNParamRow, wired into dispatch and `_update_value_display()`.
-- [x] **RAMP serialization** — `_variant_to_json()` wraps as `{"_type": "Ramp", "keys": [...]}`, `_json_to_variant()` unwraps (with raw array fallback). Full `to_dict()`/`from_dict()` round-trip.
-- [x] **`ramp()` expression function** on CookEngine — `ramp("param", t)` (self-ref) or `ramp("node", "param", t)` (cross-node). Delegates to `GNParameter.sample_ramp()`.
-- [x] **Expression editor** — `ramp()` added to autocomplete, two snippet presets (self + cross-node).
-- [x] **Network annotations** — `GNNetwork.annotations` Array[Dictionary] with CRUD methods (add/get/update/remove), `annotations_changed` signal. Counter-based unique IDs.
-- [x] **GNNetworkBox** (`gn_network_box.gd`, ~200 lines) — colored grouping rectangle, z_index=-10, title edit, drag/resize, context menu.
-- [x] **GNStickyNote** (`gn_sticky_note.gd`, ~195 lines) — editable text note, z_index=-9, drag/resize, context menu, default yellow.
-- [x] **Annotation integration** — context menu items in GNGraphEditor, view lifecycle management, serialization in `.gnpatch` files.
-- [x] **23 new tests** in `test_ramp_and_annotations.gd` — ramp factory, sampling, serialization, annotation CRUD, round-trip. All 167 tests passing.
-- [x] **RampCHOP** (`ramp_chop.gd`, ~120 lines) — dynamic ramp curve → CHOP channel operator. `count` param (1–16) dynamically creates/removes `nameN`/`rampN` parameter pairs at cook time, triggering `parameters_changed` for live inspector rebuild. `samples` param (1–4096) controls curve evaluation resolution (1 = scalar for `chop()` reads). `from_dict()` override restores dynamic slot count before base-class param restore. 9 new tests in `test_ramp_chop.gd`. All 176 tests passing.
+### Phase 7.7: Ramp Parameters & Canvas Annotations âœ…
+- [x] **RAMP parameter type** â€” new `ValueType.RAMP` (index 12) in GNParameter. Data: Array of keypoint dicts `[{pos, value, left_tangent, right_tangent}]`. `create_ramp()` factory with default linear ramp (0â†’0, 1â†’1). `sample_ramp()` static method with cubic Hermite interpolation.
+- [x] **GNRampEditor widget** (`gn_ramp_editor.gd`, ~290 lines) â€” custom `_draw()` curve editor. Grid background, curve rendering, filled area, draggable keypoints, tangent handles, add/remove points, Ctrl+click smooth toggle.
+- [x] **RAMP in inspector** â€” `_create_ramp_control()` in GNParamRow, wired into dispatch and `_update_value_display()`.
+- [x] **RAMP serialization** â€” `_variant_to_json()` wraps as `{"_type": "Ramp", "keys": [...]}`, `_json_to_variant()` unwraps (with raw array fallback). Full `to_dict()`/`from_dict()` round-trip.
+- [x] **`ramp()` expression function** on CookEngine â€” `ramp("param", t)` (self-ref) or `ramp("node", "param", t)` (cross-node). Delegates to `GNParameter.sample_ramp()`.
+- [x] **Expression editor** â€” `ramp()` added to autocomplete, two snippet presets (self + cross-node).
+- [x] **Network annotations** â€” `GNNetwork.annotations` Array[Dictionary] with CRUD methods (add/get/update/remove), `annotations_changed` signal. Counter-based unique IDs.
+- [x] **GNNetworkBox** (`gn_network_box.gd`, ~200 lines) â€” colored grouping rectangle, z_index=-10, title edit, drag/resize, context menu.
+- [x] **GNStickyNote** (`gn_sticky_note.gd`, ~195 lines) â€” editable text note, z_index=-9, drag/resize, context menu, default yellow.
+- [x] **Annotation integration** â€” context menu items in GNGraphEditor, view lifecycle management, serialization in `.gnpatch` files.
+- [x] **23 new tests** in `test_ramp_and_annotations.gd` â€” ramp factory, sampling, serialization, annotation CRUD, round-trip. All 167 tests passing.
+- [x] **RampCHOP** (`ramp_chop.gd`, ~120 lines) â€” dynamic ramp curve â†’ CHOP channel operator. `count` param (1â€“16) dynamically creates/removes `nameN`/`rampN` parameter pairs at cook time, triggering `parameters_changed` for live inspector rebuild. `samples` param (1â€“4096) controls curve evaluation resolution (1 = scalar for `chop()` reads). `from_dict()` override restores dynamic slot count before base-class param restore. 9 new tests in `test_ramp_chop.gd`. All 176 tests passing.
 
 ### Medium-term
-- [x] File output operators (FileSaveIMG, FileSaveTOP, FileSaveDAT, MovieOutIMG, FFmpegOutIMG, RecordCHOP + TOPtoIMG bridge)
-- [ ] POP family (GPU point/particle operators — see Section 18)
+- [x] File output operators (ImageSaveOUT, TextureSaveOUT, TableSaveOUT, MovieOUT, FFmpegOUT, RecordOUT + TOPtoIMG bridge)
+- [ ] POP family (GPU point/particle operators â€” see Section 18)
 - [ ] LibGodot embedding proof-of-concept
   - Build a minimal host app that embeds LibGodot
   - Load a .GNNode patch via API
   - Feed data in, read textures out
 - [ ] Syphon (macOS) / Spout (Windows) texture sharing
-- [x] FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — **Done: first reference extension for GNExtensionRegistry**
+- [x] FFmpeg GDExtension addon (`gn_ext_ffmpeg`) â€” **Done: first reference extension for GNExtensionRegistry**
   - Wraps [EIRTeam/EIRTeam.FFmpeg](https://github.com/EIRTeam/EIRTeam.FFmpeg) GDExtension
   - FFmpegInTOP: H.264, H.265, VP9, AV1, ProRes playback via dynamic `ClassDB.instantiate("FFmpegVideoStream")`
   - Demonstrates `gn_extension.cfg` manifest, `ClassDB.class_exists()` dependency guards
   - Core MovieFileInTOP always available (Theora .ogv); FFmpegInTOP appears only when GDExtension installed
-- [ ] HAP codec GDExtension — GPU-direct S3TC/DXT video playback for VJ workflows
+- [ ] HAP codec GDExtension â€” GPU-direct S3TC/DXT video playback for VJ workflows
   - HAP, HAP Alpha, HAP Q variants
   - Custom `VideoStreamHAP` resource extending Godot's `VideoStream`
   - Wraps [Vidvox/hap](https://github.com/Vidvox/hap) (Snappy + DXT decompression, direct GPU upload)
   - Enables alpha-channel video without image sequences
-  - **Exception to CPU-first philosophy:** HAP frames are already GPU-compressed (S3TC/DXT), so the operator is a TOP — CPU detour would be counterproductive.
-- [ ] **CPU-side video frame decoder GDExtension** (`gn_ext_video_decoder`) — enables IMG-family video operators
+  - **Exception to CPU-first philosophy:** HAP frames are already GPU-compressed (S3TC/DXT), so the operator is a TOP â€” CPU detour would be counterproductive.
+- [ ] **CPU-side video frame decoder GDExtension** (`gn_ext_video_decoder`) â€” enables IMG-family video operators
   - Custom GDExtension (~300-500 LOC C++) using FFmpeg's C API directly (libavcodec/libavformat/libswscale).
-  - **Motivation:** Godot's `VideoStreamPlayback` only exposes GPU textures (`get_video_texture()`). Internally, both Theora and FFmpeg decode to CPU pixel buffers first, then immediately upload to GPU via `RenderingServer::texture_2d_update()` — but this CPU data is never exposed via any public API. EIRTeam.FFmpeg also doesn't expose it (just another `VideoStream` subclass).
+  - **Motivation:** Godot's `VideoStreamPlayback` only exposes GPU textures (`get_video_texture()`). Internally, both Theora and FFmpeg decode to CPU pixel buffers first, then immediately upload to GPU via `RenderingServer::texture_2d_update()` â€” but this CPU data is never exposed via any public API. EIRTeam.FFmpeg also doesn't expose it (just another `VideoStream` subclass).
   - Exposes a `VideoFrameDecoder` class to GDScript:
-    - `open(path) → Error`, `decode_next_frame() → Image`, `seek(time_sec)`, `get_duration()`, `get_fps()`, `close()`
-  - Decodes video frames to `Image::create_from_data()` — stays CPU-side, zero GPU involvement.
+    - `open(path) â†’ Error`, `decode_next_frame() â†’ Image`, `seek(time_sec)`, `get_duration()`, `get_fps()`, `close()`
+  - Decodes video frames to `Image::create_from_data()` â€” stays CPU-side, zero GPU involvement.
   - Would enable proper **MovieFileInIMG** and **FFmpegInIMG** operators outputting `GNImageData` directly into the IMG pipeline.
   - The FFmpeg shared libraries are already shipped in `addons/ffmpeg/win64/` and `linux64/`.
-  - Eliminates the wasteful CPU→GPU→CPU roundtrip that `get_video_texture().get_image()` would cause (~1-4ms stall per frame).
-  - Frame-accurate seeking, frame stepping — things `VideoStreamPlayer` handles poorly.
-  - **OpenCV was considered and rejected:** no production-ready Godot 4 GDExtension exists, and `cv::VideoCapture` just wraps FFmpeg internally anyway — massive dependency for nothing extra.
-- [x] Custom GLSL shader TOP (user-editable shader code) — **Done: CustomShaderTOP**
-- [x] ComputeShaderTOP (user-editable GPU compute shader — see Section 27)
-- [ ] **CompositorEffectTOP** — custom render-pipeline FX with access to depth/normal/roughness buffers:
+  - Eliminates the wasteful CPUâ†’GPUâ†’CPU roundtrip that `get_video_texture().get_image()` would cause (~1-4ms stall per frame).
+  - Frame-accurate seeking, frame stepping â€” things `VideoStreamPlayer` handles poorly.
+  - **OpenCV was considered and rejected:** no production-ready Godot 4 GDExtension exists, and `cv::VideoCapture` just wraps FFmpeg internally anyway â€” massive dependency for nothing extra.
+- [x] Custom GLSL shader TOP (user-editable shader code) â€” **Done: CustomShaderTOP**
+- [x] ComputeShaderTOP (user-editable GPU compute shader â€” see Section 27)
+- [ ] **CompositorEffectTOP** â€” custom render-pipeline FX with access to depth/normal/roughness buffers:
   - Uses Godot 4.3+ `CompositorEffect` API for compute-shader-based spatial effects.
   - Access to `depth_texture`, `normal_roughness_texture`, `screen_texture` as RD textures.
   - Enables custom DOF algorithms, god rays, outline from depth edges, custom SSAO, etc.
   - Attaches to the RenderTOP viewport's `Compositor` resource.
   - User-editable GLSL compute shader code (similar to ComputeShaderTOP but with render-pipeline integration).
   - **Depends on:** Godot's `RenderingDevice` API and Forward+ renderer.
-- [ ] **Multi-buffer RenderTOP** — auxiliary render buffer outputs from the 3D viewport:
+- [ ] **Multi-buffer RenderTOP** â€” auxiliary render buffer outputs from the 3D viewport:
   - RenderTOP gains additional TOP outputs: depth, normals, velocity (motion vectors).
   - Downstream canvas_item shader TOPs can use depth+color as two texture inputs.
   - Enables hybrid 2D post-processing chains fed by 3D scene data (e.g., DOF TOP = color + depth).
   - Implementation: second SubViewport pass with `Viewport.DEBUG_DRAW_*` or custom shader pass extracting buffers.
-  - Lower barrier to entry than CompositorEffectTOP — works with existing canvas_item shader infrastructure.
+  - Lower barrier to entry than CompositorEffectTOP â€” works with existing canvas_item shader infrastructure.
 
 ### Performance & GPU Optimizations (Post-Phase 7)
 - [ ] Multi-threaded cook engine
 - [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
-- [x] **GDExtension (C++) hot-path migration — Phase 1 & 2 complete** (source written and compiled — Windows x86_64 binary live):
+- [x] **GDExtension (C++) hot-path migration â€” Phase 1 & 2 complete** (source written and compiled â€” Windows x86_64 binary live):
   - **Architecture:** C++ GDExtension provides `RefCounted` processor classes (e.g., `GNNativeBlur`) with `process()` methods. GDScript wrapper operators (e.g., `BlurIMGNative`) delegate hot loops to C++ when available, falling back to pure GDScript otherwise. Extension pattern: `addons/gn_native/` for C++ source, `addons/gn_ext_native/` for GDScript wrappers + `gn_extension.cfg`.
-  - **Phase 1 — 6 operators ported (source):** 3 IMG (GNNativeBlur, GNNativeNoise, GNNativePixelSort) + 3 SOP (GNNativeParticle, GNNativeMetaball, GNNativePolyReduce). Each has `.cpp` + `.h` files in `addons/gn_native/src/img/` and `src/sop/`.
-  - **Phase 2 — 10 operators ported (source):** 8 SOP (GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring) + 1 IMG (GNNativeEdgeDetect) + 1 CHOP (GNNativeSmooth). Files in `src/sop/`, `src/img/`, `src/chop/`.
+  - **Phase 1 â€” 6 operators ported (source):** 3 IMG (GNNativeBlur, GNNativeNoise, GNNativePixelSort) + 3 SOP (GNNativeParticle, GNNativeMetaball, GNNativePolyReduce). Each has `.cpp` + `.h` files in `addons/gn_native/src/img/` and `src/sop/`.
+  - **Phase 2 â€” 10 operators ported (source):** 8 SOP (GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring) + 1 IMG (GNNativeEdgeDetect) + 1 CHOP (GNNativeSmooth). Files in `src/sop/`, `src/img/`, `src/chop/`.
   - **Total: 16 native operators** across 3 families (4 IMG, 11 SOP, 1 CHOP), 16 help patches.
-  - **Build:** godot-cpp submodule present at `addons/gn_native/godot-cpp/`. Windows x86_64 compiled with `scons platform=windows target=template_debug arch=x86_64` → `bin/win64/libgn_native.windows.template_debug.x86_64.dll` (677 KB). `gn_native.gdextension` is active. Linux/macOS builds require running scons on those platforms (or CI).
+  - **Build:** godot-cpp submodule present at `addons/gn_native/godot-cpp/`. Windows x86_64 compiled with `scons platform=windows target=template_debug arch=x86_64` â†’ `bin/win64/libgn_native.windows.template_debug.x86_64.dll` (677 KB). `gn_native.gdextension` is active. Linux/macOS builds require running scons on those platforms (or CI).
   - **IMG operators (highest priority):** Pixel loops (`get_pixel`/`set_pixel` over 262K+ pixels) are the biggest GDScript bottleneck. BlurIMG, EdgeDetectIMG, PixelSortIMG, NoiseIMG all iterate every pixel. Port `_cook()` internals to C++ with direct `uint8_t*` pointer arithmetic. Alternative: rewrite as GPU compute shaders (even faster than C++ for batch pixel ops).
   - **SOP operators (high priority):** Vertex-heavy mesh construction (SubdivideSOP, NoiseSOP, BooleanSOP) scales with vertex count. SurfaceTool overhead in GDScript is significant at 10K+ verts. Port vertex loops to C++ via GDExtension.
   - **CHOP operators (medium priority, audio-rate only):** Control-rate CHOPs (few hundred samples) are fine in GDScript. Audio-rate CHOPs (44.1K samples: AudioInCHOP, AudioSpectrumCHOP) need native inner loops.
   - **Keep in GDScript (low priority, not worth porting):**
-    - Cook engine / core: graph traversal is O(node_count), typically hundreds — negligible overhead.
+    - Cook engine / core: graph traversal is O(node_count), typically hundreds â€” negligible overhead.
     - TOP operators: already GPU-bound (GDScript just sets shader uniforms + triggers SubViewport render).
-    - DAT operators: string/table ops backed by native Godot `String` — rarely a bottleneck.
+    - DAT operators: string/table ops backed by native Godot `String` â€” rarely a bottleneck.
     - Expression system: evaluated once per parameter per frame, microsecond overhead.
     - Extension registry / UI: trivially cheap.
-  - **Migration strategy:** Architecture already supports this — each operator's `_cook()` is a clean seam. Options: (a) C++ GDExtension class replacing the GDScript operator entirely, (b) C++ helper library called from GDScript `_cook()` for just the inner loop, (c) GPU compute shader via `RenderingDevice` (best for IMG batch pixel ops).
+  - **Migration strategy:** Architecture already supports this â€” each operator's `_cook()` is a clean seam. Options: (a) C++ GDExtension class replacing the GDScript operator entirely, (b) C++ helper library called from GDScript `_cook()` for just the inner loop, (c) GPU compute shader via `RenderingDevice` (best for IMG batch pixel ops).
   - **Remaining Phase 2 work:** Compile binaries (requires godot-cpp), add help patches for 6 native operators, write tests.
-- [ ] **GPU compute shaders for IMG operators** — alternative to C++ for pixel processing:
+- [ ] **GPU compute shaders for IMG operators** â€” alternative to C++ for pixel processing:
   - Use Godot's `RenderingDevice` API to run GLSL compute shaders on `Image` data.
-  - Upload Image → storage buffer, dispatch compute, download result.
+  - Upload Image â†’ storage buffer, dispatch compute, download result.
   - Faster than C++ for embarrassingly parallel ops (blur, edge detect, noise, color transforms).
   - Could share infrastructure with ComputeShaderTOP (user-editable compute).
 
 ### Long-term
-- [ ] **Spare Parameters** — Houdini-style "add any parameter type to any node" system:
-  - Right-click → "Add Spare Parameter" dialog with type picker (FLOAT, INT, STRING, RAMP, COLOR, etc.)
+- [ ] **Spare Parameters** â€” Houdini-style "add any parameter type to any node" system:
+  - Right-click â†’ "Add Spare Parameter" dialog with type picker (FLOAT, INT, STRING, RAMP, COLOR, etc.)
   - Dynamic parameter storage separate from `_init_parameters()` (spare vs. native params)
   - Inspector UI renders spare params alongside native ones (collapsible "Spare" section)
   - Serialization/deserialization in `.gnpatch` format (spare params saved per-node)
   - Undo/redo support for add/remove spare params
   - Enables user-defined ramps, colors, toggles on any node without operator code changes
-- [ ] NDI video streaming (NDI In/Out TOPs — would be a GDExtension `gn_ext_ndi` wrapping the NDI SDK)
-- [ ] Spout / Syphon texture sharing (SpoutInTOP, SpoutOutTOP — requires GDExtension for shared GL/DX texture handles; Windows=Spout, macOS=Syphon)
-- [x] ScreenGrabTOP — **Done as ScreenGrabIMG**: `operators/img/screen_grab_img.gd`. Viewport-only capture (main or editor viewport) → CPU Image. Moved to IMG family since `Viewport.get_texture().get_image()` returns a CPU Image. Chain → ImgToTOP for GPU texture.
-- [ ] VideoDeviceInTOP — live webcam/capture-card input as GPU texture; Godot has no native webcam API — requires GDExtension wrapping DirectShow/Media Foundation (Windows) or AVFoundation (macOS). WebcamIMG already covers CPU-side capture via DisplayServer.
-- [ ] AntiAliasTOP — standalone FXAA/TAA post-process (currently available as RenderTOP post-process; dedicated TOP would apply to any texture chain)
-- [ ] MovieFileOutTOP — record texture stream to video file (currently covered by MovieOutIMG/FFmpegOutIMG on CPU side; a GPU-side encoder would need GDExtension wrapping NVENC or VA-API)
+- [ ] NDI video streaming (NDI In/Out TOPs â€” would be a GDExtension `gn_ext_ndi` wrapping the NDI SDK)
+- [ ] Spout / Syphon texture sharing (SpoutInTOP, SpoutOutTOP â€” requires GDExtension for shared GL/DX texture handles; Windows=Spout, macOS=Syphon)
+- [x] ScreenGrabTOP â€” **Done as ScreenGrabIMG**: `operators/img/screen_grab_img.gd`. Viewport-only capture (main or editor viewport) â†’ CPU Image. Moved to IMG family since `Viewport.get_texture().get_image()` returns a CPU Image. Chain â†’ ImgToTOP for GPU texture.
+- [ ] VideoDeviceInTOP â€” live webcam/capture-card input as GPU texture; Godot has no native webcam API â€” requires GDExtension wrapping DirectShow/Media Foundation (Windows) or AVFoundation (macOS). WebcamIMG already covers CPU-side capture via DisplayServer.
+- [ ] AntiAliasTOP â€” standalone FXAA/TAA post-process (currently available as RenderTOP post-process; dedicated TOP would apply to any texture chain)
+- [ ] MovieFileOutTOP â€” record texture stream to video file (currently covered by MovieOUT/FFmpegOUT on CPU side; a GPU-side encoder would need GDExtension wrapping NVENC or VA-API)
 - [ ] FxPlug / FFGL plugin export (for VDMX, Resolume)
-- [x] Generic ScriptNode (family-less, multi-type output via `# @output` annotations) — **Done**: `operators/comp/generic_script_node.gd`
-- [x] CallbackDAT (event-driven scripting callbacks) — **Done**: `operators/dat/callback_dat.gd`
-- [x] `set_par()` writable parameter references — **Done**: in `gn_cook_engine.gd` + GNScriptHelper preamble
-- [x] Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) — **Done**: in `gn_cook_engine.gd` + GNScriptHelper preamble
-- [ ] Preset dropdown parameter (Option B — inspector renders preset as dropdown)
-- [ ] Python scripting DAT (embedded Python via GDExtension) — **Do we even need Python?** Likely not. GDScript already covers the same role as TD's Python: it's the native runtime language, compiles instantly, and has full access to every Godot API. GONODES already has ScriptCHOP/SOP/DAT/IMG, GenericScriptNode (multi-output), CallbackDAT, ExpressionCHOP, and CustomShader/ComputeShaderTOP for GPU-side GLSL. Embedding CPython would require a C++ GDExtension wrapping the Python C API (~2000+ LOC), GIL management, GDScript↔Python data marshaling, and shipping a ~30-50MB Python runtime. The only real argument is ecosystem access (numpy, scipy, PIL, ML libs) — but a WebDAT/OSC bridge to an external Python process is a better pattern for that. Keep as low-priority "nice to have".
+- [x] Generic ScriptNode (family-less, multi-type output via `# @output` annotations) â€” **Done**: `operators/comp/generic_script_node.gd`
+- [x] CallbackDAT (event-driven scripting callbacks) â€” **Done**: `operators/dat/callback_dat.gd`
+- [x] `set_par()` writable parameter references â€” **Done**: in `gn_cook_engine.gd` + GNScriptHelper preamble
+- [x] Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) â€” **Done**: in `gn_cook_engine.gd` + GNScriptHelper preamble
+- [ ] Preset dropdown parameter (Option B â€” inspector renders preset as dropdown)
+- [ ] Python scripting DAT (embedded Python via GDExtension) â€” **Do we even need Python?** Likely not. GDScript already covers the same role as TD's Python: it's the native runtime language, compiles instantly, and has full access to every Godot API. GONODES already has ScriptCHOP/SOP/DAT/IMG, GenericScriptNode (multi-output), CallbackDAT, ExpressionCHOP, and CustomShader/ComputeShaderTOP for GPU-side GLSL. Embedding CPython would require a C++ GDExtension wrapping the Python C API (~2000+ LOC), GIL management, GDScriptâ†”Python data marshaling, and shipping a ~30-50MB Python runtime. The only real argument is ecosystem access (numpy, scipy, PIL, ML libs) â€” but a WebDAT/OSC bridge to an external Python process is a better pattern for that. Keep as low-priority "nice to have".
 - [ ] Network collaboration (shared editing)
 - [ ] Asset/patch marketplace
 - [ ] Mobile/web export for patches (leveraging Godot's Mobile + Compatibility renderers)
-- [ ] **MidiOutCHOP** — send MIDI messages from CHOP channel values:
+- [ ] **MidiOutCHOP** â€” send MIDI messages from CHOP channel values:
   - Requires a **GDExtension** wrapping RtMidi or portmidi. Godot 4.x exposes `OS.open_midi_inputs()`
-    and `InputEventMIDI` for MIDI *input*, but has **no MIDI output API** — there is no
+    and `InputEventMIDI` for MIDI *input*, but has **no MIDI output API** â€” there is no
     `OS.send_midi_message()`, no `MidiOut` class, and no way to open an output device.
   - A C++ GDExtension (~200-400 LOC) would expose `MidiOut.open(device_index)`, `send_note_on()`,
     `send_cc()`, `send_pitchbend()`, etc. RtMidi is header-only with a permissive license.
   - Map CHOP channels (`note`, `velocity`, `cc:N`, `pitchbend`) to outgoing MIDI messages each frame.
-  - Only relevant for hardware control surfaces, lighting rigs, or synth triggering — lower priority.
+  - Only relevant for hardware control surfaces, lighting rigs, or synth triggering â€” lower priority.
 
-### GPU Particles (POP Family) — Roadmap
+### GPU Particles (POP Family) â€” Roadmap
 
-**Status: 🔲 Planned — Medium-term**
+**Status: ðŸ”² Planned â€” Medium-term**
 
 CPU ParticleSOP exists for basic point-cloud emission. A GPU-native POP family
 would enable millions of particles in real time using Godot's `RenderingDevice`
@@ -1793,21 +1793,21 @@ compute pipeline.
 - **Primary storage: SSBOs (Shader Storage Buffer Objects)**, not textures.
   Particle state (position, velocity, age, life, id, pscale, Cd, etc.) stored as
   flat `RDStorageBuffer` arrays on the GPU. Rationale:
-  - Godot 4's `RenderingDevice` API is buffer-centric — creating/binding SSBOs is
+  - Godot 4's `RenderingDevice` API is buffer-centric â€” creating/binding SSBOs is
     simpler than managing 3D render targets.
-  - Particles are a 1D list, not a 2D grid — no awkward `idx → (x, y)` mapping.
-  - Arbitrary struct layout — one buffer can hold interleaved per-particle data, or
+  - Particles are a 1D list, not a 2D grid â€” no awkward `idx â†’ (x, y)` mapping.
+  - Arbitrary struct layout â€” one buffer can hold interleaved per-particle data, or
     use struct-of-arrays for cache-friendly access patterns.
-  - No texture dimension limits (max 16384×16384 ≈ 268M pixels, awkward for
+  - No texture dimension limits (max 16384Ã—16384 â‰ˆ 268M pixels, awkward for
     non-power-of-2 particle counts).
 
-- **Attribute bridge: `GNGeoData.point_attribs` ↔ GPU.**(CPU↔GPU attribute bridge)
-  The existing CPU-side `point_attribs` dictionary (`String → PackedFloat32Array`)
+- **Attribute bridge: `GNGeoData.point_attribs` â†” GPU.**(CPUâ†”GPU attribute bridge)
+  The existing CPU-side `point_attribs` dictionary (`String â†’ PackedFloat32Array`)
   on `GNGeoData` serves as the abstraction layer. For GPU POPs:
   - **Upload:** pack `point_attribs` into `RDStorageBuffer` when crossing into GPU
-    compute (e.g., SOP→POP conversion).
+    compute (e.g., SOPâ†’POP conversion).
   - **Readback:** download SSBO data back into `point_attribs` for downstream CPU
-    nodes (e.g., POP→SOP for rendering via InstanceCOMP).
+    nodes (e.g., POPâ†’SOP for rendering via InstanceCOMP).
   - This keeps the existing SOP attribute workflow (AttributeSOP setting `pscale`,
     `Cd`, etc.) fully compatible with GPU particles.
 
@@ -1816,18 +1816,18 @@ compute pipeline.
   texture filtering (bilinear interpolation, blur, mip-maps). The design uses
   a **scatter/gather** pattern when spatial convolution is needed:
   ```
-  [SSBO particle state] → scatter → [3D texture grid]
-                                          ↓
+  [SSBO particle state] â†’ scatter â†’ [3D texture grid]
+                                          â†“
                                      blur / filter / diffuse (texture ops)
-                                          ↓
-  [SSBO particle state] ← gather ← [3D texture grid]
+                                          â†“
+  [SSBO particle state] â† gather â† [3D texture grid]
   ```
   Scatter/gather is one compute dispatch each, only invoked when a spatial-filter
-  node is in the chain. No filter node → pure SSBO path, zero overhead.
+  node is in the chain. No filter node â†’ pure SSBO path, zero overhead.
 
 - **TOP output via `ParticleStateTOP`.**
   A dedicated bridge operator reads the SSBO and writes particle data into a 2D
-  texture (RGBA32F — RGB=position, A=age, or similar encoding). This feeds the
+  texture (RGBA32F â€” RGB=position, A=age, or similar encoding). This feeds the
   existing TOP chain for visualization, compositing, or feedback without special
   plumbing.
 
@@ -1842,24 +1842,24 @@ compute pipeline.
 | `AdvectPOP` | Move particles by a velocity field (VOL3D input) |
 | `SpritePOP` | Render particles as camera-facing quads (instanced) |
 | `PointCloudPOP` | Render as point cloud (GL_POINTS or MultiMesh) |
-| `ParticleStateTOP` | SSBO → TOP texture bridge for visualization |
+| `ParticleStateTOP` | SSBO â†’ TOP texture bridge for visualization |
 | `SOPtoPOP` | Upload SOP point cloud + attribs to GPU buffers |
 | `POPtoSOP` | Download GPU particle state back to CPU GNGeoData |
 
 **Godot implementation details:**
 - Each POP operator wraps a compute shader dispatched via `RenderingDevice`.
-- Double-buffered SSBOs for simulation (read buffer A → write buffer B → swap).
+- Double-buffered SSBOs for simulation (read buffer A â†’ write buffer B â†’ swap).
 - Shared `GNPopData` resource holding buffer RIDs, particle count, attribute layout.
-- `GNPopBase` family base class (extends GNNode) — handles buffer lifecycle,
+- `GNPopBase` family base class (extends GNNode) â€” handles buffer lifecycle,
   dispatch helpers, attribute upload/download.
 
-### Volumetric 3D Textures (VOL3D Extension) — Roadmap
+### Volumetric 3D Textures (VOL3D Extension) â€” Roadmap
 
-**Status: 🔲 Planned — Medium-term**
+**Status: ðŸ”² Planned â€” Medium-term**
 
 Inspired by Josef Pelz's T3D plugin for TouchDesigner, a volumetric 3D texture
 extension would bring surfaces, volumetrics, fluid simulation, and abstract
-spatial data to GONODES — all without users writing GLSL.
+spatial data to GONODES â€” all without users writing GLSL.
 
 **Background:** T3D provides a family of operators that work on 3D textures
 (voxel grids where each position stores up to RGBA float values). Operators
@@ -1870,56 +1870,56 @@ Navier-Stokes smoke/liquid simulation with a few node connections.
 
 In TD, T3D was built as compute shaders hidden inside glslTOPs with extensive
 OP Create dialog hacks. GONODES has a clean extension architecture that makes
-this more straightforward — `gn_ext_vol3d/` with `gn_extension.cfg` registration.
+this more straightforward â€” `gn_ext_vol3d/` with `gn_extension.cfg` registration.
 
 **Extension structure:**
 
 ```
 addons/gn_ext_vol3d/
-├── gn_extension.cfg
-├── README.md
-├── core/
-│   └── gn_vol3d_data.gd            # GNVol3DData — wraps 3D texture RID
-├── operators/
-│   ├── noise_vol3d.gd              # 3D noise field (Perlin, simplex, Voronoi)
-│   ├── constant_vol3d.gd           # Uniform density/color fill
-│   ├── sdf_vol3d.gd                # SOP → signed distance field
-│   ├── add_vol3d.gd                # Add/subtract/multiply two 3D fields
-│   ├── blur_vol3d.gd               # 3D Gaussian/box blur
-│   ├── displace_vol3d.gd           # Warp field by vector field
-│   ├── level_vol3d.gd              # Brightness/contrast/gamma on 3D field
-│   ├── feedback_vol3d.gd           # Previous frame's volume (sim loops)
-│   ├── fluid_vol3d.gd              # Navier-Stokes (advection + pressure + diffusion)
-│   ├── surface_vol3d.gd            # Marching cubes → SOP mesh output
-│   └── volume_render_vol3d.gd      # Raymarcher → renders to TOP (2D image)
-├── shaders/
-│   ├── noise3d.glsl
-│   ├── add3d.glsl
-│   ├── blur3d.glsl
-│   ├── level3d.glsl
-│   ├── displace3d.glsl
-│   ├── advect.glsl                 # Semi-Lagrangian advection
-│   ├── divergence.glsl             # Velocity divergence
-│   ├── pressure_jacobi.glsl        # Jacobi pressure solve
-│   ├── projection.glsl             # Velocity projection (div-free)
-│   ├── sdf_from_mesh.glsl          # Mesh → SDF voxelization
-│   ├── marching_cubes.glsl         # GPU iso-surface extraction
-│   └── raymarch.glsl               # Volumetric density raymarcher
-└── help/
-    └── vol3d/
-        ├── noise_vol3d_basic.gnpatch
-        ├── fluid_smoke.gnpatch
-        └── surface_extract.gnpatch
+â”œâ”€â”€ gn_extension.cfg
+â”œâ”€â”€ README.md
+â”œâ”€â”€ core/
+â”‚   â””â”€â”€ gn_vol3d_data.gd            # GNVol3DData â€” wraps 3D texture RID
+â”œâ”€â”€ operators/
+â”‚   â”œâ”€â”€ noise_vol3d.gd              # 3D noise field (Perlin, simplex, Voronoi)
+â”‚   â”œâ”€â”€ constant_vol3d.gd           # Uniform density/color fill
+â”‚   â”œâ”€â”€ sdf_vol3d.gd                # SOP â†’ signed distance field
+â”‚   â”œâ”€â”€ add_vol3d.gd                # Add/subtract/multiply two 3D fields
+â”‚   â”œâ”€â”€ blur_vol3d.gd               # 3D Gaussian/box blur
+â”‚   â”œâ”€â”€ displace_vol3d.gd           # Warp field by vector field
+â”‚   â”œâ”€â”€ level_vol3d.gd              # Brightness/contrast/gamma on 3D field
+â”‚   â”œâ”€â”€ feedback_vol3d.gd           # Previous frame's volume (sim loops)
+â”‚   â”œâ”€â”€ fluid_vol3d.gd              # Navier-Stokes (advection + pressure + diffusion)
+â”‚   â”œâ”€â”€ surface_vol3d.gd            # Marching cubes â†’ SOP mesh output
+â”‚   â””â”€â”€ volume_render_vol3d.gd      # Raymarcher â†’ renders to TOP (2D image)
+â”œâ”€â”€ shaders/
+â”‚   â”œâ”€â”€ noise3d.glsl
+â”‚   â”œâ”€â”€ add3d.glsl
+â”‚   â”œâ”€â”€ blur3d.glsl
+â”‚   â”œâ”€â”€ level3d.glsl
+â”‚   â”œâ”€â”€ displace3d.glsl
+â”‚   â”œâ”€â”€ advect.glsl                 # Semi-Lagrangian advection
+â”‚   â”œâ”€â”€ divergence.glsl             # Velocity divergence
+â”‚   â”œâ”€â”€ pressure_jacobi.glsl        # Jacobi pressure solve
+â”‚   â”œâ”€â”€ projection.glsl             # Velocity projection (div-free)
+â”‚   â”œâ”€â”€ sdf_from_mesh.glsl          # Mesh â†’ SDF voxelization
+â”‚   â”œâ”€â”€ marching_cubes.glsl         # GPU iso-surface extraction
+â”‚   â””â”€â”€ raymarch.glsl               # Volumetric density raymarcher
+â””â”€â”€ help/
+    â””â”€â”€ vol3d/
+        â”œâ”€â”€ noise_vol3d_basic.gnpatch
+        â”œâ”€â”€ fluid_smoke.gnpatch
+        â””â”€â”€ surface_extract.gnpatch
 ```
 
 **Godot 3D texture capabilities (confirmed suitable):**
-- `RDTextureFormat` with `texture_type = TEXTURE_TYPE_3D` — arbitrary resolution,
+- `RDTextureFormat` with `texture_type = TEXTURE_TYPE_3D` â€” arbitrary resolution,
   R32F / RGBA32F / RGBA16F formats.
 - `layout(set, binding, r32f) uniform image3D` for compute shader write access.
 - `uniform sampler3D` for filtered read access (hardware bilinear interpolation).
 - Compute dispatch with `(res/8, res/8, res/8)` work groups for per-voxel ops.
-- No built-in 3D render targets or automatic mip-gen — manual compute passes needed.
-- No `SubViewport` for 3D slices — all 3D texture writes via compute only.
+- No built-in 3D render targets or automatic mip-gen â€” manual compute passes needed.
+- No `SubViewport` for 3D slices â€” all 3D texture writes via compute only.
 
 **Data type:** `GNVol3DData` (extends `GNData`) wrapping:
 - 3D texture `RID` on `RenderingDevice`
@@ -1927,17 +1927,17 @@ addons/gn_ext_vol3d/
 - Helper methods: `create(res, format)`, `destroy()`, `get_rd_rid()`
 
 **Key technical challenges:**
-1. **Fluid sim** — Navier-Stokes: semi-Lagrangian advection, divergence compute,
+1. **Fluid sim** â€” Navier-Stokes: semi-Lagrangian advection, divergence compute,
    Jacobi iteration pressure solve, velocity projection. Each step = one compute
    dispatch. Vorticity confinement and buoyancy for realistic smoke behavior.
-2. **GPU marching cubes** — Variable triangle output requires atomic counter +
+2. **GPU marching cubes** â€” Variable triangle output requires atomic counter +
    pre-allocated output buffer (Godot RD supports atomics but not append buffers).
-3. **Volume raymarcher** — Step size tuning, jittered sampling to prevent banding,
+3. **Volume raymarcher** â€” Step size tuning, jittered sampling to prevent banding,
    early termination, density-to-color transfer function.
-4. **Noise/blur/add/displace** — Straightforward single-pass compute shaders,
+4. **Noise/blur/add/displace** â€” Straightforward single-pass compute shaders,
    a few dozen GLSL lines each.
 
-**POP ↔ VOL3D interaction:**
+**POP â†” VOL3D interaction:**
 - `AdvectPOP` reads a VOL3D velocity field to move particles.
 - Scatter POP positions into a VOL3D density grid for fluid-coupled particles.
 - VOL3D `surface_vol3d` extracts a mesh that POP particles can collide with.
@@ -1946,7 +1946,7 @@ addons/gn_ext_vol3d/
 
 ## 13.4. Unit Tests
 
-**Framework:** Lightweight, dependency-free GDScript test runner — no GdUnit4 or GUT required.
+**Framework:** Lightweight, dependency-free GDScript test runner â€” no GdUnit4 or GUT required.
 
 **Run command:**
 ```bash
@@ -1957,23 +1957,23 @@ godot --headless -s tests/test_runner.gd --test-filter=parameter   # filter by n
 **Structure:**
 ```
 tests/
-├── test_runner.gd          # GNTestRunner (extends SceneTree) — discovers & runs test_*.gd scripts
-├── test_assert.gd          # GNTestAssert — static assertion helpers (assert_eq, assert_approx, etc.)
-├── test_parameter.gd       # GNParameter: factory constructors, clamping, mode switching, serialization, legacy migration, per-component expressions
-├── test_cook_engine.gd     # GNCookEngine: expression eval (time/frame/dt), par() self/cross-node, parf/pari/pars, chop(), circular guard, component expressions, error recovery
-├── test_network.gd         # GNNetwork: add/remove nodes, connect/disconnect, topo sort, cycle detection, dirty propagation, rename, serialization structure
-├── test_channel_data.gd    # GNChannelData: single/multi-sample channels, index bounds, invalidate, duplicate_data deep copy
-├── test_preset_manager.gd  # GNParamPresetManager: clipboard copy/paste, type mismatch rejection, reset to defaults
-├── test_ramp_and_annotations.gd  # RAMP parameter: factory, sampling, serialization round-trip. Annotations: CRUD, serialization round-trip
-├── test_ramp_chop.gd        # RampCHOP: default init, single/multi-sample output, dynamic count, custom curves, serialization round-trip, chop() expression integration
-└── README.md
+â”œâ”€â”€ test_runner.gd          # GNTestRunner (extends SceneTree) â€” discovers & runs test_*.gd scripts
+â”œâ”€â”€ test_assert.gd          # GNTestAssert â€” static assertion helpers (assert_eq, assert_approx, etc.)
+â”œâ”€â”€ test_parameter.gd       # GNParameter: factory constructors, clamping, mode switching, serialization, legacy migration, per-component expressions
+â”œâ”€â”€ test_cook_engine.gd     # GNCookEngine: expression eval (time/frame/dt), par() self/cross-node, parf/pari/pars, chop(), circular guard, component expressions, error recovery
+â”œâ”€â”€ test_network.gd         # GNNetwork: add/remove nodes, connect/disconnect, topo sort, cycle detection, dirty propagation, rename, serialization structure
+â”œâ”€â”€ test_channel_data.gd    # GNChannelData: single/multi-sample channels, index bounds, invalidate, duplicate_data deep copy
+â”œâ”€â”€ test_preset_manager.gd  # GNParamPresetManager: clipboard copy/paste, type mismatch rejection, reset to defaults
+â”œâ”€â”€ test_ramp_and_annotations.gd  # RAMP parameter: factory, sampling, serialization round-trip. Annotations: CRUD, serialization round-trip
+â”œâ”€â”€ test_ramp_chop.gd        # RampCHOP: default init, single/multi-sample output, dynamic count, custom curves, serialization round-trip, chop() expression integration
+â””â”€â”€ README.md
 ```
 
 **Conventions:**
 - Test files: `tests/test_*.gd`, each extends `Node`
-- Test methods: `test_*()` — discovered automatically by the runner
+- Test methods: `test_*()` â€” discovered automatically by the runner
 - Lifecycle hooks: `before_all()`, `after_all()`, `before_each()`, `after_each()` (optional)
-- Assertions: non-throwing — failures are recorded, allowing multiple assertions per test
+- Assertions: non-throwing â€” failures are recorded, allowing multiple assertions per test
 - Runner adds test instances to the scene tree root so `add_child()` works (needed for GNCookEngine, GNNetwork tests)
 
 **What's tested (core logic, no GPU):** GNParameter (incl. RAMP type), GNCookEngine expression eval (incl. ramp()), GNNetwork graph model (incl. annotations), GNChannelData, GNParamPresetManager, RampCHOP (dynamic slots, serialization, cook engine integration).
@@ -1986,35 +1986,35 @@ Full cook-cycle tests that exercise the entire `cook_frame()` pipeline through r
 
 ```
 tests/integration/
-├── test_chop_chains.gd        # 13 tests — Constant→Math→Null chains, merge, bypass, expressions, dirty propagation, diamond topology
-├── test_script_chop.gd        # 7 tests — ScriptCHOP generator/filter, @param annotations, time var, syntax error recovery, script→math chain
-├── test_network_roundtrip.gd  # 6 tests — Serialization round-trip: empty network, params, connections, expression mode, cook-after-deserialize
+â”œâ”€â”€ test_chop_chains.gd        # 13 tests â€” Constantâ†’Mathâ†’Null chains, merge, bypass, expressions, dirty propagation, diamond topology
+â”œâ”€â”€ test_script_chop.gd        # 7 tests â€” ScriptCHOP generator/filter, @param annotations, time var, syntax error recovery, scriptâ†’math chain
+â”œâ”€â”€ test_network_roundtrip.gd  # 6 tests â€” Serialization round-trip: empty network, params, connections, expression mode, cook-after-deserialize
 ```
 
-**Total automated tests:** 176 (141 unit + 9 RampCHOP + 26 integration) — all passing.
+**Total automated tests:** 176 (141 unit + 9 RampCHOP + 26 integration) â€” all passing.
 
 ### Manual Test Scenes
 
-**DEPRECATED — replaced by help example patches.** Legacy test scenes remain in `test_scenes/` for reference but are no longer the primary visual verification method. The 131 help example patches in `addons/gonodes/help/<family>/` provide the same per-operator visual coverage and are accessible directly from the `?` help button on each node.
+**DEPRECATED â€” replaced by help example patches.** Legacy test scenes remain in `test_scenes/` for reference but are no longer the primary visual verification method. The 131 help example patches in `addons/gonodes/help/<family>/` provide the same per-operator visual coverage and are accessible directly from the `?` help button on each node.
 
 ```
-test_scenes/                           # ⚠️ DEPRECATED — use help patches instead
-├── README.md                          # Legacy checklists (kept for reference)
-├── 01_chop_chain_basics.gnpatch       # → covered by chop/ help patches
-├── 02_script_chop.gnpatch             # → covered by scriptchop_generator.gnpatch
-├── 03_custom_shader_top.gnpatch       # → covered by glsl_radial_wave.gnpatch
-├── 04_expression_animation.gnpatch    # → covered by lfo_basic + circle_basic patches
-├── 05_top_compositing_chain.gnpatch   # → covered by composite_blend + edge_detect + level patches
-├── 06_physics_rigid_bodies.gnpatch    # → covered by rigid_body_basic + static_body_floor patches
-├── 07_physics_forces_properties.gnpatch # → covered by comp/ help patches
-└── 08_physics_joints_area_softbody.gnpatch # → covered by joint_hinge + area_gravity patches
+test_scenes/                           # âš ï¸ DEPRECATED â€” use help patches instead
+â”œâ”€â”€ README.md                          # Legacy checklists (kept for reference)
+â”œâ”€â”€ 01_chop_chain_basics.gnpatch       # â†’ covered by chop/ help patches
+â”œâ”€â”€ 02_script_chop.gnpatch             # â†’ covered by scriptchop_generator.gnpatch
+â”œâ”€â”€ 03_custom_shader_top.gnpatch       # â†’ covered by glsl_radial_wave.gnpatch
+â”œâ”€â”€ 04_expression_animation.gnpatch    # â†’ covered by lfo_basic + circle_basic patches
+â”œâ”€â”€ 05_top_compositing_chain.gnpatch   # â†’ covered by composite_blend + edge_detect + level patches
+â”œâ”€â”€ 06_physics_rigid_bodies.gnpatch    # â†’ covered by rigid_body_basic + static_body_floor patches
+â”œâ”€â”€ 07_physics_forces_properties.gnpatch # â†’ covered by comp/ help patches
+â””â”€â”€ 08_physics_joints_area_softbody.gnpatch # â†’ covered by joint_hinge + area_gravity patches
 ```
 
 **Why help patches replace test_scenes:**
-- Help patches are discoverable from the node's `?` button — no need to remember file names
+- Help patches are discoverable from the node's `?` button â€” no need to remember file names
 - One-to-one per-operator coverage (108 patches vs 8 test scenes that each test multi-node combos)
 - New operators automatically get help patch coverage as part of the new operator checklist (Hard Rule 25.21)
-- Test scenes tested integration scenarios; help patches test individual operators — integration testing is better served by automated tests in `tests/integration/`
+- Test scenes tested integration scenarios; help patches test individual operators â€” integration testing is better served by automated tests in `tests/integration/`
 
 ---
 
@@ -2029,9 +2029,9 @@ Shared properties, cached data, and helper methods that appear in more than one 
 **Why:** Reduces boilerplate, prevents drift between implementations, and makes family-wide behavioral changes (like the UPDATE_ONCE render lifecycle) possible in one place.
 
 **Examples:**
-- `GNTopBase._viewport`, `_material`, `_canvas`, `_cached_tex_data` — every TOP needs viewport infrastructure.
-- `GNChopBase._cached_channel_data` — every CHOP caches channel output.
-- `GNDatBase._cached_table` — every DAT caches table output.
+- `GNTopBase._viewport`, `_material`, `_canvas`, `_cached_tex_data` â€” every TOP needs viewport infrastructure.
+- `GNChopBase._cached_channel_data` â€” every CHOP caches channel output.
+- `GNDatBase._cached_table` â€” every DAT caches table output.
 
 **Rule of thumb:** If you're about to declare the same `var` in a third subclass, move it to the base.
 
@@ -2042,7 +2042,7 @@ Use Godot's native types and engine classes wherever possible instead of buildin
 **Why:** Godot's built-in classes are optimized, well-documented, and battle-tested. Wrapping them adds indirection with no benefit. Leveraging the engine's type system (Node, Resource, RefCounted) also enables automatic memory management, serialization, and editor integration for free.
 
 **Concrete preferences:**
-| Instead of … | Use … |
+| Instead of â€¦ | Use â€¦ |
 |---|---|
 | Custom render pipeline | `SubViewport` + `ShaderMaterial` + `ColorRect`/`TextureRect` |
 | Manual memory management | `RefCounted` subclasses (freed automatically) |
@@ -2061,7 +2061,7 @@ Use Godot's native types and engine classes wherever possible instead of buildin
 
 ### 4. Render Only When Needed
 
-SubViewports must be created with `UPDATE_DISABLED`. The base class (`GNTopBase.execute_cook()`) triggers `UPDATE_ONCE` after each successful cook. Operators must **not** set `UPDATE_ALWAYS` or manually trigger renders — the base class owns the render lifecycle.
+SubViewports must be created with `UPDATE_DISABLED`. The base class (`GNTopBase.execute_cook()`) triggers `UPDATE_ONCE` after each successful cook. Operators must **not** set `UPDATE_ALWAYS` or manually trigger renders â€” the base class owns the render lifecycle.
 
 Exception: `process_mode = PROCESS_MODE_ALWAYS` is acceptable for media-playback TOPs (Movie, FFmpeg) that need Godot's built-in `_process()` for decoder advancement.
 
@@ -2073,16 +2073,16 @@ Exception: `process_mode = PROCESS_MODE_ALWAYS` is acceptable for media-playback
 Each TOP node owns a `SubViewport` for rendering its output texture. The infrastructure lives in **GNTopBase**:
 
 - **Creation:** `_create_viewport()` factory produces a SubViewport with `UPDATE_DISABLED`, `gui_disable_input = true`, and optional transparency / 3D. Higher-level helpers `_ensure_viewport()` and `_init_shader_viewport()` build upon it.
-- **Canvas:** A `ColorRect` or `TextureRect` with `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` auto-fills the viewport — no manual `_canvas.size` management (see Hard Rule 25.16).
+- **Canvas:** A `ColorRect` or `TextureRect` with `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` auto-fills the viewport â€” no manual `_canvas.size` management (see Hard Rule 25.16).
 
-  **ColorRect vs TextureRect — the decision rule and why it matters:**
-  - **ColorRect** → **generators** and **multi-input compositors** (Noise, Ramp, Rectangle, Circle, Cross, Composite, Displace, Feedback, Lookup). These either produce pixels from pure math/uniforms (no input texture) or blend multiple inputs passed entirely as `uniform sampler2D` shader parameters. A ColorRect always draws regardless — it needs no `.texture` property.
-  - **TextureRect** → **single-input filters** (Level, Edge, Flip, Crop, Threshold, Tile, Transform, Blur vertical pass). These transform one upstream texture. Each cook sets `(_canvas as TextureRect).texture = tex_in.texture`, which (a) ensures the canvas draws — **a TextureRect with null `.texture` skips `_draw()` entirely**, so the shader material never executes and the viewport renders blank — and (b) makes the input available as the built-in `TEXTURE` sampler in the shader, in addition to any explicit `uniform sampler2D`.
-  - **Rule:** no input or multiple inputs → `ColorRect`; single-input filter → `TextureRect`. The `_init_shader_viewport()` helper's `use_texture_rect` parameter controls this (`false` = ColorRect, `true` = TextureRect).
-  - **Gotcha:** Forgetting to set `.texture` on a TextureRect canvas produces a silent blank viewport — no error, no warning, just transparent pixels. This was the root cause of the BlurTOP sporadic blank output bug (the vertical-pass TextureRect was never given its `.texture`).
+  **ColorRect vs TextureRect â€” the decision rule and why it matters:**
+  - **ColorRect** â†’ **generators** and **multi-input compositors** (Noise, Ramp, Rectangle, Circle, Cross, Composite, Displace, Feedback, Lookup). These either produce pixels from pure math/uniforms (no input texture) or blend multiple inputs passed entirely as `uniform sampler2D` shader parameters. A ColorRect always draws regardless â€” it needs no `.texture` property.
+  - **TextureRect** â†’ **single-input filters** (Level, Edge, Flip, Crop, Threshold, Tile, Transform, Blur vertical pass). These transform one upstream texture. Each cook sets `(_canvas as TextureRect).texture = tex_in.texture`, which (a) ensures the canvas draws â€” **a TextureRect with null `.texture` skips `_draw()` entirely**, so the shader material never executes and the viewport renders blank â€” and (b) makes the input available as the built-in `TEXTURE` sampler in the shader, in addition to any explicit `uniform sampler2D`.
+  - **Rule:** no input or multiple inputs â†’ `ColorRect`; single-input filter â†’ `TextureRect`. The `_init_shader_viewport()` helper's `use_texture_rect` parameter controls this (`false` = ColorRect, `true` = TextureRect).
+  - **Gotcha:** Forgetting to set `.texture` on a TextureRect canvas produces a silent blank viewport â€” no error, no warning, just transparent pixels. This was the root cause of the BlurTOP sporadic blank output bug (the vertical-pass TextureRect was never given its `.texture`).
 
 - **Resolution:** Generator TOPs pass `get_param_value("resolution")` as the viewport size. Filter TOPs pass `tex_in.resolution` (matching their input). No hardcoded sizes.
-- **Render lifecycle:** Viewports are created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` on every child SubViewport after `_cook()` sets uniforms/textures, so each TOP renders **exactly once per cook cycle** — no wasted GPU passes on non-dirty frames.
+- **Render lifecycle:** Viewports are created with `UPDATE_DISABLED`. `GNTopBase.execute_cook()` triggers `UPDATE_ONCE` on every child SubViewport after `_cook()` sets uniforms/textures, so each TOP renders **exactly once per cook cycle** â€” no wasted GPU passes on non-dirty frames.
 - **Input textures** are passed as shader uniforms (zero-copy GPU references).
 - **Output:** The `ViewportTexture` is wrapped in `GNTextureData` and becomes the node's `cached_output`.
 - **Cleanup:** Viewports are children of the GNNode; `queue_free()` cascades automatically.
@@ -2093,36 +2093,36 @@ Each TOP node owns a `SubViewport` for rendering its output texture. The infrast
 
 The cook engine has been optimized with these patterns:
 
-1. **Cached adjacency maps** — `GNNetwork._downstream_map` and `_input_conn_map` are rebuilt only when the graph structure changes (node/connection add/remove). All per-frame lookups (dirty propagation, input gathering) use O(1) dictionary lookups instead of scanning all connections.
+1. **Cached adjacency maps** â€” `GNNetwork._downstream_map` and `_input_conn_map` are rebuilt only when the graph structure changes (node/connection add/remove). All per-frame lookups (dirty propagation, input gathering) use O(1) dictionary lookups instead of scanning all connections.
 
-2. **Upfront dirty propagation** — Dirty flags are propagated in a single BFS pass BEFORE the cook loop starts, not interleaved with cooking. This eliminates redundant BFS calls (previously one per producing node).
+2. **Upfront dirty propagation** â€” Dirty flags are propagated in a single BFS pass BEFORE the cook loop starts, not interleaved with cooking. This eliminates redundant BFS calls (previously one per producing node).
 
-3. **Cached input arrays** — `_input_cache` stores a reusable `Array[GNData]` per node. Arrays are cleared and refilled each frame instead of being reallocated. Zero per-frame allocations in steady state.
+3. **Cached input arrays** â€” `_input_cache` stores a reusable `Array[GNData]` per node. Arrays are cleared and refilled each frame instead of being reallocated. Zero per-frame allocations in steady state.
 
-4. **Skip-already-dirty BFS** — `propagate_dirty()` stops traversal at nodes already marked dirty, avoiding redundant downstream walks.
+4. **Skip-already-dirty BFS** â€” `propagate_dirty()` stops traversal at nodes already marked dirty, avoiding redundant downstream walks.
 
-5. **SubViewport render-once-per-cook** — All TOP SubViewports are created with `UPDATE_DISABLED` instead of `UPDATE_ALWAYS`. Previously every SubViewport rendered every frame regardless of whether the TOP was dirty, wasting GPU passes on static texture chains. Now `GNTopBase.execute_cook()` sets `UPDATE_ONCE` on each child SubViewport only after `_cook()` finishes setting uniforms/textures. This means a TOP renders **exactly once per dirty cycle** — if it isn't cooked, its viewport never re-renders. For a network with N TOPs where only K are dirty, this reduces per-frame GPU render passes from N to K.
+5. **SubViewport render-once-per-cook** â€” All TOP SubViewports are created with `UPDATE_DISABLED` instead of `UPDATE_ALWAYS`. Previously every SubViewport rendered every frame regardless of whether the TOP was dirty, wasting GPU passes on static texture chains. Now `GNTopBase.execute_cook()` sets `UPDATE_ONCE` on each child SubViewport only after `_cook()` finishes setting uniforms/textures. This means a TOP renders **exactly once per dirty cycle** â€” if it isn't cooked, its viewport never re-renders. For a network with N TOPs where only K are dirty, this reduces per-frame GPU render passes from N to K.
 
-6. **Lazy viewport creation** — `_init_shader_viewport()` and `_ensure_viewport()` are guarded with `if _viewport != null: return`, deferring SubViewport allocation to the first `_cook()` call. TOPs that are never cooked (disconnected, orphaned) have zero GPU footprint — no SubViewport, no texture memory, no render passes.
+6. **Lazy viewport creation** â€” `_init_shader_viewport()` and `_ensure_viewport()` are guarded with `if _viewport != null: return`, deferring SubViewport allocation to the first `_cook()` call. TOPs that are never cooked (disconnected, orphaned) have zero GPU footprint â€” no SubViewport, no texture memory, no render passes.
 
-7. **Active chain cooking** — Only nodes that feed a live sink are cooked. The active set is computed via BFS upstream from sinks, following both wire connections and expression references. Key design points:
+7. **Active chain cooking** â€” Only nodes that feed a live sink are cooked. The active set is computed via BFS upstream from sinks, following both wire connections and expression references. Key design points:
 
    **Architecture (engine vs. editor separation):**
-   - `GNCookEngine._compute_active_set()` is engine-level — works without an editor (headless, game embed).
+   - `GNCookEngine._compute_active_set()` is engine-level â€” works without an editor (headless, game embed).
    - Structural sinks (operators with `is_sink = true`) are auto-detected by the engine.
    - UI sinks (viewer panel, floating windows) are passed from the editor via `set_active_sinks()`.
    - If no sinks exist at all, fallback activates everything (backward compatible).
 
-   **Sink detection — extensibility via `GNNode.is_sink` flag:**
-   - Operators set `is_sink = true` in their `_init()` — no hardcoded type strings in the engine.
-   - Current sinks: `WindowTOP`.
-   - Future sinks: `SpoutOutTOP`, `NDIOutTOP`, `MIDIOutCHOP`, `OSCOutCHOP`, `AudioOutCHOP`, etc.
+   **Sink detection â€” extensibility via `GNNode.is_sink` flag:**
+   - Operators set `is_sink = true` in their `_init()` â€” no hardcoded type strings in the engine.
+   - Current sinks: `WindowOUT`.
+   - Future sinks: `SpoutOutTOP`, `NDIOutTOP`, `MIDIOutCHOP`, `OscOUT`, `AudioOutCHOP`, etc.
    - To make any new output operator a sink: add `is_sink = true` to its `_init()`. Zero engine changes.
 
    **Dependency tracking (wires + expressions):**
    - Wire connections: followed via `network.get_input_connections()` (cached adjacency, O(1) per node).
    - Expression references: regex scans for `chop("id")/op("id")/top("id")/sop("id")/dat("id")/mat("id")` patterns.
-   - Both are followed recursively — if A references B which references C, all three are active.
+   - Both are followed recursively â€” if A references B which references C, all three are active.
    - `_get_expression_refs()` scans main expressions AND per-component expressions (Vector2/3/4, Color).
    - Same regex pattern as `GNGraphEditor._scan_expr_references()` (dashed overlay lines).
 
@@ -2138,9 +2138,9 @@ The cook engine has been optimized with these patterns:
    | Viewer window opened/closed | `set_active_sinks()` | Editor calls `_push_active_sinks()` |
    | Node renamed | `set_active_sinks()` | Editor rebuilds sink list with new IDs |
    | New/load patch | `set_active_sinks()` | Editor calls `_push_active_sinks()` after rebind |
-   | Engine reset | `reset()` | Internal — clears `_active_set`, sets dirty |
+   | Engine reset | `reset()` | Internal â€” clears `_active_set`, sets dirty |
 
-   During steady-state playback (no user interaction), the per-frame cost is exactly one `if _active_set_dirty:` bool check — the BFS does not run.
+   During steady-state playback (no user interaction), the per-frame cost is exactly one `if _active_set_dirty:` bool check â€” the BFS does not run.
 
    **Adding a new invalidation trigger:**
    - If a new feature can change which nodes feed sinks (e.g., dynamic port rewiring, node groups):
@@ -2149,7 +2149,7 @@ The cook engine has been optimized with these patterns:
    - The active set will recompute on the next cook frame automatically.
 
    **Visual feedback:**
-   - Info bar: `Active: N/M` — active nodes vs. total.
+   - Info bar: `Active: N/M` â€” active nodes vs. total.
    - Perf overlay: inactive nodes show dimmed `zzz` instead of cook time.
    - `GNNode.is_active` is readable by any code (operators, inspector, etc.).
 
@@ -2166,9 +2166,9 @@ Parameters support two modes:
 1. **Value mode:** Direct value (float, int, vec2, etc.)
 2. **Expression mode:** GDScript expression string evaluated at cook time
 
-**CRITICAL — Expression Architecture (Godot's Expression class):**
+**CRITICAL â€” Expression Architecture (Godot's Expression class):**
 
-Godot's `Expression` class resolves function calls as **method lookups on `base_instance`**, NOT as calls to input variables. You cannot pass Callables as input variables and expect to call them — they will be treated as data, not functions.
+Godot's `Expression` class resolves function calls as **method lookups on `base_instance`**, NOT as calls to input variables. You cannot pass Callables as input variables and expect to call them â€” they will be treated as data, not functions.
 
 Therefore:
 - `chop()`, `op()`, `top()` are **real public methods on GNCookEngine**
@@ -2176,16 +2176,16 @@ Therefore:
 - Input variables are limited to data: `["me", "time", "frame", "dt"]`
 - The expression `chop("lfo1", "out") * 5.0` calls `GNCookEngine.chop("lfo1", "out")` directly
 
-This was a hard-won architectural insight — the original design passed Callable lambdas as input vars, which silently failed (Expression returned 0.0 fallback → static noise).
+This was a hard-won architectural insight â€” the original design passed Callable lambdas as input vars, which silently failed (Expression returned 0.0 fallback â†’ static noise).
 
 Expression context provides:
-- `me` — reference to the owning node (GNNode)
-- `chop(name, channel)` — method on base_instance, returns float
-- `op(name, param)` — method on base_instance, returns Variant
-- `top(name, property)` — method on base_instance, returns Variant
-- `time` — current time in seconds (input variable)
-- `frame` — current frame number (input variable)
-- `dt` — delta time (input variable)
+- `me` â€” reference to the owning node (GNNode)
+- `chop(name, channel)` â€” method on base_instance, returns float
+- `op(name, param)` â€” method on base_instance, returns Variant
+- `top(name, property)` â€” method on base_instance, returns Variant
+- `time` â€” current time in seconds (input variable)
+- `frame` â€” current frame number (input variable)
+- `dt` â€” delta time (input variable)
 
 Example: `chop("lfo1", "out") * 5.0`
 
@@ -2228,7 +2228,7 @@ Patches should be exportable as standalone applications on all Godot-supported p
 
 **Supported export targets:**
 - Windows, macOS, Linux (desktop)
-- Android, iOS (mobile — requires Mobile or Compatibility renderer)
+- Android, iOS (mobile â€” requires Mobile or Compatibility renderer)
 - Web/HTML5 (requires Compatibility renderer)
 - Headless/server (for installations, compute-only patches)
 
@@ -2242,14 +2242,14 @@ Patches should be exportable as standalone applications on all Godot-supported p
 
 ## 15. Design Principles
 
-1. **Data flows left to right** — Inputs on left, outputs on right, consistent with TD.
-2. **Type safety at wire level** — Only compatible ports connect. Errors are prevented, not reported.
-3. **Lazy evaluation** — Nothing cooks unless it needs to. Dirty flags propagate downstream.
-4. **Separation of model and view** — GNNetwork is the pure data model (Resource). GNNode is a Node in the scene tree but doesn't do UI — the cook engine drives it. UI reads/writes the model but doesn't own it.
-5. **Operators are self-describing** — Each operator declares its ports, parameters, and family. The UI renders them generically. Adding a new operator = one new script file.
-6. **Robust error handling** — Cook errors don't crash the app. Failed nodes output null/default data and show error state in UI.
-7. **Performance visibility** — Cook times are always measurable. Users can see which nodes are expensive.
-8. **Godot-native, not Godot-shy** — This framework is permanently married to Godot. We do NOT abstract away from Godot or build engine-agnostic layers. Use Godot's built-in systems aggressively:
+1. **Data flows left to right** â€” Inputs on left, outputs on right, consistent with TD.
+2. **Type safety at wire level** â€” Only compatible ports connect. Errors are prevented, not reported.
+3. **Lazy evaluation** â€” Nothing cooks unless it needs to. Dirty flags propagate downstream.
+4. **Separation of model and view** â€” GNNetwork is the pure data model (Resource). GNNode is a Node in the scene tree but doesn't do UI â€” the cook engine drives it. UI reads/writes the model but doesn't own it.
+5. **Operators are self-describing** â€” Each operator declares its ports, parameters, and family. The UI renders them generically. Adding a new operator = one new script file.
+6. **Robust error handling** â€” Cook errors don't crash the app. Failed nodes output null/default data and show error state in UI.
+7. **Performance visibility** â€” Cook times are always measurable. Users can see which nodes are expensive.
+8. **Godot-native, not Godot-shy** â€” This framework is permanently married to Godot. We do NOT abstract away from Godot or build engine-agnostic layers. Use Godot's built-in systems aggressively:
    - `SubViewport` for TOP rendering (not a custom framebuffer abstraction)
    - `GraphEdit` / `GraphNode` for the node editor UI
    - `Resource` serialization for patch save/load
@@ -2301,8 +2301,8 @@ GONODES uses a **two-mode** parameter system: **Constant** and **Expression**. A
 
 ```
 GNParameter.Mode:
-├── CONSTANT     — Direct literal value. No evaluation overhead.
-└── EXPRESSION   — String evaluated each cook frame. Handles par(), chop(), op(), top() references.
+â”œâ”€â”€ CONSTANT     â€” Direct literal value. No evaluation overhead.
+â””â”€â”€ EXPRESSION   â€” String evaluated each cook frame. Handles par(), chop(), op(), top() references.
 ```
 
 #### Mode 1: CONSTANT (MVP)
@@ -2314,7 +2314,7 @@ offset = (0.5, 0.3)  # Just a Vector2
 No per-frame evaluation. Cheapest mode. Node is only dirty when user changes the value via the inspector.
 
 #### Mode 2: EXPRESSION (MVP)
-A string evaluated every cook frame (or when dependencies change). This is where **all** cross-node referencing lives — parameter binds, CHOP channel reads, math, conditionals, everything.
+A string evaluated every cook frame (or when dependencies change). This is where **all** cross-node referencing lives â€” parameter binds, CHOP channel reads, math, conditionals, everything.
 ```
 scale = chop("lfo1", "out") * 10.0        # CHOP channel reference (replaces old EXPORT mode)
 offset.x = par("ctrl_panel", "master_x")  # Parameter reference (replaces old BIND mode)
@@ -2326,8 +2326,8 @@ Has per-frame evaluation cost (pre-compiled Expression + execution). See Section
 Previous versions had four modes: CONSTANT, EXPRESSION, BIND, and EXPORT.  BIND and EXPORT were removed because:
 
 1. **Expressions already cover both use cases** with identical performance:
-   - Old BIND mode: `param.set_bind("ctrl_panel", "master_scale")` → now: `par("ctrl_panel", "master_scale")`
-   - Old EXPORT mode: CHOP push mapping → now: `chop("lfo1", "out") * 10.0`
+   - Old BIND mode: `param.set_bind("ctrl_panel", "master_scale")` â†’ now: `par("ctrl_panel", "master_scale")`
+   - Old EXPORT mode: CHOP push mapping â†’ now: `chop("lfo1", "out") * 10.0`
 
 2. **Expressions are strictly better**:
    - Same-frame evaluation (EXPORT had 1-frame lag since it ran after all nodes cooked)
@@ -2335,13 +2335,13 @@ Previous versions had four modes: CONSTANT, EXPRESSION, BIND, and EXPORT.  BIND 
    - No separate mapping infrastructure to maintain
    - ~300 fewer lines of code in the engine
 
-3. **Houdini precedent**: Houdini uses expressions for everything — `ch("../lfo1/tx")` is simultaneously a "bind" and a "reference". No separate bind/export modes.
+3. **Houdini precedent**: Houdini uses expressions for everything â€” `ch("../lfo1/tx")` is simultaneously a "bind" and a "reference". No separate bind/export modes.
 
 4. **TD forum consensus**: [Multiple](https://forum.derivative.ca/t/exporting-chop-vs-chop-reference/4636/2) [threads](https://forum.derivative.ca/t/export-chop-vs-relative-reference/2848) confirm exports vs. references are nearly identical in performance and interchangeable.
 
 **UX sugar** ensures users who don't want to type expressions still get a good experience:
-- **Right-click any parameter** → "Insert Parameter Reference…" or "Insert CHOP Reference…" → dialog picks source → auto-generates the `par()` or `chop()` expression
-- **Right-click a CHOP node** in the graph → "Insert CHOP Reference…" → dialog picks channel + target param → writes expression
+- **Right-click any parameter** â†’ "Insert Parameter Referenceâ€¦" or "Insert CHOP Referenceâ€¦" â†’ dialog picks source â†’ auto-generates the `par()` or `chop()` expression
+- **Right-click a CHOP node** in the graph â†’ "Insert CHOP Referenceâ€¦" â†’ dialog picks channel + target param â†’ writes expression
 - **Copy Reference** context menu entries put expression-ready strings on the clipboard
 - `GNParameter.set_param_reference()` and `GNParameter.set_chop_reference()` convenience methods for code-level use
 
@@ -2382,13 +2382,13 @@ sin(time * par("noise1", "rate"))
 ```
 
 #### Copy Reference Workflow
-Right-click a node in the graph → "Copy Node Path" or "Copy Output Ref" to get an expression-ready string in the clipboard. Right-click a parameter name in the inspector → "Copy Self Ref", "Copy Cross Ref", or "Copy op() Ref". Paste directly into any expression field.
+Right-click a node in the graph â†’ "Copy Node Path" or "Copy Output Ref" to get an expression-ready string in the clipboard. Right-click a parameter name in the inspector â†’ "Copy Self Ref", "Copy Cross Ref", or "Copy op() Ref". Paste directly into any expression field.
 
 #### Insert Reference Workflow (no-typing UX)
 For users who prefer not to type expressions:
-- **Right-click any parameter label** → "Insert Parameter Reference…" → dialog picks source node + param → auto-generates `par("node", "param")` expression and switches to EXPRESSION mode.
-- **Right-click any parameter label** → "Insert CHOP Reference…" → dialog picks CHOP node + channel + optional scale/offset → auto-generates `chop("lfo1", "out") * 2.0 + 1.0` expression.
-- **Right-click a CHOP node** in the graph → "Insert CHOP Reference…" → same dialog but pre-filled with the CHOP node ID and channels from its cached output.
+- **Right-click any parameter label** â†’ "Insert Parameter Referenceâ€¦" â†’ dialog picks source node + param â†’ auto-generates `par("node", "param")` expression and switches to EXPRESSION mode.
+- **Right-click any parameter label** â†’ "Insert CHOP Referenceâ€¦" â†’ dialog picks CHOP node + channel + optional scale/offset â†’ auto-generates `chop("lfo1", "out") * 2.0 + 1.0` expression.
+- **Right-click a CHOP node** in the graph â†’ "Insert CHOP Referenceâ€¦" â†’ same dialog but pre-filled with the CHOP node ID and channels from its cached output.
 - **Programmatic:** `param.set_param_reference("ctrl_panel", "master_scale")` and `param.set_chop_reference("lfo1", "out", 2.0, 1.0)` generate expressions automatically.
 
 #### Circular Dependency Protection
@@ -2398,7 +2398,7 @@ If `par("a")` references `par("b")` which references `par("a")`, the engine dete
 
 Each family has its own reference proxy with family-specific accessors. **MVP implements CHOP and TOP proxies. Others are designed here for future implementation.**
 
-#### `op(name)` — Generic (all families)
+#### `op(name)` â€” Generic (all families)
 ```gdscript
 op("any_node", "param_name")     # Resolved parameter value (2-arg shortcut)
 op("any_node").par.<param_name>   # Resolved parameter value (proxy dict)
@@ -2407,7 +2407,7 @@ op("any_node").cook_time          # Last cook duration in ms
 op("any_node").valid              # Whether node cooked successfully
 ```
 
-#### `par(name)` / `par(node, name)` — Parameter Reference (Houdini ch() equivalent) ✅
+#### `par(name)` / `par(node, name)` â€” Parameter Reference (Houdini ch() equivalent) âœ…
 ```gdscript
 par("scale")                      # Self-reference: own node's 'scale' param
 par("offset_x") * 2.0             # Self-reference with math
@@ -2419,29 +2419,29 @@ pars("noise1", "file")            # Cross-node, guaranteed string
 ```
 **Features:** Self-reference via single arg, cross-node via two args, typed variants (parf/pari/pars), circular dependency guard, demand-driven evaluation.
 
-#### `ramp(param, t)` — Ramp Sampling ✅
+#### `ramp(param, t)` â€” Ramp Sampling âœ…
 ```gdscript
 ramp("falloff", 0.5)               # Sample own 'falloff' RAMP param at t=0.5
 ramp("falloff", chop("lfo1","out")) # Animate ramp lookup with a CHOP
 ramp("noise1", "gradient", 0.75)    # Cross-node: sample noise1's 'gradient' RAMP at t=0.75
 ```
-**Features:** Self-reference (2 args) or cross-node (3 args). Cubic Hermite interpolation between keypoints. Clamps `t` to 0–1. Returns float 0–1. Implementation: `GNParameter.sample_ramp()` static method.
+**Features:** Self-reference (2 args) or cross-node (3 args). Cubic Hermite interpolation between keypoints. Clamps `t` to 0â€“1. Returns float 0â€“1. Implementation: `GNParameter.sample_ramp()` static method.
 
 **Ramp data structure:** Array of keypoint dictionaries `[{"pos": float, "value": float, "left_tangent": float, "right_tangent": float}]`. Sorted by `pos`. JSON-native serialization (no Godot Curve resource).
 
 **GNRampEditor widget:** Custom `_draw()` curve editor for RAMP parameters in the inspector. Grid background (0.25 increments), draggable keypoints with tangent handles, left-click to add point, right-click to remove, Ctrl+click to toggle smooth/linear tangents.
 
-#### `chop(name)` — CHOP Proxy (MVP)
+#### `chop(name)` â€” CHOP Proxy (MVP)
 ```gdscript
 chop("lfo1").value("out")         # Last sample of channel (float)
 chop("lfo1").value("out", 5)      # Sample at index 5
 chop("lfo1").channels             # Array of channel names: ["out"]
 chop("lfo1").length               # Sample count per channel
 chop("lfo1").sample_rate          # Sample rate (float)
-chop("lfo1")["out"]               # Shorthand for .value("out") — TD syntax compatibility
+chop("lfo1")["out"]               # Shorthand for .value("out") â€” TD syntax compatibility
 ```
 
-#### `top(name)` — TOP Proxy (MVP)
+#### `top(name)` â€” TOP Proxy (MVP)
 ```gdscript
 top("noise1").resolution          # Vector2i (width, height)
 top("noise1").resolution.x        # Width
@@ -2449,7 +2449,7 @@ top("noise1").resolution.y        # Height
 top("noise1").aspect              # float (width / height)
 ```
 
-#### `sop(name)` — SOP Proxy (Planned)
+#### `sop(name)` â€” SOP Proxy (Planned)
 ```gdscript
 sop("grid1").num_points           # Total point count
 sop("grid1").num_prims            # Primitive count
@@ -2459,17 +2459,17 @@ sop("grid1").bounds               # AABB bounding box
 ```
 **Note:** SOP family is implemented (14 operators, GNGeoData type), but the expression proxy for `sop()` is not yet wired up. Access SOP data through GeometryCOMP or DATtoCHOP bridges for now.
 
-#### `pop(name)` — POP Proxy (Future)
+#### `pop(name)` â€” POP Proxy (Future)
 ```gdscript
 pop("particles1").num_points      # Point count
 pop("particles1").num_prims       # Primitive count
-pop("particles1").point(0).P      # Position (GPU readback — expensive)
+pop("particles1").point(0).P      # Position (GPU readback â€” expensive)
 pop("particles1").point(0).PartVel    # Velocity
 pop("particles1").point(0).PartAge    # Age
 pop("particles1").attr("custom_attr") # Custom attribute value at point 0
 ```
 
-#### `dat(name)` — DAT Proxy (Planned)
+#### `dat(name)` â€” DAT Proxy (Planned)
 ```gdscript
 dat("table1").cell(1, "name")     # Cell value at row 1, column "name"
 dat("table1").cell(2, 3)          # Cell value at row 2, column 3
@@ -2481,13 +2481,13 @@ dat("text1").text                 # Full text content of a Text DAT
 ```
 **Note:** DAT family is implemented (12 operators, GNTableData type), but the expression proxy for `dat()` is not yet wired up. Access DAT data through DATtoCHOP bridge for now.
 
-#### `mat(name)` — MAT Proxy (Future)
+#### `mat(name)` â€” MAT Proxy (Future)
 ```gdscript
 mat("pbr1").par.base_color        # Material parameter (same as op().par.*)
 mat("pbr1").par.roughness
 ```
 
-### 17.4 Node Path Resolution (Hierarchical — Designed, Flat for MVP)
+### 17.4 Node Path Resolution (Hierarchical â€” Designed, Flat for MVP)
 
 **MVP:** `op("name")` resolves by flat string lookup within the current network (`GNNetwork.nodes[name]`). Node names must be unique within a network.
 
@@ -2495,7 +2495,7 @@ mat("pbr1").par.roughness
 Paths follow a filesystem-like hierarchy:
 
 ```gdscript
-# Flat (current network) — always works
+# Flat (current network) â€” always works
 op("noise1")
 
 # Relative paths (from the current node's network context)
@@ -2526,7 +2526,7 @@ func resolve_node_path(from_node: GNNode, path: String) -> GNNode:
         return from_node.network.nodes.get(path, null)
 ```
 
-**For MVP**, path is always a simple string name. The resolver function is written to make the upgrade to hierarchical paths a non-breaking change — expressions using `op("name")` will continue to work identically.
+**For MVP**, path is always a simple string name. The resolver function is written to make the upgrade to hierarchical paths a non-breaking change â€” expressions using `op("name")` will continue to work identically.
 
 ### 17.5 Expression Evaluation Engine
 
@@ -2567,7 +2567,7 @@ func get_expression_dependencies(node: GNNode, param_name: String) -> Array[Stri
     pass
 
 func invalidate_cache(node_id: String, param_name: String) -> void:
-    # Called when expression text changes — removes compiled Expression from cache
+    # Called when expression text changes â€” removes compiled Expression from cache
     expression_cache.erase("%s:%s" % [node_id, param_name])
     dependency_map.erase("%s:%s" % [node_id, param_name])
 ```
@@ -2578,11 +2578,11 @@ Parameter references create **implicit dependency edges** in addition to wire-ba
 
 ```
 Wire dependencies (explicit, via connections):
-    LFO_CHOP ──wire──► NoiseTOP        (data flows through port)
+    LFO_CHOP â”€â”€wireâ”€â”€â–º NoiseTOP        (data flows through port)
 
 Expression dependencies (implicit, via param references):
-    LFO_CHOP ··expr··► CompositeTOP    (CompositeTOP.opacity expression reads chop("lfo1"))
-    ControlPanel ··expr··► NoiseTOP    (NoiseTOP.scale has expression par("ctrl", "master_scale"))
+    LFO_CHOP Â·Â·exprÂ·Â·â–º CompositeTOP    (CompositeTOP.opacity expression reads chop("lfo1"))
+    ControlPanel Â·Â·exprÂ·Â·â–º NoiseTOP    (NoiseTOP.scale has expression par("ctrl", "master_scale"))
 ```
 
 **Both dependency types** feed into the same DAG for topological sort and cycle detection. The cook engine treats them uniformly:
@@ -2592,8 +2592,8 @@ Expression dependencies (implicit, via param references):
 4. Cook in order
 
 **Dirty propagation:**
-- Wire: upstream cooks → downstream marked dirty (standard)
-- Expression: referenced node parameter changes → mark this node dirty
+- Wire: upstream cooks â†’ downstream marked dirty (standard)
+- Expression: referenced node parameter changes â†’ mark this node dirty
 
 ### 17.7 Circular Reference Protection
 - All expression references add edges to the dependency DAG
@@ -2611,7 +2611,7 @@ Expression dependencies (implicit, via param references):
 | CONSTANT   | Standard input control (slider, spinner, color, etc.) | None       | None                        |
 | EXPRESSION | Text field with syntax highlighting. Resolved value shown on hover. | `fx`       | None (expression is invisible in graph) |
 
-**Mode switching:** Click the C/E toggle button on any parameter row, or right-click → "Insert Parameter Reference…" / "Insert CHOP Reference…" to auto-generate an expression.
+**Mode switching:** Click the C/E toggle button on any parameter row, or right-click â†’ "Insert Parameter Referenceâ€¦" / "Insert CHOP Referenceâ€¦" to auto-generate an expression.
 
 **Autocomplete (planned for MVP):**
 - When typing `op("` in an expression field, show dropdown of available node names
@@ -2626,7 +2626,7 @@ Expression dependencies (implicit, via param references):
 
 ---
 
-## 18. POP (Point Operators) Family — Future Planning
+## 18. POP (Point Operators) Family â€” Future Planning
 
 TouchDesigner's POPs are a relatively new operator family (GPU-accelerated point/particle system). GONODES should plan for this from the architecture level, even though implementation is post-MVP.
 
@@ -2634,9 +2634,9 @@ TouchDesigner's POPs are a relatively new operator family (GPU-accelerated point
 
 POPs (Point Operators) are a **GPU-native geometry processing system**. Key characteristics:
 - All computation runs on the GPU (unlike legacy Particle SOP which was CPU-bound)
-- Operates on **point clouds** — arrays of points with arbitrary attributes
+- Operates on **point clouds** â€” arrays of points with arbitrary attributes
 - Supports particles (with physics sim), but also static/procedural geometry
-- Uses a feedback loop architecture: Particle POP → downstream processing → Null POP → feedback back into Particle POP
+- Uses a feedback loop architecture: Particle POP â†’ downstream processing â†’ Null POP â†’ feedback back into Particle POP
 - Can handle millions of points at real-time framerates
 - Points carry typed attributes (position, velocity, age, lifespan, mass, drag, custom)
 - Rendered via Render TOP (instancing, point sprites, or geometry)
@@ -2667,15 +2667,15 @@ var attributes: Dictionary = {}
 #                           buffer: RID (GPU buffer) }
 
 # Reserved particle attributes (created by ParticlePOP):
-# "P"            : vec3  — position
-# "PartVel"      : vec3  — velocity
-# "PartAge"      : float — age in seconds
-# "PartLifeSpan" : float — expected lifespan
-# "PartForce"    : vec3  — accumulated forces
-# "PartMass"     : float — mass
-# "PartDrag"     : float — drag coefficient
-# "PartId"       : uint  — unique particle ID
-# "PartDeath"    : uint  — death flag (1 = remove next frame)
+# "P"            : vec3  â€” position
+# "PartVel"      : vec3  â€” velocity
+# "PartAge"      : float â€” age in seconds
+# "PartLifeSpan" : float â€” expected lifespan
+# "PartForce"    : vec3  â€” accumulated forces
+# "PartMass"     : float â€” mass
+# "PartDrag"     : float â€” drag coefficient
+# "PartId"       : uint  â€” unique particle ID
+# "PartDeath"    : uint  â€” death flag (1 = remove next frame)
 
 # Primitive types
 enum PrimitiveType { POINTS, LINES, LINESTRIPS, TRIANGLES, QUADS }
@@ -2684,39 +2684,39 @@ var primitives: PackedInt32Array = []  # Vertex indices
 
 func get_attribute(name: String) -> RID: ...
 func set_attribute(name: String, type: String, data: PackedFloat32Array) -> void: ...
-func read_back_positions() -> PackedVector3Array: ...  # GPU → CPU readback (expensive)
+func read_back_positions() -> PackedVector3Array: ...  # GPU â†’ CPU readback (expensive)
 ```
 
 ### Godot Implementation Strategy
 
 Godot 4.x provides several GPU-side systems we can leverage:
 
-1. **GPUParticles3D / GPUParticles2D** — Built-in particle system with process materials (ParticleProcessMaterial)
+1. **GPUParticles3D / GPUParticles2D** â€” Built-in particle system with process materials (ParticleProcessMaterial)
    - Good for basic particle effects
    - Limited: can't easily chain operations or do attribute manipulation
 
-2. **Compute Shaders** (Forward+ and Mobile renderers only) — Full GPGPU via `RenderingDevice`
+2. **Compute Shaders** (Forward+ and Mobile renderers only) â€” Full GPGPU via `RenderingDevice`
    - Create SSBO (Shader Storage Buffer Objects) for point attributes
    - Each POP operator = a compute shader dispatch
    - Chain operators by passing SSBOs between dispatches
    - **This is the right approach for GONODES POPs**
 
-3. **MultiMeshInstance3D** — For rendering point clouds as instanced geometry
-   - Each point → one instance with transform from position attribute
+3. **MultiMeshInstance3D** â€” For rendering point clouds as instanced geometry
+   - Each point â†’ one instance with transform from position attribute
    - Efficient for up to millions of instances
 
 **Architecture:**
 ```
 ParticlePOP (generator)
-  ↓ SSBO (positions, velocities, attributes)
-NoisePOP (modifier) — compute shader reads/writes SSBO
-  ↓ same SSBO, modified
-ForcePOP (forces) — compute shader adds to PartForce attribute
-  ↓
+  â†“ SSBO (positions, velocities, attributes)
+NoisePOP (modifier) â€” compute shader reads/writes SSBO
+  â†“ same SSBO, modified
+ForcePOP (forces) â€” compute shader adds to PartForce attribute
+  â†“
 NullPOP (feedback endpoint)
-  ↓ feeds back to ParticlePOP next frame
-  ↓ also feeds to...
-Render TOP — reads SSBO, renders via MultiMesh or custom shader
+  â†“ feeds back to ParticlePOP next frame
+  â†“ also feeds to...
+Render TOP â€” reads SSBO, renders via MultiMesh or custom shader
 ```
 
 **Renderer constraints:**
@@ -2731,32 +2731,32 @@ TD's particle system uses a feedback loop for simulation. In GONODES:
 
 ```
 frame N:  ParticlePOP reads previous frame's output from NullPOP
-          → births new particles, removes dead ones
-          → applies Time Integration (F → V → P)
-          → outputs current frame's SSBO
-          ↓
+          â†’ births new particles, removes dead ones
+          â†’ applies Time Integration (F â†’ V â†’ P)
+          â†’ outputs current frame's SSBO
+          â†“
           downstream POPs modify attributes
-          ↓
+          â†“
           NullPOP caches the final state
-          ↓
+          â†“
 frame N+1: ParticlePOP reads NullPOP again (feedback)
 ```
 
-This is a **controlled cycle** in the DAG — the only allowed exception to the no-cycles rule. Implementation:
+This is a **controlled cycle** in the DAG â€” the only allowed exception to the no-cycles rule. Implementation:
 - `GNNetwork` allows one feedback edge per ParticlePOP, flagged as `is_feedback = true`
 - The cook engine handles feedback connections specially: reads from previous frame's cache, not current frame
 - This gives one frame of latency, which is standard for particle systems
 
-### POP ↔ Other Family Bridges
+### POP â†” Other Family Bridges
 
 | Bridge             | Direction     | What it does                                    |
 |--------------------|---------------|-------------------------------------------------|
-| SOP to POP         | SOP → POP     | Convert mesh points to POP points               |
-| CHOP to POP        | CHOP → POP    | Map channel values to point attributes           |
-| TOP to POP         | TOP → POP     | Sample texture to set point colors/positions     |
-| DAT to POP         | DAT → POP     | Read point data from table                       |
-| POP to SOP         | POP → SOP     | Convert POP points back to mesh (future)         |
-| POP to TOP         | POP → TOP     | Render POP via Render TOP (output = texture)     |
+| SOP to POP         | SOP â†’ POP     | Convert mesh points to POP points               |
+| CHOP to POP        | CHOP â†’ POP    | Map channel values to point attributes           |
+| TOP to POP         | TOP â†’ POP     | Sample texture to set point colors/positions     |
+| DAT to POP         | DAT â†’ POP     | Read point data from table                       |
+| POP to SOP         | POP â†’ SOP     | Convert POP points back to mesh (future)         |
+| POP to TOP         | POP â†’ TOP     | Render POP via Render TOP (output = texture)     |
 
 ### Phase Planning for POPs
 
@@ -2768,7 +2768,7 @@ This is a **controlled cycle** in the DAG — the only allowed exception to the 
 
 **Phase B (particles):** 
 - Implement Particle POP with feedback loop
-- Time Integration (force → velocity → position)
+- Time Integration (force â†’ velocity â†’ position)
 - Birth/death system
 - Force Radial POP, Noise POP
 - Limit POP (bounding box, kill/bounce)
@@ -2789,7 +2789,7 @@ The GONODES editor runs on **desktop only**:
 - macOS (x86_64 + Apple Silicon)
 - Linux (x86_64)
 
-No ARM/mobile editor — too complex a UI for small screens.
+No ARM/mobile editor â€” too complex a UI for small screens.
 
 ### Patch Export Targets
 Exported patches (standalone runnables) can target **all Godot-supported platforms**:
@@ -2820,7 +2820,7 @@ func get_supported_renderers() -> Array[String]:
 ```
 
 The cook engine checks compatibility at cook time:
-- If an operator is incompatible with current renderer → skip cook, output null data, show warning badge
+- If an operator is incompatible with current renderer â†’ skip cook, output null data, show warning badge
 - The export system validates that all operators in a patch support the chosen export renderer
 - A "Renderer Compatibility" panel shows which operators work on which targets
 
@@ -2849,7 +2849,7 @@ The cook engine checks compatibility at cook time:
 ### Renderer Live-Switching in Editor
 
 The editor allows switching renderers at runtime for preview purposes:
-- Toolbar dropdown: `[Forward+ ▼]` → `Mobile` → `Compatibility`
+- Toolbar dropdown: `[Forward+ â–¼]` â†’ `Mobile` â†’ `Compatibility`
 - Triggers `ProjectSettings` change + viewport recreation
 - All SubViewports (TOP outputs) are recreated with new renderer
 - Operators re-cook
@@ -2863,15 +2863,15 @@ The editor allows switching renderers at runtime for preview purposes:
 ## 19.5. Three-Tier Resource Loading System
 
 ### Problem Statement
-`ResourceLoader.load()` only works for `res://` paths (bundled Godot resources). Standalone exported apps and user projects need to reference files on the filesystem — textures, fonts, audio, video, shaders — that live alongside the `.gnpatch` file, not inside the Godot project tree.
+`ResourceLoader.load()` only works for `res://` paths (bundled Godot resources). Standalone exported apps and user projects need to reference files on the filesystem â€” textures, fonts, audio, video, shaders â€” that live alongside the `.gnpatch` file, not inside the Godot project tree.
 
 ### Path Tiers
 
 | Tier | Prefix | Example | Resolution | Use Case |
 |------|--------|---------|------------|----------|
-| **1 — Bundled** | `res://` | `res://addons/gonodes/shaders/noise.gdshader` | `ResourceLoader.load()` | Built-in resources shipped with the editor/export |
-| **2 — Project** | `project://` | `project://textures/logo.png` | Resolve against `project_dir` → absolute path, then filesystem APIs | User assets stored alongside the `.gnpatch` file |
-| **3 — Absolute** | `/` or `C:\` | `C:\Users\me\Desktop\photo.jpg` | Direct filesystem access | Quick one-off references (not portable — shown with ⚠ warning) |
+| **1 â€” Bundled** | `res://` | `res://addons/gonodes/shaders/noise.gdshader` | `ResourceLoader.load()` | Built-in resources shipped with the editor/export |
+| **2 â€” Project** | `project://` | `project://textures/logo.png` | Resolve against `project_dir` â†’ absolute path, then filesystem APIs | User assets stored alongside the `.gnpatch` file |
+| **3 â€” Absolute** | `/` or `C:\` | `C:\Users\me\Desktop\photo.jpg` | Direct filesystem access | Quick one-off references (not portable â€” shown with âš  warning) |
 
 ### Project Folder Convention
 
@@ -2880,15 +2880,15 @@ When a user saves `MyPatch.gnpatch`, `GNProjectManager` creates a sibling folder
 ```
 MyPatch.gnpatch
 MyPatch_data/
-├── textures/
-├── fonts/
-├── video/
-├── audio/
-├── models/
-├── shaders/
-├── presets/
-├── scripts/
-└── data/
+â”œâ”€â”€ textures/
+â”œâ”€â”€ fonts/
+â”œâ”€â”€ video/
+â”œâ”€â”€ audio/
+â”œâ”€â”€ models/
+â”œâ”€â”€ shaders/
+â”œâ”€â”€ presets/
+â”œâ”€â”€ scripts/
+â””â”€â”€ data/
 ```
 
 Users place media assets into the appropriate subfolder. The file param dropdown scans these folders automatically.
@@ -2897,17 +2897,17 @@ Users place media assets into the appropriate subfolder. The file param dropdown
 
 ```
 GNProjectManager.set_from_patch_path(path)
-    │
-    ├── Creates MyPatch_data/ folder + subfolders (if needed)
-    └── Sets project_dir = "C:/path/to/MyPatch_data"
-           │
-           ▼
+    â”‚
+    â”œâ”€â”€ Creates MyPatch_data/ folder + subfolders (if needed)
+    â””â”€â”€ Sets project_dir = "C:/path/to/MyPatch_data"
+           â”‚
+           â–¼
 GNCookEngine.project_dir = project_dir
-           │
-           ▼ (each cook frame, for every node)
+           â”‚
+           â–¼ (each cook frame, for every node)
 GNNode.project_dir = cook_engine.project_dir
-           │
-           ▼ (inside operator _cook())
+           â”‚
+           â–¼ (inside operator _cook())
 GNResourceLoader.load_texture(file_path, project_dir)
 ```
 
@@ -2915,49 +2915,49 @@ The editor sets `project_dir` during save, load, new, setup, and auto-restore op
 
 ### GNResourceLoader API
 
-All methods are **static** — no instance needed.
+All methods are **static** â€” no instance needed.
 
 | Method | Signature | Returns | Notes |
 |--------|-----------|---------|-------|
-| `classify` | `(path: String) → PathTier` | PathTier enum | Checks `res://`, `project://`, or absolute |
-| `resolve` | `(path: String, project_dir: String) → String` | Absolute filesystem path | project:// → project_dir + relative; res:// and absolute pass through |
-| `to_project_relative` | `(abs_path: String, project_dir: String) → String` | `project://...` or original | Converts absolute into project-relative if under project_dir |
-| `to_saveable` | `(abs_path: String, project_dir: String) → String` | Best portable path | Prefers project:// > res:// > absolute |
-| `exists` | `(path: String, project_dir: String) → bool` | bool | Works across all three tiers |
-| `load_texture` | `(path, project_dir) → Texture2D` | Texture2D or null | res:// → ResourceLoader; filesystem → Image.load_from_file() + ImageTexture |
-| `load_image` | `(path, project_dir) → Image` | Image or null | res:// → ResourceLoader + get_image(); filesystem → Image.load_from_file() |
-| `load_font` | `(path, project_dir) → Font` | Font or null | res:// → ResourceLoader; filesystem → FontFile.load_dynamic_font() |
-| `load_audio` | `(path, project_dir) → AudioStream` | AudioStream or null | res:// → ResourceLoader; filesystem → format-specific buffer loading (OGG, WAV, MP3) |
-| `load_shader` | `(path, project_dir) → Shader` | Shader or null | res:// → ResourceLoader; filesystem → Shader.new() + code from FileAccess |
-| `load_video` | `(path, project_dir) → VideoStream` | VideoStream or null | res:// → ResourceLoader; filesystem → VideoStreamTheora.file = path |
-| `load_any` | `(path, project_dir) → Resource` | Resource or null | Tries ResourceLoader.load() for res://, delegates to type-specific for others |
-| `scan_directory` | `(dir_path, extensions) → Array[String]` | File paths | Lists matching files, supports res:// via DirAccess |
+| `classify` | `(path: String) â†’ PathTier` | PathTier enum | Checks `res://`, `project://`, or absolute |
+| `resolve` | `(path: String, project_dir: String) â†’ String` | Absolute filesystem path | project:// â†’ project_dir + relative; res:// and absolute pass through |
+| `to_project_relative` | `(abs_path: String, project_dir: String) â†’ String` | `project://...` or original | Converts absolute into project-relative if under project_dir |
+| `to_saveable` | `(abs_path: String, project_dir: String) â†’ String` | Best portable path | Prefers project:// > res:// > absolute |
+| `exists` | `(path: String, project_dir: String) â†’ bool` | bool | Works across all three tiers |
+| `load_texture` | `(path, project_dir) â†’ Texture2D` | Texture2D or null | res:// â†’ ResourceLoader; filesystem â†’ Image.load_from_file() + ImageTexture |
+| `load_image` | `(path, project_dir) â†’ Image` | Image or null | res:// â†’ ResourceLoader + get_image(); filesystem â†’ Image.load_from_file() |
+| `load_font` | `(path, project_dir) â†’ Font` | Font or null | res:// â†’ ResourceLoader; filesystem â†’ FontFile.load_dynamic_font() |
+| `load_audio` | `(path, project_dir) â†’ AudioStream` | AudioStream or null | res:// â†’ ResourceLoader; filesystem â†’ format-specific buffer loading (OGG, WAV, MP3) |
+| `load_shader` | `(path, project_dir) â†’ Shader` | Shader or null | res:// â†’ ResourceLoader; filesystem â†’ Shader.new() + code from FileAccess |
+| `load_video` | `(path, project_dir) â†’ VideoStream` | VideoStream or null | res:// â†’ ResourceLoader; filesystem â†’ VideoStreamTheora.file = path |
+| `load_any` | `(path, project_dir) â†’ Resource` | Resource or null | Tries ResourceLoader.load() for res://, delegates to type-specific for others |
+| `scan_directory` | `(dir_path, extensions) â†’ Array[String]` | File paths | Lists matching files, supports res:// via DirAccess |
 
 ### File Param UI (Three-Tier Dropdown)
 
 The `FILE` parameter type in `gn_param_row.gd` renders as:
 
 ```
-[OptionButton ▼ dropdown]  [… Browse]  [↻ Refresh]  [X Clear]
+[OptionButton â–¼ dropdown]  [â€¦ Browse]  [â†» Refresh]  [X Clear]
 ```
 
 The OptionButton dropdown is populated with three sections:
 
 ```
-── Bundled ──
+â”€â”€ Bundled â”€â”€
   res://addons/gonodes/shaders/noise.gdshader
   res://addons/gonodes/shaders/blur.gdshader
-── Project ──
+â”€â”€ Project â”€â”€
   project://textures/logo.png
   project://fonts/custom.ttf
-── External ──
-  ⚠ C:\Users\me\Desktop\photo.jpg
+â”€â”€ External â”€â”€
+  âš  C:\Users\me\Desktop\photo.jpg
 ```
 
-- **Browse "…"** opens a native `FileDialog`. If the selected file is inside the project folder, it's auto-converted to `project://` relative path.
-- **Refresh "↻"** re-scans both bundled and project directories.
+- **Browse "â€¦"** opens a native `FileDialog`. If the selected file is inside the project folder, it's auto-converted to `project://` relative path.
+- **Refresh "â†»"** re-scans both bundled and project directories.
 - **Clear "X"** resets the parameter to empty string.
-- External files show a ⚠ warning icon — they are not portable across machines.
+- External files show a âš  warning icon â€” they are not portable across machines.
 
 ### Operator Migration Summary
 
@@ -2973,11 +2973,11 @@ All operators that load external files were migrated from raw `ResourceLoader.lo
 | ImageSequenceIMG | IMG | `ResourceLoader.load(path)` | `GNResourceLoader.load_image()` + `resolve()` + `exists()` |
 | FFmpegInTOP | TOP (ext) | `_create_ffmpeg_stream(path)` | `GNResourceLoader.resolve(path, project_dir)` then `_create_ffmpeg_stream()` |
 
-**Not migrated** (write-only, use STRING params): FileSaveTOP, FileSaveDAT, RecordCHOP, MovieOutIMG, FFmpegOutIMG.
+**Not migrated** (write-only, use STRING params): TextureSaveOUT, TableSaveOUT, RecordOUT, MovieOUT, FFmpegOUT.
 
 ---
 
-## 20.5. 3D Scene Pipeline (SOP → COMP → RenderTOP)
+## 20.5. 3D Scene Pipeline (SOP â†’ COMP â†’ RenderTOP)
 
 GONODES uses Godot's native scene graph for 3D rendering instead of building a custom 3D engine. SOPs produce geometry data, COMPs wrap Godot Node3D types, and RenderTOP renders everything through a SubViewport back into the TOP texture pipeline.
 
@@ -2985,46 +2985,46 @@ GONODES uses Godot's native scene graph for 3D rendering instead of building a c
 
 ```
 SOP Chain (geometry)    MAT Layer        COMP Layer (3D scene)              TOP Pipeline
-┌──────────┐  ┌────────────┐             ┌──────────────┐                     ┌───────────┐
-│ GridSOP  │→→│TransformSOP│──→──┐       │              │                     │           │
-└──────────┘  └────────────┘     ├──→─── │GeometryCOMP  │ (MeshInstance3D)─┐  │           │
-                   ┌─────────┐  │       │              │                  │  │           │
-                   │ PBR_MAT │──→──┘     └──────────────┘                  ├──│ RenderTOP │→→ texture
-                   └─────────┘           ┌──────────────┐                  │  │           │   output
-                                         │ CameraCOMP   │ (Camera3D) ─────┤  │           │
-                                         └──────────────┘                  │  │           │
-                                         ┌──────────────┐                  │  │           │
-                                         │ LightCOMP    │ (Light3D) ──────┤  │           │
-                                         └──────────────┘                  │  └───────────┘
-                                         ┌──────────────┐                  │
-                                         │ MergeCOMP    │ (Node3D group)──┘
-                                         └──────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”             â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ GridSOP  â”‚â†’â†’â”‚TransformSOPâ”‚â”€â”€â†’â”€â”€â”       â”‚              â”‚                     â”‚           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â”œâ”€â”€â†’â”€â”€â”€ â”‚GeometryCOMP  â”‚ (MeshInstance3D)â”€â”  â”‚           â”‚
+                   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚       â”‚              â”‚                  â”‚  â”‚           â”‚
+                   â”‚ PBR_MAT â”‚â”€â”€â†’â”€â”€â”˜     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                  â”œâ”€â”€â”‚ RenderTOP â”‚â†’â†’ texture
+                   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜           â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                  â”‚  â”‚           â”‚   output
+                                         â”‚ CameraCOMP   â”‚ (Camera3D) â”€â”€â”€â”€â”€â”¤  â”‚           â”‚
+                                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                  â”‚  â”‚           â”‚
+                                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                  â”‚  â”‚           â”‚
+                                         â”‚ LightCOMP    â”‚ (Light3D) â”€â”€â”€â”€â”€â”€â”¤  â”‚           â”‚
+                                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                  â”‚
+                                         â”‚ MergeCOMP    â”‚ (Node3D group)â”€â”€â”˜
+                                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### Key Design Decisions
 
-1. **Godot-native 3D nodes** — GeometryCOMP creates a real `MeshInstance3D`, CameraCOMP creates a real `Camera3D`, LightCOMP creates a real `DirectionalLight3D`/`OmniLight3D`/`SpotLight3D`. No custom rendering abstraction.
+1. **Godot-native 3D nodes** â€” GeometryCOMP creates a real `MeshInstance3D`, CameraCOMP creates a real `Camera3D`, LightCOMP creates a real `DirectionalLight3D`/`OmniLight3D`/`SpotLight3D`. No custom rendering abstraction.
 
-2. **Isolated World3D** — Each RenderTOP creates a `SubViewport` with an explicit `world_3d = World3D.new()` assigned before tree entry, giving it a separate 3D scene. This prevents 3D content from appearing in the main editor viewport and allows multiple independent 3D scenes in one network.
+2. **Isolated World3D** â€” Each RenderTOP creates a `SubViewport` with an explicit `world_3d = World3D.new()` assigned before tree entry, giving it a separate 3D scene. This prevents 3D content from appearing in the main editor viewport and allows multiple independent 3D scenes in one network.
 
-3. **Scene population via network walk** — RenderTOP's `_populate_scene_from_network()` walks upstream connections to discover COMP nodes, then reparents their Node3D children into the RenderTOP's viewport. This means the 3D scene is defined by network wiring, not by Godot scene tree structure.
+3. **Scene population via network walk** â€” RenderTOP's `_populate_scene_from_network()` walks upstream connections to discover COMP nodes, then reparents their Node3D children into the RenderTOP's viewport. This means the 3D scene is defined by network wiring, not by Godot scene tree structure.
 
-4. **MAT input on GeometryCOMP** — GeometryCOMP accepts 3 inputs: SOP (geometry), MAT (material override), TOP (albedo texture for fallback PBR). When a MAT is connected, its Material is used directly via `material_override`; when disconnected, built-in PBR params + TOP texture build a fallback `StandardMaterial3D`.
+4. **MAT input on GeometryCOMP** â€” GeometryCOMP accepts 3 inputs: SOP (geometry), MAT (material override), TOP (albedo texture for fallback PBR). When a MAT is connected, its Material is used directly via `material_override`; when disconnected, built-in PBR params + TOP texture build a fallback `StandardMaterial3D`.
 
-5. **Default camera fallback** — If no CameraCOMP is connected to a RenderTOP, it creates a default perspective camera at (0, 2, 5) looking at origin, ensuring there's always a valid render.
+5. **Default camera fallback** â€” If no CameraCOMP is connected to a RenderTOP, it creates a default perspective camera at (0, 2, 5) looking at origin, ensuring there's always a valid render.
 
-6. **MergeCOMP for scene composition** — MergeCOMP groups multiple COMP scene nodes under a single `Node3D` parent. Inputs use **dynamic numbered ports** (comp0, comp1, comp2, …) that auto-grow when connected. Port index determines the scene graph child order (port 0 = first child, port 1 = second, …), giving the user deterministic control via which port they wire into. RenderTOP recognizes MergeCOMP and adopts the entire group node, enabling multi-object scenes wired through a single connection.
+6. **MergeCOMP for scene composition** â€” MergeCOMP groups multiple COMP scene nodes under a single `Node3D` parent. Inputs use **dynamic numbered ports** (comp0, comp1, comp2, â€¦) that auto-grow when connected. Port index determines the scene graph child order (port 0 = first child, port 1 = second, â€¦), giving the user deterministic control via which port they wire into. RenderTOP recognizes MergeCOMP and adopts the entire group node, enabling multi-object scenes wired through a single connection.
 
-7. **Shadow system** — Shadows are controlled at three levels: per-light (LightCOMP: bias, normal_bias, blur, opacity, directional shadow mode), per-object (GeometryCOMP: cast_shadow mode), and global quality (RenderTOP: shadow atlas size, directional shadow size, shadow filter).
+7. **Shadow system** â€” Shadows are controlled at three levels: per-light (LightCOMP: bias, normal_bias, blur, opacity, directional shadow mode), per-object (GeometryCOMP: cast_shadow mode), and global quality (RenderTOP: shadow atlas size, directional shadow size, shadow filter).
 
 ### COMP Family Details
 
 COMPs are unique in that they don't produce data output (no `GNData` return from cook). Instead, they create and maintain Godot Node3D instances that other nodes access via API methods:
 
-- `GeometryCOMP.get_mesh_instance() → MeshInstance3D`
-- `CameraCOMP.get_camera() → Camera3D`
-- `LightCOMP.get_light() → Light3D`
-- `MergeCOMP.get_group_node() → Node3D`
+- `GeometryCOMP.get_mesh_instance() â†’ MeshInstance3D`
+- `CameraCOMP.get_camera() â†’ Camera3D`
+- `LightCOMP.get_light() â†’ Light3D`
+- `MergeCOMP.get_group_node() â†’ Node3D`
 
 The cook engine suppresses null-output warnings for COMP family nodes since this is intentional design.
 
@@ -3034,19 +3034,19 @@ SOPs output `GNGeoData` which wraps an `ArrayMesh`:
 
 ```
 SOP generators (BoxSOP, SphereSOP, etc.)
-  → create GNGeoData with ArrayMesh
-  → pass downstream via SOP ports
+  â†’ create GNGeoData with ArrayMesh
+  â†’ pass downstream via SOP ports
 
 SOP filters (TransformSOP, NoiseSOP, etc.)
-  → read input GNGeoData
-  → extract vertex arrays
-  → modify and produce new GNGeoData
+  â†’ read input GNGeoData
+  â†’ extract vertex arrays
+  â†’ modify and produce new GNGeoData
 
 GeometryCOMP (terminal SOP consumer)
-  → reads GNGeoData from SOP input
-  → applies mesh to its MeshInstance3D
-  → if MAT input connected: uses Material directly (material_override)
-  → else: builds fallback StandardMaterial3D from params + optional TOP albedo texture
+  â†’ reads GNGeoData from SOP input
+  â†’ applies mesh to its MeshInstance3D
+  â†’ if MAT input connected: uses Material directly (material_override)
+  â†’ else: builds fallback StandardMaterial3D from params + optional TOP albedo texture
 ```
 
 ### Godot Types Used
@@ -3057,7 +3057,7 @@ GeometryCOMP (terminal SOP consumer)
 | SphereSOP | `SphereMesh` |
 | CylinderSOP | `CylinderMesh` |
 | TorusSOP | `TorusMesh` |
-| GridSOP, LineSOP, CircleSOP | `SurfaceTool` → `ArrayMesh` |
+| GridSOP, LineSOP, CircleSOP | `SurfaceTool` â†’ `ArrayMesh` |
 | NoiseSOP | `FastNoiseLite` + `SurfaceTool` |
 | TransformSOP | Manual vertex transform via `Basis` |
 | GeometryCOMP | `MeshInstance3D` + `StandardMaterial3D` |
@@ -3081,9 +3081,9 @@ GeometryCOMP (terminal SOP consumer)
 Ownership Rule:
   1. Each node OWNS its cached_output (the GNData it produced last cook).
   2. The cook engine passes cached_output REFERENCES to downstream _cook(inputs) calls.
-  3. Downstream nodes MUST NEVER mutate input data — always create new output data.
+  3. Downstream nodes MUST NEVER mutate input data â€” always create new output data.
   4. GNTextureData: the ViewportTexture is a live GPU reference (zero-copy on GPU).
-  5. GNChannelData: PackedFloat32Array is copy-on-write in GDScript — safe as long as
+  5. GNChannelData: PackedFloat32Array is copy-on-write in GDScript â€” safe as long as
      downstream doesn't mutate it. The contract forbids mutation.
 ```
 
@@ -3102,7 +3102,7 @@ Ownership Rule:
 
 Previously, each TOP cook created a new `GNTextureData` every frame. This caused unnecessary GC pressure.
 
-**New rule:** Each TOP creates its `GNTextureData` once (during `_ensure_viewport()`) and reuses it across cooks. Only metadata (resolution, timestamp) is updated. The `ViewportTexture` reference is stable — it auto-updates when the SubViewport re-renders.
+**New rule:** Each TOP creates its `GNTextureData` once (during `_ensure_viewport()`) and reuses it across cooks. Only metadata (resolution, timestamp) is updated. The `ViewportTexture` reference is stable â€” it auto-updates when the SubViewport re-renders.
 
 ```gdscript
 # In each TOP's _cook():
@@ -3119,49 +3119,49 @@ return _cached_tex_data  # Same object, reused
 ### Thread Safety (Future)
 
 When the cook engine moves to threaded cooking:
-- GNData becomes **immutable after cook** — the producing node creates a new GNData for each cook, and the old one can be read by consumers on other threads.
-- Or: **double-buffering** — each node has two GNData slots (front/back), consumers read front while producer writes back.
+- GNData becomes **immutable after cook** â€” the producing node creates a new GNData for each cook, and the old one can be read by consumers on other threads.
+- Or: **double-buffering** â€” each node has two GNData slots (front/back), consumers read front while producer writes back.
 - For MVP (single-threaded `_process`), reference passing with read-only contract is sufficient.
 
 ---
 
 ## 22. Node-Based Architecture (GNNode extends Node)
 
-GNNode extends Godot's `Node` class instead of `Resource`. This gives operators direct scene tree participation, allowing TOPs to own SubViewports as children and WindowTOPs to create OS windows naturally.
+GNNode extends Godot's `Node` class instead of `Resource`. This gives operators direct scene tree participation, allowing TOPs to own SubViewports as children and WindowOUTs to create OS windows naturally.
 
 ### Why Not Resource?
-- **No scene tree lifecycle** — Resources have no `_ready()`, `_process()`, `_exit_tree()`. This forced workarounds: a centralized ViewportManager for TOPs, `Engine.get_frames_per_second()` hacks for delta time, manual `cleanup()` methods for SubViewport teardown.
-- **Accidental copy risk** — `Resource.duplicate()` creates broken shallow copies of viewport/material references. Resource's serialization machinery was never used (patches serialize via GNNetwork, not individual nodes).
-- **Per-frame allocation overhead** — GNData as Resource had unnecessary serialization infrastructure for transient compute results.
+- **No scene tree lifecycle** â€” Resources have no `_ready()`, `_process()`, `_exit_tree()`. This forced workarounds: a centralized ViewportManager for TOPs, `Engine.get_frames_per_second()` hacks for delta time, manual `cleanup()` methods for SubViewport teardown.
+- **Accidental copy risk** â€” `Resource.duplicate()` creates broken shallow copies of viewport/material references. Resource's serialization machinery was never used (patches serialize via GNNetwork, not individual nodes).
+- **Per-frame allocation overhead** â€” GNData as Resource had unnecessary serialization infrastructure for transient compute results.
 
 ### The Tiered Design
 
 | Class | Extends | Why |
 |---|---|---|
 | **GNNode** | **Node** | Scene tree access, TOPs own SubViewports, auto-cleanup via queue_free() |
-| **GNData/GNTextureData/GNChannelData** | **RefCounted** | Transient compute results — lightest possible allocation |
+| **GNData/GNTextureData/GNChannelData** | **RefCounted** | Transient compute results â€” lightest possible allocation |
 | **GNPort** | **RefCounted** | Lightweight struct, no serialization needed |
 | **GNConnection** | **RefCounted** | Lightweight struct, network serializes connection info |
 | **GNParameter** | **Resource** | Benefits from @export for inspector + value persistence |
-| **GNNetwork** | **Resource** | The serialization boundary — saves/loads patch files as .tres |
+| **GNNetwork** | **Resource** | The serialization boundary â€” saves/loads patch files as .tres |
 
 ### Scene Tree Structure
 
 ```
 MainScene (Node)
-  ├── Viewer (TextureRect)
-  ├── InfoLabel (Label)
-  └── CookEngine (GNCookEngine extends Node)
-        ├── lfo1 (LFO_CHOP extends GNNode extends Node)
-        ├── noise1 (NoiseTOP extends GNNode extends Node)
-        │   └── VP_noise1 (SubViewport)       ← owned by TOP, auto-freed
-        │       └── Canvas (ColorRect + ShaderMaterial)
-        ├── level1 (LevelTOP extends GNNode extends Node)
-        │   └── VP_level1 (SubViewport)       ← owned by TOP, auto-freed
-        │       └── Canvas (TextureRect + ShaderMaterial)
-        └── win1 (WindowTOP extends GNNode extends Node)
-            └── GNOutput_win1 (Window)        ← separate OS window, auto-freed
-                └── Display (TextureRect)
+  â”œâ”€â”€ Viewer (TextureRect)
+  â”œâ”€â”€ InfoLabel (Label)
+  â””â”€â”€ CookEngine (GNCookEngine extends Node)
+        â”œâ”€â”€ lfo1 (LFO_CHOP extends GNNode extends Node)
+        â”œâ”€â”€ noise1 (NoiseTOP extends GNNode extends Node)
+        â”‚   â””â”€â”€ VP_noise1 (SubViewport)       â† owned by TOP, auto-freed
+        â”‚       â””â”€â”€ Canvas (ColorRect + ShaderMaterial)
+        â”œâ”€â”€ level1 (LevelTOP extends GNNode extends Node)
+        â”‚   â””â”€â”€ VP_level1 (SubViewport)       â† owned by TOP, auto-freed
+        â”‚       â””â”€â”€ Canvas (TextureRect + ShaderMaterial)
+        â””â”€â”€ win1 (WindowOUT extends GNNode extends Node)
+            â””â”€â”€ GNOutput_win1 (Window)        â† separate OS window, auto-freed
+                â””â”€â”€ Display (TextureRect)
 ```
 
 ### Timing Injection
@@ -3201,61 +3201,61 @@ GONODES supports multiple output windows, each displayable on any connected moni
 ### Godot's Multi-Window Support
 
 Godot 4.x provides:
-- `Window` node — creates an OS-level window, can be moved/resized/fullscreened
-- `DisplayServer.get_screen_count()` — enumerate connected monitors
-- `DisplayServer.get_screen_position(idx)` / `get_screen_size(idx)` — monitor geometry
-- `DisplayServer.window_set_mode()` — fullscreen, borderless, windowed
+- `Window` node â€” creates an OS-level window, can be moved/resized/fullscreened
+- `DisplayServer.get_screen_count()` â€” enumerate connected monitors
+- `DisplayServer.get_screen_position(idx)` / `get_screen_size(idx)` â€” monitor geometry
+- `DisplayServer.window_set_mode()` â€” fullscreen, borderless, windowed
 - Each `Window` can host its own `SubViewportContainer` to display content
 
-### WindowTOP Operator
+### WindowOUT Operator
 
 A new TOP operator that takes a texture input and displays it in a standalone OS window.
 
 ```
-WindowTOP
-├── Inputs: 1 (TOP texture)
-├── Outputs: 0 (display-only, terminal node)
-├── Parameters:
-│   ├── title: String ("GONODES Output")
-│   ├── monitor: int (0 = primary, 1 = secondary, ...)
-│   ├── window_mode: enum (Windowed, Fullscreen, Borderless)
-│   ├── resolution: Vector2i (1920×1080)
-│   ├── position: Vector2i (auto = centered on target monitor)
-│   ├── always_on_top: bool (false)
-│   └── vsync: bool (true)
-└── Implementation:
-    ├── Creates a Godot Window node
-    ├── Inside: SubViewportContainer + SubViewport + TextureRect
-    ├── TextureRect.texture = input TOP's ViewportTexture
-    ├── Window positioned on target monitor
-    └── Updates every frame (the TextureRect auto-updates from ViewportTexture)
+WindowOUT
+â”œâ”€â”€ Inputs: 1 (TOP texture)
+â”œâ”€â”€ Outputs: 0 (display-only, terminal node)
+â”œâ”€â”€ Parameters:
+â”‚   â”œâ”€â”€ title: String ("GONODES Output")
+â”‚   â”œâ”€â”€ monitor: int (0 = primary, 1 = secondary, ...)
+â”‚   â”œâ”€â”€ window_mode: enum (Windowed, Fullscreen, Borderless)
+â”‚   â”œâ”€â”€ resolution: Vector2i (1920Ã—1080)
+â”‚   â”œâ”€â”€ position: Vector2i (auto = centered on target monitor)
+â”‚   â”œâ”€â”€ always_on_top: bool (false)
+â”‚   â””â”€â”€ vsync: bool (true)
+â””â”€â”€ Implementation:
+    â”œâ”€â”€ Creates a Godot Window node
+    â”œâ”€â”€ Inside: SubViewportContainer + SubViewport + TextureRect
+    â”œâ”€â”€ TextureRect.texture = input TOP's ViewportTexture
+    â”œâ”€â”€ Window positioned on target monitor
+    â””â”€â”€ Updates every frame (the TextureRect auto-updates from ViewportTexture)
 ```
 
 ### Multi-Window Architecture
 
 ```
 Scene Tree:
-  Root (Window — main editor)
-  ├── MainEditor (editor UI, graph, inspector)
-  └── CookEngine (GNCookEngine)
-        ├── noise1 (NoiseTOP)
-        │   └── VP_noise1 (SubViewport)
-        │       └── Canvas (ColorRect)
-        ├── level1 (LevelTOP)
-        │   └── VP_level1 (SubViewport)
-        │       └── Canvas (TextureRect)
-        ├── win1 (WindowTOP — second monitor, fullscreen)
-        │   └── GNOutput_win1 (Window — OS window)
-        │       └── Display (TextureRect → level1's ViewportTexture)
-        └── win2 (WindowTOP — projector, borderless)
-            └── GNOutput_win2 (Window — OS window)
-                └── Display (TextureRect → noise1's ViewportTexture)
+  Root (Window â€” main editor)
+  â”œâ”€â”€ MainEditor (editor UI, graph, inspector)
+  â””â”€â”€ CookEngine (GNCookEngine)
+        â”œâ”€â”€ noise1 (NoiseTOP)
+        â”‚   â””â”€â”€ VP_noise1 (SubViewport)
+        â”‚       â””â”€â”€ Canvas (ColorRect)
+        â”œâ”€â”€ level1 (LevelTOP)
+        â”‚   â””â”€â”€ VP_level1 (SubViewport)
+        â”‚       â””â”€â”€ Canvas (TextureRect)
+        â”œâ”€â”€ win1 (WindowOUT â€” second monitor, fullscreen)
+        â”‚   â””â”€â”€ GNOutput_win1 (Window â€” OS window)
+        â”‚       â””â”€â”€ Display (TextureRect â†’ level1's ViewportTexture)
+        â””â”€â”€ win2 (WindowOUT â€” projector, borderless)
+            â””â”€â”€ GNOutput_win2 (Window â€” OS window)
+                â””â”€â”€ Display (TextureRect â†’ noise1's ViewportTexture)
 ```
 
 ### Monitor Enumeration at Runtime
 
 ```gdscript
-# Available to WindowTOP and the editor's display picker:
+# Available to WindowOUT and the editor's display picker:
 # Note: Godot 4.x uses screen_get_position/screen_get_size (not get_screen_*).
 for i in range(DisplayServer.get_screen_count()):
     var pos := DisplayServer.screen_get_position(i)
@@ -3265,21 +3265,21 @@ for i in range(DisplayServer.get_screen_count()):
 
 ### Texture Routing
 
-WindowTOP does NOT copy the texture. It assigns the upstream TOP's `ViewportTexture` directly to its internal TextureRect — a live GPU reference. The Window's render tree samples the same GPU texture as the graph viewer. **Zero-copy output.**
+WindowOUT does NOT copy the texture. It assigns the upstream TOP's `ViewportTexture` directly to its internal TextureRect â€” a live GPU reference. The Window's render tree samples the same GPU texture as the graph viewer. **Zero-copy output.**
 
-**Important — TextureRect layout in programmatic Windows:**
-When creating a TextureRect inside a Window node via code, do NOT use the `anchors_preset` property setter — it only sets anchors but leaves offsets at 0, resulting in a 0×0 rect. Always call `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER adding the control to the tree.
+**Important â€” TextureRect layout in programmatic Windows:**
+When creating a TextureRect inside a Window node via code, do NOT use the `anchors_preset` property setter â€” it only sets anchors but leaves offsets at 0, resulting in a 0Ã—0 rect. Always call `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER adding the control to the tree.
 
-**Important — ViewportTexture cross-viewport usage:**
+**Important â€” ViewportTexture cross-viewport usage:**
 When assigning a ViewportTexture programmatically (not via the editor), it works across Viewport boundaries because it references the source SubViewport by RID, not by scene-relative path. Direct assignment (`texture_rect.texture = viewport.get_texture()`) works correctly even when the TextureRect lives inside a secondary Window.
 
 ### VJ Workflow
 
 1. Build patch in the editor (monitor 1)
-2. Add a WindowTOP node, set `monitor = 1` (projector), `window_mode = Borderless`
-3. Wire the final TOP chain into the WindowTOP
+2. Add a WindowOUT node, set `monitor = 1` (projector), `window_mode = Borderless`
+3. Wire the final TOP chain into the WindowOUT
 4. The projector shows the live output, borderless, fullscreen
-5. Multiple WindowTOPs can show different parts of the patch on different displays
+5. Multiple WindowOUTs can show different parts of the patch on different displays
 6. Parameters (monitor, fullscreen, resolution) can be driven by CHOPs for live switching
 
 ---
@@ -3290,12 +3290,12 @@ GNLogger is a static utility class (`extends RefCounted`, `class_name GNLogger`)
 
 ### Design
 
-- **Static API** — call from anywhere without instantiation: `GNLogger.info("Category", "message")`
-- **Master toggle** — `GNLogger.enabled` (off by default, no output when disabled)
-- **Level filtering** — `GNLogger.level` with `DEBUG`, `INFO`, `WARN`, `ERROR`, `NONE`
-- **Category muting** — `GNLogger.muted_categories["CookEngine"] = true` to silence a subsystem
-- **Routing** — `WARN` → `push_warning()`, `ERROR` → `push_error()`, others → `print()`
-- **Per-line metadata** — frame number, optional timestamps
+- **Static API** â€” call from anywhere without instantiation: `GNLogger.info("Category", "message")`
+- **Master toggle** â€” `GNLogger.enabled` (off by default, no output when disabled)
+- **Level filtering** â€” `GNLogger.level` with `DEBUG`, `INFO`, `WARN`, `ERROR`, `NONE`
+- **Category muting** â€” `GNLogger.muted_categories["CookEngine"] = true` to silence a subsystem
+- **Routing** â€” `WARN` â†’ `push_warning()`, `ERROR` â†’ `push_error()`, others â†’ `print()`
+- **Per-line metadata** â€” frame number, optional timestamps
 
 ### Usage
 
@@ -3317,7 +3317,7 @@ GNLogger.error("Parameter", "Expression compile failed")
 | GNNetwork | Node add/remove, connect/disconnect, cycle detection, topo sort recomputation |
 | GNNode | Initialize (ports/params), null cook output |
 | TOP operators | Viewport creation, missing input warnings |
-| WindowTOP | Window creation, window hidden by user |
+| WindowOUT | Window creation, window hidden by user |
 | CHOP operators | Missing input warnings |
 | GNParameter | Expression compile success/failure |
 
@@ -3349,7 +3349,7 @@ The test scene includes a `CheckButton` (top-right corner, "Debug Log") that tog
 
 ### Overview
 
-The editor UI is built on Godot's `GraphEdit` and `GraphNode` controls with bidirectional sync to the `GNNetwork` model. Flow is left-to-right (Godot `GraphEdit` is hardcoded horizontal — vertical layout would require replacing the entire widget).
+The editor UI is built on Godot's `GraphEdit` and `GraphNode` controls with bidirectional sync to the `GNNetwork` model. Flow is left-to-right (Godot `GraphEdit` is hardcoded horizontal â€” vertical layout would require replacing the entire widget).
 
 ### Files
 
@@ -3358,8 +3358,8 @@ The editor UI is built on Godot's `GraphEdit` and `GraphNode` controls with bidi
 | `addons/gonodes/ui/gn_node_view.gd` | `GNNodeView` | GraphNode wrapper per operator. Family-colored title bar (StyleBoxFlat), typed port slots via `set_slot()`, position sync via `position_offset_changed` |
 | `addons/gonodes/ui/gn_graph_editor.gd` | `GNGraphEditor` | GraphEdit canvas. Handles connection/disconnection/deletion, bidirectional sync with GNNetwork via signals, hosts palette. Signals: `operator_selected(node_id)`, `operator_deselected()` |
 | `addons/gonodes/ui/gn_node_palette.gd` | `GNNodePalette` | PopupPanel with search LineEdit + Tree grouped by family. Tab/right-click to open. Spawns operators via `_create_operator_instance()` |
-| `scenes/gn_editor.tscn` | — | HSplitContainer layout: GraphPanel (left) + RightPanel (VSplit: Viewer + Inspector) + InfoBar (bottom) |
-| `scenes/gn_editor.gd` | — | Wires graph_editor + inspector + cook_engine. Demo network: lfo1→noise1→level1→win1 |
+| `scenes/gn_editor.tscn` | â€” | HSplitContainer layout: GraphPanel (left) + RightPanel (VSplit: Viewer + Inspector) + InfoBar (bottom) |
+| `scenes/gn_editor.gd` | â€” | Wires graph_editor + inspector + cook_engine. Demo network: lfo1â†’noise1â†’level1â†’win1 |
 
 ### Operator Registry
 
@@ -3374,12 +3374,12 @@ New operators must be manually added to this dictionary.
 ### Signal Flow
 
 ```
-User drags wire → GraphEdit.connection_request
-  → GNGraphEditor._on_connection_request()
-    → GNNetwork.connect_nodes()
-      → GNNetwork.connection_added signal
-        → GNGraphEditor._on_network_connection_added()
-          → GraphEdit.connect_node() (visually)
+User drags wire â†’ GraphEdit.connection_request
+  â†’ GNGraphEditor._on_connection_request()
+    â†’ GNNetwork.connect_nodes()
+      â†’ GNNetwork.connection_added signal
+        â†’ GNGraphEditor._on_network_connection_added()
+          â†’ GraphEdit.connect_node() (visually)
 ```
 
 Same pattern for disconnection, node add/remove.
@@ -3396,9 +3396,9 @@ The parameter inspector is a right-side panel that shows all parameters for the 
 
 | File | Class | Purpose |
 |------|-------|---------|
-| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker, RAMP: GNRampEditor curve editor). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard. ↗ expand buttons open multi-line editor. Code params get "Edit ↗" button opening GNCodeEditor. Profiling tooltip. |
-| `addons/gonodes/ui/gn_base_code_editor.gd` | `GNBaseCodeEditor` | Abstract base class (extends Window) for modal code-editing windows. Provides shared layout: MarginContainer → VBox → info label → toolbar hook → CodeEdit (line numbers, auto-indent, brace completion, word wrap) → status label → Cancel/OK buttons. Key bindings (Ctrl+Enter, Escape). Virtual hooks: `_build_toolbar()`, `_setup_code_edit()`, `_build_bottom_bar()`, `_on_ok()`. Helper methods: `_focus_end()`, `_set_status()`. |
-| `addons/gonodes/ui/gn_expression_editor.gd` | `GNExpressionEditor` | Extends GNBaseCodeEditor. Expression editing with code completion (node IDs, channels, params, custom funcs), live validation, Snippets ▾ dropdown (30+ built-in + user snippets persisted to disk), reference cheatsheet. |
+| `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker, RAMP: GNRampEditor curve editor). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard. â†— expand buttons open multi-line editor. Code params get "Edit â†—" button opening GNCodeEditor. Profiling tooltip. |
+| `addons/gonodes/ui/gn_base_code_editor.gd` | `GNBaseCodeEditor` | Abstract base class (extends Window) for modal code-editing windows. Provides shared layout: MarginContainer â†’ VBox â†’ info label â†’ toolbar hook â†’ CodeEdit (line numbers, auto-indent, brace completion, word wrap) â†’ status label â†’ Cancel/OK buttons. Key bindings (Ctrl+Enter, Escape). Virtual hooks: `_build_toolbar()`, `_setup_code_edit()`, `_build_bottom_bar()`, `_on_ok()`. Helper methods: `_focus_end()`, `_set_status()`. |
+| `addons/gonodes/ui/gn_expression_editor.gd` | `GNExpressionEditor` | Extends GNBaseCodeEditor. Expression editing with code completion (node IDs, channels, params, custom funcs), live validation, Snippets â–¾ dropdown (30+ built-in + user snippets persisted to disk), reference cheatsheet. |
 | `addons/gonodes/ui/gn_ramp_editor.gd` | `GNRampEditor` | Custom `_draw()` curve editor for RAMP parameters. Grid background (0.25 increments), cubic Hermite curve rendering, draggable keypoints with tangent handles, left-click to add point, right-click to remove (min 2), Ctrl+click to toggle smooth/linear tangents. Signal: `ramp_changed(keys)`. |
 | `addons/gonodes/ui/gn_network_box.gd` | `GNNetworkBox` | Canvas annotation: colored rectangle behind graph nodes (z_index=-10) for visual grouping. Title bar with inline edit (double-click), drag-move, bottom-right resize, right-click context menu. Signals: `box_changed`, `text_changed`, `delete_requested`, `color_changed`. |
 | `addons/gonodes/ui/gn_sticky_note.gd` | `GNStickyNote` | Canvas annotation: editable text note (z_index=-9). Multi-line TextEdit (double-click), drag-move, resize, right-click context menu. Default yellow. Signals: `note_changed`, `text_changed`, `delete_requested`, `color_changed`. |
@@ -3412,21 +3412,21 @@ The parameter inspector is a right-side panel that shows all parameters for the 
 1. **Per-cook updates are lightweight:** Inspector connects to `node_cooked` signal. Per-cook path only calls `update_expression_status()` (error label colors), NEVER `_update_mode_display()` (which sets text).
 2. **Focus guard:** `_expr_edit.has_focus()` is checked before setting text in any update path to prevent clobbering user edits.
 3. **Expression commit on focus-out:** `focus_exited` signal on expression LineEdit triggers `_apply_expression_text()`.
-4. **Mode toggle:** Single button cycles C→E (E→C). Button text and color update immediately.
+4. **Mode toggle:** Single button cycles Câ†’E (Eâ†’C). Button text and color update immediately.
 
 ### Editor Layout
 
 ```
 HSplitContainer
-├── GraphPanel (split_offset ratio ~2:1)
-│   └── GNGraphEditor (GraphEdit)
-└── RightPanel (VSplitContainer)
-    ├── ViewerPanel (TextureRect, split ~1.5)
-    │   └── _viewer_rect (shows selected TOP output)
-    └── InspectorPanel (split ~1.0)
-        └── GNParamInspector
+â”œâ”€â”€ GraphPanel (split_offset ratio ~2:1)
+â”‚   â””â”€â”€ GNGraphEditor (GraphEdit)
+â””â”€â”€ RightPanel (VSplitContainer)
+    â”œâ”€â”€ ViewerPanel (TextureRect, split ~1.5)
+    â”‚   â””â”€â”€ _viewer_rect (shows selected TOP output)
+    â””â”€â”€ InspectorPanel (split ~1.0)
+        â””â”€â”€ GNParamInspector
 InfoBar (bottom)
-└── FPS label (yellow)
+â””â”€â”€ FPS label (yellow)
 ```
 
 ---
@@ -3437,11 +3437,11 @@ These are non-negotiable constraints discovered during development. **Never viol
 
 ### 25.1 No CPU Roundtrips for Real-Time Texture Data
 
-**NEVER** call `Texture2D.get_image()` or `Image.get_data()` in a per-frame path. This triggers a GPU→CPU readback that stalls the rendering pipeline and can cost 5-15ms per call.
+**NEVER** call `Texture2D.get_image()` or `Image.get_data()` in a per-frame path. This triggers a GPUâ†’CPU readback that stalls the rendering pipeline and can cost 5-15ms per call.
 
 - Use `ViewportTexture` (live GPU reference) for texture routing between nodes
 - Use `ImageTexture` snapshots ONLY for one-time captures (thumbnails, file export)
-- All real-time texture passing stays on the GPU via SubViewport → ViewportTexture → TextureRect chain
+- All real-time texture passing stays on the GPU via SubViewport â†’ ViewportTexture â†’ TextureRect chain
 - If you need CPU-side pixel data (e.g., for a DAT or CHOP reading color values), do it async via `RenderingServer` and accept one-frame latency
 
 ### 25.2 Godot Expression base_instance Architecture
@@ -3450,29 +3450,29 @@ These are non-negotiable constraints discovered during development. **Never viol
 - Passing Callables as input variables and calling them will **silently fail** (returns null, no error)
 - Always make expression-callable functions **real methods** on the base_instance object
 
-### 25.3 GNFamily.get_name → get_family_name
+### 25.3 GNFamily.get_name â†’ get_family_name
 
 - Static methods on classes extending `Object` must not shadow built-in methods
 - `Object.get_name()` takes 0 args; a custom `get_name(family)` with 1 arg causes a signature collision at runtime
 - Use unique names: `get_family_name()`, not `get_name()`
 
-### 25.4 WindowTOP Cook-Dirty vs Param-Dirty
+### 25.4 WindowOUT Cook-Dirty vs Param-Dirty
 
-- `dirty` on a sink node (WindowTOP) is `true` every frame when upstream contains time_dependent nodes
-- Using `if dirty:` to apply window config causes per-frame reconfiguration → 15fps
+- `dirty` on a sink node (WindowOUT) is `true` every frame when upstream contains time_dependent nodes
+- Using `if dirty:` to apply window config causes per-frame reconfiguration â†’ 15fps
 - Use a dedicated `_window_params_dirty` flag, set only by overriding `_on_parameter_changed()`
-- Cook-dirty (upstream data changed) ≠ parameter-dirty (this node's params changed)
+- Cook-dirty (upstream data changed) â‰  parameter-dirty (this node's params changed)
 - Any future config-heavy sink nodes should use the same pattern
 
 ### 25.5 Anchors Preset vs set_anchors_and_offsets_preset
 
-- `Control.anchors_preset = PRESET_FULL_RECT` only sets anchors, NOT offsets → 0×0 size
+- `Control.anchors_preset = PRESET_FULL_RECT` only sets anchors, NOT offsets â†’ 0Ã—0 size
 - Always use `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` for full-rect layout
 - Must be called AFTER the control is added to the tree
 
 ### 25.6 embed_subwindows
 
-- `project.godot` must have `window/subwindows/embed_subwindows=false` for WindowTOP to create real OS-level windows
+- `project.godot` must have `window/subwindows/embed_subwindows=false` for WindowOUT to create real OS-level windows
 - Without this, Window nodes render as embedded panels inside the main window
 
 ### 25.7 DisplayServer API (Godot 4.x)
@@ -3489,7 +3489,7 @@ These are non-negotiable constraints discovered during development. **Never viol
 ### 25.9 Inspector Per-Cook Updates
 
 - Inspector is called every cook frame via `node_cooked` signal
-- NEVER call `_update_mode_display()` (which sets `_expr_edit.text`) per-cook — clobbers edits 60x/sec
+- NEVER call `_update_mode_display()` (which sets `_expr_edit.text`) per-cook â€” clobbers edits 60x/sec
 - Use lightweight `update_expression_status()` per-cook (only updates error label colors)
 - Check `_expr_edit.has_focus()` before setting text in any update path
 
@@ -3501,9 +3501,9 @@ These are non-negotiable constraints discovered during development. **Never viol
 - **Auto-grow:** After every `connect_nodes()`, the network calls `_update_dynamic_node_inputs()` which ensures `max_connected_port + 2` ports exist (one trailing empty slot for the next connection).
 - **Auto-shrink:** After every `disconnect_nodes()`, trailing empty ports are collapsed back, keeping at least one empty slot.
 - **Port index = hierarchy order:** For MergeCOMP/MergeSOP, the input port index directly determines the processing/child order. Port 0 is first, port 1 is second, etc. No Y-position sorting hack needed.
-- **Switch operators:** Override `update_dynamic_inputs()` to auto-adjust the `index` parameter's `max_value` to match `input_ports.size() - 2` (highest connected port). The old `num_inputs` parameter is removed — wiring is the source of truth.
+- **Switch operators:** Override `update_dynamic_inputs()` to auto-adjust the `index` parameter's `max_value` to match `input_ports.size() - 2` (highest connected port). The old `num_inputs` parameter is removed â€” wiring is the source of truth.
 - **Serialization:** `to_dict()` saves `dynamic_input_count`, `from_dict()` restores it before connections are loaded. Post-load safety: `_update_dynamic_node_inputs()` runs for all dynamic nodes.
-- **Cook engine path:** `_gather_inputs()` uses a single code path — port-indexed array with possible null entries for disconnected ports. Operators must handle null inputs.
+- **Cook engine path:** `_gather_inputs()` uses a single code path â€” port-indexed array with possible null entries for disconnected ports. Operators must handle null inputs.
 - Supersedes the old `port.multi_input` flag and the `num_inputs` parameter pattern. `GNPort.multi_input` still exists but is unused (deprecated).
 
 ### 25.11 COMP Nodes Return Null Output
@@ -3523,24 +3523,24 @@ These are non-negotiable constraints discovered during development. **Never viol
 ### 25.13 Lazy Cook / No Unnecessary Work
 
 - **A node must NOT cook (or render) if nothing changed.** A cook fires only when:
-  1. `time_dependent = true` → always dirty each frame
+  1. `time_dependent = true` â†’ always dirty each frame
   2. A parameter value changed (expression eval, UI edit, script)
   3. An upstream input produced new output (dirty propagation)
-- **Applies to ALL families equally** — TOPs, CHOPs, DATs, SOPs, COMPs
-- **TOP-specific rule — SubViewport update mode:**
-  - `time_dependent = true` → `UPDATE_ALWAYS` (renders every frame)
-  - `time_dependent = false` → `UPDATE_ONCE` on cook (Godot renders one frame, then auto-flips to `UPDATE_DISABLED`)
+- **Applies to ALL families equally** â€” TOPs, CHOPs, DATs, SOPs, COMPs
+- **TOP-specific rule â€” SubViewport update mode:**
+  - `time_dependent = true` â†’ `UPDATE_ALWAYS` (renders every frame)
+  - `time_dependent = false` â†’ `UPDATE_ONCE` on cook (Godot renders one frame, then auto-flips to `UPDATE_DISABLED`)
   - `_ensure_viewport()` should default to `UPDATE_DISABLED` (not `UPDATE_ALWAYS`) so the viewport never renders before first cook
 - **No per-frame overhead when static:** A non-time-dependent NoiseTOP with unchanged params produces zero GPU render passes after its initial cook
-- **Expression-driven params are safe:** Expression evaluation that changes a param marks the node dirty → re-cook → `UPDATE_ONCE` fires → exactly one render pass. No difference from `UPDATE_ALWAYS` in that scenario, but saves the render pass when the expression result is unchanged
-- **SOP/DAT/CHOP equivalent:** The cook engine already skips `_cook()` on clean nodes. No additional mechanism needed — just never set `time_dependent = true` unless the operator genuinely changes every frame
+- **Expression-driven params are safe:** Expression evaluation that changes a param marks the node dirty â†’ re-cook â†’ `UPDATE_ONCE` fires â†’ exactly one render pass. No difference from `UPDATE_ALWAYS` in that scenario, but saves the render pass when the expression result is unchanged
+- **SOP/DAT/CHOP equivalent:** The cook engine already skips `_cook()` on clean nodes. No additional mechanism needed â€” just never set `time_dependent = true` unless the operator genuinely changes every frame
 
-### 25.14 Tooltip Descriptions — Mandatory for Every Operator
+### 25.14 Tooltip Descriptions â€” Mandatory for Every Operator
 
 - **Every operator MUST provide three levels of description:**
-  1. `node_description` — set in `_init()` alongside `node_type` and `family`. Short sentence describing the node's purpose (shown in palette tooltip and node header).
-  2. **Port descriptions** — last argument (`desc`) on every `add_input()` / `add_output()` call in `_init_ports()`. Describes what the port expects or produces.
-  3. **Parameter descriptions** — last argument (`p_description`) on every `GNParameter.create_*()` call in `_init_parameters()`. Describes what the parameter controls.
+  1. `node_description` â€” set in `_init()` alongside `node_type` and `family`. Short sentence describing the node's purpose (shown in palette tooltip and node header).
+  2. **Port descriptions** â€” last argument (`desc`) on every `add_input()` / `add_output()` call in `_init_ports()`. Describes what the port expects or produces.
+  3. **Parameter descriptions** â€” last argument (`p_description`) on every `GNParameter.create_*()` call in `_init_parameters()`. Describes what the parameter controls.
 - **Factory method pattern:** `p_description` is always the LAST positional argument, after `p_label`. If a parameter has no custom label, pass `""` for `p_label` before the description: `create_float("size", 1.0, 0.0, 10.0, 0.1, "", "Widget size in pixels")`.
 - **Port method pattern:** `desc` is the last arg: `add_input("in", GNFamily.Type.TOP, false, "Input texture")`.
 - **UI wiring (already implemented):**
@@ -3549,30 +3549,30 @@ These are non-negotiable constraints discovered during development. **Never viol
   - Palette: `GNNodePalette` shows `_get_operator_description()` as tree-item tooltip.
 - **When adding a new operator:** follow this rule or the node will have empty tooltips.
 
-### 25.15 Dynamic Port Counts — Runtime-Adjustable I/O Ports
+### 25.15 Dynamic Port Counts â€” Runtime-Adjustable I/O Ports
 
 - **Goal:** Nodes whose input (or output) count is logically variable should expose a parameter or auto-detection mechanism that adds/removes ports at runtime instead of wasting fixed slots.
 - **Base-class API (GNNode):**
-  - `set_input_count(count, port_family, name_prefix, desc_prefix)` — clears all input ports, rebuilds `count` sequentially-named ports, emits `ports_changed(node_id)`.
-  - `set_output_count(…)` — same for outputs.
-  - `signal ports_changed(node_id: String)` — fired after any port-count change.
+  - `set_input_count(count, port_family, name_prefix, desc_prefix)` â€” clears all input ports, rebuilds `count` sequentially-named ports, emits `ports_changed(node_id)`.
+  - `set_output_count(â€¦)` â€” same for outputs.
+  - `signal ports_changed(node_id: String)` â€” fired after any port-count change.
 - **Graph wiring (GNGraphEditor + GNNetwork):**
   - `GNGraphEditor` connects to `ports_changed` **before** `GNNodeView.setup()` so stale wires are pruned first.
   - `GNNetwork.prune_stale_connections(node_id)` removes any connection whose port index exceeds the node's current port count, emitting `connection_removed` for each.
   - `GNNodeView` listens for `ports_changed` and calls `rebuild_slots()` to update the visual GraphNode.
-- **Parameter-driven pattern (DEPRECATED — replaced by dynamic auto-grow):**
+- **Parameter-driven pattern (DEPRECATED â€” replaced by dynamic auto-grow):**
   - The old approach used a `num_inputs` INT parameter (min 2, max 8, default 2) with `_on_parameter_changed` calling `set_input_count()`.
-  - **Superseded by `_enable_dynamic_inputs()`** — all Switch and Merge operators now use auto-grow.
+  - **Superseded by `_enable_dynamic_inputs()`** â€” all Switch and Merge operators now use auto-grow.
 - **Dynamic auto-grow pattern (Switch / Merge nodes):**
   - In `_init_ports()`, call `_enable_dynamic_inputs(family, prefix, desc)` instead of manual `add_input()`.
   - Ports auto-grow on connect (trailing empty slot) and auto-shrink on disconnect.
   - Switch operators override `update_dynamic_inputs()` to adjust the `index` parameter's `max_value` to match the highest connected port (excludes trailing empty slot).
   - Applies to: MergeSOP, MergeCOMP, RenderTOP, MergeCHOP, SwitchTOP, SwitchCHOP, SwitchDAT, SwitchSOP.
-  - No `num_inputs` parameter needed — wiring is the source of truth.
+  - No `num_inputs` parameter needed â€” wiring is the source of truth.
 - **Shader-driven pattern (CustomShaderTOP):**
   - On shader recompile, scan for `uniform sampler2D gn_tex<N>` declarations.
   - Rebuild input ports to match the highest `gn_tex` index found + 1 (clamped 0-8).
-  - No explicit `num_inputs` parameter — the shader source is the single source of truth.
+  - No explicit `num_inputs` parameter â€” the shader source is the single source of truth.
 - **Resource motivation:** Every unused TOP input port can imply an idle SubViewport. Fewer ports = fewer GPU resources wasted.
 - **When adding a new operator with variable port count:** follow either the parameter-driven or auto-detection pattern above. Always emit `ports_changed` after modifying port arrays.
 
@@ -3580,24 +3580,24 @@ These are non-negotiable constraints discovered during development. **Never viol
 
 - **Problem:** Setting `_canvas.size = Vector2(res)` manually causes rendering glitches when switching between inputs with different resolutions. The canvas can end up smaller than the viewport or positioned incorrectly, producing clipped or offset output.
 - **Root cause:** Manual size management has timing issues with Godot's layout system. When the viewport resizes, the canvas may not update in the same frame.
-- **Solution:** Use `_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER `add_child(_canvas)` (anchors require a parent). The canvas auto-fills its parent viewport at any resolution. In `_cook()`, only set `_viewport.size = res` — the canvas follows automatically via anchors.
+- **Solution:** Use `_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER `add_child(_canvas)` (anchors require a parent). The canvas auto-fills its parent viewport at any resolution. In `_cook()`, only set `_viewport.size = res` â€” the canvas follows automatically via anchors.
 - **Critical:** Use `set_anchors_and_offsets_preset()`, NOT `set_anchors_preset()`. The latter only sets anchor values but adjusts offsets to maintain the current rect (which is zero-sized), resulting in an invisible canvas. `set_anchors_and_offsets_preset()` properly zeroes offsets so the Control fills the parent.
-- **Applies to:** All 21 TOP operators with SubViewports (every file in `operators/top/` except null_top, switch_top, render_top, window_top).
-- **Special cases:** `blur_top.gd` has 2 canvases (`_canvas_h`, `_canvas_v`), `text_top.gd` has `_bg` + `_label` — all get anchors.
+- **Applies to:** All 21 TOP operators with SubViewports (every file in `operators/top/` except null_top, switch_top, render_top). WindowOUT is now in `operators/output/window_out.gd`.
+- **Special cases:** `blur_top.gd` has 2 canvases (`_canvas_h`, `_canvas_v`), `text_top.gd` has `_bg` + `_label` â€” all get anchors.
 
-### 25.17 Viewer Panel Sizing — TextureRect expand_mode
+### 25.17 Viewer Panel Sizing â€” TextureRect expand_mode
 
 - **Problem:** The ViewerPanel (TOP preview) forces the entire right panel to grow when displaying a wide texture (e.g., 512x256 = 2:1 ratio doubles the panel width).
 - **Root cause:** `TextureRect.expand_mode = EXPAND_FIT_HEIGHT` (value 3) scales the texture to fit the panel's height, then demands width matching the texture's aspect ratio. This feeds back into the SplitContainer's minimum size calculation.
 - **Solution:** Use `expand_mode = EXPAND_IGNORE_SIZE` (value 1). The TextureRect reports zero minimum size, so the panel is freely resizable. Combined with `stretch_mode = KEEP_ASPECT_CENTERED` (value 5), the texture renders with correct proportions inside whatever space is available.
 - **Also:** Set `clip_contents = true` and a small `custom_minimum_size.y = 40` on both ViewerPanel and InspectorPanel so the VSplitContainer allows them to shrink freely.
 
-### 25.18 Node Renaming — Full ID Update Chain
+### 25.18 Node Renaming â€” Full ID Update Chain
 
 - **Feature:** Double-click a node's title bar to rename it inline. Press Enter or click away to commit.
 - **Implementation chain:**
   1. `GNNodeView._gui_input()` detects double-click in the title bar area (y <= 30px)
-  2. A `LineEdit` is added as an overlay (NOT as a GraphNode child row — but since GraphNode auto-slots children, we must call `reset_size()` after removal to prevent height growth)
+  2. A `LineEdit` is added as an overlay (NOT as a GraphNode child row â€” but since GraphNode auto-slots children, we must call `reset_size()` after removal to prevent height growth)
   3. On commit, `rename_requested(old_id, new_id)` signal fires
   4. `GNGraphEditor._on_node_rename_requested()` calls `network.rename_node()`
   5. `GNNetwork.rename_node()` updates: nodes dict key, `GNNode.id`, `GNNode.name`, all `GNConnection` references, expression strings across all params, then emits `node_renamed`
@@ -3607,24 +3607,24 @@ These are non-negotiable constraints discovered during development. **Never viol
 - **Validation:** IDs must match `^[a-zA-Z_][a-zA-Z0-9_]*$` (alphanumeric + underscore, starts with letter or underscore). Empty and duplicate IDs are rejected.
 - **GraphNode.name matters:** GraphEdit uses `GraphNode.name` for wire routing. The `name` property MUST be updated atomically with the visual wire disconnect/reconnect to avoid orphaned connections.
 
-### 25.19 GNNode Lifecycle — `.new()` vs `initialize()` vs `_init_ports()`
+### 25.19 GNNode Lifecycle â€” `.new()` vs `initialize()` vs `_init_ports()`
 
-- **Problem:** `create_instance()` calls `.new()` which runs `_init()`, but `_init_ports()` is NOT called in the constructor — it’s deferred to `initialize(id)`. This means a freshly `.new()`’d operator has **empty `input_ports` and `output_ports` arrays**.
+- **Problem:** `create_instance()` calls `.new()` which runs `_init()`, but `_init_ports()` is NOT called in the constructor â€” itâ€™s deferred to `initialize(id)`. This means a freshly `.new()`â€™d operator has **empty `input_ports` and `output_ports` arrays**.
 - **Root cause:** GDScript constructors (`_init()`) cannot reliably call virtual methods on subclasses. `_init_ports()` is virtual and overridden by every operator, so it must be called after construction.
 - **Lifecycle:**
-  1. `_init()` (constructor) — sets `node_type`, `family`, `node_description`, `time_dependent`, `is_sink`. **No ports, no parameters.**
-  2. `initialize(id)` — sets ID, disables processing, calls `_init_ports()` + `_init_parameters()`, wires parameter signals.
+  1. `_init()` (constructor) â€” sets `node_type`, `family`, `node_description`, `time_dependent`, `is_sink`. **No ports, no parameters.**
+  2. `initialize(id)` â€” sets ID, disables processing, calls `_init_ports()` + `_init_parameters()`, wires parameter signals.
   3. Full `initialize()` is only needed for nodes entering the network (need ID, need param signal wiring).
-- **When you only need ports** (e.g., building the input-family cache for the palette filter): call `node._init_ports()` explicitly after `.new()`. Do NOT call full `initialize()` — it requires a unique ID and wires signals that are unnecessary for introspection.
+- **When you only need ports** (e.g., building the input-family cache for the palette filter): call `node._init_ports()` explicitly after `.new()`. Do NOT call full `initialize()` â€” it requires a unique ID and wires signals that are unnecessary for introspection.
 - **When you only need identity** (family, node_type): `.new()` alone is sufficient.
 - **Applies to:** `GNExtensionRegistry._build_input_family_cache()` which instantiates all operators, calls `_init_ports()`, inspects port arrays, then frees them. Without the explicit `_init_ports()` call, the cache would be empty and palette filtering would show all operators unfiltered.
 
-### 25.20 Editor/Engine Separation — Headless Safety
+### 25.20 Editor/Engine Separation â€” Headless Safety
 
 - **Rule:** Core engine code (`core/`, `operators/`) must NEVER import or reference UI code (`ui/`). The cook engine, network model, and all operators run without the editor present.
-- **Preview methods** (`create_preview_control()`, `update_preview_control()`) live in family base classes under `core/` but are virtual no-ops that create simple `Label`/`TextureRect` nodes. They are ONLY called by `GNNodeView` (in `ui/`) — never by the cook engine. In headless mode, no caller exists, so no Controls are created.
+- **Preview methods** (`create_preview_control()`, `update_preview_control()`) live in family base classes under `core/` but are virtual no-ops that create simple `Label`/`TextureRect` nodes. They are ONLY called by `GNNodeView` (in `ui/`) â€” never by the cook engine. In headless mode, no caller exists, so no Controls are created.
 - **Verified clean:** No file in `core/` or `operators/` uses `preload()`/`load()` on any `ui/` path. No operator references `GNNodeView`, `GNGraphEditor`, `GNParamInspector`, or any UI class.
-- **Cache building** (`_build_input_family_cache`): instantiates operators via `.new()` + `_init_ports()` only. Operator `_init()` methods set trivial string/bool fields — no viewports, shaders, textures, or Controls created. Nodes freed immediately after inspection.
+- **Cache building** (`_build_input_family_cache`): instantiates operators via `.new()` + `_init_ports()` only. Operator `_init()` methods set trivial string/bool fields â€” no viewports, shaders, textures, or Controls created. Nodes freed immediately after inspection.
 
 ### 25.21 Help Example Patches Required for Every New Operator
 
@@ -3634,57 +3634,57 @@ These are non-negotiable constraints discovered during development. **Never viol
   - The patch's `type` field in each node must use the operator's `class_name` (e.g. `"NoiseTOP"`, `"LFOCHOP"`).
   - Must demonstrate the operator's primary functionality with non-default parameter values that produce a visually interesting result.
   - Should be self-contained (no external file dependencies) unless the operator is specifically a file-input operator.
-  - Keep patch complexity low — ideally 1–4 nodes. Users should understand what the operator does at a glance.
+  - Keep patch complexity low â€” ideally 1â€“4 nodes. Users should understand what the operator does at a glance.
 - **Multiple patches encouraged:** For operators with distinct modes or use cases, create 2 patches (e.g. `pbr_metallic.gnpatch` + `pbr_emissive.gnpatch`). Maximum ~3 per operator to keep help manageable.
 - **New operator checklist:** When implementing a new operator, the PR/change must include:
   1. The operator script in `operators/<family>/`
   2. Registration in `_register_core_operators()` (or in the extension's `gn_extension.cfg`)
   3. At least one help example patch in `help/<family>/`
   4. A `node_description` string and tooltip descriptions on all parameters (Hard Rule 25.14)
-- **Extension operators:** GN extensions (`gn_ext_*`) include help patches in their own `help/<family>/` subdirectory. The help window scans extension dirs automatically (see §28.10).
-- **Validation:** Help patches are discovered at runtime via directory scan — no manifest needed. To verify coverage, compare operator names from the registry against filenames in `help/<family>/`.
+- **Extension operators:** GN extensions (`gn_ext_*`) include help patches in their own `help/<family>/` subdirectory. The help window scans extension dirs automatically (see Â§28.10).
+- **Validation:** Help patches are discovered at runtime via directory scan â€” no manifest needed. To verify coverage, compare operator names from the registry against filenames in `help/<family>/`.
 
-### 25.22 Help Patch Sink Rule — Meaningful Visualization Chain to WindowTOP
+### 25.22 Help Patch Sink Rule â€” Meaningful Visualization Chain to WindowOUT
 
-- **HARD RULE:** Every help `.gnpatch` example must terminate with a `WindowTOP` node (resolution 512×512, `open: true`) via a **meaningful, family-appropriate visualization chain**.
-- **"Meaningful" means:** The connection path from the demonstrated operator to WindowTOP must respect port family compatibility and produce a visible result that actually demonstrates the operator. Simply connecting any node to WindowTOP regardless of family is invalid — it creates broken connections and dead-end branches.
+- **HARD RULE:** Every help `.gnpatch` example must terminate with a `WindowOUT` node (resolution 512Ã—512, `open: true`) via a **meaningful, family-appropriate visualization chain**.
+- **"Meaningful" means:** The connection path from the demonstrated operator to WindowOUT must respect port family compatibility and produce a visible result that actually demonstrates the operator. Simply connecting any node to WindowOUT regardless of family is invalid â€” it creates broken connections and dead-end branches.
 - **Required chains by family:**
-  - **TOP** → WindowTOP (direct — TOP outputs are textures)
-  - **IMG** → ImgToTOP → WindowTOP (CPU image → GPU texture bridge)
-  - **CHOP** → CHOPtoTOP → WindowTOP (waveform/graph visualization)
-  - **SOP** → GeometryCOMP + CameraCOMP → RenderTOP → WindowTOP (3D render)
-  - **COMP (scene COMPs: Geo, Rigid, Static, Soft, Instance, Merge, Area)** → RenderTOP + CameraCOMP → WindowTOP (3D render)
-  - **COMP (pass-through COMPs: Null, Switch, Animation, Replicator, SubNetwork)** → must be **in the active chain** feeding RenderTOP, not bypassed. Route data *through* the demonstrated COMP, not around it.
-  - **DAT** → TextTOP → WindowTOP (text display)
-  - **MAT** → GeometryCOMP (MAT on port 1, SOP on port 0) + CameraCOMP → RenderTOP → WindowTOP
-- **Pass-through COMP rule:** If the demonstrated operator is a pass-through COMP (NullCOMP, SwitchCOMP, AnimationCOMP), the chain must route through it: `GeoComp → PassThroughCOMP → RenderTOP`. Never bypass it with a direct GeoComp → RenderTOP connection while leaving the pass-through as a dead end — the cook engine won't cook dead-end nodes, making them appear broken.
-- **WindowTOP parameters (mandatory):** `resolution: {"_type":"Vector2i","x":512,"y":512}`, `open: {"value": true}`.
-- **Purpose:** When users open a help patch, the result is immediately visible in a real OS window — no manual viewer setup needed.
+  - **TOP** â†’ WindowOUT (direct â€” TOP outputs are textures)
+  - **IMG** â†’ ImgToTOP â†’ WindowOUT (CPU image â†’ GPU texture bridge)
+  - **CHOP** â†’ CHOPtoTOP â†’ WindowOUT (waveform/graph visualization)
+  - **SOP** â†’ GeometryCOMP + CameraCOMP â†’ RenderTOP â†’ WindowOUT (3D render)
+  - **COMP (scene COMPs: Geo, Rigid, Static, Soft, Instance, Merge, Area)** â†’ RenderTOP + CameraCOMP â†’ WindowOUT (3D render)
+  - **COMP (pass-through COMPs: Null, Switch, Animation, Replicator, SubNetwork)** â†’ must be **in the active chain** feeding RenderTOP, not bypassed. Route data *through* the demonstrated COMP, not around it.
+  - **DAT** â†’ TextTOP â†’ WindowOUT (text display)
+  - **MAT** â†’ GeometryCOMP (MAT on port 1, SOP on port 0) + CameraCOMP â†’ RenderTOP â†’ WindowOUT
+- **Pass-through COMP rule:** If the demonstrated operator is a pass-through COMP (NullCOMP, SwitchCOMP, AnimationCOMP), the chain must route through it: `GeoComp â†’ PassThroughCOMP â†’ RenderTOP`. Never bypass it with a direct GeoComp â†’ RenderTOP connection while leaving the pass-through as a dead end â€” the cook engine won't cook dead-end nodes, making them appear broken.
+- **WindowOUT parameters (mandatory):** `resolution: {"_type":"Vector2i","x":512,"y":512}`, `open: {"value": true}`.
+- **Purpose:** When users open a help patch, the result is immediately visible in a real OS window â€” no manual viewer setup needed.
 - **Applies retroactively:** All 244 existing help patches follow this rule.
 
 ---
 
 ## 26. Known Bugs
 
-### 26.1 SoftBodyCOMP: Jolt SoftBody3D Incompatible with SubViewport — Replaced with CPU Verlet
+### 26.1 SoftBodyCOMP: Jolt SoftBody3D Incompatible with SubViewport â€” Replaced with CPU Verlet
 
 - **Issue:** SoftBody3D cloth mesh rendered at the correct position but did not simulate (no draping under gravity). Jolt's `set_transform` error: `Condition "!in_space()" is true` at `jolt_soft_body_3d.cpp:564`.
-- **Root cause (confirmed via diagnostics):** Jolt's internal C++ `in_space()` flag returns `false` even when `PhysicsServer3D.soft_body_get_space()` returns the correct space RID. This only occurs with SubViewport + custom World3D — the standard Jolt viewport path works. GDScript diagnostics confirmed: `in_tree=true`, valid `physics_rid`, matching space RIDs, mesh assigned, `phys_process_internal=true` — but Jolt's C++ side disagrees. **Unfixable from GDScript.**
+- **Root cause (confirmed via diagnostics):** Jolt's internal C++ `in_space()` flag returns `false` even when `PhysicsServer3D.soft_body_get_space()` returns the correct space RID. This only occurs with SubViewport + custom World3D â€” the standard Jolt viewport path works. GDScript diagnostics confirmed: `in_tree=true`, valid `physics_rid`, matching space RIDs, mesh assigned, `phys_process_internal=true` â€” but Jolt's C++ side disagrees. **Unfixable from GDScript.**
 - **Fix applied:** Complete rewrite of `soft_body_comp.gd` to use CPU-side Verlet position-based dynamics, bypassing Jolt/SoftBody3D entirely:
   1. Extracts vertex positions, indices, UVs, normals from upstream GeometryCOMP mesh.
   2. Transforms vertices to world space using the operator's transform.
   3. Builds unique edge constraints from the triangle index buffer.
   4. Computes vertex pinning based on bounding-box relative position (pin modes: None, Top Edge, Top Corners, All Edges).
-  5. Per-frame `_cook()`: Verlet integration (pos + velocity * damping + gravity * dt²), iterative distance constraint solving, floor plane collision, mesh rebuild with normal recomputation.
-  6. Uses `MeshInstance3D` (not SoftBody3D) — no physics engine dependency.
+  5. Per-frame `_cook()`: Verlet integration (pos + velocity * damping + gravity * dtÂ²), iterative distance constraint solving, floor plane collision, mesh rebuild with normal recomputation.
+  6. Uses `MeshInstance3D` (not SoftBody3D) â€” no physics engine dependency.
   7. `time_dependent = true` ensures per-frame cooking.
 - **Parameters:** `iterations` (constraint solver passes), `gravity`, `damping`, `stiffness`, `floor_collision`/`floor_y`, `pin_mode`/`pin_threshold`.
 - **Also cleaned up:** RenderTOP's `_recursive_register_bodies` no longer force-enables `set_physics_process_internal` on SoftBody3D (legacy Jolt workaround removed).
-- **Test patches:** `soft_body_cloth.gnpatch` (20×20 cloth draping onto floor with camera/light), `soft_body_basic.gnpatch` (minimal grid → cloth example).
+- **Test patches:** `soft_body_cloth.gnpatch` (20Ã—20 cloth draping onto floor with camera/light), `soft_body_basic.gnpatch` (minimal grid â†’ cloth example).
 
 ---
 
-### 26.2 WindowTOP: ESC to Exit Fullscreen Not Working — FIXED
+### 26.2 WindowOUT: ESC to Exit Fullscreen Not Working â€” FIXED
 
 - **Issue:** When the output window is in Fullscreen or Borderless mode with Always On Top enabled, the user cannot escape back to windowed mode
 - **Root cause:** Input events in a child `Window` node stay in that window's viewport tree. `Input.is_action_just_pressed()` polled from the parent node's `_process()` never sees them.
@@ -3692,21 +3692,21 @@ These are non-negotiable constraints discovered during development. **Never viol
 
 ---
 
-## 27. Code-Based / Scriptable Operators — Architecture
+## 27. Code-Based / Scriptable Operators â€” Architecture
 
 This section documents the scripting operator system: operators where the user writes executable GDScript code that runs every cook. These are the GONODES equivalents of TouchDesigner's Script CHOP, Script SOP, Script DAT, and GLSL TOP.
 
 ### 27.1 Design Philosophy
 
-1. **Sandboxed execution** — User code runs inside a dynamically-compiled `RefCounted` subclass. The framework injects context variables; the user's code sees only what's exposed.
-2. **Stable API contract** — Each Script operator defines a fixed output type (per family) but dynamic input ports and parameters via comment annotations. User code plugs into `cook()` and optionally `setup()`.
-3. **Graceful failure** — GDScript compilation errors are caught. Runtime errors print to console but don't crash the network. The operator falls back to its last-good cached output.
-4. **Hot-reload** — Code changes trigger recompilation + `setup()` re-run without restarting the cook engine. The compiled instance is reused across frames (state persists).
-5. **Per-family, not generic** — Each Script operator belongs to its family (ScriptCHOP extends GNChopBase, etc.), inheriting family colors, preview, output helpers. A generic multi-output ScriptNode is on the roadmap.
+1. **Sandboxed execution** â€” User code runs inside a dynamically-compiled `RefCounted` subclass. The framework injects context variables; the user's code sees only what's exposed.
+2. **Stable API contract** â€” Each Script operator defines a fixed output type (per family) but dynamic input ports and parameters via comment annotations. User code plugs into `cook()` and optionally `setup()`.
+3. **Graceful failure** â€” GDScript compilation errors are caught. Runtime errors print to console but don't crash the network. The operator falls back to its last-good cached output.
+4. **Hot-reload** â€” Code changes trigger recompilation + `setup()` re-run without restarting the cook engine. The compiled instance is reused across frames (state persists).
+5. **Per-family, not generic** â€” Each Script operator belongs to its family (ScriptCHOP extends GNChopBase, etc.), inheriting family colors, preview, output helpers. A generic multi-output ScriptNode is on the roadmap.
 
 ### 27.2 Implemented: CustomShaderTOP (GLSL TOP)
 
-**Status: ✅ Done**
+**Status: âœ… Done**
 
 GPU-side shader operator. The user provides a full `shader_type canvas_item;` shader. Dynamic texture input ports from `uniform sampler2D gn_tex<N>` declarations. Dynamic inspector parameters from non-reserved uniform declarations. Recompiles on code change. Default template included.
 
@@ -3714,7 +3714,7 @@ See CustomShaderTOP source for full implementation details (uniform parsing, dyn
 
 ### 27.3 Implemented: Script Operators (GDScript)
 
-**Status: ✅ Done — ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG**
+**Status: âœ… Done â€” ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG**
 
 All four share `GNScriptHelper` for compilation, annotation parsing, and execution.
 
@@ -3727,20 +3727,20 @@ All four share `GNScriptHelper` for compilation, annotation parsing, and executi
 | ScriptSOP | GNSopBase | GNGeoData | `"scriptsop"` | GNGeoData (`set_from_surface_tool`, `set_surface_arrays`, etc.) |
 | ScriptIMG | GNImgBase | GNImageData | `"scriptimg"` | GNImageData (`set_image(img)`, `image`, `resolution`, etc.) |
 
-#### 27.3.2 Execution Engine — Runtime GDScript Compilation
+#### 27.3.2 Execution Engine â€” Runtime GDScript Compilation
 
 ```gdscript
 # How it works internally:
 var script = GDScript.new()
 script.source_code = PREAMBLE + user_code  # Preamble injects context vars + helpers
-script.reload()                             # Compiles — error code if fails
+script.reload()                             # Compiles â€” error code if fails
 var instance = script.new()                 # Create RefCounted instance
-# Instance is reused across frames — state persists
+# Instance is reused across frames â€” state persists
 ```
 
 **Lifecycle:**
 1. Recompile only when code text changes (tracked via `_last_compiled_code`)
-2. Reuse the instance across frames — user-defined `var` declarations persist
+2. Reuse the instance across frames â€” user-defined `var` declarations persist
 3. Inject fresh context (`me`, `inputs`, `op`, `time`, `frame`, `dt`, `_engine`) before each `cook()` call
 4. Call `setup()` once after successful compilation (if method exists)
 5. Call `cook()` every frame (when node is dirty + active)
@@ -3791,15 +3791,15 @@ func cook():
 
 Note: `op_ref()` is used instead of `op()` because `op` is already the output object variable name.
 
-> **⚠ Data Aliasing Warning for Script Operators:** Input data (`inputs[N]`) is passed by reference from upstream nodes' `cached_output`. If this node sits at a fan-out point (the upstream output feeds other nodes too), mutating the input data in-place will **corrupt** all other consumers. Built-in operators use `_mutable_input()` to handle this automatically, but Script operators do **not** auto-copy for performance reasons. If your Script code modifies input data (e.g., `inputs[0].image.resize()`), **duplicate first**:
+> **âš  Data Aliasing Warning for Script Operators:** Input data (`inputs[N]`) is passed by reference from upstream nodes' `cached_output`. If this node sits at a fan-out point (the upstream output feeds other nodes too), mutating the input data in-place will **corrupt** all other consumers. Built-in operators use `_mutable_input()` to handle this automatically, but Script operators do **not** auto-copy for performance reasons. If your Script code modifies input data (e.g., `inputs[0].image.resize()`), **duplicate first**:
 > ```gdscript
 > var img = inputs[0].image.duplicate()
-> img.resize(512, 512)  # safe — your own copy
+> img.resize(512, 512)  # safe â€” your own copy
 > op.set_image(img)
 > ```
 > This only matters at fan-out. If the upstream node feeds only this Script, mutation is safe.
 
-#### 27.3.4 Annotation System — @param
+#### 27.3.4 Annotation System â€” @param
 
 Dynamic inspector parameters are declared via `# @param` comment annotations:
 
@@ -3818,9 +3818,9 @@ Dynamic inspector parameters are declared via `# @param` comment annotations:
 | `string` | STRING | `"text"` | `# @param string label "hello" Label` |
 | `file` | FILE | (ignored) | `# @param file texture *.png Path` |
 
-**Rebuild cycle:** Identical to CustomShaderTOP — regex parses annotations, diffs old vs. new, preserves values for same name+type, disconnects/reconnects signals, emits `parameters_changed`.
+**Rebuild cycle:** Identical to CustomShaderTOP â€” regex parses annotations, diffs old vs. new, preserves values for same name+type, disconnects/reconnects signals, emits `parameters_changed`.
 
-#### 27.3.5 Annotation System — @input
+#### 27.3.5 Annotation System â€” @input
 
 Dynamic input ports with per-port family type:
 
@@ -3858,43 +3858,43 @@ All Script operators share two static (non-annotation) parameters:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `time_dependent` | bool | `false` | Re-cook every frame. Default off — scripts only cook when dirty. |
+| `time_dependent` | bool | `false` | Re-cook every frame. Default off â€” scripts only cook when dirty. |
 | `code` | string | Default template | The user's GDScript code |
 
 `time_dependent` is respected via `_pre_cook()` override (same pattern as CustomShaderTOP).
 
-#### 27.3.7 ScriptIMG — CPU Image Output
+#### 27.3.7 ScriptIMG â€” CPU Image Output
 
-ScriptIMG extends GNImgBase (not GNTopBase) — pure CPU Image pipeline:
-- **No SubViewport** — output is `GNImageData` wrapping a CPU `Image`
-- **`op` is GNImageData** — the user calls `op.set_image(img)` to publish output
-- **No `execute_cook()` override needed** — GNImgBase uses GNNode's default (no viewport logic)
+ScriptIMG extends GNImgBase (not GNTopBase) â€” pure CPU Image pipeline:
+- **No SubViewport** â€” output is `GNImageData` wrapping a CPU `Image`
+- **`op` is GNImageData** â€” the user calls `op.set_image(img)` to publish output
+- **No `execute_cook()` override needed** â€” GNImgBase uses GNNode's default (no viewport logic)
 - **Use ImgToTOP** to convert to GPU texture for the TOP pipeline
-- **Complementary to CustomShaderTOP** — use ScriptIMG for CPU logic, CustomShaderTOP for GPU shaders
+- **Complementary to CustomShaderTOP** â€” use ScriptIMG for CPU logic, CustomShaderTOP for GPU shaders
 
-### 27.4 IMG Family — CPU Image Operators
+### 27.4 IMG Family â€” CPU Image Operators
 
-**Status: ✅ Done**
+**Status: âœ… Done**
 
 The IMG family provides CPU-side image processing as a first-class citizen, cleanly separated from the GPU-based TOP pipeline.
 
 #### CPU-First Input Philosophy
 
-**Principle:** When source data originates on the CPU (files on disk, camera feeds, procedural generation), the operator should live in the **IMG family** and output `GNImageData`. The user explicitly bridges to GPU via `→ ImgToTOP` only when needed. This gives maximum flexibility — CPU processing (ScriptIMG, BlurIMG, OpenCV via GDExtension, etc.) can happen *before* any GPU upload, and users who never need GPU textures avoid the upload entirely.
+**Principle:** When source data originates on the CPU (files on disk, camera feeds, procedural generation), the operator should live in the **IMG family** and output `GNImageData`. The user explicitly bridges to GPU via `â†’ ImgToTOP` only when needed. This gives maximum flexibility â€” CPU processing (ScriptIMG, BlurIMG, OpenCV via GDExtension, etc.) can happen *before* any GPU upload, and users who never need GPU textures avoid the upload entirely.
 
 **Rationale for the split:**
 
 | Source | Family | Why |
 |--------|--------|-----|
-| Image files (PNG, JPG, EXR, etc.) | **IMG** (ImageFileInIMG) | `ResourceLoader` returns CPU `Image` — data is natively CPU-side. |
-| Numbered image sequences | **IMG** (ImageSequenceIMG) | Same — loads frames from disk as CPU Images. |
+| Image files (PNG, JPG, EXR, etc.) | **IMG** (ImageFileInIMG) | `ResourceLoader` returns CPU `Image` â€” data is natively CPU-side. |
+| Numbered image sequences | **IMG** (ImageSequenceIMG) | Same â€” loads frames from disk as CPU Images. |
 | Webcam / camera feed | **IMG** (WebcamIMG) | CameraFeed frame data is CPU-accessible. |
-| Video playback (.ogv Theora) | **TOP** (MovieFileInTOP) | Godot's `VideoStreamPlayer` only exposes decoded frames as GPU textures via `get_video_texture()` — no CPU-side Image API exists. |
-| FFmpeg video (H.264, VP9, etc.) | **TOP** (FFmpegInTOP) | Same — EIRTeam.FFmpeg GDExtension decodes to GPU texture internally. |
+| Video playback (.ogv Theora) | **TOP** (MovieFileInTOP) | Godot's `VideoStreamPlayer` only exposes decoded frames as GPU textures via `get_video_texture()` â€” no CPU-side Image API exists. |
+| FFmpeg video (H.264, VP9, etc.) | **TOP** (FFmpegInTOP) | Same â€” EIRTeam.FFmpeg GDExtension decodes to GPU texture internally. |
 
-**Exceptions exist** — some future sources may bypass CPU entirely and deliver directly to GPU:
-- **HAP codec** (S3TC/DXT compressed video) — frames are already in GPU-native compressed format. A HAP operator would be a **TOP**, uploading S3TC blocks directly to GPU texture without CPU pixel decoding. CPU detour would be counterproductive.
-- **Spout / NDI / Syphon** texture sharing — shared GPU textures arrive on the GPU. These will be TOPs.
+**Exceptions exist** â€” some future sources may bypass CPU entirely and deliver directly to GPU:
+- **HAP codec** (S3TC/DXT compressed video) â€” frames are already in GPU-native compressed format. A HAP operator would be a **TOP**, uploading S3TC blocks directly to GPU texture without CPU pixel decoding. CPU detour would be counterproductive.
+- **Spout / NDI / Syphon** texture sharing â€” shared GPU textures arrive on the GPU. These will be TOPs.
 - Any future GPU-direct capture or decode path where CPU-side data simply doesn't exist.
 
 #### 27.4.1 Architecture
@@ -3913,33 +3913,33 @@ The IMG family provides CPU-side image processing as a first-class citizen, clea
 | NoiseIMG | Generator | Value noise (FastNoiseLite) or white noise. Mono/RGB, octaves, persistence, seed. |
 | CheckerboardIMG | Generator | 2-color grid. Configurable cells, optional softness (anti-aliased edges). |
 | BlurIMG | Filter | Separable box blur with sliding-window accumulator. Multi-pass for Gaussian approximation. |
-| EdgeDetectIMG | Filter | Sobel or Prewitt 3×3 kernels. Grayscale or color-encoded gradient direction. |
+| EdgeDetectIMG | Filter | Sobel or Prewitt 3Ã—3 kernels. Grayscale or color-encoded gradient direction. |
 | PixelSortIMG | Filter | Glitch art pixel sorting. Sort by brightness/hue/saturation/channel. Threshold-controlled spans. |
 | ScriptIMG | Scripting | User GDScript with `@param`/`@input` annotations. Full GNScriptHelper integration. |
-| ImgToTOP | Bridge | Uploads CPU Image to GPU ImageTexture → GNTextureData output. Overrides `execute_cook()` to skip SubViewport logic. |
-| TOPtoIMG | Bridge | GPU Texture → CPU Image via `get_image()`. Reverse of ImgToTOP. |
-| FileSaveIMG | Sink | Saves CPU Image to disk (PNG/WebP/EXR). `active` toggle, auto-numbering, quality param. `is_sink = true`. |
-| MovieOutIMG | Sink | Numbered image sequence output (PNG/WebP). Configurable prefix, padding, folder. `is_sink = true`. |
-| FFmpegOutIMG | Sink | Records frames to temp dir, encodes via `ffmpeg` CLI (H.264/H.265/VP9/ProRes) on deactivation. `is_sink = true`. |
+| ImgToTOP | Bridge | Uploads CPU Image to GPU ImageTexture â†’ GNTextureData output. Overrides `execute_cook()` to skip SubViewport logic. |
+| TOPtoIMG | Bridge | GPU Texture â†’ CPU Image via `get_image()`. Reverse of ImgToTOP. |
+| ImageSaveOUT | Sink | Saves CPU Image to disk (PNG/WebP/EXR). `active` toggle, auto-numbering, quality param. `is_sink = true`. |
+| MovieOUT | Sink | Numbered image sequence output (PNG/WebP). Configurable prefix, padding, folder. `is_sink = true`. |
+| FFmpegOUT | Sink | Records frames to temp dir, encodes via `ffmpeg` CLI (H.264/H.265/VP9/ProRes) on deactivation. `is_sink = true`. |
 
-### 27.5 GNScriptHelper — Shared Infrastructure
+### 27.5 GNScriptHelper â€” Shared Infrastructure
 
 `GNScriptHelper` (extends RefCounted) is instantiated per Script operator. It manages:
 
 | Responsibility | Method |
 |----------------|--------|
-| Compilation | `compile(code)` — wraps user code in preamble, `GDScript.new().reload()`, creates instance |
-| Annotation parsing | `parse_param_annotations(code)`, `parse_input_annotations(code)` — regex-based line scanning |
-| Dynamic param rebuild | `rebuild_dynamic_params(node, code)` — diff + preserve + reconnect signals |
-| Dynamic port rebuild | `rebuild_input_ports(node, code)` — diff + emit `ports_changed` |
-| Full code change | `on_code_changed(node, code)` — ports → params → compile (in order) |
-| Context injection + execution | `run_cook(node, inputs, output, engine)` — injects context, calls `setup()` once, calls `cook()` |
+| Compilation | `compile(code)` â€” wraps user code in preamble, `GDScript.new().reload()`, creates instance |
+| Annotation parsing | `parse_param_annotations(code)`, `parse_input_annotations(code)` â€” regex-based line scanning |
+| Dynamic param rebuild | `rebuild_dynamic_params(node, code)` â€” diff + preserve + reconnect signals |
+| Dynamic port rebuild | `rebuild_input_ports(node, code)` â€” diff + emit `ports_changed` |
+| Full code change | `on_code_changed(node, code)` â€” ports â†’ params â†’ compile (in order) |
+| Context injection + execution | `run_cook(node, inputs, output, engine)` â€” injects context, calls `setup()` once, calls `cook()` |
 | Preset management | Static `get_preset_list()`, `load_preset()`, `save_preset()` |
 | Save/load support | Static `restore_dynamic_param_values()` |
 
 **Preamble injection:** The preamble extends `RefCounted` and declares `var me`, `var inputs`, `var op`, `var time`, `var frame`, `var dt`, `var _engine`, plus helper functions (`par()`, `chop()`, `op_ref()`, `top()`, `sop()`, `dat()`). The user's code is appended after the preamble.
 
-### 27.6 Presets — Factory & User
+### 27.6 Presets â€” Factory & User
 
 **Storage layout:**
 ```
@@ -3966,16 +3966,16 @@ user://gonodes_presets/                 # User (read-write, created on first sav
 
 Each preset file is raw user code (annotations + `cook()` + `setup()` + helpers). Pure text, no wrapper.
 
-**UI — Option A (current):** Load/Save buttons in the inspector. Load opens a file dialog scoped to preset directories. Save prompts for a name.
+**UI â€” Option A (current):** Load/Save buttons in the inspector. Load opens a file dialog scoped to preset directories. Save prompts for a name.
 
-**Roadmap — Option B:** Preset dropdown parameter in inspector, populated by scanning preset directories.
+**Roadmap â€” Option B:** Preset dropdown parameter in inspector, populated by scanning preset directories.
 
 ### 27.7 Save/Load
 
 Each Script operator overrides `from_dict()` following the CustomShaderTOP pattern:
-1. `super.from_dict(d)` — restores static params (`code`, `time_dependent`, position, etc.)
-2. `_helper.on_code_changed(self, code)` — recompiles, creates dynamic params + ports
-3. `GNScriptHelper.restore_dynamic_param_values()` — restores dynamic param values from saved dict, skipping static param names
+1. `super.from_dict(d)` â€” restores static params (`code`, `time_dependent`, position, etc.)
+2. `_helper.on_code_changed(self, code)` â€” recompiles, creates dynamic params + ports
+3. `GNScriptHelper.restore_dynamic_param_values()` â€” restores dynamic param values from saved dict, skipping static param names
 
 ### 27.8 Adding a New Script Family
 
@@ -3991,21 +3991,21 @@ To add a Script operator for a new family (e.g., ScriptMAT):
 
 ### 27.9 ComputeShaderTOP (GPU Compute)
 
-**Status: ✅ Done**
+**Status: âœ… Done**
 
 Uses Godot's `RenderingDevice` compute shader API for massively parallel GPU operations. User writes a GLSL 450 compute shader that writes to an `image2D gn_output` storage texture.
 
 **Binding layout:**
-- set 0, binding 0 — `image2D gn_output` (rgba8 storage, write)
-- set 1, binding N — `sampler2D gn_tex<N>` (input textures, read)
-- push_constant — `PushConstants` struct with auto-bound `gn_time`, `gn_frame`, `gn_res_x`, `gn_res_y`; additional `float`/`int` fields become inspector parameters automatically
+- set 0, binding 0 â€” `image2D gn_output` (rgba8 storage, write)
+- set 1, binding N â€” `sampler2D gn_tex<N>` (input textures, read)
+- push_constant â€” `PushConstants` struct with auto-bound `gn_time`, `gn_frame`, `gn_res_x`, `gn_res_y`; additional `float`/`int` fields become inspector parameters automatically
 
 **Features:**
 - Live GLSL recompile on code change (SPIR-V compilation via local RenderingDevice)
 - Dynamic input ports from `sampler2D gn_tex<N>` declarations (up to 8)
 - Dynamic inspector parameters from push constant user fields (float/int)
 - Workgroup size parsed from `layout(local_size_x = ...)` qualifier
-- GPU→CPU readback via `ImageTexture` for TOP pipeline compatibility
+- GPUâ†’CPU readback via `ImageTexture` for TOP pipeline compatibility
 - Resolution parameter (generator mode) or inherited from input (filter mode)
 
 **File:** `addons/gonodes/operators/top/compute_shader_top.gd`
@@ -4013,43 +4013,43 @@ Uses Godot's `RenderingDevice` compute shader API for massively parallel GPU ope
 
 ### 27.10 Generic ScriptNode (Multi-Output)
 
-**Status: ✅ Done**
+**Status: âœ… Done**
 
-A family-less node with annotated output ports (`# @output chop`, `# @output top`). Extends `GNNode` directly with `family = GNFamily.Type.COMP` for gray/neutral color. Multi-output via `outputs[]` array — each `# @output` annotation creates a typed output port with a pre-prepared `GNData` subclass. The per-family Script operators remain the 90% use case; GenericScriptNode is for advanced multi-output pipelines.
+A family-less node with annotated output ports (`# @output chop`, `# @output top`). Extends `GNNode` directly with `family = GNFamily.Type.COMP` for gray/neutral color. Multi-output via `outputs[]` array â€” each `# @output` annotation creates a typed output port with a pre-prepared `GNData` subclass. The per-family Script operators remain the 90% use case; GenericScriptNode is for advanced multi-output pipelines.
 
 **File:** `addons/gonodes/operators/comp/generic_script_node.gd`
 
 ### 27.10a CallbackDAT (Event-Driven Scripting)
 
-**Status: ✅ Done**
+**Status: âœ… Done**
 
 An event-driven DAT that observes an upstream node and runs user scripts on events (`on_start`, `on_cook`, `on_value_change`, `on_create`). Connects to target node's `node_cooked` and `parameter_changed` signals. Events are queued in `_pending_events` and processed during cook to avoid re-entrancy. Output is a rolling event log table (max 50 rows). Each callback gets its own `GNScriptHelper` instance.
 
 **File:** `addons/gonodes/operators/dat/callback_dat.gd`
 
-### 27.10b Writable References — set_par()
+### 27.10b Writable References â€” set_par()
 
-**Status: ✅ Done**
+**Status: âœ… Done**
 
 Scripts can now modify parameters on any reachable node:
-- 2-arg: `set_par("param_name", value)` — sets param on the calling node
-- 3-arg: `set_par("node_id", "param_name", value)` — sets param on another node
+- 2-arg: `set_par("param_name", value)` â€” sets param on the calling node
+- 3-arg: `set_par("node_id", "param_name", value)` â€” sets param on another node
 
 Target node is automatically marked dirty. Works in all Script operators via preamble injection.
 
 **File:** `addons/gonodes/core/gn_cook_engine.gd` (method) + `gn_script_helper.gd` (preamble)
 
-### 27.10c Network API — Procedural Graph Construction
+### 27.10c Network API â€” Procedural Graph Construction
 
-**Status: ✅ Done**
+**Status: âœ… Done**
 
 Six functions available in all Script operators for runtime graph manipulation:
-- `network_add_node(operator_type, node_id)` → creates node via GNExtensionRegistry
-- `network_remove_node(node_id)` → removes node and its connections
-- `network_connect(from_id, from_port, to_id, to_port)` → wires two nodes
-- `network_disconnect(from_id, from_port, to_id, to_port)` → removes a wire
-- `network_node_ids()` → returns all node IDs in the network
-- `network_node_info(node_id)` → returns type/family/valid/position dict
+- `network_add_node(operator_type, node_id)` â†’ creates node via GNExtensionRegistry
+- `network_remove_node(node_id)` â†’ removes node and its connections
+- `network_connect(from_id, from_port, to_id, to_port)` â†’ wires two nodes
+- `network_disconnect(from_id, from_port, to_id, to_port)` â†’ removes a wire
+- `network_node_ids()` â†’ returns all node IDs in the network
+- `network_node_info(node_id)` â†’ returns type/family/valid/position dict
 
 **File:** `addons/gonodes/core/gn_cook_engine.gd` (methods) + `gn_script_helper.gd` (preamble)
 
@@ -4057,20 +4057,20 @@ Six functions available in all Script operators for runtime graph manipulation:
 
 | Priority | Operator | Status |
 |----------|----------|--------|
-| ✅ Done | CustomShaderTOP | GPU shaders with dynamic uniforms |
-| ✅ Done | ScriptCHOP | GDScript channel generation/processing |
-| ✅ Done | ScriptDAT | GDScript table/text generation/processing |
-| ✅ Done | ScriptSOP | GDScript geometry generation/processing |
-| ✅ Done | ScriptIMG | CPU-side Image manipulation via GDScript |
-| ✅ Done | IMG family | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP, TOPtoIMG, FileSaveIMG, MovieOutIMG, FFmpegOutIMG |
-| ✅ Done | Output operators | FileSaveTOP, FileSaveDAT, RecordCHOP — file save sinks with `active` toggle |
-| ✅ Done | WebcamIMG | Live camera feed as CPU Image via CameraServer |
-| ✅ Done | Cook-once pulse | `cook_once` param on Script ops + CustomShaderTOP — auto-reset after one cook |
-| ✅ Done | Generic ScriptNode | Multi-output, family-less COMP |
-| ✅ Done | CallbackDAT | Event-driven scripting callbacks |
-| ✅ Done | set_par() | Writable parameter references |
-| ✅ Done | Network API | Procedural graph construction (6 functions) |
-| ✅ Done    | ComputeShaderTOP | GPU compute via RenderingDevice |
+| âœ… Done | CustomShaderTOP | GPU shaders with dynamic uniforms |
+| âœ… Done | ScriptCHOP | GDScript channel generation/processing |
+| âœ… Done | ScriptDAT | GDScript table/text generation/processing |
+| âœ… Done | ScriptSOP | GDScript geometry generation/processing |
+| âœ… Done | ScriptIMG | CPU-side Image manipulation via GDScript |
+| âœ… Done | IMG family | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP, TOPtoIMG, ImageSaveOUT, MovieOUT, FFmpegOUT |
+| âœ… Done | Output operators | TextureSaveOUT, TableSaveOUT, RecordOUT â€” file save sinks with `active` toggle |
+| âœ… Done | WebcamIMG | Live camera feed as CPU Image via CameraServer |
+| âœ… Done | Cook-once pulse | `cook_once` param on Script ops + CustomShaderTOP â€” auto-reset after one cook |
+| âœ… Done | Generic ScriptNode | Multi-output, family-less COMP |
+| âœ… Done | CallbackDAT | Event-driven scripting callbacks |
+| âœ… Done | set_par() | Writable parameter references |
+| âœ… Done | Network API | Procedural graph construction (6 functions) |
+| âœ… Done    | ComputeShaderTOP | GPU compute via RenderingDevice |
 
 ---
 
@@ -4078,7 +4078,7 @@ Six functions available in all Script operators for runtime graph manipulation:
 
 ### 28.1 Overview
 
-GONODES uses a dynamic operator registry (`GNExtensionRegistry`) to manage all operators — both built-in core operators and third-party extension-provided operators. This replaces the previous approach of hardcoded match-block factories and static description dictionaries, enabling a plugin-friendly architecture where GDExtension addons can register new operators without modifying core code.
+GONODES uses a dynamic operator registry (`GNExtensionRegistry`) to manage all operators â€” both built-in core operators and third-party extension-provided operators. This replaces the previous approach of hardcoded match-block factories and static description dictionaries, enabling a plugin-friendly architecture where GDExtension addons can register new operators without modifying core code.
 
 ### 28.2 Registry Singleton
 
@@ -4087,10 +4087,10 @@ GONODES uses a dynamic operator registry (`GNExtensionRegistry`) to manage all o
 ### 28.3 OperatorEntry
 
 Each registered operator is stored as an `OperatorEntry` with:
-- `family: String` — TOP, CHOP, SOP, DAT, MAT, COMP, POP
-- `script: GDScript` — the preloaded GDScript class (supports `.new()`)
-- `description: String` — one-line tooltip for the palette
-- `source: String` — "core" or the extension name that provided it
+- `family: String` â€” TOP, CHOP, SOP, DAT, MAT, COMP, POP
+- `script: GDScript` â€” the preloaded GDScript class (supports `.new()`)
+- `description: String` â€” one-line tooltip for the palette
+- `source: String` â€” "core" or the extension name that provided it
 
 ### 28.4 API Surface
 
@@ -4099,7 +4099,7 @@ Each registered operator is stored as an `OperatorEntry` with:
 | `register_operator(name, family, script, desc, source)` | void | Register an operator |
 | `unregister_operator(name)` | void | Remove an operator |
 | `create_instance(name)` | GNNode | Data-driven factory (replaces match block) |
-| `get_operator_registry()` | Dictionary | `{ "TOP": [...], "CHOP": [...] }` — palette data |
+| `get_operator_registry()` | Dictionary | `{ "TOP": [...], "CHOP": [...] }` â€” palette data |
 | `get_description(name)` | String | Tooltip text |
 | `has_operator(name)` | bool | Existence check |
 | `get_operator_count()` | int | Total registered operators |
@@ -4109,7 +4109,7 @@ Each registered operator is stored as an `OperatorEntry` with:
 | `get_operators_producing_family(family)` | Array[String] | Operators with an output port matching `family` |
 | `scan_extensions()` | void | Discover and load `gn_ext_*` addons |
 
-**Input-family cache:** `get_operators_accepting_family()` and `get_operators_producing_family()` are backed by a lazy `_input_family_cache` dictionary built on first call. The cache instantiates every registered operator (`.new()` + `_init_ports()` only — not full `initialize()`) to inspect their port arrays, then frees them. Cache is invalidated on `register_operator()` / `unregister_operator()`. Used by the drop-wire-to-add-node feature to filter the palette to compatible operators.
+**Input-family cache:** `get_operators_accepting_family()` and `get_operators_producing_family()` are backed by a lazy `_input_family_cache` dictionary built on first call. The cache instantiates every registered operator (`.new()` + `_init_ports()` only â€” not full `initialize()`) to inspect their port arrays, then frees them. Cache is invalidated on `register_operator()` / `unregister_operator()`. Used by the drop-wire-to-add-node feature to filter the palette to compatible operators.
 
 ### 28.5 Extension Convention
 
@@ -4131,31 +4131,31 @@ description="FFmpeg video decoder. H.264, H.265, VP9, AV1 and more."
 
 ### 28.6 Dependency Guards
 
-Before loading an extension's operators, the registry checks `ClassDB.class_exists()` for each class listed in `dependencies`. If any dependency is missing (e.g., the GDExtension `.dll`/`.so` is not installed), the entire extension is skipped with a warning — no crash, no error.
+Before loading an extension's operators, the registry checks `ClassDB.class_exists()` for each class listed in `dependencies`. If any dependency is missing (e.g., the GDExtension `.dll`/`.so` is not installed), the entire extension is skipped with a warning â€” no crash, no error.
 
 ### 28.7 Loading Flow
 
-1. **Editor startup** → `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()`
-2. **First access** → `instance()` creates the singleton and runs `_register_core_operators()` (82 core operators)
-3. **scan_extensions()** → iterates `res://addons/gn_ext_*/gn_extension.cfg`, checks dependencies, loads operator scripts
-4. **Palette/Factory** → `GNGraphEditor.get_operator_registry()` and `_create_operator_instance()` delegate to the registry
-5. **Palette tooltips** → `GNNodePalette._get_operator_description()` delegates to registry
+1. **Editor startup** â†’ `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()`
+2. **First access** â†’ `instance()` creates the singleton and runs `_register_core_operators()` (82 core operators)
+3. **scan_extensions()** â†’ iterates `res://addons/gn_ext_*/gn_extension.cfg`, checks dependencies, loads operator scripts
+4. **Palette/Factory** â†’ `GNGraphEditor.get_operator_registry()` and `_create_operator_instance()` delegate to the registry
+5. **Palette tooltips** â†’ `GNNodePalette._get_operator_description()` delegates to registry
 
 ### 28.8 Future Extensions (Roadmap)
 
 | Extension | Folder | Dependencies | Operators | Status |
 |-----------|--------|-------------|-----------|--------|
-| FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | ✅ Done |
-| Shadertoy | `gn_ext_shadertoy` | — | 5 generator TOPs, 5 effect TOPs, ShadertoyURLTOP | ✅ Done |
-| Native Accel | `gn_ext_native` + `gn_native` | 16 C++ processor classes | 16 native operators (4 IMG, 11 SOP, 1 CHOP) | ✅ Built & active (Windows x86_64); Linux/macOS pending |
+| FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | âœ… Done |
+| Shadertoy | `gn_ext_shadertoy` | â€” | 5 generator TOPs, 5 effect TOPs, ShadertoyURLTOP | âœ… Done |
+| Native Accel | `gn_ext_native` + `gn_native` | 16 C++ processor classes | 16 native operators (4 IMG, 11 SOP, 1 CHOP) | âœ… Built & active (Windows x86_64); Linux/macOS pending |
 | Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned |
 | NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned |
 | Spout | `gn_ext_spout` | `SpoutSender` | SpoutInTOP, SpoutOutTOP | Planned |
-| MIDI | `gn_ext_midi` | — | MidiInCHOP, MidiOutCHOP | Planned |
+| MIDI | `gn_ext_midi` | â€” | MidiInCHOP, MidiOutCHOP | Planned |
 
 ### 28.10 Extension Help Patches
 
-**Status: ✅ Done**
+**Status: âœ… Done**
 
 GN extensions ship their own help example patches alongside their operator scripts.
 
@@ -4163,37 +4163,37 @@ GN extensions ship their own help example patches alongside their operator scrip
 
 ```
 addons/gn_ext_<name>/
-├── gn_extension.cfg
-├── operators/
-│   └── <family>/
-│       └── <operator>.gd
-└── help/                              # Extension help patches
-    └── <family>/
-        ├── <node_type>_basic.gnpatch
-        └── <node_type>_advanced.gnpatch
+â”œâ”€â”€ gn_extension.cfg
+â”œâ”€â”€ operators/
+â”‚   â””â”€â”€ <family>/
+â”‚       â””â”€â”€ <operator>.gd
+â””â”€â”€ help/                              # Extension help patches
+    â””â”€â”€ <family>/
+        â”œâ”€â”€ <node_type>_basic.gnpatch
+        â””â”€â”€ <node_type>_advanced.gnpatch
 ```
 
 Example for `gn_ext_shadertoy`:
 ```
 addons/gn_ext_shadertoy/
-├── gn_extension.cfg
-├── operators/top/
-│   ├── shadertoy_fire_top.gd
-│   ├── shadertoy_plasma_top.gd
-│   └── ...
-└── help/
-    └── top/
-        ├── shadertoy_fire_basic.gnpatch
-        ├── shadertoy_plasma_audio.gnpatch
-        └── ...
+â”œâ”€â”€ gn_extension.cfg
+â”œâ”€â”€ operators/top/
+â”‚   â”œâ”€â”€ shadertoy_fire_top.gd
+â”‚   â”œâ”€â”€ shadertoy_plasma_top.gd
+â”‚   â””â”€â”€ ...
+â””â”€â”€ help/
+    â””â”€â”€ top/
+        â”œâ”€â”€ shadertoy_fire_basic.gnpatch
+        â”œâ”€â”€ shadertoy_plasma_audio.gnpatch
+        â””â”€â”€ ...
 ```
 
 **Implementation:**
 - `OperatorEntry` in `GNExtensionRegistry` now stores `extension_dir` (base dir of the extension, e.g. `res://addons/gn_ext_shadertoy/`).
-- `GNExtensionRegistry.get_entry_by_script(script)` — linear scan lookup by GDScript reference (handles operators without `class_name`).
+- `GNExtensionRegistry.get_entry_by_script(script)` â€” linear scan lookup by GDScript reference (handles operators without `class_name`).
 - `GNHelpWindow._find_example_patches()` scans both core help dir AND `<extension_dir>/help/` for the operator's family.
 - Shared `_scan_dir_for_patches()` helper deduplicates scanning logic.
-- Extension patches appear alongside core patches in the help window — no distinction needed in UI.
+- Extension patches appear alongside core patches in the help window â€” no distinction needed in UI.
 
 **Files:** `gn_extension_registry.gd` (OperatorEntry.extension_dir, get_entry_by_script), `gn_help_window.gd` (_find_example_patches, _scan_dir_for_patches)
 
@@ -4201,38 +4201,38 @@ addons/gn_ext_shadertoy/
 
 ### 28.9 Audio Recording & Muxing (Roadmap)
 
-**Status: 🔲 Planned — Medium-term**
+**Status: ðŸ”² Planned â€” Medium-term**
 
 TD's Movie File Out TOP can record an audio track alongside video by wiring a
 time-sliced CHOP into its audio input.  GONODES needs an equivalent pipeline.
 
 **Design sketch:**
 
-1. **AudioOutCHOP** (new operator) — routes a CHOP's sample buffer to Godot's
+1. **AudioOutCHOP** (new operator) â€” routes a CHOP's sample buffer to Godot's
    AudioServer as an `AudioStreamGenerator`.  Enables live monitoring and provides
    the raw PCM data for recording.
 
-2. **Audio track on FFmpegOutIMG** — when an AudioOutCHOP/CHOP is wired to a
+2. **Audio track on FFmpegOUT** â€” when an AudioOutCHOP/CHOP is wired to a
    secondary input, the recorder writes PCM samples alongside the temp PNG frames.
    On finalization, FFmpeg muxes the audio track (WAV/PCM) into the output
    container (MP4/MKV/WebM) with `-i audio.wav -c:a aac` (or `-c:a libopus` for
    WebM).
 
-3. **Time-sliced CHOP accumulation** — in NRT mode, each cook frame appends
+3. **Time-sliced CHOP accumulation** â€” in NRT mode, each cook frame appends
    `length` samples from the audio CHOP to a growing `PackedFloat32Array` buffer.
    The sample rate comes from `GNChannelData.sample_rate` (e.g., 44100 Hz).
    Frames produce `sample_rate / non_realtime_fps` samples each (e.g., 1470
    samples per frame at 44100 Hz / 30 fps).
 
-4. **WAV export helper** — `_write_wav(path, samples, sample_rate, channels)`
+4. **WAV export helper** â€” `_write_wav(path, samples, sample_rate, channels)`
    utility writes a standard 16-bit PCM WAV file for FFmpeg to consume.
 
 **Dependencies:** Godot's `AudioStreamGenerator` + `AudioStreamGeneratorPlayback`
-for live output; FFmpeg CLI for muxing (already used by FFmpegOutIMG).
+for live output; FFmpeg CLI for muxing (already used by FFmpegOUT).
 
 **Interaction with NRT mode:** Audio recording is most useful in Non-Realtime
 mode where every frame is guaranteed to produce the correct number of audio
-samples.  In real-time mode, dropped frames could cause audio gaps — a warning
+samples.  In real-time mode, dropped frames could cause audio gaps â€” a warning
 badge should indicate when frames are dropped during audio recording.
 
 - `GNParamRow` creates a `CodeEdit` instead of `LineEdit` for CODE-type params
@@ -4242,33 +4242,33 @@ badge should indicate when frames are dropped during audio recording.
 ## 29. Main Help Window (GNMainHelpWindow)
 
 ### Purpose
-An organized in-editor reference hub that provides centralized access to all GONODES documentation. Opened via the **📖 Help** toolbar button or **F1** key. Singleton window — created on first use, toggled visible/hidden thereafter.
+An organized in-editor reference hub that provides centralized access to all GONODES documentation. Opened via the **ðŸ“– Help** toolbar button or **F1** key. Singleton window â€” created on first use, toggled visible/hidden thereafter.
 
 ### Architecture
-- **GNMainHelpWindow** (`addons/gonodes/ui/gn_main_help_window.gd`) — extends `Window`. HSplitContainer layout: sidebar Tree (left, 240px) + ScrollContainer>RichTextLabel (right). Dark background matching per-node help windows (Color 0.10, 0.10, 0.12).
-- **GNMarkdownRenderer** (`addons/gonodes/ui/gn_markdown_renderer.gd`) — static utility class (`extends RefCounted`) that converts Markdown to BBCode for RichTextLabel display. Handles `#/##/###` headers, `**bold**`, `*italic*`, `` `inline code` ``, triple-backtick code blocks, `| tables |`, `- bullet lists`, `1. ordered lists`, `> blockquotes`, `---` horizontal rules, and `[link](url)` links.
+- **GNMainHelpWindow** (`addons/gonodes/ui/gn_main_help_window.gd`) â€” extends `Window`. HSplitContainer layout: sidebar Tree (left, 240px) + ScrollContainer>RichTextLabel (right). Dark background matching per-node help windows (Color 0.10, 0.10, 0.12).
+- **GNMarkdownRenderer** (`addons/gonodes/ui/gn_markdown_renderer.gd`) â€” static utility class (`extends RefCounted`) that converts Markdown to BBCode for RichTextLabel display. Handles `#/##/###` headers, `**bold**`, `*italic*`, `` `inline code` ``, triple-backtick code blocks, `| tables |`, `- bullet lists`, `1. ordered lists`, `> blockquotes`, `---` horizontal rules, and `[link](url)` links.
 
 ### Sidebar Sections
-1. **📖 Getting Started** — `help/getting_started.md` — overview, families, first-patch walkthrough
-2. **🔧 Editor Guide** — `help/editor.md` — keyboard shortcuts, mouse, toolbar, inspector
-3. **📐 Expressions & Scripting** — `help/expressions.md` — expression language, cross-node refs, set_par, Network API
-4. **📋 Operators Reference** — dynamic from `GNExtensionRegistry.get_operator_registry_sectioned()` — expandable tree: Family → Section → Operator. Clicking a family shows an overview listing; clicking an operator shows auto-generated docs (ports, params, description) + optional per-operator `.md` file from `help/<family>/<op_name>.md`
-5. **⚙️ Cook Engine** — `help/cook_engine.md` — how cooking works, dirty propagation, active chains, NRT mode
-6. **🎮 Player** — `help/player.md` — standalone runtime, config.json, hotkeys, window management, headless mode
-7. **🏗️ Building** — `help/building.md` — build scripts, Quick Build, export presets, GDExtension handling
-8. **🔌 Extensions** — `help/extensions.md` — extension structure, manifest format, writing operators, dependency guards
+1. **ðŸ“– Getting Started** â€” `help/getting_started.md` â€” overview, families, first-patch walkthrough
+2. **ðŸ”§ Editor Guide** â€” `help/editor.md` â€” keyboard shortcuts, mouse, toolbar, inspector
+3. **ðŸ“ Expressions & Scripting** â€” `help/expressions.md` â€” expression language, cross-node refs, set_par, Network API
+4. **ðŸ“‹ Operators Reference** â€” dynamic from `GNExtensionRegistry.get_operator_registry_sectioned()` â€” expandable tree: Family â†’ Section â†’ Operator. Clicking a family shows an overview listing; clicking an operator shows auto-generated docs (ports, params, description) + optional per-operator `.md` file from `help/<family>/<op_name>.md`
+5. **âš™ï¸ Cook Engine** â€” `help/cook_engine.md` â€” how cooking works, dirty propagation, active chains, NRT mode
+6. **ðŸŽ® Player** â€” `help/player.md` â€” standalone runtime, config.json, hotkeys, window management, headless mode
+7. **ðŸ—ï¸ Building** â€” `help/building.md` â€” build scripts, Quick Build, export presets, GDExtension handling
+8. **ðŸ”Œ Extensions** â€” `help/extensions.md` â€” extension structure, manifest format, writing operators, dependency guards
 
 ### Features
-- **Search bar** — filters sidebar tree items by text match (recursive, auto-expands matching parents)
-- **Lazy loading** — markdown files loaded and rendered to BBCode only when a section is clicked; results cached in `_content_cache` dictionary
-- **Operator auto-docs** — operators are instantiated temporarily to read their ports/params metadata (same technique as GNHelpWindow per-node help). Tables show port names/families/descriptions and parameter names/types/defaults/descriptions.
-- **Fallback generators** — sections without .md files get inline BBCode content from generator functions
-- **Keyboard shortcuts** — **Escape** to close, **Ctrl+F** to focus the search bar
+- **Search bar** â€” filters sidebar tree items by text match (recursive, auto-expands matching parents)
+- **Lazy loading** â€” markdown files loaded and rendered to BBCode only when a section is clicked; results cached in `_content_cache` dictionary
+- **Operator auto-docs** â€” operators are instantiated temporarily to read their ports/params metadata (same technique as GNHelpWindow per-node help). Tables show port names/families/descriptions and parameter names/types/defaults/descriptions.
+- **Fallback generators** â€” sections without .md files get inline BBCode content from generator functions
+- **Keyboard shortcuts** â€” **Escape** to close, **Ctrl+F** to focus the search bar
 
 ### Editor Integration
 - `gn_editor.gd` preloads `_GNMainHelpWindowScript` and stores `_main_help_window: GNMainHelpWindow`
-- **Toolbar**: "📖 Help" button added to Row 2 of `_setup_toolbar()` (after Layout, before export dialog)
-- **F1 key**: handled in `_unhandled_key_input()` — calls `_toggle_main_help_window()`
+- **Toolbar**: "ðŸ“– Help" button added to Row 2 of `_setup_toolbar()` (after Layout, before export dialog)
+- **F1 key**: handled in `_unhandled_key_input()` â€” calls `_toggle_main_help_window()`
 - **Toggle function**: `_toggle_main_help_window()` creates the window on first call, shows/hides on subsequent calls
 
 ### Help Content Files
@@ -4282,18 +4282,18 @@ An organized in-editor reference hub that provides centralized access to all GON
 | `help/building.md` | Building | New (from dev_docs/BUILD.md) |
 | `help/extensions.md` | Extensions | New |
 
-## 30. Session Changelog — 2026-03-04 / 2026-03-05
+## 30. Session Changelog â€” 2026-03-04 / 2026-03-05
 
 Comprehensive session covering code editor integration fixes, preset creation, help system improvements, and the Main Help Window feature.
 
 ### 30.1 Code Editor Integration Fixes
 
-**Problem:** GenericScriptNode and CallbackDAT lacked "Edit ↗" code editor buttons in the inspector.
+**Problem:** GenericScriptNode and CallbackDAT lacked "Edit â†—" code editor buttons in the inspector.
 
-- **`gn_param_row.gd`** — `_is_code_editor_param()` only matched `node_type.begins_with("script")`. GenericScriptNode uses `node_type = "genericscript"` (doesn't start with "script"), and CallbackDAT's callback params (`on_start`, `on_cook`, `on_value_change`, `on_create`) weren't recognized.
+- **`gn_param_row.gd`** â€” `_is_code_editor_param()` only matched `node_type.begins_with("script")`. GenericScriptNode uses `node_type = "genericscript"` (doesn't start with "script"), and CallbackDAT's callback params (`on_start`, `on_cook`, `on_value_change`, `on_create`) weren't recognized.
   - Added `_is_script_node()` helper returning true for `begins_with("script")` OR `== "genericscript"`
   - Expanded `_is_code_editor_param()` to recognize genericscript's `"code"` param and callbackdat's callback params
-- **`gn_code_editor.gd`** — `_get_preset_folder()` returned "" for genericscript/callbackdat/shader_code.
+- **`gn_code_editor.gd`** â€” `_get_preset_folder()` returned "" for genericscript/callbackdat/shader_code.
   - Added returns: `"genericscript"`, `"callbackdat"`, `"glsl"` for CustomShaderTOP's `shader_code` param
   - Added syntax highlighting keywords: `@output`, `outputs`, `target`, `event`, `event_param`, `set_par`, `network_*`
 
@@ -4311,7 +4311,7 @@ Created 22 new presets + verified 13 existing, bringing all 7 script/shader cate
 | `presets/callbackdat/` | on_create_init.gd, param_guard.gd, cook_profiler.gd | 5 |
 | `presets/glsl/` (NEW) | plasma.gdshader, voronoi.gdshader, radial_warp.gdshader, kaleidoscope.gdshader, gradient_map.gdshader | 5 |
 
-- **`gn_script_helper.gd`** — `_scan_preset_dir()` updated to accept `.gdshader` alongside `.gd`
+- **`gn_script_helper.gd`** â€” `_scan_preset_dir()` updated to accept `.gdshader` alongside `.gd`
 
 ### 30.3 Help Patch Naming Fix
 
@@ -4326,32 +4326,32 @@ Created 22 new presets + verified 13 existing, bringing all 7 script/shader cate
 
 ### 30.4 Main Help Window (GNMainHelpWindow)
 
-Built a centralized in-editor reference hub — new feature accessible via toolbar "📖 Help" button or F1 key.
+Built a centralized in-editor reference hub â€” new feature accessible via toolbar "ðŸ“– Help" button or F1 key.
 
 **New files created:**
-- `addons/gonodes/ui/gn_main_help_window.gd` — Window with HSplitContainer: sidebar Tree (240px, searchable) + ScrollContainer>RichTextLabel content pane. Dark theme matching per-node help windows.
-- `addons/gonodes/ui/gn_markdown_renderer.gd` — Static Markdown→BBCode converter. Handles `#/##/###` headers, `**bold**`, `*italic*`, `` `code` ``, triple-backtick code blocks, `| tables |`, `- bullet lists`, `1. ordered lists`, `> blockquotes`, `---` rules, `[links](url)`.
+- `addons/gonodes/ui/gn_main_help_window.gd` â€” Window with HSplitContainer: sidebar Tree (240px, searchable) + ScrollContainer>RichTextLabel content pane. Dark theme matching per-node help windows.
+- `addons/gonodes/ui/gn_markdown_renderer.gd` â€” Static Markdownâ†’BBCode converter. Handles `#/##/###` headers, `**bold**`, `*italic*`, `` `code` ``, triple-backtick code blocks, `| tables |`, `- bullet lists`, `1. ordered lists`, `> blockquotes`, `---` rules, `[links](url)`.
 
 **New help content .md files:**
-- `help/getting_started.md` — families overview, first-patch walkthrough, key concepts
-- `help/cook_engine.md` — dirty propagation, active chains, topological sort, NRT mode, bypass/lock
-- `help/extensions.md` — manifest format, writing operators, dependency guards, loaded extensions list
+- `help/getting_started.md` â€” families overview, first-patch walkthrough, key concepts
+- `help/cook_engine.md` â€” dirty propagation, active chains, topological sort, NRT mode, bypass/lock
+- `help/extensions.md` â€” manifest format, writing operators, dependency guards, loaded extensions list
 
 **Editor integration (`gn_editor.gd`):**
 - Added `_GNMainHelpWindowScript` preload + `_main_help_window` variable
-- "📖 Help" button in toolbar Row 2
+- "ðŸ“– Help" button in toolbar Row 2
 - F1 key handler in `_unhandled_key_input()`
-- `_toggle_main_help_window()` — singleton create-on-first-use, toggle visibility thereafter
+- `_toggle_main_help_window()` â€” singleton create-on-first-use, toggle visibility thereafter
 
 **Sidebar sections:**
-1. 📖 Getting Started → `help/getting_started.md`
-2. 🔧 Editor Guide → `help/editor.md`
-3. 📐 Expressions & Scripting → `help/expressions.md`
-4. 📋 Operators Reference → dynamic per-family/per-operator tree from GNExtensionRegistry
-5. ⚙️ Cook Engine → `help/cook_engine.md`
-6. 🎮 Player → `help/player.md`
-7. 🏗️ Building → `help/building.md`
-8. 🔌 Extensions → `help/extensions.md`
+1. ðŸ“– Getting Started â†’ `help/getting_started.md`
+2. ðŸ”§ Editor Guide â†’ `help/editor.md`
+3. ðŸ“ Expressions & Scripting â†’ `help/expressions.md`
+4. ðŸ“‹ Operators Reference â†’ dynamic per-family/per-operator tree from GNExtensionRegistry
+5. âš™ï¸ Cook Engine â†’ `help/cook_engine.md`
+6. ðŸŽ® Player â†’ `help/player.md`
+7. ðŸ—ï¸ Building â†’ `help/building.md`
+8. ðŸ”Œ Extensions â†’ `help/extensions.md`
 
 ### 30.5 Help File Reorganization
 
@@ -4371,24 +4371,24 @@ Updated all references in `gn_main_help_window.gd` (`_SECTION_FILES`), `GONODES_
 
 ```
 addons/gonodes/help/
-  getting_started.md         ← Guide .md files at root (7 files)
+  getting_started.md         â† Guide .md files at root (7 files)
   editor.md
   expressions.md
   cook_engine.md
   player.md
   building.md
   extensions.md
-  chop/                      ← CHOP .gnpatch example patches (64 files)
-  top/                       ← TOP .gnpatch example patches (64 files)
-  dat/                       ← DAT .gnpatch example patches (30 files)
-  sop/                       ← SOP .gnpatch example patches (56 files)
-  comp/                      ← COMP .gnpatch example patches (22 files)
-  mat/                       ← MAT .gnpatch example patches (7 files)
+  chop/                      â† CHOP .gnpatch example patches (64 files)
+  top/                       â† TOP .gnpatch example patches (64 files)
+  dat/                       â† DAT .gnpatch example patches (30 files)
+  sop/                       â† SOP .gnpatch example patches (56 files)
+  comp/                      â† COMP .gnpatch example patches (22 files)
+  mat/                       â† MAT .gnpatch example patches (7 files)
 ```
 
 ---
 
-## 31. Session Changelog — 2026-03-06
+## 31. Session Changelog â€” 2026-03-06
 
 TouchDesigner parity deep audit + implementation of 15 gap operators (Tier 1 + Tier 2) + help patch overhaul.
 
@@ -4396,15 +4396,15 @@ TouchDesigner parity deep audit + implementation of 15 gap operators (Tier 1 + T
 
 Deep comparison of GONODES vs TouchDesigner operator inventory:
 - GONODES covers ~80% of TD's surface area across all families
-- Many apparent "gaps" were false — operators just have different names or are bundled into multi-mode operators
-- Key equivalences documented: CompositeTOP→Under/Multiply/Screen (blend modes), ChannelMixTOP→Reorder (swizzle), LevelTOP→Threshold/Contrast/Gamma, BlurTOP→DirectionalBlur, ResampleCHOP→Speed, MergeCHOP→Join
+- Many apparent "gaps" were false â€” operators just have different names or are bundled into multi-mode operators
+- Key equivalences documented: CompositeTOPâ†’Under/Multiply/Screen (blend modes), ChannelMixTOPâ†’Reorder (swizzle), LevelTOPâ†’Threshold/Contrast/Gamma, BlurTOPâ†’DirectionalBlur, ResampleCHOPâ†’Speed, MergeCHOPâ†’Join
 
 ### 31.2 Tier 1 Operators (5 high-impact)
 
 | Operator | Family | Algorithm / Notes |
 |----------|--------|-------------------|
 | FuseSOP | SOP | Spatial hash grid O(N) merge of coincident vertices within distance threshold |
-| RaySOP | SOP | Möller-Trumbore CPU raycast projecting source vertices onto target surface |
+| RaySOP | SOP | MÃ¶ller-Trumbore CPU raycast projecting source vertices onto target surface |
 | BeatCHOP | CHOP | RMS energy-based onset detection with adaptive threshold + de-bounce; synthetic BPM fallback |
 | ReplicatorCOMP | COMP | Table-driven replicator via GNNetwork API with hash-based change detection |
 | OpticalFlowTOP | TOP | Horn-Schunck GLSL fragment shader for motion vector estimation |
@@ -4413,7 +4413,7 @@ Deep comparison of GONODES vs TouchDesigner operator inventory:
 
 | Operator | Family | Algorithm / Notes |
 |----------|--------|-------------------|
-| CapSOP | SOP | Boundary edge detection → loop tracing → triangle fan caps (centroid fill) |
+| CapSOP | SOP | Boundary edge detection â†’ loop tracing â†’ triangle fan caps (centroid fill) |
 | LatticeSOP | SOP | Free-form deformation via cubic lattice with trilinear interpolation + FastNoiseLite |
 | PolyLoftSOP | SOP | Cross-section ring lofting with auto-resample + subdivisions + end caps |
 | MountainSOP | SOP | FastNoiseLite FBM vertex displacement along normals (Simplex/Perlin/Cellular/Value) |
@@ -4427,11 +4427,11 @@ Deep comparison of GONODES vs TouchDesigner operator inventory:
 ### 31.4 Help Patch Overhaul
 
 - Created 15 new help patches for all new operators
-- **WindowTOP sink rule (Hard Rule 25.22):** ALL help patches must end with WindowTOP (512×512, open=true) via meaningful, family-appropriate visualization chains
+- **WindowOUT sink rule (Hard Rule 25.22):** ALL help patches must end with WindowOUT (512Ã—512, open=true) via meaningful, family-appropriate visualization chains
 - Bulk-updated 227 existing patches via PowerShell script (`scripts/add_window_to_help.ps1`)
 - Manually fixed 2 patches with non-standard JSON keys (`from_node`/`to_node` vs `from`/`to`)
-- Second overhaul (`scripts/fix_help_patch_sinks.ps1`): replaced blind cross-family WindowTOP connections with proper chains (CHOPtoTOP for CHOPs, RenderTOP+CameraCOMP for SOPs/COMPs/MATs, TextTOP for DATs)
-- Fixed 4 COMP help patches where pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP) were dead-end branches bypassed by direct Geo→RenderTOP connections
+- Second overhaul (`scripts/fix_help_patch_sinks.ps1`): replaced blind cross-family WindowOUT connections with proper chains (CHOPtoTOP for CHOPs, RenderTOP+CameraCOMP for SOPs/COMPs/MATs, TextTOP for DATs)
+- Fixed 4 COMP help patches where pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP) were dead-end branches bypassed by direct Geoâ†’RenderTOP connections
 - Final count: 244 help patches across 6 families, all compliant with the sink rule
 
 ### 32.3 C++ GDExtension Native Acceleration Extension
@@ -4439,45 +4439,45 @@ Deep comparison of GONODES vs TouchDesigner operator inventory:
 Built a complete C++ GDExtension source tree for 16 CPU-heavy operators (Phase 1 + Phase 2), plus GDScript wrapper operators with automatic fallback.
 
 **C++ source (`addons/gn_native/`):**
-- `SConstruct` — SCons build file using godot-cpp
-- `src/register_types.cpp` + `.h` — entry point registering 16 classes across 3 families
-- `src/img/` — 4 IMG processors: GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
-- `src/sop/` — 11 SOP processors: GNNativeParticle, GNNativeMetaball, GNNativePolyReduce, GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring
-- `src/chop/` — 1 CHOP processor: GNNativeSmooth
+- `SConstruct` â€” SCons build file using godot-cpp
+- `src/register_types.cpp` + `.h` â€” entry point registering 16 classes across 3 families
+- `src/img/` â€” 4 IMG processors: GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
+- `src/sop/` â€” 11 SOP processors: GNNativeParticle, GNNativeMetaball, GNNativePolyReduce, GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring
+- `src/chop/` â€” 1 CHOP processor: GNNativeSmooth
 - `gn_native.gdextension` is **active**; `bin/win64/libgn_native.windows.template_debug.x86_64.dll` compiled (677 KB, 2026-03-10). Linux/macOS require building on those platforms.
 
 **Phase 1 GDScript wrappers (6):**
-- `operators/img/blur_img_native.gd` (BlurIMGNative) — delegates to `GNNativeBlur.process()`
-- `operators/img/noise_img_native.gd` (NoiseIMGNative) — delegates to `GNNativeNoise.process()`
-- `operators/img/pixel_sort_img_native.gd` (PixelSortIMGNative) — delegates to `GNNativePixelSort.process()`
-- `operators/sop/particle_sop_native.gd` (ParticleSOPNative) — stateful: `set_emitter()` + `step()`
-- `operators/sop/metaball_sop_native.gd` (MetaballSOPNative) — delegates to `GNNativeMetaball.process()`
-- `operators/sop/polyreduce_sop_native.gd` (PolyReduceSOPNative) — delegates to `GNNativePolyReduce.process()`
+- `operators/img/blur_img_native.gd` (BlurIMGNative) â€” delegates to `GNNativeBlur.process()`
+- `operators/img/noise_img_native.gd` (NoiseIMGNative) â€” delegates to `GNNativeNoise.process()`
+- `operators/img/pixel_sort_img_native.gd` (PixelSortIMGNative) â€” delegates to `GNNativePixelSort.process()`
+- `operators/sop/particle_sop_native.gd` (ParticleSOPNative) â€” stateful: `set_emitter()` + `step()`
+- `operators/sop/metaball_sop_native.gd` (MetaballSOPNative) â€” delegates to `GNNativeMetaball.process()`
+- `operators/sop/polyreduce_sop_native.gd` (PolyReduceSOPNative) â€” delegates to `GNNativePolyReduce.process()`
 
 **Phase 2 GDScript wrappers (10):**
-- `operators/sop/isosurface_sop_native.gd` (IsoSurfaceSOPNative) — marching cubes iso-surface with 5 field types
-- `operators/sop/ray_sop_native.gd` (RaySOPNative) — Möller–Trumbore ray-cast projection
-- `operators/sop/facet_sop_native.gd` (FacetSOPNative) — unique/consolidate with spatial hash
-- `operators/sop/fuse_sop_native.gd` (FuseSOPNative) — vertex welding within threshold
-- `operators/sop/subdivide_sop_native.gd` (SubdivideSOPNative) — uniform 1→4 subdivision
-- `operators/sop/copy_sop_native.gd` (CopySOPNative) — copy-to-points with normal alignment + pscale
-- `operators/sop/lsystem_sop_native.gd` (LSystemSOPNative) — grammar rewriting + turtle, line/tube mesh
-- `operators/sop/spring_sop_native.gd` (SpringSOPNative) — semi-implicit Euler spring deformer
-- `operators/img/edge_detect_img_native.gd` (EdgeDetectIMGNative) — Sobel/Prewitt convolution
-- `operators/chop/smooth_chop_native.gd` (SmoothCHOPNative) — biquad Butterworth IIR filter
+- `operators/sop/isosurface_sop_native.gd` (IsoSurfaceSOPNative) â€” marching cubes iso-surface with 5 field types
+- `operators/sop/ray_sop_native.gd` (RaySOPNative) â€” MÃ¶llerâ€“Trumbore ray-cast projection
+- `operators/sop/facet_sop_native.gd` (FacetSOPNative) â€” unique/consolidate with spatial hash
+- `operators/sop/fuse_sop_native.gd` (FuseSOPNative) â€” vertex welding within threshold
+- `operators/sop/subdivide_sop_native.gd` (SubdivideSOPNative) â€” uniform 1â†’4 subdivision
+- `operators/sop/copy_sop_native.gd` (CopySOPNative) â€” copy-to-points with normal alignment + pscale
+- `operators/sop/lsystem_sop_native.gd` (LSystemSOPNative) â€” grammar rewriting + turtle, line/tube mesh
+- `operators/sop/spring_sop_native.gd` (SpringSOPNative) â€” semi-implicit Euler spring deformer
+- `operators/img/edge_detect_img_native.gd` (EdgeDetectIMGNative) â€” Sobel/Prewitt convolution
+- `operators/chop/smooth_chop_native.gd` (SmoothCHOPNative) â€” biquad Butterworth IIR filter
 
-**Help patches:** 16 `.gnpatch` files in `help/sop/`, `help/img/`, `help/chop/` — one per operator.
+**Help patches:** 16 `.gnpatch` files in `help/sop/`, `help/img/`, `help/chop/` â€” one per operator.
 
-**Architecture pattern:** C++ `RefCounted` processor classes bound via `ClassDB::bind_method`. GDScript wrappers check `ClassDB.class_exists("GNNativeXxx")` at init — if available, instantiate and delegate; otherwise, return null for fallback to core GDScript operator. Extension manifest (`gn_extension.cfg`) registers all 16 operators under "Native" section.
+**Architecture pattern:** C++ `RefCounted` processor classes bound via `ClassDB::bind_method`. GDScript wrappers check `ClassDB.class_exists("GNNativeXxx")` at init â€” if available, instantiate and delegate; otherwise, return null for fallback to core GDScript operator. Extension manifest (`gn_extension.cfg`) registers all 16 operators under "Native" section.
 
 **Bugs fixed during implementation:**
-- `create_menu()` does not exist on GNParameter — fixed to `create_int()` in NoiseIMGNative and PixelSortIMGNative
-- `GNNativePolyreduce` → `GNNativePolyReduce` casing fix in `register_types.cpp`
+- `create_menu()` does not exist on GNParameter â€” fixed to `create_int()` in NoiseIMGNative and PixelSortIMGNative
+- `GNNativePolyreduce` â†’ `GNNativePolyReduce` casing fix in `register_types.cpp`
 
 **Compile errors fixed on first build (Phase 2 code, 2026-03-10):**
-- `Quadric` struct declared `private` in `gn_native_polyreduce.h` — moved to `public` so the free helper `_compute_collapse()` in the `.cpp` could access `GNNativePolyReduce::Quadric` by name
-- `p_positions.duplicate()` / `p_indices.duplicate()` on `const&` parameters in `polyreduce.cpp` — `.duplicate()` is non-const in godot-cpp; replaced with plain copy assignment (`positions = p_positions`)
-- Same `.duplicate()` issue in `spring.cpp` (`_positions = target_positions.duplicate()` → `_positions = target_positions`)
+- `Quadric` struct declared `private` in `gn_native_polyreduce.h` â€” moved to `public` so the free helper `_compute_collapse()` in the `.cpp` could access `GNNativePolyReduce::Quadric` by name
+- `p_positions.duplicate()` / `p_indices.duplicate()` on `const&` parameters in `polyreduce.cpp` â€” `.duplicate()` is non-const in godot-cpp; replaced with plain copy assignment (`positions = p_positions`)
+- Same `.duplicate()` issue in `spring.cpp` (`_positions = target_positions.duplicate()` â†’ `_positions = target_positions`)
 - Missing `#include <vector>` in `gn_native_particle.h` (needed for `std::vector<Triangle> _triangles`)
 - Missing `#include <vector>` in `gn_native_edge_detect.cpp` (needed for `std::vector<float> lum`)
 
@@ -4485,9 +4485,9 @@ Built a complete C++ GDExtension source tree for 16 CPU-heavy operators (Phase 1
 
 **Problem:** Clicking between IMG nodes showed the same "stuck" image. Two bugs:
 
-1. **Per-frame ImageTexture recreation**: `update_from_node()` called `ImageTexture.create_from_image()` every frame for IMG nodes, producing a new texture object. `_show_texture()`'s fast-path identity check (`_tex_display.texture == tex`) never matched, causing every frame to run `_hide_all_displays()` → `_show_texture()` → `_fit_to_panel()` — flicker + pan/zoom reset.
+1. **Per-frame ImageTexture recreation**: `update_from_node()` called `ImageTexture.create_from_image()` every frame for IMG nodes, producing a new texture object. `_show_texture()`'s fast-path identity check (`_tex_display.texture == tex`) never matched, causing every frame to run `_hide_all_displays()` â†’ `_show_texture()` â†’ `_fit_to_panel()` â€” flicker + pan/zoom reset.
 
-2. **COW bypass by viewer**: `_consumer_counts` only counted wire connections, not the viewer. When NoiseIMG → PixelSortIMG (1 consumer via wires), `_shared = false`. PixelSortIMG's `_mutable_input()` returned NoiseIMG's data without duplicating, sorting the upstream Image in-place. NoiseIMG's `cached_output.image` was permanently mutated to the sorted version.
+2. **COW bypass by viewer**: `_consumer_counts` only counted wire connections, not the viewer. When NoiseIMG â†’ PixelSortIMG (1 consumer via wires), `_shared = false`. PixelSortIMG's `_mutable_input()` returned NoiseIMG's data without duplicating, sorting the upstream Image in-place. NoiseIMG's `cached_output.image` was permanently mutated to the sorted version.
 
 **Fixes applied:**
 - **`gn_viewer_panel.gd`**: Added `_img_texture: ImageTexture` cache. First frame creates texture via `create_from_image()`; subsequent frames use `update()` for zero-allocation pixel refresh. Full layout only triggers on resolution change. `set_target()` clears `_img_texture = null` to force fresh texture on node switch.
@@ -4495,25 +4495,25 @@ Built a complete C++ GDExtension source tree for 16 CPU-heavy operators (Phase 1
 
 ### 31.5 Updated Totals
 
-- **249 operators** (62 TOP, 15 IMG, 63 CHOP, 28 DAT, 56 SOP, 19 COMP, 6 MAT)
-- **244 help patches** (64 CHOP, 64 TOP, 56 SOP, 30 DAT, 22 COMP, 7 MAT)
+- **256 operators** (62 TOP, 12 IMG, 61 CHOP, 29 DAT, 57 SOP, 20 COMP, 6 MAT, 9 OUT)
+- **255 core help patches** (63 CHOP, 65 TOP, 57 SOP, 30 DAT, 23 COMP, 7 MAT, 1 IMG, 9 OUT) + 16 native extension patches = 271 total
 - Zero deferred operators remain
 
 ---
 
-## 32. Session Changelog — 2026-03-10
+## 32. Session Changelog â€” 2026-03-10
 
 ### 32.1 AnimationCOMP / Pass-Through COMP Bug Fix
 
-- **AnimationCOMP** (`animation_comp.gd`): Set `_scene_node` to upstream COMP's scene node during `_cook()` so `get_scene_node()` returns non-null. `destroy_scene_node()` clears `_scene_node` without freeing it (we don't own it — upstream COMP does). Same for `_notification(PREDELETE)`.
-- **RenderTOP** (`render_top.gd`): Added `_resolve_comp_scene_node()` method that walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP, etc.) to find the actual scene node. Uses cycle-guarded recursive walk with `visited` dictionary. Only fires for the generic `GNCompBase` fallback — typed COMPs (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP, EnvironmentCOMP) use their existing fast paths unchanged. Zero performance impact on common case.
-- **Root cause:** Pass-through COMPs don't own a scene node (`_scene_node = null`), so RenderTOP's `get_scene_node()` returned null → nothing rendered. The cook engine's active chain only cooks nodes upstream of sinks — if a COMP is a dead-end branch (not feeding RenderTOP), it never cooks.
+- **AnimationCOMP** (`animation_comp.gd`): Set `_scene_node` to upstream COMP's scene node during `_cook()` so `get_scene_node()` returns non-null. `destroy_scene_node()` clears `_scene_node` without freeing it (we don't own it â€” upstream COMP does). Same for `_notification(PREDELETE)`.
+- **RenderTOP** (`render_top.gd`): Added `_resolve_comp_scene_node()` method that walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP, etc.) to find the actual scene node. Uses cycle-guarded recursive walk with `visited` dictionary. Only fires for the generic `GNCompBase` fallback â€” typed COMPs (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP, EnvironmentCOMP) use their existing fast paths unchanged. Zero performance impact on common case.
+- **Root cause:** Pass-through COMPs don't own a scene node (`_scene_node = null`), so RenderTOP's `get_scene_node()` returned null â†’ nothing rendered. The cook engine's active chain only cooks nodes upstream of sinks â€” if a COMP is a dead-end branch (not feeding RenderTOP), it never cooks.
 
 ### 32.2 Help Patch Connection Fixes
 
-- **animation_comp.gnpatch**: Fixed chain to `box → geo → anim → render ← cam → window` (was: geo fed both anim and render independently, leaving anim as dead end)
-- **null_comp_basic.gnpatch**: Fixed chain to `box → geo → null → render ← cam → window` + added BoxSOP input for geometry
-- **switch_comp_basic.gnpatch**: Fixed chain to `box → geo1 → sw ← geo2 ← sphere; sw → render ← cam → window` + added BoxSOP and SphereSOP inputs
-- **Hard Rule 25.22 updated**: Expanded from simple "end with WindowTOP" to require meaningful, family-appropriate visualization chains with specific required chain patterns per family
+- **animation_comp.gnpatch**: Fixed chain to `box â†’ geo â†’ anim â†’ render â† cam â†’ window` (was: geo fed both anim and render independently, leaving anim as dead end)
+- **null_comp_basic.gnpatch**: Fixed chain to `box â†’ geo â†’ null â†’ render â† cam â†’ window` + added BoxSOP input for geometry
+- **switch_comp_basic.gnpatch**: Fixed chain to `box â†’ geo1 â†’ sw â† geo2 â† sphere; sw â†’ render â† cam â†’ window` + added BoxSOP and SphereSOP inputs
+- **Hard Rule 25.22 updated**: Expanded from simple "end with WindowOUT" to require meaningful, family-appropriate visualization chains with specific required chain patterns per family
 
 

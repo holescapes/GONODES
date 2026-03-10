@@ -1,4 +1,4 @@
-# GONODES — UI & Workflow Guide
+# GONODES â€” UI & Workflow Guide
 
 Quick reference for every keyboard shortcut, context menu entry, toolbar button,
 mouse interaction, and inspector control in the GONODES editor.
@@ -14,7 +14,7 @@ mouse interaction, and inspector control in the GONODES editor.
 | **Ctrl + N**       | New patch (clears everything)   |
 | **Ctrl + O**       | Open patch file (.gonodes)      |
 | **Ctrl + S**       | Save current patch              |
-| **Ctrl + Shift + S** | Save As… (pick new file)     |
+| **Ctrl + Shift + S** | Save Asâ€¦ (pick new file)     |
 
 ### Graph Editing
 
@@ -30,19 +30,19 @@ mouse interaction, and inspector control in the GONODES editor.
 | **Ctrl + Z**       | Undo                                      |
 | **Ctrl + Y** / **Ctrl + Shift + Z** | Redo                   |
 
-### Node State & Layout (no modifiers — just press the key)
+### Node State & Layout (no modifiers â€” just press the key)
 
 | Shortcut | Action                                                                 |
 |----------|------------------------------------------------------------------------|
-| **B**    | **Bypass** toggle — selected nodes pass their first input through unchanged. Bypassed nodes show ⏩ in the title and are dimmed. |
-| **L**    | **Lock** toggle — selected nodes become read-only. Locked nodes show 🔒 in the title; the inspector dims all parameters and disables editing. |
-| **F**    | **Fit to view** — zooms and pans to frame the selected nodes (or the entire graph if nothing is selected). |
-| **H**    | **Align Horizontal** — moves 2+ selected nodes so they share the same vertical center (average Y). |
-| **V**    | **Align Vertical** — moves 2+ selected nodes so they share the same horizontal center (average X). |
-| **M**    | **Minimap** toggle — show/hide the corner minimap. |
-| **W**    | **Wire style** — cycle through Curved → Straight → Right-Angle wire rendering. |
-| **Ctrl + L** | **Auto-layout** — arrange all nodes using topological layering. Undoable. |
-| **?** (Shift+/) | **Shortcut reference card** — show/hide the keyboard shortcuts overlay. Press ? or Escape to dismiss. |
+| **B**    | **Bypass** toggle â€” selected nodes pass their first input through unchanged. Bypassed nodes show â© in the title and are dimmed. |
+| **L**    | **Lock** toggle â€” selected nodes become read-only. Locked nodes show ðŸ”’ in the title; the inspector dims all parameters and disables editing. |
+| **F**    | **Fit to view** â€” zooms and pans to frame the selected nodes (or the entire graph if nothing is selected). |
+| **H**    | **Align Horizontal** â€” moves 2+ selected nodes so they share the same vertical center (average Y). |
+| **V**    | **Align Vertical** â€” moves 2+ selected nodes so they share the same horizontal center (average X). |
+| **M**    | **Minimap** toggle â€” show/hide the corner minimap. |
+| **W**    | **Wire style** â€” cycle through Curved â†’ Straight â†’ Right-Angle wire rendering. |
+| **Ctrl + L** | **Auto-layout** â€” arrange all nodes using topological layering. Undoable. |
+| **?** (Shift+/) | **Shortcut reference card** â€” show/hide the keyboard shortcuts overlay. Press ? or Escape to dismiss. |
 
 ### Node Bookmarks
 
@@ -69,14 +69,14 @@ available per session. Re-assigning a slot replaces the previous bookmark.
 | **Left-drag** from port       | Start a wire connection                         |
 | **Right-click** on empty space / node | Open the **context menu**               |
 | **Right-drag** from an input port | Disconnect the wire (right-disconnects mode) |
-| **Scroll wheel**              | Zoom in/out (0.25× – 2.5×, step 0.1)          |
+| **Scroll wheel**              | Zoom in/out (0.25Ã— â€“ 2.5Ã—, step 0.1)          |
 | **Middle-click drag**         | Pan the graph canvas                            |
 
 ### Node View
 
 | Action                           | Effect                                        |
 |----------------------------------|-----------------------------------------------|
-| **Double-click title bar**       | Start **inline rename** — type a new ID and press Enter |
+| **Double-click title bar**       | Start **inline rename** â€” type a new ID and press Enter |
 | **Click `?` button** (title bar) | Open the **node help** window for that operator |
 | **Drag** node                    | Reposition node (with undo/redo support)       |
 
@@ -85,11 +85,11 @@ available per session. Re-assigning a slot replaces the previous bookmark.
 ## Context Menu (Right-click)
 
 Right-click anywhere on the graph canvas to open the context menu.
-Greyed-out items require a selection, clipboard content, or ≥2 nodes.
+Greyed-out items require a selection, clipboard content, or â‰¥2 nodes.
 
 | Menu Item          | Shortcut        | Notes                                              |
 |--------------------|-----------------|-----------------------------------------------------|
-| **Add Node…**      | Alt + A         | Opens the node palette search popup                 |
+| **Add Nodeâ€¦**      | Alt + A         | Opens the node palette search popup                 |
 | **Copy**           | Ctrl + C        | Copies selected nodes + internal wires              |
 | **Cut**            | Ctrl + X        | Cut (copy then delete)                              |
 | **Paste**          | Ctrl + V        | Paste at cursor position (IDs get `_copy` suffix)   |
@@ -98,13 +98,13 @@ Greyed-out items require a selection, clipboard content, or ≥2 nodes.
 | **Select All**     | Ctrl + A        | Select every node in the graph                      |
 | **Undo**           | Ctrl + Z        | Undo last graph action                              |
 | **Redo**           | Ctrl + Y        | Redo last undone action                             |
-| **Open Viewer**    | —               | Opens a floating viewer window (needs 1 TOP selected) |
-| **Toggle Preview** | —               | Shows/hides the inline preview on selected nodes    |
+| **Open Viewer**    | â€”               | Opens a floating viewer window (needs 1 TOP selected) |
+| **Toggle Preview** | â€”               | Shows/hides the inline preview on selected nodes    |
 | **Bypass: ON/OFF** | B               | Toggle bypass on selected nodes                     |
 | **Lock: ON/OFF**   | L               | Toggle lock on selected nodes                       |
 | **Align Horizontal** | H             | Align selected nodes to same Y (needs 2+)          |
-| **Align Vertical** | —               | Align selected nodes to same X (needs 2+)          |
-| **Node Help**      | —               | Open help window (needs exactly 1 node selected)   |
+| **Align Vertical** | â€”               | Align selected nodes to same X (needs 2+)          |
+| **Node Help**      | â€”               | Open help window (needs exactly 1 node selected)   |
 
 ### Quick-Access Keys (not in context menu)
 
@@ -129,12 +129,12 @@ The toolbar runs across the bottom of the editor. From left to right:
 | **Open**           | Open a `.gonodes` file (Ctrl + O)                             |
 | **Save**           | Save the current patch (Ctrl + S)                             |
 | **Save As**        | Save to a new file (Ctrl + Shift + S)                         |
-| **Previews** ☑     | Master toggle — show/hide inline preview thumbnails on all nodes |
-| **Perf** ☑         | Show/hide per-node cook-time overlay (ms + warning badges)    |
+| **Previews** â˜‘     | Master toggle â€” show/hide inline preview thumbnails on all nodes |
+| **Perf** â˜‘         | Show/hide per-node cook-time overlay (ms + warning badges)    |
 | **+ Viewer**       | Open a floating viewer window for the currently viewed TOP    |
 | **Stress Test**    | Generate a 55+ node test network for benchmarking             |
-| **Minimap** ☑      | Show/hide the corner minimap (same as M key)                  |
-| **Wire style** ▾   | Dropdown: Curved / Straight / Right-Angle (same as W key)     |
+| **Minimap** â˜‘      | Show/hide the corner minimap (same as M key)                  |
+| **Wire style** â–¾   | Dropdown: Curved / Straight / Right-Angle (same as W key)     |
 | **Layout**         | Auto-layout all nodes using topological order (Ctrl+L)        |
 | *(Info label)*     | Displays: FPS, frame count, cook time (ms), active/total nodes, viewed node ID |
 
@@ -149,9 +149,9 @@ its parameters. Each parameter row has interactive controls:
 
 Every parameter has a small **C/E button** on the left:
 
-- **C** (Constant) — value is set directly via the spinbox, slider, color
+- **C** (Constant) â€” value is set directly via the spinbox, slider, color
   picker, checkbox, or dropdown. This is the default mode.
-- **E** (Expression) — value is computed by a GDScript expression string
+- **E** (Expression) â€” value is computed by a GDScript expression string
   every cook frame. A text field appears for entering the expression.
 
 Click the C/E button to toggle between modes.
@@ -184,10 +184,10 @@ Expression mode, just like TouchDesigner.
 
 ### Locked Nodes
 
-When a node is **locked** (🔒), the inspector **immediately** updates:
+When a node is **locked** (ðŸ”’), the inspector **immediately** updates:
 - Dims all parameter rows
 - Disables all mouse input on controls (prevents accidental edits)
-- Shows **"🔒 LOCKED"** in the status label
+- Shows **"ðŸ”’ LOCKED"** in the status label
 
 Unlock with the **L** key or the context menu to resume editing.
 
@@ -201,13 +201,13 @@ Nodes display status through visual cues on the title bar and body:
 |--------------------|--------------------------------------------------------------|
 | White title text   | Node ID only (family name shown in tooltip on hover)          |
 | Dark outline       | Title text and ? button have a dark outline for readability   |
-| ⏩ prefix          | Node is **bypassed** — passes input through without cooking  |
-| 🔒 prefix          | Node is **locked** — parameters cannot be edited             |
+| â© prefix          | Node is **bypassed** â€” passes input through without cooking  |
+| ðŸ”’ prefix          | Node is **locked** â€” parameters cannot be edited             |
 | Dimmed appearance  | Node is bypassed (body color reduced to 50% opacity)          |
 | Family color bar   | Title bar is tinted per family (CHOP=green, TOP=purple, etc.) |
 | Preview thumbnail  | Inline output preview (80px tall, live-updating)              |
 | Perf overlay       | Cook time in ms (when Perf toggle is on)                      |
-| **zzz** overlay    | Node is **inactive** — not in any active chain (frozen output)|
+| **zzz** overlay    | Node is **inactive** â€” not in any active chain (frozen output)|
 | Error badge        | Cook errors appear in the perf overlay                        |
 
 ### Family Colors
@@ -242,12 +242,12 @@ referenced node.
 
 | Feature              | Details                                                  |
 |----------------------|----------------------------------------------------------|
-| **Minimap**          | 200×150px minimap in the corner (toggle with M or toolbar) |
-| **Zoom range**       | 0.25× to 2.5× (scroll wheel, step 0.1)                  |
-| **Default zoom**     | 0.8×                                                     |
+| **Minimap**          | 200Ã—150px minimap in the corner (toggle with M or toolbar) |
+| **Zoom range**       | 0.25Ã— to 2.5Ã— (scroll wheel, step 0.1)                  |
+| **Default zoom**     | 0.8Ã—                                                     |
 | **Snap grid**        | 20px grid snapping (enabled by default)                  |
 | **Fit to view (F)**  | Frames selected nodes or all nodes with padding          |
-| **Bookmarks (1-9)**  | Ctrl+# to set, # to jump — instant node navigation      |
+| **Bookmarks (1-9)**  | Ctrl+# to set, # to jump â€” instant node navigation      |
 | **Wire styles (W)**  | Curved (default), Straight, or Right-Angle connections   |
 | **Auto-layout (Ctrl+L)** | Topological layered arrangement, undoable            |
 
@@ -255,7 +255,7 @@ referenced node.
 
 ## Node Palette (Add Node)
 
-Open with **Alt + A** or **right-click → Add Node…**
+Open with **Alt + A** or **right-click â†’ Add Nodeâ€¦**
 
 - Search field with instant filtering (type to narrow results)
 - Nodes are organized by family (CHOP, TOP, SOP, DAT, MAT, COMP)
@@ -268,20 +268,20 @@ Open with **Alt + A** or **right-click → Add Node…**
 
 | Action                              | Result                              |
 |-------------------------------------|-------------------------------------|
-| Drag from output port → input port  | Create a connection                 |
-| Drag from input port → empty space  | Disconnect (right-disconnects mode) |
+| Drag from output port â†’ input port  | Create a connection                 |
+| Drag from input port â†’ empty space  | Disconnect (right-disconnects mode) |
 | Right-drag from connected input     | Disconnect the wire                 |
 | Delete a node                       | All connected wires are removed     |
-| Press **W**                         | Cycle wire style (Curved → Straight → Right-Angle) |
+| Press **W**                         | Cycle wire style (Curved â†’ Straight â†’ Right-Angle) |
 
-Wires are type-checked — you can only connect ports of matching families
-(CHOP→CHOP, TOP→TOP, etc.). Invalid connections are silently rejected.
+Wires are type-checked â€” you can only connect ports of matching families
+(CHOPâ†’CHOP, TOPâ†’TOP, etc.). Invalid connections are silently rejected.
 
 ### Wire Styles
 
 | Style          | Curvature | Description                              |
 |----------------|-----------|------------------------------------------|
-| **Curved**     | 0.5       | Default smooth Bézier curves             |
+| **Curved**     | 0.5       | Default smooth BÃ©zier curves             |
 | **Straight**   | 0.0       | Direct line from port to port            |
 | **Right-Angle**| 1.5       | Sharp bend for schematic-style wiring    |
 
@@ -297,7 +297,7 @@ Toggle from the toolbar dropdown or press **W** to cycle.
 4. The node, all wire references, and expression references update automatically
 5. Empty names or unchanged names are ignored
 
-Duplicated nodes automatically receive an `_copy` suffix (e.g., `lfo1` → `lfo1_copy`).
+Duplicated nodes automatically receive an `_copy` suffix (e.g., `lfo1` â†’ `lfo1_copy`).
 
 ---
 
@@ -313,7 +313,7 @@ Duplicated nodes automatically receive an `_copy` suffix (e.g., `lfo1` → `lfo1
 
 ## Help System
 
-- **? button** on each node's title bar → opens a formatted help window
+- **? button** on each node's title bar â†’ opens a formatted help window
 - **Node Help** in the context menu (1 node selected)
 - Help windows show: description, parameters table, inputs/outputs, tips,
   example expressions, and related nodes
@@ -347,14 +347,14 @@ Patches are saved as `.gonodes` JSON files containing:
 - All wire connections
 - Node states (bypass, locked, preview enabled)
 
-Bypass and lock states are persisted — reloading a patch restores all node states.
+Bypass and lock states are persisted â€” reloading a patch restores all node states.
 
 ---
 
 ## Active Chain Cooking
 
 GONODES automatically optimizes performance by only cooking nodes that feed a
-**live sink** — a node whose output is currently being displayed. This is
+**live sink** â€” a node whose output is currently being displayed. This is
 always-on with no toggle required.
 
 ### What counts as a sink?
@@ -363,25 +363,25 @@ always-on with no toggle required.
 |--------------------------|---------------------------------------------------|
 | **Viewer panel**         | The node you last clicked (if it's a TOP)         |
 | **Floating viewer window** | Each pinned viewer window targets a specific node |
-| **is_sink operators**    | Any node with `is_sink = true` (WindowTOP, future SpoutOut, MIDIOut, OSCOut, NDIOut, etc.) |
+| **is_sink operators**    | Any node with `is_sink = true` (WindowOUT, future SpoutOut, MIDIOut, OSCOut, NDIOut, etc.) |
 
 ### How it works
 
 1. Every frame, the editor tells the cook engine which nodes are sinks.
 2. The cook engine walks **upstream** from each sink via BFS to find all
-   contributing nodes — this is the **active set**.
+   contributing nodes â€” this is the **active set**.
 3. The walk follows both **wire connections** and **expression references**
    (e.g., `chop("lfo1", "out")` makes `lfo1` part of the active chain).
 4. Nodes **outside** the active set skip cooking entirely. Their `cached_output`
    is frozen at whatever it last produced.
 5. When you click a different node, it becomes the viewer target (a new sink),
    and its entire upstream chain activates instantly.
-6. The active set is **event-driven** — it only recomputes when topology,
+6. The active set is **event-driven** â€” it only recomputes when topology,
    viewer targets, or expressions change (not every frame).
 
 ### Visual feedback
 
-- **Info bar** shows `Active: N/M` — how many nodes are cooking vs. total.
+- **Info bar** shows `Active: N/M` â€” how many nodes are cooking vs. total.
 - **Perf overlay** shows `zzz` in gray on inactive nodes (when the Perf toggle
   is on).
 - Selecting a node immediately activates it and its upstream chain.

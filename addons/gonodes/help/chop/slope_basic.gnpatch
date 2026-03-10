@@ -58,7 +58,7 @@
                                                       }
                                    },
                   "window1":  {
-                                  "type":  "WindowTOP",
+                                  "type":  "WindowOUT",
                                   "position":  [
                                                    1050,
                                                    100

@@ -22,7 +22,7 @@
       }
     },
     "window1": {
-      "type": "WindowTOP",
+      "type": "WindowOUT",
       "position": [800, 200],
       "parameters": {
         "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
@@ -37,7 +37,7 @@
     {
       "id": "ann_1",
       "type": "note",
-      "text": "Table DAT — Manual Data Table\n\nA 3×3 table with comma-separated headers and data rows.\nGreat for storing configuration, lookup values, or\ndriving ReplicatorCOMP with per-instance overrides.",
+      "text": "Table DAT â€” Manual Data Table\n\nA 3Ã—3 table with comma-separated headers and data rows.\nGreat for storing configuration, lookup values, or\ndriving ReplicatorCOMP with per-instance overrides.",
       "position": [50.0, -50.0],
       "size": [600.0, 110.0],
       "color": [1.0, 1.0, 1.0, 0.8]

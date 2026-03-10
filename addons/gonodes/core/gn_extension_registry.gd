@@ -498,12 +498,6 @@ func _register_core_operators() -> void:
 	_reg("SwitchTOP",       "TOP", SwitchTOP,
 		"Select one of up to 4 texture inputs by index.")
 
-	# ── TOPs: Output ────────────────────────────────────────────────────
-	_reg("WindowTOP",       "TOP", WindowTOP,
-		"Display a texture in a standalone OS window (VJ output).")
-	_reg("FileSaveTOP",     "TOP", FileSaveTOP,
-		"Save GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write.")
-
 	# ── TOPs: Filters (matte, premultiply, posterize, radial blur, anti-alias, palette) ──
 	_reg("MatteTOP",        "TOP", MatteTOP,
 		"Apply alpha from a second texture (luma/R/G/B/A source, invert, premultiply).")
@@ -597,8 +591,6 @@ func _register_core_operators() -> void:
 	# ── CHOPs: I/O (OSC, MIDI, Audio) ──────────────────────────────────
 	_reg("OscInCHOP",       "CHOP", OscInCHOP,
 		"Receive OSC messages as CHOP channels via UDP.")
-	_reg("OscOutCHOP",      "CHOP", OscOutCHOP,
-		"Send CHOP channels as OSC messages over UDP.")
 	_reg("MidiInCHOP",      "CHOP", MidiInCHOP,
 		"Receive MIDI note, CC, pitch bend as CHOP channels.")
 	_reg("AudioInCHOP",     "CHOP", AudioInCHOP,
@@ -607,12 +599,6 @@ func _register_core_operators() -> void:
 		"FFT spectrum analysis — frequency bands as CHOP channels.")
 	_reg("AudioFileInCHOP", "CHOP", AudioFileInCHOP,
 		"Play audio file (WAV/OGG) and output waveform as CHOP channels.")
-
-	# ── CHOPs: Output / Sinks ───────────────────────────────────────────
-	_reg("RecordCHOP",      "CHOP", RecordCHOP,
-		"Record CHOP channels over time to buffer. Save to CSV/JSON.")
-	_reg("AudioDeviceOutCHOP", "CHOP", AudioDeviceOutCHOP,
-		"Output CHOP channels to audio device as PCM audio.")
 
 	# ── CHOPs: Input Devices ────────────────────────────────────────────
 	_reg("KeyboardInCHOP",  "CHOP", KeyboardInCHOP,
@@ -878,10 +864,6 @@ func _register_core_operators() -> void:
 	_reg("CallbackDAT",     "DAT", CallbackDAT,
 		"Event-driven callback DAT. Named scripts fire on target node events (onCook, onValueChange, onStart).")
 
-	# ── DATs: Output / Sinks ────────────────────────────────────────────
-	_reg("FileSaveDAT",     "DAT", FileSaveDAT,
-		"Export table/text to disk (CSV, TSV, JSON, plain text).")
-
 	# ── DATs: Input / IO (new) ──────────────────────────────────────────
 	_reg("FileInDAT",       "DAT", FileInDAT,
 		"Read a file (CSV, TSV, JSON, text) from disk into a table.")
@@ -954,14 +936,6 @@ func _register_core_operators() -> void:
 	_reg("CHOPtoTOP",       "TOP", CHOPtoTOP,
 		"Render CHOP channels as a texture (waveform, heatmap, or graph).")
 
-	# ── IMGs: Output / Sinks ────────────────────────────────────────────
-	_reg("FileSaveIMG",     "IMG", FileSaveIMG,
-		"Save CPU Image to disk (PNG, WebP, EXR). Toggle 'active' to write.")
-	_reg("MovieOutIMG",     "IMG", MovieOutIMG,
-		"Save image sequence to disk as numbered PNG/WebP frames.")
-	_reg("FFmpegOutIMG",    "IMG", FFmpegOutIMG,
-		"Encode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, ProRes).")
-
 	# ── COMPs ───────────────────────────────────────────────────────────
 	_reg("GeometryCOMP",    "COMP", GeometryCOMP,
 		"MeshInstance3D wrapper — places SOP geometry in a 3D scene with MAT material.")
@@ -1029,6 +1003,32 @@ func _register_core_operators() -> void:
 		"Point sprite material — renders vertices as sized point sprites.")
 	_reg("DepthMAT",        "MAT", DepthMAT,
 		"Visualize scene depth as grayscale with near/far controls.")
+
+	# ── OUTs: Display ──────────────────────────────────────────────────
+	_reg("WindowOUT",       "OUT", WindowOUT,
+		"Display a texture in a standalone OS window (VJ output).")
+
+	# ── OUTs: File Save ────────────────────────────────────────────────
+	_reg("TextureSaveOUT",  "OUT", TextureSaveOUT,
+		"Save GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write.")
+	_reg("ImageSaveOUT",    "OUT", ImageSaveOUT,
+		"Save CPU Image to disk (PNG, WebP, EXR). Activate toggle to write.")
+	_reg("TableSaveOUT",    "OUT", TableSaveOUT,
+		"Export table/text to disk (CSV, TSV, JSON, plain text).")
+
+	# ── OUTs: Video ────────────────────────────────────────────────────
+	_reg("MovieOUT",        "OUT", MovieOUT,
+		"Save image sequence to disk (numbered PNG/WebP frames).")
+	_reg("FFmpegOUT",       "OUT", FFmpegOUT,
+		"Encode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, ProRes).")
+
+	# ── OUTs: Audio / Network ──────────────────────────────────────────
+	_reg("AudioDeviceOUT",  "OUT", AudioDeviceOUT,
+		"Output CHOP channels to audio device as PCM audio.")
+	_reg("RecordOUT",       "OUT", RecordOUT,
+		"Record CHOP channels over time to buffer. Save to CSV/JSON.")
+	_reg("OscOUT",          "OUT", OscOUT,
+		"Send CHOP channels as OSC messages over UDP.")
 
 	GNLogger.info("ExtRegistry",
 		"Registered %d core operators" % _operators.size())

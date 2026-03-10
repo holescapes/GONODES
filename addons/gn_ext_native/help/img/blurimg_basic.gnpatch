@@ -31,7 +31,7 @@
             "parameters": {}
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1200, 100],
             "parameters": {
                 "resolution": {
@@ -50,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Blur IMG (Native) — Heavy Blur on Noise\n\nApplies a 12-pixel radius box blur (2 passes) to\nmonochrome noise. Try increasing radius/passes to\nsee the native C++ speed advantage.",
+            "text": "Blur IMG (Native) â€” Heavy Blur on Noise\n\nApplies a 12-pixel radius box blur (2 passes) to\nmonochrome noise. Try increasing radius/passes to\nsee the native C++ speed advantage.",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

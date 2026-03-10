@@ -1,12 +1,10 @@
-class_name FileSaveTOP
-extends GNTopBase
+class_name TextureSaveOUT
+extends GNOutBase
 ## Reads a GPU texture back to CPU and saves to disk as PNG, WebP, or EXR.
 ##
-## This is a **sink** operator with `is_sink = true`.  Activate the "active"
-## toggle to start writing.  Supports auto-numbering for image sequences.
-##
+## Activate the "active" toggle to start writing.
+## Supports auto-numbering for image sequences.
 ## The GPU→CPU readback (`get_image()`) happens once per cook when active.
-## The input texture passes through for downstream nodes.
 
 enum Format { PNG, WEBP, EXR }
 
@@ -18,14 +16,12 @@ var _was_active: bool = false
 
 
 func _init() -> void:
-	node_type = "filesavetop"
-	is_sink = true
+	node_type = "texturesave"
 	node_description = "Save GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.TOP, false, "Texture to save")
-	add_output("out", GNFamily.Type.TOP, "Pass-through texture")
 
 
 func _init_parameters() -> void:
@@ -47,10 +43,7 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var tex_in: GNTextureData = _get_input_top(inputs, 0)
 	if tex_in == null or tex_in.texture == null:
-		return tex_in
-
-	# Pass-through — return the input texture data directly
-	cached_output = tex_in
+		return null
 
 	var active: bool = get_param_value("active")
 
@@ -60,14 +53,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_was_active = active
 
 	if not active:
-		return tex_in
+		return null
 
 	# GPU → CPU readback
 	var image: Image = tex_in.texture.get_image()
 	if image == null:
-		GNLogger.warn("FileSaveTOP",
+		GNLogger.warn("TextureSaveOUT",
 			"'%s': get_image() returned null (texture may not be ready)" % id)
-		return tex_in
+		return null
 
 	# Build path
 	var base_path: String = get_param_value("file_path")
@@ -101,9 +94,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			err = image.save_exr(full_path, false)
 
 	if err != OK:
-		GNLogger.warn("FileSaveTOP",
+		GNLogger.warn("TextureSaveOUT",
 			"'%s': Failed to save '%s' (error %d)" % [id, full_path, err])
 	else:
-		GNLogger.debug("FileSaveTOP", "'%s': Saved '%s'" % [id, full_path])
+		GNLogger.debug("TextureSaveOUT", "'%s': Saved '%s'" % [id, full_path])
 
-	return tex_in
+	return null

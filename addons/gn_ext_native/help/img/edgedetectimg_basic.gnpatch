@@ -31,7 +31,7 @@
             "parameters": {}
         },
         "window1": {
-            "type": "WindowTOP",
+            "type": "WindowOUT",
             "position": [1200, 100],
             "parameters": {
                 "resolution": {
@@ -50,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Edge Detect IMG (Native) — Sobel on Noise\n\nSobel edge detection at 1.5× strength applied to\ncolour noise. Toggle 'color_edges' to see gradient\ndirection, or switch kernel to Prewitt.",
+            "text": "Edge Detect IMG (Native) â€” Sobel on Noise\n\nSobel edge detection at 1.5Ã— strength applied to\ncolour noise. Toggle 'color_edges' to see gradient\ndirection, or switch kernel to Prewitt.",
             "position": [-100.0, -150.0],
             "size": [400.0, 100.0],
             "color": [1.0, 1.0, 1.0, 0.8]

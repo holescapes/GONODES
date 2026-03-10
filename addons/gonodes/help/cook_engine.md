@@ -11,12 +11,12 @@ processing only what needs to update and in the correct order.
 
 When a parameter changes, an input updates, or time advances (for time-dependent
 operators), the affected node is marked **dirty**. Dirtiness propagates downstream
-through all connected nodes — if a node's input changes, it too becomes dirty.
+through all connected nodes â€” if a node's input changes, it too becomes dirty.
 
 ### 2. Active Chain Resolution
 
 Not all nodes cook every frame. The engine traces backward from **output sinks**
-(OutputTOP, RenderTOP, WindowTOP, etc.) to find all nodes that feed them. Only
+(WindowOUT, RenderTOP, etc.) to find all nodes that feed them. Only
 these "active" nodes are candidates for cooking. Disconnected nodes and branches
 that don't reach a sink are skipped entirely.
 
@@ -45,23 +45,23 @@ The node reads its inputs, processes data, and writes to its outputs.
 
 ## Time & Frames
 
-- **time** — Seconds elapsed since the cook engine started (resets on Reset)
-- **frame** — Monotonically increasing frame counter (resets on Reset)
-- **dt** — Delta time for the current frame
-- **NRT mode** — Non-Realtime mode uses a fixed timestep for deterministic,
+- **time** â€” Seconds elapsed since the cook engine started (resets on Reset)
+- **frame** â€” Monotonically increasing frame counter (resets on Reset)
+- **dt** â€” Delta time for the current frame
+- **NRT mode** â€” Non-Realtime mode uses a fixed timestep for deterministic,
   frame-perfect output. Toggle it on the toolbar and set the target FPS.
 
 ---
 
 ## Output Sinks
 
-Output sinks are the "endpoints" of your graph — they trigger the active chain:
+Output sinks are the "endpoints" of your graph â€” they trigger the active chain:
 
 | Sink          | Purpose                                          |
 |---------------|--------------------------------------------------|
-| **OutputTOP** | Displays a texture in the main viewer            |
+| **WindowOUT** | Displays a texture in a standalone OS window   |
 | **RenderTOP** | Renders a 3D scene to a viewport texture         |
-| **WindowTOP** | Opens a separate OS window showing the texture   |
+| **WindowOUT** | Opens a separate OS window showing the texture   |
 
 Any TOP that feeds into these sinks becomes part of the active chain.
 
@@ -84,8 +84,8 @@ Enable the **VRAM** toggle to see GPU memory usage in the info bar.
 - **Lock** nodes with **L** to prevent accidental parameter changes during profiling
 - Reduce TOP resolutions (width/height) where full resolution isn't needed
 - Use the **Active Chain** visualization to verify only necessary nodes are cooking
-- NoiseTOP and shader-based TOPs run on the GPU — they're generally fast
-- ScriptCHOP/DAT/SOP/IMG run on the CPU — heavy computation here affects framerate
+- NoiseTOP and shader-based TOPs run on the GPU â€” they're generally fast
+- ScriptCHOP/DAT/SOP/IMG run on the CPU â€” heavy computation here affects framerate
 
 ---
 
@@ -94,7 +94,7 @@ Enable the **VRAM** toggle to see GPU memory usage in the info bar.
 ### Bypass (B key)
 
 A bypassed node passes its first input through unchanged, skipping its own
-processing. The node shows a ⏩ indicator and dims its appearance. Useful for:
+processing. The node shows a â© indicator and dims its appearance. Useful for:
 
 - A/B testing the effect of a node
 - Temporarily disabling expensive processing
@@ -103,7 +103,7 @@ processing. The node shows a ⏩ indicator and dims its appearance. Useful for:
 ### Lock (L key)
 
 A locked node becomes read-only. The inspector dims all parameters and disables
-editing. The node shows a 🔒 indicator. Useful for:
+editing. The node shows a ðŸ”’ indicator. Useful for:
 
 - Preventing accidental changes during performance testing
 - Freezing a node's state for comparison
@@ -116,8 +116,8 @@ editing. The node shows a 🔒 indicator. Useful for:
 NRT mode replaces the variable-framerate real-time clock with a fixed timestep.
 This is essential for:
 
-- **Deterministic output** — same input always produces the same result
-- **Frame-perfect recording** — every frame is rendered regardless of real clock
-- **Slow-motion / fast-motion** — decouple simulation time from wall time
+- **Deterministic output** â€” same input always produces the same result
+- **Frame-perfect recording** â€” every frame is rendered regardless of real clock
+- **Slow-motion / fast-motion** â€” decouple simulation time from wall time
 
 Toggle NRT on the toolbar and set the target FPS with the spinner.

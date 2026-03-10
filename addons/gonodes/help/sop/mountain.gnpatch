@@ -48,7 +48,7 @@
       }
     },
     "window1": {
-      "type": "WindowTOP",
+      "type": "WindowOUT",
       "position": [1350, 200],
       "parameters": {
         "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
@@ -67,7 +67,7 @@
     {
       "id": "ann_1",
       "type": "note",
-      "text": "Mountain SOP — Noise Terrain Generation\n\nA high-res grid is displaced along vertex normals by\nfractal noise (5 octaves, Simplex). Adjust height and\nfrequency for terrain, organic surfaces, or abstract shapes.",
+      "text": "Mountain SOP â€” Noise Terrain Generation\n\nA high-res grid is displaced along vertex normals by\nfractal noise (5 octaves, Simplex). Adjust height and\nfrequency for terrain, organic surfaces, or abstract shapes.",
       "position": [50.0, -50.0],
       "size": [600.0, 110.0],
       "color": [1.0, 1.0, 1.0, 0.8]

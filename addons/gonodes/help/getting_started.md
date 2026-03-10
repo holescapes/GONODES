@@ -12,14 +12,14 @@ GONODES organizes operators into families based on the type of data they process
 
 | Family   | Purpose                                           |
 |----------|--------------------------------------------------|
-| **TOP**  | Texture operators — shader-based image generation and compositing |
-| **IMG**  | Image operators — CPU-side image processing       |
-| **CHOP** | Channel operators — time-based data and animation |
-| **DAT**  | Data operators — tables, text, and structured data |
-| **SOP**  | Surface operators — 3D geometry generation        |
-| **MAT**  | Material operators — shader materials for 3D      |
-| **COMP** | Component operators — 3D scene objects and sub-networks |
-| **Output** | Final output sinks for rendering and display    |
+| **TOP**  | Texture operators â€” shader-based image generation and compositing |
+| **IMG**  | Image operators â€” CPU-side image processing       |
+| **CHOP** | Channel operators â€” time-based data and animation |
+| **DAT**  | Data operators â€” tables, text, and structured data |
+| **SOP**  | Surface operators â€” 3D geometry generation        |
+| **MAT**  | Material operators â€” shader materials for 3D      |
+| **COMP** | Component operators â€” 3D scene objects and sub-networks |
+| **OUT** | Final output sinks for rendering and display    |
 
 ---
 
@@ -27,8 +27,8 @@ GONODES organizes operators into families based on the type of data they process
 
 1. Press **Alt+A** to open the Add Node palette
 2. Type **Noise** and select **NoiseTOP**
-3. Press **Alt+A** again and add an **OutputTOP**
-4. Drag from NoiseTOP's output port to OutputTOP's input
+3. Press **Alt+A** again and add a **WindowOUT**
+4. Drag from NoiseTOP's output port to WindowOUT's input
 5. The viewer shows animated Perlin noise!
 
 Try adjusting parameters in the inspector panel on the right. Click a node
@@ -47,8 +47,8 @@ time advances (for time-dependent operators).
 ### Active Chain
 
 Not every node cooks every frame. The engine traces backward from output
-sinks (OutputTOP, RenderTOP, WindowTOP) to find all nodes that feed them.
-Only these "active" nodes are evaluated — disconnected nodes are skipped.
+sinks (WindowOUT, RenderTOP) to find all nodes that feed them.
+Only these "active" nodes are evaluated â€” disconnected nodes are skipped.
 
 ### Expressions
 
@@ -65,11 +65,11 @@ to navigate back up. The breadcrumb bar at the top shows your current location.
 
 Five script operator types let you write custom logic:
 
-- **ScriptCHOP** — custom channel processing
-- **ScriptDAT** — custom data table generation
-- **ScriptSOP** — custom geometry generation
-- **ScriptIMG** — custom image processing
-- **GenericScriptNode** — multi-family output (CHOP + DAT + IMG)
+- **ScriptCHOP** â€” custom channel processing
+- **ScriptDAT** â€” custom data table generation
+- **ScriptSOP** â€” custom geometry generation
+- **ScriptIMG** â€” custom image processing
+- **GenericScriptNode** â€” multi-family output (CHOP + DAT + IMG)
 
 Each has a code editor with presets accessible from the inspector.
 

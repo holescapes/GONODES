@@ -2,13 +2,13 @@
 
 [sub_resource type="GDScript" id="GDScript_onsmi"]
 script/source = "extends Node
-## Phase 2 test script — wires up a minimal GONODES network and runs it:
-##   LFO_CHOP (\"lfo1\") → expression drives NoiseTOP (\"noise1\") time_offset
-##   NoiseTOP (\"noise1\") → LevelTOP (\"level1\")
-##   LevelTOP (\"level1\") → WindowTOP (\"win1\") — output on a separate window
+## Phase 2 test script â€” wires up a minimal GONODES network and runs it:
+##   LFO_CHOP (\"lfo1\") â†’ expression drives NoiseTOP (\"noise1\") time_offset
+##   NoiseTOP (\"noise1\") â†’ LevelTOP (\"level1\")
+##   LevelTOP (\"level1\") â†’ WindowOUT (\"win1\") â€” output on a separate window
 ##   Output also displayed in the main window's TextureRect viewer.
 ##
-## GNNodes extend Node — the cook engine parents them in the scene tree,
+## GNNodes extend Node â€” the cook engine parents them in the scene tree,
 ## giving TOPs ownership of their SubViewports and Windows.
 
 @onready var viewer: TextureRect = $Viewer
@@ -29,10 +29,10 @@ func _ready() -> void:
 	GNLogger.level = GNLogger.Level.DEBUG
 
 	# Print display info for debugging
-	var displays := WindowTOP.get_display_info()
+	var displays := WindowOUT.get_display_info()
 	for d in displays:
 		print(\"Display %d: %s at %s\" % [d[\"index\"], d[\"size\"], d[\"position\"]])
-	print(\"GONODES Phase 2 Test — running (%d display(s))\" % displays.size())
+	print(\"GONODES Phase 2 Test â€” running (%d display(s))\" % displays.size())
 
 
 func _setup_network() -> void:
@@ -60,12 +60,12 @@ func _setup_network() -> void:
 	level.get_parameter(\"contrast\").set_value(1.5)
 	level.get_parameter(\"brightness\").set_value(1.1)
 
-	# WindowTOP — output display window
-	var win := WindowTOP.new()
+	# WindowOUT â€” output display window
+	var win := WindowOUT.new()
 	win.initialize(\"win1\")
 	win.get_parameter(\"title\").set_value(\"GONODES Output\")
 	win.get_parameter(\"monitor\").set_value(0)
-	win.get_parameter(\"window_mode\").set_value(WindowTOP.WindowMode.WINDOWED)
+	win.get_parameter(\"window_mode\").set_value(WindowOUT.WindowMode.WINDOWED)
 	win.get_parameter(\"resolution\").set_value(Vector2i(800, 600))
 
 	# --- Add to network ---

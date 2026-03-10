@@ -36,7 +36,7 @@
       }
     },
     "window1": {
-      "type": "WindowTOP",
+      "type": "WindowOUT",
       "position": [1150, 200],
       "parameters": {
         "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
@@ -52,7 +52,7 @@
     {
       "id": "ann_1",
       "type": "note",
-      "text": "Optical Flow TOP — Motion Vectors\n\nAnimated noise feeds the optical flow shader which estimates\nper-pixel motion vectors using Horn-Schunck method.\nR=horizontal, G=vertical (0.5=zero), B=magnitude.",
+      "text": "Optical Flow TOP â€” Motion Vectors\n\nAnimated noise feeds the optical flow shader which estimates\nper-pixel motion vectors using Horn-Schunck method.\nR=horizontal, G=vertical (0.5=zero), B=magnitude.",
       "position": [50.0, -50.0],
       "size": [600.0, 110.0],
       "color": [1.0, 1.0, 1.0, 0.8]

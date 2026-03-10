@@ -1,4 +1,4 @@
-﻿{
+{
     "version":  "1.0.0",
     "generator":  "GONODES",
     "nodes":  {
@@ -30,7 +30,7 @@
                                                  }
                               },
                   "window1":  {
-                                  "type":  "WindowTOP",
+                                  "type":  "WindowOUT",
                                   "position":  [
                                                    1200,
                                                    100
