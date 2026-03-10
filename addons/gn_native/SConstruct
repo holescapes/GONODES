@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+"""
+SConstruct for gn_native — C++ GDExtension processors for GONODES.
+
+Requirements:
+  - godot-cpp (https://github.com/godotengine/godot-cpp) checked out to
+    addons/gn_native/godot-cpp/ or set GODOTCPP_PATH environment variable.
+  - SCons >= 4.0
+
+Usage:
+  cd addons/gn_native
+  scons platform=<windows|linux|macos> target=<template_debug|template_release>
+"""
+
+import os
+
+env = SConscript("godot-cpp/SConstruct")
+
+# ------------------------------------------------------------------
+# Source files
+# ------------------------------------------------------------------
+env.Append(CPPPATH=["src/"])
+
+sources = Glob("src/*.cpp") + Glob("src/sop/*.cpp") + Glob("src/img/*.cpp")
+
+# ------------------------------------------------------------------
+# Output library
+# ------------------------------------------------------------------
+library = env.SharedLibrary(
+    target="bin/{}/libgn_native{}{}".format(
+        {"windows": "win64", "linux": "linux64", "macos": "macos"}.get(
+            env["platform"], env["platform"]
+        ),
+        env["suffix"],
+        env["SHLIBSUFFIX"],
+    ),
+    source=sources,
+)
+
+Default(library)
