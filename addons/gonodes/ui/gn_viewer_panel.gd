@@ -66,6 +66,9 @@ const ZOOM_MIN := 0.1
 const ZOOM_MAX := 16.0
 const ZOOM_STEP := 0.1
 
+## Cached ImageTexture for IMG family — avoids recreating every frame.
+var _img_texture: ImageTexture = null
+
 # ─── CHOP display ────────────────────────────────────────────────────────────
 
 var _waveform: GNWaveformView = null
@@ -830,6 +833,7 @@ func set_target(p_node_id: String) -> void:
 	_zoom = 1.0
 	_pan = Vector2.ZERO
 	_panning = false
+	_img_texture = null  # Force full layout on next IMG update
 	_orbit_yaw = 45.0
 	_orbit_pitch = -30.0
 	_orbit_distance = 3.0
@@ -872,11 +876,25 @@ func update_from_node(node: GNNode) -> void:
 			if output is GNImageData:
 				var img_data: GNImageData = output as GNImageData
 				if img_data.image != null and not img_data.image.is_empty():
-					var tex := ImageTexture.create_from_image(img_data.image)
-					_show_texture(tex,
-						"%dx%d" % [img_data.resolution.x, img_data.resolution.y])
-					_update_zoom_label()
+					var info := "%dx%d" % [img_data.resolution.x, img_data.resolution.y]
+					var needs_layout := false
+					if _img_texture == null:
+						_img_texture = ImageTexture.create_from_image(img_data.image)
+						needs_layout = true
+					else:
+						var old_size := _img_texture.get_size()
+						_img_texture.update(img_data.image)
+						if Vector2i(_img_texture.get_size()) != Vector2i(old_size):
+							needs_layout = true
+					if needs_layout:
+						_show_texture(_img_texture, info)
+						_update_zoom_label()
+					else:
+						# Pixels updated in-place; skip hide/show/fit cycle
+						if _info_bar:
+							_info_bar.text = info
 					return
+			_img_texture = null
 			_show_info("No IMG output", "")
 
 		GNFamily.Type.CHOP:

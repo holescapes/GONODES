@@ -233,6 +233,7 @@ func set_active_sinks(sinks: Array[String]) -> void:
 		return
 	active_sinks = sinks
 	_active_set_dirty = true
+	_consumer_counts_dirty = true
 
 
 ## Marks the active set for recomputation on the next cook frame.
@@ -481,6 +482,14 @@ func _rebuild_consumer_counts() -> void:
 	for conn in network.connections:
 		var from_id: String = conn.from_node
 		_consumer_counts[from_id] = _consumer_counts.get(from_id, 0) + 1
+	# Count viewer sinks as additional consumers so that operators viewing
+	# a node's output via the UI cause _shared = true, preventing in-place
+	# mutation of upstream cached_output by downstream _mutable_input() calls.
+	for sink_id in active_sinks:
+		var in_conns: Array = network.get_input_connections(sink_id)
+		for conn in in_conns:
+			var from_id: String = conn.from_node
+			_consumer_counts[from_id] = _consumer_counts.get(from_id, 0) + 1
 	_consumer_counts_dirty = false
 
 
