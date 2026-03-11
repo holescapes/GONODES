@@ -57,6 +57,30 @@ func _on_value_changed(_value: float) -> void:
 	mark_dirty()
 
 
+var _remote_dragging: bool = false
+
+
+## Override: HSlider's C++ input handler doesn't fire via gui_input signal,
+## so we compute the value directly from the mouse position.
+func _dispatch_panel_input(event: InputEvent) -> void:
+	if _slider == null:
+		return
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_LEFT:
+			_remote_dragging = mb.pressed
+			if mb.pressed:
+				_set_slider_from_pos(mb.position.x)
+			return
+	elif event is InputEventMouseMotion and _remote_dragging:
+		_set_slider_from_pos(event.position.x)
+
+
+func _set_slider_from_pos(x: float) -> void:
+	var ratio := clampf(x / maxf(_slider.size.x, 1.0), 0.0, 1.0)
+	_slider.value = _slider.min_value + ratio * (_slider.max_value - _slider.min_value)
+
+
 func destroy_control_node() -> void:
 	if _slider != null and _slider.value_changed.is_connected(_on_value_changed):
 		_slider.value_changed.disconnect(_on_value_changed)

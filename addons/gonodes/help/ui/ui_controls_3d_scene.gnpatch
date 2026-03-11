@@ -1,0 +1,144 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "colorpicker1": {
+            "type": "ColorPickerUI",
+            "position": [100, 50],
+            "parameters": {
+                "default_color": { "value": { "_type": "Color", "r": 0.3, "g": 0.6, "b": 1.0, "a": 1.0 } },
+                "min_size": { "value": { "_type": "Vector2i", "x": 200, "y": 36 } }
+            }
+        },
+        "slider_rotation": {
+            "type": "SliderUI",
+            "position": [100, 200],
+            "parameters": {
+                "label": { "value": "Camera Y Rotation" },
+                "min_val": { "value": -180.0 },
+                "max_val": { "value": 180.0 },
+                "step": { "value": 1.0 },
+                "default_val": { "value": 0.0 },
+                "min_size": { "value": { "_type": "Vector2i", "x": 200, "y": 24 } }
+            }
+        },
+        "label_title": {
+            "type": "LabelUI",
+            "position": [100, 340],
+            "parameters": {
+                "text": { "value": "Material & Camera Control" },
+                "font_size": { "value": 14 },
+                "h_align": { "value": 1 }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 220, "y": 180 } },
+                "layout": { "value": 0 },
+                "spacing": { "value": 6 },
+                "bg_color": { "value": { "_type": "Color", "r": 0.1, "g": 0.1, "b": 0.14, "a": 1.0 } }
+            }
+        },
+        "bridge1": {
+            "type": "ScriptCHOP",
+            "position": [500, 350],
+            "parameters": {
+                "time_dependent": { "value": true },
+                "force_active": { "value": true },
+                "code": { "value": "# Bridge CHOP channels to GeometryCOMP and CameraCOMP params\n# Reads PanelTOP CHOP output (colorpicker + slider state)\n# and writes them to the 3D scene operators.\n\nfunc cook():\n    # Read color from panel CHOP channels\n    var r = chop(\"panel1\", \"colorpicker1:r\")\n    var g = chop(\"panel1\", \"colorpicker1:g\")\n    var b = chop(\"panel1\", \"colorpicker1:b\")\n\n    # Set geometry material color\n    set_par(\"geo1\", \"albedo_color\", Color(r, g, b, 1.0))\n\n    # Read slider value and set camera Y rotation\n    var cam_ry = chop(\"panel1\", \"slider_rotation:value\")\n    set_par(\"cam1\", \"ry\", cam_ry)\n\n    # Output the values for monitoring\n    op.set_single_value(\"r\", r)\n    op.set_single_value(\"g\", g)\n    op.set_single_value(\"b\", b)\n    op.set_single_value(\"cam_ry\", cam_ry)\n" }
+            }
+        },
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [900, -50],
+            "parameters": {
+                "radius": { "value": 0.6 },
+                "height": { "value": 1.2 },
+                "radial_segments": { "value": 48 },
+                "rings": { "value": 24 }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [1250, 50],
+            "parameters": {
+                "albedo_color": { "value": { "_type": "Color", "r": 0.3, "g": 0.6, "b": 1.0, "a": 1.0 } },
+                "metallic": { "value": 0.3 },
+                "roughness": { "value": 0.4 }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [1250, 250],
+            "parameters": {
+                "tx": { "value": 0.0 },
+                "ty": { "value": 0.5 },
+                "tz": { "value": 2.5 },
+                "rx": { "value": -10.0 },
+                "ry": { "value": 0.0 },
+                "rz": { "value": 0.0 },
+                "fov": { "value": 60.0 }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [1250, 400],
+            "parameters": {
+                "type": { "value": 0 },
+                "rx": { "value": -40.0 },
+                "ry": { "value": 30.0 },
+                "energy": { "value": 1.2 },
+                "shadows": { "value": true }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1600, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "bg_color": { "value": { "_type": "Color", "r": 0.05, "g": 0.05, "b": 0.08, "a": 1.0 } },
+                "anti_aliasing": { "value": 2 }
+            }
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [1950, 100],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [2300, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true },
+                "title": { "value": "3D Scene — UI Controlled" }
+            }
+        }
+    },
+    "connections": [
+        { "from": "colorpicker1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "slider_rotation", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "label_title", "from_port": 0, "to": "panel1", "to_port": 2 },
+        { "from": "sphere1", "from_port": 0, "to": "geo1", "to_port": 0 },
+        { "from": "geo1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "cam1", "from_port": 0, "to": "render1", "to_port": 1 },
+        { "from": "light1", "from_port": 0, "to": "render1", "to_port": 2 },
+        { "from": "render1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UI Controls 3D Scene — Color & Camera\n\nColorPicker changes the sphere's material color.\nSlider controls the camera's Y rotation (orbit).\n\nData flow:\n  UI widgets → PanelTOP (CHOP port 1) → ScriptCHOP\n  ScriptCHOP reads chop() channels and calls set_par()\n  to write color → GeometryCOMP and rotation → CameraCOMP.\n\nThe control panel and 3D render are composited into\na single output window.",
+            "position": [-200.0, -200.0],
+            "size": [550.0, 170.0],
+            "color": [0.3, 0.6, 1.0, 0.8]
+        }
+    ]
+}

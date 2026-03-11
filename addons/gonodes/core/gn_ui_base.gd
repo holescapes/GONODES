@@ -19,7 +19,13 @@ extends GNNode
 ## The Control node managed by this UI widget (Button, HSlider, Label, etc.).
 ## Subclasses create and assign their concrete Control type to this variable.
 ## Automatically freed on node removal via _notification(PREDELETE).
-var _control_node: Control = null
+## The setter tags the control with a back-reference so WindowOUT can find
+## the owning GNUiBase from any hovered Control.
+var _control_node: Control = null:
+	set(value):
+		_control_node = value
+		if value != null:
+			value.set_meta("gn_ui_owner", self)
 
 ## Widget state values exposed as CHOP channels by PanelTOP.
 ## Keys are channel names (e.g., "value", "press", "state"), values are floats.
@@ -105,3 +111,96 @@ func update_preview_control(control: Control) -> void:
 			label.text = "%s\n%s" % [_control_node.get_class(), state_str.strip_edges()]
 		else:
 			label.text = "no widget"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Panel Input Dispatch
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Standalone SubViewports (no SubViewportContainer parent) don't deliver
+# mouse-button or drag events to Controls via push_input(). WindowOUT
+# works around this by finding the GNUiBase that owns the hovered Control
+# and calling handle_panel_input(). Each widget type handles its own input.
+
+## Called by WindowOUT to deliver mouse events that push_input() cannot.
+## Receives events in SubViewport coordinates, remaps to control-local,
+## and calls _dispatch_panel_input().
+func handle_panel_input(event: InputEvent) -> void:
+	if _control_node == null:
+		return
+	var local_event := event
+	if event is InputEventMouse:
+		var ctrl_pos := _control_node.get_global_rect().position
+		local_event = event.xformed_by(Transform2D(0.0, -ctrl_pos))
+	_dispatch_panel_input(local_event)
+
+
+## Override in subclasses for widget-specific input handling.
+## Default: handles BaseButton pressed/toggled on release;
+## emits gui_input signal for all other controls (KnobUI, XYPadUI, etc.).
+func _dispatch_panel_input(event: InputEvent) -> void:
+	if _control_node is BaseButton:
+		_handle_base_button_input(event)
+	else:
+		_control_node.emit_signal("gui_input", event)
+
+
+## Handles BaseButton press/toggle on mouse-left release.
+func _handle_base_button_input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton):
+		return
+	var mb := event as InputEventMouseButton
+	if mb.button_index != MOUSE_BUTTON_LEFT or mb.pressed:
+		return
+	var btn := _control_node as BaseButton
+	if btn.toggle_mode:
+		btn.set_pressed_no_signal(not btn.button_pressed)
+	btn.emit_signal("pressed")
+	if btn.toggle_mode:
+		btn.emit_signal("toggled", btn.button_pressed)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Overlay System
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+## Requests the panel to show an overlay control anchored to this widget.
+## content: The Control to display (e.g., ItemList, color swatch grid).
+## anchor_rect: Viewport-space rect to anchor to. Defaults to _control_node rect.
+func _request_panel_overlay(content: Control, anchor_rect: Rect2 = Rect2()) -> bool:
+	if _control_node == null:
+		return false
+	var vp := _control_node.get_viewport()
+	if vp == null or not vp.has_meta("gn_panel_overlay"):
+		return false
+	var panel = vp.get_meta("gn_panel_overlay")
+	if anchor_rect == Rect2():
+		anchor_rect = _control_node.get_global_rect()
+	panel.show_overlay(self, content, anchor_rect)
+	return true
+
+
+## Dismisses the overlay if this widget owns it.
+func _dismiss_panel_overlay() -> void:
+	if _control_node == null:
+		return
+	var vp := _control_node.get_viewport()
+	if vp == null or not vp.has_meta("gn_panel_overlay"):
+		return
+	var panel = vp.get_meta("gn_panel_overlay")
+	if panel.get_overlay_owner() == self:
+		panel.hide_overlay()
+
+
+## Called when the overlay is dismissed (click-outside or explicit).
+## Override in subclasses to clean up overlay references.
+func _on_overlay_dismissed() -> void:
+	pass
+
+
+## Called by WindowOUT to deliver input events to overlay content.
+## event position is in SubViewport coordinates.
+## Return true if the event was handled.
+func _handle_overlay_input(event: InputEvent) -> bool:
+	return false

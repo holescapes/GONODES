@@ -62,6 +62,71 @@ func _on_item_pressed(item_id: int) -> void:
 	mark_dirty()
 
 
+var _overlay_list: ItemList = null
+
+
+## Override: show an inline ItemList overlay instead of the PopupMenu.
+func _dispatch_panel_input(event: InputEvent) -> void:
+	if _menu_btn == null:
+		return
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
+			_show_menu_overlay()
+
+
+func _show_menu_overlay() -> void:
+	var popup := _menu_btn.get_popup()
+	if popup.item_count == 0:
+		return
+
+	var list := ItemList.new()
+	list.name = "MenuOverlay"
+	for i in range(popup.item_count):
+		list.add_item(popup.get_item_text(i))
+
+	var item_h := 28.0
+	var list_height := minf(popup.item_count * item_h, 200.0)
+	list.custom_minimum_size = Vector2(maxf(_menu_btn.size.x, 120.0), list_height)
+	list.size = list.custom_minimum_size
+
+	var panel := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.2, 0.2, 0.25, 0.95)
+	style.border_color = Color(0.4, 0.4, 0.5, 0.8)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(3)
+	panel.add_theme_stylebox_override("panel", style)
+	panel.add_child(list)
+	panel.custom_minimum_size = Vector2(maxf(_menu_btn.size.x, 120.0) + 2, list_height + 2)
+	panel.size = panel.custom_minimum_size
+
+	_overlay_list = list
+	_request_panel_overlay(panel)
+
+
+func _handle_overlay_input(event: InputEvent) -> bool:
+	if _overlay_list == null:
+		return false
+	if not (event is InputEventMouseButton):
+		return false
+	var mb := event as InputEventMouseButton
+	if mb.button_index != MOUSE_BUTTON_LEFT or mb.pressed:
+		return false
+
+	var list_rect := _overlay_list.get_global_rect()
+	var local_pos := mb.position - list_rect.position
+	var idx := _overlay_list.get_item_at_position(local_pos, true)
+	if idx >= 0:
+		_on_item_pressed(idx)
+	_dismiss_panel_overlay()
+	return true
+
+
+func _on_overlay_dismissed() -> void:
+	_overlay_list = null
+
+
 func destroy_control_node() -> void:
 	if _menu_btn != null:
 		var popup: PopupMenu = _menu_btn.get_popup()

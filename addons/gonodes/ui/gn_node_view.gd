@@ -148,8 +148,18 @@ func _build_slots() -> void:
 	for i in range(_slot_map.size()):
 		set_slot(i, false, 0, Color.WHITE, false, 0, Color.WHITE)
 
-	# Remove existing children immediately (not queue_free — we need them gone
-	# before adding new children so GraphNode slot indices stay correct).
+	# Detach non-slot children (preview, perf overlay) so they survive the
+	# wipe — they'll be re-added after the new slot rows are in place.
+	var _preserved: Array[Control] = []
+	if _preview != null and is_instance_valid(_preview) and _preview.get_parent() == self:
+		remove_child(_preview)
+		_preserved.append(_preview)
+	if _perf_label != null and is_instance_valid(_perf_label) and _perf_label.get_parent() == self:
+		remove_child(_perf_label)
+		_preserved.append(_perf_label)
+
+	# Remove existing slot-row children immediately (not queue_free — we need
+	# them gone before adding new children so GraphNode slot indices stay correct).
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
@@ -234,6 +244,11 @@ func _build_slots() -> void:
 		type_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		type_label.add_theme_font_size_override("font_size", 12)
 		add_child(type_label)
+
+	# Re-attach preserved non-slot children after all slot rows so
+	# GraphNode slot indices remain correct.
+	for ctrl in _preserved:
+		add_child(ctrl)
 
 
 ## Public entry point — rebuilds all slot rows from the current port arrays.

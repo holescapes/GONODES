@@ -54,23 +54,36 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# Apply inverse spatial transform to panel_sources so interactive hits
 	# map back through translate/rotate/scale to the original panel viewport.
+	#
+	# The shader maps output UV → source UV as follows (see transform2d.gdshader):
+	#   1. uv -= pivot
+	#   2. uv /= scale
+	#   3. uv = rotate(uv, rotate_angle)   [forward rotate in shader = inverse of visual]
+	#   4. uv -= translate
+	#   5. uv += pivot
+	#
+	# We replicate the same sequence as a pixel-space Transform2D so that
+	# hit_test(output_point) yields the correct source-space coordinate.
 	if tex_in.panel_sources.size() > 0:
 		_cached_tex_data.panel_sources.clear()
-		# Build inverse transform in pixel space:
-		# Forward: pivot → scale → rotate → translate (in UV, origin top-left)
 		var fres := Vector2(res)
 		var pix_pivot := pvt * fres
+		var pix_trans := trans * fres
+
+		# Build the output→source mapping matching the shader steps:
 		var inv_t := Transform2D.IDENTITY
-		# Undo translate
-		inv_t = inv_t.translated(-trans * fres)
-		# Undo rotate around pivot
-		inv_t = inv_t.translated(-pix_pivot)
-		inv_t = inv_t.rotated(-rot)
-		inv_t = inv_t.translated(pix_pivot)
-		# Undo scale around pivot
-		inv_t = inv_t.translated(-pix_pivot)
-		inv_t = inv_t.scaled(Vector2(1.0 / scl.x, 1.0 / scl.y) if scl.x != 0.0 and scl.y != 0.0 else Vector2.ONE)
-		inv_t = inv_t.translated(pix_pivot)
+		# Step 1: subtract pivot
+		inv_t = Transform2D(0.0, -pix_pivot) * inv_t
+		# Step 2: divide by scale (inverse scale)
+		var inv_scl := Vector2(1.0 / scl.x, 1.0 / scl.y) if scl.x != 0.0 and scl.y != 0.0 else Vector2.ONE
+		inv_t = Transform2D(Vector2(inv_scl.x, 0), Vector2(0, inv_scl.y), Vector2.ZERO) * inv_t
+		# Step 3: rotate by rotate_angle (shader applies forward rotation)
+		inv_t = Transform2D(rot, Vector2.ZERO) * inv_t
+		# Step 4: subtract translate
+		inv_t = Transform2D(0.0, -pix_trans) * inv_t
+		# Step 5: add pivot back
+		inv_t = Transform2D(0.0, pix_pivot) * inv_t
+
 		for ps in tex_in.panel_sources:
 			var copy: GNPanelSource = ps.duplicate_source()
 			copy.transform = copy.transform * inv_t

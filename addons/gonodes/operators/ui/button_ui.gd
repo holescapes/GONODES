@@ -7,8 +7,9 @@ extends GNUiBase
 ## toggle = alternates 0/1 each click when toggle_mode is enabled.
 
 var _button: Button = null
-var _was_pressed: bool = false
 var _toggle_value: float = 0.0
+## Set true by signal, consumed (reset) after one cook frame.
+var _press_impulse: bool = false
 
 
 func _init() -> void:
@@ -30,17 +31,19 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var ms: Vector2i = get_param_value("min_size")
 	_button.custom_minimum_size = Vector2(ms.x, ms.y)
 
-	# Detect press impulse
-	var pressed_now: bool = _button.button_pressed if _button.toggle_mode else false
-	var press_impulse: float = 0.0
 	if _button.toggle_mode:
 		_toggle_value = 1.0 if _button.button_pressed else 0.0
-	# press impulse is handled via signal
 
+	# Build widget_state: press impulse lasts exactly one cook frame.
 	widget_state = {
-		"press": widget_state.get("press", 0.0),
+		"press": 1.0 if _press_impulse else 0.0,
 		"toggle": _toggle_value,
+		"hover": widget_state.get("hover", 0.0),
 	}
+	if _press_impulse:
+		_press_impulse = false
+		# Schedule another cook so press resets to 0.0 next frame.
+		mark_dirty.call_deferred()
 
 	return null
 
@@ -52,20 +55,31 @@ func _ensure_button() -> void:
 	_button.name = id + "_btn"
 	_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_button.pressed.connect(_on_button_pressed)
+	_button.mouse_entered.connect(_on_hover_changed.bind(true))
+	_button.mouse_exited.connect(_on_hover_changed.bind(false))
 	_control_node = _button
 
 
 func _on_button_pressed() -> void:
-	widget_state["press"] = 1.0
+	_press_impulse = true
 	if _button.toggle_mode:
 		_toggle_value = 1.0 if _button.button_pressed else 0.0
-		widget_state["toggle"] = _toggle_value
+	mark_dirty()
+
+
+func _on_hover_changed(hovered: bool) -> void:
+	widget_state["hover"] = 1.0 if hovered else 0.0
 	mark_dirty()
 
 
 func destroy_control_node() -> void:
-	if _button != null and _button.pressed.is_connected(_on_button_pressed):
-		_button.pressed.disconnect(_on_button_pressed)
+	if _button != null:
+		if _button.pressed.is_connected(_on_button_pressed):
+			_button.pressed.disconnect(_on_button_pressed)
+		if _button.mouse_entered.is_connected(_on_hover_changed):
+			_button.mouse_entered.disconnect(_on_hover_changed)
+		if _button.mouse_exited.is_connected(_on_hover_changed):
+			_button.mouse_exited.disconnect(_on_hover_changed)
 	_button = null
 	_toggle_value = 0.0
 	super.destroy_control_node()

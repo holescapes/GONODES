@@ -36,6 +36,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	widget_state = {
 		"index": float(idx),
 		"value": norm,
+		"hover": widget_state.get("hover", 0.0),
 	}
 
 	return null
@@ -48,6 +49,8 @@ func _ensure_option() -> void:
 	_option.name = id + "_dropdown"
 	_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_option.item_selected.connect(_on_item_selected)
+	_option.mouse_entered.connect(_on_hover_changed.bind(true))
+	_option.mouse_exited.connect(_on_hover_changed.bind(false))
 	_control_node = _option
 
 	# Populate initial items
@@ -93,8 +96,85 @@ func _on_item_selected(_idx: int) -> void:
 	mark_dirty()
 
 
+## Override: show an inline ItemList overlay instead of the OptionButton popup.
+func _dispatch_panel_input(event: InputEvent) -> void:
+	if _option == null:
+		return
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
+			_show_dropdown_overlay()
+
+
+var _overlay_list: ItemList = null
+
+
+func _show_dropdown_overlay() -> void:
+	if _option.item_count == 0:
+		return
+
+	var list := ItemList.new()
+	list.name = "DropdownOverlay"
+	for i in range(_option.item_count):
+		list.add_item(_option.get_item_text(i))
+	if _option.selected >= 0 and _option.selected < list.item_count:
+		list.select(_option.selected)
+
+	var item_h := 28.0
+	var list_height := minf(_option.item_count * item_h, 200.0)
+	list.custom_minimum_size = Vector2(_option.size.x, list_height)
+	list.size = list.custom_minimum_size
+
+	var panel := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.2, 0.2, 0.25, 0.95)
+	style.border_color = Color(0.4, 0.4, 0.5, 0.8)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(3)
+	panel.add_theme_stylebox_override("panel", style)
+	panel.add_child(list)
+	panel.custom_minimum_size = Vector2(_option.size.x + 2, list_height + 2)
+	panel.size = panel.custom_minimum_size
+
+	_overlay_list = list
+	_request_panel_overlay(panel)
+
+
+func _handle_overlay_input(event: InputEvent) -> bool:
+	if _overlay_list == null:
+		return false
+	if not (event is InputEventMouseButton):
+		return false
+	var mb := event as InputEventMouseButton
+	if mb.button_index != MOUSE_BUTTON_LEFT or mb.pressed:
+		return false
+
+	var list_rect := _overlay_list.get_global_rect()
+	var local_pos := mb.position - list_rect.position
+	var idx := _overlay_list.get_item_at_position(local_pos, true)
+	if idx >= 0:
+		_option.select(idx)
+		_option.emit_signal("item_selected", idx)
+	_dismiss_panel_overlay()
+	return true
+
+
+func _on_overlay_dismissed() -> void:
+	_overlay_list = null
+
+
+func _on_hover_changed(hovered: bool) -> void:
+	widget_state["hover"] = 1.0 if hovered else 0.0
+	mark_dirty()
+
+
 func destroy_control_node() -> void:
-	if _option != null and _option.item_selected.is_connected(_on_item_selected):
-		_option.item_selected.disconnect(_on_item_selected)
+	if _option != null:
+		if _option.item_selected.is_connected(_on_item_selected):
+			_option.item_selected.disconnect(_on_item_selected)
+		if _option.mouse_entered.is_connected(_on_hover_changed):
+			_option.mouse_entered.disconnect(_on_hover_changed)
+		if _option.mouse_exited.is_connected(_on_hover_changed):
+			_option.mouse_exited.disconnect(_on_hover_changed)
 	_option = null
 	super.destroy_control_node()

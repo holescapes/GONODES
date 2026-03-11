@@ -58,6 +58,23 @@ func _on_value_changed(_value: float) -> void:
 	mark_dirty()
 
 
+## Override: SpinBox has internal +/- buttons and a LineEdit that don't respond
+## to gui_input dispatch. Instead, detect click on left/right halves to
+## decrement/increment by step.
+func _dispatch_panel_input(event: InputEvent) -> void:
+	if _spinbox == null:
+		return
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
+			# Right third = increment, left third = decrement
+			var third := _spinbox.size.x / 3.0
+			if mb.position.x > third * 2.0:
+				_spinbox.value += _spinbox.step
+			elif mb.position.x < third:
+				_spinbox.value -= _spinbox.step
+
+
 func destroy_control_node() -> void:
 	if _spinbox != null and _spinbox.value_changed.is_connected(_on_value_changed):
 		_spinbox.value_changed.disconnect(_on_value_changed)

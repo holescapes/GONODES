@@ -29,6 +29,15 @@ var _ui_root: BoxContainer = null
 ## Cached CHOP output (port 1) for aggregated widget states.
 var _cached_chop_data: GNChannelData = null
 
+## ── Overlay System ──────────────────────────────────────────────────────────
+## CanvasLayer-based overlay for dropdowns, color pickers, and menus.
+## Widgets request overlays via GNUiBase._request_panel_overlay().
+var _overlay_layer: CanvasLayer = null
+var _overlay_root: Control = null
+var _overlay_bg: ColorRect = null
+var _overlay_active: bool = false
+var _overlay_owner: GNUiBase = null
+
 
 func _init() -> void:
 	node_type = "panel"
@@ -150,6 +159,29 @@ func _setup_panel_viewport() -> void:
 	_ui_root.name = "UIRoot"
 	_ui_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_viewport.add_child(_ui_root)
+
+	# Overlay layer for dropdowns, color pickers, etc. (above all widgets)
+	_overlay_layer = CanvasLayer.new()
+	_overlay_layer.name = "OverlayLayer"
+	_overlay_layer.layer = 100
+	_viewport.add_child(_overlay_layer)
+
+	_overlay_root = Control.new()
+	_overlay_root.name = "OverlayRoot"
+	_overlay_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_overlay_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_overlay_root.visible = false
+	_overlay_layer.add_child(_overlay_root)
+
+	_overlay_bg = ColorRect.new()
+	_overlay_bg.name = "OverlayBG"
+	_overlay_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_overlay_bg.color = Color(0.0, 0.0, 0.0, 0.4)
+	_overlay_bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	_overlay_root.add_child(_overlay_bg)
+
+	# Store reference on viewport so widgets can find the overlay system
+	_viewport.set_meta("gn_panel_overlay", self)
 
 	# Output texture data
 	_cached_tex_data = GNTextureData.new()
@@ -296,5 +328,63 @@ func _clear_managed_controls() -> void:
 
 ## Resets viewport tracking state.
 func reset_viewport() -> void:
+	hide_overlay()
 	_clear_managed_controls()
 	_prev_managed.clear()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Overlay System
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+## Shows an overlay control anchored below (or above) a widget's rect.
+func show_overlay(owner: GNUiBase, content: Control, anchor_rect: Rect2) -> void:
+	hide_overlay()
+	_overlay_owner = owner
+	_overlay_root.add_child(content)
+	# Position below the anchor
+	content.position = Vector2(anchor_rect.position.x, anchor_rect.end.y)
+	# Clamp to viewport bounds
+	var vp_size := Vector2(_viewport.size)
+	if content.position.y + content.size.y > vp_size.y:
+		content.position.y = anchor_rect.position.y - content.size.y
+	if content.position.x + content.size.x > vp_size.x:
+		content.position.x = vp_size.x - content.size.x
+	content.position.x = maxf(content.position.x, 0.0)
+	content.position.y = maxf(content.position.y, 0.0)
+	_overlay_root.visible = true
+	_overlay_active = true
+
+
+## Hides the current overlay and notifies the owner.
+func hide_overlay() -> void:
+	if not _overlay_active:
+		return
+	for i in range(_overlay_root.get_child_count() - 1, 0, -1):
+		var child := _overlay_root.get_child(i)
+		_overlay_root.remove_child(child)
+		child.queue_free()
+	_overlay_root.visible = false
+	var prev_owner := _overlay_owner
+	_overlay_owner = null
+	_overlay_active = false
+	if prev_owner != null and is_instance_valid(prev_owner):
+		prev_owner._on_overlay_dismissed()
+
+
+## Returns true when an overlay is visible.
+func is_overlay_active() -> bool:
+	return _overlay_active
+
+
+## Returns the widget that owns the active overlay.
+func get_overlay_owner() -> GNUiBase:
+	return _overlay_owner
+
+
+## Returns the viewport-space rect of the overlay content (for hit testing).
+func get_overlay_rect() -> Rect2:
+	if not _overlay_active or _overlay_root.get_child_count() <= 1:
+		return Rect2()
+	return _overlay_root.get_child(1).get_global_rect()

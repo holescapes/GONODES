@@ -9,6 +9,13 @@ extends GNOutBase
 ## The Window node is a child of this GNNode in the scene tree —
 ## freed automatically when the node is removed.
 ##
+## Interactive panels: when the input texture carries panel_sources from a
+## PanelTOP, WindowOUT forwards mouse events to the panel's SubViewport.
+## Motion events are remapped and pushed via push_input() for hover.
+## Click events are manually dispatched to the hovered control because
+## standalone SubViewports (without SubViewportContainer) don't deliver
+## mouse-button GUI events to Controls via push_input in editor mode.
+##
 ## NOTE: Always use the 'monitor' parameter to assign the output display.
 ## Manually dragging the window to another screen causes tearing because
 ## Windows DWM doesn't re-sync the GPU swapchain to the new display.
@@ -27,6 +34,19 @@ var _window_created: bool = false
 
 ## Whether window-level params need re-applying (set by own param changes only).
 var _window_params_dirty: bool = true
+
+## Tracks which panel source viewports have received notify_mouse_entered.
+## Key = SubViewport instance ID, Value = true.
+var _vp_mouse_entered: Dictionary = {}
+
+## The GNUiBase widget currently being dragged (press-held).
+## Set on left mouse-down, cleared on release. During drag, all mouse events
+## are forwarded to this widget regardless of hover state.
+var _panel_active_widget: GNUiBase = null
+
+## The GNPanelSource containing the active widget's SubViewport.
+## Stored alongside _panel_active_widget for coordinate remapping during drag.
+var _panel_active_source: GNPanelSource = null
 
 
 func _init() -> void:
@@ -80,17 +100,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_window_params_dirty = false
 
 	# Feed the texture — direct GPU reference, zero-copy.
-	# SubViewport.get_texture() returns a ViewportTexture with a direct RID
-	# to the GPU render target. No path resolution needed when assigned
-	# programmatically, so it works across Viewport boundaries.
 	if tex_in != null and tex_in.texture != null:
 		if _display_rect.texture != tex_in.texture:
 			_display_rect.texture = tex_in.texture
 			GNLogger.debug("WindowOUT", "'%s' texture assigned (zero-copy GPU)" % id)
-		# Force the output window to present this frame's content immediately.
-		# Without this, the separate Window viewport may not redraw every frame
-		# because Godot only auto-redraws when it detects a property change on
-		# the TextureRect — but ViewportTexture updates in-place via its RID.
 		_display_rect.queue_redraw()
 		_display_rect.visible = true
 	else:
@@ -110,27 +123,19 @@ func _ensure_window() -> void:
 	_window.title = "GONODES Output"
 	_window.size = Vector2i(1920, 1080)
 	_window.min_size = Vector2i(160, 120)
-	# Prevent the window from stealing main window focus on close
 	_window.close_requested.connect(_on_window_close_requested)
-	# ESC key exits fullscreen/borderless back to windowed mode.
-	# Input events in a child Window stay in that window's viewport tree,
-	# so we must listen directly on the Window rather than from _process().
 	_window.window_input.connect(_on_window_input)
 
-	# Create TextureRect stretching to fill the window
 	_display_rect = TextureRect.new()
 	_display_rect.name = "Display"
 	_display_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_display_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	# Must not consume mouse events — they need to reach window_input signal.
+	_display_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_window.add_child(_display_rect)
-
-	# Must be called AFTER adding to tree — the property setter anchors_preset
-	# only sets anchors but not offsets, leaving the rect at 0×0.
 	_display_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	# Add as child of this Node — Godot creates it as a separate OS window
 	add_child(_window)
-
 	_window_created = true
 	GNLogger.info("WindowOUT", "'%s' output window created: '%s'" % [id, _window.title])
 
@@ -208,8 +213,6 @@ func _position_on_monitor(monitor_idx: int, pos: Vector2i, mode_idx: int) -> voi
 
 ## Called when the user clicks the window's close button.
 func _on_window_close_requested() -> void:
-	# Hide instead of destroying — flip the "open" param so the inspector
-	# reflects the current state and the user can toggle it back on.
 	if _window:
 		_window.visible = false
 		set_param_value("open", false)
@@ -217,8 +220,7 @@ func _on_window_close_requested() -> void:
 
 
 ## Called for input events inside the output window.
-## ESC reverts fullscreen/borderless back to windowed mode.
-## Mouse events are forwarded to interactive PanelTOP viewports via panel_sources.
+## ESC reverts fullscreen/borderless to windowed; mouse events forwarded to panels.
 func _on_window_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		var mode_idx: int = get_param_value("window_mode")
@@ -227,7 +229,6 @@ func _on_window_input(event: InputEvent) -> void:
 			_window_params_dirty = true
 			GNLogger.info("WindowOUT", "'%s' ESC — switched to windowed mode" % id)
 
-	# Forward mouse events to interactive panels
 	if event is InputEventMouse:
 		_forward_to_panels(event as InputEventMouse)
 
@@ -253,49 +254,46 @@ static func get_display_info() -> Array[Dictionary]:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Panel Input Forwarding
 # ═══════════════════════════════════════════════════════════════════════════════
+#
+# push_input() delivers mouse MOTION (hover) to SubViewport controls, but
+# mouse BUTTON events don't reach controls' gui_input in standalone SubViewports.
+#
+# Solution: push_input for hover tracking, then delegate all button and drag
+# events to the owning GNUiBase via handle_panel_input(). Each widget type
+# handles its own input — no widget-specific logic lives here.
 
-## Forwards mouse events to interactive PanelTOP SubViewports by:
-## 1. Normalizing mouse position to the display rect area
-## 2. Hit-testing all panel_sources from the input GNTextureData
-## 3. Remapping coordinates and calling push_input() on matching viewports
+## Forwards mouse events to interactive PanelTOP SubViewports.
+## Normalizes window coords → texture coords → panel-local coords.
 func _forward_to_panels(event: InputEventMouse) -> void:
 	if _window == null or _display_rect == null:
 		return
 
-	# Get the input texture data to check for panel_sources
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
+	var tex_data: GNTextureData = _get_upstream_tex_data()
+	if tex_data == null or tex_data.panel_sources.is_empty():
 		return
 
-	# Re-read the input texture data from upstream cached output
-	var network: GNNetwork = engine.network
-	var conns: Array = network.get_input_connections(id)
-	if conns.is_empty():
+	# Map window mouse position → texture pixel coordinates.
+	var window_size := Vector2(_window.size)
+	var mouse_pos := event.position
+	var norm := Vector2(mouse_pos.x / window_size.x, mouse_pos.y / window_size.y)
+	var tex_pos := Vector2(norm.x * tex_data.resolution.x,
+		norm.y * tex_data.resolution.y)
+
+	# ── Active drag: forward all events to the captured widget ────────────
+	if _panel_active_widget != null and is_instance_valid(_panel_active_widget):
+		if _panel_active_source != null and _panel_active_source.viewport != null:
+			var vp_pos: Vector2 = _panel_active_source.transform * tex_pos
+			_push_hover(vp_pos, _panel_active_source)
+			var vp_event := _make_viewport_event(event, vp_pos)
+			_panel_active_widget.handle_panel_input(vp_event)
+		if event is InputEventMouseButton:
+			var mb := event as InputEventMouseButton
+			if mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
+				_panel_active_widget = null
+				_panel_active_source = null
 		return
 
-	var conn: GNConnection = conns[0]
-	var upstream: GNNode = network.nodes.get(conn.from_node, null)
-	if upstream == null or upstream.cached_output == null:
-		return
-	if not (upstream.cached_output is GNTextureData):
-		return
-
-	var tex_data: GNTextureData = upstream.cached_output as GNTextureData
-	if tex_data.panel_sources.is_empty():
-		return
-
-	# Normalize mouse position to [0,1] within the display rect
-	var window_size: Vector2 = Vector2(_window.size)
-	var mouse_pos: Vector2 = event.position
-	# The TextureRect uses STRETCH_KEEP_ASPECT_COVERED, but we need the
-	# actual content area. Approximate with full window for now.
-	var norm_pos := Vector2(mouse_pos.x / window_size.x, mouse_pos.y / window_size.y)
-
-	# Scale to texture resolution
-	var tex_pos := Vector2(norm_pos.x * tex_data.resolution.x,
-		norm_pos.y * tex_data.resolution.y)
-
-	# Hit-test all panel sources — first match wins
+	# ── No drag: hit-test panel sources, first hit wins ───────────────────
 	for ps in tex_data.panel_sources:
 		var source: GNPanelSource = ps as GNPanelSource
 		if source == null or source.viewport == null:
@@ -303,15 +301,98 @@ func _forward_to_panels(event: InputEventMouse) -> void:
 
 		var local: Variant = source.hit_test(tex_pos)
 		if local == null:
+			var vp_id := source.viewport.get_instance_id()
+			if _vp_mouse_entered.has(vp_id):
+				source.viewport.notify_mouse_exited()
+				_vp_mouse_entered.erase(vp_id)
 			continue
 
-		# Remap the mouse event and push to the panel viewport
-		var remapped: InputEventMouse = event.duplicate() as InputEventMouse
-		remapped.position = local as Vector2
-		if remapped is InputEventMouseMotion:
-			# Global position matches local for SubViewports
-			(remapped as InputEventMouseMotion).global_position = local as Vector2
-		elif remapped is InputEventMouseButton:
-			(remapped as InputEventMouseButton).global_position = local as Vector2
-		source.viewport.push_input(remapped)
+		var local_pos: Vector2 = local as Vector2
+
+		# Ensure viewport knows mouse is inside.
+		var vp_id := source.viewport.get_instance_id()
+		if not _vp_mouse_entered.has(vp_id):
+			source.viewport.notify_mouse_entered()
+			_vp_mouse_entered[vp_id] = true
+
+		# Push motion for hover tracking.
+		_push_hover(local_pos, source)
+
+		# ── Overlay takes priority when active ──────────────────────────
+		if source.viewport.has_meta("gn_panel_overlay"):
+			var panel = source.viewport.get_meta("gn_panel_overlay")
+			if panel != null and panel.is_overlay_active():
+				if event is InputEventMouseButton:
+					var overlay_mb := event as InputEventMouseButton
+					if overlay_mb.button_index == MOUSE_BUTTON_LEFT and not overlay_mb.pressed:
+						var overlay_rect: Rect2 = panel.get_overlay_rect()
+						if overlay_rect.has_point(local_pos):
+							var vp_event := _make_viewport_event(event, local_pos)
+							var owner: GNUiBase = panel.get_overlay_owner()
+							if owner != null and is_instance_valid(owner):
+								owner._handle_overlay_input(vp_event)
+						else:
+							panel.hide_overlay()
+				return  # Overlay consumes all events when active
+
+		# On left press, capture the widget under cursor for drag tracking.
+		if event is InputEventMouseButton:
+			var mb := event as InputEventMouseButton
+			if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
+				var hovered := source.viewport.gui_get_hovered_control()
+				var widget := _find_ui_owner(hovered)
+				if widget != null:
+					_panel_active_widget = widget
+					_panel_active_source = source
+					var vp_event := _make_viewport_event(event, local_pos)
+					widget.handle_panel_input(vp_event)
+
 		return  # First hit consumes the event
+
+
+## Pushes a synthetic motion event to the SubViewport for hover tracking.
+func _push_hover(vp_pos: Vector2, source: GNPanelSource) -> void:
+	var motion := InputEventMouseMotion.new()
+	motion.position = vp_pos
+	motion.global_position = vp_pos
+	motion.window_id = 0
+	source.viewport.push_input(motion, true)
+
+
+## Creates a viewport-local version of an input event at the given position.
+func _make_viewport_event(event: InputEventMouse, vp_pos: Vector2) -> InputEventMouse:
+	var offset := vp_pos - event.position
+	var xform := Transform2D(0.0, offset)
+	var remapped := event.xformed_by(xform) as InputEventMouse
+	remapped.window_id = 0
+	return remapped
+
+
+## Finds the GNUiBase that owns a Control by checking metadata.
+## Walks up the parent tree to handle internal children of complex widgets.
+func _find_ui_owner(control: Control) -> GNUiBase:
+	var current: Node = control
+	while current != null:
+		if current.has_meta("gn_ui_owner"):
+			return current.get_meta("gn_ui_owner") as GNUiBase
+		current = current.get_parent()
+	return null
+
+
+## Retrieves the upstream GNTextureData (for panel_sources access).
+func _get_upstream_tex_data() -> GNTextureData:
+	var engine: GNCookEngine = get_parent() as GNCookEngine \
+		if get_parent() is GNCookEngine else null
+	if engine == null or engine.network == null:
+		return null
+
+	var conns: Array = engine.network.get_input_connections(id)
+	if conns.is_empty():
+		return null
+
+	var conn: GNConnection = conns[0]
+	var upstream: GNNode = engine.network.nodes.get(conn.from_node, null)
+	if upstream == null or not (upstream.cached_output is GNTextureData):
+		return null
+
+	return upstream.cached_output as GNTextureData

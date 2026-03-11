@@ -1,0 +1,79 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lineedit1": {
+            "type": "LineEditUI",
+            "position": [100, 100],
+            "parameters": {
+                "placeholder": { "value": "Type your message..." },
+                "default_text": { "value": "Hello GONODES" },
+                "min_size": { "value": { "_type": "Vector2i", "x": 250, "y": 36 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 80 } },
+                "layout": { "value": 0 },
+                "bg_color": { "value": { "_type": "Color", "r": 0.12, "g": 0.12, "b": 0.16, "a": 1.0 } }
+            }
+        },
+        "bridge1": {
+            "type": "ScriptCHOP",
+            "position": [500, 300],
+            "parameters": {
+                "time_dependent": { "value": true },
+                "force_active": { "value": true },
+                "code": { "value": "# Bridge: read LineEditUI text → set TextTOP parameter\n# Uses _engine.resolve_node() to access the widget directly.\n\nfunc cook():\n    var le = _engine.resolve_node(\"lineedit1\")\n    if le and le.has_method(\"get_text\"):\n        var txt = le.get_text()\n        if txt.is_empty():\n            txt = \" \"\n        set_par(\"text1\", \"text\", txt)\n        op.set_single_value(\"length\", float(txt.length()))\n" }
+            }
+        },
+        "text1": {
+            "type": "TextTOP",
+            "position": [900, 100],
+            "parameters": {
+                "text": { "value": "Hello GONODES" },
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 256 } },
+                "font_size": { "value": 56 },
+                "font_color": { "value": { "_type": "Color", "r": 0.3, "g": 0.9, "b": 0.5, "a": 1.0 } },
+                "bg_color": { "value": { "_type": "Color", "r": 0.08, "g": 0.08, "b": 0.12, "a": 1.0 } },
+                "align_h": { "value": 1 },
+                "align_v": { "value": 1 },
+                "word_wrap": { "value": true }
+            }
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [1300, 100],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1700, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 256 } },
+                "open": { "value": true },
+                "title": { "value": "Live Text Preview" }
+            }
+        }
+    },
+    "connections": [
+        { "from": "lineedit1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "text1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LineEdit → TextTOP — Live Text Input\n\nType in the LineEdit widget and see the text rendered\nlive in the TextTOP output. A ScriptCHOP bridges the\nLineEditUI's text to the TextTOP's text parameter\nusing _engine.resolve_node() cross-referencing.\n\nThe panel (input field) and rendered text are composited\ntogether into a single output window.",
+            "position": [-150.0, -150.0],
+            "size": [520.0, 130.0],
+            "color": [0.2, 0.8, 0.5, 0.8]
+        }
+    ]
+}
