@@ -36,7 +36,7 @@ Everything in GONODES is an **operator** (node). Operators are organized into fa
 | **DAT** | Data tables and text | Table, Script, OSC In |
 | **MAT** | Materials and shaders | PBR, Custom Shader |
 | **COMP** | 3D scene containers and sub-networks | Geometry, Camera, Light |
-| **UI** | 2D interface widgets for PanelTOP | Button, Slider, Knob, XYPad |
+| **UI** | 2D interface widgets for PanelTOP | Button, Slider, Knob, XYPad, TextureRect, ColorPicker, Tree, TabContainer |
 
 ### How It Works
 
@@ -63,7 +63,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 Complete â€” Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowOUT open/close toggle. 3D pipeline live. 265 operators across 10 families. RAMP parameter type with curve editor. RampCHOP (dynamic 1â€“16 ramp slots). Canvas annotations (network boxes, sticky notes). Advanced scripting: GenericScriptNode (multi-output), CallbackDAT (event-driven), set_par() writable refs, Network API (procedural graph construction). 176 tests passing. Phases 1â€“6 complete.**
+**Phase 6 Complete â€" Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowOUT open/close toggle. 3D pipeline live. 288 operators across 10 families. RAMP parameter type with curve editor. RampCHOP (dynamic 1â€"16 ramp slots). Canvas annotations (network boxes, sticky notes). Advanced scripting: GenericScriptNode (multi-output), CallbackDAT (event-driven), set_par() writable refs, Network API (procedural graph construction). 176 tests passing. Phases 1â€"6 complete.**
 
 ### Completed
 

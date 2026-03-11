@@ -3510,6 +3510,136 @@ A layout container for nesting other UI widgets. Supports multiple layout modes.
 - **Parameters:** `layout` (MENU: HBox/VBox/Grid/Flow), `columns` (INT, for grid mode)
 - **State channels:** none (layout only)
 
+### TextureRectUI
+Displays a TOP texture inside PanelTOP. Optional MAT input for shader overlay.
+- **Inputs:** `top` (TOP), `mat` (MAT)
+- **Parameters:** `stretch_mode` (MENU: 7 modes), `min_size` (VECTOR2I), `expand_mode` (TOGGLE)
+- **State channels:** `has_texture`
+
+### ColorRectUI
+Colored rectangle. Clickable with optional MAT shader overlay.
+- **Inputs:** `mat` (MAT)
+- **Parameters:** `color` (COLOR), `min_size` (VECTOR2I)
+- **State channels:** `click` (impulse)
+
+### LineEditUI
+Single-line text input field.
+- **Parameters:** `placeholder` (STRING), `default_text` (STRING), `max_length` (INT), `editable` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `length`, `submitted` (impulse)
+
+### TextEditUI
+Multi-line text editor. Optional DAT input for initial content.
+- **Inputs:** `dat` (DAT)
+- **Parameters:** `placeholder` (STRING), `editable` (TOGGLE), `wrap_mode` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `lines`, `length`
+
+### ProgressBarUI
+Progress bar driven by CHOP input. Outputs value and ratio.
+- **Inputs:** `chop` (CHOP)
+- **Parameters:** `min_val` (FLOAT), `max_val` (FLOAT), `default_val` (FLOAT), `chop_channel` (STRING), `show_percentage` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `value`, `ratio`
+
+### SpinBoxUI
+Numeric spin box with increment/decrement buttons.
+- **Parameters:** `min_val` (FLOAT), `max_val` (FLOAT), `step` (FLOAT), `default_val` (FLOAT), `prefix` (STRING), `suffix` (STRING), `editable` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `value`
+
+### ColorPickerUI
+Color picker button. Opens full color picker dialog. Outputs RGBA as CHOP channels.
+- **Parameters:** `default_color` (COLOR), `edit_alpha` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `r`, `g`, `b`, `a`
+
+### RichTextLabelUI
+BBCode rich text label. Optional DAT input for content.
+- **Inputs:** `dat` (DAT)
+- **Parameters:** `text` (STRING), `bbcode` (TOGGLE), `font_size` (INT), `fit_content` (TOGGLE), `scroll_active` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** none (display only)
+
+### ScrollContainerUI
+Scrollable container for child UI widgets. Dynamic UI inputs.
+- **Parameters:** `h_scroll` (TOGGLE), `v_scroll` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `scroll_h`, `scroll_v`
+
+### TabContainerUI
+Tabbed container. Each UI input becomes a tab page. Optional DAT for tab names.
+- **Inputs:** `dat` (DAT), dynamic UI inputs
+- **Parameters:** `default_tab` (INT), `min_size` (VECTOR2I)
+- **State channels:** `tab`
+
+### SplitContainerUI
+Splits two UI inputs with a draggable divider.
+- **Inputs:** `ui_a` (UI), `ui_b` (UI)
+- **Parameters:** `vertical` (TOGGLE), `offset` (INT), `collapsed` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `offset`
+
+### MarginContainerUI
+Wraps a single UI widget with configurable margins.
+- **Inputs:** `ui` (UI)
+- **Parameters:** `left` (INT), `top` (INT), `right` (INT), `bottom` (INT), `min_size` (VECTOR2I)
+- **State channels:** none (layout only)
+
+### PanelContainerUI
+Styled panel container with background color and rounded corners.
+- **Parameters:** `bg_color` (COLOR), `corner_radius` (INT), `padding` (INT), `min_size` (VECTOR2I)
+- **State channels:** none (layout only)
+
+### TreeUI
+Tree view built from DAT table data with parent/child relationships.
+- **Inputs:** `dat` (DAT)
+- **Parameters:** `hide_root` (TOGGLE), `hide_folding` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `selected`
+
+### ItemListUI
+Selectable item list from DAT data. Optional TOP icon texture.
+- **Inputs:** `dat` (DAT), `top` (TOP)
+- **Parameters:** `allow_reselect` (TOGGLE), `max_columns` (INT), `icon_size` (INT), `min_size` (VECTOR2I)
+- **State channels:** `selected`
+
+### TabBarUI
+Tab bar from DAT data (no child content). Outputs selected tab index.
+- **Inputs:** `dat` (DAT)
+- **Parameters:** `default_tab` (INT), `closable` (TOGGLE), `drag_reorder` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `tab`
+
+### MenuButtonUI
+Button with popup menu items from DAT data.
+- **Inputs:** `dat` (DAT)
+- **Parameters:** `label` (STRING), `min_size` (VECTOR2I)
+- **State channels:** `selected`
+
+### CheckBoxUI
+Standard checkbox with text label. Unlike ToggleUI (switch style), this is classic checkbox.
+- **Parameters:** `label` (STRING), `default_on` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `value`
+
+### TextureButtonUI
+Clickable texture button with normal/pressed/hover TOP inputs.
+- **Inputs:** `normal` (TOP), `pressed` (TOP), `hover` (TOP)
+- **Parameters:** `toggle_mode` (TOGGLE), `stretch` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `press` (impulse), `toggle`
+
+### SeparatorUI
+Horizontal or vertical separator line for layout.
+- **Parameters:** `vertical` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** none (layout only)
+
+### NinePatchRectUI
+Stretchable nine-patch texture display from TOP input.
+- **Inputs:** `top` (TOP)
+- **Parameters:** `patch_left` (INT), `patch_top` (INT), `patch_right` (INT), `patch_bottom` (INT), `draw_center` (TOGGLE), `min_size` (VECTOR2I)
+- **State channels:** `has_texture`
+
+### LinkButtonUI
+Clickable text link button with underline options.
+- **Parameters:** `text` (STRING), `underline` (MENU: Always/On Hover/Never), `min_size` (VECTOR2I)
+- **State channels:** `press` (impulse)
+
+### TextureProgressBarUI
+Textured progress bar with TOP layers and CHOP driver.
+- **Inputs:** `chop` (CHOP), `under` (TOP), `progress` (TOP), `over` (TOP)
+- **Parameters:** `min_val` (FLOAT), `max_val` (FLOAT), `default_val` (FLOAT), `chop_channel` (STRING), `fill_mode` (INT: 0-5), `min_size` (VECTOR2I)
+- **State channels:** `value`, `ratio`
+
 ---
 
 ## Quick Reference
@@ -3524,8 +3654,8 @@ A layout container for nesting other UI widgets. Supports multiple layout modes.
 | **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
 | **IMG** | 12 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab |
 | **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
-| **UI** | 8 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container |
-| **Total** | **265** | |
+| **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
+| **Total** | **288** | |
 
 ---
 

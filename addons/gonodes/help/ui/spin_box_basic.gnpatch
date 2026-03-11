@@ -1,0 +1,46 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "spinbox1": {
+            "type": "SpinBoxUI",
+            "position": [100, 100],
+            "parameters": {
+                "min_val": { "value": 0.0 },
+                "max_val": { "value": 100.0 },
+                "step": { "value": 1.0 },
+                "default_val": { "value": 50.0 },
+                "suffix": { "value": "%" }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 80 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 80 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "spinbox1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SpinBox UI — Basic\n\nNumeric spin box with +/- buttons.\nConfigurable range, step, prefix/suffix.\nState channel: value.",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

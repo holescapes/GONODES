@@ -1026,6 +1026,60 @@ func _register_core_operators() -> void:
 	_reg("ContainerUI",     "UI", ContainerUI,
 		"Layout container for nesting and arranging child UI widgets.")
 
+	# ── UIs: Tier 1 — High-Value ───────────────────────────────────────
+	_reg("TextureRectUI",   "UI", TextureRectUI,
+		"Displays a TOP texture in panel. Optional MAT shader overlay.")
+	_reg("ColorRectUI",     "UI", ColorRectUI,
+		"Colored rectangle. Clickable with optional MAT shader.")
+	_reg("LineEditUI",      "UI", LineEditUI,
+		"Single-line text input. Outputs text length and submit state.")
+	_reg("TextEditUI",      "UI", TextEditUI,
+		"Multi-line text editor. Optional DAT input for initial content.")
+	_reg("ProgressBarUI",   "UI", ProgressBarUI,
+		"Progress bar driven by CHOP input. Outputs value and ratio.")
+	_reg("SpinBoxUI",       "UI", SpinBoxUI,
+		"Numeric spin box with increment/decrement buttons.")
+	_reg("ColorPickerUI",   "UI", ColorPickerUI,
+		"Color picker button. Outputs RGBA channels as CHOP state.")
+	_reg("RichTextLabelUI", "UI", RichTextLabelUI,
+		"BBCode rich text label. Optional DAT input for content.")
+
+	# ── UIs: Tier 2 — Containers ───────────────────────────────────────
+	_reg("ScrollContainerUI", "UI", ScrollContainerUI,
+		"Scrollable container for child UI widgets.")
+	_reg("TabContainerUI",  "UI", TabContainerUI,
+		"Tabbed container. Each UI input becomes a tab page.")
+	_reg("SplitContainerUI","UI", SplitContainerUI,
+		"Splits two UI inputs with a draggable divider.")
+	_reg("MarginContainerUI","UI", MarginContainerUI,
+		"Wraps a UI widget with configurable margins.")
+	_reg("PanelContainerUI","UI", PanelContainerUI,
+		"Styled panel container with background color and rounded corners.")
+
+	# ── UIs: Tier 3 — Data-Driven ──────────────────────────────────────
+	_reg("TreeUI",          "UI", TreeUI,
+		"Tree view built from DAT table data with parent/child relationships.")
+	_reg("ItemListUI",      "UI", ItemListUI,
+		"Selectable item list from DAT data. Optional TOP icon texture.")
+	_reg("TabBarUI",        "UI", TabBarUI,
+		"Tab bar from DAT data. Outputs selected tab index.")
+	_reg("MenuButtonUI",    "UI", MenuButtonUI,
+		"Button with popup menu items from DAT data.")
+
+	# ── UIs: Tier 4 — Completeness ─────────────────────────────────────
+	_reg("CheckBoxUI",      "UI", CheckBoxUI,
+		"Standard checkbox with label. Outputs 0/1 toggle state.")
+	_reg("TextureButtonUI", "UI", TextureButtonUI,
+		"Clickable texture button with normal/pressed/hover TOP inputs.")
+	_reg("SeparatorUI",     "UI", SeparatorUI,
+		"Horizontal or vertical separator line for layout.")
+	_reg("NinePatchRectUI", "UI", NinePatchRectUI,
+		"Stretchable nine-patch texture display from TOP input.")
+	_reg("LinkButtonUI",    "UI", LinkButtonUI,
+		"Clickable text link button with underline options.")
+	_reg("TextureProgressBarUI", "UI", TextureProgressBarUI,
+		"Textured progress bar with TOP layers and CHOP driver.")
+
 	# ── OUTs: Display ──────────────────────────────────────────────────
 	_reg("WindowOUT",       "OUT", WindowOUT,
 		"Display a texture in a standalone OS window (VJ output).")

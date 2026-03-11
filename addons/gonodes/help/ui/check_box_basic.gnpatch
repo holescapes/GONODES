@@ -1,0 +1,53 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "checkbox1": {
+            "type": "CheckBoxUI",
+            "position": [100, 100],
+            "parameters": {
+                "label": { "value": "Enable Effect" },
+                "default_on": { "value": false }
+            }
+        },
+        "checkbox2": {
+            "type": "CheckBoxUI",
+            "position": [100, 210],
+            "parameters": {
+                "label": { "value": "Show Grid" },
+                "default_on": { "value": true }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 120 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 120 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "checkbox1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "checkbox2", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CheckBox UI — Basic\n\nStandard checkbox with text label.\nUnlike ToggleUI (switch style), this is classic checkbox.\nState channel: value (0 or 1).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

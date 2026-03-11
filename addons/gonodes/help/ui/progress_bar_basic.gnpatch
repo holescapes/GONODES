@@ -1,0 +1,46 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "progress1": {
+            "type": "ProgressBarUI",
+            "position": [100, 100],
+            "parameters": {
+                "min_val": { "value": 0.0 },
+                "max_val": { "value": 100.0 },
+                "default_val": { "value": 65.0 },
+                "show_percentage": { "value": true },
+                "min_size": { "value": { "_type": "Vector2i", "x": 250, "y": 28 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 80 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 80 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "progress1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ProgressBar UI — Basic\n\nProgress bar widget. Wire a CHOP to drive value.\nState channels: value, ratio (0-1).\nCHOP channel name configurable via parameter.",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

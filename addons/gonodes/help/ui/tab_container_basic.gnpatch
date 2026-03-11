@@ -1,0 +1,54 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "slider_a": {
+            "type": "SliderUI",
+            "position": [100, 100],
+            "parameters": { "label": { "value": "Tab A Slider" } }
+        },
+        "button_b": {
+            "type": "ButtonUI",
+            "position": [100, 250],
+            "parameters": { "label": { "value": "Tab B Button" } }
+        },
+        "tabs1": {
+            "type": "TabContainerUI",
+            "position": [500, 100],
+            "parameters": {
+                "min_size": { "value": { "_type": "Vector2i", "x": 280, "y": 160 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [850, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 320, "y": 200 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1200, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 320, "y": 200 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "slider_a", "from_port": 0, "to": "tabs1", "to_port": 1 },
+        { "from": "button_b", "from_port": 0, "to": "tabs1", "to_port": 2 },
+        { "from": "tabs1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TabContainer UI — Basic\n\nEach UI input becomes a tab page.\nOptional DAT input on port 0 provides tab names.\nState channel: tab (selected index).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

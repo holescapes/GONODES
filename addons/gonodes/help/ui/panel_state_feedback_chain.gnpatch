@@ -1,0 +1,104 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "slider1": {
+            "type": "SliderUI",
+            "position": [100, 100],
+            "parameters": {
+                "label": { "value": "Volume" },
+                "min_value": { "value": 0.0 },
+                "max_value": { "value": 100.0 },
+                "step": { "value": 1.0 },
+                "default_value": { "value": 50.0 }
+            }
+        },
+        "knob1": {
+            "type": "KnobUI",
+            "position": [100, 250],
+            "parameters": {
+                "label": { "value": "Pan" },
+                "min_value": { "value": -1.0 },
+                "max_value": { "value": 1.0 },
+                "default_value": { "value": 0.0 }
+            }
+        },
+        "label1": {
+            "type": "LabelUI",
+            "position": [100, 400],
+            "parameters": {
+                "text": { "value": "State Readout" },
+                "font_size": { "value": 14 }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 200],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 400 } },
+                "layout": { "value": 0 },
+                "spacing": { "value": 8 }
+            }
+        },
+        "transform1": {
+            "type": "TransformTOP",
+            "position": [900, 100],
+            "parameters": {
+                "scale": { "value": { "_type": "Vector2", "x": 0.5, "y": 0.5 } },
+                "translate": { "value": { "_type": "Vector2", "x": -0.25, "y": -0.15 } }
+            }
+        },
+        "ramp1": {
+            "type": "RampTOP",
+            "position": [900, 400],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+            }
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [1300, 200],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "crop1": {
+            "type": "CropTOP",
+            "position": [1700, 200],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 480, "y": 480 } },
+                "left_top": { "value": { "_type": "Vector2", "x": 0.03, "y": 0.03 } },
+                "right_bottom": { "value": { "_type": "Vector2", "x": 0.97, "y": 0.97 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [2100, 200],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 480, "y": 480 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "slider1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "knob1", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "label1", "from_port": 0, "to": "panel1", "to_port": 2 },
+        { "from": "panel1", "from_port": 1, "to": "label1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "transform1", "to_port": 0 },
+        { "from": "ramp1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "transform1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "crop1", "to_port": 0 },
+        { "from": "crop1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Full Interactive Loop — State Feedback + 3-TOP Chain\n\nPanelTOP's CHOP output (port 1) feeds back into LabelUI,\nshowing slider/knob values in real time. The panel texture\npasses through Transform → Composite → Crop — three spatial\nTOPs in sequence. All widgets stay interactive because each\nTOP accumulates its inverse transform on panel_sources.\n\nDrag the slider and knob: the label updates live,\nand clicks work through the transformed+cropped output.",
+            "position": [-100.0, -300.0],
+            "size": [550.0, 170.0],
+            "color": [0.2, 0.7, 0.9, 0.8]
+        }
+    ]
+}

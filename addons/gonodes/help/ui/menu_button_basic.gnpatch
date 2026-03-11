@@ -1,0 +1,50 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "menubtn1": {
+            "type": "MenuButtonUI",
+            "position": [300, 100],
+            "parameters": {
+                "label": { "value": "Options" },
+                "min_size": { "value": { "_type": "Vector2i", "x": 120, "y": 32 } }
+            }
+        },
+        "label1": {
+            "type": "LabelUI",
+            "position": [300, 230],
+            "parameters": { "text": { "value": "Last selected:" } }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [650, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 120 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1000, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 120 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "menubtn1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "label1", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MenuButton UI — Basic\n\nButton with popup menu from DAT data.\nItems populate from first DAT column.\nState channel: selected (last chosen item index).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

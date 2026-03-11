@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "texrect1": {
+            "type": "TextureRectUI",
+            "position": [100, 100],
+            "parameters": {
+                "stretch_mode": { "value": 4 },
+                "min_size": { "value": { "_type": "Vector2i", "x": 256, "y": 256 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 256 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 256 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "texrect1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TextureRect UI — Basic\n\nDisplays a TOP texture inside PanelTOP.\nConnect a TOP operator to the 'top' input.\nOptional MAT input applies a shader overlay.",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

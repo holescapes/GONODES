@@ -1,0 +1,53 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lineedit1": {
+            "type": "LineEditUI",
+            "position": [100, 100],
+            "parameters": {
+                "placeholder": { "value": "Type something..." },
+                "default_text": { "value": "" },
+                "max_length": { "value": 64 }
+            }
+        },
+        "label1": {
+            "type": "LabelUI",
+            "position": [100, 250],
+            "parameters": {
+                "text": { "value": "Line Edit State:" }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "lineedit1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "label1", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LineEdit UI — Basic\n\nSingle-line text input field.\nState channels: length, submitted (impulse).\nPress Enter to trigger 'submitted'.",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

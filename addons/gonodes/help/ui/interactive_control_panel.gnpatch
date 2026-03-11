@@ -1,0 +1,87 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "colorpicker1": {
+            "type": "ColorPickerUI",
+            "position": [100, 50],
+            "parameters": {
+                "default_color": { "value": { "_type": "Color", "r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0 } }
+            }
+        },
+        "slider_size": {
+            "type": "SliderUI",
+            "position": [100, 180],
+            "parameters": {
+                "label": { "value": "Size" },
+                "min_val": { "value": 50.0 },
+                "max_val": { "value": 300.0 },
+                "default_val": { "value": 150.0 }
+            }
+        },
+        "toggle1": {
+            "type": "ToggleUI",
+            "position": [100, 300],
+            "parameters": { "label": { "value": "Show Border" } }
+        },
+        "spinbox_rotation": {
+            "type": "SpinBoxUI",
+            "position": [100, 410],
+            "parameters": {
+                "min_val": { "value": 0.0 },
+                "max_val": { "value": 360.0 },
+                "step": { "value": 5.0 },
+                "default_val": { "value": 0.0 },
+                "suffix": { "value": "°" }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [500, 100],
+            "parameters": {
+                "layout": { "value": 0 },
+                "spacing": { "value": 6 }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [850, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 320, "y": 350 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "transform1": {
+            "type": "TransformTOP",
+            "position": [1200, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1550, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 320, "y": 350 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "colorpicker1", "from_port": 0, "to": "container1", "to_port": 0 },
+        { "from": "slider_size", "from_port": 0, "to": "container1", "to_port": 1 },
+        { "from": "toggle1", "from_port": 0, "to": "container1", "to_port": 2 },
+        { "from": "spinbox_rotation", "from_port": 0, "to": "container1", "to_port": 3 },
+        { "from": "container1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "transform1", "to_port": 0 },
+        { "from": "transform1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Interactive Control Panel\n\nColorPicker + Slider + Toggle + SpinBox in a Container.\nPanelTOP renders the panel, then TransformTOP applies rotation.\nDemonstrates multiple widget types feeding into a single panel\nwith downstream TOP processing.",
+            "position": [-150.0, -100.0],
+            "size": [480.0, 120.0],
+            "color": [0.2, 0.7, 0.9, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "texprogress1": {
+            "type": "TextureProgressBarUI",
+            "position": [300, 100],
+            "parameters": {
+                "min_val": { "value": 0.0 },
+                "max_val": { "value": 100.0 },
+                "default_val": { "value": 40.0 },
+                "fill_mode": { "value": 0 },
+                "min_size": { "value": { "_type": "Vector2i", "x": 220, "y": 40 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [650, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 260, "y": 80 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1000, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 260, "y": 80 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "texprogress1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TextureProgressBar UI — Basic\n\nTextured progress bar with TOP layers.\nInputs: CHOP (driver), under/progress/over TOPs.\nState channels: value, ratio (0-1).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

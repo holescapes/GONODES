@@ -1,0 +1,50 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "linkbtn1": {
+            "type": "LinkButtonUI",
+            "position": [100, 100],
+            "parameters": {
+                "text": { "value": "Click this link" },
+                "underline": { "value": 0 }
+            }
+        },
+        "label1": {
+            "type": "LabelUI",
+            "position": [100, 220],
+            "parameters": { "text": { "value": "Link state:" } }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 100 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 100 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "linkbtn1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "label1", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LinkButton UI — Basic\n\nClickable text link with underline options.\nUnderline modes: Always, On Hover, Never.\nState channel: press (impulse 0/1).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

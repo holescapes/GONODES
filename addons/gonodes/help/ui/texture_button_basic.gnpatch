@@ -1,0 +1,44 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "texbtn1": {
+            "type": "TextureButtonUI",
+            "position": [300, 100],
+            "parameters": {
+                "toggle_mode": { "value": true },
+                "stretch": { "value": true },
+                "min_size": { "value": { "_type": "Vector2i", "x": 128, "y": 128 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [650, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 200, "y": 200 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1000, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 200, "y": 200 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "texbtn1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TextureButton UI — Basic\n\nClickable texture button with 3 TOP inputs:\nnormal, pressed, and hover textures.\nState channels: press (impulse), toggle (0/1).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

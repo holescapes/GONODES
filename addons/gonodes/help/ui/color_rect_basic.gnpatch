@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "colorrect1": {
+            "type": "ColorRectUI",
+            "position": [100, 100],
+            "parameters": {
+                "color": { "value": { "_type": "Color", "r": 0.3, "g": 0.6, "b": 0.9, "a": 1.0 } },
+                "min_size": { "value": { "_type": "Vector2i", "x": 200, "y": 100 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 128 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 128 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "colorrect1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ColorRect UI — Basic\n\nColored rectangle widget. Clickable (outputs press impulse).\nOptional MAT input applies shader overlay.\nState: click (0/1 impulse).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

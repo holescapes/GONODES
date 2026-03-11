@@ -1,0 +1,115 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "tabbar1": {
+            "type": "TabBarUI",
+            "position": [100, 50],
+            "parameters": {
+                "default_tab": { "value": 0 },
+                "closable": { "value": false },
+                "drag_reorder": { "value": true }
+            }
+        },
+        "knob1": {
+            "type": "KnobUI",
+            "position": [100, 180],
+            "parameters": {
+                "label": { "value": "Frequency" },
+                "min_val": { "value": 20.0 },
+                "max_val": { "value": 2000.0 },
+                "default_val": { "value": 440.0 }
+            }
+        },
+        "xypad1": {
+            "type": "XYPadUI",
+            "position": [100, 350],
+            "parameters": {
+                "label": { "value": "Pan/Volume" },
+                "size": { "value": 120 }
+            }
+        },
+        "linkbtn1": {
+            "type": "LinkButtonUI",
+            "position": [100, 530],
+            "parameters": {
+                "text": { "value": "Reset to defaults" },
+                "underline": { "value": 1 }
+            }
+        },
+        "rtl1": {
+            "type": "RichTextLabelUI",
+            "position": [100, 640],
+            "parameters": {
+                "text": { "value": "[b]Audio Controls[/b]\n[color=gray]Drag knob or XY pad to adjust.\n[i]Tab bar selects channel.[/i][/color]" },
+                "font_size": { "value": 14 },
+                "min_size": { "value": { "_type": "Vector2i", "x": 250, "y": 60 } }
+            }
+        },
+        "scroll1": {
+            "type": "ScrollContainerUI",
+            "position": [500, 100],
+            "parameters": {
+                "v_scroll": { "value": true },
+                "min_size": { "value": { "_type": "Vector2i", "x": 280, "y": 300 } }
+            }
+        },
+        "margin1": {
+            "type": "MarginContainerUI",
+            "position": [850, 100],
+            "parameters": {
+                "left": { "value": 12 },
+                "top": { "value": 8 },
+                "right": { "value": 12 },
+                "bottom": { "value": 8 }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [1200, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 340, "y": 400 } }
+            }
+        },
+        "transform1": {
+            "type": "TransformTOP",
+            "position": [1550, 100],
+            "parameters": {}
+        },
+        "composite1": {
+            "type": "CompositeTOP",
+            "position": [1550, 300],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 340, "y": 400 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "tabbar1", "from_port": 0, "to": "scroll1", "to_port": 0 },
+        { "from": "knob1", "from_port": 0, "to": "scroll1", "to_port": 1 },
+        { "from": "xypad1", "from_port": 0, "to": "scroll1", "to_port": 2 },
+        { "from": "linkbtn1", "from_port": 0, "to": "scroll1", "to_port": 3 },
+        { "from": "rtl1", "from_port": 0, "to": "scroll1", "to_port": 4 },
+        { "from": "scroll1", "from_port": 0, "to": "margin1", "to_port": 0 },
+        { "from": "margin1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "transform1", "to_port": 0 },
+        { "from": "transform1", "from_port": 0, "to": "composite1", "to_port": 0 },
+        { "from": "composite1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Audio Mixer Panel — Multi-Tier Interactive\n\nCombines widgets from all 4 tiers:\n• TabBarUI (Tier 3) — channel selection\n• KnobUI + XYPadUI (existing) — analog controls\n• LinkButtonUI (Tier 4) — reset action\n• RichTextLabelUI (Tier 1) — BBCode help text\n• ScrollContainerUI (Tier 2) — scrollable layout\n• MarginContainerUI (Tier 2) — padding wrapper\nPanel → TransformTOP → CompositeTOP → WindowOUT.",
+            "position": [-250.0, -140.0],
+            "size": [560.0, 180.0],
+            "color": [0.2, 0.7, 0.9, 0.8]
+        }
+    ]
+}

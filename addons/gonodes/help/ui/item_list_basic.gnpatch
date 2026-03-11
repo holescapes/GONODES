@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "itemlist1": {
+            "type": "ItemListUI",
+            "position": [300, 100],
+            "parameters": {
+                "max_columns": { "value": 1 },
+                "min_size": { "value": { "_type": "Vector2i", "x": 220, "y": 200 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [650, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 260, "y": 240 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1000, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 260, "y": 240 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "itemlist1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ItemList UI — Basic\n\nSelectable item list from DAT (first column = text).\nOptional TOP input provides icon for all items.\nState channel: selected (index, -1 for none).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

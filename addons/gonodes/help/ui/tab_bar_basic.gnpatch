@@ -1,0 +1,51 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "tabbar1": {
+            "type": "TabBarUI",
+            "position": [300, 100],
+            "parameters": {
+                "default_tab": { "value": 0 },
+                "closable": { "value": false },
+                "min_size": { "value": { "_type": "Vector2i", "x": 250, "y": 32 } }
+            }
+        },
+        "label1": {
+            "type": "LabelUI",
+            "position": [300, 230],
+            "parameters": { "text": { "value": "Selected Tab:" } }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [650, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 120 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1000, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 120 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "tabbar1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "label1", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TabBar UI — Basic\n\nStandalone tab bar (no child content).\nTab names from DAT first column.\nState channel: tab (selected index).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

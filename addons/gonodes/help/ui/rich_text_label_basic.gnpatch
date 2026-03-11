@@ -1,0 +1,45 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "rtl1": {
+            "type": "RichTextLabelUI",
+            "position": [100, 100],
+            "parameters": {
+                "text": { "value": "[b]Bold Title[/b]\n[i]Italic[/i] and [color=red]colored[/color] text.\n[url]Clickable link[/url]" },
+                "bbcode": { "value": true },
+                "font_size": { "value": 18 },
+                "min_size": { "value": { "_type": "Vector2i", "x": 280, "y": 120 } }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 320, "y": 160 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 320, "y": 160 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "rtl1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RichTextLabel UI — Basic\n\nBBCode rich text label. Supports bold, italic, color, links.\nOptional DAT input overrides parameter text.\nRead-only display widget (no interactive state).",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

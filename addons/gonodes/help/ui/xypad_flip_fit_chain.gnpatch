@@ -1,0 +1,81 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "button1": {
+            "type": "ButtonUI",
+            "position": [100, 100],
+            "parameters": {
+                "label": { "value": "Reset" },
+                "toggle_mode": { "value": false }
+            }
+        },
+        "xypad1": {
+            "type": "XYPadUI",
+            "position": [100, 250],
+            "parameters": {
+                "label": { "value": "Offset" },
+                "size": { "value": 128 }
+            }
+        },
+        "dropdown1": {
+            "type": "DropdownUI",
+            "position": [100, 450],
+            "parameters": {
+                "label": { "value": "Mode" },
+                "items": { "value": "Normal,Invert,Muted" }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 250],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "flip1": {
+            "type": "FlipTOP",
+            "position": [900, 250],
+            "parameters": {
+                "flip_x": { "value": true },
+                "flip_y": { "value": false }
+            }
+        },
+        "fit1": {
+            "type": "FitTOP",
+            "position": [1300, 250],
+            "parameters": {
+                "fit_mode": { "value": 3 },
+                "resolution": { "value": { "_type": "Vector2i", "x": 800, "y": 600 } },
+                "border_color": { "value": { "_type": "Color", "r": 0.1, "g": 0.1, "b": 0.15, "a": 1.0 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1700, 250],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 800, "y": 600 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "button1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "xypad1", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "dropdown1", "from_port": 0, "to": "panel1", "to_port": 2 },
+        { "from": "panel1", "from_port": 0, "to": "flip1", "to_port": 0 },
+        { "from": "flip1", "from_port": 0, "to": "fit1", "to_port": 0 },
+        { "from": "fit1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UI Flip + Fit Chain — Two Spatial TOPs\n\nPanel passes through FlipTOP (mirrored horizontally)\nthen FitTOP (letterboxed to 800x600). Both are affine-invertible\nTOPs that update panel_sources inverse transforms.\n\nThe XY pad and button are still interactive despite the panel\nbeing flipped and letterboxed — click on the mirrored positions\nand input is correctly mapped back through both transforms.",
+            "position": [-100.0, -250.0],
+            "size": [550.0, 150.0],
+            "color": [0.2, 0.7, 0.9, 0.8]
+        }
+    ]
+}
