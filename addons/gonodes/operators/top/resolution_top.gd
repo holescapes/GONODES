@@ -37,6 +37,18 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if filter_idx == 0 else CanvasItem.TEXTURE_FILTER_NEAREST
 
 	_cached_tex_data.resolution = res
+
+	# Invertible: pure resolution scale. Inverse maps output pixels back to input pixels.
+	if tex_in.panel_sources.size() > 0:
+		_cached_tex_data.panel_sources.clear()
+		var src_res := Vector2(tex_in.resolution)
+		var dst_res := Vector2(res)
+		var inv_t := Transform2D.IDENTITY.scaled(Vector2(src_res.x / dst_res.x, src_res.y / dst_res.y))
+		for ps in tex_in.panel_sources:
+			var copy: GNPanelSource = ps.duplicate_source()
+			copy.transform = copy.transform * inv_t
+			_cached_tex_data.panel_sources.append(copy)
+
 	return _cached_tex_data
 
 

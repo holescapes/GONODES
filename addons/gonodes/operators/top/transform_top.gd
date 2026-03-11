@@ -51,5 +51,30 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("extend_mode", ext)
 
 	_cached_tex_data.resolution = res
+
+	# Apply inverse spatial transform to panel_sources so interactive hits
+	# map back through translate/rotate/scale to the original panel viewport.
+	if tex_in.panel_sources.size() > 0:
+		_cached_tex_data.panel_sources.clear()
+		# Build inverse transform in pixel space:
+		# Forward: pivot → scale → rotate → translate (in UV, origin top-left)
+		var fres := Vector2(res)
+		var pix_pivot := pvt * fres
+		var inv_t := Transform2D.IDENTITY
+		# Undo translate
+		inv_t = inv_t.translated(-trans * fres)
+		# Undo rotate around pivot
+		inv_t = inv_t.translated(-pix_pivot)
+		inv_t = inv_t.rotated(-rot)
+		inv_t = inv_t.translated(pix_pivot)
+		# Undo scale around pivot
+		inv_t = inv_t.translated(-pix_pivot)
+		inv_t = inv_t.scaled(Vector2(1.0 / scl.x, 1.0 / scl.y) if scl.x != 0.0 and scl.y != 0.0 else Vector2.ONE)
+		inv_t = inv_t.translated(pix_pivot)
+		for ps in tex_in.panel_sources:
+			var copy: GNPanelSource = ps.duplicate_source()
+			copy.transform = copy.transform * inv_t
+			_cached_tex_data.panel_sources.append(copy)
+
 	return _cached_tex_data
 

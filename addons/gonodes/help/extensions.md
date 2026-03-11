@@ -55,7 +55,7 @@ description = "Another operator in the same extension."
 
 | Field       | Required | Description                                       |
 |-------------|----------|---------------------------------------------------|
-| family      | Yes      | TOP, CHOP, DAT, SOP, IMG, MAT, COMP, or OUT      |
+| family      | Yes      | TOP, CHOP, DAT, SOP, IMG, MAT, COMP, UI, or OUT  |
 | script      | Yes      | Resource path to the operator GDScript             |
 | description | No       | One-line tooltip text                              |
 | section     | No       | Overrides extension-level section for this operator|

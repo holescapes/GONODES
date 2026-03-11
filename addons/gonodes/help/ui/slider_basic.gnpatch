@@ -1,0 +1,47 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "slider1": {
+            "type": "SliderUI",
+            "position": [100, 100],
+            "parameters": {
+                "label": { "value": "Mix" },
+                "min_value": { "value": 0.0 },
+                "max_value": { "value": 1.0 },
+                "default_value": { "value": 0.5 },
+                "orientation": { "value": 0 }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 128 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 128 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "slider1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Slider UI — Basic\n\nHorizontal/Vertical slider widget.\nOutputs its float value as a CHOP channel\nvia PanelTOP output port 1.",
+            "position": [-100.0, -100.0],
+            "size": [380.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

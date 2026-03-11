@@ -18,8 +18,7 @@ GONODES organizes operators into families based on the type of data they process
 | **DAT**  | Data operators â€” tables, text, and structured data |
 | **SOP**  | Surface operators â€” 3D geometry generation        |
 | **MAT**  | Material operators â€” shader materials for 3D      |
-| **COMP** | Component operators â€” 3D scene objects and sub-networks |
-| **OUT** | Final output sinks for rendering and display    |
+| **COMP** | Component operators â€” 3D scene objects and sub-networks || **UI** | User interface operators — interactive 2D widgets for control panels || **OUT** | Final output sinks for rendering and display    |
 
 ---
 

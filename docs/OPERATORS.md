@@ -1,6 +1,6 @@
-# GONODES â€” Operator Reference
+﻿# GONODES â€” Operator Reference
 
-> **131 operators** across 9 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, and native extensions.
+> **131 operators** across 10 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, UI, and native extensions.
 
 ---
 
@@ -14,6 +14,7 @@
 - [COMP â€” Component Operators](#comp--component-operators)
 - [MAT â€” Material Operators](#mat--material-operators)
 - [OUT — Output Operators](#out--output-operators)
+- [UI — User Interface Operators](#ui--user-interface-operators)
 
 > **Help example patches:** Every operator has 1â€“2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set.
 >
@@ -29,6 +30,7 @@
 >    - **COMP (pass-through: Null, Switch, Animation)** â†’ Route data *through* the COMP to RenderTOP â€” never bypass it with a direct connection, or the cook engine won't cook it (dead-end branches are skipped)
 >    - **DAT** â†’ TextTOP â†’ WindowOUT
 >    - **MAT** â†’ GeometryCOMP (MAT on port 1) + CameraCOMP â†’ RenderTOP â†’ WindowOUT
+>    - **UI** †’ PanelTOP †’ WindowOUT (interactive widgets rendered to texture)
 > 3. **WindowOUT settings** â€” Resolution `512Ã—512`, `"open": true` so the window opens automatically.
 > 4. **Pass-through COMPs** must be in the active cook chain, not dead-end branches. The cook engine only cooks nodes upstream of sinks â€” an orphaned COMP node never cooks and appears broken.
 
@@ -1011,6 +1013,27 @@ Render CHOP channels as a texture â€” waveform oscilloscope, heatmap, or gr
 **Input:** `in` (CHOP â€” source channels).
 
 **How it works:** CPU-based Image rendering (no SubViewport). Reads channel samples and draws into an `Image`, then converts to `ImageTexture`. Waveform mode draws lines between samples; Heatmap maps values to a red-blue gradient; Graph draws filled bars. Auto-range scans the data for min/max each cook.
+
+---
+
+### PanelTOP
+
+Container that renders connected UI widgets into a SubViewport texture. Outputs GNTextureData with `panel_sources` metadata for interactive input forwarding through the TOP chain.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512x512 | — | SubViewport render resolution |
+| layout | Enum | VBox | VBox, HBox, Grid, Flow | How child widgets are arranged |
+| padding | Int | 8 | 0-100 | Internal padding (pixels) |
+| bg_color | Color | (0.15, 0.15, 0.15) | — | Background color |
+| bg_opacity | Float | 1.0 | 0.0-1.0 | Background opacity |
+| columns | Int | 2 | 1-10 | Column count (Grid layout only) |
+
+**Input:** Dynamic UI inputs (unlimited connected UI widgets).
+**Output 0:** TOP (GNTextureData with panel_sources).
+**Output 1:** CHOP (widget state channels: button presses, slider values, etc.).
+
+**How it works:** Creates a SubViewport with `gui_disable_input = false` and a root container inside. During cook, reparents each connected UI widget's `_control_node` into the root container. The SubViewport renders the widget tree and the resulting texture includes `GNPanelSource` metadata that WindowOUT uses for mouse input forwarding through inverse transforms.
 
 ---
 
@@ -3441,11 +3464,59 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output â€�
 
 ---
 
+## UI — User Interface Operators
+
+Interactive 2D widget operators for building control panels. UI widgets are placed inside a **PanelTOP** container which renders them into a SubViewport texture. The panel texture flows through the normal TOP chain and WindowOUT forwards mouse input back to the widgets through accumulated inverse transforms (GNPanelSource metadata on GNTextureData).
+
+**Base class:** `GNUiBase` (extends GNNode) — manages `_control_node: Control`. Color: Sky Blue.
+
+### ButtonUI
+A clickable button. Outputs press state (0/1) and cumulative click count as CHOP channels.
+- **Parameters:** `text` (STRING), `font_size` (INT, 16), `color` (COLOR)
+- **State channels:** `press`, `click_count`
+
+### SliderUI
+A horizontal or vertical slider with configurable range.
+- **Parameters:** `min` (FLOAT, 0.0), `max` (FLOAT, 1.0), `step` (FLOAT, 0.01), `value` (FLOAT, 0.5), `orientation` (MENU: Horizontal/Vertical)
+- **State channels:** `value`
+
+### ToggleUI
+An on/off toggle switch (CheckButton).
+- **Parameters:** `text` (STRING), `default_state` (TOGGLE, false)
+- **State channels:** `state`
+
+### LabelUI
+A read-only text label for display purposes.
+- **Parameters:** `text` (STRING), `font_size` (INT, 16), `color` (COLOR), `alignment` (MENU: Left/Center/Right)
+- **State channels:** none (display only)
+
+### KnobUI
+A rotary knob control with custom `_draw()` rendering.
+- **Parameters:** `min` (FLOAT, 0.0), `max` (FLOAT, 1.0), `value` (FLOAT, 0.5), `size` (INT, 64), `color` (COLOR)
+- **State channels:** `value`, `angle`
+
+### XYPadUI
+A 2D XY pad control with custom `_draw()` rendering.
+- **Parameters:** `x_min` (FLOAT, 0.0), `x_max` (FLOAT, 1.0), `y_min` (FLOAT, 0.0), `y_max` (FLOAT, 1.0), `size` (INT, 128)
+- **State channels:** `x`, `y`
+
+### DropdownUI
+A dropdown menu (OptionButton) with configurable items.
+- **Parameters:** `items` (STRING, comma-separated), `default_index` (INT, 0)
+- **State channels:** `index`
+
+### ContainerUI
+A layout container for nesting other UI widgets. Supports multiple layout modes.
+- **Parameters:** `layout` (MENU: HBox/VBox/Grid/Flow), `columns` (INT, for grid mode)
+- **State channels:** none (layout only)
+
+---
+
 ## Quick Reference
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 62 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess |
+| **TOP** | 63 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel |
 | **CHOP** | 61 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics |
 | **DAT** | 29 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML |
 | **SOP** | 57 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Select |
@@ -3453,7 +3524,8 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output â€�
 | **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
 | **IMG** | 12 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab |
 | **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
-| **Total** | **256** | |
+| **UI** | 8 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container |
+| **Total** | **265** | |
 
 ---
 

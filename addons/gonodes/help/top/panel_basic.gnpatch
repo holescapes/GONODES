@@ -1,0 +1,55 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "slider1": {
+            "type": "SliderUI",
+            "position": [100, 100],
+            "parameters": {
+                "label": { "value": "Brightness" },
+                "min_value": { "value": 0.0 },
+                "max_value": { "value": 1.0 },
+                "default_value": { "value": 0.5 }
+            }
+        },
+        "toggle1": {
+            "type": "ToggleUI",
+            "position": [100, 250],
+            "parameters": {
+                "label": { "value": "Enable" },
+                "default_value": { "value": true }
+            }
+        },
+        "panel1": {
+            "type": "PanelTOP",
+            "position": [500, 150],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "layout": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 150],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "slider1", "from_port": 0, "to": "panel1", "to_port": 0 },
+        { "from": "toggle1", "from_port": 0, "to": "panel1", "to_port": 1 },
+        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Panel TOP — Basic UI Rendering\n\nPanelTOP collects UI widgets into a SubViewport\nand renders them as a TOP texture.\nMouse events from WindowOUT are forwarded back\nthrough panel_sources for interactive controls.",
+            "position": [-100.0, -150.0],
+            "size": [500.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

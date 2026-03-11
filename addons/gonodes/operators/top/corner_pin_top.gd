@@ -50,4 +50,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("bg_color", Vector4(bg.r, bg.g, bg.b, bg.a))
 
 	_cached_tex_data.resolution = res
+	# Projective warp: homography inversion is possible but complex — clear for now
+	_cached_tex_data.panel_sources.clear()
 	return _cached_tex_data

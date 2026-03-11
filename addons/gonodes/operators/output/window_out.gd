@@ -218,6 +218,7 @@ func _on_window_close_requested() -> void:
 
 ## Called for input events inside the output window.
 ## ESC reverts fullscreen/borderless back to windowed mode.
+## Mouse events are forwarded to interactive PanelTOP viewports via panel_sources.
 func _on_window_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		var mode_idx: int = get_param_value("window_mode")
@@ -225,6 +226,10 @@ func _on_window_input(event: InputEvent) -> void:
 			set_param_value("window_mode", WindowMode.WINDOWED)
 			_window_params_dirty = true
 			GNLogger.info("WindowOUT", "'%s' ESC — switched to windowed mode" % id)
+
+	# Forward mouse events to interactive panels
+	if event is InputEventMouse:
+		_forward_to_panels(event as InputEventMouse)
 
 
 ## Override: mark window params dirty when our own parameters change.
@@ -243,3 +248,70 @@ static func get_display_info() -> Array[Dictionary]:
 			"size": DisplayServer.screen_get_size(i),
 		})
 	return displays
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Panel Input Forwarding
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Forwards mouse events to interactive PanelTOP SubViewports by:
+## 1. Normalizing mouse position to the display rect area
+## 2. Hit-testing all panel_sources from the input GNTextureData
+## 3. Remapping coordinates and calling push_input() on matching viewports
+func _forward_to_panels(event: InputEventMouse) -> void:
+	if _window == null or _display_rect == null:
+		return
+
+	# Get the input texture data to check for panel_sources
+	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	if engine == null or engine.network == null:
+		return
+
+	# Re-read the input texture data from upstream cached output
+	var network: GNNetwork = engine.network
+	var conns: Array = network.get_input_connections(id)
+	if conns.is_empty():
+		return
+
+	var conn: GNConnection = conns[0]
+	var upstream: GNNode = network.nodes.get(conn.from_node, null)
+	if upstream == null or upstream.cached_output == null:
+		return
+	if not (upstream.cached_output is GNTextureData):
+		return
+
+	var tex_data: GNTextureData = upstream.cached_output as GNTextureData
+	if tex_data.panel_sources.is_empty():
+		return
+
+	# Normalize mouse position to [0,1] within the display rect
+	var window_size: Vector2 = Vector2(_window.size)
+	var mouse_pos: Vector2 = event.position
+	# The TextureRect uses STRETCH_KEEP_ASPECT_COVERED, but we need the
+	# actual content area. Approximate with full window for now.
+	var norm_pos := Vector2(mouse_pos.x / window_size.x, mouse_pos.y / window_size.y)
+
+	# Scale to texture resolution
+	var tex_pos := Vector2(norm_pos.x * tex_data.resolution.x,
+		norm_pos.y * tex_data.resolution.y)
+
+	# Hit-test all panel sources — first match wins
+	for ps in tex_data.panel_sources:
+		var source: GNPanelSource = ps as GNPanelSource
+		if source == null or source.viewport == null:
+			continue
+
+		var local: Variant = source.hit_test(tex_pos)
+		if local == null:
+			continue
+
+		# Remap the mouse event and push to the panel viewport
+		var remapped: InputEventMouse = event.duplicate() as InputEventMouse
+		remapped.position = local as Vector2
+		if remapped is InputEventMouseMotion:
+			# Global position matches local for SubViewports
+			(remapped as InputEventMouseMotion).global_position = local as Vector2
+		elif remapped is InputEventMouseButton:
+			(remapped as InputEventMouseButton).global_position = local as Vector2
+		source.viewport.push_input(remapped)
+		return  # First hit consumes the event

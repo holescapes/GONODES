@@ -44,4 +44,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("strength", get_param_value("strength"))
 
 	_cached_tex_data.resolution = res
+	# Non-invertible: UV remap is data-dependent — clear panel_sources
+	_cached_tex_data.panel_sources.clear()
 	return _cached_tex_data

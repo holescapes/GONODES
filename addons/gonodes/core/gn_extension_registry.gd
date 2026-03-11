@@ -1004,6 +1004,28 @@ func _register_core_operators() -> void:
 	_reg("DepthMAT",        "MAT", DepthMAT,
 		"Visualize scene depth as grayscale with near/far controls.")
 
+	# ── TOPs: Panel ─────────────────────────────────────────────────────
+	_reg("PanelTOP",        "TOP", PanelTOP,
+		"Renders UI widgets into a SubViewport texture with interactive input forwarding.")
+
+	# ── UIs: Widgets ────────────────────────────────────────────────────
+	_reg("ButtonUI",        "UI", ButtonUI,
+		"Push button widget. Outputs press/release state as CHOP channel.")
+	_reg("SliderUI",        "UI", SliderUI,
+		"Horizontal or vertical slider. Outputs float value as CHOP channel.")
+	_reg("ToggleUI",        "UI", ToggleUI,
+		"On/off toggle (CheckButton). Outputs 0 or 1 as CHOP channel.")
+	_reg("LabelUI",         "UI", LabelUI,
+		"Display-only text label driven by DAT input or expression.")
+	_reg("KnobUI",          "UI", KnobUI,
+		"Rotary knob widget. Outputs float value as CHOP channel.")
+	_reg("XYPadUI",         "UI", XYPadUI,
+		"2D XY pad controller. Outputs x and y as CHOP channels.")
+	_reg("DropdownUI",      "UI", DropdownUI,
+		"Dropdown menu (OptionButton). Outputs selected index as CHOP channel.")
+	_reg("ContainerUI",     "UI", ContainerUI,
+		"Layout container for nesting and arranging child UI widgets.")
+
 	# ── OUTs: Display ──────────────────────────────────────────────────
 	_reg("WindowOUT",       "OUT", WindowOUT,
 		"Display a texture in a standalone OS window (VJ output).")

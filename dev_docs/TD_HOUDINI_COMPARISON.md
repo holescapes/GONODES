@@ -35,7 +35,7 @@
 | **Cook paradigm** | Pull-based, demand-driven per frame | Pull-based, demand-driven on dependency change | Push-based, topo-sorted per frame |
 | **Engine language** | C++ (operators), Python (scripting) | C++ (HDK), VEX (shaders/wrangles), Python/HScript | GDScript (operators), GDScript (scripting) |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan (GLSL/HLSL) | Karma (CPU/GPU), OpenGL viewport, Vulkan (Houdini 20+) | Godot renderer (Vulkan/OpenGL via SubViewport + GLSL) |
-| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT |
+| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT, UI | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT |
 | **Typical network size** | Dozens to hundreds of nodes | Hundreds to thousands of nodes | Dozens to hundreds of nodes |
 | **Hierarchy model** | COMPs contain networks (infinite nesting) | Subnet OTLs, HDA assets (infinite nesting) | SubNetworkNode with InTunnel/OutTunnel |
 | **Open source / cost** | Commercial ($2,200+ / $600 non-comm.) | Commercial ($4,495+ / free non-comm.) | Open source (Godot 4.6 + GDScript) |
@@ -165,6 +165,7 @@ Houdini's type system is **attribute-centric** â€” data is geometry with ar
 | SOP | `GNGeoData` | `ArrayMesh` + attributes | Pass-by-reference, COW |
 | COMP | N/A (scene node) | `Node3D` in scene tree | Scene tree parenting |
 | MAT | `GNMaterialData` | `Material` resource | Pass-by-reference, COW |
+| UI | N/A (control node) | `Control` in SubViewport | Scene tree parenting via PanelTOP |
 
 **Key data flow patterns:**
 - **COW (Copy-on-Write)**: `_mutable_input()` duplicates data only when `_shared = true` (fan-out). Single-consumer chains are zero-copy.

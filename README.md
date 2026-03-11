@@ -1,4 +1,4 @@
-# GONODES
+﻿# GONODES
 
 **A real-time node-based visual programming framework built on [Godot 4.6](https://godotengine.org), inspired by [TouchDesigner](https://derivative.ca).**
 
@@ -35,7 +35,8 @@ Everything in GONODES is an **operator** (node). Operators are organized into fa
 | **POP** | Point clouds and particles (GPU) | Particle, Force, Noise |
 | **DAT** | Data tables and text | Table, Script, OSC In |
 | **MAT** | Materials and shaders | PBR, Custom Shader |
-| **COMP** | Containers and sub-networks | Panel, 3D Scene |
+| **COMP** | 3D scene containers and sub-networks | Geometry, Camera, Light |
+| **UI** | 2D interface widgets for PanelTOP | Button, Slider, Knob, XYPad |
 
 ### How It Works
 
@@ -62,7 +63,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 ## Project Status
 
-**Phase 6 Complete â€” Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowOUT open/close toggle. 3D pipeline live. 256 operators across 9 families. RAMP parameter type with curve editor. RampCHOP (dynamic 1â€“16 ramp slots). Canvas annotations (network boxes, sticky notes). Advanced scripting: GenericScriptNode (multi-output), CallbackDAT (event-driven), set_par() writable refs, Network API (procedural graph construction). 176 tests passing. Phases 1â€“6 complete.**
+**Phase 6 Complete â€” Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowOUT open/close toggle. 3D pipeline live. 265 operators across 10 families. RAMP parameter type with curve editor. RampCHOP (dynamic 1â€“16 ramp slots). Canvas annotations (network boxes, sticky notes). Advanced scripting: GenericScriptNode (multi-output), CallbackDAT (event-driven), set_par() writable refs, Network API (procedural graph construction). 176 tests passing. Phases 1â€“6 complete.**
 
 ### Completed
 
@@ -90,7 +91,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 
 | Family | Count | Highlights |
 |--------|-------|-----------|
-| **TOP** | 62 | Noise, Composite, Level, Blur, Ramp, Text, ImageFileIn, MovieFileIn, FFmpegIn, Transform, CustomShader, Render, Feedback, Displace, ChromaKey, AnalyzeTOP, TimeMachine, and more |
+| **TOP** | 63 | Noise, Composite, Level, Blur, Ramp, Text, ImageFileIn, MovieFileIn, FFmpegIn, Transform, CustomShader, Render, Feedback, Displace, ChromaKey, AnalyzeTOP, TimeMachine, Panel, and more |
 | **IMG** | 12 | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP, TOPtoIMG, WebcamIMG, ImageFileInIMG, ImageSequenceIMG, ScreenGrabIMG, ScriptIMG |
 | **CHOP** | 61 | LFO, Noise, Math, Constant, Wave, Filter, Lag, Timer, Trigger, Speed, Smooth, Spring, Delay, Envelope, Ramp, Expression, Keyboard/Mouse/Gamepad input, and more |
 | **DAT** | 29 | Constant, Text, JSONDAT, WebDAT, FileInDAT, ScriptDAT, **CallbackDAT**, OPFindDAT, Evaluate, CHOPtoDAT, SOPtoDAT, TOPtoDAT, and more |
@@ -98,6 +99,7 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Environment, Null, Switch, **GenericScriptNode**, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
 | **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
 | **OUT** | 9 | WindowOUT, TextureSaveOUT, ImageSaveOUT, TableSaveOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, RecordOUT, OscOUT |
+| **UI** | 8 | ButtonUI, SliderUI, ToggleUI, LabelUI, KnobUI, XYPadUI, DropdownUI, ContainerUI |
 
 ### Advanced Scripting
 
@@ -355,7 +357,7 @@ GONODES/
 â”œâ”€â”€ README.md                        # This file
 â”œâ”€â”€ GONODES_CONTEXT.md               # Full architecture & design doc
 â”œâ”€â”€ addons/gonodes/
-â”‚   â”œâ”€â”€ core/                        # Framework core (19 classes)
+â”‚   â”œâ”€â”€ core/                        # Framework core (21 classes)
 â”‚   â”‚   â”œâ”€â”€ gn_node.gd              # Base operator (extends Node) â€” type-agnostic
 â”‚   â”‚   â”œâ”€â”€ gn_top_base.gd          # GNTopBase â€” TOP family base class
 â”‚   â”‚   â”œâ”€â”€ gn_chop_base.gd         # GNChopBase â€” CHOP family base class
@@ -363,6 +365,8 @@ GONODES/
 â”‚   â”‚   â”œâ”€â”€ gn_sop_base.gd          # GNSopBase â€” SOP family base class
 â”‚   â”‚   â”œâ”€â”€ gn_comp_base.gd         # GNCompBase â€” COMP family base class
 â”‚   â”‚   â”œâ”€â”€ gn_mat_base.gd          # GNMatBase â€” MAT family base class
+â”‚   â”‚   â”œâ”€â”€ gn_ui_base.gd           # GNUiBase  UI family base class
+â”‚   â”‚   â”œâ”€â”€ gn_panel_source.gd      # GNPanelSource  panel input forwarding metadata
 â”‚   â”‚   â”œâ”€â”€ gn_cook_engine.gd       # Frame-driven cook engine
 â”‚   â”‚   â”œâ”€â”€ gn_network.gd           # Graph model (Resource)
 â”‚   â”‚   â”œâ”€â”€ gn_parameter.gd         # Typed parameters with expressions
@@ -384,7 +388,8 @@ GONODES/
 â”‚   â”‚   â”œâ”€â”€ sop/                     # 14 SOPs: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch
 â”‚   â”‚   â”œâ”€â”€ mat/                     # 2 MATs: PBR, Shader
 â”‚   â”‚   â”œâ”€â”€ comp/                    # 4 COMPs: Geometry, Camera, Light, Merge
-â”‚   â”‚   â””â”€â”€ output/                  # WindowOUT (multi-display)
+â”‚   â”‚   â”œâ”€â”€ output/                  # WindowOUT (multi-display)
+â”‚   â”‚   â””â”€â”€ ui/                      # 8 UIs: ButtonUI, SliderUI, ToggleUI, LabelUI, KnobUI, XYPadUI, DropdownUI, ContainerUI
 â”‚   â”œâ”€â”€ ui/                          # Editor UI
 â”‚   â”‚   â”œâ”€â”€ gn_graph_editor.gd      # GraphEdit canvas (bidirectional sync)
 â”‚   â”‚   â”œâ”€â”€ gn_node_view.gd         # GraphNode per operator (family colors)
@@ -398,7 +403,9 @@ GONODES/
 â”‚   â”‚   â”œâ”€â”€ dat/                     # DAT help files & examples
 â”‚   â”‚   â”œâ”€â”€ sop/                     # SOP help files & examples
 â”‚   â”‚   â”œâ”€â”€ comp/                    # COMP help files & examples
-â”‚   â”‚   â””â”€â”€ mat/                     # MAT help files & examples
+â”‚   â”‚   â”œâ”€â”€ mat/                     # MAT help files & examples
+â”‚   â”‚   â”œâ”€â”€ output/                  # OUT help files & examples
+â”‚   â”‚   â””â”€â”€ ui/                      # UI help files & examples
 â”‚   â””â”€â”€ shaders/                     # 17 shaders: noise_simplex, composite, levels, blur, ramp, circle, rectangle, transform2d, hsv_adjust, edge, threshold, displace, flip, tile, cross, crop, lookup, feedback
 â”œâ”€â”€ scenes/
 â”‚   â”œâ”€â”€ gn_editor.tscn               # Main editor scene (HSplit layout)

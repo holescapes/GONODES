@@ -47,5 +47,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("mirror_y", my)
 
 	_cached_tex_data.resolution = res
+	# Non-invertible: tiling is many-to-one (fract/repeat) — clear panel_sources
+	_cached_tex_data.panel_sources.clear()
 	return _cached_tex_data
 
