@@ -956,6 +956,14 @@ func set_perf_overlay_visible(enabled: bool) -> void:
 			view.hide_perf_overlay()
 
 
+## Updates warning/error status badges on all node views.
+## Called after each cook frame by the editor.
+func update_status_badges() -> void:
+	for view_name in _node_views:
+		var view: GNNodeView = _node_views[view_name]
+		view.update_status_badge()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Bypass / Lock
 # ═══════════════════════════════════════════════════════════════════════════════

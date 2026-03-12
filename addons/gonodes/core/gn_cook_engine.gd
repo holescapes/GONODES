@@ -53,6 +53,12 @@ var non_realtime_fps: float = 30.0
 ## Can be used to throttle heavy patches on low-end hardware.
 var max_cooks_per_frame: int = 0
 
+## When true, per-node warning/error status strings are maintained each cook
+## cycle (cleared before cooking, set on failures).  The editor sets this;
+## the player leaves it false to skip the overhead — there is no UI to
+## display badges in exported builds.
+var editor_mode: bool = false
+
 # ─── Hierarchy ─────────────────────────────────────────────────────────────────
 
 ## Parent cook engine (set by SubNetworkNode for inner cook engines).
@@ -393,6 +399,14 @@ func cook_frame(delta: float) -> void:
 	var cooked_count := 0
 	var skipped_count := 0
 	_expr_resolved_this_frame.clear()
+
+	# Clear per-node status before cooking — self-healing: stale warnings/errors
+	# from previous frames are wiped and only re-set if the problem persists.
+	if editor_mode:
+		for node in topo_order:
+			node.node_warning = ""
+			node.node_error = ""
+
 	for node in topo_order:
 		if not node.dirty:
 			# Non-dirty node with expression params: evaluate expressions
@@ -452,6 +466,8 @@ func cook_frame(delta: float) -> void:
 			# Only warn for non-COMP nodes with output ports.
 			# Sink nodes (e.g., WindowOUT) legitimately return null.
 			# COMPs (Camera, Light) return null — their outputs are scene graph nodes, not data.
+			if editor_mode:
+				node.node_error = "cook returned null"
 			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
 			cook_error.emit(node.id, "cook returned null")
 		else:
@@ -630,6 +646,9 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 	_evaluating_params.erase(guard_key)
 
 	if expr.has_execute_failed():
+		var err_msg := "Expression error on %s: %s" % [param.param_name, expr.get_error_text()]
+		if editor_mode:
+			node.node_error = err_msg
 		GNLogger.error("CookEngine", "Expression error on %s.%s — %s" % [
 			node.id, param.param_name, expr.get_error_text()])
 		param.resolved_value = param.fallback_value
@@ -679,8 +698,11 @@ func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
 			if expr.has_execute_failed():
 				var labels := param.get_component_labels()
 				var label_str: String = labels[i] if i < labels.size() else str(i)
-				GNLogger.error("CookEngine", "Expression error on %s.%s[%s] — %s" % [
-					node.id, param.param_name, label_str, expr.get_error_text()])
+				var comp_err := "Expression error on %s.%s[%s] — %s" % [
+					node.id, param.param_name, label_str, expr.get_error_text()]
+				if editor_mode:
+					node.node_error = comp_err
+				GNLogger.error("CookEngine", comp_err)
 				components[i] = param.get_component_value(i)
 			else:
 				components[i] = float(result)
@@ -899,6 +921,16 @@ func set_par(name_or_node: String, param_or_value = null, value_arg = null) -> b
 	p.set_value(new_value)
 	target_node.mark_dirty()
 	return true
+
+
+## Logs a message from an expression context via GNLogger.
+## Uses the current eval node's ID as category.
+## Returns 0 so it can be used inline: log("msg") + some_value
+## Usage in expressions: log("some debug info")
+func log(message: String) -> float:
+	var cat: String = _current_eval_node.id if _current_eval_node else "Expression"
+	GNLogger.info(cat, str(message))
+	return 0.0
 
 
 # ─── Internal proxy implementations ─────────────────────────────────────────────

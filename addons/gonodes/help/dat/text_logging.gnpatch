@@ -1,0 +1,84 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "script1": {
+            "type": "ScriptCHOP",
+            "position": [200, 100],
+            "parameters": {
+                "time_dependent": { "value": true },
+                "code": {
+                    "value": "# log() demo — messages appear in the Textport\n# Open the Log panel (bottom toolbar) to see output.\n\n# @param float threshold 0.5 Warn when sine exceeds this\n\nfunc cook():\n\tvar val = sin(time * 2.0)\n\top.set_single_value(\"wave\", val)\n\n\t# log() sends INFO to the Textport\n\tlog(\"frame %d  wave = %.3f\" % [frame, val])\n\n\t# log_warn() if value crosses threshold\n\tif abs(val) > par(\"threshold\"):\n\t\tlog_warn(\"wave %.3f exceeds threshold %.2f\" % [val, par(\"threshold\")])\n\n\t# log_debug() for verbose detail\n\tlog_debug(\"dt = %.4f\" % dt)\n"
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [550, 100],
+            "parameters": {}
+        },
+        "constant1": {
+            "type": "ConstantCHOP",
+            "position": [200, 350],
+            "parameters": {
+                "name0": { "value": "expr_out" },
+                "value0": {
+                    "value": 0.0,
+                    "mode": "EXPRESSION",
+                    "expression": "log(\"expr eval at frame \" + str(frame)) + chop(\"script1\", \"wave\") * 10.0"
+                }
+            }
+        },
+        "null2": {
+            "type": "NullCHOP",
+            "position": [550, 350],
+            "parameters": {}
+        },
+        "cheat_sheet": {
+            "type": "TextDAT",
+            "position": [200, 600],
+            "parameters": {
+                "text": {
+                    "value": "log() Function Reference\n========================\n\nScript operators (ScriptCHOP, ScriptDAT, etc.):\n  log(msg)        -> INFO level\n  log_debug(msg)  -> DEBUG level\n  log_warn(msg)   -> WARN level\n  log_error(msg)  -> ERROR level\n\nExpression parameters:\n  log(msg)        -> INFO level (returns 0)\n\nAll messages appear in the Textport log panel.\nThe node ID is used as the log category.\nNo-op in exported player builds."
+                }
+            }
+        },
+        "text_view": {
+            "type": "TextTOP",
+            "position": [550, 600],
+            "parameters": {
+                "resolution": {
+                    "value": { "_type": "Vector2i", "x": 512, "y": 400 }
+                },
+                "font_size": { "value": 16 },
+                "h_align": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 600],
+            "parameters": {
+                "resolution": {
+                    "value": { "_type": "Vector2i", "x": 512, "y": 400 }
+                },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "script1", "from_port": 0, "to": "null1", "to_port": 0 },
+        { "from": "constant1", "from_port": 0, "to": "null2", "to_port": 0 },
+        { "from": "cheat_sheet", "from_port": 0, "to": "text_view", "to_port": 0 },
+        { "from": "text_view", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "log() Bridge — Script & Expression Demo\n\nOpen the Textport (Log button in toolbar) to see\nlive log output from both the ScriptCHOP and the\nexpression parameter on constant1.\n\nscript1: uses log(), log_warn(), log_debug()\nconstant1: expression calls log() (returns 0, side-effect)\ncheat_sheet: TextDAT with function reference",
+            "position": [-150.0, -200.0],
+            "size": [500.0, 120.0],
+            "color": [0.2, 0.7, 0.9, 0.8]
+        }
+    ]
+}

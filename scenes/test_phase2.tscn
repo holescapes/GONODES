@@ -26,7 +26,7 @@ func _ready() -> void:
 	# Wire log toggle button
 	log_toggle.toggled.connect(_on_log_toggled)
 	GNLogger.enabled = log_toggle.button_pressed
-	GNLogger.level = GNLogger.Level.DEBUG
+	GNLogger.level = GNLogger.Level.INFO
 
 	# Print display info for debugging
 	var displays := WindowOUT.get_display_info()

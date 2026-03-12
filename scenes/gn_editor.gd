@@ -55,6 +55,9 @@ var _viewer_windows: Array[GNViewerWindow] = []
 ## Docked viewer panel (replaces the old TextureRect).
 var viewer_panel: GNViewerPanel = null
 
+## Log panel (Textport) — collapsible, subscribes to GNLogger.
+var log_panel: GNLogPanel = null
+
 ## Floating help windows.
 var _help_windows: Array = []
 
@@ -89,7 +92,7 @@ func _ready() -> void:
 	# Wire log toggle early so extension scan results are visible
 	log_toggle.toggled.connect(_on_log_toggled)
 	GNLogger.enabled = log_toggle.button_pressed
-	GNLogger.level = GNLogger.Level.DEBUG
+	GNLogger.level = GNLogger.Level.INFO
 
 	# Initialize extension registry — scan for gn_ext_* addon manifests
 	GNExtensionRegistry.instance().scan_extensions()
@@ -98,6 +101,7 @@ func _ready() -> void:
 	_setup_cook_engine()
 	_setup_file_dialogs()
 	_setup_toolbar()
+	_setup_log_panel()
 
 	# Persist split-container sizes when the user drags them
 	hsplit.dragged.connect(func(offset: int): _save_setting("hsplit_offset", offset))
@@ -158,6 +162,7 @@ func _setup_cook_engine() -> void:
 	cook_engine.name = "CookEngine"
 	cook_engine.network = network
 	cook_engine.project_dir = _project.project_dir
+	cook_engine.editor_mode = true
 	add_child(cook_engine)
 
 	cook_engine.frame_cooked.connect(_on_frame_cooked)
@@ -183,6 +188,31 @@ func _setup_viewer_panel() -> void:
 	viewer_panel.size_flags_horizontal = SIZE_EXPAND_FILL
 	viewer_panel.size_flags_vertical = SIZE_EXPAND_FILL
 	viewer_container.add_child(viewer_panel)
+
+
+## Creates the collapsible log panel between the graph area and the toolbar.
+func _setup_log_panel() -> void:
+	log_panel = GNLogPanel.new()
+	log_panel.visible = false  # hidden by default, toggled by LogToggle
+	# Anchor to bottom, just above InfoBar (66px toolbar height)
+	log_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	add_child(log_panel)
+	move_child(log_panel, hsplit.get_index() + 1)  # between HSplit and InfoBar
+	_layout_log_panel()
+
+
+const _TOOLBAR_HEIGHT := 66.0
+const _LOG_PANEL_HEIGHT := 160.0
+
+## Recalculates vertical offsets for HSplit, LogPanel, and InfoBar.
+func _layout_log_panel() -> void:
+	var info_bar := $InfoBar as VBoxContainer
+	if log_panel.visible:
+		log_panel.offset_top = -((_TOOLBAR_HEIGHT) + _LOG_PANEL_HEIGHT)
+		log_panel.offset_bottom = -(_TOOLBAR_HEIGHT)
+		hsplit.offset_bottom = -((_TOOLBAR_HEIGHT) + _LOG_PANEL_HEIGHT)
+	else:
+		hsplit.offset_bottom = -(_TOOLBAR_HEIGHT)
 
 
 ## Builds the UI-level sink list and pushes it to the cook engine.
@@ -259,6 +289,9 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	# Update expression reference lines (dashed overlays)
 	graph_editor.update_expr_refs()
 
+	# Update warning/error status badges on all nodes
+	graph_editor.update_status_badges()
+
 
 func _on_cook_error(node_id: String, error_msg: String) -> void:
 	GNLogger.error("Editor", "Cook error '%s': %s" % [node_id, error_msg])
@@ -333,6 +366,9 @@ func _on_node_renamed(old_id: String, new_id: String) -> void:
 func _on_log_toggled(pressed: bool) -> void:
 	GNLogger.enabled = pressed
 	_save_setting("log_enabled", pressed)
+	if log_panel:
+		log_panel.visible = pressed
+		_layout_log_panel()
 	if pressed:
 		print("[GONODES] Logging ENABLED")
 	else:
@@ -1359,6 +1395,9 @@ func _restore_ui_state() -> void:
 	var saved_log: bool = _load_setting("log_enabled", false)
 	log_toggle.set_pressed_no_signal(saved_log)
 	GNLogger.enabled = saved_log
+	if log_panel:
+		log_panel.visible = saved_log
+		_layout_log_panel()
 
 	# Non-Realtime mode
 	var saved_nrt: bool = _load_setting("nrt_enabled", false)

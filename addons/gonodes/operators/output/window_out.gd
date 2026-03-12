@@ -345,10 +345,28 @@ func _update_panel_layer(inputs: Array[GNData]) -> void:
 
 
 ## Adds a Control node to the panel UI root if not already there.
+## Detects fan-out conflict: if the Control is already parented to another
+## WindowOUT's panel root, sets a warning on this node.
 func _adopt_control(ctrl: Control) -> void:
 	if ctrl.get_parent() != _panel_ui_root:
-		if ctrl.get_parent() != null:
-			ctrl.get_parent().remove_child(ctrl)
+		var prev_parent := ctrl.get_parent()
+		# Detect if stolen from another WindowOUT's panel root
+		if prev_parent != null:
+			var other_window := prev_parent.get_parent()
+			if other_window is Window and other_window != _window:
+				# Walk up to find the WindowOUT that owns it
+				var engine: GNCookEngine = get_parent() as GNCookEngine \
+					if get_parent() is GNCookEngine else null
+				if engine != null and engine.editor_mode and engine.network != null:
+					for other_node in engine.network.nodes.values():
+						if other_node is WindowOUT and other_node != self \
+								and other_node._panel_ui_root == prev_parent:
+							var msg := "UI shared with '%s' — Control can only have one parent" % other_node.id
+							node_warning = msg
+							other_node.node_warning = "UI shared with '%s' — Control can only have one parent" % id
+							GNLogger.warn("WindowOUT", "'%s' and '%s' both connected to same UI node" % [id, other_node.id])
+							break
+			prev_parent.remove_child(ctrl)
 		_panel_ui_root.add_child(ctrl)
 	_managed_controls.append(ctrl)
 

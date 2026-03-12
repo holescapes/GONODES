@@ -45,6 +45,10 @@ static var muted_categories: Dictionary = {}
 static var _throttle_cache: Dictionary = {}
 static var throttle_interval_frames: int = 0  # 0 = disabled
 
+## External sink — when set, every accepted log message is forwarded here.
+## Signature: func(level: Level, category: String, message: String) -> void
+static var log_sink: Callable = Callable()
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Public API
@@ -103,6 +107,10 @@ static func _log(msg_level: Level, category: String, message: String) -> void:
 			push_warning(full_msg)
 		_:
 			print(full_msg)
+
+	# Forward to external sink (e.g. editor log panel)
+	if log_sink.is_valid():
+		log_sink.call(msg_level, category, message)
 
 
 static func _build_prefix(msg_level: Level, category: String) -> String:

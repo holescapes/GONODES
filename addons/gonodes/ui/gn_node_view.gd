@@ -38,6 +38,9 @@ var _perf_label: Label = null
 ## Viewer pin (eye) button in the title bar.
 var _viewer_btn: Button = null
 
+## Status badge label — shows ⚠ or ✖ for warnings/errors on the title bar.
+var _status_badge: Label = null
+
 ## Thumbnail height in pixels (width stretches to fit the node).
 const THUMBNAIL_HEIGHT := 80
 
@@ -129,6 +132,9 @@ func setup(node: GNNode) -> void:
 
 	# Add viewer pin (eye) button to the title bar
 	_setup_viewer_button()
+
+	# Add warning/error status badge to the title bar
+	_setup_status_badge()
 
 	# Track position changes
 	position_offset_changed.connect(_on_position_changed)
@@ -274,8 +280,7 @@ func _on_position_changed() -> void:
 func update_status() -> void:
 	if gn_node == null:
 		return
-	# Could add visual feedback (glow, error badge) here in the future
-	pass
+	update_status_badge()
 
 
 ## Sets up the preview area for this node.
@@ -419,6 +424,41 @@ func _setup_perf_overlay() -> void:
 	_perf_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_perf_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_perf_label)
+
+
+## Creates the status badge label in the title bar (hidden by default).
+func _setup_status_badge() -> void:
+	var titlebar: HBoxContainer = get_titlebar_hbox()
+	if titlebar == null:
+		return
+	_status_badge = Label.new()
+	_status_badge.text = ""
+	_status_badge.visible = false
+	_status_badge.add_theme_font_size_override("font_size", 14)
+	_status_badge.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+	_status_badge.add_theme_constant_override("outline_size", 3)
+	_status_badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_status_badge.mouse_filter = Control.MOUSE_FILTER_PASS
+	titlebar.add_child(_status_badge)
+
+
+## Updates the status badge based on the node's current warning/error strings.
+func update_status_badge() -> void:
+	if gn_node == null or _status_badge == null:
+		return
+	if not gn_node.node_error.is_empty():
+		_status_badge.text = "\u2716"  # ✖
+		_status_badge.tooltip_text = gn_node.node_error
+		_status_badge.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+		_status_badge.visible = true
+	elif not gn_node.node_warning.is_empty():
+		_status_badge.text = "\u26A0"  # ⚠
+		_status_badge.tooltip_text = gn_node.node_warning
+		_status_badge.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+		_status_badge.visible = true
+	else:
+		_status_badge.visible = false
+		_status_badge.tooltip_text = ""
 
 
 ## Handler for GNNode.ports_changed — triggers a slot rebuild.

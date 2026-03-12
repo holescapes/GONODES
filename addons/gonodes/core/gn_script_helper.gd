@@ -130,6 +130,19 @@ func network_node_info(node_id: String) -> Dictionary:
 		return {}
 	return _engine.network_node_info(node_id)
 
+# ─── Logging helpers ─────────────────────────────────────
+func log(message: String) -> void:
+	GNLogger.info(me.id if me else \"Script\", str(message))
+
+func log_debug(message: String) -> void:
+	GNLogger.debug(me.id if me else \"Script\", str(message))
+
+func log_warn(message: String) -> void:
+	GNLogger.warn(me.id if me else \"Script\", str(message))
+
+func log_error(message: String) -> void:
+	GNLogger.error(me.id if me else \"Script\", str(message))
+
 # ─── USER CODE BELOW ──────────────────────────────────────
 """
 

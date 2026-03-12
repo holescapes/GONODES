@@ -3662,6 +3662,103 @@ The node palette popup supports full keyboard navigation:
 
 Navigation wraps around and skips category headers, moving only between leaf (operator) entries.
 
+### Logging & Warning System
+
+GONODES has a 2-layer logging and diagnostics system that is **editor-only** — exported player builds skip all status tracking overhead.
+
+#### Layer 1 — Per-Node Warning / Error Badges
+
+Every operator (`GNNode`) has two transient string properties:
+
+| Property | Badge | Color | Meaning |
+|----------|-------|-------|---------|
+| `node_warning` | ⚠ | Yellow | Recoverable issue (e.g. UI fan-out conflict) |
+| `node_error` | ✖ | Red | Failure (e.g. expression error, null cook result) |
+
+Both are **cleared automatically** at the start of each cook cycle and only re-set if the problem persists (self-healing). The `GNNodeView` overlay renders the badge in the top-right corner of the node with a tooltip showing the full message.
+
+**Setting status in operators:**
+
+```gdscript
+# Inside your _cook() implementation:
+node_warning = "Seed unchanged — output is static"
+node_error   = "Input image is null"
+```
+
+The cook engine also sets `node_error` automatically for:
+
+- Null cook results (`cook returned null`)
+- Expression evaluation failures
+- Per-component expression errors
+
+#### Layer 2 — Textport (Log Panel)
+
+The collapsible **Textport** at the bottom of the editor displays live log output from `GNLogger`. Toggle it with the **Log** button in the toolbar.
+
+**GNLogger API:**
+
+```gdscript
+GNLogger.debug("MyOp", "Verbose detail: %s" % info)
+GNLogger.info("MyOp",  "Lifecycle event happened")
+GNLogger.warn("MyOp",  "Recoverable issue: %s" % detail)
+GNLogger.error("MyOp", "Failure: %s" % err)
+```
+
+**Log panel features:**
+
+- 500-entry ring buffer (oldest entries drop automatically)
+- Filter buttons: DBG / INF / WRN / ERR (toggle individually)
+- Color-coded output (gray, white, yellow, red)
+- Clear button to reset all entries
+- Each line shows `[LEVEL] category: message`
+
+**`log()` — User Script & Expression Bridge:**
+
+Script operators and expression parameters can send messages to the Textport
+via built-in `log()` helpers. The node's ID is used as the log category
+automatically.
+
+```gdscript
+# In ScriptCHOP / ScriptDAT / ScriptSOP / ScriptIMG:
+log("Processing frame %d" % frame)       # INFO level
+log_debug("Verbose detail")               # DEBUG level
+log_warn("Something looks off")           # WARN level
+log_error("Critical failure")             # ERROR level
+
+# In expression parameters (INFO level only):
+log("value is " + str(par("scale")))
+```
+
+**Configuration:**
+
+```gdscript
+GNLogger.enabled = true          # master switch (default: false)
+GNLogger.level = GNLogger.Level.DEBUG  # minimum severity
+GNLogger.show_frame = true       # include frame number
+GNLogger.show_timestamp = false  # include ms timestamp
+GNLogger.muted_categories["CookEngine"] = true  # mute a subsystem
+```
+
+#### Editor-Only Guard
+
+The cook engine has an `editor_mode` flag (`false` by default). The editor sets it to `true`; the player leaves it `false`. When `editor_mode` is off:
+
+- `node_warning` / `node_error` are never cleared or set
+- WindowOUT fan-out detection is skipped
+- `GNLogger.enabled` stays `false` (no log output)
+- No `GNLogPanel` is instantiated
+- No status badge updates occur
+
+This ensures zero logging overhead in exported player builds.
+
+#### WindowOUT Fan-Out Warning
+
+When two `WindowOUT` nodes are connected to the same UI operator, Godot's single-parent rule means only one can display the widget. The editor detects this and:
+
+1. Sets `node_warning` on **both** WindowOUT nodes
+2. Logs the conflict via `GNLogger.warn()`
+3. The warning self-clears next frame if the conflict is resolved
+
 ---
 ## Quick Reference
 

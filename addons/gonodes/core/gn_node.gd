@@ -96,6 +96,18 @@ var is_sink: bool = false
 ## but skip cooking to save GPU/CPU time.
 var is_active: bool = true
 
+# ─── Node Status (per-cook warnings / errors) ─────────────────────────────────
+
+## Non-empty when this node has a warning to display (set during _cook or by the
+## cook engine).  Cleared at the start of each cook cycle.  Shown as a yellow
+## badge on the GraphNode in the editor.
+var node_warning: String = ""
+
+## Non-empty when this node has an error to display (set during _cook or by the
+## cook engine).  Cleared at the start of each cook cycle.  Shown as a red
+## badge on the GraphNode in the editor.
+var node_error: String = ""
+
 # ─── Dynamic Input Ports ───────────────────────────────────────────────────────
 
 ## If true, this node auto-grows/shrinks its input ports to always have one
