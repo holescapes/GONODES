@@ -4,119 +4,265 @@
     "nodes": {
         "slider_r": {
             "type": "SliderUI",
-            "position": [100, 50],
+            "position": [
+                100,
+                50
+            ],
             "parameters": {
-                "label": { "value": "Red" },
-                "min_val": { "value": 0.0 },
-                "max_val": { "value": 1.0 },
-                "step": { "value": 0.01 },
-                "default_val": { "value": 0.5 }
+                "label": {
+                    "value": "Red"
+                },
+                "min_val": {
+                    "value": 0.0
+                },
+                "max_val": {
+                    "value": 1.0
+                },
+                "step": {
+                    "value": 0.01
+                },
+                "default_val": {
+                    "value": 0.5
+                }
             }
         },
         "slider_g": {
             "type": "SliderUI",
-            "position": [100, 170],
+            "position": [
+                100,
+                170
+            ],
             "parameters": {
-                "label": { "value": "Green" },
-                "min_val": { "value": 0.0 },
-                "max_val": { "value": 1.0 },
-                "step": { "value": 0.01 },
-                "default_val": { "value": 0.3 }
+                "label": {
+                    "value": "Green"
+                },
+                "min_val": {
+                    "value": 0.0
+                },
+                "max_val": {
+                    "value": 1.0
+                },
+                "step": {
+                    "value": 0.01
+                },
+                "default_val": {
+                    "value": 0.3
+                }
             }
         },
         "slider_b": {
             "type": "SliderUI",
-            "position": [100, 290],
+            "position": [
+                100,
+                290
+            ],
             "parameters": {
-                "label": { "value": "Blue" },
-                "min_val": { "value": 0.0 },
-                "max_val": { "value": 1.0 },
-                "step": { "value": 0.01 },
-                "default_val": { "value": 0.8 }
+                "label": {
+                    "value": "Blue"
+                },
+                "min_val": {
+                    "value": 0.0
+                },
+                "max_val": {
+                    "value": 1.0
+                },
+                "step": {
+                    "value": 0.01
+                },
+                "default_val": {
+                    "value": 0.8
+                }
             }
         },
         "progress_r": {
             "type": "ProgressBarUI",
-            "position": [100, 420],
+            "position": [
+                100,
+                420
+            ],
             "parameters": {
-                "min_val": { "value": 0.0 },
-                "max_val": { "value": 1.0 },
-                "default_val": { "value": 0.5 },
-                "show_percentage": { "value": true }
+                "min_val": {
+                    "value": 0.0
+                },
+                "max_val": {
+                    "value": 1.0
+                },
+                "default_val": {
+                    "value": 0.5
+                },
+                "show_percentage": {
+                    "value": true
+                }
             }
         },
         "label_title": {
             "type": "LabelUI",
-            "position": [100, 530],
+            "position": [
+                100,
+                530
+            ],
             "parameters": {
-                "text": { "value": "RGB Color Mixer" },
-                "font_size": { "value": 20 },
-                "h_align": { "value": 1 }
+                "text": {
+                    "value": "RGB Color Mixer"
+                },
+                "font_size": {
+                    "value": 20
+                },
+                "h_align": {
+                    "value": 1
+                }
             }
         },
         "sep1": {
             "type": "SeparatorUI",
-            "position": [100, 640],
-            "parameters": { "vertical": { "value": false } }
+            "position": [
+                100,
+                640
+            ],
+            "parameters": {
+                "vertical": {
+                    "value": false
+                }
+            }
         },
         "colorrect1": {
             "type": "ColorRectUI",
-            "position": [100, 740],
+            "position": [
+                100,
+                740
+            ],
             "parameters": {
-                "color": { "value": { "_type": "Color", "r": 0.5, "g": 0.3, "b": 0.8, "a": 1.0 } },
-                "min_size": { "value": { "_type": "Vector2i", "x": 250, "y": 60 } }
+                "color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.5,
+                        "g": 0.3,
+                        "b": 0.8,
+                        "a": 1.0
+                    }
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 250,
+                        "y": 60
+                    }
+                }
             }
         },
         "panelcont1": {
             "type": "PanelContainerUI",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "bg_color": { "value": { "_type": "Color", "r": 0.08, "g": 0.08, "b": 0.12, "a": 0.95 } },
-                "corner_radius": { "value": 10 },
-                "padding": { "value": 10 }
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.08,
+                        "g": 0.08,
+                        "b": 0.12,
+                        "a": 0.95
+                    }
+                },
+                "corner_radius": {
+                    "value": 10
+                },
+                "padding": {
+                    "value": 10
+                }
             }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [850, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 500 } }
-            }
-        },
-        "composite1": {
-            "type": "CompositeTOP",
-            "position": [1200, 100],
-            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1550, 100],
+            "position": [
+                1550,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 500 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 300,
+                        "y": 500
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "slider_r", "from_port": 0, "to": "panelcont1", "to_port": 0 },
-        { "from": "slider_g", "from_port": 0, "to": "panelcont1", "to_port": 1 },
-        { "from": "slider_b", "from_port": 0, "to": "panelcont1", "to_port": 2 },
-        { "from": "progress_r", "from_port": 0, "to": "panelcont1", "to_port": 3 },
-        { "from": "label_title", "from_port": 0, "to": "panelcont1", "to_port": 4 },
-        { "from": "sep1", "from_port": 0, "to": "panelcont1", "to_port": 5 },
-        { "from": "colorrect1", "from_port": 0, "to": "panelcont1", "to_port": 6 },
-        { "from": "panelcont1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "composite1", "to_port": 0 },
-        { "from": "composite1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "slider_r",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 0
+        },
+        {
+            "from": "slider_g",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 1
+        },
+        {
+            "from": "slider_b",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 2
+        },
+        {
+            "from": "progress_r",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 3
+        },
+        {
+            "from": "label_title",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 4
+        },
+        {
+            "from": "sep1",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 5
+        },
+        {
+            "from": "colorrect1",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 6
+        },
+        {
+            "from": "panelcont1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RGB Color Mixer — Interactive Dashboard\n\nCombines multiple new Tier 1-4 widgets:\n• 3 SliderUI (R/G/B values)\n• ProgressBarUI (visual feedback)\n• LabelUI (title)\n• SeparatorUI (divider)\n• ColorRectUI (color preview)\n• PanelContainerUI (styled wrapper)\nAll rendered through PanelTOP → CompositeTOP → WindowOUT.",
-            "position": [-200.0, -120.0],
-            "size": [520.0, 160.0],
-            "color": [0.2, 0.7, 0.9, 0.8]
+            "text": "RGB Color Mixer \u2014 Interactive Dashboard\n\nCombines multiple new Tier 1-4 widgets:\n\u2022 3 SliderUI (R/G/B values)\n\u2022 ProgressBarUI (visual feedback)\n\u2022 LabelUI (title)\n\u2022 SeparatorUI (divider)\n\u2022 ColorRectUI (color preview)\n\u2022 PanelContainerUI (styled wrapper)\nAll wired through ContainerUI \u2192 WindowOUT panel port.",
+            "position": [
+                -200.0,
+                -120.0
+            ],
+            "size": [
+                520.0,
+                160.0
+            ],
+            "color": [
+                0.2,
+                0.7,
+                0.9,
+                0.8
+            ]
         }
     ]
 }

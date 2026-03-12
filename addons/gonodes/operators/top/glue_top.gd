@@ -101,6 +101,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_slots.append(tr)
 
 	_cached_tex_data.resolution = res
+
 	return _cached_tex_data
 
 

@@ -6,12 +6,15 @@ extends GNUiBase
 ## Accepts UI inputs via dynamic ports and nests their Control nodes
 ## inside its own container Control.
 ##
-## Outputs widget_state: {} (no interactive state — pure layout).
+## Output 0: UI (the container Control for adoption by WindowOUT/PanelTOP).
+## Output 1: CHOP (aggregated widget_state channels from all child widgets).
 
 var _container: Container = null
 var _managed_children: Array[Control] = []
 var _prev_managed: Array[Control] = []
 var _current_layout: int = -1
+
+
 
 
 func _init() -> void:
@@ -22,6 +25,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	_enable_dynamic_inputs(GNFamily.Type.UI, "ui", "UI Input")
 	add_output("out", GNFamily.Type.UI, "Container widget output")
+	# NOTE: CHOP "state" port is appended automatically by GNUiBase.initialize()
 
 
 func _init_parameters() -> void:
@@ -126,6 +130,29 @@ func _remove_stale_children() -> void:
 			if ctrl.get_parent() == _container:
 				_container.remove_child(ctrl)
 	_prev_managed.clear()
+
+
+## Overrides base class: aggregates widget_state from ALL connected children
+## (not just this container's own empty state).
+func _build_state_chop() -> void:
+	if _cached_state_chop == null:
+		_cached_state_chop = GNChannelData.new()
+	_cached_state_chop.channels.clear()
+	_cached_state_chop.length = 1
+	_cached_state_chop.sample_rate = 60.0
+
+	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	if engine == null or engine.network == null:
+		return
+
+	var network: GNNetwork = engine.network
+	for conn in network.get_input_connections(id):
+		var upstream: GNNode = network.nodes.get(conn.from_node, null)
+		if upstream is GNUiBase:
+			var ui: GNUiBase = upstream as GNUiBase
+			for key in ui.widget_state:
+				var ch_name: String = "%s:%s" % [ui.id, key]
+				_cached_state_chop.set_single_value(ch_name, float(ui.widget_state[key]))
 
 
 func destroy_control_node() -> void:

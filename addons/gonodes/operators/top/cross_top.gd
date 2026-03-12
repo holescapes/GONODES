@@ -42,5 +42,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("cross_value", cross_val)
 
 	_cached_tex_data.resolution = res
+
 	return _cached_tex_data
 

@@ -4,52 +4,106 @@
     "nodes": {
         "slider_a": {
             "type": "SliderUI",
-            "position": [100, 100],
-            "parameters": { "label": { "value": "Left Panel" } }
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Left Panel"
+                }
+            }
         },
         "button_b": {
             "type": "ButtonUI",
-            "position": [100, 250],
-            "parameters": { "label": { "value": "Right Panel" } }
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Right Panel"
+                }
+            }
         },
         "split1": {
             "type": "SplitContainerUI",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "vertical": { "value": false },
-                "min_size": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [850, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 350, "y": 180 } }
+                "vertical": {
+                    "value": false
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 300,
+                        "y": 150
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1200, 100],
+            "position": [
+                1200,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 350, "y": 180 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 350,
+                        "y": 180
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "slider_a", "from_port": 0, "to": "split1", "to_port": 0 },
-        { "from": "button_b", "from_port": 0, "to": "split1", "to_port": 1 },
-        { "from": "split1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "slider_a",
+            "from_port": 0,
+            "to": "split1",
+            "to_port": 0
+        },
+        {
+            "from": "button_b",
+            "from_port": 0,
+            "to": "split1",
+            "to_port": 1
+        },
+        {
+            "from": "split1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SplitContainer UI — Basic\n\nSplits two widgets with a draggable divider.\nToggle vertical/horizontal via parameter.\nState channel: offset (divider position in pixels).",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "SplitContainer UI \u00e2\u20ac\u201d Basic\n\nSplits two widgets with a draggable divider.\nToggle vertical/horizontal via parameter.\nState channel: offset (divider position in pixels).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

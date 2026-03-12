@@ -4,50 +4,105 @@
     "nodes": {
         "checkbox1": {
             "type": "CheckBoxUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "label": { "value": "Enable Effect" },
-                "default_on": { "value": false }
+                "label": {
+                    "value": "Enable Effect"
+                },
+                "default_on": {
+                    "value": false
+                }
             }
         },
         "checkbox2": {
             "type": "CheckBoxUI",
-            "position": [100, 210],
+            "position": [
+                100,
+                210
+            ],
             "parameters": {
-                "label": { "value": "Show Grid" },
-                "default_on": { "value": true }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [500, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 120 } },
-                "layout": { "value": 0 }
+                "label": {
+                    "value": "Show Grid"
+                },
+                "default_on": {
+                    "value": true
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 120 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 120
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
             }
         }
     },
     "connections": [
-        { "from": "checkbox1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "checkbox2", "from_port": 0, "to": "panel1", "to_port": 1 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "checkbox1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "checkbox2",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 1
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CheckBox UI — Basic\n\nStandard checkbox with text label.\nUnlike ToggleUI (switch style), this is classic checkbox.\nState channel: value (0 or 1).",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "CheckBox UI \u00e2\u20ac\u201d Basic\n\nStandard checkbox with text label.\nUnlike ToggleUI (switch style), this is classic checkbox.\nState channel: value (0 or 1).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

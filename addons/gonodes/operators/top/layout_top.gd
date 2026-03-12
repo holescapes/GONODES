@@ -77,33 +77,4 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_cached_tex_data.resolution = res
 
-	# Invertible: each input maps to a grid cell (affine translate + scale).
-	var has_panel_sources := false
-	for i in range(mini(num_inputs, 8)):
-		if i < inputs.size() and inputs[i] is GNTextureData:
-			if (inputs[i] as GNTextureData).panel_sources.size() > 0:
-				has_panel_sources = true
-				break
-	if has_panel_sources:
-		_cached_tex_data.panel_sources.clear()
-		var rows: int = ceili(float(num_inputs) / float(cols))
-		var cell_w: float = float(res.x) / float(cols)
-		var cell_h: float = float(res.y) / float(rows)
-		for i in range(mini(num_inputs, 8)):
-			if i < inputs.size() and inputs[i] is GNTextureData:
-				var tex: GNTextureData = inputs[i] as GNTextureData
-				if tex.panel_sources.size() > 0:
-					var col_idx: int = i % cols
-					var row_idx: int = i / cols
-					var cell_origin := Vector2(col_idx * cell_w, row_idx * cell_h)
-					var src_res := Vector2(tex.resolution)
-					# Inverse: output pixel → subtract cell origin → scale from cell size to source res
-					var inv_t := Transform2D.IDENTITY
-					inv_t = inv_t.translated(-cell_origin)
-					inv_t = inv_t.scaled(Vector2(src_res.x / cell_w, src_res.y / cell_h))
-					for ps in tex.panel_sources:
-						var copy: GNPanelSource = ps.duplicate_source()
-						copy.transform = copy.transform * inv_t
-						_cached_tex_data.panel_sources.append(copy)
-
 	return _cached_tex_data

@@ -49,7 +49,5 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("displace_scale", scale_val)
 
 	_cached_tex_data.resolution = res
-	# Non-invertible: per-pixel displacement is data-dependent — clear panel_sources
-	_cached_tex_data.panel_sources.clear()
 	return _cached_tex_data
 

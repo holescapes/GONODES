@@ -4,40 +4,63 @@
     "nodes": {
         "button1": {
             "type": "ButtonUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "label": { "value": "Click Me" }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [500, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 128 } },
-                "layout": { "value": 0 }
+                "label": {
+                    "value": "Click Me"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 128 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 128
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "button1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "button1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Button UI — Basic\n\nSimple push button widget.\nCHOP output port 1 on PanelTOP carries\nthe button's pressed state (0/1 channel).",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Button UI \u00e2\u20ac\u201d Basic\n\nSimple push button widget.\nWidget state available via PanelTOP CHOP output\nor direct chop() expressions.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

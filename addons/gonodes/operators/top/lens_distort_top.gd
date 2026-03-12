@@ -46,6 +46,4 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("bg_color", Vector4(bg.r, bg.g, bg.b, bg.a))
 
 	_cached_tex_data.resolution = res
-	# Non-invertible: radial distortion has no closed-form inverse — clear panel_sources
-	_cached_tex_data.panel_sources.clear()
 	return _cached_tex_data

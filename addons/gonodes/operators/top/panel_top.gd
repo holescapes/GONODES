@@ -1,21 +1,23 @@
 class_name PanelTOP
 extends GNTopBase
-## Renders UI widgets (ButtonUI, SliderUI, etc.) into an interactive SubViewport.
+## Renders UI widgets (ButtonUI, SliderUI, etc.) into a texture (pixels only).
 ##
-## Parallel to RenderTOP for 3D COMPs — PanelTOP accepts UI-family inputs,
-## reparents their Control nodes into a 2D SubViewport container, and outputs:
-##   • Port 0 (TOP): GNTextureData with a PanelSource entry for input forwarding
-##   • Port 1 (CHOP): Aggregated widget state channels from all connected UIs
-##
-## The SubViewport is configured with gui_disable_input = false so that
-## forwarded mouse/keyboard events from WindowOUT are processed by the
-## Godot UI system (focus, hover, click) as normal.
+## PanelTOP is a pure render-to-texture node — it snapshots UI controls into
+## a GNTextureData for use in TOP chains (blur, composite, recording, etc.).
+## The output is NOT interactive. For interactive UI, wire widgets directly
+## to WindowOUT's panel port via ContainerUI.
 ##
 ## Architecture:
 ##   SliderUI ─┐
-##   ButtonUI ──┼──→ PanelTOP → CompositeTOP → WindowOUT
-##   LabelUI ──┘         ↓
-##                  (CHOP: widget states)
+##   ButtonUI ──┼──→ PanelTOP → CompositeTOP → WindowOUT [TOP port] (pixels, no interaction)
+##   LabelUI ──┘
+##
+##   SliderUI ─┐
+##   ButtonUI ──┼──→ ContainerUI → WindowOUT [panel port] (interactive, native input)
+##   LabelUI ──┘
+##
+## Widget state data (CHOP) comes from each UI widget's own "state" output
+## port (added by GNUiBase), NOT from PanelTOP.
 
 ## Track which control nodes are currently in the viewport.
 var _managed_controls: Array[Control] = []
@@ -26,29 +28,18 @@ var _prev_managed: Array[Control] = []
 ## Root container inside the viewport that holds widget controls.
 var _ui_root: BoxContainer = null
 
-## Cached CHOP output (port 1) for aggregated widget states.
-var _cached_chop_data: GNChannelData = null
 
-## ── Overlay System ──────────────────────────────────────────────────────────
-## CanvasLayer-based overlay for dropdowns, color pickers, and menus.
-## Widgets request overlays via GNUiBase._request_panel_overlay().
-var _overlay_layer: CanvasLayer = null
-var _overlay_root: Control = null
-var _overlay_bg: ColorRect = null
-var _overlay_active: bool = false
-var _overlay_owner: GNUiBase = null
 
 
 func _init() -> void:
 	node_type = "panel"
 	time_dependent = true
-	node_description = "Render UI widgets to an interactive texture. Connect ButtonUI, SliderUI, etc."
+	node_description = "Render UI widgets to a texture (non-interactive). For interactive panels, wire to WindowOUT panel port."
 
 
 func _init_ports() -> void:
 	_enable_dynamic_inputs(GNFamily.Type.UI, "ui", "UI Input")
-	add_output("out", GNFamily.Type.TOP, "Panel texture with interactive forwarding")
-	add_output("state", GNFamily.Type.CHOP, "Widget state channels")
+	add_output("out", GNFamily.Type.TOP, "Panel texture (pixels only, non-interactive)")
 
 
 func _init_parameters() -> void:
@@ -69,14 +60,6 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 	if _viewport != null:
 		_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	return result
-
-
-## Override cached_output with multi-port output support.
-## Port 0 = TOP (texture), Port 1 = CHOP (widget states).
-func get_output_for_port(port: int) -> GNData:
-	if port == 1:
-		return _cached_chop_data
-	return cached_output
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -111,21 +94,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# Remove controls that were not re-adopted this frame
 	_remove_stale_controls()
 
-	# Aggregate widget states into CHOP output
-	_build_chop_output()
-
 	# Update output texture data
 	_cached_tex_data.resolution = res
-
-	# Create PanelSource at identity — downstream spatial TOPs will accumulate
-	# their inverse transforms onto this.
-	_cached_tex_data.panel_sources.clear()
-	var source := GNPanelSource.new()
-	source.viewport = _viewport
-	source.transform = Transform2D.IDENTITY
-	source.resolution = res
-	source.source_id = id
-	_cached_tex_data.panel_sources.append(source)
 
 	return _cached_tex_data
 
@@ -142,8 +112,7 @@ func _setup_panel_viewport() -> void:
 	_viewport.size = res
 	_viewport.transparent_bg = false
 	_viewport.disable_3d = true
-	# Interactive: allow mouse/keyboard events to reach UI Controls
-	_viewport.gui_disable_input = false
+	_viewport.gui_disable_input = true
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(_viewport)
 
@@ -160,37 +129,11 @@ func _setup_panel_viewport() -> void:
 	_ui_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_viewport.add_child(_ui_root)
 
-	# Overlay layer for dropdowns, color pickers, etc. (above all widgets)
-	_overlay_layer = CanvasLayer.new()
-	_overlay_layer.name = "OverlayLayer"
-	_overlay_layer.layer = 100
-	_viewport.add_child(_overlay_layer)
-
-	_overlay_root = Control.new()
-	_overlay_root.name = "OverlayRoot"
-	_overlay_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_overlay_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_overlay_root.visible = false
-	_overlay_layer.add_child(_overlay_root)
-
-	_overlay_bg = ColorRect.new()
-	_overlay_bg.name = "OverlayBG"
-	_overlay_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_overlay_bg.color = Color(0.0, 0.0, 0.0, 0.4)
-	_overlay_bg.mouse_filter = Control.MOUSE_FILTER_STOP
-	_overlay_root.add_child(_overlay_bg)
-
-	# Store reference on viewport so widgets can find the overlay system
-	_viewport.set_meta("gn_panel_overlay", self)
-
 	# Output texture data
 	_cached_tex_data = GNTextureData.new()
 	_cached_tex_data.texture = _viewport.get_texture()
 	_cached_tex_data.viewport = _viewport
 	_cached_tex_data.resolution = _viewport.size
-
-	# CHOP data for widget states
-	_cached_chop_data = GNChannelData.new()
 
 
 ## Updates the layout container type based on the layout parameter.
@@ -295,29 +238,6 @@ func _remove_stale_controls() -> void:
 	_prev_managed.clear()
 
 
-## Aggregates widget_state dictionaries from all connected UI nodes into CHOP channels.
-func _build_chop_output() -> void:
-	if _cached_chop_data == null:
-		_cached_chop_data = GNChannelData.new()
-	_cached_chop_data.channels.clear()
-	_cached_chop_data.length = 1
-	_cached_chop_data.sample_rate = 60.0
-
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		return
-
-	var network: GNNetwork = engine.network
-	for conn in network.get_input_connections(id):
-		var upstream: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream is GNUiBase:
-			var ui: GNUiBase = upstream as GNUiBase
-			for key in ui.widget_state:
-				# Prefix channel name with widget id for uniqueness
-				var ch_name: String = "%s:%s" % [ui.id, key]
-				_cached_chop_data.set_single_value(ch_name, float(ui.widget_state[key]))
-
-
 ## Removes all managed controls from the viewport (cleanup).
 func _clear_managed_controls() -> void:
 	for ctrl in _managed_controls:
@@ -328,63 +248,5 @@ func _clear_managed_controls() -> void:
 
 ## Resets viewport tracking state.
 func reset_viewport() -> void:
-	hide_overlay()
 	_clear_managed_controls()
 	_prev_managed.clear()
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Overlay System
-# ═══════════════════════════════════════════════════════════════════════════════
-
-
-## Shows an overlay control anchored below (or above) a widget's rect.
-func show_overlay(owner: GNUiBase, content: Control, anchor_rect: Rect2) -> void:
-	hide_overlay()
-	_overlay_owner = owner
-	_overlay_root.add_child(content)
-	# Position below the anchor
-	content.position = Vector2(anchor_rect.position.x, anchor_rect.end.y)
-	# Clamp to viewport bounds
-	var vp_size := Vector2(_viewport.size)
-	if content.position.y + content.size.y > vp_size.y:
-		content.position.y = anchor_rect.position.y - content.size.y
-	if content.position.x + content.size.x > vp_size.x:
-		content.position.x = vp_size.x - content.size.x
-	content.position.x = maxf(content.position.x, 0.0)
-	content.position.y = maxf(content.position.y, 0.0)
-	_overlay_root.visible = true
-	_overlay_active = true
-
-
-## Hides the current overlay and notifies the owner.
-func hide_overlay() -> void:
-	if not _overlay_active:
-		return
-	for i in range(_overlay_root.get_child_count() - 1, 0, -1):
-		var child := _overlay_root.get_child(i)
-		_overlay_root.remove_child(child)
-		child.queue_free()
-	_overlay_root.visible = false
-	var prev_owner := _overlay_owner
-	_overlay_owner = null
-	_overlay_active = false
-	if prev_owner != null and is_instance_valid(prev_owner):
-		prev_owner._on_overlay_dismissed()
-
-
-## Returns true when an overlay is visible.
-func is_overlay_active() -> bool:
-	return _overlay_active
-
-
-## Returns the widget that owns the active overlay.
-func get_overlay_owner() -> GNUiBase:
-	return _overlay_owner
-
-
-## Returns the viewport-space rect of the overlay content (for hit testing).
-func get_overlay_rect() -> Rect2:
-	if not _overlay_active or _overlay_root.get_child_count() <= 1:
-		return Rect2()
-	return _overlay_root.get_child(1).get_global_rect()

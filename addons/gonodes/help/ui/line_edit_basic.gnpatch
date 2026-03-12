@@ -4,50 +4,105 @@
     "nodes": {
         "lineedit1": {
             "type": "LineEditUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "placeholder": { "value": "Type something..." },
-                "default_text": { "value": "" },
-                "max_length": { "value": 64 }
+                "placeholder": {
+                    "value": "Type something..."
+                },
+                "default_text": {
+                    "value": ""
+                },
+                "max_length": {
+                    "value": 64
+                }
             }
         },
         "label1": {
             "type": "LabelUI",
-            "position": [100, 250],
+            "position": [
+                100,
+                250
+            ],
             "parameters": {
-                "text": { "value": "Line Edit State:" }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [500, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } },
-                "layout": { "value": 0 }
+                "text": {
+                    "value": "Line Edit State:"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 300,
+                        "y": 150
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
             }
         }
     },
     "connections": [
-        { "from": "lineedit1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "label1", "from_port": 0, "to": "panel1", "to_port": 1 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "lineedit1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "label1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 1
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LineEdit UI — Basic\n\nSingle-line text input field.\nState channels: length, submitted (impulse).\nPress Enter to trigger 'submitted'.",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "LineEdit UI \u00e2\u20ac\u201d Basic\n\nSingle-line text input field.\nState channels: length, submitted (impulse).\nPress Enter to trigger 'submitted'.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

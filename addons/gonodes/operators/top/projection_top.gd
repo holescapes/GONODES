@@ -46,7 +46,4 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("rotation", get_param_value("rotation"))
 
 	_cached_tex_data.resolution = res
-	# Cylindrical/Spherical modes are non-linear — clear panel_sources
-	# (Planar mode could be inverted but not worth special-casing right now)
-	_cached_tex_data.panel_sources.clear()
 	return _cached_tex_data

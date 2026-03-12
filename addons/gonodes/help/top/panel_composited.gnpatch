@@ -62,7 +62,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Panel Composited — Interactive Overlay\n\nPanelTOP composited over a NoiseTOP.\nMouse events from WindowOUT flow back through\nCompositeTOP's merged panel_sources to reach\nthe interactive UI widgets.",
+            "text": "Panel Composited — Pixel Overlay\n\nPanelTOP rendered as pixels, composited over NoiseTOP.\nThis is a non-interactive texture output — the widgets\nare visible but not clickable. For interactive panels,\nwire widgets to WindowOUT panel port via ContainerUI.",
             "position": [-100.0, -200.0],
             "size": [500.0, 120.0],
             "color": [1.0, 1.0, 1.0, 0.8]

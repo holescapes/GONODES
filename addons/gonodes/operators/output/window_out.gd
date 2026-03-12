@@ -1,6 +1,6 @@
 class_name WindowOUT
 extends GNOutBase
-## Displays a TOP texture input in a standalone OS window.
+## Displays a TOP texture and/or interactive UI panel in a standalone OS window.
 ## Supports multiple monitors, fullscreen/borderless/windowed modes,
 ## and positioning on any connected display.
 ##
@@ -9,12 +9,15 @@ extends GNOutBase
 ## The Window node is a child of this GNNode in the scene tree —
 ## freed automatically when the node is removed.
 ##
-## Interactive panels: when the input texture carries panel_sources from a
-## PanelTOP, WindowOUT forwards mouse events to the panel's SubViewport.
-## Motion events are remapped and pushed via push_input() for hover.
-## Click events are manually dispatched to the hovered control because
-## standalone SubViewports (without SubViewportContainer) don't deliver
-## mouse-button GUI events to Controls via push_input in editor mode.
+## Two input ports:
+##   Port 0 (TOP "in"):     Background texture — pixels only, no interaction.
+##   Port 1 (UI  "panel"):  Interactive UI panel — Controls parented directly
+##                           in the Window for native Godot input routing.
+##
+## Users compose TOPs upstream (CompositeTOP, LayoutTOP, etc.) and wire a
+## single composed texture. For UI, users compose widgets with ContainerUI
+## and wire one composed UI context. WindowOUT is a terminal sink, not a
+## compositor.
 ##
 ## NOTE: Always use the 'monitor' parameter to assign the output display.
 ## Manually dragging the window to another screen causes tearing because
@@ -35,27 +38,31 @@ var _window_created: bool = false
 ## Whether window-level params need re-applying (set by own param changes only).
 var _window_params_dirty: bool = true
 
-## Tracks which panel source viewports have received notify_mouse_entered.
-## Key = SubViewport instance ID, Value = true.
-var _vp_mouse_entered: Dictionary = {}
+## Root container for UI widget layout — direct child of Window.
+var _panel_ui_root: BoxContainer = null
 
-## The GNUiBase widget currently being dragged (press-held).
-## Set on left mouse-down, cleared on release. During drag, all mouse events
-## are forwarded to this widget regardless of hover state.
-var _panel_active_widget: GNUiBase = null
+## Controls currently adopted into the panel root.
+var _managed_controls: Array[Control] = []
 
-## The GNPanelSource containing the active widget's SubViewport.
-## Stored alongside _panel_active_widget for coordinate remapping during drag.
-var _panel_active_source: GNPanelSource = null
+## Previous frame's managed controls for stable diff.
+var _prev_managed: Array[Control] = []
+
+## Overlay system for dropdowns, color pickers, etc.
+var _overlay_layer: CanvasLayer = null
+var _overlay_root: Control = null
+var _overlay_bg: ColorRect = null
+var _overlay_active: bool = false
+var _overlay_owner: GNUiBase = null
 
 
 func _init() -> void:
 	node_type = "window"
-	node_description = "Display a texture in a standalone OS window (VJ output)."
+	node_description = "Display a texture and/or interactive UI panel in a standalone OS window."
 
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.TOP, false, "Texture to display in the window")
+	add_input("panel", GNFamily.Type.UI, false, "Interactive UI panel (native input routing)")
 
 
 func _init_parameters() -> void:
@@ -109,11 +116,16 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	else:
 		_display_rect.visible = false
 
+	# Adopt interactive UI panel from port 1
+	_update_panel_layer(inputs)
+
 	return null
 
 
-## Lazily creates the Window + TextureRect for display output.
+## Lazily creates the Window + TextureRect + panel UI root.
 ## Window is added as a child of this Node — it becomes a separate OS window.
+## UI Controls are parented directly in the Window — native Godot input routing,
+## no SubViewportContainer indirection.
 func _ensure_window() -> void:
 	if _window_created:
 		return
@@ -121,19 +133,57 @@ func _ensure_window() -> void:
 	_window = Window.new()
 	_window.name = "GNOutput_%s" % id
 	_window.title = "GONODES Output"
-	_window.size = Vector2i(1920, 1080)
+	var init_res: Vector2i = get_param_value("resolution")
+	_window.size = init_res if init_res.x > 0 and init_res.y > 0 else Vector2i(512, 512)
 	_window.min_size = Vector2i(160, 120)
+	# GNNode sets process_mode = PROCESS_MODE_DISABLED which propagates to
+	# children and blocks Godot's internal GUI dispatch on the Window.
+	# Override to ALWAYS so the Window independently processes input.
+	_window.process_mode = Node.PROCESS_MODE_ALWAYS
 	_window.close_requested.connect(_on_window_close_requested)
 	_window.window_input.connect(_on_window_input)
 
+	# Background texture layer (z=0)
 	_display_rect = TextureRect.new()
 	_display_rect.name = "Display"
 	_display_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_display_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	# Must not consume mouse events — they need to reach window_input signal.
 	_display_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_window.add_child(_display_rect)
 	_display_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	# Root container for UI widget layout — direct child of Window.
+	# Godot natively routes mouse, keyboard, and focus to Controls in a Window.
+	_panel_ui_root = VBoxContainer.new()
+	_panel_ui_root.name = "UIRoot"
+	_panel_ui_root.mouse_filter = Control.MOUSE_FILTER_PASS
+	_panel_ui_root.visible = false  # Hidden until a UI is wired
+	_window.add_child(_panel_ui_root)
+	_panel_ui_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	# Overlay layer (CanvasLayer 100) — sits above the panel for dropdowns, etc.
+	_overlay_layer = CanvasLayer.new()
+	_overlay_layer.name = "OverlayLayer"
+	_overlay_layer.layer = 100
+	_window.add_child(_overlay_layer)
+
+	_overlay_root = Control.new()
+	_overlay_root.name = "OverlayRoot"
+	_overlay_root.visible = false
+	_overlay_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_overlay_layer.add_child(_overlay_root)
+
+	_overlay_bg = ColorRect.new()
+	_overlay_bg.name = "OverlayBG"
+	_overlay_bg.color = Color(0, 0, 0, 0.3)
+	_overlay_bg.visible = true
+	_overlay_bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	_overlay_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_overlay_root.add_child(_overlay_bg)
+	_overlay_bg.gui_input.connect(_on_overlay_bg_input)
+
+	# Store reference on Window so widgets can find the overlay system
+	_window.set_meta("gn_panel_overlay", self)
 
 	add_child(_window)
 	_window_created = true
@@ -220,7 +270,7 @@ func _on_window_close_requested() -> void:
 
 
 ## Called for input events inside the output window.
-## ESC reverts fullscreen/borderless to windowed; mouse events forwarded to panels.
+## ESC reverts fullscreen/borderless to windowed.
 func _on_window_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		var mode_idx: int = get_param_value("window_mode")
@@ -228,9 +278,6 @@ func _on_window_input(event: InputEvent) -> void:
 			set_param_value("window_mode", WindowMode.WINDOWED)
 			_window_params_dirty = true
 			GNLogger.info("WindowOUT", "'%s' ESC — switched to windowed mode" % id)
-
-	if event is InputEventMouse:
-		_forward_to_panels(event as InputEventMouse)
 
 
 ## Override: mark window params dirty when our own parameters change.
@@ -252,147 +299,133 @@ static func get_display_info() -> Array[Dictionary]:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Panel Input Forwarding
+# Interactive Panel Layer
 # ═══════════════════════════════════════════════════════════════════════════════
-#
-# push_input() delivers mouse MOTION (hover) to SubViewport controls, but
-# mouse BUTTON events don't reach controls' gui_input in standalone SubViewports.
-#
-# Solution: push_input for hover tracking, then delegate all button and drag
-# events to the owning GNUiBase via handle_panel_input(). Each widget type
-# handles its own input — no widget-specific logic lives here.
 
-## Forwards mouse events to interactive PanelTOP SubViewports.
-## Normalizes window coords → texture coords → panel-local coords.
-func _forward_to_panels(event: InputEventMouse) -> void:
-	if _window == null or _display_rect == null:
+## Adopts UI Control nodes from the panel input port into the Window's UIRoot.
+## Uses stable scene population — controls that haven't changed stay in place
+## so focus, hover, and text input state are preserved across cook frames.
+func _update_panel_layer(inputs: Array[GNData]) -> void:
+	if _panel_ui_root == null:
 		return
 
-	var tex_data: GNTextureData = _get_upstream_tex_data()
-	if tex_data == null or tex_data.panel_sources.is_empty():
-		return
-
-	# Map window mouse position → texture pixel coordinates.
-	var window_size := Vector2(_window.size)
-	var mouse_pos := event.position
-	var norm := Vector2(mouse_pos.x / window_size.x, mouse_pos.y / window_size.y)
-	var tex_pos := Vector2(norm.x * tex_data.resolution.x,
-		norm.y * tex_data.resolution.y)
-
-	# ── Active drag: forward all events to the captured widget ────────────
-	if _panel_active_widget != null and is_instance_valid(_panel_active_widget):
-		if _panel_active_source != null and _panel_active_source.viewport != null:
-			var vp_pos: Vector2 = _panel_active_source.transform * tex_pos
-			_push_hover(vp_pos, _panel_active_source)
-			var vp_event := _make_viewport_event(event, vp_pos)
-			_panel_active_widget.handle_panel_input(vp_event)
-		if event is InputEventMouseButton:
-			var mb := event as InputEventMouseButton
-			if mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
-				_panel_active_widget = null
-				_panel_active_source = null
-		return
-
-	# ── No drag: hit-test panel sources, first hit wins ───────────────────
-	for ps in tex_data.panel_sources:
-		var source: GNPanelSource = ps as GNPanelSource
-		if source == null or source.viewport == null:
-			continue
-
-		var local: Variant = source.hit_test(tex_pos)
-		if local == null:
-			var vp_id := source.viewport.get_instance_id()
-			if _vp_mouse_entered.has(vp_id):
-				source.viewport.notify_mouse_exited()
-				_vp_mouse_entered.erase(vp_id)
-			continue
-
-		var local_pos: Vector2 = local as Vector2
-
-		# Ensure viewport knows mouse is inside.
-		var vp_id := source.viewport.get_instance_id()
-		if not _vp_mouse_entered.has(vp_id):
-			source.viewport.notify_mouse_entered()
-			_vp_mouse_entered[vp_id] = true
-
-		# Push motion for hover tracking.
-		_push_hover(local_pos, source)
-
-		# ── Overlay takes priority when active ──────────────────────────
-		if source.viewport.has_meta("gn_panel_overlay"):
-			var panel = source.viewport.get_meta("gn_panel_overlay")
-			if panel != null and panel.is_overlay_active():
-				if event is InputEventMouseButton:
-					var overlay_mb := event as InputEventMouseButton
-					if overlay_mb.button_index == MOUSE_BUTTON_LEFT and not overlay_mb.pressed:
-						var overlay_rect: Rect2 = panel.get_overlay_rect()
-						if overlay_rect.has_point(local_pos):
-							var vp_event := _make_viewport_event(event, local_pos)
-							var owner: GNUiBase = panel.get_overlay_owner()
-							if owner != null and is_instance_valid(owner):
-								owner._handle_overlay_input(vp_event)
-						else:
-							panel.hide_overlay()
-				return  # Overlay consumes all events when active
-
-		# On left press, capture the widget under cursor for drag tracking.
-		if event is InputEventMouseButton:
-			var mb := event as InputEventMouseButton
-			if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
-				var hovered := source.viewport.gui_get_hovered_control()
-				var widget := _find_ui_owner(hovered)
-				if widget != null:
-					_panel_active_widget = widget
-					_panel_active_source = source
-					var vp_event := _make_viewport_event(event, local_pos)
-					widget.handle_panel_input(vp_event)
-
-		return  # First hit consumes the event
-
-
-## Pushes a synthetic motion event to the SubViewport for hover tracking.
-func _push_hover(vp_pos: Vector2, source: GNPanelSource) -> void:
-	var motion := InputEventMouseMotion.new()
-	motion.position = vp_pos
-	motion.global_position = vp_pos
-	motion.window_id = 0
-	source.viewport.push_input(motion, true)
-
-
-## Creates a viewport-local version of an input event at the given position.
-func _make_viewport_event(event: InputEventMouse, vp_pos: Vector2) -> InputEventMouse:
-	var offset := vp_pos - event.position
-	var xform := Transform2D(0.0, offset)
-	var remapped := event.xformed_by(xform) as InputEventMouse
-	remapped.window_id = 0
-	return remapped
-
-
-## Finds the GNUiBase that owns a Control by checking metadata.
-## Walks up the parent tree to handle internal children of complex widgets.
-func _find_ui_owner(control: Control) -> GNUiBase:
-	var current: Node = control
-	while current != null:
-		if current.has_meta("gn_ui_owner"):
-			return current.get_meta("gn_ui_owner") as GNUiBase
-		current = current.get_parent()
-	return null
-
-
-## Retrieves the upstream GNTextureData (for panel_sources access).
-func _get_upstream_tex_data() -> GNTextureData:
+	# Find the upstream UI node on port 1
 	var engine: GNCookEngine = get_parent() as GNCookEngine \
 		if get_parent() is GNCookEngine else null
 	if engine == null or engine.network == null:
-		return null
+		_panel_ui_root.visible = false
+		return
 
-	var conns: Array = engine.network.get_input_connections(id)
-	if conns.is_empty():
-		return null
+	var network: GNNetwork = engine.network
+	var conns: Array = network.get_input_connections(id)
+	var ui_node: GNUiBase = null
+	for conn in conns:
+		if conn.to_port == 1:
+			var upstream: GNNode = network.nodes.get(conn.from_node, null)
+			if upstream is GNUiBase:
+				ui_node = upstream as GNUiBase
+			break
 
-	var conn: GNConnection = conns[0]
-	var upstream: GNNode = engine.network.nodes.get(conn.from_node, null)
-	if upstream == null or not (upstream.cached_output is GNTextureData):
-		return null
+	if ui_node == null:
+		# No UI connected — hide panel layer and remove stale controls
+		_panel_ui_root.visible = false
+		_clear_managed_controls()
+		return
 
-	return upstream.cached_output as GNTextureData
+	_panel_ui_root.visible = true
+	_prev_managed = _managed_controls.duplicate()
+	_managed_controls.clear()
+
+	# Adopt the UI widget's Control node
+	var ctrl: Control = ui_node.get_control_node()
+	if ctrl != null:
+		_adopt_control(ctrl)
+
+	_remove_stale_controls()
+
+
+## Adds a Control node to the panel UI root if not already there.
+func _adopt_control(ctrl: Control) -> void:
+	if ctrl.get_parent() != _panel_ui_root:
+		if ctrl.get_parent() != null:
+			ctrl.get_parent().remove_child(ctrl)
+		_panel_ui_root.add_child(ctrl)
+	_managed_controls.append(ctrl)
+
+
+## Removes controls that were NOT re-adopted this frame.
+func _remove_stale_controls() -> void:
+	for ctrl in _prev_managed:
+		if ctrl != null and is_instance_valid(ctrl) and not _managed_controls.has(ctrl):
+			if ctrl.get_parent() == _panel_ui_root:
+				_panel_ui_root.remove_child(ctrl)
+	_prev_managed.clear()
+
+
+## Removes all managed controls from the panel viewport.
+func _clear_managed_controls() -> void:
+	for ctrl in _managed_controls:
+		if ctrl != null and is_instance_valid(ctrl) and ctrl.get_parent() == _panel_ui_root:
+			_panel_ui_root.remove_child(ctrl)
+	_managed_controls.clear()
+	_prev_managed.clear()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Overlay System (for dropdowns, color pickers, menus)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+## Shows an overlay control anchored below (or above) a widget's rect.
+func show_overlay(owner: GNUiBase, content: Control, anchor_rect: Rect2) -> void:
+	if _overlay_root == null:
+		return
+	hide_overlay()
+	_overlay_owner = owner
+	_overlay_root.add_child(content)
+	content.position = Vector2(anchor_rect.position.x, anchor_rect.end.y)
+	var vp_size := Vector2(_window.size)
+	if content.position.y + content.size.y > vp_size.y:
+		content.position.y = anchor_rect.position.y - content.size.y
+	_overlay_root.visible = true
+	_overlay_active = true
+
+
+## Hides the overlay and notifies the owner widget.
+func hide_overlay() -> void:
+	if not _overlay_active or _overlay_root == null:
+		return
+	for child in _overlay_root.get_children():
+		if child != _overlay_bg:
+			_overlay_root.remove_child(child)
+			child.queue_free()
+	_overlay_root.visible = false
+	_overlay_active = false
+	if _overlay_owner != null and is_instance_valid(_overlay_owner):
+		_overlay_owner._on_overlay_dismissed()
+	_overlay_owner = null
+
+
+## Called when the overlay background is clicked — dismiss the overlay.
+func _on_overlay_bg_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		hide_overlay()
+
+
+## Returns whether the overlay is currently visible.
+func is_overlay_active() -> bool:
+	return _overlay_active
+
+
+## Returns the widget that owns the current overlay.
+func get_overlay_owner() -> GNUiBase:
+	return _overlay_owner
+
+
+## Returns the overlay content rect (for hit-testing).
+func get_overlay_rect() -> Rect2:
+	if _overlay_root != null and _overlay_root.visible:
+		for child in _overlay_root.get_children():
+			if child != _overlay_bg:
+				return child.get_global_rect()
+	return Rect2()

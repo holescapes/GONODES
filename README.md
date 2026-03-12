@@ -1,4 +1,4 @@
-﻿# GONODES
+# GONODES
 
 **A real-time node-based visual programming framework built on [Godot 4.6](https://godotengine.org), inspired by [TouchDesigner](https://derivative.ca).**
 
@@ -366,7 +366,6 @@ GONODES/
 â”‚   â”‚   â”œâ”€â”€ gn_comp_base.gd         # GNCompBase â€” COMP family base class
 â”‚   â”‚   â”œâ”€â”€ gn_mat_base.gd          # GNMatBase â€” MAT family base class
 â”‚   â”‚   â”œâ”€â”€ gn_ui_base.gd           # GNUiBase  UI family base class
-â”‚   â”‚   â”œâ”€â”€ gn_panel_source.gd      # GNPanelSource  panel input forwarding metadata
 â”‚   â”‚   â”œâ”€â”€ gn_cook_engine.gd       # Frame-driven cook engine
 â”‚   â”‚   â”œâ”€â”€ gn_network.gd           # Graph model (Resource)
 â”‚   â”‚   â”œâ”€â”€ gn_parameter.gd         # Typed parameters with expressions

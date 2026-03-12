@@ -4,40 +4,70 @@
     "nodes": {
         "tree1": {
             "type": "TreeUI",
-            "position": [300, 100],
+            "position": [
+                300,
+                100
+            ],
             "parameters": {
-                "hide_root": { "value": true },
-                "min_size": { "value": { "_type": "Vector2i", "x": 220, "y": 200 } }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [650, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 260, "y": 240 } }
+                "hide_root": {
+                    "value": true
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 220,
+                        "y": 200
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1000, 100],
+            "position": [
+                1000,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 260, "y": 240 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 260,
+                        "y": 240
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "tree1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "tree1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Tree UI — Basic\n\nTree view built from DAT table data.\nDAT columns: name, parent (row index or empty).\nState channel: selected (row index, -1 for none).",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Tree UI \u00e2\u20ac\u201d Basic\n\nTree view built from DAT table data.\nDAT columns: name, parent (row index or empty).\nState channel: selected (row index, -1 for none).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

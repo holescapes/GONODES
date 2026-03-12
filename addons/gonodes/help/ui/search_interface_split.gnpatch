@@ -4,93 +4,185 @@
     "nodes": {
         "lineedit1": {
             "type": "LineEditUI",
-            "position": [100, 50],
+            "position": [
+                100,
+                50
+            ],
             "parameters": {
-                "placeholder": { "value": "Enter filter text..." },
-                "default_text": { "value": "" }
+                "placeholder": {
+                    "value": "Enter filter text..."
+                },
+                "default_text": {
+                    "value": ""
+                }
             }
         },
         "dropdown1": {
             "type": "DropdownUI",
-            "position": [100, 180],
+            "position": [
+                100,
+                180
+            ],
             "parameters": {
-                "label": { "value": "Category" },
-                "items": { "value": "All\nImages\nAudio\nVideo" },
-                "default_index": { "value": 0 }
+                "label": {
+                    "value": "Category"
+                },
+                "items": {
+                    "value": "All\nImages\nAudio\nVideo"
+                },
+                "default_index": {
+                    "value": 0
+                }
             }
         },
         "checkbox_active": {
             "type": "CheckBoxUI",
-            "position": [100, 310],
+            "position": [
+                100,
+                310
+            ],
             "parameters": {
-                "label": { "value": "Active Only" },
-                "default_on": { "value": true }
+                "label": {
+                    "value": "Active Only"
+                },
+                "default_on": {
+                    "value": true
+                }
             }
         },
         "container_filters": {
             "type": "ContainerUI",
-            "position": [450, 50],
+            "position": [
+                450,
+                50
+            ],
             "parameters": {
-                "layout": { "value": 0 },
-                "spacing": { "value": 4 }
+                "layout": {
+                    "value": 0
+                },
+                "spacing": {
+                    "value": 4
+                }
             }
         },
         "textedit_results": {
             "type": "TextEditUI",
-            "position": [450, 350],
+            "position": [
+                450,
+                350
+            ],
             "parameters": {
-                "placeholder": { "value": "Results will appear here..." },
-                "editable": { "value": false },
-                "min_size": { "value": { "_type": "Vector2i", "x": 280, "y": 150 } }
+                "placeholder": {
+                    "value": "Results will appear here..."
+                },
+                "editable": {
+                    "value": false
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 280,
+                        "y": 150
+                    }
+                }
             }
         },
         "split1": {
             "type": "SplitContainerUI",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
-                "vertical": { "value": true },
-                "min_size": { "value": { "_type": "Vector2i", "x": 300, "y": 380 } }
+                "vertical": {
+                    "value": true
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 300,
+                        "y": 380
+                    }
+                }
             }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [1150, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 340, "y": 420 } }
-            }
-        },
-        "fliptop1": {
-            "type": "FlipTOP",
-            "position": [1500, 100],
-            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1850, 100],
+            "position": [
+                1850,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 340, "y": 420 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 340,
+                        "y": 420
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "lineedit1", "from_port": 0, "to": "container_filters", "to_port": 0 },
-        { "from": "dropdown1", "from_port": 0, "to": "container_filters", "to_port": 1 },
-        { "from": "checkbox_active", "from_port": 0, "to": "container_filters", "to_port": 2 },
-        { "from": "container_filters", "from_port": 0, "to": "split1", "to_port": 0 },
-        { "from": "textedit_results", "from_port": 0, "to": "split1", "to_port": 1 },
-        { "from": "split1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "fliptop1", "to_port": 0 },
-        { "from": "fliptop1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "lineedit1",
+            "from_port": 0,
+            "to": "container_filters",
+            "to_port": 0
+        },
+        {
+            "from": "dropdown1",
+            "from_port": 0,
+            "to": "container_filters",
+            "to_port": 1
+        },
+        {
+            "from": "checkbox_active",
+            "from_port": 0,
+            "to": "container_filters",
+            "to_port": 2
+        },
+        {
+            "from": "container_filters",
+            "from_port": 0,
+            "to": "split1",
+            "to_port": 0
+        },
+        {
+            "from": "textedit_results",
+            "from_port": 0,
+            "to": "split1",
+            "to_port": 1
+        },
+        {
+            "from": "split1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Search Interface — Interactive Split Layout\n\nTop: LineEditUI + DropdownUI + CheckBoxUI in ContainerUI\nBottom: TextEditUI for results\nSplitContainerUI divides the two sections.\nPanel → FlipTOP → WindowOUT demonstrates TOP processing.\nDraggable split divider adjusts layout interactively.",
-            "position": [-200.0, -120.0],
-            "size": [520.0, 140.0],
-            "color": [0.2, 0.7, 0.9, 0.8]
+            "text": "Search Interface \u2014 Interactive Split Layout\n\nTop: LineEditUI + DropdownUI + CheckBoxUI in ContainerUI\nBottom: TextEditUI for results\nSplitContainerUI divides the two sections.\nWired to WindowOUT panel port for native interaction.\nDraggable split divider adjusts layout interactively.",
+            "position": [
+                -200.0,
+                -120.0
+            ],
+            "size": [
+                520.0,
+                140.0
+            ],
+            "color": [
+                0.2,
+                0.7,
+                0.9,
+                0.8
+            ]
         }
     ]
 }

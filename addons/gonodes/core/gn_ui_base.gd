@@ -2,16 +2,18 @@ class_name GNUiBase
 extends GNNode
 ## Base class for all UI family operators — 2D interface widgets.
 ##
-## Parallel to GNCompBase (which manages Node3D for 3D scenes), GNUiBase
-## manages a Control node for 2D UI composition. PanelTOP reparents these
-## Controls into its interactive SubViewport, just as RenderTOP reparents
-## COMP scene nodes into its 3D SubViewport.
+## Manages a Control node for 2D UI composition. Two consumption paths:
+##   • Interactive: wire to WindowOUT panel port (via ContainerUI for layout).
+##     WindowOUT adopts controls directly into its Window's UIRoot container
+##     — native Godot input routing (mouse, keyboard, focus) works automatically.
+##   • Render-to-texture: wire to PanelTOP for pixel output into TOP chains.
+##     The resulting texture is non-interactive (useful for FX, recording).
 ##
 ## Provides:
 ##   • family = GNFamily.Type.UI set automatically
-##   • Default output port "out" of type UI
+##   • Default output port "out" (UI) + "state" (CHOP) on every widget
 ##   • _control_node management with automatic cleanup on PREDELETE
-##   • Widget state dictionary for CHOP output via PanelTOP
+##   • Automatic CHOP output from widget_state after each cook
 ##   • Inline label preview
 
 # ─── Shared UI Infrastructure ──────────────────────────────────────────────────
@@ -27,10 +29,14 @@ var _control_node: Control = null:
 		if value != null:
 			value.set_meta("gn_ui_owner", self)
 
-## Widget state values exposed as CHOP channels by PanelTOP.
+## Widget state values exposed as CHOP channels on the "state" output port.
 ## Keys are channel names (e.g., "value", "press", "state"), values are floats.
 ## Subclasses update this in _cook() after reading their Control's state.
+## The base class automatically converts widget_state to GNChannelData after cook.
 var widget_state: Dictionary = {}
+
+## Cached CHOP output built from widget_state after each cook.
+var _cached_state_chop: GNChannelData = null
 
 ## Optional ordering hint for layout inside PanelTOP's container.
 ## Lower values sort earlier. Set via parameter or left at default (0).
@@ -46,9 +52,14 @@ func _init() -> void:
 
 
 ## Ensures family is set even when subclass _init() doesn't call super().
+## Appends a CHOP "state" output port AFTER subclass ports so every UI widget
+## exposes its widget_state as CHOP channels.
 func initialize(p_id: String) -> void:
 	family = GNFamily.Type.UI
 	super.initialize(p_id)
+	# Append state CHOP port after whatever ports the subclass defined.
+	# This makes it always the last output port on every UI widget.
+	add_output("state", GNFamily.Type.CHOP, "Widget state channels")
 
 
 ## Default output port.  Override in subclass to add inputs or extra outputs.
@@ -74,6 +85,33 @@ func _notification(what: int) -> void:
 ## accessor (get_button, get_slider, etc.) that casts this.
 func get_control_node() -> Control:
 	return _control_node
+
+
+## Routes output data by port.  The last port is always the CHOP state output.
+func get_output_data(port_index: int) -> GNData:
+	if port_index == output_ports.size() - 1:
+		return _cached_state_chop
+	return cached_output
+
+
+## Wraps _cook(): after the subclass cook runs, converts widget_state → CHOP.
+func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
+	var result := super.execute_cook(inputs, frame)
+	_build_state_chop()
+	return result
+
+
+## Converts this widget's widget_state dictionary into GNChannelData.
+## Each key becomes a channel named "<id>:<key>" with a single float sample.
+func _build_state_chop() -> void:
+	if _cached_state_chop == null:
+		_cached_state_chop = GNChannelData.new()
+	_cached_state_chop.channels.clear()
+	_cached_state_chop.length = 1
+	_cached_state_chop.sample_rate = 60.0
+	for key in widget_state:
+		var ch_name: String = "%s:%s" % [id, key]
+		_cached_state_chop.set_single_value(ch_name, float(widget_state[key]))
 
 
 ## Destroys the control node and resets this widget to pre-first-cook state.
@@ -113,59 +151,23 @@ func update_preview_control(control: Control) -> void:
 			label.text = "no widget"
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Panel Input Dispatch
-# ═══════════════════════════════════════════════════════════════════════════════
-#
-# Standalone SubViewports (no SubViewportContainer parent) don't deliver
-# mouse-button or drag events to Controls via push_input(). WindowOUT
-# works around this by finding the GNUiBase that owns the hovered Control
-# and calling handle_panel_input(). Each widget type handles its own input.
-
-## Called by WindowOUT to deliver mouse events that push_input() cannot.
-## Receives events in SubViewport coordinates, remaps to control-local,
-## and calls _dispatch_panel_input().
-func handle_panel_input(event: InputEvent) -> void:
-	if _control_node == null:
-		return
-	var local_event := event
-	if event is InputEventMouse:
-		var ctrl_pos := _control_node.get_global_rect().position
-		local_event = event.xformed_by(Transform2D(0.0, -ctrl_pos))
-	_dispatch_panel_input(local_event)
-
-
-## Override in subclasses for widget-specific input handling.
-## Default: handles BaseButton pressed/toggled on release;
-## emits gui_input signal for all other controls (KnobUI, XYPadUI, etc.).
-func _dispatch_panel_input(event: InputEvent) -> void:
-	if _control_node is BaseButton:
-		_handle_base_button_input(event)
-	else:
-		_control_node.emit_signal("gui_input", event)
-
-
-## Handles BaseButton press/toggle on mouse-left release.
-func _handle_base_button_input(event: InputEvent) -> void:
-	if not (event is InputEventMouseButton):
-		return
-	var mb := event as InputEventMouseButton
-	if mb.button_index != MOUSE_BUTTON_LEFT or mb.pressed:
-		return
-	var btn := _control_node as BaseButton
-	if btn.toggle_mode:
-		btn.set_pressed_no_signal(not btn.button_pressed)
-	btn.emit_signal("pressed")
-	if btn.toggle_mode:
-		btn.emit_signal("toggled", btn.button_pressed)
+## Called by WindowOUT to deliver input events to overlay content.
+## event position is in SubViewport coordinates.
+## Return true if the event was handled.
+func _handle_overlay_input(event: InputEvent) -> bool:
+	return false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Overlay System
 # ═══════════════════════════════════════════════════════════════════════════════
+#
+# Overlay-based popups for dropdowns, color pickers, and menus.
+# The overlay host (WindowOUT) sets "gn_panel_overlay" meta on its Window.
+# Widgets call _request_panel_overlay to show popup controls above other widgets.
 
 
-## Requests the panel to show an overlay control anchored to this widget.
+## Requests the panel host to show an overlay control anchored to this widget.
 ## content: The Control to display (e.g., ItemList, color swatch grid).
 ## anchor_rect: Viewport-space rect to anchor to. Defaults to _control_node rect.
 func _request_panel_overlay(content: Control, anchor_rect: Rect2 = Rect2()) -> bool:
@@ -197,10 +199,3 @@ func _dismiss_panel_overlay() -> void:
 ## Override in subclasses to clean up overlay references.
 func _on_overlay_dismissed() -> void:
 	pass
-
-
-## Called by WindowOUT to deliver input events to overlay content.
-## event position is in SubViewport coordinates.
-## Return true if the event was handled.
-func _handle_overlay_input(event: InputEvent) -> bool:
-	return false

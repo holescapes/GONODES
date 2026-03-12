@@ -53,17 +53,5 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_cached_tex_data.resolution = res
 
-	# Merge panel_sources from both inputs (both are composited at same coords).
-	# CompositeTOP doesn't spatially transform — sources pass through at identity.
-	var merge_inputs: Array = []
-	var merge_transforms: Array = []
-	if tex_a != null:
-		merge_inputs.append(tex_a)
-		merge_transforms.append(Transform2D.IDENTITY)
-	if tex_b != null:
-		merge_inputs.append(tex_b)
-		merge_transforms.append(Transform2D.IDENTITY)
-	_cached_tex_data.merge_panel_sources(merge_inputs, merge_transforms)
-
 	return _cached_tex_data
 

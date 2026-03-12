@@ -109,6 +109,12 @@ var _mat_sphere: MeshInstance3D = null
 var _mat_light: DirectionalLight3D = null
 var _mat_display: TextureRect = null
 
+# ─── UI display (2D SubViewport snapshot) ─────────────────────────────────────
+
+var _ui_viewport: SubViewport = null
+var _ui_display: TextureRect = null
+var _ui_preview_control: Control = null  ## duplicate() of the real Control
+
 # ─── Fallback info label ─────────────────────────────────────────────────────
 
 var _info_label: Label = null
@@ -213,6 +219,77 @@ func _get_content_rect() -> Rect2:
 func _warm_up_3d() -> void:
 	_ensure_3d_viewport()
 	_ensure_mat_viewport()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# UI — 2D SubViewport Snapshot (Lazy)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _ensure_ui_viewport() -> void:
+	if _ui_viewport != null:
+		return
+
+	_ui_viewport = SubViewport.new()
+	_ui_viewport.name = "UI_Viewer_VP"
+	_ui_viewport.transparent_bg = true
+	_ui_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_ui_viewport.disable_3d = true
+	_ui_viewport.gui_disable_input = true
+	_ui_viewport.size = _snap_size(_get_content_rect().size)
+	add_child(_ui_viewport)
+
+	# Display TextureRect
+	_ui_display = TextureRect.new()
+	_ui_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_ui_display.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_ui_display.texture = _ui_viewport.get_texture()
+	_ui_display.mouse_filter = MOUSE_FILTER_IGNORE
+	_ui_display.visible = false
+	add_child(_ui_display)
+
+
+func _show_ui_preview(ui_node: GNUiBase) -> void:
+	_ensure_ui_viewport()
+
+	var control := ui_node.get_control_node()
+	if control == null:
+		_show_info("No UI control", "")
+		return
+
+	# Remove old preview duplicate
+	if _ui_preview_control != null and _ui_preview_control.get_parent() == _ui_viewport:
+		_ui_viewport.remove_child(_ui_preview_control)
+		_ui_preview_control.queue_free()
+		_ui_preview_control = null
+
+	# Duplicate the real control for non-destructive snapshot
+	_ui_preview_control = control.duplicate()
+	_ui_viewport.add_child(_ui_preview_control)
+
+	# Size the viewport to match the content area
+	var content := _get_content_rect()
+	_ui_viewport.size = _snap_size(content.size)
+
+	# Give the duplicated control the full viewport size
+	_ui_preview_control.position = Vector2.ZERO
+	_ui_preview_control.size = Vector2(_ui_viewport.size)
+
+	_hide_all_displays()
+	_ui_display.visible = true
+	_fit_btn.visible = false
+	_zoom_label.visible = false
+
+	_ui_display.position = content.position
+	_ui_display.size = content.size
+
+	# Render one frame
+	_ui_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+	# Info bar: show widget_state
+	var state_parts: PackedStringArray = []
+	for key in ui_node.widget_state:
+		state_parts.append("%s: %s" % [key, ui_node.widget_state[key]])
+	_info_bar.text = ", ".join(state_parts) if state_parts.size() > 0 else "(no state)"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -800,6 +877,8 @@ func _hide_all_displays() -> void:
 		_3d_display.visible = false
 	if _mat_display:
 		_mat_display.visible = false
+	if _ui_display:
+		_ui_display.visible = false
 	if _info_label:
 		_info_label.visible = false
 	if _fit_btn:
@@ -927,6 +1006,12 @@ func update_from_node(node: GNNode) -> void:
 
 		GNFamily.Type.COMP:
 			_show_info("COMP: %s" % node.node_type, "Component operator")
+
+		GNFamily.Type.UI:
+			if node is GNUiBase:
+				_show_ui_preview(node as GNUiBase)
+				return
+			_show_info("No UI output", "")
 
 		_:
 			_show_info("Unsupported family", "")

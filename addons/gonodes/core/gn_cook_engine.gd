@@ -106,6 +106,11 @@ var _active_set: Dictionary = {}
 ## When true, _active_set needs recomputing. Set by topology/sink changes.
 var _active_set_dirty: bool = true
 
+## Tracks node IDs whose expressions were already evaluated this frame
+## by [method _try_expression_dirty], so [method _resolve_node_parameters]
+## can skip redundant re-evaluation.
+var _expr_resolved_this_frame: Dictionary = {}
+
 ## Regex for extracting node references from expressions.
 ## Matches chop("id"), op("id"), top("id"), sop("id"), dat("id"), mat("id").
 static var _expr_ref_regex: RegEx = null
@@ -387,9 +392,17 @@ func cook_frame(delta: float) -> void:
 	# Step 4: Cook dirty + active nodes in topo order
 	var cooked_count := 0
 	var skipped_count := 0
+	_expr_resolved_this_frame.clear()
 	for node in topo_order:
 		if not node.dirty:
-			continue
+			# Non-dirty node with expression params: evaluate expressions
+			# (cheap) and only cook + propagate if a value actually changed.
+			# Upstream nodes are already cooked (topo order), so chop() etc.
+			# read fresh cached values.
+			if node.is_active and _try_expression_dirty(node):
+				network.propagate_dirty(node.id)
+			else:
+				continue
 
 		# Skip inactive nodes — they keep cached_output frozen
 		if not node.is_active:
@@ -468,6 +481,42 @@ func _pre_cook_pass(delta: float) -> void:
 		node._pre_cook(delta)
 
 
+## Evaluates expression parameters on a non-dirty node and checks whether any
+## resolved value actually changed.  Called during the cook loop in topological
+## order so that upstream caches are fresh (chop/op/top read correct data).
+##
+## Returns true if at least one expression value changed (node is now dirty).
+## The results are cached in [member _expr_resolved_this_frame] so that
+## [method _resolve_node_parameters] does not re-evaluate them.
+func _try_expression_dirty(node: GNNode) -> bool:
+	# Quick scan: does the node have any expression params?
+	var old_values: Dictionary = {}
+	for param_name in node.parameters:
+		var param: GNParameter = node.parameters[param_name]
+		if param.mode == GNParameter.Mode.EXPRESSION:
+			old_values[param_name] = param.resolved_value
+	if old_values.is_empty():
+		return false
+
+	# Inject timing context so expressions can reference time/frame/dt.
+	node.current_delta = current_delta
+	node.elapsed_time = elapsed_time
+	node.current_frame = frame_count
+	node.project_dir = project_dir
+
+	# Evaluate all expressions (same path as normal cook resolution).
+	_resolve_node_parameters(node)
+	_expr_resolved_this_frame[node.id] = true
+
+	# Compare: if any resolved value changed, mark dirty.
+	for param_name in old_values:
+		var param: GNParameter = node.parameters[param_name]
+		if old_values[param_name] != param.resolved_value:
+			node.mark_dirty()
+			return true
+	return false
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Input Resolution
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -526,7 +575,11 @@ func _gather_inputs(node: GNNode) -> Array[GNData]:
 
 ## Resolves all parameters on a node before it cooks.
 ## Evaluates expressions, resolves binds, etc.
+## Skips expression re-evaluation if already resolved this frame by
+## [method _try_expression_dirty].
 func _resolve_node_parameters(node: GNNode) -> void:
+	if _expr_resolved_this_frame.has(node.id):
+		return
 	for param_name in node.parameters:
 		var param: GNParameter = node.parameters[param_name]
 		match param.mode:
@@ -946,7 +999,15 @@ func _make_chop_proxy(node_name: String, channel: String = "", index: int = -1) 
 		if not channel.is_empty():
 			return 0.0
 		return {}
+	# Try cached_output first; if it's not CHOP data, scan output ports
+	# (supports multi-output nodes like PanelTOP with CHOP on port 1).
 	var data: GNData = node.cached_output
+	if data == null or not data is GNChannelData:
+		for p in range(node.output_ports.size()):
+			var port_data: GNData = node.get_output_data(p)
+			if port_data is GNChannelData:
+				data = port_data
+				break
 	if data == null or not data is GNChannelData:
 		if not channel.is_empty():
 			return 0.0
@@ -978,6 +1039,13 @@ func _make_top_proxy(node_name: String, property: String = "") -> Variant:
 			return 0.0
 		return {}
 	var data: GNData = node.cached_output
+	if data == null or not data is GNTextureData:
+		# Scan output ports for multi-output nodes (e.g., SubNetworkNode with TOP on port N).
+		for p in range(node.output_ports.size()):
+			var port_data: GNData = node.get_output_data(p)
+			if port_data is GNTextureData:
+				data = port_data
+				break
 	if data == null or not data is GNTextureData:
 		if not property.is_empty():
 			return 0.0

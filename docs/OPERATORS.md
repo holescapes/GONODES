@@ -1,4 +1,4 @@
-﻿# GONODES â€” Operator Reference
+# GONODES â€” Operator Reference
 
 > **131 operators** across 10 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, UI, and native extensions.
 
@@ -1018,7 +1018,7 @@ Render CHOP channels as a texture â€” waveform oscilloscope, heatmap, or gr
 
 ### PanelTOP
 
-Container that renders connected UI widgets into a SubViewport texture. Outputs GNTextureData with `panel_sources` metadata for interactive input forwarding through the TOP chain.
+Container that renders connected UI widgets into a SubViewport texture. Outputs a non-interactive GNTextureData for use in TOP chains (blur, composite, recording). For widget state data, use each UI widget's own CHOP `state` output port.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -1030,11 +1030,9 @@ Container that renders connected UI widgets into a SubViewport texture. Outputs 
 | columns | Int | 2 | 1-10 | Column count (Grid layout only) |
 
 **Input:** Dynamic UI inputs (unlimited connected UI widgets).
-**Output 0:** TOP (GNTextureData with panel_sources).
-**Output 1:** CHOP (widget state channels: button presses, slider values, etc.).
+**Output 0:** TOP (GNTextureData, pixels only, non-interactive).
 
-**How it works:** Creates a SubViewport with `gui_disable_input = false` and a root container inside. During cook, reparents each connected UI widget's `_control_node` into the root container. The SubViewport renders the widget tree and the resulting texture includes `GNPanelSource` metadata that WindowOUT uses for mouse input forwarding through inverse transforms.
-
+**How it works:** Creates a SubViewport with `gui_disable_input = true` and a root container inside. During cook, reparents each connected UI widget's `_control_node` into the root container. The SubViewport renders the widget tree into a texture. No interactive input is forwarded — for interactive panels, wire widgets through ContainerUI to WindowOUT's panel port instead.
 ---
 
 ## CHOP â€” Channel Operators
@@ -3456,9 +3454,12 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output â€�
 | always_on_top | Bool | false | â€” | Keep window above others |
 | vsync | Bool | true | â€” | V-sync |
 
-**Input:** `in` (TOP â€” texture to display).
+**Input 0:** `in` (TOP — background texture).
+**Input 1:** `panel` (UI — interactive panel with native Godot input routing).
 
-**How it works:** Creates a Godot `Window` node with a `TextureRect` inside. The TextureRect is assigned the input TOP's `ViewportTexture` â€” a live GPU reference with zero copy overhead. Window configuration (mode, position, monitor, vsync) is only applied when the WindowOUT's own parameters change, NOT when upstream textures update (preventing per-frame window reconfiguration). Multiple WindowOUT instances create multiple independent windows.
+**How it works:** Creates a Godot `Window` node with a `TextureRect` (`mouse_filter = IGNORE`, z=0) for the background texture and a `VBoxContainer` "UIRoot" (`mouse_filter = PASS`, z=1) for the interactive panel layer. The TextureRect is assigned the input TOP's `ViewportTexture` — a live GPU reference with zero copy overhead. UI controls from ContainerUI are adopted directly into the UIRoot container — no SubViewport indirection — so Godot's native input dispatch (mouse, keyboard, focus) works automatically. An overlay system (CanvasLayer at layer 100) supports dropdowns, color pickers, and popup menus above the panel layer. Window configuration (mode, position, monitor, vsync) is only applied when the WindowOUT's own parameters change, NOT when upstream textures update (preventing per-frame window reconfiguration). Multiple WindowOUT instances create multiple independent windows.
+
+> **Architecture note — process_mode:** GNNode sets `process_mode = PROCESS_MODE_DISABLED` during `initialize()` so operators don't run Godot's `_process()` (all cooking is driven by GNCookEngine). However, Godot propagates process_mode to child nodes, so the Window would also become DISABLED — blocking GUI event dispatch entirely (buttons, sliders, etc. stop responding). The fix: WindowOUT explicitly sets `_window.process_mode = Node.PROCESS_MODE_ALWAYS` in `_ensure_window()`. This has zero performance cost — it simply re-enables standard Godot GUI dispatch for the Window subtree.
 
 **Known issue:** Cannot ESC out of fullscreen/borderless mode from the output window. Workaround: change Window Mode back to Windowed from the inspector.
 
@@ -3466,9 +3467,11 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output â€�
 
 ## UI — User Interface Operators
 
-Interactive 2D widget operators for building control panels. UI widgets are placed inside a **PanelTOP** container which renders them into a SubViewport texture. The panel texture flows through the normal TOP chain and WindowOUT forwards mouse input back to the widgets through accumulated inverse transforms (GNPanelSource metadata on GNTextureData).
+Interactive 2D widget operators for building control panels. UI widgets are wired through a **ContainerUI** into WindowOUT's panel port (Input 1). Controls are adopted directly into the Window's VBoxContainer UIRoot—no SubViewport indirection—so Godot's native input dispatch handles mouse, keyboard, and focus automatically.
 
 **Base class:** `GNUiBase` (extends GNNode) — manages `_control_node: Control`. Color: Sky Blue.
+
+Every UI widget automatically exposes a **"state" CHOP output port** (always the last output). State channels (listed per widget below) contain float values updated each cook. Wire this CHOP output to any parameter expression or CHOP-driven node to connect UI interactions to your network. ContainerUI's state port aggregates all connected children's states into a single CHOP stream.
 
 ### ButtonUI
 A clickable button. Outputs press state (0/1) and cumulative click count as CHOP channels.
@@ -3508,7 +3511,7 @@ A dropdown menu (OptionButton) with configurable items.
 ### ContainerUI
 A layout container for nesting other UI widgets. Supports multiple layout modes.
 - **Parameters:** `layout` (MENU: HBox/VBox/Grid/Flow), `columns` (INT, for grid mode)
-- **State channels:** none (layout only)
+- **State channels:** aggregated from all connected child widgets (channels named `<widget_id>:<key>`)
 
 ### TextureRectUI
 Displays a TOP texture inside PanelTOP. Optional MAT input for shader overlay.
@@ -3642,6 +3645,24 @@ Textured progress bar with TOP layers and CHOP driver.
 
 ---
 
+## Editor Features
+
+### Viewer Panel UI Preview
+
+The viewer panel supports three viewport families: **SOP** (3D geometry), **MAT** (material preview), and **UI** (widget preview). Each viewport is a SubViewport created lazily on first use (~4—6 MB VRAM each).
+
+The UI preview captures a snapshot of the selected UI operator's `_control_node` via `SubViewport.get_texture()`. The info bar displays the current `widget_state` dictionary (button press count, slider value, toggle state, etc.). This provides a non-interactive visual preview of widget appearance directly in the editor without requiring a WindowOUT output window.
+
+### Node Palette Keyboard Navigation
+
+The node palette popup supports full keyboard navigation:
+- **Up/Down arrows** — navigate between operator entries in the filtered tree
+- **Enter** — creates the currently highlighted operator
+- **Typing** — filters the tree in real-time by operator name
+
+Navigation wraps around and skips category headers, moving only between leaf (operator) entries.
+
+---
 ## Quick Reference
 
 | Family | Count | Operators |

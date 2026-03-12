@@ -42,23 +42,5 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_cached_tex_data.resolution = res
 
-	# Apply flip inverse to panel_sources (flip is self-inverse).
-	if tex_in.panel_sources.size() > 0:
-		_cached_tex_data.panel_sources.clear()
-		var fres := Vector2(res)
-		for ps in tex_in.panel_sources:
-			var copy: GNPanelSource = ps.duplicate_source()
-			# Flip transform: mirror around center
-			if fx or fy:
-				var sx: float = -1.0 if fx else 1.0
-				var sy: float = -1.0 if fy else 1.0
-				var center := fres * 0.5
-				var inv_t := Transform2D.IDENTITY
-				inv_t = inv_t.translated(-center)
-				inv_t = inv_t.scaled(Vector2(sx, sy))
-				inv_t = inv_t.translated(center)
-				copy.transform = copy.transform * inv_t
-			_cached_tex_data.panel_sources.append(copy)
-
 	return _cached_tex_data
 

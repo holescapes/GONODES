@@ -46,7 +46,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Panel TOP — Basic UI Rendering\n\nPanelTOP collects UI widgets into a SubViewport\nand renders them as a TOP texture.\nMouse events from WindowOUT are forwarded back\nthrough panel_sources for interactive controls.",
+            "text": "Panel TOP — Render to Texture\n\nPanelTOP collects UI widgets into a SubViewport\nand renders them as a non-interactive TOP texture.\nUseful for recording, screenshots, or feeding UI\ninto shader effects. For interactive panels, wire\nwidgets to WindowOUT panel port via ContainerUI.",
             "position": [-100.0, -150.0],
             "size": [500.0, 120.0],
             "color": [1.0, 1.0, 1.0, 0.8]

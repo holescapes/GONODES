@@ -4,50 +4,117 @@
     "nodes": {
         "label_top": {
             "type": "LabelUI",
-            "position": [100, 50],
-            "parameters": { "text": { "value": "Section A" } }
+            "position": [
+                100,
+                50
+            ],
+            "parameters": {
+                "text": {
+                    "value": "Section A"
+                }
+            }
         },
         "sep1": {
             "type": "SeparatorUI",
-            "position": [100, 150],
-            "parameters": { "vertical": { "value": false } }
+            "position": [
+                100,
+                150
+            ],
+            "parameters": {
+                "vertical": {
+                    "value": false
+                }
+            }
         },
         "label_bot": {
             "type": "LabelUI",
-            "position": [100, 250],
-            "parameters": { "text": { "value": "Section B" } }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [500, 100],
+            "position": [
+                100,
+                250
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 120 } },
-                "layout": { "value": 0 }
+                "text": {
+                    "value": "Section B"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 120 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 120
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
             }
         }
     },
     "connections": [
-        { "from": "label_top", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "sep1", "from_port": 0, "to": "panel1", "to_port": 1 },
-        { "from": "label_bot", "from_port": 0, "to": "panel1", "to_port": 2 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "label_top",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "sep1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 1
+        },
+        {
+            "from": "label_bot",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 2
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Separator UI — Basic\n\nHorizontal or vertical separator line.\nUsed between widgets for visual grouping.\nNo interactive state (pure layout).",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Separator UI \u00e2\u20ac\u201d Basic\n\nHorizontal or vertical separator line.\nUsed between widgets for visual grouping.\nNo interactive state (pure layout).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

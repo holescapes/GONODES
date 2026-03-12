@@ -4,71 +4,145 @@
     "nodes": {
         "slider1": {
             "type": "SliderUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "label": { "value": "Value 1" },
-                "min_val": { "value": 0.0 },
-                "max_val": { "value": 100.0 }
+                "label": {
+                    "value": "Value 1"
+                },
+                "min_val": {
+                    "value": 0.0
+                },
+                "max_val": {
+                    "value": 100.0
+                }
             }
         },
         "slider2": {
             "type": "SliderUI",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "label": { "value": "Value 2" },
-                "min_val": { "value": 0.0 },
-                "max_val": { "value": 100.0 }
+                "label": {
+                    "value": "Value 2"
+                },
+                "min_val": {
+                    "value": 0.0
+                },
+                "max_val": {
+                    "value": 100.0
+                }
             }
         },
         "slider3": {
             "type": "SliderUI",
-            "position": [100, 300],
+            "position": [
+                100,
+                300
+            ],
             "parameters": {
-                "label": { "value": "Value 3" },
-                "min_val": { "value": 0.0 },
-                "max_val": { "value": 100.0 }
+                "label": {
+                    "value": "Value 3"
+                },
+                "min_val": {
+                    "value": 0.0
+                },
+                "max_val": {
+                    "value": 100.0
+                }
             }
         },
         "scroll1": {
             "type": "ScrollContainerUI",
-            "position": [400, 100],
+            "position": [
+                400,
+                100
+            ],
             "parameters": {
-                "v_scroll": { "value": true },
-                "h_scroll": { "value": false },
-                "min_size": { "value": { "_type": "Vector2i", "x": 250, "y": 120 } }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [700, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } }
+                "v_scroll": {
+                    "value": true
+                },
+                "h_scroll": {
+                    "value": false
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 250,
+                        "y": 120
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1050, 100],
+            "position": [
+                1050,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 300,
+                        "y": 150
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "slider1", "from_port": 0, "to": "scroll1", "to_port": 0 },
-        { "from": "slider2", "from_port": 0, "to": "scroll1", "to_port": 1 },
-        { "from": "slider3", "from_port": 0, "to": "scroll1", "to_port": 2 },
-        { "from": "scroll1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "slider1",
+            "from_port": 0,
+            "to": "scroll1",
+            "to_port": 0
+        },
+        {
+            "from": "slider2",
+            "from_port": 0,
+            "to": "scroll1",
+            "to_port": 1
+        },
+        {
+            "from": "slider3",
+            "from_port": 0,
+            "to": "scroll1",
+            "to_port": 2
+        },
+        {
+            "from": "scroll1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ScrollContainer UI — Basic\n\nScrollable container with multiple slider children.\nScroll position exposed as state channels.\nUse V/H Scroll params to limit directions.",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "ScrollContainer UI \u00e2\u20ac\u201d Basic\n\nScrollable container with multiple slider children.\nScroll position exposed as state channels.\nUse V/H Scroll params to limit directions.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

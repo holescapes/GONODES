@@ -75,4 +75,5 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_cached_tex_data.texture = tex_in.texture
 
 	_cached_tex_data.resolution = res
+
 	return _cached_tex_data

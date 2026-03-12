@@ -4,53 +4,111 @@
     "nodes": {
         "slider1": {
             "type": "SliderUI",
-            "position": [100, 100],
-            "parameters": { "label": { "value": "Brightness" } }
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Brightness"
+                }
+            }
         },
         "toggle1": {
             "type": "ToggleUI",
-            "position": [100, 220],
-            "parameters": { "label": { "value": "Enabled" } }
+            "position": [
+                100,
+                220
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Enabled"
+                }
+            }
         },
         "panelcont1": {
             "type": "PanelContainerUI",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "bg_color": { "value": { "_type": "Color", "r": 0.12, "g": 0.12, "b": 0.2, "a": 0.9 } },
-                "corner_radius": { "value": 8 },
-                "padding": { "value": 12 }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [800, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } }
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.12,
+                        "g": 0.12,
+                        "b": 0.2,
+                        "a": 0.9
+                    }
+                },
+                "corner_radius": {
+                    "value": 8
+                },
+                "padding": {
+                    "value": 12
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 300, "y": 150 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 300,
+                        "y": 150
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "slider1", "from_port": 0, "to": "panelcont1", "to_port": 0 },
-        { "from": "toggle1", "from_port": 0, "to": "panelcont1", "to_port": 1 },
-        { "from": "panelcont1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "slider1",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 0
+        },
+        {
+            "from": "toggle1",
+            "from_port": 0,
+            "to": "panelcont1",
+            "to_port": 1
+        },
+        {
+            "from": "panelcont1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PanelContainer UI — Basic\n\nStyled panel wrapper with background color,\nrounded corners, and internal padding.\nNests child UI widgets inside a visual frame.",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "PanelContainer UI \u00e2\u20ac\u201d Basic\n\nStyled panel wrapper with background color,\nrounded corners, and internal padding.\nNests child UI widgets inside a visual frame.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

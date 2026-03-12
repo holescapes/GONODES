@@ -4,89 +4,160 @@
     "nodes": {
         "slider1": {
             "type": "SliderUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "label": { "value": "Brightness" },
-                "min_value": { "value": 0.0 },
-                "max_value": { "value": 2.0 },
-                "default_value": { "value": 1.0 }
+                "label": {
+                    "value": "Brightness"
+                },
+                "min_value": {
+                    "value": 0.0
+                },
+                "max_value": {
+                    "value": 2.0
+                },
+                "default_value": {
+                    "value": 1.0
+                }
             }
         },
         "knob1": {
             "type": "KnobUI",
-            "position": [100, 250],
+            "position": [
+                100,
+                250
+            ],
             "parameters": {
-                "label": { "value": "Rotate" },
-                "min_value": { "value": 0.0 },
-                "max_value": { "value": 360.0 },
-                "default_value": { "value": 0.0 }
+                "label": {
+                    "value": "Rotate"
+                },
+                "min_value": {
+                    "value": 0.0
+                },
+                "max_value": {
+                    "value": 360.0
+                },
+                "default_value": {
+                    "value": 0.0
+                }
             }
         },
         "toggle1": {
             "type": "ToggleUI",
-            "position": [100, 400],
+            "position": [
+                100,
+                400
+            ],
             "parameters": {
-                "label": { "value": "Enable" },
-                "default_on": { "value": true }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [500, 200],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 256 } },
-                "layout": { "value": 0 }
-            }
-        },
-        "transform1": {
-            "type": "TransformTOP",
-            "position": [900, 200],
-            "parameters": {
-                "translate": { "value": { "_type": "Vector2", "x": 0.1, "y": 0.05 } },
-                "rotate": { "value": 15.0 },
-                "scale": { "value": { "_type": "Vector2", "x": 0.6, "y": 0.6 } }
+                "label": {
+                    "value": "Enable"
+                },
+                "default_on": {
+                    "value": true
+                }
             }
         },
         "noise1": {
             "type": "NoiseTOP",
-            "position": [900, 450],
+            "position": [
+                900,
+                450
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
-            }
-        },
-        "comp1": {
-            "type": "CompositeTOP",
-            "position": [1300, 300],
-            "parameters": {
-                "operation": { "value": 0 }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1700, 300],
+            "position": [
+                1700,
+                300
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                200
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
             }
         }
     },
     "connections": [
-        { "from": "slider1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "knob1", "from_port": 0, "to": "panel1", "to_port": 1 },
-        { "from": "toggle1", "from_port": 0, "to": "panel1", "to_port": 2 },
-        { "from": "panel1", "from_port": 0, "to": "transform1", "to_port": 0 },
-        { "from": "noise1", "from_port": 0, "to": "comp1", "to_port": 0 },
-        { "from": "transform1", "from_port": 0, "to": "comp1", "to_port": 1 },
-        { "from": "comp1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "slider1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "knob1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 1
+        },
+        {
+            "from": "toggle1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 2
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UI Transform Chain — Interactive Through Spatial TOPs\n\nPanel is scaled, rotated, and translated by TransformTOP,\nthen composited over noise. Mouse clicks on the transformed\npanel region still reach the slider/knob/toggle widgets\nbecause panel_sources carry inverse transforms through the chain.\n\nTry dragging the slider and knob — they respond even though\nthe panel is rotated and offset in the final composited output.",
-            "position": [-100.0, -250.0],
-            "size": [550.0, 150.0],
-            "color": [0.2, 0.7, 0.9, 0.8]
+            "text": "UI Interactive Overlay\n\nSlider, Knob, and Toggle wired through ContainerUI\nto WindowOUT panel port for native interactive input.\nNoiseTOP on the TOP port provides a background texture.\nThe panel overlays the noise with transparent background.\n\nTry dragging the slider and knob \u2014 they respond with\nnative Godot input routing (no manual forwarding needed).",
+            "position": [
+                -100.0,
+                -250.0
+            ],
+            "size": [
+                550.0,
+                150.0
+            ],
+            "color": [
+                0.2,
+                0.7,
+                0.9,
+                0.8
+            ]
         }
     ]
 }

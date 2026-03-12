@@ -4,49 +4,108 @@
     "nodes": {
         "colorpicker1": {
             "type": "ColorPickerUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "default_color": { "value": { "_type": "Color", "r": 1.0, "g": 0.5, "b": 0.0, "a": 1.0 } },
-                "edit_alpha": { "value": true }
+                "default_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.5,
+                        "b": 0.0,
+                        "a": 1.0
+                    }
+                },
+                "edit_alpha": {
+                    "value": true
+                }
             }
         },
         "label1": {
             "type": "LabelUI",
-            "position": [100, 250],
+            "position": [
+                100,
+                250
+            ],
             "parameters": {
-                "text": { "value": "RGBA State:" }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [500, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 150 } },
-                "layout": { "value": 0 }
+                "text": {
+                    "value": "RGBA State:"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 150 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 150
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
             }
         }
     },
     "connections": [
-        { "from": "colorpicker1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "label1", "from_port": 0, "to": "panel1", "to_port": 1 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "colorpicker1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "label1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 1
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ColorPicker UI — Basic\n\nColor picker button. Opens Godot's full color picker.\nState channels: r, g, b, a (0.0 to 1.0).\nPanelTOP CHOP output carries these as channels.",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "ColorPicker UI \u00e2\u20ac\u201d Basic\n\nColor picker button. Opens Godot's full color picker.\nState channels: r, g, b, a (0.0 to 1.0).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

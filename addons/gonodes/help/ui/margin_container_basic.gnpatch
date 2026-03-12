@@ -4,48 +4,90 @@
     "nodes": {
         "button1": {
             "type": "ButtonUI",
-            "position": [100, 100],
-            "parameters": { "label": { "value": "Padded Button" } }
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Padded Button"
+                }
+            }
         },
         "margin1": {
             "type": "MarginContainerUI",
-            "position": [400, 100],
+            "position": [
+                400,
+                100
+            ],
             "parameters": {
-                "left": { "value": 20 },
-                "top": { "value": 10 },
-                "right": { "value": 20 },
-                "bottom": { "value": 10 }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [750, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 100 } }
+                "left": {
+                    "value": 20
+                },
+                "top": {
+                    "value": 10
+                },
+                "right": {
+                    "value": 20
+                },
+                "bottom": {
+                    "value": 10
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1100, 100],
+            "position": [
+                1100,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 100 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 100
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "button1", "from_port": 0, "to": "margin1", "to_port": 0 },
-        { "from": "margin1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "button1",
+            "from_port": 0,
+            "to": "margin1",
+            "to_port": 0
+        },
+        {
+            "from": "margin1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MarginContainer UI — Basic\n\nWraps a single child with configurable margins.\nUseful for adding spacing around any widget.\nPure layout container (no interactive state).",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "MarginContainer UI \u00e2\u20ac\u201d Basic\n\nWraps a single child with configurable margins.\nUseful for adding spacing around any widget.\nPure layout container (no interactive state).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

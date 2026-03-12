@@ -180,9 +180,6 @@ func _init_shader_viewport(shader_path: String, transparent_bg: bool = true,
 ## child SubViewports after [method _cook] completes.  TOPs should create their
 ## viewports with [code]UPDATE_DISABLED[/code] — the base class handles when to
 ## render, eliminating wasted GPU work on non-dirty frames.
-##
-## Also carries panel_sources from the first TOP input to the output by default.
-## Spatial TOPs override this by applying inverse transforms in their _cook().
 func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 	var result := super.execute_cook(inputs, frame)
 	# After _cook() has set uniforms / textures, request a single render pass
@@ -191,14 +188,4 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 		for child in get_children():
 			if child is SubViewport:
 				child.render_target_update_mode = SubViewport.UPDATE_ONCE
-		# Auto-carry panel_sources from first TOP input if the result doesn't
-		# already have panel_sources set (PanelTOP and spatial TOPs handle their own).
-		if result is GNTextureData:
-			var out_tex: GNTextureData = result as GNTextureData
-			if out_tex.panel_sources.is_empty():
-				# Find the first TOP input
-				for inp in inputs:
-					if inp is GNTextureData:
-						out_tex.carry_panel_sources_from(inp as GNTextureData)
-						break
 	return result

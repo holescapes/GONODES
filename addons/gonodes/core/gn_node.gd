@@ -158,18 +158,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 ## Optional override — called once per frame before cook, even when not dirty.
 ## Useful for time-dependent nodes to check if they should mark themselves dirty.
-## Also marks nodes dirty if any parameter is in EXPRESSION mode, since expressions
-## may reference external state (e.g., chop("lfo1", "out"), time) that changes
-## every frame without triggering dirty propagation through wires.
+##
+## Expression parameters are NOT marked dirty here.  The cook engine evaluates
+## them in topological order (so upstream caches are fresh), compares to the
+## previous resolved value, and only marks dirty + propagates when a value
+## actually changes.  See [method GNCookEngine._try_expression_dirty].
 func _pre_cook(delta: float) -> void:
 	if time_dependent:
 		mark_dirty()
-		return
-	# Check if any parameter uses an expression — if so, must re-cook every frame
-	for param_name in parameters:
-		if parameters[param_name].mode == GNParameter.Mode.EXPRESSION:
-			mark_dirty()
-			return
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

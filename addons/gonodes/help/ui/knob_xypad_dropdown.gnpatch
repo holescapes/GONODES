@@ -4,60 +4,129 @@
     "nodes": {
         "knob1": {
             "type": "KnobUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "label": { "value": "Frequency" },
-                "min_value": { "value": 0.1 },
-                "max_value": { "value": 10.0 },
-                "default_value": { "value": 1.0 }
+                "label": {
+                    "value": "Frequency"
+                },
+                "min_value": {
+                    "value": 0.1
+                },
+                "max_value": {
+                    "value": 10.0
+                },
+                "default_value": {
+                    "value": 1.0
+                }
             }
         },
         "xypad1": {
             "type": "XYPadUI",
-            "position": [100, 250],
+            "position": [
+                100,
+                250
+            ],
             "parameters": {
-                "label": { "value": "Position" }
+                "label": {
+                    "value": "Position"
+                }
             }
         },
         "dropdown1": {
             "type": "DropdownUI",
-            "position": [100, 400],
+            "position": [
+                100,
+                400
+            ],
             "parameters": {
-                "label": { "value": "Waveform" },
-                "items": { "value": "Sine,Square,Triangle,Sawtooth" }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [500, 250],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "layout": { "value": 0 }
+                "label": {
+                    "value": "Waveform"
+                },
+                "items": {
+                    "value": "Sine,Square,Triangle,Sawtooth"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 250],
+            "position": [
+                900,
+                250
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                250
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
             }
         }
     },
     "connections": [
-        { "from": "knob1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "xypad1", "from_port": 0, "to": "panel1", "to_port": 1 },
-        { "from": "dropdown1", "from_port": 0, "to": "panel1", "to_port": 2 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "knob1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "xypad1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 1
+        },
+        {
+            "from": "dropdown1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 2
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UI Widgets — Knob, XYPad, Dropdown\n\nDemonstrates advanced UI widgets: rotary knob,\n2D XY pad, and dropdown menu. All rendered\ntogether in a single PanelTOP.",
-            "position": [-100.0, -150.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "UI Widgets \u00e2\u20ac\u201d Knob, XYPad, Dropdown\n\nDemonstrates advanced UI widgets: rotary knob,\n2D XY pad, and dropdown menu. All wired to WindowOUT panel port\nvia ContainerUI for interactive use.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -38,6 +38,7 @@ func _ready() -> void:
 	_search_edit.placeholder_text = "Search operators…"
 	_search_edit.clear_button_enabled = true
 	_search_edit.text_changed.connect(_on_search_changed)
+	_search_edit.gui_input.connect(_on_search_gui_input)
 	vbox.add_child(_search_edit)
 
 	# Tree
@@ -187,6 +188,52 @@ func _select_first_leaf(parent: TreeItem) -> bool:
 ## User types in the search bar.
 func _on_search_changed(new_text: String) -> void:
 	_populate_tree(new_text)
+
+
+## Intercepts Up/Down/Enter in the search LineEdit for tree navigation.
+func _on_search_gui_input(event: InputEvent) -> void:
+	if not (event is InputEventKey and event.pressed):
+		return
+	match event.keycode:
+		KEY_DOWN:
+			_select_next_leaf()
+			_search_edit.accept_event()
+		KEY_UP:
+			_select_prev_leaf()
+			_search_edit.accept_event()
+		KEY_ENTER, KEY_KP_ENTER:
+			_on_item_activated()
+			_search_edit.accept_event()
+
+
+## Selects the next selectable item below the current selection.
+func _select_next_leaf() -> void:
+	var selected := _tree.get_selected()
+	if selected == null:
+		_select_first_leaf(_tree.get_root())
+		return
+	var item := selected.get_next_visible()
+	while item:
+		if item.is_selectable(0):
+			item.select(0)
+			_tree.scroll_to_item(item)
+			return
+		item = item.get_next_visible()
+
+
+## Selects the previous selectable item above the current selection.
+func _select_prev_leaf() -> void:
+	var selected := _tree.get_selected()
+	if selected == null:
+		_select_first_leaf(_tree.get_root())
+		return
+	var item := selected.get_prev_visible()
+	while item:
+		if item.is_selectable(0):
+			item.select(0)
+			_tree.scroll_to_item(item)
+			return
+		item = item.get_prev_visible()
 
 
 ## User double-clicks or presses Enter on an operator item.

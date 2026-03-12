@@ -4,42 +4,76 @@
     "nodes": {
         "textedit1": {
             "type": "TextEditUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "placeholder": { "value": "Enter multi-line text..." },
-                "editable": { "value": true },
-                "wrap_mode": { "value": true },
-                "min_size": { "value": { "_type": "Vector2i", "x": 280, "y": 180 } }
-            }
-        },
-        "panel1": {
-            "type": "PanelTOP",
-            "position": [500, 100],
-            "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 320, "y": 220 } }
+                "placeholder": {
+                    "value": "Enter multi-line text..."
+                },
+                "editable": {
+                    "value": true
+                },
+                "wrap_mode": {
+                    "value": true
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 280,
+                        "y": 180
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 320, "y": 220 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 320,
+                        "y": 220
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "textedit1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "textedit1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextEdit UI — Basic\n\nMulti-line text editor. Accepts optional DAT input.\nState channels: lines, length.\nWord wrap toggleable via parameter.",
-            "position": [-100.0, -100.0],
-            "size": [380.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "TextEdit UI \u00e2\u20ac\u201d Basic\n\nMulti-line text editor. Accepts optional DAT input.\nState channels: lines, length.\nWord wrap toggleable via parameter.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }
