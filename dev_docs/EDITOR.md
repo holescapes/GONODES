@@ -104,8 +104,12 @@ reduced performance.
 > Full toolbar reference with controls and descriptions is in `help/editor.md`.
 
 The bottom toolbar is split into **two rows**:
-- **Row 1** — File & Project (New, Open, Save, Build, NRT, FPS, InfoLabel, Debug Log)
+- **Row 1** — File & Project (New, Open, Save, Build, NRT, FPS, InfoLabel, Debug Log, **Debug**)
 - **Row 2** — View & Graph (Previews, Perf, VRAM, Viewer, Stress Test, Minimap, Wire Style, Layout, Help)
+
+The **Debug** toggle (CheckButton) activates the debug panel and graph overlay.
+When enabled, four sub-toggles appear beside it: **#Order**, **Dim**,
+**Dirty**, **Sinks**, **Flow** — each controlling one overlay layer independently.
 
 Implementation: `gn_editor.gd::_setup_toolbar()` builds both rows. Each
 control stores its state via `_save_setting()` / `_load_setting()` for
@@ -119,7 +123,8 @@ persistence across sessions.
 Shortcuts are handled in `gn_editor.gd::_unhandled_key_input()`.  Node-level
 shortcuts (B=bypass, L=lock, H=help, V=viewer) are forwarded from the
 GraphEdit's key handler.  The Tab key is handled by `gn_graph_editor.gd`
-to open the operator palette.
+to open the operator palette.  **F2** toggles the Debug panel and overlay
+(equivalent to clicking the Debug toolbar button).
 
 
 ## Expression Value Preview — Implementation
@@ -207,6 +212,190 @@ timing, and correct GPU render ordering in a single frame.
 | Bypassed node | Pass-through only (no `_cook()`) |
 
 
+## Debug Window & Graph Overlay
+
+The debug system gives real-time visibility into the cook engine's internal
+state directly from the editor.  It consists of two components: a **docked
+panel** below the graph canvas and a **graph overlay** drawn on top of the
+nodes.
+
+### Activating Debug Mode
+
+- **Toolbar:** Click the **Debug** toggle (Row 1) or press **F2**.
+- **Per-layer toggles:** When Debug is on, five sub-toggles appear:
+  `#Order` · `Dim` · `Dirty` · `Sinks` · `Flow`.  Each controls one overlay layer
+  independently — think of them as map layers you can turn on or off.
+- **State persistence:** Debug toggle and individual layer states are saved
+  to `user://gonodes_settings.cfg` and restored on next launch.
+
+### Debug Panel (3 Tabs)
+
+The panel (`GNDebugPanel`) docks below the graph canvas and updates every
+6 frames (throttled to avoid UI overhead).  Only the currently visible tab
+is refreshed.
+
+#### Tab 1 — Cook Chain
+
+| Column | Description |
+|--------|-------------|
+| **#** | Topological order index (cook execution order) |
+| **Node** | Node ID — double-click to select and scroll the graph to it |
+| **Family** | Operator family, color-coded (TOP, CHOP, SOP, etc.) |
+| **Status** | `✓ cooked`, `— cached`, `✗ error`, or `inactive` |
+| **Cook (ms)** | Per-node cook time. Green < 1 ms, yellow < 5 ms, red ≥ 5 ms |
+| **Active** | Whether the node is in the current active chain |
+
+Inactive nodes are dimmed in the table.  Click the "Sort by Time" option
+to surface the most expensive nodes.
+
+**Use case — Performance profiling:** Open the Cook Chain tab to see which
+nodes are taking the longest.  Sort by cook time to find bottlenecks.  If a
+node shows "cached" it was clean this frame and did zero work.  Nodes marked
+"inactive" are in disconnected subgraphs — they consume no cook time at all.
+
+#### Tab 2 — Active Chains
+
+A tree rooted at each **sink** node (WindowOUT, viewers, Force Active
+nodes).  Expanding a sink reveals all its upstream dependencies as a
+hierarchical tree:
+
+```
+▼ window1 (WindowOUT)  0.12 ms
+  ▼ comp1 (CompositeTOP)  2.31 ms
+    ▼ noise1 (NoiseTOP)  ⟳  0.45 ms
+    ▼ text1 (TextTOP)  cached
+```
+
+- `⟳` marks time-dependent nodes (they re-cook every frame).
+- Each row shows family color and cook time.
+- Cached nodes (not dirty, zero cook time) show "cached" instead of 0.00 ms.
+
+**Use case — Understanding data flow:** When you have complex patches with
+multiple sinks, this tab shows exactly which nodes feed each output.  If
+a WindowOUT is showing stale data, check whether the expected upstream chain
+is present.  Missing a node?  It's probably not connected or bypassed.
+
+#### Tab 3 — Parameter References
+
+| Column | Description |
+|--------|-------------|
+| **Source Node** | The node that owns the parameter with an expression |
+| **Parameter** | The parameter name |
+| **Expression** | The expression text |
+| **References** | Node IDs referenced (e.g., `→ lfo1, noise1`) |
+| **Eval (μs)** | Expression evaluation time in microseconds |
+
+Scans all expression-mode parameters and extracts:
+- **Read references:** `par()`, `chop()`, `chopf()`, `chopi()`, `chops()`,
+  `op()`, `top()`, `sop()`, `dat()`, `mat()` calls.
+- **Write references:** `set_par()` calls that modify parameters on other
+  nodes.
+
+**Use case — Debugging expressions:** If a parameter isn't updating as
+expected, open this tab to verify which nodes it references.  Check the
+evaluation time — if it's unusually high, the expression may be doing
+expensive work every frame.  Double-click any row to select and scroll to
+the source node.
+
+### Graph Overlay (5 Layers)
+
+The overlay (`GNDebugOverlay`) draws directly on the graph canvas, on top
+of the nodes and wires.
+
+#### Layer 1 — Cook Order Badges (`#Order`)
+
+A small black pill with `#N` at the top-left of each node showing its
+topological cook order.  `#1` cooks first, `#N` cooks last.
+
+**Use case:** Verify that nodes cook in the order you expect.  If a
+downstream node has a lower number than its input, there's a graph topology
+problem.
+
+#### Layer 2 — Active Chain Dimming (`Dim`)
+
+Nodes **not** in the active chain are drawn at 40% opacity.  Active nodes
+remain fully opaque.
+
+**Use case:** Instantly see which parts of your graph are actually being
+cooked.  Greyed-out nodes are disconnected from any sink and doing nothing.
+Useful for identifying orphaned subgraphs or confirming that bypass is
+working correctly.
+
+#### Layer 3 — Dirty Propagation Flash (`Dirty`)
+
+Nodes that were marked dirty this frame get an **orange border flash** that
+fades out over ~0.3 seconds.  You see the "dirty wave" ripple downstream
+from whatever triggered it — a parameter change, a time-dependent node
+ticking, or an expression reevaluation.
+
+**Use case:** The #1 debugging question in any node graph is "why is this
+node cooking?"  Dirty propagation directly answers that.  When you change a
+parameter on one node and see orange borders ripple through half the graph,
+you understand the blast radius.  If a node is cooking every frame but you
+don't expect it to, watch for what's marking it dirty — likely a
+time-dependent upstream node.
+
+#### Layer 4 — Sink Labels (`Sinks`)
+
+Each sink node gets a **colored halo ring** (cycling through cyan, orange,
+green, magenta, yellow).  Every upstream node in that sink's chain gets a
+small **colored dot** matching its sink.
+
+**Use case:** When you have multiple output paths (e.g., two WindowOUTs
+driving different displays), this layer shows which nodes belong to which
+output.  Nodes feeding multiple sinks get multiple colored dots.
+
+#### Layer 5 — Data Flow Annotations (`Flow`)
+
+Small labels at the midpoint of each wire showing the **data dimensions**
+flowing through that connection.  Labels are color-coded by family.
+
+| Data Type | Label Format | Example |
+|-----------|-------------|---------|
+| TOP (texture) | `W×H` | `512×512` |
+| IMG (cpu image) | `W×H` | `256×256` |
+| CHOP (channels) | `Nch` or `Nch×L` | `3ch×128` |
+| SOP (geometry) | `Nv` | `2400v` |
+| DAT (table) | `R×C` | `10×5` |
+
+Single-sample CHOP channels (length=1) show just `3ch` without the sample
+count.
+
+**Use case:** Instantly see what data is flowing through every wire without
+clicking individual nodes.  Spot resolution mismatches (a 1024×1024 texture
+feeding into a 256×256 composite), find surprisingly large CHOP channels, or
+verify that a SOP is producing the expected vertex count.
+
+### Implementation Details
+
+- **Panel:** `GNDebugPanel` (`addons/gonodes/ui/gn_debug_panel.gd`) — 3-tab
+  `PanelContainer` with `TabContainer` + `Tree` widgets.  Each Tree row
+  stores the `node_id` as metadata for click-to-navigate.  Emits
+  `node_selected(node_id)` on double-click, which the editor routes to
+  `gn_graph_editor.scroll_to_node()`.
+- **Overlay:** `GNDebugOverlay` (`addons/gonodes/ui/gn_debug_overlay.gd`) —
+  `Control` node added as child of `GraphEdit`.  Uses `_draw()` for badges,
+  dirty flash borders, data flow pills, and sink halos.  Active dimming
+  modifies `GNNodeView.modulate` directly (reset to `Color.WHITE` when debug
+  mode is disabled).
+- **Cook engine integration:** `GNCookEngine.last_topo_order` caches the
+  topological sort result each frame.  The overlay and panel read this
+  property — they never modify engine state.
+- **Dirty flash:** `_dirty_flash` dictionary maps `node_id → alpha` (1.0 →
+  0.0).  Each frame, newly dirty nodes are set to 1.0, then all entries
+  fade by `delta * 3.3`.  Orange border rect drawn with fading alpha.
+- **Data flow labels:** Each wire is annotated by reading
+  `from_node.get_output_data(port)` and formatting the result based on
+  data type (resolution, channel count, vertex count, table dimensions).
+- **Coordinate conversion:** `_graph_to_overlay()` converts graph-space
+  coordinates (node `position_offset`) to overlay screen space, accounting
+  for zoom and scroll offset.
+- **Editor/engine separation:** Both debug files live in `ui/`.  They import
+  nothing from `core/` at the module level — references to `GNCookEngine`
+  and `GNNetwork` are set at runtime by `gn_editor.gd`.  Hard Rule 25.20
+  is fully respected.
+
+
 ## Settings Persistence
 
 Editor state is saved to `user://gonodes_settings.cfg` via
@@ -268,4 +457,6 @@ their own help patches too (see Â§28.10 in the context file).
 | `addons/gonodes/ui/gn_graph_editor.gd`  | Graph canvas (GraphEdit)        |
 | `addons/gonodes/ui/gn_param_inspector.gd`| Right-panel parameter inspector|
 | `addons/gonodes/ui/gn_export_dialog.gd` | Quick Build dialog              |
+| `addons/gonodes/ui/gn_debug_panel.gd`   | Debug panel (cook chain, active chains, param refs) |
+| `addons/gonodes/ui/gn_debug_overlay.gd` | Debug graph overlay (5 toggleable layers) |
 | `addons/gonodes/core/gn_patch_exporter.gd`| Build/copy logic              |

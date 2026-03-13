@@ -99,6 +99,13 @@ var _consumer_counts: Dictionary = {}
 ## When true, _consumer_counts needs recomputing.
 var _consumer_counts_dirty: bool = true
 
+## Last computed topological order — cached each cook frame for debug UI access.
+var last_topo_order: Array[GNNode] = []
+
+## Node IDs that were dirty this frame (snapshot taken after propagation,
+## before cooking clears the flags). Used by debug overlay for dirty flash.
+var last_dirty_ids: Dictionary = {}
+
 ## Cached compute shader availability flag.  Checked once on the first cook
 ## frame and cached for the lifetime of the engine.  False on the Compatibility
 ## renderer (OpenGL 3.3 / WebGL2) where RenderingDevice is not available.
@@ -386,6 +393,7 @@ func cook_frame(delta: float) -> void:
 
 	# Step 2: Get topological order
 	var topo_order: Array[GNNode] = network.get_topological_order()
+	last_topo_order = topo_order
 
 	# Step 3: Propagate dirty flags downstream BEFORE cooking.
 	# This ensures all affected nodes are marked dirty in one pass,
@@ -393,6 +401,12 @@ func cook_frame(delta: float) -> void:
 	for node in topo_order:
 		if node.dirty:
 			network.propagate_dirty(node.id)
+
+	# Step 3a: Snapshot dirty set for debug overlay (before cooking clears flags).
+	last_dirty_ids.clear()
+	for node in topo_order:
+		if node.dirty:
+			last_dirty_ids[node.id] = true
 
 	# Step 3b: Recompute active chain only when topology or sinks changed.
 	if _active_set_dirty:

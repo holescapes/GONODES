@@ -58,6 +58,15 @@ var viewer_panel: GNViewerPanel = null
 ## Log panel (Textport) — collapsible, subscribes to GNLogger.
 var log_panel: GNLogPanel = null
 
+## Debug panel — docked tabs for cook chain, active chains, parameter references.
+var debug_panel: GNDebugPanel = null
+
+## Debug toggle button on toolbar.
+var debug_toggle: CheckButton = null
+
+## Container for per-layer debug toggles (visible when debug is on).
+var _debug_layers_container: HBoxContainer = null
+
 ## Floating help windows.
 var _help_windows: Array = []
 
@@ -103,6 +112,7 @@ func _ready() -> void:
 	_setup_file_dialogs()
 	_setup_toolbar()
 	_setup_log_panel()
+	_setup_debug_panel()
 
 	# Persist split-container sizes when the user drags them
 	hsplit.dragged.connect(func(offset: int): _save_setting("hsplit_offset", offset))
@@ -216,6 +226,67 @@ func _layout_log_panel() -> void:
 		hsplit.offset_bottom = -(_TOOLBAR_HEIGHT)
 
 
+## Creates the debug panel (docked below graph, hidden by default).
+func _setup_debug_panel() -> void:
+	debug_panel = GNDebugPanel.new()
+	debug_panel.visible = false
+	debug_panel.cook_engine = cook_engine
+	debug_panel.network = network
+	debug_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	debug_panel.node_selected.connect(_on_debug_node_selected)
+	add_child(debug_panel)
+	move_child(debug_panel, hsplit.get_index() + 1)
+
+	# Wire cook engine + network refs to the graph overlay
+	if graph_editor.debug_overlay != null:
+		graph_editor.debug_overlay.cook_engine = cook_engine
+		graph_editor.debug_overlay.network = network
+
+
+## Handles debug toggle — shows/hides debug panel and overlay.
+func _on_debug_toggled(enabled: bool) -> void:
+	debug_panel.visible = enabled
+	graph_editor.debug_overlay.set_debug_enabled(enabled)
+	if _debug_layers_container != null:
+		_debug_layers_container.visible = enabled
+	_layout_debug_panel()
+	_save_setting("debug_enabled", enabled)
+
+
+## Handles individual debug layer toggles.
+func _on_debug_layer_toggled(enabled: bool, layer_idx: int) -> void:
+	var overlay := graph_editor.debug_overlay
+	if overlay == null:
+		return
+	match layer_idx:
+		0: overlay.show_cook_order = enabled
+		1: overlay.show_active_dimming = enabled
+		2: overlay.show_dirty_propagation = enabled
+		3: overlay.show_sink_labels = enabled
+		4: overlay.show_data_flow = enabled
+	overlay.queue_redraw()
+	if layer_idx == 1:
+		overlay._apply_active_dimming()
+
+
+## Recalculates layout when debug panel visibility changes.
+func _layout_debug_panel() -> void:
+	var bottom_offset := _TOOLBAR_HEIGHT
+	if log_panel.visible:
+		bottom_offset += _LOG_PANEL_HEIGHT
+	if debug_panel.visible:
+		debug_panel.offset_top = -(bottom_offset + 180.0)
+		debug_panel.offset_bottom = -(bottom_offset)
+		bottom_offset += 180.0
+	hsplit.offset_bottom = -(bottom_offset)
+
+
+## Debug panel click-to-select: select node in graph and scroll to it.
+func _on_debug_node_selected(node_id: String) -> void:
+	_on_graph_node_selected(node_id)
+	graph_editor.scroll_to_node(node_id)
+
+
 ## Builds the UI-level sink list and pushes it to the cook engine.
 ## Called only when viewer targets actually change (not per-frame).
 ## Structural sinks (is_sink nodes) are auto-detected by the engine.
@@ -292,6 +363,12 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 
 	# Update warning/error status badges on all nodes
 	graph_editor.update_status_badges()
+
+	# Update debug overlay and panel
+	if graph_editor.debug_overlay != null:
+		graph_editor.debug_overlay.update_overlay()
+	if debug_panel != null:
+		debug_panel.update_debug_info()
 
 
 func _on_cook_error(node_id: String, error_msg: String) -> void:
@@ -737,6 +814,37 @@ func _setup_toolbar() -> void:
 	vram_toggle.toggled.connect(func(on: bool): _vram_enabled = on)
 	row2.add_child(vram_toggle)
 
+	# Debug overlay + panel toggle
+	debug_toggle = CheckButton.new()
+	debug_toggle.text = "Debug"
+	debug_toggle.tooltip_text = "Show debug overlay (cook order, active chain, dirty flash, data flow) + debug panel (F2)"
+	debug_toggle.button_pressed = false
+	debug_toggle.toggled.connect(_on_debug_toggled)
+	row2.add_child(debug_toggle)
+
+	# Debug layer toggles (only visible when debug is on)
+	_debug_layers_container = HBoxContainer.new()
+	_debug_layers_container.add_theme_constant_override("separation", 2)
+	_debug_layers_container.visible = false
+
+	var layer_names := ["#Order", "Dim", "Dirty", "Sinks", "Flow"]
+	var layer_tooltips := [
+		"Cook order badges (#1, #2, …)",
+		"Dim inactive nodes to 40% opacity",
+		"Orange flash on nodes dirtied this frame",
+		"Sink halo rings + upstream colored dots",
+		"Data dimensions on wires (resolution, channels, vertices)",
+	]
+	for i in range(5):
+		var cb := CheckButton.new()
+		cb.text = layer_names[i]
+		cb.tooltip_text = layer_tooltips[i]
+		cb.button_pressed = true
+		cb.add_theme_font_size_override("font_size", 11)
+		cb.toggled.connect(_on_debug_layer_toggled.bind(i))
+		_debug_layers_container.add_child(cb)
+	row2.add_child(_debug_layers_container)
+
 	row2.add_child(VSeparator.new())
 
 	# Open Viewer button
@@ -834,6 +942,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F1:
 			_toggle_main_help_window()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F2:
+			debug_toggle.button_pressed = not debug_toggle.button_pressed
 			get_viewport().set_input_as_handled()
 
 
@@ -1417,6 +1528,12 @@ func _restore_ui_state() -> void:
 
 	var saved_vsplit: int = _load_setting("vsplit_offset", 0)
 	right_panel.split_offset = saved_vsplit
+
+	# Debug overlay + panel
+	var saved_debug: bool = _load_setting("debug_enabled", false)
+	debug_toggle.set_pressed_no_signal(saved_debug)
+	if saved_debug:
+		_on_debug_toggled(true)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -59,6 +59,23 @@ chop(\"ramp1\", \"falloff\")             # Read a RampCHOP channel as a float```
 
 You can also **bind** parameters directly (zero-overhead link) or use **CHOP export** to push one signal to many parameters at once.
 
+### Debugging & Profiling
+
+Press **F2** (or click the **Debug** toolbar button) to open the debug system:
+
+- **Debug Panel** — a docked panel below the graph with three tabs:
+  - **Cook Chain** — every node in topological cook order, with per-node cook time, status, and active/inactive flag. Sort by cook time to find bottlenecks.
+  - **Active Chains** — tree view rooted at each sink (WindowOUT, viewers), showing all upstream dependencies. Instantly see what feeds each output.
+  - **Param References** — all expression-mode parameters with their cross-references (`chop()`, `par()`, `set_par()`) and evaluation time.
+- **Graph Overlay** — five toggleable layers drawn directly on the canvas (like map layers you turn on/off):
+  - **#Order** — cook order badges on each node
+  - **Dim** — inactive nodes greyed out at 40% opacity
+  - **Dirty** — orange border flash on nodes dirtied this frame (see the dirty wave ripple downstream)
+  - **Sinks** — colored halo rings on sinks, colored dots on their upstream chains
+  - **Flow** — data dimensions on every wire (e.g., `512×512` for textures, `3ch×128` for channels, `2400v` for geometry)
+
+Double-click any row in the debug panel to select and scroll to that node. All debug state persists across sessions.
+
 ---
 
 ## Project Status

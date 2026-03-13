@@ -107,6 +107,9 @@ var _pre_move_positions: Dictionary = {}
 ## Whether expression reference lines are visible.
 var expr_refs_visible: bool = true
 
+## Debug overlay for cook order, active chain dimming, reference arrows, sink labels.
+var debug_overlay: GNDebugOverlay = null
+
 ## Dirty flag for expression reference scanning — set true when expressions
 ## may have changed (node add/remove, cook). Avoids a full regex rescan
 ## every frame when nothing has changed.
@@ -239,6 +242,11 @@ func _ready() -> void:
 	_expr_ref_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_expr_ref_overlay.draw.connect(_draw_expr_ref_lines)
 	add_child(_expr_ref_overlay)
+
+	# Create debug overlay (cook order badges, active dimming, ref arrows, sink labels)
+	debug_overlay = GNDebugOverlay.new()
+	debug_overlay.graph_editor = self
+	add_child(debug_overlay)
 
 	GNLogger.info("GraphEditor", "Graph editor ready")
 
@@ -970,6 +978,16 @@ func update_status_badges() -> void:
 	for view_name in _node_views:
 		var view: GNNodeView = _node_views[view_name]
 		view.update_status_badge()
+
+
+## Scrolls the graph view to center on the given node.
+func scroll_to_node(node_id: String) -> void:
+	var view: GNNodeView = _node_views.get(node_id, null)
+	if view == null:
+		return
+	var center := view.position_offset + view.size / 2.0
+	var viewport_center := size / 2.0 / zoom
+	scroll_offset = (center - viewport_center) * zoom
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

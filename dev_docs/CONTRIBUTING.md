@@ -46,7 +46,7 @@ addons/gonodes/
 │   ├── comp/       # Component operators (3D scene)
 │   ├── mat/        # Material operators
 │   └── img/        # CPU image operators
-├── ui/             # Editor GUI (graph, inspector, palette, viewer)
+├── ui/             # Editor GUI (graph, inspector, palette, viewer, debug panel/overlay)
 ├── help/           # User-facing help — .md guides + .gnpatch examples
 │   ├── chop/       # CHOP example patches
 │   ├── top/        # TOP example patches
@@ -560,6 +560,25 @@ Any node can have user-added "spare" parameters via right-click → "Add Spare P
 - Are accessible via the same `get_parameter_value()` / `set_parameter_value()` API as regular params.
 - Serialize in `.gnpatch` files under a `"spare_parameters"` key per node.
 - Render in the inspector under a collapsible "Spare Parameters" section.
+
+### Debug System Architecture
+
+The debug system provides cook engine visibility without violating
+editor/engine separation (Hard Rule 25.20).  Two UI-only files:
+
+- `gn_debug_panel.gd` — 3-tab docked panel (Cook Chain, Active Chains, Param Refs)
+- `gn_debug_overlay.gd` — 5-layer canvas overlay (cook order, dimming, dirty flash, sinks, data flow)
+
+Both live in `ui/` and receive `GNCookEngine` / `GNNetwork` references at
+runtime from `gn_editor.gd`.  They **read** engine properties
+(`last_topo_order`, `_active_set`, `active_sinks`, connections, parameters)
+but **never modify** engine state.  The only engine-side addition was
+`GNCookEngine.last_topo_order` — a cached copy of the topological sort
+result exposed for debug consumers.
+
+If you add new engine telemetry, expose it as a read-only property on the
+engine class and consume it from the debug UI.  Never add UI imports to
+`core/` or `operators/`.
 
 ### Custom Operator Assets (.gnasset)
 
