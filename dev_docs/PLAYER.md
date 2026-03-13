@@ -1,4 +1,4 @@
-# GONODES Player â€” Internals
+# GONODES Player — Internals
 
 > **Audience:** Contributors, deployment engineers, advanced users.  
 > **User-facing version:** `addons/gonodes/help/player.md` (accessible via in-editor Help window)
@@ -12,9 +12,9 @@ For basic usage (config.json, hotkeys, Quick Build), see the user-facing help.
 
 ```
 GONODESPlayer.exe
-  â”œâ”€â”€ config.json        â† settings (patch path)
-  â”œâ”€â”€ MyShow.gnpatch     â† the patch file
-  â””â”€â”€ MyShow/            â† project assets folder (optional)
+  ├── config.json        ← settings (patch path)
+  ├── MyShow.gnpatch     ← the patch file
+  └── MyShow/            ← project assets folder (optional)
 ```
 
 **Implementation (`scenes/player_main.gd`):**
@@ -39,9 +39,9 @@ GONODESPlayer.exe
 
 Parsed by `player_main.gd::_load_config()` via `JSON.parse_string()`.
 Only the `patch` field is currently used. Additional fields are silently
-ignored â€” future-proof for adding e.g. `log_level`, `headless` flags.
+ignored — future-proof for adding e.g. `log_level`, `headless` flags.
 
-VSync and FPS are intentionally absent â€” they're per-window settings
+VSync and FPS are intentionally absent — they're per-window settings
 controlled by each WindowOUT node. A global override would conflict with
 multi-window setups.
 
@@ -68,36 +68,36 @@ Handled in `player_main.gd::_unhandled_key_input()`:
 | F11 | Fullscreen | Toggles `DisplayServer.window_set_mode()` |
 
 
-## Rendering Backend â€” Internals
+## Rendering Backend — Internals
 
 The Player uses automatic renderer selection (same as the editor):
-Forward+ (Vulkan/D3D12) â†’ Compatibility (OpenGL 3.3) fallback.
+Forward+ (Vulkan/D3D12) → Compatibility (OpenGL 3.3) fallback.
 
 **Why the fallback works:** The `fallback_to_opengl3 = true` project setting
 is baked into the `.pck` at export time. Godot's runtime checks GPU
 capabilities at startup and selects the appropriate renderer before any
-scene loads. This is a Godot engine feature â€” no GONODES code involved.
+scene loads. This is a Godot engine feature — no GONODES code involved.
 
 **D3D12 on Windows:** The project uses `rendering_device/driver.windows="d3d12"`
 in project.godot. The D3D12 Agility SDK is bundled in the export via
 `export_d3d12=1`. This ensures the D3D12 runtime works on any Windows 10/11
 machine regardless of system D3D12 version.
 
-### No renderer in config.json â€” Design Decision
+### No renderer in config.json — Design Decision
 
 A global renderer override is intentionally omitted:
 - Forward+ fallback covers all practical scenarios automatically
 - A user-facing config option would risk crashes (e.g. requesting Vulkan on a machine without it)
 - Power users can still override via `--rendering-method` CLI
 
-### No VSync/FPS in config.json â€” Design Decision
+### No VSync/FPS in config.json — Design Decision
 
 VSync and frame-rate are **per-window** settings controlled by each WindowOUT.
 A single patch can have multiple WindowOUTs with independent VSync.
 A global config toggle would conflict with per-window control.
 
 
-## Window Management â€” Implementation
+## Window Management — Implementation
 
 The Player does **not** manage display windows directly.  Each WindowOUT
 creates and owns its OS window via `DisplayServer.create_sub_window()`.
@@ -105,7 +105,7 @@ creates and owns its OS window via `DisplayServer.create_sub_window()`.
 **Auto-open implementation:** In `player_main.gd::_setup_network()`, after
 loading the patch, the Player iterates all nodes and calls
 `node.parameters["open"].set_value(true)` on every WindowOUT instance.
-This is a one-time override â€” the editor's saved `open` state is ignored.
+This is a one-time override — the editor's saved `open` state is ignored.
 
 Each WindowOUT handles its own window lifecycle: creation, resize, move,
 fullscreen toggle, and destruction. The Player has no window management
@@ -124,7 +124,7 @@ copies the pre-built binary + `.pck` + patch + assets + config.json to the
 output directory.
 
 Template binaries must be pre-built via `scripts/build_templates.ps1` or
-`.sh`. Rebuild whenever Godot is upgraded â€” the binary and `.pck` must be
+`.sh`. Rebuild whenever Godot is upgraded — the binary and `.pck` must be
 from the same Godot version.
 
 
@@ -136,7 +136,7 @@ from the same Godot version.
 | `scenes/player_main.tscn`   | Player scene (Control root)          |
 | `addons/gonodes/core/gn_patch_exporter.gd` | Quick Build copy logic  |
 
-## Headless / Windowless Operation â€” Internals
+## Headless / Windowless Operation — Internals
 
 The Player runs fine without WindowOUTs. The cook engine keeps chains alive
 via the `is_sink` mechanism on file-save operators and `Force Active` scripts.
@@ -149,14 +149,14 @@ starts from all nodes where `is_sink == true`. This includes:
 - Script operators with `Force Active = ON` (parameter-driven)
 
 Without any sink nodes, the cook engine has an empty active set and no
-nodes cook â€” the Player idles at near-zero CPU.
+nodes cook — the Player idles at near-zero CPU.
 
 
 ## Troubleshooting
 
 | Problem                       | Solution                              |
 |-------------------------------|---------------------------------------|
-| Black screen, no windows open | Ensure your patch has at least one WindowOUT â€” the Player auto-opens all of them |
+| Black screen, no windows open | Ensure your patch has at least one WindowOUT — the Player auto-opens all of them |
 | "No patch file specified"     | Check that `config.json` exists next to the exe and has a valid `patch` path |
 | Poor performance              | Try `--rendering-method gl_compatibility` for lighter GPU load |
-| Player crashes on launch      | GPU may not support Vulkan â€” the fallback should handle this, but try forcing Compatibility via CLI |
+| Player crashes on launch      | GPU may not support Vulkan — the fallback should handle this, but try forcing Compatibility via CLI |

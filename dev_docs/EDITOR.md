@@ -1,11 +1,11 @@
-# GONODES Editor â€” Internals
+# GONODES Editor — Internals
 
 > **Audience:** Contributors and plugin developers.  
 > **User-facing version:** `addons/gonodes/help/editor.md` (accessible via in-editor Help window)
 
 This document covers editor architecture and implementation details beyond
 what the user-facing help covers.  For keyboard shortcuts, toolbar layout,
-and general usage, see the in-editor Help window (F1 â†’ Editor Guide).
+and general usage, see the in-editor Help window (F1 → Editor Guide).
 
 
 ## Launching
@@ -27,7 +27,7 @@ automatically falls back to **Compatibility** (OpenGL 3.3) thanks to the
 | macOS    | MoltenVK    | OpenGL 3.3        |
 | Linux    | Vulkan      | OpenGL 3.3        |
 
-There is no manual renderer selection in the editor â€” it is fully automatic.
+There is no manual renderer selection in the editor — it is fully automatic.
 Power users can force a specific renderer from the command line:
 
 ```
@@ -104,8 +104,8 @@ reduced performance.
 > Full toolbar reference with controls and descriptions is in `help/editor.md`.
 
 The bottom toolbar is split into **two rows**:
-- **Row 1** â€” File & Project (New, Open, Save, Build, NRT, FPS, InfoLabel, Debug Log)
-- **Row 2** â€” View & Graph (Previews, Perf, VRAM, Viewer, Stress Test, Minimap, Wire Style, Layout, Help)
+- **Row 1** — File & Project (New, Open, Save, Build, NRT, FPS, InfoLabel, Debug Log)
+- **Row 2** — View & Graph (Previews, Perf, VRAM, Viewer, Stress Test, Minimap, Wire Style, Layout, Help)
 
 Implementation: `gn_editor.gd::_setup_toolbar()` builds both rows. Each
 control stores its state via `_save_setting()` / `_load_setting()` for
@@ -122,23 +122,23 @@ GraphEdit's key handler.  The Tab key is handled by `gn_graph_editor.gd`
 to open the operator palette.
 
 
-## Expression Value Preview â€” Implementation
+## Expression Value Preview — Implementation
 
 When a parameter is in **Expression mode** (the "E" badge), a green
-`â†’ value` label appears in the inspector.
+`→ value` label appears in the inspector.
 
 **Implementation detail:** The preview is updated in
 `gn_param_inspector.gd::_update_expression_previews()` which is called
-each cook frame.  The label reads `GNParameter.resolved_value` â€” this
+each cook frame.  The label reads `GNParameter.resolved_value` — this
 is the last evaluated result cached by the cook engine.  Error state
-(`â†’ err` in red) comes from `GNParameter.expression_error`.
+(`→ err` in red) comes from `GNParameter.expression_error`.
 
-Expression text is preserved across CONSTANT â†” EXPRESSION mode toggles.
+Expression text is preserved across CONSTANT ↔ EXPRESSION mode toggles.
 The `GNParameter` stores `_expression_string` separately from `_value`.
 Only an explicit `reset_to_defaults()` clears the expression.
 
 
-## Script Operators â€” Force Active (Implementation)
+## Script Operators — Force Active (Implementation)
 
 All four Script operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG)
 have a **Force Active** toggle.  When enabled, the node's `is_sink`
@@ -148,10 +148,10 @@ the active chain BFS even without a downstream WindowOUT or file-save node.
 **Implementation in `GNCookEngine`:** During `_compute_active_set()`, BFS
 starts from nodes where `is_sink == true`. Script ops with Force Active
 report `is_sink = true` via their parameter callback. The cook engine
-doesn't special-case scripts â€” it's the generic `is_sink` mechanism.
+doesn't special-case scripts — it's the generic `is_sink` mechanism.
 
 
-## Quick Build â€” Implementation Details
+## Quick Build — Implementation Details
 
 > User-facing Quick Build guide is in `help/building.md`.
 
@@ -159,7 +159,7 @@ The Build button opens `GNExportDialog` which delegates to
 `GNPatchExporter` (`addons/gonodes/core/gn_patch_exporter.gd`).
 
 **Binary search order:** The exporter looks for `GONODESPlayer` in:
-1. `templates/<platform>/` (primary â€” built by build scripts)
+1. `templates/<platform>/` (primary — built by build scripts)
 2. Exe directory
 3. Project root
 4. `player/` subfolder
@@ -167,7 +167,7 @@ The Build button opens `GNExportDialog` which delegates to
 
 **config.json generation:** The exporter writes a minimal JSON with the
 patch filename. All runtime settings (renderer, VSync, FPS) are baked
-into the patch and Player binary â€” no config overrides needed.
+into the patch and Player binary — no config overrides needed.
 
 ### Why there's no renderer / VSync / FPS limit in the Build dialog
 
@@ -177,25 +177,25 @@ into the patch and Player binary â€” no config overrides needed.
   Each WindowOUT has its own `vsync` and frame-rate parameters.
 
 
-## Cook Model â€” Deep Dive
+## Cook Model — Deep Dive
 
 > User-facing overview is in `help/cook_engine.md`. For cross-system comparison
 > with TouchDesigner/Houdini, see `TD_HOUDINI_COMPARISON.md`.
 
-GONODES uses a **demand-driven flat-pass** cook architecture â€” a hybrid of
+GONODES uses a **demand-driven flat-pass** cook architecture — a hybrid of
 push and pull that avoids unnecessary work while keeping execution simple.
 
 Each frame, the cook engine:
 
 1. Marks time-dependent nodes dirty
 2. Propagates dirty flags downstream in one pass
-3. Computes the **active chain** â€” only nodes feeding a live sink (viewer,
+3. Computes the **active chain** — only nodes feeding a live sink (viewer,
    WindowOUT, `is_sink` operator) via BFS upstream from sinks
 4. Cooks dirty + active nodes in topological order (single linear pass)
-5. Skips everything else â€” inactive subgraphs and clean nodes are untouched
+5. Skips everything else — inactive subgraphs and clean nodes are untouched
 
 This achieves the same lazy evaluation as pull-based systems (Houdini,
-TouchDesigner) without recursive descent â€” no deep call stacks, predictable
+TouchDesigner) without recursive descent — no deep call stacks, predictable
 timing, and correct GPU render ordering in a single frame.
 
 | Scenario | Cooked? |
@@ -218,24 +218,24 @@ Editor state is saved to `user://gonodes_settings.cfg` via
 - Last opened patch path
 
 
-## Help System â€” Architecture
+## Help System — Architecture
 
 Every operator has built-in help accessible via the **`?` button** or
-right-click â†’ **Help**.  The system has two layers:
+right-click → **Help**.  The system has two layers:
 
 ### Per-Node Help Window (`gn_help_window.gd`)
 
 Auto-generates docs from operator metadata:
-- `node_description` â†’ description text
-- `input_ports` / `output_ports` â†’ port table (name, family, description)
-- `parameters` Dictionary â†’ parameter table (type, default, range, tooltip)
-- `.gnpatch` files from `addons/gonodes/help/<family>/` â†’ "Open Example" buttons
+- `node_description` → description text
+- `input_ports` / `output_ports` → port table (name, family, description)
+- `parameters` Dictionary → parameter table (type, default, range, tooltip)
+- `.gnpatch` files from `addons/gonodes/help/<family>/` → "Open Example" buttons
 
-Discovery is automatic â€” scans help directories at runtime, no manifest.
+Discovery is automatic — scans help directories at runtime, no manifest.
 
 ### Main Help Window (`gn_main_help_window.gd`)
 
-Centralized reference hub (F1 or toolbar "ðŸ“– Help"):
+Centralized reference hub (F1 or toolbar "📖 Help"):
 - HSplitContainer: sidebar Tree (240px, searchable) + RichTextLabel content pane
 - Markdown files rendered to BBCode via `GNMarkdownRenderer`
 - Operator tree built dynamically from `GNExtensionRegistry.get_operator_registry_sectioned()`

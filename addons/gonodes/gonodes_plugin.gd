@@ -5,7 +5,10 @@ extends EditorPlugin
 
 
 func _enter_tree() -> void:
-	# TODO: Register custom node types, dock panels, autoloads
+	# Ensure OpenGL fallback is enabled so Compatibility renderer works on old GPUs/WebGL2.
+	# Godot strips this from project.godot when it matches the default, so we enforce it here.
+	ProjectSettings.set_setting("rendering/rendering_device/fallback_to_opengl3", true)
+	ProjectSettings.save()
 	print("GONODES plugin loaded (v0.1.0)")
 
 

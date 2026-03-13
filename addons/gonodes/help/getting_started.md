@@ -12,13 +12,13 @@ GONODES organizes operators into families based on the type of data they process
 
 | Family   | Purpose                                           |
 |----------|--------------------------------------------------|
-| **TOP**  | Texture operators â€” shader-based image generation and compositing |
-| **IMG**  | Image operators â€” CPU-side image processing       |
-| **CHOP** | Channel operators â€” time-based data and animation |
-| **DAT**  | Data operators â€” tables, text, and structured data |
-| **SOP**  | Surface operators â€” 3D geometry generation        |
-| **MAT**  | Material operators â€” shader materials for 3D      |
-| **COMP** | Component operators â€” 3D scene objects and sub-networks || **UI** | User interface operators — interactive 2D widgets for control panels || **OUT** | Final output sinks for rendering and display    |
+| **TOP**  | Texture operators — shader-based image generation and compositing |
+| **IMG**  | Image operators — CPU-side image processing       |
+| **CHOP** | Channel operators — time-based data and animation |
+| **DAT**  | Data operators — tables, text, and structured data |
+| **SOP**  | Surface operators — 3D geometry generation        |
+| **MAT**  | Material operators — shader materials for 3D      |
+| **COMP** | Component operators — 3D scene objects and sub-networks || **UI** | User interface operators — interactive 2D widgets for control panels || **OUT** | Final output sinks for rendering and display    |
 
 ---
 
@@ -47,7 +47,7 @@ time advances (for time-dependent operators).
 
 Not every node cooks every frame. The engine traces backward from output
 sinks (WindowOUT, RenderTOP) to find all nodes that feed them.
-Only these "active" nodes are evaluated â€” disconnected nodes are skipped.
+Only these "active" nodes are evaluated — disconnected nodes are skipped.
 
 ### Expressions
 
@@ -64,11 +64,11 @@ to navigate back up. The breadcrumb bar at the top shows your current location.
 
 Five script operator types let you write custom logic:
 
-- **ScriptCHOP** â€” custom channel processing
-- **ScriptDAT** â€” custom data table generation
-- **ScriptSOP** â€” custom geometry generation
-- **ScriptIMG** â€” custom image processing
-- **GenericScriptNode** â€” multi-family output (CHOP + DAT + IMG)
+- **ScriptCHOP** — custom channel processing
+- **ScriptDAT** — custom data table generation
+- **ScriptSOP** — custom geometry generation
+- **ScriptIMG** — custom image processing
+- **GenericScriptNode** — multi-family output (CHOP + DAT + IMG)
 
 Each has a code editor with presets accessible from the inspector.
 
