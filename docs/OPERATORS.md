@@ -1,46 +1,46 @@
-# GONODES â€” Operator Reference
+# GONODES ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Operator Reference
 
-> **131 operators** across 10 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, UI, and native extensions.
+> **307 operators** across 10 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, UI, and native extensions.
 
 ---
 
 ## Table of Contents
 
-- [TOP â€” Texture Operators](#top--texture-operators)
-- [IMG â€” Image Operators](#img--image-operators)
-- [CHOP â€” Channel Operators](#chop--channel-operators)
-- [DAT â€” Data Operators](#dat--data-operators)
-- [SOP â€” Surface Operators](#sop--surface-operators)
-- [COMP â€” Component Operators](#comp--component-operators)
-- [MAT â€” Material Operators](#mat--material-operators)
-- [OUT — Output Operators](#out--output-operators)
-- [UI — User Interface Operators](#ui--user-interface-operators)
+- [TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Texture Operators](#top--texture-operators)
+- [IMG ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Image Operators](#img--image-operators)
+- [CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Channel Operators](#chop--channel-operators)
+- [DAT ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Data Operators](#dat--data-operators)
+- [SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Surface Operators](#sop--surface-operators)
+- [COMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Component Operators](#comp--component-operators)
+- [MAT ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Material Operators](#mat--material-operators)
+- [OUT ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Output Operators](#out--output-operators)
+- [UI ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â User Interface Operators](#ui--user-interface-operators)
 
-> **Help example patches:** Every operator has 1â€“2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set.
+> **Help example patches:** Every operator has 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set.
 >
 > ### Help Patch Hard Rule
 > Every help example patch **MUST**:
-> 1. **Be meaningful** â€” Simply placing a node with no connections is not a valid example. The patch should demonstrate a realistic, useful workflow that shows what the operator does in context.
-> 2. **End with a visible sink via family-appropriate chain** â€” The demonstrated operator must feed into WindowOUT through a chain that respects port family compatibility:
->    - **TOP** â†’ WindowOUT (direct)
->    - **IMG** â†’ ImgToTOP â†’ WindowOUT
->    - **CHOP** â†’ CHOPtoTOP â†’ WindowOUT (waveform visualization)
->    - **SOP** â†’ GeometryCOMP + CameraCOMP â†’ RenderTOP â†’ WindowOUT
->    - **COMP (scene)** â†’ RenderTOP + CameraCOMP â†’ WindowOUT
->    - **COMP (pass-through: Null, Switch, Animation)** â†’ Route data *through* the COMP to RenderTOP â€” never bypass it with a direct connection, or the cook engine won't cook it (dead-end branches are skipped)
->    - **DAT** â†’ TextTOP â†’ WindowOUT
->    - **MAT** â†’ GeometryCOMP (MAT on port 1) + CameraCOMP â†’ RenderTOP â†’ WindowOUT
->    - **UI** †’ PanelTOP †’ WindowOUT (interactive widgets rendered to texture)
-> 3. **WindowOUT settings** â€” Resolution `512Ã—512`, `"open": true` so the window opens automatically.
-> 4. **Pass-through COMPs** must be in the active cook chain, not dead-end branches. The cook engine only cooks nodes upstream of sinks â€” an orphaned COMP node never cooks and appears broken.
+> 1. **Be meaningful** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Simply placing a node with no connections is not a valid example. The patch should demonstrate a realistic, useful workflow that shows what the operator does in context.
+> 2. **End with a visible sink via family-appropriate chain** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â The demonstrated operator must feed into WindowOUT through a chain that respects port family compatibility:
+>    - **TOP** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ WindowOUT (direct)
+>    - **IMG** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ ImgToTOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ WindowOUT
+>    - **CHOP** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ CHOPtoTOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ WindowOUT (waveform visualization)
+>    - **SOP** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ GeometryCOMP + CameraCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ RenderTOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ WindowOUT
+>    - **COMP (scene)** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ RenderTOP + CameraCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ WindowOUT
+>    - **COMP (pass-through: Null, Switch, Animation)** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ Route data *through* the COMP to RenderTOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â never bypass it with a direct connection, or the cook engine won't cook it (dead-end branches are skipped)
+>    - **DAT** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ TextTOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ WindowOUT
+>    - **MAT** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ GeometryCOMP (MAT on port 1) + CameraCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ RenderTOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ WindowOUT
+>    - **UI** ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ PanelTOP ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ WindowOUT (interactive widgets rendered to texture)
+> 3. **WindowOUT settings** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Resolution `512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512`, `"open": true` so the window opens automatically.
+> 4. **Pass-through COMPs** must be in the active cook chain, not dead-end branches. The cook engine only cooks nodes upstream of sinks ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â an orphaned COMP node never cooks and appears broken.
 
 ---
 
-## TOP â€” Texture Operators
+## TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Texture Operators
 
-TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU â€” no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
+TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 51 operators** â€” 12 generators, 26 filters, 7 combiners, 3 temporal/buffer, 2 utility, 1 bridge.
+**Total: 52 operators** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â 12 generators, 26 filters, 7 combiners, 3 temporal/buffer, 2 utility, 1 bridge.
 
 ### Generators
 
@@ -54,15 +54,15 @@ Procedural noise texture generator. GPU-rendered via shader.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
 | noise_type | Enum | Simplex | Simplex, Perlin, Voronoi, White | Noise algorithm |
-| scale | Float | 4.0 | 0.1â€“100.0 | Noise frequency/zoom |
-| offset | Vector2 | (0, 0) | â€” | Spatial offset |
-| time_offset | Float | 0.0 | â€” | Z-axis offset for animation |
-| seed | Int | 0 | 0â€“99999 | Random seed |
-| monochrome | Bool | true | â€” | Grayscale or RGB noise |
+| scale | Float | 4.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Noise frequency/zoom |
+| offset | Vector2 | (0, 0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Spatial offset |
+| time_offset | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Z-axis offset for animation |
+| seed | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“99999 | Random seed |
+| monochrome | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Grayscale or RGB noise |
 
-**How it works:** Renders a fullscreen quad with a noise shader. The shader implements 4 noise algorithms selectable via uniform. Time-dependent â€” animates automatically when `time_offset` is driven by expressions.
+**How it works:** Renders a fullscreen quad with a noise shader. The shader implements 4 noise algorithms selectable via uniform. Time-dependent ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â animates automatically when `time_offset` is driven by expressions.
 
 ---
 
@@ -72,13 +72,13 @@ Gradient ramp generator.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
 | type | Enum | Horizontal | Horizontal, Vertical, Radial, Circular | Gradient direction |
-| color_a | Color | Black | â€” | Start color |
-| color_b | Color | White | â€” | End color |
-| center | Vector2 | (0.5, 0.5) | â€” | Center point (for radial/circular) |
-| phase | Float | 0.0 | â€” | Phase offset |
-| repeat | Bool | false | â€” | Repeat gradient |
+| color_a | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Start color |
+| color_b | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | End color |
+| center | Vector2 | (0.5, 0.5) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Center point (for radial/circular) |
+| phase | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Phase offset |
+| repeat | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Repeat gradient |
 
 **How it works:** Shader computes gradient value based on UV coordinates and selected type, then interpolates between the two colors. Radial mode uses distance from center. Circular mode uses angle.
 
@@ -90,13 +90,13 @@ Circle or ring shape via signed distance field.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
-| fill_color | Color | White | â€” | Shape fill color |
-| bg_color | Color | Black | â€” | Background color |
-| center | Vector2 | (0.5, 0.5) | â€” | Circle center in UV space |
-| radius | Float | 0.4 | 0.0â€“1.0 | Circle radius |
-| border_width | Float | 0.0 | 0.0â€“0.5 | Ring border width (0 = filled) |
-| softness | Float | 0.005 | 0.0â€“0.1 | Edge antialiasing |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
+| fill_color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Shape fill color |
+| bg_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background color |
+| center | Vector2 | (0.5, 0.5) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Circle center in UV space |
+| radius | Float | 0.4 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Circle radius |
+| border_width | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.5 | Ring border width (0 = filled) |
+| softness | Float | 0.005 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.1 | Edge antialiasing |
 
 **How it works:** SDF shader computes distance from center, applies smoothstep for edge softness. Border width > 0 creates a ring by subtracting an inner circle.
 
@@ -108,14 +108,14 @@ Rectangle or rounded rectangle via signed distance field.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
-| fill_color | Color | White | â€” | Shape fill color |
-| bg_color | Color | Black | â€” | Background color |
-| center | Vector2 | (0.5, 0.5) | â€” | Rectangle center |
-| size | Vector2 | (0.6, 0.4) | â€” | Width and height |
-| corner_radius | Float | 0.0 | 0.0â€“0.5 | Rounded corners |
-| border_width | Float | 0.0 | 0.0â€“0.5 | Border only mode |
-| softness | Float | 0.005 | 0.0â€“0.1 | Edge antialiasing |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
+| fill_color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Shape fill color |
+| bg_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background color |
+| center | Vector2 | (0.5, 0.5) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Rectangle center |
+| size | Vector2 | (0.6, 0.4) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Width and height |
+| corner_radius | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.5 | Rounded corners |
+| border_width | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.5 | Border only mode |
+| softness | Float | 0.005 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.1 | Edge antialiasing |
 
 **How it works:** SDF shader computes distance to a rounded rectangle. Same fill/border/softness logic as CircleTOP.
 
@@ -127,11 +127,11 @@ Solid color texture.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
-| color | Color | Black | â€” | Fill color |
-| alpha | Float | 1.0 | 0.0â€“1.0 | Alpha override |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
+| color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Fill color |
+| alpha | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Alpha override |
 
-**How it works:** No shader needed â€” uses a `ColorRect` directly in the SubViewport.
+**How it works:** No shader needed ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â uses a `ColorRect` directly in the SubViewport.
 
 ---
 
@@ -141,15 +141,15 @@ Renders text to a texture. Supports custom font loading from project resources.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| text | String | "Hello" | â€” | Text content |
-| resolution | Vector2i | 512Ã—256 | â€” | Output resolution |
-| font_file | File | (none) | â€” | Font file path (TTF, OTF, WOFF, WOFF2, .tres/.res). Leave empty for default font. |
-| font_size | Int | 48 | 8â€“256 | Font size in pixels |
-| font_color | Color | White | â€” | Text color |
-| bg_color | Color | Black | â€” | Background color |
+| text | String | "Hello" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Text content |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â256 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
+| font_file | File | (none) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Font file path (TTF, OTF, WOFF, WOFF2, .tres/.res). Leave empty for default font. |
+| font_size | Int | 48 | 8ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“256 | Font size in pixels |
+| font_color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Text color |
+| bg_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background color |
 | align_h | Enum | Center | Left, Center, Right | Horizontal alignment |
 | align_v | Enum | Center | Top, Center, Bottom | Vertical alignment |
-| word_wrap | Bool | true | â€” | Wrap text at edges |
+| word_wrap | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Wrap text at edges |
 
 **How it works:** Uses Godot's `Label` node inside a SubViewport. The Label handles text layout, wrapping, and alignment natively. Custom fonts are loaded via `ResourceLoader` and applied with `add_theme_font_override()`.
 
@@ -161,11 +161,11 @@ Loads an image or texture resource from the project and outputs it as a TOP text
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| file | File | (none) | â€” | Image/texture path (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res) |
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
+| file | File | (none) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Image/texture path (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res) |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
 | fit_mode | Enum | Keep Aspect Centered | Stretch, Keep Aspect, Keep Aspect Centered, Keep Aspect Covered, Tile | How the image fits the output |
-| bg_color | Color | Black | â€” | Background color behind transparent or non-covering images |
-| filter | Bool | true | â€” | Bilinear filtering (on) or nearest-neighbor (off) |
+| bg_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background color behind transparent or non-covering images |
+| filter | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Bilinear filtering (on) or nearest-neighbor (off) |
 
 **How it works:** Loads any Godot-importable image format via `ResourceLoader`. The loaded `Texture2D` is displayed in a `TextureRect` inside a SubViewport. Supports all Godot stretch modes. Non-texture `Image` resources are automatically converted to `ImageTexture`.
 
@@ -177,20 +177,20 @@ Plays a video file as a live texture stream. Similar to TouchDesigner's Movie Fi
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| file | File | (none) | â€” | Video file path (.ogv Theora format) |
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
-| play | Bool | true | â€” | Play / pause |
-| loop | Bool | true | â€” | Loop when finished |
-| speed | Float | 1.0 | 0.0â€“4.0 | Playback speed multiplier |
-| seek | Float | -1.0 | -1.0â€“âˆž | Seek to time in seconds (-1 = disabled) |
-| bg_color | Color | Black | â€” | Background color when no video loaded |
+| file | File | (none) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Video file path (.ogv Theora format) |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
+| play | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Play / pause |
+| loop | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Loop when finished |
+| speed | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Playback speed multiplier |
+| seek | Float | -1.0 | -1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ | Seek to time in seconds (-1 = disabled) |
+| bg_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background color when no video loaded |
 
 **How it works:** Uses Godot's native `VideoStreamPlayer` inside a SubViewport. Supports Theora (.ogv) format out of the box. The video player renders frames directly as a Control filling the viewport. Additional codecs can be added via GDExtensions.
 
 **Codec notes:**
 - **Theora (.ogv):** Built-in. CPU-decoded. No alpha channel support in Godot's decoder.
 - **H.264/VP8/VP9:** Available via community `godot-videodecoder` GDExtension (FFmpeg-based). No alpha.
-- **HAP / HAP Alpha / HAP Q:** Not yet supported. HAP is a VJ-standard codec that stores S3TC/DXT-compressed frames, uploaded directly to the GPU with no CPU decode â€” ideal for real-time performance. Requires a custom GDExtension wrapping the [HAP library](https://github.com/Vidvox/hap). See roadmap.
+- **HAP / HAP Alpha / HAP Q:** Not yet supported. HAP is a VJ-standard codec that stores S3TC/DXT-compressed frames, uploaded directly to the GPU with no CPU decode ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ideal for real-time performance. Requires a custom GDExtension wrapping the [HAP library](https://github.com/Vidvox/hap). See roadmap.
 - **Image sequences:** For alpha-channel video content, use numbered PNG/WebP frame sequences with the ImageSequenceTOP operator.
 
 ---
@@ -201,15 +201,15 @@ Plays a numbered image sequence as animated texture frames. Supports PNG, WebP, 
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| file | File | (none) | â€” | Path to ANY frame in the sequence (auto-discovers siblings) |
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution (auto-set from first frame) |
-| play | Bool | true | â€” | Play / pause |
-| speed | Float | 1.0 | 0.01â€“10.0 | Playback speed multiplier |
-| index | Int | -1 | -1â€“âˆž | Manual frame index override (-1 = auto time-based) |
-| loop_mode | Enum | Loop | â€” | Loop, Hold First, Hold Last, Ping-Pong |
-| fit_mode | Enum | Keep Aspect Centered | â€” | Stretch, Keep Aspect, Centered, Covered |
-| bg_color | Color | Black | â€” | Background behind transparent/non-covering frames |
-| preload_all | Bool | false | â€” | Load all frames at startup (faster playback, more RAM) |
+| file | File | (none) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Path to ANY frame in the sequence (auto-discovers siblings) |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution (auto-set from first frame) |
+| play | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Play / pause |
+| speed | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Playback speed multiplier |
+| index | Int | -1 | -1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ | Manual frame index override (-1 = auto time-based) |
+| loop_mode | Enum | Loop | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Loop, Hold First, Hold Last, Ping-Pong |
+| fit_mode | Enum | Keep Aspect Centered | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Stretch, Keep Aspect, Centered, Covered |
+| bg_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background behind transparent/non-covering frames |
+| preload_all | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Load all frames at startup (faster playback, more RAM) |
 
 **How it works:** Given any frame file (e.g., `render_0042.png`), the operator parses the filename to find the prefix and numbering pattern, then scans the directory for all matching files. Frames are lazy-loaded and cached on demand (or preloaded if the toggle is on). Supports expression-driven `index` for precise sequencing. The ping-pong mode reverses direction at sequence boundaries.
 
@@ -223,17 +223,17 @@ User-editable GPU shader with live recompilation.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
-| shader_code | String | *(template)* | â€” | Full `shader_type canvas_item;` shader |
-| float_aâ€“float_d | Float | 0.0 | â€” | 4 user float uniforms (`gn_float0`â€“`gn_float3`) |
-| color_a | Color | White | â€” | User color uniform (`gn_color0`) |
-| color_b | Color | Black | â€” | User color uniform (`gn_color1`) |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
+| shader_code | String | *(template)* | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Full `shader_type canvas_item;` shader |
+| float_aÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“float_d | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | 4 user float uniforms (`gn_float0`ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“`gn_float3`) |
+| color_a | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | User color uniform (`gn_color0`) |
+| color_b | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | User color uniform (`gn_color1`) |
 
-**Inputs:** Up to 4 texture inputs available as `gn_tex0`â€“`gn_tex3` in the shader.
+**Inputs:** Up to 4 texture inputs available as `gn_tex0`ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“`gn_tex3` in the shader.
 
 **Built-in uniforms:** `gn_resolution` (vec2), Godot's built-in `TIME`.
 
-**How it works:** User provides a complete `shader_type canvas_item;` shader string. The operator compiles it into a `Shader` resource and applies it. On compilation failure, the last working shader is kept. Recompilation only happens when the code text changes. Time-dependent â€” `TIME` uniform updates automatically.
+**How it works:** User provides a complete `shader_type canvas_item;` shader string. The operator compiles it into a `Shader` resource and applies it. On compilation failure, the last working shader is kept. Recompilation only happens when the code text changes. Time-dependent ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â `TIME` uniform updates automatically.
 
 ---
 
@@ -243,14 +243,14 @@ Procedural pattern generator: stripes, checkerboard, concentric circles, grids, 
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
 | type | Enum | Stripes | Stripes, Checkerboard, Concentric, Grid, Dots | Pattern type |
-| frequency | Float | 8.0 | 0.1â€“100.0 | Pattern repetition frequency |
-| duty_cycle | Float | 0.5 | 0.0â€“1.0 | Width ratio of primary shape |
-| color_a | Color | White | â€” | Primary colour |
-| color_b | Color | Black | â€” | Secondary / background colour |
-| rotation | Float | 0.0 | â€” | Rotation in radians |
-| softness | Float | 0.02 | 0.0â€“0.2 | Edge anti-aliasing |
+| frequency | Float | 8.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Pattern repetition frequency |
+| duty_cycle | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Width ratio of primary shape |
+| color_a | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Primary colour |
+| color_b | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Secondary / background colour |
+| rotation | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Rotation in radians |
+| softness | Float | 0.02 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.2 | Edge anti-aliasing |
 
 ---
 
@@ -260,15 +260,15 @@ SDF 2D primitives: triangle, line, pentagon.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
 | shape | Enum | Triangle | Triangle, Line, Pentagon | Shape type |
-| size | Float | 0.4 | 0.01â€“0.5 | Shape radius in UV space |
-| fill_color | Color | White | â€” | Shape interior colour |
-| bg_color | Color | Black | â€” | Background colour |
-| border_width | Float | 0.02 | 0.0â€“0.1 | Border thickness (0 = none) |
-| border_color | Color | White | â€” | Border colour |
-| rotation | Float | 0.0 | â€” | Shape rotation in radians |
-| softness | Float | 0.005 | 0.0â€“0.05 | Edge anti-aliasing |
+| size | Float | 0.4 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.5 | Shape radius in UV space |
+| fill_color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Shape interior colour |
+| bg_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background colour |
+| border_width | Float | 0.02 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.1 | Border thickness (0 = none) |
+| border_color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Border colour |
+| rotation | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Shape rotation in radians |
+| softness | Float | 0.005 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.05 | Edge anti-aliasing |
 
 ---
 
@@ -278,10 +278,10 @@ Render SVG vector graphics to a texture at arbitrary resolution.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
-| svg_path | String | *(empty)* | â€” | Path to .svg file (res:// or user://) |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
+| svg_path | String | *(empty)* | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Path to .svg file (res:// or user://) |
 
-**How it works:** Loads and rasterises the SVG via Godot's Image loader. Re-rasterises only when path or resolution changes. No shader â€” pure CPU rasterisation.
+**How it works:** Loads and rasterises the SVG via Godot's Image loader. Re-rasterises only when path or resolution changes. No shader ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â pure CPU rasterisation.
 
 ---
 
@@ -297,11 +297,11 @@ Brightness, contrast, gamma, and invert adjustments.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| brightness | Float | 1.0 | 0.0â€“4.0 | Brightness multiplier |
-| contrast | Float | 1.0 | 0.0â€“4.0 | Contrast amount |
-| gamma | Float | 1.0 | 0.01â€“4.0 | Gamma correction |
-| invert | Bool | false | â€” | Invert colors |
-| opacity | Float | 1.0 | 0.0â€“1.0 | Output opacity |
+| brightness | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Brightness multiplier |
+| contrast | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Contrast amount |
+| gamma | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Gamma correction |
+| invert | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Invert colors |
+| opacity | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Output opacity |
 
 **How it works:** Shader applies `color = ((color * brightness) - 0.5) * contrast + 0.5`, then `pow(color, 1.0/gamma)`, then optional invert, then alpha multiply.
 
@@ -313,11 +313,11 @@ Gaussian or box blur.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| size | Float | 5.0 | 0.0â€“100.0 | Blur radius |
-| quality | Int | 4 | 1â€“8 | Sample count per direction |
+| size | Float | 5.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Blur radius |
+| quality | Int | 4 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“8 | Sample count per direction |
 | method | Enum | Gaussian | Gaussian, Box | Blur algorithm |
 
-**How it works:** Two-pass separable blur â€” horizontal pass into an intermediate SubViewport, then vertical pass into the output SubViewport. Each pass samples multiple texels along one axis weighted by a Gaussian (or uniform for box). Two shader materials, two viewports.
+**How it works:** Two-pass separable blur ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â horizontal pass into an intermediate SubViewport, then vertical pass into the output SubViewport. Each pass samples multiple texels along one axis weighted by a Gaussian (or uniform for box). Two shader materials, two viewports.
 
 ---
 
@@ -327,10 +327,10 @@ Gaussian or box blur.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| translate | Vector2 | (0, 0) | â€” | UV translation |
-| rotate | Float | 0.0 | â€” | Rotation in radians |
-| scale | Vector2 | (1.0, 1.0) | â€” | UV scale |
-| pivot | Vector2 | (0.5, 0.5) | â€” | Transform pivot point |
+| translate | Vector2 | (0, 0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | UV translation |
+| rotate | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Rotation in radians |
+| scale | Vector2 | (1.0, 1.0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | UV scale |
+| pivot | Vector2 | (0.5, 0.5) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Transform pivot point |
 | extend | Enum | Clamp | Clamp, Repeat, Mirror, Zero | Edge extension mode |
 
 **How it works:** Shader builds a 2D transform matrix, applies it to UV coordinates, and samples the input. Extend mode controls what happens at UV boundaries.
@@ -343,9 +343,9 @@ Hue, saturation, and value (brightness) adjustments.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| hue_offset | Float | 0.0 | -1.0â€“1.0 | Hue rotation (wraps) |
-| saturation | Float | 1.0 | 0.0â€“4.0 | Saturation multiplier (0 = grayscale) |
-| value | Float | 1.0 | 0.0â€“4.0 | Value/brightness multiplier |
+| hue_offset | Float | 0.0 | -1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Hue rotation (wraps) |
+| saturation | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Saturation multiplier (0 = grayscale) |
+| value | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Value/brightness multiplier |
 
 **How it works:** Shader converts RGB to HSV, applies offsets/multipliers, converts back to RGB.
 
@@ -357,10 +357,10 @@ Sobel edge detection.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| strength | Float | 1.0 | 0.0â€“10.0 | Edge strength multiplier |
-| grayscale | Bool | true | â€” | Output grayscale or colored edges |
+| strength | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Edge strength multiplier |
+| grayscale | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output grayscale or colored edges |
 
-**How it works:** Convolution with Sobel kernels (horizontal and vertical), combined as `sqrt(gxÂ² + gyÂ²)`. Computes on luminance if grayscale, or per-channel if colored.
+**How it works:** Convolution with Sobel kernels (horizontal and vertical), combined as `sqrt(gxÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â² + gyÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â²)`. Computes on luminance if grayscale, or per-channel if colored.
 
 ---
 
@@ -370,9 +370,9 @@ Binary black/white based on luminance threshold.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| threshold | Float | 0.5 | 0.0â€“1.0 | Luminance cutoff |
-| softness | Float | 0.0 | 0.0â€“0.5 | Soft transition width |
-| use_alpha | Bool | false | â€” | Threshold alpha channel instead of luminance |
+| threshold | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Luminance cutoff |
+| softness | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.5 | Soft transition width |
+| use_alpha | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Threshold alpha channel instead of luminance |
 
 **How it works:** Shader computes luminance, applies `smoothstep(threshold - softness, threshold + softness, lum)` for soft edges or hard step for binary output.
 
@@ -384,8 +384,8 @@ Mirror texture horizontally and/or vertically.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| flip_x | Bool | false | â€” | Mirror horizontally |
-| flip_y | Bool | false | â€” | Mirror vertically |
+| flip_x | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Mirror horizontally |
+| flip_y | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Mirror vertically |
 
 **How it works:** Shader inverts UV.x and/or UV.y before sampling.
 
@@ -397,10 +397,10 @@ Tile/repeat a texture.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| repeat | Vector2 | (2.0, 2.0) | â€” | Repeat count per axis |
-| offset | Vector2 | (0, 0) | â€” | UV offset |
-| mirror_x | Bool | false | â€” | Mirror on horizontal repeats |
-| mirror_y | Bool | false | â€” | Mirror on vertical repeats |
+| repeat | Vector2 | (2.0, 2.0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Repeat count per axis |
+| offset | Vector2 | (0, 0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | UV offset |
+| mirror_x | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Mirror on horizontal repeats |
+| mirror_y | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Mirror on vertical repeats |
 
 **How it works:** Shader multiplies UV by repeat count and wraps via `fract()`. Mirror mode alternates direction on odd repeats.
 
@@ -412,9 +412,9 @@ Crop a sub-region from the input.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512Ã—512 | â€” | Output resolution |
-| left_top | Vector2 | (0.0, 0.0) | â€” | Top-left UV corner |
-| right_bottom | Vector2 | (1.0, 1.0) | â€” | Bottom-right UV corner |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output resolution |
+| left_top | Vector2 | (0.0, 0.0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Top-left UV corner |
+| right_bottom | Vector2 | (1.0, 1.0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Bottom-right UV corner |
 
 **How it works:** Shader remaps UV from the output range to the specified sub-region of the input.
 
@@ -426,11 +426,11 @@ Blends current frame with previous frame's output for trails and echoes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| mix | Float | 0.9 | 0.0â€“1.0 | Feedback persistence (higher = longer trails) |
-| translate | Vector2 | (0, 0) | â€” | Feedback UV translation per frame |
-| rotate | Float | 0.0 | â€” | Feedback rotation in radians per frame |
-| scale | Vector2 | (1.0, 1.0) | â€” | Feedback scale per frame |
-| reset | Bool | false | â€” | Clear feedback buffer |
+| mix | Float | 0.9 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Feedback persistence (higher = longer trails) |
+| translate | Vector2 | (0, 0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Feedback UV translation per frame |
+| rotate | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Feedback rotation in radians per frame |
+| scale | Vector2 | (1.0, 1.0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Feedback scale per frame |
+| reset | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Clear feedback buffer |
 
 **How it works:** Each frame, the shader blends the new input with the previous frame's output texture. The previous frame can be spatially transformed (translate/rotate/scale), creating spiral, zoom, or drift effects. Uses deferred capture (`call_deferred`) to read the viewport output into an `ImageTexture` for next frame's feedback uniform.
 
@@ -442,7 +442,7 @@ Resize a texture to a different resolution.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 1920Ã—1080 | â€” | Target output resolution |
+| resolution | Vector2i | 1920ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â1080 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Target output resolution |
 | filter | Enum | Linear | Linear, Nearest | Filtering mode |
 
 **How it works:** Renders the input texture into a SubViewport at the target resolution using a `TextureRect`. Filter mode controls interpolation quality.
@@ -456,12 +456,12 @@ Renders a 3D scene from COMPs into a 2D texture with integrated post-processing.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | **Scene** | | | | |
-| resolution | Vector2i | 1280Ã—720 | â€” | Render resolution |
-| bg_color | Color | (0.1, 0.1, 0.12) | â€” | Background color |
-| transparent_bg | Bool | false | â€” | Transparent background |
-| use_environment | Bool | true | â€” | Enable environment lighting |
-| ambient_energy | Float | 0.3 | 0.0â€“4.0 | Ambient light intensity |
-| ambient_color | Color | (0.3, 0.3, 0.4) | â€” | Ambient light color |
+| resolution | Vector2i | 1280ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â720 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Render resolution |
+| bg_color | Color | (0.1, 0.1, 0.12) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background color |
+| transparent_bg | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Transparent background |
+| use_environment | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable environment lighting |
+| ambient_energy | Float | 0.3 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Ambient light intensity |
+| ambient_color | Color | (0.3, 0.3, 0.4) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Ambient light color |
 | anti_aliasing | Enum | 4x MSAA | Off, 2x, 4x, 8x | MSAA quality |
 | **Shadows** | | | | |
 | shadow_atlas_size | Enum | 4096 | 1024, 2048, 4096, 8192 | Positional shadow atlas resolution |
@@ -469,59 +469,59 @@ Renders a 3D scene from COMPs into a 2D texture with integrated post-processing.
 | shadow_filter | Enum | Soft Medium | Hard, Soft Low/Med/High/Ultra | Shadow filter quality (PCF) |
 | **Tonemap** | | | | |
 | tonemap_mode | Enum | ACES | Linear, Reinhard, Filmic, ACES | Tone mapping algorithm |
-| tonemap_exposure | Float | 1.0 | 0.1â€“8.0 | Exposure multiplier |
-| tonemap_white | Float | 1.0 | 0.1â€“16.0 | White reference point |
+| tonemap_exposure | Float | 1.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“8.0 | Exposure multiplier |
+| tonemap_white | Float | 1.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16.0 | White reference point |
 | **Glow (Bloom)** | | | | |
-| glow_enabled | Bool | false | â€” | Enable glow/bloom |
-| glow_intensity | Float | 0.8 | 0.0â€“4.0 | Overall glow strength |
-| glow_strength | Float | 1.0 | 0.0â€“2.0 | Per-level glow contribution |
-| glow_bloom | Float | 0.0 | 0.0â€“1.0 | Screen-wide bloom amount |
-| glow_hdr_threshold | Float | 1.0 | 0.0â€“4.0 | Brightness threshold for glow |
+| glow_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable glow/bloom |
+| glow_intensity | Float | 0.8 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Overall glow strength |
+| glow_strength | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Per-level glow contribution |
+| glow_bloom | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Screen-wide bloom amount |
+| glow_hdr_threshold | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Brightness threshold for glow |
 | glow_blend_mode | Enum | Additive | Additive, Screen, Softlight, Replace, Mix | Glow compositing mode |
 | **Depth of Field** | | | | |
-| dof_far_enabled | Bool | false | â€” | Enable far DOF blur |
-| dof_far_distance | Float | 10.0 | 0.1â€“200.0 | Far focus distance |
-| dof_far_transition | Float | 5.0 | 0.1â€“50.0 | Far transition width |
-| dof_near_enabled | Bool | false | â€” | Enable near DOF blur |
-| dof_near_distance | Float | 2.0 | 0.1â€“50.0 | Near focus distance |
-| dof_near_transition | Float | 1.0 | 0.1â€“20.0 | Near transition width |
-| dof_bokeh_size | Float | 4.0 | 0.5â€“10.0 | Blur disc radius |
+| dof_far_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable far DOF blur |
+| dof_far_distance | Float | 10.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“200.0 | Far focus distance |
+| dof_far_transition | Float | 5.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Far transition width |
+| dof_near_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable near DOF blur |
+| dof_near_distance | Float | 2.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Near focus distance |
+| dof_near_transition | Float | 1.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“20.0 | Near transition width |
+| dof_bokeh_size | Float | 4.0 | 0.5ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Blur disc radius |
 | dof_bokeh_shape | Enum | Circle | Box, Hexagon, Circle | Bokeh shape |
 | **SSAO** | | | | |
-| ssao_enabled | Bool | false | â€” | Enable ambient occlusion |
-| ssao_radius | Float | 1.0 | 0.01â€“16.0 | Sampling radius |
-| ssao_intensity | Float | 2.0 | 0.0â€“10.0 | Darkening strength |
-| ssao_power | Float | 1.5 | 0.1â€“10.0 | Falloff exponent |
+| ssao_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable ambient occlusion |
+| ssao_radius | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16.0 | Sampling radius |
+| ssao_intensity | Float | 2.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Darkening strength |
+| ssao_power | Float | 1.5 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Falloff exponent |
 | **SSIL** | | | | |
-| ssil_enabled | Bool | false | â€” | Enable indirect lighting |
-| ssil_radius | Float | 5.0 | 0.01â€“16.0 | Sampling radius |
-| ssil_intensity | Float | 1.0 | 0.0â€“10.0 | Contribution strength |
-| ssil_sharpness | Float | 0.98 | 0.0â€“1.0 | Edge-aware blur sharpness |
-| ssil_normal_rejection | Float | 1.0 | 0.0â€“1.0 | Normal rejection factor |
+| ssil_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable indirect lighting |
+| ssil_radius | Float | 5.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16.0 | Sampling radius |
+| ssil_intensity | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Contribution strength |
+| ssil_sharpness | Float | 0.98 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Edge-aware blur sharpness |
+| ssil_normal_rejection | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Normal rejection factor |
 | **SSR** | | | | |
-| ssr_enabled | Bool | false | â€” | Enable screen-space reflections |
-| ssr_max_steps | Int | 64 | 1â€“512 | Ray march steps |
-| ssr_fade_in | Float | 0.15 | 0.0â€“2.0 | Reflection fade-in distance |
-| ssr_fade_out | Float | 2.0 | 0.0â€“8.0 | Reflection fade-out distance |
-| ssr_depth_tolerance | Float | 0.2 | 0.01â€“4.0 | Depth comparison tolerance |
+| ssr_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable screen-space reflections |
+| ssr_max_steps | Int | 64 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“512 | Ray march steps |
+| ssr_fade_in | Float | 0.15 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Reflection fade-in distance |
+| ssr_fade_out | Float | 2.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“8.0 | Reflection fade-out distance |
+| ssr_depth_tolerance | Float | 0.2 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Depth comparison tolerance |
 | **Adjustments** | | | | |
-| adj_enabled | Bool | false | â€” | Enable color adjustments |
-| adj_brightness | Float | 1.0 | 0.01â€“4.0 | Brightness multiplier |
-| adj_contrast | Float | 1.0 | 0.01â€“4.0 | Contrast |
-| adj_saturation | Float | 1.0 | 0.0â€“4.0 | Color saturation |
+| adj_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable color adjustments |
+| adj_brightness | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Brightness multiplier |
+| adj_contrast | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Contrast |
+| adj_saturation | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4.0 | Color saturation |
 | **Volumetric Fog** | | | | |
-| fog_enabled | Bool | false | â€” | Enable volumetric fog |
-| fog_density | Float | 0.05 | 0.0â€“1.0 | Base fog density |
-| fog_albedo | Color | (1, 1, 1) | â€” | Fog scatter color |
-| fog_emission | Color | (0, 0, 0) | â€” | Fog self-emission color |
-| fog_emission_energy | Float | 1.0 | 0.0â€“16.0 | Fog emission intensity |
-| fog_length | Float | 64.0 | 1.0â€“1024.0 | Volumetric fog distance |
+| fog_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable volumetric fog |
+| fog_density | Float | 0.05 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Base fog density |
+| fog_albedo | Color | (1, 1, 1) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Fog scatter color |
+| fog_emission | Color | (0, 0, 0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Fog self-emission color |
+| fog_emission_energy | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16.0 | Fog emission intensity |
+| fog_length | Float | 64.0 | 1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1024.0 | Volumetric fog distance |
 
-**Inputs:** `comp_in` â€” accepts multiple COMP connections (multi-input port).
+**Inputs:** `comp_in` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â accepts multiple COMP connections (multi-input port).
 
-**How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, LightCOMP, and MergeCOMP nodes and adopts their 3D nodes into the viewport's scene tree. Creates a `WorldEnvironment` with configurable ambient lighting and post-processing via Godot's `Environment` resource. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera (from CameraCOMP or default). Time-dependent â€” re-populates the scene each frame.
+**How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, LightCOMP, and MergeCOMP nodes and adopts their 3D nodes into the viewport's scene tree. Creates a `WorldEnvironment` with configurable ambient lighting and post-processing via Godot's `Environment` resource. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera (from CameraCOMP or default). Time-dependent ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â re-populates the scene each frame.
 
-**Performance:** When all post-processing toggles are off and tonemap is at defaults, the post-processing path early-exits with a single boolean check â€” zero overhead for vanilla 3D renders.
+**Performance:** When all post-processing toggles are off and tonemap is at defaults, the post-processing path early-exits with a single boolean check ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â zero overhead for vanilla 3D renders.
 
 ---
 
@@ -532,7 +532,7 @@ Per-pixel statistics: min, max, average, or sum over a configurable kernel.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | mode | Enum | Average | Min, Max, Average, Sum | Statistic to compute |
-| kernel_size | Int | 3 | 1â€“15 | Neighbourhood size (must be odd) |
+| kernel_size | Int | 3 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“15 | Neighbourhood size (must be odd) |
 
 **Inputs:** `in` (TOP). **How it works:** Samples NxN neighbourhood and outputs per-pixel statistic.
 
@@ -545,7 +545,7 @@ Convert a colour texture to grayscale.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | method | Enum | Rec.709 | Rec.709, Rec.601, Average, Desaturate | Greyscale formula |
-| mix | Float | 1.0 | 0.0â€“1.0 | Blend between original and mono |
+| mix | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Blend between original and mono |
 
 **Inputs:** `in` (TOP).
 
@@ -557,8 +557,8 @@ Unsharp-mask sharpening.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| strength | Float | 1.0 | 0.0â€“10.0 | Sharpening strength |
-| radius | Float | 1.0 | 0.1â€“10.0 | Blur kernel radius |
+| strength | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Sharpening strength |
+| radius | Float | 1.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Blur kernel radius |
 
 **Inputs:** `in` (TOP).
 
@@ -570,8 +570,8 @@ Generate tangent-space normal map from a height/bump texture.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| strength | Float | 1.0 | 0.1â€“20.0 | Bump amplification |
-| invert_y | Bool | false | â€” | Flip green channel for DirectX convention |
+| strength | Float | 1.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“20.0 | Bump amplification |
+| invert_y | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Flip green channel for DirectX convention |
 
 **Inputs:** `in` (TOP).
 
@@ -583,9 +583,9 @@ Pseudo-depth extraction via luminance mapping.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| near | Float | 0.1 | 0.01â€“100.0 | Near-plane luminance mapping |
-| far | Float | 100.0 | 0.1â€“10000.0 | Far-plane luminance mapping |
-| invert | Bool | false | â€” | Flip nearâ†”far |
+| near | Float | 0.1 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Near-plane luminance mapping |
+| far | Float | 100.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10000.0 | Far-plane luminance mapping |
+| invert | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Flip nearÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Âfar |
 
 **Inputs:** `in` (TOP). **How it works:** Maps input luminance through near/far range to produce a grayscale depth proxy.
 
@@ -601,7 +601,7 @@ Swap and remap RGBA channels with per-channel gain.
 | g_source | Enum | Green | R, G, B, A, Luma, Zero, One | Source for green channel |
 | b_source | Enum | Blue | R, G, B, A, Luma, Zero, One | Source for blue channel |
 | a_source | Enum | Alpha | R, G, B, A, Luma, Zero, One | Source for alpha channel |
-| r_gainâ€“a_gain | Float | 1.0 | 0.0â€“2.0 | Per-channel gain |
+| r_gainÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“a_gain | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Per-channel gain |
 
 **Inputs:** `in` (TOP).
 
@@ -614,9 +614,9 @@ Custom NxN kernel convolution with presets.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | preset | Enum | Emboss | Custom, Emboss, Sharpen, Edge Detect, Ridge, Gaussian Blur, Box Blur | Kernel preset |
-| kernel_size | Int | 3 | 3â€“7 | Kernel dimension (odd) |
-| divisor | Float | 1.0 | 0.001â€“100.0 | Divide result |
-| bias | Float | 0.0 | âˆ’1.0â€“1.0 | Add after division |
+| kernel_size | Int | 3 | 3ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“7 | Kernel dimension (odd) |
+| divisor | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Divide result |
+| bias | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Add after division |
 
 **Inputs:** `in` (TOP).
 
@@ -629,7 +629,7 @@ Morphological dilation (expand bright) and erosion (shrink bright).
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | mode | Enum | Dilate | Dilate, Erode | Operation |
-| radius | Int | 2 | 1â€“16 | Kernel radius in pixels |
+| radius | Int | 2 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16 | Kernel radius in pixels |
 
 **Inputs:** `in` (TOP).
 
@@ -641,10 +641,10 @@ Barrel / pincushion lens distortion with chromatic aberration.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| k1 | Float | 0.2 | âˆ’2.0â€“2.0 | Radial distortion (+ barrel, âˆ’ pincushion) |
-| k2 | Float | 0.0 | âˆ’1.0â€“1.0 | Higher-order radial distortion |
-| chromatic_aberration | Float | 0.0 | 0.0â€“5.0 | RGB channel separation |
-| bg_color | Color | Transparent | â€” | Fill outside distortion |
+| k1 | Float | 0.2 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢2.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Radial distortion (+ barrel, ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ pincushion) |
+| k2 | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Higher-order radial distortion |
+| chromatic_aberration | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“5.0 | RGB channel separation |
+| bg_color | Color | Transparent | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Fill outside distortion |
 
 **Inputs:** `in` (TOP).
 
@@ -656,10 +656,10 @@ Luminance-weighted selective blur.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| blur_size | Float | 4.0 | 0.0â€“50.0 | Max blur radius |
-| quality | Int | 4 | 1â€“8 | Samples per direction |
-| luma_threshold | Float | 0.5 | 0.0â€“1.0 | Luminance cutoff |
-| blur_bright | Bool | true | â€” | true = blur brights, false = blur darks |
+| blur_size | Float | 4.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Max blur radius |
+| quality | Int | 4 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“8 | Samples per direction |
+| luma_threshold | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Luminance cutoff |
+| blur_bright | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | true = blur brights, false = blur darks |
 
 **Inputs:** `in` (TOP).
 
@@ -672,7 +672,7 @@ Image gradient / derivative.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | output | Enum | Magnitude | Magnitude, Horizontal (dx), Vertical (dy) | Gradient component |
-| strength | Float | 1.0 | 0.1â€“20.0 | Amplification |
+| strength | Float | 1.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“20.0 | Amplification |
 
 **Inputs:** `in` (TOP).
 
@@ -684,11 +684,11 @@ Image gradient / derivative.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| top_left | Vector2 | (0, 0) | â€” | Top-left corner UV |
-| top_right | Vector2 | (1, 0) | â€” | Top-right corner UV |
-| bottom_left | Vector2 | (0, 1) | â€” | Bottom-left corner UV |
-| bottom_right | Vector2 | (1, 1) | â€” | Bottom-right corner UV |
-| bg_color | Color | Transparent | â€” | Fill outside warp |
+| top_left | Vector2 | (0, 0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Top-left corner UV |
+| top_right | Vector2 | (1, 0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Top-right corner UV |
+| bottom_left | Vector2 | (0, 1) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Bottom-left corner UV |
+| bottom_right | Vector2 | (1, 1) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Bottom-right corner UV |
+| bg_color | Color | Transparent | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Fill outside warp |
 
 **Inputs:** `in` (TOP).
 
@@ -701,9 +701,9 @@ UV projection mapping: planar, cylindrical, or spherical.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | mode | Enum | Planar | Planar, Cylindrical, Spherical | Projection type |
-| uv_offset | Vector2 | (0, 0) | â€” | UV translation |
-| uv_scale | Vector2 | (1, 1) | â€” | UV scale |
-| rotation | Float | 0.0 | â€” | UV rotation in radians |
+| uv_offset | Vector2 | (0, 0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | UV translation |
+| uv_scale | Vector2 | (1, 1) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | UV scale |
+| rotation | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | UV rotation in radians |
 
 **Inputs:** `in` (TOP).
 
@@ -716,8 +716,8 @@ Aspect-aware resize with letterbox / fill / stretch.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | fit_mode | Enum | Fit | Fit, Fill, Stretch, Letterbox | Resize strategy |
-| resolution | Vector2i | 512Ã—512 | â€” | Target resolution |
-| border_color | Color | Black | â€” | Letterbox / border fill colour |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â512 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Target resolution |
+| border_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Letterbox / border fill colour |
 
 **Inputs:** `in` (TOP).
 
@@ -736,7 +736,7 @@ Blend two textures with various blend modes.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | operation | Enum | Add | Add, Multiply, Over, Screen, Subtract, Difference | Blend mode |
-| opacity | Float | 1.0 | 0.0â€“1.0 | Blend opacity |
+| opacity | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Blend opacity |
 
 **Inputs:** `A` (TOP), `B` (TOP).
 
@@ -750,7 +750,7 @@ Linear crossfade between two textures.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| cross | Float | 0.5 | 0.0â€“1.0 | Crossfade value (0 = A, 1 = B) |
+| cross | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Crossfade value (0 = A, 1 = B) |
 
 **Inputs:** `A` (TOP), `B` (TOP).
 
@@ -764,11 +764,11 @@ Distort one texture using another as a displacement map.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| weight | Float | 0.1 | 0.0â€“2.0 | Displacement strength |
+| weight | Float | 0.1 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Displacement strength |
 | method | Enum | RG as XY | RG as XY, Luminance, RGB as XYZ | How to read displacement |
-| scale | Vector2 | (1.0, 1.0) | â€” | Per-axis displacement scale |
+| scale | Vector2 | (1.0, 1.0) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Per-axis displacement scale |
 
-**Inputs:** `source` (TOP â€” texture to distort), `displace` (TOP â€” displacement map).
+**Inputs:** `source` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â texture to distort), `displace` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â displacement map).
 
 **How it works:** Shader reads displacement values from the second texture, offsets the UV coordinates of the source texture by the displacement amount. Method controls which channels drive the displacement.
 
@@ -782,7 +782,7 @@ Color remapping via lookup table texture.
 |-----------|------|---------|-------|-------------|
 | index_by | Enum | Luminance | Luminance, Red, Green, Blue | Which channel indexes the ramp |
 
-**Inputs:** `source` (TOP â€” image to remap), `ramp` (TOP â€” color lookup table).
+**Inputs:** `source` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â image to remap), `ramp` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â color lookup table).
 
 **How it works:** Shader computes the index value from the source (luminance or single channel), then samples the ramp texture at that position. Output color comes from the ramp.
 
@@ -795,9 +795,9 @@ Remap luminance to a gradient texture.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | luma_mode | Enum | Rec.709 | Rec.709, Average, Luminosity | How to compute luminance |
-| intensity | Float | 1.0 | 0.0â€“2.0 | Blend between original and mapped |
+| intensity | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Blend between original and mapped |
 
-**Inputs:** `in` (TOP â€” source), `gradient` (TOP â€” gradient/LUT). **How it works:** Computes luminance from source, samples gradient texture at that value.
+**Inputs:** `in` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â source), `gradient` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â gradient/LUT). **How it works:** Computes luminance from source, samples gradient texture at that value.
 
 ---
 
@@ -808,9 +808,9 @@ UV displacement remap or 1D LUT value remap.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | mode | Enum | UV Remap | UV Remap, Value Remap (LUT) | Remap method |
-| strength | Float | 1.0 | 0.0â€“2.0 | Remap intensity |
+| strength | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Remap intensity |
 
-**Inputs:** `in` (TOP â€” source), `map` (TOP â€” UV displacement or LUT). **How it works:** UV Remap uses map's RG as new UV coordinates; Value Remap uses luminance as LUT index.
+**Inputs:** `in` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â source), `map` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â UV displacement or LUT). **How it works:** UV Remap uses map's RG as new UV coordinates; Value Remap uses luminance as LUT index.
 
 ---
 
@@ -820,8 +820,8 @@ Tile up to 8 input textures into a grid mosaic.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| columns | Int | 2 | 1â€“8 | Grid columns |
-| bg_color | Color | Black | â€” | Background fill |
+| columns | Int | 2 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“8 | Grid columns |
+| bg_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background fill |
 
 **Inputs:** Up to 8 dynamic TOP inputs (auto-grow/shrink). **How it works:** Shader tiles N inputs into a grid. Rows auto-calculated from input count and columns.
 
@@ -834,10 +834,10 @@ Chroma / luma key (green-screen) with spill suppression.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | key_mode | Enum | Chroma | Chroma, Luma | Keying method |
-| key_color | Color | Green | â€” | Key target colour |
-| threshold | Float | 0.3 | 0.0â€“1.0 | Tolerance |
-| smoothness | Float | 0.1 | 0.0â€“0.5 | Edge softness |
-| spill_reduction | Float | 0.5 | 0.0â€“1.0 | Green fringe suppression |
+| key_color | Color | Green | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Key target colour |
+| threshold | Float | 0.3 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Tolerance |
+| smoothness | Float | 0.1 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.5 | Edge softness |
+| spill_reduction | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Green fringe suppression |
 
 **Inputs:** `in` (TOP).
 
@@ -851,16 +851,16 @@ These TOPs store frames over time for delay, scrubbing, and playback control.
 
 #### CacheTOP
 
-Ring buffer â€” stores N frames with delay and freeze controls.
+Ring buffer ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â stores N frames with delay and freeze controls.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| length | Int | 30 | 1â€“300 | Buffer length in frames |
-| delay | Int | 0 | 0â€“299 | Output frame offset into the past |
-| freeze | Bool | false | â€” | Pause recording |
-| reset | Bool (pulse) | false | â€” | Clear the buffer |
+| length | Int | 30 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“300 | Buffer length in frames |
+| delay | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“299 | Output frame offset into the past |
+| freeze | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Pause recording |
+| reset | Bool (pulse) | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Clear the buffer |
 
-**Inputs:** `in` (TOP). **How it works:** Captures each input frame as an ImageTexture (GPUâ†’CPUâ†’GPU roundtrip). Ring buffer advances each cook. Delay outputs a past frame.
+**Inputs:** `in` (TOP). **How it works:** Captures each input frame as an ImageTexture (GPUÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢CPUÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢GPU roundtrip). Ring buffer advances each cook. Delay outputs a past frame.
 
 ---
 
@@ -870,14 +870,14 @@ Playback controller over a frame buffer with speed, scrub, and wrap modes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| speed | Float | 1.0 | âˆ’10.0â€“10.0 | Playback speed |
-| position | Float | 0.0 | 0.0â€“1.0 | Normalised scrub position |
-| use_position | Bool | false | â€” | Override speed with position scrub |
+| speed | Float | 1.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢10.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Playback speed |
+| position | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Normalised scrub position |
+| use_position | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Override speed with position scrub |
 | wrap_mode | Enum | Clamp | Clamp, Loop, Ping-Pong | End-of-buffer behaviour |
-| freeze | Bool | false | â€” | Pause playback |
-| reset | Bool (pulse) | false | â€” | Reset playback head |
+| freeze | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Pause playback |
+| reset | Bool (pulse) | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Reset playback head |
 
-**Inputs:** `in` (TOP â€” typically from CacheTOP). **How it works:** Reads from input CacheTOP's buffer. Speed/position controls which stored frame to output.
+**Inputs:** `in` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â typically from CacheTOP). **How it works:** Reads from input CacheTOP's buffer. Speed/position controls which stored frame to output.
 
 ---
 
@@ -887,7 +887,7 @@ Playback controller over a frame buffer with speed, scrub, and wrap modes.
 
 #### NullTOP
 
-Pass-through. No processing â€” forwards input to output unchanged.
+Pass-through. No processing ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â forwards input to output unchanged.
 
 Used as an organizational endpoint, a reference target for expressions, or to "name" a point in the network.
 
@@ -899,8 +899,8 @@ Select one of up to 4 inputs by index.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| index | Int | 0 | 0â€“3 | Which input to output |
-| blend | Bool | false | â€” | Blend between adjacent inputs (stubbed) |
+| index | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“3 | Which input to output |
+| blend | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Blend between adjacent inputs (stubbed) |
 
 **Inputs:** `in0`, `in1`, `in2`, `in3` (all TOP).
 
@@ -908,7 +908,7 @@ Select one of up to 4 inputs by index.
 
 ---
 
-### Filters (New â€” Matte, Premultiply, Posterize, Radial Blur, Anti-Alias, Palette)
+### Filters (New ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Matte, Premultiply, Posterize, Radial Blur, Anti-Alias, Palette)
 
 ---
 
@@ -919,10 +919,10 @@ Apply alpha from a second texture. Configurable source channel (Luma, R, G, B, A
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | source | Enum | Luma | Luma/R/G/B/A | Which channel of the matte input drives alpha |
-| invert | Bool | false | â€” | Invert the matte |
-| premultiply | Bool | true | â€” | Premultiply RGB by new alpha |
+| invert | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Invert the matte |
+| premultiply | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Premultiply RGB by new alpha |
 
-**Inputs:** `in` (TOP â€” source), `matte` (TOP â€” alpha source). **Shader:** `matte.gdshader`.
+**Inputs:** `in` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â source), `matte` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â alpha source). **Shader:** `matte.gdshader`.
 
 ---
 
@@ -944,7 +944,7 @@ Reduce color depth to N discrete levels per channel.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| levels | Int | 8 | 2â€“256 | Number of color levels |
+| levels | Int | 8 | 2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“256 | Number of color levels |
 
 **Input:** `in` (TOP). **Shader:** `posterize.gdshader`.
 
@@ -956,10 +956,10 @@ Zoom / radial blur effect radiating from a configurable center point.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| strength | Float | 0.1 | 0â€“1 | Blur intensity |
-| center_x | Float | 0.5 | 0â€“1 | Blur center X |
-| center_y | Float | 0.5 | 0â€“1 | Blur center Y |
-| samples | Int | 16 | 4â€“64 | Number of samples (quality) |
+| strength | Float | 0.1 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1 | Blur intensity |
+| center_x | Float | 0.5 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1 | Blur center X |
+| center_y | Float | 0.5 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1 | Blur center Y |
+| samples | Int | 16 | 4ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“64 | Number of samples (quality) |
 
 **Input:** `in` (TOP). **Shader:** `radial_blur.gdshader`.
 
@@ -971,8 +971,8 @@ Simplified FXAA-style anti-aliasing with luma-based edge detection.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| strength | Float | 1.0 | 0â€“2 | AA blending strength |
-| edge_threshold | Float | 0.125 | 0.01â€“0.5 | Minimum edge contrast to trigger AA |
+| strength | Float | 1.0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2 | AA blending strength |
+| edge_threshold | Float | 0.125 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“0.5 | Minimum edge contrast to trigger AA |
 
 **Input:** `in` (TOP). **Shader:** `anti_alias.gdshader`.
 
@@ -984,10 +984,10 @@ Quantize image colors to a palette texture with optional Bayer dithering.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| palette_size | Int | 16 | 2â€“256 | Number of palette colors to use |
-| dithering | Bool | false | â€” | Enable 4Ã—4 Bayer dithering |
+| palette_size | Int | 16 | 2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“256 | Number of palette colors to use |
+| dithering | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable 4ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â4 Bayer dithering |
 
-**Inputs:** `in` (TOP â€” source), `palette` (TOP â€” palette texture). **Shader:** `palette.gdshader`.
+**Inputs:** `in` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â source), `palette` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â palette texture). **Shader:** `palette.gdshader`.
 
 ---
 
@@ -997,20 +997,20 @@ Quantize image colors to a palette texture with optional Bayer dithering.
 
 #### CHOPtoTOP
 
-Render CHOP channels as a texture â€” waveform oscilloscope, heatmap, or graph.
+Render CHOP channels as a texture ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â waveform oscilloscope, heatmap, or graph.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | mode | Enum | Waveform | Waveform, Heatmap, Graph | Visualisation style |
-| resolution | Vector2i | 512Ã—256 | â€” | Output image size |
-| background | Color | (0.05, 0.05, 0.05) | â€” | Background colour |
-| line_color | Color | (0.2, 0.8, 0.2) | â€” | Waveform / graph line colour |
-| line_width | Float | 2.0 | 1.0â€“8.0 | Stroke width in pixels |
-| min_val | Float | -1.0 | -1000â€“1000 | Value mapped to bottom of image |
-| max_val | Float | 1.0 | -1000â€“1000 | Value mapped to top of image |
-| auto_range | Bool | true | â€” | Auto-fit min/max to channel data |
+| resolution | Vector2i | 512ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â256 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Output image size |
+| background | Color | (0.05, 0.05, 0.05) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background colour |
+| line_color | Color | (0.2, 0.8, 0.2) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Waveform / graph line colour |
+| line_width | Float | 2.0 | 1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“8.0 | Stroke width in pixels |
+| min_val | Float | -1.0 | -1000ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000 | Value mapped to bottom of image |
+| max_val | Float | 1.0 | -1000ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000 | Value mapped to top of image |
+| auto_range | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Auto-fit min/max to channel data |
 
-**Input:** `in` (CHOP â€” source channels).
+**Input:** `in` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â source channels).
 
 **How it works:** CPU-based Image rendering (no SubViewport). Reads channel samples and draws into an `Image`, then converts to `ImageTexture`. Waveform mode draws lines between samples; Heatmap maps values to a red-blue gradient; Graph draws filled bars. Auto-range scans the data for min/max each cook.
 
@@ -1022,26 +1022,26 @@ Container that renders connected UI widgets into a SubViewport texture. Outputs 
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Vector2i | 512x512 | — | SubViewport render resolution |
+| resolution | Vector2i | 512x512 | ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â | SubViewport render resolution |
 | layout | Enum | VBox | VBox, HBox, Grid, Flow | How child widgets are arranged |
 | padding | Int | 8 | 0-100 | Internal padding (pixels) |
-| bg_color | Color | (0.15, 0.15, 0.15) | — | Background color |
+| bg_color | Color | (0.15, 0.15, 0.15) | ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â | Background color |
 | bg_opacity | Float | 1.0 | 0.0-1.0 | Background opacity |
 | columns | Int | 2 | 1-10 | Column count (Grid layout only) |
 
 **Input:** Dynamic UI inputs (unlimited connected UI widgets).
 **Output 0:** TOP (GNTextureData, pixels only, non-interactive).
 
-**How it works:** Creates a SubViewport with `gui_disable_input = true` and a root container inside. During cook, reparents each connected UI widget's `_control_node` into the root container. The SubViewport renders the widget tree into a texture. No interactive input is forwarded — for interactive panels, wire widgets through ContainerUI to WindowOUT's panel port instead.
+**How it works:** Creates a SubViewport with `gui_disable_input = true` and a root container inside. During cook, reparents each connected UI widget's `_control_node` into the root container. The SubViewport renders the widget tree into a texture. No interactive input is forwarded ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â for interactive panels, wire widgets through ContainerUI to WindowOUT's panel port instead.
 ---
 
-## CHOP â€” Channel Operators
+## CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Channel Operators
 
 CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Array` with a name (e.g., "tx", "ty", "tz", "out"). Single-sample CHOPs act as real-time control signals. Multi-sample CHOPs carry waveform data, audio, or patterns.
 
-All CHOP data flows as `GNChannelData` â€” a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
+All CHOP data flows as `GNChannelData` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 52 operators** â€” 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge.
+**Total: 57 operators** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge.
 
 ### Generators
 
@@ -1056,15 +1056,15 @@ Low-frequency oscillator. The fundamental animation driver in GONODES.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | waveform | Enum | Sine | Sine, Triangle, Square, Sawtooth, Pulse | Wave shape |
-| frequency | Float | 1.0 | 0.001â€“100.0 | Oscillation speed in Hz |
+| frequency | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Oscillation speed in Hz |
 | amplitude | Float | 1.0 | 0.0+ | Output amplitude |
-| offset | Float | 0.0 | â€” | DC offset |
-| phase | Float | 0.0 | 0.0â€“1.0 | Phase offset |
-| duty_cycle | Float | 0.5 | 0.0â€“1.0 | Pulse width (Pulse waveform only) |
+| offset | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | DC offset |
+| phase | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Phase offset |
+| duty_cycle | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Pulse width (Pulse waveform only) |
 
 **Output:** Single channel `"out"`.
 
-**How it works:** Phase accumulator advances by `frequency * delta_time` each frame. The accumulator feeds into the selected waveform function. Time-dependent â€” always cooks (produces a new value every frame).
+**How it works:** Phase accumulator advances by `frequency * delta_time` each frame. The accumulator feeds into the selected waveform function. Time-dependent ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â always cooks (produces a new value every frame).
 
 ---
 
@@ -1075,15 +1075,15 @@ Multi-channel, multi-sample waveform generator.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | waveform | Enum | Sine | Sine, Triangle, Square, Sawtooth, Pulse, Ramp | Wave shape |
-| channels | Int | 1 | 1â€“16 | Number of channels |
-| length | Int | 1 | 1â€“4096 | Samples per channel |
-| frequency | Float | 1.0 | 0.001â€“1000.0 | Wave frequency |
+| channels | Int | 1 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16 | Number of channels |
+| length | Int | 1 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4096 | Samples per channel |
+| frequency | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Wave frequency |
 | amplitude | Float | 1.0 | 0.0+ | Output amplitude |
-| offset | Float | 0.0 | â€” | DC offset |
-| phase | Float | 0.0 | 0.0â€“1.0 | Phase offset |
-| phase_step | Float | 0.0 | 0.0â€“1.0 | Phase offset per channel |
+| offset | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | DC offset |
+| phase | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Phase offset |
+| phase_step | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Phase offset per channel |
 
-**How it works:** When `length = 1`, uses `elapsed_time` for animated output (time-dependent). When `length > 1`, fills a multi-sample array over a 0â†’1 phase sweep. `phase_step` offsets each channel's phase for spread effects. Channels are named `chan0`, `chan1`, etc.
+**How it works:** When `length = 1`, uses `elapsed_time` for animated output (time-dependent). When `length > 1`, fills a multi-sample array over a 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢1 phase sweep. `phase_step` offsets each channel's phase for spread effects. Channels are named `chan0`, `chan1`, etc.
 
 ---
 
@@ -1093,11 +1093,11 @@ Smooth procedural noise channels.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| num_channels | Int | 1 | 1â€“16 | Number of channels |
-| channel_names | String | "chan1" | â€” | Comma-separated names |
-| roughness | Float | 0.5 | 0.0â€“1.0 | Fractal roughness (octave blending) |
-| period | Float | 1.0 | 0.01â€“100.0 | Noise period/speed |
-| seed | Int | 0 | 0â€“99999 | Random seed |
+| num_channels | Int | 1 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16 | Number of channels |
+| channel_names | String | "chan1" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Comma-separated names |
+| roughness | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Fractal roughness (octave blending) |
+| period | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Noise period/speed |
+| seed | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“99999 | Random seed |
 
 **How it works:** Time accumulator advances each frame. Samples custom 1D smooth noise (hash-based with cubic interpolation) per channel. Roughness controls octave layering. Each channel uses a different seed offset. Time-dependent.
 
@@ -1109,11 +1109,11 @@ Static named values with a dynamic number of channel slots.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| count | Int | 1 | 1â€“32 | Number of channel slots |
-| nameN | String | "chan1" (slot 0) / "" | â€” | Channel name (empty = skip) |
-| valueN | Float | 0.0 | â€” | Constant value for channel |
+| count | Int | 1 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“32 | Number of channel slots |
+| nameN | String | "chan1" (slot 0) / "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Channel name (empty = skip) |
+| valueN | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Constant value for channel |
 
-**How it works:** The **count** parameter controls how many name/value pairs appear in the inspector (1â€“32). Changing count at runtime dynamically adds or removes parameter slots â€” existing values are preserved when growing. Skips channels with empty names. Useful for constants, UI controls, and reference values.
+**How it works:** The **count** parameter controls how many name/value pairs appear in the inspector (1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“32). Changing count at runtime dynamically adds or removes parameter slots ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â existing values are preserved when growing. Skips channels with empty names. Useful for constants, UI controls, and reference values.
 
 ---
 
@@ -1124,14 +1124,14 @@ Multi-sample pattern generator.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | type | Enum | Ramp | Ramp, Sine, Cosine, Step, Random, Constant | Pattern type |
-| length | Int | 100 | 1â€“16384 | Number of samples |
-| channels | Int | 1 | 1â€“16 | Number of channels |
-| from_value | Float | 0.0 | â€” | Range start |
-| to_value | Float | 1.0 | â€” | Range end |
+| length | Int | 100 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16384 | Number of samples |
+| channels | Int | 1 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16 | Number of channels |
+| from_value | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Range start |
+| to_value | Float | 1.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Range end |
 | cycles | Float | 1.0 | 0.001+ | Number of cycles |
-| seed | Int | 0 | 0â€“99999 | Seed (for Random pattern) |
+| seed | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“99999 | Seed (for Random pattern) |
 
-**How it works:** Fills a multi-sample array with the selected pattern. Ramp = linear interpolation fromâ†’to. Sine/Cosine = cyclic wave mapped to from/to range. Step = binary toggle. Random = seeded random values. Constant = flat value. Channels are named `chan0`, `chan1`, etc.
+**How it works:** Fills a multi-sample array with the selected pattern. Ramp = linear interpolation fromÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢to. Sine/Cosine = cyclic wave mapped to from/to range. Step = binary toggle. Random = seeded random values. Constant = flat value. Channels are named `chan0`, `chan1`, etc.
 
 ---
 
@@ -1142,13 +1142,13 @@ Countdown/count-up timer with start/reset triggers.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | length | Float | 10.0 | 0.0+ | Timer duration in seconds |
-| loop | Bool | false | â€” | Loop when complete |
-| auto_start | Bool | true | â€” | Start automatically |
+| loop | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Loop when complete |
+| auto_start | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Start automatically |
 | speed | Float | 1.0 | 0.0+ | Time multiplier |
 
-**Inputs:** `start` (CHOP â€” rising edge starts timer), `reset` (CHOP â€” rising edge resets).
+**Inputs:** `start` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â rising edge starts timer), `reset` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â rising edge resets).
 
-**Output channels:** `timer_seconds` (elapsed time), `timer_fraction` (0â†’1 progress), `running` (0 or 1), `done` (0 or 1).
+**Output channels:** `timer_seconds` (elapsed time), `timer_fraction` (0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢1 progress), `running` (0 or 1), `done` (0 or 1).
 
 **How it works:** Counts up using `delta_time * speed`. Start/reset inputs use rising-edge detection. Auto-starts on first cook if enabled and no start input is connected. Time-dependent.
 
@@ -1167,10 +1167,10 @@ Low-pass or high-pass filter.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | type | Enum | Low Pass | Low Pass, High Pass | Filter type |
-| cutoff | Float | 0.1 | 0.001â€“1.0 | Cutoff frequency (normalized) |
-| reset | Bool | false | â€” | Reset filter state |
+| cutoff | Float | 0.1 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Cutoff frequency (normalized) |
+| reset | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Reset filter state |
 
-**How it works:** Single-pole IIR filter. Low pass: `y = y_prev + Î± * (x - y_prev)`. High pass: `y = x - low_pass_result`. Alpha = clamped cutoff value. Maintains per-channel state across frames. Time-dependent.
+**How it works:** Single-pole IIR filter. Low pass: `y = y_prev + ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â½ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â± * (x - y_prev)`. High pass: `y = x - low_pass_result`. Alpha = clamped cutoff value. Maintains per-channel state across frames. Time-dependent.
 
 ---
 
@@ -1180,9 +1180,9 @@ Exponential smoothing with separate attack and release times.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| attack | Float | 0.2 | 0.0â€“10.0 | Rise time in seconds |
-| release | Float | 0.2 | 0.0â€“10.0 | Fall time in seconds |
-| reset | Bool | false | â€” | Reset to current input value |
+| attack | Float | 0.2 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Rise time in seconds |
+| release | Float | 0.2 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Fall time in seconds |
+| reset | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Reset to current input value |
 
 **How it works:** Uses `1.0 - exp(-dt / tau)` for frame-rate independent smoothing. Attack time is used when the input is rising, release time when falling. Time-dependent.
 
@@ -1195,8 +1195,8 @@ Clamp, loop, or zig-zag values into a range.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | type | Enum | Clamp | Clamp, Loop, Zig-Zag | Limit mode |
-| min | Float | 0.0 | â€” | Range minimum |
-| max | Float | 1.0 | â€” | Range maximum |
+| min | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Range minimum |
+| max | Float | 1.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Range maximum |
 
 **How it works:** Processes each sample. Clamp = `clamp(val, min, max)`. Loop = wraps using `fmod`. Zig-Zag = bounces back and forth within the range.
 
@@ -1208,13 +1208,13 @@ Rising-edge triggered envelope generator.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| threshold | Float | 0.5 | â€” | Trigger threshold |
-| attack | Float | 0.0 | 0.0â€“10.0 | Attack time in seconds |
+| threshold | Float | 0.5 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Trigger threshold |
+| attack | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Attack time in seconds |
 | peak | Float | 1.0 | 0.0+ | Peak value |
-| decay | Float | 0.5 | 0.0â€“10.0 | Decay time in seconds |
-| retrigger | Bool | true | â€” | Allow retriggering during decay |
+| decay | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Decay time in seconds |
+| retrigger | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Allow retriggering during decay |
 
-**How it works:** Detects rising edges (input crosses threshold). On trigger, starts an attackâ†’peakâ†’decay envelope. After decay completes, output returns to 0. Per-channel state tracking. Time-dependent.
+**How it works:** Detects rising edges (input crosses threshold). On trigger, starts an attackÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢peakÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢decay envelope. After decay completes, output returns to 0. Per-channel state tracking. Time-dependent.
 
 ---
 
@@ -1224,11 +1224,11 @@ Sample-and-hold. Captures input values on trigger and holds them.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| threshold | Float | 0.5 | â€” | Trigger threshold |
-| hold_on_start | Bool | true | â€” | Capture value on first cook |
-| reset | Bool | false | â€” | Clear held values |
+| threshold | Float | 0.5 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Trigger threshold |
+| hold_on_start | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Capture value on first cook |
+| reset | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Clear held values |
 
-**Inputs:** `in` (CHOP â€” values to sample), `trigger` (CHOP â€” rising edge triggers capture).
+**Inputs:** `in` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â values to sample), `trigger` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â rising edge triggers capture).
 
 **How it works:** On rising edge of trigger input, captures current input values and holds them until the next trigger. Time-dependent.
 
@@ -1240,13 +1240,13 @@ Velocity integrator. Accumulates input values over time.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| scale | Float | 1.0 | â€” | Speed multiplier |
-| clamp | Bool | false | â€” | Clamp accumulated value |
-| min | Float | -1000.0 | â€” | Clamp minimum |
-| max | Float | 1000.0 | â€” | Clamp maximum |
-| reset_all | Bool | false | â€” | Reset accumulator |
+| scale | Float | 1.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Speed multiplier |
+| clamp | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Clamp accumulated value |
+| min | Float | -1000.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Clamp minimum |
+| max | Float | 1000.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Clamp maximum |
+| reset_all | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Reset accumulator |
 
-**Inputs:** `in` (CHOP â€” velocity), `reset` (CHOP â€” rising edge resets).
+**Inputs:** `in` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â velocity), `reset` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â rising edge resets).
 
 **How it works:** Each frame: `accumulator += input * scale * delta_time`. Optional clamping. Useful for converting speed/velocity signals to position. Time-dependent.
 
@@ -1258,14 +1258,14 @@ Event counter with rising-edge detection.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| threshold | Float | 0.5 | â€” | Trigger threshold |
-| step | Float | 1.0 | â€” | Count increment |
-| limit_min | Float | 0.0 | â€” | Minimum count value |
-| limit_max | Float | 1000000.0 | â€” | Maximum count value |
+| threshold | Float | 0.5 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Trigger threshold |
+| step | Float | 1.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Count increment |
+| limit_min | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Minimum count value |
+| limit_max | Float | 1000000.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Maximum count value |
 | overflow | Enum | Clamp | Clamp, Loop | What to do at limits |
-| reset_all | Bool | false | â€” | Reset all counters |
+| reset_all | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Reset all counters |
 
-**Inputs:** `in` (CHOP â€” events to count), `reset` (CHOP â€” resets counter).
+**Inputs:** `in` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â events to count), `reset` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â resets counter).
 
 **How it works:** Detects rising edges crossing threshold. Increments count by `step` on each trigger. Applies min/max limits with clamp or loop overflow. Per-channel counting. Time-dependent.
 
@@ -1277,8 +1277,8 @@ Filter and rename channels by pattern.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| pattern | String | "*" | â€” | Channel name pattern (e.g., `*`, `tx,ty`, `chan*`) |
-| rename | String | "" | â€” | Comma-separated rename list (empty = keep names) |
+| pattern | String | "*" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Channel name pattern (e.g., `*`, `tx,ty`, `chan*`) |
+| rename | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Comma-separated rename list (empty = keep names) |
 
 **How it works:** Matches channel names against wildcard patterns. Supports `*` (match all), `prefix*`, `*suffix`. Comma-separated patterns for multiple matches. Optionally renames matched channels in order.
 
@@ -1297,8 +1297,8 @@ Arithmetic operations between channels.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | operation | Enum | Add | Add, Subtract, Multiply, Divide, Abs, Sin, Cos, Pow | Math operation |
-| operand | Float | 0.0 | â€” | Value for single-input operations |
-| channel_name | String | "" | â€” | Pick a specific in2 channel (empty = auto-match) |
+| operand | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Value for single-input operations |
+| channel_name | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Pick a specific in2 channel (empty = auto-match) |
 
 **Inputs:** `in1` (CHOP), `in2` (CHOP, optional).
 
@@ -1326,7 +1326,7 @@ Crossfade between two channel sets.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| cross | Float | 0.5 | 0.0â€“1.0 | Crossfade value (0 = A, 1 = B) |
+| cross | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Crossfade value (0 = A, 1 = B) |
 
 **Inputs:** `A` (CHOP), `B` (CHOP).
 
@@ -1341,11 +1341,11 @@ Boolean logic operations between channels.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | operation | Enum | AND | AND, OR, XOR, NAND, NOR, NOT | Logic operation |
-| threshold | Float | 0.5 | â€” | True/false threshold |
+| threshold | Float | 0.5 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | True/false threshold |
 
-**Inputs:** `in1` (CHOP), `in2` (CHOP, optional â€” NOT uses only in1).
+**Inputs:** `in1` (CHOP), `in2` (CHOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â NOT uses only in1).
 
-**How it works:** Converts values to boolean (â‰¥ threshold = true). Applies logic operation per-sample. Outputs 1.0 (true) or 0.0 (false).
+**How it works:** Converts values to boolean (ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¥ threshold = true). Applies logic operation per-sample. Outputs 1.0 (true) or 0.0 (false).
 
 ---
 
@@ -1365,7 +1365,7 @@ Select one of up to 4 inputs by index.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| index | Int | 0 | 0â€“3 | Which input to output |
+| index | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“3 | Which input to output |
 
 **Inputs:** `in0`, `in1`, `in2`, `in3` (all CHOP).
 
@@ -1373,13 +1373,13 @@ Select one of up to 4 inputs by index.
 
 #### RenameCHOP
 
-Rename input channels with explicit fromâ†’to mapping. Channels not matched by any rename row pass through with their original name. Empty from/to fields are skipped.
+Rename input channels with explicit fromÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢to mapping. Channels not matched by any rename row pass through with their original name. Empty from/to fields are skipped.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| renames | Int | 1 | 1â€“32 | Number of rename rows |
-| fromN | String | "" | â€” | Source channel name for row N (0-based) |
-| toN | String | "" | â€” | Target channel name for row N (0-based) |
+| renames | Int | 1 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“32 | Number of rename rows |
+| fromN | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Source channel name for row N (0-based) |
+| toN | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Target channel name for row N (0-based) |
 
 **Input:** `in` (CHOP).
 
@@ -1387,14 +1387,14 @@ Rename input channels with explicit fromâ†’to mapping. Channels not matched
 
 ---
 
-#### DATtoCHOP *(Bridge â€” DAT â†’ CHOP)*
+#### DATtoCHOP *(Bridge ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â DAT ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ CHOP)*
 
 Converts a DAT table to CHOP channels. Lives in the `dat/` folder but produces CHOP output (family = CHOP).
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | layout | Enum | Columns as Channels | Columns as Channels, Rows as Channels | Conversion layout |
-| first_is_name | Bool | true | â€” | Use first row/column as channel names |
+| first_is_name | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Use first row/column as channel names |
 
 **Input:** `dat_in` (DAT).
 
@@ -1402,7 +1402,7 @@ Converts a DAT table to CHOP channels. Lives in the `dat/` folder but produces C
 
 ---
 
-#### PhysicsCHOP *(Bridge â€” COMP â†’ CHOP)*
+#### PhysicsCHOP *(Bridge ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â COMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ CHOP)*
 
 Reads transform, velocity, and state from an upstream physics body COMP and outputs them as CHOP channels.
 
@@ -1416,7 +1416,7 @@ Reads transform, velocity, and state from an upstream physics body COMP and outp
 | speed | Bool | false | Output `speed` channel (velocity magnitude) |
 | sleeping | Bool | false | Output `sleeping` channel (1.0 = asleep) |
 
-**Input:** `comp_in` (COMP â€” a physics body such as RigidBodyCOMP).
+**Input:** `comp_in` (COMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â a physics body such as RigidBodyCOMP).
 
 **How it works:** Walks the network to find the upstream COMP's scene node (`RigidBody3D`, `StaticBody3D`, etc.) and reads its current transform and physics state. Each enabled parameter group adds the corresponding channels to the output. Position and rotation use global coordinates when the node is inside a scene tree. Velocity and sleeping state are only meaningful for `RigidBody3D` nodes; other body types output zeros for those channels.
 
@@ -1466,7 +1466,7 @@ Biquad Butterworth IIR filter (low-pass, high-pass, band-pass).
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | type | Enum | Low Pass | Low Pass, High Pass, Band Pass |
-| cutoff | Float | 0.5 | Normalized cutoff frequency (0â€“1) |
+| cutoff | Float | 0.5 | Normalized cutoff frequency (0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1) |
 | q | Float | 0.707 | Resonance / quality factor |
 
 **Input:** `in` (CHOP).
@@ -1477,7 +1477,7 @@ Biquad Butterworth IIR filter (low-pass, high-pass, band-pass).
 
 #### SpringCHOP
 
-Damped harmonic oscillator â€” channels spring toward input values.
+Damped harmonic oscillator ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â channels spring toward input values.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -1506,7 +1506,7 @@ Delay channels by N frames using a ring buffer.
 
 #### EnvelopeCHOP
 
-Envelope follower â€” RMS, peak, or average-abs with window size.
+Envelope follower ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â RMS, peak, or average-abs with window size.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -1542,7 +1542,7 @@ Index into a sample array using another channel as lookup position.
 | interpolate | Enum | Linear | Nearest, Linear |
 | extend | Enum | Clamp | Clamp, Cycle, Mirror |
 
-**Inputs:** `table` (CHOP â€” lookup data), `index` (CHOP â€” lookup positions 0â€“1).
+**Inputs:** `table` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â lookup data), `index` (CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â lookup positions 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1).
 
 **How it works:** Normalizes index values to the table's sample range. Reads interpolated values from the table at the indexed position.
 
@@ -1745,7 +1745,7 @@ Outputs mouse position, delta, buttons, and scroll as CHOP channels.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| normalized | Bool | true | Normalize position to 0â€“1 by viewport size |
+| normalized | Bool | true | Normalize position to 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1 by viewport size |
 | buttons | Bool | true | Output lmb, rmb, mmb channels |
 | scroll | Bool | true | Output scroll channel |
 
@@ -1759,7 +1759,7 @@ Outputs gamepad/controller stick, trigger, and button states.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| device | Int | 0 | Gamepad device index (0â€“7) |
+| device | Int | 0 | Gamepad device index (0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“7) |
 | deadzone | Float | 0.1 | Stick deadzone threshold |
 
 **Channels:** `lx`, `ly`, `rx`, `ry` (sticks), `lt`, `rt` (triggers), `a`, `b`, `x`, `y`, `lb`, `rb`, `start`, `select`, d-pad. **Time-dependent.**
@@ -1789,8 +1789,8 @@ Scrolling buffer that records input channel values over time (oscilloscope trace
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| length | Int | 120 | 2â€“3600 | Number of frames to record |
-| active | Bool | true | â€” | Enable recording |
+| length | Int | 120 | 2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“3600 | Number of frames to record |
+| active | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable recording |
 
 **Input:** `in` (CHOP). **Time-dependent.** Maintains ring buffers per channel.
 
@@ -1822,11 +1822,84 @@ Samples pixel values from a TOP texture as CHOP channels.
 
 ---
 
-## DAT â€” Data Operators
+#### Feedback CHOP
+
+Previous frame's CHOP data for feedback loops. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| reset | Bool | false |  | Pulse to clear stored data |
+
+**Input:** `in` (CHOP, optional).
+**Output:** CHOP (previous frame's channel data).
+
+**How it works:** Returns the channel data stored from the previous frame (`_prev_data`). After outputting, deep-copies the current input for next frame. If `reset` is pulsed, clears all stored data.
+
+---
+
+#### Blend CHOP
+
+Sample-by-sample weighted blend of multiple CHOP inputs (28 inputs).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| weight | Float | 0.5 | 0.01.0 | 0 = first input, 1 = last input |
+| method | Enum | Linear | Linear, Ease In, Ease Out, Smooth Step | Interpolation curve |
+
+**Input:** Dynamic inputs (28 CHOPs).
+**Output:** CHOP (blended channels).
+
+**How it works:** Scales `weight` across the input array to select two bracketing inputs and a fractional `t`. Applies the selected easing to `t`, then lerps all channels sample-by-sample. Missing channels are zero-filled.
+
+---
+
+#### Perform CHOP
+
+System performance metrics as CHOP channels. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| fps | Bool | true |  | Frames per second |
+| frame_time | Bool | true |  | Frame time in milliseconds |
+| frame_count | Bool | true |  | Total frames drawn |
+| memory | Bool | true |  | Static memory usage in MB |
+| gpu_time | Bool | false |  | Last GPU frame time (if available) |
+
+**Output:** CHOP (performance channels, one per enabled metric).
+
+**How it works:** Reads `Engine.get_frames_per_second()`, `Engine.get_frames_drawn()`, `OS.get_static_memory_usage()`, and `Performance.TIME_PROCESS` (GPU fallback). Each metric outputs as a single-sample channel gated by its bool.
+
+---
+
+#### Transform CHOP
+
+3D transform on xyz channel groups. Detects channel triplets and applies a matrix transform.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| tx | Float | 0.0 | unbounded | Translate X |
+| ty | Float | 0.0 | unbounded | Translate Y |
+| tz | Float | 0.0 | unbounded | Translate Z |
+| rx | Float | 0.0 | -360360 | Rotate X (degrees) |
+| ry | Float | 0.0 | -360360 | Rotate Y (degrees) |
+| rz | Float | 0.0 | -360360 | Rotate Z (degrees) |
+| sx | Float | 1.0 | 0.001100 | Scale X |
+| sy | Float | 1.0 | 0.001100 | Scale Y |
+| sz | Float | 1.0 | 0.001100 | Scale Z |
+| order | Enum | SRT | SRT, STR, RST, RTS, TSR, TRS | Transform operation order |
+
+**Input:** `in` (CHOP, optional).
+**Output:** CHOP (transformed channels).
+
+**How it works:** Builds a `Transform3D` from TRS parameters in the specified order. Detects xyz channel groups (e.g. `tx/ty/tz` or `x/y/z`) and applies the matrix to every sample as a `Vector3`. Non-grouped channels pass through unchanged.
+
+---
+
+## DAT ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
 
-**Total: 24 operators** â€” 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges.
+**Total: 29 operators** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges.
 
 ### Generators
 
@@ -1834,15 +1907,15 @@ DATs process tables and text. The output type is `GNTableData`, which operates i
 
 #### ConstantDAT
 
-Manually editable 4Ã—4 table.
+Manually editable 4ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â4 table.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| col0 | String | "name" | â€” | Column 0 header |
-| col1 | String | "value" | â€” | Column 1 header |
-| col2 | String | "" | â€” | Column 2 header (empty = skip) |
-| col3 | String | "" | â€” | Column 3 header (empty = skip) |
-| r0c0â€“r3c3 | String | "" | â€” | 16 cells (4 rows Ã— 4 columns) |
+| col0 | String | "name" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Column 0 header |
+| col1 | String | "value" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Column 1 header |
+| col2 | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Column 2 header (empty = skip) |
+| col3 | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Column 3 header (empty = skip) |
+| r0c0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“r3c3 | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | 16 cells (4 rows ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â 4 columns) |
 
 **How it works:** Builds a table from hand-entered headers and cells. Column count stops at the first empty header (after col1). Entirely empty rows are skipped.
 
@@ -1854,15 +1927,15 @@ Plain text storage.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| text | String | "" | â€” | Text content |
+| text | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Text content |
 
-**How it works:** Stores plain text in text mode (`GNTableData.set_text()`). Not a table â€” just a string.
+**How it works:** Stores plain text in text mode (`GNTableData.set_text()`). Not a table ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â just a string.
 
 ---
 
 #### InfoDAT
 
-System information table. Time-dependent â€” updates every frame.
+System information table. Time-dependent ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â updates every frame.
 
 **Parameters:** None.
 
@@ -1876,13 +1949,13 @@ System information table. Time-dependent â€” updates every frame.
 
 #### OscInDAT *(Stub)*
 
-OSC message receiver. **Currently a stub** â€” UDP/OSC networking is not yet implemented.
+OSC message receiver. **Currently a stub** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â UDP/OSC networking is not yet implemented.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| port | Int | 9000 | 1â€“65535 | Listening port |
-| max_rows | Int | 100 | 1â€“10000 | Maximum stored messages |
-| active | Bool | true | â€” | Enable/disable |
+| port | Int | 9000 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“65535 | Listening port |
+| max_rows | Int | 100 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10000 | Maximum stored messages |
+| active | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable/disable |
 
 **Output table columns:** `address`, `arg0`, `arg1`, `arg2`, `timestamp`.
 
@@ -1904,7 +1977,7 @@ Extract row/column subsets by index range.
 | row_end | Int | -1 | -1+ | Last row (-1 = all) |
 | col_start | Int | 0 | 0+ | First column (inclusive) |
 | col_end | Int | -1 | -1+ | Last column (-1 = all) |
-| include_header | Bool | true | â€” | Include header row in output |
+| include_header | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Include header row in output |
 
 ---
 
@@ -1974,7 +2047,7 @@ Select one of 2 inputs by index.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| index | Int | 0 | 0â€“1 | Which input to output |
+| index | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1 | Which input to output |
 
 ---
 
@@ -1982,7 +2055,7 @@ Select one of 2 inputs by index.
 
 ---
 
-#### CHOPtoDAT *(Bridge â€” CHOP â†’ DAT)*
+#### CHOPtoDAT *(Bridge ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ DAT)*
 
 Converts CHOP channel data to a DAT table.
 
@@ -1996,9 +2069,9 @@ Converts CHOP channel data to a DAT table.
 
 ---
 
-#### DATtoCHOP *(Bridge â€” DAT â†’ CHOP)*
+#### DATtoCHOP *(Bridge ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â DAT ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ CHOP)*
 
-See [DATtoCHOP in the CHOP section](#dattochop-bridge--dat--chop) â€” this operator has CHOP family despite living in the DAT directory.
+See [DATtoCHOP in the CHOP section](#dattochop-bridge--dat--chop) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â this operator has CHOP family despite living in the DAT directory.
 
 ---
 
@@ -2030,7 +2103,7 @@ Parse JSON to table or generate JSON from table.
 | json_string | String | "" | JSON string for parse mode |
 | pretty | Bool | true | Pretty-print generated JSON |
 
-**Input:** `in` (DAT, optional â€” for Generate mode).
+**Input:** `in` (DAT, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â for Generate mode).
 
 ---
 
@@ -2102,12 +2175,12 @@ Delete rows or columns from a table by index range.
 
 #### FIFODAT
 
-Rolling row buffer â€” accumulates rows over time, dropping oldest when full.
+Rolling row buffer ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â accumulates rows over time, dropping oldest when full.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| max_rows | Int | 100 | 1â€“10000 | Maximum rows in buffer |
-| active | Bool | true | â€” | Enable accumulation |
+| max_rows | Int | 100 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10000 | Maximum rows in buffer |
+| active | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable accumulation |
 
 **Input:** `in` (DAT). **Time-dependent.** Maintains internal buffer across cooks.
 
@@ -2175,13 +2248,13 @@ Event-driven callback DAT. Holds named GDScript snippets that fire automatically
 | on_value_change | String | (template) | Script that runs when target parameter changes |
 | on_create | String | (template) | Script that runs once when CallbackDAT is first cooked |
 
-**Input:** `target` (any family) â€” the node to observe.
-**Output:** `out` (DAT) â€” event log table with columns: `time, event, status, target`.
+**Input:** `target` (any family) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â the node to observe.
+**Output:** `out` (DAT) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â event log table with columns: `time, event, status, target`.
 
 **Callback context variables:** Same as Script operators (`me`, `inputs`, `time`, `frame`, `dt`, `par()`, `chop()`, `top()`, `sop()`, `dat()`, `set_par()`, `network_*()`) plus:
-- `target` â€” the GNNode connected to input 0
-- `event` â€” String name of the callback (e.g. "onCook")
-- `event_param` â€” for onValueChange, the parameter name that changed
+- `target` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â the GNNode connected to input 0
+- `event` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â String name of the callback (e.g. "onCook")
+- `event_param` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â for onValueChange, the parameter name that changed
 
 **Supported events:**
 
@@ -2192,7 +2265,7 @@ Event-driven callback DAT. Holds named GDScript snippets that fire automatically
 | `onCook` | Target node finishes cooking | React to output changes |
 | `onValueChange` | Target node param changes | Mirror params, trigger side effects |
 
-**Example â€” mirror a parameter:**
+**Example ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â mirror a parameter:**
 
 ```gdscript
 # onValueChange callback
@@ -2200,7 +2273,7 @@ if event_param == "speed":
     set_par("other_lfo", "speed", par(target.id, "speed") * 2.0)
 ```
 
-**Example â€” procedural graph building:**
+**Example ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â procedural graph building:**
 
 ```gdscript
 # onCreate callback
@@ -2211,11 +2284,98 @@ network_connect(nid, 0, "composite1", 1)
 
 ---
 
-## SOP â€” Surface Operators
+#### Web Server DAT
+
+HTTP server that serves responses and logs incoming requests as a table. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| port | Int | 8080 | 165535 | Listen port |
+| active | Bool | true |  | Enable / disable server |
+| content_type | String | "text/html" |  | Response Content-Type header |
+| max_requests | Int | 50 | 1100 | Maximum request log rows |
+| clear | Bool | false |  | Pulse to clear log |
+
+**Input:** `response` (DAT, optional  response body).
+**Output:** DAT table (columns: method, path, time).
+
+**How it works:** Runs a `TCPServer` that accepts connections, parses HTTP request lines, serves a response from the upstream DAT input (or "OK"), and logs each request into a rolling table trimmed to `max_requests` rows.
+
+---
+
+#### WebSocket DAT
+
+WebSocket client/server communication. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Client | Client, Server | Client connects to URL, Server listens on port |
+| url | String | "ws://127.0.0.1:9090" |  | WebSocket URL (client mode) |
+| port | Int | 9090 | 165535 | Listen port (server mode) |
+| active | Bool | true |  | Enable / disable |
+| max_lines | Int | 100 | 11000 | Maximum received messages to buffer |
+| clear | Bool | false |  | Pulse to clear buffer |
+
+**Input:** `send` (DAT, optional  data to send).
+**Output:** DAT table (column: message).
+
+**How it works:** In Client mode, connects to a WebSocket URL via `WebSocketPeer`, polls for packets, and sends upstream DAT text. In Server mode, listens via `TCPServer`, upgrades connections to `WebSocketPeer`, and broadcasts to all connected peers. Received messages accumulate into a rolling table.
+
+---
+
+#### Error DAT
+
+Captures system warnings and errors as a table by hooking GNLogger. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| level_filter | Enum | Warnings & Errors | Errors Only, Warnings & Errors, All | Minimum severity to capture |
+| max_rows | Int | 200 | 15000 | Maximum log entries |
+| clear | Bool | false |  | Pulse to clear the log |
+
+**Output:** DAT table (columns: level, category, message, timestamp).
+
+**How it works:** Hooks `GNLogger.log_sink` at init so all `GNLogger.warn`/`GNLogger.error` calls are captured. The `_on_log` callback filters by severity and appends rows. Cook trims to `max_rows` and outputs the accumulated table. Unhooks on deletion.
+
+---
+
+#### Folder DAT
+
+List directory contents as a table.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| path | String | "res://" |  | Directory path to list |
+| recursive | Bool | false |  | Include sub-directories recursively |
+| filter | String | "*" |  | Glob-style filter (e.g. *.png) |
+| include_dirs | Bool | true |  | Include directories in listing |
+
+**Output:** DAT table (columns: name, path, extension, size, is_dir).
+
+**How it works:** Opens the given directory with `DirAccess`, iterates entries (optionally recursive), filters with `matchn()`, reads file sizes, and builds a table with name/path/extension/size/is_dir columns.
+
+---
+
+#### Multi Touch In DAT
+
+Multi-touch screen input as table rows. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| active | Bool | true |  | Enable / disable touch capture |
+| normalize | Bool | false |  | Output 01 normalized coords instead of pixels |
+
+**Output:** DAT table (columns: id, x, y, pressure, rel_x, rel_y, phase).
+
+**How it works:** Maintains a `_touches` dictionary updated by `InputEventScreenTouch` (began/ended) and `InputEventScreenDrag` (moved). Each cook outputs active touches as table rows. Optionally normalizes coordinates to viewport 01. Ended touches are removed after output.
+
+---
+
+## SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Surface Operators
 
 SOPs produce and manipulate 3D geometry. The output type is `GNGeoData`, which wraps Godot's native `ArrayMesh`. SOPs leverage Godot's built-in mesh primitives (`BoxMesh`, `SphereMesh`, etc.) and `SurfaceTool` for procedural generation. Geometry flows through SOP chains and ultimately reaches a GeometryCOMP for 3D scene placement.
 
-**Total: 50 operators** â€” 13 generators, 20 filters, 6 combiners, 2 utility, 5 deformers, 3 bridge, 1 decimation.
+**Total: 55 operators** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â 13 generators, 20 filters, 6 combiners, 2 utility, 5 deformers, 3 bridge, 1 decimation.
 
 ### Generators
 
@@ -2227,10 +2387,10 @@ Subdivided plane.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| size_x | Float | 2.0 | 0.01â€“100.0 | Width |
-| size_z | Float | 2.0 | 0.01â€“100.0 | Depth |
-| rows | Int | 10 | 1â€“500 | Row subdivisions |
-| cols | Int | 10 | 1â€“500 | Column subdivisions |
+| size_x | Float | 2.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Width |
+| size_z | Float | 2.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Depth |
+| rows | Int | 10 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“500 | Row subdivisions |
+| cols | Int | 10 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“500 | Column subdivisions |
 | orientation | Enum | XZ | XZ (Horizontal), XY (Vertical), YZ (Side) | Plane orientation |
 
 **How it works:** Builds a subdivided quad using `SurfaceTool`. Vertices are arranged in a grid, triangulated, with calculated UVs and normals. Generates tangents. The mesh is centered at origin.
@@ -2243,12 +2403,12 @@ Box mesh.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| size_x | Float | 1.0 | 0.01â€“100.0 | Width |
-| size_y | Float | 1.0 | 0.01â€“100.0 | Height |
-| size_z | Float | 1.0 | 0.01â€“100.0 | Depth |
-| subdivide_w | Int | 0 | 0â€“100 | Width subdivisions |
-| subdivide_h | Int | 0 | 0â€“100 | Height subdivisions |
-| subdivide_d | Int | 0 | 0â€“100 | Depth subdivisions |
+| size_x | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Width |
+| size_y | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Height |
+| size_z | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Depth |
+| subdivide_w | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Width subdivisions |
+| subdivide_h | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Height subdivisions |
+| subdivide_d | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Depth subdivisions |
 
 **How it works:** Creates a Godot `BoxMesh`, converts to `ArrayMesh` via `SurfaceTool`.
 
@@ -2260,11 +2420,11 @@ Sphere or hemisphere mesh.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| radius | Float | 0.5 | 0.01â€“100.0 | Radius |
-| height | Float | 1.0 | 0.01â€“200.0 | Height (stretch on Y) |
-| radial_segments | Int | 32 | 3â€“256 | Longitudinal segments |
-| rings | Int | 16 | 2â€“128 | Latitudinal rings |
-| is_hemisphere | Bool | false | â€” | Only upper half |
+| radius | Float | 0.5 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Radius |
+| height | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“200.0 | Height (stretch on Y) |
+| radial_segments | Int | 32 | 3ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“256 | Longitudinal segments |
+| rings | Int | 16 | 2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“128 | Latitudinal rings |
+| is_hemisphere | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Only upper half |
 
 **How it works:** Creates a Godot `SphereMesh`, converts to `ArrayMesh` via `SurfaceTool`.
 
@@ -2276,10 +2436,10 @@ Torus (donut) mesh.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| inner_radius | Float | 0.2 | 0.01â€“50.0 | Tube radius |
-| outer_radius | Float | 0.5 | 0.01â€“100.0 | Ring radius |
-| rings | Int | 32 | 3â€“256 | Major segments |
-| ring_segments | Int | 16 | 3â€“128 | Minor segments |
+| inner_radius | Float | 0.2 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Tube radius |
+| outer_radius | Float | 0.5 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Ring radius |
+| rings | Int | 32 | 3ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“256 | Major segments |
+| ring_segments | Int | 16 | 3ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“128 | Minor segments |
 
 **How it works:** Creates a Godot `TorusMesh`, converts to `ArrayMesh` via `SurfaceTool`.
 
@@ -2291,13 +2451,13 @@ Cylinder or cone mesh.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| top_radius | Float | 0.5 | 0.0â€“50.0 | Top radius (0 = cone) |
-| bottom_radius | Float | 0.5 | 0.0â€“50.0 | Bottom radius |
-| height | Float | 1.0 | 0.01â€“100.0 | Height |
-| radial_segments | Int | 32 | 3â€“256 | Segments around circumference |
-| rings | Int | 4 | 1â€“128 | Vertical rings |
-| cap_top | Bool | true | â€” | Cap the top |
-| cap_bottom | Bool | true | â€” | Cap the bottom |
+| top_radius | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Top radius (0 = cone) |
+| bottom_radius | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Bottom radius |
+| height | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Height |
+| radial_segments | Int | 32 | 3ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“256 | Segments around circumference |
+| rings | Int | 4 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“128 | Vertical rings |
+| cap_top | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Cap the top |
+| cap_bottom | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Cap the bottom |
 
 **How it works:** Creates a Godot `CylinderMesh`, converts to `ArrayMesh` via `SurfaceTool`. Set `top_radius = 0` for a cone.
 
@@ -2309,9 +2469,9 @@ Line strip mesh.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| points | Int | 10 | 2â€“10000 | Number of points |
+| points | Int | 10 | 2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10000 | Number of points |
 | direction | Enum | X | X, Y, Z | Axis direction |
-| length | Float | 2.0 | 0.01â€“1000.0 | Total line length |
+| length | Float | 2.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Total line length |
 
 **How it works:** Generates a `LINE_STRIP` mesh with points evenly distributed along the selected axis, centered at origin.
 
@@ -2323,8 +2483,8 @@ Filled disc or wire circle.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| radius | Float | 0.5 | 0.01â€“100.0 | Circle radius |
-| segments | Int | 32 | 3â€“512 | Edge segments |
+| radius | Float | 0.5 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Circle radius |
+| segments | Int | 32 | 3ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“512 | Edge segments |
 | type | Enum | Filled Disc | Filled Disc, Wire Circle | Solid or outline |
 | orientation | Enum | XZ | XZ (Horizontal), XY (Vertical), YZ (Side) | Plane |
 
@@ -2342,9 +2502,9 @@ Translate, rotate, and scale geometry.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| tx, ty, tz | Float | 0.0 | â€” | Translation |
-| rx, ry, rz | Float | 0.0 | -360â€“360 | Rotation in degrees |
-| sx, sy, sz | Float | 1.0 | 0.001â€“100.0 | Scale |
+| tx, ty, tz | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Translation |
+| rx, ry, rz | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Rotation in degrees |
+| sx, sy, sz | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Scale |
 | order | Enum | SRT | SRT, STR, RST, RTS, TSR, TRS | Transform order |
 
 **How it works:** Builds a `Transform3D` from the translation, rotation, and scale parameters in the specified order. Applies the transform to every vertex position. Normals are transformed using the inverse-transpose basis to maintain correctness under non-uniform scale.
@@ -2353,17 +2513,17 @@ Translate, rotate, and scale geometry.
 
 #### NoiseSOP
 
-Displace vertices with procedural noise. Time-dependent â€” animates automatically.
+Displace vertices with procedural noise. Time-dependent ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â animates automatically.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| amplitude | Float | 0.2 | 0.0â€“100.0 | Displacement strength |
-| frequency | Float | 2.0 | 0.01â€“100.0 | Noise frequency |
-| offset_x, offset_y, offset_z | Float | 0.0 | â€” | Noise offset |
-| speed | Float | 1.0 | 0.0â€“10.0 | Animation speed |
+| amplitude | Float | 0.2 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Displacement strength |
+| frequency | Float | 2.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Noise frequency |
+| offset_x, offset_y, offset_z | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Noise offset |
+| speed | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Animation speed |
 | noise_type | Enum | Simplex | Simplex, Perlin, Cellular, Value | Noise algorithm |
 | displace_axis | Enum | Normal | Normal, X, Y, Z | Displacement direction |
-| seed | Int | 0 | 0â€“9999 | Random seed |
+| seed | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“9999 | Random seed |
 
 **How it works:** Uses Godot's `FastNoiseLite` to sample 3D noise at each vertex position. The noise value displaces the vertex along its normal (or a fixed axis). Time offset evolves via `elapsed_time * speed` for animation.
 
@@ -2375,9 +2535,9 @@ Midpoint subdivision.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| iterations | Int | 1 | 1â€“4 | Number of subdivision passes |
+| iterations | Int | 1 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4 | Number of subdivision passes |
 
-**How it works:** Splits each triangle into 4 by inserting midpoints on each edge. Non-triangle primitives pass through unchanged. Regenerates normals and tangents after subdivision. Each iteration quadruples the triangle count â€” limit of 4 iterations prevents runaway geometry.
+**How it works:** Splits each triangle into 4 by inserting midpoints on each edge. Non-triangle primitives pass through unchanged. Regenerates normals and tangents after subdivision. Each iteration quadruples the triangle count ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â limit of 4 iterations prevents runaway geometry.
 
 ---
 
@@ -2397,7 +2557,7 @@ Convert triangles to lines. No parameters.
 
 Merge multiple geometries into one. No parameters.
 
-**Input:** `in` (SOP, **multi-input** â€” accepts multiple connections).
+**Input:** `in` (SOP, **multi-input** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â accepts multiple connections).
 
 **How it works:** Appends all surfaces from all input `ArrayMesh` objects into a single output `ArrayMesh`. Each input's geometry becomes a separate surface in the combined mesh.
 
@@ -2419,7 +2579,7 @@ Select one of 2 inputs by index.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| index | Int | 0 | 0â€“1 | Which input to output |
+| index | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1 | Which input to output |
 
 ---
 
@@ -2512,7 +2672,7 @@ Unique points (flat shading) or consolidate close vertices.
 
 **Input:** `in` (SOP).
 
-**How it works:** Unique mode unshares every vertex so triangles have independent normals. Consolidate merges vertices within the distance threshold using O(nÂ²) proximity search.
+**How it works:** Unique mode unshares every vertex so triangles have independent normals. Consolidate merges vertices within the distance threshold using O(nÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â²) proximity search.
 
 ---
 
@@ -2559,12 +2719,12 @@ Create or modify per-vertex point attributes from expressions or presets.
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | attrib_name | String | "Cd" | Attribute name |
-| components | Int | 3 | Values per vertex (1â€“4) |
+| components | Int | 3 | Values per vertex (1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4) |
 | source | Enum | Constant | Constant, Expression, Position, Normal, UV, Random |
 
 **Input:** `in` (SOP).
 
-**How it works:** Stores results in `GNGeoData.point_attribs` dictionary â€” a dictionary of name â†’ `PackedFloat32Array` with `components` values per vertex.
+**How it works:** Stores results in `GNGeoData.point_attribs` dictionary ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â a dictionary of name ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ `PackedFloat32Array` with `components` values per vertex.
 
 ---
 
@@ -2628,7 +2788,7 @@ Instance template geometry onto each point of the target mesh.
 |-----------|------|---------|-------------|
 | align_normals | Bool | true | Orient instances to target surface normals |
 
-**Inputs:** `template` (SOP â€” geometry to copy), `target` (SOP â€” points to copy onto).
+**Inputs:** `template` (SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â geometry to copy), `target` (SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â points to copy onto).
 
 **How it works:** Extracts target point positions and normals. For each point, builds a transform basis from the normal and copies all template vertices, applying the transform. Supports `pscale` point attribute for per-instance scaling.
 
@@ -2675,7 +2835,7 @@ Sweep a cross-section along a backbone curve (parallel transport frames).
 | close_backbone | Bool | false | Loop the backbone |
 | end_caps | Bool | false | Generate end caps |
 
-**Inputs:** `backbone` (SOP â€” line strip), `profile` (SOP, optional â€” cross-section; uses circle if absent).
+**Inputs:** `backbone` (SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â line strip), `profile` (SOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â cross-section; uses circle if absent).
 
 **How it works:** Computes rotation-minimizing frames (RMF) along the backbone using the double-reflection method. Places the scaled profile at each frame position, then connects consecutive rings with quad strips. This prevents the twisting artifacts that occur with simpler Frenet frames.
 
@@ -2708,10 +2868,10 @@ Bend geometry along an axis using circular arc deformation.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| angle | Float | 0.0 | -360â€“360 | Bend angle in degrees |
+| angle | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Bend angle in degrees |
 | axis | Enum | Y | X, Y, Z | Bend axis |
-| origin | Float | 0.0 | -10â€“10 | Center of bend along axis |
-| length_val | Float | 0.0 | â€” | Region length (0 = auto from bounds) |
+| origin | Float | 0.0 | -10ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10 | Center of bend along axis |
+| length_val | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Region length (0 = auto from bounds) |
 
 **Input:** `in` (SOP). Works best on subdivided geometry.
 
@@ -2723,7 +2883,7 @@ Rotates vertices around an axis proportional to their position along that axis.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| angle | Float | 0.0 | -720â€“720 | Total twist in degrees |
+| angle | Float | 0.0 | -720ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“720 | Total twist in degrees |
 | axis | Enum | Y | X, Y, Z | Twist axis |
 
 **Input:** `in` (SOP). More subdivisions = smoother twist.
@@ -2736,8 +2896,8 @@ Scale perpendicular axes as a function of position along the taper axis.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| scale_start | Float | 1.0 | 0â€“10 | Scale at bottom |
-| scale_end | Float | 0.5 | 0â€“10 | Scale at top |
+| scale_start | Float | 1.0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10 | Scale at bottom |
+| scale_end | Float | 0.5 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10 | Scale at top |
 | axis | Enum | Y | X, Y, Z | Taper axis |
 | profile | Enum | Linear | Linear, Smooth | Interpolation profile |
 
@@ -2755,9 +2915,9 @@ Generate 3D text mesh using Godot's TextMesh.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| text | String | "Hello" | â€” | Text to render |
-| font_size | Float | 1.0 | 0.1â€“100 | Font size multiplier |
-| depth | Float | 0.1 | 0â€“10 | Extrusion depth |
+| text | String | "Hello" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Text to render |
+| font_size | Float | 1.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Font size multiplier |
+| depth | Float | 0.1 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10 | Extrusion depth |
 | horizontal_align | Enum | Center | Left, Center, Right | Horizontal alignment |
 
 No input needed. Uses Godot's built-in TextMesh for high-quality 3D text.
@@ -2774,8 +2934,8 @@ Records the centroid of input geometry over time as a line strip trail.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| length | Int | 60 | 2â€“3600 | Number of frames to record |
-| active | Bool | true | â€” | Enable recording |
+| length | Int | 60 | 2ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“3600 | Number of frames to record |
+| active | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable recording |
 
 **Input:** `in` (SOP). **Time-dependent.** Computes centroid of input and appends to ring buffer.
 
@@ -2819,20 +2979,20 @@ L-System fractal/branching geometry from formal grammar rewriting rules.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| axiom | String | "F" | â€” | Starting string |
-| rule_a | String | "F=F[+F]F[-F]F" | â€” | Production rule A (format: X=replacement) |
-| rule_b | String | "" | â€” | Production rule B (optional) |
-| rule_c | String | "" | â€” | Production rule C (optional) |
-| iterations | Int | 3 | 0â€“8 | Grammar rewriting passes |
-| step_size | Float | 1.0 | 0.01â€“100.0 | Distance per F move |
-| angle | Float | 25.7 | 0.1â€“180.0 | Turn angle in degrees |
-| step_scale | Float | 1.0 | 0.1â€“2.0 | Step size multiplier per depth |
-| angle_rand | Float | 0.0 | 0.0â€“1.0 | Random turn angle variation |
-| seed | Int | 42 | 0â€“99999 | Random seed |
-| tube_radius | Float | 0.0 | 0.0â€“10.0 | Tube radius (0 = line primitives) |
-| tube_sides | Int | 6 | 3â€“16 | Cross-section polygon sides |
-| taper | Float | 0.7 | 0.01â€“1.0 | Radius reduction per depth (branch thinning) |
-| gravity | Float | 0.0 | -5.0â€“5.0 | Downward tropism per segment |
+| axiom | String | "F" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Starting string |
+| rule_a | String | "F=F[+F]F[-F]F" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Production rule A (format: X=replacement) |
+| rule_b | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Production rule B (optional) |
+| rule_c | String | "" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Production rule C (optional) |
+| iterations | Int | 3 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“8 | Grammar rewriting passes |
+| step_size | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Distance per F move |
+| angle | Float | 25.7 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“180.0 | Turn angle in degrees |
+| step_scale | Float | 1.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Step size multiplier per depth |
+| angle_rand | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Random turn angle variation |
+| seed | Int | 42 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“99999 | Random seed |
+| tube_radius | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Tube radius (0 = line primitives) |
+| tube_sides | Int | 6 | 3ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16 | Cross-section polygon sides |
+| taper | Float | 0.7 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Radius reduction per depth (branch thinning) |
+| gravity | Float | 0.0 | -5.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“5.0 | Downward tropism per segment |
 
 **How it works:** Rewrites the axiom string using production rules for the given iterations, then a turtle interprets the result: `F` = draw forward, `+`/`-` = yaw, `&`/`^` = pitch, `\`/`/` = roll, `[`/`]` = push/pop state. When `tube_radius > 0`, generates extruded tube geometry with taper; otherwise produces line-strip primitives.
 
@@ -2844,17 +3004,17 @@ Metaball implicit surface via marching cubes. Soft-blending blob geometry.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| resolution | Int | 30 | 4â€“128 | Voxel grid subdivisions per axis |
-| bounds_size | Float | 6.0 | 0.5â€“100.0 | Cubic grid extent |
-| threshold | Float | 1.0 | 0.01â€“10.0 | Iso-surface threshold |
-| default_radius | Float | 1.0 | 0.01â€“50.0 | Ball radius (no pscale attribute) |
-| ball_count | Int | 2 | 0â€“4 | Built-in balls (no input connected) |
-| b0x, b0y, b0z, b0r | Float | â€” | â€” | Ball 0 position and radius |
-| b1x, b1y, b1z, b1r | Float | â€” | â€” | Ball 1 position and radius |
-| b2x, b2y, b2z, b2r | Float | â€” | â€” | Ball 2 position and radius |
-| b3x, b3y, b3z, b3r | Float | â€” | â€” | Ball 3 position and radius |
+| resolution | Int | 30 | 4ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“128 | Voxel grid subdivisions per axis |
+| bounds_size | Float | 6.0 | 0.5ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Cubic grid extent |
+| threshold | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Iso-surface threshold |
+| default_radius | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Ball radius (no pscale attribute) |
+| ball_count | Int | 2 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“4 | Built-in balls (no input connected) |
+| b0x, b0y, b0z, b0r | Float | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Ball 0 position and radius |
+| b1x, b1y, b1z, b1r | Float | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Ball 1 position and radius |
+| b2x, b2y, b2z, b2r | Float | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Ball 2 position and radius |
+| b3x, b3y, b3z, b3r | Float | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Ball 3 position and radius |
 
-**Input:** `points` (SOP, optional â€” point cloud for ball centres).
+**Input:** `points` (SOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â point cloud for ball centres).
 
 **How it works:** Evaluates sum-of-inverse-square fields from all ball centres on a voxel grid, then extracts the iso-surface via marching cubes lookup tables. Reuses the same static MC table data as IsoSurfaceSOP. With no input connected, uses the built-in ball parameters; with input, reads vertex positions as ball centres (and pscale attribute as radius).
 
@@ -2862,18 +3022,18 @@ Metaball implicit surface via marching cubes. Soft-blending blob geometry.
 
 #### IsoSurfaceSOP
 
-Analytic implicit surface via marching cubes â€” generates mathematical surfaces (Gyroid, Schwarz-P, Schwarz-D, Sphere, Torus, Custom).
+Analytic implicit surface via marching cubes ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â generates mathematical surfaces (Gyroid, Schwarz-P, Schwarz-D, Sphere, Torus, Custom).
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | surface_type | Enum | Gyroid | Gyroid, Schwarz-P, Schwarz-D, Sphere, Torus, Custom | Implicit function |
-| resolution | Int | 40 | 4â€“128 | Grid subdivisions per axis |
-| bounds_size | Float | 6.28 | 0.5â€“100.0 | Cubic grid extent |
-| threshold | Float | 0.0 | -50.0â€“50.0 | Iso value for surface extraction |
-| frequency | Float | 1.0 | 0.01â€“20.0 | Spatial frequency multiplier |
-| major_radius | Float | 2.0 | 0.1â€“50.0 | Torus major radius |
-| minor_radius | Float | 0.8 | 0.01â€“20.0 | Torus minor radius |
-| expression | String | "sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x)" | â€” | Custom field formula (x, y, z) |
+| resolution | Int | 40 | 4ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“128 | Grid subdivisions per axis |
+| bounds_size | Float | 6.28 | 0.5ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Cubic grid extent |
+| threshold | Float | 0.0 | -50.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Iso value for surface extraction |
+| frequency | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“20.0 | Spatial frequency multiplier |
+| major_radius | Float | 2.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Torus major radius |
+| minor_radius | Float | 0.8 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“20.0 | Torus minor radius |
+| expression | String | "sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x)" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Custom field formula (x, y, z) |
 
 **How it works:** Evaluates the selected implicit function at each voxel grid point, then extracts the iso-surface via marching cubes. Custom mode uses Godot's `Expression` class to evaluate user formulas. Normal estimation via central differencing.
 
@@ -2885,26 +3045,26 @@ CPU particle emitter from SOP surface. Outputs a live point cloud.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| rate | Float | 100.0 | 0â€“100000 | Particles emitted per second |
-| max_particles | Int | 10000 | 1â€“500000 | Maximum alive particles |
-| seed | Int | 42 | 0â€“99999 | Random seed |
-| life | Float | 2.0 | 0.01â€“60.0 | Particle lifespan (seconds) |
-| life_rand | Float | 0.0 | 0.0â€“1.0 | Random life variation |
-| emit_speed | Float | 1.0 | 0.0â€“100.0 | Initial velocity along surface normal |
-| speed_rand | Float | 0.0 | 0.0â€“1.0 | Random speed variation |
-| spread | Float | 0.0 | 0.0â€“180.0 | Cone angle deviation (degrees) |
-| gravity | Float | -9.8 | -100â€“100 | Gravity on Y axis |
-| drag | Float | 0.0 | 0.0â€“10.0 | Velocity damping |
-| turbulence | Float | 0.0 | 0.0â€“50.0 | Random force per frame |
-| attract_force | Float | 0.0 | -50â€“50 | Pull toward attractor input |
-| floor_enabled | Bool | false | â€” | Floor collision |
-| floor_y | Float | 0.0 | -100â€“100 | Floor plane Y position |
-| bounce | Float | 0.3 | 0.0â€“1.0 | Bounce restitution |
-| reset | Bool | false | â€” | Pulse to clear all particles |
+| rate | Float | 100.0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100000 | Particles emitted per second |
+| max_particles | Int | 10000 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“500000 | Maximum alive particles |
+| seed | Int | 42 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“99999 | Random seed |
+| life | Float | 2.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“60.0 | Particle lifespan (seconds) |
+| life_rand | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Random life variation |
+| emit_speed | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Initial velocity along surface normal |
+| speed_rand | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Random speed variation |
+| spread | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“180.0 | Cone angle deviation (degrees) |
+| gravity | Float | -9.8 | -100ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Gravity on Y axis |
+| drag | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Velocity damping |
+| turbulence | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50.0 | Random force per frame |
+| attract_force | Float | 0.0 | -50ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“50 | Pull toward attractor input |
+| floor_enabled | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Floor collision |
+| floor_y | Float | 0.0 | -100ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Floor plane Y position |
+| bounce | Float | 0.3 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Bounce restitution |
+| reset | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Pulse to clear all particles |
 
-**Inputs:** `emitter` (SOP, optional â€” emission surface), `attractor` (SOP, optional).
+**Inputs:** `emitter` (SOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â emission surface), `attractor` (SOP, optional).
 
-**How it works:** Maintains an internal particle pool with position, velocity, age, and life per particle. Each cook emits new particles (from emitter surface or origin), integrates particle dynamics (gravity, drag, turbulence, floor collision), kills expired particles, and outputs the live set as a point cloud mesh. Time-dependent â€” re-cooks every frame.
+**How it works:** Maintains an internal particle pool with position, velocity, age, and life per particle. Each cook emits new particles (from emitter surface or origin), integrates particle dynamics (gravity, drag, turbulence, floor collision), kills expired particles, and outputs the live set as a point cloud mesh. Time-dependent ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â re-cooks every frame.
 
 ---
 
@@ -2918,14 +3078,14 @@ Deform geometry by attracting/repelling vertices toward attractor points.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| strength | Float | 1.0 | -10.0â€“10.0 | Deformation strength (negative = repel) |
-| radius | Float | 2.0 | 0.01â€“100.0 | Falloff radius |
+| strength | Float | 1.0 | -10.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Deformation strength (negative = repel) |
+| radius | Float | 2.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Falloff radius |
 | falloff | Enum | Smooth | Linear, Smooth, Inverse Square, Gaussian | Distance falloff curve |
-| exponent | Float | 2.0 | 0.1â€“10.0 | Falloff exponent |
-| affect_normals | Bool | true | â€” | Recompute normals after deformation |
-| att_x, att_y, att_z | Float | 0.0 | -100â€“100 | Default attractor position |
+| exponent | Float | 2.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Falloff exponent |
+| affect_normals | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Recompute normals after deformation |
+| att_x, att_y, att_z | Float | 0.0 | -100ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Default attractor position |
 
-**Inputs:** `geo` (SOP â€” geometry to deform), `attractors` (SOP, optional â€” point cloud).
+**Inputs:** `geo` (SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â geometry to deform), `attractors` (SOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â point cloud).
 
 **How it works:** For each vertex, computes distance to each attractor and applies a weighted displacement toward the attractor. The falloff function shapes the deformation zone. If `attractors` input is disconnected, uses the built-in `att_x/y/z` position. Optionally recomputes normals from the deformed mesh.
 
@@ -2933,16 +3093,16 @@ Deform geometry by attracting/repelling vertices toward attractor points.
 
 #### CarveSOP
 
-Trim mesh by parametric U range â€” useful for reveal/wipe animations.
+Trim mesh by parametric U range ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â useful for reveal/wipe animations.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| first_u | Float | 0.0 | 0.0â€“1.0 | Start of kept range |
-| second_u | Float | 1.0 | 0.0â€“1.0 | End of kept range |
-| extract | Bool | false | â€” | Invert selection (keep outside) |
-| use_uvs | Bool | false | â€” | Use texture U instead of vertex index |
+| first_u | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Start of kept range |
+| second_u | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | End of kept range |
+| extract | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Invert selection (keep outside) |
+| use_uvs | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Use texture U instead of vertex index |
 | axis | Enum | Y | X, Y, Z | Positional axis for slicing |
-| use_position | Bool | false | â€” | Carve by normalised position along axis |
+| use_position | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Carve by normalised position along axis |
 
 **Input:** `geo` (SOP).
 
@@ -2956,9 +3116,9 @@ Mesh decimation via quadric error metric edge collapse.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| target_percent | Float | 50.0 | 1.0â€“100.0 | Percentage of triangles to keep |
-| preserve_boundary | Bool | true | â€” | Extra cost on boundary edges |
-| boundary_weight | Float | 10.0 | 0.1â€“1000.0 | Boundary edge penalty multiplier |
+| target_percent | Float | 50.0 | 1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Percentage of triangles to keep |
+| preserve_boundary | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Extra cost on boundary edges |
+| boundary_weight | Float | 10.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Boundary edge penalty multiplier |
 
 **Input:** `geo` (SOP).
 
@@ -2972,19 +3132,19 @@ Mesh decimation via quadric error metric edge collapse.
 
 #### CHOPtoSOP
 
-Convert CHOP channels to SOP point geometry â€” visualise waveforms as 3D lines.
+Convert CHOP channels to SOP point geometry ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â visualise waveforms as 3D lines.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | mode | Enum | Points | Points, Line, Trail | How to interpret channel data |
-| x_scale | Float | 0.1 | 0.001â€“100.0 | Horizontal sample spacing |
-| y_scale | Float | 1.0 | 0.001â€“100.0 | Vertical value multiplier |
-| max_samples | Int | 1000 | 1â€“100000 | Maximum samples to convert |
-| center_x | Bool | true | â€” | Center geometry at X origin |
+| x_scale | Float | 0.1 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Horizontal sample spacing |
+| y_scale | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Vertical value multiplier |
+| max_samples | Int | 1000 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100000 | Maximum samples to convert |
+| center_x | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Center geometry at X origin |
 
 **Input:** `in` (CHOP).
 
-**How it works:** Reads channel samples and maps them to vertex positions: X = sample index Ã— x_scale, Y = value Ã— y_scale. Points mode creates individual points; Line mode creates a connected line strip; Trail mode creates one geometry per channel.
+**How it works:** Reads channel samples and maps them to vertex positions: X = sample index ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â x_scale, Y = value ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â y_scale. Points mode creates individual points; Line mode creates a connected line strip; Trail mode creates one geometry per channel.
 
 ---
 
@@ -2995,7 +3155,7 @@ Convert DAT table rows to SOP point geometry.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | mode | Enum | Points | Points, Lines | Output primitive type |
-| max_rows | Int | 10000 | 1â€“1000000 | Maximum rows to process |
+| max_rows | Int | 10000 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000000 | Maximum rows to process |
 
 **Input:** `in` (DAT).
 
@@ -3010,10 +3170,10 @@ Convert TOP texture to SOP heightfield or point cloud.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | mode | Enum | Heightfield | Heightfield, Point Cloud, Normal Map | Conversion method |
-| resolution | Int | 64 | 4â€“512 | Grid subdivisions |
-| height_scale | Float | 2.0 | 0.0â€“100.0 | Vertical displacement multiplier |
-| grid_size | Float | 10.0 | 0.1â€“1000.0 | Horizontal extent |
-| threshold | Float | 0.1 | 0.0â€“1.0 | Luminance threshold (Point Cloud mode) |
+| resolution | Int | 64 | 4ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“512 | Grid subdivisions |
+| height_scale | Float | 2.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Vertical displacement multiplier |
+| grid_size | Float | 10.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Horizontal extent |
+| threshold | Float | 0.1 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Luminance threshold (Point Cloud mode) |
 | channel | Enum | Luminance | Luminance, Red, Green, Blue, Alpha | Displacement channel |
 
 **Input:** `in` (TOP).
@@ -3022,13 +3182,103 @@ Convert TOP texture to SOP heightfield or point cloud.
 
 ---
 
-## COMP â€” Component Operators
+#### File In SOP
 
-COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output â€” instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
+Import geometry from an OBJ, glTF, or Godot resource file.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | "" |  | Path to geometry file (OBJ, glTF, .tres, .res) |
+| reload | Bool | false |  | Pulse to force reload |
+
+**Output:** SOP (imported geometry).
+
+**How it works:** Dispatches by extension: `.obj` is parsed line-by-line with `SurfaceTool` (positions, normals, UVs, fan-triangulated faces); `.glb`/`.gltf` uses `GLTFDocument` to load and extracts the first `MeshInstance3D`; `.tres`/`.res` uses `ResourceLoader`. The resulting `ArrayMesh` is set on the output.
+
+---
+
+#### File Out SOP
+
+Export geometry to a Wavefront OBJ file with pass-through.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | "" |  | Output file path (.obj) |
+| write | Bool | false |  | Pulse to export current geometry |
+
+**Input:** `in` (SOP).
+**Output:** SOP (pass-through of input geometry).
+
+**How it works:** On `write` pulse, iterates all surfaces of the input `ArrayMesh`, writes vertices, normals, UVs, and indexed/non-indexed face definitions in Wavefront OBJ format. Creates directories as needed. Always passes input geometry through.
+
+---
+
+#### Group SOP
+
+Create point or primitive groups by spatial/index criteria.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| group_name | String | "group1" |  | Name of the group to create |
+| entity | Enum | Points | Points, Primitives | Select points or primitives |
+| method | Enum | Bounding Box | Bounding Box, Normal Direction, Range Pattern, All | Selection criterion |
+| bb_min_x/y/z | Float | -0.5 | unbounded | Bounding box minimum |
+| bb_max_x/y/z | Float | 0.5 | unbounded | Bounding box maximum |
+| dir_x/y/z | Float | 0/1/0 | -11 | Normal direction vector |
+| spread_angle | Float | 45.0 | 0180 | Cone half-angle in degrees |
+| range_pattern | String | "0-9" |  | Index range (e.g. 0-9, 20, 30-40) |
+| operation | Enum | Set | Set, Add, Remove | Group operation mode |
+
+**Input:** `in` (SOP).
+**Output:** SOP (geometry with updated group attribs).
+
+**How it works:** Duplicates input geometry, builds a selection mask using the chosen method (AABB containment, normal-direction cone test, comma-separated index ranges, or all), then applies Set/Add/Remove operation to produce a membership `PackedFloat32Array` stored as a point attrib. Primitive groups use a `prim_` prefix.
+
+---
+
+#### Primitive SOP
+
+Compute per-primitive attributes: face normals, area, centroid, and primitive index.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| face_normals | Bool | true |  | Store face normal (fn_x, fn_y, fn_z) |
+| face_area | Bool | false |  | Store face area (face_area) |
+| face_centroid | Bool | false |  | Store centroid (fc_x, fc_y, fc_z) |
+| face_id | Bool | true |  | Store primitive index (prim_id) |
+
+**Input:** `in` (SOP).
+**Output:** SOP (geometry with per-primitive point attribs).
+
+**How it works:** Iterates all triangles across all surfaces. For each face, computes cross-product normal, area (half cross-product length), and centroid. Writes toggled attributes per-vertex as point attribs.
+
+---
+
+#### Blend SOP
+
+Vertex-level morph/blend between two geometries.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| blend | Float | 0.5 | 0.01.0 | Interpolation factor (0 = A, 1 = B) |
+| blend_normals | Bool | true |  | Also interpolate normals |
+| blend_uvs | Bool | false |  | Also interpolate UVs |
+
+**Input 0:** `geo_a` (SOP  base geometry, blend=0).
+**Input 1:** `geo_b` (SOP  target geometry, blend=1).
+**Output:** SOP (blended geometry).
+
+**How it works:** For each surface where both inputs have matching vertex counts, lerps positions (and optionally normals/UVs) per-vertex by `blend`. Normalizes blended normals. Mismatched vertex counts pass through from input A.
+
+---
+
+## COMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Component Operators
+
+COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
 
 COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Godot's 3D rendering engine.
 
-**Total: 11 operators.**
+**Total: 12 operators.**
 
 > Note: SubNetworkNode, InTunnel, OutTunnel are internal system nodes.
 > NullCOMP, SwitchCOMP, EnvironmentCOMP, and GenericScriptNode are utility nodes.
@@ -3041,48 +3291,48 @@ Wraps a `MeshInstance3D`. Takes SOP geometry and optionally a TOP texture, placi
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| tx, ty, tz | Float | 0.0 | â€” | Translation |
-| rx, ry, rz | Float | 0.0 | -360â€“360 | Rotation in degrees |
-| sx, sy, sz | Float | 1.0 | 0.001â€“100.0 | Scale |
-| albedo_color | Color | White | â€” | Base material color |
-| metallic | Float | 0.0 | 0.0â€“1.0 | Metallic shading |
-| roughness | Float | 0.5 | 0.0â€“1.0 | Surface roughness |
-| emission_energy | Float | 0.0 | 0.0â€“16.0 | Emission brightness |
-| emission_color | Color | Black | â€” | Emission color |
-| visible | Bool | true | â€” | Show/hide |
+| tx, ty, tz | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Translation |
+| rx, ry, rz | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Rotation in degrees |
+| sx, sy, sz | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Scale |
+| albedo_color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Base material color |
+| metallic | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Metallic shading |
+| roughness | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Surface roughness |
+| emission_energy | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16.0 | Emission brightness |
+| emission_color | Color | Black | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Emission color |
+| visible | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Show/hide |
 
-**Inputs:** `geo_in` (SOP â€” geometry to display), `tex_in` (TOP â€” optional albedo texture).
+**Inputs:** `geo_in` (SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â geometry to display), `tex_in` (TOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â optional albedo texture).
 
-**How it works:** Creates a `MeshInstance3D` with a `StandardMaterial3D`. Each cook, applies the SOP mesh, transform, material properties, and optional TOP texture as albedo map. The MeshInstance3D is **not** added as a child of the COMP node â€” instead, RenderTOP discovers it via `get_mesh_instance()` and adopts it into its SubViewport.
+**How it works:** Creates a `MeshInstance3D` with a `StandardMaterial3D`. Each cook, applies the SOP mesh, transform, material properties, and optional TOP texture as albedo map. The MeshInstance3D is **not** added as a child of the COMP node ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â instead, RenderTOP discovers it via `get_mesh_instance()` and adopts it into its SubViewport.
 
 ---
 
 #### InstanceCOMP
 
-MultiMesh instancing â€” place thousands of copies in one draw call. Takes a template SOP and a point cloud SOP, creates a `MultiMeshInstance3D`.
+MultiMesh instancing ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â place thousands of copies in one draw call. Takes a template SOP and a point cloud SOP, creates a `MultiMeshInstance3D`.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| count | Int | 100 | 1â€“100000 | Instance count (no point cloud) |
+| count | Int | 100 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100000 | Instance count (no point cloud) |
 | scatter_mode | Enum | Grid | Grid, Random | Placement without point input |
-| spacing | Float | 1.0 | 0.01â€“100.0 | Grid cell spacing / random radius |
-| seed | Int | 42 | 0â€“99999 | Random seed |
-| tx, ty, tz | Float | 0.0 | â€” | Group translation |
-| rx, ry, rz | Float | 0.0 | -360â€“360 | Group rotation |
-| sx, sy, sz | Float | 1.0 | 0.001â€“100.0 | Group scale |
-| align_to_normal | Bool | true | â€” | Align instances to point normals |
-| scale_rand | Float | 0.0 | 0.0â€“1.0 | Random scale variation |
-| rotation_rand | Float | 0.0 | 0.0â€“360.0 | Random Y-axis rotation per instance |
-| albedo_color | Color | White | â€” | Base colour (no MAT) |
-| metallic | Float | 0.0 | 0.0â€“1.0 | Metallic (fallback material) |
-| roughness | Float | 0.5 | 0.0â€“1.0 | Roughness (fallback material) |
-| visible | Bool | true | â€” | Show/hide |
+| spacing | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Grid cell spacing / random radius |
+| seed | Int | 42 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“99999 | Random seed |
+| tx, ty, tz | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Group translation |
+| rx, ry, rz | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Group rotation |
+| sx, sy, sz | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Group scale |
+| align_to_normal | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Align instances to point normals |
+| scale_rand | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Random scale variation |
+| rotation_rand | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360.0 | Random Y-axis rotation per instance |
+| albedo_color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Base colour (no MAT) |
+| metallic | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Metallic (fallback material) |
+| roughness | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Roughness (fallback material) |
+| visible | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Show/hide |
 | cast_shadow | Enum | On | Off, On, Double-Sided, Shadows Only | Shadow mode |
-| chop_map | Enum | Off | Off, Position, Scale, Rotation Y | CHOP â†’ per-instance transforms |
+| chop_map | Enum | Off | Off, Position, Scale, Rotation Y | CHOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ per-instance transforms |
 
-**Inputs:** `template` (SOP â€” mesh to instance), `points` (SOP, optional â€” placement point cloud), `mat_in` (MAT, optional), `chop_in` (CHOP, optional â€” per-instance animation).
+**Inputs:** `template` (SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â mesh to instance), `points` (SOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â placement point cloud), `mat_in` (MAT, optional), `chop_in` (CHOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â per-instance animation).
 
-**How it works:** Creates a `MultiMeshInstance3D` with Godot's `MultiMesh`. If a point cloud SOP is connected, each point becomes an instance transform; otherwise generates a grid or random placement. Supports `pscale` and `N` (normal) attributes from the point cloud. CHOP input can drive per-instance transforms via the `chop_map` parameter. Extremely efficient â€” single draw call for all instances.
+**How it works:** Creates a `MultiMeshInstance3D` with Godot's `MultiMesh`. If a point cloud SOP is connected, each point becomes an instance transform; otherwise generates a grid or random placement. Supports `pscale` and `N` (normal) attributes from the point cloud. CHOP input can drive per-instance transforms via the `chop_map` parameter. Extremely efficient ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â single draw call for all instances.
 
 ---
 
@@ -3092,18 +3342,18 @@ Wraps a `Camera3D`. Defines the viewpoint for a RenderTOP.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| tx, ty, tz | Float | 0, 1, 3 | â€” | Camera position |
-| rx, ry, rz | Float | -15, 0, 0 | â€” | Camera rotation in degrees |
-| use_look_at | Bool | false | â€” | Override rotation to look at a target point |
-| look_at_x, y, z | Float | 0.0 | â€” | Look-at target position |
+| tx, ty, tz | Float | 0, 1, 3 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Camera position |
+| rx, ry, rz | Float | -15, 0, 0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Camera rotation in degrees |
+| use_look_at | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Override rotation to look at a target point |
+| look_at_x, y, z | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Look-at target position |
 | projection | Enum | Perspective | Perspective, Orthogonal | Projection mode |
-| fov | Float | 75.0 | 1.0â€“179.0 | Field of view (perspective only) |
-| ortho_size | Float | 10.0 | 0.1â€“1000.0 | Orthographic view size |
-| near | Float | 0.05 | 0.001â€“100.0 | Near clip plane |
-| far | Float | 100.0 | 1.0â€“10000.0 | Far clip plane |
-| clear_color | Color | (0.1, 0.1, 0.1) | â€” | Background clear color |
+| fov | Float | 75.0 | 1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“179.0 | Field of view (perspective only) |
+| ortho_size | Float | 10.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Orthographic view size |
+| near | Float | 0.05 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Near clip plane |
+| far | Float | 100.0 | 1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10000.0 | Far clip plane |
+| clear_color | Color | (0.1, 0.1, 0.1) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Background clear color |
 
-**How it works:** Creates a `Camera3D` node. Applies position, rotation (or look-at targeting), projection mode, and clipping planes. Returns null from cook â€” accessed via `get_camera()` by RenderTOP, which adopts the Camera3D into its viewport.
+**How it works:** Creates a `Camera3D` node. Applies position, rotation (or look-at targeting), projection mode, and clipping planes. Returns null from cook ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â accessed via `get_camera()` by RenderTOP, which adopts the Camera3D into its viewport.
 
 ---
 
@@ -3114,43 +3364,43 @@ Wraps a `Light3D`. Provides scene illumination in a RenderTOP.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | type | Enum | Directional | Directional, Omni, Spot | Light type |
-| tx, ty, tz | Float | 0, 3, 2 | â€” | Light position |
-| rx, ry, rz | Float | -45, 0, 0 | â€” | Light rotation in degrees |
-| color | Color | White | â€” | Light color |
-| energy | Float | 1.0 | 0.0â€“16.0 | Light intensity |
-| shadows | Bool | true | â€” | Cast shadows |
-| omni_range | Float | 10.0 | 0.1â€“1000.0 | Omni light range |
-| spot_range | Float | 10.0 | 0.1â€“1000.0 | Spot light range |
-| spot_angle | Float | 45.0 | 0.1â€“90.0 | Spot light cone angle |
+| tx, ty, tz | Float | 0, 3, 2 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Light position |
+| rx, ry, rz | Float | -45, 0, 0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Light rotation in degrees |
+| color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Light color |
+| energy | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“16.0 | Light intensity |
+| shadows | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Cast shadows |
+| omni_range | Float | 10.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Omni light range |
+| spot_range | Float | 10.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Spot light range |
+| spot_angle | Float | 45.0 | 0.1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“90.0 | Spot light cone angle |
 
-**How it works:** Creates a `DirectionalLight3D`, `OmniLight3D`, or `SpotLight3D` depending on the `type` parameter. If the type changes, the old light node is freed and a new one is created. Returns null from cook â€” accessed via `get_light()` by RenderTOP.
+**How it works:** Creates a `DirectionalLight3D`, `OmniLight3D`, or `SpotLight3D` depending on the `type` parameter. If the type changes, the old light node is freed and a new one is created. Returns null from cook ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â accessed via `get_light()` by RenderTOP.
 
 ---
 
 #### RigidBodyCOMP
 
-Wraps a `RigidBody3D` with `CollisionShape3D` for dynamic physics simulation. Takes a COMP input (typically GeometryCOMP) for mesh, material, and collision shape â€” this node only owns physics properties.
+Wraps a `RigidBody3D` with `CollisionShape3D` for dynamic physics simulation. Takes a COMP input (typically GeometryCOMP) for mesh, material, and collision shape ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â this node only owns physics properties.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| tx, ty, tz | Float | 0.0 | â€” | Initial position |
-| rx, ry, rz | Float | 0.0 | -360â€“360 | Initial rotation in degrees |
-| sx, sy, sz | Float | 1.0 | 0.001â€“100.0 | Scale |
+| tx, ty, tz | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Initial position |
+| rx, ry, rz | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Initial rotation in degrees |
+| sx, sy, sz | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Scale |
 | mode | Enum | Dynamic | Dynamic, Kinematic, Static | Physics body mode |
-| mass | Float | 1.0 | 0.001â€“1000.0 | Body mass in kg |
-| gravity_scale | Float | 1.0 | -10.0â€“10.0 | Gravity multiplier |
-| friction | Float | 1.0 | 0.0â€“2.0 | Surface friction |
-| bounce | Float | 0.0 | 0.0â€“1.0 | Restitution / bounciness |
-| linear_damp | Float | 0.0 | 0.0â€“100.0 | Linear velocity damping |
-| angular_damp | Float | 0.0 | 0.0â€“100.0 | Angular velocity damping |
-| init_vel_x/y/z | Float | 0.0 | â€” | Initial linear velocity |
-| lock_rot_x/y/z | Bool | false | â€” | Lock rotation axes |
+| mass | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Body mass in kg |
+| gravity_scale | Float | 1.0 | -10.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10.0 | Gravity multiplier |
+| friction | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Surface friction |
+| bounce | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Restitution / bounciness |
+| linear_damp | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Linear velocity damping |
+| angular_damp | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Angular velocity damping |
+| init_vel_x/y/z | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Initial linear velocity |
+| lock_rot_x/y/z | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Lock rotation axes |
 | collision_shape | Enum | Convex Hull | Convex, Box, Sphere, Capsule, Trimesh | Collision shape type |
-| ccd | Bool | false | â€” | Continuous collision detection |
+| ccd | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Continuous collision detection |
 
-**Inputs:** `comp_in` (COMP â€” typically GeometryCOMP providing mesh + material), `force_in` (CHOP, optional â€” channels: `force_x/y/z`, `impulse_x/y/z`, `torque_x/y/z`).
+**Inputs:** `comp_in` (COMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â typically GeometryCOMP providing mesh + material), `force_in` (CHOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â channels: `force_x/y/z`, `impulse_x/y/z`, `torque_x/y/z`).
 
-**Architecture:** `SOP â†’ GeometryCOMP â†’ RigidBodyCOMP â†’ MergeCOMP â†’ RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+**Architecture:** `SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ GeometryCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ RigidBodyCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ MergeCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ RenderTOP` (with PBR_MAT wired to GeometryCOMP).
 
 **How it works:** Resolves the upstream COMP's `MeshInstance3D` and mirrors its mesh, material, visibility, and shadow settings onto an internal `MeshInstance3D`. Collision shape is auto-generated from the upstream mesh. In Dynamic mode, Godot's physics engine (Jolt) controls the transform. CHOP force input is applied every cook (Dynamic mode only).
 
@@ -3158,20 +3408,20 @@ Wraps a `RigidBody3D` with `CollisionShape3D` for dynamic physics simulation. Ta
 
 #### StaticBodyCOMP
 
-Wraps a `StaticBody3D` â€” an immovable collider for floors, walls, and obstacles. Takes a COMP input (typically GeometryCOMP) â€” this node only owns collision and physics-material properties.
+Wraps a `StaticBody3D` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â an immovable collider for floors, walls, and obstacles. Takes a COMP input (typically GeometryCOMP) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â this node only owns collision and physics-material properties.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| tx, ty, tz | Float | 0.0 | â€” | Position |
-| rx, ry, rz | Float | 0.0 | -360â€“360 | Rotation in degrees |
-| sx, sy, sz | Float | 1.0 | 0.001â€“100.0 | Scale |
-| friction | Float | 1.0 | 0.0â€“2.0 | Surface friction |
-| bounce | Float | 0.0 | 0.0â€“1.0 | Restitution |
+| tx, ty, tz | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Position |
+| rx, ry, rz | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Rotation in degrees |
+| sx, sy, sz | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Scale |
+| friction | Float | 1.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“2.0 | Surface friction |
+| bounce | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Restitution |
 | collision_shape | Enum | Trimesh | Convex, Box, Sphere, Capsule, Trimesh | Collision shape type |
 
-**Inputs:** `comp_in` (COMP â€” typically GeometryCOMP providing mesh + material).
+**Inputs:** `comp_in` (COMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â typically GeometryCOMP providing mesh + material).
 
-**Architecture:** `SOP â†’ GeometryCOMP â†’ StaticBodyCOMP â†’ MergeCOMP â†’ RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+**Architecture:** `SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ GeometryCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ StaticBodyCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ MergeCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ RenderTOP` (with PBR_MAT wired to GeometryCOMP).
 
 **How it works:** Resolves the upstream COMP's `MeshInstance3D` and mirrors its mesh, material, visibility, and shadow settings onto an internal `MeshInstance3D`. Defaults to Trimesh collision (accurate for complex static geometry). Transform is applied every cook.
 
@@ -3179,24 +3429,24 @@ Wraps a `StaticBody3D` â€” an immovable collider for floors, walls, and obs
 
 #### SoftBodyCOMP
 
-Wraps a `SoftBody3D` for deformable mesh physics (cloth, jelly, rubber). Takes a COMP input (typically GeometryCOMP) â€” this node only owns soft-body physics properties.
+Wraps a `SoftBody3D` for deformable mesh physics (cloth, jelly, rubber). Takes a COMP input (typically GeometryCOMP) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â this node only owns soft-body physics properties.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| tx, ty, tz | Float | 0.0 | â€” | Position |
-| rx, ry, rz | Float | 0.0 | -360â€“360 | Rotation |
-| sx, sy, sz | Float | 1.0 | 0.001â€“100.0 | Scale |
-| simulation_precision | Int | 5 | 1â€“40 | Solver iterations |
-| total_mass | Float | 1.0 | 0.01â€“1000.0 | Total body mass |
-| linear_stiffness | Float | 0.5 | 0.0â€“1.0 | Spring stiffness |
-| pressure_coefficient | Float | 0.0 | -100.0â€“100.0 | Internal pressure |
-| damping_coefficient | Float | 0.01 | 0.0â€“1.0 | Motion damping |
-| drag_coefficient | Float | 0.0 | 0.0â€“1.0 | Air drag |
-| ray_pickable | Bool | false | â€” | Ray picking support |
+| tx, ty, tz | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Position |
+| rx, ry, rz | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Rotation |
+| sx, sy, sz | Float | 1.0 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Scale |
+| simulation_precision | Int | 5 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“40 | Solver iterations |
+| total_mass | Float | 1.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Total body mass |
+| linear_stiffness | Float | 0.5 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Spring stiffness |
+| pressure_coefficient | Float | 0.0 | -100.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Internal pressure |
+| damping_coefficient | Float | 0.01 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Motion damping |
+| drag_coefficient | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Air drag |
+| ray_pickable | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Ray picking support |
 
-**Inputs:** `comp_in` (COMP â€” typically GeometryCOMP providing mesh + material).
+**Inputs:** `comp_in` (COMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â typically GeometryCOMP providing mesh + material).
 
-**Architecture:** `SOP â†’ GeometryCOMP â†’ SoftBodyCOMP â†’ MergeCOMP â†’ RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+**Architecture:** `SOP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ GeometryCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ SoftBodyCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ MergeCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ RenderTOP` (with PBR_MAT wired to GeometryCOMP).
 
 **How it works:** Resolves the upstream COMP's `MeshInstance3D` and copies its mesh, material, visibility, and shadow settings. The mesh is assigned **once** (SoftBody3D doesn't support live mesh swapping). Physics parameters are updated every cook. High `linear_stiffness` = rigid cloth; high `pressure_coefficient` = inflated balloon.
 
@@ -3208,19 +3458,19 @@ Wraps an `Area3D` for force fields, gravity zones, and wind effects.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| tx, ty, tz | Float | 0.0 | â€” | Position |
-| rx, ry, rz | Float | 0.0 | -360â€“360 | Rotation |
-| gravity_direction_x/y/z | Float | 0,-1,0 | -1.0â€“1.0 | Gravity direction |
-| gravity_strength | Float | 9.8 | 0.0â€“100.0 | Gravity magnitude |
-| gravity_point | Bool | false | â€” | Point gravity (toward center) |
-| damping | Float | 0.0 | 0.0â€“100.0 | Linear damping override |
-| priority | Int | 0 | 0â€“128 | Area priority |
+| tx, ty, tz | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Position |
+| rx, ry, rz | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Rotation |
+| gravity_direction_x/y/z | Float | 0,-1,0 | -1.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1.0 | Gravity direction |
+| gravity_strength | Float | 9.8 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Gravity magnitude |
+| gravity_point | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Point gravity (toward center) |
+| damping | Float | 0.0 | 0.0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100.0 | Linear damping override |
+| priority | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“128 | Area priority |
 | shape | Enum | Box | Box, Sphere | Built-in shape |
-| shape_size_x/y/z | Float | 2.0 | 0.01â€“1000.0 | Box half-extents |
-| shape_radius | Float | 2.0 | 0.01â€“1000.0 | Sphere radius |
-| debug_vis | Bool | false | â€” | Show translucent debug shape |
+| shape_size_x/y/z | Float | 2.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Box half-extents |
+| shape_radius | Float | 2.0 | 0.01ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000.0 | Sphere radius |
+| debug_vis | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Show translucent debug shape |
 
-**Inputs:** `geo_in` (SOP, optional â€” custom collision shape).
+**Inputs:** `geo_in` (SOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â custom collision shape).
 
 **How it works:** Creates an `Area3D` with `SPACE_OVERRIDE_REPLACE`. When a rigid body enters the area, the area's gravity and damping override the world defaults. SOP input replaces the built-in shape with a convex hull collision shape. Debug visualization adds a translucent mesh to see the area bounds in the render.
 
@@ -3233,20 +3483,20 @@ Wraps a `Joint3D` constraint between two physics bodies.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | joint_type | Enum | Pin | Pin, Hinge, Slider, ConeTwist, 6DOF | Joint type |
-| tx, ty, tz | Float | 0.0 | â€” | Joint anchor position |
-| rx, ry, rz | Float | 0.0 | -360â€“360 | Joint rotation |
-| hinge_use_limit | Bool | false | â€” | Enable hinge angle limits |
-| hinge_limit_lower/upper | Float | -180/180 | -180â€“180 | Hinge angle limits |
-| hinge_motor_enable | Bool | false | â€” | Enable hinge motor |
-| hinge_motor_speed | Float | 1.0 | -100â€“100 | Motor target speed |
-| hinge_motor_max_impulse | Float | 1.0 | 0â€“1000 | Motor max impulse |
-| slider_limit_lower/upper | Float | -1/1 | -100â€“100 | Slider linear limits |
-| cone_swing_span | Float | 45.0 | 0â€“180 | Cone twist swing span |
-| cone_twist_span | Float | 45.0 | 0â€“180 | Cone twist twist span |
+| tx, ty, tz | Float | 0.0 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Joint anchor position |
+| rx, ry, rz | Float | 0.0 | -360ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“360 | Joint rotation |
+| hinge_use_limit | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable hinge angle limits |
+| hinge_limit_lower/upper | Float | -180/180 | -180ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“180 | Hinge angle limits |
+| hinge_motor_enable | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Enable hinge motor |
+| hinge_motor_speed | Float | 1.0 | -100ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Motor target speed |
+| hinge_motor_max_impulse | Float | 1.0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“1000 | Motor max impulse |
+| slider_limit_lower/upper | Float | -1/1 | -100ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Slider linear limits |
+| cone_swing_span | Float | 45.0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“180 | Cone twist swing span |
+| cone_twist_span | Float | 45.0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“180 | Cone twist twist span |
 
 **Inputs:** `body_a` (COMP), `body_b` (COMP).
 
-**How it works:** Creates the appropriate Joint3D subtype (PinJoint3D, HingeJoint3D, etc.). Walks the network to find Body A and Body B COMP nodes, then sets `node_a` / `node_b` NodePaths. If the joint type changes, the old joint is freed and a new one is created. Both bodies must be in the same scene tree (typically via MergeCOMP â†’ RenderTOP).
+**How it works:** Creates the appropriate Joint3D subtype (PinJoint3D, HingeJoint3D, etc.). Walks the network to find Body A and Body B COMP nodes, then sets `node_a` / `node_b` NodePaths. If the joint type changes, the old joint is freed and a new one is created. Both bodies must be in the same scene tree (typically via MergeCOMP ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ RenderTOP).
 
 ---
 
@@ -3268,15 +3518,15 @@ Select one of up to 8 component inputs by index.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| index | Int | 0 | 0â€“7 | Which input to pass through |
+| index | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“7 | Which input to pass through |
 
-**Inputs:** `in0`â€“`in7` (COMP).
+**Inputs:** `in0`ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“`in7` (COMP).
 
 ---
 
 #### EnvironmentCOMP
 
-Defines the rendering environment for a 3D scene â€” background, ambient light, tone mapping, and all post-processing effects. Connect to a RenderTOP COMP input alongside Geometry/Camera/Light COMPs.
+Defines the rendering environment for a 3D scene ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â background, ambient light, tone mapping, and all post-processing effects. Connect to a RenderTOP COMP input alongside Geometry/Camera/Light COMPs.
 
 Separating environment from rendering allows one environment shared across multiple RenderTOPs, CHOP-animated post-processing, and cleaner networks.
 
@@ -3346,9 +3596,9 @@ Extends `GNNode` directly (not a family base class). Uses COMP family for neutra
 **Annotations:**
 
 ```
-# @input <family>  <description>   â€” dynamic input port
-# @output <family> <description>   â€” dynamic output port (chop, top, sop, dat, img, mat)
-# @param <type> <name> <default> <description>  â€” inspector parameter
+# @input <family>  <description>   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â dynamic input port
+# @output <family> <description>   ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â dynamic output port (chop, top, sop, dat, img, mat)
+# @param <type> <name> <default> <description>  ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â inspector parameter
 ```
 
 **Context variables:** `me`, `inputs`, `outputs` (Array of pre-populated typed data objects, one per @output), `op` (alias for outputs[0]), `time`, `frame`, `dt`, `par()`, `chop()`, `top()`, `sop()`, `dat()`, `op_ref()`, `set_par()`, `network_add_node()`, `network_connect()`, `network_disconnect()`, `network_remove_node()`, `network_node_ids()`, `network_node_info()`.
@@ -3372,17 +3622,17 @@ func cook():
 
 ---
 
-## MAT â€” Material Operators
+## MAT ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Material Operators
 
 MATs produce materials for COMP use. Output type is `GNMaterialData`, wrapping Godot's `Material` base class. MATs connect to GeometryCOMP's material input to override the default PBR.
 
-**Total: 6 operators** â€” 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth.
+**Total: 8 operators** ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth.
 
 ---
 
 #### ConstantMAT
 
-Flat unlit material â€” no lighting or shading applied.
+Flat unlit material ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â no lighting or shading applied.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -3413,10 +3663,10 @@ Renders geometry vertices as sized point sprites.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| color | Color | White | â€” | Point color |
-| point_size | Float | 4.0 | 1â€“64 | Point size in pixels |
+| color | Color | White | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Point color |
+| point_size | Float | 4.0 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“64 | Point size in pixels |
 
-**Input:** `tex_in` (TOP, optional â€” sprite texture). Uses `POINT_SIZE` vertex shader output and `POINT_COORD` in fragment.
+**Input:** `tex_in` (TOP, optional ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â sprite texture). Uses `POINT_SIZE` vertex shader output and `POINT_COORD` in fragment.
 
 ---
 
@@ -3426,50 +3676,89 @@ Visualize scene depth as grayscale.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| near_val | Float | 0.1 | 0.001â€“100 | Near depth (white) |
-| far_val | Float | 100.0 | 1â€“10000 | Far depth (black) |
-| invert | Bool | false | â€” | Swap near/far mapping |
+| near_val | Float | 0.1 | 0.001ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“100 | Near depth (white) |
+| far_val | Float | 100.0 | 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“10000 | Far depth (black) |
+| invert | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Swap near/far mapping |
 
 Uses ShaderMaterial that linearizes FRAGCOORD.z.
 
 ---
 
-## OUT — Output Operators
+#### Normal Map MAT
 
-Output operators are terminal/sink nodes that display or save results. They extend `GNOutBase`, belong to the OUT family, and have `is_sink = true`. They have inputs but no data outputs — they are the endpoints of the cook graph.
+Normal-map visualization material with PBR base.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| normal_scale | Float | 1.0 | -4.04.0 | Normal map strength |
+| albedo_color | Color | (0.7, 0.7, 0.7) |  | Base color (no albedo texture) |
+| roughness | Float | 0.5 | 0.01.0 | Surface roughness |
+| unlit | Bool | false |  | Render unlit to see raw normal colors |
+| cull_mode | Enum | Back | Back, Front, Disabled | Face culling |
+
+**Input 0:** `normal_tex` (TOP  normal map texture).
+**Input 1:** `albedo_tex` (TOP  optional base color texture).
+**Output:** MAT (StandardMaterial3D with normal mapping).
+
+**How it works:** Creates/updates a `StandardMaterial3D`. Sets albedo color/texture, enables normal mapping with input TOP texture and `normal_scale`, applies roughness, toggles unlit shading, and sets cull mode.
+
+---
+
+#### Line MAT
+
+Line/wireframe rendering material with stipple (dashed line) controls.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| color | Color | White |  | Line color |
+| width | Float | 1.0 | 0.110.0 | Line width |
+| alpha | Float | 1.0 | 0.01.0 | Overall opacity |
+| stipple_scale | Float | 10.0 | 0.1100.0 | Dash pattern frequency |
+| stipple_ratio | Float | 1.0 | 0.01.0 | Visible portion of each dash (1.0 = solid) |
+| cull_mode | Enum | Disabled | Back, Front, Disabled | Face culling |
+
+**Output:** MAT (ShaderMaterial with wireframe render mode).
+
+**How it works:** Creates a `ShaderMaterial` with `render_mode unshaded, wireframe`. Fragment shader discards fragments based on a distance-based stipple pattern. Uniforms control color, width, alpha, stipple scale and ratio.
+
+---
+
+## OUT ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Output Operators
+
+Output operators are terminal/sink nodes that display or save results. They extend `GNOutBase`, belong to the OUT family, and have `is_sink = true`. They have inputs but no data outputs ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â they are the endpoints of the cook graph.
 
 ---
 
 #### WindowOUT
 
-Displays a TOP texture in a standalone OS window. Essential for VJ output â€” each WindowOUT creates a separate window that can be placed on any connected monitor.
+Displays a TOP texture in a standalone OS window. Essential for VJ output ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â each WindowOUT creates a separate window that can be placed on any connected monitor.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| title | String | "GONODES Output" | â€” | Window title |
-| monitor | Int | 0 | 0â€“8 | Target display index |
+| title | String | "GONODES Output" | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Window title |
+| monitor | Int | 0 | 0ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“8 | Target display index |
 | window_mode | Enum | Windowed | Windowed, Fullscreen, Borderless | Window mode |
-| resolution | Vector2i | 1920Ã—1080 | â€” | Window resolution |
-| position | Vector2i | (-1, -1) | â€” | Window position (-1,-1 = auto center) |
-| always_on_top | Bool | false | â€” | Keep window above others |
-| vsync | Bool | true | â€” | V-sync |
+| resolution | Vector2i | 1920ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â1080 | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Window resolution |
+| position | Vector2i | (-1, -1) | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Window position (-1,-1 = auto center) |
+| always_on_top | Bool | false | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | Keep window above others |
+| vsync | Bool | true | ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â | V-sync |
 
-**Input 0:** `in` (TOP — background texture).
-**Input 1:** `panel` (UI — interactive panel with native Godot input routing).
+**Input 0:** `in` (TOP ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â background texture).
+**Input 1:** `panel` (UI ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â interactive panel with native Godot input routing).
 
-**How it works:** Creates a Godot `Window` node with a `TextureRect` (`mouse_filter = IGNORE`, z=0) for the background texture and a `VBoxContainer` "UIRoot" (`mouse_filter = PASS`, z=1) for the interactive panel layer. The TextureRect is assigned the input TOP's `ViewportTexture` — a live GPU reference with zero copy overhead. UI controls from ContainerUI are adopted directly into the UIRoot container — no SubViewport indirection — so Godot's native input dispatch (mouse, keyboard, focus) works automatically. An overlay system (CanvasLayer at layer 100) supports dropdowns, color pickers, and popup menus above the panel layer. Window configuration (mode, position, monitor, vsync) is only applied when the WindowOUT's own parameters change, NOT when upstream textures update (preventing per-frame window reconfiguration). Multiple WindowOUT instances create multiple independent windows.
+**How it works:** Creates a Godot `Window` node with a `TextureRect` (`mouse_filter = IGNORE`, z=0) for the background texture and a `VBoxContainer` "UIRoot" (`mouse_filter = PASS`, z=1) for the interactive panel layer. The TextureRect is assigned the input TOP's `ViewportTexture` ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â a live GPU reference with zero copy overhead. UI controls from ContainerUI are adopted directly into the UIRoot container ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â no SubViewport indirection ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â so Godot's native input dispatch (mouse, keyboard, focus) works automatically. An overlay system (CanvasLayer at layer 100) supports dropdowns, color pickers, and popup menus above the panel layer. Window configuration (mode, position, monitor, vsync) is only applied when the WindowOUT's own parameters change, NOT when upstream textures update (preventing per-frame window reconfiguration). Multiple WindowOUT instances create multiple independent windows.
 
-> **Architecture note — process_mode:** GNNode sets `process_mode = PROCESS_MODE_DISABLED` during `initialize()` so operators don't run Godot's `_process()` (all cooking is driven by GNCookEngine). However, Godot propagates process_mode to child nodes, so the Window would also become DISABLED — blocking GUI event dispatch entirely (buttons, sliders, etc. stop responding). The fix: WindowOUT explicitly sets `_window.process_mode = Node.PROCESS_MODE_ALWAYS` in `_ensure_window()`. This has zero performance cost — it simply re-enables standard Godot GUI dispatch for the Window subtree.
+> **Architecture note ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â process_mode:** GNNode sets `process_mode = PROCESS_MODE_DISABLED` during `initialize()` so operators don't run Godot's `_process()` (all cooking is driven by GNCookEngine). However, Godot propagates process_mode to child nodes, so the Window would also become DISABLED ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â blocking GUI event dispatch entirely (buttons, sliders, etc. stop responding). The fix: WindowOUT explicitly sets `_window.process_mode = Node.PROCESS_MODE_ALWAYS` in `_ensure_window()`. This has zero performance cost ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â it simply re-enables standard Godot GUI dispatch for the Window subtree.
 
 **Known issue:** Cannot ESC out of fullscreen/borderless mode from the output window. Workaround: change Window Mode back to Windowed from the inspector.
 
 ---
 
-## UI — User Interface Operators
+## UI ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â User Interface Operators
 
-Interactive 2D widget operators for building control panels. UI widgets are wired through a **ContainerUI** into WindowOUT's panel port (Input 1). Controls are adopted directly into the Window's VBoxContainer UIRoot—no SubViewport indirection—so Godot's native input dispatch handles mouse, keyboard, and focus automatically.
+Interactive 2D widget operators for building control panels. UI widgets are wired through a **ContainerUI** into WindowOUT's panel port (Input 1). Controls are adopted directly into the Window's VBoxContainer UIRootÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âno SubViewport indirectionÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âso Godot's native input dispatch handles mouse, keyboard, and focus automatically.
 
-**Base class:** `GNUiBase` (extends GNNode) — manages `_control_node: Control`. Color: Sky Blue.
+**Base class:** `GNUiBase` (extends GNNode) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â manages `_control_node: Control`. Color: Sky Blue.
 
 Every UI widget automatically exposes a **"state" CHOP output port** (always the last output). State channels (listed per widget below) contain float values updated each cook. Wire this CHOP output to any parameter expression or CHOP-driven node to connect UI interactions to your network. ContainerUI's state port aggregates all connected children's states into a single CHOP stream.
 
@@ -3649,31 +3938,31 @@ Textured progress bar with TOP layers and CHOP driver.
 
 ### Viewer Panel UI Preview
 
-The viewer panel supports three viewport families: **SOP** (3D geometry), **MAT** (material preview), and **UI** (widget preview). Each viewport is a SubViewport created lazily on first use (~4—6 MB VRAM each).
+The viewer panel supports three viewport families: **SOP** (3D geometry), **MAT** (material preview), and **UI** (widget preview). Each viewport is a SubViewport created lazily on first use (~4ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â6 MB VRAM each).
 
 The UI preview captures a snapshot of the selected UI operator's `_control_node` via `SubViewport.get_texture()`. The info bar displays the current `widget_state` dictionary (button press count, slider value, toggle state, etc.). This provides a non-interactive visual preview of widget appearance directly in the editor without requiring a WindowOUT output window.
 
 ### Node Palette Keyboard Navigation
 
 The node palette popup supports full keyboard navigation:
-- **Up/Down arrows** — navigate between operator entries in the filtered tree
-- **Enter** — creates the currently highlighted operator
-- **Typing** — filters the tree in real-time by operator name
+- **Up/Down arrows** ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â navigate between operator entries in the filtered tree
+- **Enter** ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â creates the currently highlighted operator
+- **Typing** ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â filters the tree in real-time by operator name
 
 Navigation wraps around and skips category headers, moving only between leaf (operator) entries.
 
 ### Logging & Warning System
 
-GONODES has a 2-layer logging and diagnostics system that is **editor-only** — exported player builds skip all status tracking overhead.
+GONODES has a 2-layer logging and diagnostics system that is **editor-only** ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â exported player builds skip all status tracking overhead.
 
-#### Layer 1 — Per-Node Warning / Error Badges
+#### Layer 1 ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Per-Node Warning / Error Badges
 
 Every operator (`GNNode`) has two transient string properties:
 
 | Property | Badge | Color | Meaning |
 |----------|-------|-------|---------|
-| `node_warning` | ⚠ | Yellow | Recoverable issue (e.g. UI fan-out conflict) |
-| `node_error` | ✖ | Red | Failure (e.g. expression error, null cook result) |
+| `node_warning` | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â  | Yellow | Recoverable issue (e.g. UI fan-out conflict) |
+| `node_error` | ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ | Red | Failure (e.g. expression error, null cook result) |
 
 Both are **cleared automatically** at the start of each cook cycle and only re-set if the problem persists (self-healing). The `GNNodeView` overlay renders the badge in the top-right corner of the node with a tooltip showing the full message.
 
@@ -3681,7 +3970,7 @@ Both are **cleared automatically** at the start of each cook cycle and only re-s
 
 ```gdscript
 # Inside your _cook() implementation:
-node_warning = "Seed unchanged — output is static"
+node_warning = "Seed unchanged ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â output is static"
 node_error   = "Input image is null"
 ```
 
@@ -3691,7 +3980,7 @@ The cook engine also sets `node_error` automatically for:
 - Expression evaluation failures
 - Per-component expression errors
 
-#### Layer 2 — Textport (Log Panel)
+#### Layer 2 ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Textport (Log Panel)
 
 The collapsible **Textport** at the bottom of the editor displays live log output from `GNLogger`. Toggle it with the **Log** button in the toolbar.
 
@@ -3712,7 +4001,7 @@ GNLogger.error("MyOp", "Failure: %s" % err)
 - Clear button to reset all entries
 - Each line shows `[LEVEL] category: message`
 
-**`log()` — User Script & Expression Bridge:**
+**`log()` ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â User Script & Expression Bridge:**
 
 Script operators and expression parameters can send messages to the Textport
 via built-in `log()` helpers. The node's ID is used as the log category
@@ -3781,7 +4070,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 16 CPU-heavy operators across two phases. These appear as separate operators in the palette under a "Native" section when the C++ binaries are compiled. Each native operator has an identical parameter interface to its GDScript counterpart and includes a pure-GDScript fallback for when the C++ library is unavailable.
 
-### Phase 1 â€” Core Operators (6)
+### Phase 1 ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Core Operators (6)
 
 | Native Operator | Replaces | Family | C++ Class |
 |----------------|----------|--------|-----------|
@@ -3792,19 +4081,19 @@ The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 1
 | MetaballSOPNative | MetaballSOP | SOP | GNNativeMetaball |
 | PolyReduceSOPNative | PolyReduceSOP | SOP | GNNativePolyReduce |
 
-### Phase 2 â€” Extended Operators (10)
+### Phase 2 ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Extended Operators (10)
 
 | Native Operator | Replaces | Family | C++ Class | Algorithm |
 |----------------|----------|--------|-----------|-----------|
 | IsoSurfaceSOPNative | IsoSurfaceSOP | SOP | GNNativeIsoSurface | Marching cubes with 5 implicit field types (Gyroid, Schwarz-P/D, Sphere, Torus) |
-| RaySOPNative | RaySOP | SOP | GNNativeRay | MÃ¶llerâ€“Trumbore ray-triangle intersection, 7 direction modes |
+| RaySOPNative | RaySOP | SOP | GNNativeRay | MÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶llerÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“Trumbore ray-triangle intersection, 7 direction modes |
 | FacetSOPNative | FacetSOP | SOP | GNNativeFacet | Unique points (flat shading) / spatial-hash consolidate |
 | FuseSOPNative | FuseSOP | SOP | GNNativeFuse | Spatial-hash vertex welding within threshold |
-| SubdivideSOPNative | SubdivideSOP | SOP | GNNativeSubdivide | Uniform triangle 1â†’4 subdivision (1-4 iterations) |
+| SubdivideSOPNative | SubdivideSOP | SOP | GNNativeSubdivide | Uniform triangle 1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢4 subdivision (1-4 iterations) |
 | CopySOPNative | CopySOP | SOP | GNNativeCopy | Copy-to-points instancing with normal alignment + pscale |
 | LSystemSOPNative | LSystemSOP | SOP | GNNativeLSystem | Grammar rewriting + turtle interpretation, line or tube mesh |
 | SpringSOPNative | SpringSOP | SOP | GNNativeSpring | Semi-implicit Euler damped spring per-vertex deformer |
-| EdgeDetectIMGNative | EdgeDetectIMG | IMG | GNNativeEdgeDetect | Sobel/Prewitt 3Ã—3 convolution, gradient direction color mode |
+| EdgeDetectIMGNative | EdgeDetectIMG | IMG | GNNativeEdgeDetect | Sobel/Prewitt 3ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â3 convolution, gradient direction color mode |
 | SmoothCHOPNative | SmoothCHOP | CHOP | GNNativeSmooth | Biquad Butterworth IIR filter (LP/HP/BP) with per-channel state |
 
 **Build status:** Windows x86_64 binary compiled and active (`bin/win64/libgn_native.windows.template_debug.x86_64.dll`, 677 KB). Linux/macOS builds require running `scons platform=linux|macos target=template_debug` on those platforms. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and falls back to pure GDScript if the library is missing.

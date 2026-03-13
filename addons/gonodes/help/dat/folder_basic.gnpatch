@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "folder1": {
+            "type": "FolderDAT",
+            "position": [100, 100],
+            "parameters": {
+                "path": { "value": "res://addons/gonodes/operators" },
+                "recursive": { "value": false },
+                "filter": { "value": "*.gd" }
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [400, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "folder1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Folder DAT — Directory Listing\n\nLists files in a directory as table rows.\nSupports glob filter patterns (e.g. *.gd).\nOptional recursive traversal and directory inclusion.",
+            "position": [50.0, -50.0],
+            "size": [450.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

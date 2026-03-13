@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "touch1": {
+            "type": "MultiTouchInDAT",
+            "position": [100, 100],
+            "parameters": {
+                "normalize": { "value": false },
+                "max_touches": { "value": 10 }
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [400, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "touch1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Multi Touch In DAT\n\nReads multi-touch input events as table rows.\nEach active touch has id, x, y, pressure, phase.\nEnable normalize for 0-1 coordinate range.",
+            "position": [50.0, -50.0],
+            "size": [400.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

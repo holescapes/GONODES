@@ -1,0 +1,29 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "perform1": {
+            "type": "PerformCHOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [350, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "perform1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Perform CHOP — System Metrics\n\nOutputs fps, frame_time_ms, memory_mb, and frame_count\nchannels. Useful for performance monitoring dashboards.",
+            "position": [50.0, -50.0],
+            "size": [450.0, 60.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

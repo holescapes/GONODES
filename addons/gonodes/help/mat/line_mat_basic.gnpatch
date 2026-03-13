@@ -1,0 +1,60 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "torus1": {
+            "type": "TorusSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "line_mat1": {
+            "type": "LineMAT",
+            "position": [100, 300],
+            "parameters": {
+                "color": { "value": { "_type": "Color", "r": 0.0, "g": 1.0, "b": 0.5, "a": 1.0 } },
+                "line_width": { "value": 2.0 }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [400, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [400, 400],
+            "parameters": {
+                "tz": { "value": 5.0 }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [700, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [950, 100],
+            "parameters": {
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "torus1", "from_port": 0, "to": "geo1", "to_port": 0 },
+        { "from": "line_mat1", "from_port": 0, "to": "geo1", "to_port": 1 },
+        { "from": "geo1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "cam1", "from_port": 0, "to": "render1", "to_port": 1 },
+        { "from": "render1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Line MAT — Wireframe Material\n\nRenders geometry as wireframe lines.\nAdjust color, width, alpha, and stipple pattern.\nGreat for technical visualization and debug views.",
+            "position": [50.0, -50.0],
+            "size": [450.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

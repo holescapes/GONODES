@@ -1,0 +1,66 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "nmap1": {
+            "type": "NormalMapMAT",
+            "position": [100, 300],
+            "parameters": {
+                "normal_scale": { "value": 1.0 },
+                "roughness": { "value": 0.5 }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [400, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [400, 400],
+            "parameters": {
+                "tz": { "value": 3.0 }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [400, 600],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [700, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [950, 100],
+            "parameters": {
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "sphere1", "from_port": 0, "to": "geo1", "to_port": 0 },
+        { "from": "nmap1", "from_port": 0, "to": "geo1", "to_port": 1 },
+        { "from": "geo1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "cam1", "from_port": 0, "to": "render1", "to_port": 1 },
+        { "from": "light1", "from_port": 0, "to": "render1", "to_port": 2 },
+        { "from": "render1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Normal Map MAT\n\nApplies normal map texture for surface detail.\nConnect a normal map TOP to the normal_tex input.\nAdjust normal_scale for intensity. Supports albedo texture overlay.",
+            "position": [50.0, -50.0],
+            "size": [500.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

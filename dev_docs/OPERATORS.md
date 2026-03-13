@@ -2,9 +2,9 @@
 
 > **âš ï¸ This is a static snapshot and may be outdated.** The live operator reference is auto-generated in the in-editor Help window (F1 â†’ Operators Reference) from actual operator metadata.  
 > **Audience:** Contributors needing implementation details ("How it works" per operator).  
-> **Current operator count:** 288 operators across 10 families (this snapshot documents 131).
+> **Current operator count:** 307 operators across 10 families (this snapshot documents 150).
 
-> **131 operators** across 10 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, UI, and native extensions.
+> **150 operators** across 10 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, UI, and native extensions.
 
 ---
 
@@ -19,7 +19,7 @@
 - [MAT â€” Material Operators](#mat--material-operators)
 - [Output Operators](#output-operators)
 
-> **Help example patches:** Every operator has 1â€“2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (131 patches).
+> **Help example patches:** Every operator has 1â€“2 `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (150 patches).
 
 ---
 
@@ -1022,7 +1022,7 @@ CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Arr
 
 All CHOP data flows as `GNChannelData` â€” a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 53 operators** â€” 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 1 audio output.
+**Total: 58 operators** â€” 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 1 audio output.
 
 ### Generators
 
@@ -1820,11 +1820,96 @@ Outputs CHOP channel data to the audio system as PCM audio. Uses `AudioStreamGen
 
 ---
 
+### New Operators
+
+---
+
+#### Feedback CHOP
+
+Previous frame's CHOP data for feedback loops. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| reset | Bool | false | -- | Pulse to clear stored data |
+
+**Input:** `in` (CHOP, optional).
+**Output:** CHOP (previous frame's channel data).
+
+**How it works:** Returns the channel data stored from the previous frame (`_prev_data`). After outputting, deep-copies the current input for next frame. If `reset` is pulsed, clears all stored data.
+
+**File:** `operators/chop/feedback_chop.gd`
+
+---
+
+#### Blend CHOP
+
+Sample-by-sample weighted blend of multiple CHOP inputs (2-8 inputs).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| weight | Float | 0.5 | 0.0-1.0 | 0 = first input, 1 = last input |
+| method | Enum | Linear | Linear, Ease In, Ease Out, Smooth Step | Interpolation curve |
+
+**Input:** Dynamic inputs (2-8 CHOPs).
+**Output:** CHOP (blended channels).
+
+**How it works:** Scales `weight` across the input array to select two bracketing inputs and a fractional `t`. Applies the selected easing to `t`, then lerps all channels sample-by-sample. Missing channels are zero-filled.
+
+**File:** `operators/chop/blend_chop.gd`
+
+---
+
+#### Perform CHOP
+
+System performance metrics as CHOP channels. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| fps | Bool | true | -- | Frames per second |
+| frame_time | Bool | true | -- | Frame time in milliseconds |
+| frame_count | Bool | true | -- | Total frames drawn |
+| memory | Bool | true | -- | Static memory usage in MB |
+| gpu_time | Bool | false | -- | Last GPU frame time (if available) |
+
+**Output:** CHOP (performance channels, one per enabled metric).
+
+**How it works:** Reads `Engine.get_frames_per_second()`, `Engine.get_frames_drawn()`, `OS.get_static_memory_usage()`, and `Performance.TIME_PROCESS` (GPU fallback). Each metric outputs as a single-sample channel gated by its bool.
+
+**File:** `operators/chop/perform_chop.gd`
+
+---
+
+#### Transform CHOP
+
+3D transform on xyz channel groups. Detects channel triplets and applies a matrix transform.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| tx | Float | 0.0 | unbounded | Translate X |
+| ty | Float | 0.0 | unbounded | Translate Y |
+| tz | Float | 0.0 | unbounded | Translate Z |
+| rx | Float | 0.0 | -360-360 | Rotate X (degrees) |
+| ry | Float | 0.0 | -360-360 | Rotate Y (degrees) |
+| rz | Float | 0.0 | -360-360 | Rotate Z (degrees) |
+| sx | Float | 1.0 | 0.001-100 | Scale X |
+| sy | Float | 1.0 | 0.001-100 | Scale Y |
+| sz | Float | 1.0 | 0.001-100 | Scale Z |
+| order | Enum | SRT | SRT, STR, RST, RTS, TSR, TRS | Transform operation order |
+
+**Input:** `in` (CHOP, optional).
+**Output:** CHOP (transformed channels).
+
+**How it works:** Builds a `Transform3D` from TRS parameters in the specified order. Detects xyz channel groups (e.g. `tx/ty/tz` or `x/y/z`) and applies the matrix to every sample as a `Vector3`. Non-grouped channels pass through unchanged.
+
+**File:** `operators/chop/transform_chop.gd`
+
+---
+
 ## DAT â€” Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
 
-**Total: 24 operators** â€” 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges.
+**Total: 29 operators** â€” 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges.
 
 ### Generators
 
@@ -2209,11 +2294,112 @@ network_connect(nid, 0, "composite1", 1)
 
 ---
 
+### I/O & Utility (New 2)
+
+---
+
+#### Web Server DAT
+
+HTTP server that serves responses and logs incoming requests as a table. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| port | Int | 8080 | 1-65535 | Listen port |
+| active | Bool | true | -- | Enable/disable server |
+| content_type | String | "text/html" | -- | Response Content-Type header |
+| max_requests | Int | 50 | 1-100 | Maximum request log rows |
+| clear | Bool | false | -- | Pulse to clear log |
+
+**Input:** `response` (DAT, optional -- response body).
+**Output:** DAT table (columns: method, path, time).
+
+**How it works:** Runs a `TCPServer` that accepts connections, parses HTTP request lines, serves a response from the upstream DAT input (or "OK"), and logs each request into a rolling table trimmed to `max_requests` rows.
+
+**File:** `operators/dat/web_server_dat.gd`
+
+---
+
+#### WebSocket DAT
+
+WebSocket client/server communication. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Client | Client, Server | Client connects to URL, Server listens on port |
+| url | String | "ws://127.0.0.1:9090" | -- | WebSocket URL (client mode) |
+| port | Int | 9090 | 1-65535 | Listen port (server mode) |
+| active | Bool | true | -- | Enable/disable |
+| max_lines | Int | 100 | 1-1000 | Maximum received messages to buffer |
+| clear | Bool | false | -- | Pulse to clear buffer |
+
+**Input:** `send` (DAT, optional -- data to send).
+**Output:** DAT table (column: message).
+
+**How it works:** In Client mode, connects to a WebSocket URL via `WebSocketPeer`, polls for packets, and sends upstream DAT text. In Server mode, listens via `TCPServer`, upgrades connections to `WebSocketPeer`, and broadcasts to all connected peers. Received messages accumulate into a rolling table.
+
+**File:** `operators/dat/web_socket_dat.gd`
+
+---
+
+#### Error DAT
+
+Captures system warnings and errors as a table by hooking GNLogger. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| level_filter | Enum | Warnings & Errors | Errors Only, Warnings & Errors, All | Minimum severity to capture |
+| max_rows | Int | 200 | 1-5000 | Maximum log entries |
+| clear | Bool | false | -- | Pulse to clear the log |
+
+**Output:** DAT table (columns: level, category, message, timestamp).
+
+**How it works:** Hooks `GNLogger.log_sink` at init so all `GNLogger.warn`/`GNLogger.error` calls are captured. The `_on_log` callback filters by severity and appends rows. Cook trims to `max_rows` and outputs the accumulated table. Unhooks on deletion.
+
+**File:** `operators/dat/error_dat.gd`
+
+---
+
+#### Folder DAT
+
+List directory contents as a table.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| path | String | "res://" | -- | Directory path to list |
+| recursive | Bool | false | -- | Include sub-directories recursively |
+| filter | String | "*" | -- | Glob-style filter (e.g. *.png) |
+| include_dirs | Bool | true | -- | Include directories in listing |
+
+**Output:** DAT table (columns: name, path, extension, size, is_dir).
+
+**How it works:** Opens the given directory with `DirAccess`, iterates entries (optionally recursive), filters with `matchn()`, reads file sizes, and builds a table with name/path/extension/size/is_dir columns.
+
+**File:** `operators/dat/folder_dat.gd`
+
+---
+
+#### Multi Touch In DAT
+
+Multi-touch screen input as table rows. Time-dependent.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| active | Bool | true | -- | Enable/disable touch capture |
+| normalize | Bool | false | -- | Output 0-1 normalized coords instead of pixels |
+
+**Output:** DAT table (columns: id, x, y, pressure, rel_x, rel_y, phase).
+
+**How it works:** Maintains a `_touches` dictionary updated by `InputEventScreenTouch` (began/ended) and `InputEventScreenDrag` (moved). Each cook outputs active touches as table rows. Optionally normalizes coordinates to viewport 0-1. Ended touches are removed after output.
+
+**File:** `operators/dat/multi_touch_in_dat.gd`
+
+---
+
 ## SOP â€” Surface Operators
 
 SOPs produce and manipulate 3D geometry. The output type is `GNGeoData`, which wraps Godot's native `ArrayMesh`. SOPs leverage Godot's built-in mesh primitives (`BoxMesh`, `SphereMesh`, etc.) and `SurfaceTool` for procedural generation. Geometry flows through SOP chains and ultimately reaches a GeometryCOMP for 3D scene placement.
 
-**Total: 40 operators** â€” 9 generators, 20 filters, 6 combiners, 2 utility, 3 deformers.
+**Total: 45 operators** â€” 9 generators, 20 filters, 6 combiners, 2 utility, 3 deformers.
 
 ### Generators
 
@@ -2825,13 +3011,117 @@ Triangulate mesh and remove degenerate triangles.
 
 ---
 
+### I/O & Utility (New)
+
+---
+
+#### File In SOP
+
+Import geometry from an OBJ, glTF, or Godot resource file.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | "" | -- | Path to geometry file (OBJ, glTF, .tres, .res) |
+| reload | Bool | false | -- | Pulse to force reload |
+
+**Output:** SOP (imported geometry).
+
+**How it works:** Dispatches by extension: `.obj` is parsed line-by-line with `SurfaceTool` (positions, normals, UVs, fan-triangulated faces); `.glb`/`.gltf` uses `GLTFDocument` to load and extracts the first `MeshInstance3D`; `.tres`/`.res` uses `ResourceLoader`. The resulting `ArrayMesh` is set on the output.
+
+**File:** `operators/sop/file_in_sop.gd`
+
+---
+
+#### File Out SOP
+
+Export geometry to a Wavefront OBJ file with pass-through.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | "" | -- | Output file path (.obj) |
+| write | Bool | false | -- | Pulse to export current geometry |
+
+**Input:** `in` (SOP).
+**Output:** SOP (pass-through of input geometry).
+
+**How it works:** On `write` pulse, iterates all surfaces of the input `ArrayMesh`, writes vertices, normals, UVs, and indexed/non-indexed face definitions in Wavefront OBJ format. Creates directories as needed. Always passes input geometry through.
+
+**File:** `operators/sop/file_out_sop.gd`
+
+---
+
+#### Group SOP
+
+Create point or primitive groups by spatial/index criteria.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| group_name | String | "group1" | -- | Name of the group to create |
+| entity | Enum | Points | Points, Primitives | Select points or primitives |
+| method | Enum | Bounding Box | Bounding Box, Normal Direction, Range Pattern, All | Selection criterion |
+| bb_min_x/y/z | Float | -0.5 | unbounded | Bounding box minimum |
+| bb_max_x/y/z | Float | 0.5 | unbounded | Bounding box maximum |
+| dir_x/y/z | Float | 0/1/0 | -1-1 | Normal direction vector |
+| spread_angle | Float | 45.0 | 0-180 | Cone half-angle in degrees |
+| range_pattern | String | "0-9" | -- | Index range (e.g. 0-9, 20, 30-40) |
+| operation | Enum | Set | Set, Add, Remove | Group operation mode |
+
+**Input:** `in` (SOP).
+**Output:** SOP (geometry with updated group attribs).
+
+**How it works:** Duplicates input geometry, builds a selection mask using the chosen method (AABB containment, normal-direction cone test, comma-separated index ranges, or all), then applies Set/Add/Remove operation to produce a membership `PackedFloat32Array` stored as a point attrib. Primitive groups use a `prim_` prefix.
+
+**File:** `operators/sop/group_sop.gd`
+
+---
+
+#### Primitive SOP
+
+Compute per-primitive attributes: face normals, area, centroid, and primitive index.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| face_normals | Bool | true | -- | Store face normal (fn_x, fn_y, fn_z) |
+| face_area | Bool | false | -- | Store face area (face_area) |
+| face_centroid | Bool | false | -- | Store centroid (fc_x, fc_y, fc_z) |
+| face_id | Bool | true | -- | Store primitive index (prim_id) |
+
+**Input:** `in` (SOP).
+**Output:** SOP (geometry with per-primitive point attribs).
+
+**How it works:** Iterates all triangles across all surfaces. For each face, computes cross-product normal, area (half cross-product length), and centroid. Writes toggled attributes per-vertex as point attribs.
+
+**File:** `operators/sop/primitive_sop.gd`
+
+---
+
+#### Blend SOP
+
+Vertex-level morph/blend between two geometries.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| blend | Float | 0.5 | 0.0-1.0 | Interpolation factor (0 = A, 1 = B) |
+| blend_normals | Bool | true | -- | Also interpolate normals |
+| blend_uvs | Bool | false | -- | Also interpolate UVs |
+
+**Input 0:** `geo_a` (SOP -- base geometry, blend=0).
+**Input 1:** `geo_b` (SOP -- target geometry, blend=1).
+**Output:** SOP (blended geometry).
+
+**How it works:** For each surface where both inputs have matching vertex counts, lerps positions (and optionally normals/UVs) per-vertex by `blend`. Normalizes blended normals. Mismatched vertex counts pass through from input A.
+
+**File:** `operators/sop/blend_sop.gd`
+
+---
+
 ## COMP â€” Component Operators
 
 COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output â€” instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
 
 COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Godot's 3D rendering engine.
 
-**Total: 11 operators.**
+**Total: 12 operators.**
 
 > Note: SubNetworkNode, InTunnel, OutTunnel are internal system nodes.
 > NullCOMP, SwitchCOMP, EnvironmentCOMP, and GenericScriptNode are utility nodes.
@@ -3170,7 +3460,7 @@ AnimationPlayer wrapper for keyframe animation on COMP transform properties. Tak
 
 MATs produce materials for COMP use. Output type is `GNMaterialData`, wrapping Godot's `Material` base class. MATs connect to GeometryCOMP's material input to override the default PBR.
 
-**Total: 6 operators** â€” 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth.
+**Total: 8 operators** â€” 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth.
 
 ---
 
@@ -3228,6 +3518,49 @@ Uses ShaderMaterial that linearizes FRAGCOORD.z.
 
 ---
 
+#### Normal Map MAT
+
+Normal-map visualization material with PBR base.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| normal_scale | Float | 1.0 | -4.0-4.0 | Normal map strength |
+| albedo_color | Color | (0.7, 0.7, 0.7) | -- | Base color (no albedo texture) |
+| roughness | Float | 0.5 | 0.0-1.0 | Surface roughness |
+| unlit | Bool | false | -- | Render unlit to see raw normal colors |
+| cull_mode | Enum | Back | Back, Front, Disabled | Face culling |
+
+**Input 0:** `normal_tex` (TOP -- normal map texture).
+**Input 1:** `albedo_tex` (TOP -- optional base color texture).
+**Output:** MAT (StandardMaterial3D with normal mapping).
+
+**How it works:** Creates/updates a `StandardMaterial3D`. Sets albedo color/texture, enables normal mapping with input TOP texture and `normal_scale`, applies roughness, toggles unlit shading, and sets cull mode.
+
+**File:** `operators/mat/normal_map_mat.gd`
+
+---
+
+#### Line MAT
+
+Line/wireframe rendering material with stipple (dashed line) controls.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| color | Color | White | -- | Line color |
+| width | Float | 1.0 | 0.1-10.0 | Line width |
+| alpha | Float | 1.0 | 0.0-1.0 | Overall opacity |
+| stipple_scale | Float | 10.0 | 0.1-100.0 | Dash pattern frequency |
+| stipple_ratio | Float | 1.0 | 0.0-1.0 | Visible portion of each dash (1.0 = solid) |
+| cull_mode | Enum | Disabled | Back, Front, Disabled | Face culling |
+
+**Output:** MAT (ShaderMaterial with wireframe render mode).
+
+**How it works:** Creates a `ShaderMaterial` with `render_mode unshaded, wireframe`. Fragment shader discards fragments based on a distance-based stipple pattern. Uniforms control color, width, alpha, stipple scale and ratio.
+
+**File:** `operators/mat/line_mat.gd`
+
+---
+
 ## Output Operators
 
 Output operators are terminal/sink nodes that display results. They have inputs but no data outputs.
@@ -3260,12 +3593,12 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output â€�
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 59 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, ComputeShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, CHOPtoTOP, FileSave, Null, Switch, Window, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette |
-| **CHOP** | 53 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, OscOut, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioDeviceOut, Record, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP |
-| **DAT** | 25 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileSave, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind |
-| **SOP** | 51 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Spring, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP |
-| **COMP** | 15 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Animation |
-| **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
+| **TOP** | 60 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, ComputeShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, CHOPtoTOP, FileSave, Null, Switch, Window, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, Select |
+| **CHOP** | 58 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, OscOut, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioDeviceOut, Record, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Feedback, Blend, Object, Perform, Transform |
+| **DAT** | 30 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileSave, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, WebServer, WebSocket, Error, Folder, MultiTouchIn |
+| **SOP** | 56 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Spring, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, FileIn, FileOut, Group, Primitive, Blend |
+| **COMP** | 16 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Animation, Select |
+| **MAT** | 8 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line |
 | **IMG** | 15 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, ScreenGrab, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, FileSave, MovieOut, FFmpegOut |
 | **Output** | 1 | Window |
-| **Total** | **225** | |
+| **Total** | **244** | |

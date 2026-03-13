@@ -1427,7 +1427,7 @@ GONODES/
   - Disconnected/orphan subgraphs skip cooking entirely (keep cached_output frozen).
   - **Engine-level** (editor-independent): structural sinks auto-detected via `GNNode.is_sink` flag â€” operators set `is_sink = true` in `_init()` (WindowOUT, future SpoutOut, MIDIOut, OSCOut, NDIOut, etc.).
   - **Editor-level**: UI sinks (viewer panel, floating windows) passed via `active_sinks`.
-  - BFS follows both wire connections AND expression references (`chop()/op()/top()` calls) â€” implicit dependencies are tracked.
+  - BFS follows wire connections and expression references (`chop()/op()/top()` calls) — implicit dependencies are tracked.
   - Event-driven: active set recomputed only when topology, sinks, or expressions change (not per-frame).
   - `GNNode.is_active` flag updated every frame; perf overlay shows "zzz" for inactive nodes.
   - Always-on (no toggle) â€” info bar shows "Active: N/M" count.

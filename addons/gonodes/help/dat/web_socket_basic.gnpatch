@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "websocket1": {
+            "type": "WebSocketDAT",
+            "position": [100, 100],
+            "parameters": {
+                "protocol": { "value": 0 },
+                "url": { "value": "ws://localhost:9090" },
+                "active": { "value": false }
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [400, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "websocket1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "WebSocket DAT — Client Mode\n\nConnects to a WebSocket server at the URL.\nReceived messages appear as table rows.\nSend messages by connecting a DAT to the input.\nSet active=true to connect.",
+            "position": [50.0, -50.0],
+            "size": [450.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

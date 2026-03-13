@@ -1,0 +1,54 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "filein1": {
+            "type": "FileInSOP",
+            "position": [100, 100],
+            "parameters": {
+                "file_path": { "value": "" },
+                "format": { "value": 0 }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [350, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [350, 300],
+            "parameters": {
+                "tz": { "value": 5.0 }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [600, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [850, 100],
+            "parameters": {
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "filein1", "from_port": 0, "to": "geo1", "to_port": 0 },
+        { "from": "geo1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "cam1", "from_port": 0, "to": "render1", "to_port": 1 },
+        { "from": "render1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "File In SOP\n\nImport OBJ, glTF, or Godot resource files as SOP geometry.\nSet file_path to a .obj, .gltf, .glb, .tres, or .res file.\nSupports OBJ with UVs and normals, and glTF with full scene.",
+            "position": [50.0, -50.0],
+            "size": [550.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

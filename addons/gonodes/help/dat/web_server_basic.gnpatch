@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webserver1": {
+            "type": "WebServerDAT",
+            "position": [100, 100],
+            "parameters": {
+                "port": { "value": 8080 },
+                "active": { "value": true },
+                "content_type": { "value": 0 }
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [400, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "webserver1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Web Server DAT\n\nRuns an HTTP server on the specified port.\nLogs incoming requests as table rows.\nOptional content input from another DAT.",
+            "position": [50.0, -50.0],
+            "size": [400.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

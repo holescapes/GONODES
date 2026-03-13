@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "group1": {
+            "type": "GroupSOP",
+            "position": [350, 100],
+            "parameters": {
+                "group_name": { "value": "top_half" },
+                "entity_type": { "value": 0 },
+                "method": { "value": 1 },
+                "nx": { "value": 0.0 },
+                "ny": { "value": 1.0 },
+                "nz": { "value": 0.0 },
+                "cone_angle": { "value": 90.0 }
+            }
+        },
+        "null1": {
+            "type": "NullSOP",
+            "position": [600, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "sphere1", "from_port": 0, "to": "group1", "to_port": 0 },
+        { "from": "group1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Group SOP — Normal Selection\n\nCreates a point group by normal direction.\nHere: selects the top half of a sphere\n(normals within 90° of +Y).\nMethods: Bounding Box, Normal, Range, All.",
+            "position": [50.0, -50.0],
+            "size": [450.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

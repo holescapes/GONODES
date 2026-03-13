@@ -1,0 +1,50 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "const_a": {
+            "type": "ConstantCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "value0": { "value": 0.0 },
+                "name0": { "value": "val" }
+            }
+        },
+        "const_b": {
+            "type": "ConstantCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "value0": { "value": 1.0 },
+                "name0": { "value": "val" }
+            }
+        },
+        "blend1": {
+            "type": "BlendCHOP",
+            "position": [400, 200],
+            "parameters": {
+                "blend": { "value": 0.5 },
+                "method": { "value": 0 }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [650, 200],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "const_a", "from_port": 0, "to": "blend1", "to_port": 0 },
+        { "from": "const_b", "from_port": 0, "to": "blend1", "to_port": 1 },
+        { "from": "blend1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Blend CHOP — Weighted Mix\n\nBlends between two (or more) CHOP inputs.\nblend=0 → 100% input A, blend=1 → 100% input B.\nMethods: Linear, Ease In, Ease Out, Smooth Step.",
+            "position": [50.0, -50.0],
+            "size": [500.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

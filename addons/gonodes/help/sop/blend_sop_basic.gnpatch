@@ -1,0 +1,72 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 100],
+            "parameters": {
+                "radius": { "value": 0.5 },
+                "height": { "value": 1.0 }
+            }
+        },
+        "sphere2": {
+            "type": "SphereSOP",
+            "position": [100, 300],
+            "parameters": {
+                "radius": { "value": 0.5 },
+                "height": { "value": 0.3 }
+            }
+        },
+        "blend1": {
+            "type": "BlendSOP",
+            "position": [400, 200],
+            "parameters": {
+                "blend": { "value": 0.5 },
+                "blend_normals": { "value": true }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [650, 200],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [650, 400],
+            "parameters": {
+                "tz": { "value": 5.0 }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [900, 200],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1150, 200],
+            "parameters": {
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "sphere1", "from_port": 0, "to": "blend1", "to_port": 0 },
+        { "from": "sphere2", "from_port": 0, "to": "blend1", "to_port": 1 },
+        { "from": "blend1", "from_port": 0, "to": "geo1", "to_port": 0 },
+        { "from": "geo1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "cam1", "from_port": 0, "to": "render1", "to_port": 1 },
+        { "from": "render1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Blend SOP — Shape Morphing\n\nMorphs between two spheres: A (tall) and B (squashed disc).\nblend=0 shows sphere A, blend=1 shows sphere B.\nBoth inputs must have matching vertex counts (same topology).",
+            "position": [50.0, -50.0],
+            "size": [500.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

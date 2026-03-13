@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "error1": {
+            "type": "ErrorDAT",
+            "position": [100, 100],
+            "parameters": {
+                "level_filter": { "value": 1 },
+                "max_rows": { "value": 100 }
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [400, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "error1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Error DAT — Log Capture\n\nCaptures warnings and errors from the GONODES\nlogger as a table with level, category, message,\nand timestamp columns. Useful for debugging.",
+            "position": [50.0, -50.0],
+            "size": [450.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

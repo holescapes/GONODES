@@ -624,3 +624,83 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 | 5 | **Parameter-level dependency tracking** | Medium | High | Reduces unnecessary recooks in large networks â€” Houdini's key optimization |
 
 GONODES is already remarkably well-aligned with both TD and Houdini's core architecture. The active chain cooking, COW data model, expression system, per-component expressions, preview system, and sub-network hierarchy put it in strong competitive territory. The gaps are mostly in **power-user workflow tools** (spreadsheet, ramp, annotations) rather than fundamental architecture holes.
+
+---
+
+## 12. Operator Coverage Gap Analysis
+
+### 12.1 New Operators Added (Session 34)
+
+A systematic audit of TouchDesigner's operator set yielded **16 new operators** that close significant coverage gaps:
+
+| Family | Operator | TD Equivalent | Notes |
+|--------|----------|--------------|-------|
+| CHOP | **FeedbackCHOP** | Feedback CHOP | Previous-frame data for feedback loops |
+| CHOP | **BlendCHOP** | Blend CHOP | Weighted blend of 2-8 inputs, 4 easing modes |
+| CHOP | **PerformCHOP** | Perform CHOP | FPS, frame_time, memory, frame_count via Engine/OS/Performance |
+| CHOP | **TransformCHOP** | Transform CHOP | 3D transform on xyz channel groups, 6 transform orders |
+| DAT | **WebServerDAT** | Web Server DAT | HTTP server via TCPServer, table output of requests |
+| DAT | **WebSocketDAT** | WebSocket DAT | WebSocket client/server via WebSocketPeer |
+| DAT | **ErrorDAT** | Error DAT | Hooks GNLogger.log_sink, captures warnings/errors |
+| DAT | **FolderDAT** | Folder DAT | Directory listing with glob filter |
+| DAT | **MultiTouchInDAT** | Multi Touch In DAT | Touch events as table rows |
+| SOP | **FileInSOP** | File In SOP | OBJ/glTF/Resource import |
+| SOP | **FileOutSOP** | File Out SOP | OBJ export with geometry pass-through |
+| SOP | **GroupSOP** | Group SOP | Point/prim groups via BBox/Normal/Range/All |
+| SOP | **PrimitiveSOP** | Primitive SOP | Per-prim face normals, area, centroid, prim_id |
+| SOP | **BlendSOP** | Blend SOP | Vertex-level morph between two geometries |
+| MAT | **NormalMapMAT** | Phong MAT (normal map) | StandardMaterial3D with normal map controls |
+| MAT | **LineMAT** | Line MAT | ShaderMaterial wireframe with stipple controls |
+
+### 12.2 Excluded Operators — Rationale & Roadmap
+
+The following TD operators were evaluated and **excluded** from this batch, with documented reasons:
+
+#### Covered by Existing GONODES Operators
+
+| TD Operator | Covered By | Explanation |
+|-------------|-----------|-------------|
+| TCP/IP DAT | **NetworkDAT** | Already supports both TCP and UDP protocols |
+| UDP In/Out DAT | **NetworkDAT** | Same — NetworkDAT handles UDP mode |
+| Shift CHOP | **WarpCHOP** | Time-shifting functionality covered by WarpCHOP |
+| Cycle CHOP | **ExtendCHOP** | Cycle/repeat modes are ExtendCHOP's extend_mode parameter |
+| Clip CHOP | **TrimCHOP** | Clipping/trimming ranges handled by TrimCHOP |
+| CHOP Execute DAT | **CallbackDAT** | CallbackDAT covers all execute-on-event patterns |
+| SOP Execute DAT | **CallbackDAT** | Same pattern — CallbackDAT is generalised |
+| Phong MAT | **PBR_MAT** | PBR_MAT covers Phong-like workflows via roughness=1.0 |
+| Screen Grab TOP | **ScreenGrabIMG** | Already in IMG family as ScreenGrabIMG |
+
+#### Requires External Libraries (Roadmap)
+
+| TD Operator | Dependency | Roadmap Priority |
+|-------------|-----------|-----------------|
+| NDI In/Out TOP | NDI SDK (Newtek) | Medium — awaits GDExtension C++ pipeline |
+| Syphon In/Out TOP | Syphon framework (macOS only) | Low — platform-specific |
+| Spout In/Out TOP | Spout SDK (Windows only) | Medium — Windows-focused deployments |
+| MIDI Out CHOP | RtMidi or similar | Low — MIDI In already exists; Out needs native lib |
+
+#### Niche / External Hardware
+
+| TD Operator | Reason for Exclusion |
+|-------------|---------------------|
+| DMX In/Out CHOP | Requires USB-DMX hardware + driver library |
+| ArtNet CHOP | Lighting-specific protocol; low general demand |
+| Serial DAT | Requires serial port access (COM/tty); niche hardware |
+| Leap Motion CHOP | Deprecated hardware; community-contributed if needed |
+
+### 12.3 Updated Operator Totals
+
+| Family | Before | After | Delta |
+|--------|--------|-------|-------|
+| TOP | 63 | 64 | +1 |
+| IMG | 12 | 12 | — |
+| CHOP | 61 | 66 | +5 |
+| DAT | 29 | 34 | +5 |
+| SOP | 57 | 62 | +5 |
+| COMP | 20 | 21 | +1 |
+| MAT | 6 | 8 | +2 |
+| OUT | 9 | 9 | — |
+| UI | 31 | 31 | — |
+| **Total** | **288** | **307** | **+19** |
+
+Help patches: 299 → 318 (+19).

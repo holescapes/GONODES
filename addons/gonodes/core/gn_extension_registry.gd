@@ -680,6 +680,16 @@ func _register_core_operators() -> void:
 	_reg("DeleteCHOP",      "CHOP", DeleteCHOP,
 		"Delete channels by name pattern, index, or keep-only mode.")
 
+	# ── CHOPs: New (TD Gap) ─────────────────────────────────────────────
+	_reg("FeedbackCHOP",    "CHOP", FeedbackCHOP,
+		"Previous-frame channel data for feedback loops.")
+	_reg("BlendCHOP",       "CHOP", BlendCHOP,
+		"Sample-by-sample weighted blend across multiple CHOP inputs.")
+	_reg("PerformCHOP",     "CHOP", PerformCHOP,
+		"System performance metrics: FPS, frame time, memory.")
+	_reg("TransformCHOP",   "CHOP", TransformCHOP,
+		"3D transform on xyz channel groups (translate, rotate, scale).")
+
 	# ── SOPs: Generators ────────────────────────────────────────────────
 	_reg("GridSOP",         "SOP", GridSOP,
 		"Subdivided plane with configurable orientation.")
@@ -822,6 +832,18 @@ func _register_core_operators() -> void:
 	_reg("TOPtoSOP",        "SOP", TOPtoSOP,
 		"Convert TOP texture to SOP heightfield, point cloud, or normal map mesh.")
 
+	# ── SOPs: New (TD Gap) ──────────────────────────────────────────────
+	_reg("FileInSOP",       "SOP", FileInSOP,
+		"Import OBJ, glTF, or resource file as SOP geometry.")
+	_reg("FileOutSOP",      "SOP", FileOutSOP,
+		"Export SOP geometry to Wavefront OBJ file.")
+	_reg("GroupSOP",        "SOP", GroupSOP,
+		"Create and manage point/primitive groups via bounding box, normal, or range.")
+	_reg("PrimitiveSOP",    "SOP", PrimitiveSOP,
+		"Compute per-primitive attributes: face normal, area, centroid, prim ID.")
+	_reg("BlendSOP",        "SOP", BlendSOP,
+		"Morph between two geometries by blending vertex positions.")
+
 	# ── DATs: Generators ────────────────────────────────────────────────
 	_reg("ConstantDAT",     "DAT", ConstantDAT,
 		"Manually editable 4x4 table with column headers.")
@@ -897,6 +919,18 @@ func _register_core_operators() -> void:
 		"TCP/UDP network send/receive with protocol mode toggle.")
 	_reg("XMLDAT",          "DAT", XMLDAT,
 		"Parse XML document into a flat path/attribute/value table.")
+
+	# ── DATs: New (TD Gap) ──────────────────────────────────────────────
+	_reg("WebServerDAT",    "DAT", WebServerDAT,
+		"HTTP server via TCPServer — serve content and log requests.")
+	_reg("WebSocketDAT",    "DAT", WebSocketDAT,
+		"WebSocket client/server for real-time bidirectional messaging.")
+	_reg("ErrorDAT",        "DAT", ErrorDAT,
+		"Capture warnings and errors from GNLogger as a table.")
+	_reg("FolderDAT",       "DAT", FolderDAT,
+		"List directory contents with optional recursive traversal.")
+	_reg("MultiTouchInDAT", "DAT", MultiTouchInDAT,
+		"Multi-touch input events as table rows with position and pressure.")
 
 	# ── IMGs: Generators ─────────────────────────────────────────────────
 	_reg("NoiseIMG",        "IMG", NoiseIMG,
@@ -1003,6 +1037,12 @@ func _register_core_operators() -> void:
 		"Point sprite material — renders vertices as sized point sprites.")
 	_reg("DepthMAT",        "MAT", DepthMAT,
 		"Visualize scene depth as grayscale with near/far controls.")
+
+	# ── MATs: New (TD Gap) ──────────────────────────────────────────────
+	_reg("NormalMapMAT",    "MAT", NormalMapMAT,
+		"Normal map visualization material with tangent-space normal mapping.")
+	_reg("LineMAT",         "MAT", LineMAT,
+		"Line/wireframe material with color, width, and stipple controls.")
 
 	# ── TOPs: Panel ─────────────────────────────────────────────────────
 	_reg("PanelTOP",        "TOP", PanelTOP,
