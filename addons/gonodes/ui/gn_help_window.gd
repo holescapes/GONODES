@@ -171,7 +171,7 @@ func _build_help_content() -> void:
 			var port_desc: String = port.description if not port.description.is_empty() else "—"
 			var multi_tag := " [i](dynamic)[/i]" if gn_node._dynamic_input and port.index == 0 else ""
 			bb += _table_row([port.port_name + multi_tag, port_family, port_desc])
-		bb += "\n"
+		bb += "[/table]\n"
 	else:
 		bb += _section_header("Inputs")
 		bb += "[i]None (generator node)[/i]\n\n"
@@ -184,7 +184,7 @@ func _build_help_content() -> void:
 			var port_family := GNFamily.get_family_name(port.family)
 			var port_desc: String = port.description if not port.description.is_empty() else "—"
 			bb += _table_row([port.port_name, port_family, port_desc])
-		bb += "\n"
+		bb += "[/table]\n"
 
 	# ── Parameters ──
 	if gn_node.parameters.size() > 0:
@@ -203,7 +203,7 @@ func _build_help_content() -> void:
 			if not range_str.is_empty():
 				desc += "  [color=#666666]%s[/color]" % range_str
 			bb += _table_row([pname, type_str, default_str, desc])
-		bb += "\n"
+		bb += "[/table]\n"
 
 	# ── Flags ──
 	bb += _section_header("Properties")

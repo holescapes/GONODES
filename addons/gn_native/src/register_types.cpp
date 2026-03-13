@@ -30,6 +30,39 @@
 // CHOP processors — Phase 2
 #include "chop/gn_native_smooth.h"
 
+// CHOP processors — Phase 3
+#include "chop/gn_native_noise_chop.h"
+#include "chop/gn_native_wave_chop.h"
+#include "chop/gn_native_math_chop.h"
+#include "chop/gn_native_filter_chop.h"
+#include "chop/gn_native_resample_chop.h"
+#include "chop/gn_native_trail_chop.h"
+#include "chop/gn_native_slope_chop.h"
+#include "chop/gn_native_warp_chop.h"
+#include "chop/gn_native_interpolate_chop.h"
+#include "chop/gn_native_physics_chop.h"
+#include "chop/gn_native_pattern_chop.h"
+#include "chop/gn_native_audio_spectrum_chop.h"
+
+// SOP processors — Phase 3
+#include "sop/gn_native_noise_sop.h"
+#include "sop/gn_native_mountain_sop.h"
+#include "sop/gn_native_blend_sop.h"
+#include "sop/gn_native_scatter_sop.h"
+#include "sop/gn_native_sweep_sop.h"
+#include "sop/gn_native_extrude_sop.h"
+#include "sop/gn_native_bend_sop.h"
+#include "sop/gn_native_taper_sop.h"
+#include "sop/gn_native_twist_sop.h"
+#include "sop/gn_native_lattice_sop.h"
+#include "sop/gn_native_magnet_sop.h"
+#include "sop/gn_native_polyloft_sop.h"
+#include "sop/gn_native_skin_sop.h"
+
+// TOP processors — Phase 3
+#include "top/gn_native_optical_flow_top.h"
+#include "top/gn_native_analyze_top.h"
+
 using namespace godot;
 
 void initialize_gn_native_module(ModuleInitializationLevel p_level) {
@@ -62,6 +95,39 @@ void initialize_gn_native_module(ModuleInitializationLevel p_level) {
 
     // CHOP processors — Phase 2
     ClassDB::register_class<GNNativeSmooth>();
+
+    // CHOP processors — Phase 3
+    ClassDB::register_class<GNNativeNoiseChop>();
+    ClassDB::register_class<GNNativeWaveChop>();
+    ClassDB::register_class<GNNativeMathChop>();
+    ClassDB::register_class<GNNativeFilterChop>();
+    ClassDB::register_class<GNNativeResampleChop>();
+    ClassDB::register_class<GNNativeTrailChop>();
+    ClassDB::register_class<GNNativeSlopeChop>();
+    ClassDB::register_class<GNNativeWarpChop>();
+    ClassDB::register_class<GNNativeInterpolateChop>();
+    ClassDB::register_class<GNNativePhysicsChop>();
+    ClassDB::register_class<GNNativePatternChop>();
+    ClassDB::register_class<GNNativeAudioSpectrumChop>();
+
+    // SOP processors — Phase 3
+    ClassDB::register_class<GNNativeNoiseSop>();
+    ClassDB::register_class<GNNativeMountainSop>();
+    ClassDB::register_class<GNNativeBlendSop>();
+    ClassDB::register_class<GNNativeScatterSop>();
+    ClassDB::register_class<GNNativeSweepSop>();
+    ClassDB::register_class<GNNativeExtrudeSop>();
+    ClassDB::register_class<GNNativeBendSop>();
+    ClassDB::register_class<GNNativeTaperSop>();
+    ClassDB::register_class<GNNativeTwistSop>();
+    ClassDB::register_class<GNNativeLatticeSop>();
+    ClassDB::register_class<GNNativeMagnetSop>();
+    ClassDB::register_class<GNNativePolyLoftSop>();
+    ClassDB::register_class<GNNativeSkinSop>();
+
+    // TOP processors — Phase 3
+    ClassDB::register_class<GNNativeOpticalFlowTop>();
+    ClassDB::register_class<GNNativeAnalyzeTop>();
 }
 
 void uninitialize_gn_native_module(ModuleInitializationLevel p_level) {

@@ -206,7 +206,7 @@ const _LOG_PANEL_HEIGHT := 160.0
 
 ## Recalculates vertical offsets for HSplit, LogPanel, and InfoBar.
 func _layout_log_panel() -> void:
-	var info_bar := $InfoBar as VBoxContainer
+	var _info_bar := $InfoBar as VBoxContainer
 	if log_panel.visible:
 		log_panel.offset_top = -((_TOOLBAR_HEIGHT) + _LOG_PANEL_HEIGHT)
 		log_panel.offset_bottom = -(_TOOLBAR_HEIGHT)
