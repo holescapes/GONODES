@@ -1,0 +1,109 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "torus1": {
+            "type": "TorusSOP",
+            "position": [200, 200],
+            "parameters": {
+                "outer_radius": {"value": 0.4},
+                "inner_radius": {"value": 0.15},
+                "segments_u": {"value": 32},
+                "segments_v": {"value": 16}
+            }
+        },
+        "sop_to_vol1": {
+            "type": "SOPtoVOL",
+            "position": [550, 200],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "fill_interior": {"value": true},
+                "bandwidth": {"value": 2.0}
+            }
+        },
+        "blur1": {
+            "type": "BlurVOL",
+            "position": [900, 200],
+            "parameters": {
+                "radius": {"value": 3},
+                "iterations": {"value": 2}
+            }
+        },
+        "marching1": {
+            "type": "MarchingCubesVOL",
+            "position": [1250, 200],
+            "parameters": {
+                "threshold": {"value": 0.25}
+            }
+        },
+        "null_sop": {
+            "type": "NullSOP",
+            "position": [1600, 200],
+            "parameters": {}
+        },
+        "raymarch_before": {
+            "type": "RaymarchVOL",
+            "position": [550, 500],
+            "parameters": {
+                "width": {"value": 384},
+                "height": {"value": 384},
+                "max_steps": {"value": 128},
+                "step_size": {"value": 0.01},
+                "density_scale": {"value": 5.0},
+                "absorption": {"value": 10.0},
+                "cam_dist": {"value": 2.0}
+            }
+        },
+        "raymarch_after": {
+            "type": "RaymarchVOL",
+            "position": [1250, 500],
+            "parameters": {
+                "width": {"value": 384},
+                "height": {"value": 384},
+                "max_steps": {"value": 128},
+                "step_size": {"value": 0.01},
+                "density_scale": {"value": 5.0},
+                "absorption": {"value": 10.0},
+                "cam_dist": {"value": 2.0}
+            }
+        },
+        "window_before": {
+            "type": "WindowOUT",
+            "position": [550, 800],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 384, "y": 384}}
+            }
+        },
+        "window_after": {
+            "type": "WindowOUT",
+            "position": [1250, 800],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 384, "y": 384}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "torus1", "from_port": 0, "to": "sop_to_vol1", "to_port": 0},
+        {"from": "sop_to_vol1", "from_port": 0, "to": "blur1", "to_port": 0},
+        {"from": "blur1", "from_port": 0, "to": "marching1", "to_port": 0},
+        {"from": "marching1", "from_port": 0, "to": "null_sop", "to_port": 0},
+        {"from": "sop_to_vol1", "from_port": 0, "to": "raymarch_before", "to_port": 0},
+        {"from": "blur1", "from_port": 0, "to": "raymarch_after", "to_port": 0},
+        {"from": "raymarch_before", "from_port": 0, "to": "window_before", "to_port": 0},
+        {"from": "raymarch_after", "from_port": 0, "to": "window_after", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SOP → VOL → SOP Round-Trip\n\nDemonstrates the full conversion pipeline:\n  1. TorusSOP → mesh geometry\n  2. SOPtoVOL → rasterize into 64³ density grid\n  3. BlurVOL → smooth the density (rounds edges)\n  4. MarchingCubesVOL → extract iso-surface back to mesh\n\nThe bottom row shows raymarched views of the volume\nbefore and after blurring. The NullSOP at the end\nholds the reconstructed mesh for downstream use.",
+            "position": [-100.0, -100.0],
+            "size": [540.0, 140.0],
+            "color": [0.2, 0.6, 0.9, 0.8]
+        }
+    ]
+}

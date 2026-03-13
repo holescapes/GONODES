@@ -1,0 +1,71 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_vol": {
+            "type": "NoiseVOL",
+            "position": [200, 200],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "frequency": {"value": 3.0},
+                "amplitude": {"value": 1.0},
+                "octaves": {"value": 3},
+                "speed": {"value": 0.15}
+            }
+        },
+        "blur1": {
+            "type": "BlurVOL",
+            "position": [550, 200],
+            "parameters": {
+                "radius": {"value": 2},
+                "iterations": {"value": 1}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [900, 200],
+            "parameters": {
+                "width": {"value": 768},
+                "height": {"value": 768},
+                "max_steps": {"value": 200},
+                "step_size": {"value": 0.006},
+                "density_scale": {"value": 8.0},
+                "absorption": {"value": 15.0},
+                "cam_dist": {"value": 2.2},
+                "cam_yaw": {"value": 25.0},
+                "cam_pitch": {"value": 10.0}
+            }
+        },
+        "null_top": {
+            "type": "NullTOP",
+            "position": [1250, 200],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1600, 200],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 768, "y": 768}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise_vol", "from_port": 0, "to": "blur1", "to_port": 0},
+        {"from": "blur1", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "null_top", "to_port": 0},
+        {"from": "null_top", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "VOL → TOP Rendering Pipeline\n\nRaymarchVOL converts a 3D volume into a 2D image (TOP).\nThis is the primary rendering path for volumetric data.\n\nHigh-quality settings:\n  - 200 steps at 0.006 step size for smooth results\n  - High density_scale + absorption for rich contrast\n  - BlurVOL softens before rendering\n\nThe NullTOP holds the 2D texture for further compositing\n(e.g. CompositeTOP, LevelTOP, FeedbackTOP).",
+            "position": [-100.0, -100.0],
+            "size": [520.0, 140.0],
+            "color": [0.5, 0.8, 0.3, 0.8]
+        }
+    ]
+}

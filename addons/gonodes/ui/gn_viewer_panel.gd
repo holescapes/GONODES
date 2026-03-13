@@ -115,6 +115,43 @@ var _ui_viewport: SubViewport = null
 var _ui_display: TextureRect = null
 var _ui_preview_control: Control = null  ## duplicate() of the real Control
 
+# ─── POP display (3D viewport with MultiMesh point cloud) ────────────────────
+
+var _pop_viewport: SubViewport = null
+var _pop_camera: Camera3D = null
+var _pop_multimesh: MultiMeshInstance3D = null
+var _pop_light: DirectionalLight3D = null
+var _pop_display: TextureRect = null
+var _pop_gizmo_root: Node3D = null
+
+## POP orbit state (reuses same mechanics as SOP orbit)
+var _pop_orbit_yaw: float = 45.0
+var _pop_orbit_pitch: float = -30.0
+var _pop_orbit_distance: float = 5.0
+var _pop_orbit_dragging: bool = false
+
+## POP GPU render toggle (false = MultiMesh, true = GPU direct)
+var _pop_gpu_mode: bool = false
+var _pop_gpu_btn: Button = null
+
+## POP point size multiplier
+var _pop_point_size: float = 0.02
+
+# ─── VOL display (three orthogonal slices + MIP) ─────────────────────────────
+
+var _vol_container: VBoxContainer = null
+var _vol_slice_xy: TextureRect = null
+var _vol_slice_xz: TextureRect = null
+var _vol_slice_yz: TextureRect = null
+var _vol_mip_display: TextureRect = null
+var _vol_mip_mode: bool = false
+var _vol_mip_btn: Button = null
+var _vol_slice_pos: float = 0.5  ## Normalized slice position (0..1)
+var _vol_slice_img_xy: ImageTexture = null
+var _vol_slice_img_xz: ImageTexture = null
+var _vol_slice_img_yz: ImageTexture = null
+var _vol_mip_img: ImageTexture = null
+
 # ─── Fallback info label ─────────────────────────────────────────────────────
 
 var _info_label: Label = null
@@ -879,6 +916,16 @@ func _hide_all_displays() -> void:
 		_mat_display.visible = false
 	if _ui_display:
 		_ui_display.visible = false
+	if _pop_display:
+		_pop_display.visible = false
+	if _vol_container:
+		_vol_container.visible = false
+	if _vol_mip_display:
+		_vol_mip_display.visible = false
+	if _pop_gpu_btn:
+		_pop_gpu_btn.visible = false
+	if _vol_mip_btn:
+		_vol_mip_btn.visible = false
 	if _info_label:
 		_info_label.visible = false
 	if _fit_btn:
@@ -920,6 +967,19 @@ func set_target(p_node_id: String) -> void:
 	_wireframe_mode = false
 	if _wireframe_btn:
 		_wireframe_btn.button_pressed = false
+	# Reset POP orbit
+	_pop_orbit_yaw = 45.0
+	_pop_orbit_pitch = -30.0
+	_pop_orbit_distance = 5.0
+	_pop_orbit_dragging = false
+	_pop_gpu_mode = false
+	# Reset VOL slice
+	_vol_slice_pos = 0.5
+	_vol_mip_mode = false
+	_vol_slice_img_xy = null
+	_vol_slice_img_xz = null
+	_vol_slice_img_yz = null
+	_vol_mip_img = null
 	if _waveform:
 		_waveform.reset_view()
 
@@ -1013,6 +1073,22 @@ func update_from_node(node: GNNode) -> void:
 				return
 			_show_info("No UI output", "")
 
+		GNFamily.Type.POP:
+			if output is GNParticleData:
+				var pd: GNParticleData = output as GNParticleData
+				if pd.particle_count > 0:
+					_show_pop_particles(pd)
+					return
+			_show_info("No POP output", "")
+
+		GNFamily.Type.VOL:
+			if output is GNVolumeData:
+				var vd: GNVolumeData = output as GNVolumeData
+				if vd.has_volume():
+					_show_vol_slices(vd)
+					return
+			_show_info("No VOL output", "")
+
 		_:
 			_show_info("Unsupported family", "")
 
@@ -1031,6 +1107,456 @@ func _update_toolbar(family_name: String, p_node_id: String,
 		_family_label.add_theme_color_override("font_color", family_color)
 	if _node_label:
 		_node_label.text = p_node_id
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# POP — 3D Particle Point Cloud Viewer (MultiMesh)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _ensure_pop_viewport() -> void:
+	if _pop_viewport != null:
+		return
+
+	_pop_viewport = SubViewport.new()
+	_pop_viewport.name = "POP_Viewer_VP"
+	_pop_viewport.transparent_bg = false
+	_pop_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_pop_viewport.disable_3d = false
+	_pop_viewport.size = _snap_size(_get_content_rect().size)
+	add_child(_pop_viewport)
+
+	# Camera
+	_pop_camera = Camera3D.new()
+	_pop_camera.name = "PopCamera"
+	_pop_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	_pop_camera.fov = 45.0
+	_pop_viewport.add_child(_pop_camera)
+
+	# Light
+	_pop_light = DirectionalLight3D.new()
+	_pop_light.name = "PopLight"
+	_pop_light.rotation_degrees = Vector3(-45, 30, 0)
+	_pop_viewport.add_child(_pop_light)
+
+	# MultiMesh instance
+	_pop_multimesh = MultiMeshInstance3D.new()
+	_pop_multimesh.name = "PopMultiMesh"
+	_pop_viewport.add_child(_pop_multimesh)
+
+	# Environment
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.08, 0.08, 0.1)
+	env.ambient_light_color = Color(0.3, 0.3, 0.35)
+	env.ambient_light_energy = 0.5
+	var world := World3D.new()
+	world.environment = env
+	_pop_viewport.world_3d = world
+
+	# Display TextureRect
+	_pop_display = TextureRect.new()
+	_pop_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_pop_display.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_pop_display.texture = _pop_viewport.get_texture()
+	_pop_display.mouse_filter = MOUSE_FILTER_STOP
+	_pop_display.visible = false
+	add_child(_pop_display)
+
+	_pop_display.gui_input.connect(_on_pop_gui_input)
+	_pop_display.mouse_exited.connect(func() -> void: _pop_orbit_dragging = false)
+
+	# Axis gizmo
+	_pop_gizmo_root = Node3D.new()
+	_pop_gizmo_root.name = "PopAxisGizmo"
+	_pop_viewport.add_child(_pop_gizmo_root)
+	var axes := [
+		{"dir": Vector3(1, 0, 0), "color": Color.RED},
+		{"dir": Vector3(0, 1, 0), "color": Color.GREEN},
+		{"dir": Vector3(0, 0, 1), "color": Color.BLUE},
+	]
+	for axis in axes:
+		var im := ImmediateMesh.new()
+		im.surface_begin(Mesh.PRIMITIVE_LINES)
+		im.surface_set_color(axis["color"])
+		im.surface_add_vertex(Vector3.ZERO)
+		im.surface_set_color(axis["color"])
+		im.surface_add_vertex(axis["dir"])
+		im.surface_end()
+		var mi := MeshInstance3D.new()
+		mi.mesh = im
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.vertex_color_use_as_albedo = true
+		mat.no_depth_test = true
+		mat.render_priority = 10
+		mi.set_surface_override_material(0, mat)
+		_pop_gizmo_root.add_child(mi)
+
+	# GPU mode toggle button
+	_pop_gpu_btn = Button.new()
+	_pop_gpu_btn.text = "GPU"
+	_pop_gpu_btn.tooltip_text = "Toggle GPU direct rendering (G)"
+	_pop_gpu_btn.flat = true
+	_pop_gpu_btn.toggle_mode = true
+	_pop_gpu_btn.add_theme_font_size_override("font_size", 10)
+	_pop_gpu_btn.toggled.connect(func(pressed: bool) -> void:
+		_pop_gpu_mode = pressed
+	)
+	_pop_gpu_btn.visible = false
+	_toolbar.add_child(_pop_gpu_btn)
+
+	_update_pop_orbit_camera()
+
+
+func _show_pop_particles(pd: GNParticleData) -> void:
+	_ensure_pop_viewport()
+
+	# Read back particle positions + pscale from GPU
+	var ctx := GNGpuContext.get_context()
+	if ctx.rd == null or not pd.rd_buffer.is_valid():
+		_show_info("No GPU context", "")
+		return
+
+	var byte_count: int = pd.particle_count * pd.stride
+	var raw: PackedByteArray = ctx.rd.buffer_get_data(pd.rd_buffer, 0, byte_count)
+
+	# Build MultiMesh
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
+	mm.instance_count = pd.particle_count
+
+	# Use a small QuadMesh as the particle billboard
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1.0, 1.0)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.vertex_color_use_as_albedo = true
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	quad.material = mat
+	mm.mesh = quad
+
+	# Extract particle data from the raw SSBO readback
+	var pos_off: int = pd.get_attrib_offset("pos")
+	var color_off: int = pd.get_attrib_offset("color")
+	var pscale_off: int = pd.get_attrib_offset("pscale")
+
+	for i in range(pd.particle_count):
+		var base: int = i * pd.stride
+		var px: float = raw.decode_float(base + pos_off)
+		var py: float = raw.decode_float(base + pos_off + 4)
+		var pz: float = raw.decode_float(base + pos_off + 8)
+
+		var ps: float = _pop_point_size
+		if pscale_off >= 0:
+			ps = raw.decode_float(base + pscale_off) * _pop_point_size
+
+		var xform := Transform3D(Basis.IDENTITY.scaled(Vector3(ps, ps, ps)),
+			Vector3(px, py, pz))
+		mm.set_instance_transform(i, xform)
+
+		if color_off >= 0:
+			var cr: float = raw.decode_float(base + color_off)
+			var cg: float = raw.decode_float(base + color_off + 4)
+			var cb: float = raw.decode_float(base + color_off + 8)
+			var ca: float = raw.decode_float(base + color_off + 12)
+			mm.set_instance_color(i, Color(cr, cg, cb, ca))
+		else:
+			mm.set_instance_color(i, Color(0.2, 0.8, 0.8))  # Cyan (POP family color)
+
+	_pop_multimesh.multimesh = mm
+
+	# Show display
+	if not _pop_display.visible:
+		_hide_all_displays()
+		_pop_display.visible = true
+		_pop_gpu_btn.visible = true
+		_fit_btn.visible = false
+		_zoom_label.visible = false
+		_wireframe_btn.visible = false
+		var content := _get_content_rect()
+		_pop_display.position = content.position
+		_pop_display.size = content.size
+
+	var content := _get_content_rect()
+	_pop_viewport.size = _snap_size(content.size)
+	_pop_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+	# Gizmo scale
+	if _pop_gizmo_root:
+		var gizmo_size: float = _pop_orbit_distance * GIZMO_SCREEN_FRACTION
+		_pop_gizmo_root.scale = Vector3(gizmo_size, gizmo_size, gizmo_size)
+
+	_info_bar.text = "%d particles, stride %d B" % [pd.particle_count, pd.stride]
+
+
+func _on_pop_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_LEFT or mb.button_index == MOUSE_BUTTON_MIDDLE:
+			_pop_orbit_dragging = mb.pressed
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
+			_pop_orbit_distance = maxf(_pop_orbit_distance - 0.3, 0.5)
+			_update_pop_orbit_camera()
+			if _pop_viewport:
+				_pop_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
+			_pop_orbit_distance = minf(_pop_orbit_distance + 0.3, 50.0)
+			_update_pop_orbit_camera()
+			if _pop_viewport:
+				_pop_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	elif event is InputEventMouseMotion and _pop_orbit_dragging:
+		var mm: InputEventMouseMotion = event
+		_pop_orbit_yaw += mm.relative.x * 0.5
+		_pop_orbit_pitch = clampf(_pop_orbit_pitch - mm.relative.y * 0.5, -89.0, 89.0)
+		_update_pop_orbit_camera()
+		if _pop_viewport:
+			_pop_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
+func _update_pop_orbit_camera() -> void:
+	if _pop_camera == null:
+		return
+	var yaw_rad := deg_to_rad(_pop_orbit_yaw)
+	var pitch_rad := deg_to_rad(_pop_orbit_pitch)
+	var offset := Vector3(
+		_pop_orbit_distance * cos(pitch_rad) * sin(yaw_rad),
+		_pop_orbit_distance * sin(pitch_rad),
+		_pop_orbit_distance * cos(pitch_rad) * cos(yaw_rad)
+	)
+	_pop_camera.position = offset
+	_pop_camera.look_at(Vector3.ZERO)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VOL — Three Orthogonal Slices + MIP Viewer
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _ensure_vol_display() -> void:
+	if _vol_container != null:
+		return
+
+	# Container for slices (VBox with HBox rows)
+	_vol_container = VBoxContainer.new()
+	_vol_container.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_vol_container.visible = false
+	_vol_container.mouse_filter = MOUSE_FILTER_IGNORE
+	add_child(_vol_container)
+
+	# Top row: XY and XZ slices
+	var top_row := HBoxContainer.new()
+	top_row.size_flags_vertical = SIZE_EXPAND_FILL
+	top_row.add_theme_constant_override("separation", 2)
+	_vol_container.add_child(top_row)
+
+	_vol_slice_xy = _make_vol_slice_rect()
+	_vol_slice_xy.tooltip_text = "XY slice (top view)"
+	top_row.add_child(_vol_slice_xy)
+
+	_vol_slice_xz = _make_vol_slice_rect()
+	_vol_slice_xz.tooltip_text = "XZ slice (front view)"
+	top_row.add_child(_vol_slice_xz)
+
+	# Bottom row: YZ slice
+	var bot_row := HBoxContainer.new()
+	bot_row.size_flags_vertical = SIZE_EXPAND_FILL
+	bot_row.add_theme_constant_override("separation", 2)
+	_vol_container.add_child(bot_row)
+
+	_vol_slice_yz = _make_vol_slice_rect()
+	_vol_slice_yz.tooltip_text = "YZ slice (side view)"
+	bot_row.add_child(_vol_slice_yz)
+
+	# MIP display (hidden by default, replaces slices when toggled)
+	_vol_mip_display = TextureRect.new()
+	_vol_mip_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_vol_mip_display.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_vol_mip_display.size_flags_horizontal = SIZE_EXPAND_FILL
+	_vol_mip_display.size_flags_vertical = SIZE_EXPAND_FILL
+	_vol_mip_display.visible = false
+	_vol_mip_display.mouse_filter = MOUSE_FILTER_IGNORE
+	bot_row.add_child(_vol_mip_display)
+
+	# MIP toggle button
+	_vol_mip_btn = Button.new()
+	_vol_mip_btn.text = "MIP"
+	_vol_mip_btn.tooltip_text = "Toggle Maximum Intensity Projection (M)"
+	_vol_mip_btn.flat = true
+	_vol_mip_btn.toggle_mode = true
+	_vol_mip_btn.add_theme_font_size_override("font_size", 10)
+	_vol_mip_btn.toggled.connect(func(pressed: bool) -> void:
+		_vol_mip_mode = pressed
+		if _vol_slice_xy: _vol_slice_xy.visible = not pressed
+		if _vol_slice_xz: _vol_slice_xz.visible = not pressed
+		if _vol_slice_yz: _vol_slice_yz.visible = not pressed
+		if _vol_mip_display: _vol_mip_display.visible = pressed
+	)
+	_vol_mip_btn.visible = false
+	_toolbar.add_child(_vol_mip_btn)
+
+	# Scroll on the container to change slice position
+	_vol_container.gui_input.connect(_on_vol_gui_input)
+
+
+func _make_vol_slice_rect() -> TextureRect:
+	var tr := TextureRect.new()
+	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tr.size_flags_horizontal = SIZE_EXPAND_FILL
+	tr.size_flags_vertical = SIZE_EXPAND_FILL
+	tr.mouse_filter = MOUSE_FILTER_PASS
+	return tr
+
+
+func _show_vol_slices(vd: GNVolumeData) -> void:
+	_ensure_vol_display()
+
+	var ctx := GNGpuContext.get_context()
+	if ctx.rd == null or not vd.rd_texture.is_valid():
+		_show_info("No GPU context", "")
+		return
+
+	# Read back the full 3D texture to CPU
+	var raw: PackedByteArray = ctx.rd.texture_get_data(vd.rd_texture, 0)
+	var res: Vector3i = vd.resolution
+	var bpv: int = vd.bytes_per_voxel()
+
+	# Extract slices
+	var slice_z: int = clampi(int(_vol_slice_pos * (res.z - 1)), 0, res.z - 1)
+	var slice_y: int = clampi(int(_vol_slice_pos * (res.y - 1)), 0, res.y - 1)
+	var slice_x: int = clampi(int(_vol_slice_pos * (res.x - 1)), 0, res.x - 1)
+
+	# XY slice (fixed Z)
+	var xy_img := _extract_vol_slice_xy(raw, res, bpv, slice_z, vd.data_format)
+	if _vol_slice_img_xy == null:
+		_vol_slice_img_xy = ImageTexture.create_from_image(xy_img)
+	else:
+		_vol_slice_img_xy.update(xy_img)
+	_vol_slice_xy.texture = _vol_slice_img_xy
+
+	# XZ slice (fixed Y)
+	var xz_img := _extract_vol_slice_xz(raw, res, bpv, slice_y, vd.data_format)
+	if _vol_slice_img_xz == null:
+		_vol_slice_img_xz = ImageTexture.create_from_image(xz_img)
+	else:
+		_vol_slice_img_xz.update(xz_img)
+	_vol_slice_xz.texture = _vol_slice_img_xz
+
+	# YZ slice (fixed X)
+	var yz_img := _extract_vol_slice_yz(raw, res, bpv, slice_x, vd.data_format)
+	if _vol_slice_img_yz == null:
+		_vol_slice_img_yz = ImageTexture.create_from_image(yz_img)
+	else:
+		_vol_slice_img_yz.update(yz_img)
+	_vol_slice_yz.texture = _vol_slice_img_yz
+
+	# MIP if toggled
+	if _vol_mip_mode:
+		var mip_img := _compute_vol_mip(raw, res, bpv, vd.data_format)
+		if _vol_mip_img == null:
+			_vol_mip_img = ImageTexture.create_from_image(mip_img)
+		else:
+			_vol_mip_img.update(mip_img)
+		_vol_mip_display.texture = _vol_mip_img
+
+	# Show
+	if not _vol_container.visible:
+		_hide_all_displays()
+		_vol_container.visible = true
+		_vol_mip_btn.visible = true
+		_fit_btn.visible = false
+		_zoom_label.visible = false
+		_wireframe_btn.visible = false
+		var content := _get_content_rect()
+		_vol_container.position = content.position
+		_vol_container.size = content.size
+
+	_info_bar.text = "%dx%dx%d %s (slice %.0f%%)" % [
+		res.x, res.y, res.z, vd.field_name, _vol_slice_pos * 100.0]
+
+
+func _on_vol_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
+			_vol_slice_pos = clampf(_vol_slice_pos + 0.02, 0.0, 1.0)
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
+			_vol_slice_pos = clampf(_vol_slice_pos - 0.02, 0.0, 1.0)
+
+
+## Extracts an XY slice at fixed Z from the raw 3D texture data.
+func _extract_vol_slice_xy(raw: PackedByteArray, res: Vector3i, bpv: int,
+		z: int, fmt: int) -> Image:
+	var img := Image.create(res.x, res.y, false, Image.FORMAT_RGBA8)
+	for y in range(res.y):
+		for x in range(res.x):
+			var offset: int = ((z * res.y + y) * res.x + x) * bpv
+			var val: float = _read_voxel_value(raw, offset, fmt)
+			img.set_pixel(x, y, _density_to_color(val))
+	return img
+
+
+## Extracts an XZ slice at fixed Y.
+func _extract_vol_slice_xz(raw: PackedByteArray, res: Vector3i, bpv: int,
+		y: int, fmt: int) -> Image:
+	var img := Image.create(res.x, res.z, false, Image.FORMAT_RGBA8)
+	for z in range(res.z):
+		for x in range(res.x):
+			var offset: int = ((z * res.y + y) * res.x + x) * bpv
+			var val: float = _read_voxel_value(raw, offset, fmt)
+			img.set_pixel(x, z, _density_to_color(val))
+	return img
+
+
+## Extracts a YZ slice at fixed X.
+func _extract_vol_slice_yz(raw: PackedByteArray, res: Vector3i, bpv: int,
+		x: int, fmt: int) -> Image:
+	var img := Image.create(res.y, res.z, false, Image.FORMAT_RGBA8)
+	for z in range(res.z):
+		for yy in range(res.y):
+			var offset: int = ((z * res.y + yy) * res.x + x) * bpv
+			var val: float = _read_voxel_value(raw, offset, fmt)
+			img.set_pixel(yy, z, _density_to_color(val))
+	return img
+
+
+## Maximum Intensity Projection: for each (x, y), take the max density across Z.
+func _compute_vol_mip(raw: PackedByteArray, res: Vector3i, bpv: int,
+		fmt: int) -> Image:
+	var img := Image.create(res.x, res.y, false, Image.FORMAT_RGBA8)
+	for y in range(res.y):
+		for x in range(res.x):
+			var max_val: float = 0.0
+			for z in range(res.z):
+				var offset: int = ((z * res.y + y) * res.x + x) * bpv
+				var val: float = _read_voxel_value(raw, offset, fmt)
+				if val > max_val:
+					max_val = val
+			img.set_pixel(x, y, _density_to_color(max_val))
+	return img
+
+
+## Reads a single float value from the raw volume data at the given byte offset.
+func _read_voxel_value(raw: PackedByteArray, offset: int, fmt: int) -> float:
+	if offset + 4 > raw.size():
+		return 0.0
+	match fmt:
+		RenderingDevice.DATA_FORMAT_R32_SFLOAT:
+			return raw.decode_float(offset)
+		RenderingDevice.DATA_FORMAT_R16_SFLOAT:
+			return raw.decode_half(offset)
+		RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT:
+			return raw.decode_float(offset)  # Read just the R channel
+		RenderingDevice.DATA_FORMAT_R16G16B16A16_SFLOAT:
+			return raw.decode_half(offset)
+	return raw.decode_float(offset)
+
+
+## Maps a density value (0..1) to a grayscale color.
+func _density_to_color(val: float) -> Color:
+	var v: float = clampf(val, 0.0, 1.0)
+	return Color(v, v, v, 1.0)
 
 
 ## Keyboard shortcut handler.

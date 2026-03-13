@@ -1,0 +1,94 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [200, 200],
+            "parameters": {
+                "radius": {"value": 0.35},
+                "segments_u": {"value": 24},
+                "segments_v": {"value": 16}
+            }
+        },
+        "sop_to_vol1": {
+            "type": "SOPtoVOL",
+            "position": [550, 200],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "fill_interior": {"value": true},
+                "bandwidth": {"value": 3.0}
+            }
+        },
+        "blur1": {
+            "type": "BlurVOL",
+            "position": [550, 500],
+            "parameters": {
+                "radius": {"value": 4},
+                "iterations": {"value": 2}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [900, 200],
+            "parameters": {
+                "width": {"value": 512},
+                "height": {"value": 512},
+                "max_steps": {"value": 128},
+                "step_size": {"value": 0.01},
+                "density_scale": {"value": 5.0},
+                "absorption": {"value": 10.0},
+                "cam_dist": {"value": 2.0}
+            }
+        },
+        "raymarch_blur": {
+            "type": "RaymarchVOL",
+            "position": [900, 500],
+            "parameters": {
+                "width": {"value": 512},
+                "height": {"value": 512},
+                "max_steps": {"value": 128},
+                "step_size": {"value": 0.01},
+                "density_scale": {"value": 5.0},
+                "absorption": {"value": 10.0},
+                "cam_dist": {"value": 2.0}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 200],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window2": {
+            "type": "WindowOUT",
+            "position": [1250, 500],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "sphere1", "from_port": 0, "to": "sop_to_vol1", "to_port": 0},
+        {"from": "sop_to_vol1", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "sop_to_vol1", "from_port": 0, "to": "blur1", "to_port": 0},
+        {"from": "blur1", "from_port": 0, "to": "raymarch_blur", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0},
+        {"from": "raymarch_blur", "from_port": 0, "to": "window2", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SOP to VOL — Mesh Rasterization\n\nSOPtoVOL rasterizes geometry into a 3D density grid.\nfill_interior=true fills the solid interior (signed distance).\nbandwidth controls the surface thickness in voxels.\n\nTwo windows compare the sharp rasterized result (top)\nvs the blurred version (bottom) for soft glow effects.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 120.0],
+            "color": [0.3, 0.7, 0.9, 0.8]
+        }
+    ]
+}

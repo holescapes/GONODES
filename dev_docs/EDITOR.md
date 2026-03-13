@@ -36,6 +36,69 @@ godot --rendering-method gl_compatibility
 ```
 
 
+## Compute Shader Detection & Graceful Degradation
+
+POP operators (GPU particles via SSBO) and VOL operators (3D texture volumes)
+require `RenderingDevice` compute shaders, which are only available on the
+**Forward+** and **Mobile** renderers.  The **Compatibility** renderer
+(OpenGL 3.3 / WebGL2) has no compute support.
+
+GONODES detects this automatically at startup and gracefully skips
+incompatible nodes instead of crashing.
+
+### How it works
+
+1. **`GNGpuContext.is_compute_available()`** — static one-shot probe.  Creates
+   a throwaway `RenderingDevice`, caches the result (`true`/`false`), frees it.
+   Called once on the first cook frame.
+
+2. **`GNNode.requires_compute()`** — virtual method, returns `false` by default.
+   Overridden to return `true` in:
+   - `GNPopBase` (all POP operators)
+   - `GNVolBase` (all VOL operators)
+   - `ComputeShaderTOP`
+   - `CompositorEffectTOP`
+
+3. **Cook engine skip logic** (`gn_cook_engine.gd`) — before `execute_cook()`
+   for each node, the engine checks `node.requires_compute()`.  If compute is
+   unavailable:
+   - The node is **skipped** (not cooked).
+   - A yellow **⚠** warning badge appears on the node (editor mode only):
+     `"Requires compute shaders (Forward+ or Mobile renderer)"`
+   - `cook_error` signal fires on frame 0 with a human-readable message.
+   - Downstream nodes receive `null` input — same behavior as a disconnected
+     port, so the rest of the graph continues cooking normally.
+   - A one-time console warning is logged at startup listing the active renderer.
+
+4. **Zero overhead in player builds** — `editor_mode` is `false` in exported
+   builds, so the warning badge and textport logging are never invoked.  The
+   compute check itself is O(1) after the first frame.
+
+### Renderer compatibility matrix
+
+| Renderer | API | Compute Shaders | POP / VOL / ComputeShaderTOP |
+|---|---|---|---|
+| **Forward+** | Vulkan / D3D12 | ✅ Yes | ✅ Full support |
+| **Mobile** | Vulkan / Metal | ✅ Yes | ✅ Full support |
+| **Compatibility** | OpenGL 3.3 / WebGL2 | ❌ No | ⚠ Skipped with warning |
+
+### What users see
+
+- **Forward+ or Mobile:** Everything works.  No warnings, no badges.
+- **Compatibility fallback:** POP, VOL, ComputeShaderTOP, and
+  CompositorEffectTOP nodes show a yellow ⚠ badge.  All other families
+  (TOP, CHOP, SOP, DAT, MAT, COMP, IMG, UI, OUT) work normally.  The
+  textport log shows a one-time warning at startup.
+
+### Future: CPU fallback paths
+
+CPU fallback implementations for POP and VOL are on the roadmap (post-Phase 7)
+but not yet implemented.  When they are, each POP/VOL operator would gain a
+`_cook_cpu()` code path invoked automatically when compute is unavailable,
+enabling basic particle and volume workflows on Compatibility/WebGL2 at
+reduced performance.
+
+
 ## Toolbar Layout
 
 > Full toolbar reference with controls and descriptions is in `help/editor.md`.

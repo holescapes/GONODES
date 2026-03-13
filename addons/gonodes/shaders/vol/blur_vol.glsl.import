@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://ds43kqmrtjp18"
+path="res://.godot/imported/blur_vol.glsl-f20b799d03a2d9a987544387e0474c2c.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/vol/blur_vol.glsl"
+dest_files=["res://.godot/imported/blur_vol.glsl-f20b799d03a2d9a987544387e0474c2c.res"]
+
+[params]
+

@@ -12,6 +12,7 @@ enum Type {
 	DAT,   ## Data Operators — tables, text, scripts
 	MAT,   ## Material Operators — shader/material assignment
 	COMP,  ## Component Operators — containers, sub-networks, 3D scene composition
+	VOL,   ## Volume Operators — GPU 3D texture processing (noise, fluid, blur)
 	UI,    ## UI Operators — 2D interface widgets (buttons, sliders, knobs) for PanelTOP
 	OUT,   ## Output Operators — terminal sinks (display, file save, audio out)
 }
@@ -26,6 +27,7 @@ const FAMILY_NAMES: Dictionary = {
 	Type.DAT:  "DAT",
 	Type.MAT:  "MAT",
 	Type.COMP: "COMP",
+	Type.VOL:  "VOL",
 	Type.UI:   "UI",
 	Type.OUT:  "OUT",
 }
@@ -40,6 +42,7 @@ const FAMILY_COLORS: Dictionary = {
 	Type.DAT:  Color(0.9, 0.8, 0.2),    # Yellow
 	Type.MAT:  Color(0.9, 0.4, 0.2),    # Red/Orange
 	Type.COMP: Color(0.5, 0.5, 0.5),    # Gray
+	Type.VOL:  Color(0.9, 0.6, 0.1),    # Amber — GPU 3D volumetric textures
 	Type.UI:   Color(0.2, 0.7, 0.9),    # Sky Blue — interactive 2D widgets
 	Type.OUT:  Color(0.9, 0.3, 0.3),    # Red — terminal sink
 }

@@ -1,0 +1,80 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_density": {
+            "type": "NoiseVOL",
+            "position": [200, 200],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "frequency": {"value": 3.0},
+                "amplitude": {"value": 1.0},
+                "octaves": {"value": 3},
+                "speed": {"value": 0.3}
+            }
+        },
+        "noise_velocity": {
+            "type": "NoiseVOL",
+            "position": [200, 500],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "frequency": {"value": 2.0},
+                "amplitude": {"value": 0.4},
+                "octaves": {"value": 2},
+                "speed": {"value": 0.5}
+            }
+        },
+        "displace1": {
+            "type": "DisplaceVOL",
+            "position": [550, 200],
+            "parameters": {
+                "scale": {"value": 0.3},
+                "offset_x": {"value": 0.0},
+                "offset_y": {"value": 0.0},
+                "offset_z": {"value": 0.0}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [900, 200],
+            "parameters": {
+                "width": {"value": 512},
+                "height": {"value": 512},
+                "max_steps": {"value": 128},
+                "step_size": {"value": 0.01},
+                "density_scale": {"value": 5.0},
+                "absorption": {"value": 8.0},
+                "cam_dist": {"value": 2.0},
+                "cam_yaw": {"value": 30.0}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 200],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise_density", "from_port": 0, "to": "displace1", "to_port": 0},
+        {"from": "noise_velocity", "from_port": 0, "to": "displace1", "to_port": 1},
+        {"from": "displace1", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "VOL Displace — Warp by Velocity Field\n\nDisplaceVOL uses a second volume (input 1) as a 3D\nvelocity field to warp the density of input 0.\n\nscale controls the warp amplitude.\nThe animated noise velocity field creates a\ncontinuously evolving organic distortion.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 110.0],
+            "color": [0.6, 0.3, 0.8, 0.8]
+        }
+    ]
+}

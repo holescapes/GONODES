@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://ber7d12fkb6tn"
+path="res://.godot/imported/raymarch_vol.glsl-07d8c60f92d5997da543e032a997921b.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/vol/raymarch_vol.glsl"
+dest_files=["res://.godot/imported/raymarch_vol.glsl-07d8c60f92d5997da543e032a997921b.res"]
+
+[params]
+

@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://2hp3kf6rum27"
+path="res://.godot/imported/sop_to_vol.glsl-21cde83dcfab6afec89685b1ec2b61b8.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/vol/sop_to_vol.glsl"
+dest_files=["res://.godot/imported/sop_to_vol.glsl-21cde83dcfab6afec89685b1ec2b61b8.res"]
+
+[params]
+

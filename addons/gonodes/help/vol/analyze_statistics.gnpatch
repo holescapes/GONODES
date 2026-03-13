@@ -1,0 +1,48 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseVOL",
+            "position": [200, 200],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "frequency": {"value": 4.0},
+                "amplitude": {"value": 1.0},
+                "octaves": {"value": 4},
+                "speed": {"value": 0.2}
+            }
+        },
+        "analyze1": {
+            "type": "AnalyzeVOL",
+            "position": [550, 200],
+            "parameters": {
+                "stat_min": {"value": true},
+                "stat_max": {"value": true},
+                "stat_mean": {"value": true},
+                "stat_sum": {"value": true}
+            }
+        },
+        "null_chop": {
+            "type": "NullCHOP",
+            "position": [900, 200],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "analyze1", "to_port": 0},
+        {"from": "analyze1", "from_port": 0, "to": "null_chop", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "VOL Analyze — Volume Statistics as CHOP\n\nAnalyzeVOL scans a 3D volume and extracts statistical\ndata: min, max, mean, and sum of all voxel values.\n\nOutputs a CHOP with one sample per statistic.\nUseful for monitoring volume levels, detecting empty\nregions, or driving parameters from volume analysis.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 110.0],
+            "color": [0.1, 0.7, 0.5, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,129 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_vel_vol": {
+            "type": "NoiseVOL",
+            "position": [200, 400],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "frequency": {"value": 2.0},
+                "amplitude": {"value": 0.5},
+                "octaves": {"value": 3},
+                "speed": {"value": 0.35}
+            }
+        },
+        "fluid1": {
+            "type": "FluidVOL",
+            "position": [550, 400],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "dissipation": {"value": 0.96},
+                "pressure_iters": {"value": 20},
+                "density_add": {"value": 1.5}
+            }
+        },
+        "source1": {
+            "type": "SourcePOP",
+            "position": [200, 100],
+            "parameters": {
+                "emit_rate": {"value": 5000},
+                "life_min": {"value": 4.0},
+                "life_max": {"value": 6.0},
+                "init_speed": {"value": 0.05},
+                "emit_shape": {"value": 0},
+                "emit_radius": {"value": 0.02}
+            }
+        },
+        "advect1": {
+            "type": "AdvectPOP",
+            "position": [550, 100],
+            "parameters": {
+                "strength": {"value": 1.5},
+                "field_scale": {"value": 1.0}
+            }
+        },
+        "turbulence1": {
+            "type": "TurbulencePOP",
+            "position": [900, 100],
+            "parameters": {
+                "frequency": {"value": 3.0},
+                "amplitude": {"value": 0.15},
+                "octaves": {"value": 2}
+            }
+        },
+        "limit1": {
+            "type": "LimitPOP",
+            "position": [1250, 100],
+            "parameters": {
+                "bound_mode": {"value": 0},
+                "bound_size": {"value": 2.0}
+            }
+        },
+        "render_pop": {
+            "type": "RenderPOP",
+            "position": [1600, 100],
+            "parameters": {
+                "width": {"value": 768},
+                "height": {"value": 768},
+                "point_size": {"value": 1.5},
+                "color_mode": {"value": 2}
+            }
+        },
+        "raymarch_vol": {
+            "type": "RaymarchVOL",
+            "position": [900, 400],
+            "parameters": {
+                "width": {"value": 768},
+                "height": {"value": 768},
+                "max_steps": {"value": 120},
+                "step_size": {"value": 0.01},
+                "density_scale": {"value": 5.0},
+                "absorption": {"value": 10.0},
+                "cam_dist": {"value": 2.5},
+                "cam_yaw": {"value": 20.0}
+            }
+        },
+        "window_pop": {
+            "type": "WindowOUT",
+            "position": [1950, 100],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 768, "y": 768}}
+            }
+        },
+        "window_vol": {
+            "type": "WindowOUT",
+            "position": [1250, 400],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 768, "y": 768}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise_vel_vol", "from_port": 0, "to": "fluid1", "to_port": 0},
+        {"from": "fluid1", "from_port": 0, "to": "advect1", "to_port": 1},
+        {"from": "fluid1", "from_port": 0, "to": "raymarch_vol", "to_port": 0},
+        {"from": "source1", "from_port": 0, "to": "advect1", "to_port": 0},
+        {"from": "advect1", "from_port": 0, "to": "turbulence1", "to_port": 0},
+        {"from": "turbulence1", "from_port": 0, "to": "limit1", "to_port": 0},
+        {"from": "limit1", "from_port": 0, "to": "render_pop", "to_port": 0},
+        {"from": "render_pop", "from_port": 0, "to": "window_pop", "to_port": 0},
+        {"from": "raymarch_vol", "from_port": 0, "to": "window_vol", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Full Pipeline — Fluid VOL Driving POP Particles\n\nThis patch combines fluid simulation with particle advection:\n\n  VOL chain (bottom): NoiseVOL → FluidVOL → RaymarchVOL\n    Creates animated fluid density with Navier-Stokes solver.\n\n  POP chain (top): SourcePOP → AdvectPOP(+FluidVOL) → Turbulence → Limit → Render\n    Particles are advected by the same fluid velocity field,\n    creating a unified smoke + particle system.\n\nBoth windows show the same simulation from the VOL and POP\nperspectives — the particles track the fluid motion.",
+            "position": [-100.0, -130.0],
+            "size": [600.0, 180.0],
+            "color": [0.8, 0.2, 0.5, 0.8]
+        }
+    ]
+}

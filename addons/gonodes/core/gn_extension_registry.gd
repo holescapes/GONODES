@@ -1146,6 +1146,50 @@ func _register_core_operators() -> void:
 	_reg("OscOUT",          "OUT", OscOUT,
 		"Send CHOP channels as OSC messages over UDP.")
 
+	# ── POPs: Particle Operators ───────────────────────────────────────
+	_reg("SourcePOP",      "POP", SourcePOP,
+		"Emit particles from SOP geometry surface or origin point.")
+	_reg("ForcePOP",       "POP", ForcePOP,
+		"Apply gravity, wind, and directional forces to particles.")
+	_reg("TurbulencePOP",  "POP", TurbulencePOP,
+		"Curl noise turbulence force field on particles.")
+	_reg("CollisionPOP",   "POP", CollisionPOP,
+		"Ground plane and bounding box collision for particles.")
+	_reg("AttractPOP",     "POP", AttractPOP,
+		"Point, line, or geometry attractor/repulsor for particles.")
+	_reg("LimitPOP",       "POP", LimitPOP,
+		"Kill particles by age, bounds, or speed threshold.")
+	_reg("AdvectPOP",      "POP", AdvectPOP,
+		"Advect particles by a VOL velocity field.")
+	_reg("InstancePOP",    "POP", InstancePOP,
+		"Copy SOP geometry onto each particle position as instances.")
+	_reg("RenderPOP",      "POP", RenderPOP,
+		"Render particle point cloud into a COMP for 3D viewport.")
+	_reg("ParticleStateTOP", "TOP", ParticleStateTOP,
+		"Visualize POP particle state as a 2D texture (position/velocity/age heatmap).")
+
+	# ── VOLs: Volume Operators ─────────────────────────────────────────
+	_reg("NoiseVOL",       "VOL", NoiseVOL,
+		"Generate 3D noise density volume (Perlin, Simplex, Cellular).")
+	_reg("BlendVOL",       "VOL", BlendVOL,
+		"Blend/combine two volumes (add, multiply, max, lerp).")
+	_reg("BlurVOL",        "VOL", BlurVOL,
+		"3D Gaussian or box blur on a volume.")
+	_reg("DisplaceVOL",    "VOL", DisplaceVOL,
+		"Warp a density volume by a velocity vector field.")
+	_reg("FluidVOL",       "VOL", FluidVOL,
+		"Navier-Stokes fluid simulation (advection, pressure, projection).")
+	_reg("MarchingCubesVOL", "VOL", MarchingCubesVOL,
+		"Extract iso-surface mesh from volume density field (CPU marching cubes).")
+	_reg("RaymarchVOL",    "VOL", RaymarchVOL,
+		"Render volume as density cloud via GPU raymarching into a TOP texture.")
+	_reg("SOPtoVOL",       "VOL", SOPtoVOL,
+		"Rasterize SOP mesh into a 3D density volume.")
+	_reg("CHOPtoVOL",      "VOL", CHOPtoVOL,
+		"Map CHOP channel data into volume slices.")
+	_reg("AnalyzeVOL",     "VOL", AnalyzeVOL,
+		"Compute min, max, mean, and sum statistics of a volume.")
+
 	GNLogger.info("ExtRegistry",
 		"Registered %d core operators" % _operators.size())
 

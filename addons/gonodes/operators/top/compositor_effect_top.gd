@@ -16,6 +16,10 @@ extends RenderTOP
 ##
 ## Requires Godot 4.3+ (CompositorEffect API).
 
+
+func requires_compute() -> bool:
+	return true
+
 # ─── Outline compute shader (GLSL 450) ────────────────────────────────────────
 ## The shader reads the depth buffer via a sampler, runs a 3×3 Sobel filter,
 ## and blends the outline colour into the colour storage image.

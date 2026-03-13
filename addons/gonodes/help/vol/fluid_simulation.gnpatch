@@ -1,0 +1,76 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "fluid1": {
+            "type": "FluidVOL",
+            "position": [200, 200],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "dissipation": {"value": 0.97},
+                "pressure_iters": {"value": 25},
+                "density_add": {"value": 2.0},
+                "reset": {"value": false}
+            }
+        },
+        "noise_source": {
+            "type": "NoiseVOL",
+            "position": [200, 500],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "frequency": {"value": 6.0},
+                "amplitude": {"value": 0.5},
+                "octaves": {"value": 2},
+                "speed": {"value": 1.0}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [550, 200],
+            "parameters": {
+                "width": {"value": 512},
+                "height": {"value": 512},
+                "max_steps": {"value": 160},
+                "step_size": {"value": 0.008},
+                "density_scale": {"value": 6.0},
+                "absorption": {"value": 12.0},
+                "cam_dist": {"value": 1.8},
+                "cam_yaw": {"value": 20.0},
+                "cam_pitch": {"value": 15.0}
+            }
+        },
+        "null1": {
+            "type": "NullTOP",
+            "position": [900, 200],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 200],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise_source", "from_port": 0, "to": "fluid1", "to_port": 0},
+        {"from": "fluid1", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "null1", "to_port": 0},
+        {"from": "null1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "VOL Fluid Simulation — Navier-Stokes Density Advection\n\nFluidVOL runs a 4-pass GPU fluid solver each frame:\n  1. Inject density from upstream noise source\n  2. Advect density by velocity field\n  3. Compute divergence + Jacobi pressure solve\n  4. Project velocity (subtract pressure gradient)\n\nDissipation=0.97 gives slow density decay (smoke-like).\nPulse Reset to clear the simulation.\nLower resolution (48³) for interactive frame rates.",
+            "position": [-100.0, -100.0],
+            "size": [520.0, 150.0],
+            "color": [0.9, 0.6, 0.1, 0.8]
+        }
+    ]
+}

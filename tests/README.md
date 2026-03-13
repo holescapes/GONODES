@@ -73,8 +73,125 @@ tests/
 ├── test_network.gd         # GNNetwork: graph model, topo sort, dirty prop
 ├── test_channel_data.gd    # GNChannelData: channel ops, deep copy
 ├── test_preset_manager.gd  # GNParamPresetManager: clipboard, reset
-└── README.md               # This file
+├── README.md               # This file
+└── operators/              # Per-family operator tests
+    ├── chop/test_chop_operators.gd
+    ├── sop/test_sop_operators.gd
+    ├── top/test_top_operators.gd
+    ├── dat/test_dat_operators.gd
+    ├── comp/test_comp_operators.gd
+    ├── img/test_img_operators.gd
+    ├── mat/test_mat_operators.gd
+    ├── output/test_output_operators.gd
+    └── ui/test_ui_operators.gd
 ```
+
+## Adding Tests for New Operators
+
+When you create a new operator, add tests to the matching family file under
+`tests/operators/<family>/`.  For example a new CHOP goes in
+`tests/operators/chop/test_chop_operators.gd`.
+
+### Boilerplate
+
+Every operator test file shares this skeleton (already present in each file):
+
+```gdscript
+extends Node
+
+var _network: GNNetwork
+var _engine: GNCookEngine
+
+func before_each() -> void:
+    _network = GNNetwork.new()
+    _engine = GNCookEngine.new()
+    _engine.network = _network
+    _engine.cooking_enabled = false
+    _engine.elapsed_time = 1.0
+    _engine.frame_count = 60
+    _engine.current_delta = 1.0 / 60.0
+    add_child(_engine)
+
+func after_each() -> void:
+    if is_instance_valid(_engine):
+        remove_child(_engine)
+        _engine.queue_free()
+
+func _make_node(node: GNNode, id: String) -> GNNode:
+    node.initialize(id)
+    _network.add_node(node)
+    _engine.add_child(node)
+    return node
+
+func _cook_no_input(node: GNNode) -> GNData:
+    var inputs: Array[GNData] = []
+    node.execute_cook(inputs, _engine.frame_count)
+    return node.cached_output
+
+func _cook_with(node: GNNode, inputs: Array[GNData]) -> GNData:
+    node.execute_cook(inputs, _engine.frame_count)
+    return node.cached_output
+```
+
+### Step-by-step: adding a test for a new node
+
+Say you added a **GainCHOP** that multiplies all channel values by a gain parameter.
+
+1. Open `tests/operators/chop/test_chop_operators.gd`.
+2. Add test methods at the end of the file:
+
+```gdscript
+# ═══════════════════════════════════════════════════════════════════════════════
+#  GainCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gain_chop_default() -> void:
+    var node := _make_node(GainCHOP.new(), "gain1")
+    var input := _make_chop_data({"val": PackedFloat32Array([1.0, 2.0, 3.0])})
+    var out: GNChannelData = _cook_with(node, [input]) as GNChannelData
+    GNTestAssert.assert_not_null(out, "gain produces output")
+    GNTestAssert.assert_eq(out.channels.size(), 1, "preserves 1 channel")
+
+func test_gain_chop_multiply() -> void:
+    var node := _make_node(GainCHOP.new(), "gain2")
+    node.set_param_value("gain", 3.0)
+    var input := _make_chop_data({"val": PackedFloat32Array([2.0, 4.0])})
+    var out: GNChannelData = _cook_with(node, [input]) as GNChannelData
+    GNTestAssert.assert_approx(out.get_value("val"), 6.0, 0.01, "first sample * 3")
+
+func test_gain_chop_no_input() -> void:
+    var node := _make_node(GainCHOP.new(), "gain3")
+    var out := _cook_no_input(node)
+    # Should handle gracefully — null or empty output
+    if out != null:
+        GNTestAssert.assert_true(true, "returned non-null safely")
+```
+
+3. Run:
+```bash
+godot --headless -s tests/test_runner.gd --test-filter=gain
+```
+
+### Test guidelines
+
+- **Instantiation** — always test that the node produces non-null output with defaults.
+- **Parameter effect** — change a parameter and verify the output changes accordingly.
+- **Null/no-input safety** — call `_cook_no_input()` and confirm no crash.
+- **Correctness** — compare specific numeric output values where deterministic (e.g. math, sort, blend with weight 0 or 1).
+- **Edge cases** — empty geometry, zero-length channels, boundary parameter values.
+
+### Family-specific helpers
+
+Each test file may have family-specific helpers already defined:
+
+| Family | Helpers |
+|--------|---------|
+| CHOP   | `_make_chop_data(channels, sample_rate)` |
+| SOP    | `_make_box_geo(sx, sy, sz)`, `_make_grid_geo(rows, cols)` |
+| TOP    | `_make_test_image(w, h, color)` |
+| DAT    | `_make_table_dat(rows)` |
+
+Use these to quickly create input data instead of building it from scratch.
 
 ## Design Decisions
 

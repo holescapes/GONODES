@@ -4,6 +4,9 @@
     "files.watcherExclude": {
         "**/templates/**": true,
         "**/assets/**": true,
-        "**/*.pck": true
-    }
+        "**/*.pck": true,
+        "**/godot-cpp/**": true
+    },
+    "git.repositoryScanMaxDepth": 1,
+    "git.autoRepositoryDetection": "openEditors"
 }

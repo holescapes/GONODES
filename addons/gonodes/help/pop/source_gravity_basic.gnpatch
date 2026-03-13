@@ -1,0 +1,82 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "source1": {
+            "type": "SourcePOP",
+            "position": [200, 200],
+            "parameters": {
+                "max_particles": {"value": 50000},
+                "rate": {"value": 5000.0},
+                "life_min": {"value": 2.0},
+                "life_max": {"value": 4.0},
+                "init_speed": {"value": 3.0},
+                "pscale": {"value": 0.03}
+            }
+        },
+        "force1": {
+            "type": "ForcePOP",
+            "position": [550, 200],
+            "parameters": {
+                "gravity_y": {"value": -9.81},
+                "drag": {"value": 0.02}
+            }
+        },
+        "collision1": {
+            "type": "CollisionPOP",
+            "position": [900, 200],
+            "parameters": {
+                "ground_y": {"value": -2.0},
+                "bounce": {"value": 0.4},
+                "friction": {"value": 0.15}
+            }
+        },
+        "limit1": {
+            "type": "LimitPOP",
+            "position": [1250, 200],
+            "parameters": {
+                "bbox_min_x": {"value": -15.0},
+                "bbox_min_y": {"value": -10.0},
+                "bbox_min_z": {"value": -15.0},
+                "bbox_max_x": {"value": 15.0},
+                "bbox_max_y": {"value": 20.0},
+                "bbox_max_z": {"value": 15.0},
+                "kill_outside": {"value": true}
+            }
+        },
+        "render1": {
+            "type": "RenderPOP",
+            "position": [1600, 200],
+            "parameters": {
+                "point_size": {"value": 0.04},
+                "use_pscale": {"value": true},
+                "billboard": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1950, 200],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 768}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "source1", "from_port": 0, "to": "force1", "to_port": 0},
+        {"from": "force1", "from_port": 0, "to": "collision1", "to_port": 0},
+        {"from": "collision1", "from_port": 0, "to": "limit1", "to_port": 0},
+        {"from": "limit1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "POP Basics — Fountain with Gravity & Bouncing\n\nSourcePOP emits 5000 particles/sec upward.\nForcePOP applies gravity (-9.81 Y) and slight drag.\nCollisionPOP bounces particles off a ground plane at Y=-2.\nLimitPOP kills particles that drift outside the bounding box.\nRenderPOP draws billboard quads scaled by pscale attribute.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 120.0],
+            "color": [0.2, 0.8, 0.8, 0.8]
+        }
+    ]
+}

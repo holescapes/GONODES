@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cn7r4gaoo6fox"
+path="res://.godot/imported/advect_pop.glsl-224f8f0f2a11bed3d63b989c873abd9a.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/pop/advect_pop.glsl"
+dest_files=["res://.godot/imported/advect_pop.glsl-224f8f0f2a11bed3d63b989c873abd9a.res"]
+
+[params]
+

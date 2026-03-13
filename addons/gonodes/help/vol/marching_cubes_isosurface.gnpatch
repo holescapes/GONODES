@@ -1,0 +1,46 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseVOL",
+            "position": [200, 200],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "frequency": {"value": 3.0},
+                "amplitude": {"value": 1.2},
+                "octaves": {"value": 5},
+                "speed": {"value": 0.2}
+            }
+        },
+        "marching1": {
+            "type": "MarchingCubesVOL",
+            "position": [550, 200],
+            "parameters": {
+                "threshold": {"value": 0.5},
+                "smooth_normals": {"value": true}
+            }
+        },
+        "null_sop": {
+            "type": "NullSOP",
+            "position": [900, 200],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "marching1", "to_port": 0},
+        {"from": "marching1", "from_port": 0, "to": "null_sop", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "VOL → SOP — Marching Cubes Iso-Surface Extraction\n\nNoiseVOL generates an animated 3D density field.\nMarchingCubesVOL extracts the iso-surface at threshold=0.5\nas a GNGeoData mesh (SOP output).\n\nSmooth normals uses gradient interpolation for cleaner shading.\nLower threshold → more volume visible, higher → less.\nThe SOP output can be wired into GeometryCOMP for 3D rendering.",
+            "position": [-100.0, -100.0],
+            "size": [520.0, 120.0],
+            "color": [0.9, 0.6, 0.1, 0.8]
+        }
+    ]
+}

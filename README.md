@@ -99,6 +99,8 @@ You can also **bind** parameters directly (zero-overhead link) or use **CHOP exp
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Environment, Null, Switch, **GenericScriptNode**, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
 | **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
 | **OUT** | 9 | WindowOUT, TextureSaveOUT, ImageSaveOUT, TableSaveOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, RecordOUT, OscOUT |
+| **POP** | 10 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Instance, Render, ParticleState |
+| **VOL** | 10 | Noise, Blend, Blur, Displace, Fluid, MarchingCubes, Raymarch, SOPtoVOL, CHOPtoVOL, Analyze |
 | **UI** | 8 | ButtonUI, SliderUI, ToggleUI, LabelUI, KnobUI, XYPadUI, DropdownUI, ContainerUI |
 
 ### Advanced Scripting
@@ -123,6 +125,65 @@ GridSOP â†’ TransformSOP â†’ GeometryCOMP (MeshInstance3D) â”€â�
 ```
 
 SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and SurfaceTool for procedural generation. NoiseSOP uses FastNoiseLite for vertex displacement. MAT operators wrap Godot's Material system (StandardMaterial3D, ShaderMaterial) for per-object material assignment. GeometryCOMP accepts SOP, MAT, and TOP inputs. MergeCOMP groups multiple COMPs for scene composition. Shadow controls span all three levels: per-light (LightCOMP), per-object (GeometryCOMP), and global quality (RenderTOP).
+
+---
+
+## GPU Architecture: Why SSBO & Texture3D (Not GPGPU)
+
+GONODES uses Godot's `RenderingDevice` compute pipeline for two performance-critical families: **POP** (GPU particles) and **VOL** (3D volumetrics). The design is deliberate — we chose **SSBOs** for particles and **Texture3D** for volumes instead of the GPGPU (texture-as-data) pattern used by some older engines.
+
+### POP — SSBO-Based GPU Particles
+
+Particle state (position, velocity, age, life, color, scale) is stored in flat **Shader Storage Buffer Objects** (`RDStorageBuffer`), not packed into 2D textures.
+
+**Why SSBOs over GPGPU textures:**
+
+| | SSBO | GPGPU (texture-as-data) |
+|---|---|---|
+| **Data layout** | Flat struct array — natural for a 1D particle list | 2D grid — requires awkward `idx → (x, y)` mapping |
+| **Struct flexibility** | Arbitrary per-particle fields in one buffer (64-byte stride) | Limited to RGBA channels per texel; multiple textures needed for extra attributes |
+| **Size limits** | Buffer size limit only (typically 2 GB+) | Texture dimension cap: 16384×16384 ≈ 268M pixels, problematic for non-power-of-2 counts |
+| **Godot fit** | `RenderingDevice` API is buffer-centric — SSBO creation is native and simple | 2D render targets require SubViewport hacks or manual texture management |
+| **Read/write** | Read-write in one dispatch (double-buffered A→B swap) | Requires ping-pong render passes or image load/store |
+| **CPU readback** | `buffer_get_data()` → `PackedFloat32Array` for downstream SOP/CHOP | `texture_get_data()` → Image → decode per-pixel — slower and more complex |
+
+SSBOs also integrate cleanly with existing infrastructure: `GNGeoData.point_attribs` maps directly to/from buffer data for SOP↔POP bridging.
+
+### VOL — Texture3D Compute Volumes
+
+Volumetric data (density, velocity, pressure) is stored in **3D textures** (`RDTextureFormat` with `TEXTURE_TYPE_3D`), not SSBOs.
+
+**Why Texture3D is the right choice for volumes:**
+
+- **Hardware trilinear filtering** — `sampler3D` gives free interpolated reads, essential for fluid advection (semi-Lagrangian) and raymarching.
+- **Natural 3D addressing** — voxel grids map directly to 3D texture coordinates. No index gymnastics.
+- **Image load/store** — `layout(r32f) uniform image3D` for per-voxel compute writes, `uniform sampler3D` for filtered reads in the same pipeline.
+- **Mip-maps** — automatic multi-resolution for LOD-aware rendering (future).
+- **Raymarcher integration** — the volume can be directly sampled in a fragment shader for real-time rendering without any data conversion.
+
+Where spatial filtering on particle data is needed (e.g., density splatting), a **scatter/gather bridge** converts between SSBO and Texture3D:
+
+```
+[SSBO particles] → scatter → [3D texture grid]
+									↓
+							  blur / advect / diffuse
+									↓
+[SSBO particles] ← gather ← [3D texture grid]
+```
+
+### Renderer Compatibility
+
+Both POP and VOL families require **compute shaders**, available on Forward+ and Mobile renderers. The Compatibility renderer (OpenGL 3.3 / WebGL2) does not support compute.
+
+| Renderer | API | Compute | POP & VOL |
+|---|---|---|---|
+| **Forward+** | Vulkan / D3D12 | ✅ | Full support |
+| **Mobile** | Vulkan / Metal | ✅ | Full support |
+| **Compatibility** | OpenGL 3.3 / WebGL2 | ❌ | Skipped with warning |
+
+**Graceful degradation:** GONODES detects the active renderer at startup via `GNGpuContext.is_compute_available()`. When compute is unavailable, POP/VOL nodes are automatically skipped by the cook engine with a yellow ⚠ warning badge — the rest of the graph continues cooking normally. All other families (TOP, CHOP, SOP, DAT, MAT, COMP, IMG, UI, OUT) work on every renderer.
+
+CPU fallback paths for POP and VOL are planned for a future release, enabling basic particle and volume workflows on Compatibility/WebGL2 at reduced performance.
 
 ---
 
@@ -268,14 +329,13 @@ addons/gonodes/help/
 
 ### Planned (Post-Phase 7)
 
-- POP family (GPU particle system â€” millions of points via compute shaders)
+- CPU fallback for POP/VOL on Compatibility renderer (WebGL2, old GPUs)
 - LibGodot embedding for host applications (VDMX, Resolume)
 - FFmpeg GDExtension addon (`gn_ext_ffmpeg`) â€” H.264, VP9, AV1, ProRes
 - HAP codec GDExtension (GPU-direct S3TC/DXT video for VJ workflows, alpha support)
 - Syphon / Spout texture sharing
 - NDI video streaming
 - FxPlug / FFGL plugin export
-- ComputeShaderTOP (user-editable GPU compute shader)
 - Multi-threaded cook engine
 - GPU compute shaders for CHOPs
 - Python scripting DAT (embedded Python via GDExtension)
@@ -337,7 +397,7 @@ git clone https://github.com/your-username/gonodes.git
 â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-GONODES is built directly on Godot's native systems â€” SubViewports for texture processing, compute shaders for GPU particle work, GraphEdit for the node editor, Resource serialization for patches. No abstraction layers, no engine-agnostic wrappers. This keeps the codebase lean and ensures patches export cleanly to every platform Godot targets.
+GONODES is built directly on Godot's native systems — SubViewports for texture processing, SSBO compute shaders for GPU particles, Texture3D compute for volumetrics, GraphEdit for the node editor, Resource serialization for patches. No abstraction layers, no engine-agnostic wrappers. This keeps the codebase lean and ensures patches export cleanly to every platform Godot targets. Compute-dependent operators (POP, VOL, ComputeShaderTOP) are automatically detected and gracefully skipped on renderers without compute support.
 
 **Key design principles:**
 - **Demand-driven flat-pass cooking** â€” achieves the same lazy evaluation as pull-based systems (Houdini, TouchDesigner) without recursive descent. Only dirty + active nodes cook each frame. Inactive subgraphs are skipped entirely via active-chain BFS from sinks. Single linear topo-sorted pass â€” no deep recursion, predictable timing, correct GPU render ordering.

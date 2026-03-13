@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cr1bnhltg67a4"
+path="res://.godot/imported/limit_pop.glsl-a6e3b6bd4a03a542abe0471872946b44.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/pop/limit_pop.glsl"
+dest_files=["res://.godot/imported/limit_pop.glsl-a6e3b6bd4a03a542abe0471872946b44.res"]
+
+[params]
+

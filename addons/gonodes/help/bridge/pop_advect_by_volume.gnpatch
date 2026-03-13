@@ -1,0 +1,115 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_vel": {
+            "type": "NoiseVOL",
+            "position": [200, 500],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "frequency": {"value": 2.5},
+                "amplitude": {"value": 0.6},
+                "octaves": {"value": 3},
+                "speed": {"value": 0.4}
+            }
+        },
+        "source1": {
+            "type": "SourcePOP",
+            "position": [200, 200],
+            "parameters": {
+                "emit_rate": {"value": 3000},
+                "life_min": {"value": 3.0},
+                "life_max": {"value": 5.0},
+                "init_speed": {"value": 0.1},
+                "emit_shape": {"value": 0},
+                "emit_radius": {"value": 0.05}
+            }
+        },
+        "advect1": {
+            "type": "AdvectPOP",
+            "position": [550, 200],
+            "parameters": {
+                "strength": {"value": 1.2},
+                "field_scale": {"value": 1.0}
+            }
+        },
+        "force1": {
+            "type": "ForcePOP",
+            "position": [900, 200],
+            "parameters": {
+                "force_x": {"value": 0.0},
+                "force_y": {"value": -0.3},
+                "force_z": {"value": 0.0}
+            }
+        },
+        "limit1": {
+            "type": "LimitPOP",
+            "position": [1250, 200],
+            "parameters": {
+                "bound_mode": {"value": 0},
+                "bound_size": {"value": 1.5}
+            }
+        },
+        "render1": {
+            "type": "RenderPOP",
+            "position": [1600, 200],
+            "parameters": {
+                "width": {"value": 768},
+                "height": {"value": 768},
+                "point_size": {"value": 2.0},
+                "color_mode": {"value": 1}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [550, 500],
+            "parameters": {
+                "width": {"value": 384},
+                "height": {"value": 384},
+                "max_steps": {"value": 80},
+                "step_size": {"value": 0.015},
+                "density_scale": {"value": 3.0},
+                "absorption": {"value": 5.0},
+                "cam_dist": {"value": 2.5}
+            }
+        },
+        "window_particles": {
+            "type": "WindowOUT",
+            "position": [1950, 200],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 768, "y": 768}}
+            }
+        },
+        "window_field": {
+            "type": "WindowOUT",
+            "position": [900, 500],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 384, "y": 384}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "source1", "from_port": 0, "to": "advect1", "to_port": 0},
+        {"from": "noise_vel", "from_port": 0, "to": "advect1", "to_port": 1},
+        {"from": "advect1", "from_port": 0, "to": "force1", "to_port": 0},
+        {"from": "force1", "from_port": 0, "to": "limit1", "to_port": 0},
+        {"from": "limit1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "render1", "from_port": 0, "to": "window_particles", "to_port": 0},
+        {"from": "noise_vel", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "window_field", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "POP + VOL Bridge — Particles Advected by Volume Field\n\nAdvectPOP reads a 3D velocity field from a NoiseVOL\nand pushes particles along the flow direction.\n\nThe top chain shows advected particles with gravity.\nThe bottom chain renders the velocity field itself.\n\nThis demonstrates the core POP↔VOL bridge:\nvolume data drives particle motion in real time.",
+            "position": [-100.0, -100.0],
+            "size": [540.0, 130.0],
+            "color": [0.9, 0.3, 0.4, 0.8]
+        }
+    ]
+}

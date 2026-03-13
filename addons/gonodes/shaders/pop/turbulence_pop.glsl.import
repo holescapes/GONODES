@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://8xna6eadtw1t"
+path="res://.godot/imported/turbulence_pop.glsl-c82be54f33138b1b8995beb2f5a8e632.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/pop/turbulence_pop.glsl"
+dest_files=["res://.godot/imported/turbulence_pop.glsl-c82be54f33138b1b8995beb2f5a8e632.res"]
+
+[params]
+

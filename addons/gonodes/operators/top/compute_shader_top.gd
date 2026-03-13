@@ -131,6 +131,10 @@ func _init() -> void:
 	node_description = "GPU compute shader (GLSL 450) with storage image output and auto-detected parameters."
 
 
+func requires_compute() -> bool:
+	return true
+
+
 func _init_ports() -> void:
 	# Default template has no gn_tex sampler — ports rebuilt on shader compile.
 	add_output("out", GNFamily.Type.TOP, "Compute output texture")

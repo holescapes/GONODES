@@ -108,6 +108,13 @@ var node_warning: String = ""
 ## badge on the GraphNode in the editor.
 var node_error: String = ""
 
+## Whether this node requires GPU compute shader support (RenderingDevice).
+## Override to return true in operators that use compute shaders (POP, VOL,
+## ComputeShaderTOP, CompositorEffectTOP).  The cook engine checks this before
+## cooking and gracefully skips incompatible nodes on the Compatibility renderer.
+func requires_compute() -> bool:
+	return false
+
 # ─── Dynamic Input Ports ───────────────────────────────────────────────────────
 
 ## If true, this node auto-grows/shrinks its input ports to always have one

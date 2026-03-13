@@ -1,0 +1,78 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "torus1": {
+            "type": "TorusSOP",
+            "position": [200, 200],
+            "parameters": {}
+        },
+        "source1": {
+            "type": "SourcePOP",
+            "position": [550, 200],
+            "parameters": {
+                "max_particles": {"value": 20000},
+                "rate": {"value": 2000.0},
+                "life_min": {"value": 5.0},
+                "life_max": {"value": 8.0},
+                "init_speed": {"value": 1.0},
+                "pscale": {"value": 0.05}
+            }
+        },
+        "force1": {
+            "type": "ForcePOP",
+            "position": [900, 200],
+            "parameters": {
+                "gravity_y": {"value": -2.0},
+                "drag": {"value": 0.01}
+            }
+        },
+        "limit1": {
+            "type": "LimitPOP",
+            "position": [1250, 200],
+            "parameters": {
+                "max_speed": {"value": 10.0}
+            }
+        },
+        "instance1": {
+            "type": "InstancePOP",
+            "position": [1600, 200],
+            "parameters": {
+                "max_instances": {"value": 20000},
+                "use_pscale": {"value": true},
+                "use_color": {"value": true}
+            }
+        },
+        "box1": {
+            "type": "BoxSOP",
+            "position": [1250, 500],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1950, 200],
+            "parameters": {
+                "open": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 768}}
+            }
+        }
+    },
+    "connections": [
+        {"from": "torus1", "from_port": 0, "to": "source1", "to_port": 0},
+        {"from": "source1", "from_port": 0, "to": "force1", "to_port": 0},
+        {"from": "force1", "from_port": 0, "to": "limit1", "to_port": 0},
+        {"from": "limit1", "from_port": 0, "to": "instance1", "to_port": 0},
+        {"from": "box1", "from_port": 0, "to": "instance1", "to_port": 1},
+        {"from": "instance1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "POP Instancing — Geometry at Particle Positions\n\nInstancePOP copies a BoxSOP mesh onto each particle position.\nScaled by pscale attribute and colored by particle color.\nEmits from a TorusSOP surface with gravity pulling boxes down.\nMax instances limits CPU load for the mesh generation.\nReplace BoxSOP with any SOP for different instance shapes.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 120.0],
+            "color": [0.2, 0.8, 0.8, 0.8]
+        }
+    ]
+}

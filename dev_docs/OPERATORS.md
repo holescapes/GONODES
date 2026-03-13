@@ -2,9 +2,11 @@
 
 > **âš ï¸ This is a static snapshot and may be outdated.** The live operator reference is auto-generated in the in-editor Help window (F1 â†’ Operators Reference) from actual operator metadata.  
 > **Audience:** Contributors needing implementation details ("How it works" per operator).  
-> **Current operator count:** 307 operators across 10 families (this snapshot documents 150).
+> **Current operator count:** 308 operators across 11 families (this snapshot documents 150).
 
-> **150 operators** across 10 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, UI, and native extensions.
+> **150 operators** across 11 categories: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, and native extensions.
+>
+> **POP & VOL notes:** The POP family (10 GPU particle operators) and VOL family (10 volumetric 3D texture operators) require compute shaders (Forward+ or Mobile renderer). On the Compatibility renderer (OpenGL 3.3 / WebGL2), these operators are automatically skipped with a ⚠ warning badge — see `dev_docs/EDITOR.md § Compute Shader Detection` for implementation details.
 
 ---
 

@@ -99,6 +99,12 @@ var _consumer_counts: Dictionary = {}
 ## When true, _consumer_counts needs recomputing.
 var _consumer_counts_dirty: bool = true
 
+## Cached compute shader availability flag.  Checked once on the first cook
+## frame and cached for the lifetime of the engine.  False on the Compatibility
+## renderer (OpenGL 3.3 / WebGL2) where RenderingDevice is not available.
+var _compute_available: bool = true
+var _compute_checked: bool = false
+
 # ─── Active Chain Cooking ──────────────────────────────────────────────────────
 
 ## IDs of nodes that are live sinks (viewers, WindowTOPs, etc.).
@@ -360,6 +366,15 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 func cook_frame(delta: float) -> void:
 	var frame_start := Time.get_ticks_usec()
 
+	# One-time check: is GPU compute available on this renderer?
+	if not _compute_checked:
+		_compute_available = GNGpuContext.is_compute_available()
+		_compute_checked = true
+		if not _compute_available:
+			GNLogger.warn("CookEngine",
+				"Compute shaders unavailable (Compatibility renderer). " +
+				"POP, VOL, ComputeShaderTOP, and CompositorEffectTOP nodes will be skipped.")
+
 	# Ensure all network nodes are adopted into the scene tree.
 	# This is critical for sub-network inner cook engines where _process()
 	# is disabled (cooking_enabled = false) and cook_frame() is called directly.
@@ -452,6 +467,25 @@ func cook_frame(delta: float) -> void:
 			cooked_count += 1
 			if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
 				break
+			continue
+
+		# Skip compute-dependent nodes when the renderer has no RenderingDevice
+		# (Compatibility / OpenGL 3.3 / WebGL2).  The node keeps its last
+		# cached_output (or null) and downstream nodes receive null input,
+		# which they handle gracefully (same as any disconnected port).
+		if not _compute_available and node.requires_compute():
+			if editor_mode:
+				node.node_warning = "Requires compute shaders (unavailable on this renderer)"
+			# Log once (frame 0) to avoid spamming every frame for time-dependent nodes
+			if frame_count == 0:
+				var msg := "Node '%s' (%s) requires compute shaders — skipped" % [node.id, node.node_type]
+				GNLogger.warn("CookEngine", msg)
+				cook_error.emit(node.id, msg)
+			node.cook_valid = false
+			node.cook_time_ms = 0.0
+			node.clear_dirty()
+			node.node_cooked.emit(node.id)
+			skipped_count += 1
 			continue
 
 		# Cook the node

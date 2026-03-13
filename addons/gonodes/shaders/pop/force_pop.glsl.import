@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://c28jmalt7rlib"
+path="res://.godot/imported/force_pop.glsl-1c74ff2d3b80ca52614782f0cceedd06.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/pop/force_pop.glsl"
+dest_files=["res://.godot/imported/force_pop.glsl-1c74ff2d3b80ca52614782f0cceedd06.res"]
+
+[params]
+
