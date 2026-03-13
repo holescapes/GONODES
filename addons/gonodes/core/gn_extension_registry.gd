@@ -112,6 +112,9 @@ func create_instance(class_name_key: String) -> GNNode:
 	var entry: OperatorEntry = _operators.get(class_name_key, null)
 	if entry == null:
 		return null
+	# Custom assets need their .gnasset loaded after construction
+	if entry.source == "custom_asset":
+		return create_custom_asset_instance(class_name_key)
 	if entry.op_script == null:
 		GNLogger.warn("ExtRegistry", "Operator '%s' has no script" % class_name_key)
 		return null
@@ -525,6 +528,8 @@ func _register_core_operators() -> void:
 		"Render 3D scene with debug buffer output: Color, Unshaded, Normal Buffer, or Wireframe.")
 	_reg("CompositorEffectTOP",    "TOP", CompositorEffectTOP,
 		"Render 3D scene with a pipeline-level CompositorEffect: Outline, Depth Fog, or Depth View.")
+	_reg("MultiBufferRenderTOP",   "TOP", MultiBufferRenderTOP,
+		"Multi-buffer 3D render: outputs color, depth, and normal buffer textures.")
 
 	# ── CHOPs: Generators ───────────────────────────────────────────────
 	_reg("LFO_CHOP",        "CHOP", LFO_CHOP,
@@ -966,6 +971,12 @@ func _register_core_operators() -> void:
 	_reg("TOPtoIMG",        "IMG", TOPtoIMG,
 		"Convert TOP (GPU Texture) to IMG (CPU Image). Bridge operator (GPU readback).")
 
+	# ── IMGs: GPU Compute ───────────────────────────────────────────────
+	_reg("GpuBlurIMG",     "IMG", GpuBlurIMG,
+		"GPU Gaussian blur via compute shader (separable two-pass).")
+	_reg("GpuEdgeDetectIMG", "IMG", GpuEdgeDetectIMG,
+		"GPU Sobel edge detection via compute shader.")
+
 	# ── TOPs: Bridge (cross-family conversion) ─────────────────────────
 	_reg("CHOPtoTOP",       "TOP", CHOPtoTOP,
 		"Render CHOP channels as a texture (waveform, heatmap, or graph).")
@@ -1198,3 +1209,84 @@ func _register_core_operators() -> void:
 func _reg(class_name_key: String, family: String, op_script: GDScript,
 		description: String) -> void:
 	register_operator(class_name_key, family, op_script, description, "core")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Custom Asset Scanning (.gnasset)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Directories scanned for .gnasset files.
+const _ASSET_SCAN_DIRS: PackedStringArray = [
+	"res://addons/gonodes/assets",
+	"res://custom_operators",
+	"user://gonodes_assets",
+]
+
+## Loaded .gnasset paths (to avoid double-loading).
+var _loaded_assets: PackedStringArray = []
+
+
+## Scans known directories for .gnasset files and registers each as a custom
+## operator in the registry.  Assets whose identity block is missing or
+## malformed are skipped with a warning.
+func scan_custom_assets() -> void:
+	var found_count := 0
+	for scan_dir in _ASSET_SCAN_DIRS:
+		if not DirAccess.dir_exists_absolute(scan_dir):
+			continue
+		var dir := DirAccess.open(scan_dir)
+		if dir == null:
+			continue
+		dir.list_dir_begin()
+		var file_name := dir.get_next()
+		while file_name != "":
+			if not dir.current_is_dir() and file_name.ends_with(".gnasset"):
+				var full_path := scan_dir.path_join(file_name)
+				if not _loaded_assets.has(full_path):
+					if _register_custom_asset(full_path):
+						found_count += 1
+			file_name = dir.get_next()
+		dir.list_dir_end()
+
+	if found_count > 0:
+		GNLogger.info("ExtRegistry", "Loaded %d custom asset(s)" % found_count)
+
+
+## Registers a single .gnasset file as a custom operator.
+## Returns true on success.
+func _register_custom_asset(asset_path: String) -> bool:
+	var data := GNCustomOperator._read_asset_json(asset_path)
+	if data.is_empty():
+		GNLogger.warn("ExtRegistry", "Skipping invalid asset: %s" % asset_path)
+		return false
+
+	var identity: Dictionary = data.get("identity", {})
+	var op_name: String = identity.get("op_name", "")
+	if op_name.is_empty():
+		GNLogger.warn("ExtRegistry", "Asset missing op_name: %s" % asset_path)
+		return false
+
+	var family_str: String = identity.get("family", "COMP")
+	var desc: String = identity.get("description", "Custom operator from .gnasset")
+
+	# Register with the GNCustomOperator script — create_instance will
+	# produce a GNCustomOperator, and the caller must call load_from_asset()
+	# with the path stored in the entry's extension_dir field.
+	register_operator(op_name, family_str, GNCustomOperator,
+		desc, "custom_asset", "Custom", asset_path)
+	_loaded_assets.append(asset_path)
+	GNLogger.info("ExtRegistry", "Registered custom asset '%s' from %s" % [op_name, asset_path])
+	return true
+
+
+## Override create_instance to handle GNCustomOperator specially — it needs
+## load_from_asset() called with the asset path.
+func create_custom_asset_instance(class_name_key: String) -> GNNode:
+	var entry: OperatorEntry = _operators.get(class_name_key, null)
+	if entry == null or entry.source != "custom_asset":
+		return null
+	var node := GNCustomOperator.new()
+	if node.load_from_asset(entry.extension_dir):
+		return node
+	node.free()
+	return null

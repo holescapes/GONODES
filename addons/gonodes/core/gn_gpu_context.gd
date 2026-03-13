@@ -222,6 +222,57 @@ func create_linear_sampler() -> RID:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# 2D Texture Helpers (IMG compute)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Creates a 2D storage texture for compute shaders (RGBA8).
+func create_texture_2d(width: int, height: int,
+		data_format: int = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM) -> RID:
+	if rd == null:
+		return RID()
+	var fmt := RDTextureFormat.new()
+	fmt.texture_type = RenderingDevice.TEXTURE_TYPE_2D
+	fmt.width = width
+	fmt.height = height
+	fmt.depth = 1
+	fmt.format = data_format
+	fmt.usage_bits = (
+		RenderingDevice.TEXTURE_USAGE_STORAGE_BIT |
+		RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT |
+		RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
+	)
+	fmt.mipmaps = 1
+	return rd.texture_create(fmt, RDTextureView.new())
+
+
+## Uploads a Godot Image into a GPU storage texture. Returns the texture RID.
+## Creates a new texture each time — caller is responsible for freeing old ones.
+func upload_image(image: Image) -> RID:
+	if rd == null or image == null:
+		return RID()
+	# Ensure RGBA8 format for consistent compute shader access
+	var img := image
+	if img.get_format() != Image.FORMAT_RGBA8:
+		img = img.duplicate()
+		img.convert(Image.FORMAT_RGBA8)
+	var tex_rid := create_texture_2d(img.get_width(), img.get_height())
+	if not tex_rid.is_valid():
+		return RID()
+	rd.texture_update(tex_rid, 0, img.get_data())
+	return tex_rid
+
+
+## Downloads a GPU storage texture back to a Godot Image (RGBA8).
+func download_image(tex_rid: RID, width: int, height: int) -> Image:
+	if rd == null or not tex_rid.is_valid():
+		return null
+	var data: PackedByteArray = rd.texture_get_data(tex_rid, 0)
+	if data.is_empty():
+		return null
+	return Image.create_from_data(width, height, false, Image.FORMAT_RGBA8, data)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Dispatch Helper
 # ═══════════════════════════════════════════════════════════════════════════════
 

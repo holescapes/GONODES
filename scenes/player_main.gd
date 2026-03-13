@@ -44,6 +44,7 @@ var _debug_visible: bool = false
 func _ready() -> void:
 	# Initialize extension registry
 	GNExtensionRegistry.instance().scan_extensions()
+	GNExtensionRegistry.instance().scan_custom_assets()
 
 	_parse_config()
 	_apply_window_settings()

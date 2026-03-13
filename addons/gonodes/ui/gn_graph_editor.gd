@@ -65,6 +65,8 @@ enum _CtxID {
 	INSERT_CHOP_REF,
 	ADD_NETWORK_BOX,
 	ADD_STICKY_NOTE,
+	PROMOTE_TO_ASSET,
+	ADD_SPARE_PARAM,
 	## Dynamic IDs for preset loading start here (100+).
 	LOAD_PARAM_PRESET_BASE = 100,
 }
@@ -92,6 +94,12 @@ var _save_preset_target_node: GNNode = null
 ## Insert CHOP Reference dialog.
 var _chop_ref_dialog: AcceptDialog = null
 var _chop_ref_source_node: GNNode = null
+
+## Promote-to-asset dialog.
+var _promote_asset_dialog: GNAssetPromotionDialog = null
+
+## Spare parameter dialog.
+var _spare_param_dialog: AcceptDialog = null
 
 ## Snapshot of selected node positions before a drag move begins.
 var _pre_move_positions: Dictionary = {}
@@ -1938,6 +1946,19 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.GROUP_SELECTED), _shortcut(KEY_G, true), true)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.GROUP_SELECTED), not has_selection)
 
+	# Promote to Custom Asset — enabled when exactly one SubNetworkNode is selected
+	var is_single_subnet := false
+	if selected_ids.size() == 1 and network != null:
+		var subnet_node: GNNode = network.get_node_by_id(selected_ids[0])
+		if subnet_node is SubNetworkNode:
+			is_single_subnet = true
+	_context_menu.add_item("Promote to Custom Asset…", _CtxID.PROMOTE_TO_ASSET)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.PROMOTE_TO_ASSET), not is_single_subnet)
+
+	# Add Spare Parameter — enabled when exactly one node is selected
+	_context_menu.add_item("Add Spare Parameter…", _CtxID.ADD_SPARE_PARAM)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.ADD_SPARE_PARAM), not single_node_selected)
+
 	_context_menu.add_separator()
 	_context_menu.add_item("Node Help", _CtxID.NODE_HELP)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.NODE_HELP), selected_ids.size() != 1)
@@ -2115,6 +2136,10 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			_add_annotation_at_mouse("box")
 		_CtxID.ADD_STICKY_NOTE:
 			_add_annotation_at_mouse("note")
+		_CtxID.PROMOTE_TO_ASSET:
+			_show_promote_to_asset_dialog()
+		_CtxID.ADD_SPARE_PARAM:
+			_show_add_spare_param_dialog()
 		_:
 			# Dynamic preset load IDs
 			if id >= _CtxID.LOAD_PARAM_PRESET_BASE:
@@ -3094,8 +3119,135 @@ func _load_param_preset(preset_idx: int) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Add Spare Parameter
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Shows a dialog to add a user-defined spare parameter to the selected node.
+func _show_add_spare_param_dialog() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var target_node: GNNode = network.get_node_by_id(selected[0])
+	if target_node == null:
+		return
+
+	if _spare_param_dialog != null:
+		_spare_param_dialog.queue_free()
+
+	_spare_param_dialog = AcceptDialog.new()
+	_spare_param_dialog.title = "Add Spare Parameter — %s" % target_node.id
+	_spare_param_dialog.ok_button_text = "Add"
+	_spare_param_dialog.size = Vector2i(400, 240)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 6)
+
+	var name_lbl := Label.new()
+	name_lbl.text = "Parameter name:"
+	vbox.add_child(name_lbl)
+	var name_edit := LineEdit.new()
+	name_edit.placeholder_text = "my_param"
+	name_edit.select_all_on_focus = true
+	vbox.add_child(name_edit)
+
+	var type_lbl := Label.new()
+	type_lbl.text = "Type:"
+	vbox.add_child(type_lbl)
+	var type_option := OptionButton.new()
+	type_option.add_item("Float", GNParameter.ValueType.FLOAT)
+	type_option.add_item("Int", GNParameter.ValueType.INT)
+	type_option.add_item("Bool", GNParameter.ValueType.BOOL)
+	type_option.add_item("String", GNParameter.ValueType.STRING)
+	type_option.add_item("Color", GNParameter.ValueType.COLOR)
+	type_option.add_item("Vector2", GNParameter.ValueType.VECTOR2)
+	type_option.add_item("Vector2i", GNParameter.ValueType.VECTOR2I)
+	vbox.add_child(type_option)
+
+	var label_lbl := Label.new()
+	label_lbl.text = "Display label (optional):"
+	vbox.add_child(label_lbl)
+	var label_edit := LineEdit.new()
+	label_edit.placeholder_text = "My Param"
+	vbox.add_child(label_edit)
+
+	_spare_param_dialog.add_child(vbox)
+
+	var node_id: String = target_node.id
+	_spare_param_dialog.confirmed.connect(func() -> void:
+		var p_name: String = name_edit.text.strip_edges()
+		if p_name.is_empty():
+			GNLogger.warn("GraphEditor", "Spare parameter name cannot be empty")
+			_spare_param_dialog.queue_free()
+			return
+		# Ensure no collision with existing params
+		var node: GNNode = network.get_node_by_id(node_id) if network else null
+		if node == null:
+			_spare_param_dialog.queue_free()
+			return
+		if node.get_parameter(p_name) != null:
+			GNLogger.warn("GraphEditor", "Parameter '%s' already exists on '%s'" % [p_name, node_id])
+			_spare_param_dialog.queue_free()
+			return
+
+		var vt: int = type_option.get_selected_id()
+		var p_label: String = label_edit.text.strip_edges()
+		if p_label.is_empty():
+			p_label = p_name.capitalize()
+
+		var param: GNParameter = null
+		match vt:
+			GNParameter.ValueType.FLOAT:
+				param = GNParameter.create_float(p_name, 0.0, null, null, 0.01, p_label)
+			GNParameter.ValueType.INT:
+				param = GNParameter.create_int(p_name, 0, null, null, p_label)
+			GNParameter.ValueType.BOOL:
+				param = GNParameter.create_bool(p_name, false, p_label)
+			GNParameter.ValueType.STRING:
+				param = GNParameter.create_string(p_name, "", p_label)
+			GNParameter.ValueType.COLOR:
+				param = GNParameter.create_color(p_name, Color.WHITE, p_label)
+			GNParameter.ValueType.VECTOR2:
+				param = GNParameter.create_vector2(p_name, Vector2.ZERO, p_label)
+			GNParameter.ValueType.VECTOR2I:
+				param = GNParameter.create_vector2i(p_name, Vector2i.ZERO, p_label)
+			_:
+				param = GNParameter.create_float(p_name, 0.0, null, null, 0.01, p_label)
+
+		node.add_spare_parameter(param)
+		GNLogger.info("GraphEditor", "Added spare parameter '%s' to '%s'" % [p_name, node_id])
+		_spare_param_dialog.queue_free()
+	)
+	_spare_param_dialog.canceled.connect(func() -> void:
+		_spare_param_dialog.queue_free()
+	)
+	add_child(_spare_param_dialog)
+	name_edit.grab_focus.call_deferred()
+	_spare_param_dialog.popup_centered()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Insert CHOP Reference
 # ═══════════════════════════════════════════════════════════════════════════════
+
+## Shows the promote-to-custom-asset dialog for the selected SubNetworkNode.
+func _show_promote_to_asset_dialog() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if not node is SubNetworkNode:
+		return
+
+	if _promote_asset_dialog != null:
+		_promote_asset_dialog.queue_free()
+	_promote_asset_dialog = GNAssetPromotionDialog.new()
+	_promote_asset_dialog.asset_created.connect(func(path: String, op_name: String) -> void:
+		GNLogger.info("GraphEditor", "Custom asset '%s' created at %s" % [op_name, path])
+	)
+	add_child(_promote_asset_dialog)
+	_promote_asset_dialog.setup(node as SubNetworkNode)
+	_promote_asset_dialog.popup_centered()
+
 
 ## Shows a dialog to insert a chop() expression reference from the selected CHOP
 ## node into a target parameter on any node.  Replaces the old "Add CHOP Export"

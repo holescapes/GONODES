@@ -34,6 +34,10 @@ var output_ports: Array[GNPort] = []
 ## Map of parameter name → GNParameter.
 var parameters: Dictionary = {}
 
+## User-defined spare parameters. Stored separately from built-in parameters.
+## Keys are parameter names, values are GNParameter instances.
+var spare_parameters: Dictionary = {}
+
 # ─── Cook State ────────────────────────────────────────────────────────────────
 
 ## True when this node needs to be re-cooked.
@@ -348,14 +352,47 @@ func add_parameter(param: GNParameter) -> void:
 		param.mode_changed.connect(_on_parameter_mode_changed)
 
 
+## Adds a user-defined spare parameter. Stored separately from built-in params.
+## Emits [signal parameters_changed] so the inspector rebuilds.
+func add_spare_parameter(param: GNParameter) -> void:
+	spare_parameters[param.param_name] = param
+	if not param.value_changed.is_connected(_on_parameter_changed):
+		param.value_changed.connect(_on_parameter_changed)
+	if not param.mode_changed.is_connected(_on_parameter_mode_changed):
+		param.mode_changed.connect(_on_parameter_mode_changed)
+	parameters_changed.emit(id)
+
+
+## Removes a spare parameter by name. Returns true if removed.
+func remove_spare_parameter(param_name: String) -> bool:
+	if not spare_parameters.has(param_name):
+		return false
+	var param: GNParameter = spare_parameters[param_name]
+	if param.value_changed.is_connected(_on_parameter_changed):
+		param.value_changed.disconnect(_on_parameter_changed)
+	if param.mode_changed.is_connected(_on_parameter_mode_changed):
+		param.mode_changed.disconnect(_on_parameter_mode_changed)
+	spare_parameters.erase(param_name)
+	parameters_changed.emit(id)
+	return true
+
+
+## Returns true if the node has any spare parameters.
+func has_spare_parameters() -> bool:
+	return not spare_parameters.is_empty()
+
+
 ## Returns the raw GNParameter object, or null if not found.
 func get_parameter(param_name: String) -> GNParameter:
-	return parameters.get(param_name, null)
+	var p: GNParameter = parameters.get(param_name, null)
+	if p != null:
+		return p
+	return spare_parameters.get(param_name, null)
 
 
 ## Returns the resolved value of a parameter (respecting its current mode).
 func get_param_value(param_name: String) -> Variant:
-	var param: GNParameter = parameters.get(param_name, null)
+	var param: GNParameter = get_parameter(param_name)
 	if param == null:
 		push_warning("GNNode '%s': unknown parameter '%s'" % [id, param_name])
 		return null
@@ -365,7 +402,7 @@ func get_param_value(param_name: String) -> Variant:
 ## Programmatically sets a parameter's constant value.
 ## Useful for operators that auto-detect values (e.g., resolution from a loaded file).
 func set_param_value(p_name: String, new_value: Variant) -> void:
-	var param: GNParameter = parameters.get(p_name, null)
+	var param: GNParameter = get_parameter(p_name)
 	if param == null:
 		push_warning("GNNode '%s': unknown parameter '%s'" % [id, p_name])
 		return
@@ -376,6 +413,8 @@ func set_param_value(p_name: String, new_value: Variant) -> void:
 func get_parameter_names() -> PackedStringArray:
 	var names := PackedStringArray()
 	for key in parameters:
+		names.append(key)
+	for key in spare_parameters:
 		names.append(key)
 	return names
 
@@ -506,6 +545,23 @@ func to_dict() -> Dictionary:
 	if not params_dict.is_empty():
 		d["parameters"] = params_dict
 
+	# Serialize spare parameters (full definition, not just overrides)
+	if not spare_parameters.is_empty():
+		var spare_dict: Dictionary = {}
+		for sp_name in spare_parameters:
+			var sp: GNParameter = spare_parameters[sp_name]
+			spare_dict[sp_name] = {
+				"value_type": sp.value_type,
+				"label": sp.label,
+				"default_value": sp.default_value,
+				"min_value": sp.min_value,
+				"max_value": sp.max_value,
+				"step": sp.step,
+				"enum_options": sp.enum_options,
+				"data": sp.to_dict(),
+			}
+		d["spare_parameters"] = spare_dict
+
 	return d
 
 
@@ -542,3 +598,56 @@ func from_dict(d: Dictionary) -> void:
 				GNLogger.warn("GNNode", "'%s': skipping unknown parameter '%s' during load" % [id, param_name])
 				continue
 			param.from_dict(params_dict[param_name])
+
+	# Restore spare parameters (full definitions)
+	if d.has("spare_parameters"):
+		var spare_dict: Dictionary = d["spare_parameters"]
+		for sp_name in spare_dict:
+			var sp_def: Dictionary = spare_dict[sp_name]
+			var vt: int = int(sp_def.get("value_type", GNParameter.ValueType.FLOAT))
+			var sp := _create_spare_param_from_def(sp_name, vt, sp_def)
+			if sp != null:
+				var data: Dictionary = sp_def.get("data", {})
+				if not data.is_empty():
+					sp.from_dict(data)
+				add_spare_parameter(sp)
+
+
+## Creates a GNParameter from a spare parameter definition dictionary.
+static func _create_spare_param_from_def(sp_name: String, vt: int, sp_def: Dictionary) -> GNParameter:
+	var label_text: String = sp_def.get("label", sp_name)
+	match vt:
+		GNParameter.ValueType.FLOAT:
+			return GNParameter.create_float(sp_name,
+				float(sp_def.get("default_value", 0.0)),
+				sp_def.get("min_value", null),
+				sp_def.get("max_value", null),
+				float(sp_def.get("step", 0.01)),
+				label_text)
+		GNParameter.ValueType.INT:
+			return GNParameter.create_int(sp_name,
+				int(sp_def.get("default_value", 0)),
+				sp_def.get("min_value", null),
+				sp_def.get("max_value", null),
+				label_text)
+		GNParameter.ValueType.BOOL:
+			return GNParameter.create_bool(sp_name,
+				bool(sp_def.get("default_value", false)),
+				label_text)
+		GNParameter.ValueType.STRING:
+			return GNParameter.create_string(sp_name,
+				str(sp_def.get("default_value", "")),
+				label_text)
+		GNParameter.ValueType.COLOR:
+			var def_val: Variant = sp_def.get("default_value", Color.WHITE)
+			var color: Color = Color.WHITE
+			if def_val is Color:
+				color = def_val
+			return GNParameter.create_color(sp_name, color, label_text)
+		GNParameter.ValueType.VECTOR2:
+			return GNParameter.create_vector2(sp_name, Vector2.ZERO, label_text)
+		GNParameter.ValueType.ENUM:
+			var options: PackedStringArray = sp_def.get("enum_options", PackedStringArray())
+			return GNParameter.create_enum(sp_name, options, 0, label_text)
+		_:
+			return GNParameter.create_float(sp_name, 0.0, null, null, 0.01, label_text)

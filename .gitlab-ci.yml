@@ -4,10 +4,7 @@ stages:
 variables:
   SCONS_FLAGS: "target=template_release -j4"
 
-# ── Windows ────────────────────────────────────────────────────────────────────
-build:windows:
-  stage: build
-  tags: [saas-windows-medium-amd64]
+.build_rules: &build_rules
   rules:
     - changes:
         - addons/gn_native/src/**/*
@@ -15,58 +12,96 @@ build:windows:
         - .gitlab-ci.yml
       when: always
     - when: manual
+
+# ── Windows x86_64 ─────────────────────────────────────────────────────────────
+build:windows-x86_64:
+  stage: build
+  tags: [saas-windows-medium-amd64]
+  <<: *build_rules
   before_script:
     - git submodule update --init --recursive
     - pip install scons
   script:
     - cd addons/gn_native
-    - scons platform=windows $SCONS_FLAGS
+    - scons platform=windows arch=x86_64 $SCONS_FLAGS
   artifacts:
     paths:
       - addons/gn_native/bin/win64/
     expire_in: 90 days
 
-# ── Linux ──────────────────────────────────────────────────────────────────────
-build:linux:
+# ── Windows ARM64 ──────────────────────────────────────────────────────────────
+build:windows-arm64:
+  stage: build
+  tags: [saas-windows-medium-amd64]
+  <<: *build_rules
+  before_script:
+    - git submodule update --init --recursive
+    - pip install scons
+  script:
+    - cd addons/gn_native
+    - scons platform=windows arch=arm64 $SCONS_FLAGS
+  artifacts:
+    paths:
+      - addons/gn_native/bin/win64/
+    expire_in: 90 days
+
+# ── Linux x86_64 ──────────────────────────────────────────────────────────────
+build:linux-x86_64:
   stage: build
   tags: [saas-linux-medium-amd64]
   image: ubuntu:22.04
-  rules:
-    - changes:
-        - addons/gn_native/src/**/*
-        - addons/gn_native/SConstruct
-        - .gitlab-ci.yml
-      when: always
-    - when: manual
+  <<: *build_rules
   before_script:
     - apt-get update -qq && apt-get install -y -qq python3 python3-pip g++ pkg-config git
     - git submodule update --init --recursive
     - pip3 install scons
   script:
     - cd addons/gn_native
-    - scons platform=linux $SCONS_FLAGS
+    - scons platform=linux arch=x86_64 $SCONS_FLAGS
   artifacts:
     paths:
       - addons/gn_native/bin/linux64/
     expire_in: 90 days
 
-# ── macOS ──────────────────────────────────────────────────────────────────────
+# ── Linux ARM64 (cross-compiled from x86_64) ─────────────────────────────────
+build:linux-arm64:
+  stage: build
+  tags: [saas-linux-medium-amd64]
+  image: ubuntu:22.04
+  <<: *build_rules
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 python3-pip g++-aarch64-linux-gnu pkg-config git
+    - git submodule update --init --recursive
+    - pip3 install scons
+  script:
+    - cd addons/gn_native
+    - scons platform=linux arch=arm64 $SCONS_FLAGS
+  artifacts:
+    paths:
+      - addons/gn_native/bin/linux64/
+    expire_in: 90 days
+
+# ── macOS (universal: arm64 + x86_64) ─────────────────────────────────────────
 build:macos:
   stage: build
   tags: [saas-macos-medium-m1]
-  rules:
-    - changes:
-        - addons/gn_native/src/**/*
-        - addons/gn_native/SConstruct
-        - .gitlab-ci.yml
-      when: always
-    - when: manual
+  <<: *build_rules
   before_script:
     - git submodule update --init --recursive
     - pip3 install scons
   script:
     - cd addons/gn_native
-    - scons platform=macos $SCONS_FLAGS
+    - scons platform=macos arch=arm64 $SCONS_FLAGS
+    - scons platform=macos arch=x86_64 $SCONS_FLAGS
+    - cd bin/macos
+    - |
+      ARM_LIB=$(find . -name "*arm64*" -type f | head -1)
+      X86_LIB=$(find . -name "*x86_64*" -type f | head -1)
+      if [ -n "$ARM_LIB" ] && [ -n "$X86_LIB" ]; then
+        UNIVERSAL_NAME=$(echo "$ARM_LIB" | sed 's/\.arm64//')
+        lipo -create "$ARM_LIB" "$X86_LIB" -output "$UNIVERSAL_NAME"
+        echo "Created universal binary: $UNIVERSAL_NAME"
+      fi
   artifacts:
     paths:
       - addons/gn_native/bin/macos/

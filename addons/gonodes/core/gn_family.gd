@@ -57,3 +57,13 @@ static func get_family_name(family: Type) -> String:
 ## Returns the UI color for a family enum value.
 static func get_color(family: Type) -> Color:
 	return FAMILY_COLORS.get(family, Color.WHITE)
+
+
+## Converts a family name string (e.g. "TOP", "CHOP") to the corresponding enum value.
+## Returns [param fallback] if the string is not recognized.
+static func string_to_type(family_str: String, fallback: Type = Type.COMP) -> Type:
+	var upper := family_str.to_upper()
+	for key in FAMILY_NAMES:
+		if FAMILY_NAMES[key] == upper:
+			return key
+	return fallback

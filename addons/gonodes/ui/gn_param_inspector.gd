@@ -196,10 +196,26 @@ func inspect(node: GNNode) -> void:
 	var param_names := node.get_parameter_names()
 	var current_group: String = ""
 	var group_hbox: HBoxContainer = null
+	var spare_header_added := false
 	for p_name in param_names:
 		var param: GNParameter = node.get_parameter(p_name)
 		if param == null:
 			continue
+
+		# Add spare parameters section header
+		if not spare_header_added and node.spare_parameters.has(p_name):
+			spare_header_added = true
+			current_group = ""
+			group_hbox = null
+			var spare_sep := HSeparator.new()
+			spare_sep.add_theme_constant_override("separation", 4)
+			_vbox.add_child(spare_sep)
+			var spare_label := Label.new()
+			spare_label.text = "Spare Parameters"
+			spare_label.add_theme_font_size_override("font_size", 12)
+			spare_label.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+			spare_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			_vbox.add_child(spare_label)
 
 		var row := GNParamRow.new()
 		row.network = network

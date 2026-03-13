@@ -1,4 +1,4 @@
-name: Build gn_native (Linux & macOS)
+name: Build gn_native
 
 on:
   push:
@@ -17,7 +17,7 @@ env:
 
 jobs:
   # ── Linux x86_64 ──────────────────────────────────────────────────────────
-  build-linux:
+  build-linux-x86_64:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -33,12 +33,38 @@ jobs:
       - name: Build gn_native (Linux x86_64)
         run: |
           cd addons/gn_native
-          scons platform=linux $SCONS_FLAGS
+          scons platform=linux arch=x86_64 $SCONS_FLAGS
 
-      - name: Upload Linux artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: gn-native-linux-x86_64
+          path: addons/gn_native/bin/linux64/
+          retention-days: 90
+
+  # ── Linux ARM64 (cross-compiled from x86_64) ──────────────────────────────
+  build-linux-arm64:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build tools + ARM64 cross-compiler
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3 python3-pip g++-aarch64-linux-gnu pkg-config
+          pip3 install scons
+
+      - name: Build gn_native (Linux ARM64 cross-compile)
+        run: |
+          cd addons/gn_native
+          scons platform=linux arch=arm64 $SCONS_FLAGS
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gn-native-linux-arm64
           path: addons/gn_native/bin/linux64/
           retention-days: 90
 
@@ -66,7 +92,6 @@ jobs:
       - name: Create universal binary
         run: |
           cd addons/gn_native/bin/macos
-          # Find the arm64 and x86_64 dylibs and lipo them together
           ARM_LIB=$(find . -name "*arm64*" -type f | head -1)
           X86_LIB=$(find . -name "*x86_64*" -type f | head -1)
           if [ -n "$ARM_LIB" ] && [ -n "$X86_LIB" ]; then
@@ -77,15 +102,15 @@ jobs:
             echo "Skipping lipo — single-arch build only"
           fi
 
-      - name: Upload macOS artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: gn-native-macos
           path: addons/gn_native/bin/macos/
           retention-days: 90
 
-  # ── Windows x86_64 (for completeness) ─────────────────────────────────────
-  build-windows:
+  # ── Windows x86_64 ────────────────────────────────────────────────────────
+  build-windows-x86_64:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -98,11 +123,34 @@ jobs:
       - name: Build gn_native (Windows x86_64)
         run: |
           cd addons/gn_native
-          scons platform=windows $env:SCONS_FLAGS
+          scons platform=windows arch=x86_64 $env:SCONS_FLAGS
 
-      - name: Upload Windows artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: gn-native-windows-x86_64
+          path: addons/gn_native/bin/win64/
+          retention-days: 90
+
+  # ── Windows ARM64 (Snapdragon laptops, Surface Pro X, etc.) ───────────────
+  build-windows-arm64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install SCons
+        run: pip install scons
+
+      - name: Build gn_native (Windows ARM64)
+        run: |
+          cd addons/gn_native
+          scons platform=windows arch=arm64 $env:SCONS_FLAGS
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gn-native-windows-arm64
           path: addons/gn_native/bin/win64/
           retention-days: 90

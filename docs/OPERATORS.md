@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **307 operators** across 10 categories: TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT, UI, and native extensions.
+> **311 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants.
 
 ---
 
@@ -525,6 +525,26 @@ Renders a 3D scene from COMPs into a 2D texture with integrated post-processing.
 
 ---
 
+#### MultiBufferRenderTOP
+
+Renders a 3D scene into multiple output buffers: color, depth, and normal. Extends RenderTOP with 3 separate output ports for multi-pass compositing workflows.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| depth_enabled | Bool | true | — | Enable depth buffer output on port 1 |
+| normal_enabled | Bool | true | — | Enable normal buffer output on port 2 |
+| *(inherits all RenderTOP parameters)* | | | | |
+
+**Inputs:** `comp_in` — accepts multiple COMP connections (multi-input port, same as RenderTOP).
+
+**Output 0:** Color — standard rendered scene texture (identical to RenderTOP).
+**Output 1:** Depth — depth buffer visualization (uses `DEBUG_DRAW_OVERDRAW`).
+**Output 2:** Normal — world-space normal buffer (uses `DEBUG_DRAW_NORMAL_BUFFER`).
+
+**How it works:** Creates secondary SubViewports that share the primary viewport's `World3D` (no scene duplication). Each secondary viewport uses a different Godot debug draw mode to extract depth and normal information. Disabled outputs skip viewport creation entirely. All three outputs are `GNTextureData` GPU references.
+
+---
+
 #### AnalyzeTOP
 
 Per-pixel statistics: min, max, average, or sum over a configurable kernel.
@@ -1033,6 +1053,50 @@ Container that renders connected UI widgets into a SubViewport texture. Outputs 
 **Output 0:** TOP (GNTextureData, pixels only, non-interactive).
 
 **How it works:** Creates a SubViewport with `gui_disable_input = true` and a root container inside. During cook, reparents each connected UI widget's `_control_node` into the root container. The SubViewport renders the widget tree into a texture. No interactive input is forwarded — for interactive panels, wire widgets through ContainerUI to WindowOUT's panel port instead.
+
+---
+
+## IMG — Image Operators
+
+IMGs process CPU-side `Image` data. Unlike TOPs (GPU textures via SubViewport), IMGs work on raw pixel buffers for operations that need CPU access: file I/O, pixel sorting, procedural generation, and format conversion. All IMG data flows as `GNImageData` — a lightweight RefCounted wrapper around Godot's `Image` class.
+
+Use `ImgToTOP` to bridge IMG output into the GPU TOP pipeline.
+
+**Total: 14 operators** — 2 generators, 5 filters, 2 I/O, 2 bridges, 1 capture, 1 script, 1 GPU compute base.
+
+### GPU Compute IMG Operators
+
+These IMG operators use Godot's `RenderingDevice` compute shaders for acceleration while maintaining the CPU-side `Image` interface. They extend `GNImgComputeBase`, which handles automatic Image ↔ GPU upload/download, shader compilation caching, and CPU fallback when compute is unavailable.
+
+---
+
+#### GpuBlurIMG
+
+GPU-accelerated Gaussian blur via compute shader. Separable two-pass implementation.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| radius | Int | 3 | 1–32 | Blur kernel radius |
+| passes | Int | 1 | 1–8 | Number of blur passes (stacks for heavier blur) |
+
+**Input:** `img_in` (IMG — image to blur).
+
+**How it works:** Uploads the input `Image` to a GPU storage texture, dispatches a separable Gaussian blur compute shader (`shaders/img/blur_img.glsl`) in two passes (horizontal then vertical), and downloads the result back to CPU `Image`. Multiple passes compound the blur effect. Falls back to CPU box blur when compute shaders are unavailable.
+
+---
+
+#### GpuEdgeDetectIMG
+
+GPU-accelerated edge detection via Sobel convolution compute shader.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 1.0 | 0.1–5.0 | Edge detection strength multiplier |
+
+**Input:** `img_in` (IMG — image to detect edges in).
+
+**How it works:** Uploads the input `Image` to a GPU storage texture, dispatches a 3×3 Sobel convolution compute shader (`shaders/img/edge_detect_img.glsl`) that computes horizontal and vertical gradients, combines them as `sqrt(gx² + gy²) * strength`, and downloads the result. Falls back to CPU Sobel implementation when compute shaders are unavailable.
+
 ---
 
 ## CHOP — Channel Operators
@@ -4053,16 +4117,18 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 63 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel |
+| **TOP** | 64 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel |
 | **CHOP** | 61 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics |
 | **DAT** | 29 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML |
 | **SOP** | 57 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Select |
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
 | **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
-| **IMG** | 12 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab |
+| **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, GpuBlur, GpuEdgeDetect, Script, ImgToTOP, TOPtoIMG, ScreenGrab |
 | **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
 | **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
-| **Total** | **288** | |
+| **POP** | 10 | *(GPU particle operators — SSBO-based compute pipeline)* |
+| **VOL** | 10 | *(Volumetric 3D texture operators — Navier-Stokes fluid, raymarcher, marching cubes)* |
+| **Total** | **311** | |
 
 ---
 

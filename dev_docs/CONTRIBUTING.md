@@ -1,6 +1,6 @@
 # Contributing to GONODES
 
-> **Last updated:** 2026-03-05  
+> **Last updated:** 2026-03-10  
 > **Godot version:** 4.6.1 stable  
 > **GDScript only** — no C++/GDExtension contributions to core (extensions may use GDExtension)
 
@@ -301,6 +301,7 @@ Every operator must extend the correct family base class:
 | COMP | `GNCompBase` | `null` (Node3D via API) |
 | MAT | `GNMatBase` | `GNMaterialData` |
 | IMG | `GNImgBase` | `GNImageData` |
+| IMG (GPU compute) | `GNImgComputeBase` | `GNImageData` |
 | UI | `GNUiBase` | `null` (Control via API) |
 
 ---
@@ -442,6 +443,10 @@ Every operator must provide: (1) `node_description` in `_init()`, (2) descriptio
 
 Every new operator must ship with at least one `.gnpatch` example file in `addons/gonodes/help/<family>/`. See [§4.3](#43-help-example-patch-required--hard-rule-2521) for format details.
 
+### Hard Rule 25.23: UTF-8 Encoding — No PowerShell String Manipulation
+
+All text files (`.md`, `.gd`, `.cfg`, `.tscn`, `.gnpatch`) are UTF-8 without BOM. **NEVER** use PowerShell `Get-Content` / `Set-Content` on files with non-ASCII characters without `-Encoding UTF8` on **both** calls. PowerShell defaults to Windows-1252, causing compounding corruption. **Prefer Python** for text manipulation involving non-ASCII. Corruption signature: `Ã¢â‚¬â€` instead of `—`. See `GONODES_CONTEXT.md` §25.23 and `BUILD.md` → UTF-8 Encoding Safeguards for full details.
+
 ---
 
 ## 11. Pull Request Checklist
@@ -533,6 +538,37 @@ TOPs use an isolated `SubViewport` + `ShaderMaterial` pattern:
 2. Create Godot `Node3D` subclass (MeshInstance3D, etc.) in `_cook()`.
 3. Return `null` from `_cook()` — provide access via getter methods (e.g., `get_mesh_instance()`).
 4. RenderTOP discovers COMPs by walking the network graph.
+
+### Adding a GPU Compute IMG Operator
+
+For pixel-parallel operations (blur, edge detect, color transforms), use the GPU compute path instead of CPU loops:
+
+1. Extend `GNImgComputeBase` (not `GNImgBase`).
+2. Write a GLSL compute shader in `addons/gonodes/shaders/img/`.
+3. Override `_dispatch_compute()` — set uniforms, dispatch workgroups.
+4. Override `_cook_cpu()` — provide a CPU fallback for when compute is unavailable.
+5. The base class handles: Image ↔ GPU upload/download, shader compilation caching, fallback detection, GPU texture lifecycle.
+
+See `gpu_blur_img.gd` and `gpu_edge_detect_img.gd` for reference implementations.
+
+### Spare Parameters
+
+Any node can have user-added "spare" parameters via right-click → "Add Spare Parameter…". Spare parameters:
+
+- Are stored in `gn_node.gd` → `spare_parameters: Dictionary`, separate from `_init_parameters()`.
+- Support types: Float, Int, Bool, String, Color, Vector2, Vector2i.
+- Are accessible via the same `get_parameter_value()` / `set_parameter_value()` API as regular params.
+- Serialize in `.gnpatch` files under a `"spare_parameters"` key per node.
+- Render in the inspector under a collapsible "Spare Parameters" section.
+
+### Custom Operator Assets (.gnasset)
+
+SubNetworks can be promoted to reusable custom operators via right-click → "Promote to Custom Asset…":
+
+1. `GNCustomOperator` (extends SubNetworkNode) loads from a `.gnasset` JSON file.
+2. The promotion dialog lets users select which inner parameters to promote (expose externally).
+3. `.gnasset` files are scanned from 3 directories: `res://addons/gonodes/assets/`, `res://custom_operators/`, `user://gonodes_assets/`.
+4. Custom assets appear in the palette under a "Custom" section per family.
 
 ---
 
