@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **311 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants.
+> **313 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants.
 
 ---
 
@@ -1062,40 +1062,13 @@ IMGs process CPU-side `Image` data. Unlike TOPs (GPU textures via SubViewport), 
 
 Use `ImgToTOP` to bridge IMG output into the GPU TOP pipeline.
 
-**Total: 14 operators** — 2 generators, 5 filters, 2 I/O, 2 bridges, 1 capture, 1 script, 1 GPU compute base.
-
-### GPU Compute IMG Operators
-
-These IMG operators use Godot's `RenderingDevice` compute shaders for acceleration while maintaining the CPU-side `Image` interface. They extend `GNImgComputeBase`, which handles automatic Image ↔ GPU upload/download, shader compilation caching, and CPU fallback when compute is unavailable.
+**Total: 13 operators** — 2 generators, 5 filters, 2 I/O, 2 bridges, 1 capture, 1 script, 1 utility.
 
 ---
 
-#### GpuBlurIMG
+#### NullIMG
 
-GPU-accelerated Gaussian blur via compute shader. Separable two-pass implementation.
-
-| Parameter | Type | Default | Range | Description |
-|-----------|------|---------|-------|-------------|
-| radius | Int | 3 | 1–32 | Blur kernel radius |
-| passes | Int | 1 | 1–8 | Number of blur passes (stacks for heavier blur) |
-
-**Input:** `img_in` (IMG — image to blur).
-
-**How it works:** Uploads the input `Image` to a GPU storage texture, dispatches a separable Gaussian blur compute shader (`shaders/img/blur_img.glsl`) in two passes (horizontal then vertical), and downloads the result back to CPU `Image`. Multiple passes compound the blur effect. Falls back to CPU box blur when compute shaders are unavailable.
-
----
-
-#### GpuEdgeDetectIMG
-
-GPU-accelerated edge detection via Sobel convolution compute shader.
-
-| Parameter | Type | Default | Range | Description |
-|-----------|------|---------|-------|-------------|
-| strength | Float | 1.0 | 0.1–5.0 | Edge detection strength multiplier |
-
-**Input:** `img_in` (IMG — image to detect edges in).
-
-**How it works:** Uploads the input `Image` to a GPU storage texture, dispatches a 3×3 Sobel convolution compute shader (`shaders/img/edge_detect_img.glsl`) that computes horizontal and vertical gradients, combines them as `sqrt(gx² + gy²) * strength`, and downloads the result. Falls back to CPU Sobel implementation when compute shaders are unavailable.
+Pass-through. Forwards input image unchanged. Useful for wire organization, expression references, and inspecting multi-output ports.
 
 ---
 
@@ -3690,7 +3663,7 @@ func cook():
 
 MATs produce materials for COMP use. Output type is `GNMaterialData`, wrapping Godot's `Material` base class. MATs connect to GeometryCOMP's material input to override the default PBR.
 
-**Total: 8 operators** — 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth.
+**Total: 8 operators** — 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth, 1 null, 1 utility.
 
 ---
 
@@ -3784,6 +3757,12 @@ Line/wireframe rendering material with stipple (dashed line) controls.
 **Output:** MAT (ShaderMaterial with wireframe render mode).
 
 **How it works:** Creates a `ShaderMaterial` with `render_mode unshaded, wireframe`. Fragment shader discards fragments based on a distance-based stipple pattern. Uniforms control color, width, alpha, stipple scale and ratio.
+
+---
+
+#### NullMAT
+
+Pass-through. Forwards input material unchanged. Useful for wire organization, expression references, and inspecting multi-output ports.
 
 ---
 
@@ -4002,9 +3981,27 @@ Textured progress bar with TOP layers and CHOP driver.
 
 ### Viewer Panel UI Preview
 
-The viewer panel supports three viewport families: **SOP** (3D geometry), **MAT** (material preview), and **UI** (widget preview). Each viewport is a SubViewport created lazily on first use (~4—6 MB VRAM each).
+The viewer panel and on-node inline previews use **output-type dispatch** — the `GNNode` base class detects the actual data type of `cached_output` and selects the appropriate visualization automatically:
 
-The UI preview captures a snapshot of the selected UI operator's `_control_node` via `SubViewport.get_texture()`. The info bar displays the current `widget_state` dictionary (button press count, slider value, toggle state, etc.). This provides a non-interactive visual preview of widget appearance directly in the editor without requiring a WindowOUT output window.
+| Output Type | Preview Control | Display |
+|-------------|----------------|--------|
+| `GNTextureData` | TextureRect | Live texture thumbnail |
+| `GNChannelData` | Label | Channel name:value pairs |
+| `GNGeoData` | Label | Vertex/surface counts |
+| `GNTableData` | Label | Header + first 3 rows |
+| `GNImageData` | Label | Resolution + format |
+| `GNParticleData` | Label | Particle count |
+| `GNVolumeData` | Label | Resolution + field name |
+| `GNMaterialData` | Label | Material label |
+
+This means **cross-family nodes** automatically get the correct preview. For example:
+- RaymarchVOL (VOL family) outputs `GNTextureData` → shows texture thumbnail, not volume stats
+- InstancePOP (POP family) outputs `GNGeoData` → shows vertex counts, not particle counts
+- AnalyzeVOL (VOL family) outputs `GNChannelData` → shows channel values, not volume stats
+
+COMP, UI, and OUT families override `update_preview_control()` because they display non-data state (`_scene_node`, `_control_node`, sink status).
+
+**Multi-output nodes** (GenericScriptNode, MultiBufferRenderTOP) preview output port 0 (`cached_output`). To inspect other outputs, wire them into a **Null node** of the matching family and select that Null in the viewer. Every family has a Null pass-through: NullTOP, NullCHOP, NullSOP, NullDAT, NullIMG, NullPOP, NullVOL, NullMAT, NullCOMP.
 
 ### Node Palette Keyboard Navigation
 
@@ -4122,13 +4119,13 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **DAT** | 29 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML |
 | **SOP** | 57 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Select |
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
-| **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
-| **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, GpuBlur, GpuEdgeDetect, Script, ImgToTOP, TOPtoIMG, ScreenGrab |
+| **MAT** | 7 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, Null |
+| **IMG** | 13 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null |
 | **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
 | **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
-| **POP** | 10 | *(GPU particle operators — SSBO-based compute pipeline)* |
-| **VOL** | 10 | *(Volumetric 3D texture operators — Navier-Stokes fluid, raymarcher, marching cubes)* |
-| **Total** | **311** | |
+| **POP** | 11 | *(GPU particle operators — SSBO-based compute pipeline)* |
+| **VOL** | 11 | *(Volumetric 3D texture operators — Navier-Stokes fluid, raymarcher, marching cubes)* |
+| **Total** | **313** | |
 
 ---
 

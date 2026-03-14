@@ -42,7 +42,7 @@ const FAMILY_COLORS: Dictionary = {
 	Type.DAT:  Color(0.9, 0.8, 0.2),    # Yellow
 	Type.MAT:  Color(0.9, 0.4, 0.2),    # Red/Orange
 	Type.COMP: Color(0.5, 0.5, 0.5),    # Gray
-	Type.VOL:  Color(0.9, 0.6, 0.1),    # Amber — GPU 3D volumetric textures
+	Type.VOL:  Color(0.85, 0.35, 0.55),  # Rose — GPU 3D volumetric textures
 	Type.UI:   Color(0.2, 0.7, 0.9),    # Sky Blue — interactive 2D widgets
 	Type.OUT:  Color(0.9, 0.3, 0.3),    # Red — terminal sink
 }

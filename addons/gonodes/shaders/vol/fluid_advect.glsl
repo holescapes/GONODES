@@ -1,7 +1,3 @@
-[remap]
-type="RDShaderFile"
-path="res://addons/gonodes/shaders/vol/fluid_advect.glsl"
-
 [compute]
 #version 450
 

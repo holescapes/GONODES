@@ -43,12 +43,33 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if max_inst <= 0:
 		return null
 
-	# Build instanced mesh via MultiMesh resource → then flatten to ArrayMesh
+	# Build instanced mesh — transform source geometry by each particle's position
 	var source_mesh: Mesh = geo.mesh
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = source_mesh
-	mm.instance_count = max_inst
+	if source_mesh.get_surface_count() == 0:
+		return null
+
+	var src_arrays: Array = source_mesh.surface_get_arrays(0)
+	var src_verts: PackedVector3Array = src_arrays[Mesh.ARRAY_VERTEX]
+	var src_normals: PackedVector3Array = src_arrays[Mesh.ARRAY_NORMAL] if src_arrays[Mesh.ARRAY_NORMAL] else PackedVector3Array()
+	var has_normals: bool = src_normals.size() == src_verts.size()
+	var src_indices: PackedInt32Array = src_arrays[Mesh.ARRAY_INDEX] if src_arrays[Mesh.ARRAY_INDEX] else PackedInt32Array()
+	var src_vert_count: int = src_verts.size()
+
+	var all_verts := PackedVector3Array()
+	var all_normals := PackedVector3Array()
+	var all_indices := PackedInt32Array()
+	all_verts.resize(src_vert_count * max_inst)
+	if has_normals:
+		all_normals.resize(src_vert_count * max_inst)
+	var has_indices: bool = src_indices.size() > 0
+	if has_indices:
+		all_indices.resize(src_indices.size() * max_inst)
+
+	var use_color: bool = get_param_value("use_color")
+	var colors: PackedFloat32Array = pd.read_float_attrib("color") if use_color else PackedFloat32Array()
+	var all_colors := PackedColorArray()
+	if use_color:
+		all_colors.resize(src_vert_count * max_inst)
 
 	for i in range(max_inst):
 		var xform := Transform3D.IDENTITY
@@ -56,13 +77,36 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		if pscales.size() > i:
 			var s: float = pscales[i]
 			xform.basis = xform.basis.scaled(Vector3(s, s, s))
-		mm.set_instance_transform(i, xform)
 
-	# Output as GNGeoData wrapping the MultiMesh's generated mesh
+		var base_v: int = i * src_vert_count
+		for v in range(src_vert_count):
+			all_verts[base_v + v] = xform * src_verts[v]
+		if has_normals:
+			var basis := xform.basis
+			for v in range(src_vert_count):
+				all_normals[base_v + v] = (basis * src_normals[v]).normalized()
+		if has_indices:
+			var base_i: int = i * src_indices.size()
+			for idx in range(src_indices.size()):
+				all_indices[base_i + idx] = src_indices[idx] + base_v
+		if use_color and colors.size() >= (i + 1) * 4:
+			var c := Color(colors[i * 4], colors[i * 4 + 1], colors[i * 4 + 2], colors[i * 4 + 3])
+			for v in range(src_vert_count):
+				all_colors[base_v + v] = c
+
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = all_verts
+	if has_normals:
+		arrays[Mesh.ARRAY_NORMAL] = all_normals
+	if has_indices:
+		arrays[Mesh.ARRAY_INDEX] = all_indices
+	if use_color and all_colors.size() > 0:
+		arrays[Mesh.ARRAY_COLOR] = all_colors
+
+	var out_mesh := ArrayMesh.new()
+	out_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+
 	var out := GNGeoData.new()
-	# Store the MultiMesh reference for RenderTOP/COMP to use directly
-	out.mesh = source_mesh
-	out.point_attribs["_multimesh"] = mm
-	out.point_attribs["_instance_count"] = max_inst
-	out.vertex_count = max_inst
+	out.set_mesh(out_mesh)
 	return out

@@ -35,7 +35,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_a.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/composite.gdshader", true, false, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/composite.gdshader", true, false, res)
 
 	var op_idx: int = get_param_value("operation")
 	var opacity_val: float = get_param_value("opacity")

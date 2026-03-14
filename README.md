@@ -355,7 +355,6 @@ addons/gonodes/help/
 - FxPlug / FFGL plugin export
 - Multi-threaded cook engine
 - GPU compute shaders for CHOPs
-- Python scripting DAT (embedded Python via GDExtension)
 - Network collaboration (shared editing)
 - Asset/patch marketplace
 - Mobile/web export for patches

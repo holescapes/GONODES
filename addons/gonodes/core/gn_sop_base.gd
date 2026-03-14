@@ -68,35 +68,4 @@ func _require_input_geo(inputs: Array[GNData]) -> GNGeoData:
 	return geo
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Preview
-# ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates a Label preview showing vertex/surface counts.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	label.text = ""
-	return label
-
-
-## Updates the geometry stats preview.
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		var label: Label = control as Label
-		if cached_output is GNGeoData:
-			var geo: GNGeoData = cached_output as GNGeoData
-			if geo.has_geometry() and geo.mesh != null:
-				var verts: int = 0
-				var surfs: int = geo.mesh.get_surface_count()
-				for s in range(surfs):
-					var arrays: Array = geo.mesh.surface_get_arrays(s)
-					if arrays[Mesh.ARRAY_VERTEX] != null:
-						verts += (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
-				label.text = "%d verts\n%d surfaces" % [verts, surfs]
-			else:
-				label.text = "no geo"
-		else:
-			label.text = ""

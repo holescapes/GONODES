@@ -70,7 +70,7 @@
             "text": "VOL Fluid Simulation — Navier-Stokes Density Advection\n\nFluidVOL runs a 4-pass GPU fluid solver each frame:\n  1. Inject density from upstream noise source\n  2. Advect density by velocity field\n  3. Compute divergence + Jacobi pressure solve\n  4. Project velocity (subtract pressure gradient)\n\nDissipation=0.97 gives slow density decay (smoke-like).\nPulse Reset to clear the simulation.\nLower resolution (48³) for interactive frame rates.",
             "position": [-100.0, -100.0],
             "size": [520.0, 150.0],
-            "color": [0.9, 0.6, 0.1, 0.8]
+            "color": [0.85, 0.35, 0.55, 0.8]
         }
     ]
 }

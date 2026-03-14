@@ -67,29 +67,6 @@ func _get_input_top(inputs: Array[GNData], port: int = 0) -> GNTextureData:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Preview
-# ═══════════════════════════════════════════════════════════════════════════════
-
-## Creates a TextureRect thumbnail that shows the TOP's output texture.
-func create_preview_control() -> Control:
-	var tex_rect := TextureRect.new()
-	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	return tex_rect
-
-
-## Updates the texture preview from cached_output.
-func update_preview_control(control: Control) -> void:
-	if control is TextureRect:
-		var tex_rect: TextureRect = control as TextureRect
-		if cached_output is GNTextureData:
-			var tex_data: GNTextureData = cached_output as GNTextureData
-			tex_rect.texture = tex_data.texture
-		else:
-			tex_rect.texture = null
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # Viewport Render Control
 # ═══════════════════════════════════════════════════════════════════════════════
 

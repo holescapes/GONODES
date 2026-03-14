@@ -29,7 +29,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_a.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/cross.gdshader", true, false, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/cross.gdshader", true, false, res)
 
 	var cross_val: float = get_param_value("cross")
 

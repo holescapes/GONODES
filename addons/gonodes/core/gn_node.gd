@@ -192,20 +192,142 @@ func _pre_cook(delta: float) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Preview — Override in Family Base Classes (GNTopBase, GNChopBase, etc.)
+# Preview — Output-Type Based (auto-selects from first output port / cached data)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Creates the preview Control for this node's inline graph display.
-## Returns null by default (no preview).  Family base classes override this
-## to provide family-specific previews (texture thumbnail, channel graph, etc.).
+## Uses the first output port's family type to decide between a TextureRect
+## (TOP) or a Label (everything else).  Override in subclasses that need
+## non-data-based previews (COMP scene nodes, UI widgets, etc.).
 func create_preview_control() -> Control:
-	return null
+	# TOP output → texture thumbnail
+	if output_ports.size() > 0 and output_ports[0].family == GNFamily.Type.TOP:
+		var tex_rect := TextureRect.new()
+		tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		return tex_rect
+	# Everything else → label
+	var label := Label.new()
+	label.add_theme_font_size_override("font_size", 10)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	label.text = ""
+	return label
 
 
-## Called each cook frame to update the preview control.
-## No-op by default.  Family base classes override with update logic.
-func update_preview_control(_control: Control) -> void:
-	pass
+## Updates the preview control from cached_output.  Dispatches by the actual
+## output data type so cross-family nodes (e.g. a VOL that outputs a texture)
+## get the correct preview automatically.  For multi-output nodes the first
+## output (cached_output) is previewed; use a Null node to inspect others.
+## Override in subclasses with non-data previews (COMP, UI, OUT).
+func update_preview_control(control: Control) -> void:
+	if cached_output == null:
+		if control is Label:
+			(control as Label).text = ""
+		elif control is TextureRect:
+			(control as TextureRect).texture = null
+		return
+
+	# ── Texture (TOP) ──────────────────────────────────────────────────
+	if cached_output is GNTextureData:
+		if control is TextureRect:
+			(control as TextureRect).texture = (cached_output as GNTextureData).texture
+		return
+
+	# Everything below uses a Label
+	if not (control is Label):
+		return
+	var label: Label = control as Label
+
+	# ── Channel data (CHOP) ────────────────────────────────────────────
+	if cached_output is GNChannelData:
+		var ch_data: GNChannelData = cached_output as GNChannelData
+		var lines := PackedStringArray()
+		for ch_name in ch_data.channels:
+			var samples: PackedFloat32Array = ch_data.channels[ch_name]
+			if samples.size() > 0:
+				lines.append("%s: %.3f" % [ch_name, samples[samples.size() - 1]])
+			else:
+				lines.append("%s: —" % ch_name)
+		label.text = "\n".join(lines) if lines.size() > 0 else ""
+
+	# ── Geometry (SOP) ─────────────────────────────────────────────────
+	elif cached_output is GNGeoData:
+		var geo: GNGeoData = cached_output as GNGeoData
+		if geo.has_geometry() and geo.mesh != null:
+			var verts: int = 0
+			var surfs: int = geo.mesh.get_surface_count()
+			for s in range(surfs):
+				var arrays: Array = geo.mesh.surface_get_arrays(s)
+				if arrays[Mesh.ARRAY_VERTEX] != null:
+					verts += (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+			label.text = "%d verts\n%d surfaces" % [verts, surfs]
+		else:
+			label.text = "no geo"
+
+	# ── Table (DAT) ────────────────────────────────────────────────────
+	elif cached_output is GNTableData:
+		var tbl: GNTableData = cached_output as GNTableData
+		if tbl.table.is_empty():
+			label.text = "(empty)"
+		else:
+			var lines := PackedStringArray()
+			if tbl.has_header and tbl.table.size() > 0:
+				lines.append(" | ".join(tbl.table[0]))
+			var data_start: int = 1 if tbl.has_header else 0
+			var max_rows: int = mini(tbl.table.size() - data_start, 3)
+			for r in range(max_rows):
+				lines.append(" | ".join(tbl.table[data_start + r]))
+			if tbl.table.size() - data_start > 3:
+				lines.append("… +%d rows" % (tbl.table.size() - data_start - 3))
+			label.text = "\n".join(lines)
+
+	# ── Image (IMG) ────────────────────────────────────────────────────
+	elif cached_output is GNImageData:
+		var img_data: GNImageData = cached_output as GNImageData
+		if img_data.image != null:
+			var res: Vector2i = img_data.resolution
+			label.text = "%d×%d\n%s" % [res.x, res.y, _preview_format_name(img_data.format)]
+		else:
+			label.text = "no image"
+
+	# ── Particles (POP) ────────────────────────────────────────────────
+	elif cached_output is GNParticleData:
+		var pd: GNParticleData = cached_output as GNParticleData
+		label.text = "%d particles" % pd.particle_count
+
+	# ── Volume (VOL) ──────────────────────────────────────────────────
+	elif cached_output is GNVolumeData:
+		var vd: GNVolumeData = cached_output as GNVolumeData
+		label.text = "%dx%dx%d\n%s" % [
+			vd.resolution.x, vd.resolution.y, vd.resolution.z,
+			vd.field_name]
+
+	# ── Material (MAT) ────────────────────────────────────────────────
+	elif cached_output is GNMaterialData:
+		var mat_data: GNMaterialData = cached_output as GNMaterialData
+		if mat_data.material != null:
+			label.text = mat_data.material_label
+		else:
+			label.text = "no material"
+
+	# ── Unknown / unhandled ────────────────────────────────────────────
+	else:
+		label.text = ""
+
+
+## Short human-readable name for Image.Format (used by IMG preview).
+static func _preview_format_name(fmt: Image.Format) -> String:
+	match fmt:
+		Image.FORMAT_RGBA8: return "RGBA8"
+		Image.FORMAT_RGB8: return "RGB8"
+		Image.FORMAT_L8: return "L8"
+		Image.FORMAT_LA8: return "LA8"
+		Image.FORMAT_RGBAF: return "RGBAF"
+		Image.FORMAT_RGBAH: return "RGBAH"
+		Image.FORMAT_RF: return "RF"
+		Image.FORMAT_RGF: return "RGF"
+		_: return "fmt:%d" % fmt
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Initialization

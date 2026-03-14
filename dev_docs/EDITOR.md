@@ -143,6 +143,35 @@ The `GNParameter` stores `_expression_string` separately from `_value`.
 Only an explicit `reset_to_defaults()` clears the expression.
 
 
+## Node Preview & Viewer System
+
+### Output-Type Dispatch (Base Class)
+
+Both the **on-node inline preview** and the **docked viewer panel** display
+content based on the **actual output data type**, not the operator family.
+This means cross-family nodes automatically get the correct preview:
+
+- A VOL operator that outputs `GNTextureData` (e.g. RaymarchVOL) shows a
+  texture thumbnail, not volume stats.
+- A POP operator that outputs `GNGeoData` (e.g. InstancePOP) shows vertex
+  counts, not particle counts.
+
+The logic lives in `GNNode.create_preview_control()` and
+`GNNode.update_preview_control()` — family base classes do **not** override
+these unless they have non-data state to display (COMP: `_scene_node`,
+UI: `_control_node`, OUT: sink status).
+
+### Multi-Output Nodes
+
+Nodes with multiple outputs (e.g. GenericScriptNode, MultiBufferRenderTOP)
+preview **output port 0** (`cached_output`). To inspect other outputs, wire
+them into a **Null node** of the appropriate family and select that Null
+node in the viewer.
+
+Every family has a Null pass-through node: NullTOP, NullCHOP, NullSOP,
+NullDAT, NullIMG, NullPOP, NullVOL, NullMAT, NullCOMP.
+
+
 ## Script Operators — Force Active (Implementation)
 
 All four Script operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG)

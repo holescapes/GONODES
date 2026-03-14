@@ -7,6 +7,7 @@ func _init() -> void:
 	super._init()
 	node_type = "collision"
 	node_description = "Ground plane collision with bounce and friction."
+	time_dependent = true
 
 
 func _init_ports() -> void:

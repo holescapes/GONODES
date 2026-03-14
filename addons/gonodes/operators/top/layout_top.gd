@@ -52,7 +52,7 @@ func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
 
 func _cook(inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
-	_init_shader_viewport("res://addons/gonodes/shaders/layout.gdshader", true, false, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/layout.gdshader", true, false, res)
 
 	if _viewport.size != res:
 		_viewport.size = res

@@ -28,7 +28,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = get_param_value("resolution")
-	_init_shader_viewport("res://addons/gonodes/shaders/crop.gdshader", true, true, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/crop.gdshader", true, true, res)
 
 	var lt: Vector2 = get_param_value("left_top")
 	var rb: Vector2 = get_param_value("right_bottom")

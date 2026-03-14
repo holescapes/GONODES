@@ -986,6 +986,9 @@ func set_target(p_node_id: String) -> void:
 
 ## Main update entry point — called each cook frame by the editor.
 ## Reads the node's cached_output and routes to the correct display mode.
+## Display mode is determined by the OUTPUT DATA TYPE, not the node's family.
+## This ensures cross-family nodes (InstancePOP→SOP, MarchingCubesVOL→SOP,
+## RaymarchVOL→TOP, AnalyzeVOL→CHOP) get the correct viewer.
 func update_from_node(node: GNNode) -> void:
 	if node == null:
 		_hide_all_displays()
@@ -1000,97 +1003,91 @@ func update_from_node(node: GNNode) -> void:
 
 	var output: GNData = node.cached_output
 
+	# ── Route by OUTPUT DATA TYPE (handles cross-family nodes correctly) ──
+	if output is GNTextureData:
+		var tex_data: GNTextureData = output as GNTextureData
+		if tex_data.texture:
+			_show_texture(tex_data.texture,
+				"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
+			_update_zoom_label()
+			return
+		_show_info("No texture output", "")
+		return
+
+	if output is GNImageData:
+		var img_data: GNImageData = output as GNImageData
+		if img_data.image != null and not img_data.image.is_empty():
+			var info := "%dx%d" % [img_data.resolution.x, img_data.resolution.y]
+			var needs_layout := false
+			if _img_texture == null:
+				_img_texture = ImageTexture.create_from_image(img_data.image)
+				needs_layout = true
+			else:
+				var old_size := _img_texture.get_size()
+				_img_texture.update(img_data.image)
+				if Vector2i(_img_texture.get_size()) != Vector2i(old_size):
+					needs_layout = true
+			if needs_layout:
+				_show_texture(_img_texture, info)
+				_update_zoom_label()
+			else:
+				if _info_bar:
+					_info_bar.text = info
+			return
+		_img_texture = null
+		_show_info("No IMG output", "")
+		return
+
+	if output is GNChannelData:
+		var ch_data: GNChannelData = output as GNChannelData
+		_show_waveform(ch_data)
+		return
+
+	if output is GNTableData:
+		var tbl: GNTableData = output as GNTableData
+		_show_spreadsheet(tbl)
+		return
+
+	if output is GNGeoData:
+		var geo: GNGeoData = output as GNGeoData
+		_show_3d_mesh(geo)
+		return
+
+	if output is GNMaterialData:
+		var mat: GNMaterialData = output as GNMaterialData
+		_show_material(mat)
+		return
+
+	if output is GNParticleData:
+		var pd: GNParticleData = output as GNParticleData
+		if pd.particle_count > 0:
+			_show_pop_particles(pd)
+			return
+		_show_info("No POP output", "")
+		return
+
+	if output is GNVolumeData:
+		var vd: GNVolumeData = output as GNVolumeData
+		if vd.has_volume():
+			_show_vol_slices(vd)
+			return
+		_show_info("No VOL output", "")
+		return
+
+	# ── Family-specific fallbacks for nodes with no typed output ──
 	match family:
-		GNFamily.Type.TOP:
-			if output is GNTextureData:
-				var tex_data: GNTextureData = output as GNTextureData
-				if tex_data.texture:
-					_show_texture(tex_data.texture,
-						"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
-					_update_zoom_label()
-					return
-			_show_info("No TOP output", "")
-
-		GNFamily.Type.IMG:
-			if output is GNImageData:
-				var img_data: GNImageData = output as GNImageData
-				if img_data.image != null and not img_data.image.is_empty():
-					var info := "%dx%d" % [img_data.resolution.x, img_data.resolution.y]
-					var needs_layout := false
-					if _img_texture == null:
-						_img_texture = ImageTexture.create_from_image(img_data.image)
-						needs_layout = true
-					else:
-						var old_size := _img_texture.get_size()
-						_img_texture.update(img_data.image)
-						if Vector2i(_img_texture.get_size()) != Vector2i(old_size):
-							needs_layout = true
-					if needs_layout:
-						_show_texture(_img_texture, info)
-						_update_zoom_label()
-					else:
-						# Pixels updated in-place; skip hide/show/fit cycle
-						if _info_bar:
-							_info_bar.text = info
-					return
-			_img_texture = null
-			_show_info("No IMG output", "")
-
-		GNFamily.Type.CHOP:
-			if output is GNChannelData:
-				var ch_data: GNChannelData = output as GNChannelData
-				_show_waveform(ch_data)
-				return
-			_show_info("No CHOP output", "")
-
-		GNFamily.Type.DAT:
-			if output is GNTableData:
-				var tbl: GNTableData = output as GNTableData
-				_show_spreadsheet(tbl)
-				return
-			_show_info("No DAT output", "")
-
-		GNFamily.Type.SOP:
-			if output is GNGeoData:
-				var geo: GNGeoData = output as GNGeoData
-				_show_3d_mesh(geo)
-				return
-			_show_info("No SOP output", "")
-
-		GNFamily.Type.MAT:
-			if output is GNMaterialData:
-				var mat: GNMaterialData = output as GNMaterialData
-				_show_material(mat)
-				return
-			_show_info("No MAT output", "")
-
 		GNFamily.Type.COMP:
 			_show_info("COMP: %s" % node.node_type, "Component operator")
-
 		GNFamily.Type.UI:
 			if node is GNUiBase:
 				_show_ui_preview(node as GNUiBase)
-				return
-			_show_info("No UI output", "")
-
-		GNFamily.Type.POP:
-			if output is GNParticleData:
-				var pd: GNParticleData = output as GNParticleData
-				if pd.particle_count > 0:
-					_show_pop_particles(pd)
-					return
-			_show_info("No POP output", "")
-
-		GNFamily.Type.VOL:
-			if output is GNVolumeData:
-				var vd: GNVolumeData = output as GNVolumeData
-				if vd.has_volume():
-					_show_vol_slices(vd)
-					return
-			_show_info("No VOL output", "")
-
+			else:
+				_show_info("No UI output", "")
 		_:
-			_show_info("Unsupported family", "")
+			if output == null:
+				_show_info("No output", "")
+			else:
+				_show_info("Unsupported output type", "")
 
 
 ## Clears the viewer display.

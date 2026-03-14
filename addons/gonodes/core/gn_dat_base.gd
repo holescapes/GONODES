@@ -61,41 +61,4 @@ func _get_input_dat(inputs: Array[GNData], port: int = 0) -> GNTableData:
 	return null
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Preview
-# ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates a Label preview showing a compact table summary.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	label.text = ""
-	return label
-
-
-## Updates the table preview label with header + first few rows.
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		var label: Label = control as Label
-		if cached_output is GNTableData:
-			var tbl: GNTableData = cached_output as GNTableData
-			var lines := PackedStringArray()
-			if tbl.table.is_empty():
-				label.text = "(empty)"
-				return
-			# Show header row
-			if tbl.has_header and tbl.table.size() > 0:
-				lines.append(" | ".join(tbl.table[0]))
-			# Show up to 3 data rows
-			var data_start: int = 1 if tbl.has_header else 0
-			var data_count: int = tbl.table.size() - data_start
-			var max_rows: int = mini(data_count, 3)
-			for r in range(max_rows):
-				lines.append(" | ".join(tbl.table[data_start + r]))
-			if data_count > 3:
-				lines.append("... +%d rows" % (data_count - 3))
-			label.text = "\n".join(lines) if lines.size() > 0 else ""
-		else:
-			label.text = ""

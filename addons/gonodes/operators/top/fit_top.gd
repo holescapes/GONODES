@@ -31,7 +31,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var target_res: Vector2i = get_param_value("resolution")
-	_init_shader_viewport("res://addons/gonodes/shaders/fit.gdshader", true, true, target_res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/fit.gdshader", true, true, target_res)
 
 	if _viewport.size != target_res:
 		_viewport.size = target_res

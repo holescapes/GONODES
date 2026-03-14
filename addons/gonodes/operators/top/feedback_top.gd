@@ -34,7 +34,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_in.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/feedback.gdshader", true, false, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/feedback.gdshader", true, false, res)
 
 	var mix_val: float = get_param_value("mix")
 	var trans: Vector2 = get_param_value("translate")

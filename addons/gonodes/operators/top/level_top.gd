@@ -33,7 +33,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_in.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/levels.gdshader", true, true, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/levels.gdshader", true, true, res)
 
 	var brightness_val: float = get_param_value("brightness")
 	var contrast_val: float = get_param_value("contrast")

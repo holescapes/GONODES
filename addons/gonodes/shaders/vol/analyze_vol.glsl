@@ -1,4 +1,4 @@
-#[compute]
+[compute]
 #version 450
 
 // analyze_vol.glsl — Compute min, max, sum and count of non-zero voxels.

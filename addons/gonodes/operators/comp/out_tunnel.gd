@@ -109,14 +109,6 @@ func from_dict(d: Dictionary) -> void:
 
 
 ## Preview: show tunnel direction and index.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.text = ""
-	return label
-
-
 func update_preview_control(control: Control) -> void:
 	if control is Label:
 		(control as Label).text = "OUT [%d] %s" % [

@@ -31,7 +31,7 @@ func _init_parameters() -> void:
 
 func _cook(_inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
-	_init_shader_viewport("res://addons/gonodes/shaders/noise_simplex.gdshader", false, false, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/noise_simplex.gdshader", false, false, res)
 	var noise_type_idx: int = get_param_value("noise_type")
 	var scale_val: float = get_param_value("scale")
 	var offset_val: Vector2 = get_param_value("offset")

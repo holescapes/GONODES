@@ -42,7 +42,9 @@ static func _get_standard_layout() -> Dictionary:
 
 func _init() -> void:
 	family = GNFamily.Type.POP
-	time_dependent = true
+	# NOT time_dependent by default — only simulation operators (Source, Force,
+	# Turbulence, Collision, Attract, Advect) set this to true individually.
+	# Data-transform nodes (Instance, Render, ParticleState) don't need it.
 
 
 func requires_compute() -> bool:
@@ -138,26 +140,4 @@ func _workgroups(count: int, local_size: int = 256) -> int:
 	return ceili(float(count) / float(local_size))
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Preview
-# ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates a label preview showing particle count.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	label.text = ""
-	return label
-
-
-## Updates the particle count preview.
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		var label: Label = control as Label
-		if cached_output is GNParticleData:
-			var pd: GNParticleData = cached_output as GNParticleData
-			label.text = "%d particles" % pd.particle_count
-		else:
-			label.text = "no particles"

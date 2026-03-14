@@ -28,7 +28,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_in.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/threshold.gdshader", true, true, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/threshold.gdshader", true, true, res)
 
 	var thresh: float = get_param_value("threshold")
 	var soft: float = get_param_value("softness")

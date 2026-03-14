@@ -7,6 +7,7 @@ func _init() -> void:
 	super._init()
 	node_type = "advect"
 	node_description = "Advect particles through a VOL velocity field."
+	time_dependent = true
 
 
 func _init_ports() -> void:
@@ -45,7 +46,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var sampler: RID = ctx.create_linear_sampler()
 
 	var pc := PackedByteArray()
-	pc.resize(44)
+	pc.resize(48)  # 10 fields (40 bytes) + padding to 48 (next multiple of 16)
 	pc.encode_s32(0, pd.particle_count)
 	pc.encode_float(4, current_delta)
 	pc.encode_float(8, get_param_value("strength"))
@@ -56,8 +57,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	pc.encode_float(28, vol.bounds.size.y)
 	pc.encode_float(32, vol.bounds.size.z)
 	pc.encode_s32(36, 1 if get_param_value("add_mode") else 0)
-	# Pad to 44 for alignment
-	pc.encode_float(40, 0.0)
+	pc.encode_float(40, 0.0)  # padding
+	pc.encode_float(44, 0.0)  # padding
 
 	var uniform_set: RID = ctx.rd.uniform_set_create([
 		ctx.uniform_buffer(0, pd.rd_buffer),

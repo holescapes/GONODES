@@ -45,29 +45,4 @@ func _prepare_output() -> GNMaterialData:
 	return _cached_mat_data
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Preview
-# ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates a Label preview showing material type and key properties.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.text = ""
-	return label
-
-
-## Updates the material preview label.
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		var label: Label = control as Label
-		if cached_output is GNMaterialData:
-			var mat_data: GNMaterialData = cached_output as GNMaterialData
-			if mat_data.material != null:
-				label.text = mat_data.material_label
-			else:
-				label.text = "no material"
-		else:
-			label.text = ""

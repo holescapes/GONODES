@@ -1,4 +1,4 @@
-#[compute]
+[compute]
 #version 450
 
 // sop_to_vol.glsl — Rasterize point cloud (SSBO positions) into density grid.

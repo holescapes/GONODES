@@ -1,7 +1,3 @@
-[remap]
-type="RDShaderFile"
-path="res://addons/gonodes/shaders/vol/blur_vol.glsl"
-
 [compute]
 #version 450
 

@@ -40,7 +40,7 @@
             "text": "VOL → SOP — Marching Cubes Iso-Surface Extraction\n\nNoiseVOL generates an animated 3D density field.\nMarchingCubesVOL extracts the iso-surface at threshold=0.5\nas a GNGeoData mesh (SOP output).\n\nSmooth normals uses gradient interpolation for cleaner shading.\nLower threshold → more volume visible, higher → less.\nThe SOP output can be wired into GeometryCOMP for 3D rendering.",
             "position": [-100.0, -100.0],
             "size": [520.0, 120.0],
-            "color": [0.9, 0.6, 0.1, 0.8]
+            "color": [0.85, 0.35, 0.55, 0.8]
         }
     ]
 }

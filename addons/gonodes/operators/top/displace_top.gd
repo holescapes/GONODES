@@ -32,7 +32,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = source.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/displace.gdshader", true, false, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/displace.gdshader", true, false, res)
 
 	var weight_val: float = get_param_value("weight")
 	var method_idx: int = get_param_value("method")

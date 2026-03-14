@@ -55,7 +55,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_ensure_prev_viewport(res)
 
 	# Init the main shader viewport
-	_init_shader_viewport("res://addons/gonodes/shaders/optical_flow.gdshader",
+	_init_shader_viewport("res://addons/gonodes/shaders/top/optical_flow.gdshader",
 		true, false, res)
 
 	if _viewport.size != res:

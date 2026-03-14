@@ -71,16 +71,6 @@ func _get_input_dat(inputs: Array[GNData], port: int = 0) -> GNTableData:
 # Preview
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates a Label preview showing sink status.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	label.text = ""
-	return label
-
-
 ## Default preview — subclasses should override for richer status.
 func update_preview_control(control: Control) -> void:
 	if control is Label:

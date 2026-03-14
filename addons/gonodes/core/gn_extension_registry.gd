@@ -964,18 +964,14 @@ func _register_core_operators() -> void:
 	# ── IMGs: Scripting ─────────────────────────────────────────────────
 	_reg("ScriptIMG",       "IMG", ScriptIMG,
 		"User-scripted IMG. Write GDScript to generate or transform CPU Images.")
+	_reg("NullIMG",         "IMG", NullIMG,
+		"Pass-through for organization and references.")
 
 	# ── IMGs: Bridge ────────────────────────────────────────────────────
 	_reg("ImgToTOP",        "IMG", ImgToTOP,
 		"Convert IMG (CPU Image) to TOP (GPU Texture). Bridge operator.")
 	_reg("TOPtoIMG",        "IMG", TOPtoIMG,
 		"Convert TOP (GPU Texture) to IMG (CPU Image). Bridge operator (GPU readback).")
-
-	# ── IMGs: GPU Compute ───────────────────────────────────────────────
-	_reg("GpuBlurIMG",     "IMG", GpuBlurIMG,
-		"GPU Gaussian blur via compute shader (separable two-pass).")
-	_reg("GpuEdgeDetectIMG", "IMG", GpuEdgeDetectIMG,
-		"GPU Sobel edge detection via compute shader.")
 
 	# ── TOPs: Bridge (cross-family conversion) ─────────────────────────
 	_reg("CHOPtoTOP",       "TOP", CHOPtoTOP,
@@ -1034,6 +1030,8 @@ func _register_core_operators() -> void:
 		"Multi-output scripting node. @output annotations produce any mix of data types.")
 
 	# ── MATs ────────────────────────────────────────────────────────────
+	_reg("NullMAT",         "MAT", NullMAT,
+		"Pass-through for organization and references.")
 	_reg("PBR_MAT",         "MAT", PBR_MAT,
 		"Standard PBR material (StandardMaterial3D) with albedo, metallic, roughness, emission.")
 	_reg("Shader_MAT",      "MAT", Shader_MAT,
@@ -1158,6 +1156,8 @@ func _register_core_operators() -> void:
 		"Send CHOP channels as OSC messages over UDP.")
 
 	# ── POPs: Particle Operators ───────────────────────────────────────
+	_reg("NullPOP",        "POP", NullPOP,
+		"Pass-through for feedback loops, organization, and references.")
 	_reg("SourcePOP",      "POP", SourcePOP,
 		"Emit particles from SOP geometry surface or origin point.")
 	_reg("ForcePOP",       "POP", ForcePOP,
@@ -1180,6 +1180,8 @@ func _register_core_operators() -> void:
 		"Visualize POP particle state as a 2D texture (position/velocity/age heatmap).")
 
 	# ── VOLs: Volume Operators ─────────────────────────────────────────
+	_reg("NullVOL",        "VOL", NullVOL,
+		"Pass-through for organization and references.")
 	_reg("NoiseVOL",       "VOL", NoiseVOL,
 		"Generate 3D noise density volume (Perlin, Simplex, Cellular).")
 	_reg("BlendVOL",       "VOL", BlendVOL,

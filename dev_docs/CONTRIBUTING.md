@@ -290,7 +290,10 @@ var res := get_parameter_value("resolution")
 
 ### Family Base Classes
 
-Every operator must extend the correct family base class:
+Every operator must extend the correct family base class.
+**Preview dispatch is handled by GNNode** — it detects the output data type
+automatically, so family bases and individual operators do NOT need preview
+overrides unless they have non-data state to display (COMP, UI, OUT).
 
 | Family | Base Class | Output Type |
 |--------|-----------|-------------|
@@ -301,7 +304,6 @@ Every operator must extend the correct family base class:
 | COMP | `GNCompBase` | `null` (Node3D via API) |
 | MAT | `GNMatBase` | `GNMaterialData` |
 | IMG | `GNImgBase` | `GNImageData` |
-| IMG (GPU compute) | `GNImgComputeBase` | `GNImageData` |
 | UI | `GNUiBase` | `null` (Control via API) |
 
 ---
@@ -519,7 +521,7 @@ Parameter change / Frame tick
 TOPs use an isolated `SubViewport` + `ShaderMaterial` pattern:
 
 1. Extend `GNTopBase` — provides `_viewport`, `_material`, `_canvas`, `_cached_tex_data`.
-2. Create your shader in `addons/gonodes/shaders/` or inline.
+2. Create your shader in `addons/gonodes/shaders/top/` or inline.
 3. In `_cook()`: set shader uniforms, assign input textures, set `_viewport.size`, let `_ensure_viewport()` handle rendering.
 4. Return `_cached_tex_data` (the base class manages the `ViewportTexture` lifecycle).
 5. All texture passing stays on GPU — zero CPU readback.
@@ -539,17 +541,9 @@ TOPs use an isolated `SubViewport` + `ShaderMaterial` pattern:
 3. Return `null` from `_cook()` — provide access via getter methods (e.g., `get_mesh_instance()`).
 4. RenderTOP discovers COMPs by walking the network graph.
 
-### Adding a GPU Compute IMG Operator
+### Adding a GPU Compute Shader Operator
 
-For pixel-parallel operations (blur, edge detect, color transforms), use the GPU compute path instead of CPU loops:
-
-1. Extend `GNImgComputeBase` (not `GNImgBase`).
-2. Write a GLSL compute shader in `addons/gonodes/shaders/img/`.
-3. Override `_dispatch_compute()` — set uniforms, dispatch workgroups.
-4. Override `_cook_cpu()` — provide a CPU fallback for when compute is unavailable.
-5. The base class handles: Image ↔ GPU upload/download, shader compilation caching, fallback detection, GPU texture lifecycle.
-
-See `gpu_blur_img.gd` and `gpu_edge_detect_img.gd` for reference implementations.
+For pixel-parallel operations (blur, edge detect, color transforms), use `ComputeShaderTOP` or write a custom TOP extending `GNTopBase` with `GNGpuContext`. IMG operators must remain CPU-only (`Image`-based). See `help/top/compute_gaussian_blur.gnpatch` and `help/top/compute_edge_filter.gnpatch` for example compute shader code.
 
 ### Spare Parameters
 

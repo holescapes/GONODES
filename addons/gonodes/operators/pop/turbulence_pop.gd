@@ -7,6 +7,7 @@ func _init() -> void:
 	super._init()
 	node_type = "turbulence"
 	node_description = "Apply curl noise turbulence to particle velocities."
+	time_dependent = true
 
 
 func _init_ports() -> void:

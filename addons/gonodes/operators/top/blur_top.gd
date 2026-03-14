@@ -68,7 +68,7 @@ func _setup_viewport(size: Vector2i = Vector2i(512, 512)) -> void:
 	if _viewport_h != null:
 		return
 
-	_shader = load("res://addons/gonodes/shaders/blur.gdshader") as Shader
+	_shader = load("res://addons/gonodes/shaders/top/blur.gdshader") as Shader
 
 	# Horizontal pass viewport
 	_viewport_h = _create_viewport("VP_H_%s" % id, size)

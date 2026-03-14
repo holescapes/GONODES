@@ -62,33 +62,4 @@ func _get_input_chop(inputs: Array[GNData], port: int = 0) -> GNChannelData:
 	return null
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Preview
-# ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates a Label preview showing channel names and their current values.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	label.text = ""
-	return label
-
-
-## Updates the channel preview label with current channel values.
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		var label: Label = control as Label
-		if cached_output is GNChannelData:
-			var ch_data: GNChannelData = cached_output as GNChannelData
-			var lines := PackedStringArray()
-			for ch_name in ch_data.channels:
-				var samples: PackedFloat32Array = ch_data.channels[ch_name]
-				if samples.size() > 0:
-					lines.append("%s: %.3f" % [ch_name, samples[samples.size() - 1]])
-				else:
-					lines.append("%s: —" % ch_name)
-			label.text = "\n".join(lines) if lines.size() > 0 else ""
-		else:
-			label.text = ""

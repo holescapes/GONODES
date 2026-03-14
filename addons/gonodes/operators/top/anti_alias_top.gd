@@ -25,7 +25,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_in.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/anti_alias.gdshader", true, true, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/anti_alias.gdshader", true, true, res)
 
 	if _viewport.size != res:
 		_viewport.size = res

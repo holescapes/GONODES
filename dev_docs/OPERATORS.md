@@ -3462,7 +3462,7 @@ AnimationPlayer wrapper for keyframe animation on COMP transform properties. Tak
 
 MATs produce materials for COMP use. Output type is `GNMaterialData`, wrapping Godot's `Material` base class. MATs connect to GeometryCOMP's material input to override the default PBR.
 
-**Total: 8 operators** — 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth.
+**Total: 9 operators** — 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth, 1 null.
 
 ---
 

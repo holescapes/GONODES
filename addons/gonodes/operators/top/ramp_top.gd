@@ -28,7 +28,7 @@ func _init_parameters() -> void:
 
 func _cook(_inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
-	_init_shader_viewport("res://addons/gonodes/shaders/ramp.gdshader", false, false, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/ramp.gdshader", false, false, res)
 	var type_idx: int = get_param_value("type")
 	var col_a: Color = get_param_value("color_a")
 	var col_b: Color = get_param_value("color_b")

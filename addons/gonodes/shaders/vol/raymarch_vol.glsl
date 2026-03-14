@@ -1,4 +1,4 @@
-#[compute]
+[compute]
 #version 450
 
 // raymarch_vol.glsl — Volume ray-marching → 2D image output.

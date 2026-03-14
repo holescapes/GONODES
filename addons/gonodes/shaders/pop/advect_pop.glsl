@@ -1,7 +1,3 @@
-[remap]
-type="RDShaderFile"
-path="res://addons/gonodes/shaders/pop/advect_pop.glsl"
-
 [compute]
 #version 450
 

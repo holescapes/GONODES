@@ -149,28 +149,4 @@ func _workgroups_3d(res: Vector3i, local_size: int = 8) -> Vector3i:
 	)
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Preview
-# ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates a label preview showing volume resolution and format.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	label.text = ""
-	return label
-
-
-## Updates the volume stats preview.
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		var label: Label = control as Label
-		if cached_output is GNVolumeData:
-			var vd: GNVolumeData = cached_output as GNVolumeData
-			label.text = "%dx%dx%d\n%s" % [
-				vd.resolution.x, vd.resolution.y, vd.resolution.z,
-				vd.field_name]
-		else:
-			label.text = "no volume"

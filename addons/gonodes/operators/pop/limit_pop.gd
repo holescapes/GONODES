@@ -41,7 +41,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return pd
 
 	var pc := PackedByteArray()
-	pc.resize(40)
+	pc.resize(48)  # 10 fields (40 bytes) padded to 48 (next multiple of 16)
 	pc.encode_s32(0, pd.particle_count)
 	pc.encode_float(4, current_delta)
 	pc.encode_float(8, get_param_value("bbox_min_x"))
@@ -52,6 +52,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	pc.encode_float(28, get_param_value("bbox_max_z"))
 	pc.encode_float(32, get_param_value("max_speed"))
 	pc.encode_s32(36, 1 if get_param_value("kill_outside") else 0)
+	pc.encode_float(40, 0.0)  # padding
+	pc.encode_float(44, 0.0)  # padding
 
 	var uniform_set: RID = ctx.rd.uniform_set_create([
 		ctx.uniform_buffer(0, pd.rd_buffer),

@@ -31,7 +31,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = source.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/lookup.gdshader", true, false, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/lookup.gdshader", true, false, res)
 
 	var index_mode: int = get_param_value("index_by")
 

@@ -90,3 +90,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 ## Provides the scene node for RenderTOP to adopt.
 func get_scene_node() -> Node3D:
 	return _scene_node
+
+
+## COMP-style preview: scene node info (not particle count).
+func update_preview_control(control: Control) -> void:
+	if control is Label:
+		var label: Label = control as Label
+		if _scene_node != null:
+			var vis: String = "visible" if _scene_node.visible else "hidden"
+			label.text = "%s\n%s" % [_scene_node.get_class(), vis]
+		else:
+			label.text = "no node"

@@ -31,7 +31,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_in.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/transform2d.gdshader", true, true, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/transform2d.gdshader", true, true, res)
 
 	var trans: Vector2 = get_param_value("translate")
 	var rot: float = get_param_value("rotate")

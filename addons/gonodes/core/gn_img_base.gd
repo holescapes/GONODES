@@ -62,46 +62,4 @@ func _get_input_img(inputs: Array[GNData], port: int = 0) -> GNImageData:
 	return null
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Preview
-# ═══════════════════════════════════════════════════════════════════════════════
 
-## Creates a Label preview showing image resolution and format.
-## No GPU upload — IMG data stays CPU-side.  Use ImgToTOP to view the image.
-func create_preview_control() -> Control:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 10)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	label.text = ""
-	return label
-
-
-## Updates the image stats preview from cached_output.
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		var label: Label = control as Label
-		if cached_output is GNImageData:
-			var img_data: GNImageData = cached_output as GNImageData
-			if img_data.image != null:
-				var res: Vector2i = img_data.resolution
-				var fmt_name: String = _format_name(img_data.format)
-				label.text = "%d×%d\n%s" % [res.x, res.y, fmt_name]
-			else:
-				label.text = "no image"
-		else:
-			label.text = "no image"
-
-
-## Returns a short human-readable name for an Image.Format enum value.
-static func _format_name(fmt: Image.Format) -> String:
-	match fmt:
-		Image.FORMAT_RGBA8: return "RGBA8"
-		Image.FORMAT_RGB8: return "RGB8"
-		Image.FORMAT_L8: return "L8"
-		Image.FORMAT_LA8: return "LA8"
-		Image.FORMAT_RGBAF: return "RGBAF"
-		Image.FORMAT_RGBAH: return "RGBAH"
-		Image.FORMAT_RF: return "RF"
-		Image.FORMAT_RGF: return "RGF"
-		_: return "fmt:%d" % fmt

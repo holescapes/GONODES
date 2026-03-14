@@ -97,7 +97,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# Push constants: 21 floats + 5 ints (see shader)
 	var pc := PackedByteArray()
-	pc.resize(100)  # 25 * 4 bytes
+	pc.resize(96)  # 22 fields (88 bytes) padded to 96 (next multiple of 16)
 	pc.encode_s32(0, w)
 	pc.encode_s32(4, h)
 	pc.encode_s32(8, vol.resolution.x)
@@ -120,10 +120,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	pc.encode_float(76, up.z)
 	pc.encode_float(80, fov_rad)
 	pc.encode_float(84, absorb)
-	# Pad to multiple of 16
+	# Pad to 96 bytes (next multiple of 16)
 	pc.encode_float(88, 0.0)
 	pc.encode_float(92, 0.0)
-	pc.encode_float(96, 0.0)
 
 	var us: RID = ctx.rd.uniform_set_create([
 		ctx.uniform_sampler(0, sampler, vol.rd_texture),

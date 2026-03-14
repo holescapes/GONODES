@@ -31,7 +31,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_in.resolution
-	_init_shader_viewport("res://addons/gonodes/shaders/lens_distort.gdshader", true, true, res)
+	_init_shader_viewport("res://addons/gonodes/shaders/top/lens_distort.gdshader", true, true, res)
 
 	if _viewport.size != res:
 		_viewport.size = res

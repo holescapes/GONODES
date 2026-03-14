@@ -7,6 +7,7 @@ func _init() -> void:
 	super._init()
 	node_type = "attract"
 	node_description = "Attract particles toward a target point with inverse-square falloff."
+	time_dependent = true
 
 
 func _init_ports() -> void:

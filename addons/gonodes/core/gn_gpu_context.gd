@@ -71,16 +71,27 @@ func _init_rd() -> void:
 
 ## Loads and compiles a GLSL compute shader from the given resource path.
 ## Returns the compiled shader RID (cached on repeat calls).
+## Uses the Godot import pipeline first; falls back to direct compilation
+## from raw GLSL text if the import cache is stale or missing.
 func get_shader(glsl_path: String) -> RID:
 	if glsl_path in _shader_cache:
 		return _shader_cache[glsl_path]
 	if rd == null:
 		return RID()
+
+	# --- Try the Godot import pipeline first ---
+	var spirv: RDShaderSPIRV = null
 	var shader_file := load(glsl_path) as RDShaderFile
-	if shader_file == null:
-		push_error("GNGpuContext: Failed to load shader '%s'" % glsl_path)
+	if shader_file != null and "" in shader_file.get_version_list():
+		spirv = shader_file.get_spirv()
+
+	# --- Fallback: compile directly from raw GLSL text ---
+	if spirv == null:
+		spirv = _compile_glsl_from_text(glsl_path)
+	if spirv == null:
+		push_error("GNGpuContext: Failed to compile shader '%s'" % glsl_path)
 		return RID()
-	var spirv: RDShaderSPIRV = shader_file.get_spirv()
+
 	var err_msg: String = spirv.get_stage_compile_error(RenderingDevice.SHADER_STAGE_COMPUTE)
 	if err_msg != "":
 		push_error("GNGpuContext: Shader compile error in '%s': %s" % [glsl_path, err_msg])
@@ -88,6 +99,24 @@ func get_shader(glsl_path: String) -> RID:
 	var shader_rid: RID = rd.shader_create_from_spirv(spirv)
 	_shader_cache[glsl_path] = shader_rid
 	return shader_rid
+
+
+## Reads a .glsl file as raw text, strips the [compute] section header,
+## and compiles it directly via RenderingDevice — bypasses the import cache.
+func _compile_glsl_from_text(glsl_path: String) -> RDShaderSPIRV:
+	var raw := FileAccess.get_file_as_string(glsl_path)
+	if raw.is_empty():
+		push_error("GNGpuContext: Cannot read shader file '%s'" % glsl_path)
+		return null
+	# Strip the [compute] section header — keep everything from #version onward.
+	var ver_pos := raw.find("#version")
+	if ver_pos < 0:
+		push_error("GNGpuContext: No #version directive in '%s'" % glsl_path)
+		return null
+	var glsl_code := raw.substr(ver_pos)
+	var src := RDShaderSource.new()
+	src.source_compute = glsl_code
+	return rd.shader_compile_spirv_from_source(src)
 
 
 ## Returns a cached compute pipeline for the given shader RID.

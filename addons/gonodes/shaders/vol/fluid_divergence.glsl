@@ -1,7 +1,3 @@
-[remap]
-type="RDShaderFile"
-path="res://addons/gonodes/shaders/vol/fluid_divergence.glsl"
-
 [compute]
 #version 450
 
