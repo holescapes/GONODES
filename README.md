@@ -100,7 +100,7 @@ Double-click any row in the debug panel to select and scroll to that node. All d
 
 ## Project Status
 
-**Phase 7 Complete. 314+ operators across 11 families (TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI) plus 16 native C++ accelerated variants and 2 shader extensions (Shadertoy, ISF). Save/load, copy/paste, undo/redo, live node previews, performance profiling, expression system, sub-networks, spare parameters, parameter presets, custom operator assets (.gnasset), GPU particles (POP), volumetric 3D textures (VOL), compute shader detection & graceful degradation, debug window & overlay system, OSC/MIDI/Audio I/O, 204+ help patches, 176 automated tests passing.**
+**Phase 7 Complete. 314+ operators across 11 families (TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI) plus 69 native C++ accelerated operators and 2 shader extensions (Shadertoy, ISF). Save/load, copy/paste, undo/redo, live node previews, performance profiling, expression system, sub-networks, spare parameters, parameter presets, custom operator assets (.gnasset), GPU particles (POP), volumetric 3D textures (VOL), compute shader detection & graceful degradation, debug window & overlay system, OSC/MIDI/Audio I/O, 353 help patches, 690 automated tests passing.**
 
 ### Completed
 
@@ -503,9 +503,9 @@ GONODES/
 ├── scenes/
 │   ├── gn_editor.tscn               # Main editor scene (HSplit layout)
 │   ├── gn_editor.gd                 # Editor wiring script
-│   ├── test_phase2.tscn             # Phase 2 test scene (legacy)
-│   └── test_phase2.gd               # Phase 2 test script
-└── tests/                           # Unit & integration tests (176 tests)
+│   ├── player_main.tscn             # Standalone player scene
+│   └── player_main.gd               # Player runtime script
+└── tests/                           # Unit & integration tests (690 tests)
 ```
 
 ---

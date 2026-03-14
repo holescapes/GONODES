@@ -5,8 +5,8 @@
 > **Purpose:** Comprehensive comparison of cooking models, data flow, engine architecture, and UI patterns across all three systems — with actionable improvement recommendations for GONODES.
 >
 > Several recommendations from this document have been implemented:
-> - ✅ Ramp parameter type with curve editor (Â§11.2.B)
-> - ✅ Network boxes + sticky notes (Â§11.2.F)
+> - ✅ Ramp parameter type with curve editor (§11.2.B)
+> - ✅ Network boxes + sticky notes (§11.2.F)
 > - Remaining items tracked in GONODES_CONTEXT.md roadmap
 
 ---
@@ -35,7 +35,7 @@
 | **Cook paradigm** | Pull-based, demand-driven per frame | Pull-based, demand-driven on dependency change | Push-based, topo-sorted per frame |
 | **Engine language** | C++ (operators), Python (scripting) | C++ (HDK), VEX (shaders/wrangles), Python/HScript | GDScript (operators), GDScript (scripting) |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan (GLSL/HLSL) | Karma (CPU/GPU), OpenGL viewport, Vulkan (Houdini 20+) | Godot renderer (Vulkan/OpenGL via SubViewport + GLSL) |
-| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT, UI | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, COMP, MAT, OUT |
+| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT, UI | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI |
 | **Typical network size** | Dozens to hundreds of nodes | Hundreds to thousands of nodes | Dozens to hundreds of nodes |
 | **Hierarchy model** | COMPs contain networks (infinite nesting) | Subnet OTLs, HDA assets (infinite nesting) | SubNetworkNode with InTunnel/OutTunnel |
 | **Open source / cost** | Commercial ($2,200+ / $600 non-comm.) | Commercial ($4,495+ / free non-comm.) | Open source (Godot 4.6 + GDScript) |
@@ -365,7 +365,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 | User scripting | Python | VEX + Python | GDScript | ✓ Adequate |
 | Shader authoring | GLSL (frag/vert/compute) | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item shader) | Minor gap (no compute) |
 | C++ plugin SDK | No | Yes (HDK) | GDExtension (planned) | ✓ Architecture ready |
-| Asset packaging | No (Projects only) | HDA (full asset package) | SubNetworkNode + .gnpatch | **GAP** (see Â§11) |
+| Asset packaging | No (Projects only) | HDA (full asset package) | SubNetworkNode + .gnpatch | **GAP** (see §11) |
 | Dynamic annotations | No | Spare params, HDA interface | `@param`/`@input` in scripts | ✓ Good |
 | Extension marketplace | No | Orbolt, SideFX Labs | Planned | Future |
 
@@ -510,7 +510,7 @@ Based on the comparison, here are the most impactful improvements GONODES could 
 
 **Impact**: In a large network where one node has 20 parameters and only `scale` changed, GONODES recooks the full downstream tree. With parameter-level deps, only nodes that reference `scale` (directly or transitively) would recook.
 
-**Recommendation**: Build a parameter dependency mini-graph during `_resolve_node_parameters()`. Each expression evaluation records which parameters were read. On parameter change, only invalidate nodes whose expressions touched that specific parameter. This is the "Full Parameter DAG" mentioned in your roadmap (Â§7.6). The existing `_evaluating_params` guard is the seed — extend it to record a `reads_from` set per expression.
+**Recommendation**: Build a parameter dependency mini-graph during `_resolve_node_parameters()`. Each expression evaluation records which parameters were read. On parameter change, only invalidate nodes whose expressions touched that specific parameter. This is the "Full Parameter DAG" mentioned in your roadmap (§7.6). The existing `_evaluating_params` guard is the seed — extend it to record a `reads_from` set per expression.
 
 **Complexity**: Medium. The infrastructure (`_evaluating_params`) exists. Main work is recording reads during `par()`/`chop()` calls and using them to narrow dirty propagation.
 

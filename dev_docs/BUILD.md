@@ -326,31 +326,66 @@ All presets are defined in `export_presets.cfg` at the project root:
 | Editor macOS                | 9     | Build script    |
 
 
+## Extension Self-Containment
+
+**Every GN extension must be entirely self-contained inside its
+`addons/gn_ext_<name>/` folder.**  Never place extension assets in
+`addons/gonodes/` or any other directory outside the extension root.
+
+This applies to operator scripts, shader presets, help patches, textures,
+data files, and any other asset the extension provides.  The core discovery
+systems (`gn_script_helper`, `gn_help_window`, `GNExtensionRegistry`) scan
+`gn_ext_*/` directories automatically — no manual registration outside the
+extension folder is needed.
+
+See the existing extensions for reference:
+
+| Extension | Path | What it contains |
+|-----------|------|-----------------|
+| `gn_ext_native` | `addons/gn_ext_native/` | C++ native operators + GDScript wrappers |
+| `gn_ext_shadertoy` | `addons/gn_ext_shadertoy/` | Shadertoy GLSL translator + shader presets |
+| `gn_ext_isf` | `addons/gn_ext_isf/` | ISF shader translator + shader presets |
+| `gn_ext_ffmpeg` | `addons/gn_ext_ffmpeg/` | FFmpeg video I/O operators |
+
+Full details on the required directory layout and the discovery mechanism
+are in [CONTRIBUTING.md → Extension Self-Containment Rule](CONTRIBUTING.md#extension-self-containment-rule).
+
+
 ## Native Library Builds (gn_native)
 
-The `gn_native` addon is a C++ GDExtension that accelerates 16 CPU-heavy
-operators (4 IMG, 11 SOP, 1 CHOP) with native inner loops.  The GDScript
-wrapper operators in `gn_ext_native` auto-fallback to pure GDScript when
-the compiled binaries are unavailable.
+The `gn_ext_native` extension is a C++ GDExtension that accelerates 69
+CPU-heavy operators (37 SOP, 18 CHOP, 5 IMG, 4 TOP, 3 VOL, 2 POP) with
+native inner loops across 6 build phases.  The GDScript wrapper operators
+in `gn_ext_native` auto-fallback to pure GDScript when the compiled
+binaries are unavailable.
 
 ### Architecture
 
 ```
-addons/
-├── gn_native/               # C++ GDExtension source
+addons/gn_ext_native/
+├── gn_extension.cfg          # Extension descriptor (69 operators)
+├── native/                   # C++ GDExtension source
 │   ├── SConstruct            # SCons build configuration
 │   ├── gn_native.gdextension # Library manifest (all platforms + architectures)
-│   ├── godot-cpp/            # Submodule — godot-cpp bindings (4.5 branch)
+│   ├── godot-cpp/            # Submodule — godot-cpp bindings
 │   ├── bin/                  # Compiled binaries per platform
 │   │   ├── win64/            # Windows x86_64 + ARM64
 │   │   ├── linux64/          # Linux x86_64 + ARM64
 │   │   └── macos/            # macOS universal (x86_64 + arm64)
 │   └── src/                  # C++ source files
-│       ├── img/              # GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
-│       ├── sop/              # GNNativeIsoSurface, GNNativeRay, GNNativeFacet, etc. (11 ops)
-│       └── chop/             # GNNativeSmooth
-└── gn_ext_native/            # GDScript wrappers + gn_extension.cfg
-    └── operators/            # BlurIMGNative, NoiseIMGNative, etc.
+│       ├── sop/              # 37 SOP operators (geometry processors)
+│       ├── chop/             # 18 CHOP operators (signal processing)
+│       ├── img/              # 5 IMG operators (CPU image processing)
+│       ├── top/              # 4 TOP operators (texture analysis/bridges)
+│       ├── vol/              # 3 VOL operators (volumetric data)
+│       └── pop/              # 2 POP operators (particle system)
+└── operators/                # GDScript wrappers (auto-fallback)
+    ├── sop/
+    ├── chop/
+    ├── img/
+    ├── top/
+    ├── vol/
+    └── pop/
 ```
 
 ### Building Locally
@@ -405,9 +440,127 @@ lipo -create *arm64* *x86_64* -output libgn_native.macos.template_release.univer
 **Windows ARM64:** Use MSVC ARM64 cross-tools (installed via Visual Studio):
 
 ```powershell
-cd addons\gn_native
+cd addons\gn_ext_native\native
 scons platform=windows arch=arm64 target=template_release -j4
 ```
+
+
+## Writing C++ Extensions for GONODES
+
+If you need native-speed algorithms — mesh processing, signal filtering,
+image kernels, physics solvers, or wrapping an external C/C++ library — you
+can build a GDExtension that plugs into the GONODES operator model.
+
+### How It Works
+
+1. **Create a self-contained extension folder:** `addons/gn_ext_<name>/`
+   following the [Extension Self-Containment](#extension-self-containment)
+   rules above.
+
+2. **Add a `native/` subfolder** for C++ source, a `SConstruct` build
+   script, and a `godot-cpp/` submodule (or symlink to a shared one).
+
+3. **Write C++ processor classes** that extend `godot::RefCounted`.
+   Expose a `process()` (or similar) method via `ClassDB::bind_methods()`.
+   This is the hot inner loop — pixel iteration, vertex math, FFT, etc.
+
+4. **Write GDScript wrapper operators** in `operators/<family>/` that call
+   the C++ class when available and fall back to pure GDScript otherwise:
+
+   ```gdscript
+   func _cook(dt: float) -> void:
+       if ClassDB.class_exists("GNNativeMyAlgo"):
+           var processor = ClassDB.instantiate("GNNativeMyAlgo")
+           processor.process(input_data, params)
+       else:
+           _cook_gdscript(dt)  # pure GDScript fallback
+   ```
+
+5. **Register operators** in `gn_extension.cfg` — the registry discovers
+   them automatically.
+
+6. **Build** with `scons` (same as `gn_ext_native` above).
+
+Use `gn_ext_native` as the reference implementation. Copy its `SConstruct`
+and `register_types.cpp` pattern to bootstrap a new extension quickly.
+
+### std:: vs Godot-Native Types in C++
+
+When writing GDExtension C++ code, you have access to both the C++ Standard
+Library and Godot's own container/math types. Here's what works best:
+
+**Use std:: for internal computation:**
+
+- `std::vector<T>`, `std::sort`, `std::unordered_map` — battle-tested,
+  full-featured, and familiar to any C++ developer.
+- `std::sin`, `std::cos`, `std::sqrt` — identical underlying C library
+  calls; no performance difference vs `Math::sin()`.
+- Lambda-based sorting with `std::sort` is cleaner than Godot's
+  `SortArray` with comparator structs.
+
+**Use Godot types at the API boundary:**
+
+- `PackedVector3Array`, `PackedFloat32Array`, `PackedByteArray` — these
+  are what GDScript passes in and expects back. Accept them as parameters,
+  return them as results.
+- `Vector3`, `Color`, `Transform3D` — use Godot's math types in your
+  function signatures so GDScript can call you without conversions.
+- `String`, `Dictionary`, `Array` — for any data crossing the
+  GDScript↔C++ boundary.
+
+**The hybrid pattern (recommended):**
+
+```cpp
+// API boundary: Godot types in the function signature
+void GNNativeMyAlgo::process(PackedVector3Array p_points, float p_threshold) {
+    // Internal: std:: for the heavy lifting
+    const Vector3 *pts = p_points.ptr();
+    int count = p_points.size();
+    std::vector<int> indices(count);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::sort(indices.begin(), indices.end(), [&](int a, int b) {
+        return pts[a].y < pts[b].y;
+    });
+    // ... algorithm using std:: containers and math ...
+    // API boundary: write results back to Godot types
+    PackedVector3Array result;
+    result.resize(count);
+    // ...
+}
+```
+
+This gives you the best of both worlds: Godot types where GDScript needs
+them, std:: where raw performance and API richness matter.
+
+**Why not all-Godot internally?**
+
+- `LocalVector<T>` (Godot's internal vector) lacks sized constructors,
+  `.assign()`, range constructors, and algorithm compatibility.
+- `SortArray` requires comparator structs instead of lambdas.
+- `HashMap` works fine but has a different API from `std::unordered_map`.
+- The performance difference is negligible — both `std::vector` and
+  `LocalVector` are contiguous arrays with identical cache behavior.
+- Using std:: keeps your C++ idiomatic and portable. If you later want to
+  reuse an algorithm outside Godot, it just works.
+
+**Exception:** If you're modifying existing Godot engine code or writing
+code that must integrate deeply with Godot internals (custom servers,
+rendering callbacks), prefer Godot types throughout for consistency with
+the engine codebase.
+
+### Wrapping External Libraries
+
+For external C/C++ libraries (FFmpeg, RtMidi, NDI SDK, OpenCV, etc.):
+
+1. Place the library headers and pre-built binaries (or source) inside
+   your extension's `native/` folder.
+2. Update `SConstruct` to add include paths and link flags.
+3. Write a thin `RefCounted` wrapper class that exposes the library
+   functionality to GDScript via `ClassDB`.
+4. Add the `.dll`/`.so`/`.dylib` to your `.gdextension` manifest so
+   Godot loads them alongside your extension.
+
+See `gn_ext_ffmpeg` for a working example of wrapping an external library.
 
 
 ## CI Pipelines

@@ -17,7 +17,7 @@ This folder contains architecture references, build internals, testing infrastru
 | [OPERATORS.md](OPERATORS.md) | Contributors | Static operator reference snapshot (may be outdated). Live reference is auto-generated in the Help window's Operators section. Useful for implementation details ("How it works" per operator) |
 | [PLAYER.md](PLAYER.md) | Contributors, deployment engineers | Player runtime internals — boot sequence, Window management implementation, scene swap, headless operation, troubleshooting. User version: `help/player.md` |
 | [TD_HOUDINI_COMPARISON.md](TD_HOUDINI_COMPARISON.md) | Core developers | Architecture deep dive comparing GONODES with TouchDesigner and Houdini — cooking models, data flow, parameter systems, performance, extensibility. Includes gap analysis and prioritized improvement recommendations |
-| [TESTING.md](TESTING.md) | Contributors | Test framework architecture, running tests, writing new tests, coverage matrix, bugs found by tests. 144 automated tests (118 unit + 26 integration) |
+| [TESTING.md](TESTING.md) | Contributors | Test framework architecture, running tests, writing new tests, coverage matrix, bugs found by tests. 690 automated tests (661 unit + 29 integration) |
 
 
 ## Relationship to Help System

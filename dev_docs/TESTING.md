@@ -1,8 +1,8 @@
 # GONODES Testing Guide
 
 > **Audience:** Contributors writing or running tests.  
-> **Last updated:** 2026-03-03  
-> **Total automated tests:** 144 (118 unit + 26 integration) — all passing
+> **Last updated:** 2026-03-14  
+> **Total automated tests:** 690 (661 unit + 29 integration) — all passing
 
 ---
 
@@ -128,7 +128,7 @@ The filter is case-insensitive and matches against test method names using `cont
   ✗ test_some_broken_test — Expected '42' == '43'. values should match
 
 ═══════════════════════════════════════════════════
-  FAILED — 143/144 passed, 1 failed
+  FAILED — 689/690 passed, 1 failed
 
     ✗ test_chop_chains::test_some_broken_test — Expected '42' == '43'. values should match
 ═══════════════════════════════════════════════════
@@ -304,7 +304,7 @@ Network serialization (`to_dict()` / `from_dict()`) round-trip fidelity.
 
 ## 6. Manual Test Scenes
 
-> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (108 `.gnpatch` files in `addons/gonodes/help/<family>/`). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §6.1 below.
+> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (353 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §6.1 below.
 
 ### 6.1 Help Example Patches (Replacement)
 
@@ -513,23 +513,39 @@ The test suite has already caught production bugs:
 tests/
 ├── test_runner.gd                          # GNTestRunner — discovers & runs all test_*.gd
 ├── test_assert.gd                          # GNTestAssert — static assertion library
-├── test_parameter.gd                       # 47 tests — GNParameter
-├── test_cook_engine.gd                     # 24 tests — GNCookEngine expression eval
-├── test_network.gd                         # 22 tests — GNNetwork graph model
-├── test_channel_data.gd                    # 14 tests — GNChannelData
-├── test_preset_manager.gd                  # 11 tests — GNParamPresetManager
+├── test_parameter.gd                       # GNParameter
+├── test_cook_engine.gd                     # GNCookEngine expression eval
+├── test_network.gd                         # GNNetwork graph model
+├── test_channel_data.gd                    # GNChannelData
+├── test_preset_manager.gd                  # GNParamPresetManager
+├── test_ramp_and_annotations.gd            # Ramp params + annotations
+├── test_ramp_chop.gd                       # RampCHOP
+├── test_shadertoy.gd                       # Shadertoy extension
+├── test_native_operators.gd                # Native C++ operator wrappers
+├── operators/                              # Per-operator unit tests (all families)
+│   ├── chop/
+│   ├── comp/
+│   ├── dat/
+│   ├── img/
+│   ├── mat/
+│   ├── output/
+│   ├── pop/
+│   ├── sop/
+│   ├── top/
+│   ├── ui/
+│   └── vol/
 └── integration/
-    ├── test_chop_chains.gd                 # 13 tests — CHOP operator chain cooking
-    ├── test_script_chop.gd                 #  7 tests — ScriptCHOP runtime
-    └── test_network_roundtrip.gd           #  6 tests — serialization round-trip
+    ├── test_chop_chains.gd                 # CHOP operator chain cooking
+    ├── test_script_chop.gd                 # ScriptCHOP runtime
+    └── test_network_roundtrip.gd           # serialization round-trip
 
-addons/gonodes/help/                        # 🆕 Help example patches (108 total)
-├── chop/                                   # 32 patches — all 31 CHOP node types
-├── top/                                    # 29 patches — all 28 TOP node types
-├── sop/                                    # 15 patches — all 15 SOP node types
-├── comp/                                   # 13 patches — all 12 COMP node types
-├── dat/                                    # 16 patches — all 16 DAT node types
-└── mat/                                    #  3 patches — all 2 MAT node types
+addons/gonodes/help/                        # Help example patches (353 total across core + extensions)
+├── chop/
+├── top/
+├── sop/
+├── comp/
+├── dat/
+└── mat/
 
 test_scenes/                                # ⚠️ DEPRECATED — superseded by help patches
 ├── README.md                               # Legacy visual verification checklists

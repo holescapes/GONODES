@@ -4155,41 +4155,27 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 |-----------|-----------|-------------|
 | **gn_ext_shadertoy** | ShadertoyTOP | Runtime Shadertoy GLSL translation, URL fetch, 10 presets |
 | **gn_ext_isf** | ISFFileTOP | ISF v2 shader support, multi-pass, JSON-driven params, 10 presets |
-| **gn_ext_native** | 16 operators | C++ GDExtension acceleration (see above) |
+| **gn_ext_native** | 69 operators | C++ GDExtension acceleration (see below) |
 
 ---
 
 ## Native Acceleration Extension (Optional)
 
-The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 16 CPU-heavy operators across two phases. These appear as separate operators in the palette under a "Native" section when the C++ binaries are compiled. Each native operator has an identical parameter interface to its GDScript counterpart and includes a pure-GDScript fallback for when the C++ library is unavailable.
+The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 69 CPU-heavy operators across 6 build phases and 6 families. These appear as separate operators in the palette under a "Native" section when the C++ binaries are compiled. Each native operator has an identical parameter interface to its GDScript counterpart and includes a pure-GDScript fallback for when the C++ library is unavailable.
 
-### Phase 1 — Core Operators (6)
+### Summary by Family
 
-| Native Operator | Replaces | Family | C++ Class |
-|----------------|----------|--------|-----------|
-| BlurIMGNative | BlurIMG | IMG | GNNativeBlur |
-| NoiseIMGNative | NoiseIMG | IMG | GNNativeNoise |
-| PixelSortIMGNative | PixelSortIMG | IMG | GNNativePixelSort |
-| ParticleSOPNative | ParticleSOP | SOP | GNNativeParticle |
-| MetaballSOPNative | MetaballSOP | SOP | GNNativeMetaball |
-| PolyReduceSOPNative | PolyReduceSOP | SOP | GNNativePolyReduce |
+| Family | Count | Key Algorithms |
+|--------|-------|---------------|
+| SOP | 37 | Marching cubes, L-system turtle, quadric error decimation, Möller-Trumbore raycasting, spatial-hash welding, FFD lattice, damped spring, mesh deformers (bend/twist/taper/extrude), parametric lofting/skinning |
+| CHOP | 18 | Biquad Butterworth IIR (LP/HP/BP), FFT audio spectrum, time-warp remap, physics simulation, expression evaluation, signal interpolation |
+| IMG | 5 | Gaussian/box blur, Sobel/Prewitt edge detection, pixel sorting, Perlin noise, checkerboard |
+| TOP | 4 | Horn-Schunck optical flow, statistical analysis, CHOP→texture bridge, particle state readback |
+| VOL | 3 | Marching cubes isosurface extraction, CHOP→volume bridge, volume statistics |
+| POP | 2 | GPU particle instancing, particle state rendering |
+| **Total** | **69** | |
 
-### Phase 2 — Extended Operators (10)
-
-| Native Operator | Replaces | Family | C++ Class | Algorithm |
-|----------------|----------|--------|-----------|-----------|
-| IsoSurfaceSOPNative | IsoSurfaceSOP | SOP | GNNativeIsoSurface | Marching cubes with 5 implicit field types (Gyroid, Schwarz-P/D, Sphere, Torus) |
-| RaySOPNative | RaySOP | SOP | GNNativeRay | Möller–Trumbore ray-triangle intersection, 7 direction modes |
-| FacetSOPNative | FacetSOP | SOP | GNNativeFacet | Unique points (flat shading) / spatial-hash consolidate |
-| FuseSOPNative | FuseSOP | SOP | GNNativeFuse | Spatial-hash vertex welding within threshold |
-| SubdivideSOPNative | SubdivideSOP | SOP | GNNativeSubdivide | Uniform triangle 1→4 subdivision (1-4 iterations) |
-| CopySOPNative | CopySOP | SOP | GNNativeCopy | Copy-to-points instancing with normal alignment + pscale |
-| LSystemSOPNative | LSystemSOP | SOP | GNNativeLSystem | Grammar rewriting + turtle interpretation, line or tube mesh |
-| SpringSOPNative | SpringSOP | SOP | GNNativeSpring | Semi-implicit Euler damped spring per-vertex deformer |
-| EdgeDetectIMGNative | EdgeDetectIMG | IMG | GNNativeEdgeDetect | Sobel/Prewitt 3×3 convolution, gradient direction color mode |
-| SmoothCHOPNative | SmoothCHOP | CHOP | GNNativeSmooth | Biquad Butterworth IIR filter (LP/HP/BP) with per-channel state |
-
-**Build status:** Windows x86_64 binary compiled and active (`bin/win64/libgn_native.windows.template_debug.x86_64.dll`, 677 KB). Linux/macOS builds require running `scons platform=linux|macos target=template_debug` on those platforms. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and falls back to pure GDScript if the library is missing.
+**Build status:** Windows x86_64 binary compiled and active (`bin/win64/libgn_native.windows.template_release.x86_64.dll`). Linux/macOS builds require running `scons platform=linux|macos target=template_release` on those platforms. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and falls back to pure GDScript if the library is missing.
 
 ---
 

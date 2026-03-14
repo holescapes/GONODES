@@ -490,7 +490,7 @@ Centralized reference hub (F1 or toolbar "📖 Help"):
 
 Every new operator must include at least one help example patch
 (Hard Rule 25.21 in `GONODES_CONTEXT.md`). Extensions should include
-their own help patches too (see Â§28.10 in the context file).
+their own help patches too (see §28.10 in the context file).
 
 
 ## File Structure
