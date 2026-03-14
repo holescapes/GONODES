@@ -134,6 +134,16 @@ var _expr_resolved_this_frame: Dictionary = {}
 ## Matches chop("id"), op("id"), top("id"), sop("id"), dat("id"), mat("id").
 static var _expr_ref_regex: RegEx = null
 
+## Reverse map: upstream_node_id → Array of downstream node IDs that read it
+## via expressions (chop/op/top/par).  Built alongside the active set so that
+## the cook loop can skip _try_expression_dirty() on nodes whose expression
+## sources didn't cook this frame.  Rebuilt when _active_set_dirty.
+var _expr_consumer_map: Dictionary = {}
+
+## Set of node IDs that were actually cooked (or re-dirtied) this frame.
+## Populated during the cook loop; consulted by _should_eval_expressions().
+var _cooked_this_frame: Dictionary = {}
+
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
 ## Emitted after all nodes in a frame have been cooked.
@@ -418,6 +428,8 @@ func cook_frame(delta: float) -> void:
 		# the same frame.  Without this, viewports read stale/blank textures
 		# when the creation order doesn't match the dependency order.
 		_reorder_children_to_topo(topo_order)
+		# Rebuild the expression consumer map (upstream → expression readers)
+		_rebuild_expr_consumer_map()
 		_active_set_dirty = false
 
 	# Step 3c: Rebuild consumer counts when topology changed.
@@ -428,6 +440,7 @@ func cook_frame(delta: float) -> void:
 	var cooked_count := 0
 	var skipped_count := 0
 	_expr_resolved_this_frame.clear()
+	_cooked_this_frame.clear()
 
 	# Clear per-node status before cooking — self-healing: stale warnings/errors
 	# from previous frames are wiped and only re-set if the problem persists.
@@ -439,10 +452,11 @@ func cook_frame(delta: float) -> void:
 	for node in topo_order:
 		if not node.dirty:
 			# Non-dirty node with expression params: evaluate expressions
-			# (cheap) and only cook + propagate if a value actually changed.
-			# Upstream nodes are already cooked (topo order), so chop() etc.
-			# read fresh cached values.
-			if node.is_active and _try_expression_dirty(node):
+			# only if an upstream expression source actually cooked this frame.
+			# This avoids re-evaluating every expression on every active node
+			# every frame — only nodes whose data sources changed are checked.
+			if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
+				_cooked_this_frame[node.id] = true
 				network.propagate_dirty(node.id)
 			else:
 				continue
@@ -478,6 +492,7 @@ func cook_frame(delta: float) -> void:
 			node.cook_time_ms = 0.0
 			node.clear_dirty()
 			node.node_cooked.emit(node.id)
+			_cooked_this_frame[node.id] = true
 			cooked_count += 1
 			if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
 				break
@@ -504,6 +519,7 @@ func cook_frame(delta: float) -> void:
 
 		# Cook the node
 		var result := node.execute_cook(inputs, frame_count)
+		_cooked_this_frame[node.id] = true
 
 		# Tag the output as shared if this node feeds multiple downstream consumers.
 		# Operators use _mutable_input() to check this flag before mutating data.
@@ -537,12 +553,57 @@ func cook_frame(delta: float) -> void:
 # Pre-Cook
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Calls [method GNNode._pre_cook] on every node so time-dependent ones
-## can mark themselves dirty.
+## Calls [method GNNode._pre_cook] on active nodes so time-dependent ones
+## can mark themselves dirty.  Inactive nodes are skipped — they don't cook
+## anyway, so marking them dirty would only waste a dirty-propagation walk.
 func _pre_cook_pass(delta: float) -> void:
 	for node_id in network.nodes:
 		var node: GNNode = network.nodes[node_id]
-		node._pre_cook(delta)
+		if node.is_active:
+			node._pre_cook(delta)
+
+
+## Builds the reverse expression-consumer map: for each upstream node
+## referenced by an expression, maps upstream_id → [consumer_node_ids].
+## Rebuilt alongside the active set (event-driven, not per-frame).
+func _rebuild_expr_consumer_map() -> void:
+	_expr_consumer_map.clear()
+	for node_id in _active_set:
+		var refs: Array[String] = _get_expression_refs(node_id)
+		for ref_id in refs:
+			if not _expr_consumer_map.has(ref_id):
+				_expr_consumer_map[ref_id] = []
+			var consumers: Array = _expr_consumer_map[ref_id]
+			if node_id not in consumers:
+				consumers.append(node_id)
+
+
+## Returns true if this node's expressions should be re-evaluated this frame.
+## A node needs expression re-eval only if:
+##   (a) any of its expression-referenced sources cooked this frame, OR
+##   (b) any of its expression-referenced sources are time-dependent
+##       (their output changes every frame even when the node itself is clean), OR
+##   (c) the node references time/frame/dt (always needs re-eval).
+## Falls back to true (safe) if no consumer map is available yet.
+func _should_eval_expressions(node: GNNode) -> bool:
+	# If no consumer map yet (first frame), fall back to always-eval
+	if _expr_consumer_map.is_empty() and _active_set.is_empty():
+		return true
+
+	var refs: Array[String] = _get_expression_refs(node.id)
+	if refs.is_empty():
+		# Node has expressions but they don't reference other nodes.
+		# They likely use time/frame/dt → must re-eval every frame.
+		return true
+
+	# Check if any referenced upstream node cooked or is time-dependent
+	for ref_id in refs:
+		if _cooked_this_frame.has(ref_id):
+			return true
+		var ref_node: GNNode = network.nodes.get(ref_id, null)
+		if ref_node and ref_node.time_dependent:
+			return true
+	return false
 
 
 ## Evaluates expression parameters on a non-dirty node and checks whether any

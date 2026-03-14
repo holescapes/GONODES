@@ -1795,8 +1795,14 @@ GONODES/
   - Works with existing canvas_item shader infrastructure.
 
 ### Performance & GPU Optimizations (Post-Phase 7)
-- [ ] Multi-threaded cook engine
+- [ ] Multi-threaded cook engine (Tier 3 — automatic level-based parallelism)
+- [ ] User-facing thread regions (Tier 4 — annotation-based parallel groups)
+- [ ] Parameter-level dependency tracking (Tier 2 — surgical dirty propagation)
 - [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
+- [x] **Cook engine Tier 1 optimizations** — three quick wins implemented:
+  - **Active-only pre-cook**: `_pre_cook_pass()` skips inactive nodes entirely.
+  - **Expression consumer map**: `_should_eval_expressions()` checks whether upstream sources cooked this frame before re-evaluating expressions. Avoids per-frame polling of every expression on every active node.
+  - **Inactive dirty propagation cutoff**: `propagate_dirty()` marks inactive nodes dirty but does not BFS through them — prunes frozen subgraphs from the walk.
 - [ ] **CPU fallback for compute-dependent operators** — enables Compatibility renderer (Web/WebGL2, old hardware):
   - **POP family CPU fallback**: CPU particle simulation using `PackedVector3Array` + `MultiMesh.set_instance_transform()`. Slower than GPU compute but functional for small particle counts (~10K). Each POP operator would have a `_cook_cpu()` path alongside the existing GPU `_cook()`.
   - **VOL family CPU fallback**: CPU voxel grid using `PackedFloat32Array`. Iterative passes (blur, advect, pressure solve) run on CPU. Usable for low-resolution volumes (32³–64³). Fluid sim would be significantly slower.
@@ -2349,6 +2355,12 @@ The cook engine has been optimized with these patterns:
    | Engine reset | `reset()` | Internal — clears `_active_set`, sets dirty |
 
    During steady-state playback (no user interaction), the per-frame cost is exactly one `if _active_set_dirty:` bool check — the BFS does not run.
+
+8. **Active-only pre-cook pass** — `_pre_cook_pass()` only calls `_pre_cook(delta)` on active nodes. Inactive nodes (not feeding any sink) are skipped entirely — marking them dirty would only waste a BFS walk that the cook loop would then skip. When nodes become active again (sink change, viewer change), they already have `dirty = true` from construction or prior state.
+
+9. **Inactive-branch dirty propagation cutoff** — `propagate_dirty()` still marks inactive downstream nodes as dirty (so they pick it up when reactivated), but does NOT continue BFS traversal through them. This prunes entire frozen subgraphs from the BFS walk. A network with 200 nodes where only 30 are active only BFS-walks through those 30.
+
+10. **Expression consumer map** — `_expr_consumer_map` is a reverse index: `upstream_node_id → [consumer_node_ids]` built alongside the active set (event-driven, not per-frame). During the cook loop, `_should_eval_expressions()` checks whether any of a non-dirty node's expression sources actually cooked this frame before calling `_try_expression_dirty()`. This avoids re-evaluating every expression on every active node every frame — only nodes whose data sources changed get expression re-eval. Nodes with expressions that don't reference other nodes (only `time`/`frame`/`dt`) always re-evaluate (they depend on frame timing).
 
    **Adding a new invalidation trigger:**
    - If a new feature can change which nodes feed sinks (e.g., dynamic port rewiring, node groups):

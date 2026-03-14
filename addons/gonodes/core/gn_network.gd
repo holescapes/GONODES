@@ -512,6 +512,10 @@ func _rebuild_adjacency() -> void:
 ## Propagates dirty flags downstream from a given node (BFS).
 ## Called by the cook engine when a node's output changes.
 ## Uses cached adjacency map for O(1) lookups per node.
+## Inactive nodes are still marked dirty (so they pick it up when reactivated)
+## but their downstream is NOT traversed — saving BFS walks through frozen
+## subgraphs.  When an inactive node later becomes active, the cook engine
+## recomputes the active set and those already-dirty nodes will cook.
 func propagate_dirty(from_node_id: String) -> void:
 	_rebuild_adjacency()
 	var queue: Array[String] = []
@@ -520,7 +524,10 @@ func propagate_dirty(from_node_id: String) -> void:
 		var ds_node: GNNode = nodes.get(ds_id, null)
 		if ds_node and not ds_node.dirty:
 			ds_node.mark_dirty()
-			queue.append(ds_id)
+			# Only continue BFS through active nodes — inactive branches
+			# are frozen and don't need further propagation.
+			if ds_node.is_active:
+				queue.append(ds_id)
 
 	# BFS through further downstream
 	while not queue.is_empty():
@@ -529,7 +536,8 @@ func propagate_dirty(from_node_id: String) -> void:
 			var ds_node: GNNode = nodes.get(ds_id, null)
 			if ds_node and not ds_node.dirty:
 				ds_node.mark_dirty()
-				queue.append(ds_id)
+				if ds_node.is_active:
+					queue.append(ds_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

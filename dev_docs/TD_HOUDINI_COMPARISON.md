@@ -306,25 +306,26 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 ### 6.3 GONODES
 
-- **GDScript core**: All operators are GDScript. Inner loops (pixel ops, vertex ops) are GDScript — the primary bottleneck.
+- **GDScript core + GDExtension C++ hot-paths**: All operators are GDScript. 69 performance-critical operators (37 SOP, 18 CHOP, 5 IMG, 4 TOP, 3 VOL, 2 POP) have C++ GDExtension implementations via `gn_ext_native` that the GDScript wrappers auto-delegate to when available.
 - **Godot renderer**: TOPs leverage Godot's Vulkan/OpenGL renderer via SubViewport — GPU-accelerated.
+- **GPU compute**: POP (particles via SSBO) and VOL (volumetric via 3D textures) families use compute shaders where `RenderingDevice` is available. ComputeShaderTOP exposes user-written compute GLSL.
 - **Single-threaded cook**: Main thread only. No parallel cook lanes.
 - **Active chain cooking**: Only cooks subgraphs feeding live sinks (equivalent to TD's demand-driven).
 - **UPDATE_ONCE**: SubViewport renders exactly once per dirty cycle — eliminates redundant GPU work.
 - **COW data sharing**: `_mutable_input()` avoids unnecessary copies at fan-out points.
-- **Planned**: Multi-threaded cook, GDExtension C++ hot-paths, GPU compute shaders.
+- **Planned**: Multi-threaded cook engine, parameter-level dependency tracking.
 
 ### 6.4 Comparison
 
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
-| Core operator language | C++ | C++ + VEX (JIT) | GDScript (interpreted) | **GAP** (planned: GDExtension) |
-| GPU pipeline | Native DirectX/OpenGL/Vulkan | Karma GPU, OpenCL | Godot SubViewport (Vulkan/GL) | Adequate for real-time |
+| Core operator language | C++ | C++ + VEX (JIT) | GDScript + GDExtension C++ (69 native ops) | Partial (hot-paths covered) |
+| GPU pipeline | Native DirectX/OpenGL/Vulkan | Karma GPU, OpenCL | Godot SubViewport (Vulkan/GL) + compute shaders (POP/VOL) | Adequate for real-time |
 | Multi-threaded cook | Yes (TOPs multi-stream) | Yes (SOP internal, PDG farm) | No | **GAP** (planned) |
 | Expression compilation | Python (interpreted) | VEX (JIT compiled) | GDScript Expression (interpreted) | Minor gap |
 | Compiled blocks | No | Yes (SOP compile) | No | Not applicable (real-time) |
-| Instancing | Yes (SOP/COMP) | Yes (packed prims) | Godot MultiMeshInstance3D (usable but not integrated) | Gap (minor) |
-| Profiling | Per-node + Performance DAT | Performance monitor + dependency viewer | Per-node cook time + expression Âµs + VRAM display | ✓ Good |
+| Instancing | Yes (SOP/COMP) | Yes (packed prims) | Godot MultiMeshInstance3D via CopySOP | Minor gap |
+| Profiling | Per-node + Performance DAT | Performance monitor + dependency viewer | Per-node cook time + expression µs + VRAM display | ✓ Good |
 | Memory optimization | Texture pooling, GPU mem management | COW geometry, packed prims | COW data, lazy viewport, active chain | ✓ Adequate |
 
 ---
@@ -352,9 +353,9 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 ### 7.3 GONODES
 
 - **GDScript scripting**: ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG with runtime compilation.
-- **GLSL shaders**: CustomShaderTOP with `shader_type canvas_item` source, dynamic uniform scanning.
-- **Extension system**: `gn_ext_*` addon folders with `gn_extension.cfg` manifests. Extensions register operators dynamically.
-- **GDExtension (planned)**: C++ hot-path migration for performance-critical operators.
+- **GLSL shaders**: CustomShaderTOP with `shader_type canvas_item` source, dynamic uniform scanning. ComputeShaderTOP for `shader_type compute` (Vulkan/Forward+ only).
+- **Extension system**: `gn_ext_*` addon folders with `gn_extension.cfg` manifests (platform/architecture/dependency guards). Extensions register operators dynamically. 10 extensions shipped.
+- **GDExtension C++ (implemented)**: 69 native operators via `gn_ext_native` — C++ processor classes with GDScript fallback wrappers.
 - **@param/@input annotations**: Dynamic UI generation from script annotations.
 - **Presets**: Code presets (factory + user) for Script operators.
 
@@ -363,8 +364,8 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
 | User scripting | Python | VEX + Python | GDScript | ✓ Adequate |
-| Shader authoring | GLSL (frag/vert/compute) | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item shader) | Minor gap (no compute) |
-| C++ plugin SDK | No | Yes (HDK) | GDExtension (planned) | ✓ Architecture ready |
+| Shader authoring | GLSL (frag/vert/compute) | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item + compute shader) | ✓ Good |
+| C++ plugin SDK | No | Yes (HDK) | GDExtension (69 native ops implemented) | ✓ Done |
 | Asset packaging | No (Projects only) | HDA (full asset package) | SubNetworkNode + .gnpatch | **GAP** (see §11) |
 | Dynamic annotations | No | Spare params, HDA interface | `@param`/`@input` in scripts | ✓ Good |
 | Extension marketplace | No | Orbolt, SideFX Labs | Planned | Future |
@@ -615,13 +616,13 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 
 ## Summary: Top 5 Recommendations
 
-| # | Recommendation | Effort | Value | Rationale |
-|---|---------------|--------|-------|-----------|
-| 1 | **Ramp parameter type** with curve editor | Medium | Very High | Unlocks gradients, falloff curves, animation curves — transformative for procedural/motion graphics |
-| 2 | **CHOP waveform preview** (mini line graph) | Low | High | Makes CHOP debugging visual instead of numerical — matches TD's core UX |
-| 3 | **Data spreadsheet viewer** | Low-Med | High | Essential debugging tool for CHOPs, DATs, and SOPs — Houdini's most loved feature |
-| 4 | **Network boxes + sticky notes** | Low | Medium | Canvas organization for complex networks — near-universal in DCC tools |
-| 5 | **Parameter-level dependency tracking** | Medium | High | Reduces unnecessary recooks in large networks — Houdini's key optimization |
+| # | Recommendation | Effort | Value | Status |
+|---|---------------|--------|-------|--------|
+| 1 | **Ramp parameter type** with curve editor | Medium | Very High | ✅ **Implemented** |
+| 2 | **CHOP waveform preview** (mini line graph) | Low | High | Open |
+| 3 | **Data spreadsheet viewer** | Low-Med | High | Open |
+| 4 | **Network boxes + sticky notes** | Low | Medium | ✅ **Implemented** (annotations system) |
+| 5 | **Multi-threaded cook engine** | High | Very High | Open — #1 remaining gap |
 
 GONODES is already remarkably well-aligned with both TD and Houdini's core architecture. The active chain cooking, COW data model, expression system, per-component expressions, preview system, and sub-network hierarchy put it in strong competitive territory. The gaps are mostly in **power-user workflow tools** (spreadsheet, ramp, annotations) rather than fundamental architecture holes.
 
