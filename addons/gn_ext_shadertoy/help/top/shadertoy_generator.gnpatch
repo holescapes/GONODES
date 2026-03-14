@@ -1,0 +1,38 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "shadertoy1": {
+            "type": "ShadertoyURLTOP",
+            "position": [200, 100],
+            "parameters": {
+                "time_dependent": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "shadertoy_code": {
+                    "value": "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n\tvec2 uv = fragCoord / iResolution.xy;\n\tfloat t = iTime * 0.5;\n\tfloat r = sin(uv.x * 10.0 + t) + sin(uv.y * 8.0 - t * 1.3);\n\tfloat g = sin(uv.x * 6.0 - t + uv.y * 12.0);\n\tfloat b = sin(length(uv - 0.5) * 15.0 - t * 2.0);\n\tfragColor = vec4(0.5 + 0.5 * vec3(r, g, b), 1.0);\n}"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [600, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "shadertoy1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Shadertoy URL TOP — Generator Example\n\nPlasma generator written directly in Shadertoy's mainImage() format.\niTime drives the animation; iResolution holds the canvas size in pixels.\nEdit shadertoy_code inline or open the full code editor (Edit \u2197 button).\nPaste any Shadertoy URL into shadertoy_url and press Fetch to load code from the API.\nLoad local presets via the Presets menu in the code editor.",
+            "position": [-180.0, -190.0],
+            "size": [560.0, 130.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

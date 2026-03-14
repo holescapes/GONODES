@@ -21,6 +21,26 @@ You build **patches** — networks of connected operators that process textures,
 
 ---
 
+## On the Shoulders of Giants
+
+GONODES does not try to replace Godot — it tries to *complete* it for a different audience. Every time we needed a capability, our first question was: "does Godot already have this?" Almost always, the answer was yes.
+
+**Rendering** is handled entirely by Godot's `RenderingDevice` and `RenderingServer`. TOP textures are Godot `RID` handles. The 3D pipeline is a live Godot `SubViewport`. We do not write a single pixel ourselves that Godot's Vulkan / D3D12 / Metal back-end would have written better. GPU particles run on Godot's compute pipeline; 3D volumes use Godot's `Texture3D`. When Godot gains a new rendering feature — better shadow cascades, more samplers, a new anti-aliasing mode — GONODES gets it automatically.
+
+**The editor** runs as a Godot `EditorPlugin`. The node graph is a `GraphEdit` widget. The inspector is a `Control` tree. Every piece of Godot's UI toolkit — theming, input handling, font rendering, internationalization, accessibility — flows through to GONODES without extra code.
+
+**Export** is Godot's export system, untouched. A GONODES patch becomes a standalone desktop or mobile app via the same export templates and project settings any Godot game uses. LibGodot (available from 4.6 onward) means patches can be embedded as a living subsystem inside another application — a VJ host, an installation controller, a real-time broadcast graphics engine — with no modification to the GONODES codebase.
+
+**Scripting** reuses Godot's GDScript VM. When you write an expression like `chop("lfo1", "out") * 10.0` in a parameter field, that fragment is compiled and run by the same runtime that powers Godot games. We get a production-grade, sandboxed, hot-reloadable scripting environment for free.
+
+**GDExtension** means GONODES can reach out to native code — FFmpeg for video decoding, custom C++ operators for CPU-heavy algorithms — through Godot's stable ABI. The host engine is already there; we just write the bindings.
+
+The philosophy scales forward: Godot's roadmap is our roadmap. Improvements to the renderer, the physics engine, the animation system, WebAssembly support, XR integration — every one of those becomes available to GONODES patches the moment Godot ships it. We spend our effort on what is *unique* to GONODES (the operator model, the cook engine, the parameter system, the real-time wiring) and borrow everything else from one of the most actively developed open-source engines in the world.
+
+Building on Godot is not a constraint. It is the point.
+
+---
+
 ## Core Concepts
 
 ### Operator Families

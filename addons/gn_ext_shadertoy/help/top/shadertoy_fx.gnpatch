@@ -1,0 +1,49 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [-200, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "noise_type": {"value": 0},
+                "scale": {"value": 4.0},
+                "monochrome": {"value": false}
+            }
+        },
+        "shadertoy1": {
+            "type": "ShadertoyURLTOP",
+            "position": [200, 100],
+            "parameters": {
+                "time_dependent": {"value": false},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "shadertoy_code": {
+                    "value": "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n\tvec2 uv = fragCoord / iResolution.xy;\n\t// Chromatic aberration\n\tfloat offset = 0.004;\n\tfloat r = texture(iChannel0, uv + vec2(offset, 0.0)).r;\n\tfloat g = texture(iChannel0, uv).g;\n\tfloat b = texture(iChannel0, uv - vec2(offset, 0.0)).b;\n\tvec3 col = vec3(r, g, b);\n\t// Scanlines\n\tcol -= sin(uv.y * iResolution.y * 3.14159) * 0.04;\n\t// Vignette\n\tvec2 q = uv - 0.5;\n\tcol *= 0.9 + 0.1 * pow(16.0 * q.x * q.y * (1.0 - q.x) * (1.0 - q.y), 0.2);\n\tfragColor = vec4(col, 1.0);\n}"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [620, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1",     "from_port": 0, "to": "shadertoy1", "to_port": 0},
+        {"from": "shadertoy1", "from_port": 0, "to": "window1",    "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Shadertoy URL TOP — Effect Example\n\nCRT post-process applied to a NoiseTOP input.\niChannel0 is wired automatically when the node has one input connected.\nThe effect adds chromatic aberration, scanlines and a vignette using texture().\nAny number of input TOPs can be added: each becomes iChannel0, iChannel1, etc.\nEdit shadertoy_code inline or load a preset from the Presets menu.",
+            "position": [-250.0, -200.0],
+            "size": [580.0, 130.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

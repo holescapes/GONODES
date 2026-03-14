@@ -230,7 +230,10 @@ addons/gn_ext_myext/
 ├── operators/
 │   └── <family>/
 │       └── my_operator.gd    # Operator scripts
-└── help/                     # Extension help patches
+├── presets/                  # Code/param presets (self-contained)
+│   └── <folder>/
+│       └── my_preset.glsl
+└── help/                     # Help patches (self-contained)
     └── <family>/
         └── myop_basic.gnpatch
 ```
@@ -252,6 +255,25 @@ my_operator = "res://addons/gn_ext_myext/operators/top/my_operator.gd"
 Extensions are auto-discovered by the registry during editor startup via `scan_extensions()`. The `section` field groups your operators under a labeled section in the palette.
 
 All the same rules apply to extension operators: descriptions, help patches, parameter tooltips.
+
+### Extension Self-Containment Rule
+
+**An extension must be entirely self-contained inside its `addons/gn_ext_<name>/` folder. Never place extension assets in `addons/gonodes/`.**
+
+| Asset type | Where it lives |
+|---|---|
+| Operator scripts | `operators/<family>/` |
+| Raw shader/code presets | `presets/<folder>/` (e.g. `presets/shadertoy/`, `presets/isf/`) |
+| Parameter presets | `presets/params/` |
+| Help patches | `help/<family>/` |
+| Textures, data files | anywhere inside the extension folder |
+
+The core discovery systems find these automatically — no registration is needed:
+- `gn_script_helper.get_preset_list()` scans `gn_ext_*/presets/<folder>/` for all installed extensions.
+- `gn_help_window._find_example_patches()` scans `<extension_dir>/help/<family>/` alongside the core help directory.
+- Both systems use the same matching rules as their core counterparts.
+
+> **Why this matters:** Placing extension assets in `addons/gonodes/` couples the extension to the core, makes it impossible to distribute the extension independently, and pollutes the core tree for users who do not want the extension.
 
 ---
 
@@ -341,7 +363,7 @@ One-sentence description of the operator.
 
 ## 8. Help System Integration
 
-The in-editor Help window discovers `.gnpatch` files by scanning `addons/gonodes/help/<family>/` directories at runtime. No manifest or registration is needed — just drop the file in the right folder.
+The in-editor Help window discovers `.gnpatch` files by scanning `addons/gonodes/help/<family>/` (core) **and** each extension's `help/<family>/` directory at runtime. No manifest or registration is needed — just drop the file in the right folder (following the Extension Self-Containment Rule above).
 
 ### Help Patch Discovery
 
