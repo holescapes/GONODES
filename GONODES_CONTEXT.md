@@ -5021,15 +5021,19 @@ This would bring total native coverage from **43 → 53 operators** and eliminat
 
 At 69 native operators (22% of 314), every CPU-intensive operator would be in C++. Remaining GDScript operators would be GPU-bound, pass-through, or API-wrapper nodes where native code provides no benefit.
 
-### 36.10 ISF Extension (Planned)
+### 36.10 ISF Extension — IMPLEMENTED
 
-A new `gn_ext_isf` extension for **ISF (Interactive Shader Format)** compatibility — the dominant shader interchange format in the VJ/live-visual world (VDMX, MadMapper, Millumin, CoGe, Synesthesia). Planned architecture:
+`gn_ext_isf` — **ISF (Interactive Shader Format)** compatibility for the VJ/live-visual world (VDMX, MadMapper, Millumin, CoGe, Synesthesia).
 
-- **ISFTranslator** (`isf_translator.gd`) — parses `.fs`/`.isf` files, extracts JSON header, translates ISF GLSL → Godot `canvas_item` shaders. Maps ISF built-ins: `RENDERSIZE`→uniform vec2, `TIME`→Godot TIME, `isf_FragNormCoord`→UV, `IMG_PIXEL()`/`IMG_NORM_PIXEL()`/`IMG_THIS_PIXEL()`→texture() calls, `IMG_SIZE()`→uniform vec2 per image, `gl_FragColor`→COLOR.
-- **ISFFileTOP** — runtime loader node. User provides a `.fs`/`.isf` file path → auto-parses JSON `INPUTS` → auto-creates GNParameters (float/bool/long/point2D/color) and TOP input ports (image type) → translates and compiles shader. Drop any ISF file, get a working node with full parameter UI.
-- **ISFBaseTOP** — abstract base for pre-baked ISF shader conversions (mirrors ShadertoyBaseTOP pattern).
-- **Pre-baked conversions** — 10-15 popular ISF generators and effects from the ISF-Files community repo.
-- **Multi-pass support** (Phase 2) — `PASSES`/`TARGET`/`PERSISTENT`/`FLOAT` → multiple SubViewport render passes with persistent buffers (mirrors FeedbackTOP pattern).
-- **Audio input support** (Phase 3, stretch) — ISF `audio`/`audioFFT` input types → accept CHOP data, render as 1D texture for audio-reactive VJ shaders.
-- ISF INPUT type mapping: float→Float param, bool→Bool param, long→Enum param (VALUES+LABELS), point2D→Vector2 param, color→Color param, event→momentary Bool, image→TOP input port, audio/audioFFT→CHOP input port (stretch).
+**Architecture — runtime translation only (no pre-baked shaders):**
+
+- **ISFTranslator** (`isf_translator.gd`) — parses `.fs`/`.isf` files, extracts JSON header, translates ISF GLSL → Godot `canvas_item` shaders at runtime. Maps ISF built-ins: `RENDERSIZE`→uniform vec2, `TIME`→Godot TIME, `isf_FragNormCoord`→UV, `IMG_PIXEL()`/`IMG_NORM_PIXEL()`/`IMG_THIS_PIXEL()`→texture() calls, `IMG_SIZE()`→uniform vec2 per image, `gl_FragColor`→COLOR.
+- **ISFFileTOP** — single runtime node with inline code editor, ISF syntax highlighting, and preset system. Auto-parses JSON `INPUTS` → auto-creates GNParameters (float/bool/long/point2D/color) and TOP input ports (image type) → translates and compiles shader. Drop any ISF file, get a working node with full parameter UI.
+- **Multi-pass support** — `PASSES`/`TARGET`/`PERSISTENT`/`FLOAT` → multiple SubViewport render passes with persistent buffers.
+- **10 factory presets** (.fs files in `presets/isf/`): 5 generators (color_bars, sine_warp, kaleidoscope, gradient_map, lissajous), 5 effects (kaleidoscope_fx, glitch, mirror, edge_glow, cross_hatch).
+- **2 help patches**: `isf_generator.gnpatch`, `isf_fx.gnpatch`.
+- ISF INPUT type mapping: float→Float param, bool→Bool param, long→Enum param (VALUES+LABELS), point2D→Vector2 param, color→Color param, event→momentary Bool, image→TOP input port.
+- **Audio input support** (stretch goal) — ISF `audio`/`audioFFT` input types → accept CHOP data, render as 1D texture for audio-reactive VJ shaders.
+
+**Design decision:** No ISFBaseTOP or pre-baked `.gdshader` conversions. The ISFTranslator handles all translation at runtime, so every ISF shader works through a single node. This avoids class proliferation and keeps the extension maintainable.
 

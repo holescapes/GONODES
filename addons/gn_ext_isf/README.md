@@ -156,7 +156,7 @@ addons/gn_ext_isf/
 ├── operators/top/
 │   └── isf_file_top.gd           # ISFFileTOP node
 ├── presets/isf/                  # Factory presets (.fs files)
-├── shaders/                      # Pre-translated .gdshader references
+├── shaders/                      # (legacy — unused; all translation is runtime)
 └── help/top/
     ├── isf_generator.gnpatch     # Help patch: generator example
     └── isf_fx.gnpatch            # Help patch: FX example
