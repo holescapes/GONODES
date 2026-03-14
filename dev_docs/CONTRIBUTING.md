@@ -247,12 +247,27 @@ version = "1.0.0"
 author = "Your Name"
 description = "What this extension adds"
 section = "My Extension"
+# platforms = ["windows", "macos", "linux"]   # Optional: restrict to specific OSes
+# architectures = ["x86_64", "arm64"]           # Optional: restrict to specific CPU architectures
+# dependencies = ["SomeNativeClass"]             # Optional: required GDExtension classes
 
-[operators]
-my_operator = "res://addons/gn_ext_myext/operators/top/my_operator.gd"
+[operator.MyOperatorTOP]
+family = "TOP"
+script = "res://addons/gn_ext_myext/operators/top/my_operator.gd"
+description = "What this operator does"
 ```
 
 Extensions are auto-discovered by the registry during editor startup via `scan_extensions()`. The `section` field groups your operators under a labeled section in the palette.
+
+#### Optional `[extension]` Keys
+
+| Key | Purpose |
+|-----|---------|
+| `platforms` | Array of OS names (`"windows"`, `"macos"`, `"linux"`, `"android"`, `"ios"`, `"web"`). Extension is skipped on non-matching OSes. Omit to load everywhere. Detected via `OS.get_name().to_lower()`. |
+| `architectures` | Array of CPU architecture names (`"x86_64"`, `"x86_32"`, `"arm64"`, `"arm32"`, etc.). Extension is skipped on non-matching architectures. Omit to load on all architectures. Detected via `Engine.get_architecture_name()`. |
+| `dependencies` | Array of GDExtension class names. Extension is skipped if any class is missing from `ClassDB`. |
+
+Checks run in order: platform → architecture → dependency. If any check fails, the extension is silently skipped.
 
 All the same rules apply to extension operators: descriptions, help patches, parameter tooltips.
 

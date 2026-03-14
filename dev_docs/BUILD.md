@@ -230,6 +230,13 @@ as `.dll` / `.so` / `.dylib` files alongside a `.gdextension` manifest.  Not
 every addon provides binaries for every platform, and missing binaries will
 cause Godot's export to fail.
 
+**Build-time filtering** is handled by the build scripts (see below).
+**Runtime gating** is handled by the extension registry's `platforms` and
+`architectures` keys in `gn_extension.cfg` — see [CONTRIBUTING.md § 5](CONTRIBUTING.md)
+for the full format.  This prevents operators from appearing in the palette
+on unsupported OS/architecture combos even when the `.gdextension` file is
+present (e.g., Syphon on Windows, or Spout on ARM64 Windows).
+
 The build scripts control GDExtension handling via the `-GDExtensions` /
 `--gdext` parameter, which accepts four modes:
 

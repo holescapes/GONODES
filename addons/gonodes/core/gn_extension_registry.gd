@@ -334,6 +334,38 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 	# All operators inherit this; per-operator "section" key overrides.
 	var ext_section: String = cfg.get_value("extension", "section", ext_name)
 
+	# ── Platform check ──
+	# If the manifest declares a "platforms" key, skip this extension on non-matching OSes.
+	# Values: "windows", "macos", "linux", "android", "ios", "web"
+	var platforms: Array = cfg.get_value("extension", "platforms", [])
+	if platforms.size() > 0:
+		var current_os := OS.get_name().to_lower()
+		var matched := false
+		for plat in platforms:
+			if current_os == str(plat).to_lower():
+				matched = true
+				break
+		if not matched:
+			print("[ExtRegistry] Extension '%s' skipped — platform '%s' not in %s" % [ext_name, current_os, str(platforms)])
+			_loaded_extensions.append(folder_name)
+			return
+
+	# ── Architecture check ──
+	# If the manifest declares an "architectures" key, skip on non-matching CPU architectures.
+	# Values: "x86_64", "x86_32", "arm64", "arm32", etc. (from Engine.get_architecture_name())
+	var architectures: Array = cfg.get_value("extension", "architectures", [])
+	if architectures.size() > 0:
+		var current_arch := Engine.get_architecture_name()
+		var arch_matched := false
+		for arch in architectures:
+			if current_arch == str(arch).strip_edges():
+				arch_matched = true
+				break
+		if not arch_matched:
+			print("[ExtRegistry] Extension '%s' skipped — architecture '%s' not in %s" % [ext_name, current_arch, str(architectures)])
+			_loaded_extensions.append(folder_name)
+			return
+
 	# ── Dependency check ──
 	var deps: Array = cfg.get_value("extension", "dependencies", [])
 	for dep_class in deps:

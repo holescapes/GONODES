@@ -4347,33 +4347,56 @@ script="res://addons/gn_ext_ffmpeg/operators/top/ffmpeg_in_top.gd"
 description="FFmpeg video decoder. H.264, H.265, VP9, AV1 and more."
 ```
 
-### 28.6 Dependency Guards
+Optional keys in the `[extension]` section:
 
-Before loading an extension's operators, the registry checks `ClassDB.class_exists()` for each class listed in `dependencies`. If any dependency is missing (e.g., the GDExtension `.dll`/`.so` is not installed), the entire extension is skipped with a warning — no crash, no error.
+| Key | Type | Purpose | Example |
+|-----|------|---------|---------|
+| `platforms` | Array of strings | Restrict to specific OSes. Values: `"windows"`, `"macos"`, `"linux"`, `"android"`, `"ios"`, `"web"` (from `OS.get_name().to_lower()`). Omit = loads everywhere. | `platforms=["windows"]` |
+| `architectures` | Array of strings | Restrict to specific CPU architectures. Values: `"x86_64"`, `"x86_32"`, `"arm64"`, `"arm32"`, etc. (from `Engine.get_architecture_name()`). Omit = loads on all architectures. | `architectures=["x86_64"]` |
+| `dependencies` | Array of strings | GDExtension class names required at load time (checked via `ClassDB.class_exists()`). | `dependencies=["FFmpegVideoStream"]` |
+| `section` | String | Palette section label — groups operators under this heading. | `section="Video"` |
+
+Platform and architecture guards are checked sequentially before dependency checks. If either fails, the extension is silently skipped (logged at debug level) and marked as loaded to prevent re-scan.
+
+### 28.6 Platform & Architecture Guards
+
+The registry runs three sequential checks before loading an extension's operators:
+
+1. **Platform check** — if `platforms` is declared and the current OS (`OS.get_name().to_lower()`) is not in the list, skip.
+2. **Architecture check** — if `architectures` is declared and the current CPU arch (`Engine.get_architecture_name()`) is not in the list, skip.
+3. **Dependency check** — `ClassDB.class_exists()` for each class in `dependencies`. If any missing, skip.
+
+All three are optional. Omitting a key means "no restriction" for that axis. This allows fine-grained control:
+- Spout: `platforms=["windows"]`, `architectures=["x86_64"]` — Windows x86_64 only.
+- Syphon: `platforms=["macos"]` — any macOS architecture (universal dylib covers both x86_64 and arm64).
+- GPU Encode: `platforms=["windows", "macos"]` — no architecture restriction (macOS universal, Windows x86_64 native lib handled by `.gdextension`).
+
+If any guard fails, the extension is skipped with a warning and marked as loaded to prevent repeated scan attempts.
 
 ### 28.7 Loading Flow
 
 1. **Editor startup** → `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()`
 2. **First access** → `instance()` creates the singleton and runs `_register_core_operators()` (82 core operators)
-3. **scan_extensions()** → iterates `res://addons/gn_ext_*/gn_extension.cfg`, checks dependencies, loads operator scripts
+3. **scan_extensions()** → iterates `res://addons/gn_ext_*/gn_extension.cfg`, checks platform/architecture/dependencies, loads operator scripts
 4. **Palette/Factory** → `GNGraphEditor.get_operator_registry()` and `_create_operator_instance()` delegate to the registry
 5. **Palette tooltips** → `GNNodePalette._get_operator_description()` delegates to registry
 
 ### 28.8 Future Extensions (Roadmap)
 
-| Extension | Folder | Dependencies | Operators | Status |
-|-----------|--------|-------------|-----------|--------|
-| FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | ✅ Done |
-| Shadertoy | `gn_ext_shadertoy` | — | 5 generator TOPs, 5 effect TOPs, ShadertoyURLTOP | ✅ Done |
-| Native Accel | `gn_ext_native` | 69 C++ processor classes | 69 native operators (37 SOP, 18 CHOP, 5 IMG, 4 TOP, 3 VOL, 2 POP) | ✅ Built & active (Windows x86_64); Linux/macOS pending |
-| ISF | `gn_ext_isf` | — | ISFFileTOP + 10 factory presets | ✅ Done |
-| Spout | `gn_ext_spout` | Spout2 SDK (BSD, compiled inline) | SpoutInTOP, SpoutOutTOP | ✅ Built (Windows x86_64) |
-| Syphon | `gn_ext_syphon` | Syphon Framework (BSD) | SyphonInTOP, SyphonOutTOP | ✅ Code complete (macOS — needs macOS build) |
-| Video Capture | `gn_ext_video_capture` | OS APIs (MF/AVFoundation/V4L2) | VideoDeviceInIMG | ✅ Built (Windows x86_64); macOS/Linux pending |
-| MIDI | `gn_ext_midi` | RtMidi (MIT, compiled inline) | RtMidiInCHOP, RtMidiOutCHOP | ✅ Built (Windows x86_64); macOS/Linux pending |
-| GPU Encode | `gn_ext_gpu_encode` | OS APIs (MF/VideoToolbox) | MovieFileOutTOP | ✅ Built (Windows x86_64); macOS pending |
-| Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned |
-| NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned |
+| Extension | Folder | Dependencies | Operators | Platform / Arch Guard | Status |
+|-----------|--------|-------------|-----------|----------------------|--------|
+| FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | — (dep guard) | ✅ Done |
+| Shadertoy | `gn_ext_shadertoy` | — | 5 generator TOPs, 5 effect TOPs, ShadertoyURLTOP | — (pure GDScript) | ✅ Done |
+| Native Accel | `gn_ext_native` | 69 C++ processor classes | 69 native operators (37 SOP, 18 CHOP, 5 IMG, 4 TOP, 3 VOL, 2 POP) | — (dep guard + runtime fallback) | ✅ Built & active (Windows x86_64); Linux/macOS pending |
+| ISF | `gn_ext_isf` | — | ISFFileTOP + 10 factory presets | — (pure GDScript) | ✅ Done |
+| Spout | `gn_ext_spout` | Spout2 SDK (BSD, compiled inline) | SpoutInTOP, SpoutOutTOP | `platforms=["windows"]`, `architectures=["x86_64"]` | ✅ Built (Windows x86_64) |
+| Syphon | `gn_ext_syphon` | Syphon Framework (BSD) | SyphonInTOP, SyphonOutTOP | `platforms=["macos"]` | ✅ Code complete (macOS — needs macOS build) |
+| Video Capture | `gn_ext_video_capture` | OS APIs (MF/AVFoundation/V4L2) | VideoDeviceInIMG | — (runtime check) | ✅ Built (Windows x86_64); macOS/Linux pending |
+| MIDI | `gn_ext_midi` | RtMidi (MIT, compiled inline) | RtMidiInCHOP, RtMidiOutCHOP | — (runtime check) | ✅ Built (Windows x86_64); macOS/Linux pending |
+| GPU Encode | `gn_ext_gpu_encode` | OS APIs (MF/VideoToolbox) | MovieFileOutTOP | `platforms=["windows", "macos"]` | ✅ Built (Windows x86_64); macOS pending |
+| Mapper | `gn_ext_mapper` | — | 7 mapping TOPs | — (pure GDScript) | ✅ Done |
+| Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned | Planned |
+| NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned | Planned |
 
 ### 28.10 Extension Help Patches
 
