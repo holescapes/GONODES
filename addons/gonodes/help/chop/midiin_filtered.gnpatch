@@ -1,0 +1,102 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lag1": {
+            "type": "LagCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "lag": {
+                    "value": 0.1
+                }
+            }
+        },
+        "midi1": {
+            "type": "MidiInCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "midi1",
+            "from_port": 0,
+            "to": "lag1",
+            "to_port": 0
+        },
+        {
+            "from": "midi1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MIDI In \u2014 Smoothed\n\nMIDI input with lag smoothing.\nReduces CC value stepping.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

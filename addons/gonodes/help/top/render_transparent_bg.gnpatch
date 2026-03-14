@@ -1,0 +1,133 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                },
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "transparent_bg": {
+                    "value": true
+                },
+                "use_environment": {
+                    "value": true
+                },
+                "ambient_energy": {
+                    "value": 0.15
+                },
+                "ambient_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "anti_aliasing": {
+                    "value": 1
+                },
+                "shadow_atlas_size": {
+                    "value": 1
+                },
+                "dir_shadow_size": {
+                    "value": 1
+                },
+                "shadow_filter": {
+                    "value": 1
+                },
+                "dof_far_enabled": {
+                    "value": true
+                },
+                "dof_far_distance": {
+                    "value": 5.0
+                },
+                "dof_far_transition": {
+                    "value": 2.5
+                },
+                "dof_near_enabled": {
+                    "value": true
+                },
+                "dof_near_distance": {
+                    "value": 1.0
+                },
+                "dof_near_transition": {
+                    "value": 0.5
+                },
+                "dof_bokeh_size": {
+                    "value": 2.0
+                },
+                "dof_bokeh_shape": {
+                    "value": 1
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RenderTOP \u2014 Parameters\n\nShowcases: resolution, bg_color, transparent_bg.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

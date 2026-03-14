@@ -1,0 +1,61 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "circle1": {
+            "type": "CircleSOP",
+            "position": [100, 100],
+            "parameters": {
+                "radius": { "value": 1.0 },
+                "segments": { "value": 6 },
+                "type": { "value": 1 },
+                "orientation": { "value": 2 }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [500, 100],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [500, 350],
+            "parameters": {
+                "tx": { "value": 0 },
+                "ty": { "value": 0 },
+                "tz": { "value": 4.0 }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [850, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "circle1", "from_port": 0, "to": "geo_view", "to_port": 0 },
+        { "from": "geo_view", "from_port": 0, "to": "render_view", "to_port": 0 },
+        { "from": "cam_view", "from_port": 0, "to": "render_view", "to_port": 1 },
+        { "from": "render_view", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Circle SOP — Polygon Mode\n\nHexagon shape: 6 segments in polygon mode (type=1).\nOrientation=2 sets XY plane for front-facing view.\nChange segments to create triangles (3), pentagons (5), etc.",
+            "position": [50.0, -60.0],
+            "size": [450.0, 80.0],
+            "color": [0.5, 0.8, 0.5, 0.8]
+        }
+    ]
+}

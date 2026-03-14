@@ -1,0 +1,209 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "joint1": {
+            "type": "JointCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.5
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 0.5
+                },
+                "rx": {
+                    "value": 0.5
+                },
+                "ry": {
+                    "value": 0.5
+                },
+                "rz": {
+                    "value": 0.5
+                },
+                "joint_type": {
+                    "value": 1
+                },
+                "exclude_collision": {
+                    "value": true
+                },
+                "hinge_limit": {
+                    "value": true
+                },
+                "hinge_lower": {
+                    "value": -45.0
+                },
+                "hinge_upper": {
+                    "value": 45.0
+                },
+                "hinge_motor": {
+                    "value": true
+                },
+                "hinge_motor_speed": {
+                    "value": 0.5
+                },
+                "hinge_motor_force": {
+                    "value": 5.0
+                },
+                "slider_lower": {
+                    "value": -0.5
+                },
+                "slider_upper": {
+                    "value": 0.5
+                },
+                "cone_swing": {
+                    "value": 22.5
+                },
+                "cone_twist": {
+                    "value": 22.5
+                },
+                "cone_softness": {
+                    "value": 0.4
+                },
+                "cone_relaxation": {
+                    "value": 0.5
+                },
+                "dof_lock_lin_x": {
+                    "value": true
+                },
+                "dof_lock_lin_y": {
+                    "value": true
+                },
+                "dof_lock_lin_z": {
+                    "value": true
+                },
+                "dof_lock_ang_x": {
+                    "value": true
+                },
+                "dof_lock_ang_y": {
+                    "value": true
+                },
+                "dof_lock_ang_z": {
+                    "value": true
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                1000,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 5
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1600,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "joint1",
+            "to_port": 0
+        },
+        {
+            "from": "joint1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "JointCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,124 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "progressbar1": {
+            "type": "ProgressBarUI",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "min_val": {
+                    "value": 0.0
+                },
+                "max_val": {
+                    "value": 100.0
+                },
+                "default_val": {
+                    "value": 50.0
+                },
+                "chop_channel": {
+                    "value": "value"
+                },
+                "show_percentage": {
+                    "value": true
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "slider_ctrl": {
+            "type": "SliderUI",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Control"
+                },
+                "default_val": {
+                    "value": 0.5
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 320,
+                        "y": 280
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "progressbar1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "slider_ctrl",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ProgressBarUI \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

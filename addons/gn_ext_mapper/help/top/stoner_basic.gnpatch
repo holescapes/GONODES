@@ -1,0 +1,142 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "stoner1": {
+            "type": "StonerTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "tl_x": {
+                    "value": 0.0
+                },
+                "tl_y": {
+                    "value": 0.0
+                },
+                "tr_x": {
+                    "value": 1.0
+                },
+                "tr_y": {
+                    "value": 0.0
+                },
+                "bl_x": {
+                    "value": 0.0
+                },
+                "bl_y": {
+                    "value": 1.0
+                },
+                "br_x": {
+                    "value": 1.0
+                },
+                "br_y": {
+                    "value": 1.0
+                },
+                "grid_u": {
+                    "value": 1
+                },
+                "grid_v": {
+                    "value": 1
+                },
+                "softedge_left": {
+                    "value": 0.0
+                },
+                "softedge_right": {
+                    "value": 0.0
+                },
+                "softedge_top": {
+                    "value": 0.0
+                },
+                "softedge_bottom": {
+                    "value": 0.0
+                },
+                "softedge_gamma": {
+                    "value": 2.2
+                },
+                "test_pattern": {
+                    "value": 0
+                },
+                "test_grid_lines": {
+                    "value": 8
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "stoner1",
+            "to_port": 0
+        },
+        {
+            "from": "stoner1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "StonerTOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_mapper extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

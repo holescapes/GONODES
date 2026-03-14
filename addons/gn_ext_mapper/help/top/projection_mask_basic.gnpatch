@@ -1,0 +1,109 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "projection_mask1": {
+            "type": "ProjectionMaskTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "left": {
+                    "value": 0.0
+                },
+                "right": {
+                    "value": 1.0
+                },
+                "mask_top": {
+                    "value": 0.0
+                },
+                "bottom": {
+                    "value": 1.0
+                },
+                "feather": {
+                    "value": 0.02
+                },
+                "invert": {
+                    "value": false
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "projection_mask1",
+            "to_port": 0
+        },
+        {
+            "from": "projection_mask1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ProjectionMaskTOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_mapper extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,203 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "instance1": {
+            "type": "InstanceCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "count": {
+                    "value": 100
+                },
+                "scatter_mode": {
+                    "value": 0
+                },
+                "spacing": {
+                    "value": 1.0
+                },
+                "seed": {
+                    "value": 42
+                },
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "rx": {
+                    "value": 0.0
+                },
+                "ry": {
+                    "value": 0.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "sx": {
+                    "value": 1.0
+                },
+                "sy": {
+                    "value": 1.0
+                },
+                "sz": {
+                    "value": 1.0
+                },
+                "align_to_normal": {
+                    "value": true
+                },
+                "scale_rand": {
+                    "value": 0.0
+                },
+                "rotation_rand": {
+                    "value": 0.0
+                },
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                },
+                "metallic": {
+                    "value": 0.0
+                },
+                "roughness": {
+                    "value": 0.5
+                },
+                "visible": {
+                    "value": true
+                },
+                "cast_shadow": {
+                    "value": 0
+                },
+                "chop_map": {
+                    "value": 0
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                1000,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 5
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1600,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "instance1",
+            "to_port": 0
+        },
+        {
+            "from": "instance1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "InstanceCOMP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,111 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "checkerboardimg1": {
+            "type": "CheckerboardIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "cells_x": {
+                    "value": 8
+                },
+                "cells_y": {
+                    "value": 8
+                },
+                "color_a": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                },
+                "color_b": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                },
+                "softness": {
+                    "value": 0.0
+                }
+            }
+        },
+        "imgtotop1": {
+            "type": "ImgToTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "checkerboardimg1",
+            "from_port": 0,
+            "to": "imgtotop1",
+            "to_port": 0
+        },
+        {
+            "from": "imgtotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CheckerboardIMG \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

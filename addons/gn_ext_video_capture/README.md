@@ -25,7 +25,7 @@ Requires godot-cpp shared via junction/symlink from `gn_ext_native/native/godot-
 
 | Operator | Family | Description |
 |----------|--------|-------------|
-| VideoDeviceInTOP | TOP | Capture live video from a webcam or capture device |
+| VideoDeviceInIMG | IMG | Capture live video from a webcam or capture device |
 
 ## License
 

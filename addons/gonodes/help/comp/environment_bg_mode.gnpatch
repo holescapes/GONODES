@@ -1,0 +1,266 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "environment1": {
+            "type": "EnvironmentCOMP",
+            "position": [
+                400,
+                450
+            ],
+            "parameters": {
+                "bg_mode": {
+                    "value": 1
+                },
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "bg_energy": {
+                    "value": 0.5
+                },
+                "ambient_enabled": {
+                    "value": true
+                },
+                "ambient_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "ambient_energy": {
+                    "value": 0.15
+                },
+                "tonemap_mode": {
+                    "value": 1
+                },
+                "tonemap_exposure": {
+                    "value": 0.5
+                },
+                "tonemap_white": {
+                    "value": 0.5
+                },
+                "glow_enabled": {
+                    "value": true
+                },
+                "glow_intensity": {
+                    "value": 0.4
+                },
+                "glow_strength": {
+                    "value": 0.5
+                },
+                "glow_bloom": {
+                    "value": 0.5
+                },
+                "glow_hdr_threshold": {
+                    "value": 0.5
+                },
+                "glow_blend_mode": {
+                    "value": 1
+                },
+                "ssao_enabled": {
+                    "value": true
+                },
+                "ssao_radius": {
+                    "value": 0.5
+                },
+                "ssao_intensity": {
+                    "value": 1.0
+                },
+                "ssao_power": {
+                    "value": 0.75
+                },
+                "ssil_enabled": {
+                    "value": true
+                },
+                "ssil_radius": {
+                    "value": 2.5
+                },
+                "ssil_intensity": {
+                    "value": 0.5
+                },
+                "ssil_sharpness": {
+                    "value": 0.49
+                },
+                "ssil_normal_rejection": {
+                    "value": 0.5
+                },
+                "ssr_enabled": {
+                    "value": true
+                },
+                "ssr_max_steps": {
+                    "value": 63
+                },
+                "ssr_fade_in": {
+                    "value": 0.075
+                },
+                "ssr_fade_out": {
+                    "value": 1.0
+                },
+                "ssr_depth_tolerance": {
+                    "value": 0.1
+                },
+                "adj_enabled": {
+                    "value": true
+                },
+                "adj_brightness": {
+                    "value": 0.5
+                },
+                "adj_contrast": {
+                    "value": 0.5
+                },
+                "adj_saturation": {
+                    "value": 0.5
+                },
+                "fog_enabled": {
+                    "value": true
+                },
+                "fog_density": {
+                    "value": 0.025
+                },
+                "fog_albedo": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "fog_emission": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "fog_emission_energy": {
+                    "value": 0.5
+                },
+                "fog_length": {
+                    "value": 32.0
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1400,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "EnvironmentCOMP \u2014 Parameters\n\nShowcases: bg_mode, bg_color, bg_energy.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

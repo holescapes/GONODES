@@ -1,0 +1,147 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                50
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 0
+                },
+                "frequency": {
+                    "value": 1.0
+                }
+            }
+        },
+        "wave2": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 1
+                },
+                "frequency": {
+                    "value": 2.0
+                }
+            }
+        },
+        "wave3": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                350
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 2
+                },
+                "frequency": {
+                    "value": 3.0
+                }
+            }
+        },
+        "join1": {
+            "type": "JoinCHOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "wave1",
+            "from_port": 0,
+            "to": "join1",
+            "to_port": 0
+        },
+        {
+            "from": "wave2",
+            "from_port": 0,
+            "to": "join1",
+            "to_port": 1
+        },
+        {
+            "from": "wave3",
+            "from_port": 0,
+            "to": "join1",
+            "to_port": 2
+        },
+        {
+            "from": "join1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Join CHOP \u2014 Three Segments\n\nSine, triangle, and square waves joined sequentially.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

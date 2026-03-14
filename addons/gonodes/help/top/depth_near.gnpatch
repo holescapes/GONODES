@@ -1,0 +1,101 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "depth1": {
+            "type": "DepthTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "near": {
+                    "value": 0.025
+                },
+                "far": {
+                    "value": 50.0
+                },
+                "invert": {
+                    "value": true
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "depth1",
+            "to_port": 0
+        },
+        {
+            "from": "depth1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DepthTOP \u2014 Parameters\n\nShowcases: near, far, invert.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

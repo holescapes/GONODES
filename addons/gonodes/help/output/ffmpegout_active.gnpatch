@@ -1,0 +1,72 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "ffmpegout1": {
+            "type": "FFmpegOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": true
+                },
+                "codec": {
+                    "value": 1
+                },
+                "framerate": {
+                    "value": 29
+                },
+                "crf": {
+                    "value": 22
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "ffmpegout1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "FFmpegOUT \u2014 Parameters\n\nShowcases: active, output_file, codec.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

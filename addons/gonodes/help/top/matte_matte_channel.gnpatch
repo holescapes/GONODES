@@ -1,0 +1,94 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "matte1": {
+            "type": "MatteTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "matte_channel": {
+                    "value": 1
+                },
+                "invert": {
+                    "value": true
+                },
+                "premultiply": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "matte1",
+            "to_port": 0
+        },
+        {
+            "from": "matte1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MatteTOP \u2014 Parameters\n\nShowcases: matte_channel, invert, premultiply.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

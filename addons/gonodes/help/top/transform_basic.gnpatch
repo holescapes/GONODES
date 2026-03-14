@@ -1,111 +1,174 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  100,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "resolution":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Vector2i",
-                                                                                     "x":  512,
-                                                                                     "y":  512
-                                                                                 }
-                                                                   },
-                                                    "scale":  {
-                                                                  "value":  3.0
-                                                              },
-                                                    "monochrome":  {
-                                                                       "value":  false
-                                                                   }
-                                                }
-                             },
-                  "transform1":  {
-                                     "type":  "TransformTOP",
-                                     "position":  [
-                                                      450,
-                                                      100
-                                                  ],
-                                     "parameters":  {
-                                                        "translate":  {
-                                                                          "value":  {
-                                                                                        "_type":  "Vector2",
-                                                                                        "x":  0.1,
-                                                                                        "y":  0.0
-                                                                                    }
-                                                                      },
-                                                        "rotate":  {
-                                                                       "value":  15.0
-                                                                   },
-                                                        "scale":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Vector2",
-                                                                                    "x":  0.8,
-                                                                                    "y":  0.8
-                                                                                }
-                                                                  },
-                                                        "extend":  {
-                                                                       "value":  2
-                                                                   }
-                                                    }
-                                 },
-                  "window1":  {
-                                  "position":  [
-                                                   800,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "transform1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "transform1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Transform TOP — 2D Transform\n\nTranslate, rotate (15°), and scale (80%) a texture.\nExtend mode Mirror wraps edges seamlessly.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_grid": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "rows": {
+                    "value": 10
+                },
+                "cols": {
+                    "value": 10
+                }
+            }
+        },
+        "transform1": {
+            "type": "TransformSOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "rx": {
+                    "value": 0.0
+                },
+                "ry": {
+                    "value": 0.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "sx": {
+                    "value": 1.0
+                },
+                "sy": {
+                    "value": 1.0
+                },
+                "sz": {
+                    "value": 1.0
+                },
+                "order": {
+                    "value": 0
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_grid",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "transform1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TransformSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

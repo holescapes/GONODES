@@ -1,0 +1,86 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "source1": {
+            "type": "SourcePOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderPOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "point_size": {
+                    "value": 0.05
+                },
+                "use_pscale": {
+                    "value": true
+                },
+                "billboard": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RenderPOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

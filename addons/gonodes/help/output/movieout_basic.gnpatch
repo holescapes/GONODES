@@ -1,0 +1,87 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "movieout1": {
+            "type": "MovieOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": false
+                },
+                "output_folder": {
+                    "value": "user://output/sequence"
+                },
+                "file_prefix": {
+                    "value": "frame"
+                },
+                "format": {
+                    "value": 0
+                },
+                "quality": {
+                    "value": 0.9
+                },
+                "start_frame": {
+                    "value": 0
+                },
+                "frame_padding": {
+                    "value": 4
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "movieout1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MovieOUT \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,130 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "null1": {
+            "type": "NullCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                1000,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1600,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NullCOMP \u2014 Advanced\n\nMore complex configuration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

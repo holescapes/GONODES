@@ -1,0 +1,68 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
+        },
+        "audioout1": {
+            "type": "AudioDeviceOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": true
+                },
+                "gain": {
+                    "value": 0.5
+                },
+                "mix_rate": {
+                    "value": 22050.0
+                },
+                "buffer_length": {
+                    "value": 0.05
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "audioout1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioDeviceOUT \u2014 Parameters\n\nShowcases: active, gain, mix_rate.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

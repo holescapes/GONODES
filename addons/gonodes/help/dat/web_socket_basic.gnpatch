@@ -2,32 +2,96 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "websocket1": {
-            "type": "WebSocketDAT",
-            "position": [100, 100],
+        "web1": {
+            "type": "WebDAT",
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "protocol": { "value": 0 },
-                "url": { "value": "ws://localhost:9090" },
-                "active": { "value": false }
+                "method": {
+                    "value": 0
+                },
+                "content_type": {
+                    "value": "application/json"
+                },
+                "auto_parse": {
+                    "value": true
+                }
             }
         },
-        "null1": {
-            "type": "NullDAT",
-            "position": [400, 100],
-            "parameters": {}
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "font_size": {
+                    "value": 14
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        { "from": "websocket1", "from_port": 0, "to": "null1", "to_port": 0 }
+        {
+            "from": "web1",
+            "from_port": 0,
+            "to": "texttop1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WebSocket DAT — Client Mode\n\nConnects to a WebSocket server at the URL.\nReceived messages appear as table rows.\nSend messages by connecting a DAT to the input.\nSet active=true to connect.",
-            "position": [50.0, -50.0],
-            "size": [450.0, 80.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "WebDAT \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

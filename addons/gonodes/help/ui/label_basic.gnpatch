@@ -1,0 +1,127 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "label1": {
+            "type": "LabelUI",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "Label"
+                },
+                "font_size": {
+                    "value": 16
+                },
+                "font_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                },
+                "h_align": {
+                    "value": 0
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "slider_ctrl": {
+            "type": "SliderUI",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Control"
+                },
+                "default_val": {
+                    "value": 0.5
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 320,
+                        "y": 280
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "label1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "slider_ctrl",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LabelUI \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

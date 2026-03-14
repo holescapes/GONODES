@@ -1,0 +1,203 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "rigid_body1": {
+            "type": "RigidBodyCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.5
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 0.5
+                },
+                "rx": {
+                    "value": 0.5
+                },
+                "ry": {
+                    "value": 0.5
+                },
+                "rz": {
+                    "value": 0.5
+                },
+                "sx": {
+                    "value": 0.5
+                },
+                "sy": {
+                    "value": 0.5
+                },
+                "sz": {
+                    "value": 0.5
+                },
+                "mode": {
+                    "value": 1
+                },
+                "mass": {
+                    "value": 0.5
+                },
+                "gravity_scale": {
+                    "value": 0.5
+                },
+                "friction": {
+                    "value": 0.5
+                },
+                "bounce": {
+                    "value": 0.5
+                },
+                "linear_damp": {
+                    "value": 0.5
+                },
+                "angular_damp": {
+                    "value": 0.5
+                },
+                "init_vel_x": {
+                    "value": 0.5
+                },
+                "init_vel_y": {
+                    "value": 0.5
+                },
+                "init_vel_z": {
+                    "value": 0.5
+                },
+                "lock_rot_x": {
+                    "value": true
+                },
+                "lock_rot_y": {
+                    "value": true
+                },
+                "lock_rot_z": {
+                    "value": true
+                },
+                "collision_shape": {
+                    "value": 1
+                },
+                "ccd": {
+                    "value": true
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                1000,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 5
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1600,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "rigid_body1",
+            "to_port": 0
+        },
+        {
+            "from": "rigid_body1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RigidBodyCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

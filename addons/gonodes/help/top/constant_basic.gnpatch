@@ -1,82 +1,94 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "const1":  {
-                                 "type":  "ConstantTOP",
-                                 "position":  [
-                                                  100,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "resolution":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Vector2i",
-                                                                                     "x":  512,
-                                                                                     "y":  512
-                                                                                 }
-                                                                   },
-                                                    "color":  {
-                                                                  "value":  {
-                                                                                "_type":  "Color",
-                                                                                "r":  0.2,
-                                                                                "g":  0.4,
-                                                                                "b":  0.8,
-                                                                                "a":  1.0
-                                                                            }
-                                                              },
-                                                    "alpha":  {
-                                                                  "value":  1.0
-                                                              }
-                                                }
-                             },
-                  "window1":  {
-                                  "position":  [
-                                                   450,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "const1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Constant TOP — Solid Color\n\nGenerates a solid blue color field at 512×512.\nUseful as a background or mask source.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         360.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "constant1": {
+            "type": "ConstantDAT",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "col0": {
+                    "value": "name"
+                },
+                "col1": {
+                    "value": "value"
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "font_size": {
+                    "value": 14
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "constant1",
+            "from_port": 0,
+            "to": "texttop1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ConstantDAT \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

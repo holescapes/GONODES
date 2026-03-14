@@ -1,0 +1,104 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "textedit1": {
+            "type": "TextEditUI",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "placeholder": {
+                    "value": "Enter text..."
+                },
+                "editable": {
+                    "value": true
+                },
+                "wrap_mode": {
+                    "value": true
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "textedit1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TextEditUI \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

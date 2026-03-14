@@ -1,0 +1,51 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_table": {
+            "type": "TableDAT",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "delete1": {
+            "type": "DeleteDAT",
+            "position": [450, 100],
+            "parameters": {
+                "mode": { "value": 0 },
+                "start_index": { "value": 1 },
+                "end_index": { "value": 3 }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [850, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "font_size": { "value": 14 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "src_table", "from_port": 0, "to": "delete1", "to_port": 0 },
+        { "from": "delete1", "from_port": 0, "to": "texttop1", "to_port": 0 },
+        { "from": "texttop1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Delete DAT — Row Range Deletion\n\nDeletes rows 1 through 3 from a TableDAT source.\nMode 0 removes by row index range.\nAdjust start_index and end_index to control which rows are removed.",
+            "position": [50.0, -60.0],
+            "size": [450.0, 80.0],
+            "color": [0.5, 0.7, 1.0, 0.8]
+        }
+    ]
+}

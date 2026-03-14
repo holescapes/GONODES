@@ -304,11 +304,11 @@ Network serialization (`to_dict()` / `from_dict()`) round-trip fidelity.
 
 ## 6. Manual Test Scenes
 
-> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (353 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §6.1 below.
+> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (1,084 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §6.1 below.
 
 ### 6.1 Help Example Patches (Replacement)
 
-Every operator now ships with 1–2 `.gnpatch` example files accessible via the `?` help button on each node. These patches provide the same visual verification that manual test scenes provided, but with these advantages:
+Every operator now ships with 3+ `.gnpatch` example files accessible via the `?` help button on each node. These patches provide the same visual verification that manual test scenes provided, but with these advantages:
 
 - **Per-operator coverage** — 108 patches vs 8 multi-node test scenes
 - **Discoverable** — click `?` on any node to see its examples

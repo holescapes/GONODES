@@ -1,0 +1,97 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "spoutouttop1": {
+            "type": "SpoutOutTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "sender_name": {
+                    "value": "GONODES"
+                },
+                "active": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "spoutouttop1",
+            "to_port": 0
+        },
+        {
+            "from": "spoutouttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SpoutOutTOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_spout extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,137 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "texturebutton1": {
+            "type": "TextureButtonUI",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "toggle_mode": {
+                    "value": true
+                },
+                "stretch": {
+                    "value": true
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                }
+            }
+        },
+        "label1": {
+            "type": "LabelUI",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "text": {
+                    "value": "Testing TextureButtonUI"
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                },
+                "spacing": {
+                    "value": 8
+                }
+            }
+        },
+        "ramp1": {
+            "type": "RampTOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 550
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "texturebutton1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "label1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        },
+        {
+            "from": "ramp1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TextureButtonUI \u2014 Parameters\n\nShowcases: toggle_mode, stretch, min_size.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

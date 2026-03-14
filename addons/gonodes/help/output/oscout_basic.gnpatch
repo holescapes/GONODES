@@ -1,0 +1,74 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_lfo": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 1.0
+                },
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
+        },
+        "oscout1": {
+            "type": "OscOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "host": {
+                    "value": "127.0.0.1"
+                },
+                "port": {
+                    "value": 9001
+                },
+                "active": {
+                    "value": false
+                },
+                "prefix": {
+                    "value": "/gonodes"
+                },
+                "send_mode": {
+                    "value": 0
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_lfo",
+            "from_port": 0,
+            "to": "oscout1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "OscOUT \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

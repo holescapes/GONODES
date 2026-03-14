@@ -1,0 +1,140 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "itemlist1": {
+            "type": "ItemListUI",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "allow_reselect": {
+                    "value": true
+                },
+                "max_columns": {
+                    "value": 0
+                },
+                "icon_size": {
+                    "value": 31
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                }
+            }
+        },
+        "label1": {
+            "type": "LabelUI",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "text": {
+                    "value": "Testing ItemListUI"
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                },
+                "spacing": {
+                    "value": 8
+                }
+            }
+        },
+        "ramp1": {
+            "type": "RampTOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 550
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "itemlist1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "label1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        },
+        {
+            "from": "ramp1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ItemListUI \u2014 Parameters\n\nShowcases: allow_reselect, max_columns, icon_size.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

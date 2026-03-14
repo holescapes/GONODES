@@ -1,0 +1,75 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "recordout1": {
+            "type": "RecordOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": true
+                },
+                "max_samples": {
+                    "value": 9999
+                },
+                "save": {
+                    "value": true
+                },
+                "reset": {
+                    "value": true
+                },
+                "format": {
+                    "value": 1
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "recordout1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RecordOUT \u2014 Parameters\n\nShowcases: active, max_samples, save.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

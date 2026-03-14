@@ -2,42 +2,188 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "sphere1": {
-            "type": "SphereSOP",
-            "position": [100, 100],
-            "parameters": {}
+        "src_grid": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "rows": {
+                    "value": 10
+                },
+                "cols": {
+                    "value": 10
+                }
+            }
         },
         "group1": {
             "type": "GroupSOP",
-            "position": [350, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "group_name": { "value": "top_half" },
-                "entity_type": { "value": 0 },
-                "method": { "value": 1 },
-                "nx": { "value": 0.0 },
-                "ny": { "value": 1.0 },
-                "nz": { "value": 0.0 },
-                "cone_angle": { "value": 90.0 }
+                "group_name": {
+                    "value": "group1"
+                },
+                "entity": {
+                    "value": 0
+                },
+                "method": {
+                    "value": 0
+                },
+                "bb_min_x": {
+                    "value": -0.5
+                },
+                "bb_min_y": {
+                    "value": -0.5
+                },
+                "bb_min_z": {
+                    "value": -0.5
+                },
+                "bb_max_x": {
+                    "value": 0.5
+                },
+                "bb_max_y": {
+                    "value": 0.5
+                },
+                "bb_max_z": {
+                    "value": 0.5
+                },
+                "dir_x": {
+                    "value": 0.0
+                },
+                "dir_y": {
+                    "value": 1.0
+                },
+                "dir_z": {
+                    "value": 0.0
+                },
+                "spread_angle": {
+                    "value": 45.0
+                },
+                "range_pattern": {
+                    "value": "0-9"
+                },
+                "operation": {
+                    "value": 0
+                }
             }
         },
-        "null1": {
-            "type": "NullSOP",
-            "position": [600, 100],
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
             "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        { "from": "sphere1", "from_port": 0, "to": "group1", "to_port": 0 },
-        { "from": "group1", "from_port": 0, "to": "null1", "to_port": 0 }
+        {
+            "from": "src_grid",
+            "from_port": 0,
+            "to": "group1",
+            "to_port": 0
+        },
+        {
+            "from": "group1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Group SOP — Normal Selection\n\nCreates a point group by normal direction.\nHere: selects the top half of a sphere\n(normals within 90° of +Y).\nMethods: Bounding Box, Normal, Range, All.",
-            "position": [50.0, -50.0],
-            "size": [450.0, 80.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "GroupSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -1,6 +1,6 @@
 # gn_ext_isf — ISF Shader Pack
 
-> **Status: Complete** — Single-node ISF v2 support with inline code editor, multi-pass rendering, 10 factory presets, and 2 help patches.
+> **Status: Complete** — Single-node ISF v2 support with inline code editor, multi-pass rendering, 10 factory presets, and 3 help patches.
 
 ISF (Interactive Shader Format) support for GONODES.
 

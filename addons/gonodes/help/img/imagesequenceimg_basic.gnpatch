@@ -1,0 +1,99 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "imagesequenceimg1": {
+            "type": "ImageSequenceIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "play": {
+                    "value": true
+                },
+                "speed": {
+                    "value": 1.0
+                },
+                "index": {
+                    "value": -1
+                },
+                "loop_mode": {
+                    "value": 0
+                },
+                "preload_all": {
+                    "value": false
+                }
+            }
+        },
+        "imgtotop1": {
+            "type": "ImgToTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "imagesequenceimg1",
+            "from_port": 0,
+            "to": "imgtotop1",
+            "to_port": 0
+        },
+        {
+            "from": "imgtotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ImageSequenceIMG \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

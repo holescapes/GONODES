@@ -2,45 +2,170 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
+        "src_grid": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "rows": {
+                    "value": 10
+                },
+                "cols": {
+                    "value": 10
+                }
+            }
+        },
         "noise1": {
-            "type": "NoiseVOL",
-            "position": [200, 200],
+            "type": "NoiseSOP",
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "res_x": {"value": 64},
-                "res_y": {"value": 64},
-                "res_z": {"value": 64},
-                "frequency": {"value": 3.0},
-                "amplitude": {"value": 1.2},
-                "octaves": {"value": 5},
-                "speed": {"value": 0.2}
+                "amplitude": {
+                    "value": 0.2
+                },
+                "frequency": {
+                    "value": 2.0
+                },
+                "offset_x": {
+                    "value": 0.0
+                },
+                "offset_y": {
+                    "value": 0.0
+                },
+                "offset_z": {
+                    "value": 0.0
+                },
+                "speed": {
+                    "value": 1.0
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "displace_axis": {
+                    "value": 0
+                },
+                "seed": {
+                    "value": 0
+                }
             }
         },
-        "marching1": {
-            "type": "MarchingCubesVOL",
-            "position": [550, 200],
-            "parameters": {
-                "threshold": {"value": 0.5},
-                "smooth_normals": {"value": true}
-            }
-        },
-        "null_sop": {
-            "type": "NullSOP",
-            "position": [900, 200],
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
             "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        {"from": "noise1", "from_port": 0, "to": "marching1", "to_port": 0},
-        {"from": "marching1", "from_port": 0, "to": "null_sop", "to_port": 0}
+        {
+            "from": "src_grid",
+            "from_port": 0,
+            "to": "noise1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "VOL → SOP — Marching Cubes Iso-Surface Extraction\n\nNoiseVOL generates an animated 3D density field.\nMarchingCubesVOL extracts the iso-surface at threshold=0.5\nas a GNGeoData mesh (SOP output).\n\nSmooth normals uses gradient interpolation for cleaner shading.\nLower threshold → more volume visible, higher → less.\nThe SOP output can be wired into GeometryCOMP for 3D rendering.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 120.0],
-            "color": [0.85, 0.35, 0.55, 0.8]
+            "text": "NoiseSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

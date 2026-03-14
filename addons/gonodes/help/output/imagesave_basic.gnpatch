@@ -1,0 +1,84 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "imagesave1": {
+            "type": "ImageSaveOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": false
+                },
+                "file_path": {
+                    "value": "user://output/frame"
+                },
+                "format": {
+                    "value": 0
+                },
+                "quality": {
+                    "value": 0.75
+                },
+                "auto_number": {
+                    "value": true
+                },
+                "start_frame": {
+                    "value": 0
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "imagesave1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ImageSaveOUT \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

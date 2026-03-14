@@ -1,0 +1,109 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 1.0
+                }
+            }
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "gain": {
+                    "value": 2.0
+                },
+                "offset": {
+                    "value": 0.5
+                }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 0
+        },
+        {
+            "from": "math1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Math CHOP \u2014 Basic\n\nScales LFO by 2x and adds 0.5 offset.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -2,79 +2,170 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "noise_density": {
-            "type": "NoiseVOL",
-            "position": [200, 200],
+        "src_grid": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "res_x": {"value": 48},
-                "res_y": {"value": 48},
-                "res_z": {"value": 48},
-                "frequency": {"value": 3.0},
-                "amplitude": {"value": 1.0},
-                "octaves": {"value": 3},
-                "speed": {"value": 0.3}
+                "rows": {
+                    "value": 10
+                },
+                "cols": {
+                    "value": 10
+                }
             }
         },
-        "noise_velocity": {
-            "type": "NoiseVOL",
-            "position": [200, 500],
+        "noise1": {
+            "type": "NoiseSOP",
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "res_x": {"value": 48},
-                "res_y": {"value": 48},
-                "res_z": {"value": 48},
-                "frequency": {"value": 2.0},
-                "amplitude": {"value": 0.4},
-                "octaves": {"value": 2},
-                "speed": {"value": 0.5}
+                "amplitude": {
+                    "value": 0.2
+                },
+                "frequency": {
+                    "value": 2.0
+                },
+                "offset_x": {
+                    "value": 0.0
+                },
+                "offset_y": {
+                    "value": 0.0
+                },
+                "offset_z": {
+                    "value": 0.0
+                },
+                "speed": {
+                    "value": 1.0
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "displace_axis": {
+                    "value": 0
+                },
+                "seed": {
+                    "value": 0
+                }
             }
         },
-        "displace1": {
-            "type": "DisplaceVOL",
-            "position": [550, 200],
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
             "parameters": {
-                "scale": {"value": 0.3},
-                "offset_x": {"value": 0.0},
-                "offset_y": {"value": 0.0},
-                "offset_z": {"value": 0.0}
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
             }
         },
-        "raymarch1": {
-            "type": "RaymarchVOL",
-            "position": [900, 200],
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
             "parameters": {
-                "width": {"value": 512},
-                "height": {"value": 512},
-                "max_steps": {"value": 128},
-                "step_size": {"value": 0.01},
-                "density_scale": {"value": 5.0},
-                "absorption": {"value": 8.0},
-                "cam_dist": {"value": 2.0},
-                "cam_yaw": {"value": 30.0}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1250, 200],
+            "position": [
+                1550,
+                100
+            ],
             "parameters": {
-                "open": {"value": true},
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise_density", "from_port": 0, "to": "displace1", "to_port": 0},
-        {"from": "noise_velocity", "from_port": 0, "to": "displace1", "to_port": 1},
-        {"from": "displace1", "from_port": 0, "to": "raymarch1", "to_port": 0},
-        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "src_grid",
+            "from_port": 0,
+            "to": "noise1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "VOL Displace — Warp by Velocity Field\n\nDisplaceVOL uses a second volume (input 1) as a 3D\nvelocity field to warp the density of input 0.\n\nscale controls the warp amplitude.\nThe animated noise velocity field creates a\ncontinuously evolving organic distortion.",
-            "position": [-100.0, -100.0],
-            "size": [480.0, 110.0],
-            "color": [0.6, 0.3, 0.8, 0.8]
+            "text": "NoiseSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

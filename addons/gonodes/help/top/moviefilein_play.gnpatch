@@ -1,0 +1,113 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "moviefilein1": {
+            "type": "MovieFileInTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                },
+                "play": {
+                    "value": true
+                },
+                "loop": {
+                    "value": true
+                },
+                "speed": {
+                    "value": 0.5
+                },
+                "seek": {
+                    "value": -0.5
+                },
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "moviefilein1",
+            "to_port": 0
+        },
+        {
+            "from": "moviefilein1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MovieFileInTOP \u2014 Parameters\n\nShowcases: resolution, play, loop.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

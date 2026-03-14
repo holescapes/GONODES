@@ -1,0 +1,107 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noisevol1": {
+            "type": "NoiseVOL",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "width": {
+                    "value": 511
+                },
+                "height": {
+                    "value": 511
+                },
+                "max_steps": {
+                    "value": 127
+                },
+                "step_size": {
+                    "value": 0.005
+                },
+                "density_scale": {
+                    "value": 2.5
+                },
+                "absorption": {
+                    "value": 5.0
+                },
+                "cam_dist": {
+                    "value": 0.75
+                },
+                "cam_yaw": {
+                    "value": 0.5
+                },
+                "cam_pitch": {
+                    "value": 10.0
+                },
+                "fov": {
+                    "value": 30.0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noisevol1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RaymarchVOL \u2014 Parameters\n\nShowcases: width, height, max_steps.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

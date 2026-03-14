@@ -1,0 +1,144 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                50
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 0
+                }
+            }
+        },
+        "wave2": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 2
+                }
+            }
+        },
+        "lfo_sw": {
+            "type": "LFO_CHOP",
+            "position": [
+                250,
+                300
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 0.3
+                },
+                "amplitude": {
+                    "value": 0.5
+                },
+                "offset": {
+                    "value": 0.5
+                }
+            }
+        },
+        "sw1": {
+            "type": "SwitchCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "wave1",
+            "from_port": 0,
+            "to": "sw1",
+            "to_port": 0
+        },
+        {
+            "from": "wave2",
+            "from_port": 0,
+            "to": "sw1",
+            "to_port": 1
+        },
+        {
+            "from": "lfo_sw",
+            "from_port": 0,
+            "to": "sw1",
+            "to_port": 2
+        },
+        {
+            "from": "sw1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Switch CHOP \u2014 Animated\n\nLFO sweeps between sine and square.\nBlended transition.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

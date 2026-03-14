@@ -1,0 +1,186 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "metaball1": {
+            "type": "MetaballSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": 29
+                },
+                "bounds_size": {
+                    "value": 3.0
+                },
+                "threshold": {
+                    "value": 0.5
+                },
+                "default_radius": {
+                    "value": 0.5
+                },
+                "ball_count": {
+                    "value": 1
+                },
+                "b0x": {
+                    "value": -0.4
+                },
+                "b0y": {
+                    "value": 0.5
+                },
+                "b0z": {
+                    "value": 0.5
+                },
+                "b0r": {
+                    "value": 0.75
+                },
+                "b1x": {
+                    "value": 0.4
+                },
+                "b1y": {
+                    "value": 0.5
+                },
+                "b1z": {
+                    "value": 0.5
+                },
+                "b1r": {
+                    "value": 0.75
+                },
+                "b2x": {
+                    "value": 0.5
+                },
+                "b2y": {
+                    "value": 0.5
+                },
+                "b2z": {
+                    "value": 0.5
+                },
+                "b2r": {
+                    "value": 0.5
+                },
+                "b3x": {
+                    "value": 0.5
+                },
+                "b3y": {
+                    "value": -0.5
+                },
+                "b3z": {
+                    "value": 0.5
+                },
+                "b3r": {
+                    "value": 0.5
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "metaball1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MetaballSOP \u2014 Parameters\n\nShowcases: resolution, bounds_size, threshold.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

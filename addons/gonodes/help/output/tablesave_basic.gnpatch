@@ -1,0 +1,64 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "const_dat": {
+            "type": "ConstantDAT",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "tablesave1": {
+            "type": "TableSaveOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": false
+                },
+                "file_path": {
+                    "value": "user://output/data"
+                },
+                "format": {
+                    "value": 0
+                },
+                "include_header": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "const_dat",
+            "from_port": 0,
+            "to": "tablesave1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TableSaveOUT \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

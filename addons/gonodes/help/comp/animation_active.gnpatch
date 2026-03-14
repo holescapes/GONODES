@@ -1,0 +1,197 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "animation1": {
+            "type": "AnimationCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": true
+                },
+                "speed": {
+                    "value": 0.5
+                },
+                "duration": {
+                    "value": 1.0
+                },
+                "loop_mode": {
+                    "value": 1
+                },
+                "tx_start": {
+                    "value": 0.5
+                },
+                "tx_end": {
+                    "value": 0.5
+                },
+                "ty_start": {
+                    "value": 0.5
+                },
+                "ty_end": {
+                    "value": 0.5
+                },
+                "tz_start": {
+                    "value": 0.5
+                },
+                "tz_end": {
+                    "value": 0.5
+                },
+                "rx_start": {
+                    "value": 0.5
+                },
+                "rx_end": {
+                    "value": 0.5
+                },
+                "ry_start": {
+                    "value": 0.5
+                },
+                "ry_end": {
+                    "value": 180.0
+                },
+                "rz_start": {
+                    "value": 0.5
+                },
+                "rz_end": {
+                    "value": 0.5
+                },
+                "sx_start": {
+                    "value": 0.5
+                },
+                "sx_end": {
+                    "value": 0.5
+                },
+                "sy_start": {
+                    "value": 0.5
+                },
+                "sy_end": {
+                    "value": 0.5
+                },
+                "sz_start": {
+                    "value": 0.5
+                },
+                "sz_end": {
+                    "value": 0.5
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                1000,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1600,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "animation1",
+            "to_port": 0
+        },
+        {
+            "from": "animation1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AnimationCOMP \u2014 Parameters\n\nShowcases: active, speed, duration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

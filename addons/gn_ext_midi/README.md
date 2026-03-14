@@ -23,8 +23,8 @@ Requires godot-cpp shared via junction/symlink from `gn_ext_native/native/godot-
 
 | Operator | Family | Description |
 |----------|--------|-------------|
-| MidiInCHOP | CHOP | Receive MIDI messages — notes, CC, pitch bend, etc. |
-| MidiOutCHOP | CHOP | Send MIDI messages to external devices or DAWs |
+| RtMidiInCHOP | CHOP | Receive MIDI messages — notes, CC, pitch bend, etc. |
+| RtMidiOutCHOP | CHOP | Send MIDI messages to external devices or DAWs |
 
 ## License
 

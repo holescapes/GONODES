@@ -1,0 +1,173 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "button1": {
+            "type": "ButtonUI",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "toggle_mode": {
+                    "value": true
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1024,
+                        "y": 1024
+                    }
+                }
+            }
+        },
+        "slider1": {
+            "type": "SliderUI",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Amount"
+                },
+                "default_val": {
+                    "value": 0.5
+                }
+            }
+        },
+        "toggle1": {
+            "type": "ToggleUI",
+            "position": [
+                100,
+                400
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Enable"
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                },
+                "spacing": {
+                    "value": 6
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                700,
+                50
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "blur1": {
+            "type": "BlurTOP",
+            "position": [
+                900,
+                50
+            ],
+            "parameters": {
+                "size": {
+                    "value": 4.0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 600
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "button1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "slider1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "toggle1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "blur1",
+            "to_port": 0
+        },
+        {
+            "from": "blur1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ButtonUI \u2014 Advanced\n\nMore complex configuration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

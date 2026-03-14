@@ -1,0 +1,105 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "source1": {
+            "type": "SourcePOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "advect1": {
+            "type": "AdvectPOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "strength": {
+                    "value": 0.5
+                },
+                "add_mode": {
+                    "value": true
+                }
+            }
+        },
+        "renderpop1": {
+            "type": "RenderPOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "advect1",
+            "to_port": 0
+        },
+        {
+            "from": "advect1",
+            "from_port": 0,
+            "to": "renderpop1",
+            "to_port": 0
+        },
+        {
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AdvectPOP \u2014 Parameters\n\nShowcases: strength, add_mode.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

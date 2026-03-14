@@ -1,0 +1,65 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
+        },
+        "oscout1": {
+            "type": "OscOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "port": {
+                    "value": 9000
+                },
+                "active": {
+                    "value": false
+                },
+                "send_mode": {
+                    "value": 1
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "oscout1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "OscOUT \u2014 Parameters\n\nShowcases: host, port, active.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

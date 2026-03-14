@@ -1,0 +1,183 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sop1": {
+            "type": "BoxSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.5
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 0.5
+                },
+                "rx": {
+                    "value": 0.5
+                },
+                "ry": {
+                    "value": 0.5
+                },
+                "rz": {
+                    "value": 0.5
+                },
+                "sx": {
+                    "value": 0.5
+                },
+                "sy": {
+                    "value": 0.5
+                },
+                "sz": {
+                    "value": 0.5
+                },
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "metallic": {
+                    "value": 0.5
+                },
+                "roughness": {
+                    "value": 0.25
+                },
+                "emission_energy": {
+                    "value": 0.5
+                },
+                "emission_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "visible": {
+                    "value": true
+                },
+                "cast_shadow": {
+                    "value": 1
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1400,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sop1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "GeometryCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

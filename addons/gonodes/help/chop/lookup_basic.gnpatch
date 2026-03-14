@@ -1,0 +1,119 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "ramp1": {
+            "type": "RampCHOP",
+            "position": [
+                100,
+                50
+            ],
+            "parameters": {}
+        },
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 0
+                },
+                "frequency": {
+                    "value": 2.0
+                }
+            }
+        },
+        "lookup1": {
+            "type": "LookupCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "ramp1",
+            "from_port": 0,
+            "to": "lookup1",
+            "to_port": 0
+        },
+        {
+            "from": "wave1",
+            "from_port": 0,
+            "to": "lookup1",
+            "to_port": 1
+        },
+        {
+            "from": "lookup1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Lookup CHOP \u2014 Basic\n\nUses ramp as index into wave table.\nRemaps input through transfer function.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

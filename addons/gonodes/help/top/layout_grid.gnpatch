@@ -1,165 +1,135 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "circle1":  {
-                                  "type":  "CircleTOP",
-                                  "position":  [
-                                                   100,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  256,
-                                                                                      "y":  256
-                                                                                  }
-                                                                    },
-                                                     "radius":  {
-                                                                    "value":  0.35
-                                                                },
-                                                     "fill_color":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Color",
-                                                                                      "r":  1.0,
-                                                                                      "g":  0.2,
-                                                                                      "b":  0.2,
-                                                                                      "a":  1.0
-                                                                                  }
-                                                                    }
-                                                 }
-                              },
-                  "rect1":  {
-                                "type":  "RectangleTOP",
-                                "position":  [
-                                                 100,
-                                                 350
-                                             ],
-                                "parameters":  {
-                                                   "resolution":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Vector2i",
-                                                                                    "x":  256,
-                                                                                    "y":  256
-                                                                                }
-                                                                  },
-                                                   "fill_color":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Color",
-                                                                                    "r":  0.2,
-                                                                                    "g":  0.5,
-                                                                                    "b":  1.0,
-                                                                                    "a":  1.0
-                                                                                }
-                                                                  }
-                                               }
-                            },
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  100,
-                                                  600
-                                              ],
-                                 "parameters":  {
-                                                    "resolution":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Vector2i",
-                                                                                     "x":  256,
-                                                                                     "y":  256
-                                                                                 }
-                                                                   },
-                                                    "scale":  {
-                                                                  "value":  5.0
-                                                              }
-                                                }
-                             },
-                  "layout1":  {
-                                  "type":  "LayoutTOP",
-                                  "position":  [
-                                                   500,
-                                                   300
-                                               ],
-                                  "parameters":  {
-                                                     "columns":  {
-                                                                     "value":  3
-                                                                 },
-                                                     "bg_color":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Color",
-                                                                                    "r":  0.15,
-                                                                                    "g":  0.15,
-                                                                                    "b":  0.15,
-                                                                                    "a":  1.0
-                                                                                }
-                                                                  }
-                                                 }
-                              },
-                  "window1":  {
-                                  "position":  [
-                                                   850,
-                                                   300
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "circle1",
-                            "from_port":  0,
-                            "to":  "layout1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "rect1",
-                            "from_port":  0,
-                            "to":  "layout1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "layout1",
-                            "to_port":  2
-                        },
-                        {
-                            "from":  "layout1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Layout TOP — Grid Mosaic\n\nTiles 3 inputs (circle, rect, noise) into a grid.\nColumns=3 gives a 3×1 row. Supports up to 8 inputs.\nDynamic ports: connect more to auto-add slots.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         420.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "circle1": {
+            "type": "CircleSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.5
+                },
+                "segments": {
+                    "value": 32
+                },
+                "type": {
+                    "value": 0
+                },
+                "orientation": {
+                    "value": 0
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "circle1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CircleSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

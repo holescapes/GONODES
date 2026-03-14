@@ -1,101 +1,135 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "circle1":  {
-                                  "type":  "CircleTOP",
-                                  "position":  [
-                                                   100,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512,
-                                                                                      "y":  512
-                                                                                  }
-                                                                    },
-                                                     "fill_color":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Color",
-                                                                                      "r":  0.0,
-                                                                                      "g":  0.8,
-                                                                                      "b":  1.0,
-                                                                                      "a":  1.0
-                                                                                  }
-                                                                    },
-                                                     "bg_color":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Color",
-                                                                                    "r":  0.05,
-                                                                                    "g":  0.05,
-                                                                                    "b":  0.1,
-                                                                                    "a":  1.0
-                                                                                }
-                                                                  },
-                                                     "center":  {
-                                                                    "value":  {
-                                                                                  "_type":  "Vector2",
-                                                                                  "x":  0.5,
-                                                                                  "y":  0.5
-                                                                              }
-                                                                },
-                                                     "radius":  {
-                                                                    "value":  0.3
-                                                                },
-                                                     "softness":  {
-                                                                      "value":  0.02
-                                                                  }
-                                                 }
-                              },
-                  "window1":  {
-                                  "position":  [
-                                                   450,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "circle1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Circle TOP — Basic\n\nCyan circle on a dark background.\nSoftness adds a gentle edge fade.\nCenter and radius can be expression-driven.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "circle1": {
+            "type": "CircleSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.5
+                },
+                "segments": {
+                    "value": 32
+                },
+                "type": {
+                    "value": 0
+                },
+                "orientation": {
+                    "value": 0
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "circle1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CircleSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

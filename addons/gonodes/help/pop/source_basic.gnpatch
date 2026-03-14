@@ -1,0 +1,106 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "source1": {
+            "type": "SourcePOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "max_particles": {
+                    "value": 100000
+                },
+                "rate": {
+                    "value": 1000.0
+                },
+                "life_min": {
+                    "value": 1.0
+                },
+                "life_max": {
+                    "value": 3.0
+                },
+                "init_speed": {
+                    "value": 1.0
+                },
+                "pscale": {
+                    "value": 0.05
+                },
+                "reset": {
+                    "value": false
+                }
+            }
+        },
+        "renderpop1": {
+            "type": "RenderPOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "renderpop1",
+            "to_port": 0
+        },
+        {
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SourcePOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

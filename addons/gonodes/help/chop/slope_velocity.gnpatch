@@ -1,0 +1,54 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "waveform": { "value": 0 },
+                "frequency": { "value": 0.5 },
+                "amplitude": { "value": 1.0 }
+            }
+        },
+        "slope1": {
+            "type": "SlopeCHOP",
+            "position": [450, 100],
+            "parameters": {
+                "order": { "value": 1 },
+                "normalize": { "value": true },
+                "multiply": { "value": 2.0 }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [850, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "wave1", "from_port": 0, "to": "slope1", "to_port": 0 },
+        { "from": "slope1", "from_port": 0, "to": "choptop1", "to_port": 0 },
+        { "from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Slope CHOP — Velocity Detection\n\nComputes the first derivative (velocity) of a sine wave.\nNormalize is on; multiply=2.0 amplifies the result.\nUseful for detecting rate of change in any animated signal.",
+            "position": [50.0, -60.0],
+            "size": [450.0, 80.0],
+            "color": [0.5, 0.7, 1.0, 0.8]
+        }
+    ]
+}

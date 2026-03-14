@@ -1,168 +1,138 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "grid1":  {
-                                "type":  "GridSOP",
-                                "position":  [
-                                                 0,
-                                                 0
-                                             ],
-                                "parameters":  {
-                                                   "rows":  {
-                                                                "value":  8
-                                                            },
-                                                   "cols":  {
-                                                                "value":  8
-                                                            }
-                                               }
-                            },
-                  "sort1":  {
-                                "type":  "SortSOP",
-                                "position":  [
-                                                 250,
-                                                 0
-                                             ],
-                                "parameters":  {
-                                                   "mode":  {
-                                                                "value":  2
-                                                            },
-                                                   "seed":  {
-                                                                "value":  42
-                                                            }
-                                               }
-                            },
-                  "null1":  {
-                                "type":  "NullSOP",
-                                "position":  [
-                                                 500,
-                                                 0
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1450,
-                                                   0
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    800,
-                                                    0
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    800,
-                                                    200
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1100,
-                                                       0
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  }
-              },
-    "connections":  [
-                        {
-                            "from":  "grid1",
-                            "from_port":  0,
-                            "to":  "sort1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "sort1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Sort SOP — Randomize Vertex Order\n\nRandomly shuffles all vertices in a grid.\nModes: by axis (X/Y/Z), distance, random.\nUseful for vertex-order-dependent effects.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "grid1": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 2.0
+                },
+                "size_z": {
+                    "value": 2.0
+                },
+                "rows": {
+                    "value": 10
+                },
+                "cols": {
+                    "value": 10
+                },
+                "orientation": {
+                    "value": 0
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "GridSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

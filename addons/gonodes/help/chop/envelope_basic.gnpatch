@@ -1,0 +1,105 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "amplitude": {
+                    "value": 1.0
+                },
+                "roughness": {
+                    "value": 0.5
+                }
+            }
+        },
+        "env1": {
+            "type": "EnvelopeCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "env1",
+            "to_port": 0
+        },
+        {
+            "from": "env1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Envelope CHOP \u2014 Basic\n\nExtracts amplitude envelope from noise signal.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

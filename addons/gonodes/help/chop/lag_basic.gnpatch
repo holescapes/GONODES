@@ -1,0 +1,109 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 2
+                },
+                "frequency": {
+                    "value": 2.0
+                }
+            }
+        },
+        "lag1": {
+            "type": "LagCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "lag": {
+                    "value": 0.3
+                }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "wave1",
+            "from_port": 0,
+            "to": "lag1",
+            "to_port": 0
+        },
+        {
+            "from": "lag1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Lag CHOP \u2014 Basic\n\nSmooths a square wave with 0.3s lag.\nRounds sharp edges.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

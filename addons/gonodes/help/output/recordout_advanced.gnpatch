@@ -1,0 +1,78 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_circle": {
+            "type": "CircleTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "radius": {
+                    "value": 0.3
+                }
+            }
+        },
+        "recordout1": {
+            "type": "RecordOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": true
+                },
+                "max_samples": {
+                    "value": 10002
+                },
+                "save": {
+                    "value": true
+                },
+                "reset": {
+                    "value": true
+                },
+                "format": {
+                    "value": 2
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_circle",
+            "from_port": 0,
+            "to": "recordout1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RecordOUT \u2014 Advanced\n\nMore complex configuration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

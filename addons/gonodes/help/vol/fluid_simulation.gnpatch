@@ -2,75 +2,170 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "fluid1": {
-            "type": "FluidVOL",
-            "position": [200, 200],
+        "src_grid": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "res_x": {"value": 48},
-                "res_y": {"value": 48},
-                "res_z": {"value": 48},
-                "dissipation": {"value": 0.97},
-                "pressure_iters": {"value": 25},
-                "density_add": {"value": 2.0},
-                "reset": {"value": false}
+                "rows": {
+                    "value": 10
+                },
+                "cols": {
+                    "value": 10
+                }
             }
         },
-        "noise_source": {
-            "type": "NoiseVOL",
-            "position": [200, 500],
+        "noise1": {
+            "type": "NoiseSOP",
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "res_x": {"value": 48},
-                "res_y": {"value": 48},
-                "res_z": {"value": 48},
-                "frequency": {"value": 6.0},
-                "amplitude": {"value": 0.5},
-                "octaves": {"value": 2},
-                "speed": {"value": 1.0}
+                "amplitude": {
+                    "value": 0.2
+                },
+                "frequency": {
+                    "value": 2.0
+                },
+                "offset_x": {
+                    "value": 0.0
+                },
+                "offset_y": {
+                    "value": 0.0
+                },
+                "offset_z": {
+                    "value": 0.0
+                },
+                "speed": {
+                    "value": 1.0
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "displace_axis": {
+                    "value": 0
+                },
+                "seed": {
+                    "value": 0
+                }
             }
         },
-        "raymarch1": {
-            "type": "RaymarchVOL",
-            "position": [550, 200],
-            "parameters": {
-                "width": {"value": 512},
-                "height": {"value": 512},
-                "max_steps": {"value": 160},
-                "step_size": {"value": 0.008},
-                "density_scale": {"value": 6.0},
-                "absorption": {"value": 12.0},
-                "cam_dist": {"value": 1.8},
-                "cam_yaw": {"value": 20.0},
-                "cam_pitch": {"value": 15.0}
-            }
-        },
-        "null1": {
-            "type": "NullTOP",
-            "position": [900, 200],
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
             "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1250, 200],
+            "position": [
+                1550,
+                100
+            ],
             "parameters": {
-                "open": {"value": true},
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise_source", "from_port": 0, "to": "fluid1", "to_port": 0},
-        {"from": "fluid1", "from_port": 0, "to": "raymarch1", "to_port": 0},
-        {"from": "raymarch1", "from_port": 0, "to": "null1", "to_port": 0},
-        {"from": "null1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "src_grid",
+            "from_port": 0,
+            "to": "noise1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "VOL Fluid Simulation — Navier-Stokes Density Advection\n\nFluidVOL runs a 4-pass GPU fluid solver each frame:\n  1. Inject density from upstream noise source\n  2. Advect density by velocity field\n  3. Compute divergence + Jacobi pressure solve\n  4. Project velocity (subtract pressure gradient)\n\nDissipation=0.97 gives slow density decay (smoke-like).\nPulse Reset to clear the simulation.\nLower resolution (48³) for interactive frame rates.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 150.0],
-            "color": [0.85, 0.35, 0.55, 0.8]
+            "text": "NoiseSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

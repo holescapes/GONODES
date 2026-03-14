@@ -1,0 +1,106 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "source1": {
+            "type": "SourcePOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "max_particles": {
+                    "value": 99999
+                },
+                "rate": {
+                    "value": 500.0
+                },
+                "life_min": {
+                    "value": 0.5
+                },
+                "life_max": {
+                    "value": 1.5
+                },
+                "init_speed": {
+                    "value": 0.5
+                },
+                "pscale": {
+                    "value": 0.025
+                },
+                "reset": {
+                    "value": true
+                }
+            }
+        },
+        "renderpop1": {
+            "type": "RenderPOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "renderpop1",
+            "to_port": 0
+        },
+        {
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SourcePOP \u2014 Parameters\n\nShowcases: max_particles, rate, life_min.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

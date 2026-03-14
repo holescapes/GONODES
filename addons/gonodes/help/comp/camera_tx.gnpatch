@@ -1,0 +1,167 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.5
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 1.5
+                },
+                "rx": {
+                    "value": -7.5
+                },
+                "ry": {
+                    "value": 0.5
+                },
+                "rz": {
+                    "value": 0.5
+                },
+                "use_look_at": {
+                    "value": true
+                },
+                "look_at_x": {
+                    "value": 0.5
+                },
+                "look_at_y": {
+                    "value": 0.5
+                },
+                "look_at_z": {
+                    "value": 0.5
+                },
+                "projection": {
+                    "value": 1
+                },
+                "fov": {
+                    "value": 37.5
+                },
+                "ortho_size": {
+                    "value": 5.0
+                },
+                "near": {
+                    "value": 0.025
+                },
+                "far": {
+                    "value": 50.0
+                },
+                "clear_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1400,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CameraCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

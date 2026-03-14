@@ -1,0 +1,126 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [
+                250,
+                100
+            ],
+            "parameters": {}
+        },
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                50
+            ],
+            "parameters": {}
+        },
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {}
+        },
+        "shuf1": {
+            "type": "ShuffleCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "wave1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "shuf1",
+            "to_port": 0
+        },
+        {
+            "from": "shuf1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Shuffle CHOP \u2014 Swap Channels\n\nSwaps order of merged LFO and wave.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,121 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseVOL",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "res_x": {
+                    "value": 63
+                },
+                "res_y": {
+                    "value": 63
+                },
+                "res_z": {
+                    "value": 63
+                },
+                "frequency": {
+                    "value": 2.0
+                },
+                "amplitude": {
+                    "value": 0.5
+                },
+                "octaves": {
+                    "value": 3
+                },
+                "lacunarity": {
+                    "value": 1.0
+                },
+                "gain": {
+                    "value": 0.25
+                },
+                "offset_x": {
+                    "value": 0.5
+                },
+                "offset_y": {
+                    "value": 0.5
+                },
+                "offset_z": {
+                    "value": 0.5
+                },
+                "speed": {
+                    "value": 0.5
+                }
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NoiseVOL \u2014 Parameters\n\nShowcases: res_x, res_y, res_z.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

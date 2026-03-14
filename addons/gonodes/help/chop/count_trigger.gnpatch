@@ -1,0 +1,108 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "trigger1": {
+            "type": "TriggerCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "attack": {
+                    "value": 0.01
+                },
+                "sustain": {
+                    "value": 0.05
+                },
+                "release": {
+                    "value": 0.1
+                }
+            }
+        },
+        "count1": {
+            "type": "CountCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "trigger1",
+            "from_port": 0,
+            "to": "count1",
+            "to_port": 0
+        },
+        {
+            "from": "count1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Count CHOP \u2014 Trigger Counter\n\nCounts trigger pulses.\nUseful for event counting.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

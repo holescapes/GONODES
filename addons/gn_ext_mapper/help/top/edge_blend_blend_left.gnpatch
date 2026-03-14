@@ -1,0 +1,100 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "edge_blend1": {
+            "type": "EdgeBlendTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "blend_left": {
+                    "value": 0.5
+                },
+                "blend_right": {
+                    "value": 0.5
+                },
+                "blend_top": {
+                    "value": 0.5
+                },
+                "blend_bottom": {
+                    "value": 0.5
+                },
+                "gamma": {
+                    "value": 1.1
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "edge_blend1",
+            "to_port": 0
+        },
+        {
+            "from": "edge_blend1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "EdgeBlendTOP \u2014 Parameters\n\nShowcases: blend_left, blend_right, blend_top.\nRequires gn_ext_mapper extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

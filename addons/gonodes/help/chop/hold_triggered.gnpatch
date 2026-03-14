@@ -1,0 +1,120 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseCHOP",
+            "position": [
+                100,
+                50
+            ],
+            "parameters": {
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
+        },
+        "timer1": {
+            "type": "TimerCHOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "length": {
+                    "value": 1.0
+                }
+            }
+        },
+        "hold1": {
+            "type": "HoldCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "hold1",
+            "to_port": 0
+        },
+        {
+            "from": "timer1",
+            "from_port": 0,
+            "to": "hold1",
+            "to_port": 1
+        },
+        {
+            "from": "hold1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Hold CHOP \u2014 Timer Triggered\n\nHolds noise value every 1 second.\nCreates stepped random values.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

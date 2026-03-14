@@ -1,0 +1,91 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "out_tunnel1": {
+            "type": "OutTunnel",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "index": {
+                    "value": 0
+                },
+                "family": {
+                    "value": 1
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "out_tunnel1",
+            "to_port": 0
+        },
+        {
+            "from": "out_tunnel1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "OutTunnel \u2014 Parameters\n\nShowcases: index, family, label.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

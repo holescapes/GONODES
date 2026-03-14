@@ -2,103 +2,101 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "source1": {
-            "type": "SourcePOP",
-            "position": [200, 200],
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "max_particles": {"value": 100000},
-                "rate": {"value": 10000.0},
-                "life_min": {"value": 1.5},
-                "life_max": {"value": 3.0},
-                "init_speed": {"value": 8.0},
-                "pscale": {"value": 0.015}
-            }
-        },
-        "force1": {
-            "type": "ForcePOP",
-            "position": [550, 200],
-            "parameters": {
-                "gravity_y": {"value": -15.0},
-                "drag": {"value": 0.01}
-            }
-        },
-        "collision1": {
-            "type": "CollisionPOP",
-            "position": [900, 200],
-            "parameters": {
-                "ground_y": {"value": 0.0},
-                "bounce": {"value": 0.6},
-                "friction": {"value": 0.1}
-            }
-        },
-        "attract1": {
-            "type": "AttractPOP",
-            "position": [1250, 200],
-            "parameters": {
-                "target_x": {"value": 0.0},
-                "target_y": {"value": 0.5},
-                "target_z": {"value": 0.0},
-                "strength": {"value": 5.0},
-                "radius": {"value": 8.0}
-            }
-        },
-        "turbulence1": {
-            "type": "TurbulencePOP",
-            "position": [1600, 200],
-            "parameters": {
-                "amplitude": {"value": 1.5},
-                "frequency": {"value": 4.0},
-                "speed": {"value": 1.0}
+                "amplitude": {
+                    "value": 2.0
+                }
             }
         },
         "limit1": {
-            "type": "LimitPOP",
-            "position": [1950, 200],
-            "parameters": {
-                "bbox_min_x": {"value": -12.0},
-                "bbox_min_y": {"value": -1.0},
-                "bbox_min_z": {"value": -12.0},
-                "bbox_max_x": {"value": 12.0},
-                "bbox_max_y": {"value": 15.0},
-                "bbox_max_z": {"value": 12.0},
-                "max_speed": {"value": 20.0},
-                "kill_outside": {"value": true}
-            }
+            "type": "LimitCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
         },
-        "render1": {
-            "type": "RenderPOP",
-            "position": [2300, 200],
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
-                "point_size": {"value": 0.02},
-                "billboard": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [2650, 200],
+            "position": [
+                1550,
+                100
+            ],
             "parameters": {
-                "open": {"value": true},
-                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 768}}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "source1", "from_port": 0, "to": "force1", "to_port": 0},
-        {"from": "force1", "from_port": 0, "to": "collision1", "to_port": 0},
-        {"from": "collision1", "from_port": 0, "to": "attract1", "to_port": 0},
-        {"from": "attract1", "from_port": 0, "to": "turbulence1", "to_port": 0},
-        {"from": "turbulence1", "from_port": 0, "to": "limit1", "to_port": 0},
-        {"from": "limit1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "limit1",
+            "to_port": 0
+        },
+        {
+            "from": "limit1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "POP Full Chain — All Operators Combined\n\n100K particles with the full processing pipeline:\nSource → Force (heavy gravity) → Collision (bouncy floor)\n→ Attract (pull toward center) → Turbulence (organic breakup)\n→ Limit (bounds + speed clamp) → Render (billboard quads)\n\nDemonstrates chaining every POP modifier. Each operator\nmodifies the SSBO in-place via GPU compute dispatch.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 130.0],
-            "color": [0.2, 0.8, 0.8, 0.8]
+            "text": "Limit CHOP \u2014 Basic\n\nClamps LFO to default range.\nPrevents values from exceeding bounds.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

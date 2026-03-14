@@ -100,7 +100,7 @@ Double-click any row in the debug panel to select and scroll to that node. All d
 
 ## Project Status
 
-**Phase 7 Complete. 329+ operators across 11 families (TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI) plus 69 native C++ accelerated operators, 2 shader extensions (Shadertoy, ISF), 5 hardware I/O extensions (Spout, Syphon, Video Capture, MIDI, GPU Encode), and 1 projection-mapping extension (Mapper). Save/load, copy/paste, undo/redo, live node previews, performance profiling, expression system, sub-networks, spare parameters, parameter presets, custom operator assets (.gnasset), GPU particles (POP), volumetric 3D textures (VOL), compute shader detection & graceful degradation, debug window & overlay system, OSC/MIDI/Audio I/O, 353 help patches, 690 automated tests passing.**
+**Phase 7 Complete. 348 operators across 11 families (TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI) plus 69 native C++ accelerated operators, 2 shader extensions (Shadertoy, ISF), 5 hardware I/O extensions (Spout, Syphon, Video Capture, MIDI, GPU Encode), and 1 projection-mapping extension (Mapper). Save/load, copy/paste, undo/redo, live node previews, performance profiling, expression system, sub-networks, spare parameters, parameter presets, custom operator assets (.gnasset), GPU particles (POP), volumetric 3D textures (VOL), compute shader detection & graceful degradation, debug window & overlay system, OSC/MIDI/Audio I/O, 1,084 help patches (3+ per operator), 690 automated tests passing.**
 
 ### Completed
 
@@ -128,17 +128,17 @@ Double-click any row in the debug panel to select and scroll to that node. All d
 
 | Family | Count | Highlights |
 |--------|-------|-----------|
-| **TOP** | 77 | Noise, Composite, Level, Blur, Ramp, Text, ImageFileIn, MovieFileIn, FFmpegIn, Transform, CustomShader, Render, Feedback, Displace, ChromaKey, AnalyzeTOP, TimeMachine, Panel, SpoutIn/Out, SyphonIn/Out, MovieFileOut, QuadMap, BezierMap, GridWarp, EdgeBlend, ProjectionMask, Stoner, ProjectorBlend, and more |
+| **TOP** | 81 | Noise, Composite, Level, Blur, Ramp, Text, ImageFileIn, MovieFileIn, FFmpegIn, Transform, CustomShader, Render, Feedback, Displace, ChromaKey, AnalyzeTOP, TimeMachine, Panel, Snapshot, ComputeShader, SpoutIn/Out, SyphonIn/Out, MovieFileOut, QuadMap, BezierMap, GridWarp, EdgeBlend, ProjectionMask, Stoner, ProjectorBlend, and more |
 | **IMG** | 14 | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP, TOPtoIMG, WebcamIMG, ImageFileInIMG, ImageSequenceIMG, ScreenGrabIMG, ScriptIMG, VideoDeviceInIMG, NullIMG |
-| **CHOP** | 63 | LFO, Noise, Math, Constant, Wave, Filter, Lag, Timer, Trigger, Speed, Smooth, Spring, Delay, Envelope, Ramp, Expression, Keyboard/Mouse/Gamepad input, MidiIn, MidiOut, and more |
-| **DAT** | 29 | Constant, Text, JSONDAT, WebDAT, FileInDAT, ScriptDAT, **CallbackDAT**, OPFindDAT, Evaluate, CHOPtoDAT, SOPtoDAT, TOPtoDAT, and more |
-| **SOP** | 57 | Grid, Box, Sphere, Torus, Transform, Noise, Subdivide, Boolean, Extrude, Sweep, Skin, Bend, Twist, Font, ScriptSOP, and more |
+| **CHOP** | 68 | LFO, Noise, Math, Constant, Wave, Filter, Lag, Timer, Trigger, Speed, Smooth, Spring, Delay, Envelope, Ramp, Expression, Feedback, Blend, Perform, Transform, Keyboard/Mouse/Gamepad input, MidiIn, RtMidiIn/Out, and more |
+| **DAT** | 33 | Constant, Text, JSONDAT, WebDAT, WebServerDAT, WebSocketDAT, FileInDAT, FolderDAT, ErrorDAT, MultiTouchInDAT, ScriptDAT, **CallbackDAT**, OPFindDAT, Evaluate, CHOPtoDAT, SOPtoDAT, TOPtoDAT, and more |
+| **SOP** | 62 | Grid, Box, Sphere, Torus, Transform, Noise, Subdivide, Boolean, Extrude, Sweep, Skin, Bend, Twist, Font, FileIn/Out, Group, Primitive, Blend, Script, Spring, and more |
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Environment, Null, Switch, **GenericScriptNode**, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
-| **MAT** | 6 | PBR, Shader, Constant, Wireframe, PointSprite, Depth |
+| **MAT** | 9 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, Null |
 | **OUT** | 9 | WindowOUT, TextureSaveOUT, ImageSaveOUT, TableSaveOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, RecordOUT, OscOUT |
 | **POP** | 10 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Instance, Render, ParticleState |
-| **VOL** | 10 | Noise, Blend, Blur, Displace, Fluid, MarchingCubes, Raymarch, SOPtoVOL, CHOPtoVOL, Analyze |
-| **UI** | 8 | ButtonUI, SliderUI, ToggleUI, LabelUI, KnobUI, XYPadUI, DropdownUI, ContainerUI |
+| **VOL** | 11 | Noise, Blend, Blur, Displace, Fluid, MarchingCubes, Raymarch, SOPtoVOL, CHOPtoVOL, Analyze, Null |
+| **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
 
 ### Extensions
 
@@ -149,7 +149,7 @@ Double-click any row in the debug panel to select and scroll to that node. All d
 | **gn_ext_spout** | SpoutInTOP, SpoutOutTOP | Windows-only Spout2 texture sharing — send/receive GPU textures between GONODES and other apps (Resolume, OBS, TouchDesigner). |
 | **gn_ext_syphon** | SyphonInTOP, SyphonOutTOP | macOS-only Syphon texture sharing — send/receive GPU textures via IOSurface (VDMX, MadMapper, CoGe). |
 | **gn_ext_video_capture** | VideoDeviceInIMG | Cross-platform webcam/capture device input — Media Foundation (Windows), AVFoundation (macOS), V4L2 (Linux). |
-| **gn_ext_midi** | MidiInCHOP, MidiOutCHOP | Cross-platform MIDI I/O via RtMidi — receive/send notes, CC, pitch bend to external controllers and DAWs. |
+| **gn_ext_midi** | RtMidiInCHOP, RtMidiOutCHOP | Cross-platform MIDI I/O via RtMidi — receive/send notes, CC, pitch bend to external controllers and DAWs. |
 | **gn_ext_gpu_encode** | MovieFileOutTOP | Hardware-accelerated video encoding — Media Foundation (Windows), VideoToolbox (macOS). Record to H.264 MP4. |
 | **gn_ext_mapper** | QuadMapTOP, BezierMapTOP, GridWarpTOP, EdgeBlendTOP, ProjectionMaskTOP, StonerTOP, ProjectorBlendTOP | Projection mapping toolkit — GPU perspective/bezier/grid warping, soft edge blending, masking for multi-projector setups. |
 

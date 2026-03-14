@@ -1,0 +1,152 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "btn_child": {
+            "type": "ButtonUI",
+            "position": [
+                100,
+                50
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Button A"
+                }
+            }
+        },
+        "slider_child": {
+            "type": "SliderUI",
+            "position": [
+                100,
+                180
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Param"
+                },
+                "default_val": {
+                    "value": 0.5
+                }
+            }
+        },
+        "toggle_child": {
+            "type": "ToggleUI",
+            "position": [
+                100,
+                310
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Enable"
+                }
+            }
+        },
+        "tabcontainer1": {
+            "type": "TabContainerUI",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "default_tab": {
+                    "value": 0
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                }
+            }
+        },
+        "noise_top": {
+            "type": "NoiseTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 400,
+                        "y": 450
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "btn_child",
+            "from_port": 0,
+            "to": "tabcontainer1",
+            "to_port": 0
+        },
+        {
+            "from": "slider_child",
+            "from_port": 0,
+            "to": "tabcontainer1",
+            "to_port": 0
+        },
+        {
+            "from": "toggle_child",
+            "from_port": 0,
+            "to": "tabcontainer1",
+            "to_port": 0
+        },
+        {
+            "from": "tabcontainer1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        },
+        {
+            "from": "noise_top",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TabContainerUI \u2014 Parameters\n\nShowcases: default_tab, min_size.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

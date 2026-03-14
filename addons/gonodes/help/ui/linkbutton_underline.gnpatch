@@ -1,0 +1,112 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "linkbutton1": {
+            "type": "LinkButtonUI",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "underline": {
+                    "value": 1
+                },
+                "min_size": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                }
+            }
+        },
+        "slider_ctrl": {
+            "type": "SliderUI",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Control"
+                },
+                "default_val": {
+                    "value": 0.5
+                }
+            }
+        },
+        "container1": {
+            "type": "ContainerUI",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 320,
+                        "y": 280
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "linkbutton1",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "slider_ctrl",
+            "from_port": 0,
+            "to": "container1",
+            "to_port": 0
+        },
+        {
+            "from": "container1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LinkButtonUI \u2014 Parameters\n\nShowcases: text, underline, min_size.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

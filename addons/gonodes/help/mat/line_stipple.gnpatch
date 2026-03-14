@@ -1,0 +1,70 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "grid1": {
+            "type": "GridSOP",
+            "position": [100, 100],
+            "parameters": {
+                "rows": { "value": 8 },
+                "columns": { "value": 8 }
+            }
+        },
+        "line_mat1": {
+            "type": "LineMAT",
+            "position": [100, 350],
+            "parameters": {
+                "color": { "value": { "_type": "Color", "r": 1.0, "g": 1.0, "b": 0.0, "a": 1.0 } },
+                "width": { "value": 1.5 },
+                "alpha": { "value": 1.0 },
+                "stipple_scale": { "value": 3.0 },
+                "stipple_ratio": { "value": 0.5 },
+                "cull_mode": { "value": 0 }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [450, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [450, 450],
+            "parameters": {
+                "tz": { "value": 4.0 }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [800, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "grid1", "from_port": 0, "to": "geo1", "to_port": 0 },
+        { "from": "line_mat1", "from_port": 0, "to": "geo1", "to_port": 1 },
+        { "from": "geo1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "cam1", "from_port": 0, "to": "render1", "to_port": 1 },
+        { "from": "render1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Line MAT — Stipple Pattern\n\nDashed/stippled wireframe on a grid.\nstipple_scale=3 and stipple_ratio=0.5 create an even dash pattern.\nYellow wireframe with no face culling for full visibility.",
+            "position": [50.0, -60.0],
+            "size": [450.0, 80.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -348,10 +348,10 @@ See the existing extensions for reference:
 | `gn_ext_ffmpeg` | `addons/gn_ext_ffmpeg/` | FFmpeg video I/O operators |
 | `gn_ext_spout` | `addons/gn_ext_spout/` | Windows Spout2 texture sharing (SpoutInTOP, SpoutOutTOP) |
 | `gn_ext_syphon` | `addons/gn_ext_syphon/` | macOS Syphon texture sharing (SyphonInTOP, SyphonOutTOP) |
-| `gn_ext_video_capture` | `addons/gn_ext_video_capture/` | Cross-platform webcam/capture device input (VideoDeviceInTOP) |
-| `gn_ext_midi` | `addons/gn_ext_midi/` | Cross-platform MIDI I/O via RtMidi (MidiInCHOP, MidiOutCHOP) |
+| `gn_ext_video_capture` | `addons/gn_ext_video_capture/` | Cross-platform webcam/capture device input (VideoDeviceInIMG) |
+| `gn_ext_midi` | `addons/gn_ext_midi/` | Cross-platform MIDI I/O via RtMidi (RtMidiInCHOP, RtMidiOutCHOP) |
 | `gn_ext_gpu_encode` | `addons/gn_ext_gpu_encode/` | Hardware GPU video encoding (MovieFileOutTOP) |
-| `gn_ext_mapper` | `addons/gn_ext_mapper/` | Projection mapping toolkit — GPU warping, edge blend, masking (5 TOPs) |
+| `gn_ext_mapper` | `addons/gn_ext_mapper/` | Projection mapping toolkit — GPU warping, edge blend, masking (7 TOPs) |
 
 Full details on the required directory layout and the discovery mechanism
 are in [CONTRIBUTING.md → Extension Self-Containment Rule](CONTRIBUTING.md#extension-self-containment-rule).

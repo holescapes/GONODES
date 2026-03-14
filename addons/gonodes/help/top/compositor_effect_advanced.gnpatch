@@ -1,0 +1,88 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "compositor_effect1": {
+            "type": "CompositorEffectTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "effect_mode": {
+                    "value": 2
+                },
+                "effect_threshold": {
+                    "value": 0.16
+                },
+                "effect_strength": {
+                    "value": 2.0
+                },
+                "effect_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.2,
+                        "g": 0.6,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "compositor_effect1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CompositorEffectTOP \u2014 Advanced\n\nMore complex configuration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

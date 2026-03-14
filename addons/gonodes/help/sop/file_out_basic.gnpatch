@@ -4,34 +4,138 @@
     "nodes": {
         "box1": {
             "type": "BoxSOP",
-            "position": [100, 100],
-            "parameters": {}
-        },
-        "fileout1": {
-            "type": "FileOutSOP",
-            "position": [350, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "file_path": { "value": "user://exported_box.obj" }
+                "size_x": {
+                    "value": 1.0
+                },
+                "size_y": {
+                    "value": 1.0
+                },
+                "size_z": {
+                    "value": 1.0
+                },
+                "subdivide_w": {
+                    "value": 0
+                },
+                "subdivide_h": {
+                    "value": 0
+                },
+                "subdivide_d": {
+                    "value": 0
+                }
             }
         },
-        "null1": {
-            "type": "NullSOP",
-            "position": [600, 100],
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
             "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        { "from": "box1", "from_port": 0, "to": "fileout1", "to_port": 0 },
-        { "from": "fileout1", "from_port": 0, "to": "null1", "to_port": 0 }
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "File Out SOP\n\nExports SOP geometry to Wavefront OBJ format.\nSet file_path and pulse 'write' to save.\nGeometry passes through to the output.",
-            "position": [50.0, -50.0],
-            "size": [400.0, 80.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "BoxSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

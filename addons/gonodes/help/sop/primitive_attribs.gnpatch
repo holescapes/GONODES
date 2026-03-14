@@ -4,37 +4,135 @@
     "nodes": {
         "grid1": {
             "type": "GridSOP",
-            "position": [100, 100],
-            "parameters": {}
-        },
-        "prim1": {
-            "type": "PrimitiveSOP",
-            "position": [350, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "compute_normals": { "value": true },
-                "compute_area": { "value": true },
-                "compute_centroid": { "value": true },
-                "compute_id": { "value": true }
+                "size_x": {
+                    "value": 2.0
+                },
+                "size_z": {
+                    "value": 2.0
+                },
+                "rows": {
+                    "value": 10
+                },
+                "cols": {
+                    "value": 10
+                },
+                "orientation": {
+                    "value": 0
+                }
             }
         },
-        "null1": {
-            "type": "NullSOP",
-            "position": [600, 100],
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
             "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        { "from": "grid1", "from_port": 0, "to": "prim1", "to_port": 0 },
-        { "from": "prim1", "from_port": 0, "to": "null1", "to_port": 0 }
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Primitive SOP\n\nComputes per-primitive attributes: face normals,\nface area, face centroids, and primitive IDs.\nStored as point attributes on the output geometry.",
-            "position": [50.0, -50.0],
-            "size": [450.0, 80.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "GridSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

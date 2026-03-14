@@ -1,0 +1,106 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noiseimg1": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "pixelsortimg1": {
+            "type": "PixelSortIMG",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "direction": {
+                    "value": 0
+                },
+                "sort_mode": {
+                    "value": 0
+                },
+                "threshold_low": {
+                    "value": 0.1
+                },
+                "threshold_high": {
+                    "value": 0.9
+                },
+                "reverse": {
+                    "value": false
+                }
+            }
+        },
+        "imgtotop1": {
+            "type": "ImgToTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noiseimg1",
+            "from_port": 0,
+            "to": "pixelsortimg1",
+            "to_port": 0
+        },
+        {
+            "from": "pixelsortimg1",
+            "from_port": 0,
+            "to": "imgtotop1",
+            "to_port": 0
+        },
+        {
+            "from": "imgtotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PixelSortIMG \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

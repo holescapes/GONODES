@@ -1,0 +1,167 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "static_body1": {
+            "type": "StaticBodyCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "rx": {
+                    "value": 0.0
+                },
+                "ry": {
+                    "value": 0.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "sx": {
+                    "value": 1.0
+                },
+                "sy": {
+                    "value": 1.0
+                },
+                "sz": {
+                    "value": 1.0
+                },
+                "friction": {
+                    "value": 1.0
+                },
+                "bounce": {
+                    "value": 0.0
+                },
+                "collision_shape": {
+                    "value": 0
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                1000,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 5
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1600,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "static_body1",
+            "to_port": 0
+        },
+        {
+            "from": "static_body1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "StaticBodyCOMP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

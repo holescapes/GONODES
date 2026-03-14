@@ -1,0 +1,176 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_sphere": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "group1": {
+            "type": "GroupSOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "entity": {
+                    "value": 1
+                },
+                "method": {
+                    "value": 1
+                },
+                "bb_min_x": {
+                    "value": -0.25
+                },
+                "bb_min_y": {
+                    "value": -0.25
+                },
+                "bb_min_z": {
+                    "value": -0.25
+                },
+                "bb_max_x": {
+                    "value": 0.25
+                },
+                "bb_max_y": {
+                    "value": 0.25
+                },
+                "bb_max_z": {
+                    "value": 0.25
+                },
+                "dir_x": {
+                    "value": 0.5
+                },
+                "dir_y": {
+                    "value": 0.5
+                },
+                "dir_z": {
+                    "value": 0.5
+                },
+                "spread_angle": {
+                    "value": 22.5
+                },
+                "operation": {
+                    "value": 1
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_sphere",
+            "from_port": 0,
+            "to": "group1",
+            "to_port": 0
+        },
+        {
+            "from": "group1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "GroupSOP \u2014 Parameters\n\nShowcases: group_name, entity, method.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

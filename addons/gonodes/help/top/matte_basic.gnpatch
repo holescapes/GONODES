@@ -1,103 +1,135 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  0,
-                                                  100
-                                              ],
-                                 "parameters":  {
-
-                                                }
-                             },
-                  "circle1":  {
-                                  "type":  "CircleTOP",
-                                  "position":  [
-                                                   0,
-                                                   250
-                                               ],
-                                  "parameters":  {
-                                                     "radius":  {
-                                                                    "value":  0.4
-                                                                }
-                                                 }
-                              },
-                  "matte1":  {
-                                 "type":  "MatteTOP",
-                                 "position":  [
-                                                  300,
-                                                  150
-                                              ],
-                                 "parameters":  {
-                                                    "source":  {
-                                                                   "value":  "Luma"
-                                                               },
-                                                    "premultiply":  {
-                                                                        "value":  true
-                                                                    }
-                                                }
-                             },
-                  "window1":  {
-                                  "position":  [
-                                                   650,
-                                                   150
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "matte1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "circle1",
-                            "from_port":  0,
-                            "to":  "matte1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "matte1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Matte TOP — Alpha from Circle\n\nUse a second texture to define the alpha channel.\nConfigurable source channel, invert, and premultiply.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "circle1": {
+            "type": "CircleSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.5
+                },
+                "segments": {
+                    "value": 32
+                },
+                "type": {
+                    "value": 0
+                },
+                "orientation": {
+                    "value": 0
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "circle1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CircleSOP \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }
