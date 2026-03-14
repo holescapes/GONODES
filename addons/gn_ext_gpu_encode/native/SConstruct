@@ -1,0 +1,143 @@
+#!/usr/bin/env python
+"""
+SConstruct for gn_ext_gpu_encode — Hardware video encoding GDExtension.
+
+Uses Media Foundation (Windows) or VideoToolbox (macOS).
+Links against pre-built godot-cpp from gn_ext_native.
+
+Usage:
+  cd addons/gn_ext_gpu_encode/native
+  scons platform=<windows|macos> target=template_release -j4
+"""
+
+import os
+import sys
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+platform = ARGUMENTS.get("platform", "")
+target = ARGUMENTS.get("target", "template_release")
+
+if not platform:
+    if sys.platform == "win32":
+        platform = "windows"
+    elif sys.platform == "darwin":
+        platform = "macos"
+    else:
+        print("gn_ext_gpu_encode: Linux GPU encoding not yet supported. Skipping.")
+        Exit(0)
+
+godotcpp_root = os.path.abspath("../../gn_ext_native/native/godot-cpp")
+
+# ---------------------------------------------------------------------------
+# Build environment
+# ---------------------------------------------------------------------------
+if platform == "windows":
+    env = Environment(tools=["default", "msvc"])
+
+    env.Append(CCFLAGS=["/std:c++17", "/EHsc", "/utf-8"])
+    if target == "template_release":
+        env.Append(CCFLAGS=["/O2", "/MT", "/DNDEBUG"])
+        suffix = ".windows.template_release.x86_64"
+    else:
+        env.Append(CCFLAGS=["/Od", "/MTd", "/Zi", "/D_DEBUG"])
+        suffix = ".windows.template_debug.x86_64"
+
+    env.Append(CPPDEFINES=[
+        "WINDOWS_ENABLED",
+        "TYPED_METHOD_BIND",
+        "NOMINMAX",
+        "WIN32",
+        "_WIN32",
+    ])
+
+    env.Append(LIBS=[
+        "mfplat",
+        "mf",
+        "mfreadwrite",
+        "mfuuid",
+        "ole32",
+        "propsys",
+    ])
+
+    lib_ext = ".dll"
+    out_dir = "bin/win64"
+
+elif platform == "macos":
+    env = Environment()
+
+    env.Append(CCFLAGS=["-std=c++17", "-fPIC"])
+    env.Append(OBJCXXFLAGS=["-std=c++17", "-fPIC", "-fobjc-arc"])
+
+    mac_arch = ARGUMENTS.get("arch", "universal")
+    if mac_arch == "universal":
+        env.Append(CCFLAGS=["-arch", "arm64", "-arch", "x86_64"])
+        env.Append(OBJCXXFLAGS=["-arch", "arm64", "-arch", "x86_64"])
+        env.Append(LINKFLAGS=["-arch", "arm64", "-arch", "x86_64"])
+        arch_suffix = ".universal"
+    elif mac_arch == "arm64":
+        env.Append(CCFLAGS=["-arch", "arm64"])
+        env.Append(LINKFLAGS=["-arch", "arm64"])
+        arch_suffix = ".arm64"
+    else:
+        env.Append(CCFLAGS=["-arch", "x86_64"])
+        env.Append(LINKFLAGS=["-arch", "x86_64"])
+        arch_suffix = ".x86_64"
+
+    if target == "template_release":
+        env.Append(CCFLAGS=["-O2", "-DNDEBUG"])
+        suffix = ".macos.template_release" + arch_suffix
+    else:
+        env.Append(CCFLAGS=["-O0", "-g", "-D_DEBUG"])
+        suffix = ".macos.template_debug" + arch_suffix
+
+    env.Append(CPPDEFINES=["MACOS_ENABLED", "TYPED_METHOD_BIND"])
+    env.Append(FRAMEWORKS=[
+        "VideoToolbox",
+        "CoreMedia",
+        "CoreVideo",
+        "CoreFoundation",
+        "AVFoundation",
+    ])
+
+    lib_ext = ".dylib"
+    out_dir = "bin/macos"
+
+else:
+    print("gn_ext_gpu_encode: Unsupported platform '%s'." % platform)
+    Exit(1)
+
+# ---------------------------------------------------------------------------
+# godot-cpp include paths + pre-built static library
+# ---------------------------------------------------------------------------
+env.Append(CPPPATH=[
+    os.path.join(godotcpp_root, "include"),
+    os.path.join(godotcpp_root, "gen", "include"),
+    os.path.join(godotcpp_root, "gdextension"),
+    "src/",
+])
+
+if platform == "windows":
+    godotcpp_lib = os.path.join(godotcpp_root, "bin", "libgodot-cpp" + suffix + ".lib")
+else:
+    godotcpp_lib = os.path.join(godotcpp_root, "bin", "libgodot-cpp" + suffix + ".a")
+
+env.Append(LIBS=[File(godotcpp_lib)])
+
+# ---------------------------------------------------------------------------
+# Sources
+# ---------------------------------------------------------------------------
+sources = Glob("src/*.cpp")
+if platform == "macos":
+    sources += Glob("src/*.mm")
+
+# ---------------------------------------------------------------------------
+# Output library
+# ---------------------------------------------------------------------------
+library = env.SharedLibrary(
+    target=os.path.join(out_dir, "libgn_gpu_encode" + suffix + lib_ext),
+    source=sources,
+)
+
+Default(library)

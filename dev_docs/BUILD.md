@@ -346,6 +346,12 @@ See the existing extensions for reference:
 | `gn_ext_shadertoy` | `addons/gn_ext_shadertoy/` | Shadertoy GLSL translator + shader presets |
 | `gn_ext_isf` | `addons/gn_ext_isf/` | ISF shader translator + shader presets |
 | `gn_ext_ffmpeg` | `addons/gn_ext_ffmpeg/` | FFmpeg video I/O operators |
+| `gn_ext_spout` | `addons/gn_ext_spout/` | Windows Spout2 texture sharing (SpoutInTOP, SpoutOutTOP) |
+| `gn_ext_syphon` | `addons/gn_ext_syphon/` | macOS Syphon texture sharing (SyphonInTOP, SyphonOutTOP) |
+| `gn_ext_video_capture` | `addons/gn_ext_video_capture/` | Cross-platform webcam/capture device input (VideoDeviceInTOP) |
+| `gn_ext_midi` | `addons/gn_ext_midi/` | Cross-platform MIDI I/O via RtMidi (MidiInCHOP, MidiOutCHOP) |
+| `gn_ext_gpu_encode` | `addons/gn_ext_gpu_encode/` | Hardware GPU video encoding (MovieFileOutTOP) |
+| `gn_ext_mapper` | `addons/gn_ext_mapper/` | Projection mapping toolkit — GPU warping, edge blend, masking (5 TOPs) |
 
 Full details on the required directory layout and the discovery mechanism
 are in [CONTRIBUTING.md → Extension Self-Containment Rule](CONTRIBUTING.md#extension-self-containment-rule).
@@ -561,6 +567,41 @@ For external C/C++ libraries (FFmpeg, RtMidi, NDI SDK, OpenCV, etc.):
    Godot loads them alongside your extension.
 
 See `gn_ext_ffmpeg` for a working example of wrapping an external library.
+
+### Building Hardware I/O Extensions
+
+Five hardware I/O extensions use standalone SConstruct files that link
+against the pre-built godot-cpp from `gn_ext_native` (via directory
+junction/symlink) **without** re-invoking godot-cpp's SConstruct. This
+avoids file locks when the Godot editor is running.
+
+**Prerequisites:** godot-cpp must already be built inside `gn_ext_native`.
+Each extension needs a junction: `native/godot-cpp → ../../gn_ext_native/native/godot-cpp`.
+
+```bash
+# Create junctions (Windows — run once)
+mklink /J addons\gn_ext_spout\native\godot-cpp addons\gn_ext_native\native\godot-cpp
+mklink /J addons\gn_ext_video_capture\native\godot-cpp addons\gn_ext_native\native\godot-cpp
+mklink /J addons\gn_ext_midi\native\godot-cpp addons\gn_ext_native\native\godot-cpp
+mklink /J addons\gn_ext_gpu_encode\native\godot-cpp addons\gn_ext_native\native\godot-cpp
+mklink /J addons\gn_ext_syphon\native\godot-cpp addons\gn_ext_native\native\godot-cpp
+```
+
+**Building each extension:**
+
+| Extension | Platform | Command |
+|-----------|----------|---------|
+| `gn_ext_spout` | Windows only | `cd addons/gn_ext_spout/native && scons platform=windows target=template_release -j4` |
+| `gn_ext_syphon` | macOS only | `cd addons/gn_ext_syphon/native && scons platform=macos target=template_release -j4` |
+| `gn_ext_video_capture` | All | `cd addons/gn_ext_video_capture/native && scons platform=<windows\|macos\|linux> target=template_release -j4` |
+| `gn_ext_midi` | All | `cd addons/gn_ext_midi/native && scons platform=<windows\|macos\|linux> target=template_release -j4` |
+| `gn_ext_gpu_encode` | Windows, macOS | `cd addons/gn_ext_gpu_encode/native && scons platform=<windows\|macos> target=template_release -j4` |
+
+**Key build flags:**
+- All extensions use `/MT` (static CRT) on Windows to match godot-cpp.
+- Spout compiles Spout2 SDK sources inline (no pre-built library needed).
+- MIDI compiles RtMidi source inline with `__WINDOWS_MM__` / `__MACOSX_CORE__` / `__LINUX_ALSA__` defines.
+- Video Capture and GPU Encode use OS-provided APIs (no third-party dependencies).
 
 
 ## CI Pipelines
