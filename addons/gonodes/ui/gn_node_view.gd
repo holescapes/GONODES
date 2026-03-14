@@ -5,8 +5,6 @@ extends GraphNode
 ## Double-click the title bar to rename the node.
 ## One GNNodeView per GNNode in the network.
 
-# Sub-network type — explicit preload for cold-cache robustness.
-const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
 
 ## The GNNode this view represents.
 var gn_node: GNNode = null
@@ -61,7 +59,7 @@ func setup(node: GNNode) -> void:
 		" [Native]" if _is_native else ""]
 
 	# Sub-network tooltip: show inner node count + dive-in hint
-	if gn_node is _SubNetworkNodeScript and gn_node.inner_network != null:
+	if gn_node is SubNetworkNode and gn_node.inner_network != null:
 		var inner_count: int = gn_node.inner_network.get_node_count()
 		tooltip_text += "\n%d inner node(s) — double-click to dive in" % inner_count
 
@@ -506,7 +504,7 @@ func _gui_input(event: InputEvent) -> void:
 			_start_rename()
 			accept_event()
 		# Body area — dive into sub-network (if applicable)
-		elif gn_node is _SubNetworkNodeScript:
+		elif gn_node is SubNetworkNode:
 			dive_into_requested.emit(gn_node.id)
 			accept_event()
 

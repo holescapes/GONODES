@@ -5,10 +5,6 @@ extends GraphEdit
 ## Handles node views, wire connections, deletion, and syncs
 ## UI actions back to the GNNetwork model.
 
-# Sub-network types — explicit preload for cold-cache robustness.
-const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
-const _InTunnelScript = preload("res://addons/gonodes/operators/comp/in_tunnel.gd")
-const _OutTunnelScript = preload("res://addons/gonodes/operators/comp/out_tunnel.gd")
 
 ## The network this editor visualizes and edits.
 var network: GNNetwork = null
@@ -1395,7 +1391,7 @@ func _try_dive_into_selected() -> void:
 	if selected.size() != 1:
 		return
 	var node: GNNode = network.get_node_by_id(selected[0])
-	if node is _SubNetworkNodeScript:
+	if node is SubNetworkNode:
 		dive_into_requested.emit(selected[0])
 
 ## Copies selected nodes and their internal connections to the clipboard.
@@ -2888,7 +2884,7 @@ func group_selected_into_subnet() -> void:
 		var source_port: GNPort = source_node.get_output_port(conn.from_port) if source_node else null
 		var port_family: GNFamily.Type = source_port.family if source_port else GNFamily.Type.TOP
 
-		var tunnel := _InTunnelScript.new()
+		var tunnel := InTunnel.new()
 		tunnel.tunnel_index = in_tunnel_index
 		tunnel.tunnel_family = port_family
 		tunnel.tunnel_label = "in%d" % in_tunnel_index
@@ -2915,7 +2911,7 @@ func group_selected_into_subnet() -> void:
 		var source_port: GNPort = source_node.get_output_port(conn.from_port) if source_node else null
 		var port_family: GNFamily.Type = source_port.family if source_port else GNFamily.Type.TOP
 
-		var tunnel := _OutTunnelScript.new()
+		var tunnel := OutTunnel.new()
 		tunnel.tunnel_index = out_tunnel_index
 		tunnel.tunnel_family = port_family
 		tunnel.tunnel_label = "out%d" % out_tunnel_index

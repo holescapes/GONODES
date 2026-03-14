@@ -359,7 +359,7 @@ Prerequisites: Python 3, SCons, a C++ compiler (MSVC on Windows, g++ on Linux, c
 
 ```bash
 # 1. Initialize the godot-cpp submodule (first time only)
-cd addons/gn_native
+cd addons/gn_ext_native/native
 git submodule update --init --recursive
 
 # 2. Build for the current platform
@@ -386,7 +386,7 @@ binary automatically.
 
 ```bash
 sudo apt-get install g++-aarch64-linux-gnu
-cd addons/gn_native
+cd addons/gn_ext_native/native
 scons platform=linux arch=arm64 target=template_release -j4
 ```
 
@@ -395,7 +395,7 @@ SCons auto-detects the `aarch64-linux-gnu-g++` cross-compiler.
 **macOS Universal Binary:** Build both architectures and combine with `lipo`:
 
 ```bash
-cd addons/gn_native
+cd addons/gn_ext_native/native
 scons platform=macos arch=arm64  target=template_release -j4
 scons platform=macos arch=x86_64 target=template_release -j4
 cd bin/macos
@@ -431,22 +431,22 @@ Both GitHub Actions and GitLab CI build the native library for 5 targets:
 
 #### GitHub Actions (`.github/workflows/build-native.yml`)
 
-Triggers automatically on push to `addons/gn_native/src/**` or `SConstruct`,
+Triggers automatically on push to `addons/gn_ext_native/native/src/**` or `SConstruct`,
 plus manual dispatch.  Each platform is a separate job running in parallel.
 
 ```bash
 # All 5 jobs use the same core command:
-cd addons/gn_native
+cd addons/gn_ext_native/native
 scons platform=<PLATFORM> arch=<ARCH> target=template_release -j4
 ```
 
 Artifacts are uploaded with 90-day retention.  Download them from the
-Actions tab and drop into `addons/gn_native/bin/<platform>/`.
+Actions tab and drop into `addons/gn_ext_native/native/bin/<platform>/`.
 
 #### GitLab CI (`.gitlab-ci.yml`)
 
 Same 5 targets.  Uses YAML anchors (`&build_rules`) for shared rules.
-Triggers on changes to `addons/gn_native/src/**`, `SConstruct`, or
+Triggers on changes to `addons/gn_ext_native/native/src/**`, `SConstruct`, or
 `.gitlab-ci.yml`, plus manual trigger.
 
 ### Full Build Workflow
@@ -454,7 +454,7 @@ Triggers on changes to `addons/gn_native/src/**`, `SConstruct`, or
 The complete release build flow:
 
 1. **CI builds native libraries** → download artifacts for all 5 platforms
-2. **Drop binaries** into `addons/gn_native/bin/{win64,linux64,macos}/`
+2. **Drop binaries** into `addons/gn_ext_native/native/bin/{win64,linux64,macos}/`
 3. **Build Player templates** locally:
    ```bash
    ./scripts/build_templates.sh --godot /path/to/godot --platforms all --clean
@@ -549,8 +549,8 @@ writing it back produces mojibake: `—` (em-dash) becomes `Ã¢â‚¬â€`,
 | `export_presets.cfg`                          | Godot export preset definitions      |
 | `templates/`                                  | Built Player/Editor binaries (.gitignored) |
 | `addons/gonodes/core/gn_patch_exporter.gd`   | Quick Build copy logic (runtime)     |
-| `addons/gn_native/SConstruct`                 | SCons build config for C++ GDExtension |
-| `addons/gn_native/gn_native.gdextension`     | GDExtension manifest (all 5 platforms) |
-| `addons/gn_native/godot-cpp/`                | godot-cpp submodule (4.5 branch)     |
+| `addons/gn_ext_native/native/SConstruct`                 | SCons build config for C++ GDExtension |
+| `addons/gn_ext_native/native/gn_native.gdextension`     | GDExtension manifest (all 5 platforms) |
+| `addons/gn_ext_native/native/godot-cpp/`                | godot-cpp submodule (4.5 branch)     |
 | `.github/workflows/build-native.yml`          | GitHub Actions CI — native library   |
 | `.gitlab-ci.yml`                              | GitLab CI — native library           |

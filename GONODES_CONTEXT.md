@@ -1781,7 +1781,7 @@ GONODES/
     - `open(path) → Error`, `decode_next_frame() → Image`, `seek(time_sec)`, `get_duration()`, `get_fps()`, `close()`
   - Decodes video frames to `Image::create_from_data()` — stays CPU-side, zero GPU involvement.
   - Would enable proper **MovieFileInIMG** and **FFmpegInIMG** operators outputting `GNImageData` directly into the IMG pipeline.
-  - The FFmpeg shared libraries are already shipped in `addons/ffmpeg/win64/` and `linux64/`.
+  - The FFmpeg shared libraries are already shipped in `addons/gn_ext_ffmpeg/native/win64/` and `linux64/`.
   - Eliminates the wasteful CPU→GPU→CPU roundtrip that `get_video_texture().get_image()` would cause (~1-4ms stall per frame).
   - Frame-accurate seeking, frame stepping — things `VideoStreamPlayer` handles poorly.
   - **OpenCV was considered and rejected:** no production-ready Godot 4 GDExtension exists, and `cv::VideoCapture` just wraps FFmpeg internally anyway — massive dependency for nothing extra.
@@ -1804,11 +1804,11 @@ GONODES/
   - **Graceful degradation already implemented**: `requires_compute()` virtual on `GNNode` + cook engine skip logic with warning badge. Incompatible nodes are skipped with a yellow ⚠ badge and downstream chains receive null input (same as disconnected ports).
   - **Priority**: Low — desktop targets always have Vulkan/D3D12. Only needed if Web or legacy-GPU export becomes a user requirement.
 - [x] **GDExtension (C++) hot-path migration — Phase 1 & 2 complete** (source written and compiled — Windows x86_64 binary live):
-  - **Architecture:** C++ GDExtension provides `RefCounted` processor classes (e.g., `GNNativeBlur`) with `process()` methods. GDScript wrapper operators (e.g., `BlurIMGNative`) delegate hot loops to C++ when available, falling back to pure GDScript otherwise. Extension pattern: `addons/gn_native/` for C++ source, `addons/gn_ext_native/` for GDScript wrappers + `gn_extension.cfg`.
-  - **Phase 1 — 6 operators ported (source):** 3 IMG (GNNativeBlur, GNNativeNoise, GNNativePixelSort) + 3 SOP (GNNativeParticle, GNNativeMetaball, GNNativePolyReduce). Each has `.cpp` + `.h` files in `addons/gn_native/src/img/` and `src/sop/`.
+  - **Architecture:** C++ GDExtension provides `RefCounted` processor classes (e.g., `GNNativeBlur`) with `process()` methods. GDScript wrapper operators (e.g., `BlurIMGNative`) delegate hot loops to C++ when available, falling back to pure GDScript otherwise. Extension pattern: `addons/gn_ext_native/native/` for C++ source, `addons/gn_ext_native/` for GDScript wrappers + `gn_extension.cfg`.
+  - **Phase 1 — 6 operators ported (source):** 3 IMG (GNNativeBlur, GNNativeNoise, GNNativePixelSort) + 3 SOP (GNNativeParticle, GNNativeMetaball, GNNativePolyReduce). Each has `.cpp` + `.h` files in `addons/gn_ext_native/native/src/img/` and `src/sop/`.
   - **Phase 2 — 10 operators ported (source):** 8 SOP (GNNativeIsoSurface, GNNativeRay, GNNativeFacet, GNNativeFuse, GNNativeSubdivide, GNNativeCopy, GNNativeLSystem, GNNativeSpring) + 1 IMG (GNNativeEdgeDetect) + 1 CHOP (GNNativeSmooth). Files in `src/sop/`, `src/img/`, `src/chop/`.
   - **Total: 16 native operators** across 3 families (4 IMG, 11 SOP, 1 CHOP), 16 help patches.
-  - **Build:** godot-cpp submodule present at `addons/gn_native/godot-cpp/`. Windows x86_64 compiled with `scons platform=windows target=template_debug arch=x86_64` → `bin/win64/libgn_native.windows.template_debug.x86_64.dll` (677 KB). `gn_native.gdextension` is active. Linux/macOS builds require running scons on those platforms (or CI).
+  - **Build:** godot-cpp submodule present at `addons/gn_ext_native/native/godot-cpp/`. Windows x86_64 compiled with `scons platform=windows target=template_debug arch=x86_64` → `bin/win64/libgn_native.windows.template_debug.x86_64.dll` (677 KB). `gn_native.gdextension` is active. Linux/macOS builds require running scons on those platforms (or CI).
   - **IMG operators (highest priority):** Pixel loops (`get_pixel`/`set_pixel` over 262K+ pixels) are the biggest GDScript bottleneck. BlurIMG, EdgeDetectIMG, PixelSortIMG, NoiseIMG all iterate every pixel. Port `_cook()` internals to C++ with direct `uint8_t*` pointer arithmetic. Alternative: rewrite as GPU compute shaders (even faster than C++ for batch pixel ops).
   - **SOP operators (high priority):** Vertex-heavy mesh construction (SubdivideSOP, NoiseSOP, BooleanSOP) scales with vertex count. SurfaceTool overhead in GDScript is significant at 10K+ verts. Port vertex loops to C++ via GDExtension.
   - **CHOP operators (medium priority, audio-rate only):** Control-rate CHOPs (few hundred samples) are fine in GDScript. Audio-rate CHOPs (44.1K samples: AudioInCHOP, AudioSpectrumCHOP) need native inner loops.
@@ -4656,7 +4656,7 @@ Deep comparison of GONODES vs TouchDesigner operator inventory:
 
 Built a complete C++ GDExtension source tree for 16 CPU-heavy operators (Phase 1 + Phase 2), plus GDScript wrapper operators with automatic fallback.
 
-**C++ source (`addons/gn_native/`):**
+**C++ source (`addons/gn_ext_native/native/`):**
 - `SConstruct` — SCons build file using godot-cpp
 - `src/register_types.cpp` + `.h` — entry point registering 16 classes across 3 families
 - `src/img/` — 4 IMG processors: GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect

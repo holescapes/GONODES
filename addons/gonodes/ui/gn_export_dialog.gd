@@ -8,7 +8,6 @@ extends Window
 ## WindowOUT in the patch controls its own display window.
 ## Displays progress + result.
 
-const _GNPatchExporterScript = preload("res://addons/gonodes/core/gn_patch_exporter.gd")
 
 ## Emitted when user confirms the export.  The editor wires this to start the build.
 signal export_requested(settings: Dictionary)
@@ -148,7 +147,7 @@ func _on_build_pressed() -> void:
 	_progress_label.text = "Starting build..."
 
 	# Configure exporter
-	_exporter = _GNPatchExporterScript.new()
+	_exporter = GNPatchExporter.new()
 	_exporter.patch_path = patch_path
 	_exporter.output_dir = out_dir
 

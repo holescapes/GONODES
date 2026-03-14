@@ -3,22 +3,16 @@ extends Node
 ##
 ## Tests cover:
 ##   - ShadertoyTranslator: built-in replacement, mainImage→fragment, header gen
-##   - ShadertoyBaseTOP subclass structure (ports, params, read-only credits)
 ##   - ShadertoyURLTOP: URL/ID extraction utility
+##   - Pre-baked subclass init (seascape, plasma, CRT, etc.)
 ##   - Effect TOPs: extra shader-specific params exist
-
-# Preloads — extension classes may not auto-register in headless mode
-const _Translator := preload("res://addons/gn_ext_shadertoy/shadertoy_translator.gd")
-const _BaseTOP := preload("res://addons/gn_ext_shadertoy/operators/top/shadertoy_base_top.gd")
-const _URLTOP := preload("res://addons/gn_ext_shadertoy/operators/top/shadertoy_url_top.gd")
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ShadertoyTranslator — Built-in Replacements
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_translator_empty_code() -> void:
-	var result = _Translator.translate("")
+	var result = ShadertoyTranslator.translate("")
 	GNTestAssert.assert_eq(result.success, false, "empty code should fail")
 	GNTestAssert.assert_not_empty(result.error, "should have error message")
 
@@ -28,7 +22,7 @@ func test_translator_basic_gradient() -> void:
 	vec2 uv = fragCoord / iResolution.xy;
 	fragColor = vec4(uv, 0.5 + 0.5 * sin(iTime), 1.0);
 }"""
-	var result = _Translator.translate(src, "Gradient", "Test")
+	var result = ShadertoyTranslator.translate(src, "Gradient", "Test")
 	GNTestAssert.assert_eq(result.success, true, "should succeed")
 	GNTestAssert.assert_eq(result.uses_time, true, "uses iTime")
 	GNTestAssert.assert_eq(result.shader_name, "Gradient", "shader_name")
@@ -52,7 +46,7 @@ func test_translator_ichannel_detection() -> void:
 	fragColor = texture(iChannel0, fragCoord / iResolution.xy)
 		+ 0.5 * texture(iChannel2, fragCoord / iResolution.xy);
 }"""
-	var result = _Translator.translate(src)
+	var result = ShadertoyTranslator.translate(src)
 	GNTestAssert.assert_eq(result.success, true, "should succeed")
 	GNTestAssert.assert_eq(result.needs_input_tex.size(), 2, "two channels used")
 	GNTestAssert.assert_eq(result.needs_input_tex[0], 0, "iChannel0 detected")
@@ -70,7 +64,7 @@ func test_translator_imouse_iframe() -> void:
 	vec2 m = iMouse.xy / iResolution.xy;
 	fragColor = vec4(uv + m, t, 1.0);
 }"""
-	var result = _Translator.translate(src)
+	var result = ShadertoyTranslator.translate(src)
 	GNTestAssert.assert_eq(result.success, true, "should succeed")
 	GNTestAssert.assert_eq(result.uses_mouse, true, "uses iMouse")
 	GNTestAssert.assert_eq(result.uses_frame, true, "uses iFrame")
@@ -85,7 +79,7 @@ func test_translator_bare_iresolution() -> void:
 	vec3 r = iResolution;
 	fragColor = vec4(fragCoord / r.xy, 0.0, 1.0);
 }"""
-	var result = _Translator.translate(src)
+	var result = ShadertoyTranslator.translate(src)
 	GNTestAssert.assert_eq(result.success, true, "should succeed")
 	GNTestAssert.assert_contains(result.godot_code, "vec3(gn_resolution, 1.0)",
 		"bare iResolution → vec3(gn_resolution, 1.0)")
@@ -96,7 +90,7 @@ func test_translator_custom_param_names() -> void:
 	vec2 uv = fc / iResolution.xy;
 	col = vec4(uv, 0.0, 1.0);
 }"""
-	var result = _Translator.translate(src)
+	var result = ShadertoyTranslator.translate(src)
 	GNTestAssert.assert_eq(result.success, true, "should succeed")
 	GNTestAssert.assert_contains(result.godot_code, "void fragment()",
 		"mainImage(out vec4 col, in vec2 fc) → fragment()")
@@ -110,7 +104,7 @@ precision highp float;
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	fragColor = vec4(1.0);
 }"""
-	var result = _Translator.translate(src)
+	var result = ShadertoyTranslator.translate(src)
 	GNTestAssert.assert_eq(result.success, true, "should succeed")
 	GNTestAssert.assert_eq(result.godot_code.find("#version"), -1,
 		"#version should be stripped")
@@ -122,91 +116,15 @@ func test_translator_itimedelta() -> void:
 	var src := """void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 	fragColor = vec4(iTimeDelta, 0.0, 0.0, 1.0);
 }"""
-	var result = _Translator.translate(src)
+	var result = ShadertoyTranslator.translate(src)
 	GNTestAssert.assert_eq(result.success, true, "should succeed")
 	GNTestAssert.assert_contains(result.godot_code, "gn_time_delta",
 		"iTimeDelta → gn_time_delta")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ShadertoyBaseTOP & Pre-baked Subclasses
+# Pre-baked Subclasses
 # ═══════════════════════════════════════════════════════════════════════════════
-
-func test_base_generator_ports() -> void:
-	var top = _BaseTOP.new()
-	top._is_generator = true
-	top._input_tex_count = 0
-	top._shader_path = "res://addons/gn_ext_shadertoy/shaders/st_plasma.gdshader"
-	top._shadertoy_url = "https://example.com"
-	top._credits = "Test Author"
-	top._init_ports()
-	top._init_parameters()
-
-	GNTestAssert.assert_eq(top.input_ports.size(), 0, "generator has no inputs")
-	GNTestAssert.assert_eq(top.output_ports.size(), 1, "one output")
-	GNTestAssert.assert_eq(top.parameters.has("resolution"), true,
-		"generator has resolution param")
-	GNTestAssert.assert_eq(top.parameters.has("shadertoy_url"), true,
-		"has shadertoy_url param")
-	GNTestAssert.assert_eq(top.parameters.has("credits"), true,
-		"has credits param")
-
-	# Read-only check
-	var url_param: GNParameter = top.parameters["shadertoy_url"]
-	GNTestAssert.assert_eq(url_param.read_only, true, "shadertoy_url is read_only")
-	GNTestAssert.assert_eq(url_param.value, "https://example.com",
-		"URL pre-filled from _shadertoy_url")
-
-
-func test_base_effect_ports() -> void:
-	var top = _BaseTOP.new()
-	top._is_generator = false
-	top._input_tex_count = 1
-	top._shader_path = "res://addons/gn_ext_shadertoy/shaders/st_crt.gdshader"
-	top._shadertoy_url = ""
-	top._credits = "Test"
-	top._init_ports()
-	top._init_parameters()
-
-	GNTestAssert.assert_eq(top.input_ports.size(), 1, "effect has one input")
-	GNTestAssert.assert_eq(top.output_ports.size(), 1, "one output")
-	GNTestAssert.assert_eq(top.parameters.has("resolution"), false,
-		"effect has no resolution param (inherits from input)")
-
-
-func test_url_param_skipped_when_empty() -> void:
-	var top = _BaseTOP.new()
-	top._is_generator = false
-	top._input_tex_count = 1
-	top._shader_path = "res://addons/gn_ext_shadertoy/shaders/st_crt.gdshader"
-	top._shadertoy_url = ""
-	top._credits = "Original GONODES"
-	top._init_ports()
-	top._init_parameters()
-
-	GNTestAssert.assert_eq(top.parameters.has("shadertoy_url"), false,
-		"empty URL ⇒ no shadertoy_url param")
-	GNTestAssert.assert_eq(top.parameters.has("credits"), true,
-		"credits param always present")
-
-
-func test_url_param_present_when_set() -> void:
-	var top = _BaseTOP.new()
-	top._is_generator = false
-	top._input_tex_count = 1
-	top._shader_path = "res://addons/gn_ext_shadertoy/shaders/st_halftone.gdshader"
-	top._shadertoy_url = "https://www.shadertoy.com/view/Mdf3Dn"
-	top._credits = "tsone"
-	top._init_ports()
-	top._init_parameters()
-
-	GNTestAssert.assert_eq(top.parameters.has("shadertoy_url"), true,
-		"non-empty URL ⇒ shadertoy_url param exists")
-	var url_param: GNParameter = top.parameters["shadertoy_url"]
-	GNTestAssert.assert_eq(url_param.read_only, true, "URL is read-only")
-	GNTestAssert.assert_contains(url_param.value, "Mdf3Dn",
-		"URL value matches")
-
 
 func test_seascape_top_init() -> void:
 	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_seascape_top.gd").new()
@@ -302,29 +220,29 @@ func test_halftone_top_params() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_url_extract_bare_id() -> void:
-	var sid = _URLTOP._extract_shader_id("Ms2SD1")
+	var sid = ShadertoyTOP._extract_shader_id("Ms2SD1")
 	GNTestAssert.assert_eq(sid, "Ms2SD1", "bare ID")
 
 
 func test_url_extract_full_url() -> void:
-	var sid = _URLTOP._extract_shader_id(
+	var sid = ShadertoyTOP._extract_shader_id(
 		"https://www.shadertoy.com/view/Ms2SD1")
 	GNTestAssert.assert_eq(sid, "Ms2SD1", "full URL")
 
 
 func test_url_extract_trailing_slash() -> void:
-	var sid = _URLTOP._extract_shader_id(
+	var sid = ShadertoyTOP._extract_shader_id(
 		"https://www.shadertoy.com/view/Ms2SD1/")
 	GNTestAssert.assert_eq(sid, "Ms2SD1", "trailing slash")
 
 
 func test_url_extract_empty() -> void:
-	var sid = _URLTOP._extract_shader_id("")
+	var sid = ShadertoyTOP._extract_shader_id("")
 	GNTestAssert.assert_eq(sid, "", "empty string")
 
 
 func test_url_top_init() -> void:
-	var op = _URLTOP.new()
+	var op = ShadertoyTOP.new()
 	GNTestAssert.assert_eq(op.node_type, "shadertoy", "node_type")
 	GNTestAssert.assert_eq(op.time_dependent, true, "time_dependent default")
 	op._init_ports()

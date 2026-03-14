@@ -5,10 +5,6 @@ extends Control
 ## in the viewer panel. Includes a debug info label and log toggle.
 ## Supports save/load of patches as `.gnpatch` JSON files.
 
-const GNHelpWindowScene := preload("res://addons/gonodes/ui/gn_help_window.gd")
-const _GNMainHelpWindowScript = preload("res://addons/gonodes/ui/gn_main_help_window.gd")
-const _SubNetworkNodeScript = preload("res://addons/gonodes/operators/comp/sub_network_node.gd")
-const _GNExportDialogScript = preload("res://addons/gonodes/ui/gn_export_dialog.gd")
 
 @onready var graph_editor: GNGraphEditor = $HSplit/GraphPanel/GraphEditor
 @onready var inspector: GNParamInspector = $HSplit/RightPanel/InspectorPanel
@@ -599,7 +595,7 @@ func _on_help_requested(node_id: String) -> void:
 			hw.grab_focus()
 			return
 
-	var hw := GNHelpWindowScene.new()
+	var hw := GNHelpWindow.new()
 	hw.show_help_for(node)
 	var offset := _help_windows.size() * 30
 	hw.position = Vector2i(300 + offset, 100 + offset)
@@ -660,7 +656,7 @@ func _toggle_main_help_window() -> void:
 		if _main_help_window.visible:
 			_main_help_window.grab_focus()
 		return
-	_main_help_window = _GNMainHelpWindowScript.new()
+	_main_help_window = GNMainHelpWindow.new()
 	add_child(_main_help_window)
 	_main_help_window.popup_centered()
 
@@ -899,7 +895,7 @@ func _setup_toolbar() -> void:
 	row2.add_child(btn_help)
 
 	# Create the export dialog (hidden until needed)
-	_export_dialog = _GNExportDialogScript.new()
+	_export_dialog = GNExportDialog.new()
 	_export_dialog.visible = false
 	add_child(_export_dialog)
 
@@ -1589,7 +1585,7 @@ func _init_nav_stack() -> void:
 ## Called when the user wants to dive into a SubNetworkNode.
 func _on_dive_into_requested(node_id: String) -> void:
 	var node: GNNode = _current_network().get_node_by_id(node_id)
-	if not node is _SubNetworkNodeScript:
+	if not node is SubNetworkNode:
 		return
 	var subnet = node
 	subnet._ensure_inner_network()
@@ -1648,7 +1644,7 @@ func _navigate_to_depth(target_depth: int) -> void:
 			var parent_entry: _NavEntry = _nav_stack[i - 1] as _NavEntry
 			var subnet_node: GNNode = parent_entry.network.get_node_by_id(
 				leaving.subnet_node_id)
-			if subnet_node and subnet_node is _SubNetworkNodeScript:
+			if subnet_node and subnet_node is SubNetworkNode:
 				subnet_node.sync_ports_from_tunnels()
 
 	# Pop entries until we reach target depth

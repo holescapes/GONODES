@@ -63,6 +63,56 @@
 #include "top/gn_native_optical_flow_top.h"
 #include "top/gn_native_analyze_top.h"
 
+// SOP processors — Phase 4
+#include "sop/gn_native_top_to_sop.h"
+#include "sop/gn_native_point_sop.h"
+#include "sop/gn_native_clip_sop.h"
+#include "sop/gn_native_sort_sop.h"
+
+// SOP processors — Phase 5
+#include "sop/gn_native_uv_project_sop.h"
+#include "sop/gn_native_attribute_sop.h"
+#include "sop/gn_native_transform_sop.h"
+#include "sop/gn_native_divide_sop.h"
+#include "sop/gn_native_normal_sop.h"
+#include "sop/gn_native_mirror_sop.h"
+
+// SOP processors — Phase 6
+#include "sop/gn_native_cap_sop.h"
+#include "sop/gn_native_delete_sop.h"
+#include "sop/gn_native_carve_sop.h"
+
+// CHOP processors — Phase 4
+#include "chop/gn_native_top_to_chop.h"
+
+// CHOP processors — Phase 5
+#include "chop/gn_native_expression_chop.h"
+#include "chop/gn_native_audio_dynamics_chop.h"
+
+// CHOP processors — Phase 6
+#include "chop/gn_native_stretch_chop.h"
+#include "chop/gn_native_lookup_chop.h"
+
+// TOP processors — Phase 4
+#include "top/gn_native_chop_to_top.h"
+
+// TOP processors — Phase 5
+#include "top/gn_native_particle_state_top.h"
+
+// IMG processors — Phase 6
+#include "img/gn_native_checkerboard_img.h"
+
+// VOL processors — Phase 4
+#include "vol/gn_native_marching_cubes_vol.h"
+#include "vol/gn_native_chop_to_vol.h"
+#include "vol/gn_native_analyze_vol.h"
+
+// POP processors — Phase 4
+#include "pop/gn_native_instance_pop.h"
+
+// POP processors — Phase 5
+#include "pop/gn_native_render_pop.h"
+
 using namespace godot;
 
 void initialize_gn_native_module(ModuleInitializationLevel p_level) {
@@ -128,6 +178,56 @@ void initialize_gn_native_module(ModuleInitializationLevel p_level) {
     // TOP processors — Phase 3
     ClassDB::register_class<GNNativeOpticalFlowTop>();
     ClassDB::register_class<GNNativeAnalyzeTop>();
+
+    // SOP processors — Phase 4
+    ClassDB::register_class<GNNativeTopToSop>();
+    ClassDB::register_class<GNNativePointSop>();
+    ClassDB::register_class<GNNativeClipSop>();
+    ClassDB::register_class<GNNativeSortSop>();
+
+    // SOP processors — Phase 5
+    ClassDB::register_class<GNNativeUvProjectSop>();
+    ClassDB::register_class<GNNativeAttributeSop>();
+    ClassDB::register_class<GNNativeTransformSop>();
+    ClassDB::register_class<GNNativeDivideSop>();
+    ClassDB::register_class<GNNativeNormalSop>();
+    ClassDB::register_class<GNNativeMirrorSop>();
+
+    // SOP processors — Phase 6
+    ClassDB::register_class<GNNativeCapSop>();
+    ClassDB::register_class<GNNativeDeleteSop>();
+    ClassDB::register_class<GNNativeCarveSop>();
+
+    // CHOP processors — Phase 4
+    ClassDB::register_class<GNNativeTopToChop>();
+
+    // CHOP processors — Phase 5
+    ClassDB::register_class<GNNativeExpressionChop>();
+    ClassDB::register_class<GNNativeAudioDynamicsChop>();
+
+    // CHOP processors — Phase 6
+    ClassDB::register_class<GNNativeStretchChop>();
+    ClassDB::register_class<GNNativeLookupChop>();
+
+    // TOP processors — Phase 4
+    ClassDB::register_class<GNNativeChopToTop>();
+
+    // TOP processors — Phase 5
+    ClassDB::register_class<GNNativeParticleStateTop>();
+
+    // IMG processors — Phase 6
+    ClassDB::register_class<GNNativeCheckerboardImg>();
+
+    // VOL processors — Phase 4
+    ClassDB::register_class<GNNativeMarchingCubesVol>();
+    ClassDB::register_class<GNNativeChopToVol>();
+    ClassDB::register_class<GNNativeAnalyzeVol>();
+
+    // POP processors — Phase 4
+    ClassDB::register_class<GNNativeInstancePop>();
+
+    // POP processors — Phase 5
+    ClassDB::register_class<GNNativeRenderPop>();
 }
 
 void uninitialize_gn_native_module(ModuleInitializationLevel p_level) {

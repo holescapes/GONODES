@@ -10,7 +10,7 @@
 *.gdextension.uid.bak
 
 # godot-cpp build dependency (cloned separately, not a submodule)
-addons/gn_native/godot-cpp/
+addons/gn_ext_native/native/godot-cpp/
 
 # Windows DLL lock/temp files created by Godot while running
 ~lib*

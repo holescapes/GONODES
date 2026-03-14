@@ -19,8 +19,6 @@ extends GNTopBase
 ##   Factory presets in addons/gn_ext_shadertoy/presets/shadertoy/ (.glsl)
 ##   User presets in user://gonodes_presets/shadertoy/
 
-const _ShadertoyTranslator := preload("res://addons/gn_ext_shadertoy/shadertoy_translator.gd")
-
 const _API_BASE := "https://www.shadertoy.com/api/v1/shaders/%s?key=%s"
 
 const DEFAULT_SHADERTOY_CODE := """// Paste your Shadertoy GLSL code here.
@@ -154,7 +152,7 @@ func _translate_and_compile(shadertoy_code: String, size: Vector2i) -> void:
 		_dynamic_param_names.clear()
 		return
 
-	var tr := _ShadertoyTranslator.translate(shadertoy_code)
+	var tr := ShadertoyTranslator.translate(shadertoy_code)
 	if not tr.success:
 		GNLogger.error("ShadertoyTOP",
 			"'%s' — translation failed: %s" % [id, tr.error])

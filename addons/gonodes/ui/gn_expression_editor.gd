@@ -12,7 +12,6 @@ extends "res://addons/gonodes/ui/gn_base_code_editor.gd"
 ##   editor.open(param, component_index)
 ##   editor.expression_committed.connect(_handle_expr)
 
-const _ExprFunctions := preload("res://addons/gonodes/core/gn_expression_functions.gd")
 
 ## Emitted when the user confirms the expression (OK or Ctrl+Enter).
 ## Provides the final expression text, the parameter, and the component index
@@ -324,8 +323,8 @@ func _suggest_top_properties() -> void:
 
 ## Suggests registered custom function names (for fn("...") autocomplete).
 func _suggest_fn_names() -> void:
-	for func_name in _ExprFunctions.get_names():
-		var entry = _ExprFunctions.get_all().get(func_name)
+	for func_name in GNExpressionFunctions.get_names():
+		var entry = GNExpressionFunctions.get_all().get(func_name)
 		var desc: String = ""
 		if entry:
 			desc = entry.description
@@ -383,8 +382,8 @@ func _suggest_general() -> void:
 			Color(0.6, 0.7, 0.95))
 
 	# Custom user-defined functions (registered via GNExpressionFunctions)
-	for func_name in _ExprFunctions.get_names():
-		var entry = _ExprFunctions.get_all().get(func_name)
+	for func_name in GNExpressionFunctions.get_names():
+		var entry = GNExpressionFunctions.get_all().get(func_name)
 		if entry and not entry.is_builtin:
 			var desc: String = entry.description if entry.description else "Custom function"
 			var insert := "fn(\"%s\", " % func_name

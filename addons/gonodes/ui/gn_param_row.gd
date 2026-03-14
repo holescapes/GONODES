@@ -66,8 +66,6 @@ var _resolved_label: Label = null
 ## Direct reference to the code TextEdit when inside a code-editor wrapper VBox.
 var _code_edit: TextEdit = null
 
-## Preloaded GNCodeEditor script (lazy reference avoids class_name resolution issues).
-const _GNCodeEditorScript := preload("res://addons/gonodes/ui/gn_code_editor.gd")
 
 ## Lazily-created windowed code editor for Script/Shader params.
 var _code_editor: Window = null
@@ -468,7 +466,7 @@ func _is_script_node() -> bool:
 ## Lazily creates (or re-opens) the windowed GNCodeEditor for this param.
 func _open_code_editor() -> void:
 	if _code_editor == null:
-		_code_editor = _GNCodeEditorScript.new()
+		_code_editor = GNCodeEditor.new()
 		add_child(_code_editor)
 		_code_editor.code_committed.connect(_on_code_editor_committed)
 	_code_editor.open(owner_node, param.param_name)
