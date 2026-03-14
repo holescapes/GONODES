@@ -1,0 +1,38 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "isf1": {
+            "type": "ISFFileTOP",
+            "position": [200, 100],
+            "parameters": {
+                "time_dependent": {"value": true},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "isf_code": {
+                    "value": "/*{\n\t\"DESCRIPTION\": \"Animated sine warp\",\n\t\"ISFVSN\": \"2.0\",\n\t\"CATEGORIES\": [\"Generator\"],\n\t\"INPUTS\": [\n\t\t{\"NAME\": \"frequency\", \"TYPE\": \"float\", \"DEFAULT\": 6.0, \"MIN\": 0.5, \"MAX\": 30.0},\n\t\t{\"NAME\": \"amplitude\", \"TYPE\": \"float\", \"DEFAULT\": 0.08, \"MIN\": 0.0, \"MAX\": 0.5},\n\t\t{\"NAME\": \"speed\",     \"TYPE\": \"float\", \"DEFAULT\": 1.0,  \"MIN\": 0.0, \"MAX\": 5.0}\n\t]\n}*/\n\nvoid main() {\n\tvec2 uv = isf_FragNormCoord;\n\tuv.x += sin(uv.y * frequency + TIME * speed) * amplitude;\n\tuv.y += cos(uv.x * frequency + TIME * speed) * amplitude;\n\tvec3 col = 0.5 + 0.5 * cos(vec3(uv.x, uv.y, uv.x + uv.y) * TAU + TIME);\n\tgl_FragColor = vec4(col, 1.0);\n}"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [600, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "isf1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ISF File TOP — Generator Example\n\nSine warp generator written directly in ISF (Interactive Shader Format).\nThe JSON INPUTS block auto-creates frequency, amplitude and speed parameters.\nEdit isf_code inline or open the full code editor (Edit \u2197 button).\nLoad presets via the Presets menu in the code editor.",
+            "position": [-150.0, -180.0],
+            "size": [520.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

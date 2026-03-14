@@ -1,0 +1,48 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [-200, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "noise_type": {"value": 0},
+                "scale": {"value": 4.0},
+                "monochrome": {"value": false}
+            }
+        },
+        "isf1": {
+            "type": "ISFFileTOP",
+            "position": [200, 100],
+            "parameters": {
+                "time_dependent": {"value": false},
+                "isf_code": {
+                    "value": "/*{\n\t\"DESCRIPTION\": \"Edge detection glow\",\n\t\"ISFVSN\": \"2.0\",\n\t\"CATEGORIES\": [\"Stylize\"],\n\t\"INPUTS\": [\n\t\t{\"NAME\": \"src\",        \"TYPE\": \"image\"},\n\t\t{\"NAME\": \"edge_color\", \"TYPE\": \"color\",  \"DEFAULT\": [0.0, 0.8, 1.0, 1.0]},\n\t\t{\"NAME\": \"threshold\",  \"TYPE\": \"float\",  \"DEFAULT\": 0.2, \"MIN\": 0.0, \"MAX\": 1.0},\n\t\t{\"NAME\": \"glow_width\", \"TYPE\": \"float\",  \"DEFAULT\": 3.0, \"MIN\": 1.0, \"MAX\": 20.0},\n\t\t{\"NAME\": \"show_src\",   \"TYPE\": \"bool\",   \"DEFAULT\": true}\n\t]\n}*/\n\nfloat luma(vec4 c) { return dot(c.rgb, vec3(0.299, 0.587, 0.114)); }\n\nvoid main() {\n\tvec2 uv = isf_FragNormCoord;\n\tvec2 px = 1.0 / RENDERSIZE;\n\tvec2 off = px * glow_width;\n\tfloat tl = luma(IMG_NORM_PIXEL(src, uv + vec2(-off.x,  off.y)));\n\tfloat t  = luma(IMG_NORM_PIXEL(src, uv + vec2(0.0,     off.y)));\n\tfloat tr = luma(IMG_NORM_PIXEL(src, uv + vec2( off.x,  off.y)));\n\tfloat ml = luma(IMG_NORM_PIXEL(src, uv + vec2(-off.x, 0.0)));\n\tfloat mr = luma(IMG_NORM_PIXEL(src, uv + vec2( off.x, 0.0)));\n\tfloat bl = luma(IMG_NORM_PIXEL(src, uv + vec2(-off.x, -off.y)));\n\tfloat b  = luma(IMG_NORM_PIXEL(src, uv + vec2(0.0,    -off.y)));\n\tfloat br = luma(IMG_NORM_PIXEL(src, uv + vec2( off.x, -off.y)));\n\tfloat gx = -tl - 2.0*ml - bl + tr + 2.0*mr + br;\n\tfloat gy = -tl - 2.0*t  - tr + bl + 2.0*b  + br;\n\tfloat edge = smoothstep(threshold, threshold + 0.1, length(vec2(gx, gy)));\n\tvec4 base = show_src ? IMG_NORM_PIXEL(src, uv) : vec4(0.0);\n\tgl_FragColor = base + edge_color * edge;\n}"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [620, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "isf1", "to_port": 0},
+        {"from": "isf1",   "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ISF File TOP — Effect Example\n\nEdge detection glow applied to a NoiseTOP input.\nThe JSON INPUTS block defines one image input (src) plus colour, threshold,\nglow_width and show_src parameters — all auto-generated in the inspector.\nIMG_NORM_PIXEL() samples the image at normalised coordinates.\nRENDERSIZE gives the canvas resolution in pixels.",
+            "position": [-250.0, -200.0],
+            "size": [580.0, 130.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -625,9 +625,22 @@ const USER_PRESET_DIR := "user://gonodes_presets/"
 static func get_preset_list(family_folder: String) -> Array:
 	var result: Array = []
 
-	# Factory presets
+	# Core factory presets
 	var factory_path := FACTORY_PRESET_DIR + family_folder
 	_scan_preset_dir(factory_path, true, result)
+
+	# Extension presets — each gn_ext_* folder may ship presets/<family_folder>/
+	var addons_dir := DirAccess.open("res://addons")
+	if addons_dir != null:
+		addons_dir.list_dir_begin()
+		var folder_name := addons_dir.get_next()
+		while folder_name != "":
+			if addons_dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
+				var ext_preset_path := "res://addons/%s/presets/%s" % [
+					folder_name, family_folder]
+				_scan_preset_dir(ext_preset_path, true, result)
+			folder_name = addons_dir.get_next()
+		addons_dir.list_dir_end()
 
 	# User presets
 	var user_path := USER_PRESET_DIR + family_folder
@@ -636,21 +649,25 @@ static func get_preset_list(family_folder: String) -> Array:
 	return result
 
 
-## Scans a directory for .gd and .gdshader preset files.
+## Scans a directory for code preset files.
+## Recognised extensions: .gd, .gdshader, .fs, .glsl, .frag, .isf
 static func _scan_preset_dir(dir_path: String, is_factory: bool, result: Array) -> void:
 	var dir := DirAccess.open(dir_path)
 	if dir == null:
 		return
+	const EXTS := [".gd", ".gdshader", ".fs", ".glsl", ".frag", ".isf"]
 	dir.list_dir_begin()
 	var fname := dir.get_next()
 	while fname != "":
-		if not dir.current_is_dir() and (fname.ends_with(".gd") or fname.ends_with(".gdshader")):
-			var preset_name := fname.get_basename()
-			result.append({
-				"name": preset_name,
-				"path": dir_path + "/" + fname,
-				"is_factory": is_factory,
-			})
+		if not dir.current_is_dir():
+			for ext in EXTS:
+				if fname.ends_with(ext):
+					result.append({
+						"name": fname.get_basename(),
+						"path": dir_path + "/" + fname,
+						"is_factory": is_factory,
+					})
+					break
 		fname = dir.get_next()
 	dir.list_dir_end()
 
@@ -670,9 +687,10 @@ static func load_preset(file_path: String) -> String:
 
 
 ## Saves user code as a preset.  Creates directories if needed.
+## [param file_ext] defaults to ".gd" but can be ".fs", ".glsl", etc.
 ## Returns true on success.
 static func save_preset(family_folder: String, preset_name: String,
-		code: String) -> bool:
+		code: String, file_ext: String = ".gd") -> bool:
 	var dir_path := USER_PRESET_DIR + family_folder
 	# Ensure directory exists
 	if not DirAccess.dir_exists_absolute(dir_path):
@@ -681,7 +699,8 @@ static func save_preset(family_folder: String, preset_name: String,
 			GNLogger.error("ScriptHelper",
 				"Cannot create preset directory: %s (error %d)" % [dir_path, err])
 			return false
-	var file_path := dir_path + "/" + preset_name + ".gd"
+	var ext := file_ext if file_ext.begins_with(".") else "." + file_ext
+	var file_path := dir_path + "/" + preset_name + ext
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	if file == null:
 		GNLogger.error("ScriptHelper",
