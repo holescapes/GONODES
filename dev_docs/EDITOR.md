@@ -145,6 +145,22 @@ Only an explicit `reset_to_defaults()` clears the expression.
 
 ## Node Preview & Viewer System
 
+### Shared Rendering via GNViewerRenderer
+
+All data-to-image rendering logic is consolidated in `GNViewerRenderer`
+(`addons/gonodes/core/gn_viewer_renderer.gd`) — a static utility class.
+Both the **docked viewer panel** (`GNViewerPanel`) and **SnapshotTOP**
+(node-graph operator) delegate to `GNViewerRenderer` for:
+- SOP/POP/MAT SubViewport creation (camera, light, gizmo, environment)
+- Orbit camera positioning
+- Volume slice extraction (XY/XZ/YZ) and MIP projection
+- CHOP waveform to CPU Image rendering
+- DAT table to CPU Image rendering
+
+Any improvement to a visualization mode (e.g. better SOP lighting,
+new waveform styles, colored volume mapping) benefits both the interactive
+viewer and the SnapshotTOP node automatically.
+
 ### Output-Type Dispatch (Base Class)
 
 Both the **on-node inline preview** and the **docked viewer panel** display

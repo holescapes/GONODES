@@ -1,0 +1,60 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "torus1": {
+            "type": "TorusSOP",
+            "position": [100, 100],
+            "parameters": {
+                "inner_radius": {"value": 0.3},
+                "outer_radius": {"value": 0.8},
+                "rings": {"value": 32},
+                "ring_segments": {"value": 24}
+            }
+        },
+        "noise1": {
+            "type": "NoiseSOP",
+            "position": [400, 100],
+            "parameters": {
+                "amplitude": {"value": 0.15},
+                "frequency": {"value": 3.0}
+            }
+        },
+        "snapshot1": {
+            "type": "SnapshotTOP",
+            "position": [700, 100],
+            "parameters": {
+                "mode": {"value": 0},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "orbit_yaw": {"value": 35.0},
+                "orbit_pitch": {"value": -25.0},
+                "orbit_distance": {"value": 2.5},
+                "wireframe": {"value": false}
+            },
+            "snapshot_mode": 0
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1050, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "torus1", "from_port": 0, "to": "noise1", "to_port": 0},
+        {"from": "noise1", "from_port": 0, "to": "snapshot1", "to_port": 0},
+        {"from": "snapshot1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SnapshotTOP — SOP Mode\n\nRenders a noisy torus mesh as a TOP texture using\nthe same 3D viewer as the docked viewer panel.\nTry adjusting orbit_yaw, orbit_pitch, and wireframe.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

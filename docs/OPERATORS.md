@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **313 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants.
+> **314 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants.
 
 ---
 
@@ -40,7 +40,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 52 operators** — 12 generators, 26 filters, 7 combiners, 3 temporal/buffer, 2 utility, 1 bridge.
+**Total: 52 operators** — 12 generators, 26 filters, 7 combiners, 3 temporal/buffer, 2 utility, 2 bridge.
 
 ### Generators
 
@@ -1033,6 +1033,28 @@ Render CHOP channels as a texture — waveform oscilloscope, heatmap, or graph.
 **Input:** `in` (CHOP — source channels).
 
 **How it works:** CPU-based Image rendering (no SubViewport). Reads channel samples and draws into an `Image`, then converts to `ImageTexture`. Waveform mode draws lines between samples; Heatmap maps values to a red-blue gradient; Graph draws filled bars. Auto-range scans the data for min/max each cook.
+
+---
+
+#### SnapshotTOP
+
+Renders any non-TOP data type as a TOP texture — the same visualization the viewer panel shows, but as a node output for downstream processing. Shares rendering code with `GNViewerPanel` via `GNViewerRenderer`, so viewer improvements automatically update this node too.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | SOP | SOP, CHOP, DAT, POP, VOL, MAT, IMG | Select the input data family. Changing mode rebuilds the input port type. |
+| resolution | Vector2i | 512×512 | — | Output image size |
+| orbit_yaw | Float | 45.0 | -360–360 | Horizontal camera rotation (SOP/POP modes) |
+| orbit_pitch | Float | -30.0 | -89–89 | Vertical camera rotation (SOP/POP modes) |
+| orbit_distance | Float | 3.0 | 0.5–50 | Camera distance from origin (SOP/POP modes) |
+| wireframe | Bool | false | — | Render mesh as wireframe (SOP mode) |
+| point_size | Float | 0.02 | 0.001–1.0 | Billboard size per particle (POP mode) |
+| vol_view | Enum | Slices | Slices, MIP | Volume visualization style (VOL mode) |
+| slice_pos | Float | 0.5 | 0.0–1.0 | Normalized slice position along each axis (VOL mode) |
+
+**Input:** `in` — dynamic port, family changes with mode (SOP/CHOP/DAT/POP/VOL/MAT/IMG).
+
+**How it works:** Delegates all rendering to `GNViewerRenderer` — the same static utility class that `GNViewerPanel` uses. SOP and POP modes create lazily-initialized SubViewports with orbit cameras. CHOP mode renders a waveform to a CPU Image. DAT mode renders a grid-cell table. VOL mode composites 3 orthogonal slices (or MIP) into a single image. MAT mode renders a lit sphere with the material applied. IMG mode is a direct pass-through upload. Parameters that don't apply to the current mode are automatically hidden.
 
 ---
 

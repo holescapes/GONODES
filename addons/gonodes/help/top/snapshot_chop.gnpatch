@@ -1,0 +1,62 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFOCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 2.0},
+                "type": {"value": 0},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "noisechop1": {
+            "type": "NoiseCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "channels": {"value": 3},
+                "frequency": {"value": 0.5},
+                "amplitude": {"value": 0.8}
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [400, 200],
+            "parameters": {}
+        },
+        "snapshot1": {
+            "type": "SnapshotTOP",
+            "position": [700, 200],
+            "parameters": {
+                "mode": {"value": 1},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 256}}
+            },
+            "snapshot_mode": 1
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1050, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "merge1", "to_port": 0},
+        {"from": "noisechop1", "from_port": 0, "to": "merge1", "to_port": 1},
+        {"from": "merge1", "from_port": 0, "to": "snapshot1", "to_port": 0},
+        {"from": "snapshot1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SnapshotTOP — CHOP Mode\n\nRenders merged LFO + noise channels as a waveform\ntexture. Same visualization as the viewer panel,\nbut available as a TOP for downstream processing.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

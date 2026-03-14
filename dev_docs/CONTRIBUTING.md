@@ -37,7 +37,7 @@
 
 ```
 addons/gonodes/
-├── core/           # Engine: cook engine, network, data types, base classes
+├── core/           # Engine: cook engine, network, data types, base classes, GNViewerRenderer
 ├── operators/      # All operator scripts, organized by family
 │   ├── top/        # Texture operators (GPU)
 │   ├── chop/       # Channel operators

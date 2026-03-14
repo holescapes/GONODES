@@ -574,41 +574,12 @@ func _ensure_3d_viewport() -> void:
 	if _3d_viewport != null:
 		return
 
-	_3d_viewport = SubViewport.new()
-	_3d_viewport.name = "SOP_Viewer_VP"
-	_3d_viewport.transparent_bg = false
-	_3d_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	_3d_viewport.disable_3d = false
-	_3d_viewport.size = _snap_size(_get_content_rect().size)
+	var scene := GNViewerRenderer.create_sop_viewport(_snap_size(_get_content_rect().size))
+	_3d_viewport = scene["viewport"]
+	_3d_camera = scene["camera"]
+	_3d_mesh_instance = scene["mesh_instance"]
+	_gizmo_root = scene["gizmo_root"]
 	add_child(_3d_viewport)
-
-	# Camera
-	_3d_camera = Camera3D.new()
-	_3d_camera.name = "Camera"
-	_3d_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
-	_3d_camera.fov = 45.0
-	_3d_viewport.add_child(_3d_camera)
-
-	# Light
-	_3d_light = DirectionalLight3D.new()
-	_3d_light.name = "Light"
-	_3d_light.rotation_degrees = Vector3(-45, 30, 0)
-	_3d_viewport.add_child(_3d_light)
-
-	# Mesh instance (updated each frame with the SOP's mesh)
-	_3d_mesh_instance = MeshInstance3D.new()
-	_3d_mesh_instance.name = "MeshPreview"
-	_3d_viewport.add_child(_3d_mesh_instance)
-
-	# Environment for dark background
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.1, 0.1, 0.12)
-	env.ambient_light_color = Color(0.2, 0.2, 0.25)
-	env.ambient_light_energy = 0.5
-	var world := World3D.new()
-	world.environment = env
-	_3d_viewport.world_3d = world
 
 	# Display TextureRect
 	_3d_display = TextureRect.new()
@@ -621,9 +592,6 @@ func _ensure_3d_viewport() -> void:
 
 	_3d_display.gui_input.connect(_on_3d_gui_input)
 	_3d_display.mouse_exited.connect(func() -> void: _orbit_dragging = false)
-
-	# Axis gizmo — small lines at origin showing X (red), Y (green), Z (blue)
-	_create_axis_gizmo(_3d_viewport)
 
 	_update_orbit_camera()
 
@@ -708,61 +676,17 @@ func _on_3d_gui_input(event: InputEvent) -> void:
 func _update_orbit_camera() -> void:
 	if _3d_camera == null:
 		return
-	var yaw_rad := deg_to_rad(_orbit_yaw)
-	var pitch_rad := deg_to_rad(_orbit_pitch)
-	var offset := Vector3(
-		_orbit_distance * cos(pitch_rad) * sin(yaw_rad),
-		_orbit_distance * sin(pitch_rad),
-		_orbit_distance * cos(pitch_rad) * cos(yaw_rad)
-	)
-	_3d_camera.position = offset
-	_3d_camera.look_at(Vector3.ZERO)
+	GNViewerRenderer.apply_orbit_camera(_3d_camera, _orbit_yaw, _orbit_pitch, _orbit_distance)
 	_update_gizmo_scale()
 
 
-## Creates XYZ axis lines at the origin: X=red, Y=green, Z=blue.
-## Lines are parented to a shared Node3D root so the gizmo can be uniformly
-## scaled to maintain constant screen size regardless of zoom/orbit distance.
-func _create_axis_gizmo(viewport: SubViewport) -> void:
-	_gizmo_root = Node3D.new()
-	_gizmo_root.name = "AxisGizmo"
-	viewport.add_child(_gizmo_root)
-
-	# Unit-length axes — actual visual size comes from _gizmo_root.scale
-	var axes := [
-		{"dir": Vector3(1, 0, 0), "color": Color.RED},
-		{"dir": Vector3(0, 1, 0), "color": Color.GREEN},
-		{"dir": Vector3(0, 0, 1), "color": Color.BLUE},
-	]
-	for axis in axes:
-		var im := ImmediateMesh.new()
-		im.surface_begin(Mesh.PRIMITIVE_LINES)
-		im.surface_set_color(axis["color"])
-		im.surface_add_vertex(Vector3.ZERO)
-		im.surface_set_color(axis["color"])
-		im.surface_add_vertex(axis["dir"])
-		im.surface_end()
-		var mi := MeshInstance3D.new()
-		mi.mesh = im
-		# Unshaded material so axes are always visible, rendered on top
-		var mat := StandardMaterial3D.new()
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.vertex_color_use_as_albedo = true
-		mat.no_depth_test = true
-		mat.render_priority = 10
-		mi.material_override = mat
-		_gizmo_root.add_child(mi)
-
-	_update_gizmo_scale()
+## NOTE: Axis gizmo is now created by GNViewerRenderer.create_sop_viewport().
 
 
 ## Rescales the axis gizmo so it occupies a constant fraction of the screen
 ## regardless of orbit distance.  Called after every camera move / zoom.
 func _update_gizmo_scale() -> void:
-	if _gizmo_root == null:
-		return
-	var s: float = _orbit_distance * GIZMO_SCREEN_FRACTION
-	_gizmo_root.scale = Vector3(s, s, s)
+	GNViewerRenderer.update_gizmo_scale(_gizmo_root, _orbit_distance, GIZMO_SCREEN_FRACTION)
 
 
 ## Toggles between solid mesh and wireframe rendering.
@@ -777,12 +701,8 @@ func _on_wireframe_toggled(pressed: bool) -> void:
 func _apply_wireframe_mode() -> void:
 	if _3d_viewport == null:
 		return
-	if _wireframe_mode:
-		_3d_viewport.debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
-	else:
-		_3d_viewport.debug_draw = Viewport.DEBUG_DRAW_DISABLED
-	# Kick a render so the change is visible immediately.
-	_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	GNViewerRenderer.render_sop(_3d_viewport, _3d_mesh_instance,
+		_3d_mesh_instance.mesh, _wireframe_mode)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -793,47 +713,10 @@ func _ensure_mat_viewport() -> void:
 	if _mat_viewport != null:
 		return
 
-	_mat_viewport = SubViewport.new()
-	_mat_viewport.name = "MAT_Viewer_VP"
-	_mat_viewport.transparent_bg = false
-	_mat_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	_mat_viewport.disable_3d = false
-	_mat_viewport.size = _snap_size(_get_content_rect().size)
+	var scene := GNViewerRenderer.create_mat_viewport(_snap_size(_get_content_rect().size))
+	_mat_viewport = scene["viewport"]
+	_mat_sphere = scene["sphere"]
 	add_child(_mat_viewport)
-
-	# Camera
-	_mat_camera = Camera3D.new()
-	_mat_camera.name = "Camera"
-	_mat_camera.position = Vector3(0, 0, 2.5)
-	_mat_viewport.add_child(_mat_camera)
-	_mat_camera.look_at(Vector3.ZERO)
-
-	# Light
-	_mat_light = DirectionalLight3D.new()
-	_mat_light.name = "Light"
-	_mat_light.rotation_degrees = Vector3(-45, 30, 0)
-	_mat_viewport.add_child(_mat_light)
-
-	# Preview sphere
-	_mat_sphere = MeshInstance3D.new()
-	_mat_sphere.name = "PreviewSphere"
-	var sphere_mesh := SphereMesh.new()
-	sphere_mesh.radius = 0.8
-	sphere_mesh.height = 1.6
-	sphere_mesh.radial_segments = 64
-	sphere_mesh.rings = 32
-	_mat_sphere.mesh = sphere_mesh
-	_mat_viewport.add_child(_mat_sphere)
-
-	# Environment
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.15, 0.15, 0.18)
-	env.ambient_light_color = Color(0.3, 0.3, 0.35)
-	env.ambient_light_energy = 0.5
-	var world := World3D.new()
-	world.environment = env
-	_mat_viewport.world_3d = world
 
 	# Display
 	_mat_display = TextureRect.new()
@@ -857,13 +740,9 @@ func _show_material(mat_data: GNMaterialData) -> void:
 	_mat_display.size = content.size
 	_mat_viewport.size = _snap_size(content.size)
 
-	# Apply material to sphere
-	if mat_data.material != null:
-		_mat_sphere.material_override = mat_data.material
-	else:
-		_mat_sphere.material_override = null
-
-	_mat_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	# Delegate rendering to the shared renderer
+	GNViewerRenderer.render_mat(_mat_viewport, _mat_sphere,
+		mat_data.material if mat_data.material != null else null)
 
 	var mat_name := ""
 	if mat_data.material != null:
@@ -1114,41 +993,12 @@ func _ensure_pop_viewport() -> void:
 	if _pop_viewport != null:
 		return
 
-	_pop_viewport = SubViewport.new()
-	_pop_viewport.name = "POP_Viewer_VP"
-	_pop_viewport.transparent_bg = false
-	_pop_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	_pop_viewport.disable_3d = false
-	_pop_viewport.size = _snap_size(_get_content_rect().size)
+	var scene := GNViewerRenderer.create_pop_viewport(_snap_size(_get_content_rect().size))
+	_pop_viewport = scene["viewport"]
+	_pop_camera = scene["camera"]
+	_pop_multimesh = scene["multimesh_instance"]
+	_pop_gizmo_root = scene["gizmo_root"]
 	add_child(_pop_viewport)
-
-	# Camera
-	_pop_camera = Camera3D.new()
-	_pop_camera.name = "PopCamera"
-	_pop_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
-	_pop_camera.fov = 45.0
-	_pop_viewport.add_child(_pop_camera)
-
-	# Light
-	_pop_light = DirectionalLight3D.new()
-	_pop_light.name = "PopLight"
-	_pop_light.rotation_degrees = Vector3(-45, 30, 0)
-	_pop_viewport.add_child(_pop_light)
-
-	# MultiMesh instance
-	_pop_multimesh = MultiMeshInstance3D.new()
-	_pop_multimesh.name = "PopMultiMesh"
-	_pop_viewport.add_child(_pop_multimesh)
-
-	# Environment
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.08, 0.08, 0.1)
-	env.ambient_light_color = Color(0.3, 0.3, 0.35)
-	env.ambient_light_energy = 0.5
-	var world := World3D.new()
-	world.environment = env
-	_pop_viewport.world_3d = world
 
 	# Display TextureRect
 	_pop_display = TextureRect.new()
@@ -1161,33 +1011,6 @@ func _ensure_pop_viewport() -> void:
 
 	_pop_display.gui_input.connect(_on_pop_gui_input)
 	_pop_display.mouse_exited.connect(func() -> void: _pop_orbit_dragging = false)
-
-	# Axis gizmo
-	_pop_gizmo_root = Node3D.new()
-	_pop_gizmo_root.name = "PopAxisGizmo"
-	_pop_viewport.add_child(_pop_gizmo_root)
-	var axes := [
-		{"dir": Vector3(1, 0, 0), "color": Color.RED},
-		{"dir": Vector3(0, 1, 0), "color": Color.GREEN},
-		{"dir": Vector3(0, 0, 1), "color": Color.BLUE},
-	]
-	for axis in axes:
-		var im := ImmediateMesh.new()
-		im.surface_begin(Mesh.PRIMITIVE_LINES)
-		im.surface_set_color(axis["color"])
-		im.surface_add_vertex(Vector3.ZERO)
-		im.surface_set_color(axis["color"])
-		im.surface_add_vertex(axis["dir"])
-		im.surface_end()
-		var mi := MeshInstance3D.new()
-		mi.mesh = im
-		var mat := StandardMaterial3D.new()
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.vertex_color_use_as_albedo = true
-		mat.no_depth_test = true
-		mat.render_priority = 10
-		mi.set_surface_override_material(0, mat)
-		_pop_gizmo_root.add_child(mi)
 
 	# GPU mode toggle button
 	_pop_gpu_btn = Button.new()
@@ -1208,61 +1031,9 @@ func _ensure_pop_viewport() -> void:
 func _show_pop_particles(pd: GNParticleData) -> void:
 	_ensure_pop_viewport()
 
-	# Read back particle positions + pscale from GPU
-	var ctx := GNGpuContext.get_context()
-	if ctx.rd == null or not pd.rd_buffer.is_valid():
+	if not GNViewerRenderer.render_pop(_pop_viewport, _pop_multimesh, pd, _pop_point_size):
 		_show_info("No GPU context", "")
 		return
-
-	var byte_count: int = pd.particle_count * pd.stride
-	var raw: PackedByteArray = ctx.rd.buffer_get_data(pd.rd_buffer, 0, byte_count)
-
-	# Build MultiMesh
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.instance_count = pd.particle_count
-
-	# Use a small QuadMesh as the particle billboard
-	var quad := QuadMesh.new()
-	quad.size = Vector2(1.0, 1.0)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.vertex_color_use_as_albedo = true
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	quad.material = mat
-	mm.mesh = quad
-
-	# Extract particle data from the raw SSBO readback
-	var pos_off: int = pd.get_attrib_offset("pos")
-	var color_off: int = pd.get_attrib_offset("color")
-	var pscale_off: int = pd.get_attrib_offset("pscale")
-
-	for i in range(pd.particle_count):
-		var base: int = i * pd.stride
-		var px: float = raw.decode_float(base + pos_off)
-		var py: float = raw.decode_float(base + pos_off + 4)
-		var pz: float = raw.decode_float(base + pos_off + 8)
-
-		var ps: float = _pop_point_size
-		if pscale_off >= 0:
-			ps = raw.decode_float(base + pscale_off) * _pop_point_size
-
-		var xform := Transform3D(Basis.IDENTITY.scaled(Vector3(ps, ps, ps)),
-			Vector3(px, py, pz))
-		mm.set_instance_transform(i, xform)
-
-		if color_off >= 0:
-			var cr: float = raw.decode_float(base + color_off)
-			var cg: float = raw.decode_float(base + color_off + 4)
-			var cb: float = raw.decode_float(base + color_off + 8)
-			var ca: float = raw.decode_float(base + color_off + 12)
-			mm.set_instance_color(i, Color(cr, cg, cb, ca))
-		else:
-			mm.set_instance_color(i, Color(0.2, 0.8, 0.8))  # Cyan (POP family color)
-
-	_pop_multimesh.multimesh = mm
 
 	# Show display
 	if not _pop_display.visible:
@@ -1315,15 +1086,7 @@ func _on_pop_gui_input(event: InputEvent) -> void:
 func _update_pop_orbit_camera() -> void:
 	if _pop_camera == null:
 		return
-	var yaw_rad := deg_to_rad(_pop_orbit_yaw)
-	var pitch_rad := deg_to_rad(_pop_orbit_pitch)
-	var offset := Vector3(
-		_pop_orbit_distance * cos(pitch_rad) * sin(yaw_rad),
-		_pop_orbit_distance * sin(pitch_rad),
-		_pop_orbit_distance * cos(pitch_rad) * cos(yaw_rad)
-	)
-	_pop_camera.position = offset
-	_pop_camera.look_at(Vector3.ZERO)
+	GNViewerRenderer.apply_orbit_camera(_pop_camera, _pop_orbit_yaw, _pop_orbit_pitch, _pop_orbit_distance)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1419,13 +1182,13 @@ func _show_vol_slices(vd: GNVolumeData) -> void:
 	var res: Vector3i = vd.resolution
 	var bpv: int = vd.bytes_per_voxel()
 
-	# Extract slices
+	# Extract slices via shared renderer
 	var slice_z: int = clampi(int(_vol_slice_pos * (res.z - 1)), 0, res.z - 1)
 	var slice_y: int = clampi(int(_vol_slice_pos * (res.y - 1)), 0, res.y - 1)
 	var slice_x: int = clampi(int(_vol_slice_pos * (res.x - 1)), 0, res.x - 1)
 
 	# XY slice (fixed Z)
-	var xy_img := _extract_vol_slice_xy(raw, res, bpv, slice_z, vd.data_format)
+	var xy_img := GNViewerRenderer.extract_vol_slice_xy(raw, res, bpv, slice_z, vd.data_format)
 	if _vol_slice_img_xy == null:
 		_vol_slice_img_xy = ImageTexture.create_from_image(xy_img)
 	else:
@@ -1433,7 +1196,7 @@ func _show_vol_slices(vd: GNVolumeData) -> void:
 	_vol_slice_xy.texture = _vol_slice_img_xy
 
 	# XZ slice (fixed Y)
-	var xz_img := _extract_vol_slice_xz(raw, res, bpv, slice_y, vd.data_format)
+	var xz_img := GNViewerRenderer.extract_vol_slice_xz(raw, res, bpv, slice_y, vd.data_format)
 	if _vol_slice_img_xz == null:
 		_vol_slice_img_xz = ImageTexture.create_from_image(xz_img)
 	else:
@@ -1441,7 +1204,7 @@ func _show_vol_slices(vd: GNVolumeData) -> void:
 	_vol_slice_xz.texture = _vol_slice_img_xz
 
 	# YZ slice (fixed X)
-	var yz_img := _extract_vol_slice_yz(raw, res, bpv, slice_x, vd.data_format)
+	var yz_img := GNViewerRenderer.extract_vol_slice_yz(raw, res, bpv, slice_x, vd.data_format)
 	if _vol_slice_img_yz == null:
 		_vol_slice_img_yz = ImageTexture.create_from_image(yz_img)
 	else:
@@ -1450,7 +1213,7 @@ func _show_vol_slices(vd: GNVolumeData) -> void:
 
 	# MIP if toggled
 	if _vol_mip_mode:
-		var mip_img := _compute_vol_mip(raw, res, bpv, vd.data_format)
+		var mip_img := GNViewerRenderer.compute_vol_mip(raw, res, bpv, vd.data_format)
 		if _vol_mip_img == null:
 			_vol_mip_img = ImageTexture.create_from_image(mip_img)
 		else:
@@ -1482,78 +1245,7 @@ func _on_vol_gui_input(event: InputEvent) -> void:
 			_vol_slice_pos = clampf(_vol_slice_pos - 0.02, 0.0, 1.0)
 
 
-## Extracts an XY slice at fixed Z from the raw 3D texture data.
-func _extract_vol_slice_xy(raw: PackedByteArray, res: Vector3i, bpv: int,
-		z: int, fmt: int) -> Image:
-	var img := Image.create(res.x, res.y, false, Image.FORMAT_RGBA8)
-	for y in range(res.y):
-		for x in range(res.x):
-			var offset: int = ((z * res.y + y) * res.x + x) * bpv
-			var val: float = _read_voxel_value(raw, offset, fmt)
-			img.set_pixel(x, y, _density_to_color(val))
-	return img
-
-
-## Extracts an XZ slice at fixed Y.
-func _extract_vol_slice_xz(raw: PackedByteArray, res: Vector3i, bpv: int,
-		y: int, fmt: int) -> Image:
-	var img := Image.create(res.x, res.z, false, Image.FORMAT_RGBA8)
-	for z in range(res.z):
-		for x in range(res.x):
-			var offset: int = ((z * res.y + y) * res.x + x) * bpv
-			var val: float = _read_voxel_value(raw, offset, fmt)
-			img.set_pixel(x, z, _density_to_color(val))
-	return img
-
-
-## Extracts a YZ slice at fixed X.
-func _extract_vol_slice_yz(raw: PackedByteArray, res: Vector3i, bpv: int,
-		x: int, fmt: int) -> Image:
-	var img := Image.create(res.y, res.z, false, Image.FORMAT_RGBA8)
-	for z in range(res.z):
-		for yy in range(res.y):
-			var offset: int = ((z * res.y + yy) * res.x + x) * bpv
-			var val: float = _read_voxel_value(raw, offset, fmt)
-			img.set_pixel(yy, z, _density_to_color(val))
-	return img
-
-
-## Maximum Intensity Projection: for each (x, y), take the max density across Z.
-func _compute_vol_mip(raw: PackedByteArray, res: Vector3i, bpv: int,
-		fmt: int) -> Image:
-	var img := Image.create(res.x, res.y, false, Image.FORMAT_RGBA8)
-	for y in range(res.y):
-		for x in range(res.x):
-			var max_val: float = 0.0
-			for z in range(res.z):
-				var offset: int = ((z * res.y + y) * res.x + x) * bpv
-				var val: float = _read_voxel_value(raw, offset, fmt)
-				if val > max_val:
-					max_val = val
-			img.set_pixel(x, y, _density_to_color(max_val))
-	return img
-
-
-## Reads a single float value from the raw volume data at the given byte offset.
-func _read_voxel_value(raw: PackedByteArray, offset: int, fmt: int) -> float:
-	if offset + 4 > raw.size():
-		return 0.0
-	match fmt:
-		RenderingDevice.DATA_FORMAT_R32_SFLOAT:
-			return raw.decode_float(offset)
-		RenderingDevice.DATA_FORMAT_R16_SFLOAT:
-			return raw.decode_half(offset)
-		RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT:
-			return raw.decode_float(offset)  # Read just the R channel
-		RenderingDevice.DATA_FORMAT_R16G16B16A16_SFLOAT:
-			return raw.decode_half(offset)
-	return raw.decode_float(offset)
-
-
-## Maps a density value (0..1) to a grayscale color.
-func _density_to_color(val: float) -> Color:
-	var v: float = clampf(val, 0.0, 1.0)
-	return Color(v, v, v, 1.0)
+## NOTE: Volume slice/MIP extraction and voxel reading are now in GNViewerRenderer.
 
 
 ## Keyboard shortcut handler.

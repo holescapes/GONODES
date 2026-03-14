@@ -976,6 +976,8 @@ func _register_core_operators() -> void:
 	# ── TOPs: Bridge (cross-family conversion) ─────────────────────────
 	_reg("CHOPtoTOP",       "TOP", CHOPtoTOP,
 		"Render CHOP channels as a texture (waveform, heatmap, or graph).")
+	_reg("SnapshotTOP",     "TOP", SnapshotTOP,
+		"Render any non-TOP data as a texture (SOP/CHOP/DAT/POP/VOL/MAT/IMG). Same visualization as the viewer panel.")
 
 	# ── COMPs ───────────────────────────────────────────────────────────
 	_reg("GeometryCOMP",    "COMP", GeometryCOMP,
