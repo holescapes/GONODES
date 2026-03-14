@@ -4149,6 +4149,14 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **VOL** | 11 | *(Volumetric 3D texture operators — Navier-Stokes fluid, raymarcher, marching cubes)* |
 | **Total** | **313** | |
 
+### Extension Operators (not included in count above)
+
+| Extension | Operators | Description |
+|-----------|-----------|-------------|
+| **gn_ext_shadertoy** | ShadertoyTOP | Runtime Shadertoy GLSL translation, URL fetch, 10 presets |
+| **gn_ext_isf** | ISFFileTOP | ISF v2 shader support, multi-pass, JSON-driven params, 10 presets |
+| **gn_ext_native** | 16 operators | C++ GDExtension acceleration (see above) |
+
 ---
 
 ## Native Acceleration Extension (Optional)
@@ -4182,3 +4190,65 @@ The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 1
 | SmoothCHOPNative | SmoothCHOP | CHOP | GNNativeSmooth | Biquad Butterworth IIR filter (LP/HP/BP) with per-channel state |
 
 **Build status:** Windows x86_64 binary compiled and active (`bin/win64/libgn_native.windows.template_debug.x86_64.dll`, 677 KB). Linux/macOS builds require running `scons platform=linux|macos target=template_debug` on those platforms. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and falls back to pure GDScript if the library is missing.
+
+---
+
+## Shadertoy Extension (gn_ext_shadertoy)
+
+The `gn_ext_shadertoy` extension provides a single **ShadertoyTOP** node that runs any Shadertoy GLSL shader inside GONODES. No pre-baked operators — write, paste, or fetch any `void mainImage(out vec4, in vec2)` shader and it compiles immediately through the runtime Shadertoy-to-Godot translation pipeline.
+
+### ShadertoyTOP
+
+| Family | Inputs | Outputs |
+|--------|--------|---------|
+| TOP | 0..4 (auto-wired from iChannel usage) | 1 texture |
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `time_dependent` | Bool | Re-cook every frame (enable for shaders using `iTime`) |
+| `fetch` | Bool (pulse) | Download shader from `shadertoy_url` via the public API |
+| `resolution` | Vector2i | Output resolution (generators only) |
+| `shadertoy_url` | String | Shadertoy page URL or bare shader ID (e.g. `Ms2SD1`) |
+| `shadertoy_api_key` | String | Personal Shadertoy API key (required for fetch — see below) |
+| `shadertoy_code` | String | Raw Shadertoy GLSL (`void mainImage` format) |
+| *dynamic* | various | Auto-created from `uniform` declarations on compile |
+
+**Translation pipeline:** `ShadertoyTranslator` maps Shadertoy built-ins (`iTime` → `TIME`, `iResolution` → `gn_resolution`, `iMouse` → `gn_mouse`, `iChannel0..3` → TOP inputs, `fragCoord` → `UV * gn_resolution`, `fragColor` → `COLOR`). Custom `uniform` declarations become auto-generated inspector parameters.
+
+**URL Fetch & API key:** The fetch button downloads a shader's Image pass GLSL from the Shadertoy public API. This requires a free personal API key from [shadertoy.com/myapps](https://www.shadertoy.com/myapps) (you must publish at least one shader first). Without a valid key, fetch returns a 403 error.
+
+**Presets:** 10 factory presets (5 generators: plasma, creation, star nest, lava lamp, voronoi; 5 effects: CRT, chromatic aberration, pixelate, film grain, halftone).
+
+**Help patches:** 3 examples — generator, FX chain, URL fetch workflow.
+
+---
+
+## ISF Extension (gn_ext_isf)
+
+The `gn_ext_isf` extension provides a single **ISFFileTOP** node that runs [ISF v2](https://docs.vidvox.net/freeboard/) (Interactive Shader Format) shaders inside GONODES. Parameters, input ports, and multi-pass targets are auto-generated from the JSON metadata header.
+
+### ISFFileTOP
+
+| Family | Inputs | Outputs |
+|--------|--------|---------|
+| TOP | 0..n (image inputs from JSON INPUTS) | 1 texture |
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `time_dependent` | Bool | Re-cook every frame (enable for shaders using `TIME`) |
+| `isf_file` | File | Load an external `.fs` / `.isf` / `.frag` file into the editor |
+| `resolution` | Vector2i | Output resolution (generators only) |
+| `isf_code` | String | Live ISF source — edit inline or open the full code editor |
+| *dynamic* | various | Auto-created from JSON `INPUTS` on compile |
+
+**Translation pipeline:** `ISFTranslator` maps ISF built-ins (`isf_FragNormCoord` → `UV`, `gl_FragColor` → `COLOR`, `TIME` → Godot `TIME`, `RENDERSIZE` → `isf_rendersize`, `IMG_PIXEL`/`IMG_NORM_PIXEL`/`IMG_THIS_PIXEL` → `texture()` calls). ISF input types (`float`, `bool`, `long`, `point2D`, `color`, `event`, `image`) become inspector parameters or TOP input ports.
+
+**Multi-pass:** ISF's `PASSES` array is fully supported. Each pass gets its own SubViewport. `PERSISTENT` enables feedback-loop buffers. Per-pass `WIDTH`/`HEIGHT` expressions support `$WIDTH`, `$HEIGHT` variables.
+
+**Presets:** 10 factory presets (5 generators: color bars, sine warp, kaleidoscope, gradient map, Lissajous; 5 effects: kaleidoscope FX, glitch, mirror, edge glow, cross-hatch).
+
+**Help patches:** 2 examples — generator, FX chain.

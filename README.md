@@ -100,7 +100,7 @@ Double-click any row in the debug panel to select and scroll to that node. All d
 
 ## Project Status
 
-**Phase 6 Complete – Phase 7 planned. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry. MAT family (PBR, Shader) with per-object materials. MergeCOMP scene composition. Shadow system. WindowOUT open/close toggle. 3D pipeline live. 288 operators across 10 families. RAMP parameter type with curve editor. RampCHOP (dynamic 1–16 ramp slots). Canvas annotations (network boxes, sticky notes). Advanced scripting: GenericScriptNode (multi-output), CallbackDAT (event-driven), set_par() writable refs, Network API (procedural graph construction). 176 tests passing. Phases 1–6 complete.**
+**Phase 7 Complete. 314+ operators across 11 families (TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI) plus 16 native C++ accelerated variants and 2 shader extensions (Shadertoy, ISF). Save/load, copy/paste, undo/redo, live node previews, performance profiling, expression system, sub-networks, spare parameters, parameter presets, custom operator assets (.gnasset), GPU particles (POP), volumetric 3D textures (VOL), compute shader detection & graceful degradation, debug window & overlay system, OSC/MIDI/Audio I/O, 204+ help patches, 176 automated tests passing.**
 
 ### Completed
 
@@ -139,6 +139,13 @@ Double-click any row in the debug panel to select and scroll to that node. All d
 | **POP** | 10 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Instance, Render, ParticleState |
 | **VOL** | 10 | Noise, Blend, Blur, Displace, Fluid, MarchingCubes, Raymarch, SOPtoVOL, CHOPtoVOL, Analyze |
 | **UI** | 8 | ButtonUI, SliderUI, ToggleUI, LabelUI, KnobUI, XYPadUI, DropdownUI, ContainerUI |
+
+### Shader Extensions
+
+| Extension | Node | Description |
+|-----------|------|-------------|
+| **gn_ext_shadertoy** | ShadertoyTOP | Runtime Shadertoy GLSL translation — write, paste, or fetch any `mainImage` shader. Auto-mapped built-ins, URL fetch via Shadertoy API (requires free API key), 10 factory presets, inline code editor with syntax highlighting. |
+| **gn_ext_isf** | ISFFileTOP | ISF v2 (Interactive Shader Format) support — auto-generated parameters and input ports from JSON `INPUTS` header, single-pass and multi-pass with persistent buffers, 10 factory presets, inline code editor. |
 
 ### Advanced Scripting
 
@@ -333,11 +340,11 @@ addons/gonodes/help/
 - [x] ImgToTOP — CPU Image → GPU Texture bridge
 
 **Media I/O:**
-- [ ] OSC input/output operators (OscInCHOP, OscOUT, complete OscInDAT stub)
-- [ ] MIDI input (MidiInCHOP, MidiInDAT with device selection)
-- [ ] Audio input (AudioInCHOP, AudioSpectrumCHOP, AudioFileInCHOP)
-- [ ] WebcamTOP — live camera feed via CameraServer
-- [ ] ImageSequenceTOP — numbered frame playback with alpha
+- [x] OSC input/output operators (OscInCHOP, OscOUT, OscInDAT)
+- [x] MIDI input (MidiInCHOP, MidiInDAT with device selection)
+- [x] Audio input (AudioInCHOP, AudioSpectrumCHOP, AudioFileInCHOP)
+- [x] WebcamIMG — live camera feed via CameraServer
+- [x] ImageSequenceIMG — numbered frame playback with alpha
 
 **Performance:**
 - [x] SubViewport UPDATE_ONCE for non-time-dependent TOPs
@@ -355,14 +362,13 @@ addons/gonodes/help/
 - [x] Node bypass/disable toggle (B key)
 - [x] Node lock toggle (L key)
 - [x] Wire style options (curved/straight/right-angle)
-- [ ] Renderer selection UI (Forward+/Mobile/Compatibility dropdown)
 - [x] Patch export to standalone apps (Quick Build)
 - [x] Node grouping / sub-networks (Ctrl+G to group, Enter to dive, Backspace to exit)
-- [ ] Spare Parameters (Houdini-style add-any-param-to-any-node)
+- [x] Spare Parameters (Houdini-style add-any-param-to-any-node)
 - [x] Minimap navigation
 - [x] Node bookmarks (quick-jump 1-9)
 - [x] Auto-layout (topological + layer assignment)
-- [ ] Parameter presets (save/load/copy between nodes)
+- [x] Parameter presets (save/load/copy between nodes)
 
 ### Planned (Post-Phase 7)
 

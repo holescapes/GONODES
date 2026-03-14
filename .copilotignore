@@ -11,3 +11,10 @@ assets/
 **/*.wav
 **/*.mp4
 **/*.ogv
+**/*.obj
+**/*.dll
+**/*.so
+**/*.dylib
+**/*.exp
+**/*.lib
+**/bin/

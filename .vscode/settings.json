@@ -7,17 +7,25 @@
         "**/templates/**": true,
         "**/assets/**": true,
         "**/*.pck": true,
-        "**/godot-cpp/**": true
+        "**/godot-cpp/**": true,
+        "**/*.uid": true,
+        "**/*.import": true
     },
     "search.exclude": {
         "**/.godot": true,
         "**/.import": true,
         "**/godot-cpp/**": true,
-        "**/templates/**": true
+        "**/templates/**": true,
+        "**/*.uid": true,
+        "**/*.import": true,
+        "**/*.obj": true
     },
     "files.exclude": {
         "**/.godot": true,
-        "**/.import": true
+        "**/.import": true,
+        "**/godot-cpp": true,
+        "**/*.uid": true,
+        "**/*.import": true
     },
     "git.repositoryScanMaxDepth": 1,
     "git.autoRepositoryDetection": "openEditors"

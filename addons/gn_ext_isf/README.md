@@ -1,5 +1,7 @@
 # gn_ext_isf — ISF Shader Pack
 
+> **Status: Complete** — Single-node ISF v2 support with inline code editor, multi-pass rendering, 10 factory presets, and 2 help patches.
+
 ISF (Interactive Shader Format) support for GONODES.
 
 ---
@@ -165,7 +167,3 @@ User presets are stored in:
 addons/gn_ext_isf/presets/isf/    ← factory presets (read-only)
 user://gonodes_presets/isf/        ← user presets (saved from editor)
 ```
-
-### Generators
-| File | Description |
-|------|-------------|
