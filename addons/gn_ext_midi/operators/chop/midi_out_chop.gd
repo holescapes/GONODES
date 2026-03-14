@@ -1,6 +1,6 @@
-class_name MidiOutCHOP
+class_name RtMidiOutCHOP
 extends GNChopBase
-## Send MIDI messages to an external device or DAW.
+## Send MIDI messages via RtMidi native library.
 ## Takes channel data input and maps channels to MIDI output:
 ## - Channels named "n0"-"n127": note on/off (velocity from value)
 ## - Channels named "cc0"-"cc127": CC messages (value from channel)
@@ -13,10 +13,10 @@ var _prev_note_states: PackedFloat32Array = PackedFloat32Array()
 
 
 func _init() -> void:
-	node_type = "midioutchop"
+	node_type = "rtmidiout"
 	time_dependent = true
 	is_sink = true
-	node_description = "Send MIDI messages to external device or DAW."
+	node_description = "Send MIDI via RtMidi native library."
 	if ClassDB.class_exists("GNMidiOut"):
 		_midi_out = ClassDB.instantiate("GNMidiOut")
 	_prev_note_states.resize(128)

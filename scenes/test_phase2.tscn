@@ -1,0 +1,162 @@
+[gd_scene format=3 uid="uid://df8kgkrhhegqk"]
+
+[sub_resource type="GDScript" id="GDScript_onsmi"]
+script/source = "extends Node
+## Phase 2 test script â€” wires up a minimal GONODES network and runs it:
+##   LFO_CHOP (\"lfo1\") â†’ expression drives NoiseTOP (\"noise1\") time_offset
+##   NoiseTOP (\"noise1\") â†’ LevelTOP (\"level1\")
+##   LevelTOP (\"level1\") â†’ WindowOUT (\"win1\") â€” output on a separate window
+##   Output also displayed in the main window's TextureRect viewer.
+##
+## GNNodes extend Node â€” the cook engine parents them in the scene tree,
+## giving TOPs ownership of their SubViewports and Windows.
+
+@onready var viewer: TextureRect = $Viewer
+@onready var label: Label = $InfoLabel
+@onready var log_toggle: CheckButton = $LogToggle
+
+var network: GNNetwork
+var cook_engine: GNCookEngine
+
+
+func _ready() -> void:
+	_setup_network()
+	_setup_cook_engine()
+
+	# Wire log toggle button
+	log_toggle.toggled.connect(_on_log_toggled)
+	GNLogger.enabled = log_toggle.button_pressed
+	GNLogger.level = GNLogger.Level.INFO
+
+	# Print display info for debugging
+	var displays := WindowOUT.get_display_info()
+	for d in displays:
+		print(\"Display %d: %s at %s\" % [d[\"index\"], d[\"size\"], d[\"position\"]])
+	print(\"GONODES Phase 2 Test â€” running (%d display(s))\" % displays.size())
+
+
+func _setup_network() -> void:
+	network = GNNetwork.new()
+
+	# --- Create nodes ---
+	var lfo := LFO_CHOP.new()
+	lfo.initialize(\"lfo1\")
+	lfo.get_parameter(\"frequency\").set_value(0.5)
+	lfo.get_parameter(\"amplitude\").set_value(1.0)
+	lfo.get_parameter(\"waveform\").set_value(LFO_CHOP.Waveform.SINE)
+
+	var noise := NoiseTOP.new()
+	noise.initialize(\"noise1\")
+	noise.get_parameter(\"scale\").set_value(6.0)
+	noise.get_parameter(\"resolution\").set_value(Vector2i(512, 512))
+	noise.get_parameter(\"monochrome\").set_value(true)
+	# Set time_offset to EXPRESSION mode: driven by the LFO
+	noise.get_parameter(\"time_offset\").set_expression(
+		'chop(\"lfo1\", \"out\") * 5.0'
+	)
+
+	var level := LevelTOP.new()
+	level.initialize(\"level1\")
+	level.get_parameter(\"contrast\").set_value(1.5)
+	level.get_parameter(\"brightness\").set_value(1.1)
+
+	# WindowOUT â€” output display window
+	var win := WindowOUT.new()
+	win.initialize(\"win1\")
+	win.get_parameter(\"title\").set_value(\"GONODES Output\")
+	win.get_parameter(\"monitor\").set_value(0)
+	win.get_parameter(\"window_mode\").set_value(WindowOUT.WindowMode.WINDOWED)
+	win.get_parameter(\"resolution\").set_value(Vector2i(800, 600))
+
+	# --- Add to network ---
+	network.add_node(lfo)
+	network.add_node(noise)
+	network.add_node(level)
+	network.add_node(win)
+
+	# --- Wire ---
+	network.connect_nodes(\"noise1\", 0, \"level1\", 0)
+	network.connect_nodes(\"level1\", 0, \"win1\", 0)
+
+
+func _setup_cook_engine() -> void:
+	cook_engine = GNCookEngine.new()
+	cook_engine.name = \"CookEngine\"
+	cook_engine.network = network
+	add_child(cook_engine)
+
+	cook_engine.frame_cooked.connect(_on_frame_cooked)
+	cook_engine.cook_error.connect(_on_cook_error)
+
+
+func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
+	# Update viewer with the last TOP in the chain (level1)
+	var level_node: GNNode = network.get_node_by_id(\"level1\")
+	if level_node and level_node.cached_output is GNTextureData:
+		var tex_data: GNTextureData = level_node.cached_output as GNTextureData
+		if tex_data.texture:
+			viewer.texture = tex_data.texture
+
+	# Update debug label
+	var lfo_node: GNNode = network.get_node_by_id(\"lfo1\")
+	var lfo_val: float = 0.0
+	if lfo_node and lfo_node.cached_output is GNChannelData:
+		lfo_val = (lfo_node.cached_output as GNChannelData).get_value(\"out\")
+
+	var noise_node: GNNode = network.get_node_by_id(\"noise1\")
+	var time_off: float = noise_node.get_parameter(\"time_offset\").resolved_value if noise_node else 0.0
+
+	label.text = \"FPS: %d | Frame: %d | Cook: %.2fms | LFO: %.3f | TimeOffset: %.3f\" % [
+		Engine.get_frames_per_second(), frame, cook_time_ms, lfo_val, time_off
+	]
+
+
+func _on_cook_error(node_id: String, error_msg: String) -> void:
+	GNLogger.error(\"TestScene\", \"Cook error on '%s': %s\" % [node_id, error_msg])
+
+
+func _on_log_toggled(pressed: bool) -> void:
+	GNLogger.enabled = pressed
+	if pressed:
+		print(\"[GONODES] Logging ENABLED (level: DEBUG)\")
+	else:
+		print(\"[GONODES] Logging DISABLED\")
+"
+
+[node name="TestPhase2" type="Node" unique_id=749739463]
+script = SubResource("GDScript_onsmi")
+
+[node name="Viewer" type="TextureRect" parent="." unique_id=454931271]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 3
+stretch_mode = 5
+
+[node name="InfoLabel" type="Label" parent="." unique_id=464101479]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+text = "Initializing..."
+horizontal_alignment = 1
+
+[node name="LogToggle" type="CheckButton" parent="." unique_id=152042831]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -140.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 42.0
+grow_horizontal = 0
+text = "Debug Log"

@@ -1,0 +1,8 @@
+[configuration]
+
+entry_symbol = "gn_syphon_init"
+compatibility_minimum = 4.1
+
+[libraries]
+macos.debug = "res://addons/gn_ext_syphon/native/bin/macos/libgn_syphon.macos.template_debug.universal.dylib"
+macos.release = "res://addons/gn_ext_syphon/native/bin/macos/libgn_syphon.macos.template_release.universal.dylib"

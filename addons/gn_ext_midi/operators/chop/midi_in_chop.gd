@@ -1,7 +1,8 @@
-class_name MidiInCHOP
+class_name RtMidiInCHOP
 extends GNChopBase
-## Receive MIDI messages from an external controller or DAW.
-## Outputs channel data: note velocity (ch1-ch128 for notes), CC values (cc0-cc127),
+## Receive MIDI messages via RtMidi native library.
+## Lower latency than Godot's built-in MIDI.
+## Outputs channel data: note velocity (n0-n127), CC values (cc0-cc127),
 ## pitch bend, and raw message fields.
 
 var _midi_in: RefCounted = null
@@ -15,9 +16,9 @@ var _pitch_bend: float = 0.0
 
 
 func _init() -> void:
-	node_type = "midiinchop"
+	node_type = "rtmidiin"
 	time_dependent = true
-	node_description = "Receive MIDI from external controller or DAW."
+	node_description = "Receive MIDI via RtMidi native library."
 	if ClassDB.class_exists("GNMidiIn"):
 		_midi_in = ClassDB.instantiate("GNMidiIn")
 	_note_velocities.resize(128)
@@ -45,7 +46,7 @@ func _init_parameters() -> void:
 
 func _cook(_inputs: Array[GNData]) -> GNData:
 	if _midi_in == null:
-		node_warning = "MIDI requires the native gn_ext_midi library."
+		node_warning = "Native MIDI requires the gn_ext_midi library."
 		return null
 
 	var port: int = get_param_value("port")
@@ -59,7 +60,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		_midi_in.close_port()
 		_port_open = false
 		if not _midi_in.open_port(port):
-			node_warning = "Failed to open MIDI input port %d." % port
+			node_warning = "Failed to open native MIDI input port %d." % port
 			return null
 		_port_open = true
 		_prev_port = port

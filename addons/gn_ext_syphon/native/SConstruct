@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+"""
+SConstruct for gn_ext_syphon — Syphon texture sharing GDExtension for GONODES.
+
+macOS-only. Links against pre-built godot-cpp from gn_ext_native.
+Uses Objective-C++ (.mm) for Syphon framework interop.
+
+Usage:
+  cd addons/gn_ext_syphon/native
+  scons platform=macos target=template_release -j4
+"""
+
+import os
+import sys
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+platform = ARGUMENTS.get("platform", "macos")
+target = ARGUMENTS.get("target", "template_release")
+arch = ARGUMENTS.get("arch", "universal")
+
+if platform != "macos":
+    print("gn_ext_syphon: Skipping build — Syphon is macOS-only.")
+    Exit(0)
+
+godotcpp_root = os.path.abspath("../../gn_ext_native/native/godot-cpp")
+
+# ---------------------------------------------------------------------------
+# Build environment
+# ---------------------------------------------------------------------------
+env = Environment()
+
+env.Append(CCFLAGS=["-std=c++17", "-fPIC"])
+env.Append(OBJCXXFLAGS=["-std=c++17", "-fPIC", "-fobjc-arc"])
+
+if target == "template_release":
+    env.Append(CCFLAGS=["-O2", "-DNDEBUG"])
+    suffix = ".macos.template_release"
+else:
+    env.Append(CCFLAGS=["-O0", "-g", "-D_DEBUG"])
+    suffix = ".macos.template_debug"
+
+# Universal binary (arm64 + x86_64)
+if arch == "universal":
+    env.Append(CCFLAGS=["-arch", "arm64", "-arch", "x86_64"])
+    env.Append(OBJCXXFLAGS=["-arch", "arm64", "-arch", "x86_64"])
+    env.Append(LINKFLAGS=["-arch", "arm64", "-arch", "x86_64"])
+    suffix += ".universal"
+elif arch == "arm64":
+    env.Append(CCFLAGS=["-arch", "arm64"])
+    env.Append(LINKFLAGS=["-arch", "arm64"])
+    suffix += ".arm64"
+else:
+    env.Append(CCFLAGS=["-arch", "x86_64"])
+    env.Append(LINKFLAGS=["-arch", "x86_64"])
+    suffix += ".x86_64"
+
+env.Append(CPPDEFINES=[
+    "MACOS_ENABLED",
+    "TYPED_METHOD_BIND",
+])
+
+# ---------------------------------------------------------------------------
+# godot-cpp include paths + pre-built static library
+# ---------------------------------------------------------------------------
+env.Append(CPPPATH=[
+    os.path.join(godotcpp_root, "include"),
+    os.path.join(godotcpp_root, "gen", "include"),
+    os.path.join(godotcpp_root, "gdextension"),
+])
+
+godotcpp_lib = os.path.join(godotcpp_root, "bin",
+    "libgodot-cpp" + suffix + ".a")
+env.Append(LIBS=[File(godotcpp_lib)])
+
+# ---------------------------------------------------------------------------
+# Syphon framework
+# ---------------------------------------------------------------------------
+syphon_path = "Syphon-Framework"
+
+env.Append(CPPPATH=[
+    "src/",
+    syphon_path,
+])
+
+env.Append(FRAMEWORKS=[
+    "Cocoa",
+    "OpenGL",
+    "IOSurface",
+    "CoreVideo",
+    "Metal",
+])
+
+# If Syphon is built as a framework bundle, link it:
+env.Append(FRAMEWORKPATH=[syphon_path + "/build/Release"])
+env.Append(FRAMEWORKS=["Syphon"])
+
+# ---------------------------------------------------------------------------
+# Sources — .mm files for Objective-C++ bridge
+# ---------------------------------------------------------------------------
+ext_sources = Glob("src/*.cpp") + Glob("src/*.mm")
+
+# ---------------------------------------------------------------------------
+# Output library
+# ---------------------------------------------------------------------------
+library = env.SharedLibrary(
+    target="bin/macos/libgn_syphon" + suffix + ".dylib",
+    source=ext_sources,
+)
+
+Default(library)
