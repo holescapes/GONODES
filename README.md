@@ -155,10 +155,10 @@ SOPs produce geometry → MATs define materials → COMPs compose the 3D scene �
 
 ```
 GridSOP → TransformSOP → GeometryCOMP (MeshInstance3D) ─┐
-                   ↑           ↑                        │
-              PBR_MAT     CameraCOMP (Camera3D)       ├─→ RenderTOP → texture output
-                          LightCOMP  (Light3D)        │
-                          MergeCOMP  (Node3D group) ──┘
+				   ↑           ↑                        │
+			  PBR_MAT     CameraCOMP (Camera3D)       ├─→ RenderTOP → texture output
+						  LightCOMP  (Light3D)        │
+						  MergeCOMP  (Node3D group) ──┘
 ```
 
 SOP generators use Godot's built-in mesh types (BoxMesh, SphereMesh, etc.) and SurfaceTool for procedural generation. NoiseSOP uses FastNoiseLite for vertex displacement. MAT operators wrap Godot's Material system (StandardMaterial3D, ShaderMaterial) for per-object material assignment. GeometryCOMP accepts SOP, MAT, and TOP inputs. MergeCOMP groups multiple COMPs for scene composition. Shadow controls span all three levels: per-light (LightCOMP), per-object (GeometryCOMP), and global quality (RenderTOP).

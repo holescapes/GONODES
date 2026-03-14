@@ -81,6 +81,11 @@ var fallback_value: Variant = 0.0
 ## by the user.  Useful for metadata fields (URLs, credits, etc.).
 @export var read_only: bool = false
 
+## When true, this bool parameter renders as a momentary push-button in the
+## inspector rather than a toggle checkbox.  The operator's _pre_cook should
+## read the value, act on it, then reset it to false (one-shot pulse).
+var is_pulse: bool = false
+
 ## Optional display group tag.  Consecutive parameters sharing the same
 ## non-empty display_group are rendered side-by-side in one inspector row.
 @export var display_group: String = ""
@@ -202,6 +207,24 @@ static func create_bool(p_name: String, p_default: bool,
 	param.value = p_default
 	param.fallback_value = p_default
 	param.resolved_value = p_default
+	return param
+
+
+## Factory method to create a momentary-pulse BOOL parameter.
+## Renders as a push-button in the inspector.  The value goes true for
+## exactly one cook frame; the operator's _pre_cook should auto-reset it.
+static func create_pulse(p_name: String, p_label: String = "",
+		p_description: String = "") -> GNParameter:
+	var param := GNParameter.new()
+	param.param_name = p_name
+	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
+	param.value_type = ValueType.BOOL
+	param.default_value = false
+	param.value = false
+	param.fallback_value = false
+	param.resolved_value = false
+	param.is_pulse = true
 	return param
 
 
@@ -385,6 +408,11 @@ static func sample_ramp(keys: Array, t: float) -> float:
 ## Sets the parameter value (CONSTANT mode) and emits [signal value_changed].
 func set_value(new_value: Variant) -> void:
 	var clamped := _clamp_value(new_value)
+	if is_pulse and new_value == true:
+		value = clamped
+		resolved_value = clamped
+		value_changed.emit(param_name, value)
+		return
 	if value != clamped:
 		value = clamped
 		resolved_value = clamped
@@ -803,6 +831,10 @@ func to_dict() -> Dictionary:
 	if read_only:
 		d["read_only"] = true
 
+	# Persist pulse flag
+	if is_pulse:
+		d["is_pulse"] = true
+
 	return d
 
 
@@ -855,5 +887,9 @@ func from_dict(d: Dictionary) -> void:
 	# Restore read-only flag (credit / metadata params)
 	if d.has("read_only"):
 		read_only = d["read_only"]
+
+	# Restore pulse flag
+	if d.has("is_pulse"):
+		is_pulse = d["is_pulse"]
 
 	# Legacy bind info is handled above in the mode restore block

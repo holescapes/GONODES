@@ -224,9 +224,13 @@ static func _replace_main_image(code: String) -> String:
 	if frag_color_name != "COLOR":
 		code = code.replace(frag_color_name, "COLOR")
 
-	# Replace fragCoord → FRAGCOORD
+	# Replace fragCoord → (UV * gn_resolution)
+	# Godot's FRAGCOORD is in screen-space (wrong for SubViewport ColorRect).
+	# UV * gn_resolution gives correct viewport-local pixel coordinates.
 	if frag_coord_name != "FRAGCOORD":
-		# fragCoord.xy → FRAGCOORD.xy, fragCoord → FRAGCOORD
-		code = code.replace(frag_coord_name, "FRAGCOORD")
+		# Handle .xy access first to avoid double-wrapping
+		code = code.replace(frag_coord_name + ".xy", "(UV * gn_resolution)")
+		# Remaining bare references
+		code = code.replace(frag_coord_name, "(UV * gn_resolution)")
 
 	return code

@@ -2,10 +2,22 @@
     "godotTools.editorPath.godot4": "c:\\Ford\\Godot\\godot\\bin\\godot.windows.editor.x86_64.exe",
     "cmake.ignoreCMakeListsMissing": true,
     "files.watcherExclude": {
+        "**/.godot/**": true,
+        "**/.import/**": true,
         "**/templates/**": true,
         "**/assets/**": true,
         "**/*.pck": true,
         "**/godot-cpp/**": true
+    },
+    "search.exclude": {
+        "**/.godot": true,
+        "**/.import": true,
+        "**/godot-cpp/**": true,
+        "**/templates/**": true
+    },
+    "files.exclude": {
+        "**/.godot": true,
+        "**/.import": true
     },
     "git.repositoryScanMaxDepth": 1,
     "git.autoRepositoryDetection": "openEditors"

@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "shadertoy1": {
-            "type": "ShadertoyURLTOP",
+            "type": "ShadertoyTOP",
             "position": [200, 100],
             "parameters": {
                 "time_dependent": {"value": true},

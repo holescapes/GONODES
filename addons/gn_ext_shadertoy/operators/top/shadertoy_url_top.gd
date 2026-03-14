@@ -1,4 +1,4 @@
-class_name ShadertoyURLTOP
+class_name ShadertoyTOP
 extends GNTopBase
 ## Shadertoy GLSL shader node — inline editor + runtime translation pipeline.
 ##
@@ -21,7 +21,7 @@ extends GNTopBase
 
 const _ShadertoyTranslator := preload("res://addons/gn_ext_shadertoy/shadertoy_translator.gd")
 
-const _API_BASE := "https://www.shadertoy.com/api/v1/shaders/%s?key=BdHjRn"
+const _API_BASE := "https://www.shadertoy.com/api/v1/shaders/%s?key=%s"
 
 const DEFAULT_SHADERTOY_CODE := """// Paste your Shadertoy GLSL code here.
 // Example — simple colour gradient:
@@ -61,24 +61,31 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("time_dependent", true,
 		"Time Dependent", "Re-cook every frame (enable for shaders using iTime)"))
-	add_parameter(GNParameter.create_bool("fetch", false,
-		"Fetch", "Pulse: download shader from Shadertoy URL, then auto-resets"))
+	var fetch_param := GNParameter.create_pulse("fetch",
+		"Fetch", "Download shader from the Shadertoy URL")
+	fetch_param.value_changed.connect(_on_fetch_changed)
+	add_parameter(fetch_param)
 	add_parameter(GNParameter.create_vector2i("resolution",
 		Vector2i(512, 512), "", "Output resolution for generator shaders"))
 	add_parameter(GNParameter.create_string("shadertoy_url", "",
 		"Shadertoy URL", "Shadertoy page URL or shader ID (e.g. Ms2SD1)"))
+	add_parameter(GNParameter.create_string("shadertoy_api_key", "",
+		"API Key", "Your Shadertoy API key — register at shadertoy.com/myapps"))
 	add_parameter(GNParameter.create_string("shadertoy_code",
 		DEFAULT_SHADERTOY_CODE.strip_edges(),
 		"Shadertoy Code", "Raw Shadertoy GLSL — translated to Godot on cook"))
+
+
+func _on_fetch_changed(_p_name: String, new_value: Variant) -> void:
+	if new_value == true:
+		set_param_value("fetch", false)
+		_start_fetch()
 
 
 # ── Pre-cook ──────────────────────────────────────────────────────────────────
 
 func _pre_cook(delta: float) -> void:
 	time_dependent = get_param_value("time_dependent")
-	if get_param_value("fetch"):
-		_start_fetch()
-		set_param_value("fetch", false)
 	super._pre_cook(delta)
 
 
@@ -101,7 +108,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_last_translated_code = st_code
 
 	if not _shader_ok:
-		return _cached_tex_data if _cached_tex_data != null else null
+		# Empty code or waiting for fetch — return blank black (no X icon).
+		# Translation errors set _cached_tex_data = null → returns null → X icon.
+		if _cached_tex_data == null and _last_translated_code.strip_edges().is_empty():
+			_setup_viewport(res)
+		return _cached_tex_data
 
 	if _viewport == null:
 		_setup_viewport(res)
@@ -135,18 +146,25 @@ func _cook(inputs: Array[GNData]) -> GNData:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _translate_and_compile(shadertoy_code: String, size: Vector2i) -> void:
+	# Empty code → clear the shader, go blank
 	if shadertoy_code.strip_edges().is_empty():
+		_shader_ok = false
+		if _material != null:
+			_material.shader = null
+		_dynamic_param_names.clear()
 		return
 
 	var tr := _ShadertoyTranslator.translate(shadertoy_code)
 	if not tr.success:
-		GNLogger.error("ShadertoyURLTOP",
+		GNLogger.error("ShadertoyTOP",
 			"'%s' — translation failed: %s" % [id, tr.error])
 		_shader_ok = false
+		# Null _cached_tex_data so _cook returns null → X icon on node
+		_cached_tex_data = null
 		return
 
 	var godot_code := tr.godot_code
-	GNLogger.info("ShadertoyURLTOP",
+	GNLogger.info("ShadertoyTOP",
 		"'%s' — translated %d → %d chars" % [id, shadertoy_code.length(), godot_code.length()])
 
 	# Compile
@@ -215,13 +233,21 @@ func _rebuild_tex_inputs(count: int) -> void:
 	for i in range(count):
 		add_input("in%d" % i, GNFamily.Type.TOP, false,
 			"Texture input %d (iChannel%d)" % [i, i])
-	GNLogger.info("ShadertoyURLTOP",
+	GNLogger.info("ShadertoyTOP",
 		"'%s' input ports → %d" % [id, count])
 	ports_changed.emit(id)
 
 
 func _rebuild_uniform_params(godot_code: String) -> void:
 	var new_uniforms: Array = CustomShaderTOP._parse_uniforms(godot_code)
+
+	# Filter out Shadertoy auto-bound uniforms that CustomShaderTOP doesn't know about
+	var filtered: Array = []
+	for info in new_uniforms:
+		var ui: CustomShaderTOP._UniformInfo = info as CustomShaderTOP._UniformInfo
+		if ui.uniform_name not in _RESERVED_UNIFORMS:
+			filtered.append(info)
+	new_uniforms = filtered
 
 	# Snapshot existing dynamic param values
 	var old_values: Dictionary = {}
@@ -277,7 +303,7 @@ func _rebuild_uniform_params(godot_code: String) -> void:
 		param.mode_changed.connect(_on_parameter_mode_changed)
 		_dynamic_param_names.append(ui.uniform_name)
 
-	GNLogger.info("ShadertoyURLTOP",
+	GNLogger.info("ShadertoyTOP",
 		"'%s' dynamic params → %s" % [id, str(_dynamic_param_names)])
 	parameters_changed.emit(id)
 
@@ -312,34 +338,34 @@ func _start_fetch() -> void:
 	var url_str: String = get_param_value("shadertoy_url")
 	var shader_id := _extract_shader_id(url_str)
 	if shader_id.is_empty():
-		GNLogger.warn("ShadertoyURLTOP",
+		GNLogger.warn("ShadertoyTOP",
 			"'%s' — no valid Shadertoy URL or ID to fetch" % id)
 		return
 	if _fetching:
-		GNLogger.warn("ShadertoyURLTOP",
+		GNLogger.warn("ShadertoyTOP",
 			"'%s' — fetch already in progress" % id)
 		return
 
-	# Ensure HTTPRequest node exists
 	if _http == null:
 		_http = HTTPRequest.new()
 		_http.name = "ShadertoyHTTP"
-		# Attach to the viewport (it's in the scene tree)
-		if _viewport != null:
-			_viewport.add_child(_http)
-		else:
-			# Viewport not yet created — create one first
-			_setup_viewport(Vector2i(512, 512))
-			_viewport.add_child(_http)
+		_http.process_mode = Node.PROCESS_MODE_ALWAYS
+		add_child(_http)
 		_http.request_completed.connect(_on_fetch_completed)
 
-	var api_url := _API_BASE % shader_id
-	GNLogger.info("ShadertoyURLTOP",
-		"'%s' — fetching shader '%s'" % [id, shader_id])
+	var api_key: String = get_param_value("shadertoy_api_key").strip_edges()
+	if api_key.is_empty():
+		GNLogger.error("ShadertoyTOP",
+			"'%s' — no API key. Register one at shadertoy.com/myapps" % id)
+		_fetching = false
+		return
+
+	var api_url := _API_BASE % [shader_id, api_key]
+	GNLogger.info("ShadertoyTOP", "'%s' — fetching '%s'" % [id, shader_id])
 	_fetching = true
 	var err := _http.request(api_url)
 	if err != OK:
-		GNLogger.error("ShadertoyURLTOP",
+		GNLogger.error("ShadertoyTOP",
 			"'%s' — HTTP request failed: %s" % [id, error_string(err)])
 		_fetching = false
 
@@ -349,26 +375,23 @@ func _on_fetch_completed(result: int, response_code: int,
 	_fetching = false
 
 	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
-		GNLogger.error("ShadertoyURLTOP",
+		GNLogger.error("ShadertoyTOP",
 			"'%s' — fetch failed (HTTP %d, result %d)" % [id, response_code, result])
 		return
 
 	var json := JSON.new()
-	var parse_err := json.parse(body.get_string_from_utf8())
-	if parse_err != OK:
-		GNLogger.error("ShadertoyURLTOP",
+	if json.parse(body.get_string_from_utf8()) != OK:
+		GNLogger.error("ShadertoyTOP",
 			"'%s' — JSON parse error: %s" % [id, json.get_error_message()])
 		return
 
 	var data: Dictionary = json.data if json.data is Dictionary else {}
 	if data.has("Error"):
-		GNLogger.error("ShadertoyURLTOP",
+		GNLogger.error("ShadertoyTOP",
 			"'%s' — Shadertoy API error: %s" % [id, data["Error"]])
 		return
 
-	# Extract the Image pass code
-	var shader_info: Dictionary = data.get("Shader", {})
-	var renderpasses: Array = shader_info.get("renderpass", [])
+	var renderpasses: Array = data.get("Shader", {}).get("renderpass", [])
 	var image_code := ""
 	for rp in renderpasses:
 		if rp is Dictionary and rp.get("type", "") == "image":
@@ -376,14 +399,14 @@ func _on_fetch_completed(result: int, response_code: int,
 			break
 
 	if image_code.is_empty():
-		GNLogger.error("ShadertoyURLTOP",
-			"'%s' — no 'image' renderpass found in API response" % id)
+		GNLogger.error("ShadertoyTOP",
+			"'%s' — no 'image' renderpass in API response" % id)
 		return
 
-	# Populate the code param — the next cook will auto-translate
+	GNLogger.info("ShadertoyTOP",
+		"'%s' — fetched %d chars" % [id, image_code.length()])
 	set_param_value("shadertoy_code", image_code)
-	GNLogger.info("ShadertoyURLTOP",
-		"'%s' — fetched %d chars of Shadertoy code" % [id, image_code.length()])
+	parameters_changed.emit(id)
 	mark_dirty()
 
 

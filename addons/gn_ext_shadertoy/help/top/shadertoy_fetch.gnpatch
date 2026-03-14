@@ -1,0 +1,108 @@
+{
+	"annotations": [
+		{
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.800000011920929
+			],
+			"id": "ann_1",
+			"position": [
+				-180.0,
+				-190.0
+			],
+			"size": [
+				560.0,
+				130.0
+			],
+			"text": "Shadertoy URL TOP — Fetch Example\n\n1. Register a free API key at shadertoy.com/myapps (Apps tab → Add).\n2. Paste the key into the shadertoy_api_key parameter.\n3. Paste any Shadertoy page URL (or bare ID like Ms2SD1) into shadertoy_url.\n4. Press the Fetch button — the shader GLSL downloads, auto-translates, and renders.\n\nThe fetched code appears in shadertoy_code and can be edited or saved as a preset.",
+			"type": "note"
+		}
+	],
+	"connections": [
+		{
+			"from": "shadertoy1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"generator": "GONODES",
+	"nodes": {
+		"shadertoy1": {
+			"parameters": {
+				"fetch": {
+					"is_pulse": true,
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"shadertoy_api_key": {
+					"value": ""
+				},
+				"shadertoy_code": {
+					"value": "// Compact Colour Field — demoscene-inspired 1KB visual\n// Inspired by \"Creation\" by Danilo Guanabara (Silexars) — CC BY-NC-SA 3.0\n// https://www.shadertoy.com/view/XsXXDn\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec3 c;\n    float l, z = iTime;\n    for (int i = 0; i < 3; i++) {\n        vec2 uv, p = fragCoord.xy / iResolution.xy;\n        uv = p;\n        p -= 0.5;\n        p.x *= iResolution.x / iResolution.y;\n        z += 0.07;\n        l = length(p);\n        uv += p / l * (sin(z) + 1.0) * abs(sin(l * 9.0 - z * 2.0));\n        c[i] = 0.01 / length(mod(uv, 1.0) - 0.5);\n    }\n    fragColor = vec4(c / l, 1.0);\n}\n"
+				},
+				"shadertoy_url": {
+					"value": "https://www.shadertoy.com/view/Ms2SD1"
+				},
+				"time_dependent": {
+					"value": true
+				}
+			},
+			"position": [
+				200.0,
+				100.0
+			],
+			"type": ""
+		},
+		"window1": {
+			"parameters": {
+				"always_on_top": {
+					"value": false
+				},
+				"monitor": {
+					"value": 0
+				},
+				"open": {
+					"value": false
+				},
+				"position": {
+					"value": {
+						"_type": "Vector2i",
+						"x": -1,
+						"y": -1
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"title": {
+					"value": "GONODES Output"
+				},
+				"vsync": {
+					"value": true
+				},
+				"window_mode": {
+					"value": 0
+				}
+			},
+			"position": [
+				600.0,
+				100.0
+			],
+			"type": "WindowOUT"
+		}
+	},
+	"version": "1.0.0"
+}

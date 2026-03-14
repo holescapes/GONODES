@@ -379,6 +379,13 @@ func _create_int_control() -> Control:
 
 
 func _create_bool_control() -> Control:
+	# Pulse params render as a momentary push-button instead of a checkbox
+	if param.is_pulse:
+		var btn := Button.new()
+		btn.text = param.label
+		btn.size_flags_horizontal = SIZE_EXPAND_FILL
+		btn.pressed.connect(_on_pulse_pressed)
+		return btn
 	var cb := CheckBox.new()
 	cb.button_pressed = bool(param.value)
 	cb.text = "On" if cb.button_pressed else "Off"
@@ -724,6 +731,11 @@ func _on_int_changed(val: float) -> void:
 	if _updating:
 		return
 	param.set_value(int(val))
+
+
+func _on_pulse_pressed() -> void:
+	# Pulse buttons are one-shot actions — never suppressed by _updating.
+	param.set_value(true)
 
 
 func _on_bool_changed(pressed: bool) -> void:
@@ -1234,6 +1246,8 @@ func _update_value_display() -> void:
 			if spinbox:
 				spinbox.value = int(param.get_resolved_value())
 		GNParameter.ValueType.BOOL:
+			if param.is_pulse:
+				return  # Pulse buttons have no toggle state to refresh
 			var cb := _control as CheckBox
 			if cb:
 				cb.button_pressed = bool(param.get_resolved_value())
