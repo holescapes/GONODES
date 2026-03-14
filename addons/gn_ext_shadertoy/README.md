@@ -1,98 +1,102 @@
-# gn_ext_shadertoy — Shadertoy Shader Pack for GONODES
+﻿# gn_ext_shadertoy  Shadertoy Shader Pack for GONODES
 
-GONODES extension that provides **10 pre-baked Shadertoy-to-Godot shader
-conversions** (5 generators + 5 effects) and a **runtime translator**
-(`ShadertoyURLTOP`) that converts any pasted Shadertoy GLSL into a Godot
-shader on the fly.
+Single `ShadertoyURLTOP` node that runs all Shadertoy GLSL through the runtime
+translation pipeline. No pre-baked operators  write, paste or fetch any shader
+and it compiles immediately.
 
-## Requirements
+---
 
-**None.** This extension is pure GDScript and .gdshader files — no external
-dependencies or GDExtensions required.
+## Node: ShadertoyURLTOP
 
-## Architecture
-
-| Component | Purpose |
-|---|---|
-| `gn_extension.cfg` | Manifest registering 11 operators (10 pre-baked + 1 runtime) |
-| `shadertoy_translator.gd` | Static utility: Shadertoy GLSL → Godot `canvas_item` shader |
-| `operators/top/shadertoy_base_top.gd` | Abstract base class for all pre-baked shader TOPs |
-| `operators/top/shadertoy_url_top.gd` | Runtime translator — paste code or fetch by URL |
-| `shaders/*.gdshader` | Pre-converted Godot shaders |
-
-## Generators (no input)
-
-| Operator | Source | Author | Description |
-|---|---|---|---|
-| `st_seascape` | [Ms2SD1](https://www.shadertoy.com/view/Ms2SD1) | TDM (Alexander Alekseev) | Procedural ocean with waves and lighting |
-| `st_voronoi_fire` | [4tlSzl](https://www.shadertoy.com/view/4tlSzl) | Shane | Volumetric fire palette over 3D Voronoi noise |
-| `st_creation` | [XsXXDn](https://www.shadertoy.com/view/XsXXDn) | Danilo Guanabara (Silexars) | Compact demoscene colour field |
-| `st_star_nest` | [XlfGRj](https://www.shadertoy.com/view/XlfGRj) | Pablo Roman Andrioli (Kali) | Volumetric space fractal — MIT License |
-| `st_plasma` | — | Original GONODES | Classic retro plasma globe effect |
-
-### Generator parameters
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `resolution` | Vector2i | 512×512 | Output texture resolution |
-| `shadertoy_url` | String (read-only) | — | Original Shadertoy URL |
-| `credits` | String (read-only) | — | Author and licence |
-
-## Effects (one texture input)
-
-| Operator | Source | Description | Extra parameters |
-|---|---|---|---|
-| `st_crt` | Original | CRT barrel distortion + scanlines + vignette | `curvature`, `scanline_weight`, `vignette_strength` |
-| `st_chromatic_ab` | Original | Radial RGB channel offset | `intensity`, `radial_weight` |
-| `st_pixelate` | Original | Mosaic / pixelation | `pixel_size` |
-| `st_film_grain` | Original | Animated noise grain overlay | `grain_intensity`, `grain_speed` |
-| `st_halftone` | [Mdf3Dn](https://www.shadertoy.com/view/Mdf3Dn) | CMYK halftone dot rendering by tsone | `dot_size`, `dot_scale` |
-
-### Effect parameters
-
-Effects inherit `shadertoy_url` and `credits` read-only params from the base
-class, plus their own shader-specific uniforms listed above.
-
-## Runtime translator — ShadertoyURLTOP (`shadertoy`)
-
-Paste any single-pass Shadertoy GLSL code and the node automatically:
-
-1. Runs `ShadertoyTranslator.translate()` to convert built-ins
-2. Compiles the resulting Godot shader
-3. Scans the shader for uniforms and creates dynamic parameters
-4. Rebuilds input ports from `iChannel0..3` usage
+| Family | Inputs | Outputs |
+|--------|--------|---------|
+| TOP | 0..4 (auto-wired from iChannel usage) | 1 texture |
 
 ### Parameters
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `time_dependent` | Bool | `true` | Re-cook every frame |
-| `fetch` | Bool (pulse) | `false` | Download shader from Shadertoy API |
-| `resolution` | Vector2i | 512×512 | Output resolution (generators only) |
-| `shadertoy_url` | String | `""` | Shadertoy URL or bare ID for fetch |
-| `shadertoy_code` | String | template | Paste Shadertoy GLSL here |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `time_dependent` | Bool | Re-cook every frame. Enable for shaders using `iTime`. |
+| `fetch` | Bool (pulse) | Download shader from `shadertoy_url` via the public API. Auto-resets. |
+| `resolution` | Vector2i | Output resolution (generators only  auto-hidden for FX). |
+| `shadertoy_url` | String | Shadertoy page URL or bare shader ID (e.g. `Ms2SD1`). |
+| `shadertoy_code` | String | Raw Shadertoy GLSL. Edit inline or open the full code editor. |
+| *dynamic* | various | Auto-created from `uniform` declarations on compile. |
 
-### Translation map
+### Code Editor
 
-| Shadertoy | Godot equivalent |
-|---|---|
-| `iResolution` | `gn_resolution` (uniform vec2) |
-| `iTime` | `TIME` (built-in) |
-| `iTimeDelta` | `gn_time_delta` (uniform float) |
-| `iFrame` | `gn_frame` (uniform int) |
-| `iMouse` | `gn_mouse` (uniform vec4) |
-| `iChannel0..3` | `gn_tex0..3` (uniform sampler2D) |
-| `mainImage(out vec4, in vec2)` | `void fragment()` / `COLOR` / `FRAGCOORD` |
+Click **Edit ** next to `shadertoy_code` to open the full-screen editor with:
 
-## Multi-pass support (future)
+- **Shadertoy syntax highlighting**  `iTime`, `iResolution`, `iMouse`, `iChannel0..3`, `iFrame`, `mainImage`, GLSL types/functions
+- **Presets menu**  10 factory presets (5 generators + 5 effects), user presets in `user://gonodes_presets/shadertoy/`
+- **Quick reference bar**  `void mainImage(out vec4, in vec2)` signature + all iXxx uniforms
 
-Only the main "Image" pass is currently converted. Multi-pass Buffer A/B/C/D
-support would require:
+### URL Fetch
 
-1. Parse the `renderpass` array from the Shadertoy API JSON
-2. Create one SubViewport per buffer pass, each with its own shader
-3. Wire buffer outputs as `sampler2D` inputs to subsequent passes
-4. Run passes in order each cook: BufferA → BufferB → … → Image
-5. Buffer passes can read their own previous frame via a feedback texture
+Set `shadertoy_url` to a Shadertoy page URL or a bare shader ID, then pulse `fetch`. The Shadertoy public API returns the Image pass GLSL, which is placed into `shadertoy_code` and auto-compiled on the next cook.
 
-This mirrors the `FeedbackTOP` pattern already in GONODES core.
+---
+
+## Translation Pipeline
+
+```
+void mainImage(out vec4 fragColor, in vec2 fragCoord) { ... }
+         
+   ShadertoyTranslator
+         
+shader_type canvas_item;
+uniform vec2 gn_resolution;
+...
+void fragment() { ... }
+```
+
+**Auto-mapped built-ins:**
+
+| Shadertoy | Godot |
+|-----------|-------|
+| `iTime` | `TIME` |
+| `iResolution` | `uniform vec2 gn_resolution` |
+| `iMouse` | `uniform vec4 gn_mouse` |
+| `iFrame` | `uniform int gn_frame` |
+| `iChannel0..3` | TOP input ports  `gn_tex0..3` |
+| `fragCoord` | `FRAGCOORD.xy` |
+| `fragColor` | `COLOR` |
+
+**`uniform` declarations** in the shader body (e.g. `uniform float block_size; // = 8.0`) become auto-generated inspector parameters with default values parsed from the comment.
+
+---
+
+## Bundled Presets
+
+Loaded from `addons/gn_ext_shadertoy/presets/shadertoy/` (.glsl files):
+
+### Generators
+| File | Description |
+|------|-------------|
+| `plasma.glsl` | Classic plasma globe  retro demoscene effect |
+| `creation.glsl` | Compact colour field  demoscene-style 1KB visual |
+| `star_nest.glsl` | Volumetric space fractal with depth-ray march |
+| `lava_lamp.glsl` | Smooth metaball blobs with warm/cool palette |
+| `voronoi.glsl` | Animated cellular Voronoi noise |
+
+### Effects (require iChannel0 input)
+| File | Description |
+|------|-------------|
+| `crt.glsl` | CRT monitor  barrel distortion, scanlines, vignette |
+| `chromatic_ab.glsl` | Radial RGB channel offset |
+| `pixelate.glsl` | Mosaic / blocky pixelation (`block_size` param) |
+| `film_grain.glsl` | Luminance-weighted animated film grain |
+| `halftone.glsl` | CMYK halftone dot-screen rendering |
+
+---
+
+## Directory Layout
+
+```
+addons/gn_ext_shadertoy/
+ gn_extension.cfg              # Extension manifest (ShadertoyURLTOP only)
+ shadertoy_translator.gd       # Shadertoy GLSL  Godot canvas_item translator
+ operators/top/
+    shadertoy_url_top.gd      # ShadertoyURLTOP node
+ presets/shadertoy/            # Factory presets (.glsl  mainImage format)
+```

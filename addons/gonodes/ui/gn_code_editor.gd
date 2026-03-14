@@ -26,6 +26,7 @@ var _param_name: String = ""
 ## Whether this editor is in shader mode (GLSL-like highlighting).
 var _shader_mode: bool = false
 var _isf_mode: bool = false
+var _shadertoy_mode: bool = false
 
 # ─── Preset UI ────────────────────────────────────────────────────────────────
 
@@ -97,6 +98,7 @@ func open(node: GNNode, param_name: String) -> void:
 	_param_name = param_name
 	_shader_mode = (param_name == "shader_code")
 	_isf_mode = (param_name == "isf_code")
+	_shadertoy_mode = (param_name == "shadertoy_code")
 
 	# Configure window title
 	var family_name := GNFamily.get_family_name(node.family)
@@ -109,6 +111,8 @@ func open(node: GNNode, param_name: String) -> void:
 	if _ref_label:
 		if _isf_mode:
 			_ref_label.text = "ISF: TIME, RENDERSIZE, isf_FragNormCoord, gl_FragColor | IMG_PIXEL, IMG_NORM_PIXEL, IMG_THIS_PIXEL, IMG_SIZE"
+		elif _shadertoy_mode:
+			_ref_label.text = "void mainImage(out vec4 fragColor, in vec2 fragCoord)  |  iTime, iResolution, iMouse, iChannel0..3, iFrame, iTimeDelta"
 		elif _shader_mode:
 			_ref_label.text = "Uniforms: gn_time, gn_resolution, gn_tex0..7 | Built-in: UV, COLOR, SCREEN_UV"
 		else:
@@ -122,6 +126,8 @@ func open(node: GNNode, param_name: String) -> void:
 	# Apply syntax highlighting
 	if _isf_mode:
 		_setup_isf_highlighter()
+	elif _shadertoy_mode:
+		_setup_shadertoy_highlighter()
 	elif _shader_mode:
 		_setup_shader_highlighter()
 	else:
@@ -198,6 +204,63 @@ func _setup_gdscript_highlighter() -> void:
 		h.add_keyword_color(fn, Color(0.6, 0.7, 0.95))
 
 	# Symbols
+	h.symbol_color = Color(0.7, 0.7, 0.7)
+	h.function_color = Color(0.5, 0.85, 0.95)
+	h.member_variable_color = Color(0.85, 0.85, 0.75)
+
+	_code_edit.syntax_highlighter = h
+
+
+## Shadertoy GLSL highlighting — mainImage format with all iXxx built-ins.
+func _setup_shadertoy_highlighter() -> void:
+	var h := CodeHighlighter.new()
+
+	# Numbers
+	h.number_color = Color(0.72, 0.86, 0.56)
+
+	# Strings (rarely used in Shadertoy GLSL)
+	h.add_color_region('"', '"', Color(0.87, 0.72, 0.45))
+
+	# Comments
+	h.add_color_region("//", "", Color(0.45, 0.45, 0.45), true)
+	h.add_color_region("/*", "*/", Color(0.45, 0.45, 0.45))
+
+	# Shadertoy built-in uniforms
+	for kw in ["iTime", "iTimeDelta", "iFrame", "iDate",
+			"iResolution", "iMouse",
+			"iChannel0", "iChannel1", "iChannel2", "iChannel3",
+			"iChannelResolution", "iSampleRate",
+			"fragCoord", "fragColor"]:
+		h.add_keyword_color(kw, Color(0.55, 0.8, 1.0))
+
+	# GLSL keywords
+	for kw in ["void", "if", "else", "for", "while", "return", "discard",
+			"true", "false", "const", "struct", "in", "out", "inout",
+			"uniform", "varying", "precision", "mediump", "highp", "lowp"]:
+		h.add_keyword_color(kw, Color(0.95, 0.5, 0.6))
+
+	# GLSL types
+	for kw in ["float", "int", "bool", "vec2", "vec3", "vec4",
+			"ivec2", "ivec3", "ivec4", "mat2", "mat3", "mat4",
+			"sampler2D", "sampler3D", "samplerCube"]:
+		h.add_keyword_color(kw, Color(0.5, 0.85, 0.95))
+
+	# GLSL math functions
+	for fn in ["sin", "cos", "tan", "abs", "floor", "ceil", "round",
+			"clamp", "mix", "step", "smoothstep", "length", "normalize",
+			"dot", "cross", "reflect", "refract", "pow", "sqrt",
+			"min", "max", "mod", "fract", "sign", "texture",
+			"distance", "atan", "asin", "acos", "exp", "log",
+			"inversesqrt", "radians", "degrees"]:
+		h.add_keyword_color(fn, Color(0.6, 0.7, 0.95))
+
+	# mainImage entry point
+	h.add_keyword_color("mainImage", Color(0.4, 0.9, 0.5))
+
+	# Constants
+	for kw in ["PI", "TAU"]:
+		h.add_keyword_color(kw, Color(0.55, 0.8, 1.0))
+
 	h.symbol_color = Color(0.7, 0.7, 0.7)
 	h.function_color = Color(0.5, 0.85, 0.95)
 	h.member_variable_color = Color(0.85, 0.85, 0.75)
@@ -358,6 +421,9 @@ func _get_preset_folder() -> String:
 	# ISFFileTOP
 	if _param_name == "isf_code":
 		return "isf"
+	# ShadertoyURLTOP
+	if _param_name == "shadertoy_code":
+		return "shadertoy"
 	return ""
 
 
@@ -469,8 +535,8 @@ func _on_save_preset_pressed() -> void:
 		if sanitized.is_empty():
 			return
 
-		var ok := GNScriptHelper.save_preset(captured_folder, sanitized, captured_code,
-				".fs" if _isf_mode else ".gd")
+		var ext := ".fs" if _isf_mode else (".glsl" if _shadertoy_mode else ".gd")
+		var ok := GNScriptHelper.save_preset(captured_folder, sanitized, captured_code, ext)
 		if ok:
 			_set_status("Saved preset: %s" % sanitized, Color(0.4, 0.9, 0.5))
 		else:

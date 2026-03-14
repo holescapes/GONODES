@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://dpnn5ckf2xt1s"
+path="res://.godot/imported/chromatic_ab.glsl-474f573ed6c96b8f689494319fa90afc.res"
+
+[deps]
+
+source_file="res://addons/gn_ext_shadertoy/presets/shadertoy/chromatic_ab.glsl"
+dest_files=["res://.godot/imported/chromatic_ab.glsl-474f573ed6c96b8f689494319fa90afc.res"]
+
+[params]
+

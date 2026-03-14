@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://uiwlqlco34i4"
+path="res://.godot/imported/halftone.glsl-2a89e4c33a63c02e695b64d9cacb3a0f.res"
+
+[deps]
+
+source_file="res://addons/gn_ext_shadertoy/presets/shadertoy/halftone.glsl"
+dest_files=["res://.godot/imported/halftone.glsl-2a89e4c33a63c02e695b64d9cacb3a0f.res"]
+
+[params]
+

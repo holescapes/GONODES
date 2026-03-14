@@ -1,25 +1,23 @@
 class_name ShadertoyURLTOP
 extends GNTopBase
-## Runtime Shadertoy-to-Godot shader translator and compiler.
+## Shadertoy GLSL shader node — inline editor + runtime translation pipeline.
 ##
-## Accepts either:
-##   1. **Pasted Shadertoy GLSL** in the [code]shadertoy_code[/code] parameter.
-##   2. **A Shadertoy URL / ID** in the [code]shadertoy_url[/code] parameter,
-##      combined with the [code]fetch[/code] pulse to download the shader from
-##      the Shadertoy public API.
+## Write or paste raw Shadertoy GLSL (void mainImage format) directly in the
+## inspector or open the full code editor with Shadertoy syntax highlighting
+## and the Presets menu (factory presets in addons/gn_ext_shadertoy/presets/shadertoy/).
 ##
-## The pasted code is run through [ShadertoyTranslator] to produce a Godot
-## `shader_type canvas_item;` shader, which is then compiled and its uniforms
-## scanned exactly like [CustomShaderTOP].
+## Optionally set shadertoy_url and pulse fetch to download any public shader
+## from the Shadertoy API — the code lands in shadertoy_code and is compiled
+## immediately on the next cook.
 ##
-## ── Workflow ─────────────────────────────────────────────────────────────────
-##   • Paste code ➜ auto-translate & compile on next cook.
-##   • Enter URL  ➜ click Fetch ➜ API downloads code ➜ fills shadertoy_code.
+## ── Translation pipeline ──────────────────────────────────────────────────────
+##   mainImage GLSL → ShadertoyTranslator → Godot canvas_item shader
+##   iTime/iResolution/iMouse auto-bound; uniform declarations → inspector params;
+##   iChannel0..3 usage → auto-generated TOP input ports.
 ##
-## ── Multi-pass (future) ──────────────────────────────────────────────────────
-## Only the main "Image" pass is converted.  Multi-pass (Buffer A-D) support
-## would require creating one SubViewport per pass and wiring them; see
-## [ShadertoyTranslator] docstring for the roadmap.
+## ── Presets ───────────────────────────────────────────────────────────────────
+##   Factory presets in addons/gn_ext_shadertoy/presets/shadertoy/ (.glsl)
+##   User presets in user://gonodes_presets/shadertoy/
 
 const _ShadertoyTranslator := preload("res://addons/gn_ext_shadertoy/shadertoy_translator.gd")
 

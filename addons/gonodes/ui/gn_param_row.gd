@@ -437,6 +437,8 @@ func _is_code_editor_param() -> bool:
 		return true
 	if param.param_name == "isf_code":
 		return true
+	if param.param_name == "shadertoy_code":
+		return true
 	return false
 
 
