@@ -1862,13 +1862,7 @@ GONODES/
 - [ ] Network collaboration (shared editing)
 - [ ] Asset/patch marketplace
 - [ ] Mobile/web export for patches (leveraging Godot's Mobile + Compatibility renderers)
-- [ ] **ListCOMP** — TD-style scrollable data grid UI driven by DAT input:
-  - Column definitions from DAT header row, per-cell rendering with optional formatting (color, alignment)
-  - Row selection (single, multi, range), header click-to-sort, column resize/reorder
-  - Scroll virtualization for large tables (only renders visible rows)
-  - CHOP output for selection state (selected row indices as channel samples)
-  - Partially covered by existing UI family (ItemListUI, TreeUI) but those lack column/grid layout
-  - Would extend GNUiBase with a custom Tree-based or GridContainer-based implementation
+- [ ] ~~**ListCOMP**~~ — **DEPRIORITIZED.** Godot's built-in Tree and ItemList nodes cover most data-grid needs. Existing TreeUI and ItemListUI operators already wrap these. A full TD-style ListCOMP with column definitions, click-to-sort, and scroll virtualization would be a large effort for marginal gain over what `TreeUI` with `columns` param already provides. Revisit if users request it.
 - [x] **SDF Composition Extension** (`gn_ext_sdf`) — **IMPLEMENTED** (26 operators + 78 help patches):
   - **Not a new family** — intermediate data is a `GNSDFData` (extends GNData) carrying an SDF scene-graph AST. Final node compiles to GLSL and renders to GNTextureData (TOP output).
   - **SDF Primitives** (10): SphereSDF, BoxSDF, TorusSDF, CylinderSDF, CapsuleSDF, PlaneSDF, ConeSDF, PyramidSDF, OctahedronSDF, GyroidSDF

@@ -201,3 +201,15 @@ Ports of popular Shadertoy shaders to GONODES TOP operators.
 
 - Several Shadertoy-derived visual effects
 - Auto-translated from GLSL to Godot shading language
+
+### gn_ext_sdf
+
+Composable SDF (Signed Distance Field) raymarching toolkit — 26 operators.
+
+- **10 Primitives**: SphereSDF, BoxSDF, TorusSDF, CylinderSDF, CapsuleSDF, PlaneSDF, ConeSDF, PyramidSDF, OctahedronSDF, GyroidSDF
+- **5 Booleans**: UnionSDF, IntersectionSDF, SubtractSDF, SmoothUnionSDF, SmoothSubtractSDF
+- **8 Domain Modifiers**: RepeatSDF, MirrorSDF, TwistSDF, BendSDF, ElongateSDF, RoundSDF, OnionSDF, DisplaceSDF
+- **2 Material**: MaterialSDF (PBR albedo/roughness/metallic), GradientSDF (distance-based coloring)
+- **1 Renderer**: RaymarchSDF TOP — compiles SDF AST to GLSL, renders with orbit camera, AO, soft shadows
+- SDF nodes output `GNSDFData` (AST tree); RaymarchSDF outputs standard `GNTextureData` (TOP)
+- 78 help patches (3 per operator, animated with LFO-driven `chop()` expressions)
