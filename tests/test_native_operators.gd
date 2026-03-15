@@ -197,9 +197,9 @@ func test_metaball_native_mesh_has_vertices() -> void:
 	node.set_param_value("ball_count", 2)
 	var out := _cook_no_input(node)
 	if out != null:
-		var geo: GNGeometryData = out as GNGeometryData
+		var geo: GNGeoData = out as GNGeoData
 		if geo.mesh != null:
-			var arrays := geo.mesh.surface_get_arrays(0)
+			var arrays: Array = geo.mesh.surface_get_arrays(0)
 			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 			GNTestAssert.assert_gt(verts.size(), 0, "metaball mesh has vertices")
 

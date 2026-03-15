@@ -93,7 +93,7 @@ func test_constant_dat_headers() -> void:
 	node.set_param_value("col1", "beta")
 	var out := _cook_no_input(node)
 	if out is GNTableData:
-		var headers := out.get_headers()
+		var headers: PackedStringArray = out.get_headers()
 		GNTestAssert.assert_true(Array(headers).has("alpha"), "header alpha")
 		GNTestAssert.assert_true(Array(headers).has("beta"), "header beta")
 
@@ -145,7 +145,7 @@ func test_table_dat_header_parsing() -> void:
 	node.set_param_value("headers", "x,y,z")
 	var out := _cook_no_input(node)
 	if out is GNTableData:
-		var h := out.get_headers()
+		var h: PackedStringArray = out.get_headers()
 		GNTestAssert.assert_eq(h[0], "x", "header 0")
 		GNTestAssert.assert_eq(h[1], "y", "header 1")
 		GNTestAssert.assert_eq(h[2], "z", "header 2")

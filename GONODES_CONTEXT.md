@@ -1795,9 +1795,20 @@ GONODES/
   - Works with existing canvas_item shader infrastructure.
 
 ### Performance & GPU Optimizations (Post-Phase 7)
-- [ ] Multi-threaded cook engine (Tier 3 — automatic level-based parallelism)
-- [ ] User-facing thread regions (Tier 4 — annotation-based parallel groups)
-- [ ] Parameter-level dependency tracking (Tier 2 — surgical dirty propagation)
+- [ ] **Multi-threaded cook engine (Tier 3 — automatic level-based parallelism)**:
+  - Group topo-sorted nodes into dependency "levels" (nodes at the same level have no mutual dependencies).
+  - Cook each level in parallel using Godot's `WorkerThreadPool.add_group_task()`.
+  - Main-thread-affine nodes (TOPs with SubViewport, UI widgets) are fenced — they cook on the main thread between parallel batches.
+  - CPU-only families (CHOP, DAT, SOP, IMG) are the primary parallel candidates.
+  - Requires `Mutex` guards on `_cooked_this_frame`, `last_dirty_ids`, and `_dirty_immediate_downstream()`.
+  - Expected speedup: proportional to independent branch count (2-4× for typical networks with parallel chains).
+- [ ] **User-facing thread regions (Tier 4 — annotation-based parallel groups)**:
+  - Users mark network boxes as "parallel regions" via a checkbox on GNNetworkBox.
+  - Nodes inside a parallel-region box are cooked concurrently using `WorkerThreadPool`.
+  - Adds user control over parallelism — experts can force-parallelize known-safe subgraphs.
+  - Requires validation: warn if a parallel region contains main-thread-affine nodes (TOPs, UI).
+  - Deferred until Tier 3 infrastructure is stable.
+- [x] **Input hash guard (Tier 2 — parameter-level cook skipping)** — before cooking a dirty node, hashes all resolved parameter values + upstream input data timestamps. If hash matches last frame, the cook is skipped entirely (not just propagation — the node doesn't execute `_cook()` at all). 100% accurate for parameter-driven changes. Time-dependent nodes include frame timing in hash so they always cook. `_dirty_immediate_downstream()` marks only direct successors when a node does cook — cascade continues in topo order. Replaces the former output fingerprinting approach (`compute_fingerprint()` / `is_gpu_resident()` removed from all GNData classes).
 - [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
 - [x] **Cook engine Tier 1 optimizations** — three quick wins implemented:
   - **Active-only pre-cook**: `_pre_cook_pass()` skips inactive nodes entirely.
@@ -1850,6 +1861,23 @@ GONODES/
 - [ ] Network collaboration (shared editing)
 - [ ] Asset/patch marketplace
 - [ ] Mobile/web export for patches (leveraging Godot's Mobile + Compatibility renderers)
+- [ ] **ListCOMP** — TD-style scrollable data grid UI driven by DAT input:
+  - Column definitions from DAT header row, per-cell rendering with optional formatting (color, alignment)
+  - Row selection (single, multi, range), header click-to-sort, column resize/reorder
+  - Scroll virtualization for large tables (only renders visible rows)
+  - CHOP output for selection state (selected row indices as channel samples)
+  - Partially covered by existing UI family (ItemListUI, TreeUI) but those lack column/grid layout
+  - Would extend GNUiBase with a custom Tree-based or GridContainer-based implementation
+- [ ] **SDF Composition Extension** (`gn_ext_sdf`) — RayTK-inspired composable SDF raymarching toolkit:
+  - **Not a new family** — intermediate data is a `GNSDFData` (extends GNData) carrying an SDF scene-graph AST (tree of primitives + operators). Final node compiles to GLSL and renders to GNTextureData (TOP output).
+  - **SDF Primitives** (~10): SphereSDF, BoxSDF, TorusSDF, CylinderSDF, CapsuleSDF, PlaneSDF, ConeSDF, PyramidSDF, OctahedronSDF, GyroidSDF
+  - **Boolean Operators** (~5): UnionSDF, IntersectionSDF, SubtractSDF, SmoothUnionSDF, SmoothSubtractSDF
+  - **Domain Modifiers** (~8): RepeatSDF (infinite tiling), MirrorSDF, TwistSDF, BendSDF, ElongateSDF, RoundSDF, OnionSDF (hollow shell), DisplaceSDF (noise warp)
+  - **Material/Color**: MaterialSDF (assign albedo/roughness/metallic per shape), GradientSDF (distance-based coloring)
+  - **Final Renderer**: RaymarchSDF TOP — collects upstream SDF chain, compiles a single `canvas_item` fragment shader, renders to SubViewport. Params: resolution, max_steps, epsilon, camera (orbit or free), lighting model (Phong/PBR), ambient occlusion, soft shadows.
+  - **Architecture**: Each SDF node appends to the AST in `_cook()` (tree of `{type, params, children}`). RaymarchSDF walks the AST and emits GLSL code (`sdf_scene()` function body). Shader is recompiled only when the AST fingerprint changes (hash of tree structure + param values). This is similar to how ISF/Shadertoy translators work but generates procedural GLSL from a node graph.
+  - **Why not a new family**: The SDF chain produces a TOP (2D texture) as final output. The intermediate GNSDFData is internal to the extension — downstream nodes see a normal GNTextureData. No new family color, no port type — SDF nodes have SDF-typed ports (using a custom family or a sub-type marker on existing ports). Extension registers under "SDF" palette section within TOPs.
+  - **Distinct from VOL**: VOL operates on discrete 3D voxel grids (sampled data in 3D textures). SDF is continuous/analytical — the shader evaluates mathematical distance functions per pixel at full precision. VOL raymarcher samples a grid; SDF raymarcher evaluates math. Both produce TOP output but the pipeline is fundamentally different.
 - [ ] **MidiOutCHOP** — send MIDI messages from CHOP channel values:
   - Requires a **GDExtension** wrapping RtMidi or portmidi. Godot 4.x exposes `OS.open_midi_inputs()`
     and `InputEventMIDI` for MIDI *input*, but has **no MIDI output API** — there is no
@@ -2372,6 +2400,27 @@ The cook engine has been optimized with these patterns:
    - Info bar: `Active: N/M` — active nodes vs. total.
    - Perf overlay: inactive nodes show dimmed `zzz` instead of cook time.
    - `GNNode.is_active` is readable by any code (operators, inspector, etc.).
+
+11. **Input hash guard (Tier 2)** — Parameter-level cook skipping replaces the former output fingerprinting. Before cooking a dirty+active node, the cook engine hashes all resolved parameter values (built-in + spare) plus upstream input data timestamps into a single int (`_compute_cook_input_hash()`). If the hash matches the previous frame's hash (`_last_cook_input_hash` on GNNode), the cook is skipped entirely — `_cook()` is never called, `cached_output` stays frozen, and no downstream propagation occurs.
+
+    **Why input hashing beats output fingerprinting:**
+    - **100% accurate for parameters**: Parameter values are small typed data (float, int, Vector2, Color, String, Array). `hash()` on these is exact.
+    - **100% accurate for inputs**: Data timestamps track the frame of last cook. If upstream re-cooked, the timestamp changes and the hash differs. No heuristic pixel/vertex sampling.
+    - **Skips the cook itself**: Output fingerprinting still had to cook the node before checking. Input hashing skips the entire `_cook()` call — zero GPU/CPU work for unchanged nodes.
+    - **No GPU-resident special cases**: Output fingerprinting needed `is_gpu_resident()` to force propagation for TOPs/POPs/VOLs (GPU data can't be cheaply compared). Input hashing doesn't look at output data at all — works identically for all families.
+    - **Simpler code**: No `compute_fingerprint()` or `is_gpu_resident()` overrides on 9 data classes. One method on the cook engine + one hash field on GNNode.
+
+    **Time-dependent nodes**: Include `elapsed_time` in the hash, so it always differs frame-to-frame and the node always cooks. This is correct — their output depends on wall-clock time.
+
+    **Expression-dirty nodes**: When `_try_expression_dirty()` changes a parameter's `resolved_value`, the node falls through to the cook section where the input hash will see the changed param value and allow the cook.
+
+    **Incremental propagation**: When a node does cook (hash mismatch), `_dirty_immediate_downstream()` marks only direct successors dirty. Those successors then run their own input hash check in topo order — cascading stops at the first node whose inputs haven't changed.
+
+    **Key invariants:**
+    - First frame: `_last_cook_input_hash = -1` (sentinel), so hash never matches → all nodes cook.
+    - `invalidate_all()` marks all nodes dirty — they cook regardless of hash on the next frame.
+    - Bypass nodes: input hash guard runs before bypass check. If hash matches (same passthrough input + same params), bypass is skipped entirely.
+    - Compute-unavailable nodes: skipped before hash check (handled by `requires_compute()` early-out).
 
 ### CHOP Channel Model
 CHOPs produce `GNChannelData` which contains:

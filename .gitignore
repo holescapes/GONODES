@@ -14,3 +14,9 @@ addons/gn_ext_native/native/godot-cpp/
 
 # Windows DLL lock/temp files created by Godot while running
 ~lib*
+
+# Platform-local .gdignore files for cross-platform GDExtensions.
+# Syphon is macOS-only — on Windows, addons/gn_ext_syphon/native/.gdignore
+# prevents Godot from trying to load the macOS-only .gdextension file.
+# On macOS dev machines, don't create that file so Syphon loads normally.
+addons/gn_ext_syphon/native/.gdignore

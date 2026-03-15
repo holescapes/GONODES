@@ -86,7 +86,7 @@ Houdini uses a more sophisticated **pull-based, demand-driven** cook model, but 
 
 GONODES uses a **push-based, topography-sorted per-frame** cook model:
 
-- Every frame, `cook_frame(delta)` runs: marks time-dependent nodes dirty, topo-sorts, propagates dirty downstream (BFS), cooks all dirty+active nodes in topo order.
+- Every frame, `cook_frame(delta)` runs: marks time-dependent nodes dirty, topo-sorts, cooks dirty+active nodes in topo order with input hash guard (parameter values + input timestamps — nodes skip cooking entirely when inputs unchanged).
 - **Active chain cooking** limits work to subgraphs feeding live sinks (viewers, WindowOUT, RecordOUT, etc.).
 - Inactive nodes keep `cached_output` frozen — **similar to TD's demand-driven model**.
 - Cook is **synchronous, single-threaded, main-thread** — no parallel cook lanes.
@@ -98,7 +98,7 @@ GONODES uses a **push-based, topography-sorted per-frame** cook model:
 | Behavior | TouchDesigner | Houdini | GONODES |
 |----------|--------------|---------|---------|
 | Cook trigger | Demand (downstream pull) | Demand (downstream pull) | Frame loop (topo-sorted push) |
-| Dirty granularity | Node-level | Parameter-level | Node-level |
+| Dirty granularity | Node-level | Parameter-level | Node-level + input hash guard |
 | Time-dep recook | Auto per frame for time-dep nodes | Only on frame change (explicit $T/$F) | Auto per frame for time-dep nodes |
 | Inactive subgraph | Never cooks (no demand) | Never cooks (no demand) | Active chain skips them |
 | GPU parallelism | Multi-stream TOP cook | Karma GPU (offline) | Single Godot render thread |
@@ -230,7 +230,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
 | Expression language | Python | HScript + VEX | GDScript Expression | ✓ adequate |
-| Parameter-level deps | Partial (CHOP export) | Full dependency DAG | None (node-level dirty) | **GAP** |
+| Parameter-level deps | Partial (CHOP export) | Full dependency DAG | Input hash guard (param values + input timestamps) | Practical — 100% accurate for param changes |
 | Ramp parameter type | No (workaround via LookupTOP) | Yes (first-class, `chramp()`) | No | **GAP** |
 | Multiparm / dynamic groups | No | Yes | No | Gap (minor) |
 | Keyframe animation | Yes (basic timeline) | Yes (full animation editor) | No | **GAP** |
@@ -313,7 +313,8 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 - **Active chain cooking**: Only cooks subgraphs feeding live sinks (equivalent to TD's demand-driven).
 - **UPDATE_ONCE**: SubViewport renders exactly once per dirty cycle — eliminates redundant GPU work.
 - **COW data sharing**: `_mutable_input()` avoids unnecessary copies at fan-out points.
-- **Planned**: Multi-threaded cook engine, parameter-level dependency tracking.
+- **Input hash guard (Tier 2)**: Before cooking, hashes all resolved parameter values + input data timestamps. If unchanged from last frame, the cook is skipped entirely (no `_cook()` call, no GPU/CPU work). 100% accurate for parameter-driven changes. Incremental propagation in topo order replaces upfront BFS.
+- **Planned**: Multi-threaded cook engine (Tier 3 — level-based parallelism), user-facing thread regions (Tier 4).
 
 ### 6.4 Comparison
 

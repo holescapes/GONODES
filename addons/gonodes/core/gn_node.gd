@@ -55,6 +55,12 @@ var cook_time_ms: float = 0.0
 ## True if the last cook completed without errors.
 var cook_valid: bool = false
 
+## Hash of the last cook's inputs (resolved param values + input timestamps).
+## Used by the cook engine's input hash guard (Tier 2) to skip redundant cooks
+## when parameters and inputs haven't changed since the previous frame.
+## -1 sentinel forces the first cook to always proceed.
+var _last_cook_input_hash: int = -1
+
 # ─── Timing (set by GNCookEngine each frame before cooking) ────────────────────
 
 ## Delta time for the current frame (seconds).

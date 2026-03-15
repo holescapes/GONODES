@@ -540,6 +540,13 @@ func propagate_dirty(from_node_id: String) -> void:
 					queue.append(ds_id)
 
 
+## Returns the IDs of nodes immediately downstream of the given node.
+## Uses the cached adjacency map — O(1) lookup after rebuild.
+func get_immediate_downstream(node_id: String) -> Array:
+	_rebuild_adjacency()
+	return _downstream_map.get(node_id, [])
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Annotation Management (Network Boxes & Sticky Notes)
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -85,7 +85,7 @@ func test_force_pop_instantiation() -> void:
 
 func test_force_pop_default_gravity() -> void:
 	var node := _make_node(ForcePOP.new(), "force2")
-	var grav := node.get_param_value("gravity_y")
+	var grav: Variant = node.get_param_value("gravity_y")
 	GNTestAssert.assert_not_null(grav, "has gravity_y param")
 
 func test_force_pop_no_input_safety() -> void:

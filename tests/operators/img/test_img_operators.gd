@@ -75,7 +75,7 @@ func test_noise_img_monochrome() -> void:
 	node.set_param_value("monochrome", true)
 	var out := _cook_no_input(node)
 	if out is GNImageData and out.image != null:
-		var px := out.image.get_pixel(8, 8)
+		var px: Color = out.image.get_pixel(8, 8)
 		GNTestAssert.assert_approx(px.r, px.g, 0.001, "mono r==g")
 		GNTestAssert.assert_approx(px.g, px.b, 0.001, "mono g==b")
 
@@ -91,8 +91,8 @@ func test_noise_img_different_seeds() -> void:
 	var out2 := _cook_no_input(n2)
 
 	if out1 is GNImageData and out2 is GNImageData and out1.image and out2.image:
-		var px1 := out1.image.get_pixel(4, 4)
-		var px2 := out2.image.get_pixel(4, 4)
+		var px1: Color = out1.image.get_pixel(4, 4)
+		var px2: Color = out2.image.get_pixel(4, 4)
 		# Different seeds should (almost certainly) produce different pixels
 		var diff := absf(px1.r - px2.r) + absf(px1.g - px2.g) + absf(px1.b - px2.b)
 		GNTestAssert.assert_gt(diff, 0.001, "different seeds → different pixels")
@@ -120,8 +120,8 @@ func test_checkerboard_img_pattern_corners() -> void:
 	var out := _cook_no_input(node)
 	if out is GNImageData and out.image != null:
 		# Top-left quadrant should be one color, top-right another
-		var tl := out.image.get_pixel(8, 8)
-		var tr := out.image.get_pixel(48, 8)
+		var tl: Color = out.image.get_pixel(8, 8)
+		var tr: Color = out.image.get_pixel(48, 8)
 		# They should differ (one white, one black)
 		var diff := absf(tl.r - tr.r)
 		GNTestAssert.assert_gt(diff, 0.5, "checkerboard alternates")
@@ -160,7 +160,7 @@ func test_blur_img_smooths_edges() -> void:
 	var out := _cook_with(blur, [check_out] as Array[GNData])
 	if out is GNImageData and out.image != null:
 		# Edge pixel (boundary between cells) should not be pure black or white
-		var edge_px := out.image.get_pixel(16, 8)
+		var edge_px: Color = out.image.get_pixel(16, 8)
 		GNTestAssert.assert_gt(edge_px.r, 0.05, "edge not pure black after blur")
 		GNTestAssert.assert_lt(edge_px.r, 0.95, "edge not pure white after blur")
 
@@ -189,9 +189,9 @@ func test_edge_detect_img_finds_edges() -> void:
 	var out := _cook_with(edge, [check_out] as Array[GNData])
 	if out is GNImageData and out.image != null:
 		# Center of a solid quadrant should have low edge value
-		var center_px := out.image.get_pixel(8, 8)
+		var center_px: Color = out.image.get_pixel(8, 8)
 		# Edge boundary should have higher value
-		var edge_px := out.image.get_pixel(16, 8)
+		var edge_px: Color = out.image.get_pixel(16, 8)
 		GNTestAssert.assert_gt(edge_px.r, center_px.r, "edge brightness > flat area")
 
 

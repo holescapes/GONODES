@@ -405,14 +405,16 @@ func cook_frame(delta: float) -> void:
 	var topo_order: Array[GNNode] = network.get_topological_order()
 	last_topo_order = topo_order
 
-	# Step 3: Propagate dirty flags downstream BEFORE cooking.
-	# This ensures all affected nodes are marked dirty in one pass,
-	# eliminating redundant BFS calls during the cook loop.
-	for node in topo_order:
-		if node.dirty:
-			network.propagate_dirty(node.id)
+	# Step 3: Incremental parameter-level dirty propagation (Tier 2).
+	# Instead of upfront BFS that eagerly dirties everything downstream,
+	# each node checks whether its cook inputs (parameter values + upstream
+	# data timestamps) actually changed.  If unchanged, the cook is skipped
+	# entirely and downstream stays clean.  Propagation cascades in topo
+	# order: when a node does cook, only its direct successors are dirtied.
 
-	# Step 3a: Snapshot dirty set for debug overlay (before cooking clears flags).
+	# Step 3a: Snapshot initially-dirty nodes for debug overlay.
+	# Nodes dirtied by incremental propagation during the cook loop are
+	# added to last_dirty_ids as they trigger.
 	last_dirty_ids.clear()
 	for node in topo_order:
 		if node.dirty:
@@ -457,7 +459,9 @@ func cook_frame(delta: float) -> void:
 			# every frame — only nodes whose data sources changed are checked.
 			if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
 				_cooked_this_frame[node.id] = true
-				network.propagate_dirty(node.id)
+				# Expression changed a param value — node is now dirty.
+				# Falls through to cook section below where the input hash
+				# guard will see the changed param and allow the cook.
 			else:
 				continue
 
@@ -478,6 +482,20 @@ func cook_frame(delta: float) -> void:
 		# Gather input data from upstream cached outputs
 		var inputs: Array[GNData] = _gather_inputs(node)
 
+		# ── Input hash guard (Tier 2) ────────────────────────────────────
+		# Hash all resolved parameter values + input data timestamps.
+		# If identical to last cook, skip entirely — params and inputs
+		# haven't changed, so output would be the same.
+		# Time-dependent nodes include frame timing in the hash so they
+		# always cook (their output depends on wall-clock time).
+		var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
+		if cook_input_hash == node._last_cook_input_hash:
+			# Nothing changed — skip cook, keep cached_output, don't propagate.
+			node.clear_dirty()
+			skipped_count += 1
+			continue
+		node._last_cook_input_hash = cook_input_hash
+
 		# Bypass: pass first input through without cooking
 		if node.bypass:
 			var passthrough: GNData = null
@@ -493,6 +511,7 @@ func cook_frame(delta: float) -> void:
 			node.clear_dirty()
 			node.node_cooked.emit(node.id)
 			_cooked_this_frame[node.id] = true
+			_dirty_immediate_downstream(node.id)
 			cooked_count += 1
 			if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
 				break
@@ -525,6 +544,10 @@ func cook_frame(delta: float) -> void:
 		# Operators use _mutable_input() to check this flag before mutating data.
 		if result != null:
 			result._shared = _consumer_counts.get(node.id, 0) > 1
+
+		# Input hash already confirmed something changed — propagate dirty
+		# to immediate downstream.  Cascade continues in topo order.
+		_dirty_immediate_downstream(node.id)
 
 		if result == null and node.output_ports.size() > 0 and node.family != GNFamily.Type.COMP:
 			# Only warn for non-COMP nodes with output ports.
@@ -604,6 +627,52 @@ func _should_eval_expressions(node: GNNode) -> bool:
 		if ref_node and ref_node.time_dependent:
 			return true
 	return false
+
+
+## Computes a hash of all cook inputs for a node: resolved parameter values +
+## upstream input data timestamps.  Used by the input hash guard (Tier 2) to
+## detect whether a dirty node actually needs to re-cook.
+##
+## Time-dependent nodes include [member elapsed_time] in the hash so the guard
+## never suppresses their cook — their output depends on wall-clock time.
+##
+## This is 100% accurate for parameter-driven changes (parameters are small,
+## exact-typed values).  For input data changes, timestamps track the frame of
+## last cook — if an upstream node re-cooked, the timestamp changes and the
+## hash differs, triggering a re-cook.  This mirrors TD's demand-driven model:
+## if upstream cooked, downstream cooks.
+func _compute_cook_input_hash(node: GNNode, inputs: Array[GNData]) -> int:
+	var h: int = 73856093
+	# Hash all resolved parameter values (both built-in and spare)
+	for param_name in node.parameters:
+		var param: GNParameter = node.parameters[param_name]
+		h = h * 31 + hash(param.get_resolved_value())
+	for param_name in node.spare_parameters:
+		var param: GNParameter = node.spare_parameters[param_name]
+		h = h * 31 + hash(param.get_resolved_value())
+	# Hash input data timestamps — if upstream re-cooked, timestamp changes
+	for inp in inputs:
+		if inp != null:
+			h = h * 37 + inp.timestamp
+		else:
+			h = h * 37
+	# Time-dependent nodes: include frame timing so hash always differs
+	if node.time_dependent:
+		h = h * 41 + hash(elapsed_time)
+	return h
+
+
+## Marks only the immediate downstream nodes of [param node_id] dirty.
+## Used by the incremental input hash guard during the cook loop.
+## Since nodes cook in topological order, marking only direct successors
+## is sufficient — further propagation cascades naturally as each downstream
+## node reaches the input hash guard and checks its own inputs.
+func _dirty_immediate_downstream(node_id: String) -> void:
+	for ds_id in network.get_immediate_downstream(node_id):
+		var ds_node: GNNode = network.nodes.get(ds_id, null)
+		if ds_node and not ds_node.dirty:
+			ds_node.mark_dirty()
+			last_dirty_ids[ds_id] = true
 
 
 ## Evaluates expression parameters on a non-dirty node and checks whether any
