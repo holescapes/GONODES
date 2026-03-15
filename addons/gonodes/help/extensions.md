@@ -49,6 +49,7 @@ description = "Another operator in the same extension."
 | author         | No       | Author name                                    |
 | description    | No       | Brief description of the extension             |
 | dependencies   | No       | Array of ClassDB class names that must exist   |
+| platforms      | No       | Array of OS names (e.g. `["macos"]`, `["windows"]`). If set, the extension is skipped on other platforms. |
 | section        | No       | Palette sub-heading (defaults to name)         |
 
 ### Operator-Level Fields
@@ -119,6 +120,69 @@ dependencies = ["FFmpegFrameDecoder"]
 ```
 
 This prevents crashes when the native library isn't available.
+
+---
+
+## Platform-Specific Extensions
+
+Some extensions only work on a single OS — Syphon is macOS-only, Spout is
+Windows-only. Two layers handle this:
+
+### Layer 1: `platforms` Manifest Key
+
+The `platforms` field in `gn_extension.cfg` tells the GNExtensionRegistry to
+skip the extension's GDScript operators on non-matching platforms:
+
+```
+[extension]
+name = "Syphon Texture Sharing"
+platforms = ["macos"]
+```
+
+Valid values match `OS.get_name().to_lower()`: `"windows"`, `"macos"`,
+`"linux"`, `"android"`, `"ios"`, `"web"`.
+
+### Layer 2: `.gdignore` for Native Libraries
+
+The `platforms` key only governs GDScript operator registration. It does **not**
+prevent Godot's engine-level file scanner from discovering `.gdextension` files
+inside the extension. If a `.gdextension` lists libraries only for macOS, Godot
+will log errors every launch on Windows (and vice versa) because it cannot find
+a matching binary for the current OS — there is no built-in `.gdextension`
+platform filter.
+
+**Solution:** Place a `.gdignore` file inside the `native/` directory on
+platforms where the library does not apply. This makes Godot's scanner skip
+the entire directory, so the `.gdextension` file is never seen.
+
+```
+addons/gn_ext_syphon/
+├── gn_extension.cfg          # platforms=["macos"] — GDScript guard
+├── operators/
+│   └── top/
+│       ├── syphon_in_top.gd  # ClassDB.class_exists() runtime guard
+│       └── syphon_out_top.gd
+└── native/
+    ├── .gdignore             # ← present on Windows, absent on macOS
+    └── gn_syphon.gdextension
+```
+
+The `.gdignore` must be **excluded from version control** so it does not affect
+other platforms. Add it to `.gitignore`:
+
+```
+# Platform-local .gdignore — prevents Godot from loading
+# macOS-only .gdextension files on Windows (and vice versa).
+addons/gn_ext_syphon/native/.gdignore
+```
+
+This gives you three independent safety layers:
+
+| Layer | Scope | Mechanism |
+|-------|-------|----------|
+| `.gdignore` in `native/` | Engine file scanner | Godot skips the entire directory |
+| `platforms` in manifest | GDScript operator registration | Extension registry skips on wrong OS |
+| `ClassDB.class_exists()` in `_init()` | Runtime | Operator gracefully degrades if native class is absent |
 
 ---
 

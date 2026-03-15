@@ -1,0 +1,118 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "sdf1": {
+      "type": "GyroidSDF",
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {
+        "scale": {
+          "value": 1.0
+        },
+        "thickness": {
+          "value": 0.1
+        },
+        "position_x": {
+          "value": 0
+        },
+        "position_y": {
+          "value": 0
+        },
+        "position_z": {
+          "value": 0
+        }
+      }
+    },
+    "raymarch1": {
+      "type": "RaymarchSDF",
+      "position": [
+        600,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "cam_distance": {
+          "value": 5.0
+        },
+        "cam_angle_x": {
+          "value": 0.3
+        },
+        "cam_angle_y": {
+          "value": 0.4
+        },
+        "fov": {
+          "value": 60.0
+        },
+        "show_ao": {
+          "value": true
+        },
+        "soft_shadows": {
+          "value": true
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1000,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "sdf1",
+      "from_port": 0,
+      "to": "raymarch1",
+      "to_port": 0
+    },
+    {
+      "from": "raymarch1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Gyroid SDF \u2014 Basic\n\nDefault parameters.\nSDF primitive -> RaymarchSDF -> WindowOUT.",
+      "position": [
+        -150,
+        -180
+      ],
+      "size": [
+        520,
+        120
+      ],
+      "color": [
+        1,
+        1,
+        1,
+        0.8
+      ]
+    }
+  ]
+}

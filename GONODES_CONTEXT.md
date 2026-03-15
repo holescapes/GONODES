@@ -1809,7 +1809,7 @@ GONODES/
   - Requires validation: warn if a parallel region contains main-thread-affine nodes (TOPs, UI).
   - Deferred until Tier 3 infrastructure is stable.
 - [x] **Input hash guard (Tier 2 — parameter-level cook skipping)** — before cooking a dirty node, hashes all resolved parameter values + upstream input data timestamps. If hash matches last frame, the cook is skipped entirely (not just propagation — the node doesn't execute `_cook()` at all). 100% accurate for parameter-driven changes. Time-dependent nodes include frame timing in hash so they always cook. `_dirty_immediate_downstream()` marks only direct successors when a node does cook — cascade continues in topo order. Replaces the former output fingerprinting approach (`compute_fingerprint()` / `is_gpu_resident()` removed from all GNData classes).
-- [ ] GPU compute shaders for CHOPs (massive parallel channel processing)
+- ~~GPU compute shaders for CHOPs~~ — **REMOVED.** CPU readback latency (upload SSBO → dispatch → fence → readback) negates parallelism gains for typical CHOP data sizes (control-rate: ~4 KB, audio-rate: ~172 KB/ch). CHOPs need data back on CPU for expressions, parameter driving, and cook engine hashing. Already covered by 69 native C++ operators via GDExtension (pointer arithmetic inner loops within 2-3× of GPU compute for these sizes). Users needing extreme parallel processing can use ComputeShaderTOP (stays on GPU) or ScriptCHOP with native helper.
 - [x] **Cook engine Tier 1 optimizations** — three quick wins implemented:
   - **Active-only pre-cook**: `_pre_cook_pass()` skips inactive nodes entirely.
   - **Expression consumer map**: `_should_eval_expressions()` checks whether upstream sources cooked this frame before re-evaluating expressions. Avoids per-frame polling of every expression on every active node.
@@ -1847,11 +1847,12 @@ GONODES/
   - Full serialization/deserialization in `.gnpatch` format
   - Same `get_parameter_value()` / `set_parameter_value()` API as regular params
 - [ ] NDI video streaming (NDI In/Out TOPs — would be a GDExtension `gn_ext_ndi` wrapping the NDI SDK)
-- [ ] Spout / Syphon texture sharing (SpoutInTOP, SpoutOutTOP — requires GDExtension for shared GL/DX texture handles; Windows=Spout, macOS=Syphon)
+- [x] Spout / Syphon texture sharing — **Done**: `gn_ext_spout` (Windows: SpoutInTOP, SpoutOutTOP) and `gn_ext_syphon` (macOS: SyphonInTOP, SyphonOutTOP). Both are GDExtension addons with ClassDB.class_exists() runtime guards and `platforms` manifest key for cross-platform skip. `.gdignore` in `native/` prevents Godot from loading the wrong platform's `.gdextension` file.
 - [x] ScreenGrabTOP — **Done as ScreenGrabIMG**: `operators/img/screen_grab_img.gd`. Viewport-only capture (main or editor viewport) → CPU Image. Moved to IMG family since `Viewport.get_texture().get_image()` returns a CPU Image. Chain → ImgToTOP for GPU texture.
 - [x] VideoDeviceInIMG — live webcam/capture-card input as CPU Image; Godot has no native webcam API — GDExtension wrapping Media Foundation (Windows), AVFoundation (macOS), V4L2 (Linux). Built as IMG family since native API returns PackedByteArray. Chain → ImgToTOP for GPU texture.
-- [ ] AntiAliasTOP — standalone FXAA/TAA post-process (currently available as RenderTOP post-process; dedicated TOP would apply to any texture chain)
-- [ ] MovieFileOutTOP — record texture stream to video file (currently covered by MovieOUT/FFmpegOUT on CPU side; a GPU-side encoder would need GDExtension wrapping NVENC or VA-API)
+- [x] AntiAliasTOP — **Done**: `operators/top/anti_alias_top.gd`. Simplified FXAA with configurable strength and edge threshold. Standalone TOP that applies to any texture chain.
+- [x] MovieFileOutTOP — **Done**: `gn_ext_gpu_encode/operators/top/movie_file_out_top.gd`. GPU-side H.264 encoding via GDExtension (Media Foundation / VideoToolbox). Also: MovieOUT (CPU image sequence) and FFmpegOUT (CLI-based H.264/H.265/VP9/ProRes).
+- [x] MidiOutCHOP — **Done**: `gn_ext_midi/operators/chop/midi_out_chop.gd` (RtMidiOutCHOP). Native RtMidi GDExtension backend with note on/off, CC, pitch bend mapping from CHOP channels.
 - [ ] FxPlug / FFGL plugin export (for VDMX, Resolume)
 - [x] Generic ScriptNode (family-less, multi-type output via `# @output` annotations) — **Done**: `operators/comp/generic_script_node.gd`
 - [x] CallbackDAT (event-driven scripting callbacks) — **Done**: `operators/dat/callback_dat.gd`
@@ -1868,24 +1869,16 @@ GONODES/
   - CHOP output for selection state (selected row indices as channel samples)
   - Partially covered by existing UI family (ItemListUI, TreeUI) but those lack column/grid layout
   - Would extend GNUiBase with a custom Tree-based or GridContainer-based implementation
-- [ ] **SDF Composition Extension** (`gn_ext_sdf`) — RayTK-inspired composable SDF raymarching toolkit:
-  - **Not a new family** — intermediate data is a `GNSDFData` (extends GNData) carrying an SDF scene-graph AST (tree of primitives + operators). Final node compiles to GLSL and renders to GNTextureData (TOP output).
-  - **SDF Primitives** (~10): SphereSDF, BoxSDF, TorusSDF, CylinderSDF, CapsuleSDF, PlaneSDF, ConeSDF, PyramidSDF, OctahedronSDF, GyroidSDF
-  - **Boolean Operators** (~5): UnionSDF, IntersectionSDF, SubtractSDF, SmoothUnionSDF, SmoothSubtractSDF
-  - **Domain Modifiers** (~8): RepeatSDF (infinite tiling), MirrorSDF, TwistSDF, BendSDF, ElongateSDF, RoundSDF, OnionSDF (hollow shell), DisplaceSDF (noise warp)
-  - **Material/Color**: MaterialSDF (assign albedo/roughness/metallic per shape), GradientSDF (distance-based coloring)
-  - **Final Renderer**: RaymarchSDF TOP — collects upstream SDF chain, compiles a single `canvas_item` fragment shader, renders to SubViewport. Params: resolution, max_steps, epsilon, camera (orbit or free), lighting model (Phong/PBR), ambient occlusion, soft shadows.
-  - **Architecture**: Each SDF node appends to the AST in `_cook()` (tree of `{type, params, children}`). RaymarchSDF walks the AST and emits GLSL code (`sdf_scene()` function body). Shader is recompiled only when the AST fingerprint changes (hash of tree structure + param values). This is similar to how ISF/Shadertoy translators work but generates procedural GLSL from a node graph.
-  - **Why not a new family**: The SDF chain produces a TOP (2D texture) as final output. The intermediate GNSDFData is internal to the extension — downstream nodes see a normal GNTextureData. No new family color, no port type — SDF nodes have SDF-typed ports (using a custom family or a sub-type marker on existing ports). Extension registers under "SDF" palette section within TOPs.
-  - **Distinct from VOL**: VOL operates on discrete 3D voxel grids (sampled data in 3D textures). SDF is continuous/analytical — the shader evaluates mathematical distance functions per pixel at full precision. VOL raymarcher samples a grid; SDF raymarcher evaluates math. Both produce TOP output but the pipeline is fundamentally different.
-- [ ] **MidiOutCHOP** — send MIDI messages from CHOP channel values:
-  - Requires a **GDExtension** wrapping RtMidi or portmidi. Godot 4.x exposes `OS.open_midi_inputs()`
-    and `InputEventMIDI` for MIDI *input*, but has **no MIDI output API** — there is no
-    `OS.send_midi_message()`, no `MidiOut` class, and no way to open an output device.
-  - A C++ GDExtension (~200-400 LOC) would expose `MidiOut.open(device_index)`, `send_note_on()`,
-    `send_cc()`, `send_pitchbend()`, etc. RtMidi is header-only with a permissive license.
-  - Map CHOP channels (`note`, `velocity`, `cc:N`, `pitchbend`) to outgoing MIDI messages each frame.
-  - Only relevant for hardware control surfaces, lighting rigs, or synth triggering — lower priority.
+- [x] **SDF Composition Extension** (`gn_ext_sdf`) — **IMPLEMENTED** (26 operators + 78 help patches):
+  - **Not a new family** — intermediate data is a `GNSDFData` (extends GNData) carrying an SDF scene-graph AST. Final node compiles to GLSL and renders to GNTextureData (TOP output).
+  - **SDF Primitives** (10): SphereSDF, BoxSDF, TorusSDF, CylinderSDF, CapsuleSDF, PlaneSDF, ConeSDF, PyramidSDF, OctahedronSDF, GyroidSDF
+  - **Boolean Operators** (5): UnionSDF, IntersectionSDF, SubtractSDF, SmoothUnionSDF, SmoothSubtractSDF
+  - **Domain Modifiers** (8): RepeatSDF, MirrorSDF, TwistSDF, BendSDF, ElongateSDF, RoundSDF, OnionSDF, DisplaceSDF
+  - **Material/Color** (2): MaterialSDF, GradientSDF
+  - **Renderer** (1): RaymarchSDF TOP — orbit camera, AO, soft shadows, Blinn-Phong shading
+  - **Base classes**: GNSDFData (AST carrier with hash), GNSdfBase (extends GNNode)
+  - **Help patches**: 78 interactive/animated patches (3 per operator, LFO-driven `chop()` expressions)
+- [x] **MidiOutCHOP** — **Done**: `gn_ext_midi/operators/chop/midi_out_chop.gd` (RtMidiOutCHOP). C++ GDExtension (`GNMidiOut`) wrapping RtMidi with `send_note_on()`, `send_cc()`, `send_pitch_bend()`, `send_raw()`. Maps CHOP channels (n0-n127 for notes, cc0-cc127 for CCs, pitch_bend) to outgoing MIDI. Note on/off edge detection with previous-state tracking.
 
 ### GPU Particles (POP Family)  IMPLEMENTED — Roadmap
 
