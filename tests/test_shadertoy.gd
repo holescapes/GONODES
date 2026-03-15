@@ -3,9 +3,10 @@ extends Node
 ##
 ## Tests cover:
 ##   - ShadertoyTranslator: built-in replacement, mainImage→fragment, header gen
-##   - ShadertoyURLTOP: URL/ID extraction utility
-##   - Pre-baked subclass init (seascape, plasma, CRT, etc.)
-##   - Effect TOPs: extra shader-specific params exist
+##   - ShadertoyTOP: URL/ID extraction, init, params
+##   - Factory presets exist on disk
+
+const ShadertoyTOP = preload("res://addons/gn_ext_shadertoy/operators/top/shadertoy_top.gd")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ShadertoyTranslator — Built-in Replacements
@@ -123,100 +124,25 @@ func test_translator_itimedelta() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Pre-baked Subclasses
+# Factory Presets — verify preset files exist on disk
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_seascape_top_init() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_seascape_top.gd").new()
-	GNTestAssert.assert_eq(op.node_type, "st_seascape", "node_type")
-	GNTestAssert.assert_eq(op.time_dependent, true, "time_dependent")
-	GNTestAssert.assert_eq(op._is_generator, true, "is generator")
-	GNTestAssert.assert_eq(op._input_tex_count, 0, "no inputs")
-	GNTestAssert.assert_contains(op._shader_path, "st_seascape", "shader path set")
-	GNTestAssert.assert_contains(op._shadertoy_url, "Ms2SD1", "URL contains shader ID")
-
-
-func test_voronoi_fire_top_init() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_voronoi_fire_top.gd").new()
-	GNTestAssert.assert_eq(op.node_type, "st_voronoi_fire", "node_type")
-	GNTestAssert.assert_eq(op._is_generator, true, "is generator")
-
-
-func test_creation_top_init() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_creation_top.gd").new()
-	GNTestAssert.assert_eq(op.node_type, "st_creation", "node_type")
-	GNTestAssert.assert_eq(op._is_generator, true, "is generator")
-
-
-func test_star_nest_top_init() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_star_nest_top.gd").new()
-	GNTestAssert.assert_eq(op.node_type, "st_star_nest", "node_type")
-	GNTestAssert.assert_eq(op._is_generator, true, "is generator")
-
-
-func test_plasma_top_init() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_plasma_top.gd").new()
-	GNTestAssert.assert_eq(op.node_type, "st_plasma", "node_type")
-	GNTestAssert.assert_eq(op._is_generator, true, "is generator")
+func test_factory_presets_exist() -> void:
+	## All 10 factory presets should exist as .glsl files.
+	var preset_dir := "res://addons/gn_ext_shadertoy/presets/shadertoy/"
+	var expected := [
+		"plasma.glsl", "creation.glsl", "star_nest.glsl", "lava_lamp.glsl",
+		"voronoi.glsl", "crt.glsl", "chromatic_ab.glsl", "pixelate.glsl",
+		"film_grain.glsl", "halftone.glsl",
+	]
+	for preset: String in expected:
+		var path := preset_dir + preset
+		GNTestAssert.assert_true(FileAccess.file_exists(path),
+			"preset should exist: %s" % preset)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Effect TOPs — extra params
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_crt_top_params() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_crt_top.gd").new()
-	GNTestAssert.assert_eq(op.node_type, "st_crt", "node_type")
-	GNTestAssert.assert_eq(op._is_generator, false, "is effect")
-	GNTestAssert.assert_eq(op._input_tex_count, 1, "one input")
-	op._init_ports()
-	op._init_parameters()
-	GNTestAssert.assert_eq(op.parameters.has("curvature"), true, "has curvature param")
-	GNTestAssert.assert_eq(op.parameters.has("scanline_weight"), true, "has scanline_weight")
-	GNTestAssert.assert_eq(op.parameters.has("vignette_strength"), true, "has vignette_strength")
-
-
-func test_chromatic_ab_top_params() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_chromatic_ab_top.gd").new()
-	GNTestAssert.assert_eq(op.node_type, "st_chromatic_ab", "node_type")
-	GNTestAssert.assert_eq(op._is_generator, false, "is effect")
-	op._init_ports()
-	op._init_parameters()
-	GNTestAssert.assert_eq(op.parameters.has("intensity"), true, "has intensity param")
-	GNTestAssert.assert_eq(op.parameters.has("radial_weight"), true, "has radial_weight")
-
-
-func test_pixelate_top_params() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_pixelate_top.gd").new()
-	GNTestAssert.assert_eq(op._is_generator, false, "is effect")
-	op._init_ports()
-	op._init_parameters()
-	GNTestAssert.assert_eq(op.parameters.has("pixel_size"), true, "has pixel_size")
-
-
-func test_film_grain_top_params() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_film_grain_top.gd").new()
-	GNTestAssert.assert_eq(op._is_generator, false, "is effect")
-	op._init_ports()
-	op._init_parameters()
-	GNTestAssert.assert_eq(op.parameters.has("grain_intensity"), true, "has grain_intensity")
-	GNTestAssert.assert_eq(op.parameters.has("grain_speed"), true, "has grain_speed")
-
-
-func test_halftone_top_params() -> void:
-	var op = load("res://addons/gn_ext_shadertoy/operators/top/st_halftone_top.gd").new()
-	GNTestAssert.assert_eq(op._is_generator, false, "is effect")
-	GNTestAssert.assert_contains(op._shadertoy_url, "Mdf3Dn", "URL has shader ID")
-	op._init_ports()
-	op._init_parameters()
-	GNTestAssert.assert_eq(op.parameters.has("dot_size"), true, "has dot_size")
-	GNTestAssert.assert_eq(op.parameters.has("dot_scale"), true, "has dot_scale")
-	GNTestAssert.assert_eq(op.parameters.has("shadertoy_url"), true,
-		"halftone effect has a Shadertoy URL param")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# ShadertoyURLTOP — URL Extraction
+# ShadertoyTOP — URL Extraction
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_url_extract_bare_id() -> void:
@@ -288,19 +214,12 @@ func test_read_only_serialization() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_shadertoy_section_in_registry() -> void:
-	## All Shadertoy extension operators should have section == "Shadertoy".
+	## ShadertoyTOP should have section == "Shadertoy".
 	var reg := GNExtensionRegistry.instance()
-	# Force-load the extension if not already loaded
 	reg.scan_extensions()
-	var st_ops := [
-		"STSeascapeTOP", "STVoronoiFireTOP", "STCreationTOP", "STStarNestTOP",
-		"STPlasmaTOP", "STCRTTOP", "STChromaticAbTOP", "STPixelateTOP",
-		"STFilmGrainTOP", "STHalftoneTOP", "ShadertoyURLTOP",
-	]
-	for op_name in st_ops:
-		if reg.has_operator(op_name):
-			GNTestAssert.assert_eq(reg.get_section(op_name), "Shadertoy",
-				"%s should have section 'Shadertoy'" % op_name)
+	if reg.has_operator("ShadertoyTOP"):
+		GNTestAssert.assert_eq(reg.get_section("ShadertoyTOP"), "Shadertoy",
+			"ShadertoyTOP should have section 'Shadertoy'")
 
 
 func test_core_operators_have_no_section() -> void:

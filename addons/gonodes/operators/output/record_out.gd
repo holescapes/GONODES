@@ -27,6 +27,11 @@ func _init() -> void:
 	node_description = "Record CHOP channels over time to buffer. Save to CSV/JSON."
 
 
+## Disk write on save — not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.CHOP, false, "Channels to record")
 

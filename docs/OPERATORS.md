@@ -4155,7 +4155,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | Extension | Operators | Description |
 |-----------|-----------|-------------|
 | **gn_ext_shadertoy** | ShadertoyTOP | Runtime Shadertoy GLSL translation, URL fetch, 10 presets |
-| **gn_ext_isf** | ISFFileTOP | ISF v2 shader support, multi-pass, JSON-driven params, 10 presets |
+| **gn_ext_isf** | ISFTOP | ISF v2 shader support, multi-pass, JSON-driven params, 10 presets |
 | **gn_ext_native** | 69 operators | C++ GDExtension acceleration (see below) |
 | **gn_ext_spout** | SpoutInTOP, SpoutOutTOP | Windows-only Spout2 texture sharing with other apps |
 | **gn_ext_syphon** | SyphonInTOP, SyphonOutTOP | macOS-only Syphon texture sharing via IOSurface |
@@ -4221,9 +4221,9 @@ The `gn_ext_shadertoy` extension provides a single **ShadertoyTOP** node that ru
 
 ## ISF Extension (gn_ext_isf)
 
-The `gn_ext_isf` extension provides a single **ISFFileTOP** node that runs [ISF v2](https://docs.vidvox.net/freeboard/) (Interactive Shader Format) shaders inside GONODES. Parameters, input ports, and multi-pass targets are auto-generated from the JSON metadata header.
+The `gn_ext_isf` extension provides a single **ISFTOP** node that runs [ISF v2](https://docs.vidvox.net/freeboard/) (Interactive Shader Format) shaders inside GONODES. Parameters, input ports, and multi-pass targets are auto-generated from the JSON metadata header.
 
-### ISFFileTOP
+### ISFTOP
 
 | Family | Inputs | Outputs |
 |--------|--------|---------|

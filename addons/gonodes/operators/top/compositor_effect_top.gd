@@ -20,6 +20,11 @@ extends RenderTOP
 func requires_compute() -> bool:
 	return true
 
+
+## CompositorEffect only works on Forward+ (uses RenderSceneBuffersRD).
+func supported_renderers() -> PackedStringArray:
+	return PackedStringArray(["forward_plus"])
+
 # ─── Outline compute shader (GLSL 450) ────────────────────────────────────────
 ## The shader reads the depth buffer via a sampler, runs a 3×3 Sobel filter,
 ## and blends the outline colour into the colour storage image.

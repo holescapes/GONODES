@@ -44,6 +44,11 @@ func _init() -> void:
 	node_description = "FFmpeg video player. H.264, H.265, VP9, AV1 and more. Requires EIRTeam.FFmpeg."
 
 
+## Requires local file access for video decoding — not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.TOP, "Decoded video frame")
 

@@ -125,6 +125,22 @@ var node_error: String = ""
 func requires_compute() -> bool:
 	return false
 
+## Renderers this operator supports.  Default: all three Godot backends.
+## Override in operators that only work on specific renderers.
+## Values: "forward_plus", "mobile", "gl_compatibility".
+## The cook engine checks this each frame and skips incompatible operators
+## with a warning badge — same graceful degradation as requires_compute().
+func supported_renderers() -> PackedStringArray:
+	return PackedStringArray(["forward_plus", "mobile", "gl_compatibility"])
+
+## Platforms this operator supports.  Default: all Godot export targets.
+## Override in operators restricted to specific operating systems.
+## Values: "windows", "macos", "linux", "android", "ios", "web".
+## The cook engine checks this each frame and skips incompatible operators
+## with a warning badge — same pattern as supported_renderers().
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios", "web"])
+
 # ─── Dynamic Input Ports ───────────────────────────────────────────────────────
 
 ## If true, this node auto-grows/shrinks its input ports to always have one

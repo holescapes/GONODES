@@ -23,6 +23,11 @@ func _init() -> void:
 	_prev_note_states.fill(0.0)
 
 
+## MIDI hardware not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.CHOP, false, "Channel data to send as MIDI")
 	add_output("out", GNFamily.Type.CHOP, "Pass-through of input")

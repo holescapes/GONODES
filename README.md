@@ -145,7 +145,7 @@ Double-click any row in the debug panel to select and scroll to that node. All d
 | Extension | Operators | Description |
 |-----------|-----------|-------------|
 | **gn_ext_shadertoy** | ShadertoyTOP | Runtime Shadertoy GLSL translation — write, paste, or fetch any `mainImage` shader. Auto-mapped built-ins, URL fetch via Shadertoy API (requires free API key), 10 factory presets, inline code editor with syntax highlighting. |
-| **gn_ext_isf** | ISFFileTOP | ISF v2 (Interactive Shader Format) support — auto-generated parameters and input ports from JSON `INPUTS` header, single-pass and multi-pass with persistent buffers, 10 factory presets, inline code editor. |
+| **gn_ext_isf** | ISFTOP | ISF v2 (Interactive Shader Format) support — auto-generated parameters and input ports from JSON `INPUTS` header, single-pass and multi-pass with persistent buffers, 10 factory presets, inline code editor. |
 | **gn_ext_spout** | SpoutInTOP, SpoutOutTOP | Windows-only Spout2 texture sharing — send/receive GPU textures between GONODES and other apps (Resolume, OBS, TouchDesigner). |
 | **gn_ext_syphon** | SyphonInTOP, SyphonOutTOP | macOS-only Syphon texture sharing — send/receive GPU textures via IOSurface (VDMX, MadMapper, CoGe). |
 | **gn_ext_video_capture** | VideoDeviceInIMG | Cross-platform webcam/capture device input — Media Foundation (Windows), AVFoundation (macOS), V4L2 (Linux). |

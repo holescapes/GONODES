@@ -325,6 +325,48 @@ func test_compute_guard_flag_default() -> void:
 	GNTestAssert.assert_false(a.requires_compute(), "NullCHOP doesn't require compute")
 
 
+func test_supported_renderers_default_all() -> void:
+	## Regular nodes support all three renderers by default.
+	var a := _make_null("a")
+	var renderers := a.supported_renderers()
+	GNTestAssert.assert_true(renderers.has("forward_plus"), "default supports forward_plus")
+	GNTestAssert.assert_true(renderers.has("mobile"), "default supports mobile")
+	GNTestAssert.assert_true(renderers.has("gl_compatibility"), "default supports gl_compatibility")
+
+
+func test_supported_platforms_default_all() -> void:
+	## Regular nodes support all six platforms by default.
+	var a := _make_null("a")
+	var platforms := a.supported_platforms()
+	GNTestAssert.assert_true(platforms.has("windows"), "default supports windows")
+	GNTestAssert.assert_true(platforms.has("macos"), "default supports macos")
+	GNTestAssert.assert_true(platforms.has("linux"), "default supports linux")
+	GNTestAssert.assert_true(platforms.has("android"), "default supports android")
+	GNTestAssert.assert_true(platforms.has("ios"), "default supports ios")
+	GNTestAssert.assert_true(platforms.has("web"), "default supports web")
+
+
+func test_ffmpeg_out_platform_restricted() -> void:
+	## FFmpegOUT should be restricted to desktop platforms only.
+	var op := _make(FFmpegOUT, "ffout")
+	var platforms := op.supported_platforms()
+	GNTestAssert.assert_true(platforms.has("windows"), "FFmpegOUT supports windows")
+	GNTestAssert.assert_true(platforms.has("macos"), "FFmpegOUT supports macos")
+	GNTestAssert.assert_true(platforms.has("linux"), "FFmpegOUT supports linux")
+	GNTestAssert.assert_false(platforms.has("android"), "FFmpegOUT excludes android")
+	GNTestAssert.assert_false(platforms.has("ios"), "FFmpegOUT excludes ios")
+	GNTestAssert.assert_false(platforms.has("web"), "FFmpegOUT excludes web")
+
+
+func test_window_out_supports_all_platforms() -> void:
+	## WindowOUT should support all platforms (platform-adaptive, not restricted).
+	var op := _make(WindowOUT, "win")
+	var platforms := op.supported_platforms()
+	GNTestAssert.assert_eq(platforms.size(), 6, "WindowOUT supports all 6 platforms")
+	var renderers := op.supported_renderers()
+	GNTestAssert.assert_eq(renderers.size(), 3, "WindowOUT supports all 3 renderers")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Connection Topology Changes — cook after reconnect
 # ═══════════════════════════════════════════════════════════════════════════════

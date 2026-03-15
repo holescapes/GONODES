@@ -20,6 +20,12 @@ func _init() -> void:
 		_capture = ClassDB.instantiate("GNVideoCapture")
 
 
+## Requires platform-specific capture APIs (Media Foundation / AVFoundation / V4L2).
+## Not available on mobile or web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux"])
+
+
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.IMG, "Captured video frame (CPU Image)")
 

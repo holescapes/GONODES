@@ -81,7 +81,7 @@ func popup_at_filtered(global_pos: Vector2, allowed: PackedStringArray) -> void:
 
 ## Builds or rebuilds the tree, optionally filtering by search text.
 ## Operators with a non-empty section get grouped under a sub-heading within
-## their family (e.g. TOP → Shadertoy → STSeascapeTOP).
+## their family (e.g. TOP → Shadertoy → ShadertoyTOP).
 func _populate_tree(filter: String) -> void:
 	_tree.clear()
 	var root := _tree.create_item()

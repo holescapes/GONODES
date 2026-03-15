@@ -29,6 +29,11 @@ func _init() -> void:
 	node_description = "Save image sequence to disk (numbered PNG/WebP frames)."
 
 
+## Disk write — not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.IMG, false, "Image to save as frame")
 

@@ -8,6 +8,11 @@ func _init() -> void:
 	node_description = "Export geometry to a Wavefront OBJ file."
 
 
+## Local filesystem access — not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.SOP, false, "Geometry to export")
 	add_output("out", GNFamily.Type.SOP, "Pass-through geometry")

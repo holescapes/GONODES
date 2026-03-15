@@ -54,6 +54,9 @@ var _overlay_bg: ColorRect = null
 var _overlay_active: bool = false
 var _overlay_owner: GNUiBase = null
 
+## Track open WindowOUT instances for multi-window validation on mobile/web.
+static var _open_instance_ids: Dictionary = {}
+
 
 func _init() -> void:
 	node_type = "window"
@@ -87,10 +90,27 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var tex_in: GNTextureData = _get_input_top(inputs, 0)
 
+	var should_open: bool = get_param_value("open")
+
+	# Track open WindowOUT instances and warn on mobile/web if >1
+	if should_open:
+		_open_instance_ids[id] = true
+	else:
+		_open_instance_ids.erase(id)
+
+	var platform := GNGpuContext.get_current_platform()
+	var _is_single_window := platform in ["android", "ios", "web"]
+	if _is_single_window and _open_instance_ids.size() > 1 and should_open:
+		node_warning = "Multiple WindowOUT nodes open — %s supports only one window. Only the first will display." % platform.capitalize()
+	elif _is_single_window and should_open:
+		# TODO Phase 6: On mobile/web, parent TextureRect + UI panel into the
+		# main viewport instead of creating a Window node.  For now, the Window
+		# approach works on desktop; mobile/web display requires adaptation.
+		pass
+
 	_ensure_window()
 
 	# Sync window visibility with the "open" parameter
-	var should_open: bool = get_param_value("open")
 	if _window != null and _window.visible != should_open:
 		_window.visible = should_open
 		if should_open:

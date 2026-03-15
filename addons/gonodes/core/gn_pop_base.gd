@@ -51,6 +51,10 @@ func requires_compute() -> bool:
 	return true
 
 
+func supported_renderers() -> PackedStringArray:
+	return PackedStringArray(["forward_plus", "mobile"])
+
+
 func initialize(p_id: String) -> void:
 	family = GNFamily.Type.POP
 	super.initialize(p_id)

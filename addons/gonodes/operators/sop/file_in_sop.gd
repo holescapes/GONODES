@@ -8,6 +8,11 @@ func _init() -> void:
 	node_description = "Import geometry from an OBJ, glTF, or resource file."
 
 
+## Local filesystem access — not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.SOP, "Imported geometry")
 

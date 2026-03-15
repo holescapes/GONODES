@@ -44,6 +44,11 @@ func _init() -> void:
 	node_description = "Encode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, ProRes)."
 
 
+## FFmpeg CLI requires OS.execute() — desktop-only (no CLI on mobile or web).
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux"])
+
+
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.IMG, false, "Image frames to encode")
 

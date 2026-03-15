@@ -27,6 +27,11 @@ func _init() -> void:
 	_cc_values.fill(0.0)
 
 
+## MIDI hardware not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.CHOP, "MIDI channel data")
 

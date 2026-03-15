@@ -13,7 +13,7 @@
             }
         },
         "isf1": {
-            "type": "ISFFileTOP",
+            "type": "ISFTOP",
             "position": [200, 100],
             "parameters": {
                 "time_dependent": {"value": false},

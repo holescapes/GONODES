@@ -1,4 +1,4 @@
-﻿class_name ISFFileTOP
+﻿class_name ISFTOP
 extends GNTopBase
 ## ISF (Interactive Shader Format) shader node.
 ##
@@ -131,15 +131,15 @@ func from_dict(d: Dictionary) -> void:
 
 func _load_file_to_code(path: String) -> void:
 	if not FileAccess.file_exists(path):
-		GNLogger.error("ISFFileTOP", "'%s' — file not found: %s" % [id, path])
+		GNLogger.error("ISFTOP", "'%s' — file not found: %s" % [id, path])
 		return
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		GNLogger.error("ISFFileTOP", "'%s' — cannot open: %s" % [id, path])
+		GNLogger.error("ISFTOP", "'%s' — cannot open: %s" % [id, path])
 		return
 	set_param_value("isf_code", file.get_as_text())
 	file.close()
-	GNLogger.info("ISFFileTOP", "'%s' — loaded %s" % [id, path.get_file()])
+	GNLogger.info("ISFTOP", "'%s' — loaded %s" % [id, path.get_file()])
 
 
 # ===============================================================================
@@ -153,7 +153,7 @@ func _compile(source: String) -> void:
 
 	var result := ISFTranslator.translate(source)
 	if not result.success:
-		GNLogger.error("ISFFileTOP",
+		GNLogger.error("ISFTOP",
 			"'%s' — ISF translation failed: %s" % [id, result.error])
 		_compiled = false
 		return
@@ -201,7 +201,7 @@ func _compile(source: String) -> void:
 			_pass_shaders.append(s)
 
 	_compiled = true
-	GNLogger.info("ISFFileTOP",
+	GNLogger.info("ISFTOP",
 		"'%s' — compiled (%d passes, %d ISF params, %d image ports)" % [
 			id, maxi(result.passes.size(), 1),
 			_isf_param_names.size(), result.image_inputs.size()])

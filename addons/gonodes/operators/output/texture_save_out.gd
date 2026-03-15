@@ -20,6 +20,11 @@ func _init() -> void:
 	node_description = "Save GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write."
 
 
+## Disk write — not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.TOP, false, "Texture to save")
 

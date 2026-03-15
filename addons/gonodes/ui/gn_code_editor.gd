@@ -418,10 +418,10 @@ func _get_preset_folder() -> String:
 	# CustomShaderTOP (node_type == "glsl")
 	if _param_name == "shader_code":
 		return "glsl"
-	# ISFFileTOP
+	# ISFTOP
 	if _param_name == "isf_code":
 		return "isf"
-	# ShadertoyURLTOP
+	# ShadertoyTOP
 	if _param_name == "shadertoy_code":
 		return "shadertoy"
 	return ""

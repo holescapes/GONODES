@@ -144,7 +144,7 @@ func get_operator_registry() -> Dictionary:
 
 
 ## Returns the operator registry grouped by family AND section.
-## { "TOP": { "": ["NoiseTOP", ...], "Shadertoy": ["STSeascapeTOP", ...] }, ... }
+## { "TOP": { "": ["NoiseTOP", ...], "Shadertoy": ["ShadertoyTOP", ...] }, ... }
 ## Operators with no section go under the "" (empty string) key.
 func get_operator_registry_sectioned() -> Dictionary:
 	var result: Dictionary = {}

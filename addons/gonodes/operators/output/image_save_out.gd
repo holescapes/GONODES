@@ -20,6 +20,11 @@ func _init() -> void:
 	node_description = "Save CPU Image to disk (PNG, WebP, EXR). Activate the toggle to write."
 
 
+## Disk write — not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.IMG, false, "Image to save")
 

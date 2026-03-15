@@ -8471,10 +8471,10 @@
     ]
   },
   {
-    "class_name": "ISFFileTOP",
+    "class_name": "ISFTOP",
     "node_type": "isf",
     "family": "top",
-    "file": "addons/gn_ext_isf/operators/top/isf_file_top.gd",
+    "file": "addons/gn_ext_isf/operators/top/isf_top.gd",
     "extension": "gn_ext_isf",
     "params": [
       {
@@ -9422,7 +9422,7 @@
     "class_name": "ShadertoyTOP",
     "node_type": "shadertoy",
     "family": "top",
-    "file": "addons/gn_ext_shadertoy/operators/top/shadertoy_url_top.gd",
+    "file": "addons/gn_ext_shadertoy/operators/top/shadertoy_top.gd",
     "extension": "gn_ext_shadertoy",
     "params": [
       {

@@ -25,7 +25,7 @@
             }
         },
         "isf1": {
-            "type": "ISFFileTOP",
+            "type": "ISFTOP",
             "position": [
                 450,
                 100
@@ -81,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ISFFileTOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_isf extension.",
+            "text": "ISFTOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_isf extension.",
             "position": [
                 -100.0,
                 -100.0

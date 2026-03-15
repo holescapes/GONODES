@@ -9,6 +9,11 @@ func _init() -> void:
 	node_description = "Read a file (CSV, TSV, JSON, or text) from disk into a table."
 
 
+## Local filesystem access — not available on web (no FileAccess to arbitrary paths).
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.DAT, "File contents")
 

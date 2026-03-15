@@ -1099,18 +1099,7 @@ GONODES/
 │           ├── img/                         # GNNativeBlur, GNNativeNoise, GNNativePixelSort, GNNativeEdgeDetect
 │           ├── sop/                         # GNNativeParticle, GNNativeMetaball, GNNativePolyReduce + 8 Phase 2 SOPs
 │           └── chop/                        # GNNativeSmooth
-│           ├── shadertoy_base_top.gd   # Abstract base for pre-baked Shadertoy TOPs
-│           ├── shadertoy_url_top.gd    # ShadertoyURLTOP — runtime paste/fetch translator
-│           ├── st_seascape_top.gd      # Generator: procedural ocean
-│           ├── st_voronoi_fire_top.gd  # Generator: Voronoi fire
-│           ├── st_creation_top.gd      # Generator: demoscene colour field
-│           ├── st_star_nest_top.gd     # Generator: space fractal
-│           ├── st_plasma_top.gd        # Generator: retro plasma
-│           ├── st_crt_top.gd           # Effect: CRT barrel distortion
-│           ├── st_chromatic_ab_top.gd  # Effect: chromatic aberration
-│           ├── st_pixelate_top.gd      # Effect: mosaic pixelation
-│           ├── st_film_grain_top.gd    # Effect: animated film grain
-│           └── st_halftone_top.gd      # Effect: CMYK halftone dots
+│           └── shadertoy_top.gd         # ShadertoyTOP — runtime paste/fetch/inline translator (single operator, 10 factory GLSL presets)
 ├── scenes/
 │   └── main.tscn                   # Application entry scene
 ├── tests/
@@ -1814,7 +1803,7 @@ GONODES/
   - **Active-only pre-cook**: `_pre_cook_pass()` skips inactive nodes entirely.
   - **Expression consumer map**: `_should_eval_expressions()` checks whether upstream sources cooked this frame before re-evaluating expressions. Avoids per-frame polling of every expression on every active node.
   - **Inactive dirty propagation cutoff**: `propagate_dirty()` marks inactive nodes dirty but does not BFS through them — prunes frozen subgraphs from the walk.
-- [ ] **CPU fallback for compute-dependent operators** — enables Compatibility renderer (Web/WebGL2, old hardware):
+- [ ] **CPU fallback for compute-dependent operators** — enables Compatibility renderer (Web/WebGL2, old hardware). See Section 34 Phase 3:
   - **POP family CPU fallback**: CPU particle simulation using `PackedVector3Array` + `MultiMesh.set_instance_transform()`. Slower than GPU compute but functional for small particle counts (~10K). Each POP operator would have a `_cook_cpu()` path alongside the existing GPU `_cook()`.
   - **VOL family CPU fallback**: CPU voxel grid using `PackedFloat32Array`. Iterative passes (blur, advect, pressure solve) run on CPU. Usable for low-resolution volumes (32³–64³). Fluid sim would be significantly slower.
   - **ComputeShaderTOP CPU fallback**: Not feasible — user-written GLSL compute code can't run on CPU. Instead, suggest users use CustomShaderTOP (`shader_type canvas_item` fragment shader) which works on all renderers including Compatibility.
@@ -1861,7 +1850,7 @@ GONODES/
 - [ ] Preset dropdown parameter (Option B — inspector renders preset as dropdown)
 - [ ] Network collaboration (shared editing)
 - [ ] Asset/patch marketplace
-- [ ] Mobile/web export for patches (leveraging Godot's Mobile + Compatibility renderers)
+- [x] Mobile/web export for patches — **Phase 1-2 DONE** (renderer compatibility matrix + shader audit). See Section 34.
 - [ ] ~~**ListCOMP**~~ — **DEPRIORITIZED.** Godot's built-in Tree and ItemList nodes cover most data-grid needs. Existing TreeUI and ItemListUI operators already wrap these. A full TD-style ListCOMP with column definitions, click-to-sort, and scroll virtualization would be a large effort for marginal gain over what `TreeUI` with `columns` param already provides. Revisit if users request it.
 - [x] **SDF Composition Extension** (`gn_ext_sdf`) — **IMPLEMENTED** (26 operators + 78 help patches):
   - **Not a new family** — intermediate data is a `GNSDFData` (extends GNData) carrying an SDF scene-graph AST. Final node compiles to GLSL and renders to GNTextureData (TOP output).
@@ -4434,9 +4423,9 @@ If any guard fails, the extension is skipped with a warning and marked as loaded
 | Extension | Folder | Dependencies | Operators | Platform / Arch Guard | Status |
 |-----------|--------|-------------|-----------|----------------------|--------|
 | FFmpeg | `gn_ext_ffmpeg` | `FFmpegVideoStream` | FFmpegInTOP | — (dep guard) | ✅ Done |
-| Shadertoy | `gn_ext_shadertoy` | — | 5 generator TOPs, 5 effect TOPs, ShadertoyURLTOP | — (pure GDScript) | ✅ Done |
+| Shadertoy | `gn_ext_shadertoy` | — | ShadertoyTOP (10 factory GLSL presets) | — (pure GDScript) | ✅ Done |
 | Native Accel | `gn_ext_native` | 69 C++ processor classes | 69 native operators (37 SOP, 18 CHOP, 5 IMG, 4 TOP, 3 VOL, 2 POP) | — (dep guard + runtime fallback) | ✅ Built & active (Windows x86_64); Linux/macOS pending |
-| ISF | `gn_ext_isf` | — | ISFFileTOP + 10 factory presets | — (pure GDScript) | ✅ Done |
+| ISF | `gn_ext_isf` | — | ISFTOP + 10 factory presets | — (pure GDScript) | ✅ Done |
 | Spout | `gn_ext_spout` | Spout2 SDK (BSD, compiled inline) | SpoutInTOP, SpoutOutTOP | `platforms=["windows"]`, `architectures=["x86_64"]` | ✅ Built (Windows x86_64) |
 | Syphon | `gn_ext_syphon` | Syphon Framework (BSD) | SyphonInTOP, SyphonOutTOP | `platforms=["macos"]` | ✅ Code complete (macOS — needs macOS build) |
 | Video Capture | `gn_ext_video_capture` | OS APIs (MF/AVFoundation/V4L2) | VideoDeviceInIMG | — (runtime check) | ✅ Built (Windows x86_64); macOS/Linux pending |
@@ -5104,7 +5093,7 @@ At 69 native operators (20% of 348), every CPU-intensive operator would be in C+
 **Architecture — runtime translation only (no pre-baked shaders):**
 
 - **ISFTranslator** (`isf_translator.gd`) — parses `.fs`/`.isf` files, extracts JSON header, translates ISF GLSL → Godot `canvas_item` shaders at runtime. Maps ISF built-ins: `RENDERSIZE`→uniform vec2, `TIME`→Godot TIME, `isf_FragNormCoord`→UV, `IMG_PIXEL()`/`IMG_NORM_PIXEL()`/`IMG_THIS_PIXEL()`→texture() calls, `IMG_SIZE()`→uniform vec2 per image, `gl_FragColor`→COLOR.
-- **ISFFileTOP** — single runtime node with inline code editor, ISF syntax highlighting, and preset system. Auto-parses JSON `INPUTS` → auto-creates GNParameters (float/bool/long/point2D/color) and TOP input ports (image type) → translates and compiles shader. Drop any ISF file, get a working node with full parameter UI.
+- **ISFTOP** — single runtime node with inline code editor, ISF syntax highlighting, and preset system. Auto-parses JSON `INPUTS` → auto-creates GNParameters (float/bool/long/point2D/color) and TOP input ports (image type) → translates and compiles shader. Drop any ISF file, get a working node with full parameter UI.
 - **Multi-pass support** — `PASSES`/`TARGET`/`PERSISTENT`/`FLOAT` → multiple SubViewport render passes with persistent buffers.
 - **10 factory presets** (.fs files in `presets/isf/`): 5 generators (color_bars, sine_warp, kaleidoscope, gradient_map, lissajous), 5 effects (kaleidoscope_fx, glitch, mirror, edge_glow, cross_hatch).
 - **2 help patches**: `isf_generator.gnpatch`, `isf_fx.gnpatch`.
@@ -5112,4 +5101,208 @@ At 69 native operators (20% of 348), every CPU-intensive operator would be in C+
 - **Audio input support** (stretch goal) — ISF `audio`/`audioFFT` input types → accept CHOP data, render as 1D texture for audio-reactive VJ shaders.
 
 **Design decision:** No ISFBaseTOP or pre-baked `.gdshader` conversions. The ISFTranslator handles all translation at runtime, so every ISF shader works through a single node. This avoids class proliferation and keeps the extension maintainable.
+
+---
+
+## 34. Mobile / Web Export — Renderer & Platform Compatibility
+
+### 34.1 Overview
+
+GONODES targets all Godot-supported platforms: desktop (Windows, macOS, Linux), mobile (Android, iOS), and web (HTML5). Compatibility is tracked on two orthogonal axes:
+
+**Axis 1 — Renderer** (GPU capability):
+
+| Renderer           | GPU Target              | Compute Shaders | Platforms                    |
+|--------------------|-------------------------|-----------------|------------------------------|
+| **Forward+**       | Vulkan / D3D12          | Yes             | Desktop                      |
+| **Mobile**         | Vulkan-lite / Metal     | Yes (subset)    | Mobile, some desktop         |
+| **Compatibility**  | OpenGL 3.3 / WebGL2     | No              | Web, old hardware            |
+
+**Axis 2 — Platform** (OS capability):
+
+| Platform   | Filesystem | Multi-Window | CLI (OS.execute) | Threads | MIDI |
+|------------|------------|--------------|-------------------|---------|------|
+| Windows    | ✓          | ✓            | ✓                 | ✓       | ✓    |
+| macOS      | ✓          | ✓            | ✓                 | ✓       | ✓    |
+| Linux      | ✓          | ✓            | ✓                 | ✓       | ✓    |
+| Android    | ✓ (scoped) | ✗            | ✗                 | ✓       | ✓    |
+| iOS        | ✓ (scoped) | ✗            | ✗                 | ✓       | ✗    |
+| Web        | ✗          | ✗            | ✗                 | ✗¹      | ✗    |
+
+¹ Web supports threads only with SharedArrayBuffer + COOP/COEP headers.
+
+### 34.2 Renderer Detection (Phase 1 — IMPLEMENTED)
+
+**`GNGpuContext.get_current_renderer()`** — static method returning the active rendering method string (`"forward_plus"`, `"mobile"`, or `"gl_compatibility"`). Reads from `ProjectSettings` once, cached for session lifetime.
+
+**`GNNode.supported_renderers()`** — virtual method returning a `PackedStringArray` of compatible renderer strings. Default returns all three (`["forward_plus", "mobile", "gl_compatibility"]`). Operators override this to declare restrictions.
+
+**Cook engine check** — In `cook_frame()`, after the existing `requires_compute()` early-out, a second check compares `node.supported_renderers()` against `_current_renderer`. Incompatible nodes are skipped with a warning badge (same pattern as compute guard: `node_warning` set, `cook_valid = false`, `cook_time_ms = 0`, downstream receives null).
+
+### 34.3 Platform Detection (Phase 2.5 — IMPLEMENTED)
+
+**`GNGpuContext.get_current_platform()`** — static method returning the OS name as a lowercase string (`"windows"`, `"macos"`, `"linux"`, `"android"`, `"ios"`, `"web"`). Wraps `OS.get_name().to_lower()`, cached.
+
+**`GNNode.supported_platforms()`** — virtual method returning a `PackedStringArray` of compatible platform strings. Default returns all six platforms. Operators override this to declare OS-level restrictions.
+
+**Cook engine check** — In `cook_frame()`, after the renderer guard, a third check compares `node.supported_platforms()` against `_current_platform`. Same skip pattern (warning badge, `cook_valid = false`, null downstream).
+
+### 34.4 Why Two Axes
+
+Renderer and platform are orthogonal:
+- **ComputeShaderTOP** needs Vulkan/Metal (renderer constraint) but works on any OS that has those GPUs.
+- **FFmpegOUT** needs `OS.execute()` (platform constraint) but works on any renderer.
+- **WindowOUT** works on ALL renderers AND all platforms — it adapts behavior internally (multi-window on desktop, main-viewport fallback on mobile/web in Phase 6).
+- Conflating these into a single axis would wrongly skip WindowOUT on desktop + Compatibility renderer.
+
+### 34.5 Operator Compatibility Matrix
+
+**Tier A — All Renderers, All Platforms** (default, majority of operators):
+
+| Family | Count | Notes |
+|--------|-------|-------|
+| CHOP   | 68    | CPU-only data processing |
+| DAT    | ~30   | String/table operations (except file I/O, see Tier D) |
+| SOP    | ~60   | SurfaceTool / ArrayMesh (except file I/O, see Tier D) |
+| IMG    | 14    | CPU Image pixel ops |
+| COMP   | 20    | Scene tree nodes (Camera, Light, etc.) |
+| MAT    | 9     | ShaderMaterial / StandardMaterial3D |
+| TOP    | ~70   | SubViewport + `canvas_item` fragment shaders |
+| UI     | 31    | Godot Control nodes |
+| SDF    | 26    | RaymarchSDF compiles to `canvas_item` fragment shader |
+| WindowOUT | 1  | Platform-adaptive: multi-window on desktop, main viewport on mobile/web |
+| AudioDeviceOUT | 1 | AudioStreamGenerator works everywhere |
+| OscOUT | 1 | UDP works on all platforms with network access |
+
+**Tier B — Renderer-restricted** (no Compatibility / WebGL2):
+Operators that require GPU compute (`RenderingDevice` API):
+
+| Operator | Family | Override |
+|----------|--------|----------|
+| All POP operators (10) | POP | `supported_renderers → ["forward_plus", "mobile"]` |
+| All VOL operators (11) | VOL | `supported_renderers → ["forward_plus", "mobile"]` |
+| ComputeShaderTOP | TOP | `supported_renderers → ["forward_plus", "mobile"]` |
+
+**Tier C — Renderer-restricted** (Forward+ only):
+
+| Operator | Family | Override |
+|----------|--------|----------|
+| CompositorEffectTOP | TOP | `supported_renderers → ["forward_plus"]` |
+
+**Tier D — Platform-restricted** (no web):
+Operators that require local filesystem, CLI, or platform-specific hardware:
+
+| Operator | Family | Override | Reason |
+|----------|--------|----------|--------|
+| FFmpegOUT | OUT | `supported_platforms → ["windows", "macos", "linux"]` | Needs `OS.execute()` for ffmpeg CLI |
+| FFmpegInTOP | TOP (ext) | `supported_platforms → desktop + mobile` | File access for video decoding |
+| VideoDeviceInIMG | IMG (ext) | `supported_platforms → ["windows", "macos", "linux"]` | Native capture APIs (MF/AVF/V4L2) |
+| RtMidiInCHOP | CHOP (ext) | `supported_platforms → desktop + mobile` | No MIDI hardware on web |
+| RtMidiOutCHOP | CHOP (ext) | `supported_platforms → desktop + mobile` | No MIDI hardware on web |
+| FileInDAT | DAT | `supported_platforms → desktop + mobile` | FileAccess to local paths |
+| FolderDAT | DAT | `supported_platforms → desktop + mobile` | DirAccess directory listing |
+| XMLDAT | DAT | `supported_platforms → desktop + mobile` | FileAccess (file source mode) |
+| FileInSOP | SOP | `supported_platforms → desktop + mobile` | FileAccess to OBJ/glTF files |
+| FileOutSOP | SOP | `supported_platforms → desktop + mobile` | FileAccess write |
+| ImageSaveOUT | OUT | `supported_platforms → desktop + mobile` | Disk write |
+| MovieOUT | OUT | `supported_platforms → desktop + mobile` | Disk write sequence |
+| TextureSaveOUT | OUT | `supported_platforms → desktop + mobile` | GPU→CPU readback + disk write |
+| TableSaveOUT | OUT | `supported_platforms → desktop + mobile` | Disk write |
+| RecordOUT | OUT | `supported_platforms → desktop + mobile` | Disk write on save |
+
+**Tier E — Extension-level platform guards** (handled at extension registry level via `gn_extension.cfg`):
+
+| Extension | cfg Guard | Operators |
+|-----------|-----------|-----------|
+| `gn_ext_spout` | `platforms=["windows"]` | SpoutInTOP, SpoutOutTOP |
+| `gn_ext_syphon` | `platforms=["macos"]` | SyphonInTOP, SyphonOutTOP |
+| `gn_ext_gpu_encode` | `dependencies=["GNGpuEncoder"]` | MovieFileOutTOP |
+
+**Tier F — All platforms, no guards needed** (pure shader / CPU / Godot APIs):
+
+| Extension | Operators | Why no guards |
+|-----------|-----------|---------------|
+| `gn_ext_isf` | ISFTOP (1) | Pure `canvas_item` shader compilation |
+| `gn_ext_shadertoy` | ShadertoyTOP (1) | Pure `canvas_item` shader + HTTP |
+| `gn_ext_sdf` | 26 SDF operators | Shader AST → `canvas_item` raymarcher |
+| `gn_ext_mapper` | 7 projection/warp TOPs | Pure `canvas_item` shaders |
+| `gn_ext_native` | 64 accelerated ops | Runtime ClassDB fallback to GDScript |
+
+### 34.6 WindowOUT — Platform-Adaptive Design
+
+WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapts internally:
+
+| Platform | Behavior |
+|----------|----------|
+| Desktop  | Creates a standalone OS `Window` node — multi-monitor, fullscreen, positioning |
+| Mobile   | (Phase 6) Renders TextureRect + UI panel into main viewport. `monitor`/`position`/`window_mode` params become no-ops. |
+| Web      | (Phase 6) Same as mobile — TextureRect in main viewport, sized to HTML canvas. |
+
+**Multi-WindowOUT validation:** On mobile/web (single-window platforms), if more than one WindowOUT has `open = true`, all but the first display a warning: "Multiple WindowOUT nodes open — [Platform] supports only one window." This is checked every cook frame via a static `_open_instance_ids` tracker.
+
+### 34.7 Shader Compatibility Audit (Phase 2 — IMPLEMENTED)
+
+**All 57 `.gdshader` files** across the project use `shader_type canvas_item` — compatible with all three Godot renderers (Forward+, Mobile, Compatibility/WebGL2).
+
+**GLSL feature audit — CLEAN:**
+- No `textureGather` (GLES3 optional, not in WebGL2)
+- No `imageStore` / `imageLoad` (compute-only)
+- No `texelFetch` with MSAA
+- No `layout(binding=...)` beyond WebGL2 limits
+- `textureSize()` used in optical_flow.gdshader — supported in GLES3 / WebGL2
+- `dFdx` / `dFdy` / `fwidth` — not used in any shader
+
+**Shader translators — all safe:**
+- **ShadertoyTranslator** → outputs `shader_type canvas_item` (line 109)
+- **ISFTranslator** → outputs `shader_type canvas_item` (line 435)
+- **RaymarchSDF** → compiles to `shader_type canvas_item` (line 131)
+
+### 34.8 Web-Specific Limitations (addressed in future phases)
+
+| Limitation | Affected Operators | Status |
+|------------|-------------------|--------|
+| No local filesystem | FileInDAT, FolderDAT, FileInSOP, FileOutSOP, etc. | ✓ Platform-guarded via `supported_platforms()` |
+| No compute shaders | All POP (10), all VOL (11), ComputeShaderTOP, CompositorEffectTOP | ✓ Renderer-guarded via `supported_renderers()` |
+| No CLI | FFmpegOUT | ✓ Platform-guarded (desktop only) |
+| Single window | WindowOUT | Phase 6 — main viewport fallback + multi-WindowOUT warning (implemented) |
+| No `Thread.new()` | Future multi-threaded cook engine | Phase 5 — detect & single-thread |
+| No MIDI | MidiInCHOP, MidiInDAT | Extension platform guard |
+| SharedArrayBuffer requirement | All (Godot web export) | Phase 7 — document server headers |
+
+### 34.9 Remaining Phases
+
+- **Phase 3 — CPU Fallback for Compute Operators**: `_cook_cpu()` paths for POP and VOL.
+- **Phase 4 — Export Presets & Build Pipeline**: Android, iOS, Web export presets. GDExtension WASM compilation.
+- **Phase 5 — Thread Detection**: `OS.get_name() == "Web"` → single-threaded cook engine.
+- **Phase 6 — WindowOUT Mobile/Web Adaptation**: Main viewport rendering, single-window mode, touch input routing.
+- **Phase 7 — Web Runtime**: Patch loading from URL, JS↔GDScript bridge, COOP/COEP headers.
+- **Phase 8 — Export Compatibility Report**: Editor toolbar with platform/renderer dropdown, live incompatibility badges, "Export Report" button.
+
+### 34.10 Implementation Files Changed (Phase 1-2.5)
+
+| File | Change |
+|------|--------|
+| `addons/gonodes/core/gn_node.gd` | Added `supported_renderers()` + `supported_platforms()` virtual methods |
+| `addons/gonodes/core/gn_gpu_context.gd` | Added `get_current_renderer()` + `get_current_platform()` static methods |
+| `addons/gonodes/core/gn_cook_engine.gd` | `_current_renderer` + `_current_platform` cache, renderer guard + platform guard in `cook_frame()` |
+| `addons/gonodes/core/gn_pop_base.gd` | Override: `supported_renderers → ["forward_plus", "mobile"]` |
+| `addons/gonodes/core/gn_vol_base.gd` | Override: `supported_renderers → ["forward_plus", "mobile"]` |
+| `addons/gonodes/operators/top/compute_shader_top.gd` | Override: `supported_renderers → ["forward_plus", "mobile"]` |
+| `addons/gonodes/operators/top/compositor_effect_top.gd` | Override: `supported_renderers → ["forward_plus"]` |
+| `addons/gonodes/operators/output/window_out.gd` | Removed wrong `supported_renderers` override. Added multi-WindowOUT warning (static `_open_instance_ids`). Platform-adaptive design (Phase 6 TODO). |
+| `addons/gonodes/operators/output/ffmpeg_out.gd` | Override: `supported_platforms → ["windows", "macos", "linux"]` (was wrongly `supported_renderers`) |
+| `addons/gonodes/operators/dat/file_in_dat.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gonodes/operators/dat/folder_dat.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gonodes/operators/sop/file_in_sop.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gonodes/operators/sop/file_out_sop.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gonodes/operators/output/image_save_out.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gonodes/operators/output/movie_out.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gonodes/operators/output/texture_save_out.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gonodes/operators/output/table_save_out.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gonodes/operators/output/record_out.gd` | Override: `supported_platforms → desktop + mobile` |
+| `addons/gn_ext_ffmpeg/operators/top/ffmpeg_in_top.gd` | Override: `supported_platforms → desktop + mobile` (file access for video) |
+| `addons/gn_ext_video_capture/operators/img/video_device_in_img.gd` | Override: `supported_platforms → ["windows", "macos", "linux"]` (native capture APIs) |
+| `addons/gn_ext_midi/operators/chop/midi_in_chop.gd` | Override: `supported_platforms → desktop + mobile` (no MIDI on web) |
+| `addons/gn_ext_midi/operators/chop/midi_out_chop.gd` | Override: `supported_platforms → desktop + mobile` (no MIDI on web) |
+| `dev_docs/CONTRIBUTING.md` | Added "Platform & Renderer Compatibility for Extensions" section |
 

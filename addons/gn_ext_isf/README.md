@@ -8,11 +8,11 @@ ISF (Interactive Shader Format) support for GONODES.
 
 ## Overview
 
-This extension adds a single `ISFFileTOP` node that lets you write, load and edit [ISF v2](https://docs.vidvox.net/freeboard/) shaders directly inside the GONODES editor. The node auto-generates inspector parameters and input ports from the JSON `INPUTS` header, so there is no separate class per shader — just one node and as many presets as you like.
+This extension adds a single `ISFTOP` node that lets you write, load and edit [ISF v2](https://docs.vidvox.net/freeboard/) shaders directly inside the GONODES editor. The node auto-generates inspector parameters and input ports from the JSON `INPUTS` header, so there is no separate class per shader — just one node and as many presets as you like.
 
 ---
 
-## Node: ISFFileTOP
+## Node: ISFTOP
 
 | Family | Inputs | Outputs |
 |--------|--------|---------|
@@ -154,7 +154,7 @@ addons/gn_ext_isf/
 ├── gn_extension.cfg              # Extension manifest
 ├── isf_translator.gd             # ISF → Godot GLSL translator
 ├── operators/top/
-│   └── isf_file_top.gd           # ISFFileTOP node
+│   └── isf_top.gd                # ISFTOP node
 ├── presets/isf/                  # Factory presets (.fs files)
 ├── shaders/                      # (legacy — unused; all translation is runtime)
 └── help/top/

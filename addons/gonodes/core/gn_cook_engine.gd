@@ -112,6 +112,14 @@ var last_dirty_ids: Dictionary = {}
 var _compute_available: bool = true
 var _compute_checked: bool = false
 
+## Cached renderer string ("forward_plus", "mobile", "gl_compatibility").
+## Read once on first cook frame from GNGpuContext.get_current_renderer().
+var _current_renderer: String = ""
+
+## Cached platform string ("windows", "macos", "linux", "android", "ios", "web").
+## Read once on first cook frame from GNGpuContext.get_current_platform().
+var _current_platform: String = ""
+
 # ─── Active Chain Cooking ──────────────────────────────────────────────────────
 
 ## IDs of nodes that are live sinks (viewers, WindowTOPs, etc.).
@@ -386,11 +394,14 @@ func cook_frame(delta: float) -> void:
 	# One-time check: is GPU compute available on this renderer?
 	if not _compute_checked:
 		_compute_available = GNGpuContext.is_compute_available()
+		_current_renderer = GNGpuContext.get_current_renderer()
+		_current_platform = GNGpuContext.get_current_platform()
 		_compute_checked = true
 		if not _compute_available:
 			GNLogger.warn("CookEngine",
 				"Compute shaders unavailable (Compatibility renderer). " +
 				"POP, VOL, ComputeShaderTOP, and CompositorEffectTOP nodes will be skipped.")
+		GNLogger.info("CookEngine", "Active renderer: %s" % _current_renderer)
 
 	# Ensure all network nodes are adopted into the scene tree.
 	# This is critical for sub-network inner cook engines where _process()
@@ -527,6 +538,44 @@ func cook_frame(delta: float) -> void:
 			# Log once (frame 0) to avoid spamming every frame for time-dependent nodes
 			if frame_count == 0:
 				var msg := "Node '%s' (%s) requires compute shaders — skipped" % [node.id, node.node_type]
+				GNLogger.warn("CookEngine", msg)
+				cook_error.emit(node.id, msg)
+			node.cook_valid = false
+			node.cook_time_ms = 0.0
+			node.clear_dirty()
+			node.node_cooked.emit(node.id)
+			skipped_count += 1
+			continue
+
+		# Skip operators that don't support the current renderer.
+		# This is the general renderer compatibility check — covers all
+		# restrictions beyond just compute (e.g., mobile-only, desktop-only).
+		var _supported := node.supported_renderers()
+		if _supported.size() > 0 and not _supported.has(_current_renderer):
+			if editor_mode:
+				node.node_warning = "Not supported on '%s' renderer" % _current_renderer
+			if frame_count == 0:
+				var msg := "Node '%s' (%s) unsupported on '%s' renderer — skipped" % [
+					node.id, node.node_type, _current_renderer]
+				GNLogger.warn("CookEngine", msg)
+				cook_error.emit(node.id, msg)
+			node.cook_valid = false
+			node.cook_time_ms = 0.0
+			node.clear_dirty()
+			node.node_cooked.emit(node.id)
+			skipped_count += 1
+			continue
+
+		# Skip operators that don't support the current platform.
+		# Orthogonal to the renderer check — this guards OS-level
+		# capabilities (filesystem, multi-window, CLI, etc.).
+		var _plat_supported := node.supported_platforms()
+		if _plat_supported.size() > 0 and not _plat_supported.has(_current_platform):
+			if editor_mode:
+				node.node_warning = "Not supported on '%s' platform" % _current_platform
+			if frame_count == 0:
+				var msg := "Node '%s' (%s) unsupported on '%s' platform — skipped" % [
+					node.id, node.node_type, _current_platform]
 				GNLogger.warn("CookEngine", msg)
 				cook_error.emit(node.id, msg)
 			node.cook_valid = false

@@ -290,6 +290,124 @@ The core discovery systems find these automatically — no registration is neede
 
 > **Why this matters:** Placing extension assets in `addons/gonodes/` couples the extension to the core, makes it impossible to distribute the extension independently, and pollutes the core tree for users who do not want the extension.
 
+### Platform & Renderer Compatibility for Extensions
+
+GONODES has two orthogonal compatibility axes that extension authors must consider. These are **independent** of the cfg-level `platforms` guard — cfg guards control whether the *entire extension loads*; the operator-level overrides control whether *individual operators cook* on a given platform or renderer.
+
+#### When to use which guard
+
+| Scenario | Mechanism | Example |
+|----------|-----------|---------|
+| Entire extension is OS-specific (native .dll/.dylib) | `platforms` in `gn_extension.cfg` | Spout (Windows), Syphon (macOS) |
+| Entire extension needs a C++ class at runtime | `dependencies` in `gn_extension.cfg` | FFmpeg (`FFmpegVideoStream`), GPU Encode (`GNGpuEncoder`) |
+| Individual operator needs GPU compute shaders | Override `supported_renderers()` in operator | Compute shader ops, particle systems |
+| Individual operator needs local filesystem or CLI | Override `supported_platforms()` in operator | File I/O, FFmpeg CLI, video capture |
+| Operator works everywhere but adapts behavior | No override — detect platform internally | WindowOUT (multi-window on desktop, single on mobile/web) |
+
+#### Axis 1 — Renderer compatibility (`supported_renderers`)
+
+Override this when your operator depends on **GPU capabilities** that aren't available on all renderers.
+
+```gdscript
+## Requires compute shaders (Vulkan / Metal only).
+func supported_renderers() -> PackedStringArray:
+    return PackedStringArray(["forward_plus", "mobile"])
+```
+
+When to override:
+- Operator uses `RenderingDevice` API (compute shaders, SSBO, image load/store)
+- Operator uses `RenderSceneBuffersRD` (depth/normal buffer access via compositor)
+- Operator uses Vulkan-specific features not in OpenGL 3.3 / WebGL2
+
+When **not** to override:
+- `shader_type canvas_item` fragment shaders — these work on ALL renderers
+- CPU-only processing (CHOP math, DAT parsing, SOP mesh ops)
+- Godot scene tree features (Camera3D, Light3D, Control nodes)
+
+The three possible values: `"forward_plus"`, `"mobile"`, `"gl_compatibility"`.
+
+Default (no override) = all three renderers.
+
+#### Axis 2 — Platform compatibility (`supported_platforms`)
+
+Override this when your operator depends on **OS-level features** not available everywhere.
+
+```gdscript
+## Needs local filesystem — not available on web.
+func supported_platforms() -> PackedStringArray:
+    return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+```
+
+```gdscript
+## Desktop-only — requires OS.execute() for CLI tools.
+func supported_platforms() -> PackedStringArray:
+    return PackedStringArray(["windows", "macos", "linux"])
+```
+
+Platform capabilities reference:
+
+| Capability | Desktop | Android/iOS | Web |
+|------------|---------|-------------|-----|
+| Local filesystem (`FileAccess`) | ✓ | ✓ (scoped) | ✗ |
+| CLI execution (`OS.execute()`) | ✓ | ✗ | ✗ |
+| Multiple OS windows (`Window.new()`) | ✓ | ✗ | ✗ |
+| Threads (`Thread.new()`) | ✓ | ✓ | ✗¹ |
+| MIDI hardware | ✓ | ✓² | ✗ |
+| Webcam/capture devices | ✓ | ✗³ | ✗ |
+| UDP/TCP networking | ✓ | ✓ | ✗⁴ |
+
+¹ Web supports threads only with SharedArrayBuffer + COOP/COEP headers.
+² Android MIDI requires API 23+.
+³ Possible via Android Camera2 API but not via current native libraries.
+⁴ Web can use WebSocket but not raw UDP/TCP.
+
+The six possible values: `"windows"`, `"macos"`, `"linux"`, `"android"`, `"ios"`, `"web"`.
+
+Default (no override) = all six platforms.
+
+#### How the cook engine handles incompatible nodes
+
+When a node fails a renderer or platform check during `cook_frame()`:
+1. `node_warning` is set (yellow badge in editor)
+2. `cook_valid = false`
+3. `cook_time_ms = 0`
+4. `cached_output` retains its last value (or null if never cooked)
+5. Downstream nodes receive null — they handle this like a disconnected input
+6. A warning is logged once (frame 0) and emitted via `cook_error`
+
+The node is **not deleted** — it stays in the graph. If the user later exports to a compatible platform, it will cook normally.
+
+#### Platform-adaptive operators (preferred over restriction)
+
+When possible, make your operator **adapt** to the platform rather than refusing to run. Example: WindowOUT works everywhere but changes its display strategy:
+
+```gdscript
+func _cook(inputs: Array[GNData]) -> GNData:
+    var platform := GNGpuContext.get_current_platform()
+    if platform in ["android", "ios", "web"]:
+        _setup_main_viewport_display()   # Single-window fallback
+    else:
+        _setup_window_display()          # Full OS window
+```
+
+This keeps patches portable — the same `.gnpatch` works on every platform without rewiring.
+
+#### Quick reference — existing operator overrides
+
+| Operator | `supported_renderers()` | `supported_platforms()` | Reason |
+|----------|------------------------|------------------------|--------|
+| POP family (10) | `forward_plus`, `mobile` | all | GPU compute |
+| VOL family (11) | `forward_plus`, `mobile` | all | GPU compute |
+| ComputeShaderTOP | `forward_plus`, `mobile` | all | GPU compute |
+| CompositorEffectTOP | `forward_plus` | all | RenderSceneBuffersRD |
+| FFmpegOUT | all | `windows`, `macos`, `linux` | Needs `OS.execute()` |
+| FFmpegInTOP | all | desktop + mobile | Needs file access |
+| VideoDeviceInIMG | all | `windows`, `macos`, `linux` | Native capture APIs |
+| RtMidiInCHOP | all | desktop + mobile | No MIDI on web |
+| RtMidiOutCHOP | all | desktop + mobile | No MIDI on web |
+| File I/O (11 ops) | all | desktop + mobile | No FileAccess on web |
+| WindowOUT | all | all | Platform-adaptive (not restricted) |
+
 ---
 
 ## 6. Code Style & Conventions

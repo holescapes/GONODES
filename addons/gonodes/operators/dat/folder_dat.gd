@@ -8,6 +8,11 @@ func _init() -> void:
 	node_description = "List directory contents as a table."
 
 
+## DirAccess directory listing — not available on web.
+func supported_platforms() -> PackedStringArray:
+	return PackedStringArray(["windows", "macos", "linux", "android", "ios"])
+
+
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.DAT, "Directory listing table")
 

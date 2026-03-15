@@ -59,6 +59,33 @@ static func is_compute_available() -> bool:
 	return _compute_available == 1
 
 
+## Returns the active rendering method as a string.
+## Possible values: "forward_plus", "mobile", "gl_compatibility".
+## Cached after first call — the renderer cannot change at runtime.
+static var _current_renderer: String = ""
+
+static func get_current_renderer() -> String:
+	if _current_renderer.is_empty():
+		_current_renderer = str(
+			ProjectSettings.get_setting("rendering/renderer/rendering_method", "forward_plus")
+		).strip_edges()
+		# Normalize — Godot stores "forward_plus", "mobile", or "gl_compatibility".
+		if _current_renderer.is_empty():
+			_current_renderer = "forward_plus"
+	return _current_renderer
+
+
+## Returns the current platform as a lowercase string.
+## Possible values: "windows", "macos", "linux", "android", "ios", "web".
+## Cached after first call — the platform cannot change at runtime.
+static var _current_platform: String = ""
+
+static func get_current_platform() -> String:
+	if _current_platform.is_empty():
+		_current_platform = OS.get_name().to_lower()
+	return _current_platform
+
+
 func _init_rd() -> void:
 	rd = RenderingServer.create_local_rendering_device()
 	if rd == null:
