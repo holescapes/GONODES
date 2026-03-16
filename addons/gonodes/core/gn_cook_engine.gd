@@ -120,6 +120,10 @@ var _current_renderer: String = ""
 ## Read once on first cook frame from GNGpuContext.get_current_platform().
 var _current_platform: String = ""
 
+## Whether multi-threaded cooking is safe on this platform.
+## False on web (no SharedArrayBuffer guarantee).  Checked once on first cook.
+var _threads_available: bool = true
+
 # ─── Active Chain Cooking ──────────────────────────────────────────────────────
 
 ## IDs of nodes that are live sinks (viewers, WindowTOPs, etc.).
@@ -396,11 +400,15 @@ func cook_frame(delta: float) -> void:
 		_compute_available = GNGpuContext.is_compute_available()
 		_current_renderer = GNGpuContext.get_current_renderer()
 		_current_platform = GNGpuContext.get_current_platform()
+		_threads_available = GNGpuContext.are_threads_available()
 		_compute_checked = true
 		if not _compute_available:
 			GNLogger.warn("CookEngine",
 				"Compute shaders unavailable (Compatibility renderer). " +
-				"POP, VOL, ComputeShaderTOP, and CompositorEffectTOP nodes will be skipped.")
+				"POP/VOL nodes will use CPU fallback. ComputeShaderTOP and CompositorEffectTOP will be skipped.")
+		if not _threads_available:
+			GNLogger.info("CookEngine",
+				"Threads unavailable on '%s' — single-threaded cook mode." % _current_platform)
 		GNLogger.info("CookEngine", "Active renderer: %s" % _current_renderer)
 
 	# Ensure all network nodes are adopted into the scene tree.
@@ -533,19 +541,40 @@ func cook_frame(delta: float) -> void:
 		# cached_output (or null) and downstream nodes receive null input,
 		# which they handle gracefully (same as any disconnected port).
 		if not _compute_available and node.requires_compute():
-			if editor_mode:
-				node.node_warning = "Requires compute shaders (unavailable on this renderer)"
-			# Log once (frame 0) to avoid spamming every frame for time-dependent nodes
-			if frame_count == 0:
-				var msg := "Node '%s' (%s) requires compute shaders — skipped" % [node.id, node.node_type]
-				GNLogger.warn("CookEngine", msg)
-				cook_error.emit(node.id, msg)
-			node.cook_valid = false
-			node.cook_time_ms = 0.0
-			node.clear_dirty()
-			node.node_cooked.emit(node.id)
-			skipped_count += 1
-			continue
+			if node.has_cpu_fallback():
+				# CPU fallback path — cook using pure-CPU implementation
+				if editor_mode and frame_count == 0:
+					node.node_warning = "Running CPU fallback (no compute shaders)"
+					GNLogger.info("CookEngine", "Node '%s' (%s) using CPU fallback" % [node.id, node.node_type])
+				var cpu_inputs: Array[GNData] = _gather_inputs(node)
+				var cpu_start := Time.get_ticks_usec()
+				var cpu_result: GNData = node._cook_cpu(cpu_inputs)
+				node.cook_time_ms = (Time.get_ticks_usec() - cpu_start) / 1000.0
+				if cpu_result != null:
+					cpu_result.valid = true
+					cpu_result.timestamp = frame_count
+				node.cached_output = cpu_result
+				node.cook_valid = cpu_result != null
+				node.clear_dirty()
+				node.node_cooked.emit(node.id)
+				_cooked_this_frame[node.id] = true
+				_dirty_immediate_downstream(node.id)
+				cooked_count += 1
+				continue
+			else:
+				# No CPU fallback available — skip with warning
+				if editor_mode:
+					node.node_warning = "Requires compute shaders (unavailable on this renderer)"
+				if frame_count == 0:
+					var msg := "Node '%s' (%s) requires compute shaders — skipped" % [node.id, node.node_type]
+					GNLogger.warn("CookEngine", msg)
+					cook_error.emit(node.id, msg)
+				node.cook_valid = false
+				node.cook_time_ms = 0.0
+				node.clear_dirty()
+				node.node_cooked.emit(node.id)
+				skipped_count += 1
+				continue
 
 		# Skip operators that don't support the current renderer.
 		# This is the general renderer compatibility check — covers all

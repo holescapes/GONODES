@@ -95,3 +95,51 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.texture_update(out_vol.rd_texture, 0, bytes)
 
 	return out_vol
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	if inputs.size() == 0 or not (inputs[0] is GNChannelData):
+		return null
+	var chop: GNChannelData = inputs[0] as GNChannelData
+	var names: PackedStringArray = chop.get_channel_names()
+	if names.is_empty():
+		return null
+
+	var res := Vector3i(get_param_value("res_x"), get_param_value("res_y"), get_param_value("res_z"))
+	var mode: int = get_param_value("mode")
+	var ch_name: String = get_param_value("channel")
+
+	var out := _create_volume_cpu(res, 1, "density")
+
+	match mode:
+		0:  # slice
+			var slice_size: int = res.x * res.y
+			for zi in range(mini(names.size(), res.z)):
+				var samples: PackedFloat32Array = chop.get_channel(names[zi])
+				for i in range(mini(samples.size(), slice_size)):
+					out.cpu_data[zi * slice_size + i] = samples[i]
+		1:  # stack
+			var target: String = ch_name if ch_name != "" else names[0]
+			var samples: PackedFloat32Array = chop.get_channel(target)
+			if samples.is_empty():
+				return null
+			var slice_size: int = res.x * res.y
+			for zi in range(res.z):
+				for i in range(mini(samples.size(), slice_size)):
+					out.cpu_data[zi * slice_size + i] = samples[i]
+		2:  # map
+			var tx: PackedFloat32Array = chop.get_channel("tx")
+			var ty: PackedFloat32Array = chop.get_channel("ty")
+			var tz: PackedFloat32Array = chop.get_channel("tz")
+			var target: String = ch_name if ch_name != "" else "val"
+			var vals: PackedFloat32Array = chop.get_channel(target)
+			if tx.is_empty() or ty.is_empty() or tz.is_empty():
+				return null
+			var count: int = mini(mini(tx.size(), ty.size()), mini(tz.size(), vals.size()))
+			for i in range(count):
+				var gx: int = clampi(int(tx[i] * float(res.x)), 0, res.x - 1)
+				var gy: int = clampi(int(ty[i] * float(res.y)), 0, res.y - 1)
+				var gz: int = clampi(int(tz[i] * float(res.z)), 0, res.z - 1)
+				out.cpu_data[gz * res.y * res.x + gy * res.x + gx] += vals[i]
+
+	return out

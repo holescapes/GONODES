@@ -92,6 +92,12 @@ func get_scene_node() -> Node3D:
 	return _scene_node
 
 
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	# RenderPOP already uses CPU readback (read_positions/read_float_attrib)
+	# which handles both GPU and CPU particle data transparently.
+	return _cook(inputs)
+
+
 ## COMP-style preview: scene node info (not particle count).
 func update_preview_control(control: Control) -> void:
 	if control is Label:

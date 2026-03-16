@@ -26,6 +26,15 @@ var channel_count: int = 1
 ## Semantic label for the volume contents (e.g., "density", "velocity", "temperature").
 var field_name: String = "density"
 
+## Whether this volume data is stored on CPU (true) or GPU (false).
+## CPU mode is used as a fallback when compute shaders are unavailable.
+var is_cpu: bool = false
+
+## CPU-side voxel data (used when is_cpu == true).
+## For single-channel (R32F): length = res.x * res.y * res.z
+## For RGBA: length = res.x * res.y * res.z * 4
+var cpu_data: PackedFloat32Array = PackedFloat32Array()
+
 
 func get_family() -> GNFamily.Type:
 	return GNFamily.Type.VOL
@@ -36,6 +45,19 @@ func invalidate() -> void:
 
 
 func duplicate_data() -> GNData:
+	if is_cpu:
+		var copy := GNVolumeData.new()
+		copy.valid = valid
+		copy.timestamp = timestamp
+		copy.is_cpu = true
+		copy.rd_texture = RID()
+		copy.resolution = resolution
+		copy.bounds = bounds
+		copy.data_format = data_format
+		copy.channel_count = channel_count
+		copy.field_name = field_name
+		copy.cpu_data = cpu_data.duplicate()
+		return copy
 	if not rd_texture.is_valid():
 		return _make_empty()
 	var ctx := GNGpuContext.get_context()
@@ -58,8 +80,10 @@ func duplicate_data() -> GNData:
 	return copy
 
 
-## Returns true if this data has a valid GPU texture.
+## Returns true if this data has valid volume storage.
 func has_volume() -> bool:
+	if is_cpu:
+		return cpu_data.size() > 0
 	return rd_texture.is_valid()
 
 

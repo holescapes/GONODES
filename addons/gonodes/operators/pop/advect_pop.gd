@@ -70,3 +70,48 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(sampler)
 
 	return pd
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var pd := _get_input_pop_cpu(inputs, 0)
+	if pd == null or not pd.has_particles():
+		return null
+
+	var vol: GNVolumeData = null
+	if inputs.size() > 1 and inputs[1] is GNVolumeData:
+		vol = inputs[1] as GNVolumeData
+	if vol == null or not vol.has_volume() or not vol.is_cpu:
+		return pd  # Pass through without advection
+
+	var strength: float = get_param_value("strength")
+	var add_mode: bool = get_param_value("add_mode")
+	var dt: float = current_delta
+	var res: Vector3i = vol.resolution
+	var bounds_pos: Vector3 = vol.bounds.position
+	var bounds_size: Vector3 = vol.bounds.size
+
+	for i in range(pd.particle_count):
+		var pos: Vector3 = pd.cpu_positions[i]
+		# Map position to volume UV [0,1]
+		var uvw := Vector3(
+			(pos.x - bounds_pos.x) / bounds_size.x,
+			(pos.y - bounds_pos.y) / bounds_size.y,
+			(pos.z - bounds_pos.z) / bounds_size.z)
+		uvw = uvw.clamp(Vector3.ZERO, Vector3.ONE)
+		# Sample velocity field (RGBA: xyz = velocity)
+		var fx: float = uvw.x * (res.x - 1)
+		var fy: float = uvw.y * (res.y - 1)
+		var fz: float = uvw.z * (res.z - 1)
+		var xi: int = clampi(int(fx), 0, res.x - 1)
+		var yi: int = clampi(int(fy), 0, res.y - 1)
+		var zi: int = clampi(int(fz), 0, res.z - 1)
+		var base: int = (zi * res.y * res.x + yi * res.x + xi) * vol.channel_count
+		var field_vel := Vector3.ZERO
+		if vol.channel_count >= 3 and base + 2 < vol.cpu_data.size():
+			field_vel = Vector3(vol.cpu_data[base], vol.cpu_data[base + 1], vol.cpu_data[base + 2])
+		if add_mode:
+			pd.cpu_velocities[i] += field_vel * strength * dt
+		else:
+			pd.cpu_velocities[i] = field_vel * strength
+
+	return pd

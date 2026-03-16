@@ -24,3 +24,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if inputs.size() > 0 and inputs[0] is GNParticleData:
 		return inputs[0]
 	return null
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	if inputs.size() > 0 and inputs[0] is GNParticleData:
+		return inputs[0]
+	return null

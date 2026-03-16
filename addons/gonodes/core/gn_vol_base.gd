@@ -22,6 +22,10 @@ func requires_compute() -> bool:
 	return true
 
 
+func has_cpu_fallback() -> bool:
+	return true
+
+
 func supported_renderers() -> PackedStringArray:
 	return PackedStringArray(["forward_plus", "mobile"])
 
@@ -151,6 +155,80 @@ func _workgroups_3d(res: Vector3i, local_size: int = 8) -> Vector3i:
 		ceili(float(res.y) / float(local_size)),
 		ceili(float(res.z) / float(local_size))
 	)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CPU Fallback Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Creates a CPU-side GNVolumeData with a pre-allocated float array.
+func _create_volume_cpu(res: Vector3i,
+		channels: int = 1,
+		p_field: String = "density") -> GNVolumeData:
+	var vd := GNVolumeData.new()
+	vd.is_cpu = true
+	vd.rd_texture = RID()
+	vd.resolution = res
+	vd.channel_count = channels
+	vd.field_name = p_field
+	vd.cpu_data.resize(res.x * res.y * res.z * channels)
+	vd.cpu_data.fill(0.0)
+	return vd
+
+
+## Safely extracts CPU-capable GNVolumeData from inputs at [param port].
+func _get_input_vol_cpu(inputs: Array[GNData], port: int = 0) -> GNVolumeData:
+	if port < inputs.size() and inputs[port] is GNVolumeData:
+		var vd := inputs[port] as GNVolumeData
+		if vd.is_cpu:
+			return vd
+	return null
+
+
+## Returns the linear index into a flat CPU volume array.
+func _vol_idx(x: int, y: int, z: int, res: Vector3i, channels: int = 1) -> int:
+	return (z * res.y * res.x + y * res.x + x) * channels
+
+
+## Samples the CPU volume with clamped integer coordinates.
+func _vol_sample(data: PackedFloat32Array, x: int, y: int, z: int,
+		res: Vector3i, channels: int = 1) -> float:
+	x = clampi(x, 0, res.x - 1)
+	y = clampi(y, 0, res.y - 1)
+	z = clampi(z, 0, res.z - 1)
+	return data[_vol_idx(x, y, z, res, channels)]
+
+
+## Trilinear sample of CPU volume at normalized [0,1] coordinates.
+func _vol_sample_trilinear(data: PackedFloat32Array, uvw: Vector3,
+		res: Vector3i, channels: int = 1) -> float:
+	var fx: float = uvw.x * (res.x - 1)
+	var fy: float = uvw.y * (res.y - 1)
+	var fz: float = uvw.z * (res.z - 1)
+	var x0: int = int(fx)
+	var y0: int = int(fy)
+	var z0: int = int(fz)
+	var x1: int = mini(x0 + 1, res.x - 1)
+	var y1: int = mini(y0 + 1, res.y - 1)
+	var z1: int = mini(z0 + 1, res.z - 1)
+	var xf: float = fx - x0
+	var yf: float = fy - y0
+	var zf: float = fz - z0
+	var c000: float = _vol_sample(data, x0, y0, z0, res, channels)
+	var c100: float = _vol_sample(data, x1, y0, z0, res, channels)
+	var c010: float = _vol_sample(data, x0, y1, z0, res, channels)
+	var c110: float = _vol_sample(data, x1, y1, z0, res, channels)
+	var c001: float = _vol_sample(data, x0, y0, z1, res, channels)
+	var c101: float = _vol_sample(data, x1, y0, z1, res, channels)
+	var c011: float = _vol_sample(data, x0, y1, z1, res, channels)
+	var c111: float = _vol_sample(data, x1, y1, z1, res, channels)
+	var c00: float = lerpf(c000, c100, xf)
+	var c10: float = lerpf(c010, c110, xf)
+	var c01: float = lerpf(c001, c101, xf)
+	var c11: float = lerpf(c011, c111, xf)
+	var c0: float = lerpf(c00, c10, yf)
+	var c1: float = lerpf(c01, c11, yf)
+	return lerpf(c0, c1, zf)
 
 
 

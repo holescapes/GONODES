@@ -72,3 +72,32 @@ func _parse_format(fmt_str: String) -> int:
 		"RGBA16F": return RenderingDevice.DATA_FORMAT_R16G16B16A16_SFLOAT
 		"RGBA32F": return RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
 	return RenderingDevice.DATA_FORMAT_R32_SFLOAT
+
+
+func _cook_cpu(_inputs: Array[GNData]) -> GNData:
+	var res := Vector3i(get_param_value("res_x"), get_param_value("res_y"), get_param_value("res_z"))
+	var vol := _create_volume_cpu(res, 1, "density")
+
+	var noise := FastNoiseLite.new()
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	noise.frequency = get_param_value("frequency")
+	noise.fractal_octaves = get_param_value("octaves")
+	noise.fractal_lacunarity = get_param_value("lacunarity")
+	noise.fractal_gain = get_param_value("gain")
+
+	var amplitude: float = get_param_value("amplitude")
+	var ox: float = get_param_value("offset_x")
+	var oy: float = get_param_value("offset_y")
+	var oz: float = get_param_value("offset_z")
+	var t: float = elapsed_time * get_param_value("speed")
+
+	for z in range(res.z):
+		for y in range(res.y):
+			for x in range(res.x):
+				var nx: float = float(x) / float(res.x) + ox
+				var ny: float = float(y) / float(res.y) + oy
+				var nz: float = float(z) / float(res.z) + oz + t
+				var v: float = noise.get_noise_3d(nx, ny, nz) * amplitude
+				vol.cpu_data[_vol_idx(x, y, z, res)] = v
+
+	return vol

@@ -60,6 +60,12 @@ var debug_panel: GNDebugPanel = null
 ## Debug toggle button on toolbar.
 var debug_toggle: CheckButton = null
 
+## Export compatibility report panel.
+var compat_panel: GNCompatReportPanel = null
+
+## Compat report toggle button on toolbar.
+var compat_toggle: CheckButton = null
+
 ## Container for per-layer debug toggles (visible when debug is on).
 var _debug_layers_container: HBoxContainer = null
 
@@ -109,6 +115,7 @@ func _ready() -> void:
 	_setup_toolbar()
 	_setup_log_panel()
 	_setup_debug_panel()
+	_setup_compat_panel()
 
 	# Persist split-container sizes when the user drags them
 	hsplit.dragged.connect(func(offset: int): _save_setting("hsplit_offset", offset))
@@ -239,6 +246,26 @@ func _setup_debug_panel() -> void:
 		graph_editor.debug_overlay.network = network
 
 
+## Creates the export compatibility report panel (docked below graph, hidden by default).
+func _setup_compat_panel() -> void:
+	compat_panel = GNCompatReportPanel.new()
+	compat_panel.visible = false
+	compat_panel.network = network
+	compat_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	compat_panel.node_selected.connect(_on_debug_node_selected)
+	add_child(compat_panel)
+	move_child(compat_panel, hsplit.get_index() + 1)
+
+
+## Handles compat report toggle.
+func _on_compat_toggled(enabled: bool) -> void:
+	compat_panel.visible = enabled
+	if enabled:
+		compat_panel._scan()
+	_layout_debug_panel()
+	_save_setting("compat_enabled", enabled)
+
+
 ## Handles debug toggle — shows/hides debug panel and overlay.
 func _on_debug_toggled(enabled: bool) -> void:
 	debug_panel.visible = enabled
@@ -265,7 +292,7 @@ func _on_debug_layer_toggled(enabled: bool, layer_idx: int) -> void:
 		overlay._apply_active_dimming()
 
 
-## Recalculates layout when debug panel visibility changes.
+## Recalculates layout when debug/compat panel visibility changes.
 func _layout_debug_panel() -> void:
 	var bottom_offset := _TOOLBAR_HEIGHT
 	if log_panel.visible:
@@ -274,6 +301,10 @@ func _layout_debug_panel() -> void:
 		debug_panel.offset_top = -(bottom_offset + 180.0)
 		debug_panel.offset_bottom = -(bottom_offset)
 		bottom_offset += 180.0
+	if compat_panel != null and compat_panel.visible:
+		compat_panel.offset_top = -(bottom_offset + 200.0)
+		compat_panel.offset_bottom = -(bottom_offset)
+		bottom_offset += 200.0
 	hsplit.offset_bottom = -(bottom_offset)
 
 
@@ -530,7 +561,7 @@ func _on_build_pressed() -> void:
 		add_child(dlg)
 		dlg.popup_centered()
 		return
-	_export_dialog.show_for_patch(_current_file_path)
+	_export_dialog.show_for_patch(_current_file_path, network)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -886,6 +917,14 @@ func _setup_toolbar() -> void:
 	row2.add_child(btn_layout)
 
 	row2.add_child(VSeparator.new())
+
+	# Compat report toggle
+	compat_toggle = CheckButton.new()
+	compat_toggle.text = "Compat"
+	compat_toggle.tooltip_text = "Show export compatibility report — scan network against target platform/renderer"
+	compat_toggle.button_pressed = false
+	compat_toggle.toggled.connect(_on_compat_toggled)
+	row2.add_child(compat_toggle)
 
 	# Help button
 	var btn_help := Button.new()

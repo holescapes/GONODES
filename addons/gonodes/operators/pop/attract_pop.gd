@@ -57,3 +57,29 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(uniform_set)
 
 	return pd
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var pd := _get_input_pop_cpu(inputs)
+	if pd == null or not pd.has_particles():
+		return null
+
+	var target := Vector3(
+		get_param_value("target_x"),
+		get_param_value("target_y"),
+		get_param_value("target_z"))
+	var strength: float = get_param_value("strength")
+	var radius: float = get_param_value("radius")
+	var dt: float = current_delta
+
+	for i in range(pd.particle_count):
+		var diff: Vector3 = target - pd.cpu_positions[i]
+		var dist: float = diff.length()
+		if dist < 0.001:
+			continue
+		if radius > 0.0 and dist > radius:
+			continue
+		var force_mag: float = strength / maxf(dist * dist, 0.01)
+		pd.cpu_velocities[i] += diff.normalized() * force_mag * dt
+
+	return pd

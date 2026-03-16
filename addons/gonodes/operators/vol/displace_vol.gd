@@ -63,3 +63,36 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(sampler)
 
 	return out_vol
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var vol_in := _get_input_vol_cpu(inputs, 0)
+	if vol_in == null or not vol_in.has_volume():
+		return null
+
+	var vel_in := _get_input_vol_cpu(inputs, 1)
+	if vel_in == null or not vel_in.has_volume():
+		return vol_in  # Pass through
+
+	var strength: float = get_param_value("strength")
+	var res: Vector3i = vol_in.resolution
+	var ch: int = vol_in.channel_count
+	var out := _create_volume_cpu(res, ch, vol_in.field_name)
+
+	for z in range(res.z):
+		for y in range(res.y):
+			for x in range(res.x):
+				# Read velocity at this voxel
+				var vidx: int = (z * res.y * res.x + y * res.x + x) * vel_in.channel_count
+				var vx: float = vel_in.cpu_data[vidx] if vidx < vel_in.cpu_data.size() else 0.0
+				var vy: float = vel_in.cpu_data[vidx + 1] if vidx + 1 < vel_in.cpu_data.size() else 0.0
+				var vz: float = vel_in.cpu_data[vidx + 2] if vidx + 2 < vel_in.cpu_data.size() else 0.0
+				# Sample source at displaced position
+				var uvw := Vector3(
+					float(x) / float(res.x) - vx * strength,
+					float(y) / float(res.y) - vy * strength,
+					float(z) / float(res.z) - vz * strength)
+				out.cpu_data[_vol_idx(x, y, z, res, ch)] = _vol_sample_trilinear(
+					vol_in.cpu_data, uvw, res, ch)
+
+	return out

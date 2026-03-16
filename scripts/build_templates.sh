@@ -77,6 +77,9 @@ player_preset_name() {
         linux_x86_64)   echo "Player Linux x86_64"   ;;
         linux_arm64)    echo "Player Linux ARM64"    ;;
         macos)          echo "Player macOS"          ;;
+        android)        echo "Player Android ARM64"  ;;
+        ios)            echo "Player iOS ARM64"      ;;
+        web)            echo "Player Web"            ;;
         *) return 1 ;;
     esac
 }
@@ -88,6 +91,7 @@ editor_preset_name() {
         linux_x86_64)   echo "Editor Linux x86_64"   ;;
         linux_arm64)    echo "Editor Linux ARM64"    ;;
         macos)          echo "Editor macOS"          ;;
+        android|ios|web) echo "" ;;  # No editor builds for mobile/web
         *) return 1 ;;
     esac
 }
@@ -96,6 +100,9 @@ platform_ext() {
     case "$1" in
         windows_x86_64|windows_arm64) echo ".exe" ;;
         macos)                        echo ".app" ;;
+        android)                      echo ".apk" ;;
+        ios)                          echo ".ipa" ;;
+        web)                          echo ".html" ;;
         *)                            echo ""     ;;
     esac
 }
@@ -577,14 +584,14 @@ fi
 
 # Expand "all"
 if [[ "$PLATFORMS" == "all" ]]; then
-    PLATFORMS="windows_x86_64,windows_arm64,linux_x86_64,linux_arm64,macos"
+    PLATFORMS="windows_x86_64,windows_arm64,linux_x86_64,linux_arm64,macos,android,ios,web"
 fi
 
 # Split on commas
 IFS=',' read -ra PLATFORM_LIST <<< "$PLATFORMS"
 
 # Validate
-ALL_VALID="windows_x86_64 windows_arm64 linux_x86_64 linux_arm64 macos"
+ALL_VALID="windows_x86_64 windows_arm64 linux_x86_64 linux_arm64 macos android ios web"
 for plat in "${PLATFORM_LIST[@]}"; do
     if ! echo "$ALL_VALID" | grep -qw "$plat"; then
         fail "Unknown platform: $plat"
@@ -684,8 +691,13 @@ ok "project.godot restored."
 
 if $INCLUDE_EDITOR; then
     for plat in "${PLATFORM_LIST[@]}"; do
-        ext="$(platform_ext "$plat")"
         preset="$(editor_preset_name "$plat")"
+        # Skip platforms that don't have editor builds (mobile/web)
+        if [[ -z "$preset" ]]; then
+            ok "Skipping Editor for $plat (no editor preset)"
+            continue
+        fi
+        ext="$(platform_ext "$plat")"
         plat_dir="$OUTPUT_DIR/$plat"
         editor_out="$plat_dir/GONODES${ext}"
 

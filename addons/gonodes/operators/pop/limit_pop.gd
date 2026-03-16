@@ -63,3 +63,49 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(uniform_set)
 
 	return pd
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var pd := _get_input_pop_cpu(inputs)
+	if pd == null or not pd.has_particles():
+		return null
+
+	var bbox_min := Vector3(
+		get_param_value("bbox_min_x"),
+		get_param_value("bbox_min_y"),
+		get_param_value("bbox_min_z"))
+	var bbox_max := Vector3(
+		get_param_value("bbox_max_x"),
+		get_param_value("bbox_max_y"),
+		get_param_value("bbox_max_z"))
+	var max_speed: float = get_param_value("max_speed")
+	var kill_outside: bool = get_param_value("kill_outside")
+
+	var write_idx: int = 0
+	for i in range(pd.particle_count):
+		var pos: Vector3 = pd.cpu_positions[i]
+		# Kill outside bounds
+		if kill_outside:
+			if pos.x < bbox_min.x or pos.x > bbox_max.x \
+			or pos.y < bbox_min.y or pos.y > bbox_max.y \
+			or pos.z < bbox_min.z or pos.z > bbox_max.z:
+				continue
+		# Speed clamp
+		if max_speed > 0.0:
+			var vel: Vector3 = pd.cpu_velocities[i]
+			var spd: float = vel.length()
+			if spd > max_speed:
+				pd.cpu_velocities[i] = vel * (max_speed / spd)
+		# Compact
+		if write_idx != i:
+			pd.cpu_positions[write_idx] = pd.cpu_positions[i]
+			pd.cpu_velocities[write_idx] = pd.cpu_velocities[i]
+			pd.cpu_colors[write_idx] = pd.cpu_colors[i]
+			pd.cpu_ages[write_idx] = pd.cpu_ages[i]
+			pd.cpu_lives[write_idx] = pd.cpu_lives[i]
+			pd.cpu_masses[write_idx] = pd.cpu_masses[i]
+			pd.cpu_pscales[write_idx] = pd.cpu_pscales[i]
+		write_idx += 1
+	pd.particle_count = write_idx
+
+	return pd

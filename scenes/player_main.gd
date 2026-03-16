@@ -10,9 +10,17 @@ extends Control
 ##   GONODESPlayer.exe --patch path.gnpatch — explicit patch path
 ##   GONODESPlayer.exe --rendering-method mobile  — force renderer (power users)
 ##
+## Web usage:
+##   The patch can be baked into the .pck (Full Export) or loaded from a URL
+##   via the `patch_url` query parameter or config.json `patch_url` key.
+##   Requires COOP/COEP headers for SharedArrayBuffer (threads):
+##     Cross-Origin-Opener-Policy: same-origin
+##     Cross-Origin-Embedder-Policy: require-corp
+##
 ## config.json format:
 ##   {
-##     "patch": "MyShow.gnpatch"
+##     "patch": "MyShow.gnpatch",
+##     "patch_url": "https://example.com/patches/MyShow.gnpatch"
 ##   }
 ##
 ## Rendering backend is automatic — Forward+ with fallback to Compatibility
@@ -34,11 +42,22 @@ var _project: GNProjectManager = GNProjectManager.new()
 ## Parsed config dictionary.
 var _config: Dictionary = {}
 
+## URL for remote patch loading (web).
+var _patch_url: String = ""
+
 ## Info label (shown only if no WindowOUT opens — fallback display).
 var _info_label: Label = null
 
 ## Whether the debug info overlay is visible.  Toggle with F1.
 var _debug_visible: bool = false
+
+## JS↔GDScript bridge signals (web only — called via JavaScriptBridge.create_callback).
+## Emitted when the player is ready to receive patches.
+signal player_ready()
+## Emitted when a patch has been loaded and cooking starts.
+signal patch_loaded(patch_name: String)
+## Emitted on errors.
+signal player_error(message: String)
 
 
 func _ready() -> void:
@@ -48,6 +67,22 @@ func _ready() -> void:
 
 	_parse_config()
 	_apply_window_settings()
+
+	if _patch_path.is_empty() and _patch_url.is_empty():
+		# On web, try reading the patch_url from the URL query string
+		if GNGpuContext.get_current_platform() == "web":
+			_patch_url = _get_url_param("patch_url")
+
+	# Register JS bridge callbacks (web only)
+	if GNGpuContext.get_current_platform() == "web":
+		_register_js_bridge()
+
+	if not _patch_url.is_empty():
+		# Load patch from URL (web)
+		_setup_info_display()
+		_update_info("Loading patch from URL...")
+		_fetch_patch_from_url(_patch_url)
+		return
 
 	if _patch_path.is_empty():
 		_show_error("No patch file specified.\n\nPlace a config.json next to the executable,\nor launch with --patch <file.gnpatch>")
@@ -83,6 +118,11 @@ func _parse_config() -> void:
 		else:
 			# Relative to exe directory
 			_patch_path = exe_dir.path_join(config_patch)
+
+	# 2b. Resolve patch URL from config (web)
+	var config_url: String = _config.get("patch_url", "")
+	if not config_url.is_empty():
+		_patch_url = config_url
 
 	# 3. CLI overrides — --patch <path> takes priority
 	var args := OS.get_cmdline_args()
@@ -240,3 +280,116 @@ func _show_error(message: String) -> void:
 	lbl.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 	add_child(lbl)
 	push_error("[GONODES Player] %s" % message)
+	player_error.emit(message)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Web Runtime — URL Patch Loading & JS Bridge
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Fetches a .gnpatch file from a URL via HTTPRequest (web/desktop).
+func _fetch_patch_from_url(url: String) -> void:
+	var http := HTTPRequest.new()
+	http.name = "PatchFetcher"
+	add_child(http)
+	http.request_completed.connect(_on_patch_url_fetched.bind(http))
+	var err := http.request(url)
+	if err != OK:
+		_show_error("Failed to start HTTP request: %d\nURL: %s" % [err, url])
+		http.queue_free()
+
+
+## Callback when URL fetch completes.
+func _on_patch_url_fetched(result: int, response_code: int, _headers: PackedStringArray,
+		body: PackedByteArray, http: HTTPRequest) -> void:
+	http.queue_free()
+
+	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+		_show_error("Failed to fetch patch from URL.\nHTTP %d (result: %d)\nURL: %s" % [
+			response_code, result, _patch_url])
+		return
+
+	# Parse the JSON patch data directly from the response body
+	var json_str: String = body.get_string_from_utf8()
+	if json_str.is_empty():
+		_show_error("Empty response from patch URL.")
+		return
+
+	network = GNNetwork.new()
+	var json := JSON.new()
+	if json.parse(json_str) != OK or not (json.data is Dictionary):
+		_show_error("Failed to parse patch data from URL.\n%s" % json.get_error_message())
+		return
+
+	network.from_dict(json.data)
+
+	# Set up cook engine
+	cook_engine = GNCookEngine.new()
+	cook_engine.name = "CookEngine"
+	cook_engine.network = network
+	add_child(cook_engine)
+
+	cook_engine.frame_cooked.connect(_on_frame_cooked)
+	cook_engine.cook_error.connect(_on_cook_error)
+
+	_force_open_window_tops()
+	cook_engine.set_active_sinks([])
+
+	var patch_name: String = _patch_url.get_file()
+	_update_info("Running: %s (%d nodes)" % [patch_name, network.get_node_count()])
+	patch_loaded.emit(patch_name)
+
+	print("[GONODES Player] Loaded from URL: %s (%d nodes)" % [
+		_patch_url, network.get_node_count()])
+
+
+## Reads a query parameter from the browser URL (web only).
+## Falls back to empty string on non-web platforms.
+func _get_url_param(param_name: String) -> String:
+	if GNGpuContext.get_current_platform() != "web":
+		return ""
+	# Use JavaScriptBridge to read URL search params
+	var js_code := "new URLSearchParams(window.location.search).get('%s') || ''" % param_name
+	var result = JavaScriptBridge.eval(js_code)
+	if result is String:
+		return result
+	return ""
+
+
+## Registers JavaScript-callable functions for the JS↔GDScript bridge.
+## Allows host pages to control the player:
+##   window.gonodesLoadPatch(url) — load a patch from URL
+##   window.gonodesSetParam(nodeId, paramName, value) — set a parameter
+func _register_js_bridge() -> void:
+	if GNGpuContext.get_current_platform() != "web":
+		return
+	# Expose a callback for dynamic patch loading
+	var load_cb := JavaScriptBridge.create_callback(_js_load_patch)
+	JavaScriptBridge.eval("window.gonodesLoadPatch = %s" % str(load_cb))
+	var param_cb := JavaScriptBridge.create_callback(_js_set_param)
+	JavaScriptBridge.eval("window.gonodesSetParam = %s" % str(param_cb))
+	player_ready.emit()
+
+
+## JS callback: window.gonodesLoadPatch(url)
+func _js_load_patch(args: Array) -> void:
+	if args.size() < 1 or not (args[0] is String):
+		return
+	var url: String = args[0]
+	if url.is_empty():
+		return
+	_patch_url = url
+	_fetch_patch_from_url(url)
+
+
+## JS callback: window.gonodesSetParam(nodeId, paramName, value)
+func _js_set_param(args: Array) -> void:
+	if args.size() < 3:
+		return
+	var node_id: String = str(args[0])
+	var param_name: String = str(args[1])
+	var value = args[2]
+	if cook_engine != null and network != null:
+		var node: GNNode = network.nodes.get(node_id, null)
+		if node != null:
+			node.set_param_value(param_name, value)

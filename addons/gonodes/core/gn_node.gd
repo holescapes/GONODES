@@ -125,6 +125,21 @@ var node_error: String = ""
 func requires_compute() -> bool:
 	return false
 
+
+## Whether this node provides a CPU fallback when compute shaders are unavailable.
+## Override to return true in families that implement [method _cook_cpu] (POP, VOL).
+## When true, the cook engine calls [method _cook_cpu] instead of skipping the node
+## on Compatibility / WebGL2 renderers.
+func has_cpu_fallback() -> bool:
+	return false
+
+
+## CPU fallback cook method — called instead of [method _cook] when the renderer
+## lacks compute shader support and [method has_cpu_fallback] returns true.
+## Override in subclasses to provide a pure-CPU implementation.
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	return null
+
 ## Renderers this operator supports.  Default: all three Godot backends.
 ## Override in operators that only work on specific renderers.
 ## Values: "forward_plus", "mobile", "gl_compatibility".

@@ -11,16 +11,19 @@ mechanics, main-scene swap implementation, and CI pipeline setup.
 ## Overview
 
 GONODES uses a **Quick Build** paradigm: pre-built Player binaries are stored
-in the `templates/` folder.  When the user presses **Build** in the editor,
-the exporter copies the correct platform binary + `.pck` + patch + assets
-to the output folder.  No Godot export templates are needed at runtime.
+in the `templates/` folder.  When the user clicks **Build** in the editor,
+the **Export Patch** dialog opens.  The user picks a target platform (8
+options covering desktop, mobile, and web), a renderer (Forward+, Mobile,
+or Compatibility), and an output folder.  The exporter copies the correct
+Player template + `.pck` + patch + assets + `config.json` to the output
+folder.  No Godot export templates are needed at runtime.
 
 Two build scripts automate template creation:
 
 | Script                          | For                                       |
 |---------------------------------|-------------------------------------------|
-| `scripts/build_templates.ps1`   | PowerShell — Windows, or any OS with pwsh |
-| `scripts/build_templates.sh`    | Bash — Linux, macOS                       |
+| `scripts/build_templates.ps1`   | PowerShell --- Windows, or any OS with pwsh |
+| `scripts/build_templates.sh`    | Bash --- Linux, macOS                       |
 
 Both scripts are functionally identical and produce the same output.
 
@@ -44,16 +47,20 @@ Rebuild the templates whenever you:
 
 ## Prerequisites
 
-1. **Godot 4.6.x editor binary** — can be the standard editor or a console
+1. **Godot 4.6.x editor binary** --- can be the standard editor or a console
    build (console build recommended for CI, produces better log output).
 
-2. **Godot export templates** — install via `Editor → Manage Export Templates`
-   in the Godot editor.  You need templates for every platform you want to
-   target (e.g. Windows x86_64, Linux x86_64, macOS).
+2. **Godot export templates** --- install via `Editor --> Manage Export Templates`
+   in the Godot editor.  Downloading "for Current Version" installs templates
+   for all platforms at once (desktop, mobile, and web).
 
-3. **Export presets** — the project ships with optimized presets for all 5
-   desktop targets in `export_presets.cfg`.  If Godot warns about a missing
-   platform, install the corresponding export templates.
+3. **Export presets** --- the project ships with optimized presets for all 8
+   platform targets (5 desktop + Android + iOS + Web) in `export_presets.cfg`.
+
+4. **Platform-specific SDKs** (mobile only):
+   - **Android**: Android SDK + JDK --- configure in Godot's
+     `Editor --> Editor Settings --> Export --> Android`
+   - **iOS**: Requires macOS with Xcode (cannot build from Windows/Linux)
 
 
 ## Quick Start
@@ -62,17 +69,24 @@ Rebuild the templates whenever you:
 
 ```powershell
 # Build Player for the current host platform (auto-detected)
-.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe"
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot_console.exe"
 
-# Build Player for all desktop platforms
-.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe" -Platforms "all"
+# Build Player for all platforms (desktop + mobile + web)
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot_console.exe" -Platforms "all"
+
+# Build just web + android
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot_console.exe" -Platforms "web,android"
 
 # Build both Player and Editor for all platforms, clean first
-.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot.exe" -Platforms "all" -IncludeEditor -Clean
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\godot_console.exe" -Platforms "all" -IncludeEditor -Clean
 
 # Shortcut: build everything (Player + Editor, all platforms)
 .\scripts\build_templates.ps1 -BuildAll -Clean
 ```
+
+> **Note:** On PowerShell 5.1 (Windows default), use
+> `powershell -ExecutionPolicy Bypass -File .\scripts\build_templates.ps1 ...`
+> if you get an execution policy error.
 
 ### Linux / macOS (Bash)
 
@@ -80,8 +94,11 @@ Rebuild the templates whenever you:
 # Build Player for the current host platform (auto-detected)
 ./scripts/build_templates.sh --godot /path/to/godot
 
-# Build Player for all desktop platforms
+# Build Player for all platforms (desktop + mobile + web)
 ./scripts/build_templates.sh --godot /path/to/godot --platforms all
+
+# Build just web + android
+./scripts/build_templates.sh --godot /path/to/godot --platforms web,android
 
 # Build both Player and Editor for all platforms, clean first
 ./scripts/build_templates.sh --godot /path/to/godot --platforms all --include-editor --clean
@@ -124,40 +141,55 @@ Rebuild the templates whenever you:
 
 ### Platform Names
 
-| Platform          | OS      | Architecture |
-|-------------------|---------|--------------|
-| `windows_x86_64`  | Windows | Intel/AMD 64 |
-| `windows_arm64`   | Windows | ARM 64       |
-| `linux_x86_64`    | Linux   | Intel/AMD 64 |
-| `linux_arm64`     | Linux   | ARM 64       |
-| `macos`           | macOS   | Universal    |
+| Platform          | OS      | Architecture | Template folder             |
+|-------------------|---------|--------------|-----------------------------|
+| `windows_x86_64`  | Windows | Intel/AMD 64 | `templates/windows_x86_64/` |
+| `windows_arm64`   | Windows | ARM 64       | `templates/windows_arm64/`  |
+| `linux_x86_64`    | Linux   | Intel/AMD 64 | `templates/linux_x86_64/`   |
+| `linux_arm64`     | Linux   | ARM 64       | `templates/linux_arm64/`    |
+| `macos`           | macOS   | Universal    | `templates/macos/`          |
+| `android`         | Android | ARM 64       | `templates/android/`        |
+| `ios`             | iOS     | ARM 64       | `templates/ios/`            |
+| `web`             | Web     | WASM         | `templates/web/`            |
 
 When no `--platforms` is given, both scripts auto-detect the host OS and
-architecture and build for the current machine only.
+architecture and build for the current machine only (desktop only).
+Mobile and web are only built when explicitly requested or with `"all"`.
 
 
 ## Output Structure
 
 ```
 templates/
-├── windows_x86_64/
-│   ├── GONODESPlayer.exe
-│   └── GONODESPlayer.pck
-├── windows_arm64/
-│   ├── GONODESPlayer.exe
-│   └── GONODESPlayer.pck
-├── linux_x86_64/
-│   ├── GONODESPlayer
-│   └── GONODESPlayer.pck
-├── linux_arm64/
-│   ├── GONODESPlayer
-│   └── GONODESPlayer.pck
-└── macos/
-    └── GONODESPlayer.app/
+  windows_x86_64/
+    GONODESPlayer.exe
+    GONODESPlayer.pck
+  windows_arm64/
+    GONODESPlayer.exe
+    GONODESPlayer.pck
+  linux_x86_64/
+    GONODESPlayer
+    GONODESPlayer.pck
+  linux_arm64/
+    GONODESPlayer
+    GONODESPlayer.pck
+  macos/
+    GONODESPlayer.app/
+  android/
+    GONODESPlayer.apk
+  ios/
+    GONODESPlayer.ipa
+  web/
+    GONODESPlayer.html
+    GONODESPlayer.wasm
+    GONODESPlayer.pck
+    GONODESPlayer.js
+    ...
 ```
 
-The Quick Build button in the editor automatically finds the correct
-platform's binary from `templates/<platform>/`.
+The Export Patch dialog automatically finds the correct platform's
+template from `templates/<platform>/` and shows an availability hint
+if the template is missing.
 
 
 ## Release-Build Optimizations
@@ -315,12 +347,49 @@ Both scripts also install a cleanup trap / `finally` block that attempts
 automatic restoration on exit.
 
 
+## Export Patch Dialog (Runtime)
+
+The user-facing Export Patch dialog (`gn_export_dialog.gd`) provides:
+
+- **Platform dropdown** --- 8 concrete targets (all the platform names above)
+- **Renderer dropdown** --- Forward+, Mobile, Compatibility (independent of platform)
+- **Template availability hint** --- orange warning if no template exists for
+  the selected platform
+- **Compatibility scan** --- checks every node in the patch against the selected
+  platform + renderer and reports incompatible/fallback nodes
+
+The renderer is not hardcoded per platform.  The user chooses based on their
+target hardware.  The selected renderer is written to `config.json` alongside
+the patch path.
+
+`config.json` for desktop/mobile:
+```json
+{
+  "patch": "MyShow.gnpatch",
+  "renderer": "forward_plus"
+}
+```
+
+`config.json` for web:
+```json
+{
+  "patch_url": "MyShow.gnpatch",
+  "renderer": "gl_compatibility"
+}
+```
+
+The rendering method is baked into the Player binary at build time (via the
+export preset).  The `renderer` field in config.json is informational ---
+it records what the exporter intended, and can be consumed by future Player
+enhancements.
+
+
 ## Export Presets
 
 All presets are defined in `export_presets.cfg` at the project root:
 
 | Preset                      | Index | Purpose         |
-|-----------------------------|-------|-----------------|
+|-----------------------------|-------|-----------------||
 | Editor Windows x86_64       | 0     | Manual / Editor |
 | Player Windows x86_64       | 1     | Build script    |
 | Player Windows ARM64        | 2     | Build script    |
@@ -331,6 +400,13 @@ All presets are defined in `export_presets.cfg` at the project root:
 | Editor Linux x86_64         | 7     | Build script    |
 | Editor Linux ARM64          | 8     | Build script    |
 | Editor macOS                | 9     | Build script    |
+| Player Android ARM64        | 10    | Build script    |
+| Player iOS ARM64            | 11    | Build script    |
+| Player Web                  | 12    | Build script    |
+
+Editor builds are only available for the 5 desktop platforms.  Mobile and
+web have Player-only presets (no editor builds --- the GONODES editor is
+desktop-only).
 
 
 ## Extension Self-Containment

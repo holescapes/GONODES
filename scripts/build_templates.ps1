@@ -1,11 +1,11 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Builds GONODES Player (and optionally Editor) binaries for desktop platforms.
+    Builds GONODES Player (and optionally Editor) binaries for all platforms.
 
 .DESCRIPTION
     Uses Godot's command-line export system to produce Player and Editor
-    binaries for Windows, macOS, and Linux across x86_64 and ARM64.
+    binaries for Windows, macOS, Linux, Android, iOS, and Web.
 
     The resulting binaries are placed in the templates/ folder at the
     project root, organized by platform:
@@ -16,6 +16,9 @@
           linux_x86_64/     GONODESPlayer     + .pck
           linux_arm64/      GONODESPlayer     + .pck
           macos/            GONODESPlayer.app/
+          android/          GONODESPlayer.apk
+          ios/              GONODESPlayer.ipa
+          web/              GONODESPlayer.html + .wasm + .pck + .js
 
     IMPORTANT -- Main-Scene Swap
     ----------------------------
@@ -46,9 +49,10 @@
 
 .PARAMETER Platforms
     Which platforms to build.  Comma-separated list of:
-      windows_x86_64, windows_arm64, linux_x86_64, linux_arm64, macos
-    Default: auto-detected from host OS/architecture
-    Use "all" to build everything.
+      windows_x86_64, windows_arm64, linux_x86_64, linux_arm64, macos,
+      android, ios, web
+    Default: auto-detected from host OS/architecture (desktop only)
+    Use "all" to build everything including mobile + web.
 
 .PARAMETER BuildAll
     Convenience shortcut: build both Player and Editor for ALL platforms.
@@ -125,6 +129,18 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# --- PowerShell 5.1 compatibility shims --------------------------------------
+# $IsWindows, $IsMacOS, $IsLinux are automatic in PS 7+ but absent in 5.1.
+if (-not (Get-Variable -Name IsWindows -Scope Global -ErrorAction SilentlyContinue)) {
+    $Global:IsWindows = ($env:OS -eq "Windows_NT")
+}
+if (-not (Get-Variable -Name IsMacOS -Scope Global -ErrorAction SilentlyContinue)) {
+    $Global:IsMacOS = $false
+}
+if (-not (Get-Variable -Name IsLinux -Scope Global -ErrorAction SilentlyContinue)) {
+    $Global:IsLinux = $false
+}
+
 # --- Constants ----------------------------------------------------------------
 
 $SCRIPT_DIR             = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -140,6 +156,9 @@ $PLATFORM_PRESETS = @{
     "linux_x86_64"   = @{ player = "Player Linux x86_64";    editor = "Editor Linux x86_64";    ext = "" }
     "linux_arm64"    = @{ player = "Player Linux ARM64";     editor = "Editor Linux ARM64";     ext = "" }
     "macos"          = @{ player = "Player macOS";           editor = "Editor macOS";           ext = ".app" }
+    "android"        = @{ player = "Player Android ARM64";   editor = "";                       ext = ".apk" }
+    "ios"            = @{ player = "Player iOS ARM64";       editor = "";                       ext = ".ipa" }
+    "web"            = @{ player = "Player Web";             editor = "";                       ext = ".html" }
 }
 
 # --- Host Platform Detection --------------------------------------------------
@@ -226,8 +245,8 @@ function Set-MainScene([string]$projectGodot, [string]$scenePath) {
 
     if ($content -match $pattern) {
         $newContent = $content -replace $pattern, $replacement
-        [System.IO.File]::WriteAllText($projectGodot, $newContent,
-            [System.Text.Encoding]::UTF8)
+        $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+        [System.IO.File]::WriteAllText($projectGodot, $newContent, $utf8NoBom)
         return $true
     }
     Write-Fail "Could not find run/main_scene in project.godot"
@@ -611,7 +630,7 @@ if ($Platforms.Count -eq 0) {
 }
 
 if ($Platforms -contains "all") {
-    $Platforms = @("windows_x86_64", "windows_arm64", "linux_x86_64", "linux_arm64", "macos")
+    $Platforms = @("windows_x86_64", "windows_arm64", "linux_x86_64", "linux_arm64", "macos", "android", "ios", "web")
 }
 foreach ($plat in $Platforms) {
     if (-not $PLATFORM_PRESETS.ContainsKey($plat)) {
@@ -696,6 +715,11 @@ try {
     if ($IncludeEditor) {
         foreach ($plat in $Platforms) {
             $info      = $PLATFORM_PRESETS[$plat]
+            # Skip platforms that don't have editor builds (mobile/web)
+            if ($info.editor -eq "") {
+                Write-Ok "Skipping Editor for $plat (no editor preset)"
+                continue
+            }
             $platDir   = Join-Path $OutputDir $plat
             $editorFn  = "GONODES$($info.ext)"
             $editorOut = Join-Path $platDir $editorFn

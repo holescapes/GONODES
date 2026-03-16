@@ -58,3 +58,42 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(uniform_set)
 
 	return pd
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var pd := _get_input_pop_cpu(inputs)
+	if pd == null or not pd.has_particles():
+		return null
+
+	var ground_y: float = get_param_value("ground_y")
+	var bounce: float = get_param_value("bounce")
+	var friction: float = get_param_value("friction")
+	var kill_below: float = get_param_value("kill_below")
+
+	var write_idx: int = 0
+	for i in range(pd.particle_count):
+		var pos: Vector3 = pd.cpu_positions[i]
+		# Kill particles below threshold
+		if pos.y < kill_below:
+			continue
+		# Ground collision
+		if pos.y < ground_y:
+			pos.y = ground_y
+			var vel: Vector3 = pd.cpu_velocities[i]
+			vel.y = -vel.y * bounce
+			vel.x *= (1.0 - friction)
+			vel.z *= (1.0 - friction)
+			pd.cpu_velocities[i] = vel
+			pd.cpu_positions[i] = pos
+		if write_idx != i:
+			pd.cpu_positions[write_idx] = pd.cpu_positions[i]
+			pd.cpu_velocities[write_idx] = pd.cpu_velocities[i]
+			pd.cpu_colors[write_idx] = pd.cpu_colors[i]
+			pd.cpu_ages[write_idx] = pd.cpu_ages[i]
+			pd.cpu_lives[write_idx] = pd.cpu_lives[i]
+			pd.cpu_masses[write_idx] = pd.cpu_masses[i]
+			pd.cpu_pscales[write_idx] = pd.cpu_pscales[i]
+		write_idx += 1
+	pd.particle_count = write_idx
+
+	return pd

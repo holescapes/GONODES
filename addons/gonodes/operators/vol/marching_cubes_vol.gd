@@ -85,6 +85,52 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return geo
 
 
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var vol := _get_input_vol_cpu(inputs, 0)
+	if vol == null or not vol.has_volume():
+		return null
+
+	if not MetaballSOP._tables_initialized:
+		MetaballSOP._init_marching_cubes_tables()
+		MetaballSOP._tables_initialized = true
+
+	var res: Vector3i = vol.resolution
+	var threshold: float = get_param_value("threshold")
+	var smooth: bool = get_param_value("smooth_normals")
+	var field: PackedFloat32Array = vol.cpu_data
+
+	var gx: int = res.x
+	var gy: int = res.y
+	var gz: int = res.z
+	var bounds: AABB = vol.bounds
+	var cell_size := Vector3(
+		bounds.size.x / float(gx - 1),
+		bounds.size.y / float(gy - 1),
+		bounds.size.z / float(gz - 1))
+
+	var verts := PackedVector3Array()
+	var normals := PackedVector3Array()
+
+	for iz in range(gz - 1):
+		for iy in range(gy - 1):
+			for ix in range(gx - 1):
+				_march_cell(ix, iy, iz, gx, gy, field, threshold,
+					bounds.position, cell_size, smooth, verts, normals)
+
+	if verts.is_empty():
+		return null
+
+	var geo := GNGeoData.new()
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	geo.set_mesh(mesh)
+	return geo
+
+
 func _march_cell(ix: int, iy: int, iz: int, gx: int, gy: int,
 		field: PackedFloat32Array, threshold: float,
 		origin: Vector3, cell_size: Vector3, smooth: bool,

@@ -86,6 +86,23 @@ static func get_current_platform() -> String:
 	return _current_platform
 
 
+## Returns true if the current platform supports multi-threaded execution.
+## Web requires SharedArrayBuffer + COOP/COEP headers for threads — difficult
+## to guarantee at runtime.  This returns false on web to ensure the cook engine
+## always uses single-threaded mode for web exports.
+## Cached after first call.
+static var _threads_available: int = -1  # -1 = unchecked, 0 = no, 1 = yes
+
+static func are_threads_available() -> bool:
+	if _threads_available < 0:
+		var platform := get_current_platform()
+		if platform == "web":
+			_threads_available = 0
+		else:
+			_threads_available = 1
+	return _threads_available == 1
+
+
 func _init_rd() -> void:
 	rd = RenderingServer.create_local_rendering_device()
 	if rd == null:

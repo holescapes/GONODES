@@ -42,6 +42,19 @@ var attribute_layout: Dictionary = {}
 ## World-space bounding box of the particle cloud (estimated).
 var bounds: AABB = AABB()
 
+## Whether this particle data is stored on CPU (true) or GPU (false).
+## CPU mode is used as a fallback when compute shaders are unavailable.
+var is_cpu: bool = false
+
+## CPU-side particle arrays (used when is_cpu == true).
+var cpu_positions: PackedVector3Array = PackedVector3Array()
+var cpu_velocities: PackedVector3Array = PackedVector3Array()
+var cpu_colors: PackedColorArray = PackedColorArray()
+var cpu_ages: PackedFloat32Array = PackedFloat32Array()
+var cpu_lives: PackedFloat32Array = PackedFloat32Array()
+var cpu_masses: PackedFloat32Array = PackedFloat32Array()
+var cpu_pscales: PackedFloat32Array = PackedFloat32Array()
+
 
 func get_family() -> GNFamily.Type:
 	return GNFamily.Type.POP
@@ -53,6 +66,24 @@ func invalidate() -> void:
 
 
 func duplicate_data() -> GNData:
+	if is_cpu:
+		var copy := GNParticleData.new()
+		copy.valid = valid
+		copy.timestamp = timestamp
+		copy.is_cpu = true
+		copy.particle_count = particle_count
+		copy.max_particles = max_particles
+		copy.stride = stride
+		copy.attribute_layout = attribute_layout.duplicate(true)
+		copy.bounds = bounds
+		copy.cpu_positions = cpu_positions.duplicate()
+		copy.cpu_velocities = cpu_velocities.duplicate()
+		copy.cpu_colors = cpu_colors.duplicate()
+		copy.cpu_ages = cpu_ages.duplicate()
+		copy.cpu_lives = cpu_lives.duplicate()
+		copy.cpu_masses = cpu_masses.duplicate()
+		copy.cpu_pscales = cpu_pscales.duplicate()
+		return copy
 	if rd_buffer == RID() or particle_count == 0:
 		return _make_empty()
 	var ctx := GNGpuContext.get_context()
@@ -81,16 +112,20 @@ func get_attrib_offset(attrib_name: String) -> int:
 	return desc.offset
 
 
-## Returns true if this data has a valid GPU buffer.
+## Returns true if this data has valid particle storage.
 func has_particles() -> bool:
+	if is_cpu:
+		return particle_count > 0 and cpu_positions.size() >= particle_count
 	return rd_buffer.is_valid() and particle_count > 0
 
 
-## Reads back particle positions to CPU as PackedVector3Array (expensive).
+## Reads back particle positions to CPU as PackedVector3Array (expensive for GPU).
 ## Used by POPtoSOP bridge and viewer preview.
 func read_positions() -> PackedVector3Array:
 	if not has_particles():
 		return PackedVector3Array()
+	if is_cpu:
+		return cpu_positions.slice(0, particle_count)
 	var ctx := GNGpuContext.get_context()
 	var byte_size: int = particle_count * stride
 	var raw: PackedByteArray = ctx.read_buffer(rd_buffer, byte_size)
@@ -111,6 +146,13 @@ func read_positions() -> PackedVector3Array:
 ## Reads back a float attribute per particle to CPU.
 func read_float_attrib(attrib_name: String) -> PackedFloat32Array:
 	if not has_particles():
+		return PackedFloat32Array()
+	if is_cpu:
+		match attrib_name:
+			"age": return cpu_ages.slice(0, particle_count)
+			"life": return cpu_lives.slice(0, particle_count)
+			"mass": return cpu_masses.slice(0, particle_count)
+			"pscale": return cpu_pscales.slice(0, particle_count)
 		return PackedFloat32Array()
 	var ctx := GNGpuContext.get_context()
 	var byte_size: int = particle_count * stride

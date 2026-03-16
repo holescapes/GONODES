@@ -117,3 +117,75 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.free_rid(pts_buf)
 
 	return out_vol
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	if inputs.size() == 0 or not (inputs[0] is GNGeoData):
+		return null
+	var geo: GNGeoData = inputs[0] as GNGeoData
+	if not geo.has_geometry():
+		return null
+
+	var positions := PackedVector3Array()
+	for s in range(geo.mesh.get_surface_count()):
+		var arrays: Array = geo.mesh.surface_get_arrays(s)
+		if arrays[Mesh.ARRAY_VERTEX] != null:
+			positions.append_array(arrays[Mesh.ARRAY_VERTEX])
+	if positions.is_empty():
+		return null
+
+	var pad: float = get_param_value("padding")
+	var bmin := Vector3(INF, INF, INF)
+	var bmax := Vector3(-INF, -INF, -INF)
+	for p in positions:
+		bmin = Vector3(minf(bmin.x, p.x), minf(bmin.y, p.y), minf(bmin.z, p.z))
+		bmax = Vector3(maxf(bmax.x, p.x), maxf(bmax.y, p.y), maxf(bmax.z, p.z))
+	bmin -= Vector3(pad, pad, pad)
+	bmax += Vector3(pad, pad, pad)
+	var bsize: Vector3 = bmax - bmin
+	if bsize.x < 0.001: bsize.x = 1.0
+	if bsize.y < 0.001: bsize.y = 1.0
+	if bsize.z < 0.001: bsize.z = 1.0
+
+	var res := Vector3i(get_param_value("res_x"), get_param_value("res_y"), get_param_value("res_z"))
+	var radius: float = get_param_value("radius")
+	var strength: float = get_param_value("strength")
+
+	var out := _create_volume_cpu(res, 1, "density")
+	out.bounds = AABB(bmin, bsize)
+
+	# CPU splatting — smooth sphere at each vertex position
+	var inv_size := Vector3(1.0 / bsize.x, 1.0 / bsize.y, 1.0 / bsize.z)
+	var rad_voxels := Vector3i(
+		ceili(radius * inv_size.x * res.x),
+		ceili(radius * inv_size.y * res.y),
+		ceili(radius * inv_size.z * res.z))
+
+	for pt in positions:
+		# Map world position to grid coords
+		var gf := Vector3(
+			(pt.x - bmin.x) * inv_size.x * float(res.x),
+			(pt.y - bmin.y) * inv_size.y * float(res.y),
+			(pt.z - bmin.z) * inv_size.z * float(res.z))
+		var gc := Vector3i(int(gf.x), int(gf.y), int(gf.z))
+		# Splat within radius
+		for dz in range(-rad_voxels.z, rad_voxels.z + 1):
+			var vz: int = gc.z + dz
+			if vz < 0 or vz >= res.z: continue
+			for dy in range(-rad_voxels.y, rad_voxels.y + 1):
+				var vy: int = gc.y + dy
+				if vy < 0 or vy >= res.y: continue
+				for dx in range(-rad_voxels.x, rad_voxels.x + 1):
+					var vx: int = gc.x + dx
+					if vx < 0 or vx >= res.x: continue
+					# World-space distance
+					var wp := Vector3(
+						bmin.x + (float(vx) + 0.5) / float(res.x) * bsize.x,
+						bmin.y + (float(vy) + 0.5) / float(res.y) * bsize.y,
+						bmin.z + (float(vz) + 0.5) / float(res.z) * bsize.z)
+					var dist: float = pt.distance_to(wp)
+					if dist < radius:
+						var falloff: float = 1.0 - (dist / radius)
+						out.cpu_data[_vol_idx(vx, vy, vz, res)] += strength * falloff
+
+	return out

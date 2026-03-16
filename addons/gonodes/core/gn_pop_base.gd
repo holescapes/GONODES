@@ -51,6 +51,10 @@ func requires_compute() -> bool:
 	return true
 
 
+func has_cpu_fallback() -> bool:
+	return true
+
+
 func supported_renderers() -> PackedStringArray:
 	return PackedStringArray(["forward_plus", "mobile"])
 
@@ -142,6 +146,37 @@ func _encode_int(v: int) -> PackedByteArray:
 ## with [param local_size] threads per group. 
 func _workgroups(count: int, local_size: int = 256) -> int:
 	return ceili(float(count) / float(local_size))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CPU Fallback Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Allocates a CPU-side GNParticleData with arrays pre-sized for [param max_count].
+func _allocate_particles_cpu(max_count: int) -> GNParticleData:
+	var data := GNParticleData.new()
+	data.is_cpu = true
+	data.max_particles = max_count
+	data.particle_count = 0
+	data.stride = STANDARD_STRIDE
+	data.attribute_layout = _get_standard_layout().duplicate(true)
+	data.cpu_positions.resize(max_count)
+	data.cpu_velocities.resize(max_count)
+	data.cpu_colors.resize(max_count)
+	data.cpu_ages.resize(max_count)
+	data.cpu_lives.resize(max_count)
+	data.cpu_masses.resize(max_count)
+	data.cpu_pscales.resize(max_count)
+	return data
+
+
+## Safely extracts CPU-capable GNParticleData from inputs at [param port].
+func _get_input_pop_cpu(inputs: Array[GNData], port: int = 0) -> GNParticleData:
+	if port < inputs.size() and inputs[port] is GNParticleData:
+		var pd := inputs[port] as GNParticleData
+		if pd.is_cpu:
+			return pd
+	return null
 
 
 

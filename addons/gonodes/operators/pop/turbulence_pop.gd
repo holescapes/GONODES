@@ -60,3 +60,43 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(uniform_set)
 
 	return pd
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var pd := _get_input_pop_cpu(inputs)
+	if pd == null or not pd.has_particles():
+		return null
+
+	var amplitude: float = get_param_value("amplitude")
+	var frequency: float = get_param_value("frequency")
+	var roughness: float = get_param_value("roughness")
+	var octaves: int = get_param_value("octaves")
+	var speed: float = get_param_value("speed")
+	var dt: float = current_delta
+	var t: float = elapsed_time * speed
+
+	# Use FastNoiseLite for curl noise approximation
+	var noise := FastNoiseLite.new()
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	noise.frequency = frequency
+	noise.fractal_octaves = octaves
+	noise.fractal_gain = roughness
+
+	for i in range(pd.particle_count):
+		var pos: Vector3 = pd.cpu_positions[i]
+		# Curl noise via finite differences of 3D noise
+		var eps: float = 0.01
+		var n_x0: float = noise.get_noise_3d(pos.x + eps, pos.y, pos.z + t)
+		var n_x1: float = noise.get_noise_3d(pos.x - eps, pos.y, pos.z + t)
+		var n_y0: float = noise.get_noise_3d(pos.x, pos.y + eps, pos.z + t)
+		var n_y1: float = noise.get_noise_3d(pos.x, pos.y - eps, pos.z + t)
+		var n_z0: float = noise.get_noise_3d(pos.x, pos.y, pos.z + eps + t)
+		var n_z1: float = noise.get_noise_3d(pos.x, pos.y, pos.z - eps + t)
+		var curl := Vector3(
+			(n_y0 - n_y1) - (n_z0 - n_z1),
+			(n_z0 - n_z1) - (n_x0 - n_x1),
+			(n_x0 - n_x1) - (n_y0 - n_y1)
+		) / (2.0 * eps)
+		pd.cpu_velocities[i] += curl * amplitude * dt
+
+	return pd

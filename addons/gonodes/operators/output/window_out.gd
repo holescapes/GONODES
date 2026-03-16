@@ -57,6 +57,13 @@ var _overlay_owner: GNUiBase = null
 ## Track open WindowOUT instances for multi-window validation on mobile/web.
 static var _open_instance_ids: Dictionary = {}
 
+## Whether this WindowOUT runs in embedded mode (mobile/web).
+## Embedded mode parents display into the main viewport instead of a Window.
+var _embedded_mode: bool = false
+
+## Main viewport container for embedded mode (Control in scene tree root).
+var _embedded_root: Control = null
+
 
 func _init() -> void:
 	node_type = "window"
@@ -102,27 +109,29 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var _is_single_window := platform in ["android", "ios", "web"]
 	if _is_single_window and _open_instance_ids.size() > 1 and should_open:
 		node_warning = "Multiple WindowOUT nodes open — %s supports only one window. Only the first will display." % platform.capitalize()
-	elif _is_single_window and should_open:
-		# TODO Phase 6: On mobile/web, parent TextureRect + UI panel into the
-		# main viewport instead of creating a Window node.  For now, the Window
-		# approach works on desktop; mobile/web display requires adaptation.
-		pass
+
+	_embedded_mode = _is_single_window
 
 	_ensure_window()
 
-	# Sync window visibility with the "open" parameter
-	if _window != null and _window.visible != should_open:
-		_window.visible = should_open
-		if should_open:
-			GNLogger.info("WindowOUT", "'%s' output window re-opened via parameter" % id)
+	if _embedded_mode:
+		# Embedded mode — show/hide the fullscreen Control in the main viewport
+		if _embedded_root != null:
+			_embedded_root.visible = should_open
+	else:
+		# Desktop mode — Window node
+		if _window != null and _window.visible != should_open:
+			_window.visible = should_open
+			if should_open:
+				GNLogger.info("WindowOUT", "'%s' output window re-opened via parameter" % id)
 
 	# Apply lightweight params every frame (title, texture)
-	if _window != null:
+	if _window != null and not _embedded_mode:
 		_window.title = get_param_value("title")
 
 	# Apply heavyweight window params only when OUR params changed
 	# (not when upstream input changes mark us cook-dirty)
-	if _window_params_dirty:
+	if _window_params_dirty and not _embedded_mode:
 		_apply_window_params()
 		_window_params_dirty = false
 
@@ -142,12 +151,15 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return null
 
 
-## Lazily creates the Window + TextureRect + panel UI root.
-## Window is added as a child of this Node — it becomes a separate OS window.
-## UI Controls are parented directly in the Window — native Godot input routing,
-## no SubViewportContainer indirection.
+## Lazily creates the display infrastructure.
+## Desktop: Window + TextureRect + panel UI root (separate OS window).
+## Mobile/Web: fullscreen Control in the main viewport (embedded mode).
 func _ensure_window() -> void:
 	if _window_created:
+		return
+
+	if _embedded_mode:
+		_ensure_embedded()
 		return
 
 	_window = Window.new()
@@ -208,6 +220,48 @@ func _ensure_window() -> void:
 	add_child(_window)
 	_window_created = true
 	GNLogger.info("WindowOUT", "'%s' output window created: '%s'" % [id, _window.title])
+
+
+## Creates the embedded-mode layout: fullscreen Control in the main viewport.
+## Used on mobile/web where standalone Window nodes are not supported.
+func _ensure_embedded() -> void:
+	if _window_created:
+		return
+
+	_embedded_root = Control.new()
+	_embedded_root.name = "GNEmbedded_%s" % id
+	_embedded_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_embedded_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_embedded_root.process_mode = Node.PROCESS_MODE_ALWAYS
+	_embedded_root.visible = false  # Shown when "open" param is true
+
+	# Background texture
+	_display_rect = TextureRect.new()
+	_display_rect.name = "Display"
+	_display_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_display_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_display_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_embedded_root.add_child(_display_rect)
+	_display_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	# UI panel root
+	_panel_ui_root = VBoxContainer.new()
+	_panel_ui_root.name = "UIRoot"
+	_panel_ui_root.mouse_filter = Control.MOUSE_FILTER_PASS
+	_panel_ui_root.visible = false
+	_embedded_root.add_child(_panel_ui_root)
+	_panel_ui_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	# Store overlay reference for UI widgets
+	_embedded_root.set_meta("gn_panel_overlay", self)
+
+	# Parent into main scene tree root so it fills the viewport
+	var tree := get_tree()
+	if tree != null and tree.root != null:
+		tree.root.add_child.call_deferred(_embedded_root)
+
+	_window_created = true
+	GNLogger.info("WindowOUT", "'%s' embedded display created (mobile/web mode)" % id)
 
 
 ## Applies current parameter values to the Window node.

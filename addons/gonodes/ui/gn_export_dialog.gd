@@ -2,23 +2,92 @@ class_name GNExportDialog
 extends Window
 ## Export dialog for building standalone GONODES applications.
 ##
-## Presents an output directory picker and kicks off a Quick Build via
-## GNPatchExporter.  All runtime settings (renderer, VSync, window layout)
-## are automatic — renderer uses Forward+ with OpenGL fallback, and each
-## WindowOUT in the patch controls its own display window.
-## Displays progress + result.
+## The user picks a concrete target platform (OS + architecture) and a renderer
+## independently.  Eight platform targets cover all Godot export configurations:
+##
+##   windows_x86_64, windows_arm64, linux_x86_64, linux_arm64, macos,
+##   android, ios, web
+##
+## Three renderers are available:  Forward+, Mobile, Compatibility.
+## The user chooses the renderer — we don't force it per platform.
+##
+## Before building, the dialog scans the current network against the target
+## platform + renderer and shows a compatibility summary.  Warnings (CPU
+## fallback) don't block the build; errors (unsupported nodes) show but
+## the user can still proceed — the nodes will simply be skipped at runtime.
+##
+## A template-availability hint is shown when no pre-built Player template
+## exists for the selected platform.
 
 
 ## Emitted when user confirms the export.  The editor wires this to start the build.
 signal export_requested(settings: Dictionary)
 
 
+# ─── Platform definitions ─────────────────────────────────────────────────────
+
+## Internal platform IDs — each maps 1:1 to a templates/<id>/ directory.
+const _PLATFORM_IDS := [
+	"windows_x86_64", "windows_arm64",
+	"linux_x86_64", "linux_arm64",
+	"macos",
+	"android", "ios", "web",
+]
+
+## Display names for the platform dropdown (same order as _PLATFORM_IDS).
+const _PLATFORM_LABELS := [
+	"Windows x86_64", "Windows ARM64",
+	"Linux x86_64", "Linux ARM64",
+	"macOS (Universal)",
+	"Android", "iOS", "Web",
+]
+
+## Maps each platform ID to the OS-level string used by supported_platforms().
+## Desktop variants collapse to their base OS name; mobile/web are identity.
+const _PLATFORM_TO_OS := {
+	"windows_x86_64": "windows",
+	"windows_arm64":  "windows",
+	"linux_x86_64":   "linux",
+	"linux_arm64":    "linux",
+	"macos":          "macos",
+	"android":        "android",
+	"ios":            "ios",
+	"web":            "web",
+}
+
+# ─── Renderer definitions ─────────────────────────────────────────────────────
+
+## Internal renderer IDs (Godot's canonical strings).
+const _RENDERER_IDS := ["forward_plus", "mobile", "gl_compatibility"]
+
+## Display names for the renderer dropdown.
+const _RENDERER_LABELS := ["Forward+", "Mobile", "Compatibility"]
+
+## Allowed renderer indices per platform.  Indices into _RENDERER_IDS / _RENDERER_LABELS.
+## Desktop: all three.  Android/iOS: Mobile + Compatibility.  Web: Compatibility only.
+const _PLATFORM_ALLOWED_RENDERERS := {
+	"windows_x86_64": [0, 1, 2],
+	"windows_arm64":  [0, 1, 2],
+	"linux_x86_64":   [0, 1, 2],
+	"linux_arm64":    [0, 1, 2],
+	"macos":          [0, 1, 2],
+	"android":        [1, 2],     # Mobile, Compatibility
+	"ios":            [1, 2],     # Mobile, Compatibility
+	"web":            [2],        # Compatibility only
+}
+
+
 # ─── Controls ──────────────────────────────────────────────────────────────────
+
+var _platform_btn: OptionButton
+var _renderer_btn: OptionButton
+var _template_hint: Label
 var _output_dir_edit: LineEdit
 var _browse_btn: Button
 var _build_btn: Button
 var _cancel_btn: Button
 var _progress_label: Label
+var _compat_label: RichTextLabel
 var _dir_dialog: FileDialog
 
 ## Currently active exporter (null when idle).
@@ -27,10 +96,13 @@ var _exporter: RefCounted = null
 ## Patch path set by the editor before showing.
 var patch_path: String = ""
 
+## Network reference set by the editor — used for compat scan.
+var network: GNNetwork = null
+
 
 func _ready() -> void:
-	title = "Export Patch — Quick Build"
-	size = Vector2i(480, 200)
+	title = "Export Patch"
+	size = Vector2i(580, 460)
 	exclusive = true
 	unresizable = false
 
@@ -43,8 +115,30 @@ func _ready() -> void:
 	add_child(margin)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 10)
+	vbox.add_theme_constant_override("separation", 8)
 	margin.add_child(vbox)
+
+	# ── Platform ─────────────────────────────────────────────────────────
+	vbox.add_child(_make_label("Target Platform"))
+	_platform_btn = OptionButton.new()
+	for label in _PLATFORM_LABELS:
+		_platform_btn.add_item(label)
+	_platform_btn.selected = _detect_host_platform_index()
+	_platform_btn.item_selected.connect(_on_selection_changed)
+	vbox.add_child(_platform_btn)
+
+	# ── Renderer ─────────────────────────────────────────────────────────
+	vbox.add_child(_make_label("Renderer"))
+	_renderer_btn = OptionButton.new()
+	_renderer_btn.item_selected.connect(_on_selection_changed)
+	vbox.add_child(_renderer_btn)
+	_populate_renderer_dropdown(_platform_btn.selected)
+
+	# ── Template availability hint ───────────────────────────────────────
+	_template_hint = Label.new()
+	_template_hint.add_theme_font_size_override("font_size", 12)
+	_template_hint.autowrap_mode = TextServer.AUTOWRAP_WORD
+	vbox.add_child(_template_hint)
 
 	# ── Output Directory ─────────────────────────────────────────────────
 	vbox.add_child(_make_label("Output Directory"))
@@ -55,10 +149,20 @@ func _ready() -> void:
 	_output_dir_edit.placeholder_text = "Choose output folder..."
 	dir_hbox.add_child(_output_dir_edit)
 	_browse_btn = Button.new()
-	_browse_btn.text = "Browse…"
+	_browse_btn.text = "Browse..."
 	_browse_btn.pressed.connect(_on_browse_pressed)
 	dir_hbox.add_child(_browse_btn)
 	vbox.add_child(dir_hbox)
+
+	# ── Compatibility Summary ────────────────────────────────────────────
+	vbox.add_child(_make_label("Compatibility"))
+	_compat_label = RichTextLabel.new()
+	_compat_label.bbcode_enabled = true
+	_compat_label.fit_content = true
+	_compat_label.custom_minimum_size.y = 60
+	_compat_label.scroll_active = true
+	_compat_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_child(_compat_label)
 
 	# ── Progress ─────────────────────────────────────────────────────────
 	_progress_label = Label.new()
@@ -89,17 +193,21 @@ func _ready() -> void:
 	_dir_dialog.dir_selected.connect(_on_dir_selected)
 	add_child(_dir_dialog)
 
-	# Close button
 	close_requested.connect(func(): hide())
+
+	# Initial UI update
+	_update_template_hint()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Public
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Shows the dialog, pre-filling a default output directory based on the patch.
-func show_for_patch(p_patch_path: String) -> void:
+## Shows the dialog, pre-filling output directory from the patch path.
+func show_for_patch(p_patch_path: String, p_network: GNNetwork = null) -> void:
 	patch_path = p_patch_path
+	network = p_network
+
 	if not patch_path.is_empty():
 		var stem := patch_path.get_file().get_basename()
 		var default_dir := patch_path.get_base_dir().path_join(stem + "_build")
@@ -107,19 +215,209 @@ func show_for_patch(p_patch_path: String) -> void:
 
 	_progress_label.text = ""
 	_build_btn.disabled = false
+	_update_template_hint()
+	_run_compat_scan()
 	popup_centered()
 
 
 ## Returns the current settings as a Dictionary.
 func get_export_settings() -> Dictionary:
 	return {
+		"platform": _PLATFORM_IDS[_platform_btn.selected],
+		"renderer": _RENDERER_IDS[_get_selected_renderer_index()],
 		"output_dir": _output_dir_edit.text,
 	}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Host Detection
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns the _PLATFORM_IDS index matching the host machine.
+func _detect_host_platform_index() -> int:
+	var os_name := OS.get_name()
+	var arch := Engine.get_architecture_name()  # e.g. "x86_64", "arm64"
+	var is_arm: bool = arch.contains("arm") or arch.contains("aarch")
+
+	var host_id: String
+	match os_name:
+		"Windows":
+			host_id = "windows_arm64" if is_arm else "windows_x86_64"
+		"Linux", "FreeBSD":
+			host_id = "linux_arm64" if is_arm else "linux_x86_64"
+		"macOS":
+			host_id = "macos"
+		"Android":
+			host_id = "android"
+		"iOS":
+			host_id = "ios"
+		"Web":
+			host_id = "web"
+		_:
+			host_id = "windows_x86_64"
+
+	var idx: int = _PLATFORM_IDS.find(host_id)
+	return idx if idx >= 0 else 0
+
+
+## Repopulates the renderer dropdown with only the renderers allowed for the
+## given platform, and selects the best default.
+func _populate_renderer_dropdown(plat_idx: int) -> void:
+	var plat_id: String = _PLATFORM_IDS[plat_idx]
+	var allowed: Array = _PLATFORM_ALLOWED_RENDERERS.get(plat_id, [0, 1, 2])
+
+	_renderer_btn.clear()
+	for ri: int in allowed:
+		_renderer_btn.add_item(_RENDERER_LABELS[ri])
+		# Store the real _RENDERER_IDS index as item metadata
+		_renderer_btn.set_item_metadata(_renderer_btn.item_count - 1, ri)
+
+	# Pick the best default: first allowed entry is already the recommended one
+	_renderer_btn.selected = 0
+
+
+## Returns the real _RENDERER_IDS index for the currently selected renderer item.
+func _get_selected_renderer_index() -> int:
+	var sel: int = _renderer_btn.selected
+	if sel < 0:
+		return 2  # Compatibility fallback
+	return _renderer_btn.get_item_metadata(sel)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Template Availability
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Checks whether a template directory exists for the selected platform
+## and updates the hint label accordingly.
+func _update_template_hint() -> void:
+	if _template_hint == null:
+		return
+
+	var plat_id: String = _PLATFORM_IDS[_platform_btn.selected]
+	var plat_label: String = _PLATFORM_LABELS[_platform_btn.selected]
+
+	# Use the same search logic as GNPatchExporter._find_template_dir()
+	var found := false
+	var search_roots: PackedStringArray = []
+	search_roots.append(ProjectSettings.globalize_path("res://"))
+	search_roots.append(OS.get_executable_path().get_base_dir())
+
+	for root in search_roots:
+		var candidate := root.path_join("templates").path_join(plat_id)
+		if DirAccess.dir_exists_absolute(candidate):
+			var d := DirAccess.open(candidate)
+			if d != null:
+				d.list_dir_begin()
+				var first := d.get_next()
+				d.list_dir_end()
+				if not first.is_empty():
+					found = true
+					break
+
+	if found:
+		_template_hint.text = ""
+		_template_hint.add_theme_color_override("font_color", Color(0.5, 0.8, 0.5))
+	else:
+		_template_hint.text = ("No template found for %s. "
+			+ "Build it first: scripts/build_templates -Platforms %s") % [plat_label, plat_id]
+		_template_hint.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Compatibility Scan
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Scans the network against the selected platform+renderer and updates
+## the compatibility summary label.
+func _run_compat_scan() -> void:
+	if _compat_label == null:
+		return
+
+	var plat_idx: int = _platform_btn.selected
+	var plat_id: String = _PLATFORM_IDS[plat_idx]
+	var plat_label: String = _PLATFORM_LABELS[plat_idx]
+	var rend_idx: int = _get_selected_renderer_index()
+	var target_renderer: String = _RENDERER_IDS[rend_idx]
+	var renderer_label: String = _RENDERER_LABELS[rend_idx]
+
+	if network == null or network.nodes.is_empty():
+		_compat_label.text = "[color=#aaaaaa]No nodes to check.[/color]"
+		return
+
+	# Map concrete platform ID to OS-level name for supported_platforms() checks
+	var check_platform: String = _PLATFORM_TO_OS.get(plat_id, plat_id)
+
+	var errors: int = 0
+	var warnings: int = 0
+	var error_nodes: PackedStringArray = []
+	var warn_nodes: PackedStringArray = []
+
+	for node_id: String in network.nodes:
+		var node: GNNode = network.nodes[node_id]
+		if node == null:
+			continue
+
+		# Renderer check
+		var sr: PackedStringArray = node.supported_renderers()
+		if not sr.has(target_renderer):
+			if node.has_cpu_fallback():
+				warnings += 1
+				warn_nodes.append(node_id)
+			else:
+				errors += 1
+				error_nodes.append(node_id)
+
+		# Platform check
+		var sp: PackedStringArray = node.supported_platforms()
+		if not sp.has(check_platform):
+			errors += 1
+			if not error_nodes.has(node_id):
+				error_nodes.append(node_id)
+
+	var total: int = network.nodes.size()
+	var lines: PackedStringArray = []
+
+	if errors == 0 and warnings == 0:
+		lines.append("[color=#66ff66]All %d nodes compatible with %s / %s[/color]" % [
+			total, plat_label, renderer_label])
+	else:
+		if errors > 0:
+			lines.append("[color=#ff5555]%d node(s) will be SKIPPED (no fallback): %s[/color]" % [
+				errors, ", ".join(error_nodes)])
+		if warnings > 0:
+			lines.append("[color=#ffdd33]%d node(s) will use CPU fallback (slower): %s[/color]" % [
+				warnings, ", ".join(warn_nodes)])
+		lines.append("[color=#aaaaaa]Platform: %s | Renderer: %s | Total: %d nodes[/color]" % [
+			plat_label, renderer_label, total])
+
+	_compat_label.text = "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Callbacks
 # ═══════════════════════════════════════════════════════════════════════════════
+
+## Called when either the platform or renderer dropdown changes.
+func _on_selection_changed(_idx: int) -> void:
+	# If the platform changed, repopulate the renderer list for the new platform
+	var plat_id: String = _PLATFORM_IDS[_platform_btn.selected]
+	var allowed: Array = _PLATFORM_ALLOWED_RENDERERS.get(plat_id, [0, 1, 2])
+	var current_renderer_count: int = _renderer_btn.item_count
+	if current_renderer_count != allowed.size():
+		_populate_renderer_dropdown(_platform_btn.selected)
+	else:
+		# Verify items still match (handles switching between platforms with same count)
+		var mismatch := false
+		for i in current_renderer_count:
+			if _renderer_btn.get_item_metadata(i) != allowed[i]:
+				mismatch = true
+				break
+		if mismatch:
+			_populate_renderer_dropdown(_platform_btn.selected)
+	_update_template_hint()
+	_run_compat_scan()
+
 
 func _on_browse_pressed() -> void:
 	if not _output_dir_edit.text.is_empty():
@@ -134,11 +432,11 @@ func _on_dir_selected(dir: String) -> void:
 func _on_build_pressed() -> void:
 	var out_dir: String = _output_dir_edit.text.strip_edges()
 	if out_dir.is_empty():
-		_progress_label.text = "⚠ Please choose an output directory."
+		_progress_label.text = "Please choose an output directory."
 		_progress_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.2))
 		return
 	if patch_path.is_empty():
-		_progress_label.text = "⚠ No patch file loaded. Save your patch first."
+		_progress_label.text = "No patch file loaded. Save your patch first."
 		_progress_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.2))
 		return
 
@@ -146,19 +444,20 @@ func _on_build_pressed() -> void:
 	_progress_label.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
 	_progress_label.text = "Starting build..."
 
+	var platform_id: String = _PLATFORM_IDS[_platform_btn.selected]
+	var renderer_id: String = _RENDERER_IDS[_get_selected_renderer_index()]
+
 	# Configure exporter
 	_exporter = GNPatchExporter.new()
 	_exporter.patch_path = patch_path
 	_exporter.output_dir = out_dir
-
+	_exporter.target_platform = platform_id
+	_exporter.target_renderer = renderer_id
 	_exporter.progress.connect(_on_export_progress)
 	_exporter.completed.connect(_on_export_completed)
 
 	# Run the build
-	var err: int = _exporter.quick_build()
-	if err != OK and _progress_label.text.begins_with("Starting"):
-		# _fail already set a message via completed signal
-		pass
+	_exporter.quick_build()
 
 
 func _on_export_progress(message: String) -> void:
@@ -169,10 +468,10 @@ func _on_export_completed(success: bool, message: String) -> void:
 	_build_btn.disabled = false
 	if success:
 		_progress_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4))
-		_progress_label.text = "✓ " + message
+		_progress_label.text = message
 	else:
 		_progress_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
-		_progress_label.text = "✗ " + message
+		_progress_label.text = message
 	_exporter = null
 
 
@@ -185,15 +484,3 @@ func _make_label(text: String) -> Label:
 	lbl.text = text
 	lbl.add_theme_font_size_override("font_size", 13)
 	return lbl
-
-
-func _make_int_spin(default: int, min_val: int, max_val: int, tip: String) -> SpinBox:
-	var spin := SpinBox.new()
-	spin.min_value = min_val
-	spin.max_value = max_val
-	spin.value = default
-	spin.step = 1
-	spin.rounded = true
-	spin.tooltip_text = tip
-	spin.custom_minimum_size.x = 80
-	return spin

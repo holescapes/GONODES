@@ -148,3 +148,95 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_out_tex.resolution = Vector2i(w, h)
 	_out_tex.format = Image.FORMAT_RGBA8
 	return _out_tex
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var vol := _get_input_vol_cpu(inputs, 0)
+	if vol == null or not vol.has_volume():
+		return null
+
+	var w: int = get_param_value("width")
+	var h: int = get_param_value("height")
+	var max_steps: int = get_param_value("max_steps")
+	var step: float = get_param_value("step_size")
+	var dscale: float = get_param_value("density_scale")
+	var absorb: float = get_param_value("absorption")
+	var dist: float = get_param_value("cam_dist")
+	var yaw: float = deg_to_rad(get_param_value("cam_yaw"))
+	var pitch: float = deg_to_rad(get_param_value("cam_pitch"))
+	var fov_rad: float = deg_to_rad(get_param_value("fov"))
+
+	var eye := Vector3(
+		dist * cos(pitch) * sin(yaw),
+		dist * sin(pitch),
+		dist * cos(pitch) * cos(yaw))
+	var fwd := (-eye).normalized()
+	var world_up := Vector3.UP
+	var right := fwd.cross(world_up).normalized()
+	if right.length_squared() < 0.001:
+		right = Vector3.RIGHT
+	var up := right.cross(fwd).normalized()
+
+	var res: Vector3i = vol.resolution
+	var aspect: float = float(w) / float(h)
+	var half_h: float = tan(fov_rad * 0.5)
+
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+
+	for py in range(h):
+		for px in range(w):
+			var u: float = (float(px) + 0.5) / float(w) * 2.0 - 1.0
+			var v: float = (float(py) + 0.5) / float(h) * 2.0 - 1.0
+			var rd: Vector3 = (fwd + right * u * half_h * aspect + up * (-v) * half_h).normalized()
+
+			# Ray-AABB intersection with unit cube [-0.5, 0.5]
+			var t_near: float = 0.0
+			var t_far: float = 1e10
+			for axis in range(3):
+				var orig: float = [eye.x, eye.y, eye.z][axis]
+				var dir: float = [rd.x, rd.y, rd.z][axis]
+				if absf(dir) < 1e-8:
+					if orig < -0.5 or orig > 0.5:
+						t_far = -1.0
+						break
+				else:
+					var t0: float = (-0.5 - orig) / dir
+					var t1: float = (0.5 - orig) / dir
+					if t0 > t1:
+						var tmp: float = t0
+						t0 = t1
+						t1 = tmp
+					t_near = maxf(t_near, t0)
+					t_far = minf(t_far, t1)
+
+			if t_near >= t_far or t_far < 0.0:
+				img.set_pixel(px, py, Color.BLACK)
+				continue
+
+			# Front-to-back compositing
+			var transmittance: float = 1.0
+			var accumulated: float = 0.0
+			var t_cur: float = maxf(t_near, 0.0)
+
+			for _s in range(max_steps):
+				if t_cur > t_far or transmittance < 0.01:
+					break
+				var pos: Vector3 = eye + rd * t_cur
+				# Map [-0.5, 0.5] to [0, 1] for volume sampling
+				var uvw := Vector3(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
+				var density: float = _vol_sample_trilinear(vol.cpu_data, uvw, res) * dscale
+				if density > 0.0:
+					var alpha: float = 1.0 - exp(-absorb * density * step)
+					accumulated += transmittance * alpha * density
+					transmittance *= (1.0 - alpha)
+				t_cur += step
+
+			var brightness: float = clampf(accumulated, 0.0, 1.0)
+			img.set_pixel(px, py, Color(brightness, brightness, brightness, 1.0 - transmittance))
+
+	if _out_tex == null:
+		_out_tex = GNTextureData.new()
+	_out_tex.texture = ImageTexture.create_from_image(img)
+	_out_tex.resolution = Vector2i(w, h)
+	_out_tex.format = Image.FORMAT_RGBA8
+	return _out_tex

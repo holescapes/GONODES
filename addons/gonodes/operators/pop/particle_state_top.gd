@@ -44,43 +44,67 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var count: int = pd.particle_count
 	var height: int = ceili(float(count) / float(width))
 
-	# CPU readback of the full buffer
-	var ctx := GNGpuContext.get_context()
-	var raw: PackedByteArray = ctx.read_buffer(pd.rd_buffer, count * pd.stride)
-	var off: int = pd.get_attrib_offset(attrib_name)
-	if off < 0:
-		return null
-
-	var desc: GNParticleData.AttribDesc = pd.attribute_layout.get(attrib_name, null)
-	if desc == null:
-		return null
-
-	# Build an Image
+	# Build an Image from particle data
 	var img := Image.create(width, height, false, Image.FORMAT_RGBAF)
 	img.fill(Color.BLACK)
 
-	for i in range(count):
-		var px: int = i % width
-		var py: int = i / width
-		var base: int = i * pd.stride + off
-		var col := Color.BLACK
-		match desc.type:
-			"float":
-				var v: float = raw.decode_float(base) * vis_scale
-				col = Color(v, v, v, 1.0)
-			"vec2":
-				col.r = raw.decode_float(base) * vis_scale
-				col.g = raw.decode_float(base + 4) * vis_scale
-			"vec3":
-				col.r = raw.decode_float(base) * vis_scale
-				col.g = raw.decode_float(base + 4) * vis_scale
-				col.b = raw.decode_float(base + 8) * vis_scale
-			"vec4":
-				col.r = raw.decode_float(base) * vis_scale
-				col.g = raw.decode_float(base + 4) * vis_scale
-				col.b = raw.decode_float(base + 8) * vis_scale
-				col.a = raw.decode_float(base + 12) * vis_scale
-		img.set_pixel(px, py, col)
+	if pd.is_cpu:
+		# CPU particle path — read directly from CPU arrays
+		for i in range(count):
+			var px: int = i % width
+			var py: int = i / width
+			var col := Color.BLACK
+			match attrib_name:
+				"pos":
+					var p: Vector3 = pd.cpu_positions[i] * vis_scale
+					col = Color(p.x, p.y, p.z, 1.0)
+				"vel":
+					var v: Vector3 = pd.cpu_velocities[i] * vis_scale
+					col = Color(v.x, v.y, v.z, 1.0)
+				"color":
+					col = pd.cpu_colors[i]
+				"age":
+					var a: float = pd.cpu_ages[i] * vis_scale
+					col = Color(a, a, a, 1.0)
+				"life":
+					var l: float = pd.cpu_lives[i] * vis_scale
+					col = Color(l, l, l, 1.0)
+				"pscale":
+					var s: float = pd.cpu_pscales[i] * vis_scale
+					col = Color(s, s, s, 1.0)
+			img.set_pixel(px, py, col)
+	else:
+		# GPU readback path
+		var ctx := GNGpuContext.get_context()
+		var raw: PackedByteArray = ctx.read_buffer(pd.rd_buffer, count * pd.stride)
+		var off: int = pd.get_attrib_offset(attrib_name)
+		if off < 0:
+			return null
+		var desc: GNParticleData.AttribDesc = pd.attribute_layout.get(attrib_name, null)
+		if desc == null:
+			return null
+		for i in range(count):
+			var px: int = i % width
+			var py: int = i / width
+			var base: int = i * pd.stride + off
+			var col := Color.BLACK
+			match desc.type:
+				"float":
+					var v: float = raw.decode_float(base) * vis_scale
+					col = Color(v, v, v, 1.0)
+				"vec2":
+					col.r = raw.decode_float(base) * vis_scale
+					col.g = raw.decode_float(base + 4) * vis_scale
+				"vec3":
+					col.r = raw.decode_float(base) * vis_scale
+					col.g = raw.decode_float(base + 4) * vis_scale
+					col.b = raw.decode_float(base + 8) * vis_scale
+				"vec4":
+					col.r = raw.decode_float(base) * vis_scale
+					col.g = raw.decode_float(base + 4) * vis_scale
+					col.b = raw.decode_float(base + 8) * vis_scale
+					col.a = raw.decode_float(base + 12) * vis_scale
+			img.set_pixel(px, py, col)
 
 	if _cached_texture == null:
 		_cached_texture = GNTextureData.new()

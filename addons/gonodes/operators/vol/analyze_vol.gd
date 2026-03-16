@@ -82,3 +82,51 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	return out
 
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var vol := _get_input_vol_cpu(inputs, 0)
+	if vol == null or not vol.has_volume():
+		return null
+
+	var values: PackedFloat32Array = vol.cpu_data
+	var total: int = values.size()
+
+	var v_min: float = INF
+	var v_max: float = -INF
+	var v_sum: float = 0.0
+	var nonzero: int = 0
+
+	for i in range(total):
+		var v: float = values[i]
+		if v < v_min: v_min = v
+		if v > v_max: v_max = v
+		v_sum += v
+		if absf(v) > 1e-7:
+			nonzero += 1
+
+	var v_mean: float = v_sum / float(maxi(total, 1))
+
+	var out := GNChannelData.new()
+	out.sample_rate = 60.0
+	out.set_single_value("min", v_min)
+	out.set_single_value("max", v_max)
+	out.set_single_value("mean", v_mean)
+	out.set_single_value("sum", v_sum)
+	out.set_single_value("nonzero_count", float(nonzero))
+	out.set_single_value("total_voxels", float(total))
+
+	if get_param_value("histogram"):
+		var bins: int = get_param_value("hist_bins")
+		var range_val: float = v_max - v_min
+		if range_val < 1e-10:
+			range_val = 1.0
+		var hist := PackedFloat32Array()
+		hist.resize(bins)
+		for i in range(total):
+			var idx: int = clampi(int((values[i] - v_min) / range_val * float(bins)), 0, bins - 1)
+			hist[idx] += 1.0
+		out.set_channel("histogram", hist)
+		out.length = bins
+
+	return out
+

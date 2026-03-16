@@ -79,3 +79,35 @@ func _op_to_int(op: String) -> int:
 		"min": return 4
 		"mix": return 5
 	return 0
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var vol_a := _get_input_vol_cpu(inputs, 0)
+	var vol_b := _get_input_vol_cpu(inputs, 1)
+	if vol_a == null or not vol_a.has_volume():
+		return vol_b
+	if vol_b == null or not vol_b.has_volume():
+		return vol_a
+
+	var res: Vector3i = vol_a.resolution
+	var ch: int = vol_a.channel_count
+	var op_idx: int = _op_to_int(get_param_value("operation"))
+	var mix_f: float = get_param_value("mix_factor")
+	var scale_a: float = get_param_value("scale_a")
+	var scale_b: float = get_param_value("scale_b")
+
+	var out := _create_volume_cpu(res, ch, vol_a.field_name)
+	var total: int = res.x * res.y * res.z * ch
+
+	for i in range(total):
+		var a: float = vol_a.cpu_data[i] * scale_a
+		var b: float = vol_b.cpu_data[i] * scale_b if i < vol_b.cpu_data.size() else 0.0
+		match op_idx:
+			0: out.cpu_data[i] = a + b          # add
+			1: out.cpu_data[i] = a - b          # subtract
+			2: out.cpu_data[i] = a * b          # multiply
+			3: out.cpu_data[i] = maxf(a, b)     # max
+			4: out.cpu_data[i] = minf(a, b)     # min
+			5: out.cpu_data[i] = lerpf(a, b, mix_f)  # mix
+
+	return out

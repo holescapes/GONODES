@@ -61,3 +61,25 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(uniform_set)
 
 	return pd  # Modified in-place
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var pd := _get_input_pop_cpu(inputs)
+	if pd == null or not pd.has_particles():
+		return null
+
+	var fx: float = get_param_value("gravity_x") + get_param_value("wind_x")
+	var fy: float = get_param_value("gravity_y") + get_param_value("wind_y")
+	var fz: float = get_param_value("gravity_z") + get_param_value("wind_z")
+	var force := Vector3(fx, fy, fz)
+	var drag: float = get_param_value("drag")
+	var dt: float = current_delta
+
+	for i in range(pd.particle_count):
+		var vel: Vector3 = pd.cpu_velocities[i]
+		vel += force * dt
+		vel *= (1.0 - drag * dt)
+		pd.cpu_velocities[i] = vel
+		pd.cpu_positions[i] += vel * dt
+
+	return pd

@@ -79,3 +79,40 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		temp_vol.release_to_pool()
 
 	return dst_vol
+
+
+func _cook_cpu(inputs: Array[GNData]) -> GNData:
+	var vol_in := _get_input_vol_cpu(inputs)
+	if vol_in == null or not vol_in.has_volume():
+		return null
+
+	var res: Vector3i = vol_in.resolution
+	var radius: int = get_param_value("radius")
+	var passes: int = get_param_value("passes")
+	var ch: int = vol_in.channel_count
+
+	var src: PackedFloat32Array = vol_in.cpu_data.duplicate()
+	var dst: PackedFloat32Array = PackedFloat32Array()
+	dst.resize(src.size())
+
+	for _p in range(passes):
+		dst.fill(0.0)
+		for z in range(res.z):
+			for y in range(res.y):
+				for x in range(res.x):
+					var total: float = 0.0
+					var count: int = 0
+					for dz in range(-radius, radius + 1):
+						for dy in range(-radius, radius + 1):
+							for dx in range(-radius, radius + 1):
+								total += _vol_sample(src, x + dx, y + dy, z + dz, res, ch)
+								count += 1
+					dst[_vol_idx(x, y, z, res, ch)] = total / float(count)
+		# Swap for next pass
+		var tmp: PackedFloat32Array = src
+		src = dst
+		dst = tmp
+
+	var out := _create_volume_cpu(res, ch, vol_in.field_name)
+	out.cpu_data = src
+	return out
