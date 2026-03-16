@@ -1189,6 +1189,26 @@ func _register_core_operators() -> void:
 	_reg("OscOUT",          "OUT", OscOUT,
 		"Send CHOP channels as OSC messages over UDP.")
 
+	# ── OUTs: Host Bridge (LibGodot Embedding) ────────────────────────
+	_reg("HostOutTOP",      "OUT", HostOutTOP,
+		"Export texture to host application (LibGodot embedding). Zero-copy shared GPU.")
+	_reg("HostOutCHOP",     "OUT", HostOutCHOP,
+		"Export channel data to host application (LibGodot embedding).")
+	_reg("HostOutDAT",      "OUT", HostOutDAT,
+		"Export table/text data to host application (LibGodot embedding).")
+
+	# ── TOPs: Host Bridge ──────────────────────────────────────────────
+	_reg("HostInTOP",       "TOP", HostInTOP,
+		"Receive texture from host application (LibGodot embedding). Zero-copy shared GPU.")
+
+	# ── CHOPs: Host Bridge ─────────────────────────────────────────────
+	_reg("HostInCHOP",      "CHOP", HostInCHOP,
+		"Receive channel data from host application (LibGodot embedding).")
+
+	# ── DATs: Host Bridge ──────────────────────────────────────────────
+	_reg("HostInDAT",       "DAT", HostInDAT,
+		"Receive table/text data from host application (LibGodot embedding).")
+
 	# ── POPs: Particle Operators ───────────────────────────────────────
 	_reg("NullPOP",        "POP", NullPOP,
 		"Pass-through for feedback loops, organization, and references.")

@@ -1,0 +1,64 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "host_lfo": {
+            "type": "HostInCHOP",
+            "position": [100, 200],
+            "parameters": {
+                "label": {
+                    "value": "LFO from host"
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1280,
+                        "y": 720
+                    }
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "scale": {
+                    "value": 5.0
+                },
+                "monochrome": {
+                    "value": false
+                }
+            }
+        },
+        "host_out": {
+            "type": "HostOutTOP",
+            "position": [900, 100],
+            "parameters": {
+                "label": {
+                    "value": "Main output"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "host_out",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LibGONODES Example Patch — show.gnpatch\n\nUsed by the SDL, OpenGL, Vulkan, and Metal host examples.\n\nThe host injects an LFO into \"host_lfo\" (HostInCHOP)\nand reads the rendered texture from \"host_out\" (HostOutTOP).\n\nThe host drives noise1.time_offset via parameter API\nor uses the LFO channel to animate the noise.",
+            "position": [-100.0, -150.0],
+            "size": [550.0, 180.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

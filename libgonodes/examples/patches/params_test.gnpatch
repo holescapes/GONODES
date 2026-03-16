@@ -1,0 +1,158 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [400, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "time_offset": {
+                    "value": 0.0
+                },
+                "seed": {
+                    "value": 0
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "text1": {
+            "type": "TextTOP",
+            "position": [400, 300],
+            "parameters": {
+                "text": {
+                    "value": "Hello"
+                }
+            }
+        },
+        "constant1": {
+            "type": "ConstantTOP",
+            "position": [400, 500],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.0,
+                        "g": 0.0,
+                        "b": 0.0,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "host_lfo": {
+            "type": "HostInCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "label": {
+                    "value": "LFO from host"
+                }
+            }
+        },
+        "host_chop": {
+            "type": "HostInCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "label": {
+                    "value": "Transform channels"
+                }
+            }
+        },
+        "host_wave": {
+            "type": "HostInCHOP",
+            "position": [100, 500],
+            "parameters": {
+                "label": {
+                    "value": "Waveform data"
+                }
+            }
+        },
+        "host_dat": {
+            "type": "HostInDAT",
+            "position": [100, 700],
+            "parameters": {
+                "label": {
+                    "value": "Sensor table from host"
+                }
+            }
+        },
+        "host_out_tex": {
+            "type": "HostOutTOP",
+            "position": [800, 100],
+            "parameters": {
+                "label": {
+                    "value": "Texture output"
+                }
+            }
+        },
+        "host_out_chop": {
+            "type": "HostOutCHOP",
+            "position": [800, 300],
+            "parameters": {
+                "label": {
+                    "value": "Channel output"
+                }
+            }
+        },
+        "host_out_dat": {
+            "type": "HostOutDAT",
+            "position": [800, 700],
+            "parameters": {
+                "label": {
+                    "value": "Table output"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "host_out_tex",
+            "to_port": 0
+        },
+        {
+            "from": "host_chop",
+            "from_port": 0,
+            "to": "host_out_chop",
+            "to_port": 0
+        },
+        {
+            "from": "host_dat",
+            "from_port": 0,
+            "to": "host_out_dat",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LibGONODES Parameters Demo Patch — params_test.gnpatch\n\nUsed by the params_demo example to exercise the full C API:\n  • Parameter get/set on noise1, text1, constant1\n  • CHOP injection (host_lfo, host_chop, host_wave)\n  • DAT injection (host_dat)\n  • Texture output (host_out_tex ← noise1)\n  • CHOP output (host_out_chop ← host_chop passthrough)\n  • DAT output (host_out_dat ← host_dat passthrough)\n  • Introspection: list_nodes, list_connections\n  • Parameter change callback",
+            "position": [-150.0, -200.0],
+            "size": [600.0, 250.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

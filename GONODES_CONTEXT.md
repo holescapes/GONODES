@@ -78,18 +78,23 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 │  └─────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────┘
 
-Embedding Model (Future):
-├──────────────────────────┐
-│  Host App (VDMX, etc.)   │
-│  ├────────────────────┐  │
-│  │ LibGodot (embedded) │  │
-│  │  + GONODES Framework│  │
-│  │  (GDExtension)     │  │
-│  └────────────────────┘  │
-│  Host feeds data in →    │
-│  ← reads textures out    │
-│  Loads .GNNode patches   │
-└──────────────────────────┘
+Embedding Model (libgonodes — IMPLEMENTED):
+├──────────────────────────────────────────────┐
+│  Host App (VDMX, Resolume, custom C/C++)     │
+│  ├────────────────────────────────────────┐  │
+│  │ libgonodes.so/dll (C API)              │  │
+│  │  ├─ gonodes_bootstrap (loads LibGodot) │  │
+│  │  ├─ gonodes_host (30+ API functions)   │  │
+│  │  └─ GNEmbeddedHost (GDScript bridge)   │  │
+│  │  + GONODES Framework (GDExtension)     │  │
+│  └────────────────────────────────────────┘  │
+│  GPU context sharing: Vulkan/Metal/OpenGL    │
+│  Host feeds data in → HostIn{TOP,CHOP,DAT}  │
+│  ← reads textures out  HostOut{TOP,CHOP,DAT}│
+│  Loads .gnpatch via API, hot-reload capable  │
+│  5 example host apps (SDL, Vulkan, GLFW,     │
+│  Metal, headless params demo)                │
+└──────────────────────────────────────────────┘
 ```
 
 ---
@@ -1755,10 +1760,14 @@ GONODES/
 ### Medium-term
 - [x] File output operators (ImageSaveOUT, TextureSaveOUT, TableSaveOUT, MovieOUT, FFmpegOUT, RecordOUT + TOPtoIMG bridge)
 - [x] POP family (GPU point/particle operators — see Section 18)
-- [ ] LibGodot embedding proof-of-concept
-  - Build a minimal host app that embeds LibGodot
-  - Load a .GNNode patch via API
-  - Feed data in, read textures out
+- [x] LibGodot embedding — **IMPLEMENTED** (`libgonodes/` C shared library)
+  - Full C API (`gonodes_host.h`) with 30+ functions: lifecycle, patch management, frame loop, input injection, output reading, introspection, callbacks, stats
+  - GPU context sharing: Vulkan (VkDevice), Metal (MTLDevice), OpenGL (HGLRC/EGLContext) — zero-copy texture exchange on shared device
+  - GNEmbeddedHost GDScript singleton replaces player_main.gd for embedded mode
+  - 6 bridge operators: HostInTOP, HostInCHOP, HostInDAT, HostOutTOP, HostOutCHOP, HostOutDAT
+  - Stateful hot-reload (preserves CHOP values, timers, feedback textures)
+  - 5 example host apps: SDL+OpenGL, Vulkan, GLFW+OpenGL, Metal (macOS), params demo (headless)
+  - CMake build system, integration guide in `dev_docs/INTEGRATION.md`
 - [ ] Syphon (macOS) / Spout (Windows) texture sharing
 - [x] FFmpeg GDExtension addon (`gn_ext_ffmpeg`) — **Done: first reference extension for GNExtensionRegistry**
   - Wraps [EIRTeam/EIRTeam.FFmpeg](https://github.com/EIRTeam/EIRTeam.FFmpeg) GDExtension
@@ -3586,7 +3595,7 @@ The test scene includes a `CheckButton` (top-right corner, "Debug Log") that tog
 2. **Expression sandboxing:** GDScript `Expression` class is limited. May need a custom expression parser for the `op()/chop()` syntax. Evaluate during Phase 4.
 3. **Viewport performance ceiling:** How many SubViewports can run simultaneously before frame drops? Profile during Phase 6.
 4. **Thread safety:** When moving cook engine to threads (future), GNData needs immutable snapshots or double-buffering. Design for this but don't implement in MVP.
-5. **LibGodot API surface:** What exactly does the LibGodot C API expose? Need to research when targeting host embedding post-MVP.
+5. ~~**LibGodot API surface:**~~ **RESOLVED.** LibGodot exposes `godot_setup()`, `godot_start()`, `godot_iteration()`, `godot_shutdown()`. GONODES wraps these in `libgonodes/src/gonodes_bootstrap.cpp` with dynamic loading. Full C API implemented in `gonodes_host.h` (30+ functions). See `dev_docs/INTEGRATION.md`.
 6. **Renderer live-switching:** Does Godot 4.6 support hot-swapping renderers without restart? If not, what's the best workaround for editor preview?
 7. **Compute shader availability:** Verify that `RenderingDevice` compute dispatches work in Mobile renderer on all targets (some mobile GPUs have limitations).
 8. **POP feedback loops:** Validate that the one-frame-latency feedback model works smoothly with Godot's `SubViewport` / buffer management.

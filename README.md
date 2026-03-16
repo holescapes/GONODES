@@ -194,7 +194,7 @@ For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT
 
 ## Roadmap
 
-- LibGodot embedding for host applications (VDMX, Resolume)
+- ~~LibGodot embedding for host applications~~ — **Done.** Full C API (`libgonodes/`), 6 bridge operators (HostIn/OutTOP, CHOP, DAT), GPU context sharing (Vulkan/Metal/OpenGL zero-copy), hot-reload, introspection, 5 example apps. See [dev_docs/INTEGRATION.md](dev_docs/INTEGRATION.md).
 - FFmpeg GDExtension — H.264, VP9, AV1, ProRes decode/encode
 - HAP codec (GPU-direct S3TC/DXT video for VJ workflows)
 - NDI video streaming
