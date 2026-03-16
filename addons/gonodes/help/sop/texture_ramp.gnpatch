@@ -1,0 +1,85 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "grid1": {
+            "type": "GridSOP",
+            "position": [100, 100],
+            "parameters": {
+                "sizex": {"value": 2.0},
+                "sizey": {"value": 2.0},
+                "rows": {"value": 32},
+                "columns": {"value": 32}
+            }
+        },
+        "ramp1": {
+            "type": "RampTOP",
+            "position": [100, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 256, "y": 256}
+                }
+            }
+        },
+        "texture1": {
+            "type": "TextureSOP",
+            "position": [450, 200],
+            "parameters": {
+                "mode": {"value": 1},
+                "displacement_scale": {"value": 0.5},
+                "uv_set": {"value": 0}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 200],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [800, 400],
+            "parameters": {
+                "tx": {"value": 2.0},
+                "ty": {"value": 2.0},
+                "tz": {"value": 3.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1150, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1500, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "grid1", "from_port": 0, "to": "texture1", "to_port": 0},
+        {"from": "ramp1", "from_port": 0, "to": "texture1", "to_port": 1},
+        {"from": "texture1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Texture SOP \u2014 Ramp Displacement\n\nGrid displaced by a ramp gradient TOP creates a sloped\nsurface. displacement_scale=0.5 controls height.\nSwap the ramp for any TOP to create different terrain shapes.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -170,7 +170,7 @@ func _build_help_content() -> void:
 			var port_family := GNFamily.get_family_name(port.family)
 			var port_desc: String = port.description if not port.description.is_empty() else "—"
 			var multi_tag := " [i](dynamic)[/i]" if gn_node._dynamic_input and port.index == 0 else ""
-			bb += _table_row([port.port_name + multi_tag, port_family, port_desc])
+			bb += _table_row([port.display_name() + multi_tag, port_family, port_desc])
 		bb += "[/table]\n"
 	else:
 		bb += _section_header("Inputs")
@@ -183,7 +183,7 @@ func _build_help_content() -> void:
 		for port in gn_node.output_ports:
 			var port_family := GNFamily.get_family_name(port.family)
 			var port_desc: String = port.description if not port.description.is_empty() else "—"
-			bb += _table_row([port.port_name, port_family, port_desc])
+			bb += _table_row([port.display_name(), port_family, port_desc])
 		bb += "[/table]\n"
 
 	# ── Parameters ──

@@ -23,11 +23,22 @@ var multi_input: bool = false
 ## Human-readable description shown as tooltip when hovering over the port.
 var description: String = ""
 
+## Optional display label. When non-empty, the UI shows this instead of
+## [member port_name].  Useful for multi-output operators where the
+## programmatic name (e.g. "out0") differs from the human label
+## (e.g. "Color", "Depth", "Normal").
+var label: String = ""
+
+## Returns the string to display in the node UI.
+## Prefers [member label] if set, otherwise [member port_name].
+func display_name() -> String:
+	return label if not label.is_empty() else port_name
+
 
 ## Creates a new port with the given configuration.
 static func create(p_name: String, p_family: GNFamily.Type, p_index: int,
 		p_is_input: bool, p_multi_input: bool = false,
-		p_description: String = "") -> GNPort:
+		p_description: String = "", p_label: String = "") -> GNPort:
 	var port := GNPort.new()
 	port.port_name = p_name
 	port.family = p_family
@@ -35,6 +46,7 @@ static func create(p_name: String, p_family: GNFamily.Type, p_index: int,
 	port.is_input = p_is_input
 	port.multi_input = p_multi_input
 	port.description = p_description
+	port.label = p_label
 	return port
 
 

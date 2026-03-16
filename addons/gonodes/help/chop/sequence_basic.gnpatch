@@ -1,0 +1,76 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 50],
+            "parameters": {
+                "frequency": {"value": 0.5},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [100, 200],
+            "parameters": {
+                "waveform": {"value": 2},
+                "frequency": {"value": 1.0},
+                "amplitude": {"value": 0.5}
+            }
+        },
+        "noise1": {
+            "type": "NoiseCHOP",
+            "position": [100, 350],
+            "parameters": {
+                "amplitude": {"value": 0.8}
+            }
+        },
+        "sequence1": {
+            "type": "SequenceCHOP",
+            "position": [500, 150],
+            "parameters": {
+                "duration": {"value": 3.0},
+                "crossfade": {"value": 0.5},
+                "loop": {"value": true}
+            },
+            "dynamic_input_count": 3
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [900, 150],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 150],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "sequence1", "to_port": 0},
+        {"from": "wave1", "from_port": 0, "to": "sequence1", "to_port": 1},
+        {"from": "noise1", "from_port": 0, "to": "sequence1", "to_port": 2},
+        {"from": "sequence1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Sequence CHOP \u2014 Basic\n\nThree CHOP sources (sine, square, noise) played end-to-end.\n3s duration per clip with 0.5s crossfade between transitions.\nLoop = on so the sequence repeats.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

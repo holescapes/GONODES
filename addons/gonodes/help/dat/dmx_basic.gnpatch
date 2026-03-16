@@ -1,0 +1,59 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 0.5},
+                "amplitude": {"value": 127.0},
+                "offset": {"value": 128.0}
+            }
+        },
+        "channel1": {
+            "type": "ChannelCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "count": {"value": 3},
+                "name0": {"value": "ch1"},
+                "value0": {"value": 255.0},
+                "name1": {"value": "ch2"},
+                "value1": {"value": 128.0},
+                "name2": {"value": "ch3"},
+                "value2": {"value": 0.0}
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [450, 200],
+            "parameters": {}
+        },
+        "dmx1": {
+            "type": "DMXDAT",
+            "position": [800, 200],
+            "parameters": {
+                "universe": {"value": 0},
+                "ip": {"value": "255.255.255.255"},
+                "port": {"value": 6454},
+                "active": {"value": false},
+                "channels": {"value": 512}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "merge1", "to_port": 0},
+        {"from": "channel1", "from_port": 0, "to": "merge1", "to_port": 1},
+        {"from": "merge1", "from_port": 0, "to": "dmx1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DMX DAT \u2014 Basic\n\nArt-Net UDP output. CHOP values mapped to DMX channels.\nLFO animates channel 1, static values on channels 2-3.\nSet 'active' = true to start broadcasting on universe 0.\nDefault IP = broadcast (255.255.255.255), port 6454.",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

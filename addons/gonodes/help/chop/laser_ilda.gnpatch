@@ -1,0 +1,30 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "laser1": {
+            "type": "LaserCHOP",
+            "position": [300, 200],
+            "parameters": {
+                "pattern": {"value": 4},
+                "points": {"value": 500},
+                "scale": {"value": 0.9},
+                "animate": {"value": true},
+                "speed": {"value": 15.0},
+                "blank_points": {"value": 10},
+                "intensity": {"value": 1.0}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Laser CHOP \u2014 ILDA Test Pattern\n\n500-point ILDA 12.2 style test: white outer square\n+ rainbow inner circle. 10 blank points at path start\nfor galvo settle time. Standard calibration pattern\nused in the laser show industry.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

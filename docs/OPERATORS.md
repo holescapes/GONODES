@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **348 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
+> **371 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
 
 ---
 
@@ -40,7 +40,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 52 operators** — 12 generators, 26 filters, 7 combiners, 3 temporal/buffer, 2 utility, 2 bridge.
+**Total: 54 operators** — 12 generators, 28 filters, 7 combiners, 3 temporal/buffer, 2 utility, 2 bridge.
 
 ### Generators
 
@@ -863,6 +863,36 @@ Chroma / luma key (green-screen) with spill suppression.
 
 ---
 
+#### DeformTOP
+
+Deform/displace a texture using a second texture as displacement map. Three modes: Displace (raw UV shift), Refract (luminance-weighted), Warp (polar displacement).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `strength` | Float | 0.1 | Displacement strength |
+| `mode` | Enum | Displace | Deformation algorithm (Displace / Refract / Warp) |
+| `resolution` | Vector2i | 1024×1024 | Output resolution |
+
+**Inputs:** `in` (TOP source), `deform` (TOP displacement map).
+
+---
+
+#### ReorderTOP
+
+Reorder/swizzle RGBA channels of a texture. Maps each output channel from any input channel (Red, Green, Blue, Alpha, One, Zero, Luminance).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `output_r` | Enum | Red | Source for output red |
+| `output_g` | Enum | Green | Source for output green |
+| `output_b` | Enum | Blue | Source for output blue |
+| `output_a` | Enum | Alpha | Source for output alpha |
+| `resolution` | Vector2i | 1024×1024 | Output resolution |
+
+**Inputs:** `in` (TOP).
+
+---
+
 ### Temporal / Buffer
 
 These TOPs store frames over time for delay, scrubbing, and playback control.
@@ -1100,7 +1130,7 @@ CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Arr
 
 All CHOP data flows as `GNChannelData` — a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 57 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge.
+**Total: 65 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 4 animation/sequencing, 2 object/skeleton, 1 tablet, 6 signal analysis.
 
 ### Generators
 
@@ -1960,11 +1990,122 @@ System performance metrics as CHOP channels. Time-dependent.
 
 ---
 
+### Animation / Sequencing
+
+---
+
+#### Keyframe CHOP
+
+Keyframe curve animation. Each slot defines a named channel with a ramp curve sampled at the current elapsed time within a user-defined time range. Extend modes: Hold, Cycle, Mirror, Slope.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `start` | Float | 0.0 | Start time (seconds) |
+| `end` | Float | 4.0 | End time (seconds) |
+| `extend` | Enum | Hold | Behaviour outside range |
+| `count` | Int | 1 | Number of channel slots |
+| `nameN` | String | animN | Channel name for slot N |
+| `curveN` | Ramp | — | Keyframe curve for slot N |
+
+**Output:** CHOP (animated channels).
+
+---
+
+#### Sequence CHOP
+
+Sequence CHOP inputs end-to-end in time. Each input plays for its duration, with optional crossfade blending between segments.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `duration` | Float | 2.0 | Seconds per input segment |
+| `crossfade` | Float | 0.0 | Blend time between segments |
+| `loop` | Bool | true | Loop back to first input |
+
+**Inputs:** Dynamic (multiple CHOPs).
+**Output:** CHOP (sequenced channels).
+
+---
+
+#### Clip CHOP
+
+Play back recorded CHOP data with transport controls. Records the first frame of input and replays with speed, loop, and trim control.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `start` | Float | 0.0 | Start position (0–1) |
+| `end` | Float | 1.0 | End position (0–1) |
+| `speed` | Float | 1.0 | Playback speed |
+| `loop` | Enum | Loop | None / Loop / PingPong |
+| `play` | Bool | true | Enable playback |
+| `trigger` | Pulse | — | Reset to start |
+
+**Inputs:** `in` (CHOP).
+**Output:** CHOP (playback channels).
+
+---
+
+#### Channel CHOP
+
+Create named channels from parameter values. Expression-friendly — each value parameter supports full expression mode for procedural animation.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `count` | Int | 3 | Number of channel slots |
+| `nameN` | String | chanN | Channel name |
+| `valueN` | Float | 0.0 | Channel value (expression-friendly) |
+
+**Output:** CHOP (named channels).
+
+---
+
+### Object / Skeleton
+
+---
+
+#### Object CHOP
+
+Read transform channels (tx/ty/tz/rx/ry/rz/sx/sy/sz) from a COMP node referenced by path.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `comp_path` | String | — | Node ID of the COMP to read |
+
+**Output:** CHOP (9 transform channels).
+
+---
+
+#### Skeleton CHOP
+
+Read skeleton bone transforms as CHOP channels. For each matching bone: `bone:tx`, `bone:ty`, `bone:tz`, `bone:rx`, `bone:ry`, `bone:rz`.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `comp_path` | String | — | Node ID of the Skeleton3D COMP |
+| `bone_filter` | String | * | Wildcard pattern for bone names |
+| `local` | Bool | true | Use local (vs model) space |
+
+**Output:** CHOP (6 channels per bone).
+
+---
+
+#### Tablet In CHOP
+
+Pen tablet/stylus input. Outputs position, pressure, tilt, and button state.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `normalize` | Bool | true | Normalize to 0–1 range |
+| `active` | Bool | true | Enable input capture |
+
+**Output:** CHOP (x, y, pressure, tilt_x, tilt_y, button).
+
+---
+
 ## DAT — Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
 
-**Total: 29 operators** — 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges.
+**Total: 33 operators** — 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges, 4 protocol/event, 5 networking.
 
 ### Generators
 
@@ -2437,11 +2578,83 @@ Multi-touch screen input as table rows. Time-dependent.
 
 ---
 
+### Protocol / Event
+
+---
+
+#### Serial DAT
+
+Serial port (COM) communication. Outputs received data as table rows with timestamps. Framework ready for native serial transport extensions.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `port` | String | COM3 | Serial port name |
+| `baud_rate` | Int | 9600 | Communication speed |
+| `delimiter` | Enum | Newline | Message delimiter |
+| `max_rows` | Int | 100 | Max table rows |
+| `active` | Bool | false | Enable communication |
+| `clear` | Pulse | — | Clear buffer |
+
+**Output:** DAT table (timestamp, message).
+
+---
+
+#### DMX DAT
+
+DMX lighting protocol controller via Art-Net UDP. Takes CHOP channel values and outputs as DMX universe table. Sends Art-Net packets when active.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `universe` | Int | 0 | DMX universe number |
+| `ip` | String | 255.255.255.255 | Art-Net destination IP |
+| `port` | Int | 6454 | UDP port |
+| `active` | Bool | false | Enable DMX output |
+| `channels` | Int | 512 | Active channel count |
+
+**Inputs:** `values` (CHOP, channel values 0–255).
+**Output:** DAT table (channel, value).
+
+---
+
+#### Render Pick DAT
+
+Pick 3D objects from a render by screen coordinates via physics ray casting. Returns hit position, normal, distance, and object identity.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `render_comp` | String | — | Camera/Render COMP node ID |
+| `u` | Float | 0.5 | Horizontal pick (0–1) |
+| `v` | Float | 0.5 | Vertical pick (0–1) |
+| `max_distance` | Float | 1000.0 | Max ray distance |
+| `use_input` | Bool | true | Use input CHOP u/v |
+
+**Inputs:** `uv` (CHOP, optional).
+**Output:** DAT table (hit, node_id, world_xyz, normal_xyz, distance, face_index, u, v).
+
+---
+
+#### Panel Execute DAT
+
+Logs panel/UI interaction events as DAT table rows with timestamps.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `panel_path` | String | — | Panel node ID to monitor |
+| `max_events` | Int | 100 | Max events to keep |
+| `log_values` | Bool | true | Log value changes |
+| `log_hover` | Bool | false | Log hover events |
+| `clear` | Pulse | — | Clear log |
+
+**Inputs:** `panel` (CHOP, UI state).
+**Output:** DAT table (timestamp, event, channel, value).
+
+---
+
 ## SOP — Surface Operators
 
 SOPs produce and manipulate 3D geometry. The output type is `GNGeoData`, which wraps Godot's native `ArrayMesh`. SOPs leverage Godot's built-in mesh primitives (`BoxMesh`, `SphereMesh`, etc.) and `SurfaceTool` for procedural generation. Geometry flows through SOP chains and ultimately reaches a GeometryCOMP for 3D scene placement.
 
-**Total: 55 operators** — 13 generators, 20 filters, 6 combiners, 2 utility, 5 deformers, 3 bridge, 1 decimation.
+**Total: 64 operators** — 13 generators, 20 filters, 6 combiners, 2 utility, 5 deformers, 3 bridge, 1 decimation, 3 smoothing/remesh, 2 merge/texture, 4 poly construction, 5 new.
 
 ### Generators
 
@@ -3338,6 +3551,150 @@ Vertex-level morph/blend between two geometries.
 
 ---
 
+### Smoothing / Remeshing
+
+---
+
+#### Smooth SOP
+
+Iterative Laplacian vertex smoothing (relaxation). Averages vertex position with neighbours with configurable strength and iteration count. Border vertices can be pinned.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `iterations` | Int | 3 | Smoothing passes |
+| `strength` | Float | 0.5 | Blend factor (0=none, 1=full) |
+| `pin_borders` | Bool | true | Pin boundary vertices |
+
+**Inputs:** `in` (SOP).
+**Output:** SOP (smoothed geometry).
+
+---
+
+#### PolyBevel SOP
+
+Bevel polygon edges by pushing vertices inward along normals and creating chamfer geometry. Multi-division rounding with configurable roundness.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `offset` | Float | 0.05 | Bevel distance |
+| `divisions` | Int | 1 | Rounding subdivisions |
+| `roundness` | Float | 0.5 | Flat (0) to rounded (1) |
+
+**Inputs:** `in` (SOP).
+**Output:** SOP (beveled geometry).
+
+---
+
+#### Remesh SOP
+
+Retopologize to uniform triangle density. Edge-length-based midpoint subdivision with optional Laplacian smoothing.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `target_edge` | Float | 0.1 | Desired edge length |
+| `iterations` | Int | 3 | Subdivision passes |
+| `smooth` | Bool | true | Post-smoothing |
+
+**Inputs:** `in` (SOP).
+**Output:** SOP (uniformly tessellated mesh).
+
+---
+
+### Reference / Texture
+
+---
+
+#### Object Merge SOP
+
+Fetch geometry from another SOP by path reference, optionally applying the source's transform.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `sop_path` | String | — | Node ID of source SOP |
+| `apply_transform` | Bool | false | Apply source transform |
+
+**Output:** SOP (referenced geometry).
+
+---
+
+#### Texture SOP
+
+Apply a TOP texture to SOP geometry as vertex colors or normal-based displacement.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `mode` | Enum | Vertex Color | Application mode |
+| `displacement_scale` | Float | 0.1 | Displacement multiplier |
+| `uv_set` | Int | 0 | UV channel (0 or 1) |
+
+**Inputs:** `geo` (SOP), `tex` (TOP).
+**Output:** SOP (textured/displaced geometry).
+
+---
+
+### Poly Construction
+
+---
+
+#### PolyBridge SOP
+
+Bridge two polygon edge loops with connecting quad strips. Supports subdivision and twist.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `divisions` | Int | 1 | Bridge subdivisions |
+| `twist` | Float | 0.0 | Twist angle (degrees) |
+
+**Inputs:** `geo_a` (SOP), `geo_b` (SOP).
+**Output:** SOP (bridge geometry).
+
+---
+
+#### PolyPatch SOP
+
+Bilinear Coons patch surface from 4 boundary corners with configurable resolution.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `rows` | Int | 10 | U subdivisions |
+| `cols` | Int | 10 | V subdivisions |
+
+**Inputs:** `in` (SOP, first 4 vertices as corners).
+**Output:** SOP (patch surface with UVs).
+
+---
+
+#### PolySpline SOP
+
+Catmull-Rom spline curve, tube, or ribbon from input control points.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `subdivisions` | Int | 8 | Points per segment |
+| `output` | Enum | Line | Line / Tube / Ribbon |
+| `radius` | Float | 0.05 | Tube/ribbon radius |
+| `sides` | Int | 8 | Tube cross-section sides |
+| `closed` | Bool | false | Close the spline loop |
+
+**Inputs:** `in` (SOP, control points).
+**Output:** SOP (spline geometry).
+
+---
+
+#### PolyStitch SOP
+
+Stitch two polygon boundaries by connecting nearest vertex pairs. Creates triangle strips between matched boundary vertices.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `max_distance` | Float | 1.0 | Max pairing distance (0=unlimited) |
+| `include_inputs` | Bool | true | Include original geometry |
+
+**Inputs:** `geo_a` (SOP), `geo_b` (SOP).
+**Output:** SOP (stitched geometry).
+
+---
+
 ## COMP — Component Operators
 
 COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output — instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
@@ -4143,11 +4500,11 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 66 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot |
+| **TOP** | 68 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder |
 *(Note: 15 additional TOPs via extensions — see Extension Operators below)* |
-| **CHOP** | 66 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform |
-| **DAT** | 33 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn |
-| **SOP** | 62 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Select, FileIn, FileOut, Group, Primitive, Blend, Spring |
+| **CHOP** | 73 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn |
+| **DAT** | 37 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX, RenderPick, PanelExecute |
+| **SOP** | 71 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch |
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
 | **MAT** | 9 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, Null |
 | **IMG** | 13 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null |
@@ -4155,7 +4512,8 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
 | **POP** | 10 | *(GPU particle operators — SSBO-based compute pipeline)* |
 | **VOL** | 11 | *(Volumetric 3D texture operators — Navier-Stokes fluid, raymarcher, marching cubes)* |
-| **Total** | **330** | |
+| **Generic** | 1 | Dot |
+| **Total** | **353** | |
 
 ### Extension Operators (not included in count above)
 

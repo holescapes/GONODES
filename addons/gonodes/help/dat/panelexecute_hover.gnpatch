@@ -1,0 +1,40 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "panel1": {
+            "type": "SliderCOMP",
+            "position": [100, 200],
+            "parameters": {}
+        },
+        "panelexec1": {
+            "type": "PanelExecuteDAT",
+            "position": [500, 200],
+            "parameters": {
+                "panel_path": {"value": "panel1"},
+                "max_events": {"value": 50},
+                "log_values": {"value": true},
+                "log_hover": {"value": true},
+                "clear": {"value": false}
+            }
+        },
+        "evaluate1": {
+            "type": "EvaluateDAT",
+            "position": [850, 200],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "panelexec1", "from_port": 0, "to": "evaluate1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PanelExecute DAT \u2014 Hover Tracking\n\nLogs both value changes and hover events from a slider.\nlog_hover=true captures mouse position over the panel.\nmax_events=50 keeps a rolling buffer of recent events.\nEvaluateDAT downstream can filter or process the event table.",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

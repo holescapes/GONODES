@@ -1,0 +1,72 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 100],
+            "parameters": {
+                "rows": {"value": 6},
+                "columns": {"value": 6},
+                "radius": {"value": 1.0}
+            }
+        },
+        "remesh1": {
+            "type": "RemeshSOP",
+            "position": [450, 100],
+            "parameters": {
+                "target_edge": {"value": 0.08},
+                "iterations": {"value": 5},
+                "smooth": {"value": true}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [800, 300],
+            "parameters": {
+                "tz": {"value": 4.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "sphere1", "from_port": 0, "to": "remesh1", "to_port": 0},
+        {"from": "remesh1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Remesh SOP \u2014 Dense Sphere\n\nLow-poly sphere (6\u00d76) remeshed to fine detail.\ntarget_edge=0.08 with 5 iterations and smoothing\nproduces a high-quality uniform triangle mesh.\nCompare with the raw 6\u00d76 input to see the difference.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

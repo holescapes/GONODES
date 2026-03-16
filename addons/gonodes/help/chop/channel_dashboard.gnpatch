@@ -1,0 +1,70 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "channel1": {
+            "type": "ChannelCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "count": {"value": 6},
+                "name0": {"value": "r"},
+                "value0": {
+                    "mode": "EXPRESSION",
+                    "value": 1.0,
+                    "expression": "abs(sin(time*1.0))"
+                },
+                "name1": {"value": "g"},
+                "value1": {
+                    "mode": "EXPRESSION",
+                    "value": 0.5,
+                    "expression": "abs(sin(time*1.5+2.094))"
+                },
+                "name2": {"value": "b"},
+                "value2": {
+                    "mode": "EXPRESSION",
+                    "value": 0.0,
+                    "expression": "abs(sin(time*2.0+4.189))"
+                },
+                "name3": {"value": "width"},
+                "value3": {"value": 512.0},
+                "name4": {"value": "height"},
+                "value4": {"value": 512.0},
+                "name5": {"value": "opacity"},
+                "value5": {"value": 1.0}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "channel1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Channel CHOP \u2014 Color Dashboard\n\n6 named channels: animated RGB color (phase-shifted sines)\nplus static width, height, opacity values. Demonstrates\nmixing expression-driven and constant channels for a\ncontrol dashboard pattern.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

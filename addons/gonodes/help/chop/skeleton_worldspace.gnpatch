@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "skeleton1": {
+            "type": "SkeletonCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "comp_path": {"value": "geo1"},
+                "bone_filter": {"value": "*"},
+                "local": {"value": false}
+            }
+        },
+        "choptodat1": {
+            "type": "CHOPtoDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "skeleton1", "from_port": 0, "to": "choptodat1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Skeleton CHOP \u2014 World Space\n\nReads all bone transforms in world space (local=false).\nCHOPtoDAT shows the raw transform table.\nCompare with local=true to see the difference:\nworld space includes parent bone contributions.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

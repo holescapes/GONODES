@@ -1,0 +1,61 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "channel1": {
+            "type": "ChannelCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "count": {"value": 3},
+                "name0": {"value": "tx"},
+                "value0": {
+                    "mode": "EXPRESSION",
+                    "value": 0.0,
+                    "expression": "sin(time)*2.0"
+                },
+                "name1": {"value": "ty"},
+                "value1": {
+                    "mode": "EXPRESSION",
+                    "value": 0.0,
+                    "expression": "cos(time)*2.0"
+                },
+                "name2": {"value": "tz"},
+                "value2": {"value": 0.0}
+            }
+        },
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 350],
+            "parameters": {
+                "radius": {"value": 0.3}
+            }
+        },
+        "choptosop1": {
+            "type": "CHOPtoSOP",
+            "position": [500, 200],
+            "parameters": {
+                "attribute": {"value": 0}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [900, 200],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "channel1", "from_port": 0, "to": "choptosop1", "to_port": 0},
+        {"from": "sphere1", "from_port": 0, "to": "choptosop1", "to_port": 1},
+        {"from": "choptosop1", "from_port": 0, "to": "geo1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Channel CHOP \u2014 Expression-Driven\n\nThree channels (tx, ty, tz) with expression-mode values.\ntx = sin(time)*2, ty = cos(time)*2 creates a circular orbit.\nApplied to a sphere via CHOPtoSOP.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

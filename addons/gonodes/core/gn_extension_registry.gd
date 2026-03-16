@@ -563,6 +563,12 @@ func _register_core_operators() -> void:
 	_reg("MultiBufferRenderTOP",   "TOP", MultiBufferRenderTOP,
 		"Multi-buffer 3D render: outputs color, depth, and normal buffer textures.")
 
+	# ── TOPs: New (Medium-Impact TD Gap) ────────────────────────────────
+	_reg("DeformTOP",       "TOP", DeformTOP,
+		"Deform texture using displacement map (displace, refract, warp).")
+	_reg("ReorderTOP",      "TOP", ReorderTOP,
+		"Reorder/swizzle texture RGBA channels.")
+
 	# ── CHOPs: Generators ───────────────────────────────────────────────
 	_reg("LFO_CHOP",        "CHOP", LFO_CHOP,
 		"Low-frequency oscillator (sine, triangle, square, saw, pulse).")
@@ -614,6 +620,10 @@ func _register_core_operators() -> void:
 		"Select one of up to 4 channel inputs by index.")
 	_reg("RenameCHOP",      "CHOP", RenameCHOP,
 		"Rename input channels with explicit from→to mapping.")
+
+	# ── Generic: Routing ────────────────────────────────────────────────
+	_reg("DotNode",         "CHOP", DotNode,
+		"Wire routing point — visual pass-through for any data type.")
 
 	# ── CHOPs: Bridge ───────────────────────────────────────────────────
 	_reg("DATtoCHOP",       "CHOP", DATtoCHOP,
@@ -696,6 +706,26 @@ func _register_core_operators() -> void:
 		"1st/2nd derivative (rate-of-change) of input channels — velocity, acceleration.")
 	_reg("AudioDynamicsCHOP",   "CHOP", AudioDynamicsCHOP,
 		"Compressor / Limiter / Expander / Gate dynamics processor for audio-rate CHOPs.")
+
+	# ── CHOPs: Animation / Sequencing ───────────────────────────────────
+	_reg("KeyframeCHOP",    "CHOP", KeyframeCHOP,
+		"Keyframe curve animation → CHOP channels (ramp curves sampled over time).")
+	_reg("SequenceCHOP",    "CHOP", SequenceCHOP,
+		"Sequence CHOP inputs end-to-end in time with optional crossfade.")
+	_reg("ClipCHOP",        "CHOP", ClipCHOP,
+		"Play back recorded CHOP data with transport controls (speed, loop, trim).")
+	_reg("ChannelCHOP",     "CHOP", ChannelCHOP,
+		"Named channels from parameter values (expression-friendly).")
+
+	# ── CHOPs: Object / Skeleton ────────────────────────────────────────
+	_reg("ObjectCHOP",      "CHOP", ObjectCHOP,
+		"Read COMP transform (tx/ty/tz/rx/ry/rz/sx/sy/sz) as CHOP channels.")
+	_reg("SkeletonCHOP",    "CHOP", SkeletonCHOP,
+		"Read skeleton bone transforms as CHOP channels with bone filter.")
+
+	# ── CHOPs: Input Devices (new) ──────────────────────────────────────
+	_reg("TabletInCHOP",    "CHOP", TabletInCHOP,
+		"Pen tablet / stylus input (position, pressure, tilt) as CHOP channels.")
 
 	# ── CHOPs: Combiners (new) ──────────────────────────────────────────
 	_reg("InterpolateCHOP", "CHOP", InterpolateCHOP,
@@ -881,6 +911,28 @@ func _register_core_operators() -> void:
 	_reg("BlendSOP",        "SOP", BlendSOP,
 		"Morph between two geometries by blending vertex positions.")
 
+	# ── SOPs: New (High-Impact TD Gap) ──────────────────────────────────
+	_reg("SmoothSOP",       "SOP", SmoothSOP,
+		"Laplacian vertex smoothing (relaxation) with border pinning.")
+	_reg("PolyBevelSOP",    "SOP", PolyBevelSOP,
+		"Bevel polygon edges with offset and rounding divisions.")
+	_reg("RemeshSOP",       "SOP", RemeshSOP,
+		"Retopologize mesh to uniform triangle density via midpoint subdivision.")
+
+	# ── SOPs: New (Medium-Impact TD Gap) ────────────────────────────────
+	_reg("ObjectMergeSOP",  "SOP", ObjectMergeSOP,
+		"Fetch geometry from another SOP by path reference.")
+	_reg("TextureSOP",      "SOP", TextureSOP,
+		"Apply TOP texture to SOP geometry (vertex color or displacement).")
+	_reg("PolyBridgeSOP",   "SOP", PolyBridgeSOP,
+		"Bridge two polygon edge loops with connecting faces.")
+	_reg("PolyPatchSOP",    "SOP", PolyPatchSOP,
+		"Smooth polynomial patch surface from boundary curves.")
+	_reg("PolySplineSOP",   "SOP", PolySplineSOP,
+		"Smooth Catmull-Rom spline curve or tube from input points.")
+	_reg("PolyStitchSOP",   "SOP", PolyStitchSOP,
+		"Stitch polygon boundaries by connecting nearest vertices.")
+
 	# ── DATs: Generators ────────────────────────────────────────────────
 	_reg("ConstantDAT",     "DAT", ConstantDAT,
 		"Manually editable 4x4 table with column headers.")
@@ -968,6 +1020,18 @@ func _register_core_operators() -> void:
 		"List directory contents with optional recursive traversal.")
 	_reg("MultiTouchInDAT", "DAT", MultiTouchInDAT,
 		"Multi-touch input events as table rows with position and pressure.")
+
+	# ── DATs: New (High-Impact TD Gap) ──────────────────────────────────
+	_reg("SerialDAT",       "DAT", SerialDAT,
+		"Serial port communication (COM port read/write) with table output.")
+	_reg("DMXDAT",           "DAT", DMXDAT,
+		"DMX lighting protocol (Art-Net / sACN) controller with channel table.")
+	_reg("RenderPickDAT",   "DAT", RenderPickDAT,
+		"Pick 3D objects from render by screen coordinates (ray cast).")
+
+	# ── DATs: New (Medium-Impact TD Gap) ────────────────────────────────
+	_reg("PanelExecuteDAT", "DAT", PanelExecuteDAT,
+		"Log panel/UI events (press, release, value change) as DAT table rows.")
 
 	# ── IMGs: Generators ─────────────────────────────────────────────────
 	_reg("NoiseIMG",        "IMG", NoiseIMG,

@@ -1,0 +1,37 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "constant1": {
+            "type": "ConstantDAT",
+            "position": [100, 200],
+            "parameters": {
+                "text": {"value": "Hello from GONODES"}
+            }
+        },
+        "serial_tx1": {
+            "type": "SerialSendDAT",
+            "position": [500, 200],
+            "parameters": {
+                "port": {"value": "COM3"},
+                "baud_rate": {"value": 9600},
+                "line_ending": {"value": 1},
+                "active": {"value": false},
+                "continuous": {"value": false}
+            }
+        }
+    },
+    "connections": [
+        {"from": "constant1", "from_port": 0, "to": "serial_tx1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Serial Send DAT \u2014 Basic\n\nSends a constant text message on pulse.\nConstantDAT feeds a single row to SerialSendDAT.\nLine ending = LF appended to each message.\nUse Send Now pulse or set Continuous for auto-send.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

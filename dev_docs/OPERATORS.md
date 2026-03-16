@@ -2,7 +2,7 @@
 
 > **⚠️ This is a static snapshot and may be outdated.** The live operator reference is auto-generated in the in-editor Help window (F1 → Operators Reference) from actual operator metadata.  
 > **Audience:** Contributors needing implementation details ("How it works" per operator).  
-> **Current operator count:** 308 operators across 11 families (this snapshot documents 150).
+> **Current operator count:** 371 operators across 11 families (this snapshot documents 150).
 
 > **150 operators** across 11 categories: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, and native extensions.
 >

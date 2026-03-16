@@ -1,0 +1,102 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "keyframe1": {
+            "type": "KeyframeCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 6.0},
+                "extend": {"value": 2},
+                "count": {"value": 3},
+                "name0": {"value": "scale_x"},
+                "curve0": {
+                    "value": {
+                        "_type": "Ramp",
+                        "keys": [
+                            {"pos": 0.0, "value": 0.5, "left_tangent": 0.0, "right_tangent": 0.0},
+                            {"pos": 0.5, "value": 2.0, "left_tangent": 0.0, "right_tangent": 0.0},
+                            {"pos": 1.0, "value": 0.5, "left_tangent": 0.0, "right_tangent": 0.0}
+                        ]
+                    }
+                },
+                "name1": {"value": "scale_y"},
+                "curve1": {
+                    "value": {
+                        "_type": "Ramp",
+                        "keys": [
+                            {"pos": 0.0, "value": 2.0, "left_tangent": 0.0, "right_tangent": 0.0},
+                            {"pos": 0.5, "value": 0.5, "left_tangent": 0.0, "right_tangent": 0.0},
+                            {"pos": 1.0, "value": 2.0, "left_tangent": 0.0, "right_tangent": 0.0}
+                        ]
+                    }
+                },
+                "name2": {"value": "rotation"},
+                "curve2": {
+                    "value": {
+                        "_type": "Ramp",
+                        "keys": [
+                            {"pos": 0.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
+                            {"pos": 1.0, "value": 360.0, "left_tangent": 0.0, "right_tangent": 0.0}
+                        ]
+                    }
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 400],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "transform1": {
+            "type": "TransformTOP",
+            "position": [500, 200],
+            "parameters": {
+                "sx": {
+                    "mode": "EXPRESSION",
+                    "value": 1.0,
+                    "expression": "chop(\"keyframe1\",\"out\",0)"
+                },
+                "sy": {
+                    "mode": "EXPRESSION",
+                    "value": 1.0,
+                    "expression": "chop(\"keyframe1\",\"out\",1)"
+                },
+                "rotate": {
+                    "mode": "EXPRESSION",
+                    "value": 0.0,
+                    "expression": "chop(\"keyframe1\",\"out\",2)"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "transform1", "to_port": 0},
+        {"from": "transform1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Keyframe CHOP \u2014 Mirror Extend\n\n3 keyframe channels drive a TOP transform: scale_x,\nscale_y (opposing), and rotation (0\u2192360). Extend = MIRROR\nso the animation bounces back and forth forever.\nExpressions on TransformTOP read the keyframe channels.",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,61 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [450, 100],
+            "parameters": {
+                "rx": {
+                    "mode": "EXPRESSION",
+                    "value": 0.0,
+                    "expression": "time*30.0"
+                },
+                "ry": {
+                    "mode": "EXPRESSION",
+                    "value": 0.0,
+                    "expression": "time*45.0"
+                }
+            }
+        },
+        "object1": {
+            "type": "ObjectCHOP",
+            "position": [450, 350],
+            "parameters": {
+                "comp_path": {"value": "geo1"}
+            }
+        },
+        "select1": {
+            "type": "SelectCHOP",
+            "position": [800, 350],
+            "parameters": {
+                "channel_names": {"value": "rx ry"}
+            }
+        },
+        "choptodat1": {
+            "type": "CHOPtoDAT",
+            "position": [1150, 350],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "box1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "object1", "from_port": 0, "to": "select1", "to_port": 0},
+        {"from": "select1", "from_port": 0, "to": "choptodat1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Object CHOP \u2014 Select Channels\n\nSpinning box COMP read by Object CHOP, then Select\nfilters to just rx/ry channels. CHOPtoDAT shows the\nvalues in a table. Demonstrates channel filtering\nfrom Object CHOP output.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

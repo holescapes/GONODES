@@ -1,0 +1,67 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 30.0},
+                "amplitude": {"value": 127.0},
+                "offset": {"value": 128.0}
+            }
+        },
+        "lfo2": {
+            "type": "LFO_CHOP",
+            "position": [100, 250],
+            "parameters": {
+                "frequency": {"value": 15.0},
+                "amplitude": {"value": 127.0},
+                "offset": {"value": 128.0},
+                "phase": {"value": 0.25}
+            }
+        },
+        "lfo3": {
+            "type": "LFO_CHOP",
+            "position": [100, 400],
+            "parameters": {
+                "frequency": {"value": 7.5},
+                "amplitude": {"value": 127.0},
+                "offset": {"value": 128.0},
+                "phase": {"value": 0.5}
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [450, 250],
+            "parameters": {}
+        },
+        "dmx1": {
+            "type": "DMXDAT",
+            "position": [800, 250],
+            "parameters": {
+                "universe": {"value": 1},
+                "ip": {"value": "192.168.1.255"},
+                "port": {"value": 6454},
+                "active": {"value": false},
+                "channels": {"value": 12}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "merge1", "to_port": 0},
+        {"from": "lfo2", "from_port": 0, "to": "merge1", "to_port": 1},
+        {"from": "lfo3", "from_port": 0, "to": "merge1", "to_port": 2},
+        {"from": "merge1", "from_port": 0, "to": "dmx1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DMX DAT \u2014 RGB Chase\n\nThree phase-shifted LFOs mapped to DMX channels 1-3.\nCreates an RGB chase pattern on universe 1.\nSubnet IP broadcast (192.168.1.255) for local network.\n12 channels allocated (4 RGB fixtures).",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

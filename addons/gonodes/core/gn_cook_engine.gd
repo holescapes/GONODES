@@ -59,6 +59,19 @@ var max_cooks_per_frame: int = 0
 ## display badges in exported builds.
 var editor_mode: bool = false
 
+# ─── Parallel Cook (Tier 3) ────────────────────────────────────────────────────
+
+## When true, CPU-family nodes (CHOP, SOP, DAT, IMG) at the same topological
+## level are cooked in parallel using WorkerThreadPool.  GPU-family nodes
+## (TOP, POP, VOL) always cook on the main thread (Godot renderer constraint).
+## Requires _threads_available = true (false on web).
+var parallel_cook_enabled: bool = true
+
+## Minimum number of cookable CPU nodes at a topo level to trigger parallel
+## dispatch.  Below this threshold, sequential cook is cheaper (avoids
+## WorkerThreadPool overhead).
+var parallel_min_batch: int = 3
+
 # ─── Hierarchy ─────────────────────────────────────────────────────────────────
 
 ## Parent cook engine (set by SubNetworkNode for inner cook engines).
@@ -470,177 +483,73 @@ func cook_frame(delta: float) -> void:
 			node.node_warning = ""
 			node.node_error = ""
 
-	for node in topo_order:
-		if not node.dirty:
-			# Non-dirty node with expression params: evaluate expressions
-			# only if an upstream expression source actually cooked this frame.
-			# This avoids re-evaluating every expression on every active node
-			# every frame — only nodes whose data sources changed are checked.
-			if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
-				_cooked_this_frame[node.id] = true
-				# Expression changed a param value — node is now dirty.
-				# Falls through to cook section below where the input hash
-				# guard will see the changed param and allow the cook.
+	# Parallel cook path: group nodes into topo levels and cook independent
+	# CPU-family nodes within each level concurrently.
+	var _use_parallel := parallel_cook_enabled and _threads_available
+	if _use_parallel:
+		var levels: Array = network.get_topological_levels()
+		for level in levels:
+			var cpu_batch: Array[GNNode] = []
+			var gpu_batch: Array[GNNode] = []
+			for node in level:
+				if not node.dirty:
+					if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
+						_cooked_this_frame[node.id] = true
+					else:
+						continue
+				if not node.is_active:
+					skipped_count += 1
+					continue
+				if _is_gpu_family(node):
+					gpu_batch.append(node)
+				else:
+					cpu_batch.append(node)
+
+			# Cook GPU nodes sequentially on main thread (renderer constraint)
+			for node in gpu_batch:
+				var r := _cook_single_node(node)
+				if r == 1: cooked_count += 1
+				elif r == 0: skipped_count += 1
+
+			# Cook CPU nodes in parallel if batch is large enough
+			if cpu_batch.size() >= parallel_min_batch:
+				_cook_cpu_batch_parallel(cpu_batch)
+				cooked_count += cpu_batch.size()
 			else:
-				continue
+				for node in cpu_batch:
+					var r := _cook_single_node(node)
+					if r == 1: cooked_count += 1
+					elif r == 0: skipped_count += 1
 
-		# Skip inactive nodes — they keep cached_output frozen
-		if not node.is_active:
-			skipped_count += 1
-			continue
+			# Dirty propagation after entire level is cooked
+			for node in gpu_batch:
+				if _cooked_this_frame.has(node.id):
+					_dirty_immediate_downstream(node.id)
+			for node in cpu_batch:
+				if _cooked_this_frame.has(node.id):
+					_dirty_immediate_downstream(node.id)
+	else:
+		# Sequential cook path (original)
+		for node in topo_order:
+			if not node.dirty:
+				if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
+					_cooked_this_frame[node.id] = true
+				else:
+					continue
 
-		# Inject timing context (so operators can use self.current_delta, etc.)
-		node.current_delta = current_delta
-		node.elapsed_time = elapsed_time
-		node.current_frame = frame_count
-		node.project_dir = project_dir
-
-		# Resolve parameters (expressions, binds) before cooking
-		_resolve_node_parameters(node)
-
-		# Gather input data from upstream cached outputs
-		var inputs: Array[GNData] = _gather_inputs(node)
-
-		# ── Input hash guard (Tier 2) ────────────────────────────────────
-		# Hash all resolved parameter values + input data timestamps.
-		# If identical to last cook, skip entirely — params and inputs
-		# haven't changed, so output would be the same.
-		# Time-dependent nodes include frame timing in the hash so they
-		# always cook (their output depends on wall-clock time).
-		var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
-		if cook_input_hash == node._last_cook_input_hash:
-			# Nothing changed — skip cook, keep cached_output, don't propagate.
-			node.clear_dirty()
-			skipped_count += 1
-			continue
-		node._last_cook_input_hash = cook_input_hash
-
-		# Bypass: pass first input through without cooking
-		if node.bypass:
-			var passthrough: GNData = null
-			for inp in inputs:
-				if inp != null:
-					passthrough = inp
-					break
-			node.cached_output = passthrough
-			if passthrough != null:
-				passthrough._shared = _consumer_counts.get(node.id, 0) > 1
-			node.cook_valid = passthrough != null
-			node.cook_time_ms = 0.0
-			node.clear_dirty()
-			node.node_cooked.emit(node.id)
-			_cooked_this_frame[node.id] = true
-			_dirty_immediate_downstream(node.id)
-			cooked_count += 1
-			if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
-				break
-			continue
-
-		# Skip compute-dependent nodes when the renderer has no RenderingDevice
-		# (Compatibility / OpenGL 3.3 / WebGL2).  The node keeps its last
-		# cached_output (or null) and downstream nodes receive null input,
-		# which they handle gracefully (same as any disconnected port).
-		if not _compute_available and node.requires_compute():
-			if node.has_cpu_fallback():
-				# CPU fallback path — cook using pure-CPU implementation
-				if editor_mode and frame_count == 0:
-					node.node_warning = "Running CPU fallback (no compute shaders)"
-					GNLogger.info("CookEngine", "Node '%s' (%s) using CPU fallback" % [node.id, node.node_type])
-				var cpu_inputs: Array[GNData] = _gather_inputs(node)
-				var cpu_start := Time.get_ticks_usec()
-				var cpu_result: GNData = node._cook_cpu(cpu_inputs)
-				node.cook_time_ms = (Time.get_ticks_usec() - cpu_start) / 1000.0
-				if cpu_result != null:
-					cpu_result.valid = true
-					cpu_result.timestamp = frame_count
-				node.cached_output = cpu_result
-				node.cook_valid = cpu_result != null
-				node.clear_dirty()
-				node.node_cooked.emit(node.id)
-				_cooked_this_frame[node.id] = true
-				_dirty_immediate_downstream(node.id)
-				cooked_count += 1
-				continue
-			else:
-				# No CPU fallback available — skip with warning
-				if editor_mode:
-					node.node_warning = "Requires compute shaders (unavailable on this renderer)"
-				if frame_count == 0:
-					var msg := "Node '%s' (%s) requires compute shaders — skipped" % [node.id, node.node_type]
-					GNLogger.warn("CookEngine", msg)
-					cook_error.emit(node.id, msg)
-				node.cook_valid = false
-				node.cook_time_ms = 0.0
-				node.clear_dirty()
-				node.node_cooked.emit(node.id)
+			if not node.is_active:
 				skipped_count += 1
 				continue
 
-		# Skip operators that don't support the current renderer.
-		# This is the general renderer compatibility check — covers all
-		# restrictions beyond just compute (e.g., mobile-only, desktop-only).
-		var _supported := node.supported_renderers()
-		if _supported.size() > 0 and not _supported.has(_current_renderer):
-			if editor_mode:
-				node.node_warning = "Not supported on '%s' renderer" % _current_renderer
-			if frame_count == 0:
-				var msg := "Node '%s' (%s) unsupported on '%s' renderer — skipped" % [
-					node.id, node.node_type, _current_renderer]
-				GNLogger.warn("CookEngine", msg)
-				cook_error.emit(node.id, msg)
-			node.cook_valid = false
-			node.cook_time_ms = 0.0
-			node.clear_dirty()
-			node.node_cooked.emit(node.id)
-			skipped_count += 1
-			continue
+			var r := _cook_single_node(node)
+			if r == 1:
+				cooked_count += 1
+				_dirty_immediate_downstream(node.id)
+			elif r == 0:
+				skipped_count += 1
 
-		# Skip operators that don't support the current platform.
-		# Orthogonal to the renderer check — this guards OS-level
-		# capabilities (filesystem, multi-window, CLI, etc.).
-		var _plat_supported := node.supported_platforms()
-		if _plat_supported.size() > 0 and not _plat_supported.has(_current_platform):
-			if editor_mode:
-				node.node_warning = "Not supported on '%s' platform" % _current_platform
-			if frame_count == 0:
-				var msg := "Node '%s' (%s) unsupported on '%s' platform — skipped" % [
-					node.id, node.node_type, _current_platform]
-				GNLogger.warn("CookEngine", msg)
-				cook_error.emit(node.id, msg)
-			node.cook_valid = false
-			node.cook_time_ms = 0.0
-			node.clear_dirty()
-			node.node_cooked.emit(node.id)
-			skipped_count += 1
-			continue
-
-		# Cook the node
-		var result := node.execute_cook(inputs, frame_count)
-		_cooked_this_frame[node.id] = true
-
-		# Tag the output as shared if this node feeds multiple downstream consumers.
-		# Operators use _mutable_input() to check this flag before mutating data.
-		if result != null:
-			result._shared = _consumer_counts.get(node.id, 0) > 1
-
-		# Input hash already confirmed something changed — propagate dirty
-		# to immediate downstream.  Cascade continues in topo order.
-		_dirty_immediate_downstream(node.id)
-
-		if result == null and node.output_ports.size() > 0 and node.family != GNFamily.Type.COMP:
-			# Only warn for non-COMP nodes with output ports.
-			# Sink nodes (e.g., WindowOUT) legitimately return null.
-			# COMPs (Camera, Light) return null — their outputs are scene graph nodes, not data.
-			if editor_mode:
-				node.node_error = "cook returned null"
-			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
-			cook_error.emit(node.id, "cook returned null")
-		else:
-			GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
-
-		cooked_count += 1
-		if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
-			break
+			if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
+				break
 
 	# Step 5: Frame bookkeeping
 	frame_count += 1
@@ -1601,6 +1510,192 @@ func _hash1(n: float) -> float:
 
 func _hash2(x: float, y: float) -> float:
 	return fmod(sin(x * 127.1 + y * 311.7) * 43758.5453, 1.0) * 2.0 - 1.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Parallel Cook Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns true for families that require main-thread execution (GPU / renderer).
+func _is_gpu_family(node: GNNode) -> bool:
+	return node.family in [GNFamily.Type.TOP, GNFamily.Type.POP, GNFamily.Type.VOL]
+
+
+## Cooks a single node through the full guard pipeline (hash guard, bypass,
+## compute check, renderer/platform check, execute_cook).
+## Returns 1 if the node was cooked, 0 if skipped.
+func _cook_single_node(node: GNNode) -> int:
+	# Inject timing context
+	node.current_delta = current_delta
+	node.elapsed_time = elapsed_time
+	node.current_frame = frame_count
+	node.project_dir = project_dir
+
+	# Resolve parameters (expressions, binds)
+	_resolve_node_parameters(node)
+
+	# Gather input data from upstream cached outputs
+	var inputs: Array[GNData] = _gather_inputs(node)
+
+	# ── Input hash guard (Tier 2) ──
+	var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
+	if cook_input_hash == node._last_cook_input_hash:
+		node.clear_dirty()
+		return 0
+	node._last_cook_input_hash = cook_input_hash
+
+	# Bypass: passthrough first non-null input
+	if node.bypass:
+		var passthrough: GNData = null
+		for inp in inputs:
+			if inp != null:
+				passthrough = inp
+				break
+		node.cached_output = passthrough
+		if passthrough != null:
+			passthrough._shared = _consumer_counts.get(node.id, 0) > 1
+		node.cook_valid = passthrough != null
+		node.cook_time_ms = 0.0
+		node.clear_dirty()
+		node.node_cooked.emit(node.id)
+		_cooked_this_frame[node.id] = true
+		return 1
+
+	# Skip compute-dependent nodes on renderers without RenderingDevice
+	if not _compute_available and node.requires_compute():
+		if node.has_cpu_fallback():
+			if editor_mode and frame_count == 0:
+				node.node_warning = "Running CPU fallback (no compute shaders)"
+				GNLogger.info("CookEngine", "Node '%s' (%s) using CPU fallback" % [node.id, node.node_type])
+			var cpu_start := Time.get_ticks_usec()
+			var cpu_result: GNData = node._cook_cpu(inputs)
+			node.cook_time_ms = (Time.get_ticks_usec() - cpu_start) / 1000.0
+			if cpu_result != null:
+				cpu_result.valid = true
+				cpu_result.timestamp = frame_count
+			node.cached_output = cpu_result
+			node.cook_valid = cpu_result != null
+			node.clear_dirty()
+			node.node_cooked.emit(node.id)
+			_cooked_this_frame[node.id] = true
+			return 1
+		else:
+			if editor_mode:
+				node.node_warning = "Requires compute shaders (unavailable on this renderer)"
+			if frame_count == 0:
+				var msg := "Node '%s' (%s) requires compute shaders — skipped" % [node.id, node.node_type]
+				GNLogger.warn("CookEngine", msg)
+				cook_error.emit(node.id, msg)
+			node.cook_valid = false
+			node.cook_time_ms = 0.0
+			node.clear_dirty()
+			node.node_cooked.emit(node.id)
+			return 0
+
+	# Renderer compatibility check
+	var _supported := node.supported_renderers()
+	if _supported.size() > 0 and not _supported.has(_current_renderer):
+		if editor_mode:
+			node.node_warning = "Not supported on '%s' renderer" % _current_renderer
+		if frame_count == 0:
+			var msg := "Node '%s' (%s) unsupported on '%s' renderer — skipped" % [
+				node.id, node.node_type, _current_renderer]
+			GNLogger.warn("CookEngine", msg)
+			cook_error.emit(node.id, msg)
+		node.cook_valid = false
+		node.cook_time_ms = 0.0
+		node.clear_dirty()
+		node.node_cooked.emit(node.id)
+		return 0
+
+	# Platform compatibility check
+	var _plat_supported := node.supported_platforms()
+	if _plat_supported.size() > 0 and not _plat_supported.has(_current_platform):
+		if editor_mode:
+			node.node_warning = "Not supported on '%s' platform" % _current_platform
+		if frame_count == 0:
+			var msg := "Node '%s' (%s) unsupported on '%s' platform — skipped" % [
+				node.id, node.node_type, _current_platform]
+			GNLogger.warn("CookEngine", msg)
+			cook_error.emit(node.id, msg)
+		node.cook_valid = false
+		node.cook_time_ms = 0.0
+		node.clear_dirty()
+		node.node_cooked.emit(node.id)
+		return 0
+
+	# Cook the node
+	var result := node.execute_cook(inputs, frame_count)
+	_cooked_this_frame[node.id] = true
+
+	# Tag shared output
+	if result != null:
+		result._shared = _consumer_counts.get(node.id, 0) > 1
+
+	if result == null and node.output_ports.size() > 0 and node.family != GNFamily.Type.COMP:
+		if editor_mode:
+			node.node_error = "cook returned null"
+		GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
+		cook_error.emit(node.id, "cook returned null")
+	else:
+		GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
+
+	return 1
+
+
+## Cooks a batch of CPU-family nodes in parallel using WorkerThreadPool.
+## Pre-resolves parameters and gathers inputs on the main thread (these
+## access the network graph which is not thread-safe), then dispatches
+## the actual _cook() calls to worker threads.
+func _cook_cpu_batch_parallel(batch: Array) -> void:
+	# Phase 1: Main-thread preparation (graph reads are not thread-safe)
+	var prepared: Array[Dictionary] = []
+	for node in batch:
+		node.current_delta = current_delta
+		node.elapsed_time = elapsed_time
+		node.current_frame = frame_count
+		node.project_dir = project_dir
+		_resolve_node_parameters(node)
+		var inputs: Array[GNData] = _gather_inputs(node)
+		var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
+		if cook_input_hash == node._last_cook_input_hash:
+			node.clear_dirty()
+			continue
+		node._last_cook_input_hash = cook_input_hash
+		prepared.append({"node": node, "inputs": inputs})
+
+	if prepared.is_empty():
+		return
+
+	# Phase 2: Dispatch _cook() calls to worker threads
+	var task_ids: Array[int] = []
+	for entry in prepared:
+		var n: GNNode = entry["node"]
+		var inp: Array[GNData] = entry["inputs"]
+		var tid := WorkerThreadPool.add_task(func():
+			var start_us := Time.get_ticks_usec()
+			var result: GNData = n._cook(inp)
+			n.cook_time_ms = (Time.get_ticks_usec() - start_us) / 1000.0
+			if result != null:
+				result.valid = true
+				result.timestamp = frame_count
+			n.cached_output = result
+			n.cook_valid = result != null
+			n.clear_dirty()
+		)
+		task_ids.append(tid)
+
+	# Phase 3: Wait for all tasks
+	for tid in task_ids:
+		WorkerThreadPool.wait_for_task_completion(tid)
+
+	# Phase 4: Post-cook (main thread) — emit signals, tag shared, track
+	for entry in prepared:
+		var n: GNNode = entry["node"]
+		n.node_cooked.emit(n.id)
+		_cooked_this_frame[n.id] = true
+		if n.cached_output != null:
+			n.cached_output._shared = _consumer_counts.get(n.id, 0) > 1
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

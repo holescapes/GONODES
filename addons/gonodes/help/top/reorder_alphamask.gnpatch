@@ -1,0 +1,73 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "reorder1": {
+            "type": "ReorderTOP",
+            "position": [450, 100],
+            "parameters": {
+                "output_r": {"value": 0},
+                "output_g": {"value": 5},
+                "output_b": {"value": 5},
+                "output_a": {"value": 0},
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "composite1": {
+            "type": "CompositeTOP",
+            "position": [800, 200],
+            "parameters": {
+                "operation": {"value": 0}
+            }
+        },
+        "constant1": {
+            "type": "ConstantTOP",
+            "position": [450, 350],
+            "parameters": {
+                "color": {
+                    "value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 1.0}
+                },
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1150, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "reorder1", "to_port": 0},
+        {"from": "reorder1", "from_port": 0, "to": "composite1", "to_port": 0},
+        {"from": "constant1", "from_port": 0, "to": "composite1", "to_port": 1},
+        {"from": "composite1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Reorder TOP \u2014 Alpha Mask Pipeline\n\nExtracts red channel as both R output and Alpha,\nsets G & B to Zero. Creates a red-only image with\ntransparency from the red intensity. Composited over\nblack to visualize the mask. Great for matte workflows.",
+            "position": [-100.0, -100.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

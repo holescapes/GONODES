@@ -19,16 +19,17 @@ If you've used TouchDesigner, Max/MSP, vvvv, or VUO, you know the workflow: conn
 
 ## Features at a Glance
 
-**348 operators** across **11 families**, plus **69 native C++ accelerated operators** and **8 extensions**.
+**371 operators** across **11 families**, plus **69 native C++ accelerated operators** and **8 extensions**.  
+Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
 
 | Family | What It Processes | Examples |
 |--------|-------------------|----------|
-| **TOP** (81) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, ComputeShader |
-| **CHOP** (68) | Signals & channels | LFO, Math, Filter, Spring, Audio, MIDI, Keyboard/Mouse/Gamepad |
-| **SOP** (62) | 3D geometry | Grid, Boolean, Extrude, Sweep, LSystem, Metaball, Spring |
-| **DAT** (33) | Data tables & text | JSON, Web, WebSocket, OSC, Script, Callback |
+| **TOP** (83) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
+| **CHOP** (76) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
+| **SOP** (71) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
+| **DAT** (37) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
 | **COMP** (20) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
 | **POP** (10) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
 | **VOL** (11) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
@@ -171,7 +172,7 @@ git clone https://github.com/your-username/gonodes.git
 │  UI Layer                                   │
 │  Node graph, Inspector, Viewer, Debug       │
 ├─────────────────────────────────────────────┤
-│  Operator Library (348 + extensions)        │
+│  Operator Library (371 + extensions)        │
 │  TOPs, CHOPs, SOPs, POPs, VOLs, DATs,      │
 │  MATs, COMPs, IMGs, OUTs, UIs              │
 ├─────────────────────────────────────────────┤
@@ -200,6 +201,8 @@ For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT
 - NDI video streaming
 - FxPlug / FFGL plugin export
 - Multi-threaded cook engine
+- Laser DAC drivers — EtherDream, Helios, ShowNET (GDExtension; data model via LaserCHOP ready)
+- Serial port GDExtension — hardware I/O backend for SerialSendDAT / SerialReceiveDAT
 - Network collaboration (shared editing)
 
 ---

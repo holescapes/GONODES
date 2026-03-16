@@ -1,0 +1,59 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 2.0},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "clip1": {
+            "type": "ClipCHOP",
+            "position": [450, 100],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 1.0},
+                "speed": {"value": 0.5},
+                "loop": {"value": 1},
+                "play": {"value": true}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [850, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "clip1", "to_port": 0},
+        {"from": "clip1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Clip CHOP \u2014 Basic\n\nRecords the LFO input and plays it back at half speed.\nLoop = LOOP, trim window 0\u20131s.\nToggle 'play' off to freeze the playhead.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

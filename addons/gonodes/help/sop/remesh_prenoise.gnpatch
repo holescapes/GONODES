@@ -1,0 +1,79 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "torus1": {
+            "type": "TorusSOP",
+            "position": [100, 100],
+            "parameters": {
+                "rows": {"value": 8},
+                "columns": {"value": 8}
+            }
+        },
+        "remesh1": {
+            "type": "RemeshSOP",
+            "position": [450, 100],
+            "parameters": {
+                "target_edge": {"value": 0.2},
+                "iterations": {"value": 2},
+                "smooth": {"value": false}
+            }
+        },
+        "noise1": {
+            "type": "NoiseSOPNative",
+            "position": [800, 100],
+            "parameters": {
+                "amplitude": {"value": 0.15}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [1150, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [1150, 300],
+            "parameters": {
+                "tz": {"value": 5.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1850, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "torus1", "from_port": 0, "to": "remesh1", "to_port": 0},
+        {"from": "remesh1", "from_port": 0, "to": "noise1", "to_port": 0},
+        {"from": "noise1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Remesh SOP \u2014 Pre-Noise\n\nRemesh before noise deformation ensures uniform vertex density.\nsmooth=false preserves the organic triangle pattern.\nNoise then applies evenly across the entire surface.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

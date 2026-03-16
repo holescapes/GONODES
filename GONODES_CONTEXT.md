@@ -5331,3 +5331,71 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 | `addons/gn_ext_midi/operators/chop/midi_out_chop.gd` | Override: `supported_platforms → desktop + mobile` (no MIDI on web) |
 | `dev_docs/CONTRIBUTING.md` | Added "Platform & Renderer Compatibility for Extensions" section |
 
+---
+
+## Session — TD Gap Bridge Implementation
+
+### New Features
+
+| Feature | Files Modified | Description |
+|---------|---------------|-------------|
+| **Parallel cook engine** | `gn_cook_engine.gd`, `gn_network.gd` | Level-based topological sort with WorkerThreadPool parallel dispatch. CPU-family nodes at the same dependency level cook concurrently; GPU families (TOP/POP/VOL) cook sequentially on main thread. Config: `parallel_cook_enabled`, `parallel_min_batch`. |
+| **Named output ports** | `gn_port.gd`, `gn_node.gd`, `gn_node_view.gd`, `gn_help_window.gd`, `gn_main_help_window.gd` | Added `label: String` and `display_name()` to GNPort. `add_input`/`add_output` now accept optional `port_label`. UI displays label when set, falls back to port_name. |
+| **Dot routing node** | `operators/dot_node.gd` | Family-agnostic pass-through node for wire routing. Auto-adapts family from connected port via `adapt_to_family()`. |
+
+### New Operators (23)
+
+| Operator | Family | Description |
+|----------|--------|-------------|
+| KeyframeCHOP | CHOP | Keyframe curve animation via ramp curves sampled over time |
+| SequenceCHOP | CHOP | Sequence inputs end-to-end with optional crossfade |
+| ClipCHOP | CHOP | Play back recorded CHOP data with transport controls |
+| ChannelCHOP | CHOP | Named channels from parameter values (expression-friendly) |
+| ObjectCHOP | CHOP | Read COMP transform as tx/ty/tz/rx/ry/rz/sx/sy/sz channels |
+| SkeletonCHOP | CHOP | Read Skeleton3D bone transforms with bone filter |
+| TabletInCHOP | CHOP | Pen tablet input (position, pressure, tilt) |
+| DotNode | CHOP | Wire routing point (family-agnostic pass-through) |
+| DeformTOP | TOP | Texture deformation via displacement map (displace/refract/warp) |
+| ReorderTOP | TOP | RGBA channel swizzle/reorder |
+| SmoothSOP | SOP | Laplacian vertex smoothing with border pinning |
+| PolyBevelSOP | SOP | Bevel polygon edges with offset and rounding |
+| RemeshSOP | SOP | Retopologize to uniform density via midpoint subdivision |
+| ObjectMergeSOP | SOP | Fetch geometry from another SOP by path reference |
+| TextureSOP | SOP | Apply TOP texture as vertex color or displacement |
+| PolyBridgeSOP | SOP | Bridge two polygon edge loops |
+| PolyPatchSOP | SOP | Bilinear Coons patch surface from boundary |
+| PolySplineSOP | SOP | Catmull-Rom spline curve/tube/ribbon |
+| PolyStitchSOP | SOP | Stitch boundaries by nearest vertex pairs |
+| SerialDAT | DAT | Serial port (COM) communication |
+| DMXDAT | DAT | DMX/Art-Net lighting protocol controller |
+| RenderPickDAT | DAT | Ray-cast object picking from 3D render |
+| PanelExecuteDAT | DAT | Log panel/UI events as table rows |
+
+### Updated Totals
+
+Total: **371 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 71 SOP, 10 POP, 11 VOL, 20 COMP, 9 MAT, 9 OUT, 31 UI). 11 families.
+
+### TD Gap Resolution
+
+| Gap | Status | Notes |
+|-----|--------|-------|
+| Multi-threaded cook engine | ✅ Implemented | Level-based parallel dispatch via WorkerThreadPool |
+| Keyframe animation | ✅ Implemented | KeyframeCHOP, SequenceCHOP, ClipCHOP, ChannelCHOP |
+| Named output ports | ✅ Implemented | GNPort.label + display_name() |
+| Dot/routing nodes | ✅ Implemented | DotNode with family adaptation |
+| ObjectCHOP | ✅ Implemented | Read COMP transforms as channels |
+| SkeletonCHOP (Pose/Skeleton) | ✅ Implemented | Bone transform readout with filter |
+| PolyBevelSOP | ✅ Implemented | Vertex-pull bevel with divisions |
+| SmoothSOP | ✅ Implemented | Iterative Laplacian smoothing |
+| RemeshSOP | ✅ Implemented | Midpoint subdivision remeshing |
+| SerialDAT | ✅ Implemented | Framework ready (native transport pluggable) |
+| DMXDAT | ✅ Implemented | Art-Net UDP protocol |
+| RenderPickDAT | ✅ Implemented | Physics ray-cast picking |
+| DeformTOP | ✅ Implemented | Shader-based displacement |
+| ReorderTOP | ✅ Implemented | Channel swizzle shader |
+| ObjectMergeSOP | ✅ Implemented | Reference-based geometry fetch |
+| TextureSOP | ✅ Implemented | TOP→vertex color/displacement |
+| PolyBridge/Patch/Spline/StitchSOP | ✅ Implemented | 4 poly construction operators |
+| TabletInCHOP | ✅ Implemented | Pen/stylus input |
+| PanelExecuteDAT | ✅ Implemented | UI event logging |
+

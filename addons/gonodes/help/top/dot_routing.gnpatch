@@ -1,0 +1,67 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "dot1": {
+            "type": "DotNode",
+            "position": [400, 100],
+            "parameters": {}
+        },
+        "blur1": {
+            "type": "BlurTOP",
+            "position": [650, 50],
+            "parameters": {
+                "size": {"value": 10.0}
+            }
+        },
+        "edge1": {
+            "type": "EdgeTOP",
+            "position": [650, 200],
+            "parameters": {}
+        },
+        "composite1": {
+            "type": "CompositeTOP",
+            "position": [1000, 100],
+            "parameters": {
+                "operation": {"value": 0}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1350, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "dot1", "to_port": 0},
+        {"from": "dot1", "from_port": 0, "to": "blur1", "to_port": 0},
+        {"from": "dot1", "from_port": 0, "to": "edge1", "to_port": 0},
+        {"from": "blur1", "from_port": 0, "to": "composite1", "to_port": 0},
+        {"from": "edge1", "from_port": 0, "to": "composite1", "to_port": 1},
+        {"from": "composite1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Dot Node \u2014 TOP Routing\n\nSame Dot node, now adapting to TOP family.\nNoise splits via Dot into Blur and Edge branches,\nthen composited back together. Dot nodes are\nfamily-agnostic \u2014 they adapt to whatever connects.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

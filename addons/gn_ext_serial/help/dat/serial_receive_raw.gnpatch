@@ -1,0 +1,28 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "serial_rx1": {
+            "type": "SerialReceiveDAT",
+            "position": [300, 200],
+            "parameters": {
+                "port": {"value": "/dev/ttyUSB0"},
+                "baud_rate": {"value": 115200},
+                "delimiter": {"value": 2},
+                "max_rows": {"value": 500},
+                "active": {"value": false}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Serial Receive DAT \u2014 Raw Stream\n\nLinux USB serial at 115200 baud, no delimiter (raw).\nEach poll cycle becomes one message row.\nmax_rows=500 for longer data capture.\nGood for binary protocols or high-speed data.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

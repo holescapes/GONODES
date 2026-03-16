@@ -1,0 +1,54 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "channel1": {
+            "type": "ChannelCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "count": {"value": 4},
+                "name0": {"value": "red"},
+                "value0": {"value": 1.0},
+                "name1": {"value": "green"},
+                "value1": {"value": 0.5},
+                "name2": {"value": "blue"},
+                "value2": {"value": 0.2},
+                "name3": {"value": "alpha"},
+                "value3": {"value": 1.0}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "channel1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Channel CHOP \u2014 Basic\n\nFour named constant channels (red, green, blue, alpha).\nUse expression mode on the value parameters to create\ncomputed channels, e.g. value0 = sin(time).",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

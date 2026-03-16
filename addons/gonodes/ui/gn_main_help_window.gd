@@ -481,7 +481,7 @@ func _generate_operator_bbcode(op_name: String) -> String:
 			bb += "[cell][b][color=#aaaaaa]Family[/color][/b][/cell]"
 			bb += "[cell][b][color=#aaaaaa]Description[/color][/b][/cell]"
 			for port in node.input_ports:
-				bb += "[cell]%s[/cell]" % port.port_name
+				bb += "[cell]%s[/cell]" % port.display_name()
 				bb += "[cell]%s[/cell]" % GNFamily.get_family_name(port.family)
 				bb += "[cell]%s[/cell]" % port.description
 			bb += "[/table]\n\n"
@@ -494,7 +494,7 @@ func _generate_operator_bbcode(op_name: String) -> String:
 			bb += "[cell][b][color=#aaaaaa]Family[/color][/b][/cell]"
 			bb += "[cell][b][color=#aaaaaa]Description[/color][/b][/cell]"
 			for port in node.output_ports:
-				bb += "[cell]%s[/cell]" % port.port_name
+				bb += "[cell]%s[/cell]" % port.display_name()
 				bb += "[cell]%s[/cell]" % GNFamily.get_family_name(port.family)
 				bb += "[cell]%s[/cell]" % port.description
 			bb += "[/table]\n\n"

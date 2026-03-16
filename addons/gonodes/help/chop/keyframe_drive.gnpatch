@@ -1,0 +1,89 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "keyframe1": {
+            "type": "KeyframeCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 2.0},
+                "extend": {"value": 0},
+                "count": {"value": 1},
+                "name0": {"value": "tx"},
+                "curve0": {
+                    "value": {
+                        "_type": "Ramp",
+                        "keys": [
+                            {"pos": 0.0, "value": -2.0, "left_tangent": 0.0, "right_tangent": 0.0},
+                            {"pos": 0.5, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
+                            {"pos": 1.0, "value": 2.0, "left_tangent": 0.0, "right_tangent": 0.0}
+                        ]
+                    }
+                }
+            }
+        },
+        "keyframe2": {
+            "type": "KeyframeCHOP",
+            "position": [100, 350],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 2.0},
+                "extend": {"value": 0},
+                "count": {"value": 1},
+                "name0": {"value": "ty"},
+                "curve0": {
+                    "value": {
+                        "_type": "Ramp",
+                        "keys": [
+                            {"pos": 0.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 2.0},
+                            {"pos": 0.5, "value": 1.5, "left_tangent": 0.0, "right_tangent": 0.0},
+                            {"pos": 1.0, "value": 0.0, "left_tangent": -2.0, "right_tangent": 0.0}
+                        ]
+                    }
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [450, 200],
+            "parameters": {}
+        },
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [450, 450],
+            "parameters": {
+                "radius": {"value": 0.3}
+            }
+        },
+        "choptosop1": {
+            "type": "CHOPtoSOP",
+            "position": [800, 300],
+            "parameters": {
+                "attribute": {"value": 0}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [1150, 300],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "keyframe1", "from_port": 0, "to": "merge1", "to_port": 0},
+        {"from": "keyframe2", "from_port": 0, "to": "merge1", "to_port": 1},
+        {"from": "merge1", "from_port": 0, "to": "choptosop1", "to_port": 0},
+        {"from": "sphere1", "from_port": 0, "to": "choptosop1", "to_port": 1},
+        {"from": "choptosop1", "from_port": 0, "to": "geo1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Keyframe CHOP \u2014 Drive Geometry\n\nTwo keyframe channels (tx, ty) merged and applied\nto a sphere via CHOPtoSOP. Creates an arc trajectory.\nExtend = HOLD so the object stays at its final position.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

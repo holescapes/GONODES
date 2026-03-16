@@ -1,0 +1,45 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "serial_rx1": {
+            "type": "SerialReceiveDAT",
+            "position": [100, 200],
+            "parameters": {
+                "port": {"value": "COM3"},
+                "baud_rate": {"value": 9600},
+                "delimiter": {"value": 0},
+                "active": {"value": false}
+            }
+        },
+        "evaluate1": {
+            "type": "EvaluateDAT",
+            "position": [450, 200],
+            "parameters": {}
+        },
+        "serial_tx1": {
+            "type": "SerialSendDAT",
+            "position": [450, 400],
+            "parameters": {
+                "port": {"value": "COM3"},
+                "baud_rate": {"value": 9600},
+                "line_ending": {"value": 1},
+                "active": {"value": false},
+                "continuous": {"value": false}
+            }
+        }
+    },
+    "connections": [
+        {"from": "serial_rx1", "from_port": 0, "to": "evaluate1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Serial Send DAT \u2014 Bidirectional\n\nReceive and send on the same COM port.\nSerialReceiveDAT listens for incoming data,\nSerialSendDAT can reply. EvaluateDAT processes\nincoming messages before generating responses.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,80 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "noise2": {
+            "type": "NoiseTOP",
+            "position": [100, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "seed": {"value": 42}
+            }
+        },
+        "deform1": {
+            "type": "DeformTOP",
+            "position": [500, 200],
+            "parameters": {
+                "strength": {
+                    "mode": "EXPRESSION",
+                    "value": 0.1,
+                    "expression": "sin(time*2.0)*0.15+0.1"
+                },
+                "mode": {"value": 1},
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "feedback1": {
+            "type": "FeedbackTOP",
+            "position": [500, 450],
+            "parameters": {}
+        },
+        "composite1": {
+            "type": "CompositeTOP",
+            "position": [850, 200],
+            "parameters": {
+                "operation": {"value": 0}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "deform1", "to_port": 0},
+        {"from": "noise2", "from_port": 0, "to": "deform1", "to_port": 1},
+        {"from": "deform1", "from_port": 0, "to": "composite1", "to_port": 0},
+        {"from": "feedback1", "from_port": 0, "to": "composite1", "to_port": 1},
+        {"from": "composite1", "from_port": 0, "to": "feedback1", "to_port": 0},
+        {"from": "composite1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Deform TOP \u2014 Refract + Feedback\n\nNoise refracted through animated noise displacement,\ncomposited with its own feedback for a liquid-glass effect.\nStrength oscillates via expression: sin(time*2)*0.15+0.1.",
+            "position": [-100.0, -100.0],
+            "size": [520.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

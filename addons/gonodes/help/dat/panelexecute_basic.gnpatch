@@ -1,0 +1,44 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "mouse1": {
+            "type": "MouseInCHOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "panelexec1": {
+            "type": "PanelExecuteDAT",
+            "position": [500, 100],
+            "parameters": {
+                "panel_path": {"value": ""},
+                "max_events": {"value": 50},
+                "log_values": {"value": true},
+                "log_hover": {"value": false}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "mouse1", "from_port": 0, "to": "panelexec1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PanelExecute DAT \u2014 Basic\n\nLogs UI events as DAT table rows. Mouse input provides\nposition/button state. Events include press, release,\nmove (if log_hover=true). Set panel_path to a UI COMP\nfor panel-specific events. Use 'clear' pulse to reset.",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

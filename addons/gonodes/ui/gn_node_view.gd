@@ -178,8 +178,8 @@ func _build_slots() -> void:
 		var has_left := i < in_count
 		var has_right := i < out_count
 
-		var left_name := gn_node.input_ports[i].port_name if has_left else ""
-		var right_name := gn_node.output_ports[i].port_name if has_right else ""
+		var left_name := gn_node.input_ports[i].display_name() if has_left else ""
+		var right_name := gn_node.output_ports[i].display_name() if has_right else ""
 
 		# Use an HBoxContainer so left/right labels stay flush against their edges
 		var row_container := HBoxContainer.new()

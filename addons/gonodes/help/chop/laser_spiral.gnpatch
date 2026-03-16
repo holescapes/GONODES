@@ -1,0 +1,47 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 0.5},
+                "amplitude": {"value": 0.3},
+                "offset": {"value": 0.7}
+            }
+        },
+        "noise1": {
+            "type": "NoiseCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "channels": {"value": 3},
+                "amplitude": {"value": 1.0},
+                "frequency": {"value": 2.0}
+            }
+        },
+        "laser1": {
+            "type": "LaserCHOP",
+            "position": [500, 200],
+            "parameters": {
+                "pattern": {"value": 3},
+                "points": {"value": 400},
+                "scale": {"value": 0.8},
+                "animate": {"value": true},
+                "speed": {"value": 45.0},
+                "color": {"_type": "Color", "r": 1.0, "g": 0.0, "b": 0.5, "a": 1.0}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Laser CHOP \u2014 Animated Spiral\n\nFast-rotating spiral pattern (45\u00b0/sec) in magenta.\n400 points with 3 revolutions per frame.\nLFO and Noise CHOPs shown as potential modulators\nfor scale, rotation, or colour when wired in.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

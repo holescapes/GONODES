@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [100, 300],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [400, 200],
+            "parameters": {}
+        },
+        "renderpick1": {
+            "type": "RenderPickDAT",
+            "position": [750, 200],
+            "parameters": {
+                "render_comp": {"value": "render1"},
+                "u": {"value": 0.5},
+                "v": {"value": 0.5},
+                "max_distance": {"value": 1000.0},
+                "use_input": {"value": false}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RenderPick DAT \u2014 Scene Query\n\nRenders a scene with Camera + Geometry COMPs,\nthen uses RenderPickDAT to query the center of the viewport.\nuse_input=false means U/V are manual parameters.\nReports picked geometry, distance, and surface normal.",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

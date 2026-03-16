@@ -1,0 +1,54 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo_u": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 0.2},
+                "amplitude": {"value": 0.5},
+                "offset": {"value": 0.5}
+            }
+        },
+        "lfo_v": {
+            "type": "LFO_CHOP",
+            "position": [100, 280],
+            "parameters": {
+                "frequency": {"value": 0.3},
+                "amplitude": {"value": 0.5},
+                "offset": {"value": 0.5},
+                "phase": {"value": 0.25}
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [400, 180],
+            "parameters": {}
+        },
+        "renderpick1": {
+            "type": "RenderPickDAT",
+            "position": [750, 180],
+            "parameters": {
+                "render_comp": {"value": "render1"},
+                "max_distance": {"value": 500.0},
+                "use_input": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo_u", "from_port": 0, "to": "merge1", "to_port": 0},
+        {"from": "lfo_v", "from_port": 0, "to": "merge1", "to_port": 1},
+        {"from": "merge1", "from_port": 0, "to": "renderpick1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RenderPick DAT \u2014 Animated UV Scan\n\nTwo LFOs drive U and V coordinates via CHOP input.\nuse_input=true reads the UV from the incoming CHOP.\nThe pick point sweeps across the rendered viewport,\ncontinuously reporting what geometry is under each sample.",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

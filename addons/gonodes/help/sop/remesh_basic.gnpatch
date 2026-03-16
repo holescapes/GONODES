@@ -1,0 +1,74 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [100, 100],
+            "parameters": {
+                "sizex": {"value": 2.0},
+                "sizey": {"value": 0.5},
+                "sizez": {"value": 2.0}
+            }
+        },
+        "remesh1": {
+            "type": "RemeshSOP",
+            "position": [450, 100],
+            "parameters": {
+                "target_edge": {"value": 0.15},
+                "iterations": {"value": 3},
+                "smooth": {"value": true}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [800, 300],
+            "parameters": {
+                "tx": {"value": 2.0},
+                "ty": {"value": 1.5},
+                "tz": {"value": 3.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "box1", "from_port": 0, "to": "remesh1", "to_port": 0},
+        {"from": "remesh1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Remesh SOP \u2014 Basic\n\nMidpoint subdivision creates a uniform triangle mesh\nfrom a coarse box. target_edge=0.15 controls density.\nSmooth = on applies Laplacian post-smoothing for even triangles.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "laser1": {
+            "type": "LaserCHOP",
+            "position": [300, 200],
+            "parameters": {
+                "pattern": {"value": 0},
+                "points": {"value": 200},
+                "scale": {"value": 0.8},
+                "animate": {"value": true},
+                "speed": {"value": 30.0},
+                "color": {"_type": "Color", "r": 0.0, "g": 1.0, "b": 0.0, "a": 1.0}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Laser CHOP \u2014 Basic Circle\n\nGenerates a 200-point green circle pattern\nrotating at 30\u00b0/sec. Outputs x, y, r, g, b, i channels.\nThis data model matches laser DAC protocols\n(EtherDream, Helios, ILDA).",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

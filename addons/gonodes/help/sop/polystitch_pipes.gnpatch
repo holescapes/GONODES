@@ -1,0 +1,99 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "tube1": {
+            "type": "TubeSOP",
+            "position": [100, 100],
+            "parameters": {
+                "radius": {"value": 0.5},
+                "height": {"value": 2.0}
+            }
+        },
+        "tube2": {
+            "type": "TubeSOP",
+            "position": [100, 350],
+            "parameters": {
+                "radius": {"value": 0.5},
+                "height": {"value": 2.0}
+            }
+        },
+        "transform2": {
+            "type": "TransformSOP",
+            "position": [450, 350],
+            "parameters": {
+                "tx": {"value": 0.8},
+                "ry": {"value": 45.0}
+            }
+        },
+        "polystitch1": {
+            "type": "PolyStitchSOP",
+            "position": [800, 200],
+            "parameters": {
+                "max_distance": {"value": 0.3},
+                "include_inputs": {"value": true}
+            }
+        },
+        "smooth1": {
+            "type": "SmoothSOP",
+            "position": [1150, 200],
+            "parameters": {
+                "iterations": {"value": 2},
+                "strength": {"value": 0.5}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [1500, 200],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [1500, 400],
+            "parameters": {
+                "tx": {"value": 2.0},
+                "ty": {"value": 2.0},
+                "tz": {"value": 4.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1850, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [2200, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "tube2", "from_port": 0, "to": "transform2", "to_port": 0},
+        {"from": "tube1", "from_port": 0, "to": "polystitch1", "to_port": 0},
+        {"from": "transform2", "from_port": 0, "to": "polystitch1", "to_port": 1},
+        {"from": "polystitch1", "from_port": 0, "to": "smooth1", "to_port": 0},
+        {"from": "smooth1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PolyStitch SOP \u2014 Pipe Junction\n\nTwo tubes at 45\u00b0 angle stitched where they overlap,\nthen smoothed for a clean pipe junction.\nmax_distance=0.3 keeps stitching tight to the contact zone.\nSmooth SOP blends the junction into a natural transition.",
+            "position": [-100.0, -100.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

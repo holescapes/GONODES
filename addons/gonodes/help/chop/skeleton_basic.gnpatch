@@ -1,0 +1,48 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "skeleton1": {
+            "type": "SkeletonCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "comp_path": {"value": "geo1"},
+                "bone_filter": {"value": "*"},
+                "local": {"value": true}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "skeleton1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Skeleton CHOP \u2014 Basic\n\nReads bone transforms from a Skeleton3D inside a COMP.\nOutputs tx/ty/tz/rx/ry/rz per bone as named channels.\nSet comp_path to a GeometryCOMP that has a Skeleton3D child.\nbone_filter='*' reads all bones; use 'Arm*' to filter.",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

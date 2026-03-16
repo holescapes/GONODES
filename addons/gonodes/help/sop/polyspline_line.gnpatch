@@ -1,0 +1,81 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "line1": {
+            "type": "LineSOP",
+            "position": [100, 100],
+            "parameters": {
+                "length": {"value": 4.0},
+                "divisions": {"value": 8}
+            }
+        },
+        "noise1": {
+            "type": "NoiseSOPNative",
+            "position": [450, 100],
+            "parameters": {
+                "amplitude": {"value": 0.8}
+            }
+        },
+        "polyspline1": {
+            "type": "PolySplineSOP",
+            "position": [800, 100],
+            "parameters": {
+                "subdivisions": {"value": 32},
+                "output": {"value": 0},
+                "closed": {"value": false}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [1150, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [1150, 300],
+            "parameters": {
+                "tx": {"value": 1.0},
+                "ty": {"value": 1.0},
+                "tz": {"value": 5.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1850, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "line1", "from_port": 0, "to": "noise1", "to_port": 0},
+        {"from": "noise1", "from_port": 0, "to": "polyspline1", "to_port": 0},
+        {"from": "polyspline1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PolySpline SOP \u2014 Smooth Line\n\nNoisy line control points \u2192 32-segment Catmull-Rom spline.\nOutput=Line for a thin smooth curve. High subdivisions\nmake the spline silky smooth through the control points.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

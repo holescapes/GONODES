@@ -388,18 +388,20 @@ func initialize(p_id: String) -> void:
 # Port Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Adds an input port and returns it.
+## Adds an input port and returns it.  [param port_label] overrides the
+## display name in the UI when set (see [method GNPort.display_name]).
 func add_input(port_name: String, port_family: GNFamily.Type,
-		multi: bool = false, desc: String = "") -> GNPort:
-	var port := GNPort.create(port_name, port_family, input_ports.size(), true, multi, desc)
+		multi: bool = false, desc: String = "", port_label: String = "") -> GNPort:
+	var port := GNPort.create(port_name, port_family, input_ports.size(), true, multi, desc, port_label)
 	input_ports.append(port)
 	return port
 
 
-## Adds an output port and returns it.
+## Adds an output port and returns it.  [param port_label] overrides the
+## display name in the UI when set (see [method GNPort.display_name]).
 func add_output(port_name: String, port_family: GNFamily.Type,
-		desc: String = "") -> GNPort:
-	var port := GNPort.create(port_name, port_family, output_ports.size(), false, false, desc)
+		desc: String = "", port_label: String = "") -> GNPort:
+	var port := GNPort.create(port_name, port_family, output_ports.size(), false, false, desc, port_label)
 	output_ports.append(port)
 	return port
 

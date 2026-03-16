@@ -1,0 +1,77 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "objectmerge1": {
+            "type": "ObjectMergeSOP",
+            "position": [100, 350],
+            "parameters": {
+                "sop_path": {"value": "box1"},
+                "apply_transform": {"value": false}
+            }
+        },
+        "copy1": {
+            "type": "CopySOPNative",
+            "position": [450, 200],
+            "parameters": {
+                "copies": {"value": 5},
+                "ty": {"value": 1.2}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 200],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [800, 400],
+            "parameters": {
+                "tx": {"value": 3.0},
+                "ty": {"value": 3.0},
+                "tz": {"value": 6.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1150, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1500, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "objectmerge1", "from_port": 0, "to": "copy1", "to_port": 0},
+        {"from": "copy1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ObjectMerge SOP \u2014 Into Copy\n\nObjectMerge fetches a box and feeds it into Copy SOP.\nThe source box can be edited independently and all copies\nupdate automatically. Pattern: shared source \u2192 instancing.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

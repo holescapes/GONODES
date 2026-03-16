@@ -566,6 +566,70 @@ func _compute_topological_order() -> Array[GNNode]:
 	return sorted
 
 
+## Returns nodes grouped by topological level (depth from sources).
+## Level 0 = nodes with no upstream dependencies.  Nodes within the same level
+## are independent and can safely cook in parallel if they share no mutable data.
+## Cached alongside _topo_cache — rebuilt when _topo_dirty.
+var _topo_levels_cache: Array = []  # Array[Array[GNNode]]
+var _topo_levels_dirty: bool = true
+
+func get_topological_levels() -> Array:
+	if not _topo_levels_dirty and not _topo_dirty:
+		return _topo_levels_cache
+	_topo_levels_cache = _compute_topological_levels()
+	_topo_levels_dirty = false
+	return _topo_levels_cache
+
+
+func _compute_topological_levels() -> Array:
+	var in_degree: Dictionary = {}
+	var adjacency: Dictionary = {}
+	var depth: Dictionary = {}
+	for node_id in nodes:
+		in_degree[node_id] = 0
+		adjacency[node_id] = []
+		depth[node_id] = 0
+
+	for conn in connections:
+		if nodes.has(conn.from_node) and nodes.has(conn.to_node):
+			adjacency[conn.from_node].append(conn.to_node)
+			in_degree[conn.to_node] += 1
+
+	# Kahn's with level tracking
+	var queue: Array[String] = []
+	for node_id in in_degree:
+		if in_degree[node_id] == 0:
+			queue.append(node_id)
+			depth[node_id] = 0
+
+	var max_depth: int = 0
+	while not queue.is_empty():
+		var current_id: String = queue.pop_front()
+		var d: int = depth[current_id]
+		for ds_id in adjacency.get(current_id, []):
+			depth[ds_id] = maxi(depth[ds_id], d + 1)
+			max_depth = maxi(max_depth, depth[ds_id])
+			in_degree[ds_id] -= 1
+			if in_degree[ds_id] == 0:
+				queue.append(ds_id)
+
+	# Bucket nodes into levels
+	var levels: Array = []
+	levels.resize(max_depth + 1)
+	for i in range(levels.size()):
+		levels[i] = []
+	for node_id in depth:
+		var node: GNNode = nodes.get(node_id, null)
+		if node:
+			levels[depth[node_id]].append(node)
+	return levels
+
+
+func _mark_topo_dirty() -> void:
+	_topo_dirty = true
+	_topo_levels_dirty = true
+
+
 ## DFS cycle detection helper.
 func _dfs_has_cycle(node_id: String, color: Dictionary) -> bool:
 	color[node_id] = 1  # GRAY — visiting
@@ -586,6 +650,7 @@ func _dfs_has_cycle(node_id: String, color: Dictionary) -> bool:
 ## Invalidates the cached topological order.
 func _invalidate_topo() -> void:
 	_topo_dirty = true
+	_topo_levels_dirty = true
 	_topo_cache.clear()
 	_adjacency_dirty = true
 

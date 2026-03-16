@@ -1,0 +1,35 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "serial_rx1": {
+            "type": "SerialReceiveDAT",
+            "position": [300, 200],
+            "parameters": {
+                "port": {"value": "COM5"},
+                "baud_rate": {"value": 9600},
+                "delimiter": {"value": 0},
+                "max_rows": {"value": 200},
+                "active": {"value": false}
+            }
+        },
+        "evaluate1": {
+            "type": "EvaluateDAT",
+            "position": [650, 200],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "serial_rx1", "from_port": 0, "to": "evaluate1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Serial Receive DAT \u2014 Arduino Sensor\n\nTypical Arduino setup: COM5 at 9600 baud, newline framed.\nEvaluateDAT downstream can parse CSV sensor values.\nGreat for physical computing / installation work.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,65 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 100],
+            "parameters": {
+                "radius": {"value": 1.0}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [450, 100],
+            "parameters": {
+                "tx": {"value": 0.0},
+                "ty": {"value": 1.5},
+                "tz": {"value": -3.0},
+                "rx": {"value": 15.0},
+                "ry": {"value": 30.0}
+            }
+        },
+        "object1": {
+            "type": "ObjectCHOP",
+            "position": [450, 350],
+            "parameters": {
+                "comp_path": {"value": "geo1"}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [850, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "sphere1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "object1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Object CHOP \u2014 Basic\n\nReads the transform of geo1 as 9 CHOP channels:\ntx, ty, tz, rx, ry, rz, sx, sy, sz.\nChange geo1's position/rotation to see values update.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

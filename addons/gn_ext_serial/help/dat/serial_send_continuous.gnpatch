@@ -1,0 +1,61 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 1.0},
+                "amplitude": {"value": 127.0},
+                "offset": {"value": 128.0}
+            }
+        },
+        "lfo2": {
+            "type": "LFO_CHOP",
+            "position": [100, 280],
+            "parameters": {
+                "frequency": {"value": 0.5},
+                "amplitude": {"value": 50.0},
+                "offset": {"value": 50.0}
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [350, 180],
+            "parameters": {}
+        },
+        "chop_to_dat1": {
+            "type": "ChopToDAT",
+            "position": [600, 180],
+            "parameters": {}
+        },
+        "serial_tx1": {
+            "type": "SerialSendDAT",
+            "position": [900, 180],
+            "parameters": {
+                "port": {"value": "COM3"},
+                "baud_rate": {"value": 115200},
+                "line_ending": {"value": 1},
+                "active": {"value": false},
+                "continuous": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "merge1", "to_port": 0},
+        {"from": "lfo2", "from_port": 0, "to": "merge1", "to_port": 1},
+        {"from": "merge1", "from_port": 0, "to": "chop_to_dat1", "to_port": 0},
+        {"from": "chop_to_dat1", "from_port": 0, "to": "serial_tx1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Serial Send DAT \u2014 Continuous LFO Stream\n\nTwo LFOs merged and converted to DAT, then\ncontinuously streamed over serial at 115200 baud.\nUseful for driving servos, LEDs, or displays\nfrom animated CHOP data.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

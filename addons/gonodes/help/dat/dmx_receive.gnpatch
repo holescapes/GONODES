@@ -1,0 +1,28 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "dmx1": {
+            "type": "DMXDAT",
+            "position": [500, 200],
+            "parameters": {
+                "mode": {"value": 1},
+                "universe": {"value": 0},
+                "port": {"value": 6454},
+                "active": {"value": true},
+                "channels": {"value": 24}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DMX DAT \u2014 Art-Net Receive\n\nMode set to Receive: listens on port 6454 for\nincoming Art-Net OpDmx packets on universe 0.\nOutput table shows received channel values.\nNo external library \u2014 uses Godot's PacketPeerUDP.",
+            "position": [50.0, -50.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

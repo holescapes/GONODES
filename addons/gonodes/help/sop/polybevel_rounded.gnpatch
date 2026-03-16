@@ -1,0 +1,73 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "cylinder1": {
+            "type": "CylinderSOP",
+            "position": [100, 100],
+            "parameters": {
+                "radius": {"value": 0.5},
+                "height": {"value": 2.0}
+            }
+        },
+        "polybevel1": {
+            "type": "PolyBevelSOP",
+            "position": [450, 100],
+            "parameters": {
+                "offset": {"value": 0.15},
+                "divisions": {"value": 5},
+                "roundness": {"value": 1.0}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [800, 300],
+            "parameters": {
+                "tx": {"value": 1.5},
+                "ty": {"value": 1.5},
+                "tz": {"value": 3.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "cylinder1", "from_port": 0, "to": "polybevel1", "to_port": 0},
+        {"from": "polybevel1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PolyBevel SOP \u2014 Round Cylinder\n\nCylinder with 5-division bevel at full roundness (1.0).\nLarger offset (0.15) creates pronounced rounded caps.\nHigh divisions + high roundness = smooth fillet edges.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}
