@@ -23,12 +23,19 @@ var _no_selection_label: Label = null
 
 ## Preset toolbar elements
 var _preset_bar: HBoxContainer = null
+var _preset_dropdown: OptionButton = null
 var _copy_btn: Button = null
 var _paste_btn: Button = null
 var _reset_btn: Button = null
 var _presets_btn: MenuButton = null
 var _save_preset_dialog: AcceptDialog = null
 var _save_preset_line_edit: LineEdit = null
+
+## Cached preset list for the current node (rebuilt when node or dropdown changes).
+var _cached_presets: Array = []
+
+## Whether we're programmatically changing the dropdown (suppress signals).
+var _updating_dropdown: bool = false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -77,13 +84,31 @@ func _ready() -> void:
 	_preset_bar.visible = false  # Hidden until a node is inspected
 	header_box.add_child(_preset_bar)
 
+	# Preset dropdown selector
+	var preset_row := HBoxContainer.new()
+	preset_row.add_theme_constant_override("separation", 4)
+	var preset_lbl := Label.new()
+	preset_lbl.text = "Preset:"
+	preset_lbl.add_theme_font_size_override("font_size", 11)
+	preset_row.add_child(preset_lbl)
+	_preset_dropdown = OptionButton.new()
+	_preset_dropdown.add_theme_font_size_override("font_size", 11)
+	_preset_dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_preset_dropdown.item_selected.connect(_on_preset_dropdown_selected)
+	preset_row.add_child(_preset_dropdown)
+	_preset_bar.add_child(preset_row)
+
+	# Buttons row
+	var btn_row := HBoxContainer.new()
+	btn_row.add_theme_constant_override("separation", 4)
+
 	_copy_btn = Button.new()
 	_copy_btn.text = "Copy"
 	_copy_btn.tooltip_text = "Copy all parameters to clipboard"
 	_copy_btn.add_theme_font_size_override("font_size", 11)
 	_copy_btn.custom_minimum_size = Vector2(50, 0)
 	_copy_btn.pressed.connect(_on_copy_pressed)
-	_preset_bar.add_child(_copy_btn)
+	btn_row.add_child(_copy_btn)
 
 	_paste_btn = Button.new()
 	_paste_btn.text = "Paste"
@@ -91,7 +116,7 @@ func _ready() -> void:
 	_paste_btn.add_theme_font_size_override("font_size", 11)
 	_paste_btn.custom_minimum_size = Vector2(50, 0)
 	_paste_btn.pressed.connect(_on_paste_pressed)
-	_preset_bar.add_child(_paste_btn)
+	btn_row.add_child(_paste_btn)
 
 	_reset_btn = Button.new()
 	_reset_btn.text = "Reset"
@@ -99,7 +124,7 @@ func _ready() -> void:
 	_reset_btn.add_theme_font_size_override("font_size", 11)
 	_reset_btn.custom_minimum_size = Vector2(50, 0)
 	_reset_btn.pressed.connect(_on_reset_pressed)
-	_preset_bar.add_child(_reset_btn)
+	btn_row.add_child(_reset_btn)
 
 	_presets_btn = MenuButton.new()
 	_presets_btn.text = "Presets ▾"
@@ -108,7 +133,8 @@ func _ready() -> void:
 	_presets_btn.flat = false
 	_presets_btn.get_popup().id_pressed.connect(_on_preset_menu_id_pressed)
 	_presets_btn.get_popup().about_to_popup.connect(_rebuild_presets_menu)
-	_preset_bar.add_child(_presets_btn)
+	btn_row.add_child(_presets_btn)
+	_preset_bar.add_child(btn_row)
 
 	# Separator
 	var sep := HSeparator.new()
@@ -189,6 +215,7 @@ func inspect(node: GNNode) -> void:
 	# Show preset toolbar and update paste button
 	_preset_bar.visible = true
 	_paste_btn.disabled = not GNParamPresetManager.can_paste(node)
+	_refresh_preset_dropdown()
 
 	# Build parameter rows in definition order.
 	# Consecutive params sharing a non-empty display_group are placed
@@ -531,3 +558,48 @@ func _on_save_preset_confirmed() -> void:
 	if preset_name.is_empty() or _current_node == null:
 		return
 	GNParamPresetManager.save_preset(_current_node, preset_name)
+	_refresh_preset_dropdown()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Preset Dropdown
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Rebuilds the preset OptionButton dropdown for the current node.
+func _refresh_preset_dropdown() -> void:
+	if _preset_dropdown == null or _current_node == null:
+		return
+	_updating_dropdown = true
+	_preset_dropdown.clear()
+	_preset_dropdown.add_item("[Default]")
+
+	var op_type: String = _current_node.get_script().get_global_name()
+	_cached_presets = GNParamPresetManager.get_preset_list(op_type)
+
+	for entry in _cached_presets:
+		var label: String = entry["name"]
+		if entry["is_factory"]:
+			label += "  [factory]"
+		_preset_dropdown.add_item(label)
+
+	_preset_dropdown.selected = 0
+	_updating_dropdown = false
+
+
+## Called when the user selects a preset from the dropdown.
+func _on_preset_dropdown_selected(idx: int) -> void:
+	if _updating_dropdown or _current_node == null:
+		return
+	if idx == 0:
+		# "[Default]" selected — reset to factory defaults
+		var count := GNParamPresetManager.reset_to_defaults(_current_node)
+		if count > 0:
+			_current_node.parameters_changed.emit(_current_node.id)
+		return
+	# Preset entries start at index 1 → _cached_presets index = idx - 1
+	var preset_idx: int = idx - 1
+	if preset_idx >= 0 and preset_idx < _cached_presets.size():
+		var applied := GNParamPresetManager.load_preset(
+			_current_node, _cached_presets[preset_idx]["path"])
+		if applied > 0:
+			_current_node.parameters_changed.emit(_current_node.id)

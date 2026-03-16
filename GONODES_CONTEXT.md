@@ -428,7 +428,15 @@ func remove_annotation(ann_id: String) -> bool
 
 **`GNStickyNote`** (extends Control) — editable text note on the canvas (`z_index = -9`). Multi-line text display, inline TextEdit (double-click), drag-move, resize, right-click context menu (Edit Text, Change Color, Delete). Default yellow color. Signals: `note_changed`, `text_changed`, `delete_requested`, `color_changed`.
 
-**`rename_node()` updates:** nodes dictionary key, `GNNode.id`, `GNNode.name`, all `GNConnection.from_node`/`to_node` references, expression strings across all parameters in the network (simple `"old_id"` -> `"new_id"` replacement). Validates: alphanumeric/underscore only, no duplicates, no empty. Emits `node_renamed` then `graph_changed`.
+**`rename_node()` updates:** nodes dictionary key, `GNNode.id`, `GNNode.name`, all `GNConnection.from_node`/`to_node` references, and expression strings across all parameters in the network via regex-based path-segment replacement (`_update_expressions_for_rename()`). The rename engine handles:
+- **Main expressions** on every parameter in EXPRESSION mode
+- **Per-component expressions** (Vector2/3/4, Color) — recompiled after text replacement
+- **Script operator code** (`scriptchop`, `scriptdat`, `scriptsop`, `scriptimg`, `genericscript`) — the `code` parameter's GDScript source is scanned and updated
+- **CallbackDAT callback slots** (`on_start`, `on_cook`, `on_value_change`, `on_create`)
+- **Hierarchical paths** — `"subnet1/old_id"` → `"subnet1/new_id"` via per-segment matching (splits by `/`, replaces exact segments only)
+- **All reference functions** — `chop[sfi]()`, `op()`, `top()`, `sop()`, `dat()`, `mat()`, `par[sfi]()`, `set_par()`
+
+Validates: alphanumeric/underscore only, no duplicates, no empty. Emits `node_renamed` then `graph_changed`.
 
 ### GNConnection
 ```gdscript
@@ -1467,7 +1475,7 @@ GONODES/
   - [x] Node lock toggle (L key — prevents parameter changes, ?? indicator, inspector dims and disables inputs).
   - [x] Wire style options (W key to cycle, toolbar dropdown — curved/straight/right-angle via `connection_lines_curvature`).
 - [x] **Expression & scripting system refinement**:
-  - [x] Autocomplete / intellisense for expression fields (node IDs, channel names, param names) — via GNExpressionEditor CodeEdit autocomplete.
+  - [x] Autocomplete / intellisense for expression fields — via GNExpressionEditor CodeEdit autocomplete. Family-aware node filtering (chop(" shows CHOPs only, top(" shows TOPs only, op("/par("/set_par(" show all). Hierarchical path completion (type "subnet1/" to browse subnetwork nodes, "../" for parent). par()/set_par() context detection with second-arg param name suggestions. Node IDs color-coded by family.
   - [x] Expression syntax highlighting (CodeHighlighter in GNExpressionEditor — GONODES keywords green/purple, context vars cyan, math funcs blue, built-in utilities teal, GDScript keywords pink).
   - [x] Custom user-defined expression functions — `GNExpressionFunctions` registry + `fn()` dispatch on CookEngine. Register via `GNExpressionFunctions.register()`, call via `fn("name", args...)`.
   - [x] Multi-line expression editor popup — `GNExpressionEditor` (Window) with CodeEdit, syntax highlighting, live validation, autocomplete, Ctrl+Enter confirm, Escape cancel. Opened via ↗ button next to expression fields.
@@ -1803,7 +1811,7 @@ GONODES/
   - **Active-only pre-cook**: `_pre_cook_pass()` skips inactive nodes entirely.
   - **Expression consumer map**: `_should_eval_expressions()` checks whether upstream sources cooked this frame before re-evaluating expressions. Avoids per-frame polling of every expression on every active node.
   - **Inactive dirty propagation cutoff**: `propagate_dirty()` marks inactive nodes dirty but does not BFS through them — prunes frozen subgraphs from the walk.
-- [ ] **CPU fallback for compute-dependent operators** — enables Compatibility renderer (Web/WebGL2, old hardware). See Section 34 Phase 3:
+- [x] **CPU fallback for compute-dependent operators** — enables Compatibility renderer (Web/WebGL2, old hardware). See Section 34 Phase 3:
   - **POP family CPU fallback**: CPU particle simulation using `PackedVector3Array` + `MultiMesh.set_instance_transform()`. Slower than GPU compute but functional for small particle counts (~10K). Each POP operator would have a `_cook_cpu()` path alongside the existing GPU `_cook()`.
   - **VOL family CPU fallback**: CPU voxel grid using `PackedFloat32Array`. Iterative passes (blur, advect, pressure solve) run on CPU. Usable for low-resolution volumes (32³–64³). Fluid sim would be significantly slower.
   - **ComputeShaderTOP CPU fallback**: Not feasible — user-written GLSL compute code can't run on CPU. Instead, suggest users use CustomShaderTOP (`shader_type canvas_item` fragment shader) which works on all renderers including Compatibility.
@@ -1847,7 +1855,7 @@ GONODES/
 - [x] CallbackDAT (event-driven scripting callbacks) — **Done**: `operators/dat/callback_dat.gd`
 - [x] `set_par()` writable parameter references — **Done**: in `gn_cook_engine.gd` + GNScriptHelper preamble
 - [x] Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) — **Done**: in `gn_cook_engine.gd` + GNScriptHelper preamble
-- [ ] Preset dropdown parameter (Option B — inspector renders preset as dropdown)
+- [x] Preset dropdown parameter (Option B — inspector renders preset as dropdown)
 - [ ] Network collaboration (shared editing)
 - [ ] Asset/patch marketplace
 - [x] Mobile/web export for patches — **Phase 1-8 ALL COMPLETE** (renderer/platform detection, shader audit, CPU fallback for POP/VOL, export presets, thread detection, WindowOUT embedded mode, web runtime JS bridge, export compatibility report UI). See Section 34.
@@ -3643,7 +3651,7 @@ The parameter inspector is a right-side panel that shows all parameters for the 
 |------|-------|---------|
 | `addons/gonodes/ui/gn_param_row.gd` | `GNParamRow` | Per-parameter widget. Type-specific controls (FLOAT: HSlider+SpinBox, INT: SpinBox, BOOL: CheckBox, ENUM: OptionButton, COLOR: ColorPickerButton, VECTOR2/2I: dual SpinBox, STRING: LineEdit, FILE: Button+FileDialog picker, RAMP: GNRampEditor curve editor). Mode toggle button (C=green, E=orange). Expression LineEdit with focus guard. ↗ expand buttons open multi-line editor. Code params get "Edit ↗" button opening GNCodeEditor. Profiling tooltip. |
 | `addons/gonodes/ui/gn_base_code_editor.gd` | `GNBaseCodeEditor` | Abstract base class (extends Window) for modal code-editing windows. Provides shared layout: MarginContainer → VBox → info label → toolbar hook → CodeEdit (line numbers, auto-indent, brace completion, word wrap) → status label → Cancel/OK buttons. Key bindings (Ctrl+Enter, Escape). Virtual hooks: `_build_toolbar()`, `_setup_code_edit()`, `_build_bottom_bar()`, `_on_ok()`. Helper methods: `_focus_end()`, `_set_status()`. |
-| `addons/gonodes/ui/gn_expression_editor.gd` | `GNExpressionEditor` | Extends GNBaseCodeEditor. Expression editing with code completion (node IDs, channels, params, custom funcs), live validation, Snippets ▾ dropdown (30+ built-in + user snippets persisted to disk), reference cheatsheet. |
+| `addons/gonodes/ui/gn_expression_editor.gd` | `GNExpressionEditor` | Extends GNBaseCodeEditor. Expression editing with family-aware code completion (chop(" filters CHOPs, top(" filters TOPs, par("/set_par(" show all; hierarchical path completion via `_suggest_hierarchical_nodes()` for subnetwork browsing; node IDs color-coded by family), live validation, Snippets ▾ dropdown (30+ built-in + user snippets persisted to disk), reference cheatsheet. |
 | `addons/gonodes/ui/gn_ramp_editor.gd` | `GNRampEditor` | Custom `_draw()` curve editor for RAMP parameters. Grid background (0.25 increments), cubic Hermite curve rendering, draggable keypoints with tangent handles, left-click to add point, right-click to remove (min 2), Ctrl+click to toggle smooth/linear tangents. Signal: `ramp_changed(keys)`. |
 | `addons/gonodes/ui/gn_network_box.gd` | `GNNetworkBox` | Canvas annotation: colored rectangle behind graph nodes (z_index=-10) for visual grouping. Title bar with inline edit (double-click), drag-move, bottom-right resize, right-click context menu. Signals: `box_changed`, `text_changed`, `delete_requested`, `color_changed`. |
 | `addons/gonodes/ui/gn_sticky_note.gd` | `GNStickyNote` | Canvas annotation: editable text note (z_index=-9). Multi-line TextEdit (double-click), drag-move, resize, right-click context menu. Default yellow. Signals: `note_changed`, `text_changed`, `delete_requested`, `color_changed`. |
@@ -3847,7 +3855,7 @@ These are non-negotiable constraints discovered during development. **Never viol
   2. A `LineEdit` is added as an overlay (NOT as a GraphNode child row — but since GraphNode auto-slots children, we must call `reset_size()` after removal to prevent height growth)
   3. On commit, `rename_requested(old_id, new_id)` signal fires
   4. `GNGraphEditor._on_node_rename_requested()` calls `network.rename_node()`
-  5. `GNNetwork.rename_node()` updates: nodes dict key, `GNNode.id`, `GNNode.name`, all `GNConnection` references, expression strings across all params, then emits `node_renamed`
+  5. `GNNetwork.rename_node()` updates: nodes dict key, `GNNode.id`, `GNNode.name`, all `GNConnection` references, expression strings across all params (regex-based path-segment replacement including component_expressions, script code bodies, and CallbackDAT callback slots), then emits `node_renamed`
   6. `GNGraphEditor._on_network_node_renamed()` disconnects visual wires under old name, updates `_node_views` dict key, calls `view.apply_rename()`, reconnects wires, re-emits `operator_selected`
   7. `gn_editor.gd._on_node_renamed()` updates `_viewer_node_id` if renamed node was being viewed
   8. Inspector refreshes header label on re-inspect of same node object

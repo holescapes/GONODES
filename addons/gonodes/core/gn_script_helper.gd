@@ -614,38 +614,22 @@ func on_code_changed(node: GNNode, code: String) -> bool:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Factory presets directory (read-only, ships with addon).
+## @deprecated Use GNPresetPaths instead.
 const FACTORY_PRESET_DIR := "res://addons/gonodes/presets/"
 
-## User presets directory (read-write, created on first save).
-const USER_PRESET_DIR := "user://gonodes_presets/"
+## User presets directory (read-write).
+## @deprecated Use GNPresetPaths instead.
+const USER_PRESET_DIR := "user://gonodes/presets/code/"
 
 
 ## Returns all available preset names for a given family.
 ## Returns Array of { "name": String, "path": String, "is_factory": bool }.
 static func get_preset_list(family_folder: String) -> Array:
 	var result: Array = []
-
-	# Core factory presets
-	var factory_path := FACTORY_PRESET_DIR + family_folder
-	_scan_preset_dir(factory_path, true, result)
-
-	# Extension presets — each gn_ext_* folder may ship presets/<family_folder>/
-	var addons_dir := DirAccess.open("res://addons")
-	if addons_dir != null:
-		addons_dir.list_dir_begin()
-		var folder_name := addons_dir.get_next()
-		while folder_name != "":
-			if addons_dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
-				var ext_preset_path := "res://addons/%s/presets/%s" % [
-					folder_name, family_folder]
-				_scan_preset_dir(ext_preset_path, true, result)
-			folder_name = addons_dir.get_next()
-		addons_dir.list_dir_end()
-
-	# User presets
-	var user_path := USER_PRESET_DIR + family_folder
-	_scan_preset_dir(user_path, false, result)
-
+	var dirs := GNPresetPaths.get_code_preset_dirs(family_folder)
+	for i in range(dirs.size()):
+		var is_factory: bool = i < dirs.size() - 1
+		_scan_preset_dir(dirs[i], is_factory, result)
 	return result
 
 
@@ -691,7 +675,7 @@ static func load_preset(file_path: String) -> String:
 ## Returns true on success.
 static func save_preset(family_folder: String, preset_name: String,
 		code: String, file_ext: String = ".gd") -> bool:
-	var dir_path := USER_PRESET_DIR + family_folder
+	var dir_path := GNPresetPaths.get_code_preset_save_dir(family_folder)
 	# Ensure directory exists
 	if not DirAccess.dir_exists_absolute(dir_path):
 		var err := DirAccess.make_dir_recursive_absolute(dir_path)

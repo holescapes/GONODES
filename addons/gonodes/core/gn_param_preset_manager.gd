@@ -14,17 +14,10 @@ extends RefCounted
 ##
 ## All serialization reuses `GNParameter.to_dict()` / `from_dict()` so the
 ## JSON format stays consistent with `.gnpatch` files.
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Constants
-# ═══════════════════════════════════════════════════════════════════════════════
-
-## Factory presets directory (read-only, ships with addon).
-const FACTORY_PRESET_DIR := "res://addons/gonodes/presets/params/"
-
-## User presets directory (read-write, created on first save).
-const USER_PRESET_DIR := "user://gonodes_param_presets/"
+##
+## Directories are managed via [GNPresetPaths] — factory presets ship in
+## `res://addons/gonodes/presets/params/`, user presets live under
+## `user://gonodes/presets/params/`.
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -45,6 +38,9 @@ static func copy_params(node: GNNode) -> void:
 	for p_name in node.parameters:
 		var param: GNParameter = node.parameters[p_name]
 		params_dict[p_name] = param.to_dict()
+	for sp_name in node.spare_parameters:
+		var sp: GNParameter = node.spare_parameters[sp_name]
+		params_dict["spare:" + sp_name] = sp.to_dict()
 	_clipboard = {
 		"operator_type": operator_type,
 		"params": params_dict,
@@ -71,11 +67,18 @@ static func paste_params(node: GNNode) -> int:
 	var params_dict: Dictionary = _clipboard.get("params", {})
 	var applied := 0
 	for p_name in params_dict:
-		var param: GNParameter = node.parameters.get(p_name, null)
-		if param == null:
-			continue
-		param.from_dict(params_dict[p_name])
-		applied += 1
+		if p_name.begins_with("spare:"):
+			var sp_name: String = p_name.substr(6)
+			var sp: GNParameter = node.spare_parameters.get(sp_name, null)
+			if sp != null:
+				sp.from_dict(params_dict[p_name])
+				applied += 1
+		else:
+			var param: GNParameter = node.parameters.get(p_name, null)
+			if param == null:
+				continue
+			param.from_dict(params_dict[p_name])
+			applied += 1
 	# Mark node dirty so it re-cooks
 	node.mark_dirty()
 	GNLogger.info("PresetManager", "Pasted %d/%d parameters onto '%s'" % [
@@ -101,15 +104,11 @@ static func clipboard_operator_type() -> String:
 ## Returns Array of { "name": String, "path": String, "is_factory": bool }.
 static func get_preset_list(operator_type: String) -> Array:
 	var result: Array = []
-
-	# Factory presets
-	var factory_path := FACTORY_PRESET_DIR + operator_type
-	_scan_preset_dir(factory_path, true, result)
-
-	# User presets
-	var user_path := USER_PRESET_DIR + operator_type
-	_scan_preset_dir(user_path, false, result)
-
+	var dirs := GNPresetPaths.get_param_preset_dirs(operator_type)
+	for i in range(dirs.size()):
+		# Last entry is the user directory
+		var is_factory: bool = i < dirs.size() - 1
+		_scan_preset_dir(dirs[i], is_factory, result)
 	return result
 
 
@@ -120,11 +119,15 @@ static func save_preset(node: GNNode, preset_name: String) -> bool:
 		return false
 	var operator_type: String = node.get_script().get_global_name()
 
-	# Serialize all parameters
+	# Serialize all parameters (built-in + spare)
 	var params_dict: Dictionary = {}
 	for p_name in node.parameters:
 		var param: GNParameter = node.parameters[p_name]
 		params_dict[p_name] = param.to_dict()
+	# Include spare parameters — keyed with "spare:" prefix for clarity
+	for sp_name in node.spare_parameters:
+		var sp: GNParameter = node.spare_parameters[sp_name]
+		params_dict["spare:" + sp_name] = sp.to_dict()
 
 	var data: Dictionary = {
 		"operator_type": operator_type,
@@ -134,7 +137,7 @@ static func save_preset(node: GNNode, preset_name: String) -> bool:
 	}
 
 	# Ensure directory exists
-	var dir_path := USER_PRESET_DIR + operator_type
+	var dir_path := GNPresetPaths.get_param_preset_save_dir(operator_type)
 	if not DirAccess.dir_exists_absolute(dir_path):
 		var err := DirAccess.make_dir_recursive_absolute(dir_path)
 		if err != OK:
@@ -196,11 +199,18 @@ static func load_preset(node: GNNode, file_path: String) -> int:
 	var params_dict: Dictionary = data.get("params", {})
 	var applied := 0
 	for p_name in params_dict:
-		var param: GNParameter = node.parameters.get(p_name, null)
-		if param == null:
-			continue
-		param.from_dict(params_dict[p_name])
-		applied += 1
+		if p_name.begins_with("spare:"):
+			var sp_name: String = p_name.substr(6)
+			var sp: GNParameter = node.spare_parameters.get(sp_name, null)
+			if sp != null:
+				sp.from_dict(params_dict[p_name])
+				applied += 1
+		else:
+			var param: GNParameter = node.parameters.get(p_name, null)
+			if param == null:
+				continue
+			param.from_dict(params_dict[p_name])
+			applied += 1
 
 	# Mark node dirty so it re-cooks
 	node.mark_dirty()

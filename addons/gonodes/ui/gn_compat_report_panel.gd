@@ -120,6 +120,7 @@ func _scan() -> void:
 
 	var target_platform: String = _PLATFORMS[_platform_btn.selected]
 	var target_renderer: String = _RENDERERS[_renderer_btn.selected]
+	var renderer_label: String = _RENDERER_LABELS[_renderer_btn.selected]
 	var has_compute: bool = target_renderer != "gl_compatibility"
 
 	var issues: Array[Dictionary] = []
@@ -129,18 +130,24 @@ func _scan() -> void:
 		if node == null:
 			continue
 
+		var node_type: String = node.node_type if "node_type" in node else node_id
+
 		# Check renderer compatibility
 		var supported_rend: PackedStringArray = node.supported_renderers()
 		if not supported_rend.has(target_renderer):
 			var has_fallback: bool = node.has_cpu_fallback()
 			var detail: String
 			if has_fallback:
-				detail = "CPU fallback available — will run at reduced performance"
+				detail = "Will run on CPU instead of GPU — reduced performance"
 			else:
-				detail = "No fallback — node will be skipped (output = null)"
+				if not has_compute and node.requires_compute():
+					detail = "%s has no compute shaders — node disabled, output = null, downstream receives empty input" % renderer_label
+				else:
+					detail = "Not supported on %s — node disabled, output = null, downstream receives empty input" % renderer_label
 			issues.append({
 				"node_id": node_id,
 				"node_name": node.display_name if "display_name" in node else node_id,
+				"node_type": node_type,
 				"family": node.get_family_name() if node.has_method("get_family_name") else "?",
 				"issue": "Renderer: needs %s" % "/".join(supported_rend),
 				"detail": detail,
@@ -153,11 +160,32 @@ func _scan() -> void:
 			issues.append({
 				"node_id": node_id,
 				"node_name": node.display_name if "display_name" in node else node_id,
+				"node_type": node_type,
 				"family": node.get_family_name() if node.has_method("get_family_name") else "?",
-				"issue": "Platform: needs %s" % "/".join(supported_plat),
-				"detail": "Node will be skipped on %s" % target_platform,
+				"issue": "Platform: only available on %s" % "/".join(supported_plat),
+				"detail": "Node disabled on %s — output = null, downstream receives empty input" % target_platform,
 				"severity": "error",
 			})
+
+	# ── Multi-WindowOUT check for single-window platforms ────────────
+	var is_single_window: bool = target_platform in ["web", "android", "ios"]
+	if is_single_window:
+		var window_out_ids: PackedStringArray = []
+		for node_id: String in network.nodes:
+			var node: GNNode = network.nodes[node_id]
+			if node != null and node.node_type == "window":
+				window_out_ids.append(node_id)
+		if window_out_ids.size() > 1:
+			for wid in window_out_ids:
+				issues.append({
+					"node_id": wid,
+					"node_name": wid,
+					"node_type": "window",
+					"family": "OUT",
+					"issue": "Multi-window: %d WindowOUTs, platform supports 1" % window_out_ids.size(),
+					"detail": "%s only supports a single window — extra WindowOUTs cook but won't open" % target_platform,
+					"severity": "warn",
+				})
 
 	# Populate tree
 	for entry: Dictionary in issues:
@@ -181,13 +209,18 @@ func _scan() -> void:
 	var warn_count: int = issue_count - error_count
 
 	if issue_count == 0:
-		_summary_label.text = "All %d nodes compatible with %s / %s" % [
-			node_count, target_platform, _RENDERER_LABELS[_renderer_btn.selected]]
+		_summary_label.text = "✓ All %d nodes fully compatible with %s / %s" % [
+			node_count, target_platform, renderer_label]
 		_summary_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.4))
 	else:
-		_summary_label.text = "%d issue(s) in %d nodes (%d errors, %d warnings) — %s / %s" % [
-			issue_count, node_count, error_count, warn_count,
-			target_platform, _RENDERER_LABELS[_renderer_btn.selected]]
+		var parts: PackedStringArray = []
+		if error_count > 0:
+			parts.append("%d skipped" % error_count)
+		if warn_count > 0:
+			parts.append("%d CPU fallback" % warn_count)
+		_summary_label.text = "%d of %d nodes affected (%s) — %s / %s" % [
+			issue_count, node_count, ", ".join(parts),
+			target_platform, renderer_label]
 		if error_count > 0:
 			_summary_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35))
 		else:

@@ -161,22 +161,126 @@ func rename_node(old_id: String, new_id: String) -> bool:
 			conn.to_node = new_id
 
 	# Update expression references across all nodes in the network.
-	# Simple string replace: "old_id" -> "new_id" in expression text.
-	for n_id in nodes:
-		var n: GNNode = nodes[n_id]
-		for param_name in n.parameters:
-			var param: GNParameter = n.parameters[param_name]
-			if not param.expression.is_empty() and old_id in param.expression:
-				var updated := param.expression.replace(
-					'"%s"' % old_id, '"%s"' % new_id)
-				if updated != param.expression:
-					param.set_expression(updated)
+	# Regex-based: catches chop/op/top/sop/dat/mat/par/set_par references
+	# and handles hierarchical paths containing the old ID as a segment.
+	_update_expressions_for_rename(old_id, new_id)
 
 	_invalidate_topo()
 	GNLogger.info("Network", "Node renamed: '%s' → '%s'" % [old_id, new_id])
 	node_renamed.emit(old_id, new_id)
 	graph_changed.emit()
 	return true
+
+
+## Node types whose "code" parameter contains GDScript with node references.
+var _SCRIPT_NODE_TYPES: PackedStringArray = PackedStringArray([
+	"scriptchop", "scriptdat", "scriptsop", "scriptimg", "genericscript",
+])
+
+## CallbackDAT code parameters (multiple script slots, not "code").
+var _CALLBACK_CODE_PARAMS: PackedStringArray = PackedStringArray([
+	"on_start", "on_cook", "on_value_change", "on_create",
+])
+
+
+## Updates all expression strings and script code bodies across the network
+## when a node is renamed.  Uses regex to match the old ID inside quoted
+## strings (first argument of node-reference functions and hierarchical paths).
+func _update_expressions_for_rename(old_id: String, new_id: String) -> void:
+	# Build a regex that matches the old_id inside quoted strings:
+	#   1. As a standalone ID:   "old_id"
+	#   2. As a path segment:    "something/old_id"  or  "old_id/something"
+	var esc_old := old_id.replace(".", "\\.").replace("-", "\\-")
+	var re := RegEx.new()
+	# Match "old_id" as a complete ID or as a path segment within quotes.
+	# We replace the ID portion while preserving surrounding path segments.
+	# Approach: find all "...old_id..." in quoted strings and do targeted replacement.
+	re.compile('\"([^\"]*)\"')
+
+	for n_id in nodes:
+		var n: GNNode = nodes[n_id]
+		for param_name in n.parameters:
+			var param: GNParameter = n.parameters[param_name]
+
+			# Main expression
+			if param.mode == GNParameter.Mode.EXPRESSION and not param.expression.is_empty():
+				var updated := _replace_id_in_expr(param.expression, old_id, new_id)
+				if updated != param.expression:
+					param.set_expression(updated)
+
+			# Per-component expressions (Vector2/3/4, Color)
+			for i in range(param.component_expressions.size()):
+				if param.component_modes.size() > i and \
+						param.component_modes[i] == GNParameter.Mode.EXPRESSION:
+					var comp_expr: String = param.component_expressions[i]
+					if not comp_expr.is_empty():
+						var updated := _replace_id_in_expr(comp_expr, old_id, new_id)
+						if updated != comp_expr:
+							param.component_expressions[i] = updated
+							param._compile_component_expression(i)
+
+		# Script operator code bodies — update node references in GDScript source
+		if n.node_type in _SCRIPT_NODE_TYPES:
+			var code_param: GNParameter = n.parameters.get("code", null)
+			if code_param != null:
+				var code_val: String = code_param.value if code_param.value is String else ""
+				if not code_val.is_empty() and old_id in code_val:
+					var updated := _replace_id_in_expr(code_val, old_id, new_id)
+					if updated != code_val:
+						n.set_param_value("code", updated)
+
+		# CallbackDAT — multiple script slots
+		if n.node_type == "callbackdat":
+			for cb_param_name in _CALLBACK_CODE_PARAMS:
+				var cb_param: GNParameter = n.parameters.get(cb_param_name, null)
+				if cb_param != null:
+					var cb_val: String = cb_param.value if cb_param.value is String else ""
+					if not cb_val.is_empty() and old_id in cb_val:
+						var updated := _replace_id_in_expr(cb_val, old_id, new_id)
+						if updated != cb_val:
+							n.set_param_value(cb_param_name, updated)
+
+
+## Replaces a node ID within quoted strings in an expression or code body.
+## Handles standalone IDs ("old_id") and path segments ("prefix/old_id",
+## "old_id/suffix", "a/old_id/b").  Does NOT touch unquoted occurrences
+## or IDs that are substrings of longer identifiers within the same segment.
+func _replace_id_in_expr(text: String, old_id: String, new_id: String) -> String:
+	var re := RegEx.new()
+	# Match old_id as a complete path segment inside double-quoted strings.
+	# (?<=")        — after opening quote (or after /)
+	# (?:^|(?<=/))  — either start of string-content or after path separator
+	# old_id        — the exact old node ID
+	# (?:(?=/)|$)   — followed by path separator or before closing quote
+	# We process each quoted string individually to be safe.
+	re.compile('"([^"]*)"')
+	var result := text
+	var offset := 0
+	for m in re.search_all(text):
+		var full_match: String = m.get_string(0)
+		var inner: String = m.get_string(1)
+		var new_inner := _replace_path_segment(inner, old_id, new_id)
+		if new_inner != inner:
+			var new_full := '"%s"' % new_inner
+			var start_pos: int = m.get_start(0) + offset
+			result = result.substr(0, start_pos) + new_full + result.substr(start_pos + full_match.length())
+			offset += new_full.length() - full_match.length()
+	return result
+
+
+## Replaces old_id as a complete path segment (split by "/") in a path string.
+## "lfo1" → matches "lfo1", "subnet/lfo1", "lfo1/inner", "a/lfo1/b"
+## Does NOT match "lfo10" or "my_lfo1" (must be exact segment).
+func _replace_path_segment(path: String, old_id: String, new_id: String) -> String:
+	var segments := path.split("/")
+	var changed := false
+	for i in range(segments.size()):
+		if segments[i] == old_id:
+			segments[i] = new_id
+			changed = true
+	if changed:
+		return "/".join(segments)
+	return path
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -499,11 +499,16 @@ open the **Expression Editor** popup. It provides:
   and context variables
 - **Live validation** — errors shown immediately as you type
 - **Autocomplete** — press Ctrl+Space for suggestions:
-  - Inside `chop("`, `op("`, `top("` — suggests node IDs
-  - Inside `chop("lfo1", "` — suggests channel names
-  - Inside `op("node1", "` — suggests parameter names
+  - Inside `chop("` — suggests only CHOP-family nodes (green)
+  - Inside `top("` — suggests only TOP-family nodes (purple)
+  - Inside `sop("`, `dat("`, `mat("` — filters by family
+  - Inside `op("`, `par("`, `set_par("` — suggests all nodes (any family)
+  - Inside `chop("lfo1", "` — suggests channel names from that node
+  - Inside `op("node1", "` or `par("node1", "` — suggests parameter names
   - Inside `fn("` — suggests registered custom functions
+  - Hierarchical paths: type `subnet1/` to browse subnetwork nodes, `../` for parent
   - General context — variables, functions, constants
+  - Node IDs are color-coded by family (CHOP green, TOP purple, SOP blue, etc.)
 - **Snippets** dropdown — pre-built expression templates (see below)
 - **Profiling info** — shows last/average evaluation time
 - **Ctrl+Enter** to confirm, **Escape** to cancel

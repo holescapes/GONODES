@@ -284,7 +284,7 @@ func _update_param_refs() -> void:
 
 	# Regex for extracting node references from expressions
 	var ref_regex := RegEx.new()
-	ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|par)\\s*\\(\\s*\"([^\"]+)\"")
+	ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
 
 	var set_par_regex := RegEx.new()
 	set_par_regex.compile("set_par\\s*\\(\\s*\"([^\"]+)\"")

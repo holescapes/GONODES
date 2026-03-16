@@ -57,6 +57,28 @@ var _overlay_owner: GNUiBase = null
 ## Track open WindowOUT instances for multi-window validation on mobile/web.
 static var _open_instance_ids: Dictionary = {}
 
+## Static registry: node_id → WindowOUT reference.  Input CHOPs look up windows here.
+static var _input_registry: Dictionary = {}
+
+## ID of the WindowOUT whose Window most recently received focus.
+static var _last_focused_window: String = ""
+
+# ── Per-window input state (updated from _on_window_input) ──────────────────
+## Keyboard: keycode (Key) → true when pressed.
+var _input_keys: Dictionary = {}
+## Mouse position in local window coordinates.
+var _input_mouse_pos: Vector2 = Vector2.ZERO
+## Mouse button states: MOUSE_BUTTON_LEFT/RIGHT/MIDDLE → bool.
+var _input_mouse_buttons: Dictionary = {}
+## Accumulated scroll impulse (decays per frame like MouseInCHOP).
+var _input_scroll: float = 0.0
+## Touch points: finger index → {x, y, pressure, rel_x, rel_y, phase}.
+var _input_touches: Dictionary = {}
+## True while this window has OS keyboard/mouse focus.
+var _input_has_focus: bool = false
+## Window size (updated every cook so CHOPs can normalize).
+var _input_window_size: Vector2 = Vector2(512, 512)
+
 ## Whether this WindowOUT runs in embedded mode (mobile/web).
 ## Embedded mode parents display into the main viewport instead of a Window.
 var _embedded_mode: bool = false
@@ -102,8 +124,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# Track open WindowOUT instances and warn on mobile/web if >1
 	if should_open:
 		_open_instance_ids[id] = true
+		_input_registry[id] = self
 	else:
 		_open_instance_ids.erase(id)
+		_input_registry.erase(id)
 
 	var platform := GNGpuContext.get_current_platform()
 	var _is_single_window := platform in ["android", "ios", "web"]
@@ -145,6 +169,17 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	else:
 		_display_rect.visible = false
 
+	# Update cached window size for input CHOPs normalisation
+	if _window != null and not _embedded_mode:
+		_input_window_size = Vector2(_window.size)
+	elif _embedded_root != null:
+		var vp: Window = Engine.get_main_loop().root if Engine.get_main_loop() != null else null
+		if vp != null:
+			_input_window_size = Vector2(vp.get_visible_rect().size)
+
+	# Decay per-frame impulse values (scroll, ended touches)
+	_decay_input_state()
+
 	# Adopt interactive UI panel from port 1
 	_update_panel_layer(inputs)
 
@@ -174,6 +209,8 @@ func _ensure_window() -> void:
 	_window.process_mode = Node.PROCESS_MODE_ALWAYS
 	_window.close_requested.connect(_on_window_close_requested)
 	_window.window_input.connect(_on_window_input)
+	_window.focus_entered.connect(_on_window_focus_entered)
+	_window.focus_exited.connect(_on_window_focus_exited)
 
 	# Background texture layer (z=0)
 	_display_rect = TextureRect.new()
@@ -344,20 +381,109 @@ func _on_window_close_requested() -> void:
 
 
 ## Called for input events inside the output window.
+## Tracks per-window input state for KeyboardInCHOP / MouseInCHOP / MultiTouchInDAT.
 ## ESC reverts fullscreen/borderless to windowed.
 func _on_window_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		var mode_idx: int = get_param_value("window_mode")
-		if mode_idx != WindowMode.WINDOWED:
-			set_param_value("window_mode", WindowMode.WINDOWED)
-			_window_params_dirty = true
-			GNLogger.info("WindowOUT", "'%s' ESC — switched to windowed mode" % id)
+	# ── Keyboard ──────────────────────────────────────────────────────────
+	if event is InputEventKey:
+		var ke: InputEventKey = event as InputEventKey
+		_input_keys[ke.keycode] = ke.pressed
+		# ESC: revert fullscreen/borderless to windowed
+		if ke.pressed and ke.keycode == KEY_ESCAPE:
+			var mode_idx: int = get_param_value("window_mode")
+			if mode_idx != WindowMode.WINDOWED:
+				set_param_value("window_mode", WindowMode.WINDOWED)
+				_window_params_dirty = true
+				GNLogger.info("WindowOUT", "'%s' ESC — switched to windowed mode" % id)
+
+	# ── Mouse motion ──────────────────────────────────────────────────────
+	elif event is InputEventMouseMotion:
+		_input_mouse_pos = (event as InputEventMouseMotion).position
+
+	# ── Mouse buttons / scroll ────────────────────────────────────────────
+	elif event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		match mb.button_index:
+			MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE:
+				_input_mouse_buttons[mb.button_index] = mb.pressed
+			MOUSE_BUTTON_WHEEL_UP:
+				if mb.pressed:
+					_input_scroll += 1.0
+			MOUSE_BUTTON_WHEEL_DOWN:
+				if mb.pressed:
+					_input_scroll -= 1.0
+
+	# ── Touch ──────────────────────────────────────────────────────────────
+	elif event is InputEventScreenTouch:
+		var st: InputEventScreenTouch = event as InputEventScreenTouch
+		if st.pressed:
+			_input_touches[st.index] = {
+				"x": st.position.x, "y": st.position.y,
+				"pressure": st.pressure if st.pressure > 0 else 1.0,
+				"rel_x": 0.0, "rel_y": 0.0, "phase": "began"
+			}
+		else:
+			if _input_touches.has(st.index):
+				_input_touches[st.index]["phase"] = "ended"
+			else:
+				_input_touches[st.index] = {
+					"x": st.position.x, "y": st.position.y,
+					"pressure": 0.0,
+					"rel_x": 0.0, "rel_y": 0.0, "phase": "ended"
+				}
+	elif event is InputEventScreenDrag:
+		var sd: InputEventScreenDrag = event as InputEventScreenDrag
+		_input_touches[sd.index] = {
+			"x": sd.position.x, "y": sd.position.y,
+			"pressure": sd.pressure if sd.pressure > 0 else 1.0,
+			"rel_x": sd.relative.x, "rel_y": sd.relative.y, "phase": "moved"
+		}
+
+
+## Called when the window gains OS focus.
+func _on_window_focus_entered() -> void:
+	_input_has_focus = true
+	_last_focused_window = id
+
+
+## Called when the window loses OS focus.
+func _on_window_focus_exited() -> void:
+	_input_has_focus = false
 
 
 ## Override: mark window params dirty when our own parameters change.
 func _on_parameter_changed(p_name: String, _new_value: Variant) -> void:
 	super._on_parameter_changed(p_name, _new_value)
 	_window_params_dirty = true
+
+
+## Decay per-frame impulse values (scroll).  Call once per cook.
+func _decay_input_state() -> void:
+	_input_scroll *= 0.9
+	# Purge ended touches
+	var ended: Array = []
+	for idx in _input_touches:
+		if _input_touches[idx].get("phase", "") == "ended":
+			ended.append(idx)
+	for idx in ended:
+		_input_touches.erase(idx)
+
+
+## Static lookup: returns the WindowOUT registered under [param node_id], or null.
+static func get_window_by_id(node_id: String) -> WindowOUT:
+	var ref = _input_registry.get(node_id, null)
+	if ref != null and is_instance_valid(ref):
+		return ref as WindowOUT
+	return null
+
+
+## Returns the IDs of all currently registered (open) WindowOUT nodes.
+static func get_open_window_ids() -> PackedStringArray:
+	var ids := PackedStringArray()
+	for k in _input_registry:
+		if is_instance_valid(_input_registry[k]):
+			ids.append(k)
+	return ids
 
 
 ## Returns info about all connected displays (for UI picker / expression use).

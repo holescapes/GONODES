@@ -102,7 +102,7 @@ var network: GNNetwork = null
 
 func _ready() -> void:
 	title = "Export Patch"
-	size = Vector2i(580, 460)
+	size = Vector2i(620, 540)
 	exclusive = true
 	unresizable = false
 
@@ -158,8 +158,8 @@ func _ready() -> void:
 	vbox.add_child(_make_label("Compatibility"))
 	_compat_label = RichTextLabel.new()
 	_compat_label.bbcode_enabled = true
-	_compat_label.fit_content = true
-	_compat_label.custom_minimum_size.y = 60
+	_compat_label.fit_content = false
+	_compat_label.custom_minimum_size.y = 120
 	_compat_label.scroll_active = true
 	_compat_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(_compat_label)
@@ -329,7 +329,7 @@ func _update_template_hint() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Scans the network against the selected platform+renderer and updates
-## the compatibility summary label.
+## the compatibility summary label with descriptive per-node impact text.
 func _run_compat_scan() -> void:
 	if _compat_label == null:
 		return
@@ -340,6 +340,7 @@ func _run_compat_scan() -> void:
 	var rend_idx: int = _get_selected_renderer_index()
 	var target_renderer: String = _RENDERER_IDS[rend_idx]
 	var renderer_label: String = _RENDERER_LABELS[rend_idx]
+	var has_compute: bool = target_renderer != "gl_compatibility"
 
 	if network == null or network.nodes.is_empty():
 		_compat_label.text = "[color=#aaaaaa]No nodes to check.[/color]"
@@ -348,48 +349,115 @@ func _run_compat_scan() -> void:
 	# Map concrete platform ID to OS-level name for supported_platforms() checks
 	var check_platform: String = _PLATFORM_TO_OS.get(plat_id, plat_id)
 
-	var errors: int = 0
-	var warnings: int = 0
-	var error_nodes: PackedStringArray = []
-	var warn_nodes: PackedStringArray = []
+	# Categorize every affected node with its type and reason
+	# skipped: {node_id: {type, reason}}  — node output will be null
+	# cpu_fallback: {node_id: {type, reason}}  — runs on CPU instead of GPU
+	# platform_blocked: {node_id: {type, reason}}  — OS-level incompatibility
+	var skipped: Array[Dictionary] = []
+	var cpu_fallback: Array[Dictionary] = []
+	var platform_blocked: Array[Dictionary] = []
 
 	for node_id: String in network.nodes:
 		var node: GNNode = network.nodes[node_id]
 		if node == null:
 			continue
 
+		var node_type: String = node.node_type if "node_type" in node else node_id
+		var family: String = node.get_family_name() if node.has_method("get_family_name") else "?"
+
 		# Renderer check
 		var sr: PackedStringArray = node.supported_renderers()
 		if not sr.has(target_renderer):
 			if node.has_cpu_fallback():
-				warnings += 1
-				warn_nodes.append(node_id)
+				cpu_fallback.append({
+					"id": node_id, "type": node_type, "family": family,
+					"needs": "/".join(sr),
+				})
 			else:
-				errors += 1
-				error_nodes.append(node_id)
+				skipped.append({
+					"id": node_id, "type": node_type, "family": family,
+					"needs": "/".join(sr),
+				})
 
 		# Platform check
 		var sp: PackedStringArray = node.supported_platforms()
 		if not sp.has(check_platform):
-			errors += 1
-			if not error_nodes.has(node_id):
-				error_nodes.append(node_id)
+			# Avoid adding to platform_blocked if already in skipped
+			var already_flagged := false
+			for s in skipped:
+				if s["id"] == node_id:
+					already_flagged = true
+					break
+			if not already_flagged:
+				platform_blocked.append({
+					"id": node_id, "type": node_type, "family": family,
+					"platforms": "/".join(sp),
+				})
 
 	var total: int = network.nodes.size()
 	var lines: PackedStringArray = []
 
-	if errors == 0 and warnings == 0:
-		lines.append("[color=#66ff66]All %d nodes compatible with %s / %s[/color]" % [
+	# ── Multi-WindowOUT check (single-window platforms) ───────────────
+	var is_single_window: bool = check_platform in ["web", "android", "ios"]
+	var window_out_ids: PackedStringArray = []
+	if is_single_window:
+		for node_id: String in network.nodes:
+			var node: GNNode = network.nodes[node_id]
+			if node != null and node.node_type == "window":
+				window_out_ids.append(node_id)
+
+	var has_multi_window_warn: bool = is_single_window and window_out_ids.size() > 1
+
+	if skipped.is_empty() and cpu_fallback.is_empty() and platform_blocked.is_empty() and not has_multi_window_warn:
+		lines.append("[color=#66ff66]✓ All %d nodes fully compatible with %s / %s.[/color]" % [
 			total, plat_label, renderer_label])
-	else:
-		if errors > 0:
-			lines.append("[color=#ff5555]%d node(s) will be SKIPPED (no fallback): %s[/color]" % [
-				errors, ", ".join(error_nodes)])
-		if warnings > 0:
-			lines.append("[color=#ffdd33]%d node(s) will use CPU fallback (slower): %s[/color]" % [
-				warnings, ", ".join(warn_nodes)])
-		lines.append("[color=#aaaaaa]Platform: %s | Renderer: %s | Total: %d nodes[/color]" % [
-			plat_label, renderer_label, total])
+		_compat_label.text = "\n".join(lines)
+		return
+
+	if not skipped.is_empty() or not cpu_fallback.is_empty() or not platform_blocked.is_empty():
+		# ── Header ────────────────────────────────────────────────────
+		var issue_total: int = skipped.size() + cpu_fallback.size() + platform_blocked.size()
+		lines.append("[color=#aaaaaa]%d of %d node(s) affected by %s / %s:[/color]" % [
+			issue_total, total, plat_label, renderer_label])
+
+	# ── Skipped nodes (no fallback — output will be null) ─────────────
+	if not skipped.is_empty():
+		lines.append("")
+		lines.append("[color=#ff5555][b]Skipped (%d)[/b] — these nodes will be disabled (output = null).[/color]" % skipped.size())
+		if not has_compute:
+			lines.append("[color=#ff8888]  The %s renderer has no compute shader support.[/color]" % renderer_label)
+		for entry in skipped:
+			lines.append("[color=#ff8888]  • %s [/color][color=#aaaaaa](%s) — requires %s[/color]" % [
+				entry["id"], entry["type"], entry["needs"]])
+		lines.append("[color=#ff8888]  Downstream nodes wired to these will receive empty input.[/color]")
+
+	# ── CPU fallback nodes (slower but functional) ────────────────────
+	if not cpu_fallback.is_empty():
+		lines.append("")
+		lines.append("[color=#ffdd33][b]CPU Fallback (%d)[/b] — these nodes will run on CPU instead of GPU.[/color]" % cpu_fallback.size())
+		lines.append("[color=#ffdd88]  Performance will be reduced compared to the GPU compute path.[/color]")
+		for entry in cpu_fallback:
+			lines.append("[color=#ffdd88]  • %s [/color][color=#aaaaaa](%s) — GPU needs %s, falling back to CPU[/color]" % [
+				entry["id"], entry["type"], entry["needs"]])
+
+	# ── Platform-blocked nodes ────────────────────────────────────────
+	if not platform_blocked.is_empty():
+		lines.append("")
+		lines.append("[color=#ff5555][b]Platform Unavailable (%d)[/b] — these nodes don't support %s.[/color]" % [
+			platform_blocked.size(), plat_label])
+		for entry in platform_blocked:
+			lines.append("[color=#ff8888]  • %s [/color][color=#aaaaaa](%s) — only available on %s[/color]" % [
+				entry["id"], entry["type"], entry["platforms"]])
+
+	# ── Multi-WindowOUT warning for single-window platforms ──────────
+	if has_multi_window_warn:
+		lines.append("")
+		lines.append("[color=#ffdd33][b]Multi-Window (%d WindowOUTs)[/b] — %s only supports a single window.[/color]" % [
+			window_out_ids.size(), plat_label])
+		lines.append("[color=#ffdd88]  Only one WindowOUT will display. The others will cook but their windows won't open.[/color]")
+		for wid in window_out_ids:
+			lines.append("[color=#ffdd88]  • %s[/color]" % wid)
+		lines.append("[color=#ffdd88]  Consider merging outputs into a single WindowOUT using CompositeTOP or LayoutTOP.[/color]")
 
 	_compat_label.text = "\n".join(lines)
 

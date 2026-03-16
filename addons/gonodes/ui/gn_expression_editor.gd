@@ -204,51 +204,77 @@ func _on_code_completion_requested() -> void:
 	var col := _code_edit.get_caret_column()
 	var text_before := line.substr(0, col)
 
-	# Detect context: are we inside chop("..., op("..., top("...?
-	var inside_func := _detect_function_context(text_before)
+	# Detect context: are we inside chop("..., op("..., par("...?
+	var context := _detect_function_context(text_before)
 
-	if inside_func == "node_id":
-		# We're inside a function call's first string argument — suggest node IDs
-		_suggest_node_ids()
-	elif inside_func == "chop_channel":
-		# Second argument of chop() — suggest channel names
-		var node_id := _extract_first_string_arg(text_before)
-		_suggest_chop_channels(node_id)
-	elif inside_func == "op_param":
-		# Second argument of op() — suggest param names
-		var node_id := _extract_first_string_arg(text_before)
-		_suggest_op_params(node_id)
-	elif inside_func == "top_prop":
-		# Second argument of top() — suggest property names
-		_suggest_top_properties()
-	elif inside_func == "fn_name":
-		# First argument of fn() — suggest registered function names
-		_suggest_fn_names()
-	else:
-		# General context — suggest variables, functions, node reference functions
-		_suggest_general()
+	match context:
+		"node_id_chop":
+			_suggest_node_ids(GNFamily.Type.CHOP)
+		"node_id_top":
+			_suggest_node_ids(GNFamily.Type.TOP)
+		"node_id_sop":
+			_suggest_node_ids(GNFamily.Type.SOP)
+		"node_id_dat":
+			_suggest_node_ids(GNFamily.Type.DAT)
+		"node_id_mat":
+			_suggest_node_ids(GNFamily.Type.MAT)
+		"node_id":
+			_suggest_node_ids(-1)
+		"chop_channel":
+			var node_id := _extract_first_string_arg(text_before)
+			_suggest_chop_channels(node_id)
+		"op_param", "par_param":
+			var node_id := _extract_first_string_arg(text_before)
+			_suggest_op_params(node_id)
+		"top_prop":
+			_suggest_top_properties()
+		"fn_name":
+			_suggest_fn_names()
+		_:
+			_suggest_general()
 
 
 ## Detects what kind of autocomplete context we're in based on text before cursor.
+## Returns a context string indicating what kind of suggestions to show.
 func _detect_function_context(text: String) -> String:
-	# Check for patterns like: chop("  op("  top("
+	# Check for patterns like: chop("  op("  par("  set_par("
 	# We look backwards for the most recent unclosed function call
 
 	# Pattern: func_name("first_arg", "  → suggesting second arg
 	var re_second := RegEx.new()
-	re_second.compile("(chop|op|top)\\s*\\(\\s*\"[^\"]*\"\\s*,\\s*\"[^\"]*$")
+	re_second.compile("(chop[sfi]?|op|top|par[sfi]?|set_par)\\s*\\(\\s*\"[^\"]*\"\\s*,\\s*\"[^\"]*$")
 	var m_second := re_second.search(text)
 	if m_second:
 		var fn := m_second.get_string(1)
-		match fn:
-			"chop": return "chop_channel"
-			"op": return "op_param"
-			"top": return "top_prop"
+		if fn.begins_with("chop"):
+			return "chop_channel"
+		elif fn == "op":
+			return "op_param"
+		elif fn == "top":
+			return "top_prop"
+		elif fn.begins_with("par") or fn == "set_par":
+			return "par_param"
 
 	# Pattern: func_name("  → suggesting first arg (node ID)
-	var re_first := RegEx.new()
-	re_first.compile("(?:chop|op|top|sop|dat|mat)\\s*\\(\\s*\"[^\"]*$")
-	if re_first.search(text):
+	# Family-specific: chop → CHOPs, top → TOPs, etc.
+	var re_family := RegEx.new()
+	re_family.compile("(chop[sfi]?|top|sop|dat|mat)\\s*\\(\\s*\"[^\"]*$")
+	var m_family := re_family.search(text)
+	if m_family:
+		var fn := m_family.get_string(1)
+		if fn.begins_with("chop"):
+			return "node_id_chop"
+		match fn:
+			"top": return "node_id_top"
+			"sop": return "node_id_sop"
+			"dat": return "node_id_dat"
+			"mat": return "node_id_mat"
+		return "node_id"
+
+	# Pattern: op/par/set_par("  → all node types
+	var re_any := RegEx.new()
+	re_any.compile("(?:op|par[sfi]?|set_par)\\s*\\(\\s*\"[^\"]*$")
+	if re_any.search(text):
 		return "node_id"
 
 	# Pattern: fn("  → suggesting custom function names
@@ -264,22 +290,143 @@ func _detect_function_context(text: String) -> String:
 ## E.g., from 'chop("lfo1", "' returns "lfo1".
 func _extract_first_string_arg(text: String) -> String:
 	var re := RegEx.new()
-	re.compile("(?:chop|op|top)\\s*\\(\\s*\"([^\"]*)\"")
+	re.compile("(?:chop[sfi]?|op|top|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]*)\"")
 	var m := re.search(text)
 	if m:
 		return m.get_string(1)
 	return ""
 
 
-## Suggests all node IDs in the network.
-func _suggest_node_ids() -> void:
+## Suggests node IDs in the network, optionally filtered by output family.
+## Pass -1 to show all nodes (for op/par/set_par).
+## Supports hierarchical path completion: typing "subnet1/" lists that
+## subnetwork's inner nodes.
+func _suggest_node_ids(filter_family: int = -1) -> void:
 	if network == null:
 		return
+
+	# Detect if the user is typing a hierarchical path (contains "/")
+	var line := _code_edit.get_line(_code_edit.get_caret_line())
+	var col := _code_edit.get_caret_column()
+	var text_before := line.substr(0, col)
+
+	# Extract what's been typed inside the current quotes
+	var partial := _extract_partial_path(text_before)
+
+	if "/" in partial:
+		# Hierarchical path — resolve the prefix and list inner nodes
+		_suggest_hierarchical_nodes(partial, filter_family)
+	else:
+		# Flat — list current network's nodes (+ "../" for parent access)
+		_suggest_flat_nodes(filter_family)
+
+
+## Suggests nodes from the current network level.
+func _suggest_flat_nodes(filter_family: int) -> void:
+	# Offer "../" to navigate to parent network
+	_code_edit.add_code_completion_option(
+		CodeEdit.KIND_FILE_PATH, "../", "../",
+		Color(0.7, 0.7, 0.5), null, "Parent network")
+
 	for node_id in network.nodes:
+		var node: GNNode = network.nodes[node_id]
+		if filter_family >= 0 and not _node_has_output_family(node, filter_family):
+			continue
+		var family_name: String = GNFamily.get_family_name(node.family)
 		_code_edit.add_code_completion_option(
 			CodeEdit.KIND_VARIABLE, node_id, node_id,
-			Color(0.55, 0.8, 1.0), null, null)
+			GNFamily.FAMILY_COLORS.get(node.family, Color(0.55, 0.8, 1.0)),
+			null, family_name)
+
+		# If this node is a subnetwork, also offer "node_id/" to drill in
+		if "inner_network" in node and node.get("inner_network") != null:
+			var display_sub: String = node_id + "/"
+			_code_edit.add_code_completion_option(
+				CodeEdit.KIND_FILE_PATH, display_sub, display_sub,
+				Color(0.7, 0.7, 0.5), null, "Subnetwork — type / to browse")
+
 	_code_edit.update_code_completion_options(true)
+
+
+## Suggests nodes inside a subnetwork when the user types "subnet1/".
+func _suggest_hierarchical_nodes(partial: String, filter_family: int) -> void:
+	var segments: PackedStringArray = partial.split("/")
+	var prefix: String = "/".join(segments.slice(0, segments.size() - 1))
+	var target_net: GNNetwork = _resolve_network_path(prefix)
+	if target_net == null:
+		_code_edit.update_code_completion_options(true)
+		return
+
+	for node_id in target_net.nodes:
+		var node: GNNode = target_net.nodes[node_id]
+		if filter_family >= 0 and not _node_has_output_family(node, filter_family):
+			continue
+		var insert_text: String = prefix + "/" + node_id
+		var family_name: String = GNFamily.get_family_name(node.family)
+		_code_edit.add_code_completion_option(
+			CodeEdit.KIND_VARIABLE, node_id, insert_text,
+			GNFamily.FAMILY_COLORS.get(node.family, Color(0.55, 0.8, 1.0)),
+			null, family_name)
+
+		# Offer further drill-down for nested subnetworks
+		if "inner_network" in node and node.get("inner_network") != null:
+			var display_nested: String = node_id + "/"
+			var insert_deeper: String = prefix + "/" + node_id + "/"
+			_code_edit.add_code_completion_option(
+				CodeEdit.KIND_FILE_PATH, display_nested, insert_deeper,
+				Color(0.7, 0.7, 0.5), null, "Subnetwork")
+
+	_code_edit.update_code_completion_options(true)
+
+
+## Resolves a path prefix like "../" or "subnet1" or "subnet1/inner" to a GNNetwork.
+func _resolve_network_path(prefix: String) -> GNNetwork:
+	if prefix.is_empty():
+		return network
+
+	var segments := prefix.split("/")
+	var current_net: GNNetwork = network
+
+	for seg in segments:
+		if seg == "..":
+			# Walk up — check if any node in the registry owns current_net
+			# For now, parent resolution requires engine context which we
+			# don't have, so ".." returns null (parent suggestions are cosmetic).
+			return null
+		elif seg.is_empty():
+			continue
+		else:
+			var node: GNNode = current_net.nodes.get(seg, null)
+			if node == null:
+				return null
+			if "inner_network" in node:
+				var inner = node.get("inner_network")
+				if inner is GNNetwork:
+					current_net = inner
+				else:
+					return null
+			else:
+				return null
+
+	return current_net
+
+
+## Checks if a node has at least one output port matching the given family.
+func _node_has_output_family(node: GNNode, family: int) -> bool:
+	for port in node.output_ports:
+		if port.family == family:
+			return true
+	return false
+
+
+## Extracts the partial text being typed inside the current quoted string.
+## E.g., from 'chop("sub1/noi' returns "sub1/noi".
+func _extract_partial_path(text: String) -> String:
+	# Find the last unmatched opening quote
+	var last_quote := text.rfind("\"")
+	if last_quote < 0:
+		return ""
+	return text.substr(last_quote + 1)
 
 
 ## Suggests CHOP channel names for a specific node.
@@ -346,7 +493,9 @@ func _suggest_general() -> void:
 	# Node reference functions
 	for fn_entry in [["chop(\"", "Read CHOP channel value"],
 			["op(\"", "Read node parameter value"],
-			["top(\"", "Read TOP info (resolution, aspect)"]]:
+			["top(\"", "Read TOP info (resolution, aspect)"],
+			["par(\"", "Read parameter value (self or cross-node)"],
+			["set_par(\"", "Write parameter value on another node"]]:
 		_code_edit.add_code_completion_option(
 			CodeEdit.KIND_FUNCTION, fn_entry[0], fn_entry[0],
 			Color(0.4, 0.9, 0.5), null, fn_entry[1])

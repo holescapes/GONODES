@@ -349,7 +349,7 @@ func _compute_active_set() -> Dictionary:
 
 
 ## Extracts node IDs referenced in expressions of the given node.
-## Scans all parameters for chop()/op()/top()/sop()/dat()/mat() calls.
+## Scans all parameters for chop()/op()/top()/sop()/dat()/mat()/par()/set_par() calls.
 func _get_expression_refs(node_id: String) -> Array[String]:
 	var refs: Array[String] = []
 	var node: GNNode = network.nodes.get(node_id, null)
@@ -359,7 +359,7 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 	# Lazy-init regex (same pattern as GNGraphEditor's overlay scanner)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat)\\s*\\(\\s*\"([^\"]+)\"")
+		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for param_name in node.parameters:
 		var param: GNParameter = node.parameters[param_name]

@@ -1179,7 +1179,7 @@ func _scan_expr_references() -> void:
 	# Lazy-init regex
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:chop|op|top|sop|dat|mat)\\s*\\(\\s*\"([^\"]+)\"")
+		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for node_id in network.nodes:
 		var node: GNNode = network.nodes[node_id]

@@ -1717,8 +1717,11 @@ Outputs keyboard key states as CHOP channels. Each tracked key becomes a channel
 |-----------|------|---------|-------------|
 | keys | String | "w a s d space" | Space-separated key names |
 | mode | Enum | Momentary | Toggle (flip on press), Momentary (held = 1) |
+| window | String | "" | WindowOUT node name to read from (empty = global Input) |
 
-**Time-dependent.** Uses `Input.is_key_pressed()`.
+**Channels:** Per-key channels (1.0/0.0), plus `focused` (1.0 when target window has focus) when `window` is set.
+
+**Time-dependent.** When `window` is empty, uses global `Input.is_key_pressed()`. When set, reads per-window key state tracked by WindowOUT's `_on_window_input()` handler.
 
 ---
 
@@ -1728,11 +1731,14 @@ Outputs mouse position, delta, buttons, and scroll as CHOP channels.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| normalized | Bool | true | Normalize position to 0–1 by viewport size |
+| normalized | Bool | true | Normalize position to 0–1 by viewport/window size |
 | buttons | Bool | true | Output lmb, rmb, mmb channels |
 | scroll | Bool | true | Output scroll channel |
+| window | String | "" | WindowOUT node name to read from (empty = global Input) |
 
-**Channels:** `tx`, `ty`, `dx`, `dy`, `lmb`, `rmb`, `mmb`, `scroll`. **Time-dependent.**
+**Channels:** `tx`, `ty`, `dx`, `dy`, `lmb`, `rmb`, `mmb`, `scroll`, plus `focused` when `window` is set. When bound to a WindowOUT, position/delta are in that window's local coordinates and normalization uses the window's size.
+
+**Time-dependent.**
 
 ---
 
@@ -2388,10 +2394,11 @@ Multi-touch screen input as table rows. Time-dependent.
 |-----------|------|---------|-------|-------------|
 | active | Bool | true | -- | Enable/disable touch capture |
 | normalize | Bool | false | -- | Output 0-1 normalized coords instead of pixels |
+| window | String | "" | -- | WindowOUT node name to read from (empty = global) |
 
-**Output:** DAT table (columns: id, x, y, pressure, rel_x, rel_y, phase).
+**Output:** DAT table (columns: id, x, y, pressure, rel_x, rel_y, phase, window). The `window` column shows the WindowOUT's title when bound to a specific window.
 
-**How it works:** Maintains a `_touches` dictionary updated by `InputEventScreenTouch` (began/ended) and `InputEventScreenDrag` (moved). Each cook outputs active touches as table rows. Optionally normalizes coordinates to viewport 0-1. Ended touches are removed after output.
+**How it works:** When `window` is empty, maintains a `_touches` dictionary updated by `InputEventScreenTouch` (began/ended) and `InputEventScreenDrag` (moved). When `window` is set, reads from the target WindowOUT's per-window `_input_touches` state. Each cook outputs active touches as table rows. Optionally normalizes coordinates to viewport/window 0-1. Ended touches are removed after output.
 
 **File:** `operators/dat/multi_touch_in_dat.gd`
 

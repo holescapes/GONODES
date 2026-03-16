@@ -29,6 +29,5 @@ enabled=PackedStringArray("res://addons/gonodes/plugin.cfg")
 
 [rendering]
 
-rendering_device/fallback_to_opengl3=true
 rendering_device/driver.windows="d3d12"
 textures/vram_compression/import_etc2_astc=true
