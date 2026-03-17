@@ -1,0 +1,16 @@
+[configuration]
+
+entry_symbol = "gn_hap_codec_init"
+compatibility_minimum = 4.1
+
+[libraries]
+windows.debug.x86_64 = "res://addons/gn_ext_hap/native/bin/win64/libgn_hap_codec.windows.template_release.x86_64.dll"
+windows.release.x86_64 = "res://addons/gn_ext_hap/native/bin/win64/libgn_hap_codec.windows.template_release.x86_64.dll"
+windows.debug.arm64 = "res://addons/gn_ext_hap/native/bin/win64/libgn_hap_codec.windows.template_release.arm64.dll"
+windows.release.arm64 = "res://addons/gn_ext_hap/native/bin/win64/libgn_hap_codec.windows.template_release.arm64.dll"
+linux.debug.x86_64 = "res://addons/gn_ext_hap/native/bin/linux64/libgn_hap_codec.linux.template_release.x86_64.so"
+linux.release.x86_64 = "res://addons/gn_ext_hap/native/bin/linux64/libgn_hap_codec.linux.template_release.x86_64.so"
+linux.debug.arm64 = "res://addons/gn_ext_hap/native/bin/linux64/libgn_hap_codec.linux.template_release.arm64.so"
+linux.release.arm64 = "res://addons/gn_ext_hap/native/bin/linux64/libgn_hap_codec.linux.template_release.arm64.so"
+macos.debug = "res://addons/gn_ext_hap/native/bin/macos/libgn_hap_codec.macos.template_release.framework"
+macos.release = "res://addons/gn_ext_hap/native/bin/macos/libgn_hap_codec.macos.template_release.framework"

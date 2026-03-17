@@ -1,0 +1,345 @@
+name: Build GDExtensions
+
+on:
+  push:
+    paths:
+      - 'addons/gn_ext_*/native/src/**'
+      - 'addons/gn_ext_*/native/build.cfg'
+      - 'addons/gn_ext_*/native/SConstruct'
+      - 'addons/gn_ext_*/native/**/*.cpp'
+      - 'addons/gn_ext_*/native/**/*.c'
+      - 'addons/gn_ext_*/native/**/*.cc'
+      - 'addons/gn_ext_*/native/**/*.h'
+      - 'addons/gn_ext_*/native/**/*.mm'
+      - 'build/**'
+      - '.github/workflows/build-extensions.yml'
+  pull_request:
+    paths:
+      - 'addons/gn_ext_*/native/**'
+      - 'build/**'
+  workflow_dispatch:
+
+env:
+  SCONS_FLAGS: "target=template_release -j4"
+
+jobs:
+  # ── Discover which extensions to build ────────────────────────────────────
+  discover:
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.scan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan extensions
+        id: scan
+        run: |
+          python3 build/ci_discover.py >> "$GITHUB_OUTPUT"
+
+  # ── Linux x86_64 ──────────────────────────────────────────────────────────
+  build-linux-x86_64:
+    needs: discover
+    if: ${{ needs.discover.outputs.matrix != '[]' }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check platform support
+        id: check
+        run: |
+          python3 -c "
+          import configparser, sys
+          cp = configparser.ConfigParser()
+          cp.read('addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          sys.exit(0 if 'linux' in plats else 1)
+          " && echo "supported=true" >> "$GITHUB_OUTPUT" || echo "supported=false" >> "$GITHUB_OUTPUT"
+
+      - name: Install build tools
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3 python3-pip g++ pkg-config
+          pip3 install scons
+
+      - name: Build ${{ matrix.ext }} (Linux x86_64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=linux arch=x86_64 $SCONS_FLAGS
+
+      - name: Upload artifact
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-linux-x86_64
+          path: addons/${{ matrix.ext }}/native/bin/linux64/
+          retention-days: 90
+
+  # ── Linux ARM64 (cross-compiled) ──────────────────────────────────────────
+  build-linux-arm64:
+    needs: discover
+    if: ${{ needs.discover.outputs.matrix != '[]' }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check platform support
+        id: check
+        run: |
+          python3 -c "
+          import configparser, sys
+          cp = configparser.ConfigParser()
+          cp.read('addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          sys.exit(0 if 'linux' in plats else 1)
+          " && echo "supported=true" >> "$GITHUB_OUTPUT" || echo "supported=false" >> "$GITHUB_OUTPUT"
+
+      - name: Install build tools + ARM64 cross-compiler
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3 python3-pip g++-aarch64-linux-gnu pkg-config
+          pip3 install scons
+
+      - name: Build ${{ matrix.ext }} (Linux ARM64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=linux arch=arm64 $SCONS_FLAGS
+
+      - name: Upload artifact
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-linux-arm64
+          path: addons/${{ matrix.ext }}/native/bin/linux64/
+          retention-days: 90
+
+  # ── macOS (universal via lipo) ────────────────────────────────────────────
+  build-macos:
+    needs: discover
+    if: ${{ needs.discover.outputs.matrix != '[]' }}
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check platform support
+        id: check
+        run: |
+          python3 -c "
+          import configparser, sys
+          cp = configparser.ConfigParser()
+          cp.read('addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          sys.exit(0 if 'macos' in plats else 1)
+          " && echo "supported=true" >> "$GITHUB_OUTPUT" || echo "supported=false" >> "$GITHUB_OUTPUT"
+
+      - name: Install SCons
+        if: steps.check.outputs.supported == 'true'
+        run: pip3 install scons
+
+      - name: Build ${{ matrix.ext }} (macOS arm64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=macos arch=arm64 $SCONS_FLAGS
+
+      - name: Build ${{ matrix.ext }} (macOS x86_64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=macos arch=x86_64 $SCONS_FLAGS
+
+      - name: Create universal binary
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          BIN_DIR="addons/${{ matrix.ext }}/native/bin/macos"
+          if [ -d "$BIN_DIR" ]; then
+            cd "$BIN_DIR"
+            for ARM_LIB in $(find . -name "*arm64*" -type f); do
+              X86_LIB=$(echo "$ARM_LIB" | sed 's/\.arm64/.x86_64/')
+              UNIVERSAL=$(echo "$ARM_LIB" | sed 's/\.arm64//')
+              if [ -f "$X86_LIB" ]; then
+                lipo -create "$ARM_LIB" "$X86_LIB" -output "$UNIVERSAL"
+                echo "Created universal: $UNIVERSAL"
+              fi
+            done
+          fi
+
+      - name: Upload artifact
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-macos
+          path: addons/${{ matrix.ext }}/native/bin/macos/
+          retention-days: 90
+
+  # ── Windows x86_64 ────────────────────────────────────────────────────────
+  build-windows-x86_64:
+    needs: discover
+    if: ${{ needs.discover.outputs.matrix != '[]' }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check platform support
+        id: check
+        shell: python
+        run: |
+          import configparser, sys, os
+          cp = configparser.ConfigParser()
+          cp.read(r'addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f"supported={'true' if 'windows' in plats else 'false'}\n")
+
+      - name: Install SCons
+        if: steps.check.outputs.supported == 'true'
+        run: pip install scons
+
+      - name: Build ${{ matrix.ext }} (Windows x86_64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=windows arch=x86_64 $env:SCONS_FLAGS
+
+      - name: Upload artifact
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-windows-x86_64
+          path: addons/${{ matrix.ext }}/native/bin/win64/
+          retention-days: 90
+
+  # ── Windows ARM64 ─────────────────────────────────────────────────────────
+  build-windows-arm64:
+    needs: discover
+    if: ${{ needs.discover.outputs.matrix != '[]' }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check platform support
+        id: check
+        shell: python
+        run: |
+          import configparser, sys, os
+          cp = configparser.ConfigParser()
+          cp.read(r'addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f"supported={'true' if 'windows' in plats else 'false'}\n")
+
+      - name: Install SCons
+        if: steps.check.outputs.supported == 'true'
+        run: pip install scons
+
+      - name: Build ${{ matrix.ext }} (Windows ARM64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=windows arch=arm64 $env:SCONS_FLAGS
+
+      - name: Upload artifact
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-windows-arm64
+          path: addons/${{ matrix.ext }}/native/bin/win64/
+          retention-days: 90
+
+  # ── gn_ext_native (uses godot-cpp SConstruct — separate build) ────────────
+  build-native-linux-x86_64:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq python3 python3-pip g++ pkg-config
+          pip3 install scons
+      - run: cd addons/gn_ext_native/native && scons platform=linux arch=x86_64 $SCONS_FLAGS
+      - uses: actions/upload-artifact@v4
+        with: { name: gn_ext_native-linux-x86_64, path: addons/gn_ext_native/native/bin/linux64/, retention-days: 90 }
+
+  build-native-linux-arm64:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq python3 python3-pip g++-aarch64-linux-gnu pkg-config
+          pip3 install scons
+      - run: cd addons/gn_ext_native/native && scons platform=linux arch=arm64 $SCONS_FLAGS
+      - uses: actions/upload-artifact@v4
+        with: { name: gn_ext_native-linux-arm64, path: addons/gn_ext_native/native/bin/linux64/, retention-days: 90 }
+
+  build-native-macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - run: pip3 install scons
+      - run: |
+          cd addons/gn_ext_native/native
+          scons platform=macos arch=arm64 $SCONS_FLAGS
+          scons platform=macos arch=x86_64 $SCONS_FLAGS
+          cd bin/macos
+          ARM_LIB=$(find . -name "*arm64*" -type f | head -1)
+          X86_LIB=$(find . -name "*x86_64*" -type f | head -1)
+          if [ -n "$ARM_LIB" ] && [ -n "$X86_LIB" ]; then
+            UNIVERSAL=$(echo "$ARM_LIB" | sed 's/\.arm64//')
+            lipo -create "$ARM_LIB" "$X86_LIB" -output "$UNIVERSAL"
+          fi
+      - uses: actions/upload-artifact@v4
+        with: { name: gn_ext_native-macos, path: addons/gn_ext_native/native/bin/macos/, retention-days: 90 }
+
+  build-native-windows-x86_64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - run: pip install scons
+      - run: cd addons/gn_ext_native/native && scons platform=windows arch=x86_64 $env:SCONS_FLAGS
+      - uses: actions/upload-artifact@v4
+        with: { name: gn_ext_native-windows-x86_64, path: addons/gn_ext_native/native/bin/win64/, retention-days: 90 }
+
+  build-native-windows-arm64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - run: pip install scons
+      - run: cd addons/gn_ext_native/native && scons platform=windows arch=arm64 $env:SCONS_FLAGS
+      - uses: actions/upload-artifact@v4
+        with: { name: gn_ext_native-windows-arm64, path: addons/gn_ext_native/native/bin/win64/, retention-days: 90 }

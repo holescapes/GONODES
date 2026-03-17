@@ -4528,6 +4528,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_midi** | RtMidiInCHOP, RtMidiOutCHOP | Cross-platform MIDI I/O via RtMidi (notes, CC, pitch bend) |
 | **gn_ext_gpu_encode** | MovieFileOutTOP | Hardware GPU video encoding to H.264 MP4 (MF/VideoToolbox) |
 | **gn_ext_mapper** | QuadMapTOP, BezierMapTOP, GridWarpTOP, EdgeBlendTOP, ProjectionMaskTOP, StonerTOP, ProjectorBlendTOP | GPU projection mapping — bezier/quad/grid warp, edge blend, masking |
+| **gn_ext_hap** | HapInTOP, HapOUT | GPU-direct HAP video codec — DXT-compressed frames upload to GPU with zero CPU decode. Supports HAP, HAP Alpha, HAP Q variants in QuickTime MOV containers |
 | **gn_ext_sdf** | 26 operators (10 primitives, 5 booleans, 8 modifiers, 2 materials, 1 renderer) | Composable SDF raymarching — build 3D scenes from SDF primitives with boolean ops, domain modifiers, and materials, rendered via RaymarchSDF TOP |
 
 ---

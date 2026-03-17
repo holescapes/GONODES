@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "description": "HapInTOP — Looping with speed control. Demonstrates playback speed and looping.",
+  "nodes": {
+    "hapin1": {
+      "type": "hapintop",
+      "position": [200, 200],
+      "params": {
+        "file": "",
+        "play": true,
+        "loop": true,
+        "speed": 2.0,
+        "seek": -1.0
+      }
+    },
+    "level1": {
+      "type": "level",
+      "position": [600, 200],
+      "params": {
+        "brightness": 1.0,
+        "contrast": 1.2
+      }
+    },
+    "null1": {
+      "type": "nulltop",
+      "position": [1000, 200],
+      "params": {}
+    },
+    "info1": {
+      "type": "info",
+      "position": [200, 400],
+      "params": {
+        "text": "HAP playback with speed control.\nSpeed > 1.0 skips frames for fast-forward.\nLoop automatically restarts at the end.\nSeek (sec) overrides the playback position when >= 0."
+      }
+    }
+  },
+  "connections": [
+    {"from": "hapin1", "from_port": 0, "to": "level1", "to_port": 0},
+    {"from": "level1", "from_port": 0, "to": "null1", "to_port": 0}
+  ]
+}

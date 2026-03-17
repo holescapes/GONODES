@@ -17,7 +17,7 @@ extends GNOutBase
 ##   - VP9 (.webm) — open codec, good quality
 ##   - ProRes (.mov) — production quality, large files
 
-enum Codec { H264, H265, VP9, PRORES }
+enum Codec { H264, H265, VP9, AV1, PRORES }
 
 ## Temp directory for intermediate frames.
 var _temp_dir: String = ""
@@ -41,7 +41,7 @@ var _ffmpeg_checked: bool = false
 
 func _init() -> void:
 	node_type = "ffmpegout"
-	node_description = "Encode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, ProRes)."
+	node_description = "Encode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, AV1, ProRes)."
 
 
 ## FFmpeg CLI requires OS.execute() — desktop-only (no CLI on mobile or web).
@@ -59,7 +59,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("output_file", "user://output/video",
 		"Output File", "Output video path (without extension — set by codec)"))
 	add_parameter(GNParameter.create_enum("codec",
-		PackedStringArray(["H.264 (.mp4)", "H.265 (.mp4)", "VP9 (.webm)", "ProRes (.mov)"]), 0,
+		PackedStringArray(["H.264 (.mp4)", "H.265 (.mp4)", "VP9 (.webm)", "AV1 (.mp4)", "ProRes (.mov)"]), 0,
 		"Codec", "Video codec for encoding"))
 	add_parameter(GNParameter.create_int("framerate", 30, 1, 120,
 		"Framerate", "Output video frame rate"))
@@ -166,6 +166,11 @@ func _encode_video() -> void:
 			codec_args = PackedStringArray([
 				"-c:v", "libvpx-vp9", "-crf", str(crf), "-b:v", "0",
 				"-pix_fmt", "yuv420p"])
+		Codec.AV1:
+			extension = ".mp4"
+			codec_args = PackedStringArray([
+				"-c:v", "libaom-av1", "-crf", str(crf), "-b:v", "0",
+				"-pix_fmt", "yuv420p", "-cpu-used", "4"])
 		Codec.PRORES:
 			extension = ".mov"
 			codec_args = PackedStringArray([

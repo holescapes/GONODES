@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "description": "HapInTOP — Basic HAP video playback. Load a .mov file encoded with HAP and play it back with GPU-direct DXT upload.",
+  "nodes": {
+    "hapin1": {
+      "type": "hapintop",
+      "position": [200, 200],
+      "params": {
+        "file": "",
+        "play": true,
+        "loop": true,
+        "speed": 1.0,
+        "seek": -1.0
+      }
+    },
+    "null1": {
+      "type": "nulltop",
+      "position": [600, 200],
+      "params": {}
+    },
+    "info1": {
+      "type": "info",
+      "position": [200, 400],
+      "params": {
+        "text": "HapInTOP plays .mov files encoded with the HAP codec.\nDXT-compressed frames upload directly to the GPU —\nno CPU pixel decode needed.\n\nSet the 'file' parameter to a HAP .mov file path.\nSupports HAP (DXT1), HAP Alpha (DXT5), and HAP Q (YCoCg)."
+      }
+    }
+  },
+  "connections": [
+    {"from": "hapin1", "from_port": 0, "to": "null1", "to_port": 0}
+  ]
+}

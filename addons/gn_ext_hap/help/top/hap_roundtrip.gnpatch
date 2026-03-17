@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "description": "HAP round-trip — Record with HapOutTOP, then play back with HapInTOP for GPU-direct video loop.",
+  "nodes": {
+    "noise1": {
+      "type": "noise",
+      "position": [200, 100],
+      "params": {
+        "resolution": {"_type": "Vector2i", "x": 1280, "y": 720}
+      }
+    },
+    "hapout1": {
+      "type": "hapout",
+      "position": [600, 100],
+      "params": {
+        "file_path": "user://output/roundtrip.mov",
+        "variant": 0,
+        "fps": 30,
+        "record": false
+      }
+    },
+    "hapin1": {
+      "type": "hapintop",
+      "position": [200, 400],
+      "params": {
+        "file": "user://output/roundtrip.mov",
+        "play": true,
+        "loop": true,
+        "speed": 1.0
+      }
+    },
+    "null1": {
+      "type": "nulltop",
+      "position": [600, 400],
+      "params": {}
+    },
+    "info1": {
+      "type": "info",
+      "position": [200, 600],
+      "params": {
+        "text": "HAP Round-Trip Demo\n\nTop chain: NoiseTOP → HapOutTOP (toggle record to capture)\nBottom chain: HapInTOP → NullTOP (plays back the recorded file)\n\n1. Toggle hapout1 'record' ON for a few seconds\n2. Toggle 'record' OFF to finalize\n3. hapin1 automatically plays back the GPU-direct HAP file"
+      }
+    }
+  },
+  "connections": [
+    {"from": "noise1", "from_port": 0, "to": "hapout1", "to_port": 0},
+    {"from": "hapin1", "from_port": 0, "to": "null1", "to_port": 0}
+  ]
+}

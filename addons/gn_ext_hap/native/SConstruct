@@ -1,0 +1,6 @@
+# gn_ext_hap — Thin shim delegating to the shared GONODES build system.
+# See build/gn_build.py for the actual build logic and build.cfg for configuration.
+import os, sys
+sys.path.insert(0, os.path.normpath(os.path.join(Dir("#").abspath, "..", "..", "..", "build")))
+from gn_build import build_extension
+build_extension(native_dir=Dir("#").abspath)

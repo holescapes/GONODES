@@ -1,0 +1,124 @@
+"""
+Root SConstruct — Unified build entry point for ALL GONODES GDExtension addons.
+
+Auto-discovers extensions with a native/build.cfg and builds them for the
+requested platform/arch.  gn_ext_native is built separately (it uses
+godot-cpp's own SConstruct).
+
+Usage:
+  # Build all extensions for the current platform/arch:
+  scons
+
+  # Build all extensions for a specific platform/arch:
+  scons platform=windows arch=x86_64
+
+  # Build a single extension:
+  scons ext=gn_ext_hap platform=windows
+
+  # Build gn_ext_native (delegates to its own SConstruct):
+  scons ext=gn_ext_native platform=windows
+
+  # List discovered extensions:
+  scons --list-extensions
+"""
+
+import os
+import sys
+
+# SConstruct lives in build/, so workspace root is one level up
+_build_dir = Dir("#").abspath
+_workspace_root = os.path.normpath(os.path.join(_build_dir, ".."))
+
+# Make gn_build.py importable (it's in the same dir as this SConstruct)
+sys.path.insert(0, _build_dir)
+from gn_build import discover_extensions, parse_build_cfg, make_env, collect_sources, \
+    detect_host_platform, detect_host_arch, ALL_PLATFORMS, ALL_ARCHS_BY_PLATFORM
+
+_addons_dir = os.path.join(_workspace_root, "addons")
+
+# ── Arguments ──────────────────────────────────────────────────────────────────
+
+plat = ARGUMENTS.get("platform", "") or detect_host_platform()
+target = ARGUMENTS.get("target", "template_release")
+arch = ARGUMENTS.get("arch", "") or detect_host_arch()
+ext_filter = ARGUMENTS.get("ext", "")  # optional: build only one extension
+list_mode = "list-extensions" in ARGUMENTS or "--list-extensions" in sys.argv
+
+print(f"GONODES unified build: platform={plat}  target={target}  arch={arch}")
+
+# ── gn_ext_native (special case — uses godot-cpp SConstruct) ──────────────────
+
+native_dir = os.path.join(_addons_dir, "gn_ext_native", "native")
+
+if ext_filter in ("", "gn_ext_native"):
+    native_sconstruct = os.path.join(native_dir, "SConstruct")
+    if os.path.isfile(native_sconstruct):
+        SConscript(native_sconstruct)
+
+# ── Auto-discover extensions with build.cfg ────────────────────────────────────
+
+extensions = discover_extensions(_addons_dir)
+
+if list_mode:
+    print("\n=== Discovered GONODES GDExtension addons ===\n")
+    print(f"  {'Extension':<30} {'Platforms':<30} {'Library'}")
+    print(f"  {'-'*30} {'-'*30} {'-'*20}")
+    for ext_name, ext_native_dir, cfg_path in extensions:
+        cfg = parse_build_cfg(cfg_path)
+        platforms = ", ".join(cfg["platforms"])
+        print(f"  {ext_name:<30} {platforms:<30} {cfg['lib_name']}")
+    print(f"\n  gn_ext_native (godot-cpp SConstruct -- always all platforms)")
+    print(f"\n  Total: {len(extensions) + 1} native extensions\n")
+    Exit(0)
+
+# ── Build each discovered extension ───────────────────────────────────────────
+
+built = []
+skipped = []
+
+for ext_name, ext_native_dir, cfg_path in extensions:
+    # Filter to a single extension if requested
+    if ext_filter and ext_filter != ext_name:
+        continue
+
+    cfg = parse_build_cfg(cfg_path)
+
+    if plat not in cfg["platforms"]:
+        skipped.append((ext_name, f"platform '{plat}' not in {cfg['platforms']}"))
+        continue
+
+    print(f"\n{'='*60}")
+    print(f"Building {ext_name} ({cfg['lib_name']})")
+    print(f"{'='*60}")
+
+    godotcpp_root = os.path.abspath(
+        os.path.join(ext_native_dir, "..", "..", "gn_ext_native", "native", "godot-cpp")
+    )
+
+    result = make_env(plat, target, arch, godotcpp_root, cfg, ext_native_dir)
+    if result is None:
+        skipped.append((ext_name, "make_env returned None"))
+        continue
+
+    env, suffix, out_dir, lib_ext = result
+
+    sources = collect_sources(env, cfg, ext_native_dir, plat)
+    if not sources:
+        skipped.append((ext_name, "no sources found"))
+        continue
+
+    os.makedirs(out_dir, exist_ok=True)
+    lib_target = os.path.join(out_dir, f"lib{cfg['lib_name']}{suffix}{lib_ext}")
+    library = env.SharedLibrary(target=lib_target, source=sources)
+    Default(library)
+    built.append(ext_name)
+
+# ── Summary ────────────────────────────────────────────────────────────────────
+
+print(f"\n{'='*60}")
+print(f"Build summary: {len(built)} extension(s) queued for {plat}/{arch}")
+for name in built:
+    print(f"  [OK] {name}")
+for name, reason in skipped:
+    print(f"  [--] {name} -- {reason}")
+print(f"{'='*60}\n")

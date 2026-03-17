@@ -568,10 +568,15 @@ can build a GDExtension that plugs into the GONODES operator model.
 5. **Register operators** in `gn_extension.cfg` — the registry discovers
    them automatically.
 
-6. **Build** with `scons` (same as `gn_ext_native` above).
+6. **Add a `build.cfg`** declaring your library name, supported platforms,
+   sources, and any system libraries or frameworks. Add the 6-line
+   `SConstruct` shim. See above for the full format and example.
 
-Use `gn_ext_native` as the reference implementation. Copy its `SConstruct`
-and `register_types.cpp` pattern to bootstrap a new extension quickly.
+7. **Build** with `cd build && scons ext=gn_ext_<name> platform=<PLATFORM> -j4`,
+   or from the extension directory: `cd addons/gn_ext_<name>/native && scons`.
+
+Use `gn_ext_hap` as the simplest reference for a new extension. Copy its
+`build.cfg` and `SConstruct` to bootstrap quickly.
 
 ### std:: vs Godot-Native Types in C++
 
@@ -651,94 +656,312 @@ For external C/C++ libraries (FFmpeg, RtMidi, NDI SDK, OpenCV, etc.):
 
 See `gn_ext_ffmpeg` for a working example of wrapping an external library.
 
-### Building Hardware I/O Extensions
+### Unified Build System for All Native Extensions
 
-Five hardware I/O extensions use standalone SConstruct files that link
-against the pre-built godot-cpp from `gn_ext_native` (via directory
-junction/symlink) **without** re-invoking godot-cpp's SConstruct. This
-avoids file locks when the Godot editor is running.
+GONODES uses a **unified, declarative build system** for all C++ GDExtension
+addons (except `gn_ext_native`, which uses godot-cpp's SConstruct directly).
 
-**Prerequisites:** godot-cpp must already be built inside `gn_ext_native`.
-Each extension needs a junction: `native/godot-cpp → ../../gn_ext_native/native/godot-cpp`.
+Each extension declares its configuration in a small `build.cfg` INI file.
+A shared Python module (`build/gn_build.py`) reads these configs and handles
+all platform detection, compiler setup, godot-cpp linking, and cross-compilation.
 
-```bash
-# Create junctions (Windows — run once)
-mklink /J addons\gn_ext_spout\native\godot-cpp addons\gn_ext_native\native\godot-cpp
-mklink /J addons\gn_ext_video_capture\native\godot-cpp addons\gn_ext_native\native\godot-cpp
-mklink /J addons\gn_ext_midi\native\godot-cpp addons\gn_ext_native\native\godot-cpp
-mklink /J addons\gn_ext_gpu_encode\native\godot-cpp addons\gn_ext_native\native\godot-cpp
-mklink /J addons\gn_ext_syphon\native\godot-cpp addons\gn_ext_native\native\godot-cpp
+#### Architecture
+
+```
+build/
+  gn_build.py          # Shared build logic (platform detection, env setup, source collection)
+  SConstruct           # Root entry point — auto-discovers and builds all extensions
+  ci_discover.py       # CI helper — outputs GitHub Actions matrix JSON
+
+addons/gn_ext_<name>/
+  native/
+    build.cfg          # Declarative build config (name, platforms, sources, libs)
+    SConstruct         # Thin shim (6 lines) — delegates to build/gn_build.py
+    src/               # C++ source files
+    bin/               # Compiled output (per-platform subdirectories)
 ```
 
-**Building each extension:**
+#### build.cfg Format
 
-| Extension | Platform | Command |
-|-----------|----------|---------|
-| `gn_ext_spout` | Windows only | `cd addons/gn_ext_spout/native && scons platform=windows target=template_release -j4` |
-| `gn_ext_syphon` | macOS only | `cd addons/gn_ext_syphon/native && scons platform=macos target=template_release -j4` |
-| `gn_ext_video_capture` | All | `cd addons/gn_ext_video_capture/native && scons platform=<windows\|macos\|linux> target=template_release -j4` |
-| `gn_ext_midi` | All | `cd addons/gn_ext_midi/native && scons platform=<windows\|macos\|linux> target=template_release -j4` |
-| `gn_ext_gpu_encode` | Windows, macOS | `cd addons/gn_ext_gpu_encode/native && scons platform=<windows\|macos> target=template_release -j4` |
+Each extension's `build.cfg` declares what to build and where:
 
-**Key build flags:**
-- All extensions use `/MT` (static CRT) on Windows to match godot-cpp.
-- Spout compiles Spout2 SDK sources inline (no pre-built library needed).
-- MIDI compiles RtMidi source inline with `__WINDOWS_MM__` / `__MACOSX_CORE__` / `__LINUX_ALSA__` defines.
-- Video Capture and GPU Encode use OS-provided APIs (no third-party dependencies).
+```ini
+# build.cfg — Example (HAP codec)
+[library]
+name = gn_hap_codec
+entry_symbol = gn_hap_codec_init
+platforms = windows, macos, linux
+
+[sources]
+cpp = src/*.cpp
+thirdparty_c = hap/*.c
+thirdparty_cc = snappy/*.cc
+thirdparty_cpp = squish/*.cpp
+include_dirs = hap, snappy, squish
+
+[windows]
+libs = <system libs if any>
+defines = <platform defines if any>
+
+[macos]
+frameworks = <macOS frameworks if any>
+
+[linux]
+libs = <linux libs if any>
+defines = <linux defines if any>
+```
+
+| Section | Key | Description |
+|---------|-----|-------------|
+| `[library]` | `name` | Output library name (e.g., `gn_hap_codec` produces `libgn_hap_codec.<platform>.<target>.<arch>.dll`) |
+| | `entry_symbol` | GDExtension init function name |
+| | `platforms` | Comma-separated list: `windows`, `macos`, `linux` (or omit for all) |
+| `[sources]` | `cpp` | Glob pattern for C++ sources (default: `src/*.cpp`) |
+| | `c` | Glob pattern for C sources |
+| | `objcxx` | Glob pattern for Objective-C++ sources (`.mm` files, macOS) |
+| | `thirdparty_cpp/c/cc` | Glob patterns for bundled third-party code |
+| | `include_dirs` | Comma-separated include directories |
+| `[windows]` | `libs` | System libraries to link (e.g., `opengl32, d3d11, dxgi`) |
+| | `defines` | Preprocessor defines (e.g., `__WINDOWS_MM__`) |
+| `[macos]` | `frameworks` | macOS frameworks to link (e.g., `Cocoa, OpenGL, Metal`) |
+| | `objcxx_sources` | Platform-specific ObjC++ sources |
+| `[linux]` | `libs` | Linux libraries to link (e.g., `asound, pthread`) |
+| | `defines` | Preprocessor defines (e.g., `__LINUX_ALSA__`) |
+
+#### All Native Extensions
+
+| Extension | Library Name | Platforms | What It Builds |
+|-----------|-------------|-----------|----------------|
+| `gn_ext_native` | `gn_native` | All | 92 native operators (uses godot-cpp SConstruct directly) |
+| `gn_ext_hap` | `gn_hap_codec` | All | HAP video codec (bundles hap, snappy, squish) |
+| `gn_ext_spout` | `gn_spout` | Windows | Spout2 texture sharing (bundles Spout2 SDK) |
+| `gn_ext_syphon` | `gn_syphon` | macOS | Syphon texture sharing (ObjC++ bridge) |
+| `gn_ext_video_capture` | `gn_video_capture` | All | Webcam/capture (MF, AVFoundation, V4L2) |
+| `gn_ext_gpu_encode` | `gn_gpu_encode` | Windows, macOS | Hardware H.264 encoding (MF, VideoToolbox) |
+| `gn_ext_midi` | `gn_midi` | All | MIDI I/O (bundles RtMidi) |
+
+#### Prerequisites
+
+- **Python 3.x** and **SCons 4.x** (`pip install scons`)
+- **C++ compiler**: MSVC on Windows, g++ on Linux, clang on macOS
+- **godot-cpp** submodule initialized and built in `gn_ext_native/native/godot-cpp/`
+
+```bash
+# First time: initialize and build godot-cpp
+cd addons/gn_ext_native/native
+git submodule update --init --recursive
+scons platform=<PLATFORM> arch=<ARCH> target=template_release -j4
+```
+
+All other extensions link against this pre-built godot-cpp. No symlinks
+or junctions are needed — `gn_build.py` resolves the path automatically.
+
+#### Build Commands
+
+##### Unified Build (from `build/` directory)
+
+```bash
+cd build
+
+# Build ALL extensions for the current host platform:
+scons -j4
+
+# Build ALL extensions for a specific platform/arch:
+scons platform=windows arch=x86_64 target=template_release -j4
+scons platform=linux   arch=x86_64 target=template_release -j4
+scons platform=linux   arch=arm64  target=template_release -j4
+scons platform=macos   arch=arm64  target=template_release -j4
+scons platform=macos   arch=x86_64 target=template_release -j4
+
+# Build a SINGLE extension:
+scons ext=gn_ext_hap    platform=windows -j4
+scons ext=gn_ext_midi   platform=linux   -j4
+scons ext=gn_ext_spout  platform=windows -j4   # Spout is Windows-only
+
+# Build gn_ext_native (delegates to its own SConstruct):
+scons ext=gn_ext_native platform=windows -j4
+
+# List all discovered extensions and their platform support:
+scons --list-extensions
+```
+
+**Auto-skip logic:** Extensions that don't support the target platform are
+silently skipped. Running `scons platform=linux` will skip `gn_ext_spout`
+(Windows-only) and `gn_ext_syphon` (macOS-only) automatically.
+
+##### Standalone Build (from each extension's directory)
+
+Each extension's `SConstruct` is a 6-line shim that delegates to `gn_build.py`.
+You can build from the extension directory directly:
+
+```bash
+# Standalone build — same as the old per-extension workflow
+cd addons/gn_ext_hap/native
+scons platform=windows arch=x86_64 target=template_release -j4
+
+cd addons/gn_ext_midi/native
+scons platform=linux arch=x86_64 target=template_release -j4
+```
+
+This produces identical output to the unified build. Both paths work.
+
+##### Build Flags Reference
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `platform` | `windows`, `linux`, `macos` | Auto-detected from host OS | Target operating system |
+| `arch` | `x86_64`, `arm64` | Auto-detected from host CPU | Target architecture |
+| `target` | `template_release`, `template_debug` | `template_release` | Release = optimized, stripped. Debug = symbols + assertions |
+| `ext` | `gn_ext_<name>` | *(all)* | Build only this extension (unified build only) |
+| `-j N` | integer | 1 | Parallel compilation jobs |
+| `--list-extensions` | flag | off | Print discovered extensions and exit |
+
+##### Compiler Flags Applied Automatically
+
+| Platform | Flags | Notes |
+|----------|-------|-------|
+| Windows | `/std:c++17 /EHsc /utf-8 /MT /O2 /DLL` | Static CRT (`/MT`) matches godot-cpp |
+| Windows ARM64 | + `/arch:ARM64` | Cross-compiled from x86_64 host |
+| Linux | `-std=c++17 -fPIC -O2 -shared` | Position-independent code |
+| Linux ARM64 | Uses `aarch64-linux-gnu-g++` | Cross-compiled from x86_64 host |
+| macOS | `-std=c++17 -fPIC -O2 -arch <arch> -dynamiclib` | ObjC++ support (`.mm` files) with `-fobjc-arc` |
+
+##### Cross-Compilation
+
+**Linux ARM64 from x86_64:**
+```bash
+sudo apt-get install g++-aarch64-linux-gnu
+cd build
+scons platform=linux arch=arm64 target=template_release -j4
+```
+
+**macOS Universal Binary:**
+```bash
+cd build
+scons platform=macos arch=arm64  target=template_release -j4
+scons platform=macos arch=x86_64 target=template_release -j4
+# Then lipo per extension:
+cd ../addons/gn_ext_hap/native/bin/macos
+lipo -create *arm64* *x86_64* -output libgn_hap_codec.macos.template_release.dylib
+```
+
+**Windows ARM64:**
+```powershell
+cd build
+scons platform=windows arch=arm64 target=template_release -j4
+```
+
+##### Output Locations
+
+All binaries land in `addons/gn_ext_<name>/native/bin/<platform>/`:
+
+```
+addons/gn_ext_hap/native/bin/
+  win64/   libgn_hap_codec.windows.template_release.x86_64.dll
+  linux64/ libgn_hap_codec.linux.template_release.x86_64.so
+  macos/   libgn_hap_codec.macos.template_release.arm64.dylib
+
+addons/gn_ext_spout/native/bin/
+  win64/   libgn_spout.windows.template_release.x86_64.dll
+
+addons/gn_ext_midi/native/bin/
+  win64/   libgn_midi.windows.template_release.x86_64.dll
+  linux64/ libgn_midi.linux.template_release.x86_64.so
+  macos/   libgn_midi.macos.template_release.arm64.dylib
+```
+
+### Adding a New Native Extension
+
+1. Create `addons/gn_ext_<name>/native/`
+2. Add a `build.cfg` with your library name, platforms, and sources
+3. Add a minimal `SConstruct` shim:
+   ```python
+   # gn_ext_<name> — Thin shim delegating to the shared GONODES build system.
+   import os, sys
+   sys.path.insert(0, os.path.normpath(os.path.join(Dir("#").abspath, "..", "..", "..", "build")))
+   from gn_build import build_extension
+   build_extension(native_dir=Dir("#").abspath)
+   ```
+4. Write your C++ source in `src/`
+5. Build: `cd build && scons ext=gn_ext_<name> platform=windows -j4`
+6. The CI pipelines auto-discover the new extension — no workflow edits needed
 
 
 ## CI Pipelines
 
 GONODES has two tiers of CI:
 
-1. **Player/Editor exports** — build the Godot Player binaries (see [CI / Automation](#ci--automation-player-exports) below).
-2. **Native library builds** — compile the C++ GDExtension for all 5 platform targets.
+1. **Player/Editor exports** — build the Godot Player binaries via build scripts
+2. **Native library builds** — compile all C++ GDExtensions for all platform targets
 
-### Native Library CI (gn_native)
+### Native Library CI
 
-Both GitHub Actions and GitLab CI build the native library for 5 targets:
+A unified CI workflow automatically discovers all extensions with a
+`native/build.cfg` and builds them for every platform they support.
+
+#### Platforms & Runners
 
 | Target | Runner | Compiler | Notes |
 |--------|--------|----------|-------|
-| Linux x86_64 | ubuntu-22.04 | g++ | Standard build |
-| Linux ARM64 | ubuntu-22.04 | g++-aarch64-linux-gnu | Cross-compiled on x86_64 (free tier) |
-| macOS Universal | macos-14 (M1) | clang | arm64 + x86_64 combined via `lipo` |
-| Windows x86_64 | Windows runner | MSVC | Standard build |
-| Windows ARM64 | Windows runner | MSVC ARM64 cross-tools | Cross-compiled |
+| Linux x86_64 | Ubuntu 22.04 | g++ | Standard build |
+| Linux ARM64 | Ubuntu 22.04 | g++-aarch64-linux-gnu | Cross-compiled on x86_64 |
+| macOS Universal | macOS M1 | clang | arm64 + x86_64 combined via `lipo` |
+| Windows x86_64 | Windows | MSVC | Standard build |
+| Windows ARM64 | Windows | MSVC ARM64 cross-tools | Cross-compiled |
 
-#### GitHub Actions (`.github/workflows/build-native.yml`)
+#### GitHub Actions (`.github/workflows/build-extensions.yml`)
 
-Triggers automatically on push to `addons/gn_ext_native/native/src/**` or `SConstruct`,
-plus manual dispatch.  Each platform is a separate job running in parallel.
+A single unified workflow with two stages:
+
+1. **Discover** — runs `build/ci_discover.py` to scan for extensions with
+   `native/build.cfg`, outputs a dynamic matrix
+2. **Build** — 5 platform jobs per extension (auto-skips unsupported platforms)
+   plus 5 dedicated jobs for `gn_ext_native` (uses its own SConstruct)
+
+Triggers on changes to `addons/gn_ext_*/native/**`, `build/**`, or the
+workflow file, plus manual dispatch.
 
 ```bash
-# All 5 jobs use the same core command:
+# What each job runs (unified build):
+cd build
+scons platform=<PLATFORM> arch=<ARCH> target=template_release -j4
+
+# gn_ext_native jobs run from its own directory:
 cd addons/gn_ext_native/native
 scons platform=<PLATFORM> arch=<ARCH> target=template_release -j4
 ```
 
-Artifacts are uploaded with 90-day retention.  Download them from the
-Actions tab and drop into `addons/gn_ext_native/native/bin/<platform>/`.
+Artifacts are uploaded with 90-day retention. Adding a new extension with
+a `build.cfg` automatically appears in the next CI run — no workflow edits.
 
 #### GitLab CI (`.gitlab-ci.yml`)
 
-Same 5 targets.  Uses YAML anchors (`&build_rules`) for shared rules.
-Triggers on changes to `addons/gn_ext_native/native/src/**`, `SConstruct`, or
+Two job groups:
+
+1. **`build:native-*`** — 5 jobs for `gn_ext_native` (dedicated SConstruct)
+2. **`build:ext-*`** — 5 jobs that build ALL `build.cfg` extensions at once
+   via `cd build && scons`. Extensions that don't support the target platform
+   are auto-skipped.
+
+Triggers on changes to `addons/gn_ext_*/native/**`, `build/**`, or
 `.gitlab-ci.yml`, plus manual trigger.
+
+macOS jobs build both architectures and run `lipo` to create universal binaries.
 
 ### Full Build Workflow
 
 The complete release build flow:
 
-1. **CI builds native libraries** → download artifacts for all 5 platforms
-2. **Drop binaries** into `addons/gn_ext_native/native/bin/{win64,linux64,macos}/`
+1. **CI builds all native libraries** for all 5 platform targets
+2. **Download artifacts** and drop binaries into each extension's
+   `native/bin/{win64,linux64,macos}/`
 3. **Build Player templates** locally:
    ```bash
    ./scripts/build_templates.sh --godot /path/to/godot --platforms all --clean
    ```
 4. The build script's GDExtension handling (`--gdext auto`) automatically
-   includes the native binaries for each target platform.
-5. **Result:** Player binaries with native acceleration on all platforms.
+   includes the native binaries for each target platform
+5. **Result:** Player binaries with native acceleration on all platforms
 
 
 ## CI / Automation (Player Exports)
@@ -826,8 +1049,16 @@ writing it back produces mojibake: `—` (em-dash) becomes `Ã¢â‚¬â€`,
 | `export_presets.cfg`                          | Godot export preset definitions      |
 | `templates/`                                  | Built Player/Editor binaries (.gitignored) |
 | `addons/gonodes/core/gn_patch_exporter.gd`   | Quick Build copy logic (runtime)     |
-| `addons/gn_ext_native/native/SConstruct`                 | SCons build config for C++ GDExtension |
-| `addons/gn_ext_native/native/gn_native.gdextension`     | GDExtension manifest (all 5 platforms) |
-| `addons/gn_ext_native/native/godot-cpp/`                | godot-cpp submodule (4.5 branch)     |
-| `.github/workflows/build-native.yml`          | GitHub Actions CI — native library   |
-| `.gitlab-ci.yml`                              | GitLab CI — native library           |
+| **Unified native build system** | |
+| `build/gn_build.py`                          | Shared build logic (platform detection, env setup, source collection) |
+| `build/SConstruct`                           | Root entry point — auto-discovers and builds all extensions |
+| `build/ci_discover.py`                        | CI helper — outputs GitHub Actions matrix JSON |
+| `addons/gn_ext_*/native/build.cfg`           | Per-extension declarative build config |
+| `addons/gn_ext_*/native/SConstruct`          | Per-extension thin shim (delegates to gn_build.py) |
+| **gn_ext_native (special case)** | |
+| `addons/gn_ext_native/native/SConstruct`     | godot-cpp SConstruct (builds godot-cpp + native operators) |
+| `addons/gn_ext_native/native/gn_native.gdextension` | GDExtension manifest (all 5 platforms) |
+| `addons/gn_ext_native/native/godot-cpp/`     | Submodule — godot-cpp bindings |
+| **CI workflows** | |
+| `.github/workflows/build-extensions.yml`      | GitHub Actions — unified native build (all extensions) |
+| `.gitlab-ci.yml`                              | GitLab CI — unified native build (all extensions) |

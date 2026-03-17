@@ -19,7 +19,7 @@ If you've used TouchDesigner, Max/MSP, vvvv, or VUO, you know the workflow: conn
 
 ## Features at a Glance
 
-**371 operators** across **11 families**, plus **69 native C++ accelerated operators** and **8 extensions**.  
+**371 operators** across **11 families**, plus **69 native C++ accelerated operators** and **11 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
@@ -82,12 +82,15 @@ Physics simulation (Jolt), environment/post-processing, instancing, animation �
 |-----------|-------------|
 | **Shadertoy** | Paste any `mainImage` GLSL shader — auto-translated uniforms, URL fetch, 10 presets |
 | **ISF** | Interactive Shader Format v2 — auto-generated params from JSON headers, multi-pass |
+| **HAP** | GPU-direct video codec — S3TC/DXT frames uploaded to GPU with zero CPU decode |
 | **Spout** | Windows GPU texture sharing with Resolume, OBS, TouchDesigner |
 | **Syphon** | macOS GPU texture sharing with VDMX, MadMapper, CoGe |
 | **Video Capture** | Cross-platform webcam input (Media Foundation / AVFoundation / V4L2) |
 | **MIDI** | RtMidi I/O — notes, CC, pitch bend to controllers and DAWs |
 | **GPU Encode** | Hardware H.264 MP4 recording (Media Foundation / VideoToolbox) |
 | **Mapper** | Projection mapping toolkit — QuadMap, BezierMap, GridWarp, EdgeBlend, and more |
+| **SDF** | Signed distance field composition — 10 primitives, 5 booleans, 8 modifiers, raymarcher |
+| **Serial** | Serial port I/O for hardware communication (Arduino, DMX controllers, sensors) |
 
 ### Scripting
 
@@ -163,6 +166,31 @@ git clone https://github.com/your-username/gonodes.git
 
 **Requirements:** Godot 4.6 or later. Windows, macOS, or Linux for the editor. Exported patches run on all Godot-supported platforms.
 
+### Building Native Extensions (optional)
+
+GONODES works out of the box with pure GDScript. Native C++ extensions provide acceleration for CPU-heavy operators and hardware I/O. A unified build system compiles all extensions from a single entry point:
+
+```bash
+# Prerequisites: Python 3, SCons, C++ compiler
+pip install scons
+cd addons/gn_ext_native/native
+git submodule update --init --recursive
+scons platform=windows arch=x86_64 -j4      # Build godot-cpp + native operators
+
+# Build all other extensions (HAP, MIDI, Spout, etc.):
+cd ../../../build
+scons platform=windows arch=x86_64 -j4      # Auto-discovers and builds all
+
+# Or build a single extension:
+scons ext=gn_ext_hap platform=windows -j4
+scons ext=gn_ext_midi platform=linux -j4
+
+# List what's available:
+scons --list-extensions
+```
+
+Extensions that don't support the target platform are silently skipped. See [build/README.md](build/README.md) for the full reference, or [dev_docs/BUILD.md](dev_docs/BUILD.md) for CI pipelines, cross-compilation, and Player template builds.
+
 ---
 
 ## Architecture
@@ -196,11 +224,15 @@ For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT
 ## Roadmap
 
 - ~~LibGodot embedding for host applications~~ — **Done.** Full C API (`libgonodes/`), 6 bridge operators (HostIn/OutTOP, CHOP, DAT), GPU context sharing (Vulkan/Metal/OpenGL zero-copy), hot-reload, introspection, 5 example apps. See [dev_docs/INTEGRATION.md](dev_docs/INTEGRATION.md).
-- FFmpeg GDExtension — H.264, VP9, AV1, ProRes decode/encode
-- HAP codec (GPU-direct S3TC/DXT video for VJ workflows)
-- NDI video streaming
+- ~~Multi-threaded cook engine~~ — **Done.** Level-based parallelism via `WorkerThreadPool`. CPU families (CHOP, SOP, DAT, IMG) cook in parallel within each topological level; GPU families (TOP, POP, VOL) remain on main thread.
+- ~~Event-driven expression evaluation~~ — **Done.** Expression consumer map (`_expr_consumer_map`) replaces per-frame polling; expressions only re-evaluate when referenced upstream nodes actually cook.
+- ~~Output sinks (Spout, MIDI, OSC, Audio)~~ — **Done.** SpoutOutTOP, RtMidiOutCHOP, OscOUT, AudioDeviceOUT — all with `is_sink = true`.
+- ~~Generic multi-output ScriptNode~~ — **Done.** `GenericScriptNode` (COMP family) with `# @output` annotations for any mix of data types.
+- ~~JSON serialization (.gnpatch)~~ — **Done.** `.gnpatch` JSON format used for all patch files, including cross-app portability via libgonodes C API.
+- ~~FFmpeg GDExtension~~ — **Done.** FFmpegInTOP (decode: H.264, H.265, VP9, AV1, ProRes + all FFmpeg codecs), FFmpegOUT (encode: H.264, H.265, VP9, AV1, ProRes via CLI), MovieFileOutTOP (GPU hardware H.264/H.265 encode via MF/VideoToolbox).
+- ~~HAP codec~~ — **Done.** `gn_ext_hap` GDExtension with HapInTOP (GPU-direct DXT playback, zero CPU decode) and HapOutTOP (DXT compress + Snappy + MOV mux). Supports HAP, HAP Alpha, HAP Q variants.
+- NDI video streaming (NDIOutTOP)
 - FxPlug / FFGL plugin export
-- Multi-threaded cook engine
 - Laser DAC drivers — EtherDream, Helios, ShowNET (GDExtension; data model via LaserCHOP ready)
 - Network collaboration (shared editing)
 
