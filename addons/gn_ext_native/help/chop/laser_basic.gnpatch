@@ -1,0 +1,56 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "laser1": {
+            "type": "LaserCHOPNative",
+            "position": [100, 100],
+            "parameters": {
+                "pattern": {"value": 0},
+                "points": {"value": 200},
+                "scale": {"value": 0.8},
+                "animate": {"value": true},
+                "speed": {"value": 30.0}
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [450, 100],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [800, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "laser1", "from_port": 0, "to": "null1", "to_port": 0},
+        {"from": "null1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Laser CHOP (Native) \u2014 Rotating Circle\n\nCircle pattern with 200 points, rotating at 30\u00b0/sec.\nOutputs x/y/r/g/b/i channels for ILDA laser control.\nNative C++ generates all 5 patterns with blanking.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

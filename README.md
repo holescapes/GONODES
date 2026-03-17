@@ -202,7 +202,6 @@ For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT
 - FxPlug / FFGL plugin export
 - Multi-threaded cook engine
 - Laser DAC drivers — EtherDream, Helios, ShowNET (GDExtension; data model via LaserCHOP ready)
-- Serial port GDExtension — hardware I/O backend for SerialSendDAT / SerialReceiveDAT
 - Network collaboration (shared editing)
 
 ---

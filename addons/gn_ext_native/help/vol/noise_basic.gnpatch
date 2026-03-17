@@ -1,0 +1,54 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseVOLNative",
+            "position": [100, 100],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "frequency": {"value": 4.0},
+                "amplitude": {"value": 1.0},
+                "octaves": {"value": 4},
+                "lacunarity": {"value": 2.0},
+                "gain": {"value": 0.5},
+                "speed": {"value": 0.5}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [450, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [800, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Noise VOL (Native) \u2014 Animated FBM Cloud\n\n64\u00b3 FBM value noise with 4 octaves, animated at speed 0.5.\nHash-based noise computed entirely in C++.\nLacunarity and gain control octave stacking.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

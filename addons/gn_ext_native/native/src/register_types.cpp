@@ -113,6 +113,40 @@
 // POP processors — Phase 5
 #include "pop/gn_native_render_pop.h"
 
+// Serial I/O — Phase 7
+#include "serial/gn_native_serial_port.h"
+
+// SOP processors — Phase 8 (CPU-hot migration)
+#include "sop/gn_native_smooth_sop.h"
+#include "sop/gn_native_remesh_sop.h"
+#include "sop/gn_native_polybevel_sop.h"
+#include "sop/gn_native_polystitch_sop.h"
+#include "sop/gn_native_wireframe_sop.h"
+
+// CHOP processors — Phase 8 (CPU-hot migration)
+#include "chop/gn_native_ik_chop.h"
+#include "chop/gn_native_sop_to_chop.h"
+#include "chop/gn_native_laser_chop.h"
+#include "chop/gn_native_composite_chop.h"
+#include "chop/gn_native_fan_chop.h"
+
+// VOL processors — Phase 8 (CPU-hot migration)
+#include "vol/gn_native_fluid_vol.h"
+#include "vol/gn_native_blur_vol.h"
+#include "vol/gn_native_noise_vol.h"
+#include "vol/gn_native_displace_vol.h"
+#include "vol/gn_native_blend_vol.h"
+#include "vol/gn_native_sop_to_vol.h"
+
+// POP processors — Phase 8 (CPU-hot migration)
+#include "pop/gn_native_advect_pop.h"
+#include "pop/gn_native_attract_pop.h"
+#include "pop/gn_native_collision_pop.h"
+#include "pop/gn_native_force_pop.h"
+#include "pop/gn_native_turbulence_pop.h"
+#include "pop/gn_native_source_pop.h"
+#include "pop/gn_native_limit_pop.h"
+
 using namespace godot;
 
 void initialize_gn_native_module(ModuleInitializationLevel p_level) {
@@ -228,6 +262,40 @@ void initialize_gn_native_module(ModuleInitializationLevel p_level) {
 
     // POP processors — Phase 5
     ClassDB::register_class<GNNativeRenderPop>();
+
+    // Serial I/O — Phase 7
+    ClassDB::register_class<GNNativeSerialPort>();
+
+    // SOP processors — Phase 8 (CPU-hot migration)
+    ClassDB::register_class<GNNativeSmoothSop>();
+    ClassDB::register_class<GNNativeRemeshSop>();
+    ClassDB::register_class<GNNativePolyBevelSop>();
+    ClassDB::register_class<GNNativePolyStitchSop>();
+    ClassDB::register_class<GNNativeWireframeSop>();
+
+    // CHOP processors — Phase 8 (CPU-hot migration)
+    ClassDB::register_class<GNNativeIkChop>();
+    ClassDB::register_class<GNNativeSopToChop>();
+    ClassDB::register_class<GNNativeLaserChop>();
+    ClassDB::register_class<GNNativeCompositeChop>();
+    ClassDB::register_class<GNNativeFanChop>();
+
+    // VOL processors — Phase 8 (CPU-hot migration)
+    ClassDB::register_class<GNNativeFluidVol>();
+    ClassDB::register_class<GNNativeBlurVol>();
+    ClassDB::register_class<GNNativeNoiseVol>();
+    ClassDB::register_class<GNNativeDisplaceVol>();
+    ClassDB::register_class<GNNativeBlendVol>();
+    ClassDB::register_class<GNNativeSopToVol>();
+
+    // POP processors — Phase 8 (CPU-hot migration)
+    ClassDB::register_class<GNNativeAdvectPop>();
+    ClassDB::register_class<GNNativeAttractPop>();
+    ClassDB::register_class<GNNativeCollisionPop>();
+    ClassDB::register_class<GNNativeForcePop>();
+    ClassDB::register_class<GNNativeTurbulencePop>();
+    ClassDB::register_class<GNNativeSourcePop>();
+    ClassDB::register_class<GNNativeLimitPop>();
 }
 
 void uninitialize_gn_native_module(ModuleInitializationLevel p_level) {

@@ -1,0 +1,56 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "source1": {
+            "type": "SourcePOP",
+            "position": [100, 100],
+            "parameters": {
+                "max_particles": {"value": 50000},
+                "rate": {"value": 2000.0}
+            }
+        },
+        "force1": {
+            "type": "ForcePOPNative",
+            "position": [450, 100],
+            "parameters": {
+                "gravity_y": {"value": -9.81},
+                "drag": {"value": 0.01}
+            }
+        },
+        "renderpop1": {
+            "type": "RenderPOP",
+            "position": [800, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "source1", "from_port": 0, "to": "force1", "to_port": 0},
+        {"from": "force1", "from_port": 0, "to": "renderpop1", "to_port": 0},
+        {"from": "renderpop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Force POP (Native) \u2014 Gravity + Drag\n\nParticles falling under gravity (-9.81) with light drag.\nCombines gravity, wind, and drag in one Euler step.\nNative C++ processes all particles in a tight loop.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

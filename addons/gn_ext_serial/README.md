@@ -7,24 +7,37 @@ Provides bidirectional serial port (COM / tty) communication via two DAT operato
 | **SerialSendDAT** | Out | Sends DAT rows or CHOP values as serial messages |
 | **SerialReceiveDAT** | In | Receives serial data into a rolling DAT table |
 
-## Requirements
+## Native Backend
 
-Actual hardware I/O requires a **GDExtension** that exposes a `SerialPort` class with at minimum:
+Serial I/O is handled by the **GNNativeSerialPort** C++ class, built as part
+of the `gn_ext_native` GDExtension. This provides cross-platform hardware
+access:
 
+| Platform | Backend | Port format |
+|----------|---------|-------------|
+| **Windows** | `CreateFileW` / `ReadFile` / `WriteFile` (Win32 API) | `COM3`, `COM10`, etc. |
+| **Linux** | POSIX `open()` / `read()` / `write()` + `termios` | `/dev/ttyUSB0`, `/dev/ttyACM0` |
+| **macOS** | Same POSIX backend | `/dev/cu.usbserial-*`, `/dev/tty.usbmodem-*` |
+
+The C++ source is at `addons/gn_ext_native/native/src/serial/gn_native_serial_port.cpp`.
+
+### Scaffold Mode
+
+If `gn_ext_native` is not loaded (e.g., web builds or missing DLL), both
+operators run in **scaffold mode** — data flow and table structure work
+correctly, but no bytes are sent or received on the wire.  The output
+table shows a `"no extension"` status.
+
+## Building
+
+Serial support is part of the main `gn_ext_native` build:
+
+```bash
+cd addons/gn_ext_native/native
+scons platform=windows target=template_release
 ```
-SerialPort.open(port_name: String, baud_rate: int) -> Error
-SerialPort.write(data: PackedByteArray) -> void
-SerialPort.read(bytes: int) -> PackedByteArray
-SerialPort.get_available() -> int
-SerialPort.close() -> void
-```
 
-Without the native backend, both operators run in **scaffold mode** — data flow and table structure work correctly, but no bytes are sent or received on the wire.
-
-### Recommended GDExtensions
-
-- [gdserialport](https://github.com/matrixant/serial_port) — Cross-platform serial port for Godot 4.x
-- Custom C++ GDExtension wrapping your platform's serial API
+No additional dependencies — serial APIs are provided by the OS.
 
 ## Parameters
 

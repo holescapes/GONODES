@@ -6,25 +6,26 @@ extends GNDatBase
 ## DAT table.  Supports newline, null-terminated, or raw (no delimiter)
 ## framing.
 ##
-## **Requires a serial GDExtension** (e.g. GDSerialPort) that exposes
-## `SerialPort.open()`, `.read()` / `.get_available()`, `.close()`.
-## Without it the operator runs in scaffold mode — the table structure
-## is correct but no hardware I/O occurs.
+## Uses the native GNNativeSerialPort C++ class (in gn_ext_native) for
+## cross-platform serial I/O (Windows COM, Linux/macOS tty).  If the
+## native extension is not loaded, the operator runs in scaffold mode.
 ##
 ## TouchDesigner equivalent: Serial DAT (receive side).
 
-var _serial: RefCounted = null  # SerialPort instance (when extension loaded)
+var _serial: RefCounted = null  # GNNativeSerialPort instance
 var _has_native: bool = false
 var _buffer: String = ""
 var _rows: Array[PackedStringArray] = []
 var _max_rows: int = 100
+var _last_port: String = ""
+var _last_baud: int = 0
 
 
 func _init() -> void:
 	node_type = "serial_receive"
 	time_dependent = true
-	node_description = "Serial port receiver. Collects incoming COM/tty data into a rolling table. Requires a serial GDExtension for actual hardware I/O."
-	_has_native = ClassDB.class_exists(&"SerialPort")
+	node_description = "Serial port receiver. Collects incoming COM/tty data into a rolling table. Uses native C++ serial I/O when gn_ext_native is loaded."
+	_has_native = ClassDB.class_exists(&"GNNativeSerialPort")
 
 
 func _init_ports() -> void:
@@ -78,17 +79,17 @@ func _poll_serial() -> void:
 	if not _has_native:
 		return
 
-	if _serial == null:
+	if _serial == null or not _serial.is_open():
 		_open_port()
 	if _serial == null:
 		return
 
 	# Read available data
-	var available: int = _serial.call("get_available")
+	var available: int = _serial.get_available()
 	if available <= 0:
 		return
 
-	var raw: PackedByteArray = _serial.call("read", available)
+	var raw: PackedByteArray = _serial.read_data(available)
 	if raw.is_empty():
 		return
 
@@ -133,19 +134,24 @@ func _open_port() -> void:
 		return
 	var port_name: String = get_param_value("port")
 	var baud: int = get_param_value("baud_rate")
-	_serial = ClassDB.instantiate(&"SerialPort")
-	if _serial == null:
-		return
-	var err = _serial.call("open", port_name, baud)
+	# Reopen if port/baud changed
+	if _serial != null and _serial.is_open():
+		if port_name == _last_port and baud == _last_baud:
+			return
+		_serial.close_port()
+	_serial = GNNativeSerialPort.new()
+	var err: int = _serial.open_port(port_name, baud)
 	if err != OK:
 		push_warning("SerialReceiveDAT: Could not open %s at %d baud" % [port_name, baud])
 		_serial = null
+	else:
+		_last_port = port_name
+		_last_baud = baud
 
 
-## Closes the serial port.
 func _close_port() -> void:
 	if _serial != null:
-		_serial.call("close")
+		_serial.close_port()
 		_serial = null
 
 

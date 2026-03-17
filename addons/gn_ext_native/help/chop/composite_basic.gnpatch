@@ -1,0 +1,73 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "waveform": {"value": 0},
+                "frequency": {"value": 2.0},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "wave2": {
+            "type": "WaveCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "waveform": {"value": 2},
+                "frequency": {"value": 3.0},
+                "amplitude": {"value": 0.5}
+            }
+        },
+        "composite1": {
+            "type": "CompositeCHOPNative",
+            "position": [450, 100],
+            "parameters": {
+                "operation": {"value": 0},
+                "weights": {"value": "1,0.5"}
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "wave1", "from_port": 0, "to": "composite1", "to_port": 0},
+        {"from": "wave2", "from_port": 0, "to": "composite1", "to_port": 1},
+        {"from": "composite1", "from_port": 0, "to": "null1", "to_port": 0},
+        {"from": "null1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Composite CHOP (Native) \u2014 Weighted Average\n\nSine and square waves blended with weights 1.0 and 0.5.\nSupports Average, Add, Max, Min operations.\nNative C++ handles per-sample channel blending.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

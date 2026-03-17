@@ -1,0 +1,69 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseVOLNative",
+            "position": [100, 100],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "frequency": {"value": 4.0}
+            }
+        },
+        "noise2": {
+            "type": "NoiseVOLNative",
+            "position": [100, 300],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "frequency": {"value": 2.0},
+                "octaves": {"value": 2}
+            }
+        },
+        "displace1": {
+            "type": "DisplaceVOLNative",
+            "position": [450, 100],
+            "parameters": {
+                "strength": {"value": 2.0}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [800, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "displace1", "to_port": 0},
+        {"from": "noise2", "from_port": 0, "to": "displace1", "to_port": 1},
+        {"from": "displace1", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Displace VOL (Native) \u2014 Velocity-Warped Density\n\nDensity volume warped by a second noise as velocity field.\nStrength 2.0 produces strong organic distortion.\nNative C++ uses trilinear interpolation for sampling.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

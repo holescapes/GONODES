@@ -20,13 +20,15 @@ var _serial: RefCounted = null  # SerialPort instance (when extension loaded)
 var _has_native: bool = false
 var _send_log: Array[PackedStringArray] = []
 var _max_log: int = 50
+var _last_port: String = ""
+var _last_baud: int = 0
 
 
 func _init() -> void:
 	node_type = "serial_send"
 	time_dependent = true
-	node_description = "Serial port sender. Transmits DAT rows or CHOP values over a COM/tty port. Requires a serial GDExtension for actual hardware I/O."
-	_has_native = ClassDB.class_exists(&"SerialPort")
+	node_description = "Serial port sender. Transmits DAT rows or CHOP values over a COM/tty port. Uses native C++ serial I/O when gn_ext_native is loaded."
+	_has_native = ClassDB.class_exists(&"GNNativeSerialPort")
 
 
 func _init_ports() -> void:
@@ -102,13 +104,13 @@ func _transmit(msg: String) -> void:
 	var full_msg := msg + line_ending
 	var ts := "%.3f" % (Time.get_ticks_msec() / 1000.0)
 
-	if _has_native and _serial != null:
-		_serial.call("write", full_msg.to_utf8_buffer())
+	if _has_native and _serial != null and _serial.is_open():
+		_serial.write_data(full_msg.to_utf8_buffer())
 		_log_entry(ts, msg, "sent")
 	elif _has_native:
 		_open_port()
-		if _serial != null:
-			_serial.call("write", full_msg.to_utf8_buffer())
+		if _serial != null and _serial.is_open():
+			_serial.write_data(full_msg.to_utf8_buffer())
 			_log_entry(ts, msg, "sent")
 		else:
 			_log_entry(ts, msg, "error: port not opened")
@@ -139,17 +141,23 @@ func _open_port() -> void:
 		return
 	var port_name: String = get_param_value("port")
 	var baud: int = get_param_value("baud_rate")
-	_serial = ClassDB.instantiate(&"SerialPort")
-	if _serial == null:
-		return
-	var err = _serial.call("open", port_name, baud)
+	# Reopen if port/baud changed
+	if _serial != null and _serial.is_open():
+		if port_name == _last_port and baud == _last_baud:
+			return
+		_serial.close_port()
+	_serial = GNNativeSerialPort.new()
+	var err: int = _serial.open_port(port_name, baud)
 	if err != OK:
 		push_warning("SerialSendDAT: Could not open %s at %d baud" % [port_name, baud])
 		_serial = null
+	else:
+		_last_port = port_name
+		_last_baud = baud
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		if _serial != null:
-			_serial.call("close")
+			_serial.close_port()
 			_serial = null

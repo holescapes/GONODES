@@ -306,7 +306,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 ### 6.3 GONODES
 
-- **GDScript core + GDExtension C++ hot-paths**: All operators are GDScript. 69 performance-critical operators (37 SOP, 18 CHOP, 5 IMG, 4 TOP, 3 VOL, 2 POP) have C++ GDExtension implementations via `gn_ext_native` that the GDScript wrappers auto-delegate to when available.
+- **GDScript core + GDExtension C++ hot-paths**: All operators are GDScript. 92 performance-critical operators (42 SOP, 23 CHOP, 5 IMG, 4 TOP, 9 VOL, 9 POP) have C++ GDExtension implementations via `gn_ext_native` that the GDScript wrappers auto-delegate to when available.
 - **Godot renderer**: TOPs leverage Godot's Vulkan/OpenGL renderer via SubViewport — GPU-accelerated.
 - **GPU compute**: POP (particles via SSBO) and VOL (volumetric via 3D textures) families use compute shaders where `RenderingDevice` is available. ComputeShaderTOP exposes user-written compute GLSL.
 - **Single-threaded cook**: Main thread only. No parallel cook lanes.
@@ -320,9 +320,9 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
-| Core operator language | C++ | C++ + VEX (JIT) | GDScript + GDExtension C++ (69 native ops) | Partial (hot-paths covered) |
+| Core operator language | C++ | C++ + VEX (JIT) | GDScript + GDExtension C++ (92 native ops) | Partial (hot-paths covered) |
 | GPU pipeline | Native DirectX/OpenGL/Vulkan | Karma GPU, OpenCL | Godot SubViewport (Vulkan/GL) + compute shaders (POP/VOL) | Adequate for real-time |
-| Multi-threaded cook | Yes (TOPs multi-stream) | Yes (SOP internal, PDG farm) | No | **GAP** (planned) |
+| Multi-threaded cook | Yes (TOPs multi-stream) | Yes (SOP internal, PDG farm) | Yes (level-based WorkerThreadPool) | ✓ Implemented |
 | Expression compilation | Python (interpreted) | VEX (JIT compiled) | GDScript Expression (interpreted) | Minor gap |
 | Compiled blocks | No | Yes (SOP compile) | No | Not applicable (real-time) |
 | Instancing | Yes (SOP/COMP) | Yes (packed prims) | Godot MultiMeshInstance3D via CopySOP | Minor gap |
@@ -366,7 +366,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 |---------|--------------|---------|---------|------|
 | User scripting | Python | VEX + Python | GDScript | ✓ Adequate |
 | Shader authoring | GLSL (frag/vert/compute) | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item + compute shader) | ✓ Good |
-| C++ plugin SDK | No | Yes (HDK) | GDExtension (69 native ops implemented) | ✓ Done |
+| C++ plugin SDK | No | Yes (HDK) | GDExtension (92 native ops implemented) | ✓ Done |
 | Asset packaging | No (Projects only) | HDA (full asset package) | SubNetworkNode + .gnpatch | **GAP** (see §11) |
 | Dynamic annotations | No | Spare params, HDA interface | `@param`/`@input` in scripts | ✓ Good |
 | Extension marketplace | No | Orbolt, SideFX Labs | Planned | Future |
