@@ -1,0 +1,59 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_den": {
+            "type": "NoiseVOL",
+            "position": [100, 100],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "scale": {"value": 6.0}
+            }
+        },
+        "fluid1": {
+            "type": "FluidVOL",
+            "position": [500, 100],
+            "parameters": {
+                "res_x": {"value": 64},
+                "res_y": {"value": 64},
+                "res_z": {"value": 64},
+                "dissipation": {"value": 0.98},
+                "pressure_iters": {"value": 20},
+                "density_add": {"value": 2.0},
+                "vorticity": {"value": 0.5}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [900, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise_den", "from_port": 0, "to": "fluid1", "to_port": 0},
+        {"from": "fluid1", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "FluidVOL \u2014 Vorticity Confinement\n\nNoiseVOL density \u2192 FluidVOL with vorticity=0.5.\nVorticity confinement amplifies rotational structures,\nadding swirl detail that would otherwise dissipate.\nCompare with vorticity=0 to see the difference.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

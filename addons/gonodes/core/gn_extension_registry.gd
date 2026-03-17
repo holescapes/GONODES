@@ -517,6 +517,12 @@ func _register_core_operators() -> void:
 	_reg("TimeMachineTOP",  "TOP", TimeMachineTOP,
 		"Playback controller over a frame buffer with speed, scrub, and wrap modes.")
 
+	# ── TOPs: Simulation / Generative ───────────────────────────────────
+	_reg("Fluid2DTOP",      "TOP", Fluid2DTOP,
+		"2D fluid simulation with advection, vorticity, and dye injection.")
+	_reg("ReactionDiffusionTOP", "TOP", ReactionDiffusionTOP,
+		"Gray-Scott reaction-diffusion — generative pattern synthesis.")
+
 	# ── TOPs: Scripting ─────────────────────────────────────────────────
 	_reg("CustomShaderTOP",  "TOP", CustomShaderTOP,
 		"User-editable GLSL shader with 4 texture inputs and uniforms.")
@@ -706,6 +712,8 @@ func _register_core_operators() -> void:
 		"1st/2nd derivative (rate-of-change) of input channels — velocity, acceleration.")
 	_reg("AudioDynamicsCHOP",   "CHOP", AudioDynamicsCHOP,
 		"Compressor / Limiter / Expander / Gate dynamics processor for audio-rate CHOPs.")
+	_reg("AudioBandCHOP",       "CHOP", AudioBandCHOP,
+		"Multi-band frequency analysis with envelope followers for VJ-reactive visuals.")
 
 	# ── CHOPs: Animation / Sequencing ───────────────────────────────────
 	_reg("KeyframeCHOP",    "CHOP", KeyframeCHOP,

@@ -1,0 +1,59 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "circle1": {
+            "type": "CircleTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "radius": {"value": 0.15},
+                "softness": {"value": 0.02}
+            }
+        },
+        "rd1": {
+            "type": "ReactionDiffusionTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "feed_rate": {"value": 0.035},
+                "kill_rate": {"value": 0.065},
+                "speed": {"value": 1.0},
+                "steps_per_frame": {"value": 8},
+                "seed_amount": {"value": 0.3},
+                "color_mode": {"value": 2},
+                "color_a": {"value": {"_type": "Color", "r": 0.02, "g": 0.0, "b": 0.1, "a": 1.0}},
+                "color_b": {"value": {"_type": "Color", "r": 0.8, "g": 0.9, "b": 1.0, "a": 1.0}},
+                "brightness": {"value": 1.8}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "circle1", "from_port": 0, "to": "rd1", "to_port": 0},
+        {"from": "rd1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Reaction-Diffusion TOP \u2014 Seed Mask\n\nA CircleTOP feeds into the seed input.\nThe circle continuously injects chemical V, creating\nspot patterns that radiate outward from the disc.\nSpots preset (f=0.035, k=0.065) for isolated dots.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

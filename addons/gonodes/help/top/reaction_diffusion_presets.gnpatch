@@ -1,0 +1,89 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "rd_mitosis": {
+            "type": "ReactionDiffusionTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 256, "y": 256}
+                },
+                "feed_rate": {"value": 0.0367},
+                "kill_rate": {"value": 0.0649},
+                "steps_per_frame": {"value": 16},
+                "color_mode": {"value": 1},
+                "brightness": {"value": 2.0}
+            }
+        },
+        "rd_maze": {
+            "type": "ReactionDiffusionTOP",
+            "position": [100, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 256, "y": 256}
+                },
+                "feed_rate": {"value": 0.029},
+                "kill_rate": {"value": 0.057},
+                "steps_per_frame": {"value": 16},
+                "color_mode": {"value": 2},
+                "color_a": {"value": {"_type": "Color", "r": 0.0, "g": 0.05, "b": 0.15, "a": 1.0}},
+                "color_b": {"value": {"_type": "Color", "r": 0.2, "g": 0.9, "b": 0.4, "a": 1.0}},
+                "brightness": {"value": 1.5}
+            }
+        },
+        "rd_worms": {
+            "type": "ReactionDiffusionTOP",
+            "position": [100, 600],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 256, "y": 256}
+                },
+                "feed_rate": {"value": 0.078},
+                "kill_rate": {"value": 0.061},
+                "steps_per_frame": {"value": 16},
+                "color_mode": {"value": 2},
+                "color_a": {"value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 1.0}},
+                "color_b": {"value": {"_type": "Color", "r": 1.0, "g": 0.3, "b": 0.1, "a": 1.0}},
+                "brightness": {"value": 2.0}
+            }
+        },
+        "layout1": {
+            "type": "LayoutTOP",
+            "position": [500, 300],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 768, "y": 256}
+                },
+                "cols": {"value": 3}
+            },
+            "dynamic_input_count": 3
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 300],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 768, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "rd_mitosis", "from_port": 0, "to": "layout1", "to_port": 0},
+        {"from": "rd_maze", "from_port": 0, "to": "layout1", "to_port": 1},
+        {"from": "rd_worms", "from_port": 0, "to": "layout1", "to_port": 2},
+        {"from": "layout1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Reaction-Diffusion TOP \u2014 Presets\n\nThree different f/k parameter sets side by side:\n\u2022 Mitosis (f=0.0367, k=0.0649) \u2014 dividing blobs (heat map)\n\u2022 Maze (f=0.029, k=0.057) \u2014 labyrinth stripes (green)\n\u2022 Worms (f=0.078, k=0.061) \u2014 coral tendrils (orange)\nAll at 256\u00d7256, 16 steps/frame for fast evolution.",
+            "position": [-100.0, -120.0],
+            "size": [550.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

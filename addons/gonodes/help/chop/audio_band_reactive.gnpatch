@@ -1,0 +1,83 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "spectrum1": {
+            "type": "AudioSpectrumCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "bus": {"value": "Master"},
+                "bands": {"value": 64},
+                "fft_size": {"value": 3}
+            }
+        },
+        "band1": {
+            "type": "AudioBandCHOP",
+            "position": [500, 100],
+            "parameters": {
+                "num_bands": {"value": 3},
+                "band_names": {"value": "bass,mid,treble"},
+                "crossovers": {"value": "200,4000"},
+                "attack": {"value": 0.01},
+                "release": {"value": 0.08},
+                "gain": {"value": 2.0}
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "scale": {"value": 3.0}
+            }
+        },
+        "transform1": {
+            "type": "TransformTOP",
+            "position": [500, 350],
+            "parameters": {
+                "sx": {
+                    "mode": "EXPRESSION",
+                    "value": 1.0,
+                    "expression": "0.5 + chop(\"band1\",\"bass\") * 2.0"
+                },
+                "sy": {
+                    "mode": "EXPRESSION",
+                    "value": 1.0,
+                    "expression": "0.5 + chop(\"band1\",\"bass\") * 2.0"
+                },
+                "rotate": {
+                    "mode": "EXPRESSION",
+                    "value": 0.0,
+                    "expression": "chop(\"band1\",\"treble\") * 180.0"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "spectrum1", "from_port": 0, "to": "band1", "to_port": 0},
+        {"from": "noise1", "from_port": 0, "to": "transform1", "to_port": 0},
+        {"from": "transform1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioBand CHOP \u2014 VJ Reactive\n\n3-band analysis drives a TransformTOP via expressions:\n\u2022 Bass \u2192 scale (zoom pulse)\n\u2022 Treble \u2192 rotation\nFast attack (10 ms), short release (80 ms), 2\u00d7 gain.\nClassic VJ music-reactive pattern.",
+            "position": [-100.0, -120.0],
+            "size": [530.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

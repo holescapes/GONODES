@@ -1,0 +1,59 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "fluid1": {
+            "type": "Fluid2DTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "emitter_pos": {
+                    "mode": "EXPRESSION",
+                    "value": {"_type": "Vector2", "x": 0.5, "y": 0.5},
+                    "expression_x": "0.5 + sin(time) * 0.3",
+                    "expression_y": "0.5 + cos(time) * 0.3"
+                },
+                "emitter_dir": {
+                    "mode": "EXPRESSION",
+                    "value": {"_type": "Vector2", "x": 0.0, "y": -1.0},
+                    "expression_x": "cos(time * 2.0)",
+                    "expression_y": "sin(time * 2.0)"
+                },
+                "emitter_radius": {"value": 0.03},
+                "emitter_force": {"value": 2.0},
+                "emitter_dye": {"value": 1.5},
+                "velocity_dissipation": {"value": 0.998},
+                "density_dissipation": {"value": 0.97},
+                "vorticity": {"value": 0.8},
+                "dye_color_a": {"value": {"_type": "Color", "r": 1.0, "g": 0.2, "b": 0.0, "a": 1.0}},
+                "dye_color_b": {"value": {"_type": "Color", "r": 0.0, "g": 0.3, "b": 1.0, "a": 1.0}},
+                "brightness": {"value": 2.0}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "fluid1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Fluid2D TOP \u2014 Animated Emitter\n\nEmitter position orbits in a circle via expressions.\nForce direction also rotates, creating complex swirls.\nHigh vorticity (0.8) and slow dissipation for dense turbulence.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

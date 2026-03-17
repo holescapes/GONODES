@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://b8m2qlyo07njx"
+path="res://.godot/imported/fluid_obstacle.glsl-c820b207ab0102182a2c460912152231.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/vol/fluid_obstacle.glsl"
+dest_files=["res://.godot/imported/fluid_obstacle.glsl-c820b207ab0102182a2c460912152231.res"]
+
+[params]
+

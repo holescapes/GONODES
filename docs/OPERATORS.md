@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **371 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
+> **374 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
 
 ---
 
@@ -40,7 +40,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 54 operators** — 12 generators, 28 filters, 7 combiners, 3 temporal/buffer, 2 utility, 2 bridge.
+**Total: 56 operators** — 12 generators, 28 filters, 7 combiners, 3 temporal/buffer, 2 simulation/generative, 2 utility, 2 bridge.
 
 ### Generators
 
@@ -931,6 +931,74 @@ Playback controller over a frame buffer with speed, scrub, and wrap modes.
 
 ---
 
+### Simulation / Generative
+
+These feedback-loop TOPs evolve a physical or mathematical simulation each frame, producing animated generative textures. Both use a dual-viewport architecture: a **sim viewport** (CLEAR_MODE_NEVER, SCREEN_TEXTURE feedback) that carries state between frames, and a **render viewport** that colorizes the raw simulation buffer for output.
+
+---
+
+#### Fluid2DTOP
+
+2D Navier-Stokes fluid simulation rendered as a live texture. Semi-Lagrangian advection, vorticity confinement, pressure correction, and configurable emitter with optional dye injection.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output / simulation resolution |
+| emitter_pos | Vector2 | (0.5, 0.5) | 0–1 | Emitter position (normalized UV) |
+| emitter_dir | Vector2 | (0, -1) | — | Force direction vector |
+| emitter_radius | Float | 0.06 | 0.01–0.5 | Emitter radius (normalized) |
+| emitter_force | Float | 1.0 | 0.0–10.0 | Force injection strength |
+| emitter_dye | Float | 1.0 | 0.0–5.0 | Dye injection amount |
+| enable_emitter | Bool | true | — | Toggle emitter on/off |
+| velocity_dissipation | Float | 0.995 | 0.9–1.0 | Velocity decay per step |
+| density_dissipation | Float | 0.98 | 0.9–1.0 | Density decay per step |
+| vorticity | Float | 0.3 | 0.0–2.0 | Vorticity confinement strength |
+| pressure | Float | 16.0 | 0.0–32.0 | Pressure correction strength |
+| dye_color_a | Color | (1, 0.4, 0.1) | — | Primary dye color |
+| dye_color_b | Color | (0.1, 0.4, 1) | — | Secondary dye color |
+| brightness | Float | 1.5 | 0.1–5.0 | Output brightness multiplier |
+| show_velocity | Bool | false | — | Visualize velocity field |
+| reset | Bool | false | — | Clear and restart simulation |
+
+**Input 0:** `dye` (TOP, optional) — external dye source texture.
+**Output:** TOP (colorized fluid density + velocity).
+
+**How it works:** The sim shader packs velocity (RG) and density (B) into an RGBA buffer using SCREEN_TEXTURE for frame-to-frame feedback. Each frame: (1) self-advect velocity via semi-Lagrangian backtrace, (2) compute and apply vorticity confinement, (3) simplified pressure projection, (4) inject emitter force + dye, (5) apply dissipation. The render shader reads the packed buffer and maps density to a two-color gradient, or shows velocity magnitude when `show_velocity` is enabled. Emitter parameters support expressions for animated position/direction.
+
+---
+
+#### ReactionDiffusionTOP
+
+Gray-Scott reaction-diffusion simulation — evolves two chemicals (U, V) via diffusion and reaction to produce emergent patterns: spots, stripes, coral, mazes, worms, and more.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Simulation / output resolution |
+| feed_rate | Float | 0.055 | 0.0–0.1 | Replenishment rate of U (controls pattern type) |
+| kill_rate | Float | 0.062 | 0.0–0.1 | Removal rate of V (controls pattern type) |
+| diffusion_u | Float | 1.0 | 0.0–2.0 | Diffusion rate of chemical U |
+| diffusion_v | Float | 0.5 | 0.0–2.0 | Diffusion rate of chemical V |
+| speed | Float | 1.0 | 0.1–5.0 | Time step multiplier |
+| steps_per_frame | Int | 4 | 1–32 | Sub-steps per render (higher = faster evolution) |
+| seed_pos | Vector2 | (0.5, 0.5) | 0–1 | Circle seed injection position |
+| seed_radius | Float | 0.05 | 0.01–0.3 | Seed circle radius |
+| seed_amount | Float | 0.25 | 0.0–1.0 | V concentration injected |
+| add_seed | Bool | false | — | Inject seed this frame (pulse) |
+| color_mode | Enum | Mono | Mono, Heat Map, Custom | Output coloring style |
+| color_a | Color | Black | — | Background color (Custom mode) |
+| color_b | Color | White | — | Pattern color (Custom mode) |
+| brightness | Float | 1.0 | 0.1–5.0 | Output brightness |
+| invert | Bool | false | — | Swap foreground/background |
+| reset | Bool | false | — | Re-initialize simulation |
+| preset | Enum | Custom | Custom, Mitosis, Coral, Maze, Spots, Worms, Waves | Quick parameter presets |
+
+**Input 0:** `seed` (TOP, optional) — seed mask texture (bright pixels inject V).
+**Output:** TOP (colorized reaction-diffusion pattern).
+
+**How it works:** U (red channel) and V (green channel) evolve via the Gray-Scott equations: `dU/dt = Du∇²U - UV² + f(1-U)`, `dV/dt = Dv∇²V + UV² - (f+k)V`. The Laplacian uses a 3×3 weighted stencil. Multiple sub-steps per frame accelerate evolution without frame-rate coupling. SCREEN_TEXTURE provides frame-to-frame feedback. The 7 presets set (f, k) pairs that produce distinct pattern families — selecting a preset auto-resets the simulation. The render shader offers three modes: Mono (V concentration as grayscale), Heat Map (4-stop palette from blue through white), and Custom (two-color ramp).
+
+---
+
 ### Utility
 
 ---
@@ -1130,7 +1198,7 @@ CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Arr
 
 All CHOP data flows as `GNChannelData` — a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 65 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 4 animation/sequencing, 2 object/skeleton, 1 tablet, 6 signal analysis.
+**Total: 66 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 4 animation/sequencing, 2 object/skeleton, 1 tablet, 7 signal analysis & audio.
 
 ### Generators
 
@@ -2098,6 +2166,39 @@ Pen tablet/stylus input. Outputs position, pressure, tilt, and button state.
 | `active` | Bool | true | Enable input capture |
 
 **Output:** CHOP (x, y, pressure, tilt_x, tilt_y, button).
+
+---
+
+### Signal Analysis & Audio
+
+---
+
+#### AudioBandCHOP
+
+Multi-band frequency analysis with per-band envelope followers. Takes an AudioSpectrumCHOP (or any CHOP with `band:N` channels) and groups frequencies into configurable ranges — essential for music-reactive VJ visuals.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| num_bands | Int | 5 | 1–16 | Number of output frequency bands |
+| band_names | String | bass,low_mid,mid,high_mid,treble | — | Comma-separated band names |
+| crossovers | String | 80,250,2000,6000 | Hz | Comma-separated crossover frequencies between bands |
+| attack | Float | 0.02 | 0.001–1.0 | Envelope attack time (seconds) |
+| release | Float | 0.15 | 0.01–2.0 | Envelope release time (seconds) |
+| peak_decay | Float | 0.98 | 0.9–0.999 | Peak hold decay per frame (higher = slower) |
+| gain | Float | 1.0 | 0.1–10.0 | Input gain multiplier |
+| freq_min | Float | 20.0 | 1–1000 | Assumed lowest frequency of input spectrum |
+| freq_max | Float | 20000.0 | 100–24000 | Assumed highest frequency of input spectrum |
+
+**Input 0:** `spectrum` (CHOP) — AudioSpectrumCHOP with `band:N` channels.
+
+**Output channels per band:**
+- `{name}` — smoothed band level (0–1)
+- `{name}_peak` — peak-hold level (decays slowly)
+- `{name}_norm` — level normalized against recent peak (auto-gain)
+- `total` — overall combined energy
+- `dominant_band` — index of the loudest band
+
+**How it works:** Input spectrum bands are mapped to output bands by logarithmic frequency distribution. Each input band's center frequency is computed via `exp(log_min + t * (log_max - log_min))` and assigned to the output band whose crossover range contains it. An exponential attack/release envelope follower smooths each band level. Peak hold with configurable decay provides a slowly-falling maximum for auto-gain normalization. Typical workflow: `AudioInCHOP → AudioSpectrumCHOP → AudioBandCHOP → drive parameters via expressions`.
 
 ---
 
@@ -4500,9 +4601,9 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 68 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder |
+| **TOP** | 70 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion |
 *(Note: 15 additional TOPs via extensions — see Extension Operators below)* |
-| **CHOP** | 73 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn |
+| **CHOP** | 74 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn |
 | **DAT** | 37 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX, RenderPick, PanelExecute |
 | **SOP** | 71 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch |
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
@@ -4511,9 +4612,9 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
 | **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
 | **POP** | 10 | *(GPU particle operators — SSBO-based compute pipeline)* |
-| **VOL** | 11 | *(Volumetric 3D texture operators — Navier-Stokes fluid, raymarcher, marching cubes)* |
+| **VOL** | 11 | Noise, Fluid, Advect, Analyze, Merge, Math, Null, Switch, Raymarch, MarchingCubes, SOPtoVOL — *FluidVOL now includes vorticity confinement + obstacle input* |
 | **Generic** | 1 | Dot |
-| **Total** | **353** | |
+| **Total** | **356** | |
 
 ### Extension Operators (not included in count above)
 
