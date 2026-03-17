@@ -23,7 +23,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo_in", GNFamily.Type.SOP, false, "SOP shape input (optional — uses built-in shape if empty)")
+	add_input("geo_in", GNFamily.Type.SOP, false, "SOP shape input (optional — uses built-in shape if empty)", "Geometry")
 	add_output("out", GNFamily.Type.COMP, "Area component")
 
 

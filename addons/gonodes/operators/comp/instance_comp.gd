@@ -32,8 +32,8 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("template", GNFamily.Type.SOP, false, "Template SOP geometry")
 	add_input("points", GNFamily.Type.SOP, false, "Point cloud for instance placement (optional)")
-	add_input("mat_in", GNFamily.Type.MAT, false, "Material override (optional)")
-	add_input("chop_in", GNFamily.Type.CHOP, false, "Per-instance CHOP animation (optional)")
+	add_input("mat_in", GNFamily.Type.MAT, false, "Material override (optional)", "Material")
+	add_input("chop_in", GNFamily.Type.CHOP, false, "Per-instance CHOP animation (optional)", "CHOP")
 	add_output("out", GNFamily.Type.COMP, "Instanced component")
 
 

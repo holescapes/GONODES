@@ -21,8 +21,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("body_a", GNFamily.Type.COMP, false, "First physics body (COMP)")
-	add_input("body_b", GNFamily.Type.COMP, false, "Second physics body (COMP)")
+	add_input("body_a", GNFamily.Type.COMP, false, "First physics body (COMP)", "Body A")
+	add_input("body_b", GNFamily.Type.COMP, false, "Second physics body (COMP)", "Body B")
 	add_output("out", GNFamily.Type.COMP, "Joint component")
 
 

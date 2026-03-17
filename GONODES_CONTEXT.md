@@ -439,7 +439,7 @@ func remove_annotation(ann_id: String) -> bool
 - **Script operator code** (`scriptchop`, `scriptdat`, `scriptsop`, `scriptimg`, `genericscript`) — the `code` parameter's GDScript source is scanned and updated
 - **CallbackDAT callback slots** (`on_start`, `on_cook`, `on_value_change`, `on_create`)
 - **Hierarchical paths** — `"subnet1/old_id"` → `"subnet1/new_id"` via per-segment matching (splits by `/`, replaces exact segments only)
-- **All reference functions** — `chop[sfi]()`, `op()`, `top()`, `sop()`, `dat()`, `mat()`, `par[sfi]()`, `set_par()`
+- **All reference functions** — `chop[sfi]()`, `op()`, `top()`, `sop()`, `dat()`, `mat()`, `vol()`, `img()`, `output()`, `par[sfi]()`, `set_par()`
 
 Validates: alphanumeric/underscore only, no duplicates, no empty. Emits `node_renamed` then `graph_changed`.
 
@@ -465,7 +465,7 @@ var active_sinks: Array[String] = []    # UI-level sinks (viewer, floating windo
 var _active_set: Dictionary = {}        # { node_id: true } — cached active node set
 var _active_set_dirty: bool = true      # Recompute on next cook frame
 var _expr_resolved_this_frame: Dictionary = {}  # { node_id: true } — prevents double expression eval
-static var _expr_ref_regex: RegEx       # Regex for chop()/op()/top()/sop()/dat()/mat() refs
+static var _expr_ref_regex: RegEx       # Regex for chop()/op()/top()/sop()/dat()/mat()/vol()/img()/output() refs
 
 func _process(delta: float) -> void:
     cook_frame(delta)
@@ -2717,15 +2717,13 @@ top("noise1").resolution.y        # Height
 top("noise1").aspect              # float (width / height)
 ```
 
-#### `sop(name)` — SOP Proxy (Planned)
+#### `sop(name, port)` — SOP Output Access
 ```gdscript
-sop("grid1").num_points           # Total point count
-sop("grid1").num_prims            # Primitive count
-sop("grid1").point(0).P           # Position of point 0 (Vector3)
-sop("grid1").point(0).N           # Normal of point 0
-sop("grid1").bounds               # AABB bounding box
+sop("grid1")                      # → GNGeoData from first SOP port
+sop("grid1", "out")               # → GNGeoData by port name
+sop("grid1", 0)                   # → GNGeoData by port index
 ```
-**Note:** SOP family is implemented (14 operators, GNGeoData type), but the expression proxy for `sop()` is not yet wired up. Access SOP data through GeometryCOMP or DATtoCHOP bridges for now.
+**Note:** Returns the raw `GNGeoData` object. Attribute-level proxy (`.num_points`, `.point(0).P`) is planned.
 
 #### `pop(name)` — POP Proxy (Future)
 ```gdscript
@@ -2737,22 +2735,39 @@ pop("particles1").point(0).PartAge    # Age
 pop("particles1").attr("custom_attr") # Custom attribute value at point 0
 ```
 
-#### `dat(name)` — DAT Proxy (Planned)
+#### `dat(name, port)` — DAT Output Access
 ```gdscript
-dat("table1").cell(1, "name")     # Cell value at row 1, column "name"
-dat("table1").cell(2, 3)          # Cell value at row 2, column 3
-dat("table1").num_rows            # Row count
-dat("table1").num_cols            # Column count
-dat("table1").row(0)              # Entire row as Array
-dat("table1").col("name")         # Entire column as Array
-dat("text1").text                 # Full text content of a Text DAT
+dat("table1")                     # → GNTableData from first DAT port
+dat("table1", "out")              # → GNTableData by port name
+dat("table1", 0)                  # → GNTableData by port index
 ```
-**Note:** DAT family is implemented (12 operators, GNTableData type), but the expression proxy for `dat()` is not yet wired up. Access DAT data through DATtoCHOP bridge for now.
+**Note:** Returns the raw `GNTableData` object. Cell-level proxy (`.cell()`, `.num_rows`) is planned.
 
-#### `mat(name)` — MAT Proxy (Future)
+#### `mat(name, port)` — MAT Output Access
 ```gdscript
-mat("pbr1").par.base_color        # Material parameter (same as op().par.*)
-mat("pbr1").par.roughness
+mat("pbr1")                       # → GNMaterialData from first MAT port
+mat("pbr1", "out")                # → GNMaterialData by port name
+```
+
+#### `img(name, port)` — IMG Output Access
+```gdscript
+img("noise_img1")                 # → GNImageData from first IMG port
+img("noise_img1", 0)              # → GNImageData by port index
+```
+
+#### `vol(name, port)` — VOL Output Access
+```gdscript
+vol("fluid1")                     # → GNVolumeData from first VOL port
+vol("fluid1", "Density")          # → GNVolumeData by port label
+vol("fluid1", "density_out")      # → GNVolumeData by port name
+vol("fluid1", 1)                  # → GNVolumeData by port index
+```
+
+#### `output(name, port)` — Generic Output Access
+```gdscript
+output("fluid1", "Density")       # → GNData by port label (any family)
+output("fluid1", 0)               # → GNData by port index
+output("fluid1")                  # → GNData from port 0
 ```
 
 ### 17.4 Node Path Resolution (Hierarchical — Designed, Flat for MVP)
@@ -5346,7 +5361,7 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 | Feature | Files Modified | Description |
 |---------|---------------|-------------|
 | **Parallel cook engine** | `gn_cook_engine.gd`, `gn_network.gd` | Level-based topological sort with WorkerThreadPool parallel dispatch. CPU-family nodes at the same dependency level cook concurrently; GPU families (TOP/POP/VOL) cook sequentially on main thread. Config: `parallel_cook_enabled`, `parallel_min_batch`. |
-| **Named output ports** | `gn_port.gd`, `gn_node.gd`, `gn_node_view.gd`, `gn_help_window.gd`, `gn_main_help_window.gd` | Added `label: String` and `display_name()` to GNPort. `add_input`/`add_output` now accept optional `port_label`. UI displays label when set, falls back to port_name. |
+| **Named output ports** | `gn_port.gd`, `gn_node.gd`, `gn_node_view.gd`, `gn_help_window.gd`, `gn_main_help_window.gd`, `gn_cook_engine.gd` | Added `label: String` and `display_name()` to GNPort. `add_input`/`add_output` now accept optional `port_label`. UI displays label when set, falls back to port_name. All multi-port operators labeled. Expression functions `output()`, `vol()`, `sop()`, `dat()`, `img()`, `mat()` resolve ports by index, name, or label (case-insensitive) via `GNNode.get_output_data_by_name()`. |
 | **Dot routing node** | `operators/dot_node.gd` | Family-agnostic pass-through node for wire routing. Auto-adapts family from connected port via `adapt_to_family()`. |
 
 ### New Operators (23)

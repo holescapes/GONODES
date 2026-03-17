@@ -11,7 +11,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("dat_in", GNFamily.Type.DAT, false, "DAT table input")
+	add_input("dat_in", GNFamily.Type.DAT, false, "DAT table input", "Dat")
 	add_output("out", GNFamily.Type.CHOP, "Channel data output")
 
 

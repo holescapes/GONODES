@@ -11,10 +11,10 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in1", GNFamily.Type.TOP, false, "Texture 1 (top-left)")
-	add_input("in2", GNFamily.Type.TOP, false, "Texture 2")
-	add_input("in3", GNFamily.Type.TOP, false, "Texture 3")
-	add_input("in4", GNFamily.Type.TOP, false, "Texture 4")
+	add_input("in1", GNFamily.Type.TOP, false, "Texture 1 (top-left)", "Input 1")
+	add_input("in2", GNFamily.Type.TOP, false, "Texture 2", "Input 2")
+	add_input("in3", GNFamily.Type.TOP, false, "Texture 3", "Input 3")
+	add_input("in4", GNFamily.Type.TOP, false, "Texture 4", "Input 4")
 	add_output("out", GNFamily.Type.TOP, "Atlas texture")
 
 

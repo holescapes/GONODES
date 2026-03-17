@@ -19,11 +19,11 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("density_in", GNFamily.Type.VOL, false, "Density source (added each frame)")
-	add_input("vel_in", GNFamily.Type.VOL, false, "External velocity force (optional)")
+	add_input("density_in", GNFamily.Type.VOL, false, "Density source (added each frame)", "Density")
+	add_input("vel_in", GNFamily.Type.VOL, false, "External velocity force (optional)", "Velocity")
 	add_input("obstacle", GNFamily.Type.VOL, true, "Obstacle mask volume (R > 0.5 = solid)")
-	add_output("density_out", GNFamily.Type.VOL, "Simulated density field")
-	add_output("velocity_out", GNFamily.Type.VOL, "Simulated velocity field")
+	add_output("density_out", GNFamily.Type.VOL, "Simulated density field", "Density")
+	add_output("velocity_out", GNFamily.Type.VOL, "Simulated velocity field", "Velocity")
 
 
 func _init_parameters() -> void:

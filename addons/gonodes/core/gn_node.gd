@@ -605,6 +605,20 @@ func get_output_data(port_index: int) -> GNData:
 	return cached_output
 
 
+## Returns the cooked output data for a port matched by name.
+## Accepts either [member GNPort.port_name] or [member GNPort.label]
+## (case-insensitive).  Returns [code]null[/code] if no port matches.
+## This enables expression syntax like [code]vol("fluid1", "Density")[/code].
+func get_output_data_by_name(port_name_or_label: String) -> GNData:
+	var lower := port_name_or_label.to_lower()
+	for port in output_ports:
+		if port.port_name.to_lower() == lower:
+			return get_output_data(port.index)
+		if not port.label.is_empty() and port.label.to_lower() == lower:
+			return get_output_data(port.index)
+	return null
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Cook Execution (called by GNCookEngine, not directly by users)
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -334,7 +334,7 @@ is present.  Missing a node?  It's probably not connected or bypassed.
 
 Scans all expression-mode parameters and extracts:
 - **Read references:** `par()`, `chop()`, `chopf()`, `chopi()`, `chops()`,
-  `op()`, `top()`, `sop()`, `dat()`, `mat()` calls.
+  `op()`, `top()`, `sop()`, `dat()`, `mat()`, `vol()`, `img()`, `output()` calls.
 - **Write references:** `set_par()` calls that modify parameters on other
   nodes.
 

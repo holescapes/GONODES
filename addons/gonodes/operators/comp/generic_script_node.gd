@@ -87,9 +87,9 @@ func _init() -> void:
 func _init_ports() -> void:
 	# Default ports from annotations in DEFAULT_CODE.
 	# Rebuilt dynamically when code changes.
-	add_input("in0", GNFamily.Type.CHOP, false, "Signal source")
-	add_output("out0", GNFamily.Type.CHOP, "Modified signal")
-	add_output("out1", GNFamily.Type.DAT, "Signal info")
+	add_input("in0", GNFamily.Type.CHOP, false, "Signal source", "Input 0")
+	add_output("out0", GNFamily.Type.CHOP, "Modified signal", "Output 0")
+	add_output("out1", GNFamily.Type.DAT, "Signal info", "Output 1")
 
 
 func _init_parameters() -> void:

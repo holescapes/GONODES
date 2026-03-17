@@ -181,6 +181,78 @@ ramp("ease", chop("lfo1", "out") * 0.5 + 0.5)
 > chop("ramp1", "falloff", 42)  # specific sample index (samples>1)
 > ```
 
+### Named Output Access
+
+Multi-output nodes (e.g., FluidVOL with Density and Velocity outputs,
+MultiBufferRenderTOP with Color/Depth/Normal) expose their outputs by
+**port name or label**. Six functions let you fetch typed output data from
+any node — by index, by name, or by label.
+
+#### `output(node_id, port)`
+
+Generic output accessor — works with any data family.
+
+| Argument  | Type          | Required | Description                                        |
+|-----------|---------------|----------|----------------------------------------------------|
+| `node_id` | String        | yes      | The ID of the source node                           |
+| `port`    | int or String | no       | Port index, port name, or port label. Omit for port 0. |
+
+```gdscript
+# By port index
+output("fluid1", 0)          # → GNVolumeData (density)
+output("fluid1", 1)          # → GNVolumeData (velocity)
+
+# By port name
+output("fluid1", "density_out")
+
+# By port label (case-insensitive)
+output("fluid1", "Density")
+output("fluid1", "velocity")
+
+# Default (port 0)
+output("fluid1")
+```
+
+#### Family-Typed Variants
+
+These functions work like `output()` but filter by data type. When called
+without a port argument, they return the **first output matching the type**
+rather than always port 0.
+
+| Function | Returns          | Type Filter     |
+|----------|------------------|-----------------|
+| `vol()`  | `GNVolumeData`   | VOL family      |
+| `sop()`  | `GNGeoData`      | SOP family      |
+| `dat()`  | `GNTableData`    | DAT family      |
+| `img()`  | `GNImageData`    | IMG family      |
+| `mat()`  | `GNMaterialData` | MAT family      |
+
+All accept the same `(node_id, port)` signature as `output()`.
+
+```gdscript
+# FluidVOL has two VOL outputs — get each by label
+vol("fluid1", "Density")     # → GNVolumeData
+vol("fluid1", "Velocity")    # → GNVolumeData
+
+# Default: first VOL output (port 0 = density)
+vol("fluid1")
+
+# MultiBufferRenderTOP — get specific buffer by index or label
+output("mbr1", "Color")      # → GNImageData (port 0)
+output("mbr1", "Depth")      # → GNImageData (port 1)
+output("mbr1", "Normal")     # → GNImageData (port 2)
+
+# SOP/DAT/MAT examples
+sop("grid1")                 # → GNGeoData from first SOP port
+dat("table1", "out")         # → GNTableData by port name
+mat("pbr1")                  # → GNMaterialData
+```
+
+> **Port Labels vs Port Names:** Every port has a `port_name` (internal ID like
+> `"density_out"`) and an optional `label` (display name like `"Density"`).
+> Both `output()` and the typed variants match either one, case-insensitively.
+> Labels are visible on the node in the graph editor.
+
 ### Copy Reference Workflow
 
 Instead of typing references manually, you can copy them from the UI:
@@ -483,6 +555,7 @@ me.cook_valid
 4. **Per-component expressions return floats.** Don't return a Vector2 from a
    single component's expression — the engine expects a scalar per component.
 5. **Node IDs are case-sensitive.** `chop("LFO1", "out")` won't find `lfo1`.
+   Port names/labels in `output()`, `vol()`, etc. are case-**in**sensitive.
 6. **Renaming a node** automatically updates all expression strings across the
    network that reference the old name.
 7. **Right-click to copy references.** Right-click a node → Copy Node Path, or
@@ -501,7 +574,8 @@ open the **Expression Editor** popup. It provides:
 - **Autocomplete** — press Ctrl+Space for suggestions:
   - Inside `chop("` — suggests only CHOP-family nodes (green)
   - Inside `top("` — suggests only TOP-family nodes (purple)
-  - Inside `sop("`, `dat("`, `mat("` — filters by family
+  - Inside `sop("`, `dat("`, `mat("`, `vol("`, `img("` — filters by family
+  - Inside `output("` — suggests all nodes (any family)
   - Inside `op("`, `par("`, `set_par("` — suggests all nodes (any family)
   - Inside `chop("lfo1", "` — suggests channel names from that node
   - Inside `op("node1", "` or `par("node1", "` — suggests parameter names
@@ -603,7 +677,7 @@ The expression editor's **Snippets ▾** dropdown provides ready-to-use template
 | **Remapping** | Fit to range, Fit to 0-1, Sin to 0-1, Smoothstep, Step threshold |
 | **Smoothing** | Smooth follow, Lag (asymmetric), Trigger detect |
 | **Noise & Random** | Noise 1D, Noise 2D, Random [0,1], Random range |
-| **Node References** | Read CHOP channel, Read parameter, Self-reference par(), TOP resolution, TOP aspect, Copy reference workflow |
+| **Node References** | Read CHOP channel, Read parameter, Self-reference par(), TOP resolution, TOP aspect, Named output (output/vol/sop/dat/img/mat), Copy reference workflow |
 | **Math Patterns** | Sine + offset, Exponential decay, Power curve, Circular motion, Quantize |
 
 Snippets are inserted at the cursor position, or replace the entire editor if empty.

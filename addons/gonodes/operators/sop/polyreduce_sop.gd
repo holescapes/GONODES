@@ -19,7 +19,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo", GNFamily.Type.SOP, true, "Geometry to simplify")
+	add_input("geo", GNFamily.Type.SOP, true, "Geometry to simplify", "Geometry")
 	add_output("out", GNFamily.Type.SOP, "Reduced geometry")
 
 

@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("normal_tex", GNFamily.Type.TOP, false, "Normal map texture")
-	add_input("albedo_tex", GNFamily.Type.TOP, false, "Optional base color texture")
+	add_input("normal_tex", GNFamily.Type.TOP, false, "Normal map texture", "Normal Texture")
+	add_input("albedo_tex", GNFamily.Type.TOP, false, "Optional base color texture", "Albedo Texture")
 	add_output("out", GNFamily.Type.MAT, "Normal map material output")
 
 

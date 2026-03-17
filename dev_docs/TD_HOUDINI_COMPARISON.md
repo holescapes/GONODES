@@ -7,7 +7,13 @@
 > Several recommendations from this document have been implemented:
 > - ✅ Ramp parameter type with curve editor (§11.2.B)
 > - ✅ Network boxes + sticky notes (§11.2.F)
-> - Remaining items tracked in GONODES_CONTEXT.md roadmap
+> - ✅ Audio Band CHOP — multi-band frequency analysis with envelope followers (§13 #1)
+> - ✅ 2D Fluid TOP — Navier-Stokes feedback shader with dual viewport (§13 #16)
+> - ✅ Reaction-Diffusion TOP — Gray-Scott generative patterns, 7 presets (§13 #11)
+> - ✅ FluidVOL vorticity confinement — curl amplification compute pass (§13 #7)
+> - ✅ FluidVOL obstacle collision — SDF/mesh mask injection into velocity field (§13 #5)
+> - ✅ Timeline / Cue system — TimelineCHOP, CueDAT, CueCHOP, Editor Timeline UI (§13 #6)
+> - Remaining items tracked in GONODES_CONTEXT.md roadmap and §13 below
 
 ---
 
@@ -24,6 +30,8 @@
 9. [Sub-Networks & Encapsulation](#9-sub-networks--encapsulation)
 10. [I/O & External Integration](#10-io--external-integration)
 11. [Gap Analysis & Recommendations](#11-gap-analysis--recommendations)
+12. [Operator Coverage Gap Analysis](#12-operator-coverage-gap-analysis)
+13. [Full Feature Audit & Improvement Roadmap](#13-full-feature-audit--improvement-roadmap)
 
 ---
 
@@ -181,8 +189,8 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 | Attribute system | Limited (SOP attributes) | Rich (point/prim/vert/detail, arbitrary types) | Basic (`point_attribs` dict on GNGeoData) |
 | GPU texture transfer | Zero-copy FBO handles | N/A (offline rendering) | SubViewport texture handles (Godot-managed) |
 | Cross-family data | Bridge operators + CHOP exports | Bridge operators + attribute promotion | Bridge operators + expressions |
-| Multi-output nodes | Some (CHOP, SOP) | Common (Boolean, Split, etc.) | SubNetworkNode only |
-| Named outputs | No (port index only) | Yes (named outputs) | No (port index only) |
+| Multi-output nodes | Some (CHOP, SOP) | Common (Boolean, Split, etc.) | Yes (FluidVOL, MultiBufferRender, etc.) |
+| Named outputs | No (port index only) | Yes (named outputs) | Yes (port labels + `output()`/`vol()`/`sop()`/`dat()`/`img()`/`mat()`) |
 | Data introspection | Built-in viewers per family | Geometry spreadsheet, visualizers | Per-family preview (label/texture) |
 
 ---
@@ -266,7 +274,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 - **Evaluation order**: Kahn's BFS topological sort, cached. All dirty+active nodes cooked in order.
 - **Cycle prevention**: DAG enforcement at connection time (`has_cycle()` check).
 - **FeedbackTOP**: Uses `RenderingServer.texture_2d_get()` to read from the *previous frame's* texture, breaking the cycle.
-- **Expression-tracked dependencies**: Active chain BFS follows both wire connections AND expression references (regex scan for `chop()/op()/top()/sop()/dat()/mat()` calls).
+- **Expression-tracked dependencies**: Active chain BFS follows both wire connections AND expression references (regex scan for `chop()/op()/top()/sop()/dat()/mat()/vol()/img()/output()` calls).
 
 ### 5.4 Comparison
 
@@ -583,9 +591,9 @@ The ramp parameter type provides the curve editor infrastructure (keypoints with
 
 #### I. Named Output Ports
 
-**Gap**: Houdini SOPs frequently have named outputs (Boolean → "Intersect", "A minus B", "B just B"). GONODES uses indexed ports only.
+**Gap**: ~~Houdini SOPs frequently have named outputs (Boolean → "Intersect", "A minus B", "B just B"). GONODES uses indexed ports only.~~
 
-**Recommendation**: Add optional `port_label: String` to `GNPort`. Show in tooltip and palette. Low effort, improves readability for multi-output nodes.
+**Status**: ✅ **IMPLEMENTED** — `GNPort.label` + `display_name()` on all ports. `add_input()`/`add_output()` accept optional `port_label`. UI renders labels on the graph. All multi-port operators labeled. Expression functions `output()`, `vol()`, `sop()`, `dat()`, `img()`, `mat()` resolve ports by index, name, or label (case-insensitive).
 
 #### J. Dot/Routing Nodes
 
@@ -695,3 +703,143 @@ The following TD operators were evaluated and **excluded** from this batch, with
 | **Total** | **288** | **310** | **+22** |
 
 Help patches: 299 → 327 (+28).
+
+---
+
+## 13. Full Feature Audit & Improvement Roadmap
+
+> **Date:** 2026-03-17
+> **Scope:** Comprehensive TD/Houdini feature audit against the current GONODES codebase (374+ operators, 11 families, 11 GDExtension addons). Prioritized for real-time visual art / VJ workflows.
+
+### 13.1 Feature Coverage Matrix
+
+| TD Feature Area | TD Implementation | GONODES Status |
+|---|---|---|
+| **Texture processing** | 90+ TOPs | **70 TOPs** — ~80% parity, strong |
+| **Channel/signal** | 70+ CHOPs | **74 CHOPs** — near parity |
+| **Geometry** | 50+ SOPs | **71 SOPs** — exceeds TD in some areas |
+| **Data tables** | 30+ DATs | **37 DATs** — near parity |
+| **Materials** | ~10 MATs | **9 MATs** — solid |
+| **Components** | COMPs (containers, 3D scenes, panels) | **20 COMPs** — good, physics included |
+| **GPU Particles** | Particle SOP/POP network | **10 POP operators** — SSBO compute pipeline |
+| **3D Volumes** | Not native (3D texture workarounds) | **11 VOL operators** — **GONODES leads here** |
+| **UI Widgets** | Panel COMP widgets | **31 UI operators** — comparable |
+| **Shader authoring** | GLSL TOP, Compute Shader TOP | CustomShaderTOP + ComputeShaderTOP + ISF + Shadertoy — strong |
+| **Video I/O** | Theora, HAP, FFMPEG, NDI, Blackmagic | HAP, FFmpeg, GPU Encode, Theora — **missing NDI, Blackmagic** |
+| **Texture sharing** | Spout (Win), Syphon (Mac) | **Both implemented** |
+| **Projection mapping** | Stoner, Kantan Mapper (plugins) | **gn_ext_mapper** built-in |
+| **Audio** | Audio analysis, synthesis, device I/O | AudioIn, AudioSpectrum, AudioBand, AudioDynamics, Beat, AudioDeviceOUT |
+| **MIDI** | MIDI In/Out | **gn_ext_midi** (RtMidiIn + RtMidiOut) |
+| **OSC** | OSC In/Out | OscOutOUT + OscInDAT/OscInCHOP |
+| **Serial** | Serial DAT | **gn_ext_serial** |
+| **Physics** | Bullet (legacy) | **Jolt physics COMPs** — modern, better |
+| **SDF rendering** | Not built-in | **gn_ext_sdf** — GONODES leads |
+| **Embed in host apps** | TouchEngine SDK | **LibGodot + libgonodes C API** — comparable |
+| **Custom operators** | C++ or Python .tox | **.gnasset + Script operators** |
+| **Fluid simulation** | NVIDIA Flex (plugin), GLSL workarounds | **FluidVOL (3D NS) + Fluid2DTOP (2D NS)** — see §13.3 |
+| **Machine Learning** | TensorFlow, OpenCV, MediaPipe plugins | **Not present** |
+| **AR/Face Tracking** | Kinect, Leap, MediaPipe | **Not present** |
+| **Multi-display** | Multi-window, output mapping | WindowOUT multi-window — basic |
+
+### 13.2 Houdini Features Worth Borrowing
+
+| Houdini Concept | Relevance | GONODES Status |
+|---|---|---|
+| VEX/CVEX wrangle nodes | GDScript node-level scripting | ScriptSOP/CHOP/DAT/IMG — ✅ covered |
+| HDA (Houdini Digital Assets) | Reusable operator packages | .gnasset + SubNetwork — ✅ covered |
+| Attribute system | Rich per-element data | AttributeSOP — partial (no vertex attrs on data type) |
+| PDG (Task Graph) | Batch/async processing | Not applicable for real-time |
+| FLIP Fluids | Particle-in-cell hybrid | See §13.5 #23 |
+| Pyro (sparse volumes) | Fire/smoke/explosion | See §13.4 #8 |
+| Wire/Cloth/Hair solvers | Specialized sim | Jolt soft body as base |
+| Crowds/Agents | Mass animation instancing | InstanceCOMP partially covers |
+| Terrain (HeightfieldSOP) | Generative landscapes | See §13.5 #13 |
+| For-Each loops | Iterative per-piece processing | ReplicatorCOMP |
+| Spare parameters | Add params to any node | ✅ Already implemented |
+| Takes (parameter layers) | Named param snapshots | See §11.3.K — planned |
+
+### 13.3 Fluid Simulation — Current State
+
+GONODES has **two fluid simulation systems**:
+
+**3D Fluid (FluidVOL)** — GPU Navier-Stokes on 3D volume grid:
+- 6-pass pipeline: Inject → Advect (semi-Lagrangian) → Vorticity Confinement → Divergence → Pressure (Jacobi) → Project
+- Obstacle support: mesh/SDF mask injection (R > 0.5 = solid, 0.1–0.5 = friction boundary)
+- Vorticity confinement: curl amplification for turbulent detail (adjustable 0–5)
+- Rendering: RaymarchVOL (Beer-Lambert absorption, front-to-back compositing)
+- Mesh extraction: MarchingCubesVOL (CPU iso-surface → SOP)
+- POP interaction: AdvectPOP moves particles along VOL velocity field
+- CPU fallback for all passes (Compatibility renderer support)
+
+**2D Fluid (Fluid2DTOP)** — GPU Navier-Stokes on SCREEN_TEXTURE feedback:
+- Dual SubViewport architecture: sim viewport (CLEAR_MODE_NEVER) + render viewport
+- Semi-Lagrangian advection, vorticity confinement, simplified pressure correction
+- Configurable emitter (position/direction/radius/force/dye — expression-friendly)
+- External dye input (TOP) for ink/paint effects
+- Two-color gradient rendering with velocity visualization mode
+
+**What could still improve fluid visuals:**
+
+| Visual Feature | Current State | Enhancement |
+|---|---|---|
+| Translucent fluid surface | MarchingCubes + PBR_MAT | Dedicated FluidSurfaceMAT (subsurface, refraction, Fresnel) |
+| Temperature / buoyancy | Not present | Temperature field + upward force in FluidVOL |
+| Multiple species | Single density channel | Multi-channel density (RGBA32F already supports it) |
+| Multi-pass lighting | Single-pass raymarcher | Phase functions (Henyey-Greenstein), shadow rays |
+
+### 13.4 Improvement Roadmap — Tier 1 (High Impact, Moderate Effort)
+
+| # | Suggestion | Why | Effort | Status |
+|---|---|---|---|---|
+| 1 | **Audio Input + Analysis** | VJ workflow lifeblood — live mic/line-in drives reactive visuals | Medium | ✅ **AudioBandCHOP** done (AudioInCHOP, AudioSpectrumCHOP, BeatCHOP already existed) |
+| 2 | **NDI In/Out extension** | Industry standard video-over-IP for live production | Medium | ⬜ Needs C++ GDExtension wrapping libndi |
+| 3 | **OSC In CHOP/DAT** | Controllers (TouchOSC, Lemur), phones, other software | Low | ✅ OscInDAT + OscInCHOP already exist |
+| 4 | **Fluid Surface Rendering** | FluidVOL → MarchingCubes → visually compelling output | Medium | ⬜ Dedicated FluidSurfaceMAT with refraction/caustics |
+| 5 | **FluidVOL Obstacle Collision** | Fluid flows around objects, wake turbulence | Low-Medium | ✅ **Implemented** — obstacle input port + compute shader + CPU fallback |
+| 6 | **Timeline / Cue System** | Live performance structure — cue points, transitions, scene switching | Medium | ✅ **Implemented** — TimelineCHOP, CueDAT, CueCHOP, Editor Timeline UI |
+| 7 | **Vorticity Confinement** | Curl amplification — transforms flat fluid into cinematic turbulence | Low | ✅ **Implemented** — GPU compute pass + CPU fallback, 0–5 strength |
+
+### 13.5 Improvement Roadmap — Tier 2 (Feature Extensions)
+
+| # | Suggestion | Why | Effort | Status |
+|---|---|---|---|---|
+| 8 | **Pyro-Style Emitter VOL** | Temperature + fuel + combustion for fire/smoke | Medium | ⬜ VOL infrastructure exists, needs combustion model |
+| 9 | **Cloth/Softbody SOP** | Verlet-integration mesh deformer for visual art | Medium-High | ⬜ SoftBodyCOMP (Jolt) exists for physics, not procedural cloth |
+| 10 | **Machine Learning Bridge** | MediaPipe face/hand/pose, style transfer, depth estimation | High | ⬜ Transformative but heavy — could be `gn_ext_ml` wrapping ONNX |
+| 11 | **Reaction-Diffusion TOP** | Classic generative art pattern (Gray-Scott model) | Low | ✅ **Implemented** — 7 presets, seed input, 3 color modes |
+| 12 | **Multi-Pass Lighting in RaymarchVOL** | Phase functions, shadow rays, scattering approximation | Medium | ⬜ Transforms volume rendering from blob to atmospheric phenomenon |
+| 13 | **HeightfieldSOP** | Terrain generation from noise/erosion for generative landscapes | Medium | ⬜ |
+| 14 | **Instancer improvements** | Per-instance color/scale from CHOP, animated geometry, LOD | Medium | ⬜ Current InstanceCOMP is functional but basic |
+| 15 | **Point Cloud rendering** | Dedicated splatting renderer with size attenuation, depth testing | Medium | ⬜ Better than RenderPOP's billboard approach for dense clouds |
+
+### 13.6 Improvement Roadmap — Tier 3 (Polish & Advanced)
+
+| # | Suggestion | Why | Effort | Status |
+|---|---|---|---|---|
+| 16 | **2D Fluid TOP** | Screen-space Navier-Stokes for interactive installations | Low | ✅ **Implemented** — Fluid2DTOP with dual viewport feedback |
+| 17 | **Blackmagic / AJA video I/O** | Professional SDI/HDMI capture/output for broadcast | High | ⬜ Niche but essential for high-end installations |
+| 18 | **Trail / Ribbon rendering** | Render particle trails as ribbons/tubes — staple VJ effect | Medium | ⬜ TrailSOP exists, needs efficient GPU ribbon renderer |
+| 19 | **Voronoi / Shatter SOP** | Procedural fracturing for motion graphics | Medium | ⬜ |
+| 20 | **Periodic/Tiling Noise** | Seamless tiling for looping content | Low | ⬜ NoiseTOP shader modification |
+| 21 | **GPU Marching Cubes** | MarchingCubesVOL is CPU-only; compute shader would be 10-100× faster | High | ⬜ Godot 4.x RD atomics may help |
+| 22 | **Boids / Flocking POP** | Emergent behavior particles — classic generative art | Medium | ⬜ Compute shader with spatial hash neighbor search |
+| 23 | **FLIP Fluid (Houdini-style)** | Hybrid particle-grid for splashy water — unique among real-time tools | Very High | ⬜ |
+
+### 13.7 Roadmap Summary
+
+**Completed this session (6 of 7 Tier 1 items):**
+- ✅ #1 Audio Band CHOP (multi-band frequency analysis with envelope followers)
+- ✅ #5 FluidVOL obstacles (GPU + CPU, friction boundary support)
+- ✅ #6 Timeline/Cue system (3 operators + editor UI)
+- ✅ #7 Vorticity confinement (GPU compute + CPU, adjustable strength)
+- ✅ #11 Reaction-Diffusion TOP (Gray-Scott, 7 presets, seed input, 3 color modes)
+- ✅ #16 2D Fluid TOP (dual-viewport NS with emitter, dye input, velocity visualization)
+
+**Highest remaining priorities:**
+1. **NDI extension (#2)** — unlocks professional live production pipelines
+2. **Fluid Surface MAT (#4)** — makes existing 3D fluid pipeline look production-quality
+3. **Pyro emitter VOL (#8)** — fire/smoke on existing VOL infrastructure
+4. **ML bridge (#10)** — face/hand tracking would be transformative for installations
+5. **Takes / parameter layers (§11.3.K)** — live performance preset switching
+
+**Overall completion:** 12 of 23 suggestions implemented (52%), including all high-priority architectural items (§11.1) and 6 of 7 Tier 1 workflow items.

@@ -24,9 +24,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo_in", GNFamily.Type.SOP, false, "SOP geometry input")
-	add_input("mat_in", GNFamily.Type.MAT, false, "Material input (optional — overrides built-in PBR)")
-	add_input("tex_in", GNFamily.Type.TOP, false, "Albedo texture for fallback PBR (optional)")
+	add_input("geo_in", GNFamily.Type.SOP, false, "SOP geometry input", "Geometry")
+	add_input("mat_in", GNFamily.Type.MAT, false, "Material input (optional — overrides built-in PBR)", "Material")
+	add_input("tex_in", GNFamily.Type.TOP, false, "Albedo texture for fallback PBR (optional)", "Texture")
 	add_output("out", GNFamily.Type.COMP, "Geometry component")
 
 

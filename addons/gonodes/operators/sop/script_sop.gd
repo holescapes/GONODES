@@ -67,7 +67,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in0", GNFamily.Type.SOP, false, "Source geometry")
+	add_input("in0", GNFamily.Type.SOP, false, "Source geometry", "Input 0")
 	add_output("out", GNFamily.Type.SOP, "Script output geometry")
 
 

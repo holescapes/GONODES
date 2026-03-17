@@ -226,7 +226,8 @@ Nodes display status through visual cues on the title bar and body:
 ## Expression Reference Lines
 
 When a parameter's expression references another node via `chop("node_id")`,
-`op("node_id")`, `top("node_id")`, `sop()`, `dat()`, or `mat()`, the editor
+`op("node_id")`, `top("node_id")`, `sop()`, `dat()`, `mat()`, `vol()`,
+`img()`, or `output()`, the editor
 draws **dashed cyan lines with arrowheads** from the referencing node to the
 referenced node.
 
@@ -295,7 +296,7 @@ Toggle from the toolbar dropdown or press **W** to cycle.
 2. An inline text field appears with the current ID pre-selected
 3. Type the new name and press **Enter** (or click away to confirm)
 4. The node, all wire references, and expression references update automatically:
-   - All `chop()`, `op()`, `top()`, `sop()`, `dat()`, `mat()`, `par()`, `set_par()` references
+   - All `chop()`, `op()`, `top()`, `sop()`, `dat()`, `mat()`, `vol()`, `img()`, `output()`, `par()`, `set_par()` references
    - Per-component expressions on Vector2/3/4 and Color parameters
    - Script operator code bodies (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG, GenericScriptNode)
    - CallbackDAT callback slots (on_start, on_cook, on_value_change, on_create)

@@ -16,7 +16,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("tex_in", GNFamily.Type.TOP, false, "Sprite texture (optional)")
+	add_input("tex_in", GNFamily.Type.TOP, false, "Sprite texture (optional)", "Texture")
 	add_output("out", GNFamily.Type.MAT, "Point sprite material output")
 
 

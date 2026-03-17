@@ -15,7 +15,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("color_tex", GNFamily.Type.TOP, false, "Color texture (optional)")
+	add_input("color_tex", GNFamily.Type.TOP, false, "Color texture (optional)", "Color Texture")
 	add_output("out", GNFamily.Type.MAT, "Constant material output")
 
 

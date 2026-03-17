@@ -69,7 +69,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	# Default shader uses gn_tex0 only — ports are rebuilt when shader code changes
-	add_input("in0", GNFamily.Type.TOP, false, "Texture input 0 (gn_tex0 in shader)")
+	add_input("in0", GNFamily.Type.TOP, false, "Texture input 0 (gn_tex0 in shader)", "Input 0")
 	add_output("out", GNFamily.Type.TOP, "Shader output texture")
 
 

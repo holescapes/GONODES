@@ -54,7 +54,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	# Default ports from annotations in DEFAULT_CODE.
 	# Will be rebuilt dynamically when code changes.
-	add_input("in0", GNFamily.Type.CHOP, false, "Input channels")
+	add_input("in0", GNFamily.Type.CHOP, false, "Input channels", "Input 0")
 	add_output("out", GNFamily.Type.CHOP, "Script output channels")
 
 

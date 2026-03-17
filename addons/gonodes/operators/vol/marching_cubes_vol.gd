@@ -11,7 +11,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("vol", GNFamily.Type.VOL, true, "Density volume to mesh")
+	add_input("vol", GNFamily.Type.VOL, true, "Density volume to mesh", "Volume")
 	add_output("mesh", GNFamily.Type.SOP, "Extracted triangle mesh")
 
 

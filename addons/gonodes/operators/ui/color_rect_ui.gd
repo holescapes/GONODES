@@ -16,7 +16,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("mat", GNFamily.Type.MAT, false, "Shader material overlay")
+	add_input("mat", GNFamily.Type.MAT, false, "Shader material overlay", "Material")
 	add_output("out", GNFamily.Type.UI, "Widget output")
 
 

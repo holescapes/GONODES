@@ -16,7 +16,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo_in", GNFamily.Type.SOP, false, "Emitter geometry (optional)")
+	add_input("geo_in", GNFamily.Type.SOP, false, "Emitter geometry (optional)", "Geometry")
 	add_output("out", GNFamily.Type.POP, "Particle data output")
 
 

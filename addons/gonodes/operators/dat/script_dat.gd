@@ -51,7 +51,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in0", GNFamily.Type.DAT, false, "Input table")
+	add_input("in0", GNFamily.Type.DAT, false, "Input table", "Input 0")
 	add_output("out", GNFamily.Type.DAT, "Script output table")
 
 

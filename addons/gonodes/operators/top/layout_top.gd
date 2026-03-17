@@ -11,8 +11,8 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	# Dynamic ports — start with 2, grow on connect
-	add_input("in0", GNFamily.Type.TOP, false, "Input texture 0")
-	add_input("in1", GNFamily.Type.TOP, false, "Input texture 1")
+	add_input("in0", GNFamily.Type.TOP, false, "Input texture 0", "Input 0")
+	add_input("in1", GNFamily.Type.TOP, false, "Input texture 1", "Input 1")
 	add_input("", GNFamily.Type.TOP, false, "")  # trailing empty for auto-grow
 	add_output("out", GNFamily.Type.TOP, "Mosaic texture")
 

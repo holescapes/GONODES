@@ -24,7 +24,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo", GNFamily.Type.SOP, true, "Geometry to carve")
+	add_input("geo", GNFamily.Type.SOP, true, "Geometry to carve", "Geometry")
 	add_output("out", GNFamily.Type.SOP, "Carved geometry")
 
 

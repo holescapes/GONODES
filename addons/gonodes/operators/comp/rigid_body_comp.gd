@@ -26,8 +26,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("comp_in", GNFamily.Type.COMP, false, "Geometry COMP input (mesh + material)")
-	add_input("force_in", GNFamily.Type.CHOP, false, "Force/impulse CHOP input (optional)")
+	add_input("comp_in", GNFamily.Type.COMP, false, "Geometry COMP input (mesh + material)", "Comp")
+	add_input("force_in", GNFamily.Type.CHOP, false, "Force/impulse CHOP input (optional)", "Force")
 	add_output("out", GNFamily.Type.COMP, "RigidBody component")
 
 

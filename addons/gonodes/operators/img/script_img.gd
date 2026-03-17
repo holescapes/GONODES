@@ -65,7 +65,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in0", GNFamily.Type.IMG, false, "Input image")
+	add_input("in0", GNFamily.Type.IMG, false, "Input image", "Input 0")
 	add_output("out", GNFamily.Type.IMG, "Script output image")
 
 

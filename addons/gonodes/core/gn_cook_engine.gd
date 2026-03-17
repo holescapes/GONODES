@@ -375,7 +375,7 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 	# Lazy-init regex (same pattern as GNGraphEditor's overlay scanner)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
+		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for param_name in node.parameters:
 		var param: GNParameter = node.parameters[param_name]
@@ -1101,6 +1101,52 @@ func log(message: String) -> float:
 	return 0.0
 
 
+## Access a specific output port on any node by name or index.
+## Works across all families — the universal multi-output accessor.
+## Usage:
+##   output("fluid1", "Density")      → GNData by port label/name
+##   output("fluid1", "density_out")  → GNData by port_name
+##   output("fluid1", 1)              → GNData by port index
+##   output("fluid1")                 → GNData from port 0 (cached_output)
+func output(node_name: String, port = null) -> Variant:
+	return _resolve_output(node_name, port)
+
+
+## Read VOL data. Usage:
+##   vol("fluid1")                     → GNVolumeData from first VOL port
+##   vol("fluid1", "Density")          → GNVolumeData by port name/label
+##   vol("fluid1", "density_out")      → GNVolumeData by port_name
+##   vol("fluid1", 1)                  → GNVolumeData by port index
+func vol(node_name: String, port = null) -> Variant:
+	return _resolve_output(node_name, port, "GNVolumeData")
+
+
+## Read SOP data. Usage:
+##   sop("grid1")                      → GNGeoData from first SOP port
+##   sop("grid1", "out")               → GNGeoData by port name
+func sop(node_name: String, port = null) -> Variant:
+	return _resolve_output(node_name, port, "GNGeoData")
+
+
+## Read DAT data. Usage:
+##   dat("table1")                     → GNTableData from first DAT port
+##   dat("table1", "out")              → GNTableData by port name
+func dat(node_name: String, port = null) -> Variant:
+	return _resolve_output(node_name, port, "GNTableData")
+
+
+## Read IMG data. Usage:
+##   img("noise_img1")                 → GNImageData from first IMG port
+func img(node_name: String, port = null) -> Variant:
+	return _resolve_output(node_name, port, "GNImageData")
+
+
+## Read MAT data. Usage:
+##   mat("pbr1")                       → GNMaterialData from first MAT port
+func mat(node_name: String, port = null) -> Variant:
+	return _resolve_output(node_name, port, "GNMaterialData")
+
+
 # ─── Internal proxy implementations ─────────────────────────────────────────────
 
 
@@ -1258,6 +1304,46 @@ func _make_top_proxy(node_name: String, property: String = "") -> Variant:
 	if not property.is_empty():
 		return info.get(property, 0.0)
 	return info
+
+
+## Universal output port resolver.  Supports access by port index (int),
+## port name/label (String), or default (null → port 0 / first matching type).
+## When [param type_filter] is set, scans ports for the first output of that
+## class.  This powers [code]vol()[/code], [code]sop()[/code],
+## [code]dat()[/code], [code]img()[/code], [code]mat()[/code], and
+## [code]output()[/code].
+func _resolve_output(node_name: String, port = null, type_filter: String = "") -> Variant:
+	if network == null:
+		return null
+	var node: GNNode = resolve_node(node_name)
+	if node == null:
+		return null
+
+	# ── Explicit port index ──
+	if port is int:
+		return node.get_output_data(port)
+
+	# ── Explicit port name / label ──
+	if port is String and not (port as String).is_empty():
+		var data: GNData = node.get_output_data_by_name(port as String)
+		if data != null:
+			return data
+		return null
+
+	# ── Default: port 0 or first port matching the type filter ──
+	if type_filter.is_empty():
+		return node.get_output_data(0)
+
+	# Try cached_output first
+	var data: GNData = node.cached_output
+	if data != null and data.get_class() == type_filter:
+		return data
+	# Scan all output ports for the right type
+	for p in range(node.output_ports.size()):
+		var port_data: GNData = node.get_output_data(p)
+		if port_data != null and port_data.get_class() == type_filter:
+			return port_data
+	return null
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

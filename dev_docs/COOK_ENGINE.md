@@ -126,7 +126,7 @@ If the hash matches `node._last_cook_input_hash` → skip cook, clear dirty, **n
 
 Expressions like `chop("lfo1", "out") * 5.0` create **implicit dependencies** not represented by wires. The cook engine:
 
-1. Scans all expression strings with regex for `chop/op/top/sop/dat/mat("id")` references
+1. Scans all expression strings with regex for `chop/op/top/sop/dat/mat/vol/img/output("id")` references
 2. Builds `_expr_consumer_map`: `upstream_id → [consumer_node_ids]`
 3. During the cook loop, a non-dirty node's expressions are only re-evaluated if an upstream source **actually cooked this frame** (`_should_eval_expressions`)
 

@@ -16,7 +16,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo", GNFamily.Type.SOP, true, "Geometry to deform")
+	add_input("geo", GNFamily.Type.SOP, true, "Geometry to deform", "Geometry")
 	add_input("attractors", GNFamily.Type.SOP, false, "Attractor point cloud (optional)")
 	add_output("out", GNFamily.Type.SOP, "Deformed geometry")
 
