@@ -49,6 +49,9 @@ var non_realtime: bool = false
 ## 1.0 / non_realtime_fps.  Typical values: 24 (film), 30 (NTSC), 60 (game).
 var non_realtime_fps: float = 30.0
 
+## Global playback speed multiplier.  1.0 = normal, 0.5 = half speed, etc.
+var playback_speed: float = 1.0
+
 ## Maximum nodes to cook per frame (0 = unlimited).
 ## Can be used to throttle heavy patches on low-end hardware.
 var max_cooks_per_frame: int = 0
@@ -196,11 +199,11 @@ func _process(delta: float) -> void:
 
 	# Non-realtime: fixed timestep — deterministic, frame-perfect timing
 	if non_realtime:
-		current_delta = 1.0 / non_realtime_fps
+		current_delta = (1.0 / non_realtime_fps) * playback_speed
 		elapsed_time += current_delta
 	else:
-		current_delta = delta
-		elapsed_time += delta
+		current_delta = delta * playback_speed
+		elapsed_time += current_delta
 
 	cook_frame(current_delta)
 
@@ -1725,4 +1728,39 @@ func reset() -> void:
 	_consumer_counts.clear()
 	_consumer_counts_dirty = true
 	GNLogger.info("CookEngine", "Engine reset")
+	invalidate_all()
+
+
+## Seeks the engine to a specific time (seconds).  Adjusts elapsed_time and
+## frame_count, then invalidates all nodes so the next frame re-cooks.
+func seek_time(t: float) -> void:
+	elapsed_time = maxf(t, 0.0)
+	frame_count = roundi(elapsed_time * (non_realtime_fps if non_realtime else 60.0))
+	invalidate_all()
+
+
+## Seeks the engine to a specific frame number.
+func seek_frame(f: int) -> void:
+	var fps := non_realtime_fps if non_realtime else 60.0
+	elapsed_time = float(f) / fps
+	frame_count = f
+	invalidate_all()
+
+
+## Advances exactly one frame while paused.
+func step_forward() -> void:
+	cooking_enabled = false
+	var fps := non_realtime_fps if non_realtime else 60.0
+	var dt: float = (1.0 / fps) * playback_speed
+	elapsed_time += dt
+	cook_frame(dt)
+
+
+## Steps back one frame while paused.
+func step_backward() -> void:
+	cooking_enabled = false
+	var fps := non_realtime_fps if non_realtime else 60.0
+	var dt := 1.0 / fps
+	elapsed_time = maxf(elapsed_time - dt, 0.0)
+	frame_count = maxi(frame_count - 1, 0)
 	invalidate_all()

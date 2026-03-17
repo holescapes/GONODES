@@ -1,0 +1,51 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "timeline1": {
+            "type": "TimelineCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 10.0},
+                "speed": {"value": 1.0},
+                "loop": {"value": 1},
+                "play": {"value": true},
+                "sync_to_engine": {"value": true}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "timeline1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Timeline CHOP \u2014 Basic\n\nSynced to engine clock, 0\u201310 s range, looping.\nOutputs: time, frame, fraction, playing, speed, looped.\nVisualized as a waveform via CHOPtoTOP.",
+            "position": [-100.0, -120.0],
+            "size": [480.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

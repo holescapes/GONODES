@@ -714,6 +714,10 @@ func _register_core_operators() -> void:
 		"Sequence CHOP inputs end-to-end in time with optional crossfade.")
 	_reg("ClipCHOP",        "CHOP", ClipCHOP,
 		"Play back recorded CHOP data with transport controls (speed, loop, trim).")
+	_reg("TimelineCHOP",    "CHOP", TimelineCHOP,
+		"Independent local timeline — generates time/frame/fraction channels.")
+	_reg("CueCHOP",         "CHOP", CueCHOP,
+		"Cue sequencer — reads cue table and outputs current cue state as CHOP channels.")
 	_reg("ChannelCHOP",     "CHOP", ChannelCHOP,
 		"Named channels from parameter values (expression-friendly).")
 
@@ -940,6 +944,8 @@ func _register_core_operators() -> void:
 		"Plain text storage.")
 	_reg("InfoDAT",         "DAT", InfoDAT,
 		"System info table (fps, frame, time, OS, memory).")
+	_reg("CueDAT",          "DAT", CueDAT,
+		"Cue list manager — named cues with timing, transitions, and parameter overrides.")
 	_reg("OscInDAT",        "DAT", OscInDAT,
 		"Receive OSC messages into a DAT table via UDP.")
 	_reg("MidiInDAT",       "DAT", MidiInDAT,

@@ -1,0 +1,70 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "fast_tl": {
+            "type": "TimelineCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 4.0},
+                "speed": {"value": 2.5},
+                "loop": {"value": 1},
+                "play": {"value": true},
+                "sync_to_engine": {"value": false}
+            }
+        },
+        "slow_tl": {
+            "type": "TimelineCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 8.0},
+                "speed": {"value": 0.5},
+                "loop": {"value": 2},
+                "play": {"value": true},
+                "sync_to_engine": {"value": false}
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [500, 200],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [900, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "fast_tl", "from_port": 0, "to": "merge1", "to_port": 0},
+        {"from": "slow_tl", "from_port": 0, "to": "merge1", "to_port": 1},
+        {"from": "merge1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Timeline CHOP \u2014 Free-Running\n\nTwo independent timelines, NOT synced to engine:\n\u2022 fast_tl: 4 s range, 2.5\u00d7 speed, Loop\n\u2022 slow_tl: 8 s range, 0.5\u00d7 speed, Ping-Pong\nMerged to compare their 'fraction' channels side by side.",
+            "position": [-100.0, -120.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

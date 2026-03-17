@@ -1,0 +1,71 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "cuedat1": {
+            "type": "CueDAT",
+            "position": [100, 100],
+            "parameters": {
+                "num_cues": {"value": 3},
+                "cue0_name": {"value": "start"},
+                "cue0_time": {"value": 0.0},
+                "cue0_duration": {"value": 4.0},
+                "cue0_transition": {"value": "cut"},
+                "cue0_data": {"value": "{}"},
+                "cue1_name": {"value": "middle"},
+                "cue1_time": {"value": 4.0},
+                "cue1_duration": {"value": 6.0},
+                "cue1_transition": {"value": "fade:1.0"},
+                "cue1_data": {"value": "{}"},
+                "cue2_name": {"value": "end"},
+                "cue2_time": {"value": 10.0},
+                "cue2_duration": {"value": 5.0},
+                "cue2_transition": {"value": "fade:2.0"},
+                "cue2_data": {"value": "{}"}
+            }
+        },
+        "cuechop1": {
+            "type": "CueCHOP",
+            "position": [500, 100],
+            "parameters": {
+                "source": {"value": 0},
+                "timeline": {"value": ""},
+                "apply_data": {"value": false}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "cuedat1", "from_port": 0, "to": "cuechop1", "to_port": 0},
+        {"from": "cuechop1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Cue CHOP \u2014 Basic\n\nCueDAT \u2192 CueCHOP in Timeline mode (auto-advance by engine time).\n3 cues at 0 s, 4 s, and 10 s.\nOutput channels: active_cue, cue_progress, transition,\nnext_cue, cue_elapsed, cue_remaining.",
+            "position": [-100.0, -120.0],
+            "size": [530.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

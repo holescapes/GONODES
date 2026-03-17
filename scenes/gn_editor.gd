@@ -19,11 +19,18 @@ var cook_engine: GNCookEngine
 ## Toolbar toggles (created in _setup_toolbar, stored for state persistence).
 var play_button: Button
 var reset_button: Button
+var step_back_button: Button
+var step_fwd_button: Button
+var speed_spin: SpinBox
+var loop_button: Button
 var preview_toggle: CheckButton
 var perf_toggle: CheckButton
 var vram_toggle: CheckButton
 var nrt_toggle: CheckButton
 var nrt_fps_spin: SpinBox
+var _timeline_scrubber: HSlider
+var _timeline_time_label: Label
+var _loop_mode_idx: int = 0  ## 0=None, 1=Loop, 2=PingPong
 
 ## VRAM budget monitoring (opt-in via toolbar toggle).
 var _vram_enabled: bool = false
@@ -379,6 +386,14 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 
 	info_label.text = " | ".join(parts)
 
+	# Update timeline scrubber position (without re-triggering seek)
+	if _timeline_scrubber != null and cook_engine != null:
+		_timeline_scrubber.set_value_no_signal(cook_engine.elapsed_time)
+		var t := cook_engine.elapsed_time
+		var mins := int(t) / 60.0
+		var secs := fmod(t, 60.0)
+		_timeline_time_label.text = "%d:%04.1f / F%d" % [mins, secs, cook_engine.frame_count]
+
 	# Update live previews on all nodes in the graph
 	graph_editor.update_previews()
 
@@ -547,6 +562,43 @@ func _on_nrt_fps_changed(value: float) -> void:
 	if cook_engine != null:
 		cook_engine.non_realtime_fps = value
 	_save_setting("nrt_fps", value)
+
+
+## Steps backward one frame.
+func _on_step_back_pressed() -> void:
+	if cook_engine != null:
+		cook_engine.step_backward()
+		play_button.button_pressed = true  # show paused state
+		play_button.text = "Play  ▶"
+
+
+## Steps forward one frame.
+func _on_step_fwd_pressed() -> void:
+	if cook_engine != null:
+		cook_engine.step_forward()
+		play_button.button_pressed = true  # show paused state
+		play_button.text = "Play  ▶"
+
+
+## Changes playback speed.
+func _on_speed_changed(value: float) -> void:
+	if cook_engine != null:
+		cook_engine.playback_speed = value
+
+
+## Cycles loop mode: Off → Loop → Ping-Pong.
+func _on_loop_pressed() -> void:
+	_loop_mode_idx = (_loop_mode_idx + 1) % 3
+	if cook_engine != null:
+		cook_engine.loop_mode = _loop_mode_idx
+	var labels := ["Loop: Off", "Loop: On", "Loop: P-P"]
+	loop_button.text = labels[_loop_mode_idx]
+
+
+## Handles scrubber drag — seeks to the selected time.
+func _on_scrubber_changed(value: float) -> void:
+	if cook_engine != null:
+		cook_engine.seek_time(value)
 
 
 ## Opens the export dialog for Quick Build.
@@ -779,6 +831,42 @@ func _setup_toolbar() -> void:
 	reset_button.pressed.connect(_on_reset_pressed)
 	row1.add_child(reset_button)
 
+	# Step backward button
+	step_back_button = Button.new()
+	step_back_button.text = "⏪"
+	step_back_button.tooltip_text = "Step back one frame"
+	step_back_button.pressed.connect(_on_step_back_pressed)
+	row1.add_child(step_back_button)
+
+	# Step forward button
+	step_fwd_button = Button.new()
+	step_fwd_button.text = "⏩"
+	step_fwd_button.tooltip_text = "Step forward one frame"
+	step_fwd_button.pressed.connect(_on_step_fwd_pressed)
+	row1.add_child(step_fwd_button)
+
+	# Speed multiplier
+	var speed_label := Label.new()
+	speed_label.text = "Speed:"
+	row1.add_child(speed_label)
+	speed_spin = SpinBox.new()
+	speed_spin.min_value = 0.0
+	speed_spin.max_value = 10.0
+	speed_spin.value = 1.0
+	speed_spin.step = 0.1
+	speed_spin.suffix = "x"
+	speed_spin.tooltip_text = "Global playback speed multiplier"
+	speed_spin.custom_minimum_size.x = 80
+	speed_spin.value_changed.connect(_on_speed_changed)
+	row1.add_child(speed_spin)
+
+	# Loop mode cycle button
+	loop_button = Button.new()
+	loop_button.text = "Loop: Off"
+	loop_button.tooltip_text = "Cycle loop mode: Off → Loop → Ping-Pong (requires time range)"
+	loop_button.pressed.connect(_on_loop_pressed)
+	row1.add_child(loop_button)
+
 	row1.add_child(VSeparator.new())
 
 	# Non-Realtime toggle
@@ -811,6 +899,26 @@ func _setup_toolbar() -> void:
 	info_label.reparent(row1, false)
 	info_label.size_flags_horizontal = Control.SIZE_SHRINK_END
 	log_toggle.reparent(row1, false)
+
+	# ── Timeline Scrubber Row ────────────────────────────────────────────
+	var tl_row := HBoxContainer.new()
+	tl_row.add_theme_constant_override("separation", 4)
+	info_bar.add_child(tl_row)
+
+	_timeline_time_label = Label.new()
+	_timeline_time_label.text = "0:00.0 / F0"
+	_timeline_time_label.custom_minimum_size.x = 120
+	tl_row.add_child(_timeline_time_label)
+
+	_timeline_scrubber = HSlider.new()
+	_timeline_scrubber.min_value = 0.0
+	_timeline_scrubber.max_value = 600.0  # 10 minutes default
+	_timeline_scrubber.step = 0.01
+	_timeline_scrubber.value = 0.0
+	_timeline_scrubber.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_timeline_scrubber.tooltip_text = "Drag to scrub time — click to seek"
+	_timeline_scrubber.value_changed.connect(_on_scrubber_changed)
+	tl_row.add_child(_timeline_scrubber)
 
 	# ── Row 2: View & Graph ──────────────────────────────────────────────
 	var row2 := HBoxContainer.new()

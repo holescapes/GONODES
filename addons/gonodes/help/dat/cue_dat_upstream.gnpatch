@@ -1,0 +1,57 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "table1": {
+            "type": "TableDAT",
+            "position": [100, 100],
+            "parameters": {
+                "rows": {"value": 3},
+                "cols": {"value": 6},
+                "headers": {"value": "index,name,time,duration,transition,data"}
+            }
+        },
+        "cuedat1": {
+            "type": "CueDAT",
+            "position": [500, 100],
+            "parameters": {
+                "num_cues": {"value": 1}
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 640, "y": 512}
+                },
+                "font_size": {"value": 12}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 640, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "table1", "from_port": 0, "to": "cuedat1", "to_port": 0},
+        {"from": "cuedat1", "from_port": 0, "to": "texttop1", "to_port": 0},
+        {"from": "texttop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Cue DAT \u2014 Upstream Table\n\nA TableDAT feeds cue rows into CueDAT.\nWhen an upstream DAT is connected, CueDAT passes it\nthrough instead of using its built-in parameter cues.\nEdit the TableDAT cells to define cues dynamically.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

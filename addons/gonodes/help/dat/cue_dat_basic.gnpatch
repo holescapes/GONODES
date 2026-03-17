@@ -1,0 +1,62 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "cuedat1": {
+            "type": "CueDAT",
+            "position": [100, 100],
+            "parameters": {
+                "num_cues": {"value": 3},
+                "cue0_name": {"value": "intro"},
+                "cue0_time": {"value": 0.0},
+                "cue0_duration": {"value": 5.0},
+                "cue0_transition": {"value": "cut"},
+                "cue0_data": {"value": "{}"},
+                "cue1_name": {"value": "main"},
+                "cue1_time": {"value": 5.0},
+                "cue1_duration": {"value": 10.0},
+                "cue1_transition": {"value": "fade:1.0"},
+                "cue1_data": {"value": "{}"},
+                "cue2_name": {"value": "outro"},
+                "cue2_time": {"value": 15.0},
+                "cue2_duration": {"value": 5.0},
+                "cue2_transition": {"value": "fade:2.0"},
+                "cue2_data": {"value": "{}"}
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "font_size": {"value": 14}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "cuedat1", "from_port": 0, "to": "texttop1", "to_port": 0},
+        {"from": "texttop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Cue DAT \u2014 Basic\n\nThree cues: intro (0 s), main (5 s), outro (15 s).\n\u2022 intro: instant cut, 5 s duration\n\u2022 main: 1 s fade-in, 10 s duration\n\u2022 outro: 2 s fade-in, 5 s duration\nView the table output as text to inspect columns.",
+            "position": [-100.0, -120.0],
+            "size": [490.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

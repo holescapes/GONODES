@@ -1,0 +1,72 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "timeline1": {
+            "type": "TimelineCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 6.0},
+                "speed": {"value": 1.0},
+                "loop": {"value": 2},
+                "play": {"value": true},
+                "sync_to_engine": {"value": true}
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "transform1": {
+            "type": "TransformTOP",
+            "position": [500, 250],
+            "parameters": {
+                "rotate": {
+                    "mode": "EXPRESSION",
+                    "value": 0.0,
+                    "expression": "chop(\"timeline1\",\"fraction\") * 360.0"
+                },
+                "sx": {
+                    "mode": "EXPRESSION",
+                    "value": 1.0,
+                    "expression": "0.5 + chop(\"timeline1\",\"fraction\") * 1.5"
+                },
+                "sy": {
+                    "mode": "EXPRESSION",
+                    "value": 1.0,
+                    "expression": "0.5 + chop(\"timeline1\",\"fraction\") * 1.5"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 250],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "transform1", "to_port": 0},
+        {"from": "transform1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Timeline CHOP \u2014 Drive Transform\n\nA Ping-Pong timeline (0\u20136 s) drives a Transform TOP via expressions.\n\u2022 Rotation: fraction \u00d7 360\u00b0 (full spin per cycle)\n\u2022 Scale: 0.5\u20132.0 (grows with progress)\nDemonstrates referencing timeline channels from expressions.",
+            "position": [-100.0, -120.0],
+            "size": [530.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

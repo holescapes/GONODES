@@ -1,0 +1,93 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "timeline1": {
+            "type": "TimelineCHOP",
+            "position": [100, 50],
+            "parameters": {
+                "start": {"value": 0.0},
+                "end": {"value": 20.0},
+                "speed": {"value": 1.0},
+                "loop": {"value": 1},
+                "play": {"value": true},
+                "sync_to_engine": {"value": true}
+            }
+        },
+        "cuedat1": {
+            "type": "CueDAT",
+            "position": [100, 250],
+            "parameters": {
+                "num_cues": {"value": 3},
+                "cue0_name": {"value": "slow_noise"},
+                "cue0_time": {"value": 0.0},
+                "cue0_duration": {"value": 7.0},
+                "cue0_transition": {"value": "fade:1.0"},
+                "cue0_data": {"value": "{\"noise1/roughness\": 0.2, \"noise1/period\": 4.0}"},
+                "cue1_name": {"value": "fast_noise"},
+                "cue1_time": {"value": 7.0},
+                "cue1_duration": {"value": 7.0},
+                "cue1_transition": {"value": "fade:0.5"},
+                "cue1_data": {"value": "{\"noise1/roughness\": 0.9, \"noise1/period\": 0.5}"},
+                "cue2_name": {"value": "medium_noise"},
+                "cue2_time": {"value": 14.0},
+                "cue2_duration": {"value": 6.0},
+                "cue2_transition": {"value": "fade:2.0"},
+                "cue2_data": {"value": "{\"noise1/roughness\": 0.5, \"noise1/period\": 2.0}"}
+            }
+        },
+        "cuechop1": {
+            "type": "CueCHOP",
+            "position": [500, 150],
+            "parameters": {
+                "source": {"value": 0},
+                "timeline": {"value": "timeline1"},
+                "apply_data": {"value": true}
+            }
+        },
+        "noise1": {
+            "type": "NoiseCHOP",
+            "position": [500, 350],
+            "parameters": {
+                "amplitude": {"value": 1.0},
+                "roughness": {"value": 0.5},
+                "period": {"value": 2.0}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [900, 250],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 250],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "cuedat1", "from_port": 0, "to": "cuechop1", "to_port": 0},
+        {"from": "cuechop1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "noise1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Cue CHOP \u2014 Timeline + Data Overrides\n\nThe full pipeline: TimelineCHOP \u2192 CueDAT \u2192 CueCHOP.\nCueCHOP reads time from 'timeline1' and auto-advances cues.\nEach cue's data{} overrides NoiseCHOP parameters:\n\u2022 slow_noise: roughness 0.2, period 4 s\n\u2022 fast_noise: roughness 0.9, period 0.5 s\n\u2022 medium_noise: roughness 0.5, period 2 s\nWatch the Noise output change character at each cue transition.",
+            "position": [-100.0, -120.0],
+            "size": [550.0, 130.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}
