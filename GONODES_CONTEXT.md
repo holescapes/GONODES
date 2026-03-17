@@ -5362,6 +5362,7 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 |---------|---------------|-------------|
 | **Parallel cook engine** | `gn_cook_engine.gd`, `gn_network.gd` | Level-based topological sort with WorkerThreadPool parallel dispatch. CPU-family nodes at the same dependency level cook concurrently; GPU families (TOP/POP/VOL) cook sequentially on main thread. Config: `parallel_cook_enabled`, `parallel_min_batch`. |
 | **Named output ports** | `gn_port.gd`, `gn_node.gd`, `gn_node_view.gd`, `gn_help_window.gd`, `gn_main_help_window.gd`, `gn_cook_engine.gd` | Added `label: String` and `display_name()` to GNPort. `add_input`/`add_output` now accept optional `port_label`. UI displays label when set, falls back to port_name. All multi-port operators labeled. Expression functions `output()`, `vol()`, `sop()`, `dat()`, `img()`, `mat()` resolve ports by index, name, or label (case-insensitive) via `GNNode.get_output_data_by_name()`. |
+| **.gnasset Edit-in-Place (Phase 3)** | `gn_custom_operator.gd`, `gn_graph_editor.gd`, `gn_editor.gd` | Right-click GNCustomOperator: "Edit Asset" enters edit mode (snapshot + dive-in + Save/Discard/Re-promote banner). "Make Unique" detaches to plain SubNetworkNode. Save writes inner network back to .gnasset, validates promoted params, reloads sibling instances. |
 | **Dot routing node** | `operators/dot_node.gd` | Family-agnostic pass-through node for wire routing. Auto-adapts family from connected port via `adapt_to_family()`. |
 
 ### New Operators (23)

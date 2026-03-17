@@ -30,6 +30,12 @@ var _promoted_map: Dictionary = {}
 ## expressions from inner nodes as par("../", "param_name").
 var _custom_param_defs: Array[Dictionary] = []
 
+## True when the user is actively editing the asset's inner network in-place.
+var asset_editing: bool = false
+
+## Snapshot of the inner network dict taken when asset editing begins, for discard.
+var _pre_edit_snapshot: Dictionary = {}
+
 
 func _init() -> void:
 	node_type = "custom_asset"
@@ -347,6 +353,98 @@ static func _read_asset_json(path: String) -> Dictionary:
 	if json.data is Dictionary:
 		return json.data as Dictionary
 	return {}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Edit-in-Place — Phase 3
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Begins asset editing — takes a snapshot of the inner network for discard.
+func begin_asset_edit() -> void:
+	asset_editing = true
+	_pre_edit_snapshot = inner_network.to_dict()
+	GNLogger.info("CustomOperator", "Began editing asset: %s" % asset_path)
+
+
+## Saves the current inner network state back to the .gnasset file.
+## Preserves identity and custom_parameters; refreshes promoted parameter
+## mappings (drops broken ones, keeps valid ones).
+## Returns true on success.
+func save_asset_from_inner() -> bool:
+	if asset_path.is_empty():
+		GNLogger.error("CustomOperator", "No asset_path set — cannot save")
+		return false
+
+	var data := _read_asset_json(asset_path)
+	if data.is_empty():
+		# Build fresh structure if file is missing / corrupt
+		data = {"identity": asset_identity}
+
+	# Replace inner network with current live state
+	data["inner_network"] = inner_network.to_dict()
+
+	# Validate promoted parameters — drop entries whose inner node/param is gone
+	var valid_promoted: Array = []
+	for pdef in _promoted_defs:
+		var inner_node: GNNode = inner_network.nodes.get(pdef["inner_node_id"], null)
+		if inner_node == null:
+			GNLogger.warn("CustomOperator", "Dropped promoted param '%s' — inner node '%s' removed" % [
+				pdef["promoted_name"], pdef["inner_node_id"]])
+			continue
+		if not inner_node.parameters.has(pdef["inner_param_name"]):
+			GNLogger.warn("CustomOperator", "Dropped promoted param '%s' — inner param '%s.%s' removed" % [
+				pdef["promoted_name"], pdef["inner_node_id"], pdef["inner_param_name"]])
+			continue
+		valid_promoted.append(pdef)
+	data["promoted_parameters"] = valid_promoted
+
+	var ok := write_asset_json(asset_path, data)
+	if ok:
+		_promoted_defs = []
+		for vp in valid_promoted:
+			_promoted_defs.append(vp)
+		asset_editing = false
+		_pre_edit_snapshot = {}
+		GNLogger.info("CustomOperator", "Saved asset: %s" % asset_path)
+	return ok
+
+
+## Discards in-progress edits by restoring from the pre-edit snapshot.
+func discard_asset_edits() -> void:
+	if not _pre_edit_snapshot.is_empty():
+		inner_network.from_dict(_pre_edit_snapshot)
+		sync_ports_from_tunnels()
+	else:
+		# Fallback: reload from disk
+		load_from_asset(asset_path)
+	asset_editing = false
+	_pre_edit_snapshot = {}
+	GNLogger.info("CustomOperator", "Discarded asset edits: %s" % asset_path)
+
+
+## Reloads the inner network from the .gnasset file on disk.
+## Used to sync other instances after one instance saves.
+func reload_from_asset() -> void:
+	var old_overrides: Dictionary = {}
+	# Preserve per-instance parameter overrides
+	for p_name in _promoted_map:
+		var param: GNParameter = parameters.get(p_name, null)
+		if param:
+			old_overrides[p_name] = param.to_dict()
+	for cp_def in _custom_param_defs:
+		var cp_name: String = cp_def.get("name", "")
+		var param: GNParameter = parameters.get(cp_name, null)
+		if param:
+			old_overrides[cp_name] = param.to_dict()
+
+	load_from_asset(asset_path)
+
+	# Restore overrides
+	for p_name in old_overrides:
+		var param: GNParameter = parameters.get(p_name, null)
+		if param:
+			param.from_dict(old_overrides[p_name])
+	mark_dirty()
 
 
 ## Writes a .gnasset file from the given data dictionary. Returns true on success.

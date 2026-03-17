@@ -62,6 +62,9 @@ enum _CtxID {
 	ADD_NETWORK_BOX,
 	ADD_STICKY_NOTE,
 	PROMOTE_TO_ASSET,
+	EDIT_ASSET,
+	MAKE_UNIQUE,
+	REPROMOTE_ASSET,
 	ADD_SPARE_PARAM,
 	## Dynamic IDs for preset loading start here (100+).
 	LOAD_PARAM_PRESET_BASE = 100,
@@ -174,6 +177,15 @@ signal help_requested(node_id: String)
 ## Signal emitted when the user wants to dive into a SubNetworkNode
 ## (Enter key or double-click on the node body).
 signal dive_into_requested(node_id: String)
+
+## Signal emitted when the user requests editing a custom asset in-place.
+signal edit_asset_requested(node_id: String)
+
+## Signal emitted when the user wants to detach an asset instance (Make Unique).
+signal make_unique_requested(node_id: String)
+
+## Signal emitted when the user wants to re-promote parameters on a custom asset.
+signal repromote_asset_requested(node_id: String)
 
 ## Signal emitted when the user clicks the eye (viewer pin) button on a node.
 signal viewer_pin_requested(node_id: String)
@@ -1962,12 +1974,23 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 
 	# Promote to Custom Asset — enabled when exactly one SubNetworkNode is selected
 	var is_single_subnet := false
+	var is_single_custom_asset := false
 	if selected_ids.size() == 1 and network != null:
 		var subnet_node: GNNode = network.get_node_by_id(selected_ids[0])
 		if subnet_node is SubNetworkNode:
 			is_single_subnet = true
+		if subnet_node is GNCustomOperator:
+			is_single_custom_asset = true
 	_context_menu.add_item("Promote to Custom Asset…", _CtxID.PROMOTE_TO_ASSET)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.PROMOTE_TO_ASSET), not is_single_subnet)
+
+	# Custom asset actions — enabled only when exactly one GNCustomOperator is selected
+	_context_menu.add_item("Edit Asset…", _CtxID.EDIT_ASSET)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.EDIT_ASSET), not is_single_custom_asset)
+	_context_menu.add_item("Make Unique", _CtxID.MAKE_UNIQUE)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.MAKE_UNIQUE), not is_single_custom_asset)
+	_context_menu.add_item("Re-promote Parameters…", _CtxID.REPROMOTE_ASSET)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.REPROMOTE_ASSET), not is_single_custom_asset)
 
 	# Add Spare Parameter — enabled when exactly one node is selected
 	_context_menu.add_item("Add Spare Parameter…", _CtxID.ADD_SPARE_PARAM)
@@ -2152,6 +2175,18 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			_add_annotation_at_mouse("note")
 		_CtxID.PROMOTE_TO_ASSET:
 			_show_promote_to_asset_dialog()
+		_CtxID.EDIT_ASSET:
+			var sel := _get_selected_node_ids()
+			if sel.size() == 1:
+				edit_asset_requested.emit(sel[0])
+		_CtxID.MAKE_UNIQUE:
+			var sel2 := _get_selected_node_ids()
+			if sel2.size() == 1:
+				make_unique_requested.emit(sel2[0])
+		_CtxID.REPROMOTE_ASSET:
+			var sel3 := _get_selected_node_ids()
+			if sel3.size() == 1:
+				repromote_asset_requested.emit(sel3[0])
 		_CtxID.ADD_SPARE_PARAM:
 			_show_add_spare_param_dialog()
 		_:
@@ -3260,6 +3295,19 @@ func _show_promote_to_asset_dialog() -> void:
 	)
 	add_child(_promote_asset_dialog)
 	_promote_asset_dialog.setup(node as SubNetworkNode)
+	_promote_asset_dialog.popup_centered()
+
+
+## Shows the promotion dialog for an explicit SubNetworkNode (used by re-promote).
+func _show_promote_to_asset_dialog_for(subnet: SubNetworkNode) -> void:
+	if _promote_asset_dialog != null:
+		_promote_asset_dialog.queue_free()
+	_promote_asset_dialog = GNAssetPromotionDialog.new()
+	_promote_asset_dialog.asset_created.connect(func(path: String, op_name: String) -> void:
+		GNLogger.info("GraphEditor", "Custom asset '%s' re-promoted at %s" % [op_name, path])
+	)
+	add_child(_promote_asset_dialog)
+	_promote_asset_dialog.setup(subnet)
 	_promote_asset_dialog.popup_centered()
 
 

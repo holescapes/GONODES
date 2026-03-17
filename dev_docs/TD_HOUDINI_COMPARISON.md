@@ -543,9 +543,9 @@ A ramp parameter would let them draw a gradient curve directly in the inspector 
 
 #### C. ~~Reusable Asset Package Format (.gnasset)~~ — IMPLEMENTED
 
-**Status**: ✅ Fully implemented. `GNCustomOperator` extends SubNetworkNode and loads self-contained `.gnasset` JSON files. Promotion wizard (`GNAssetPromotionDialog`): right-click SubNetwork → "Promote to Custom Asset…" → set identity (name/family/author/version/tags) + choose which inner params to promote → writes `.gnasset` file. `GNExtensionRegistry.scan_custom_assets()` hot-registers assets from 3 directories (`res://addons/gonodes/assets/`, `res://custom_operators/`, `user://gonodes_assets/`) into the operator palette at startup.
+**Status**: ✅ Fully implemented. `GNCustomOperator` extends SubNetworkNode and loads self-contained `.gnasset` JSON files. Promotion wizard (`GNAssetPromotionDialog`): right-click SubNetwork → "Promote to Custom Asset…" → set identity (name/family/author/version/tags) + choose which inner params to promote → writes `.gnasset` file. `GNExtensionRegistry.scan_custom_assets()` hot-registers assets from 3 directories (`res://addons/gonodes/assets/`, `res://custom_operators/`, `user://gonodes_assets/`) into the operator palette at startup. **Phase 3 (Edit-in-Place)**: Right-click custom asset → "Edit Asset…" dives into inner network with Save/Discard banner; "Make Unique" detaches into plain SubNetworkNode; "Re-promote Parameters…" reopens promotion dialog. Instance reload on save syncs sibling instances in the same network.
 
-**Remaining (Phases 3-4)**: Unpack-to-SubNetwork, inline asset editing, dedicated asset browser panel, nested asset dependency resolution, community sharing integration.
+**Remaining (Phase 4)**: Global cross-network instance sync (project-wide asset→instance registry), dedicated asset browser panel, nested asset dependency resolution, community sharing integration.
 
 #### D. ~~Multi-Threaded Cook Engine~~ — IMPLEMENTED
 
@@ -824,6 +824,7 @@ GONODES has **two fluid simulation systems**:
 | 21 | **GPU Marching Cubes** | MarchingCubesVOL is CPU-only; compute shader would be 10-100× faster | High | ⬜ Godot 4.x RD atomics may help |
 | 22 | **Boids / Flocking POP** | Emergent behavior particles — classic generative art | Medium | ⬜ Compute shader with spatial hash neighbor search |
 | 23 | **FLIP Fluid (Houdini-style)** | Hybrid particle-grid for splashy water — unique among real-time tools | Very High | ⬜ |
+| 24 | **Global .gnasset Instance Sync** | When an asset is saved, reload ALL instances across open networks/patches (project-wide asset→instance registry). Currently same-network only. | Medium | ⬜ |
 
 ### 13.7 Roadmap Summary
 
@@ -842,4 +843,4 @@ GONODES has **two fluid simulation systems**:
 4. **ML bridge (#10)** — face/hand tracking would be transformative for installations
 5. **Takes / parameter layers (§11.3.K)** — live performance preset switching
 
-**Overall completion:** 12 of 23 suggestions implemented (52%), including all high-priority architectural items (§11.1) and 6 of 7 Tier 1 workflow items.
+**Overall completion:** 12 of 24 suggestions implemented (50%), including all high-priority architectural items (§11.1) and 6 of 7 Tier 1 workflow items.

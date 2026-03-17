@@ -105,6 +105,9 @@ var _nav_stack: Array[_NavEntry] = []
 ## Breadcrumb bar (HBoxContainer with clickable labels).
 var _breadcrumb_bar: HBoxContainer = null
 
+## Node ID of the GNCustomOperator currently being edited in-place (“” if none).
+var _editing_asset_node_id: String = ""
+
 
 func _ready() -> void:
 	# Wire log toggle early so extension scan results are visible
@@ -139,6 +142,9 @@ func _ready() -> void:
 	graph_editor.help_requested.connect(_on_help_requested)
 	graph_editor.dive_into_requested.connect(_on_dive_into_requested)
 	graph_editor.viewer_pin_requested.connect(_on_viewer_pin_requested)
+	graph_editor.edit_asset_requested.connect(_on_edit_asset_requested)
+	graph_editor.make_unique_requested.connect(_on_make_unique_requested)
+	graph_editor.repromote_asset_requested.connect(_on_repromote_asset_requested)
 
 	# Replace the scene's TextureRect Viewer with a GNViewerPanel
 	_setup_viewer_panel()
@@ -1870,3 +1876,154 @@ func _update_breadcrumb() -> void:
 			var depth := i
 			btn.pressed.connect(_navigate_to_depth.bind(depth))
 		_breadcrumb_bar.add_child(btn)
+
+	# Asset edit-mode banner
+	if not _editing_asset_node_id.is_empty():
+		var asset_node: GNNode = network.get_node_by_id(_editing_asset_node_id)
+		var asset_label := _editing_asset_node_id
+		if asset_node is GNCustomOperator:
+			var co := asset_node as GNCustomOperator
+			asset_label = co.asset_path.get_file() if not co.asset_path.is_empty() else _editing_asset_node_id
+
+		var spacer := Control.new()
+		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_breadcrumb_bar.add_child(spacer)
+
+		var edit_label := Label.new()
+		edit_label.text = "Editing: %s" % asset_label
+		edit_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.2))
+		edit_label.add_theme_font_size_override("font_size", 13)
+		_breadcrumb_bar.add_child(edit_label)
+
+		var save_btn := Button.new()
+		save_btn.text = "Save"
+		save_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+		save_btn.pressed.connect(_on_asset_edit_save)
+		_breadcrumb_bar.add_child(save_btn)
+
+		var discard_btn := Button.new()
+		discard_btn.text = "Discard"
+		discard_btn.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
+		discard_btn.pressed.connect(_on_asset_edit_discard)
+		_breadcrumb_bar.add_child(discard_btn)
+
+		var repromote_btn := Button.new()
+		repromote_btn.text = "Re-promote\u2026"
+		repromote_btn.pressed.connect(func() -> void: _on_repromote_asset_requested(_editing_asset_node_id))
+		_breadcrumb_bar.add_child(repromote_btn)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Asset Edit-in-Place
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Called when the user right-clicks a GNCustomOperator → "Edit Asset…".
+func _on_edit_asset_requested(node_id: String) -> void:
+	var node: GNNode = _current_network().get_node_by_id(node_id)
+	if not node is GNCustomOperator:
+		return
+	var co := node as GNCustomOperator
+	co.begin_asset_edit()
+	_editing_asset_node_id = node_id
+
+	# Dive into the inner network (reuse existing mechanism)
+	_on_dive_into_requested(node_id)
+
+
+## Saves the edited asset back to disk and reloads sibling instances.
+func _on_asset_edit_save() -> void:
+	if _editing_asset_node_id.is_empty():
+		return
+	var co := network.get_node_by_id(_editing_asset_node_id) as GNCustomOperator
+	if co == null:
+		return
+
+	if not co.save_asset_from_inner():
+		GNLogger.error("Editor", "Failed to save asset: %s" % co.asset_path)
+		return
+
+	# Reload all OTHER instances of the same asset in this network
+	var asset_path: String = co.asset_path
+	for nid in network.nodes:
+		if nid == _editing_asset_node_id:
+			continue
+		var other: GNNode = network.nodes[nid]
+		if other is GNCustomOperator and (other as GNCustomOperator).asset_path == asset_path:
+			(other as GNCustomOperator).reload_from_asset()
+
+	# Navigate back to root/parent level
+	_editing_asset_node_id = ""
+	_navigate_to_depth(maxi(0, _nav_stack.size() - 2))
+
+	GNLogger.info("Editor", "Asset saved and instances reloaded: %s" % asset_path)
+
+
+## Discards in-progress edits and navigates back.
+func _on_asset_edit_discard() -> void:
+	if _editing_asset_node_id.is_empty():
+		return
+	var co := network.get_node_by_id(_editing_asset_node_id) as GNCustomOperator
+	if co != null:
+		co.discard_asset_edits()
+
+	_editing_asset_node_id = ""
+	_navigate_to_depth(maxi(0, _nav_stack.size() - 2))
+
+	GNLogger.info("Editor", "Asset edits discarded")
+
+
+## Converts a GNCustomOperator into a plain SubNetworkNode (detaches from asset).
+func _on_make_unique_requested(node_id: String) -> void:
+	var node: GNNode = _current_network().get_node_by_id(node_id)
+	if not node is GNCustomOperator:
+		return
+	var co := node as GNCustomOperator
+
+	# Snapshot the inner network
+	var inner_dict: Dictionary = co.inner_network.to_dict()
+	var old_pos: Vector2 = co.graph_position
+
+	# Collect all connections to/from this node
+	var incoming: Array = []
+	var outgoing: Array = []
+	for conn in _current_network().connections:
+		if conn.to_node == node_id:
+			incoming.append({"from": conn.from_node, "from_port": conn.from_port, "to_port": conn.to_port})
+		if conn.from_node == node_id:
+			outgoing.append({"to": conn.to_node, "to_port": conn.to_port, "from_port": conn.from_port})
+
+	# Remove old custom operator node + its connections
+	_current_network().remove_node(node_id)
+
+	# Create plain SubNetworkNode
+	var subnet := SubNetworkNode.new()
+	subnet.initialize(node_id)
+	subnet.graph_position = old_pos
+	subnet._ensure_inner_network()
+	subnet.inner_network.from_dict(inner_dict)
+	subnet.sync_ports_from_tunnels()
+	_current_network().add_node(subnet)
+
+	# Restore connections
+	for c in incoming:
+		_current_network().connect_nodes(c["from"], c["from_port"], node_id, c["to_port"])
+	for c in outgoing:
+		_current_network().connect_nodes(node_id, c["from_port"], c["to"], c["to_port"])
+
+	# Refresh UI
+	graph_editor.bind_network(_current_network())
+	GNLogger.info("Editor", "Made '%s' unique — detached from asset" % node_id)
+
+
+## Re-opens the promotion dialog on the custom asset's inner network.
+func _on_repromote_asset_requested(node_id: String) -> void:
+	var node: GNNode = network.get_node_by_id(node_id)
+	if not node is GNCustomOperator:
+		# If we're currently dived in, the node is in the root network
+		if _nav_stack.size() > 0:
+			node = (_nav_stack[0] as _NavEntry).network.get_node_by_id(node_id)
+	if not node is SubNetworkNode:
+		return
+
+	# Reuse the graph editor's promotion dialog
+	graph_editor._show_promote_to_asset_dialog_for(node as SubNetworkNode)
