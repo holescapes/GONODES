@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cd1ny2l88t0wy"
+path="res://.godot/imported/pyro_combustion.glsl-7d9b75180c3ed58e9c44365daae69637.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/vol/pyro_combustion.glsl"
+dest_files=["res://.godot/imported/pyro_combustion.glsl-7d9b75180c3ed58e9c44365daae69637.res"]
+
+[params]
+

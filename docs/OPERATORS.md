@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **374 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
+> **377 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
 
 ---
 
@@ -61,8 +61,13 @@ Procedural noise texture generator. GPU-rendered via shader.
 | time_offset | Float | 0.0 | — | Z-axis offset for animation |
 | seed | Int | 0 | 0–99999 | Random seed |
 | monochrome | Bool | true | — | Grayscale or RGB noise |
+| octaves | Int | 1 | 1–8 | FBM octave count (1 = single layer) |
+| lacunarity | Float | 2.0 | 1.0–4.0 | Frequency multiplier per octave |
+| gain | Float | 0.5 | 0.0–1.0 | Amplitude multiplier per octave |
+| periodic | Bool | false | — | Enable seamless tiling via periodic Perlin |
+| tile_size | Float | 4.0 | 1.0–64.0 | Repeat period in noise-space (periodic mode) |
 
-**How it works:** Renders a fullscreen quad with a noise shader. The shader implements 4 noise algorithms selectable via uniform. Time-dependent — animates automatically when `time_offset` is driven by expressions.
+**How it works:** Renders a fullscreen quad with a noise shader. The shader implements 4 noise algorithms selectable via uniform. When `octaves` > 1, fractal Brownian motion (FBM) layers multiple noise samples with increasing frequency and decreasing amplitude. When `periodic` is enabled, a tileable Perlin implementation replaces the base noise so the output tiles seamlessly — useful for seamless textures, looping animations, and tiled backgrounds. Time-dependent — animates automatically when `time_offset` is driven by expressions.
 
 ---
 
@@ -3796,6 +3801,34 @@ Stitch two polygon boundaries by connecting nearest vertex pairs. Creates triang
 
 ---
 
+#### HeightfieldSOP
+
+Procedural terrain heightfield generator — creates a subdivided grid, displaces vertices vertically using FBM noise, and optionally applies thermal erosion for natural-looking landscapes.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| size_x | Float | 10.0 | 0.1–1000.0 | Terrain width |
+| size_z | Float | 10.0 | 0.1–1000.0 | Terrain depth |
+| subdivisions | Int | 64 | 4–512 | Grid subdivisions (vertex count = (n+1)²) |
+| height | Float | 2.0 | 0.0–100.0 | Maximum displacement height |
+| octaves | Int | 6 | 1–12 | FBM fractal octaves |
+| frequency | Float | 0.8 | 0.01–10.0 | Base noise frequency |
+| lacunarity | Float | 2.0 | 1.0–4.0 | Frequency multiplier per octave |
+| persistence | Float | 0.5 | 0.0–1.0 | Amplitude decay per octave |
+| seed | Int | 0 | 0–99999 | Noise seed |
+| offset_x | Float | 0.0 | — | Noise offset X |
+| offset_z | Float | 0.0 | — | Noise offset Z |
+| noise_type | Enum | Simplex | Simplex, Perlin, Cellular, Value | Noise algorithm |
+| erosion_iters | Int | 0 | 0–100 | Thermal erosion iterations |
+| erosion_strength | Float | 0.1 | 0.0–1.0 | Material transfer per iteration |
+| talus_angle | Float | 0.6 | 0.0–2.0 | Slope threshold for erosion |
+
+**Output:** SOP (terrain mesh with normals, tangents, and UVs).
+
+**How it works:** Generates a (subdivisions+1)² vertex grid, samples `FastNoiseLite` with FBM fractal at each position, and displaces Y by noise × height. Thermal erosion simulates material sliding downhill: for each iteration, each vertex checks its 4-connected neighbors — if the slope exceeds `talus_angle`, material transfers from higher to lower vertex, producing realistic ridges and valleys. Final mesh includes auto-generated normals and tangents for correct lighting.
+
+---
+
 ## COMP — Component Operators
 
 COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output — instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
@@ -4251,6 +4284,34 @@ Line/wireframe rendering material with stipple (dashed line) controls.
 
 ---
 
+#### FluidSurfaceMAT
+
+Physically-inspired water/fluid surface material with Fresnel reflections, refraction, animated caustics, and procedural wave normals.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| deep_color | Color | (0.02, 0.08, 0.15, 1) | — | Deep water color |
+| shallow_color | Color | (0.1, 0.4, 0.5, 1) | — | Shallow/edge color |
+| opacity | Float | 0.85 | 0.0–1.0 | Base opacity |
+| fresnel_power | Float | 3.0 | 0.5–10.0 | Fresnel exponent |
+| fresnel_bias | Float | 0.04 | 0.0–1.0 | Minimum reflectance |
+| refraction_strength | Float | 0.05 | 0.0–0.5 | Refraction distortion |
+| metallic | Float | 0.0 | 0.0–1.0 | Metallic factor |
+| roughness | Float | 0.05 | 0.0–1.0 | Surface roughness |
+| specular | Float | 0.8 | 0.0–1.0 | Specular intensity |
+| caustic_scale | Float | 8.0 | 1.0–50.0 | Caustic pattern scale |
+| caustic_speed | Float | 1.0 | 0.0–5.0 | Caustic animation speed |
+| caustic_intensity | Float | 0.3 | 0.0–2.0 | Caustic brightness |
+| wave_scale | Float | 10.0 | 1.0–50.0 | Normal wave frequency |
+| wave_height | Float | 0.02 | 0.0–0.2 | Normal perturbation strength |
+| wave_speed | Float | 1.0 | 0.0–5.0 | Wave animation speed |
+
+**Input 0:** `normal_map` (TOP, optional — external normal map blended with procedural waves).
+
+**How it works:** Spatial shader with Fresnel-based deep/shallow color blending. Dual-layer animated Voronoi caustics add underwater light patterns. Procedural sine-wave normals create surface ripples. Refraction via BACKLIGHT. Optional TOP input provides an external normal map blended with the procedural waves. Suitable for ocean, pool, lava (with adjusted colors), and any fluid surface.
+
+---
+
 #### NullMAT
 
 Pass-through. Forwards input material unchanged. Useful for wire organization, expression references, and inspecting multi-output ports.
@@ -4609,16 +4670,16 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 *(Note: 15 additional TOPs via extensions — see Extension Operators below)* |
 | **CHOP** | 74 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn |
 | **DAT** | 37 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX, RenderPick, PanelExecute |
-| **SOP** | 71 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch |
+| **SOP** | 72 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch |
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
-| **MAT** | 9 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, Null |
+| **MAT** | 10 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null |
 | **IMG** | 13 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null |
 | **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
 | **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
 | **POP** | 10 | *(GPU particle operators — SSBO-based compute pipeline)* |
-| **VOL** | 11 | Noise, Fluid, Advect, Analyze, Merge, Math, Null, Switch, Raymarch, MarchingCubes, SOPtoVOL — *FluidVOL now includes vorticity confinement + obstacle input* |
+| **VOL** | 12 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Switch, Raymarch, MarchingCubes, SOPtoVOL — *FluidVOL now includes vorticity confinement + obstacle input* |
 | **Generic** | 1 | Dot |
-| **Total** | **356** | |
+| **Total** | **359** | |
 
 ### Extension Operators (not included in count above)
 

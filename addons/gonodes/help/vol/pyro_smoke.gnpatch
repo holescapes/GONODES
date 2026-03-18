@@ -1,0 +1,64 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "fuel_noise": {
+            "type": "NoiseVOL",
+            "position": [100, 100],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "frequency": {"value": 2.0},
+                "amplitude": {"value": 0.8},
+                "octaves": {"value": 4}
+            }
+        },
+        "pyro1": {
+            "type": "PyroVOL",
+            "position": [450, 100],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "burn_rate": {"value": 0.8},
+                "heat_output": {"value": 1.0},
+                "smoke_output": {"value": 3.0},
+                "buoyancy": {"value": 1.2},
+                "cooling": {"value": 0.98},
+                "vorticity": {"value": 0.8},
+                "dissipation": {"value": 0.995}
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [800, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "fuel_noise", "from_port": 0, "to": "pyro1", "to_port": 0},
+        {"from": "pyro1", "from_port": 0, "to": "raymarch1", "to_port": 0},
+        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PyroVOL \u2014 Billowing Smoke\n\nSame pipeline as pyro_basic, tuned to emphasize thick smoke:\n\u2022 Lower burn_rate (0.8): fuel smolders slowly\n\u2022 Low heat_output (1.0): less fire, more smoke\n\u2022 High smoke_output (3.0): dense smoke production\n\u2022 Higher cooling (0.98): temperature lingers for softer dissipation\n\u2022 Higher vorticity (0.8): more turbulent rolling smoke\n\u2022 High dissipation (0.995): smoke hangs in the air longer",
+            "position": [-120.0, -160.0],
+            "size": [550.0, 150.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

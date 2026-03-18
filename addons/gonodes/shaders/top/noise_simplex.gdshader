@@ -8,6 +8,11 @@ uniform vec2 offset = vec2(0.0, 0.0);
 uniform float time_offset = 0.0;
 uniform int seed_val = 0;
 uniform bool monochrome = true;
+uniform int octaves = 1;         // FBM octave count (1 = single pass)
+uniform float lacunarity = 2.0;  // frequency multiplier per octave
+uniform float gain = 0.5;        // amplitude multiplier per octave
+uniform bool periodic = false;   // seamless tiling mode
+uniform float tile_size = 4.0;   // tile period (in noise-space units)
 
 // --- Hash / Noise Helpers ---
 
@@ -99,8 +104,8 @@ float wnoise(vec2 v) {
 	return hash21(v) * 2.0 - 1.0;
 }
 
-// Dispatch noise by type — returns value in [-1, 1]
-float get_noise(vec2 v) {
+// Single-sample noise dispatch (no FBM) — returns value in [-1, 1]
+float get_noise_raw(vec2 v) {
 	if (noise_type == 1) {
 		return pnoise(v);
 	} else if (noise_type == 2) {
@@ -109,6 +114,56 @@ float get_noise(vec2 v) {
 		return wnoise(v);
 	}
 	return snoise(v); // 0 = Simplex (default)
+}
+
+// --- Periodic (tileable) Perlin noise ---
+// Uses mod-wrapped integer lattice so the pattern repeats every 'period' cells.
+
+float periodic_hash(vec2 p, float period) {
+	p = mod(p, period);
+	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+	p3 += dot(p3, p3.yzx + 33.33);
+	return fract((p3.x + p3.y) * p3.z);
+}
+
+float periodic_pnoise(vec2 v, float period) {
+	vec2 i = floor(v);
+	vec2 f = fract(v);
+	vec2 u = f * f * (3.0 - 2.0 * f);
+	float a = periodic_hash(i + vec2(0.0, 0.0), period);
+	float b = periodic_hash(i + vec2(1.0, 0.0), period);
+	float c = periodic_hash(i + vec2(0.0, 1.0), period);
+	float d = periodic_hash(i + vec2(1.0, 1.0), period);
+	return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 2.0 - 1.0;
+}
+
+// --- FBM (fractal Brownian motion) wrapper ---
+
+float fbm_noise(vec2 v) {
+	float value = 0.0;
+	float amplitude = 1.0;
+	float frequency = 1.0;
+	float total_amp = 0.0;
+	for (int i = 0; i < octaves; i++) {
+		vec2 p = v * frequency;
+		if (periodic) {
+			value += amplitude * periodic_pnoise(p, tile_size * frequency);
+		} else {
+			value += amplitude * get_noise_raw(p);
+		}
+		total_amp += amplitude;
+		frequency *= lacunarity;
+		amplitude *= gain;
+	}
+	return (total_amp > 0.0) ? value / total_amp : 0.0;
+}
+
+// Dispatch noise by type — returns value in [-1, 1]
+float get_noise(vec2 v) {
+	if (octaves > 1 || periodic) {
+		return fbm_noise(v);
+	}
+	return get_noise_raw(v);
 }
 
 void fragment() {

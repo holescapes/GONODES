@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://gjxhhcjsi55"
+path="res://.godot/imported/pyro_buoyancy.glsl-169d114febd3cd21962c945645566c13.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/vol/pyro_buoyancy.glsl"
+dest_files=["res://.godot/imported/pyro_buoyancy.glsl-169d114febd3cd21962c945645566c13.res"]
+
+[params]
+

@@ -1,0 +1,69 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "terrain1": {
+            "type": "HeightfieldSOP",
+            "position": [100, 100],
+            "parameters": {
+                "size_x": {"value": 12.0},
+                "size_z": {"value": 12.0},
+                "subdivisions": {"value": 128},
+                "height": {"value": 3.0},
+                "octaves": {"value": 8},
+                "frequency": {"value": 0.8},
+                "persistence": {"value": 0.45},
+                "erosion_iters": {"value": 30},
+                "erosion_strength": {"value": 0.04},
+                "talus_angle": {"value": 0.5}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [400, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [400, 350],
+            "parameters": {
+                "tx": {"value": 4.0},
+                "ty": {"value": 5.0},
+                "tz": {"value": 10.0},
+                "rx": {"value": -25.0},
+                "ry": {"value": 20.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [750, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "terrain1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HeightfieldSOP \u2014 Eroded Terrain\n\n8-octave noise with 30 thermal erosion passes.\nErosion smooths steep slopes for natural look.\nLower talus_angle = more erosion on gentler slopes.\nHigher erosion_strength = faster material transfer.",
+            "position": [-120.0, -130.0],
+            "size": [460.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

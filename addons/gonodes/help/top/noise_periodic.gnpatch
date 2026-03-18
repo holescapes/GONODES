@@ -1,0 +1,42 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "noise_type": {"value": 0},
+                "scale": {"value": 4.0},
+                "periodic": {"value": true},
+                "tile_size": {"value": 4.0},
+                "octaves": {"value": 4},
+                "lacunarity": {"value": 2.0},
+                "gain": {"value": 0.5},
+                "monochrome": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NoiseTOP \u2014 Periodic/Tiling Noise\n\nEnable 'periodic' to generate seamlessly tiling noise.\nThe output tiles perfectly when repeated in a grid.\n\ntile_size controls the repeat period.\nCombine with octaves for FBM detail.\nPerfect for looping VJ backgrounds.",
+            "position": [-120.0, -130.0],
+            "size": [450.0, 140.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

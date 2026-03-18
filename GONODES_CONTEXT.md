@@ -5395,7 +5395,21 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 
 ### Updated Totals
 
-Total: **371 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 71 SOP, 10 POP, 11 VOL, 20 COMP, 9 MAT, 9 OUT, 31 UI). 11 families.
+Total: **374 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 72 SOP, 10 POP, 12 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI). 11 families.
+
+### New Operators Added (Roadmap Batch)
+
+| Operator | Family | Description |
+|----------|--------|-------------|
+| FluidSurfaceMAT | MAT | Fluid surface material — Fresnel, refraction, dual-layer Voronoi caustics, procedural wave normals |
+| PyroVOL | VOL | Pyro fire/smoke simulation — fuel/combustion/buoyancy/cooling, 3 compute shaders, 11-step GPU pipeline |
+| HeightfieldSOP | SOP | Procedural terrain heightfield — FastNoiseLite FBM, 4 noise types, thermal erosion |
+
+### Updated Existing Operators
+
+| Operator | Changes |
+|----------|---------|
+| NoiseTOP | Added FBM octaves (1–8), lacunarity, gain, periodic tiling mode (seamless Perlin), tile_size |
 
 ### TD Gap Resolution
 

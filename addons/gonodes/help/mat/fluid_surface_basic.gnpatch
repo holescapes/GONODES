@@ -1,0 +1,71 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "fluid_mat": {
+            "type": "FluidSurfaceMAT",
+            "position": [100, 350],
+            "parameters": {
+                "deep_color": {"value": {"_type": "Color", "r": 0.02, "g": 0.08, "b": 0.25, "a": 1.0}},
+                "shallow_color": {"value": {"_type": "Color", "r": 0.1, "g": 0.5, "b": 0.7, "a": 1.0}},
+                "opacity": {"value": 0.85},
+                "fresnel_power": {"value": 3.0},
+                "roughness": {"value": 0.05},
+                "caustics_enabled": {"value": true},
+                "caustics_intensity": {"value": 0.4},
+                "wave_strength": {"value": 0.08}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [400, 200],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [400, 450],
+            "parameters": {
+                "ty": {"value": 1.5},
+                "tz": {"value": 3.0},
+                "rx": {"value": -20.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [750, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1100, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "sphere1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "fluid_mat", "from_port": 0, "to": "geo1", "to_port": 1},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "FluidSurfaceMAT \u2014 Basic\n\nFluid surface material with Fresnel reflections,\nanimated caustic highlights, and wave normal ripples.\n\nDesigned for FluidVOL \u2192 MarchingCubes pipeline,\nbut works on any mesh. Adjust deep/shallow colors,\ncaustics intensity, and roughness for different looks.",
+            "position": [-120.0, -130.0],
+            "size": [480.0, 130.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

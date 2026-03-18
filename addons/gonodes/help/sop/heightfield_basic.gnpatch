@@ -1,0 +1,66 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "terrain1": {
+            "type": "HeightfieldSOP",
+            "position": [100, 100],
+            "parameters": {
+                "size_x": {"value": 10.0},
+                "size_z": {"value": 10.0},
+                "subdivisions": {"value": 128},
+                "height": {"value": 2.0},
+                "octaves": {"value": 6},
+                "frequency": {"value": 1.0},
+                "persistence": {"value": 0.5}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [400, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [400, 350],
+            "parameters": {
+                "tx": {"value": 3.0},
+                "ty": {"value": 4.0},
+                "tz": {"value": 8.0},
+                "rx": {"value": -25.0},
+                "ry": {"value": 15.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [750, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "terrain1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HeightfieldSOP \u2014 Basic Terrain\n\n128\u00d7128 grid displaced by 6-octave FBM noise.\nAdjust frequency, persistence, and height for different looks.\nChange seed for variation. Add erosion for natural detail.",
+            "position": [-120.0, -130.0],
+            "size": [460.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

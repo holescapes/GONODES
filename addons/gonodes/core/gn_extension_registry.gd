@@ -898,6 +898,8 @@ func _register_core_operators() -> void:
 		"Loft polygon surface between cross-section rings.")
 	_reg("MountainSOP",     "SOP", MountainSOP,
 		"Noise-based vertex displacement along normals.")
+	_reg("HeightfieldSOP",  "SOP", HeightfieldSOP,
+		"Procedural terrain heightfield with noise layers and erosion.")
 
 	# ── SOPs: Filter / Selection ────────────────────────────────────────
 	_reg("SelectSOP",       "SOP", SelectSOP,
@@ -1164,6 +1166,8 @@ func _register_core_operators() -> void:
 		"Normal map visualization material with tangent-space normal mapping.")
 	_reg("LineMAT",         "MAT", LineMAT,
 		"Line/wireframe material with color, width, and stipple controls.")
+	_reg("FluidSurfaceMAT", "MAT", FluidSurfaceMAT,
+		"Fluid surface material — Fresnel, refraction, caustics, wave normals.")
 
 	# ── TOPs: Panel ─────────────────────────────────────────────────────
 	_reg("PanelTOP",        "TOP", PanelTOP,
@@ -1334,6 +1338,8 @@ func _register_core_operators() -> void:
 		"Map CHOP channel data into volume slices.")
 	_reg("AnalyzeVOL",     "VOL", AnalyzeVOL,
 		"Compute min, max, mean, and sum statistics of a volume.")
+	_reg("PyroVOL",        "VOL", PyroVOL,
+		"Pyro fire/smoke simulation — combustion, buoyancy, turbulence.")
 
 	GNLogger.info("ExtRegistry",
 		"Registered %d core operators" % _operators.size())

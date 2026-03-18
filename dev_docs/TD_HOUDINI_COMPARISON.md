@@ -13,6 +13,10 @@
 > - ✅ FluidVOL vorticity confinement — curl amplification compute pass (§13 #7)
 > - ✅ FluidVOL obstacle collision — SDF/mesh mask injection into velocity field (§13 #5)
 > - ✅ Timeline / Cue system — TimelineCHOP, CueDAT, CueCHOP, Editor Timeline UI (§13 #6)
+> - ✅ Periodic/Tiling Noise — FBM octaves + periodic Perlin in NoiseTOP shader (§13 #20)
+> - ✅ Fluid Surface MAT — Fresnel, refraction, Voronoi caustics, wave normals (§13 #4)
+> - ✅ Pyro Emitter VOL — fuel/combustion/buoyancy/cooling GPU pipeline (§13 #8)
+> - ✅ HeightfieldSOP — FBM terrain + thermal erosion (§13 #13)
 > - Remaining items tracked in GONODES_CONTEXT.md roadmap and §13 below
 
 ---
@@ -794,7 +798,7 @@ GONODES has **two fluid simulation systems**:
 | 1 | **Audio Input + Analysis** | VJ workflow lifeblood — live mic/line-in drives reactive visuals | Medium | ✅ **AudioBandCHOP** done (AudioInCHOP, AudioSpectrumCHOP, BeatCHOP already existed) |
 | 2 | **NDI In/Out extension** | Industry standard video-over-IP for live production | Medium | ⬜ Needs C++ GDExtension wrapping libndi |
 | 3 | **OSC In CHOP/DAT** | Controllers (TouchOSC, Lemur), phones, other software | Low | ✅ OscInDAT + OscInCHOP already exist |
-| 4 | **Fluid Surface Rendering** | FluidVOL → MarchingCubes → visually compelling output | Medium | ⬜ Dedicated FluidSurfaceMAT with refraction/caustics |
+| 4 | **Fluid Surface Rendering** | FluidVOL → MarchingCubes → visually compelling output | Medium | ✅ **FluidSurfaceMAT** — Fresnel, refraction, dual-layer Voronoi caustics, procedural wave normals |
 | 5 | **FluidVOL Obstacle Collision** | Fluid flows around objects, wake turbulence | Low-Medium | ✅ **Implemented** — obstacle input port + compute shader + CPU fallback |
 | 6 | **Timeline / Cue System** | Live performance structure — cue points, transitions, scene switching | Medium | ✅ **Implemented** — TimelineCHOP, CueDAT, CueCHOP, Editor Timeline UI |
 | 7 | **Vorticity Confinement** | Curl amplification — transforms flat fluid into cinematic turbulence | Low | ✅ **Implemented** — GPU compute pass + CPU fallback, 0–5 strength |
@@ -803,12 +807,12 @@ GONODES has **two fluid simulation systems**:
 
 | # | Suggestion | Why | Effort | Status |
 |---|---|---|---|---|
-| 8 | **Pyro-Style Emitter VOL** | Temperature + fuel + combustion for fire/smoke | Medium | ⬜ VOL infrastructure exists, needs combustion model |
+| 8 | **Pyro-Style Emitter VOL** | Temperature + fuel + combustion for fire/smoke | Medium | ✅ **PyroVOL** — fuel/combustion/buoyancy/cooling, 3 compute shaders, 11-step GPU pipeline |
 | 9 | **Cloth/Softbody SOP** | Verlet-integration mesh deformer for visual art | Medium-High | ⬜ SoftBodyCOMP (Jolt) exists for physics, not procedural cloth |
 | 10 | **Machine Learning Bridge** | MediaPipe face/hand/pose, style transfer, depth estimation | High | ⬜ Transformative but heavy — could be `gn_ext_ml` wrapping ONNX |
 | 11 | **Reaction-Diffusion TOP** | Classic generative art pattern (Gray-Scott model) | Low | ✅ **Implemented** — 7 presets, seed input, 3 color modes |
 | 12 | **Multi-Pass Lighting in RaymarchVOL** | Phase functions, shadow rays, scattering approximation | Medium | ⬜ Transforms volume rendering from blob to atmospheric phenomenon |
-| 13 | **HeightfieldSOP** | Terrain generation from noise/erosion for generative landscapes | Medium | ⬜ |
+| 13 | **HeightfieldSOP** | Terrain generation from noise/erosion for generative landscapes | Medium | ✅ **Implemented** — FastNoiseLite FBM, 4 noise types, thermal erosion |
 | 14 | **Instancer improvements** | Per-instance color/scale from CHOP, animated geometry, LOD | Medium | ✅ **Implemented** — chop_map Color (r/g/b/a), Uniform Scale (s), SOP Cd attribute |
 | 15 | **Point Cloud rendering** | Dedicated splatting renderer with size attenuation, depth testing | Medium | ⬜ Better than RenderPOP's billboard approach for dense clouds |
 
@@ -820,7 +824,7 @@ GONODES has **two fluid simulation systems**:
 | 17 | **Blackmagic / AJA video I/O** | Professional SDI/HDMI capture/output for broadcast | High | ⬜ Niche but essential for high-end installations |
 | 18 | **Trail / Ribbon rendering** | Render particle trails as ribbons/tubes — staple VJ effect | Medium | ⬜ TrailSOP exists, needs efficient GPU ribbon renderer |
 | 19 | **Voronoi / Shatter SOP** | Procedural fracturing for motion graphics | Medium | ⬜ |
-| 20 | **Periodic/Tiling Noise** | Seamless tiling for looping content | Low | ⬜ NoiseTOP shader modification |
+| 20 | **Periodic/Tiling Noise** | Seamless tiling for looping content | Low | ✅ **Implemented** — FBM octaves + periodic Perlin in NoiseTOP shader |
 | 21 | **GPU Marching Cubes** | MarchingCubesVOL is CPU-only; compute shader would be 10-100× faster | High | ⬜ Godot 4.x RD atomics may help |
 | 22 | **Boids / Flocking POP** | Emergent behavior particles — classic generative art | Medium | ⬜ Compute shader with spatial hash neighbor search |
 | 23 | **FLIP Fluid (Houdini-style)** | Hybrid particle-grid for splashy water — unique among real-time tools | Very High | ⬜ |
@@ -830,17 +834,21 @@ GONODES has **two fluid simulation systems**:
 
 **Completed this session (6 of 7 Tier 1 items):**
 - ✅ #1 Audio Band CHOP (multi-band frequency analysis with envelope followers)
+- ✅ #4 Fluid Surface MAT (Fresnel, refraction, dual-layer Voronoi caustics, wave normals)
 - ✅ #5 FluidVOL obstacles (GPU + CPU, friction boundary support)
 - ✅ #6 Timeline/Cue system (3 operators + editor UI)
 - ✅ #7 Vorticity confinement (GPU compute + CPU, adjustable strength)
+- ✅ #8 Pyro emitter VOL (fuel/combustion/buoyancy/cooling, 3 compute shaders)
 - ✅ #11 Reaction-Diffusion TOP (Gray-Scott, 7 presets, seed input, 3 color modes)
+- ✅ #13 HeightfieldSOP (FastNoiseLite FBM, 4 noise types, thermal erosion)
 - ✅ #16 2D Fluid TOP (dual-viewport NS with emitter, dye input, velocity visualization)
+- ✅ #20 Periodic/Tiling Noise (FBM octaves + periodic Perlin in NoiseTOP shader)
 
 **Highest remaining priorities:**
 1. **NDI extension (#2)** — unlocks professional live production pipelines
-2. **Fluid Surface MAT (#4)** — makes existing 3D fluid pipeline look production-quality
-3. **Pyro emitter VOL (#8)** — fire/smoke on existing VOL infrastructure
-4. **ML bridge (#10)** — face/hand tracking would be transformative for installations
-5. ~~Takes / parameter layers (§11.3.K)~~ — ✅ **Implemented** — GNTakeManager + editor panel
+2. **ML bridge (#10)** — face/hand tracking would be transformative for installations
+3. **Multi-pass lighting in RaymarchVOL (#12)** — phase functions, shadow rays
+4. **Point cloud rendering (#15)** — dedicated splatting with depth + size attenuation
+5. **GPU Marching Cubes (#21)** — compute shader for 10-100× speedup
 
-**Overall completion:** 12 of 24 suggestions implemented (50%), including all high-priority architectural items (§11.1) and 6 of 7 Tier 1 workflow items.
+**Overall completion:** 16 of 24 suggestions implemented (67%), including all high-priority architectural items (§11.1) and all 7 Tier 1 workflow items.
