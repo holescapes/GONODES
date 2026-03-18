@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://dm3j3p6gutrol"
+path="res://.godot/imported/trail_ribbon.glsl-ac36a8c58fb3491e732e9102f4f223dc.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/pop/trail_ribbon.glsl"
+dest_files=["res://.godot/imported/trail_ribbon.glsl-ac36a8c58fb3491e732e9102f4f223dc.res"]
+
+[params]
+

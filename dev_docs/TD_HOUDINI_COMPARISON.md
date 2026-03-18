@@ -17,6 +17,9 @@
 > - ✅ Fluid Surface MAT — Fresnel, refraction, Voronoi caustics, wave normals (§13 #4)
 > - ✅ Pyro Emitter VOL — fuel/combustion/buoyancy/cooling GPU pipeline (§13 #8)
 > - ✅ HeightfieldSOP — FBM terrain + thermal erosion (§13 #13)
+> - ✅ GPU Marching Cubes — compute shader with atomic append (§13 #21)
+> - ✅ Boids/Flocking POP — Reynolds rules compute shader (§13 #22)
+> - ✅ Trail/Ribbon SOP — particle trail ribbon renderer (§13 #18)
 > - Remaining items tracked in GONODES_CONTEXT.md roadmap and §13 below
 
 ---
@@ -822,11 +825,11 @@ GONODES has **two fluid simulation systems**:
 |---|---|---|---|---|
 | 16 | **2D Fluid TOP** | Screen-space Navier-Stokes for interactive installations | Low | ✅ **Implemented** — Fluid2DTOP with dual viewport feedback |
 | 17 | **Blackmagic / AJA video I/O** | Professional SDI/HDMI capture/output for broadcast | High | ⬜ Niche but essential for high-end installations |
-| 18 | **Trail / Ribbon rendering** | Render particle trails as ribbons/tubes — staple VJ effect | Medium | ⬜ TrailSOP exists, needs efficient GPU ribbon renderer |
+| 18 | **Trail / Ribbon rendering** | Render particle trails as ribbons/tubes — staple VJ effect | Medium | ✅ **TrailRibbonSOP** — ring buffer trail recording, ribbon mesh with taper, alpha fade, UVs |
 | 19 | **Voronoi / Shatter SOP** | Procedural fracturing for motion graphics | Medium | ⬜ |
 | 20 | **Periodic/Tiling Noise** | Seamless tiling for looping content | Low | ✅ **Implemented** — FBM octaves + periodic Perlin in NoiseTOP shader |
-| 21 | **GPU Marching Cubes** | MarchingCubesVOL is CPU-only; compute shader would be 10-100× faster | High | ⬜ Godot 4.x RD atomics may help |
-| 22 | **Boids / Flocking POP** | Emergent behavior particles — classic generative art | Medium | ⬜ Compute shader with spatial hash neighbor search |
+| 21 | **GPU Marching Cubes** | MarchingCubesVOL is CPU-only; compute shader would be 10-100× faster | High | ✅ **GPUMarchingCubesVOL** — compute shader with atomic append buffer, lookup table upload |
+| 22 | **Boids / Flocking POP** | Emergent behavior particles — classic generative art | Medium | ✅ **BoidsPOP** — Reynolds rules (separation/alignment/cohesion), brute-force O(n²) compute shader |
 | 23 | **FLIP Fluid (Houdini-style)** | Hybrid particle-grid for splashy water — unique among real-time tools | Very High | ⬜ |
 | 24 | **Global .gnasset Instance Sync** | When an asset is saved, reload ALL instances across open networks/patches (project-wide asset→instance registry). Currently same-network only. | Medium | ⬜ |
 
@@ -842,13 +845,15 @@ GONODES has **two fluid simulation systems**:
 - ✅ #11 Reaction-Diffusion TOP (Gray-Scott, 7 presets, seed input, 3 color modes)
 - ✅ #13 HeightfieldSOP (FastNoiseLite FBM, 4 noise types, thermal erosion)
 - ✅ #16 2D Fluid TOP (dual-viewport NS with emitter, dye input, velocity visualization)
+- ✅ #18 Trail/Ribbon rendering (TrailRibbonSOP — ring buffer, taper, alpha fade)
 - ✅ #20 Periodic/Tiling Noise (FBM octaves + periodic Perlin in NoiseTOP shader)
+- ✅ #21 GPU Marching Cubes (compute shader with atomic append, lookup table upload)
+- ✅ #22 Boids/Flocking POP (Reynolds rules compute shader, spherical boundary)
 
 **Highest remaining priorities:**
 1. **NDI extension (#2)** — unlocks professional live production pipelines
 2. **ML bridge (#10)** — face/hand tracking would be transformative for installations
 3. **Multi-pass lighting in RaymarchVOL (#12)** — phase functions, shadow rays
 4. **Point cloud rendering (#15)** — dedicated splatting with depth + size attenuation
-5. **GPU Marching Cubes (#21)** — compute shader for 10-100× speedup
 
-**Overall completion:** 16 of 24 suggestions implemented (67%), including all high-priority architectural items (§11.1) and all 7 Tier 1 workflow items.
+**Overall completion:** 19 of 24 suggestions implemented (79%), including all Tier 1 items and most Tier 2/3 items.

@@ -1,0 +1,61 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "source1": {
+            "type": "SourcePOP",
+            "position": [100, 100],
+            "parameters": {
+                "max_particles": {"value": 5000},
+                "rate": {"value": 2000.0},
+                "life_min": {"value": 30.0},
+                "life_max": {"value": 60.0},
+                "init_speed": {"value": 2.0},
+                "pscale": {"value": 0.05}
+            }
+        },
+        "boids1": {
+            "type": "BoidsPOP",
+            "position": [450, 100],
+            "parameters": {
+                "perception_radius": {"value": 2.0},
+                "avoid_radius": {"value": 0.5},
+                "separation": {"value": 1.5},
+                "alignment": {"value": 1.0},
+                "cohesion": {"value": 1.0},
+                "max_speed": {"value": 5.0},
+                "max_force": {"value": 3.0},
+                "bounds_radius": {"value": 10.0},
+                "bounds_force": {"value": 5.0}
+            }
+        },
+        "render1": {
+            "type": "RenderPOP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1150, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "source1", "from_port": 0, "to": "boids1", "to_port": 0},
+        {"from": "boids1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Boids Flocking Simulation\n\nSourcePOP emits particles → BoidsPOP applies Reynolds flocking rules:\n• Separation: steer away from close neighbors\n• Alignment: match average velocity of nearby flock\n• Cohesion: steer toward flock center\n\nSpherical boundary keeps the flock contained.\nAll three weights are adjustable. Try:\n• High separation + low cohesion = scattered\n• High cohesion + low separation = tight swarm\n• High alignment = schooling fish behavior",
+            "position": [-100.0, -170.0],
+            "size": [550.0, 170.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

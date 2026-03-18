@@ -1,0 +1,61 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseVOL",
+            "position": [100, 100],
+            "parameters": {
+                "res_x": {"value": 48},
+                "res_y": {"value": 48},
+                "res_z": {"value": 48},
+                "frequency": {"value": 3.0},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "gpumc1": {
+            "type": "GPUMarchingCubesVOL",
+            "position": [450, 100],
+            "parameters": {
+                "threshold": {"value": 0.4},
+                "max_triangles": {"value": 500000}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [1100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1450, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "gpumc1", "to_port": 0},
+        {"from": "gpumc1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "GPU Marching Cubes\n\nGPUMarchingCubesVOL extracts an iso-surface from a 3D volume\nusing a compute shader — 10-100× faster than the CPU version.\n\nNoiseVOL generates a 48³ density field.\nThe compute shader processes all cells in parallel with\natomic vertex append for thread-safe triangle output.\n\nTry adjusting the threshold to see different iso-surfaces,\nor increase NoiseVOL resolution for smoother results.",
+            "position": [-100.0, -170.0],
+            "size": [550.0, 160.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

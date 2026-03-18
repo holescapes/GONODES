@@ -5395,7 +5395,7 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 
 ### Updated Totals
 
-Total: **374 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 72 SOP, 10 POP, 12 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI). 11 families.
+Total: **377 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 73 SOP, 11 POP, 13 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI). 11 families.
 
 ### New Operators Added (Roadmap Batch)
 
@@ -5404,6 +5404,9 @@ Total: **374 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 72 SOP, 10 POP, 12 VO
 | FluidSurfaceMAT | MAT | Fluid surface material — Fresnel, refraction, dual-layer Voronoi caustics, procedural wave normals |
 | PyroVOL | VOL | Pyro fire/smoke simulation — fuel/combustion/buoyancy/cooling, 3 compute shaders, 11-step GPU pipeline |
 | HeightfieldSOP | SOP | Procedural terrain heightfield — FastNoiseLite FBM, 4 noise types, thermal erosion |
+| GPUMarchingCubesVOL | VOL | GPU-accelerated marching cubes via compute shader with atomic append buffer — 10–100× faster than CPU |
+| BoidsPOP | POP | Reynolds flocking simulation — separation/alignment/cohesion, brute-force O(n²) compute shader, spherical boundary |
+| TrailRibbonSOP | SOP | Ribbon mesh from particle trails — ring buffer recording, width taper, alpha fade, proper normals/UVs |
 
 ### Updated Existing Operators
 

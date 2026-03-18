@@ -876,6 +876,8 @@ func _register_core_operators() -> void:
 	# ── SOPs: Filters (new 2) ─────────────────────────────────────────
 	_reg("TrailSOP",        "SOP", TrailSOP,
 		"Record centroid over time as a line strip trail.")
+	_reg("TrailRibbonSOP",  "SOP", TrailRibbonSOP,
+		"Build ribbon mesh from particle trails — width taper, alpha fade, UVs.")
 	_reg("UVProjectSOP",    "SOP", UVProjectSOP,
 		"Assign UVs via planar, cylindrical, or spherical projection.")
 	_reg("DivideSOP",       "SOP", DivideSOP,
@@ -1312,6 +1314,8 @@ func _register_core_operators() -> void:
 		"Copy SOP geometry onto each particle position as instances.")
 	_reg("RenderPOP",      "POP", RenderPOP,
 		"Render particle point cloud into a COMP for 3D viewport.")
+	_reg("BoidsPOP",       "POP", BoidsPOP,
+		"Flocking boids simulation — separation, alignment, cohesion.")
 	_reg("ParticleStateTOP", "TOP", ParticleStateTOP,
 		"Visualize POP particle state as a 2D texture (position/velocity/age heatmap).")
 
@@ -1330,6 +1334,8 @@ func _register_core_operators() -> void:
 		"Navier-Stokes fluid simulation (advection, pressure, projection).")
 	_reg("MarchingCubesVOL", "VOL", MarchingCubesVOL,
 		"Extract iso-surface mesh from volume density field (CPU marching cubes).")
+	_reg("GPUMarchingCubesVOL", "VOL", GPUMarchingCubesVOL,
+		"GPU-accelerated iso-surface extraction via compute shader marching cubes.")
 	_reg("RaymarchVOL",    "VOL", RaymarchVOL,
 		"Render volume as density cloud via GPU raymarching into a TOP texture.")
 	_reg("SOPtoVOL",       "VOL", SOPtoVOL,

@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **377 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
+> **380 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
 
 ---
 
@@ -3326,6 +3326,25 @@ Records the centroid of input geometry over time as a line strip trail.
 
 ---
 
+#### TrailRibbonSOP
+
+Builds ribbon geometry from POP particle trails — records positions each frame into a ring buffer, then generates triangle mesh ribbons with normals, UVs, and alpha fade.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| trail_length | Int | 30 | 2–300 | Frames of trail history per particle |
+| width | Float | 0.1 | 0.001–10.0 | Ribbon half-width |
+| taper | Float | 0.8 | 0.0–1.0 | Width taper (0 = uniform, 1 = full taper to tip) |
+| max_particles | Int | 1000 | 1–100000 | Max particles to generate ribbons for |
+| fade_alpha | Bool | true | — | Fade alpha along trail (old = transparent) |
+| active | Bool | true | — | Record new positions each frame |
+
+**Input:** `pop_in` (POP). **Output:** SOP (triangle mesh). **Time-dependent.**
+
+**How it works:** Reads particle positions via GPU readback (or CPU arrays), stores each particle’s trail in a ring buffer, then builds ribbon quads perpendicular to the trail tangent. Width tapers from newest to oldest, alpha fades for a natural trail fade-out. Cross-product with up vector computes the side axis; normals face the camera-agnostic ribbon normal.
+
+---
+
 #### UVProjectSOP
 
 Assign UV coordinates via planar, cylindrical, or spherical projection.
@@ -4670,16 +4689,16 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 *(Note: 15 additional TOPs via extensions — see Extension Operators below)* |
 | **CHOP** | 74 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn |
 | **DAT** | 37 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX, RenderPick, PanelExecute |
-| **SOP** | 72 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch |
+| **SOP** | 73 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, TrailRibbon, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch |
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
 | **MAT** | 10 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null |
 | **IMG** | 13 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null |
 | **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
 | **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
-| **POP** | 10 | *(GPU particle operators — SSBO-based compute pipeline)* |
-| **VOL** | 12 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Switch, Raymarch, MarchingCubes, SOPtoVOL — *FluidVOL now includes vorticity confinement + obstacle input* |
+| **POP** | 11 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null — *SSBO-based compute pipeline* |
+| **VOL** | 13 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **359** | |
+| **Total** | **362** | |
 
 ### Extension Operators (not included in count above)
 
