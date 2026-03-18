@@ -317,6 +317,22 @@ Duplicated nodes automatically receive an `_copy` suffix (e.g., `lfo1` → `lfo1
 
 ---
 
+## Take Panel
+
+Toggle the **Takes** button in the toolbar to show the Take panel —
+a parameter layer system for live performance preset switching.
+
+- **Capture Base**: Snapshot all current parameter values as the reference state
+- **Capture Take**: Save current parameter differences as a named take
+- **Apply**: Instantly apply a take's overrides on top of Base
+- **Revert to Base**: Restore all parameters to the base state
+- **Blend slider**: Smoothly interpolate between Base and a take (float, int, Color, Vector lerp)
+- **Save / Load**: Persist takes to `.gntake` files (JSON)
+
+See `help/takes.md` for full documentation.
+
+---
+
 ## Help System
 
 - **? button** on each node's title bar → opens a formatted help window

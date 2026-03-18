@@ -73,6 +73,15 @@ var compat_panel: GNCompatReportPanel = null
 ## Compat report toggle button on toolbar.
 var compat_toggle: CheckButton = null
 
+## Take manager — named parameter layer presets.
+var take_manager: GNTakeManager = null
+
+## Take panel — UI for managing takes.
+var take_panel: GNTakePanel = null
+
+## Take toggle button on toolbar.
+var take_toggle: CheckButton = null
+
 ## Container for per-layer debug toggles (visible when debug is on).
 var _debug_layers_container: HBoxContainer = null
 
@@ -126,6 +135,7 @@ func _ready() -> void:
 	_setup_log_panel()
 	_setup_debug_panel()
 	_setup_compat_panel()
+	_setup_take_panel()
 
 	# Persist split-container sizes when the user drags them
 	hsplit.dragged.connect(func(offset: int): _save_setting("hsplit_offset", offset))
@@ -228,7 +238,7 @@ func _setup_log_panel() -> void:
 	_layout_log_panel()
 
 
-const _TOOLBAR_HEIGHT := 66.0
+const _TOOLBAR_HEIGHT := 98.0
 const _LOG_PANEL_HEIGHT := 160.0
 
 ## Recalculates vertical offsets for HSplit, LogPanel, and InfoBar.
@@ -268,6 +278,24 @@ func _setup_compat_panel() -> void:
 	compat_panel.node_selected.connect(_on_debug_node_selected)
 	add_child(compat_panel)
 	move_child(compat_panel, hsplit.get_index() + 1)
+
+
+func _setup_take_panel() -> void:
+	take_manager = GNTakeManager.new()
+	take_manager.network = network
+	take_panel = GNTakePanel.new()
+	take_panel.visible = false
+	take_panel.setup(take_manager)
+	take_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	add_child(take_panel)
+	move_child(take_panel, hsplit.get_index() + 1)
+
+
+## Handles take toggle — shows/hides take panel.
+func _on_take_toggled(enabled: bool) -> void:
+	take_panel.visible = enabled
+	_layout_debug_panel()
+	_save_setting("take_enabled", enabled)
 
 
 ## Handles compat report toggle.
@@ -317,6 +345,10 @@ func _layout_debug_panel() -> void:
 	if compat_panel != null and compat_panel.visible:
 		compat_panel.offset_top = -(bottom_offset + 200.0)
 		compat_panel.offset_bottom = -(bottom_offset)
+		bottom_offset += 200.0
+	if take_panel != null and take_panel.visible:
+		take_panel.offset_top = -(bottom_offset + 200.0)
+		take_panel.offset_bottom = -(bottom_offset)
 		bottom_offset += 200.0
 	hsplit.offset_bottom = -(bottom_offset)
 
@@ -1040,6 +1072,13 @@ func _setup_toolbar() -> void:
 	compat_toggle.toggled.connect(_on_compat_toggled)
 	row2.add_child(compat_toggle)
 
+	take_toggle = CheckButton.new()
+	take_toggle.text = "Takes"
+	take_toggle.tooltip_text = "Show take manager — capture, apply and blend named parameter snapshots (Shift+T)"
+	take_toggle.button_pressed = false
+	take_toggle.toggled.connect(_on_take_toggled)
+	row2.add_child(take_toggle)
+
 	# Help button
 	var btn_help := Button.new()
 	btn_help.text = "📖 Help"
@@ -1683,6 +1722,12 @@ func _restore_ui_state() -> void:
 	debug_toggle.set_pressed_no_signal(saved_debug)
 	if saved_debug:
 		_on_debug_toggled(true)
+
+	# Take panel
+	var saved_take: bool = _load_setting("take_enabled", false)
+	take_toggle.set_pressed_no_signal(saved_take)
+	if saved_take:
+		_on_take_toggled(true)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

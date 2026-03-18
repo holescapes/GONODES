@@ -3852,11 +3852,15 @@ MultiMesh instancing — place thousands of copies in one draw call. Takes a tem
 | roughness | Float | 0.5 | 0.0–1.0 | Roughness (fallback material) |
 | visible | Bool | true | — | Show/hide |
 | cast_shadow | Enum | On | Off, On, Double-Sided, Shadows Only | Shadow mode |
-| chop_map | Enum | Off | Off, Position, Scale, Rotation Y | CHOP → per-instance transforms |
+| chop_map | Enum | Off | Off, Position, Scale, Rotation Y, Color (r/g/b/a), Uniform Scale (s) | CHOP → per-instance transforms or color |
 
 **Inputs:** `template` (SOP — mesh to instance), `points` (SOP, optional — placement point cloud), `mat_in` (MAT, optional), `chop_in` (CHOP, optional — per-instance animation).
 
 **How it works:** Creates a `MultiMeshInstance3D` with Godot's `MultiMesh`. If a point cloud SOP is connected, each point becomes an instance transform; otherwise generates a grid or random placement. Supports `pscale` and `N` (normal) attributes from the point cloud. CHOP input can drive per-instance transforms via the `chop_map` parameter. Extremely efficient — single draw call for all instances.
+
+**Per-Instance Color:** Set `chop_map` to **Color (r/g/b/a)** and connect a CHOP with channels named `r`, `g`, `b`, `a`. Each instance receives a unique color via `MultiMesh.use_colors`. Alternatively, if the SOP point cloud contains a `Cd` attribute (PackedColorArray), per-instance colors are applied automatically regardless of chop_map mode.
+
+**Uniform Scale:** Set `chop_map` to **Uniform Scale (s)** and connect a CHOP with a channel named `s`. Each instance's XYZ scale is multiplied uniformly by the channel value.
 
 ---
 

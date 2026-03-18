@@ -603,9 +603,9 @@ The ramp parameter type provides the curve editor infrastructure (keypoints with
 
 #### K. Takes / Parameter Layer Overrides
 
-**Gap**: Houdini's Take system lets you save named parameter states and switch between configurations non-destructively.
+**Status**: ✅ **Implemented** — `GNTakeManager` provides cross-network named parameter layers.
 
-**Recommendation**: Low priority — parameter presets partially cover this use case. Could extend `GNParamPresetManager` with "take" semantics (apply an override layer, revert to base).
+**Features**: Capture Base snapshot, capture named Takes (sparse delta — only stores changed params), apply/revert instantly, blend smoothly between takes (type-aware lerp for float/int/Color/Vector), save/load `.gntake` files. Editor panel with list, blend slider, and save/load dialogs.
 
 ---
 
@@ -809,7 +809,7 @@ GONODES has **two fluid simulation systems**:
 | 11 | **Reaction-Diffusion TOP** | Classic generative art pattern (Gray-Scott model) | Low | ✅ **Implemented** — 7 presets, seed input, 3 color modes |
 | 12 | **Multi-Pass Lighting in RaymarchVOL** | Phase functions, shadow rays, scattering approximation | Medium | ⬜ Transforms volume rendering from blob to atmospheric phenomenon |
 | 13 | **HeightfieldSOP** | Terrain generation from noise/erosion for generative landscapes | Medium | ⬜ |
-| 14 | **Instancer improvements** | Per-instance color/scale from CHOP, animated geometry, LOD | Medium | ⬜ Current InstanceCOMP is functional but basic |
+| 14 | **Instancer improvements** | Per-instance color/scale from CHOP, animated geometry, LOD | Medium | ✅ **Implemented** — chop_map Color (r/g/b/a), Uniform Scale (s), SOP Cd attribute |
 | 15 | **Point Cloud rendering** | Dedicated splatting renderer with size attenuation, depth testing | Medium | ⬜ Better than RenderPOP's billboard approach for dense clouds |
 
 ### 13.6 Improvement Roadmap — Tier 3 (Polish & Advanced)
@@ -841,6 +841,6 @@ GONODES has **two fluid simulation systems**:
 2. **Fluid Surface MAT (#4)** — makes existing 3D fluid pipeline look production-quality
 3. **Pyro emitter VOL (#8)** — fire/smoke on existing VOL infrastructure
 4. **ML bridge (#10)** — face/hand tracking would be transformative for installations
-5. **Takes / parameter layers (§11.3.K)** — live performance preset switching
+5. ~~Takes / parameter layers (§11.3.K)~~ — ✅ **Implemented** — GNTakeManager + editor panel
 
 **Overall completion:** 12 of 24 suggestions implemented (50%), including all high-priority architectural items (§11.1) and 6 of 7 Tier 1 workflow items.

@@ -123,6 +123,33 @@ func get_point_attrib(attrib_name: String) -> PackedFloat32Array:
 	return point_attribs.get(attrib_name, PackedFloat32Array())
 
 
+## Gets a per-vertex color attribute.  Reads from the mesh COLOR array if
+## [param attrib_name] is "Cd" and no explicit attrib exists.  Also handles
+## packed float arrays with 3 or 4 floats per vertex (r,g,b or r,g,b,a).
+func get_point_attrib_color(attrib_name: String) -> PackedColorArray:
+	var stored: Variant = point_attribs.get(attrib_name, null)
+	if stored is PackedColorArray:
+		return stored as PackedColorArray
+	if stored is PackedFloat32Array:
+		var fa := stored as PackedFloat32Array
+		var vc: int = vertex_count if vertex_count > 0 else 1
+		var result := PackedColorArray()
+		if fa.size() >= vc * 4:
+			for i in range(vc):
+				result.append(Color(fa[i * 4], fa[i * 4 + 1], fa[i * 4 + 2], fa[i * 4 + 3]))
+		elif fa.size() >= vc * 3:
+			for i in range(vc):
+				result.append(Color(fa[i * 3], fa[i * 3 + 1], fa[i * 3 + 2], 1.0))
+		return result
+	# Fall back to mesh COLOR array for "Cd"
+	if attrib_name == "Cd" and mesh != null:
+		for s in range(mesh.get_surface_count()):
+			var arrays: Array = mesh.surface_get_arrays(s)
+			if arrays.size() > Mesh.ARRAY_COLOR and arrays[Mesh.ARRAY_COLOR] != null:
+				return arrays[Mesh.ARRAY_COLOR] as PackedColorArray
+	return PackedColorArray()
+
+
 # ─── Duplication ───────────────────────────────────────────────────────────────
 
 func invalidate() -> void:

@@ -1,0 +1,74 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "noise_color": {
+            "type": "NoiseCHOP",
+            "position": [100, 350],
+            "parameters": {
+                "num_channels": {"value": 4},
+                "channel_names": {"value": "r,g,b,a"},
+                "roughness": {"value": 0.3},
+                "period": {"value": 2.0},
+                "seed": {"value": 7}
+            }
+        },
+        "instance1": {
+            "type": "InstanceCOMP",
+            "position": [500, 200],
+            "parameters": {
+                "count": {"value": 64},
+                "scatter_mode": {"value": 0},
+                "spacing": {"value": 1.2},
+                "chop_map": {"value": 4}
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [500, 450],
+            "parameters": {
+                "tx": {"value": 0.0},
+                "ty": {"value": 2.0},
+                "tz": {"value": 8.0},
+                "rx": {"value": -15.0}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [850, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1200, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "sphere1", "from_port": 0, "to": "instance1", "to_port": 0},
+        {"from": "noise_color", "from_port": 0, "to": "instance1", "to_port": 3},
+        {"from": "instance1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Instance COMP \u2014 CHOP-Driven Per-Instance Color\n\nNoiseCHOP outputs 4 channels named r, g, b, a.\nchop_map set to 'Color (r/g/b/a)' reads these channels\nand assigns each instance a unique color via MultiMesh.use_colors.\nColors animate smoothly over time from the noise.",
+            "position": [-120.0, -130.0],
+            "size": [500.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

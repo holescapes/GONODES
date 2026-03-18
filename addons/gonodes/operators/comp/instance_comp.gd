@@ -84,8 +84,9 @@ func _init_parameters() -> void:
 
 	# CHOP animation mapping
 	add_parameter(GNParameter.create_enum("chop_map",
-		PackedStringArray(["Off", "Position (tx/ty/tz)", "Scale (sx/sy/sz)", "Rotation Y"]), 0,
-		"CHOP Map", "How CHOP channels drive per-instance transforms"))
+		PackedStringArray(["Off", "Position (tx/ty/tz)", "Scale (sx/sy/sz)", "Rotation Y",
+			"Color (r/g/b/a)", "Uniform Scale (s)"]), 0,
+		"CHOP Map", "How CHOP channels drive per-instance transforms or appearance"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -105,6 +106,16 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_multi_mesh.transform_format = MultiMesh.TRANSFORM_3D
 		_multi_mesh_instance.multimesh = _multi_mesh
 		_scene_node = _multi_mesh_instance
+
+	# ── Determine if per-instance color is needed ──
+	var chop_map: int = get_param_value("chop_map")
+	var needs_color := (chop_map == 4)  # Color mode
+	var cd_attr := PackedColorArray()
+	if pts_geo != null and pts_geo.has_geometry():
+		cd_attr = pts_geo.get_point_attrib_color("Cd")
+		if not cd_attr.is_empty():
+			needs_color = true
+	_multi_mesh.use_colors = needs_color
 
 	# ── Assign template mesh ──
 	_multi_mesh.mesh = template.mesh
@@ -165,7 +176,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var base_seed: int = get_param_value("seed")
 
 	# CHOP animation data
-	var chop_map: int = get_param_value("chop_map")
 	var chop_channels: Array[PackedFloat32Array] = []
 	if chop_in != null and chop_map > 0:
 		var ch_names: PackedStringArray
@@ -173,6 +183,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			1: ch_names = PackedStringArray(["tx", "ty", "tz"])
 			2: ch_names = PackedStringArray(["sx", "sy", "sz"])
 			3: ch_names = PackedStringArray(["ry"])
+			4: ch_names = PackedStringArray(["r", "g", "b", "a"])
+			5: ch_names = PackedStringArray(["s"])
 			_: ch_names = PackedStringArray()
 		for cn in ch_names:
 			if chop_in.channels.has(cn):
@@ -228,9 +240,26 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			# Rotation Y from CHOP
 			var cry: float = chop_channels[0][i] if i < chop_channels[0].size() else 0.0
 			basis = basis * Basis(Vector3.UP, deg_to_rad(cry))
+		elif chop_map == 5 and chop_channels.size() == 1:
+			# Uniform scale from CHOP
+			var cs: float = chop_channels[0][i] if i < chop_channels[0].size() else 1.0
+			s *= cs
 
 		basis = basis.scaled(s)
 		_multi_mesh.set_instance_transform(i, Transform3D(basis, pos))
+
+		# Per-instance color
+		if needs_color:
+			var col := Color.WHITE
+			if chop_map == 4 and chop_channels.size() >= 3:
+				var cr: float = chop_channels[0][i] if i < chop_channels[0].size() else 1.0
+				var cg: float = chop_channels[1][i] if i < chop_channels[1].size() else 1.0
+				var cb: float = chop_channels[2][i] if i < chop_channels[2].size() else 1.0
+				var ca: float = chop_channels[3][i] if chop_channels.size() > 3 and i < chop_channels[3].size() else 1.0
+				col = Color(cr, cg, cb, ca)
+			elif not cd_attr.is_empty() and i < cd_attr.size():
+				col = cd_attr[i]
+			_multi_mesh.set_instance_color(i, col)
 
 	# ── Group transform ──
 	_multi_mesh_instance.position = Vector3(
