@@ -1,0 +1,47 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 0.5},
+                "amplitude": {"value": 50.0},
+                "offset": {"value": 50.0}
+            }
+        },
+        "chop_to_dat1": {
+            "type": "CHOPDAT",
+            "position": [400, 100],
+            "parameters": {}
+        },
+        "mqtt_sensor": {
+            "type": "MqttDAT",
+            "position": [700, 100],
+            "parameters": {
+                "broker": {"value": "broker.hivemq.com"},
+                "port": {"value": 1883},
+                "client_id": {"value": "gonodes_iot"},
+                "publish_topic": {"value": "gonodes/sensor/temperature"},
+                "subscribe": {"value": "gonodes/sensor/#"},
+                "active": {"value": false},
+                "max_messages": {"value": 200}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "chop_to_dat1", "to_port": 0},
+        {"from": "chop_to_dat1", "from_port": 0, "to": "mqtt_sensor", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MQTT DAT \u2014 IoT Sensor Simulation\n\nLFO generates fake temperature data (0\u2013100).\nCHOP\u2192DAT converts to text, publishes to a public\nHiveMQ broker. Subscribes to all sensor topics.\nUse for testing IoT dashboards and sensor networks.",
+            "position": [-100.0, -80.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

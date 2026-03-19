@@ -1,0 +1,31 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "vp1": {
+            "type": "VectorPathTOP",
+            "position": [400, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 1024}},
+                "shape": {"value": 1},
+                "stroke_color": {"value": {"_type": "Color", "r": 1.0, "g": 0.8, "b": 0.2, "a": 1.0}},
+                "stroke_width": {"value": 3.0},
+                "fill_color": {"value": {"_type": "Color", "r": 0.2, "g": 0.4, "b": 0.9, "a": 0.6}},
+                "fill": {"value": true},
+                "bg_color": {"value": {"_type": "Color", "r": 0.05, "g": 0.05, "b": 0.1, "a": 1.0}},
+                "antialiased": {"value": true}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "VectorPath TOP \u2014 Default Star\n\nPolygon mode with no CHOP input renders\na default 5-pointed star. Anti-aliased fill\nwith gold stroke on dark background.\nConnect a CHOP with x0,y0,x1,y1,... channels\nto drive custom point positions.",
+            "position": [-50.0, -70.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

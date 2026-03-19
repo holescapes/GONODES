@@ -681,6 +681,8 @@ func _register_core_operators() -> void:
 		"Deform texture using displacement map (displace, refract, warp).")
 	_reg("ReorderTOP",      "TOP", ReorderTOP,
 		"Reorder/swizzle texture RGBA channels.")
+	_reg("VectorPathTOP",   "TOP", VectorPathTOP,
+		"Anti-aliased 2D vector path rendering (lines, Bézier curves, shapes).")
 
 	# ── CHOPs: Generators ───────────────────────────────────────────────
 	_reg("LFO_CHOP",        "CHOP", LFO_CHOP,
@@ -1057,6 +1059,8 @@ func _register_core_operators() -> void:
 		"Stitch polygon boundaries by connecting nearest vertices.")
 	_reg("VoronoiShatterSOP", "SOP", VoronoiShatterSOP,
 		"Voronoi fracture — procedural shattering with interior faces and piece attribute.")
+	_reg("ClothSOP",         "SOP", ClothSOP,
+		"Verlet cloth simulation — gravity, wind, pin constraints, substeps.")
 
 	# ── DATs: Generators ────────────────────────────────────────────────
 	_reg("ConstantDAT",     "DAT", ConstantDAT,
@@ -1159,6 +1163,8 @@ func _register_core_operators() -> void:
 	# ── DATs: New (Medium-Impact TD Gap) ────────────────────────────────
 	_reg("PanelExecuteDAT", "DAT", PanelExecuteDAT,
 		"Log panel/UI events (press, release, value change) as DAT table rows.")
+	_reg("MqttDAT",          "DAT", MqttDAT,
+		"MQTT 3.1.1 client — publish/subscribe IoT messaging via TCP.")
 
 	# ── IMGs: Generators ─────────────────────────────────────────────────
 	_reg("NoiseIMG",        "IMG", NoiseIMG,

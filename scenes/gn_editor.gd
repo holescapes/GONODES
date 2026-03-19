@@ -1987,14 +1987,11 @@ func _on_asset_edit_save() -> void:
 		GNLogger.error("Editor", "Failed to save asset: %s" % co.asset_path)
 		return
 
-	# Reload all OTHER instances of the same asset in this network
+	# Reload ALL instances of the same asset across the entire project
 	var asset_path: String = co.asset_path
-	for nid in network.nodes:
-		if nid == _editing_asset_node_id:
-			continue
-		var other: GNNode = network.nodes[nid]
-		if other is GNCustomOperator and (other as GNCustomOperator).asset_path == asset_path:
-			(other as GNCustomOperator).reload_from_asset()
+	var reloaded: int = _reload_asset_instances_recursive(network, asset_path, _editing_asset_node_id)
+	if reloaded > 0:
+		GNLogger.info("Editor", "Reloaded %d instance(s) of '%s' across all networks" % [reloaded, asset_path])
 
 	# Navigate back to root/parent level
 	_editing_asset_node_id = ""
@@ -2015,6 +2012,30 @@ func _on_asset_edit_discard() -> void:
 	_navigate_to_depth(maxi(0, _nav_stack.size() - 2))
 
 	GNLogger.info("Editor", "Asset edits discarded")
+
+
+## Recursively walks a GNNetwork and all nested SubNetworkNode inner_networks,
+## reloading every GNCustomOperator whose asset_path matches [param target_path].
+## Skips the node with [param skip_id] (the one that just saved).
+## Returns the count of reloaded instances.
+func _reload_asset_instances_recursive(net: GNNetwork, target_path: String, skip_id: String) -> int:
+	var count: int = 0
+	for nid in net.nodes:
+		var node: GNNode = net.nodes[nid]
+		if node is GNCustomOperator:
+			var co := node as GNCustomOperator
+			# Reload if same asset and not the one that just saved
+			if co.asset_path == target_path and nid != skip_id:
+				co.reload_from_asset()
+				count += 1
+			# Also recurse into this custom operator's inner network
+			if co.inner_network != null:
+				count += _reload_asset_instances_recursive(co.inner_network, target_path, skip_id)
+		elif node is SubNetworkNode:
+			var sn := node as SubNetworkNode
+			if sn.inner_network != null:
+				count += _reload_asset_instances_recursive(sn.inner_network, target_path, skip_id)
+	return count
 
 
 ## Converts a GNCustomOperator into a plain SubNetworkNode (detaches from asset).
