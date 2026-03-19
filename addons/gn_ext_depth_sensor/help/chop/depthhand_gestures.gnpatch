@@ -1,0 +1,40 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "hand1": {
+            "type": "DepthHandCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "backend": { "value": 0 },
+                "finger_filter": { "value": "*_tip" }
+            }
+        },
+        "select1": {
+            "type": "SelectCHOP",
+            "position": [500, 100],
+            "parameters": {
+                "pattern": { "value": "hand0:pinch_strength hand0:grab_strength" }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [900, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "hand1", "from_port": 0, "to": "select1", "to_port": 0 },
+        { "from": "select1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Hand — Gestures\n\nExtracting gesture channels from hand tracking.\n\nFinger Filter set to '*_tip' outputs only fingertips.\nSelect CHOP isolates pinch and grab strength.\n\nUse grab_strength for grab detection:\n  0.0 = fully open hand\n  1.0 = closed fist\n\nUse pinch_strength for pinch gestures:\n  0.0 = fingers apart\n  1.0 = thumb touching index finger",
+            "position": [-100.0, -100.0],
+            "size": [490.0, 150.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -3611,3 +3611,111 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 | **IMG** | 15 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, ScreenGrab, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, FileSave, MovieOut, FFmpegOut |
 | **Output** | 1 | Window |
 | **Total** | **244** | |
+
+---
+
+## Extension Operators
+
+Extension operators ship in `addons/gn_ext_<name>/` and require their respective GDExtension native libraries to be compiled. They are auto-discovered by the extension registry and appear in the palette when their dependencies are present.
+
+### gn_ext_depth_sensor — Depth Sensor Extension
+
+Unified depth sensor interface supporting Azure Kinect, Intel RealSense, and Ultraleap. All operators share `GNDepthSensorHelper` for dynamic device discovery — no hardcoded backend names. Device dropdown populated at runtime from compiled backends + physically connected sensors, with a **Rescan Devices** pulse button for hot-plug detection.
+
+**Capability flags** (bitmask): `CAP_DEPTH` (1), `CAP_COLOR` (2), `CAP_IR` (4), `CAP_SKELETON` (8), `CAP_POINT_CLOUD` (16), `CAP_PLAYER_INDEX` (32), `CAP_FLOOR_PLANE` (64), `CAP_HAND_TRACK` (128). Each backend declares its capabilities; operators check at runtime and degrade gracefully.
+
+**Common parameters** (all operators):
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| device | Enum | First Available | Dropdown of connected sensors (auto-populated) |
+| active | Bool | true | Enable / disable |
+| timeout_ms | Int | 33 | Frame capture timeout |
+| rescan | Pulse | — | Re-enumerate connected sensors |
+
+---
+
+#### DepthSensorTOP
+
+Outputs image streams from a depth sensor: depth, color, IR, or player index.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| stream | Enum | Depth | Depth, Color, IR, Player Index | Which image stream to output |
+| max_depth_mm | Int | 5000 | 500–20000 | Maximum depth range for normalization |
+
+**Output:** TOP (RGBA8 texture).
+
+**How it works:** Opens the selected device via `GNDepthSensor`, captures a frame, and converts the requested stream to RGBA8. Depth is normalized to grayscale (0 = max, 255 = near). IR is normalized from 16-bit. Player index is color-coded per body ID.
+
+**File:** `gn_ext_depth_sensor/operators/top/depth_sensor_top.gd`
+
+---
+
+#### DepthSkeletonCHOP
+
+Hardware skeleton tracking as CHOP channels.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| max_bodies | Int | 6 | 1–6 | Maximum tracked bodies |
+| min_confidence | Float | 0.0 | 0.0–1.0 | Minimum joint confidence filter |
+| joint_filter | String | * | — | Wildcard pattern for joint names |
+
+**Output:** CHOP channels: `body0:joint_name:tx/ty/tz` (meters), `body0:joint_name:rx/ry/rz` (degrees), `body0:joint_name:confidence` (0–1). 32 joints per body (Azure Kinect).
+
+**Requires:** `CAP_SKELETON` (Azure Kinect). Sensors without skeleton support output nothing — chain DepthSensorTOP → PoseDetectCHOP for ML fallback.
+
+**File:** `gn_ext_depth_sensor/operators/chop/depth_skeleton_chop.gd`
+
+---
+
+#### DepthHandCHOP
+
+Hand and finger bone tracking as CHOP channels.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| min_confidence | Float | 0.0 | 0.0–1.0 | Minimum hand confidence filter |
+| finger_filter | String | * | — | Wildcard pattern for bone names |
+
+**Output:** CHOP channels per hand: `hand0:palm:tx/ty/tz/rx/ry/rz`, `hand0:thumb_tip:tx/ty/tz/rx/ry/rz`, ..., `hand0:grab_strength`, `hand0:pinch_strength`, `hand0:confidence`, `hand0:is_left`. 27 bones per hand (palm + wrist + 5 fingers × 5 bones).
+
+**Requires:** `CAP_HAND_TRACK` (Ultraleap). Sensors without hand tracking output nothing.
+
+**File:** `gn_ext_depth_sensor/operators/chop/depth_hand_chop.gd`
+
+---
+
+#### DepthPointCloudSOP
+
+Dense 3D point cloud mesh from depth sensor.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| use_color | Bool | true | — | Use camera color for per-point Cd |
+| skip | Int | 1 | 1–16 | Sample every Nth point |
+| max_depth | Float | 5.0 | 0.1–20.0 | Discard points beyond this distance (meters) |
+
+**Output:** SOP (POINTS primitive mesh with optional Cd vertex color).
+
+**Requires:** `CAP_POINT_CLOUD` (Azure Kinect, RealSense). Coordinate system flipped for Godot (Y up, -Z forward).
+
+**File:** `gn_ext_depth_sensor/operators/sop/depth_point_cloud_sop.gd`
+
+---
+
+#### DepthSensorDAT
+
+Lists all connected depth sensors with capabilities.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | true | Enable / disable enumeration |
+| rescan | Pulse | — | Force re-enumeration |
+
+**Output:** DAT table with columns: name, serial, backend, depth, color, ir, skeleton, point_cloud, player_index, floor_plane, hand_track (each "yes" or "no").
+
+**How it works:** Iterates all compiled backends, opens each discovered device briefly to read its capability bitmask, then closes. Useful for debugging device connectivity.
+
+**File:** `gn_ext_depth_sensor/operators/dat/depth_sensor_dat.gd`

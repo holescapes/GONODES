@@ -746,6 +746,7 @@ Help patches: 299 → 327 (+28).
 | **Fluid simulation** | NVIDIA Flex (plugin), GLSL workarounds | **FluidVOL (3D NS) + Fluid2DTOP (2D NS)** — see §13.3 |
 | **Machine Learning** | TensorFlow, OpenCV, MediaPipe plugins | ✅ `gn_ext_ml` — ONNX Runtime bridge (pose, hand, face, depth, style, segmentation, object detection) |
 | **AR/Face Tracking** | Kinect, Leap, MediaPipe | ✅ FaceDetectCHOP (468 landmarks), PoseDetectCHOP (33 keypoints), HandDetectCHOP (21 per hand) |
+| **Depth Sensors** | Kinect TOP/CHOP, RealSense, ZED, Orbbec, Leap | ✅ `gn_ext_depth_sensor` — unified API (Azure Kinect + RealSense + Ultraleap), capability flags, depth/color/IR/skeleton/hand tracking/point cloud/player index |
 | **Multi-display** | Multi-window, output mapping | WindowOUT multi-window — basic |
 
 ### 13.2 Houdini Features Worth Borrowing
@@ -832,6 +833,7 @@ GONODES has **two fluid simulation systems**:
 | 22 | **Boids / Flocking POP** | Emergent behavior particles — classic generative art | Medium | ✅ **BoidsPOP** — Reynolds rules (separation/alignment/cohesion), brute-force O(n²) compute shader |
 | 23 | **FLIP Fluid (Houdini-style)** | Hybrid particle-grid for splashy water — unique among real-time tools | Very High | ⬜ |
 | 24 | **Global .gnasset Instance Sync** | When an asset is saved, reload ALL instances across open networks/patches (project-wide asset→instance registry). Currently same-network only. | Medium | ⬜ |
+| 25 | **Depth Sensor Extension** | Unified depth sensor API — Azure Kinect + RealSense + Ultraleap with capability flags, skeleton, hand tracking, point cloud | High | ✅ **gn_ext_depth_sensor** — 5 operators (DepthSensorTOP, DepthSkeletonCHOP, DepthHandCHOP, DepthPointCloudSOP, DepthSensorDAT), 3 C++ backends, 15 help patches |
 
 ### 13.7 Roadmap Summary
 
@@ -855,6 +857,7 @@ GONODES has **two fluid simulation systems**:
 - ✅ #22 Boids/Flocking POP (Reynolds rules compute shader, spherical boundary)
 
 - ✅ #10 ML Bridge (gn_ext_ml — 7 operators, ONNX Runtime, body/hand/face/depth/style/segmentation/detection)
+- ✅ #25 Depth Sensor Extension (gn_ext_depth_sensor — 5 operators, Azure Kinect + RealSense + Ultraleap, capability flags, 15 help patches)
 
 **Highest remaining priorities:**
 1. **Cloth/Softbody SOP (#9)** — procedural cloth deformer for visual art
@@ -862,4 +865,4 @@ GONODES has **two fluid simulation systems**:
 3. **FLIP Fluid (#23)** — hybrid particle-grid for splashy water simulations
 4. **Global .gnasset Sync (#24)** — project-wide asset instance registry
 
-**Overall completion:** 21 of 24 suggestions implemented (88%), including all Tier 1 items and most Tier 2/3 items.
+**Overall completion:** 22 of 25 suggestions implemented (88%), including all Tier 1 items and most Tier 2/3 items.

@@ -1,0 +1,53 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "pointcloud1": {
+            "type": "DepthPointCloudSOP",
+            "position": [100, 100],
+            "parameters": {
+                "backend": { "value": 0 },
+                "use_color": { "value": false },
+                "skip": { "value": 4 },
+                "max_depth": { "value": 3.0 }
+            }
+        },
+        "transform1": {
+            "type": "TransformSOP",
+            "position": [500, 100],
+            "parameters": {}
+        },
+        "instance1": {
+            "type": "InstanceCOMP",
+            "position": [500, 300],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [900, 200],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 200],
+            "parameters": {
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "pointcloud1", "from_port": 0, "to": "transform1", "to_port": 0 },
+        { "from": "transform1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "render1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Point Cloud — Sparse + Transform\n\nSkip = 4 gives quarter-density for faster rendering.\nMax Depth = 3m clips distant background.\nTransformSOP rotates/scales the point cloud in 3D.\nUse with RenderTOP for a 3D viewport camera view.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

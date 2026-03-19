@@ -1,0 +1,48 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "skeleton1": {
+            "type": "DepthSkeletonCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "backend": { "value": 0 },
+                "min_confidence": { "value": 0.5 }
+            }
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [500, 100],
+            "parameters": {
+                "operation": { "value": 4 }
+            }
+        },
+        "select1": {
+            "type": "SelectCHOP",
+            "position": [500, 300],
+            "parameters": {
+                "pattern": { "value": "body0:*:tx body0:*:ty body0:*:tz" }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [900, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "skeleton1", "from_port": 0, "to": "math1", "to_port": 0 },
+        { "from": "skeleton1", "from_port": 0, "to": "select1", "to_port": 0 },
+        { "from": "math1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Skeleton — Confidence Filter + Position Extract\n\nMin Confidence = 0.5 drops unreliable joints.\nMathCHOP can scale positions (e.g. multiply by 100\nfor centimeter units).\nSelectCHOP extracts only position channels\n(body0:*:tx/ty/tz) for driving geometry.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

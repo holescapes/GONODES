@@ -1,0 +1,58 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "pointcloud1": {
+            "type": "DepthPointCloudSOP",
+            "position": [100, 100],
+            "parameters": {
+                "backend": { "value": 1 },
+                "use_color": { "value": true },
+                "skip": { "value": 1 },
+                "max_depth": { "value": 2.0 }
+            }
+        },
+        "pointcloud2": {
+            "type": "DepthPointCloudSOP",
+            "position": [100, 400],
+            "parameters": {
+                "backend": { "value": 0 },
+                "use_color": { "value": true },
+                "skip": { "value": 2 }
+            }
+        },
+        "merge1": {
+            "type": "MergeSOP",
+            "position": [500, 250],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "PointCloudRenderTOP",
+            "position": [900, 250],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 250],
+            "parameters": {
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "pointcloud1", "from_port": 0, "to": "merge1", "to_port": 0 },
+        { "from": "pointcloud2", "from_port": 0, "to": "merge1", "to_port": 1 },
+        { "from": "merge1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "render1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Point Cloud — Multi-Sensor Merge\n\nTwo DepthPointCloudSOPs from different sensors\n(one RealSense, one Kinect) merged into a single\npoint cloud. Each operator manages its own device\nconnection independently. MergeSOP combines the\ngeometry, PointCloudRenderTOP renders both.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

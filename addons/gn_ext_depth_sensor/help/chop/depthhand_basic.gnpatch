@@ -1,0 +1,31 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "hand1": {
+            "type": "DepthHandCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "backend": { "value": 0 }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "hand1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Hand — Basic Tracking\n\nHand and finger tracking from Ultraleap.\nOutputs channels per hand:\n  hand0:palm:tx/ty/tz — palm position (meters)\n  hand0:thumb_tip:tx/ty/tz — fingertip position\n  hand0:grab_strength — 0 (open) to 1 (fist)\n  hand0:pinch_strength — 0 (open) to 1 (pinch)\n\n5 fingers × 5 bones + palm + wrist per hand.\nRequires Ultraleap SDK.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 140.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

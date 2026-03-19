@@ -4470,7 +4470,7 @@ If any guard fails, the extension is skipped with a warning and marked as loaded
 | MIDI | `gn_ext_midi` | RtMidi (MIT, compiled inline) | RtMidiInCHOP, RtMidiOutCHOP | — (runtime check) | ✅ Built (Windows x86_64); macOS/Linux pending |
 | GPU Encode | `gn_ext_gpu_encode` | OS APIs (MF/VideoToolbox) | MovieFileOutTOP | `platforms=["windows", "macos"]` | ✅ Built (Windows x86_64); macOS pending |
 | Mapper | `gn_ext_mapper` | — | 7 mapping TOPs | — (pure GDScript) | ✅ Done |
-| Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned | Planned |
+| Depth Sensors | `gn_ext_depth_sensor` | `GNDepthSensor` | DepthSensorTOP, DepthSkeletonCHOP, DepthHandCHOP, DepthPointCloudSOP, DepthSensorDAT | `platforms=["windows", "linux"]` | ✅ Code complete (requires Azure Kinect SDK / RealSense SDK / Ultraleap SDK) |
 | NDI | `gn_ext_ndi` | `GNNDIReceiver`, `GNNDISender` | NDIInTOP, NDIOutTOP, NDIAudioInCHOP, NDIAudioOutCHOP | `platforms=["windows", "linux", "macos"]` | ✅ Built (Windows x86_64) |
 | ML / ONNX | `gn_ext_ml` | `GNOnnxInference` | PoseDetectCHOP, HandDetectCHOP, FaceDetectCHOP, DepthEstimateTOP, StyleTransferTOP, SegmentationTOP, ObjectDetectDAT | `platforms=["windows", "linux", "macos"]` | ✅ Code complete (requires ONNX Runtime SDK) |
 
@@ -5014,8 +5014,8 @@ All 20 POP+VOL operators registered in `gn_extension_registry.gd`:
 
 - **348 operators** (81 TOP, 14 IMG, 68 CHOP, 33 DAT, 62 SOP, 10 POP, 11 VOL, 20 COMP, 9 MAT, 9 OUT, 31 UI)
 - **11 operator families**: TOP, IMG, CHOP, SOP, POP, VOL, DAT, MAT, COMP, UI, OUT
-- **13 GDExtension addons**: gn_ext_native (92 C++ operators), gn_ext_shadertoy, gn_ext_isf, gn_ext_ffmpeg, gn_ext_hap, gn_ext_spout, gn_ext_syphon, gn_ext_video_capture, gn_ext_midi, gn_ext_gpu_encode, gn_ext_mapper, gn_ext_ndi (NDI video/audio I/O), gn_ext_ml (ONNX Runtime ML inference — pose/hand/face/depth/style/segmentation/detection)
-- **1,105 help patches** (1,014 core + 91 extension) across all 11 families — 3+ per operator
+- **14 GDExtension addons**: gn_ext_native (92 C++ operators), gn_ext_shadertoy, gn_ext_isf, gn_ext_ffmpeg, gn_ext_hap, gn_ext_spout, gn_ext_syphon, gn_ext_video_capture, gn_ext_midi, gn_ext_gpu_encode, gn_ext_mapper, gn_ext_ndi (NDI video/audio I/O), gn_ext_ml (ONNX Runtime ML inference — pose/hand/face/depth/style/segmentation/detection), gn_ext_depth_sensor (Azure Kinect + RealSense + Ultraleap — depth/color/IR/skeleton/hand tracking/point cloud)
+- **1,120 help patches** (1,014 core + 106 extension) across all 11 families — 3+ per operator
 - **18 GLSL compute shaders** (7 POP + 11 VOL)
 - POP and VOL roadmap items moved to implemented. Custom Operator Assets (.gnasset) remains on roadmap.
 
@@ -5396,7 +5396,7 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 
 ### Updated Totals
 
-Total: **391 operators** (87 TOP, 14 IMG, 79 CHOP, 38 DAT, 74 SOP, 11 POP, 13 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI, +6 NDI ext, +7 ML ext). 11 families. 12 GDExtension addons.
+Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI, +6 NDI ext, +7 ML ext, +5 depth sensor ext). 11 families. 14 GDExtension addons.
 
 ### New Operators Added (Roadmap Batch)
 
@@ -5421,6 +5421,11 @@ Total: **391 operators** (87 TOP, 14 IMG, 79 CHOP, 38 DAT, 74 SOP, 11 POP, 13 VO
 | StyleTransferTOP | TOP (ext) | Neural style transfer — apply artistic styles to textures. Requires gn_ext_ml |
 | SegmentationTOP | TOP (ext) | Person/background segmentation — binary/soft mask. Requires gn_ext_ml |
 | ObjectDetectDAT | DAT (ext) | Object detection via YOLOv8 — table of bounding boxes + COCO labels. Requires gn_ext_ml |
+| DepthSensorTOP | TOP (ext) | Depth sensor image streams (depth/color/IR/player index) — Azure Kinect + RealSense. Requires gn_ext_depth_sensor |
+| DepthSkeletonCHOP | CHOP (ext) | Hardware skeleton joint tracking — 32 joints per body, positions/rotations/confidence. Requires gn_ext_depth_sensor |
+| DepthPointCloudSOP | SOP (ext) | Dense 3D point cloud mesh from depth sensor with per-point color. Requires gn_ext_depth_sensor |
+| DepthSensorDAT | DAT (ext) | Lists connected depth sensors with capabilities and serial numbers. Requires gn_ext_depth_sensor |
+| DepthHandCHOP | CHOP (ext) | Hand and finger bone tracking — per-finger positions/rotations, grab/pinch strength. Requires gn_ext_depth_sensor |
 
 ### Updated Existing Operators
 
@@ -5461,4 +5466,5 @@ Total: **391 operators** (87 TOP, 14 IMG, 79 CHOP, 38 DAT, 74 SOP, 11 POP, 13 VO
 | ML Style Transfer | ✅ Implemented | StyleTransferTOP — neural style transfer with strength blend |
 | ML Segmentation | ✅ Implemented | SegmentationTOP — person/background mask |
 | ML Object Detection | ✅ Implemented | ObjectDetectDAT — YOLOv8 bounding boxes + COCO labels |
+| Depth Sensors (Kinect/RealSense/Ultraleap) | ✅ Implemented | gn_ext_depth_sensor — unified API with capability flags (depth/color/IR/skeleton/hand tracking/point cloud/player index) |
 

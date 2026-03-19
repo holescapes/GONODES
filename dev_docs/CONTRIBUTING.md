@@ -303,11 +303,42 @@ All the same rules apply to extension operators: descriptions, help patches, par
 | Raw shader/code presets | `presets/<folder>/` (e.g. `presets/shadertoy/`, `presets/isf/`) |
 | Parameter presets | `presets/params/` |
 | Help patches | `help/<family>/` |
+| Shared helper scripts | Root of extension folder (e.g. `depth_sensor_helper.gd`) |
 | Textures, data files | anywhere inside the extension folder |
 
 The core discovery systems find these automatically — no registration is needed:
 - `gn_script_helper.get_preset_list()` scans `gn_ext_*/presets/<folder>/` for all installed extensions.
 - `gn_help_window._find_example_patches()` scans `<extension_dir>/help/<family>/` alongside the core help directory.
+
+### Shared Helper Pattern (for native extensions)
+
+Extensions with native (C++) dependencies often need shared state across multiple operators (device caches, singleton access, common parameter logic). The recommended pattern:
+
+1. **Create a static helper class** in the extension root (e.g. `depth_sensor_helper.gd` with `class_name GNDepthSensorHelper`)
+2. **Use static variables** for cached data (backend lists, device lists) — shared across all operator instances
+3. **Use static methods** for common operations (`is_available()`, `get_backends()`, device enum building)
+4. **Provide a `rescan()` method** to clear caches when hardware changes at runtime
+5. **Use `rescan_and_update_param(node)`** to refresh enum dropdown options + emit `parameters_changed` for live inspector updates
+
+This avoids each operator independently querying the native layer and keeps device discovery centralized. See `gn_ext_depth_sensor/depth_sensor_helper.gd` for the reference implementation.
+
+### Dynamic Device Menus (Pulse + _pre_cook pattern)
+
+For operators that enumerate hardware devices, use a pulse parameter + `_pre_cook()` to allow runtime rescanning:
+
+```gdscript
+# In _init_parameters():
+add_parameter(GNParameter.create_pulse("rescan", "Rescan Devices",
+    "Re-enumerate connected devices and refresh dropdown"))
+
+# In _pre_cook():
+func _pre_cook(_delta: float) -> void:
+    if get_param_value("rescan"):
+        set_param_value("rescan", false)
+        MyHelper.rescan_and_update_param(self)
+```
+
+The helper's `rescan_and_update_param()` should: clear caches, rebuild the enum options, clamp the selected index, and emit `parameters_changed` to trigger an inspector rebuild.
 - Both systems use the same matching rules as their core counterparts.
 
 > **Why this matters:** Placing extension assets in `addons/gonodes/` couples the extension to the core, makes it impossible to distribute the extension independently, and pollutes the core tree for users who do not want the extension.

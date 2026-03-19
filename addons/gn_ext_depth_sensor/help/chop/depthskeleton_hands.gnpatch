@@ -1,0 +1,41 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "skeleton1": {
+            "type": "DepthSkeletonCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "backend": { "value": 0 },
+                "joint_filter": { "value": "hand*" }
+            }
+        },
+        "filter1": {
+            "type": "FilterCHOP",
+            "position": [500, 100],
+            "parameters": {
+                "filter_type": { "value": 0 },
+                "filter_width": { "value": 5.0 }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [900, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "skeleton1", "from_port": 0, "to": "filter1", "to_port": 0 },
+        { "from": "filter1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Skeleton — Filtered Hand Tracking\n\nJoint Filter = 'hand*' extracts only hand-related\njoints (hand_left, hand_right, handtip_left, etc.).\nFilterCHOP smooths the jittery raw tracking data.\n\nUseful for gesture-driven visuals where you only\nneed hand positions, not the full skeleton.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sensor1": {
+            "type": "DepthSensorTOP",
+            "position": [100, 100],
+            "parameters": {
+                "stream": { "value": 1 },
+                "backend": { "value": 0 }
+            }
+        },
+        "sensor2": {
+            "type": "DepthSensorTOP",
+            "position": [100, 300],
+            "parameters": {
+                "stream": { "value": 0 },
+                "backend": { "value": 0 }
+            }
+        },
+        "composite1": {
+            "type": "CompositeTOP",
+            "position": [500, 200],
+            "parameters": {
+                "operation": { "value": 4 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 200],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 640, "y": 480 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "sensor1", "from_port": 0, "to": "composite1", "to_port": 0 },
+        { "from": "sensor2", "from_port": 0, "to": "composite1", "to_port": 1 },
+        { "from": "composite1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Sensor — Color + Depth Composite\n\nTwo DepthSensorTOPs pointing at the same device:\none for Color (stream 1), one for Depth (stream 0).\nComposite blends them together for a depth-tinted\ncolor view. Both share one hardware connection\ninternally (reference counting).",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

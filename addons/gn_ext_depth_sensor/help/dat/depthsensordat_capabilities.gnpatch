@@ -1,0 +1,45 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sensordat1": {
+            "type": "DepthSensorDAT",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "sensor1": {
+            "type": "DepthSensorTOP",
+            "position": [100, 350],
+            "parameters": {
+                "stream": { "value": 0 },
+                "backend": { "value": 0 }
+            }
+        },
+        "skeleton1": {
+            "type": "DepthSkeletonCHOP",
+            "position": [100, 550],
+            "parameters": {
+                "backend": { "value": 0 }
+            }
+        },
+        "pointcloud1": {
+            "type": "DepthPointCloudSOP",
+            "position": [100, 750],
+            "parameters": {
+                "backend": { "value": 0 },
+                "skip": { "value": 4 }
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Sensor — Capability Reference\n\nAll 4 depth sensor operators side by side.\n\n1. DepthSensorDAT — lists devices + capabilities\n2. DepthSensorTOP — depth/color/IR/player textures\n3. DepthSkeletonCHOP — joint tracking (Kinect only)\n4. DepthPointCloudSOP — 3D point cloud mesh\n\nSet the same Device Serial on all operators to\nshare one hardware connection. The DAT table\nshows which capabilities each sensor supports.",
+            "position": [-250.0, -100.0],
+            "size": [300.0, 200.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

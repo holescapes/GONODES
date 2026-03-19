@@ -1,0 +1,29 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sensordat1": {
+            "type": "DepthSensorDAT",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "sensordat1", "from_port": 0, "to": "null1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Depth Sensor DAT — Device List\n\nLists all connected depth sensors across all\nbackends (Azure Kinect + RealSense).\nShows name, serial, backend, and capability\nflags (depth, color, ir, skeleton, etc.).\n\nUse the serial number in other depth sensor\noperators to select a specific device.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 130.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}
