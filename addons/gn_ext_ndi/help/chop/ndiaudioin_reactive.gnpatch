@@ -1,0 +1,63 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "ndiaudioin1": {
+            "type": "NDIAudioInCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "source": { "value": "" },
+                "bandwidth": { "value": 1 }
+            }
+        },
+        "lag1": {
+            "type": "LagCHOP",
+            "position": [600, 100],
+            "parameters": {
+                "lag_up": { "value": 0.05 },
+                "lag_down": { "value": 0.2 }
+            }
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [1100, 100],
+            "parameters": {}
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [600, 500],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+            }
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [1100, 500],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1600, 500],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "ndiaudioin1", "from_port": 0, "to": "lag1", "to_port": 0 },
+        { "from": "lag1", "from_port": 0, "to": "math1", "to_port": 0 },
+        { "from": "noise1", "from_port": 0, "to": "level1", "to_port": 0 },
+        { "from": "level1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NDI Audio In — Audio-Reactive Visuals\n\nReceives NDI audio, smooths it with Lag\nfor stable envelope following, then\ndrives NoiseTOP brightness via CHOP\nexport for audio-reactive generative art.\n\nConnect Math output to Level's brightness\nvia CHOP export for the reactive link.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 140.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

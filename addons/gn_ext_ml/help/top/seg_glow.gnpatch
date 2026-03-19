@@ -1,0 +1,79 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "bridge1": {
+            "type": "IMGtoTOP",
+            "position": [350, 100],
+            "parameters": {}
+        },
+        "seg1": {
+            "type": "SegmentationTOP",
+            "position": [600, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "threshold": { "value": 0.5 },
+                "soft_mask": { "value": true }
+            }
+        },
+        "blur1": {
+            "type": "BlurTOP",
+            "position": [850, 100],
+            "parameters": {
+                "radius": { "value": 8.0 }
+            }
+        },
+        "edge1": {
+            "type": "EdgeTOP",
+            "position": [850, 300],
+            "parameters": {}
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [1100, 100],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [1350, 100],
+            "parameters": {
+                "brightness": { "value": 2.0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1600, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
+        { "from": "bridge1", "from_port": 0, "to": "seg1", "to_port": 0 },
+        { "from": "seg1", "from_port": 0, "to": "blur1", "to_port": 0 },
+        { "from": "seg1", "from_port": 0, "to": "edge1", "to_port": 0 },
+        { "from": "blur1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "edge1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "level1", "to_port": 0 },
+        { "from": "level1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Segmentation — Glow Silhouette\n\nSoft mask blurred heavily + edge detection composited.\nCreates a glowing outline effect around the person.\nLevel boost brightens the glow for neon effect.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,55 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "ndiaudioin1": {
+            "type": "NDIAudioInCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "source": { "value": "" },
+                "bandwidth": { "value": 1 }
+            }
+        },
+        "audioband1": {
+            "type": "AudioBandCHOP",
+            "position": [600, 100],
+            "parameters": {}
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [1100, 100],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [1600, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 256 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [2100, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 256 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "ndiaudioin1", "from_port": 0, "to": "audioband1", "to_port": 0 },
+        { "from": "audioband1", "from_port": 0, "to": "math1", "to_port": 0 },
+        { "from": "math1", "from_port": 0, "to": "choptop1", "to_port": 0 },
+        { "from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NDI Audio In — Frequency Bands\n\nReceives NDI audio, splits into frequency\nbands via AudioBandCHOP, and visualizes\nthe spectrum as a bar graph.\n\nIdeal for audio-reactive visuals driven\nby remote NDI audio sources.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

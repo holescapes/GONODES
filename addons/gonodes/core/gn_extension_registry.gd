@@ -282,6 +282,111 @@ func _invalidate_port_cache() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Native GDExtension Activation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Scans `res://addons/gn_ext_*/native/` for `.gdextension` and
+## `.gdextension.disabled` files.  For each one, checks whether the native
+## binary for the current platform actually exists.  If it does, ensures the
+## file has the `.gdextension` extension (active).  If it doesn't, renames
+## it to `.gdextension.disabled` so Godot won't attempt to load it.
+##
+## Call this from the plugin's `_enter_tree()`.  Changes only take effect on
+## the *next* Godot restart (because Godot loads GDExtensions at engine init,
+## before plugins run).
+##
+## Returns `true` if any files were renamed (meaning a restart would clear
+## errors or pick up newly-compiled libraries).
+static func sync_native_extensions() -> bool:
+	var addons_path := "res://addons"
+	var dir := DirAccess.open(addons_path)
+	if dir == null:
+		return false
+
+	var changed := false
+	dir.list_dir_begin()
+	var folder_name := dir.get_next()
+	while folder_name != "":
+		if dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
+			var native_dir_path := addons_path + "/" + folder_name + "/native"
+			if DirAccess.dir_exists_absolute(native_dir_path):
+				if _sync_native_dir(native_dir_path):
+					changed = true
+		folder_name = dir.get_next()
+	dir.list_dir_end()
+
+	if changed:
+		print("[ExtRegistry] Native extension files changed — restart Godot to apply.")
+	return changed
+
+
+## Scans a single `native/` directory for `.gdextension` / `.gdextension.disabled`
+## files and activates or deactivates them based on whether the library exists.
+static func _sync_native_dir(native_dir_path: String) -> bool:
+	var nd := DirAccess.open(native_dir_path)
+	if nd == null:
+		return false
+
+	var changed := false
+	nd.list_dir_begin()
+	var file_name := nd.get_next()
+	while file_name != "":
+		if not nd.current_is_dir():
+			var is_active := file_name.ends_with(".gdextension")
+			var is_disabled := file_name.ends_with(".gdextension.disabled")
+			if is_active or is_disabled:
+				var full_path := native_dir_path + "/" + file_name
+				var has_binary := _gdextension_has_platform_binary(full_path)
+				if has_binary and is_disabled:
+					# Binary exists — activate
+					var new_name := file_name.replace(".gdextension.disabled", ".gdextension")
+					var err := nd.rename(file_name, new_name)
+					if err == OK:
+						print("[ExtRegistry] Activated native extension: %s" % new_name)
+						changed = true
+				elif not has_binary and is_active:
+					# Binary missing — deactivate
+					var new_name := file_name + ".disabled"
+					var err := nd.rename(file_name, new_name)
+					if err == OK:
+						print("[ExtRegistry] Deactivated native extension (binary missing): %s → %s" % [file_name, new_name])
+						changed = true
+		file_name = nd.get_next()
+	nd.list_dir_end()
+	return changed
+
+
+## Parses a `.gdextension` (or `.gdextension.disabled`) ConfigFile and checks
+## whether the library binary for the current OS + build type + architecture
+## exists on disk.
+static func _gdextension_has_platform_binary(gdext_path: String) -> bool:
+	var cfg := ConfigFile.new()
+	if cfg.load(gdext_path) != OK:
+		return false
+
+	# Build platform keys to try, from most specific to least.
+	# Godot uses: "<os>.<build>.<arch>" → "<os>.<build>" → "<os>.<arch>" → "<os>"
+	var os_name := OS.get_name().to_lower()   # "windows", "linux", "macos"
+	var arch := Engine.get_architecture_name() # "x86_64", "arm64", etc.
+	var build := "debug" if OS.is_debug_build() else "release"
+
+	var keys_to_try: PackedStringArray = [
+		"%s.%s.%s" % [os_name, build, arch],   # windows.debug.x86_64
+		"%s.%s" % [os_name, build],             # macos.debug
+		"%s.%s" % [os_name, arch],              # windows.x86_64
+		os_name,                                # linux
+	]
+
+	for key in keys_to_try:
+		if cfg.has_section_key("libraries", key):
+			var lib_path: String = cfg.get_value("libraries", key, "")
+			if not lib_path.is_empty() and FileAccess.file_exists(lib_path):
+				return true
+
+	return false
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Extension Scanning
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -568,6 +673,8 @@ func _register_core_operators() -> void:
 		"Render 3D scene with a pipeline-level CompositorEffect: Outline, Depth Fog, or Depth View.")
 	_reg("MultiBufferRenderTOP",   "TOP", MultiBufferRenderTOP,
 		"Multi-buffer 3D render: outputs color, depth, and normal buffer textures.")
+	_reg("PointCloudRenderTOP",    "TOP", PointCloudRenderTOP,
+		"Point cloud splatting renderer with size attenuation and depth testing.")
 
 	# ── TOPs: New (Medium-Impact TD Gap) ────────────────────────────────
 	_reg("DeformTOP",       "TOP", DeformTOP,
@@ -948,6 +1055,8 @@ func _register_core_operators() -> void:
 		"Smooth Catmull-Rom spline curve or tube from input points.")
 	_reg("PolyStitchSOP",   "SOP", PolyStitchSOP,
 		"Stitch polygon boundaries by connecting nearest vertices.")
+	_reg("VoronoiShatterSOP", "SOP", VoronoiShatterSOP,
+		"Voronoi fracture — procedural shattering with interior faces and piece attribute.")
 
 	# ── DATs: Generators ────────────────────────────────────────────────
 	_reg("ConstantDAT",     "DAT", ConstantDAT,

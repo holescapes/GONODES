@@ -9,6 +9,11 @@ func _enter_tree() -> void:
 	# Godot strips this from project.godot when it matches the default, so we enforce it here.
 	ProjectSettings.set_setting("rendering/rendering_device/fallback_to_opengl3", true)
 	ProjectSettings.save()
+
+	# Deactivate .gdextension files whose native binaries aren't compiled yet.
+	# Changes take effect on the next Godot restart (GDExtensions load before plugins).
+	GNExtensionRegistry.sync_native_extensions()
+
 	print("GONODES plugin loaded (v0.1.0)")
 
 

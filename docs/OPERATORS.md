@@ -550,6 +550,34 @@ Renders a 3D scene into multiple output buffers: color, depth, and normal. Exten
 
 ---
 
+#### PointCloudRenderTOP
+
+Renders POP particle data as a 2D point-cloud image using GPU compute splatting. Each particle is projected with perspective and drawn as a circular disc with soft-edge falloff and depth testing. Supports per-particle color from POP data or a uniform override color.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| width | Int | 512 | 64–4096 | Output image width |
+| height | Int | 512 | 64–4096 | Output image height |
+| point_size | Float | 4.0 | 0.5–64.0 | Base splat radius in pixels |
+| size_attenuation | Float | 1.0 | 0.0–1.0 | 0 = constant, 1 = full perspective |
+| alpha | Float | 1.0 | 0.0–1.0 | Global opacity multiplier |
+| use_particle_color | Bool | true | — | Use per-particle color (false = uniform) |
+| color | Color | white | — | Uniform color when not using particle color |
+| bg_color | Color | transparent | — | Background color |
+| cam_dist | Float | 3.0 | 0.1–50.0 | Camera distance from origin |
+| cam_yaw | Float | 0.0 | -180–180 | Horizontal rotation (degrees) |
+| cam_pitch | Float | 20.0 | -89–89 | Vertical rotation (degrees) |
+| fov | Float | 60.0 | 10–120 | Field of view (degrees) |
+| near_clip | Float | 0.01 | 0.001–1.0 | Near clipping distance |
+| far_clip | Float | 100.0 | 1–1000 | Far clipping distance |
+
+**Input:** `pop` (POP — particle data to render).
+**Output:** TOP (rendered point cloud image).
+
+**How it works:** GPU path dispatches `point_cloud_render.glsl` — each invocation reads one particle from the SSBO (64-byte stride), projects to screen space, and splats a circular disc with depth testing. CPU fallback uses the same algorithm with Image pixel writes.
+
+---
+
 #### AnalyzeTOP
 
 Per-pixel statistics: min, max, average, or sum over a configurable kernel.
@@ -3848,6 +3876,22 @@ Procedural terrain heightfield generator — creates a subdivided grid, displace
 
 ---
 
+#### VoronoiShatter SOP
+
+Fractures input geometry via 3D Voronoi decomposition. Seeds are scattered inside the mesh bounding box; each seed defines a Voronoi cell. The input mesh is clipped against each cell's half-planes using Sutherland-Hodgman clipping, producing separate fragment surfaces. Outputs a `piece` point attribute for per-fragment identification.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| num_points | Int | 8 | 2–256 | Number of Voronoi seed points |
+| seed | Int | 0 | 0–99999 | Random seed for point scatter |
+| offset | Float | 0.0 | 0.0–0.1 | Gap between pieces (explode factor) |
+| interior_faces | Bool | true | — | Generate faces on cut planes |
+
+**Input:** `in` (SOP — geometry to fracture).
+**Output:** SOP (one surface per piece, `piece` point attribute).
+
+---
+
 ## COMP — Component Operators
 
 COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output — instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
@@ -4685,11 +4729,11 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 70 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion |
-*(Note: 15 additional TOPs via extensions — see Extension Operators below)* |
+| **TOP** | 71 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion, PointCloudRender |
+*(Note: 17 additional TOPs via extensions — see Extension Operators below)* |
 | **CHOP** | 74 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn |
 | **DAT** | 37 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX, RenderPick, PanelExecute |
-| **SOP** | 73 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, TrailRibbon, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch |
+| **SOP** | 74 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, TrailRibbon, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch, VoronoiShatter |
 | **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
 | **MAT** | 10 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null |
 | **IMG** | 13 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null |

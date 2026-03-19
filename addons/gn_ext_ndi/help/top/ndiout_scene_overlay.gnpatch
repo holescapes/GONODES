@@ -1,0 +1,64 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "render1": {
+            "type": "RenderTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 1280, "y": 720 } }
+            }
+        },
+        "geocomp1": {
+            "type": "GeometryCOMP",
+            "position": [100, 400],
+            "parameters": {}
+        },
+        "torus1": {
+            "type": "TorusSOP",
+            "position": [-300, 400],
+            "parameters": {}
+        },
+        "text1": {
+            "type": "TextTOP",
+            "position": [550, 100],
+            "parameters": {
+                "text": { "value": "GoNodes Live" },
+                "resolution": { "value": { "_type": "Vector2i", "x": 1280, "y": 720 } }
+            }
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [1000, 100],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "ndiout1": {
+            "type": "NDIOutTOP",
+            "position": [1450, 100],
+            "parameters": {
+                "name": { "value": "GoNodes Scene" },
+                "fps_n": { "value": 60 },
+                "fps_d": { "value": 1 }
+            }
+        }
+    },
+    "connections": [
+        { "from": "torus1", "from_port": 0, "to": "geocomp1", "to_port": 0 },
+        { "from": "geocomp1", "from_port": 0, "to": "render1", "to_port": 0 },
+        { "from": "render1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "text1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "ndiout1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NDI Out — 3D Scene with Overlay\n\nRenders a 3D scene, composites a text\noverlay, and sends the result as a\n60fps NDI stream named 'GoNodes Scene'.\n\nOpen any NDI receiver to see the output.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

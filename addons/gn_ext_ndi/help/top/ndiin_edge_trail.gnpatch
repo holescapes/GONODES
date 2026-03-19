@@ -1,0 +1,64 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "ndiin1": {
+            "type": "NDIInTOP",
+            "position": [100, 100],
+            "parameters": {
+                "source": { "value": "" },
+                "resolution": { "value": { "_type": "Vector2i", "x": 1920, "y": 1080 } }
+            }
+        },
+        "edge1": {
+            "type": "EdgeTOP",
+            "position": [550, 100],
+            "parameters": {}
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [1000, 100],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "feedback1": {
+            "type": "FeedbackTOP",
+            "position": [1000, 400],
+            "parameters": {}
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [1450, 400],
+            "parameters": {
+                "opacity": { "value": 0.95 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1450, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 960, "y": 540 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "ndiin1", "from_port": 0, "to": "edge1", "to_port": 0 },
+        { "from": "edge1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "feedback1", "from_port": 0, "to": "level1", "to_port": 0 },
+        { "from": "level1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "window1", "to_port": 0 },
+        { "from": "comp1", "from_port": 0, "to": "feedback1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NDI In — Edge Trail Effect\n\nReceives NDI video, extracts edges,\nand composites with a fading feedback\nloop to create trailing edge trails.\n\nA classic VJ effect on live camera feeds.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

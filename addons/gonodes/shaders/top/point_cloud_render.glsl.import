@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://ntlpwete4n2n"
+path="res://.godot/imported/point_cloud_render.glsl-b026bcc62c346c31e7d21d686b3a5639.res"
+
+[deps]
+
+source_file="res://addons/gonodes/shaders/top/point_cloud_render.glsl"
+dest_files=["res://.godot/imported/point_cloud_render.glsl-b026bcc62c346c31e7d21d686b3a5639.res"]
+
+[params]
+

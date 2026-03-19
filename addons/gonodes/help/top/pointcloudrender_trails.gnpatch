@@ -1,0 +1,77 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "emitter1": {
+            "type": "EmitterPOP",
+            "position": [100, 100],
+            "parameters": {
+                "emit_rate": { "value": 200 },
+                "life": { "value": 4.0 }
+            }
+        },
+        "pcrender1": {
+            "type": "PointCloudRenderTOP",
+            "position": [600, 100],
+            "parameters": {
+                "width": { "value": 512 },
+                "height": { "value": 512 },
+                "point_size": { "value": 16.0 },
+                "size_attenuation": { "value": 0.0 },
+                "use_particle_color": { "value": false },
+                "color": { "value": { "_type": "Color", "r": 0.2, "g": 0.8, "b": 1.0, "a": 1.0 } },
+                "alpha": { "value": 0.6 },
+                "bg_color": { "value": { "_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 1.0 } },
+                "cam_dist": { "value": 5.0 },
+                "cam_yaw": { "value": 0.0 },
+                "cam_pitch": { "value": 0.0 },
+                "fov": { "value": 45.0 }
+            }
+        },
+        "feedback1": {
+            "type": "FeedbackTOP",
+            "position": [1100, 400],
+            "parameters": {}
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [1600, 400],
+            "parameters": {
+                "opacity": { "value": 0.92 }
+            }
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [1100, 100],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1600, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "emitter1", "from_port": 0, "to": "pcrender1", "to_port": 0 },
+        { "from": "pcrender1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "feedback1", "from_port": 0, "to": "level1", "to_port": 0 },
+        { "from": "level1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "window1", "to_port": 0 },
+        { "from": "comp1", "from_port": 0, "to": "feedback1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Point Cloud Render — Trailing Points\n\nLarge constant-size cyan splats with\na feedback loop that creates fading\ntrails behind moving particles.\n\nDemonstrates uniform color mode,\nconstant size (no attenuation), and\nfeedback compositing for motion trails.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 140.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

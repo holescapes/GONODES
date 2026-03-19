@@ -1,0 +1,48 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "bridge1": {
+            "type": "IMGtoTOP",
+            "position": [350, 100],
+            "parameters": {}
+        },
+        "seg1": {
+            "type": "SegmentationTOP",
+            "position": [600, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "threshold": { "value": 0.5 },
+                "soft_mask": { "value": false }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [850, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
+        { "from": "bridge1", "from_port": 0, "to": "seg1", "to_port": 0 },
+        { "from": "seg1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Segmentation — Basic Mask\n\nWebcam -> person segmentation -> binary mask.\nWhite = person, black = background.\nAdjust threshold for tighter/looser segmentation.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

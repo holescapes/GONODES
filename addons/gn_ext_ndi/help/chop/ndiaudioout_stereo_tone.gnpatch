@@ -1,0 +1,50 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": { "value": 440.0 },
+                "amplitude": { "value": 0.8 }
+            }
+        },
+        "lfo2": {
+            "type": "LFO_CHOP",
+            "position": [100, 400],
+            "parameters": {
+                "frequency": { "value": 554.37 },
+                "amplitude": { "value": 0.6 }
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [550, 250],
+            "parameters": {}
+        },
+        "ndiaudioout1": {
+            "type": "NDIAudioOutCHOP",
+            "position": [1000, 250],
+            "parameters": {
+                "name": { "value": "GoNodes Stereo Tone" },
+                "sample_rate": { "value": 48000 }
+            }
+        }
+    },
+    "connections": [
+        { "from": "lfo1", "from_port": 0, "to": "merge1", "to_port": 0 },
+        { "from": "lfo2", "from_port": 0, "to": "merge1", "to_port": 1 },
+        { "from": "merge1", "from_port": 0, "to": "ndiaudioout1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NDI Audio Out — Stereo Tone Generator\n\nGenerates two sine tones (440 Hz + 554 Hz,\na major third interval), merges into stereo\nchannels, and sends as NDI audio.\n\nOpen any NDI audio receiver on the network\nto hear the output.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

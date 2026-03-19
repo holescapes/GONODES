@@ -269,6 +269,28 @@ Extensions are auto-discovered by the registry during editor startup via `scan_e
 
 Checks run in order: platform → architecture → dependency. If any check fails, the extension is silently skipped.
 
+### Native Binary Auto-Activation
+
+Godot auto-discovers `.gdextension` files at engine startup — before any GDScript runs. If a `.gdextension` references a library that doesn't exist on disk, Godot logs noisy `GDExtension dynamic library not found` errors every time the editor starts. This is a common situation during development: you may have the GDScript operators written but haven't compiled the C++ yet, or you're working on a machine without the SDK installed.
+
+The extension registry solves this with **auto-activation**. On every editor launch, `GNExtensionRegistry.sync_native_extensions()` (called from the plugin's `_enter_tree()`) scans all `gn_ext_*/native/` directories for `.gdextension` and `.gdextension.disabled` files:
+
+| Condition | Action |
+|-----------|--------|
+| Binary exists on disk + file is `.gdextension.disabled` | Rename to `.gdextension` (activate) |
+| Binary missing + file is `.gdextension` | Rename to `.gdextension.disabled` (silence) |
+| Binary exists + file is already `.gdextension` | No change |
+| Binary missing + file is already `.disabled` | No change |
+
+Since Godot loads GDExtensions before plugins run, changes take effect on the **next** restart. The console will print `[ExtRegistry] Activated native extension: ...` or `[ExtRegistry] Deactivated native extension ...` when a rename occurs, along with a reminder to restart.
+
+This means:
+- **Developing operators before compiling C++?** The `.gdextension` file is automatically disabled — no errors.
+- **Just compiled the native library?** Next launch detects the binary and re-enables the `.gdextension`. One more restart loads it.
+- **Deleted a binary?** Next launch deactivates the `.gdextension` automatically.
+
+No manual file management needed. The `dependencies` guard in `gn_extension.cfg` still prevents operators from registering when the native class is absent, so even if the `.gdextension` were somehow left active without a binary, operators won't appear in the palette.
+
 All the same rules apply to extension operators: descriptions, help patches, parameter tooltips.
 
 ### Extension Self-Containment Rule

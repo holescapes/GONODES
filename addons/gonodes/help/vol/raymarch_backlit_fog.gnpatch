@@ -1,0 +1,58 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noisevol1": {
+            "type": "NoiseVOL",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": { "value": 48 }
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [600, 100],
+            "parameters": {
+                "width": { "value": 512 },
+                "height": { "value": 512 },
+                "max_steps": { "value": 128 },
+                "step_size": { "value": 0.01 },
+                "density_scale": { "value": 4.0 },
+                "absorption": { "value": 8.0 },
+                "cam_dist": { "value": 1.8 },
+                "cam_yaw": { "value": 45.0 },
+                "cam_pitch": { "value": 30.0 },
+                "light_yaw": { "value": -45.0 },
+                "light_pitch": { "value": 70.0 },
+                "light_color": { "value": { "_type": "Color", "r": 0.6, "g": 0.8, "b": 1.0, "a": 1.0 } },
+                "light_intensity": { "value": 3.0 },
+                "hg_g": { "value": -0.3 },
+                "shadow_steps": { "value": 24 },
+                "ambient": { "value": 0.3 },
+                "emit_color": { "value": { "_type": "Color", "r": 0.1, "g": 0.15, "b": 0.3, "a": 1.0 } }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1100, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "noisevol1", "from_port": 0, "to": "raymarch1", "to_port": 0 },
+        { "from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RaymarchVOL — Backlit Fog\n\nBack-scattering (hg_g = -0.3) with cool\nblue light from above creates a misty,\nfoggy atmosphere. Higher ambient (0.3)\nfills shadows with soft diffuse light.\n\nCompare with the sunset scatter example:\nforward vs backward scattering changes\nthe entire character of the volume.",
+            "position": [-100.0, -100.0],
+            "size": [475.0, 140.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

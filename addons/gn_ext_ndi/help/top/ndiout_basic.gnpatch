@@ -1,0 +1,35 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 1280, "y": 720 } }
+            }
+        },
+        "ndiout1": {
+            "type": "NDIOutTOP",
+            "position": [600, 100],
+            "parameters": {
+                "name": { "value": "GoNodes" },
+                "fps_n": { "value": 30 },
+                "fps_d": { "value": 1 }
+            }
+        }
+    },
+    "connections": [
+        { "from": "noise1", "from_port": 0, "to": "ndiout1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NDI Out — Basic\n\nSend any texture as an NDI stream.\nOther NDI receivers on the network will see\na source named 'GoNodes'.\n\nRequires gn_ext_ndi GDExtension — see README.md.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

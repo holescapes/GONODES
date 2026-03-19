@@ -1,0 +1,73 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "bridge1": {
+            "type": "IMGtoTOP",
+            "position": [350, 100],
+            "parameters": {}
+        },
+        "face1": {
+            "type": "FaceDetectCHOP",
+            "position": [600, 100],
+            "parameters": {
+                "detail": { "value": 0 },
+                "min_confidence": { "value": 0.5 }
+            }
+        },
+        "smooth1": {
+            "type": "SmoothCHOP",
+            "position": [850, 100],
+            "parameters": {
+                "width": { "value": 0.1 }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [600, 300],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "type": { "value": 0 }
+            }
+        },
+        "transform1": {
+            "type": "TransformTOP",
+            "position": [850, 300],
+            "parameters": {
+                "translate_x": { "value": 0.0, "expression": "chop('smooth1').value('nose_tip:x') - 0.5" },
+                "translate_y": { "value": 0.0, "expression": "chop('smooth1').value('nose_tip:y') - 0.5" },
+                "scale": { "value": 1.0, "expression": "1.0 + (chop('smooth1').value('mouth_left:x') - chop('smooth1').value('mouth_right:x')) * 3.0" }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1100, 300],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
+        { "from": "bridge1", "from_port": 0, "to": "face1", "to_port": 0 },
+        { "from": "face1", "from_port": 0, "to": "smooth1", "to_port": 0 },
+        { "from": "noise1", "from_port": 0, "to": "transform1", "to_port": 0 },
+        { "from": "transform1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Face Detect — Head Tracking Transform\n\nNose position drives texture translation.\nMouth width drives scale (smile = zoom).\nFace tracking mapped to visual parameters via expressions.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

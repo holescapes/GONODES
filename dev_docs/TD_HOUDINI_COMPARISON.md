@@ -732,7 +732,7 @@ Help patches: 299 → 327 (+28).
 | **3D Volumes** | Not native (3D texture workarounds) | **11 VOL operators** — **GONODES leads here** |
 | **UI Widgets** | Panel COMP widgets | **31 UI operators** — comparable |
 | **Shader authoring** | GLSL TOP, Compute Shader TOP | CustomShaderTOP + ComputeShaderTOP + ISF + Shadertoy — strong |
-| **Video I/O** | Theora, HAP, FFMPEG, NDI, Blackmagic | HAP, FFmpeg, GPU Encode, Theora — **missing NDI, Blackmagic** |
+| **Video I/O** | Theora, HAP, FFMPEG, NDI, Blackmagic | HAP, FFmpeg, GPU Encode, Theora, NDI — **missing Blackmagic** |
 | **Texture sharing** | Spout (Win), Syphon (Mac) | **Both implemented** |
 | **Projection mapping** | Stoner, Kantan Mapper (plugins) | **gn_ext_mapper** built-in |
 | **Audio** | Audio analysis, synthesis, device I/O | AudioIn, AudioSpectrum, AudioBand, AudioDynamics, Beat, AudioDeviceOUT |
@@ -744,8 +744,8 @@ Help patches: 299 → 327 (+28).
 | **Embed in host apps** | TouchEngine SDK | **LibGodot + libgonodes C API** — comparable |
 | **Custom operators** | C++ or Python .tox | **.gnasset + Script operators** |
 | **Fluid simulation** | NVIDIA Flex (plugin), GLSL workarounds | **FluidVOL (3D NS) + Fluid2DTOP (2D NS)** — see §13.3 |
-| **Machine Learning** | TensorFlow, OpenCV, MediaPipe plugins | **Not present** |
-| **AR/Face Tracking** | Kinect, Leap, MediaPipe | **Not present** |
+| **Machine Learning** | TensorFlow, OpenCV, MediaPipe plugins | ✅ `gn_ext_ml` — ONNX Runtime bridge (pose, hand, face, depth, style, segmentation, object detection) |
+| **AR/Face Tracking** | Kinect, Leap, MediaPipe | ✅ FaceDetectCHOP (468 landmarks), PoseDetectCHOP (33 keypoints), HandDetectCHOP (21 per hand) |
 | **Multi-display** | Multi-window, output mapping | WindowOUT multi-window — basic |
 
 ### 13.2 Houdini Features Worth Borrowing
@@ -792,14 +792,14 @@ GONODES has **two fluid simulation systems**:
 | Translucent fluid surface | MarchingCubes + PBR_MAT | Dedicated FluidSurfaceMAT (subsurface, refraction, Fresnel) |
 | Temperature / buoyancy | Not present | Temperature field + upward force in FluidVOL |
 | Multiple species | Single density channel | Multi-channel density (RGBA32F already supports it) |
-| Multi-pass lighting | Single-pass raymarcher | Phase functions (Henyey-Greenstein), shadow rays |
+| Multi-pass lighting | Henyey-Greenstein + shadow rays | Phase functions, directional light, ambient, emission color |
 
 ### 13.4 Improvement Roadmap — Tier 1 (High Impact, Moderate Effort)
 
 | # | Suggestion | Why | Effort | Status |
 |---|---|---|---|---|
 | 1 | **Audio Input + Analysis** | VJ workflow lifeblood — live mic/line-in drives reactive visuals | Medium | ✅ **AudioBandCHOP** done (AudioInCHOP, AudioSpectrumCHOP, BeatCHOP already existed) |
-| 2 | **NDI In/Out extension** | Industry standard video-over-IP for live production | Medium | ⬜ Needs C++ GDExtension wrapping libndi |
+| 2 | **NDI In/Out extension** | Industry standard video-over-IP for live production | Medium | ✅ **gn_ext_ndi** — 4 operators (NDIInTOP, NDIOutTOP, NDIAudioInCHOP, NDIAudioOutCHOP), C++ GDExtension wrapping NDI SDK with video + multi-channel audio |
 | 3 | **OSC In CHOP/DAT** | Controllers (TouchOSC, Lemur), phones, other software | Low | ✅ OscInDAT + OscInCHOP already exist |
 | 4 | **Fluid Surface Rendering** | FluidVOL → MarchingCubes → visually compelling output | Medium | ✅ **FluidSurfaceMAT** — Fresnel, refraction, dual-layer Voronoi caustics, procedural wave normals |
 | 5 | **FluidVOL Obstacle Collision** | Fluid flows around objects, wake turbulence | Low-Medium | ✅ **Implemented** — obstacle input port + compute shader + CPU fallback |
@@ -812,12 +812,12 @@ GONODES has **two fluid simulation systems**:
 |---|---|---|---|---|
 | 8 | **Pyro-Style Emitter VOL** | Temperature + fuel + combustion for fire/smoke | Medium | ✅ **PyroVOL** — fuel/combustion/buoyancy/cooling, 3 compute shaders, 11-step GPU pipeline |
 | 9 | **Cloth/Softbody SOP** | Verlet-integration mesh deformer for visual art | Medium-High | ⬜ SoftBodyCOMP (Jolt) exists for physics, not procedural cloth |
-| 10 | **Machine Learning Bridge** | MediaPipe face/hand/pose, style transfer, depth estimation | High | ⬜ Transformative but heavy — could be `gn_ext_ml` wrapping ONNX |
+| 10 | **Machine Learning Bridge** | MediaPipe face/hand/pose, style transfer, depth estimation | High | ✅ **gn_ext_ml** — 7 operators (PoseDetectCHOP, HandDetectCHOP, FaceDetectCHOP, DepthEstimateTOP, StyleTransferTOP, SegmentationTOP, ObjectDetectDAT), ONNX Runtime GDExtension (GNOnnxInference), GPU acceleration via DirectML/CUDA/CoreML |
 | 11 | **Reaction-Diffusion TOP** | Classic generative art pattern (Gray-Scott model) | Low | ✅ **Implemented** — 7 presets, seed input, 3 color modes |
-| 12 | **Multi-Pass Lighting in RaymarchVOL** | Phase functions, shadow rays, scattering approximation | Medium | ⬜ Transforms volume rendering from blob to atmospheric phenomenon |
+| 12 | **Multi-Pass Lighting in RaymarchVOL** | Phase functions, shadow rays, scattering approximation | Medium | ✅ **Implemented** — Henyey-Greenstein phase function, shadow rays, directional light with color/intensity, ambient, configurable emission color |
 | 13 | **HeightfieldSOP** | Terrain generation from noise/erosion for generative landscapes | Medium | ✅ **Implemented** — FastNoiseLite FBM, 4 noise types, thermal erosion |
 | 14 | **Instancer improvements** | Per-instance color/scale from CHOP, animated geometry, LOD | Medium | ✅ **Implemented** — chop_map Color (r/g/b/a), Uniform Scale (s), SOP Cd attribute |
-| 15 | **Point Cloud rendering** | Dedicated splatting renderer with size attenuation, depth testing | Medium | ⬜ Better than RenderPOP's billboard approach for dense clouds |
+| 15 | **Point Cloud rendering** | Dedicated splatting renderer with size attenuation, depth testing | Medium | ✅ **PointCloudRenderTOP** — GPU compute splatting with perspective projection, depth testing, per-particle color, soft-edge falloff |
 
 ### 13.6 Improvement Roadmap — Tier 3 (Polish & Advanced)
 
@@ -826,7 +826,7 @@ GONODES has **two fluid simulation systems**:
 | 16 | **2D Fluid TOP** | Screen-space Navier-Stokes for interactive installations | Low | ✅ **Implemented** — Fluid2DTOP with dual viewport feedback |
 | 17 | **Blackmagic / AJA video I/O** | Professional SDI/HDMI capture/output for broadcast | High | ⬜ Niche but essential for high-end installations |
 | 18 | **Trail / Ribbon rendering** | Render particle trails as ribbons/tubes — staple VJ effect | Medium | ✅ **TrailRibbonSOP** — ring buffer trail recording, ribbon mesh with taper, alpha fade, UVs |
-| 19 | **Voronoi / Shatter SOP** | Procedural fracturing for motion graphics | Medium | ⬜ |
+| 19 | **Voronoi / Shatter SOP** | Procedural fracturing for motion graphics | Medium | ✅ **VoronoiShatterSOP** — 3D Voronoi decomposition, Sutherland-Hodgman clipping, interior faces, piece attribute, explode offset |
 | 20 | **Periodic/Tiling Noise** | Seamless tiling for looping content | Low | ✅ **Implemented** — FBM octaves + periodic Perlin in NoiseTOP shader |
 | 21 | **GPU Marching Cubes** | MarchingCubesVOL is CPU-only; compute shader would be 10-100× faster | High | ✅ **GPUMarchingCubesVOL** — compute shader with atomic append buffer, lookup table upload |
 | 22 | **Boids / Flocking POP** | Emergent behavior particles — classic generative art | Medium | ✅ **BoidsPOP** — Reynolds rules (separation/alignment/cohesion), brute-force O(n²) compute shader |
@@ -837,23 +837,29 @@ GONODES has **two fluid simulation systems**:
 
 **Completed this session (6 of 7 Tier 1 items):**
 - ✅ #1 Audio Band CHOP (multi-band frequency analysis with envelope followers)
+- ✅ #2 NDI In/Out extension (gn_ext_ndi — 4 operators, C++ GDExtension, video + audio)
 - ✅ #4 Fluid Surface MAT (Fresnel, refraction, dual-layer Voronoi caustics, wave normals)
 - ✅ #5 FluidVOL obstacles (GPU + CPU, friction boundary support)
 - ✅ #6 Timeline/Cue system (3 operators + editor UI)
 - ✅ #7 Vorticity confinement (GPU compute + CPU, adjustable strength)
 - ✅ #8 Pyro emitter VOL (fuel/combustion/buoyancy/cooling, 3 compute shaders)
 - ✅ #11 Reaction-Diffusion TOP (Gray-Scott, 7 presets, seed input, 3 color modes)
+- ✅ #12 Multi-Pass RaymarchVOL Lighting (HG phase function, shadow rays, directional light)
 - ✅ #13 HeightfieldSOP (FastNoiseLite FBM, 4 noise types, thermal erosion)
+- ✅ #15 Point Cloud rendering (PointCloudRenderTOP — GPU compute splatting, depth test)
 - ✅ #16 2D Fluid TOP (dual-viewport NS with emitter, dye input, velocity visualization)
 - ✅ #18 Trail/Ribbon rendering (TrailRibbonSOP — ring buffer, taper, alpha fade)
+- ✅ #19 Voronoi/Shatter SOP (3D Voronoi decomposition, interior faces, piece attribute)
 - ✅ #20 Periodic/Tiling Noise (FBM octaves + periodic Perlin in NoiseTOP shader)
 - ✅ #21 GPU Marching Cubes (compute shader with atomic append, lookup table upload)
 - ✅ #22 Boids/Flocking POP (Reynolds rules compute shader, spherical boundary)
 
-**Highest remaining priorities:**
-1. **NDI extension (#2)** — unlocks professional live production pipelines
-2. **ML bridge (#10)** — face/hand tracking would be transformative for installations
-3. **Multi-pass lighting in RaymarchVOL (#12)** — phase functions, shadow rays
-4. **Point cloud rendering (#15)** — dedicated splatting with depth + size attenuation
+- ✅ #10 ML Bridge (gn_ext_ml — 7 operators, ONNX Runtime, body/hand/face/depth/style/segmentation/detection)
 
-**Overall completion:** 19 of 24 suggestions implemented (79%), including all Tier 1 items and most Tier 2/3 items.
+**Highest remaining priorities:**
+1. **Cloth/Softbody SOP (#9)** — procedural cloth deformer for visual art
+2. **Blackmagic video I/O (#17)** — professional SDI/HDMI capture for broadcast
+3. **FLIP Fluid (#23)** — hybrid particle-grid for splashy water simulations
+4. **Global .gnasset Sync (#24)** — project-wide asset instance registry
+
+**Overall completion:** 21 of 24 suggestions implemented (88%), including all Tier 1 items and most Tier 2/3 items.

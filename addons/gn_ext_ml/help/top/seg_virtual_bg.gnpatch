@@ -1,0 +1,94 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "bridge1": {
+            "type": "IMGtoTOP",
+            "position": [350, 100],
+            "parameters": {}
+        },
+        "seg1": {
+            "type": "SegmentationTOP",
+            "position": [600, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "threshold": { "value": 0.5 },
+                "soft_mask": { "value": true }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [600, 300],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "type": { "value": 0 }
+            }
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [850, 100],
+            "parameters": {
+                "operation": { "value": 5 }
+            }
+        },
+        "comp2": {
+            "type": "CompositeTOP",
+            "position": [850, 300],
+            "parameters": {
+                "operation": { "value": 5 }
+            }
+        },
+        "seg_inv": {
+            "type": "SegmentationTOP",
+            "position": [600, 200],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "threshold": { "value": 0.5 },
+                "soft_mask": { "value": true },
+                "invert": { "value": true }
+            }
+        },
+        "comp3": {
+            "type": "CompositeTOP",
+            "position": [1100, 200],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1350, 200],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
+        { "from": "bridge1", "from_port": 0, "to": "seg1", "to_port": 0 },
+        { "from": "bridge1", "from_port": 0, "to": "seg_inv", "to_port": 0 },
+        { "from": "bridge1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "seg1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "noise1", "from_port": 0, "to": "comp2", "to_port": 0 },
+        { "from": "seg_inv", "from_port": 0, "to": "comp2", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "comp3", "to_port": 0 },
+        { "from": "comp2", "from_port": 0, "to": "comp3", "to_port": 1 },
+        { "from": "comp3", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Segmentation — Virtual Background\n\nPerson masked from webcam + noise background composited.\nSoft mask for smooth edges. Inverted mask isolates BG.\nReplace noise with any TOP for custom backgrounds.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

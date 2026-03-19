@@ -1,0 +1,11 @@
+[configuration]
+entry_symbol = "gn_ml_init"
+compatibility_minimum = 4.1
+
+[libraries]
+windows.debug.x86_64 = "res://addons/gn_ext_ml/native/bin/win64/libgn_ml.windows.template_release.x86_64.dll"
+windows.release.x86_64 = "res://addons/gn_ext_ml/native/bin/win64/libgn_ml.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/gn_ext_ml/native/bin/linux64/libgn_ml.linux.template_release.x86_64.so"
+linux.release.x86_64 = "res://addons/gn_ext_ml/native/bin/linux64/libgn_ml.linux.template_release.x86_64.so"
+macos.debug = "res://addons/gn_ext_ml/native/bin/macos/libgn_ml.macos.template_release.framework"
+macos.release = "res://addons/gn_ext_ml/native/bin/macos/libgn_ml.macos.template_release.framework"

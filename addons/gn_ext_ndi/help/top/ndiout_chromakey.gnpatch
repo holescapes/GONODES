@@ -1,0 +1,42 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "ndiin1": {
+            "type": "NDIInTOP",
+            "position": [100, 100],
+            "parameters": {
+                "source": { "value": "" },
+                "resolution": { "value": { "_type": "Vector2i", "x": 1920, "y": 1080 } }
+            }
+        },
+        "chromakey1": {
+            "type": "ChromaKeyTOP",
+            "position": [550, 100],
+            "parameters": {}
+        },
+        "ndiout1": {
+            "type": "NDIOutTOP",
+            "position": [1000, 100],
+            "parameters": {
+                "name": { "value": "GoNodes Keyed" },
+                "fps_n": { "value": 30 },
+                "fps_d": { "value": 1 }
+            }
+        }
+    },
+    "connections": [
+        { "from": "ndiin1", "from_port": 0, "to": "chromakey1", "to_port": 0 },
+        { "from": "chromakey1", "from_port": 0, "to": "ndiout1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NDI Out — Chroma Key Pass-through\n\nReceives an NDI source, applies chroma\nkeying to remove a green/blue screen,\nand sends the keyed result back out\nas a new NDI stream.\n\nUseful for live production pipelines.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

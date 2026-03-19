@@ -1,0 +1,37 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "wave1": {
+            "type": "WaveCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "channels": { "value": 2 },
+                "length": { "value": 1024 },
+                "frequency": { "value": 440.0 },
+                "amplitude": { "value": 0.5 }
+            }
+        },
+        "ndiaudioout1": {
+            "type": "NDIAudioOutCHOP",
+            "position": [600, 100],
+            "parameters": {
+                "name": { "value": "GoNodes Audio" },
+                "sample_rate": { "value": 48000 }
+            }
+        }
+    },
+    "connections": [
+        { "from": "wave1", "from_port": 0, "to": "ndiaudioout1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "NDI Audio Out — Basic\n\nSend CHOP channel data as NDI audio.\nEach CHOP channel maps to an NDI audio channel.\nHere a 440 Hz stereo sine wave is sent.\n\nRequires gn_ext_ndi GDExtension — see README.md.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

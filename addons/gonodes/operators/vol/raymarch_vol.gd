@@ -37,6 +37,23 @@ func _init_parameters() -> void:
 		-89.0, 89.0, 1.0, "Camera Pitch", "Vertical rotation (degrees)"))
 	add_parameter(GNParameter.create_float("fov", 60.0,
 		10.0, 120.0, 1.0, "FOV", "Field of view (degrees)"))
+	# Lighting
+	add_parameter(GNParameter.create_float("light_yaw", 45.0,
+		-180.0, 180.0, 1.0, "Light Yaw", "Light direction yaw (degrees)"))
+	add_parameter(GNParameter.create_float("light_pitch", 60.0,
+		-89.0, 89.0, 1.0, "Light Pitch", "Light direction pitch (degrees)"))
+	add_parameter(GNParameter.create_color("light_color", Color(1.0, 0.95, 0.8),
+		"Light Color", "Directional light color"))
+	add_parameter(GNParameter.create_float("light_intensity", 2.0,
+		0.0, 20.0, 0.1, "Light Intensity", "Directional light brightness"))
+	add_parameter(GNParameter.create_float("hg_g", 0.3,
+		-0.99, 0.99, 0.01, "Scattering (HG g)", "Henyey-Greenstein asymmetry: >0 forward, <0 back"))
+	add_parameter(GNParameter.create_int("shadow_steps", 32,
+		0, 128, "Shadow Steps", "Shadow ray march steps (0 = no shadows)"))
+	add_parameter(GNParameter.create_float("ambient", 0.15,
+		0.0, 1.0, 0.01, "Ambient", "Ambient light contribution"))
+	add_parameter(GNParameter.create_color("emit_color", Color(1.0, 0.85, 0.6),
+		"Emission Color", "Self-emission color (density-proportional glow)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -74,6 +91,20 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var up := right.cross(fwd).normalized()
 	var fov_rad: float = deg_to_rad(fov_deg)
 
+	# Lighting parameters
+	var l_yaw: float = deg_to_rad(get_param_value("light_yaw"))
+	var l_pitch: float = deg_to_rad(get_param_value("light_pitch"))
+	var light_dir := Vector3(
+		cos(l_pitch) * sin(l_yaw),
+		sin(l_pitch),
+		cos(l_pitch) * cos(l_yaw)).normalized()
+	var light_col: Color = get_param_value("light_color")
+	var light_int: float = get_param_value("light_intensity")
+	var hg_g: float = get_param_value("hg_g")
+	var shadow_st: int = get_param_value("shadow_steps")
+	var amb: float = get_param_value("ambient")
+	var emit_col: Color = get_param_value("emit_color")
+
 	# Create 2D output texture on RD
 	var tf := RDTextureFormat.new()
 	tf.texture_type = RenderingDevice.TEXTURE_TYPE_2D
@@ -95,9 +126,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var sampler: RID = ctx.create_linear_sampler()
 
-	# Push constants: 21 floats + 5 ints (see shader)
+	# Push constants: camera + lighting (40 fields → 160 bytes)
 	var pc := PackedByteArray()
-	pc.resize(96)  # 22 fields (88 bytes) padded to 96 (next multiple of 16)
+	pc.resize(160)
 	pc.encode_s32(0, w)
 	pc.encode_s32(4, h)
 	pc.encode_s32(8, vol.resolution.x)
@@ -120,9 +151,26 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	pc.encode_float(76, up.z)
 	pc.encode_float(80, fov_rad)
 	pc.encode_float(84, absorb)
-	# Pad to 96 bytes (next multiple of 16)
-	pc.encode_float(88, 0.0)
-	pc.encode_float(92, 0.0)
+	# Lighting fields (offset 88)
+	pc.encode_float(88, light_dir.x)
+	pc.encode_float(92, light_dir.y)
+	pc.encode_float(96, light_dir.z)
+	pc.encode_float(100, light_col.r)
+	pc.encode_float(104, light_col.g)
+	pc.encode_float(108, light_col.b)
+	pc.encode_float(112, light_int)
+	pc.encode_float(116, hg_g)
+	pc.encode_s32(120, shadow_st)
+	pc.encode_float(124, amb)
+	pc.encode_float(128, emit_col.r)
+	pc.encode_float(132, emit_col.g)
+	pc.encode_float(136, emit_col.b)
+	# Pad to 160 bytes (next multiple of 16 after 140)
+	pc.encode_float(140, 0.0)
+	pc.encode_float(144, 0.0)
+	pc.encode_float(148, 0.0)
+	pc.encode_float(152, 0.0)
+	pc.encode_float(156, 0.0)
 
 	var us: RID = ctx.rd.uniform_set_create([
 		ctx.uniform_sampler(0, sampler, vol.rd_texture),
@@ -165,6 +213,18 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 	var yaw: float = deg_to_rad(get_param_value("cam_yaw"))
 	var pitch: float = deg_to_rad(get_param_value("cam_pitch"))
 	var fov_rad: float = deg_to_rad(get_param_value("fov"))
+
+	# Lighting
+	var l_yaw: float = deg_to_rad(get_param_value("light_yaw"))
+	var l_pitch: float = deg_to_rad(get_param_value("light_pitch"))
+	var light_dir := Vector3(
+		cos(l_pitch) * sin(l_yaw),
+		sin(l_pitch),
+		cos(l_pitch) * cos(l_yaw)).normalized()
+	var light_col: Color = get_param_value("light_color")
+	var light_int: float = get_param_value("light_intensity")
+	var amb: float = get_param_value("ambient")
+	var emit_col: Color = get_param_value("emit_color")
 
 	var eye := Vector3(
 		dist * cos(pitch) * sin(yaw),
@@ -213,26 +273,36 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 				img.set_pixel(px, py, Color.BLACK)
 				continue
 
-			# Front-to-back compositing
+			# Front-to-back compositing with lighting
 			var transmittance: float = 1.0
-			var accumulated: float = 0.0
+			var color_r: float = 0.0
+			var color_g: float = 0.0
+			var color_b: float = 0.0
 			var t_cur: float = maxf(t_near, 0.0)
 
 			for _s in range(max_steps):
 				if t_cur > t_far or transmittance < 0.01:
 					break
 				var pos: Vector3 = eye + rd * t_cur
-				# Map [-0.5, 0.5] to [0, 1] for volume sampling
 				var uvw := Vector3(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
 				var density: float = _vol_sample_trilinear(vol.cpu_data, uvw, res) * dscale
 				if density > 0.0:
 					var alpha: float = 1.0 - exp(-absorb * density * step)
-					accumulated += transmittance * alpha * density
+					# Simplified lighting for CPU: directional + ambient, no shadows
+					var radiance_r: float = (light_col.r * light_int * (1.0 + amb) * density) + (emit_col.r * density)
+					var radiance_g: float = (light_col.g * light_int * (1.0 + amb) * density) + (emit_col.g * density)
+					var radiance_b: float = (light_col.b * light_int * (1.0 + amb) * density) + (emit_col.b * density)
+					color_r += transmittance * alpha * radiance_r
+					color_g += transmittance * alpha * radiance_g
+					color_b += transmittance * alpha * radiance_b
 					transmittance *= (1.0 - alpha)
 				t_cur += step
 
-			var brightness: float = clampf(accumulated, 0.0, 1.0)
-			img.set_pixel(px, py, Color(brightness, brightness, brightness, 1.0 - transmittance))
+			img.set_pixel(px, py, Color(
+				clampf(color_r, 0.0, 1.0),
+				clampf(color_g, 0.0, 1.0),
+				clampf(color_b, 0.0, 1.0),
+				1.0 - transmittance))
 
 	if _out_tex == null:
 		_out_tex = GNTextureData.new()

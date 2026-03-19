@@ -1,0 +1,70 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "bridge1": {
+            "type": "IMGtoTOP",
+            "position": [350, 100],
+            "parameters": {}
+        },
+        "detect1": {
+            "type": "ObjectDetectDAT",
+            "position": [600, 100],
+            "parameters": {
+                "confidence": { "value": 0.3 },
+                "max_detections": { "value": 50 }
+            }
+        },
+        "sort1": {
+            "type": "SortDAT",
+            "position": [850, 100],
+            "parameters": {
+                "sort_col": { "value": 1 },
+                "descending": { "value": true }
+            }
+        },
+        "dattochop1": {
+            "type": "DATtoCHOP",
+            "position": [1100, 100],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [1350, 100],
+            "parameters": {
+                "mode": { "value": 1 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1600, 100],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
+        { "from": "bridge1", "from_port": 0, "to": "detect1", "to_port": 0 },
+        { "from": "detect1", "from_port": 0, "to": "sort1", "to_port": 0 },
+        { "from": "sort1", "from_port": 0, "to": "dattochop1", "to_port": 0 },
+        { "from": "dattochop1", "from_port": 0, "to": "choptop1", "to_port": 0 },
+        { "from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Object Detect — Confidence Heatmap\n\nDetections sorted by confidence -> DAT to CHOP.\nCHOPtoTOP heatmap visualizes detection confidence.\nBright spots = high-confidence detections.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

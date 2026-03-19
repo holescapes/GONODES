@@ -4471,7 +4471,8 @@ If any guard fails, the extension is skipped with a warning and marked as loaded
 | GPU Encode | `gn_ext_gpu_encode` | OS APIs (MF/VideoToolbox) | MovieFileOutTOP | `platforms=["windows", "macos"]` | ✅ Built (Windows x86_64); macOS pending |
 | Mapper | `gn_ext_mapper` | — | 7 mapping TOPs | — (pure GDScript) | ✅ Done |
 | Kinect | `gn_ext_kinect` | `KinectTracker` | KinectCHOP, KinectPointCloudSOP | Planned | Planned |
-| NDI | `gn_ext_ndi` | `NDIFinder` | NDIInTOP, NDIOutTOP | Planned | Planned |
+| NDI | `gn_ext_ndi` | `GNNDIReceiver`, `GNNDISender` | NDIInTOP, NDIOutTOP, NDIAudioInCHOP, NDIAudioOutCHOP | `platforms=["windows", "linux", "macos"]` | ✅ Built (Windows x86_64) |
+| ML / ONNX | `gn_ext_ml` | `GNOnnxInference` | PoseDetectCHOP, HandDetectCHOP, FaceDetectCHOP, DepthEstimateTOP, StyleTransferTOP, SegmentationTOP, ObjectDetectDAT | `platforms=["windows", "linux", "macos"]` | ✅ Code complete (requires ONNX Runtime SDK) |
 
 ### 28.10 Extension Help Patches
 
@@ -5013,8 +5014,8 @@ All 20 POP+VOL operators registered in `gn_extension_registry.gd`:
 
 - **348 operators** (81 TOP, 14 IMG, 68 CHOP, 33 DAT, 62 SOP, 10 POP, 11 VOL, 20 COMP, 9 MAT, 9 OUT, 31 UI)
 - **11 operator families**: TOP, IMG, CHOP, SOP, POP, VOL, DAT, MAT, COMP, UI, OUT
-- **11 GDExtension addons**: gn_ext_native (92 C++ operators), gn_ext_shadertoy, gn_ext_isf, gn_ext_ffmpeg, gn_ext_hap (HAP GPU-direct video codec — HapInTOP, HapOUT), gn_ext_spout, gn_ext_syphon, gn_ext_video_capture, gn_ext_midi, gn_ext_gpu_encode, gn_ext_mapper
-- **1,084 help patches** (1,014 core + 70 extension) across all 11 families — 3+ per operator
+- **13 GDExtension addons**: gn_ext_native (92 C++ operators), gn_ext_shadertoy, gn_ext_isf, gn_ext_ffmpeg, gn_ext_hap, gn_ext_spout, gn_ext_syphon, gn_ext_video_capture, gn_ext_midi, gn_ext_gpu_encode, gn_ext_mapper, gn_ext_ndi (NDI video/audio I/O), gn_ext_ml (ONNX Runtime ML inference — pose/hand/face/depth/style/segmentation/detection)
+- **1,105 help patches** (1,014 core + 91 extension) across all 11 families — 3+ per operator
 - **18 GLSL compute shaders** (7 POP + 11 VOL)
 - POP and VOL roadmap items moved to implemented. Custom Operator Assets (.gnasset) remains on roadmap.
 
@@ -5395,7 +5396,7 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 
 ### Updated Totals
 
-Total: **377 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 73 SOP, 11 POP, 13 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI). 11 families.
+Total: **391 operators** (87 TOP, 14 IMG, 79 CHOP, 38 DAT, 74 SOP, 11 POP, 13 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI, +6 NDI ext, +7 ML ext). 11 families. 12 GDExtension addons.
 
 ### New Operators Added (Roadmap Batch)
 
@@ -5407,12 +5408,26 @@ Total: **377 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 73 SOP, 11 POP, 13 VO
 | GPUMarchingCubesVOL | VOL | GPU-accelerated marching cubes via compute shader with atomic append buffer — 10–100× faster than CPU |
 | BoidsPOP | POP | Reynolds flocking simulation — separation/alignment/cohesion, brute-force O(n²) compute shader, spherical boundary |
 | TrailRibbonSOP | SOP | Ribbon mesh from particle trails — ring buffer recording, width taper, alpha fade, proper normals/UVs |
+| VoronoiShatterSOP | SOP | 3D Voronoi fracture — Sutherland-Hodgman clipping, interior faces, piece attribute, explode offset |
+| PointCloudRenderTOP | TOP | GPU compute point-cloud splatting — perspective projection, depth testing, per-particle color, soft-edge falloff |
+| NDIInTOP | TOP (ext) | Receive NDI video from network — auto-resolution, bandwidth modes. Requires gn_ext_ndi GDExtension |
+| NDIOutTOP | TOP (ext) | Send texture as NDI video to network. Requires gn_ext_ndi GDExtension |
+| NDIAudioInCHOP | CHOP (ext) | Receive NDI audio as CHOP channels — multi-channel, configurable sample rate |
+| NDIAudioOutCHOP | CHOP (ext) | Send CHOP channels as NDI audio — interleaved float, multi-channel |
+| PoseDetectCHOP | CHOP (ext) | Body pose estimation via BlazePose — 33 keypoints (x/y/z/visibility). Requires gn_ext_ml |
+| HandDetectCHOP | CHOP (ext) | Hand landmark tracking — 21 points per hand. Requires gn_ext_ml |
+| FaceDetectCHOP | CHOP (ext) | Face mesh landmarks — 468 points (or key subset). Requires gn_ext_ml |
+| DepthEstimateTOP | TOP (ext) | Monocular depth estimation via MiDaS — grayscale depth map. Requires gn_ext_ml |
+| StyleTransferTOP | TOP (ext) | Neural style transfer — apply artistic styles to textures. Requires gn_ext_ml |
+| SegmentationTOP | TOP (ext) | Person/background segmentation — binary/soft mask. Requires gn_ext_ml |
+| ObjectDetectDAT | DAT (ext) | Object detection via YOLOv8 — table of bounding boxes + COCO labels. Requires gn_ext_ml |
 
 ### Updated Existing Operators
 
 | Operator | Changes |
 |----------|---------|
 | NoiseTOP | Added FBM octaves (1–8), lacunarity, gain, periodic tiling mode (seamless Perlin), tile_size |
+| RaymarchVOL | Multi-pass lighting — Henyey-Greenstein phase function, shadow rays, directional light (yaw/pitch/color/intensity), ambient, configurable emission color |
 
 ### TD Gap Resolution
 
@@ -5437,4 +5452,13 @@ Total: **377 operators** (83 TOP, 14 IMG, 76 CHOP, 37 DAT, 73 SOP, 11 POP, 13 VO
 | PolyBridge/Patch/Spline/StitchSOP | ✅ Implemented | 4 poly construction operators |
 | TabletInCHOP | ✅ Implemented | Pen/stylus input |
 | PanelExecuteDAT | ✅ Implemented | UI event logging |
+| NDI Video/Audio I/O | ✅ Implemented | gn_ext_ndi — 4 operators (video+audio in/out), C++ GDExtension wrapping NDI SDK |
+| Multi-Pass Vol Lighting | ✅ Implemented | RaymarchVOL — HG phase, shadow rays, directional/ambient/emission |
+| VoronoiShatterSOP | ✅ Implemented | 3D Voronoi fracture with interior faces and piece attribute |
+| PointCloudRenderTOP | ✅ Implemented | GPU compute splatting with depth test and per-particle color |
+| ML Body/Hand/Face Tracking | ✅ Implemented | gn_ext_ml — PoseDetectCHOP (33 keypoints), HandDetectCHOP (21 per hand), FaceDetectCHOP (468 landmarks) |
+| ML Depth Estimation | ✅ Implemented | DepthEstimateTOP — MiDaS monocular depth via ONNX Runtime |
+| ML Style Transfer | ✅ Implemented | StyleTransferTOP — neural style transfer with strength blend |
+| ML Segmentation | ✅ Implemented | SegmentationTOP — person/background mask |
+| ML Object Detection | ✅ Implemented | ObjectDetectDAT — YOLOv8 bounding boxes + COCO labels |
 

@@ -1,0 +1,88 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "bridge1": {
+            "type": "IMGtoTOP",
+            "position": [350, 100],
+            "parameters": {}
+        },
+        "hand1": {
+            "type": "HandDetectCHOP",
+            "position": [600, 100],
+            "parameters": {
+                "max_hands": { "value": 1 },
+                "min_confidence": { "value": 0.5 }
+            }
+        },
+        "smooth1": {
+            "type": "SmoothCHOP",
+            "position": [850, 100],
+            "parameters": {
+                "width": { "value": 0.15 }
+            }
+        },
+        "circle1": {
+            "type": "CircleTOP",
+            "position": [850, 300],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "radius": { "value": 0.05 },
+                "center_x": { "value": 0.5, "expression": "chop('smooth1').value('hand0:index_tip:x')" },
+                "center_y": { "value": 0.5, "expression": "chop('smooth1').value('hand0:index_tip:y')" }
+            }
+        },
+        "feedback1": {
+            "type": "FeedbackTOP",
+            "position": [1100, 300],
+            "parameters": {}
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [1100, 200],
+            "parameters": {
+                "operation": { "value": 0 }
+            }
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [1350, 300],
+            "parameters": {
+                "brightness": { "value": 0.98 }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1350, 200],
+            "parameters": {
+                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+                "open": { "value": true }
+            }
+        }
+    },
+    "connections": [
+        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
+        { "from": "bridge1", "from_port": 0, "to": "hand1", "to_port": 0 },
+        { "from": "hand1", "from_port": 0, "to": "smooth1", "to_port": 0 },
+        { "from": "circle1", "from_port": 0, "to": "comp1", "to_port": 0 },
+        { "from": "feedback1", "from_port": 0, "to": "comp1", "to_port": 1 },
+        { "from": "comp1", "from_port": 0, "to": "level1", "to_port": 0 },
+        { "from": "level1", "from_port": 0, "to": "feedback1", "to_port": 0 },
+        { "from": "comp1", "from_port": 0, "to": "window1", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Hand Detect — Finger Painting\n\nIndex fingertip position drives a circle with feedback.\nCreates a persistent drawing trail as you move your hand.\nFeedback + Level brightness fade gives a painting effect.",
+            "position": [-100.0, -100.0],
+            "size": [450.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

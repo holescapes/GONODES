@@ -269,6 +269,15 @@ for the full format.  This prevents operators from appearing in the palette
 on unsupported OS/architecture combos even when the `.gdextension` file is
 present (e.g., Syphon on Windows, or Spout on ARM64 Windows).
 
+**Auto-activation** is handled by `GNExtensionRegistry.sync_native_extensions()`,
+called from the plugin's `_enter_tree()`.  It renames `.gdextension` files
+whose platform binary is missing to `.gdextension.disabled` (so Godot won't
+try to load them), and renames them back when the binary appears.  This
+eliminates the `GDExtension dynamic library not found` console errors that
+occur when extensions are checked in but not yet compiled on the current
+machine.  See [CONTRIBUTING.md § 5 — Native Binary Auto-Activation](CONTRIBUTING.md)
+for the full behaviour.
+
 The build scripts control GDExtension handling via the `-GDExtensions` /
 `--gdext` parameter, which accepts four modes:
 
