@@ -1,0 +1,59 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "userpythonsop1": {
+            "type": "UserPythonSOP",
+            "position": [100, 100],
+            "parameters": {
+                "auto_reload": {"value": true},
+                "time_dep": {"value": true}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [500, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [500, 300],
+            "parameters": {
+                "tx": {"value": 0},
+                "ty": {"value": 1.5},
+                "tz": {"value": 4}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "userpythonsop1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UserPythonSOP \u2014 Python Geometry with NumPy\n\nWrite SOP operators in Python using NumPy arrays.\nThe default example applies a sine-wave vertex deformation.\n\nClick the node, then 'Edit Python \u2197' in the inspector.\nPress Ctrl+R to reload. No compilation needed.\n\nUse vectorized NumPy ops for best performance.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

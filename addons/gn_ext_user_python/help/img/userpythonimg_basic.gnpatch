@@ -1,0 +1,50 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseIMGNative",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "scale": {"value": 6.0}
+            }
+        },
+        "userpythonimg1": {
+            "type": "UserPythonIMG",
+            "position": [500, 100],
+            "parameters": {
+                "auto_reload": {"value": true},
+                "time_dep": {"value": false}
+            }
+        },
+        "imgtotop1": {
+            "type": "ImgToTOP",
+            "position": [900, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "userpythonimg1", "to_port": 0},
+        {"from": "userpythonimg1", "from_port": 0, "to": "imgtotop1", "to_port": 0},
+        {"from": "imgtotop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UserPythonIMG \u2014 Python Pixel Processing\n\nWrite IMG operators in Python using NumPy arrays.\nThe default example adjusts brightness.\nLoad the Edge Detect example for Sobel filtering.\n\nImage pixels arrive as (H, W, 4) uint8 numpy arrays.\nReturn via make_img_result(pixels, width, height).",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

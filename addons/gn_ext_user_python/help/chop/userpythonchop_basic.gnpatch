@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "userpythonchop1": {
+            "type": "UserPythonCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "auto_reload": {"value": true},
+                "time_dep": {"value": true}
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 256}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 256}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "userpythonchop1", "from_port": 0, "to": "choptop1", "to_port": 0},
+        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UserPythonCHOP \u2014 Python Signal Processing\n\nWrite CHOP operators in Python using NumPy.\nThe default example generates phase-offset sine channels.\n\nUse gonodes.chop helpers: make_chop_result(channels_dict)\nfor multi-channel output with sample rate.\n\nLoad the Signal Generator example for waveform selection.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

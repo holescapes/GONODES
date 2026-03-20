@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "userpythondat1": {
+            "type": "UserPythonDAT",
+            "position": [100, 100],
+            "parameters": {
+                "auto_reload": {"value": true},
+                "time_dep": {"value": false}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "userpythondat1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UserPythonDAT \u2014 Python Data Processing\n\nWrite DAT operators in Python for table/text manipulation.\nThe default example filters rows by string match.\nLoad the CSV Parser example for structured CSV parsing.\n\nPython's stdlib (csv, json, re, etc.) is available \u2014\nno need to pip install anything for basic data work.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

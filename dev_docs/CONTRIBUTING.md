@@ -13,14 +13,15 @@
 3. [Development Setup](#3-development-setup)
 4. [Contributing a New Operator](#4-contributing-a-new-operator)
 5. [Contributing an Extension](#5-contributing-an-extension)
-6. [Code Style & Conventions](#6-code-style--conventions)
-7. [Documentation Requirements](#7-documentation-requirements)
-8. [Help System Integration](#8-help-system-integration)
-9. [Testing Requirements](#9-testing-requirements)
-10. [Hard Rules — Non-Negotiable](#10-hard-rules--non-negotiable)
-11. [Pull Request Checklist](#11-pull-request-checklist)
-12. [Architecture Guidelines](#12-architecture-guidelines)
-13. [Common Pitfalls](#13-common-pitfalls)
+6. [User Native C++ Nodes (gn_ext_user_native)](#6-user-native-c-nodes-gn_ext_user_native)
+7. [Code Style & Conventions](#7-code-style--conventions)
+8. [Documentation Requirements](#8-documentation-requirements)
+9. [Help System Integration](#9-help-system-integration)
+10. [Testing Requirements](#10-testing-requirements)
+11. [Hard Rules — Non-Negotiable](#11-hard-rules--non-negotiable)
+12. [Pull Request Checklist](#12-pull-request-checklist)
+13. [Architecture Guidelines](#13-architecture-guidelines)
+14. [Common Pitfalls](#14-common-pitfalls)
 
 ---
 
@@ -465,7 +466,76 @@ This keeps patches portable — the same `.gnpatch` works on every platform with
 
 ---
 
-## 6. Code Style & Conventions
+## 6. User Native C++ Nodes (gn_ext_user_native)
+
+GONODES ships a hot-reloadable C++ scripting system in `addons/gn_ext_user_native/` that lets end users write native-speed operators directly inside the editor. This section is for **contributors modifying the user_native infrastructure itself** — not for end users writing C++ nodes (see the in-editor help or `addons/gn_ext_user_native/README.md` for that).
+
+### Architecture
+
+```
+User writes .h file (extending gn::GNUserNode)
+        ↓
+GNNativeCompiler (core/gn_native_compiler.gd)
+  ├─ SCons build (primary) or direct compiler fallback (MSVC/GCC/Clang)
+  ├─ Links against godot-cpp (toolchain/ → GODOT_CPP_PATH env → gn_ext_native/)
+  └─ Produces .dll/.so/.dylib
+        ↓
+GNNativeReloader (core/gn_native_reloader.gd)
+  ├─ Unloads old GDExtension
+  ├─ Loads new GDExtension via GDExtensionManager
+  └─ ClassDB.instantiate(class_name) → new processor
+        ↓
+GDScript Wrapper (operators/sop/user_native_sop.gd etc.)
+  ├─ Calls _processor.native_setup(context)   ← once after load
+  ├─ Calls _processor.native_cook(params, inputs, context)   ← each dirty frame
+  ├─ Calls _processor.get_port_definitions()   ← dynamic I/O
+  └─ Calls _processor.get_param_definitions()  ← dynamic params
+```
+
+### Lifecycle methods
+
+| Method | Signature | When called |
+|--------|-----------|-------------|
+| `native_setup(context)` | `void native_setup(const Dictionary &context)` | Once after instantiation + after each hot-reload |
+| `native_cook(params, inputs, context)` | `Dictionary native_cook(const Dictionary &params, const Array &inputs, const Dictionary &context)` | Each frame the node is dirty |
+| `get_port_definitions()` | `Array get_port_definitions()` | After setup, to define inputs/outputs |
+| `get_param_definitions()` | `Array get_param_definitions()` | After setup, to define user parameters |
+
+### SDK headers (in `sdk/`)
+
+| Header | Purpose |
+|--------|---------|
+| `gn_user_node.h` | Base class + lifecycle + param reader helpers (`parf`, `pari`, `parb`, `pars`, `parc`, `parv3`) |
+| `gn_user_types.h` | Type aliases + param definition factories (`gn::parf()`, `gn::pari()`, `gn::make_vector3()`, etc.) |
+| `gn_user_sop.h` | SOP output helpers (`make_sop_result()`, `make_point_cloud()`) |
+| `gn_user_chop.h` | CHOP output helpers (`make_chop_single()`, `make_chop_result()`) |
+| `gn_user_img.h` | IMG output helpers (`make_img_result()`, `get_input_image()`) |
+| `gn_user_top.h` | TOP output helpers (`make_top_shader_result()`, `make_top_image_result()`) |
+| `gn_user_dat.h` | DAT output helpers (`make_dat_table()`, `make_dat_text()`) |
+
+### Vector3 parameter handling
+
+GNParameter has **no `create_vector3()`**. Vector3 params must be split into 3 float params with `_x`/`_y`/`_z` suffixes. The wrapper operators handle this automatically via `_add_vector3_params()` (splitting) and `_gather_user_params()` (reassembling). If you add a new param type to the SDK, you must update **all 5 wrapper operators**.
+
+### Modifying the build system
+
+Two build paths exist:
+1. **SCons** (primary) — uses godot-cpp's SConstruct
+2. **Direct compiler** (fallback) — invokes MSVC/GCC/Clang directly with hardcoded flags
+
+Both live in `gn_native_compiler.gd`. The CLI equivalent is `build_user_node.py`. Changes to compiler flags or godot-cpp discovery must be mirrored in both files.
+
+### Release impact
+
+Any changes to the SDK headers, build system, or wrapper operators affect the release process:
+- SDK header changes → update `toolchain/README.md`, examples, templates
+- Build system changes → update both `gn_native_compiler.gd` and `build_user_node.py`
+- New param types → update all 5 wrappers + SDK `gn_user_types.h`
+- godot-cpp version changes → must re-bundle in `toolchain/godot-cpp/` (see `RELEASE_CHECKLIST.md` Phase 3)
+
+---
+
+## 7. Code Style & Conventions
 
 ### General
 
