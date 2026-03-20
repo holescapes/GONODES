@@ -19,26 +19,52 @@ Each UserNative operator:
 - Falls back to a "no output" state if compilation fails (with error display)
 - Preserves all parameters and connections across reloads
 
+## Building
+
+### From the editor
+
+Press **Ctrl+B** in the C++ code editor — the `GNNativeCompiler` handles everything:
+writes source, generates register_types.cpp + SConstruct + .gdextension,
+invokes SCons (or falls back to direct g++/clang++/cl compilation), and
+hot-reloads the result.
+
+### From the command line
+
+```bash
+cd addons/gn_ext_user_native
+python build_user_node.py examples/wave_deform_sop.h WaveDeformSOP
+python build_user_node.py my_node.h MyNode --clean --platform windows --arch x86_64
+```
+
+See `python build_user_node.py --help` for full options.
+
+### godot-cpp discovery order
+
+1. `toolchain/godot-cpp/` — local clone
+2. `GODOT_CPP_PATH` environment variable
+3. `addons/gn_ext_native/native/godot-cpp/` — project's shared copy
+
 ## Directory Structure
 
 ```
 addons/gn_ext_user_native/
 ├── gn_extension.cfg         # Extension manifest
+├── build_user_node.py       # CLI build script
 ├── README.md                # This file
 ├── operators/               # GDScript wrapper operators
-│   ├── sop/
-│   ├── chop/
-│   ├── img/
-│   ├── top/
-│   └── dat/
+│   ├── user_native_sop.gd
+│   ├── user_native_chop.gd
+│   ├── user_native_img.gd
+│   ├── user_native_top.gd
+│   └── user_native_dat.gd
 ├── sdk/                     # C++ SDK headers (user-facing API)
 │   ├── gn_user_node.h       # Base class for all user nodes
-│   ├── gn_user_sop.h        # SOP-specific helpers
-│   ├── gn_user_chop.h       # CHOP-specific helpers
-│   ├── gn_user_img.h        # IMG-specific helpers
-│   ├── gn_user_top.h        # TOP-specific helpers
-│   ├── gn_user_dat.h        # DAT-specific helpers
-│   └── gn_user_types.h      # Common type aliases
+│   ├── gn_user_types.h      # Type aliases + param factories
+│   ├── gn_user_sop.h        # SOP output helpers
+│   ├── gn_user_chop.h       # CHOP output helpers
+│   ├── gn_user_img.h        # IMG output helpers
+│   ├── gn_user_top.h        # TOP output helpers
+│   └── gn_user_dat.h        # DAT output helpers
 ├── templates/               # Starter templates for each family
 │   ├── sop_template.h
 │   ├── chop_template.h
@@ -46,22 +72,18 @@ addons/gn_ext_user_native/
 │   ├── top_template.h
 │   └── dat_template.h
 ├── examples/                # Example C++ source files
-│   ├── wave_deform_sop.h    # SOP: sine wave vertex deformer
-│   ├── signal_gen_chop.h    # CHOP: multi-waveform generator
-│   ├── edge_detect_img.h    # IMG: Sobel edge detection
-│   ├── life_top.h           # TOP: Conway's Game of Life
-│   └── csv_parse_dat.h      # DAT: fast CSV parser
+│   ├── wave_deform_sop.h    # Sine wave vertex deformer
+│   ├── scatter_sop.h        # Point scatter (vector3/enum)
+│   ├── signal_gen_chop.h    # Multi-waveform generator
+│   ├── edge_detect_img.h    # Sobel edge detection
+│   ├── life_top.h           # Conway's Game of Life
+│   ├── gradient_top.h       # GPU gradient generator
+│   └── csv_parse_dat.h      # Fast CSV parser
 ├── toolchain/               # Bundled compiler (populated at install)
 │   └── README.md
 ├── help/                    # Help documentation and example patches
-│   ├── user_native.md       # Main guide
-│   ├── sop/
-│   ├── chop/
-│   ├── img/
-│   ├── top/
-│   └── dat/
 └── core/                    # Internal infrastructure
-    ├── gn_native_compiler.gd    # Compilation manager
+    ├── gn_native_compiler.gd    # Compilation + direct fallback
     ├── gn_native_reloader.gd    # Hot-reload manager
     ├── gn_native_file_watch.gd  # File change detection
     └── gn_cpp_code_editor.gd    # C++ code editor window

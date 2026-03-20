@@ -88,6 +88,30 @@ func _init() -> void:
 	_ext_dir = "res://addons/gn_ext_user_native/"
 
 
+## Remove build artifacts for a specific node.
+func clean_build(node_id: String) -> void:
+	var build_dir := _get_build_dir(node_id)
+	if DirAccess.dir_exists_absolute(build_dir):
+		_remove_dir_recursive(build_dir)
+
+
+func _remove_dir_recursive(path: String) -> void:
+	var dir := DirAccess.open(path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var fname := dir.get_next()
+	while not fname.is_empty():
+		var full := path.path_join(fname)
+		if dir.current_is_dir():
+			_remove_dir_recursive(full)
+		else:
+			DirAccess.remove_absolute(full)
+		fname = dir.get_next()
+	dir.list_dir_end()
+	DirAccess.remove_absolute(path)
+
+
 ## Compile a user C++ source file for a specific node.
 ## @param node_id       Unique node identifier
 ## @param source_code   The full C++ source text
@@ -131,6 +155,7 @@ func _do_compile(node_id: String, source: String, cls_name: String,
 
 	var source_filename := cls_name.to_snake_case() + ".h"
 	var platform := _get_platform()
+	var arch := _get_arch()
 	var lib_name := "libuser_%s" % node_id.replace("-", "_")
 
 	# Write source file
@@ -167,21 +192,29 @@ func _do_compile(node_id: String, source: String, cls_name: String,
 	f.store_string(sconstruct)
 	f.close()
 
-	# Run SCons
+	# Run SCons, or fall back to direct compiler invocation
 	var scons_path := _find_scons()
-	if scons_path.is_empty():
-		return {"success": false, "output": "SCons not found. Install SCons or check the bundled toolchain.", "lib_path": ""}
+	var output_text := ""
+	var exit_code := -1
 
-	var args := PackedStringArray([
-		"-C", ProjectSettings.globalize_path(build_dir),
-		"platform=%s" % platform,
-		"target=template_release",
-		"-j%d" % OS.get_processor_count(),
-	])
+	if not scons_path.is_empty():
+		var args := PackedStringArray([
+			"-C", ProjectSettings.globalize_path(build_dir),
+			"platform=%s" % platform,
+			"arch=%s" % arch,
+			"target=template_release",
+			"-j%d" % OS.get_processor_count(),
+		])
 
-	var output := []
-	var exit_code := OS.execute(scons_path, args, output, true)
-	var output_text := "\n".join(output)
+		var output := []
+		exit_code = OS.execute(scons_path, args, output, true)
+		output_text = "\n".join(output)
+	else:
+		# Fallback: try direct compiler invocation
+		var direct_result := _compile_direct(build_dir, source_filename, lib_name,
+			platform, arch, godot_cpp_path, sdk_path)
+		exit_code = direct_result["exit_code"]
+		output_text = direct_result["output"]
 
 	if exit_code != 0:
 		return {"success": false, "output": output_text, "lib_path": ""}
@@ -192,7 +225,7 @@ func _do_compile(node_id: String, source: String, cls_name: String,
 		return {"success": false, "output": "Build succeeded but library not found.\n" + output_text, "lib_path": ""}
 
 	# Write .gdextension file
-	_write_gdextension(build_dir, lib_name, lib_path, platform)
+	_write_gdextension(build_dir, lib_name, lib_path, platform, arch)
 
 	return {"success": true, "output": output_text, "lib_path": lib_path}
 
@@ -212,18 +245,30 @@ func _get_platform() -> String:
 		return "linux"
 
 
+func _get_arch() -> String:
+	var features := OS.get_processor_name().to_lower()
+	if features.contains("arm") or features.contains("aarch64"):
+		return "arm64"
+	return "x86_64"
+
+
 func _find_godot_cpp() -> String:
-	# 1. Bundled with extension
+	# 1. Extension's bundled toolchain
 	var bundled := ProjectSettings.globalize_path(
 		_ext_dir + "toolchain/godot-cpp")
 	if DirAccess.dir_exists_absolute(bundled):
 		return bundled
 
-	# 2. Project-level
-	var project_level := ProjectSettings.globalize_path(
-		"res://addons/gn_ext_user_native/toolchain/godot-cpp")
-	if DirAccess.dir_exists_absolute(project_level):
-		return project_level
+	# 2. GODOT_CPP_PATH environment variable
+	var env_path := OS.get_environment("GODOT_CPP_PATH")
+	if not env_path.is_empty() and DirAccess.dir_exists_absolute(env_path):
+		return env_path
+
+	# 3. Project's gn_ext_native bundled godot-cpp (shared by all extensions)
+	var project_native := ProjectSettings.globalize_path(
+		"res://addons/gn_ext_native/native/godot-cpp")
+	if DirAccess.dir_exists_absolute(project_native):
+		return project_native
 
 	return ""
 
@@ -261,11 +306,17 @@ func _find_compiled_lib(build_dir: String, lib_name: String, platform: String) -
 
 
 func _write_gdextension(build_dir: String, lib_name: String,
-		lib_path: String, platform: String) -> void:
+		lib_path: String, platform: String, arch: String = "x86_64") -> void:
 	var lib_entries := ""
 	var relative_path := "bin/" + lib_path.get_file()
-	lib_entries += '%s.debug.x86_64 = "%s"\n' % [platform, relative_path]
-	lib_entries += '%s.release.x86_64 = "%s"\n' % [platform, relative_path]
+
+	if platform == "macos":
+		# macOS uses universal/bare keys without explicit arch
+		lib_entries += 'macos.debug = "%s"\n' % relative_path
+		lib_entries += 'macos.release = "%s"\n' % relative_path
+	else:
+		lib_entries += '%s.debug.%s = "%s"\n' % [platform, arch, relative_path]
+		lib_entries += '%s.release.%s = "%s"\n' % [platform, arch, relative_path]
 
 	var content := _GDEXTENSION_TEMPLATE.format({"lib_entries": lib_entries}).strip_edges()
 	var gde_path := build_dir.path_join(lib_name + ".gdextension")
@@ -276,8 +327,14 @@ func _write_gdextension(build_dir: String, lib_name: String,
 
 
 ## Check if a compiler is available on this system.
+## Returns true if godot-cpp is found and either SCons or a direct compiler exists.
 func is_toolchain_available() -> bool:
-	if not _find_godot_cpp().is_empty() and not _find_scons().is_empty():
+	if _find_godot_cpp().is_empty():
+		return false
+	if not _find_scons().is_empty():
+		return true
+	# SCons absent — check for direct compiler fallback
+	if not _find_system_compiler().is_empty():
 		return true
 	return false
 
@@ -287,39 +344,162 @@ func get_toolchain_status() -> String:
 	var status := ""
 	var godot_cpp := _find_godot_cpp()
 	var scons := _find_scons()
+	var compiler := _find_system_compiler()
 
 	if godot_cpp.is_empty():
-		status += "⚠ godot-cpp not found. Place it in toolchain/godot-cpp/\n"
+		status += "⚠ godot-cpp not found.\n"
+		status += "  Place it in toolchain/godot-cpp/, set GODOT_CPP_PATH,\n"
+		status += "  or ensure gn_ext_native/native/godot-cpp/ exists.\n"
 	else:
 		status += "✓ godot-cpp: %s\n" % godot_cpp
 
 	if scons.is_empty():
-		status += "⚠ SCons not found. Install SCons: pip install scons\n"
+		if compiler.is_empty():
+			status += "⚠ SCons not found and no system compiler detected.\n"
+			status += "  Install SCons: pip install scons\n"
+		else:
+			status += "⚠ SCons not found — will use direct compiler fallback.\n"
+			status += "✓ Compiler: %s\n" % compiler
 	else:
 		status += "✓ SCons: %s\n" % scons
 
-	return status.strip_edges()
+	status += "✓ Platform: %s  Arch: %s\n" % [_get_platform(), _get_arch()]
+	return status
 
 
-## Clean build artifacts for a node.
-func clean_build(node_id: String) -> void:
-	var build_dir := _get_build_dir(node_id)
-	if DirAccess.dir_exists_absolute(build_dir):
-		_remove_dir_recursive(build_dir)
+# ── Direct compiler fallback ──────────────────────────────────────────────────
 
 
-func _remove_dir_recursive(path: String) -> void:
-	var dir := DirAccess.open(path)
-	if dir == null:
-		return
-	dir.list_dir_begin()
-	var fname := dir.get_next()
-	while not fname.is_empty():
-		var full_path := path.path_join(fname)
-		if dir.current_is_dir():
-			_remove_dir_recursive(full_path)
-		else:
-			dir.remove(fname)
-		fname = dir.get_next()
-	dir.list_dir_begin()  # reset
-	DirAccess.remove_absolute(path)
+## Find a usable C++ compiler on the system.
+func _find_system_compiler() -> String:
+	var platform := _get_platform()
+	var candidates: PackedStringArray
+	if platform == "windows":
+		candidates = PackedStringArray(["cl", "g++", "clang++"])
+	else:
+		candidates = PackedStringArray(["g++", "clang++"])
+
+	for cmd in candidates:
+		var output := []
+		var args := PackedStringArray(["--version"]) if cmd != "cl" else PackedStringArray()
+		var code := OS.execute(cmd, args, output, true)
+		if code == 0 or (cmd == "cl" and code != -1):
+			return cmd
+	return ""
+
+
+## Compile using direct compiler invocation when SCons is not available.
+## Requires godot-cpp to be already built (pre-built static lib must exist).
+func _compile_direct(build_dir: String, source_filename: String,
+		lib_name: String, platform: String, arch: String,
+		godot_cpp_path: String, sdk_path: String) -> Dictionary:
+	var compiler := _find_system_compiler()
+	if compiler.is_empty():
+		return {"exit_code": 1, "output": "No compiler found. Install a C++ compiler or SCons."}
+
+	var global_build_dir := ProjectSettings.globalize_path(build_dir)
+	var bin_dir := global_build_dir.path_join("bin")
+	if not DirAccess.dir_exists_absolute(bin_dir):
+		DirAccess.make_dir_recursive_absolute(bin_dir)
+
+	var suffix := ".%s.template_release.%s" % [platform, arch]
+	var includes := [
+		godot_cpp_path.path_join("include"),
+		godot_cpp_path.path_join("gen/include"),
+		godot_cpp_path.path_join("gdextension"),
+		sdk_path,
+	]
+
+	# Find the pre-built godot-cpp library
+	var godotcpp_lib := ""
+	if platform == "windows":
+		godotcpp_lib = godot_cpp_path.path_join(
+			"bin/libgodot-cpp%s.lib" % suffix)
+	else:
+		godotcpp_lib = godot_cpp_path.path_join(
+			"bin/libgodot-cpp%s.a" % suffix)
+
+	if not FileAccess.file_exists(godotcpp_lib):
+		return {"exit_code": 1, "output": "godot-cpp pre-built library not found at: %s\nBuild godot-cpp first with SCons, then retry." % godotcpp_lib}
+
+	var source_cpp := global_build_dir.path_join("register_types.cpp")
+	var output := []
+	var exit_code := 0
+
+	# On Linux ARM64, prefer aarch64-linux-gnu-g++ for cross-compilation
+	if platform == "linux" and arch == "arm64" and compiler == "g++":
+		var cross_output := []
+		var cross_code := OS.execute("aarch64-linux-gnu-g++", PackedStringArray(["--version"]), cross_output, true)
+		if cross_code == 0:
+			compiler = "aarch64-linux-gnu-g++"
+
+	if platform == "windows" and compiler == "cl":
+		exit_code = _compile_direct_msvc(global_build_dir, bin_dir,
+			source_cpp, lib_name, suffix, includes, godotcpp_lib, output, arch)
+	else:
+		exit_code = _compile_direct_gcc(compiler, global_build_dir, bin_dir,
+			source_cpp, lib_name, suffix, platform, includes, godotcpp_lib, output, arch)
+
+	return {"exit_code": exit_code, "output": "\n".join(output)}
+
+
+func _compile_direct_msvc(build_dir: String, bin_dir: String,
+		source_cpp: String, lib_name: String, suffix: String,
+		includes: Array, godotcpp_lib: String,
+		output: Array, arch: String = "x86_64") -> int:
+	var obj_path := build_dir.path_join("register_types.obj")
+	var dll_path := bin_dir.path_join("%s%s.dll" % [lib_name, suffix])
+
+	# Compile
+	var compile_args := PackedStringArray([
+		"/c", "/std:c++17", "/EHsc", "/utf-8",
+		"/O2", "/MT", "/DNDEBUG",
+		"/DWINDOWS_ENABLED", "/DTYPED_METHOD_BIND", "/DNOMINMAX",
+		"/DWIN32", "/D_WIN32",
+	])
+	if arch == "arm64":
+		compile_args.append("/arch:ARM64")
+	for inc in includes:
+		compile_args.append("/I%s" % inc)
+	compile_args.append_array(PackedStringArray(["/Fo%s" % obj_path, source_cpp]))
+
+	var code := OS.execute("cl", compile_args, output, true)
+	if code != 0:
+		return code
+
+	# Link
+	var link_args := PackedStringArray([
+		"/DLL", "/OUT:%s" % dll_path,
+		obj_path, godotcpp_lib,
+	])
+	code = OS.execute("link", link_args, output, true)
+	return code
+
+
+func _compile_direct_gcc(compiler: String, build_dir: String, bin_dir: String,
+		source_cpp: String, lib_name: String, suffix: String,
+		platform: String, includes: Array, godotcpp_lib: String,
+		output: Array, arch: String = "x86_64") -> int:
+	var lib_ext := ".so" if platform == "linux" else ".dylib"
+	var lib_path := bin_dir.path_join("%s%s%s" % [lib_name, suffix, lib_ext])
+
+	var args := PackedStringArray([
+		"-std=c++17", "-fPIC", "-O2", "-DNDEBUG",
+		"-DTYPED_METHOD_BIND",
+	])
+
+	if platform == "linux":
+		args.append("-DLINUX_ENABLED")
+		args.append_array(PackedStringArray(["-shared", "-o", lib_path]))
+	else:  # macOS
+		args.append("-DMACOS_ENABLED")
+		args.append_array(PackedStringArray(["-arch", arch]))
+		args.append_array(PackedStringArray(["-dynamiclib", "-o", lib_path]))
+
+	for inc in includes:
+		args.append("-I%s" % inc)
+	args.append(source_cpp)
+	args.append(godotcpp_lib)
+
+	var code := OS.execute(compiler, args, output, true)
+	return code
