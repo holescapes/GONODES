@@ -1,0 +1,36 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}}
+            }
+        },
+        "bm_out1": {
+            "type": "BlackmagicOutTOP",
+            "position": [500, 200],
+            "parameters": {
+                "device": {"value": 0},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}},
+                "fps": {"value": 4},
+                "active": {"value": false}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "bm_out1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Blackmagic Out TOP \u2014 SDI Output\n\nSends noise texture to SDI/HDMI via DeckLink.\nThe input TOP is converted to RGBA, resized to\nthe output resolution, and scheduled for playback.\nSet active=true to begin output.",
+            "position": [-100.0, -60.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

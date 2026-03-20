@@ -44,8 +44,12 @@ func _init_parameters() -> void:
 		"Constraint Iterations", "Solver iterations per step (higher = stiffer)"))
 	add_parameter(GNParameter.create_float("stiffness", 1.0, 0.0, 1.0, 0.01,
 		"Stiffness", "Constraint stiffness (1 = rigid, 0 = jelly)"))
-	add_parameter(GNParameter.create_vector3("wind", Vector3.ZERO,
-		"Wind", "Wind force vector"))
+	add_parameter(GNParameter.create_float("wind_x", 0.0, -100.0, 100.0, 0.01,
+		"Wind X", "Wind force X component"))
+	add_parameter(GNParameter.create_float("wind_y", 0.0, -100.0, 100.0, 0.01,
+		"Wind Y", "Wind force Y component"))
+	add_parameter(GNParameter.create_float("wind_z", 0.0, -100.0, 100.0, 0.01,
+		"Wind Z", "Wind force Z component"))
 	add_parameter(GNParameter.create_enum("pin_mode",
 		PackedStringArray(["Top Row", "Top Corners", "Custom Attrib", "None"]), 0,
 		"Pin Mode", "Which vertices are fixed in place"))
@@ -57,7 +61,7 @@ func _init_parameters() -> void:
 
 func _pre_cook(delta: float) -> void:
 	super._pre_cook(delta)
-	if _is_pulse_active("reset"):
+	if get_param_value("reset"):
 		_initialized = false
 		mark_dirty()
 
@@ -77,7 +81,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var damping_val: float = get_param_value("damping")
 	var iterations: int = get_param_value("iterations")
 	var stiffness_val: float = get_param_value("stiffness")
-	var wind_val: Vector3 = get_param_value("wind")
+	var wind_val := Vector3(get_param_value("wind_x"), get_param_value("wind_y"), get_param_value("wind_z"))
 	var substep_count: int = int(get_param_value("substeps"))
 	var dt: float = current_delta / float(substep_count) if substep_count > 0 else current_delta
 

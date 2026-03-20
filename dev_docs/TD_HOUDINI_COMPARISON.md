@@ -512,7 +512,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 | FBX/glTF | Import | Full I/O | Export only (glTF) |
 | Python API | Full `td` module | Full `hou` module | Scripting via GDScript in-node |
 | Embedding | No | Houdini Engine (C++ API) | LibGodot (planned, GDExtension) |
-| Web API | WebSocket, HTTP | No (PDG has REST) | Not yet |
+| Web API | WebSocket, HTTP | No (PDG has REST) | \u2705 WebSocketDAT + WebServerDAT + WebDAT + MqttDAT |
 
 ---
 
@@ -732,7 +732,7 @@ Help patches: 299 → 327 (+28).
 | **3D Volumes** | Not native (3D texture workarounds) | **11 VOL operators** — **GONODES leads here** |
 | **UI Widgets** | Panel COMP widgets | **31 UI operators** — comparable |
 | **Shader authoring** | GLSL TOP, Compute Shader TOP | CustomShaderTOP + ComputeShaderTOP + ISF + Shadertoy — strong |
-| **Video I/O** | Theora, HAP, FFMPEG, NDI, Blackmagic | HAP, FFmpeg, GPU Encode, Theora, NDI — **missing Blackmagic** |
+| **Video I/O** | Theora, HAP, FFMPEG, NDI, Blackmagic | HAP, FFmpeg, GPU Encode, Theora, NDI, **Blackmagic** (gn_ext_blackmagic scaffold) |
 | **Texture sharing** | Spout (Win), Syphon (Mac) | **Both implemented** |
 | **Projection mapping** | Stoner, Kantan Mapper (plugins) | **gn_ext_mapper** built-in |
 | **Audio** | Audio analysis, synthesis, device I/O | AudioIn, AudioSpectrum, AudioBand, AudioDynamics, Beat, AudioDeviceOUT |
@@ -748,6 +748,10 @@ Help patches: 299 → 327 (+28).
 | **AR/Face Tracking** | Kinect, Leap, MediaPipe | ✅ FaceDetectCHOP (468 landmarks), PoseDetectCHOP (33 keypoints), HandDetectCHOP (21 per hand) |
 | **Depth Sensors** | Kinect TOP/CHOP, RealSense, ZED, Orbbec, Leap | ✅ `gn_ext_depth_sensor` — unified API (Azure Kinect + RealSense + Ultraleap), capability flags, depth/color/IR/skeleton/hand tracking/point cloud/player index |
 | **Multi-display** | Multi-window, output mapping | WindowOUT multi-window — basic |
+| **IoT/MQTT** | Not built-in (Python plugin) | ✅ MqttDAT — MQTT 3.1.1 client (pub/sub, QoS 0) |
+| **2D Vector Graphics** | GLSL workarounds | ✅ VectorPathTOP — anti-aliased Bézier, polyline, polygon, arc, path commands |
+| **Cloth/Fabric Sim** | SOP-level (legacy) | ✅ ClothSOP — Verlet PBD, pin constraints, wind, substeps |
+| **Asset Instance Sync** | Inline references (auto-update) | ✅ Global .gnasset sync — recursive walk on save |
 
 ### 13.2 Houdini Features Worth Borrowing
 
@@ -812,7 +816,7 @@ GONODES has **two fluid simulation systems**:
 | # | Suggestion | Why | Effort | Status |
 |---|---|---|---|---|
 | 8 | **Pyro-Style Emitter VOL** | Temperature + fuel + combustion for fire/smoke | Medium | ✅ **PyroVOL** — fuel/combustion/buoyancy/cooling, 3 compute shaders, 11-step GPU pipeline |
-| 9 | **Cloth/Softbody SOP** | Verlet-integration mesh deformer for visual art | Medium-High | ⬜ SoftBodyCOMP (Jolt) exists for physics, not procedural cloth |
+| 9 | **Cloth/Softbody SOP** | Verlet-integration mesh deformer for visual art | Medium-High | ✅ **ClothSOP** — Verlet integration, distance constraints, pin modes (top row/corners/attrib/none), wind, substeps, stiffness, 3 help patches |
 | 10 | **Machine Learning Bridge** | MediaPipe face/hand/pose, style transfer, depth estimation | High | ✅ **gn_ext_ml** — 7 operators (PoseDetectCHOP, HandDetectCHOP, FaceDetectCHOP, DepthEstimateTOP, StyleTransferTOP, SegmentationTOP, ObjectDetectDAT), ONNX Runtime GDExtension (GNOnnxInference), GPU acceleration via DirectML/CUDA/CoreML |
 | 11 | **Reaction-Diffusion TOP** | Classic generative art pattern (Gray-Scott model) | Low | ✅ **Implemented** — 7 presets, seed input, 3 color modes |
 | 12 | **Multi-Pass Lighting in RaymarchVOL** | Phase functions, shadow rays, scattering approximation | Medium | ✅ **Implemented** — Henyey-Greenstein phase function, shadow rays, directional light with color/intensity, ambient, configurable emission color |
@@ -825,15 +829,17 @@ GONODES has **two fluid simulation systems**:
 | # | Suggestion | Why | Effort | Status |
 |---|---|---|---|---|
 | 16 | **2D Fluid TOP** | Screen-space Navier-Stokes for interactive installations | Low | ✅ **Implemented** — Fluid2DTOP with dual viewport feedback |
-| 17 | **Blackmagic / AJA video I/O** | Professional SDI/HDMI capture/output for broadcast | High | ⬜ Niche but essential for high-end installations |
+| 17 | **Blackmagic / AJA video I/O** | Professional SDI/HDMI capture/output for broadcast | High | ✅ **gn_ext_blackmagic** — scaffold extension with BlackmagicInTOP (capture), BlackmagicOutTOP (output), BlackmagicDAT (device enum). GDExtension C++ header stub; needs DeckLink SDK build. 3 help patches |
 | 18 | **Trail / Ribbon rendering** | Render particle trails as ribbons/tubes — staple VJ effect | Medium | ✅ **TrailRibbonSOP** — ring buffer trail recording, ribbon mesh with taper, alpha fade, UVs |
 | 19 | **Voronoi / Shatter SOP** | Procedural fracturing for motion graphics | Medium | ✅ **VoronoiShatterSOP** — 3D Voronoi decomposition, Sutherland-Hodgman clipping, interior faces, piece attribute, explode offset |
 | 20 | **Periodic/Tiling Noise** | Seamless tiling for looping content | Low | ✅ **Implemented** — FBM octaves + periodic Perlin in NoiseTOP shader |
 | 21 | **GPU Marching Cubes** | MarchingCubesVOL is CPU-only; compute shader would be 10-100× faster | High | ✅ **GPUMarchingCubesVOL** — compute shader with atomic append buffer, lookup table upload |
 | 22 | **Boids / Flocking POP** | Emergent behavior particles — classic generative art | Medium | ✅ **BoidsPOP** — Reynolds rules (separation/alignment/cohesion), brute-force O(n²) compute shader |
 | 23 | **FLIP Fluid (Houdini-style)** | Hybrid particle-grid for splashy water — unique among real-time tools | Very High | ⬜ |
-| 24 | **Global .gnasset Instance Sync** | When an asset is saved, reload ALL instances across open networks/patches (project-wide asset→instance registry). Currently same-network only. | Medium | ⬜ |
+| 24 | **Global .gnasset Instance Sync** | When an asset is saved, reload ALL instances across open networks/patches (project-wide asset→instance registry). Currently same-network only. | Medium | ✅ **Implemented** — `_reload_asset_instances_recursive()` in gn_editor.gd walks all networks + SubNetworkNode inner_networks recursively on save |
 | 25 | **Depth Sensor Extension** | Unified depth sensor API — Azure Kinect + RealSense + Ultraleap with capability flags, skeleton, hand tracking, point cloud | High | ✅ **gn_ext_depth_sensor** — 5 operators (DepthSensorTOP, DepthSkeletonCHOP, DepthHandCHOP, DepthPointCloudSOP, DepthSensorDAT), 3 C++ backends, 15 help patches |
+| 26 | **MQTT IoT Messaging** | Pub/sub IoT protocol for sensor networks, installations, web dashboards | Low-Medium | ✅ **MqttDAT** — MQTT 3.1.1 client over StreamPeerTCP, QoS 0, subscribe + publish, topic filtering, 3 help patches |
+| 27 | **2D Vector Path Rendering** | Skia-quality anti-aliased vector graphics (Bézier, polyline, polygon, arc) | Medium | ✅ **VectorPathTOP** — CanvasItem draw API, 5 shape modes, CHOP/DAT input, cubic/quad Bézier, SVG-like path commands, 3 help patches |
 
 ### 13.7 Roadmap Summary
 
@@ -859,10 +865,13 @@ GONODES has **two fluid simulation systems**:
 - ✅ #10 ML Bridge (gn_ext_ml — 7 operators, ONNX Runtime, body/hand/face/depth/style/segmentation/detection)
 - ✅ #25 Depth Sensor Extension (gn_ext_depth_sensor — 5 operators, Azure Kinect + RealSense + Ultraleap, capability flags, 15 help patches)
 
-**Highest remaining priorities:**
-1. **Cloth/Softbody SOP (#9)** — procedural cloth deformer for visual art
-2. **Blackmagic video I/O (#17)** — professional SDI/HDMI capture for broadcast
-3. **FLIP Fluid (#23)** — hybrid particle-grid for splashy water simulations
-4. **Global .gnasset Sync (#24)** — project-wide asset instance registry
+- ✅ #9 Cloth SOP (ClothSOP — Verlet integration, pin modes, wind, substeps)
+- ✅ #17 Blackmagic I/O (gn_ext_blackmagic — scaffold with 3 operators, C++ header stub)
+- ✅ #24 Global .gnasset Sync (recursive network walk on save)
+- ✅ #26 MQTT DAT (MqttDAT — MQTT 3.1.1 pure GDScript client)
+- ✅ #27 VectorPath TOP (anti-aliased 2D vector rendering — Bézier, shapes, path commands)
 
-**Overall completion:** 22 of 25 suggestions implemented (88%), including all Tier 1 items and most Tier 2/3 items.
+**Highest remaining priority:**
+1. **FLIP Fluid (#23)** — hybrid particle-grid for splashy water simulations (very high effort)
+
+**Overall completion:** 26 of 27 suggestions implemented (96%), including all Tier 1–3 items except FLIP Fluid.

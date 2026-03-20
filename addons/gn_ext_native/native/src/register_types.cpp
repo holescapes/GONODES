@@ -147,6 +147,20 @@
 #include "pop/gn_native_source_pop.h"
 #include "pop/gn_native_limit_pop.h"
 
+// SOP processors — Phase 9 (CPU-hot audit migration)
+#include "sop/gn_native_cloth_sop.h"
+#include "sop/gn_native_texture_sop.h"
+#include "sop/gn_native_peak_sop.h"
+#include "sop/gn_native_group_sop.h"
+#include "sop/gn_native_polyspline_sop.h"
+#include "sop/gn_native_polypatch_sop.h"
+#include "sop/gn_native_polybridge_sop.h"
+
+// CHOP processors — Phase 9 (CPU-hot audit migration)
+#include "chop/gn_native_transform_chop.h"
+#include "chop/gn_native_lag_chop.h"
+#include "chop/gn_native_blend_chop.h"
+
 using namespace godot;
 
 void initialize_gn_native_module(ModuleInitializationLevel p_level) {
@@ -296,6 +310,20 @@ void initialize_gn_native_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<GNNativeTurbulencePop>();
     ClassDB::register_class<GNNativeSourcePop>();
     ClassDB::register_class<GNNativeLimitPop>();
+
+    // SOP processors — Phase 9 (CPU-hot audit migration)
+    ClassDB::register_class<GNNativeClothSop>();
+    ClassDB::register_class<GNNativeTextureSop>();
+    ClassDB::register_class<GNNativePeakSop>();
+    ClassDB::register_class<GNNativeGroupSop>();
+    ClassDB::register_class<GNNativePolySplineSop>();
+    ClassDB::register_class<GNNativePolyPatchSop>();
+    ClassDB::register_class<GNNativePolyBridgeSop>();
+
+    // CHOP processors — Phase 9 (CPU-hot audit migration)
+    ClassDB::register_class<GNNativeTransformChop>();
+    ClassDB::register_class<GNNativeLagChop>();
+    ClassDB::register_class<GNNativeBlendChop>();
 }
 
 void uninitialize_gn_native_module(ModuleInitializationLevel p_level) {

@@ -1,0 +1,22 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "bm_dat1": {
+            "type": "BlackmagicDAT",
+            "position": [400, 200],
+            "parameters": {}
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Blackmagic DAT \u2014 Device Enumeration\n\nLists all detected DeckLink devices with name,\nmodel, input/output support, and max resolution.\nPress Rescan to re-enumerate after connecting\nor disconnecting hardware.",
+            "position": [0.0, -60.0],
+            "size": [520.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

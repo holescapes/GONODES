@@ -23,7 +23,7 @@ func _init_parameters() -> void:
 
 
 func _pre_cook(_delta: float) -> void:
-	if _is_pulse_active("rescan"):
+	if get_param_value("rescan"):
 		mark_dirty()
 
 
