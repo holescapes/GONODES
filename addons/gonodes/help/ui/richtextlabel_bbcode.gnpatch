@@ -10,13 +10,17 @@
             ],
             "parameters": {
                 "bbcode": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "font_size": {
                     "value": 15
                 },
                 "fit_content": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "scroll_active": {
                     "value": true

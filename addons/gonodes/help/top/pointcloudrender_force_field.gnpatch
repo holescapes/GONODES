@@ -3,63 +3,151 @@
     "generator": "GONODES",
     "nodes": {
         "emitter1": {
-            "type": "EmitterPOP",
-            "position": [100, 100],
+            "type": "SourcePOP",
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "emit_rate": { "value": 1000 },
-                "life": { "value": 5.0 }
+                "emit_rate": {
+                    "value": 1000
+                },
+                "life": {
+                    "value": 5.0
+                }
             }
         },
         "force1": {
             "type": "ForcePOP",
-            "position": [550, 100],
+            "position": [
+                550,
+                100
+            ],
             "parameters": {}
         },
         "pcrender1": {
             "type": "PointCloudRenderTOP",
-            "position": [1000, 100],
+            "position": [
+                1000,
+                100
+            ],
             "parameters": {
-                "width": { "value": 1024 },
-                "height": { "value": 1024 },
-                "point_size": { "value": 3.0 },
-                "size_attenuation": { "value": 1.0 },
-                "use_particle_color": { "value": true },
-                "bg_color": { "value": { "_type": "Color", "r": 0.02, "g": 0.02, "b": 0.05, "a": 1.0 } },
-                "cam_dist": { "value": 8.0 },
-                "cam_yaw": { "value": 30.0 },
-                "cam_pitch": { "value": 15.0 }
+                "width": {
+                    "value": 1024,
+                    "expression": "(1024 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "height": {
+                    "value": 1024,
+                    "expression": "(1024 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "point_size": {
+                    "value": 3.0
+                },
+                "size_attenuation": {
+                    "value": 1.0
+                },
+                "use_particle_color": {
+                    "value": true
+                },
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.02,
+                        "g": 0.02,
+                        "b": 0.05,
+                        "a": 1.0
+                    }
+                },
+                "cam_dist": {
+                    "value": 8.0
+                },
+                "cam_yaw": {
+                    "value": 30.0
+                },
+                "cam_pitch": {
+                    "value": 15.0
+                }
             }
         },
         "level1": {
             "type": "LevelTOP",
-            "position": [1450, 100],
+            "position": [
+                1450,
+                100
+            ],
             "parameters": {
-                "brightness": { "value": 0.2 }
+                "brightness": {
+                    "value": 0.2
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1900, 100],
+            "position": [
+                1900,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 1024, "y": 1024 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1024,
+                        "y": 1024
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "emitter1", "from_port": 0, "to": "force1", "to_port": 0 },
-        { "from": "force1", "from_port": 0, "to": "pcrender1", "to_port": 0 },
-        { "from": "pcrender1", "from_port": 0, "to": "level1", "to_port": 0 },
-        { "from": "level1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "emitter1",
+            "from_port": 0,
+            "to": "force1",
+            "to_port": 0
+        },
+        {
+            "from": "force1",
+            "from_port": 0,
+            "to": "pcrender1",
+            "to_port": 0
+        },
+        {
+            "from": "pcrender1",
+            "from_port": 0,
+            "to": "level1",
+            "to_port": 0
+        },
+        {
+            "from": "level1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Point Cloud Render — Force Field Particles\n\nEmits 1000 particles/sec with forces applied.\nRenders at 1024x1024 with small splats on a\ndark background for a nebula/galaxy effect.\n\nBrightness boost via LevelTOP creates glow.\nRotate camera with cam_yaw/cam_pitch.",
-            "position": [-100.0, -100.0],
-            "size": [475.0, 130.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Point Cloud Render \u2014 Force Field Particles\n\nEmits 1000 particles/sec with forces applied.\nRenders at 1024x1024 with small splats on a\ndark background for a nebula/galaxy effect.\n\nBrightness boost via LevelTOP creates glow.\nRotate camera with cam_yaw/cam_pitch.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                475.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

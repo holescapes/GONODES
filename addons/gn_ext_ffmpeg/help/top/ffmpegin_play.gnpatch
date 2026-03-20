@@ -2,22 +2,6 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_ramp": {
-            "type": "RampTOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
         "ffmpegin1": {
             "type": "FFmpegInTOP",
             "position": [
@@ -33,10 +17,14 @@
                     }
                 },
                 "play": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "loop": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "speed": {
                     "value": 0.5
@@ -79,12 +67,6 @@
         }
     },
     "connections": [
-        {
-            "from": "src_ramp",
-            "from_port": 0,
-            "to": "ffmpegin1",
-            "to_port": 0
-        },
         {
             "from": "ffmpegin1",
             "from_port": 0,

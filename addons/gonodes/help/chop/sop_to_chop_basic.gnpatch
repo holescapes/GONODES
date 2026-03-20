@@ -1,107 +1,109 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "sphere1":  {
-                                  "type":  "SphereSOP",
-                                  "position":  [
-                                                   0,
-                                                   100
-                                               ],
-                                  "parameters":  {
-
-                                                 }
-                              },
-                  "s2c1":  {
-                               "type":  "SOPtoCHOP",
-                               "position":  [
-                                                300,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "attribute":  {
-                                                                    "value":  0
-                                                                },
-                                                  "max_points":  {
-                                                                     "value":  100
-                                                                 }
-                                              }
-                           },
-                  "window1":  {
-                                  "position":  [
-                                                   1000,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    650,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "sphere1",
-                            "from_port":  0,
-                            "to":  "s2c1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "s2c1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "SOP to CHOP — Geometry to Channels\n\nExtracts vertex positions as px, py, pz channels.\nAlso supports normals and UVs.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                100
+            ],
+            "parameters": {}
+        },
+        "s2c1": {
+            "type": "SOPtoCHOP",
+            "position": [
+                300,
+                100
+            ],
+            "parameters": {
+                "attribute": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "max_points": {
+                    "value": 100,
+                    "expression": "(100 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                650,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "s2c1",
+            "to_port": 0
+        },
+        {
+            "from": "s2c1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SOP to CHOP \u2014 Geometry to Channels\n\nExtracts vertex positions as px, py, pz channels.\nAlso supports normals and UVs.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

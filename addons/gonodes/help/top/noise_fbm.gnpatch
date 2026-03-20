@@ -4,37 +4,89 @@
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "noise_type": {"value": 0},
-                "scale": {"value": 6.0},
-                "octaves": {"value": 6},
-                "lacunarity": {"value": 2.0},
-                "gain": {"value": 0.5},
-                "monochrome": {"value": false}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "noise_type": {
+                    "value": 0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
+                },
+                "scale": {
+                    "value": 6.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "octaves": {
+                    "value": 6
+                },
+                "lacunarity": {
+                    "value": 2.0
+                },
+                "gain": {
+                    "value": 0.5
+                },
+                "monochrome": {
+                    "value": false
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "NoiseTOP \u2014 FBM (Fractal Brownian Motion)\n\n6 octaves of layered noise for rich detail.\nlacunarity (2.0) doubles frequency per layer.\ngain (0.5) halves amplitude per layer.\n\nColor mode (monochrome off) generates independent R/G/B channels.\nUseful for cloud textures, terrain height, etc.",
-            "position": [-120.0, -130.0],
-            "size": [480.0, 140.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -120.0,
+                -130.0
+            ],
+            "size": [
+                480.0,
+                140.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

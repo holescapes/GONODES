@@ -4,74 +4,210 @@
     "nodes": {
         "source1": {
             "type": "SourcePOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "max_particles": {"value": 50000},
-                "rate": {"value": 5000.0},
-                "init_speed": {"value": 5.0}
+                "max_particles": {
+                    "value": 50000
+                },
+                "rate": {
+                    "value": 5000.0
+                },
+                "init_speed": {
+                    "value": 5.0
+                }
             }
         },
         "force1": {
             "type": "ForcePOP",
-            "position": [400, 100],
+            "position": [
+                400,
+                100
+            ],
             "parameters": {
-                "gravity_y": {"value": -9.81}
+                "gravity_y": {
+                    "value": -9.81
+                }
             }
         },
         "advect1": {
             "type": "AdvectPOPNative",
-            "position": [700, 100],
+            "position": [
+                700,
+                100
+            ],
             "parameters": {
-                "strength": {"value": 2.0},
-                "add_mode": {"value": true}
+                "strength": {
+                    "value": 2.0
+                },
+                "add_mode": {
+                    "value": true
+                }
             }
         },
         "noise_vol": {
             "type": "NoiseVOL",
-            "position": [400, 300],
+            "position": [
+                400,
+                300
+            ],
             "parameters": {
-                "res_x": {"value": 32},
-                "res_y": {"value": 32},
-                "res_z": {"value": 32},
-                "frequency": {"value": 2.0},
-                "speed": {"value": 0.5}
+                "res_x": {
+                    "value": 32
+                },
+                "res_y": {
+                    "value": 32
+                },
+                "res_z": {
+                    "value": 32
+                },
+                "frequency": {
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "speed": {
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "renderpop1": {
             "type": "RenderPOP",
-            "position": [1000, 100],
+            "position": [
+                1000,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1350, 100],
+            "position": [
+                1575,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1175,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                1175,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
             }
         }
     },
     "connections": [
-        {"from": "source1", "from_port": 0, "to": "force1", "to_port": 0},
-        {"from": "force1", "from_port": 0, "to": "advect1", "to_port": 0},
-        {"from": "noise_vol", "from_port": 0, "to": "advect1", "to_port": 1},
-        {"from": "advect1", "from_port": 0, "to": "renderpop1", "to_port": 0},
-        {"from": "renderpop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "force1",
+            "to_port": 0
+        },
+        {
+            "from": "force1",
+            "from_port": 0,
+            "to": "advect1",
+            "to_port": 0
+        },
+        {
+            "from": "noise_vol",
+            "from_port": 0,
+            "to": "advect1",
+            "to_port": 1
+        },
+        {
+            "from": "advect1",
+            "from_port": 0,
+            "to": "renderpop1",
+            "to_port": 0
+        },
+        {
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Advect POP (Native) \u2014 Volume Field Driving\n\nParticles advected by a noise velocity volume field.\nGravity pulls down while noise creates swirling motion.\nNative C++ samples volume with trilinear interpolation.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

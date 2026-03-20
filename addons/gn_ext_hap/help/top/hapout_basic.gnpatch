@@ -1,33 +1,67 @@
 {
-  "version": "1.0",
-  "description": "HapOutTOP — Record a texture to HAP .mov video. Toggle 'record' on to capture, off to finalize.",
-  "nodes": {
-    "noise1": {
-      "type": "noise",
-      "position": [200, 200],
-      "params": {
-        "resolution": {"_type": "Vector2i", "x": 512, "y": 512}
-      }
+    "version": "1.0",
+    "description": "HapOutTOP \u2014 Record a texture to HAP .mov video. Toggle 'record' on to capture, off to finalize.",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                200,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "hapout1": {
+            "type": "HapOUT",
+            "position": [
+                600,
+                200
+            ],
+            "parameters": {
+                "file_path": {
+                    "value": "user://output/test_hap.mov"
+                },
+                "variant": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "fps": {
+                    "value": 30,
+                    "expression": "(30 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "record": {
+                    "value": false
+                }
+            }
+        },
+        "info1": {
+            "type": "InfoDAT",
+            "position": [
+                200,
+                400
+            ],
+            "parameters": {
+                "text": {
+                    "value": "HapOutTOP records input textures to a HAP .mov file.\n\n1. Set file_path and variant (HAP / HAP Alpha / HAP Q)\n2. Toggle 'record' ON \u2014 frames are captured each cook\n3. Toggle 'record' OFF \u2014 .mov file is finalized\n\nThe output .mov can be played by HapInTOP with\nzero CPU decode overhead."
+                }
+            }
+        }
     },
-    "hapout1": {
-      "type": "hapout",
-      "position": [600, 200],
-      "params": {
-        "file_path": "user://output/test_hap.mov",
-        "variant": 0,
-        "fps": 30,
-        "record": false
-      }
-    },
-    "info1": {
-      "type": "info",
-      "position": [200, 400],
-      "params": {
-        "text": "HapOutTOP records input textures to a HAP .mov file.\n\n1. Set file_path and variant (HAP / HAP Alpha / HAP Q)\n2. Toggle 'record' ON — frames are captured each cook\n3. Toggle 'record' OFF — .mov file is finalized\n\nThe output .mov can be played by HapInTOP with\nzero CPU decode overhead."
-      }
-    }
-  },
-  "connections": [
-    {"from": "noise1", "from_port": 0, "to": "hapout1", "to_port": 0}
-  ]
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "hapout1",
+            "to_port": 0
+        }
+    ]
 }

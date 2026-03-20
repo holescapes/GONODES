@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "effect_mode": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "effect_threshold": {
-                    "value": 0.04
+                    "value": 0.04,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "effect_strength": {
                     "value": 0.5

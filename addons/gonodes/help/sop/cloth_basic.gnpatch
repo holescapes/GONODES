@@ -4,44 +4,155 @@
     "nodes": {
         "grid1": {
             "type": "GridSOP",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "size_x": {"value": 2.0},
-                "size_y": {"value": 2.0},
-                "rows": {"value": 20},
-                "cols": {"value": 20}
+                "size_x": {
+                    "value": 2.0
+                },
+                "size_y": {
+                    "value": 2.0
+                },
+                "rows": {
+                    "value": 20
+                },
+                "cols": {
+                    "value": 20
+                }
             }
         },
         "cloth1": {
             "type": "ClothSOP",
-            "position": [500, 200],
+            "position": [
+                500,
+                200
+            ],
             "parameters": {
-                "gravity": {"value": -9.8},
-                "damping": {"value": 0.99},
-                "iterations": {"value": 8},
-                "stiffness": {"value": 1.0},
-                "pin_mode": {"value": 0},
-                "substeps": {"value": 2.0}
+                "gravity": {
+                    "value": -9.8,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
+                },
+                "damping": {
+                    "value": 0.99,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "iterations": {
+                    "value": 8
+                },
+                "stiffness": {
+                    "value": 1.0
+                },
+                "pin_mode": {
+                    "value": 0
+                },
+                "substeps": {
+                    "value": 2.0
+                }
             }
         },
         "render1": {
-            "type": "RenderCOMP",
-            "position": [900, 200],
+            "type": "RenderTOP",
+            "position": [
+                900,
+                200
+            ],
             "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                200
+            ],
+            "parameters": {}
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                400
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 5.0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        {"from": "grid1", "from_port": 0, "to": "cloth1", "to_port": 0},
-        {"from": "cloth1", "from_port": 0, "to": "render1", "to_port": 0}
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "cloth1",
+            "to_port": 0
+        },
+        {
+            "from": "cloth1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Cloth SOP \u2014 Basic Drape\n\nA 20\u00d720 grid falls under gravity with the top row\npinned. Verlet integration with 8 constraint\niterations and 2 substeps per frame.\nAdjust stiffness (0\u20131) to control fabric rigidity.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

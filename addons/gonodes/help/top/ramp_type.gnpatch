@@ -38,10 +38,14 @@
                     }
                 },
                 "phase": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "time % 4.0 / 4.0",
+                    "mode": "EXPRESSION"
                 },
                 "repeat": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

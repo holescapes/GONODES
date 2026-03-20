@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "points": {
-                    "value": 12
+                    "value": 12,
+                    "expression": "(12 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "direction": {
-                    "value": 2
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "length": {
                     "value": 4.0

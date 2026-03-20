@@ -10,13 +10,17 @@
             ],
             "parameters": {
                 "time_dependent": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "active": {
                     "value": true
                 },
                 "log_events": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

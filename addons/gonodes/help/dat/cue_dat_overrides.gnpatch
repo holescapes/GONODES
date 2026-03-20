@@ -4,64 +4,152 @@
     "nodes": {
         "cuedat1": {
             "type": "CueDAT",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "num_cues": {"value": 4},
-                "cue0_name": {"value": "red_scene"},
-                "cue0_time": {"value": 0.0},
-                "cue0_duration": {"value": 3.0},
-                "cue0_transition": {"value": "cut"},
-                "cue0_data": {"value": "{\"color1/r\": 1.0, \"color1/g\": 0.0, \"color1/b\": 0.0}"},
-                "cue1_name": {"value": "green_scene"},
-                "cue1_time": {"value": 3.0},
-                "cue1_duration": {"value": 3.0},
-                "cue1_transition": {"value": "fade:0.5"},
-                "cue1_data": {"value": "{\"color1/r\": 0.0, \"color1/g\": 1.0, \"color1/b\": 0.0}"},
-                "cue2_name": {"value": "blue_scene"},
-                "cue2_time": {"value": 6.0},
-                "cue2_duration": {"value": 3.0},
-                "cue2_transition": {"value": "fade:0.5"},
-                "cue2_data": {"value": "{\"color1/r\": 0.0, \"color1/g\": 0.0, \"color1/b\": 1.0}"},
-                "cue3_name": {"value": "white_flash"},
-                "cue3_time": {"value": 9.0},
-                "cue3_duration": {"value": 2.0},
-                "cue3_transition": {"value": "fade:1.5"},
-                "cue3_data": {"value": "{\"color1/r\": 1.0, \"color1/g\": 1.0, \"color1/b\": 1.0}"}
+                "num_cues": {
+                    "value": 4,
+                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "cue0_name": {
+                    "value": "red_scene"
+                },
+                "cue0_time": {
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "cue0_duration": {
+                    "value": 3.0
+                },
+                "cue0_transition": {
+                    "value": "cut"
+                },
+                "cue0_data": {
+                    "value": "{\"color1/r\": 1.0, \"color1/g\": 0.0, \"color1/b\": 0.0}"
+                },
+                "cue1_name": {
+                    "value": "green_scene"
+                },
+                "cue1_time": {
+                    "value": 3.0
+                },
+                "cue1_duration": {
+                    "value": 3.0
+                },
+                "cue1_transition": {
+                    "value": "fade:0.5"
+                },
+                "cue1_data": {
+                    "value": "{\"color1/r\": 0.0, \"color1/g\": 1.0, \"color1/b\": 0.0}"
+                },
+                "cue2_name": {
+                    "value": "blue_scene"
+                },
+                "cue2_time": {
+                    "value": 6.0
+                },
+                "cue2_duration": {
+                    "value": 3.0
+                },
+                "cue2_transition": {
+                    "value": "fade:0.5"
+                },
+                "cue2_data": {
+                    "value": "{\"color1/r\": 0.0, \"color1/g\": 0.0, \"color1/b\": 1.0}"
+                },
+                "cue3_name": {
+                    "value": "white_flash"
+                },
+                "cue3_time": {
+                    "value": 9.0
+                },
+                "cue3_duration": {
+                    "value": 2.0
+                },
+                "cue3_transition": {
+                    "value": "fade:1.5"
+                },
+                "cue3_data": {
+                    "value": "{\"color1/r\": 1.0, \"color1/g\": 1.0, \"color1/b\": 1.0}"
+                }
             }
         },
         "texttop1": {
             "type": "TextTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 640, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 640,
+                        "y": 512
+                    }
                 },
-                "font_size": {"value": 12}
+                "font_size": {
+                    "value": 12
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 640, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 640,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "cuedat1", "from_port": 0, "to": "texttop1", "to_port": 0},
-        {"from": "texttop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "cuedat1",
+            "from_port": 0,
+            "to": "texttop1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Cue DAT \u2014 Data Overrides\n\nFour cues with JSON data{} payloads.\nEach cue carries RGB color overrides that a CueCHOP\ncan apply to a target node via set_par().\nUseful for scene presets, lighting states, etc.",
-            "position": [-100.0, -120.0],
-            "size": [500.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                500.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

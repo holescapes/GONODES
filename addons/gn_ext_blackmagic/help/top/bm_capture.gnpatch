@@ -4,24 +4,78 @@
     "nodes": {
         "bm_in1": {
             "type": "BlackmagicInTOP",
-            "position": [400, 200],
+            "position": [
+                400,
+                200
+            ],
             "parameters": {
-                "device": {"value": 0},
-                "resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}},
-                "fps": {"value": 4},
-                "active": {"value": false}
+                "device": {
+                    "value": 0
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1920,
+                        "y": 1080
+                    }
+                },
+                "fps": {
+                    "value": 4,
+                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "active": {
+                    "value": false
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                700,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
-    "connections": [],
+    "connections": [
+        {
+            "from": "bm_in1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Blackmagic In TOP \u2014 SDI Capture\n\nCaptures 1080p30 from the first DeckLink device.\nSet active=true to start capturing.\nRequires: DeckLink hardware + Desktop Video drivers\n+ gn_ext_blackmagic GDExtension built and loaded.",
-            "position": [0.0, -60.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                0.0,
+                -60.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

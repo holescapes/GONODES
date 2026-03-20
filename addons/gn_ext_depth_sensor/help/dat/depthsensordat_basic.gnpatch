@@ -4,26 +4,94 @@
     "nodes": {
         "sensordat1": {
             "type": "DepthSensorDAT",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "null1": {
             "type": "NullDAT",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "DAT Output",
+                    "expression": "str(op(\"null1\"))",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         }
     },
     "connections": [
-        { "from": "sensordat1", "from_port": 0, "to": "null1", "to_port": 0 }
+        {
+            "from": "sensordat1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Sensor DAT — Device List\n\nLists all connected depth sensors across all\nbackends (Azure Kinect + RealSense).\nShows name, serial, backend, and capability\nflags (depth, color, ir, skeleton, etc.).\n\nUse the serial number in other depth sensor\noperators to select a specific device.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 130.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Sensor DAT \u2014 Device List\n\nLists all connected depth sensors across all\nbackends (Azure Kinect + RealSense).\nShows name, serial, backend, and capability\nflags (depth, color, ir, skeleton, etc.).\n\nUse the serial number in other depth sensor\noperators to select a specific device.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

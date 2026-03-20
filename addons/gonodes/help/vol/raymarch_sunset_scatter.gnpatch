@@ -4,55 +4,145 @@
     "nodes": {
         "noisevol1": {
             "type": "NoiseVOL",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": 64 }
+                "resolution": {
+                    "value": 64
+                }
             }
         },
         "raymarch1": {
             "type": "RaymarchVOL",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "width": { "value": 512 },
-                "height": { "value": 512 },
-                "max_steps": { "value": 200 },
-                "step_size": { "value": 0.005 },
-                "density_scale": { "value": 8.0 },
-                "absorption": { "value": 15.0 },
-                "cam_dist": { "value": 2.0 },
-                "cam_yaw": { "value": -20.0 },
-                "cam_pitch": { "value": 10.0 },
-                "light_yaw": { "value": 90.0 },
-                "light_pitch": { "value": 30.0 },
-                "light_color": { "value": { "_type": "Color", "r": 1.0, "g": 0.4, "b": 0.1, "a": 1.0 } },
-                "light_intensity": { "value": 5.0 },
-                "hg_g": { "value": 0.7 },
-                "shadow_steps": { "value": 48 },
-                "ambient": { "value": 0.05 },
-                "emit_color": { "value": { "_type": "Color", "r": 1.0, "g": 0.3, "b": 0.0, "a": 1.0 } }
+                "width": {
+                    "value": 512,
+                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "height": {
+                    "value": 512,
+                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "max_steps": {
+                    "value": 200
+                },
+                "step_size": {
+                    "value": 0.005
+                },
+                "density_scale": {
+                    "value": 8.0
+                },
+                "absorption": {
+                    "value": 15.0
+                },
+                "cam_dist": {
+                    "value": 2.0
+                },
+                "cam_yaw": {
+                    "value": -20.0
+                },
+                "cam_pitch": {
+                    "value": 10.0
+                },
+                "light_yaw": {
+                    "value": 90.0
+                },
+                "light_pitch": {
+                    "value": 30.0
+                },
+                "light_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.1,
+                        "a": 1.0
+                    }
+                },
+                "light_intensity": {
+                    "value": 5.0
+                },
+                "hg_g": {
+                    "value": 0.7
+                },
+                "shadow_steps": {
+                    "value": 48
+                },
+                "ambient": {
+                    "value": 0.05
+                },
+                "emit_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.3,
+                        "b": 0.0,
+                        "a": 1.0
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1100, 100],
+            "position": [
+                1100,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "noisevol1", "from_port": 0, "to": "raymarch1", "to_port": 0 },
-        { "from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "noisevol1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RaymarchVOL — Sunset Scattering\n\nStrong forward scattering (hg_g=0.7) with\nwarm orange light creates a sunset/fire look.\nHigh shadow_steps (48) for deep self-shadowing.\nThe light is to the side for dramatic raking.\n\nTry rotating the light with light_yaw to\nsee how scattering direction changes.",
-            "position": [-100.0, -100.0],
-            "size": [475.0, 140.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "RaymarchVOL \u2014 Sunset Scattering\n\nStrong forward scattering (hg_g=0.7) with\nwarm orange light creates a sunset/fire look.\nHigh shadow_steps (48) for deep self-shadowing.\nThe light is to the side for dramatic raking.\n\nTry rotating the light with light_yaw to\nsee how scattering direction changes.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                475.0,
+                140.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

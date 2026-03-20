@@ -29,7 +29,9 @@
                     "value": 1
                 },
                 "kernel_size": {
-                    "value": 7
+                    "value": 7,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

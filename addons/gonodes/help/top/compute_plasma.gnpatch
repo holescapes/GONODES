@@ -1,92 +1,92 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "compute1":  {
-                                   "type":  "ComputeShaderTOP",
-                                   "position":  [
-                                                    200,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     },
-                                                      "time_dependent":  {
-                                                                             "value":  true
-                                                                         },
-                                                      "shader_code":  {
-                                                                          "value":  "#version 450\n\nlayout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\n\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\tfloat speed;  // = 1.0\n\tfloat scale;  // = 4.0\n} pc;\n\nvoid main() {\n\tivec2 coords = ivec2(gl_GlobalInvocationID.xy);\n\tivec2 size = imageSize(gn_output);\n\tif (coords.x \u003e= size.x || coords.y \u003e= size.y) return;\n\n\tvec2 uv = vec2(coords) / vec2(size);\n\tfloat t = pc.gn_time * pc.speed;\n\tfloat s = pc.scale;\n\n\tfloat v = sin(uv.x * s + t);\n\tv += sin(uv.y * s + t * 0.7);\n\tv += sin((uv.x + uv.y) * s * 0.5 + t * 1.3);\n\tv += sin(length(uv - 0.5) * s * 2.0 + t * 0.5);\n\tv *= 0.25;\n\n\tvec3 col = vec3(\n\t\tsin(v * 3.14159 + 0.0) * 0.5 + 0.5,\n\t\tsin(v * 3.14159 + 2.094) * 0.5 + 0.5,\n\t\tsin(v * 3.14159 + 4.189) * 0.5 + 0.5\n\t);\n\n\timageStore(gn_output, coords, vec4(col, 1.0));\n}"
-                                                                      }
-                                                  }
-                               },
-                  "null1":  {
-                                "type":  "NullTOP",
-                                "position":  [
-                                                 600,
-                                                 100
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   950,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "compute1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Compute Shader TOP — GPU Plasma\n\nGLSL 450 compute shader running on the GPU via RenderingDevice.\nOutputs to an image2D storage texture, read back as a TOP.\n\nPush constant fields speed and scale become inspector params\nautomatically. Built-in gn_time / gn_res are auto-bound.",
-                            "position":  [
-                                             -100.0,
-                                             -170.0
-                                         ],
-                            "size":  [
-                                         480.0,
-                                         120.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "compute1": {
+            "type": "ComputeShaderTOP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "time_dependent": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "shader_code": {
+                    "value": "#version 450\n\nlayout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\n\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\tfloat speed;  // = 1.0\n\tfloat scale;  // = 4.0\n} pc;\n\nvoid main() {\n\tivec2 coords = ivec2(gl_GlobalInvocationID.xy);\n\tivec2 size = imageSize(gn_output);\n\tif (coords.x >= size.x || coords.y >= size.y) return;\n\n\tvec2 uv = vec2(coords) / vec2(size);\n\tfloat t = pc.gn_time * pc.speed;\n\tfloat s = pc.scale;\n\n\tfloat v = sin(uv.x * s + t);\n\tv += sin(uv.y * s + t * 0.7);\n\tv += sin((uv.x + uv.y) * s * 0.5 + t * 1.3);\n\tv += sin(length(uv - 0.5) * s * 2.0 + t * 0.5);\n\tv *= 0.25;\n\n\tvec3 col = vec3(\n\t\tsin(v * 3.14159 + 0.0) * 0.5 + 0.5,\n\t\tsin(v * 3.14159 + 2.094) * 0.5 + 0.5,\n\t\tsin(v * 3.14159 + 4.189) * 0.5 + 0.5\n\t);\n\n\timageStore(gn_output, coords, vec4(col, 1.0));\n}"
+                }
+            }
+        },
+        "null1": {
+            "type": "NullTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                950,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "compute1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Compute Shader TOP \u2014 GPU Plasma\n\nGLSL 450 compute shader running on the GPU via RenderingDevice.\nOutputs to an image2D storage texture, read back as a TOP.\n\nPush constant fields speed and scale become inspector params\nautomatically. Built-in gn_time / gn_res are auto-bound.",
+            "position": [
+                -100.0,
+                -170.0
+            ],
+            "size": [
+                480.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

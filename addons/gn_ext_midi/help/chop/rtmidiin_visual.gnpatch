@@ -10,7 +10,9 @@
             ],
             "parameters": {
                 "length": {
-                    "value": 10.0
+                    "value": 10.0,
+                    "expression": "(10.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 }
             }
         },
@@ -66,7 +68,7 @@
             "to_port": 0
         },
         {
-            "from": "rtmidi1",
+            "from": "trail1",
             "from_port": 0,
             "to": "choptop1",
             "to_port": 0

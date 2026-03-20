@@ -4,42 +4,122 @@
     "nodes": {
         "sensordat1": {
             "type": "DepthSensorDAT",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "sensor1": {
             "type": "DepthSensorTOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "stream": { "value": 0 },
-                "backend": { "value": 0 }
+                "stream": {
+                    "value": 0
+                },
+                "device": {
+                    "value": 0
+                }
             }
         },
         "skeleton1": {
             "type": "DepthSkeletonCHOP",
-            "position": [100, 550],
+            "position": [
+                100,
+                550
+            ],
             "parameters": {
-                "backend": { "value": 0 }
+                "device": {
+                    "value": 0
+                }
             }
         },
         "pointcloud1": {
             "type": "DepthPointCloudSOP",
-            "position": [100, 750],
+            "position": [
+                100,
+                750
+            ],
             "parameters": {
-                "backend": { "value": 0 },
-                "skip": { "value": 4 }
+                "device": {
+                    "value": 0
+                },
+                "skip": {
+                    "value": 4
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "DAT Output",
+                    "expression": "str(op(\"sensordat1\"))",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         }
     },
-    "connections": [],
+    "connections": [
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Sensor — Capability Reference\n\nAll 4 depth sensor operators side by side.\n\n1. DepthSensorDAT — lists devices + capabilities\n2. DepthSensorTOP — depth/color/IR/player textures\n3. DepthSkeletonCHOP — joint tracking (Kinect only)\n4. DepthPointCloudSOP — 3D point cloud mesh\n\nSet the same Device Serial on all operators to\nshare one hardware connection. The DAT table\nshows which capabilities each sensor supports.",
-            "position": [-250.0, -100.0],
-            "size": [300.0, 200.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Sensor \u2014 Capability Reference\n\nAll 4 depth sensor operators side by side.\n\n1. DepthSensorDAT \u2014 lists devices + capabilities\n2. DepthSensorTOP \u2014 depth/color/IR/player textures\n3. DepthSkeletonCHOP \u2014 joint tracking (Kinect only)\n4. DepthPointCloudSOP \u2014 3D point cloud mesh\n\nSet the same Device Serial on all operators to\nshare one hardware connection. The DAT table\nshows which capabilities each sensor supports.",
+            "position": [
+                -250.0,
+                -100.0
+            ],
+            "size": [
+                300.0,
+                200.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

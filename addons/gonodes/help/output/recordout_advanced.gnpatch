@@ -3,23 +3,12 @@
     "generator": "GONODES",
     "nodes": {
         "src_circle": {
-            "type": "CircleTOP",
+            "type": "MathCHOP",
             "position": [
                 100,
                 100
             ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "radius": {
-                    "value": 0.3
-                }
-            }
+            "parameters": {}
         },
         "recordout1": {
             "type": "RecordOUT",
@@ -32,10 +21,14 @@
                     "value": true
                 },
                 "max_samples": {
-                    "value": 10002
+                    "value": 10002,
+                    "expression": "(10002 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "save": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "reset": {
                     "value": true

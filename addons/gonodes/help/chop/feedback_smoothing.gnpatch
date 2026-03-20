@@ -4,46 +4,106 @@
     "nodes": {
         "noise1": {
             "type": "NoiseCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "amplitude": { "value": 2.0 },
-                "roughness": { "value": 0.8 }
+                "amplitude": {
+                    "value": 2.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
+                },
+                "roughness": {
+                    "value": 0.8,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "feedback1": {
             "type": "FeedbackCHOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {}
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1250, 100],
+            "position": [
+                1250,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "noise1", "from_port": 0, "to": "feedback1", "to_port": 0 },
-        { "from": "feedback1", "from_port": 0, "to": "choptop1", "to_port": 0 },
-        { "from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "feedback1",
+            "to_port": 0
+        },
+        {
+            "from": "feedback1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Feedback CHOP — Noise Smoothing\n\nFeedback smooths a noisy input by blending each frame with the previous.\nThe high-roughness noise becomes visually smoother through the feedback loop.\nToggle reset to restart the feedback buffer.",
-            "position": [50.0, -60.0],
-            "size": [450.0, 80.0],
-            "color": [0.5, 0.7, 1.0, 0.8]
+            "text": "Feedback CHOP \u2014 Noise Smoothing\n\nFeedback smooths a noisy input by blending each frame with the previous.\nThe high-roughness noise becomes visually smoother through the feedback loop.\nToggle reset to restart the feedback buffer.",
+            "position": [
+                50.0,
+                -60.0
+            ],
+            "size": [
+                450.0,
+                80.0
+            ],
+            "color": [
+                0.5,
+                0.7,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -1,136 +1,140 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "static_floor":  {
-                                       "type":  "StaticBodyCOMP",
-                                       "position":  [
-                                                        200,
-                                                        100
-                                                    ],
-                                       "parameters":  {
-                                                          "tx":  {
-                                                                     "value":  0.0
-                                                                 },
-                                                          "ty":  {
-                                                                     "value":  0.0
-                                                                 },
-                                                          "tz":  {
-                                                                     "value":  0.0
-                                                                 },
-                                                          "sx":  {
-                                                                     "value":  10.0
-                                                                 },
-                                                          "sy":  {
-                                                                     "value":  0.1
-                                                                 },
-                                                          "sz":  {
-                                                                     "value":  10.0
-                                                                 },
-                                                          "friction":  {
-                                                                           "value":  0.8
-                                                                       },
-                                                          "bounce":  {
-                                                                         "value":  0.1
-                                                                     },
-                                                          "collision_shape":  {
-                                                                                  "value":  0
-                                                                              }
-                                                      }
-                                   },
-                  "window1":  {
-                                  "position":  [
-                                                   850,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       500,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    200,
-                                                    300
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "static_floor",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Static Body COMP — Ground Plane\n\nFlat 10×0.1×10 static body as a floor.\nHigh friction (0.8), low bounce (0.1).\nRigid bodies will collide and rest here.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "static_floor": {
+            "type": "StaticBodyCOMP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0,
+                    "expression": "sin(time * 0.8) * 2.0",
+                    "mode": "EXPRESSION"
+                },
+                "ty": {
+                    "value": 0.0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "sx": {
+                    "value": 10.0
+                },
+                "sy": {
+                    "value": 0.1
+                },
+                "sz": {
+                    "value": 10.0
+                },
+                "friction": {
+                    "value": 0.8
+                },
+                "bounce": {
+                    "value": 0.1
+                },
+                "collision_shape": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                850,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                200,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "static_floor",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Static Body COMP \u2014 Ground Plane\n\nFlat 10\u00d70.1\u00d710 static body as a floor.\nHigh friction (0.8), low bounce (0.1).\nRigid bodies will collide and rest here.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

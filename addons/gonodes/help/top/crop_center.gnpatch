@@ -1,112 +1,116 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  100,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "resolution":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Vector2i",
-                                                                                     "x":  512,
-                                                                                     "y":  512
-                                                                                 }
-                                                                   },
-                                                    "scale":  {
-                                                                  "value":  4.0
-                                                              },
-                                                    "monochrome":  {
-                                                                       "value":  false
-                                                                   }
-                                                }
-                             },
-                  "crop1":  {
-                                "type":  "CropTOP",
-                                "position":  [
-                                                 450,
-                                                 100
-                                             ],
-                                "parameters":  {
-                                                   "resolution":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Vector2i",
-                                                                                    "x":  256,
-                                                                                    "y":  256
-                                                                                }
-                                                                  },
-                                                   "left_top":  {
-                                                                    "value":  {
-                                                                                  "_type":  "Vector2",
-                                                                                  "x":  0.25,
-                                                                                  "y":  0.25
-                                                                              }
-                                                                },
-                                                   "right_bottom":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2",
-                                                                                      "x":  0.75,
-                                                                                      "y":  0.75
-                                                                                  }
-                                                                    }
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   800,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "crop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "crop1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Crop TOP — Center Region\n\nCrops the center 50% of the noise texture.\nOutput is 256×256, sampling from 25%-75%\nof the original coordinates.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "monochrome": {
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "crop1": {
+            "type": "CropTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                },
+                "left_top": {
+                    "value": {
+                        "_type": "Vector2",
+                        "x": 0.25,
+                        "y": 0.25
+                    }
+                },
+                "right_bottom": {
+                    "value": {
+                        "_type": "Vector2",
+                        "x": 0.75,
+                        "y": 0.75
+                    }
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "crop1",
+            "to_port": 0
+        },
+        {
+            "from": "crop1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Crop TOP \u2014 Center Region\n\nCrops the center 50% of the noise texture.\nOutput is 256\u00d7256, sampling from 25%-75%\nof the original coordinates.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

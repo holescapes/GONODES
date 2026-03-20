@@ -4,32 +4,68 @@
     "nodes": {
         "sensor1": {
             "type": "DepthSensorTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "stream": { "value": 0 },
-                "backend": { "value": 0 }
+                "stream": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "device": {
+                    "value": 0
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 640, "y": 480 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 640,
+                        "y": 480
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "sensor1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "sensor1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Sensor — Basic Depth\n\nCapture depth image from Azure Kinect or RealSense.\nSet Backend and Device Serial parameters.\nStream = Depth shows a grayscale depth map\n(white = near, dark = far).\n\nRequires gn_ext_depth_sensor GDExtension.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Sensor \u2014 Basic Depth\n\nCapture depth image from Azure Kinect or RealSense.\nSet Backend and Device Serial parameters.\nStream = Depth shows a grayscale depth map\n(white = near, dark = far).\n\nRequires gn_ext_depth_sensor GDExtension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

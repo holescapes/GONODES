@@ -10,7 +10,9 @@
             ],
             "parameters": {
                 "gain": {
-                    "value": 2.0
+                    "value": 2.0,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

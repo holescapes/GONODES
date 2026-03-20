@@ -1,116 +1,118 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "audiofile1":  {
-                                     "type":  "AudioFileInCHOP",
-                                     "position":  [
-                                                      100,
-                                                      100
-                                                  ],
-                                     "parameters":  {
-                                                        "play":  {
-                                                                     "value":  false
-                                                                 },
-                                                        "loop":  {
-                                                                     "value":  true
-                                                                 },
-                                                        "volume":  {
-                                                                       "value":  0.0
-                                                                   },
-                                                        "buffer_size":  {
-                                                                            "value":  1024
-                                                                        },
-                                                        "stereo":  {
-                                                                       "value":  true
-                                                                   }
-                                                    }
-                                 },
-                  "null1":  {
-                                "type":  "NullCHOP",
-                                "position":  [
-                                                 450,
-                                                 100
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1150,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    800,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "audiofile1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Audio File In CHOP — Player\n\nLoads a WAV or OGG audio file.\nSet the \u0027file\u0027 parameter and enable \u0027play\u0027.\nOutputs stereo waveform data as channels.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         110.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "audiofile1": {
+            "type": "AudioFileInCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "play": {
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "loop": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "volume": {
+                    "value": 0.0
+                },
+                "buffer_size": {
+                    "value": 1024
+                },
+                "stereo": {
+                    "value": true
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "audiofile1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Audio File In CHOP \u2014 Player\n\nLoads a WAV or OGG audio file.\nSet the 'file' parameter and enable 'play'.\nOutputs stereo waveform data as channels.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

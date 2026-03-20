@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "size_x": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "size_y": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "size_z": {
                     "value": 0.5

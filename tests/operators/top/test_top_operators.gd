@@ -707,3 +707,547 @@ func test_panel_top_instantiate() -> void:
 func test_anti_alias_top_instantiate() -> void:
 	var node := _make_node(AntiAliasTOP.new(), "aa1")
 	GNTestAssert.assert_eq(node.node_type, "anti_alias", "node_type")
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TOPtoDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_toptodat_instantiate() -> void:
+	var node := _make_node(TOPtoDAT.new(), "t2d1")
+	GNTestAssert.assert_eq(node.family, "dat", "family is dat")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ImgToTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_img_to_top_instantiate() -> void:
+	var node := _make_node(ImgToTOP.new(), "i2t1")
+	GNTestAssert.assert_eq(node.node_type, "img_to_top", "node_type")
+
+func test_img_to_top_produces_texture() -> void:
+	var node := _make_node(ImgToTOP.new(), "i2t2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out is GNTextureData, "ImgToTOP produces GNTextureData")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TOPtoIMG
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_tiptoimg_instantiate() -> void:
+	var node := _make_node(TOPtoIMG.new(), "t2i1")
+	GNTestAssert.assert_eq(node.family, "img", "family is img")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HostOutTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_host_out_top_instantiate() -> void:
+	var node := _make_node(HostOutTOP.new(), "hout1")
+	GNTestAssert.assert_not_null(node, "HostOutTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ParticleStateTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_particle_state_top_instantiate() -> void:
+	var node := _make_node(ParticleStateTOP.new(), "pstate1")
+	GNTestAssert.assert_not_null(node, "ParticleStateTOP created")
+
+func test_particle_state_top_null_input() -> void:
+	var node := _make_node(ParticleStateTOP.new(), "pstate2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out == null or out is GNTextureData, "ParticleStateTOP handles null input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TOPtoSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_toptosop_instantiate() -> void:
+	var node := _make_node(TOPtoSOP.new(), "t2s1")
+	GNTestAssert.assert_eq(node.family, "sop", "family is sop")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DeformTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_deform_top_instantiate() -> void:
+	var node := _make_node(DeformTOP.new(), "deform1")
+	GNTestAssert.assert_eq(node.node_type, "deform", "node_type")
+
+func test_deform_top_with_inputs() -> void:
+	var node := _make_node(DeformTOP.new(), "deform2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var displacement := _make_constant_tex(Color.GRAY, Vector2i(64, 64))
+	var out := _cook_with(node, [tex, displacement] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "DeformTOP with displacement produces output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Fluid2DTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_fluid_2d_top_instantiate() -> void:
+	var node := _make_node(Fluid2DTOP.new(), "fluid2d1")
+	GNTestAssert.assert_not_null(node, "Fluid2DTOP created")
+
+func test_fluid_2d_top_produces_output() -> void:
+	var node := _make_node(Fluid2DTOP.new(), "fluid2d2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_not_null(out, "Fluid2DTOP produces output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HostInTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_host_in_top_instantiate() -> void:
+	var node := _make_node(HostInTOP.new(), "hin1")
+	GNTestAssert.assert_not_null(node, "HostInTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MultiBufferRenderTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_multi_buffer_render_top_instantiate() -> void:
+	var node := _make_node(MultiBufferRenderTOP.new(), "mbr1")
+	GNTestAssert.assert_eq(node.node_type, "multi_buffer_render", "node_type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PointCloudRenderTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_point_cloud_render_top_instantiate() -> void:
+	var node := _make_node(PointCloudRenderTOP.new(), "pcr1")
+	GNTestAssert.assert_eq(node.node_type, "point_cloud_render", "node_type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ReactionDiffusionTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_reaction_diffusion_top_instantiate() -> void:
+	var node := _make_node(ReactionDiffusionTOP.new(), "rd1")
+	GNTestAssert.assert_not_null(node, "ReactionDiffusionTOP created")
+
+func test_reaction_diffusion_top_produces_output() -> void:
+	var node := _make_node(ReactionDiffusionTOP.new(), "rd2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_not_null(out, "ReactionDiffusionTOP produces output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ReorderTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_reorder_top_instantiate() -> void:
+	var node := _make_node(ReorderTOP.new(), "reord1")
+	GNTestAssert.assert_not_null(node, "ReorderTOP created")
+
+func test_reorder_top_with_input() -> void:
+	var node := _make_node(ReorderTOP.new(), "reord2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "ReorderTOP with input produces output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SnapshotTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_snapshot_top_instantiate() -> void:
+	var node := _make_node(SnapshotTOP.new(), "snap1")
+	GNTestAssert.assert_not_null(node, "SnapshotTOP created")
+
+func test_snapshot_top_with_input() -> void:
+	var node := _make_node(SnapshotTOP.new(), "snap2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "SnapshotTOP captures frame")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VectorPathTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_vector_path_top_instantiate() -> void:
+	var node := _make_node(VectorPathTOP.new(), "vpath1")
+	GNTestAssert.assert_not_null(node, "VectorPathTOP created")
+
+func test_vector_path_top_cook() -> void:
+	var node := _make_node(VectorPathTOP.new(), "vpath2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_not_null(out, "VectorPathTOP cooks successfully")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TOPtoSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_toptosop_native_instantiate() -> void:
+	var node := _make_node(TOPtoSOPNative.new(), "t2sn1")
+	GNTestAssert.assert_not_null(node, "TOPtoSOPNative created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AnalyzeTOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_analyze_top_native_instantiate() -> void:
+	var node := _make_node(AnalyzeTOPNative.new(), "an1")
+	GNTestAssert.assert_not_null(node, "AnalyzeTOPNative created")
+
+func test_analyze_top_native_with_input() -> void:
+	var node := _make_node(AnalyzeTOPNative.new(), "an2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "AnalyzeTOPNative cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OpticalFlowTOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_optical_flow_top_native_instantiate() -> void:
+	var node := _make_node(OpticalFlowTOPNative.new(), "ofn1")
+	GNTestAssert.assert_not_null(node, "OpticalFlowTOPNative created")
+
+func test_optical_flow_top_native_with_input() -> void:
+	var node := _make_node(OpticalFlowTOPNative.new(), "ofn2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "OpticalFlowTOPNative cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ParticleStateTOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_particle_state_top_native_instantiate() -> void:
+	var node := _make_node(ParticleStateTOPNative.new(), "psn1")
+	GNTestAssert.assert_not_null(node, "ParticleStateTOPNative created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BlackmagicInTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_blackmagic_in_top_instantiate() -> void:
+	var node := _make_node(BlackmagicInTOP.new(), "bmin1")
+	GNTestAssert.assert_not_null(node, "BlackmagicInTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BlackmagicOutTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_blackmagic_out_top_instantiate() -> void:
+	var node := _make_node(BlackmagicOutTOP.new(), "bmout1")
+	GNTestAssert.assert_not_null(node, "BlackmagicOutTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DepthSensorTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_depth_sensor_top_instantiate() -> void:
+	var node := _make_node(DepthSensorTOP.new(), "ds1")
+	GNTestAssert.assert_not_null(node, "DepthSensorTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FFmpegInTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ffmpeg_in_top_instantiate() -> void:
+	var node := _make_node(FFmpegInTOP.new(), "ffin1")
+	GNTestAssert.assert_not_null(node, "FFmpegInTOP created")
+
+func test_ffmpeg_in_top_set_file() -> void:
+	var node := _make_node(FFmpegInTOP.new(), "ffin2")
+	node.set_param_value("file_path", "test.mp4")
+	var param: Variant = node.get_param_value("file_path")
+	GNTestAssert.assert_eq(param, "test.mp4", "file_path param set")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MovieFileOutTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_movie_file_out_top_instantiate() -> void:
+	var node := _make_node(MovieFileOutTOP.new(), "moout1")
+	GNTestAssert.assert_not_null(node, "MovieFileOutTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HapInTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_hap_in_top_instantiate() -> void:
+	var node := _make_node(HapInTOP.new(), "hapin1")
+	GNTestAssert.assert_not_null(node, "HapInTOP created")
+
+func test_hap_in_top_set_file() -> void:
+	var node := _make_node(HapInTOP.new(), "hapin2")
+	node.set_param_value("file_path", "test.mov")
+	var param: Variant = node.get_param_value("file_path")
+	GNTestAssert.assert_eq(param, "test.mov", "file_path param set")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ISFTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_isf_top_instantiate() -> void:
+	var node := _make_node(ISFTOP.new(), "isf1")
+	GNTestAssert.assert_not_null(node, "ISFTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BezierMapTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_bezier_map_top_instantiate() -> void:
+	var node := _make_node(BezierMapTOP.new(), "bmap1")
+	GNTestAssert.assert_not_null(node, "BezierMapTOP created")
+
+func test_bezier_map_top_with_input() -> void:
+	var node := _make_node(BezierMapTOP.new(), "bmap2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "BezierMapTOP cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# EdgeBlendTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_edge_blend_top_instantiate() -> void:
+	var node := _make_node(EdgeBlendTOP.new(), "eblend1")
+	GNTestAssert.assert_not_null(node, "EdgeBlendTOP created")
+
+func test_edge_blend_top_with_input() -> void:
+	var node := _make_node(EdgeBlendTOP.new(), "eblend2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "EdgeBlendTOP cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GridWarpTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_grid_warp_top_instantiate() -> void:
+	var node := _make_node(GridWarpTOP.new(), "gwarp1")
+	GNTestAssert.assert_not_null(node, "GridWarpTOP created")
+
+func test_grid_warp_top_with_input() -> void:
+	var node := _make_node(GridWarpTOP.new(), "gwarp2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "GridWarpTOP cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ProjectionMaskTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_projection_mask_top_instantiate() -> void:
+	var node := _make_node(ProjectionMaskTOP.new(), "pmask1")
+	GNTestAssert.assert_not_null(node, "ProjectionMaskTOP created")
+
+func test_projection_mask_top_with_input() -> void:
+	var node := _make_node(ProjectionMaskTOP.new(), "pmask2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "ProjectionMaskTOP cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ProjectorBlendTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_projector_blend_top_instantiate() -> void:
+	var node := _make_node(ProjectorBlendTOP.new(), "pblend1")
+	GNTestAssert.assert_not_null(node, "ProjectorBlendTOP created")
+
+func test_projector_blend_top_with_input() -> void:
+	var node := _make_node(ProjectorBlendTOP.new(), "pblend2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "ProjectorBlendTOP cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# QuadMapTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_quad_map_top_instantiate() -> void:
+	var node := _make_node(QuadMapTOP.new(), "qmap1")
+	GNTestAssert.assert_not_null(node, "QuadMapTOP created")
+
+func test_quad_map_top_with_input() -> void:
+	var node := _make_node(QuadMapTOP.new(), "qmap2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "QuadMapTOP cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# StonerTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_stoner_top_instantiate() -> void:
+	var node := _make_node(StonerTOP.new(), "stone1")
+	GNTestAssert.assert_not_null(node, "StonerTOP created")
+
+func test_stoner_top_with_input() -> void:
+	var node := _make_node(StonerTOP.new(), "stone2")
+	var tex := _make_constant_tex(Color.WHITE, Vector2i(64, 64))
+	if tex == null:
+		return
+	var out := _cook_with(node, [tex] as Array[GNData])
+	GNTestAssert.assert_not_null(out, "StonerTOP cooks with texture input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DepthEstimateTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_depth_estimate_top_instantiate() -> void:
+	var node := _make_node(DepthEstimateTOP.new(), "de1")
+	GNTestAssert.assert_not_null(node, "DepthEstimateTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SegmentationTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_segmentation_top_instantiate() -> void:
+	var node := _make_node(SegmentationTOP.new(), "seg1")
+	GNTestAssert.assert_not_null(node, "SegmentationTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# StyleTransferTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_style_transfer_top_instantiate() -> void:
+	var node := _make_node(StyleTransferTOP.new(), "st1")
+	GNTestAssert.assert_not_null(node, "StyleTransferTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# NDIInTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ndi_in_top_instantiate() -> void:
+	var node := _make_node(NDIInTOP.new(), "ndiin1")
+	GNTestAssert.assert_not_null(node, "NDIInTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# NDIOutTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ndi_out_top_instantiate() -> void:
+	var node := _make_node(NDIOutTOP.new(), "ndiout1")
+	GNTestAssert.assert_not_null(node, "NDIOutTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ShadertoyTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_shadertoy_top_instantiate() -> void:
+	var node := _make_node(ShadertoyTOP.new(), "stoy1")
+	GNTestAssert.assert_not_null(node, "ShadertoyTOP created")
+
+func test_shadertoy_top_set_shader() -> void:
+	var node := _make_node(ShadertoyTOP.new(), "stoy2")
+	node.set_param_value("shader_code", "void main() { gl_FragColor = vec4(1.0); }")
+	var param: Variant = node.get_param_value("shader_code")
+	GNTestAssert.assert_true(str(param).contains("gl_FragColor"), "shader_code param set")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SpoutInTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_spout_in_top_instantiate() -> void:
+	var node := _make_node(SpoutInTOP.new(), "spoutin1")
+	GNTestAssert.assert_not_null(node, "SpoutInTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SpoutOutTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_spout_out_top_instantiate() -> void:
+	var node := _make_node(SpoutOutTOP.new(), "spoutout1")
+	GNTestAssert.assert_not_null(node, "SpoutOutTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SyphonInTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_syphon_in_top_instantiate() -> void:
+	var node := _make_node(SyphonInTOP.new(), "syphonin1")
+	GNTestAssert.assert_not_null(node, "SyphonInTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SyphonOutTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_syphon_out_top_instantiate() -> void:
+	var node := _make_node(SyphonOutTOP.new(), "syphonout1")
+	GNTestAssert.assert_not_null(node, "SyphonOutTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# UserNativeTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_user_native_top_instantiate() -> void:
+	var node := _make_node(UserNativeTOP.new(), "unative1")
+	GNTestAssert.assert_not_null(node, "UserNativeTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# UserPythonTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_user_python_top_instantiate() -> void:
+	var node := _make_node(UserPythonTOP.new(), "upython1")
+	GNTestAssert.assert_not_null(node, "UserPythonTOP created")

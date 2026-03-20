@@ -38,10 +38,14 @@
                     "value": 1
                 },
                 "quality": {
-                    "value": 0.375
+                    "value": 0.375,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "auto_number": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "start_frame": {
                     "value": 0

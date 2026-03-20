@@ -19,7 +19,9 @@
                     }
                 },
                 "point_size": {
-                    "value": 4.0
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

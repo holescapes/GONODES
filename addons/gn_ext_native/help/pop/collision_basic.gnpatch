@@ -4,55 +4,165 @@
     "nodes": {
         "source1": {
             "type": "SourcePOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "max_particles": {"value": 50000},
-                "rate": {"value": 2000.0},
-                "init_speed": {"value": 3.0}
+                "max_particles": {
+                    "value": 50000
+                },
+                "rate": {
+                    "value": 2000.0,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
+                },
+                "init_speed": {
+                    "value": 3.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "collision1": {
             "type": "CollisionPOPNative",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "ground_y": {"value": 0.0},
-                "bounce": {"value": 0.5},
-                "friction": {"value": 0.1}
+                "ground_y": {
+                    "value": 0.0
+                },
+                "bounce": {
+                    "value": 0.5
+                },
+                "friction": {
+                    "value": 0.1
+                }
             }
         },
         "renderpop1": {
             "type": "RenderPOP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1375,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                975,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                975,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
             }
         }
     },
     "connections": [
-        {"from": "source1", "from_port": 0, "to": "collision1", "to_port": 0},
-        {"from": "collision1", "from_port": 0, "to": "renderpop1", "to_port": 0},
-        {"from": "renderpop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "collision1",
+            "to_port": 0
+        },
+        {
+            "from": "collision1",
+            "from_port": 0,
+            "to": "renderpop1",
+            "to_port": 0
+        },
+        {
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Collision POP (Native) \u2014 Ground Plane Bounce\n\nParticles bounce off ground at Y=0 with 50% restitution.\nFriction damping on contact, kill below threshold.\nNative C++ handles collision + array compaction.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

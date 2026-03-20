@@ -4,68 +4,162 @@
     "nodes": {
         "slider1": {
             "type": "SliderUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "label": { "value": "Noise Scale" },
-                "min_value": { "value": 1.0 },
-                "max_value": { "value": 20.0 },
-                "default_value": { "value": 5.0 }
+                "label": {
+                    "value": "Noise Scale"
+                },
+                "min_value": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "max_value": {
+                    "value": 20.0,
+                    "expression": "(20.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "default_value": {
+                    "value": 5.0
+                }
             }
         },
         "toggle1": {
             "type": "ToggleUI",
-            "position": [100, 250],
+            "position": [
+                100,
+                250
+            ],
             "parameters": {
-                "label": { "value": "Animate" },
-                "default_value": { "value": true }
+                "label": {
+                    "value": "Animate"
+                },
+                "default_value": {
+                    "value": true
+                }
             }
         },
         "panel1": {
             "type": "PanelTOP",
-            "position": [500, 150],
+            "position": [
+                500,
+                150
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 256 } },
-                "layout": { "value": 0 }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                },
+                "layout": {
+                    "value": 0
+                }
             }
         },
         "noise1": {
             "type": "NoiseTOP",
-            "position": [500, 400],
+            "position": [
+                500,
+                400
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "comp1": {
             "type": "CompositeTOP",
-            "position": [900, 250],
+            "position": [
+                900,
+                250
+            ],
             "parameters": {
-                "operation": { "value": 0 }
+                "operation": {
+                    "value": 0
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1300, 250],
+            "position": [
+                1300,
+                250
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "slider1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "toggle1", "from_port": 0, "to": "panel1", "to_port": 1 },
-        { "from": "noise1", "from_port": 0, "to": "comp1", "to_port": 0 },
-        { "from": "panel1", "from_port": 0, "to": "comp1", "to_port": 1 },
-        { "from": "comp1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "slider1",
+            "from_port": 0,
+            "to": "panel1",
+            "to_port": 0
+        },
+        {
+            "from": "toggle1",
+            "from_port": 0,
+            "to": "panel1",
+            "to_port": 1
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "comp1",
+            "to_port": 0
+        },
+        {
+            "from": "panel1",
+            "from_port": 0,
+            "to": "comp1",
+            "to_port": 1
+        },
+        {
+            "from": "comp1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Panel Composited — Pixel Overlay\n\nPanelTOP rendered as pixels, composited over NoiseTOP.\nThis is a non-interactive texture output — the widgets\nare visible but not clickable. For interactive panels,\nwire widgets to WindowOUT panel port via ContainerUI.",
-            "position": [-100.0, -200.0],
-            "size": [500.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Panel Composited \u2014 Pixel Overlay\n\nPanelTOP rendered as pixels, composited over NoiseTOP.\nThis is a non-interactive texture output \u2014 the widgets\nare visible but not clickable. For interactive panels,\nwire widgets to WindowOUT panel port via ContainerUI.",
+            "position": [
+                -100.0,
+                -200.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

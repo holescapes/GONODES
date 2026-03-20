@@ -32,10 +32,14 @@
             ],
             "parameters": {
                 "preset": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "kernel_size": {
-                    "value": 3
+                    "value": 3,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "divisor": {
                     "value": 1.0

@@ -18,10 +18,14 @@
             ],
             "parameters": {
                 "distance": {
-                    "value": 0.1
+                    "value": 0.1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "output_sides": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "output_front": {
                     "value": true

@@ -3,14 +3,16 @@
     "generator": "GONODES",
     "nodes": {
         "src_text": {
-            "type": "TextDAT",
+            "type": "LFO_CHOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "text": {
-                    "value": "Hello World"
+                "frequency": {
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

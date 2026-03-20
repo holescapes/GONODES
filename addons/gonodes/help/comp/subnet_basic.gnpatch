@@ -1,136 +1,122 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "subnet1":  {
-                                  "type":  "SubNetworkNode",
-                                  "position":  [
-                                                   200,
-                                                   100
-                                               ],
-                                  "parameters":  {
-
-                                                 }
-                              },
-                  "window1":  {
-                                  "position":  [
-                                                   1450,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "box_view":  {
-                                   "type":  "BoxSOP",
-                                   "position":  [
-                                                    500,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    800,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1100,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    800,
-                                                    300
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "box_view",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "SubNetwork — Container\n\nA collapsible container for organizing nodes.\nDouble-click to enter and build sub-networks.\nUse In/Out Tunnels for input/output ports.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "window1": {
+            "position": [
+                1450,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "box_view": {
+            "type": "BoxSOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                800,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box_view",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SubNetwork — Container\n\nA collapsible container for organizing nodes.\nDouble-click to enter and build sub-networks.\nUse In/Out Tunnels for input/output ports.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

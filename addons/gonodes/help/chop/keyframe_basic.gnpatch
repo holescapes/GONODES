@@ -4,32 +4,86 @@
     "nodes": {
         "keyframe1": {
             "type": "KeyframeCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "start": {"value": 0.0},
-                "end": {"value": 4.0},
-                "extend": {"value": 1},
-                "count": {"value": 2},
-                "name0": {"value": "bounce"},
+                "start": {
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "end": {
+                    "value": 4.0,
+                    "expression": "(4.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "extend": {
+                    "value": 1
+                },
+                "count": {
+                    "value": 2
+                },
+                "name0": {
+                    "value": "bounce"
+                },
                 "curve0": {
                     "value": {
                         "_type": "Ramp",
                         "keys": [
-                            {"pos": 0.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 2.0},
-                            {"pos": 0.5, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 1.0, "value": 0.0, "left_tangent": -2.0, "right_tangent": 0.0}
+                            {
+                                "pos": 0.0,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 2.0
+                            },
+                            {
+                                "pos": 0.5,
+                                "value": 1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 1.0,
+                                "value": 0.0,
+                                "left_tangent": -2.0,
+                                "right_tangent": 0.0
+                            }
                         ]
                     }
                 },
-                "name1": {"value": "fade"},
+                "name1": {
+                    "value": "fade"
+                },
                 "curve1": {
                     "value": {
                         "_type": "Ramp",
                         "keys": [
-                            {"pos": 0.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 0.3, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 0.7, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 1.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0}
+                            {
+                                "pos": 0.0,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 0.3,
+                                "value": 1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 0.7,
+                                "value": 1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 1.0,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            }
                         ]
                     }
                 }
@@ -37,36 +91,73 @@
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "keyframe1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "keyframe1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Keyframe CHOP \u2014 Basic\n\nTwo ramp-curve channels sampled over elapsed time.\n'bounce' is a parabolic arc, 'fade' is a trapezoidal envelope.\nExtend mode = CYCLE so the 4-second animation loops.",
-            "position": [-100.0, -120.0],
-            "size": [500.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                500.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

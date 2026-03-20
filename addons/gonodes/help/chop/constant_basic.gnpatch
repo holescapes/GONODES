@@ -1,122 +1,124 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "const1":  {
-                                 "type":  "ConstantCHOP",
-                                 "position":  [
-                                                  100,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "count":  {
-                                                                  "value":  3
-                                                              },
-                                                    "name0":  {
-                                                                  "value":  "x"
-                                                              },
-                                                    "value0":  {
-                                                                   "value":  1.0
-                                                               },
-                                                    "name1":  {
-                                                                  "value":  "y"
-                                                              },
-                                                    "value1":  {
-                                                                   "value":  2.5
-                                                               },
-                                                    "name2":  {
-                                                                  "value":  "z"
-                                                              },
-                                                    "value2":  {
-                                                                   "value":  -0.5
-                                                               }
-                                                }
-                             },
-                  "null1":  {
-                                "type":  "NullCHOP",
-                                "position":  [
-                                                 450,
-                                                 100
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1150,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    800,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "const1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Constant CHOP — Basic\n\nDefines 3 named channels with fixed values.\nUseful for setting up static data or expressions.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "const1": {
+            "type": "ConstantCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "count": {
+                    "value": 3,
+                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "name0": {
+                    "value": "x"
+                },
+                "value0": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "name1": {
+                    "value": "y"
+                },
+                "value1": {
+                    "value": 2.5
+                },
+                "name2": {
+                    "value": "z"
+                },
+                "value2": {
+                    "value": -0.5
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "const1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Constant CHOP \u2014 Basic\n\nDefines 3 named channels with fixed values.\nUseful for setting up static data or expressions.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

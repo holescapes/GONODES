@@ -1,116 +1,118 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "spectrum1":  {
-                                    "type":  "AudioSpectrumCHOP",
-                                    "position":  [
-                                                     100,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "active":  {
-                                                                      "value":  true
-                                                                  },
-                                                       "bands":  {
-                                                                     "value":  32
-                                                                 },
-                                                       "freq_min":  {
-                                                                        "value":  20.0
-                                                                    },
-                                                       "freq_max":  {
-                                                                        "value":  20000.0
-                                                                    },
-                                                       "smoothing":  {
-                                                                         "value":  0.8
-                                                                     }
-                                                   }
-                                },
-                  "null1":  {
-                                "type":  "NullCHOP",
-                                "position":  [
-                                                 450,
-                                                 100
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1150,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    800,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "spectrum1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Audio Spectrum CHOP — Analyzer\n\nAnalyzes the Master audio bus into 32 frequency\nbands from 20 Hz to 20 kHz. Smoothing at 0.8\nfor stable visual output.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         110.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "spectrum1": {
+            "type": "AudioSpectrumCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": true
+                },
+                "bands": {
+                    "value": 32,
+                    "expression": "(32 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "freq_min": {
+                    "value": 20.0,
+                    "expression": "(20.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "freq_max": {
+                    "value": 20000.0
+                },
+                "smoothing": {
+                    "value": 0.8
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "spectrum1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Audio Spectrum CHOP \u2014 Analyzer\n\nAnalyzes the Master audio bus into 32 frequency\nbands from 20 Hz to 20 kHz. Smoothing at 0.8\nfor stable visual output.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

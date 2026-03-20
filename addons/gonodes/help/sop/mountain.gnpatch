@@ -1,76 +1,178 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "grid1": {
-      "type": "GridSOP",
-      "position": [100, 200],
-      "parameters": {
-        "size_x": {"value": 4.0},
-        "size_y": {"value": 4.0},
-        "subdivisions_x": {"value": 50},
-        "subdivisions_y": {"value": 50}
-      }
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "grid1": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 4.0
+                },
+                "size_y": {
+                    "value": 4.0
+                },
+                "subdivisions_x": {
+                    "value": 50
+                },
+                "subdivisions_y": {
+                    "value": 50
+                }
+            }
+        },
+        "mountain1": {
+            "type": "MountainSOP",
+            "position": [
+                450,
+                200
+            ],
+            "parameters": {
+                "height": {
+                    "value": 0.8,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "frequency": {
+                    "value": 1.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "octaves": {
+                    "value": 5
+                },
+                "lacunarity": {
+                    "value": 2.0
+                },
+                "persistence": {
+                    "value": 0.5
+                },
+                "seed": {
+                    "value": 7
+                },
+                "noise_type": {
+                    "value": 0
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                750,
+                200
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                750,
+                400
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 2.0
+                },
+                "tz": {
+                    "value": 5.0
+                },
+                "rx": {
+                    "value": -20.0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1050,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1350,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
     },
-    "mountain1": {
-      "type": "MountainSOP",
-      "position": [450, 200],
-      "parameters": {
-        "height": {"value": 0.8},
-        "frequency": {"value": 1.5},
-        "octaves": {"value": 5},
-        "lacunarity": {"value": 2.0},
-        "persistence": {"value": 0.5},
-        "seed": {"value": 7},
-        "noise_type": {"value": 0}
-      }
-    },
-    "geo1": {
-      "type": "GeometryCOMP",
-      "position": [750, 200],
-      "parameters": {}
-    },
-    "cam1": {
-      "type": "CameraCOMP",
-      "position": [750, 400],
-      "parameters": {
-        "tx": {"value": 0.0},
-        "ty": {"value": 2.0},
-        "tz": {"value": 5.0},
-        "rx": {"value": -20.0}
-      }
-    },
-    "render1": {
-      "type": "RenderTOP",
-      "position": [1050, 200],
-      "parameters": {
-        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [1350, 200],
-      "parameters": {
-        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-        "open": {"value": true}
-      }
-    }
-  },
-  "connections": [
-    {"from": "grid1", "from_port": 0, "to": "mountain1", "to_port": 0},
-    {"from": "mountain1", "from_port": 0, "to": "geo1", "to_port": 0},
-    {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-    {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-    {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "Mountain SOP â€” Noise Terrain Generation\n\nA high-res grid is displaced along vertex normals by\nfractal noise (5 octaves, Simplex). Adjust height and\nfrequency for terrain, organic surfaces, or abstract shapes.",
-      "position": [50.0, -50.0],
-      "size": [600.0, 110.0],
-      "color": [1.0, 1.0, 1.0, 0.8]
-    }
-  ]
+    "connections": [
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "mountain1",
+            "to_port": 0
+        },
+        {
+            "from": "mountain1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Mountain SOP \u00e2\u20ac\u201d Noise Terrain Generation\n\nA high-res grid is displaced along vertex normals by\nfractal noise (5 octaves, Simplex). Adjust height and\nfrequency for terrain, organic surfaces, or abstract shapes.",
+            "position": [
+                50.0,
+                -50.0
+            ],
+            "size": [
+                600.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

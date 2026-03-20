@@ -1,600 +1,604 @@
 {
-    "annotations":  [
-                        {
-                            "color":  [
-                                          0.800000011920929,
-                                          0.899999976158142,
-                                          1.0,
-                                          0.800000011920929
-                                      ],
-                            "id":  "ann_1",
-                            "position":  [
-                                             -450.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         500.0,
-                                         120.0
-                                     ],
-                            "text":  "Soft Body Jelly Ball\n\nA sphere drops from y=4 onto a floor at y=0.\nNo vertices are pinned (pin_mode=None) so the\nentire ball deforms on impact like jelly.\nTry lowering stiffness for squishier behaviour.",
-                            "type":  "note"
-                        }
-                    ],
-    "connections":  [
-                        {
-                            "from":  "sphere1",
-                            "from_port":  0,
-                            "to":  "geo1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo1",
-                            "from_port":  0,
-                            "to":  "soft1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "grid_floor",
-                            "from_port":  0,
-                            "to":  "geo_floor",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "soft1",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_floor",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "cam1",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  2
-                        },
-                        {
-                            "from":  "light1",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  3
-                        },
-                        {
-                            "from":  "merge1",
-                            "from_port":  0,
-                            "to":  "render1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "render1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "generator":  "GONODES",
-    "nodes":  {
-                  "cam1":  {
-                               "parameters":  {
-                                                  "clear_color":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Color",
-                                                                                    "a":  1.0,
-                                                                                    "b":  0.100000001490116,
-                                                                                    "g":  0.100000001490116,
-                                                                                    "r":  0.100000001490116
-                                                                                }
-                                                                  },
-                                                  "far":  {
-                                                              "value":  100.0
-                                                          },
-                                                  "fov":  {
-                                                              "value":  75.0
-                                                          },
-                                                  "look_at_x":  {
-                                                                    "value":  0.0
-                                                                },
-                                                  "look_at_y":  {
-                                                                    "value":  0.0
-                                                                },
-                                                  "look_at_z":  {
-                                                                    "value":  0.0
-                                                                },
-                                                  "near":  {
-                                                               "value":  0.05
-                                                           },
-                                                  "ortho_size":  {
-                                                                     "value":  10.0
-                                                                 },
-                                                  "projection":  {
-                                                                     "value":  0
-                                                                 },
-                                                  "rx":  {
-                                                             "value":  -15.0
-                                                         },
-                                                  "ry":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "rz":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "tx":  {
-                                                             "value":  1.04
-                                                         },
-                                                  "ty":  {
-                                                             "value":  3.0
-                                                         },
-                                                  "tz":  {
-                                                             "value":  4.0
-                                                         },
-                                                  "use_look_at":  {
-                                                                      "value":  false
-                                                                  }
-                                              },
-                               "position":  [
-                                                200.0,
-                                                400.0
-                                            ],
-                               "type":  "CameraCOMP"
-                           },
-                  "geo1":  {
-                               "parameters":  {
-                                                  "albedo_color":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Color",
-                                                                                     "a":  1.0,
-                                                                                     "b":  1.0,
-                                                                                     "g":  0.600000023841858,
-                                                                                     "r":  0.200000002980232
-                                                                                 }
-                                                                   },
-                                                  "cast_shadow":  {
-                                                                      "value":  1
-                                                                  },
-                                                  "emission_color":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Color",
-                                                                                       "a":  1.0,
-                                                                                       "b":  0.0,
-                                                                                       "g":  0.0,
-                                                                                       "r":  0.0
-                                                                                   }
-                                                                     },
-                                                  "emission_energy":  {
-                                                                          "value":  0.0
-                                                                      },
-                                                  "metallic":  {
-                                                                   "value":  0.1
-                                                               },
-                                                  "roughness":  {
-                                                                    "value":  0.3
-                                                                },
-                                                  "rx":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "ry":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "rz":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "sx":  {
-                                                             "value":  1.0
-                                                         },
-                                                  "sy":  {
-                                                             "value":  1.0
-                                                         },
-                                                  "sz":  {
-                                                             "value":  1.0
-                                                         },
-                                                  "tx":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "ty":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "tz":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "visible":  {
-                                                                  "value":  true
-                                                              }
-                                              },
-                               "position":  [
-                                                -100.0,
-                                                0.0
-                                            ],
-                               "type":  "GeometryCOMP"
-                           },
-                  "geo_floor":  {
-                                    "parameters":  {
-                                                       "albedo_color":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Color",
-                                                                                          "a":  1.0,
-                                                                                          "b":  0.850000023841858,
-                                                                                          "g":  0.850000023841858,
-                                                                                          "r":  0.850000023841858
-                                                                                      }
-                                                                        },
-                                                       "cast_shadow":  {
-                                                                           "value":  1
-                                                                       },
-                                                       "emission_color":  {
-                                                                              "value":  {
-                                                                                            "_type":  "Color",
-                                                                                            "a":  1.0,
-                                                                                            "b":  0.0,
-                                                                                            "g":  0.0,
-                                                                                            "r":  0.0
-                                                                                        }
-                                                                          },
-                                                       "emission_energy":  {
-                                                                               "value":  0.0
-                                                                           },
-                                                       "metallic":  {
-                                                                        "value":  0.0
-                                                                    },
-                                                       "roughness":  {
-                                                                         "value":  0.8
-                                                                     },
-                                                       "rx":  {
-                                                                  "value":  0.0
-                                                              },
-                                                       "ry":  {
-                                                                  "value":  0.0
-                                                              },
-                                                       "rz":  {
-                                                                  "value":  0.0
-                                                              },
-                                                       "sx":  {
-                                                                  "value":  1.0
-                                                              },
-                                                       "sy":  {
-                                                                  "value":  1.0
-                                                              },
-                                                       "sz":  {
-                                                                  "value":  1.0
-                                                              },
-                                                       "tx":  {
-                                                                  "value":  0.0
-                                                              },
-                                                       "ty":  {
-                                                                  "value":  0.0
-                                                              },
-                                                       "tz":  {
-                                                                  "value":  0.0
-                                                              },
-                                                       "visible":  {
-                                                                       "value":  true
-                                                                   }
-                                                   },
-                                    "position":  [
-                                                     -100.0,
-                                                     250.0
-                                                 ],
-                                    "type":  "GeometryCOMP"
-                                },
-                  "grid_floor":  {
-                                     "parameters":  {
-                                                        "cols":  {
-                                                                     "value":  2
-                                                                 },
-                                                        "orientation":  {
-                                                                            "value":  0
-                                                                        },
-                                                        "rows":  {
-                                                                     "value":  2
-                                                                 },
-                                                        "size_x":  {
-                                                                       "value":  8.0
-                                                                   },
-                                                        "size_z":  {
-                                                                       "value":  2.0
-                                                                   }
-                                                    },
-                                     "position":  [
-                                                      -400.0,
-                                                      250.0
-                                                  ],
-                                     "type":  "GridSOP"
-                                 },
-                  "light1":  {
-                                 "parameters":  {
-                                                    "color":  {
-                                                                  "value":  {
-                                                                                "_type":  "Color",
-                                                                                "a":  1.0,
-                                                                                "b":  1.0,
-                                                                                "g":  1.0,
-                                                                                "r":  1.0
-                                                                            }
-                                                              },
-                                                    "dir_shadow_mode":  {
-                                                                            "value":  2
-                                                                        },
-                                                    "energy":  {
-                                                                   "value":  1.0
-                                                               },
-                                                    "omni_range":  {
-                                                                       "value":  10.0
-                                                                   },
-                                                    "rx":  {
-                                                               "value":  -50.0
-                                                           },
-                                                    "ry":  {
-                                                               "value":  25.0
-                                                           },
-                                                    "rz":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "shadow_bias":  {
-                                                                        "value":  0.1
-                                                                    },
-                                                    "shadow_blur":  {
-                                                                        "value":  1.0
-                                                                    },
-                                                    "shadow_normal_bias":  {
-                                                                               "value":  1.0
-                                                                           },
-                                                    "shadow_opacity":  {
-                                                                           "value":  1.0
-                                                                       },
-                                                    "shadows":  {
-                                                                    "value":  true
-                                                                },
-                                                    "spot_angle":  {
-                                                                       "value":  45.0
-                                                                   },
-                                                    "spot_range":  {
-                                                                       "value":  10.0
-                                                                   },
-                                                    "tx":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "ty":  {
-                                                               "value":  3.0
-                                                           },
-                                                    "type":  {
-                                                                 "value":  0
-                                                             },
-                                                    "tz":  {
-                                                               "value":  2.0
-                                                           }
-                                                },
-                                 "position":  [
-                                                  200.0,
-                                                  550.0
-                                              ],
-                                 "type":  "LightCOMP"
-                             },
-                  "merge1":  {
-                                 "dynamic_input_count":  5,
-                                 "parameters":  {
-                                                    "rx":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "ry":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "rz":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "sx":  {
-                                                               "value":  1.0
-                                                           },
-                                                    "sy":  {
-                                                               "value":  1.0
-                                                           },
-                                                    "sz":  {
-                                                               "value":  1.0
-                                                           },
-                                                    "tx":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "ty":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "tz":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "visible":  {
-                                                                    "value":  true
-                                                                }
-                                                },
-                                 "position":  [
-                                                  500.0,
-                                                  200.0
-                                              ],
-                                 "type":  "MergeCOMP"
-                             },
-                  "render1":  {
-                                  "dynamic_input_count":  2,
-                                  "parameters":  {
-                                                     "ambient_color":  {
-                                                                           "value":  {
-                                                                                         "_type":  "Color",
-                                                                                         "a":  1.0,
-                                                                                         "b":  0.400000005960464,
-                                                                                         "g":  0.300000011920929,
-                                                                                         "r":  0.300000011920929
-                                                                                     }
-                                                                       },
-                                                     "ambient_energy":  {
-                                                                            "value":  0.3
-                                                                        },
-                                                     "anti_aliasing":  {
-                                                                           "value":  2
-                                                                       },
-                                                     "bg_color":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Color",
-                                                                                    "a":  1.0,
-                                                                                    "b":  0.119999997317791,
-                                                                                    "g":  0.100000001490116,
-                                                                                    "r":  0.100000001490116
-                                                                                }
-                                                                  },
-                                                     "dir_shadow_size":  {
-                                                                             "value":  2
-                                                                         },
-                                                     "dof_bokeh_shape":  {
-                                                                             "value":  2
-                                                                         },
-                                                     "dof_bokeh_size":  {
-                                                                            "value":  4.0
-                                                                        },
-                                                     "dof_far_distance":  {
-                                                                              "value":  10.0
-                                                                          },
-                                                     "dof_far_enabled":  {
-                                                                             "value":  false
-                                                                         },
-                                                     "dof_far_transition":  {
-                                                                                "value":  5.0
-                                                                            },
-                                                     "dof_near_distance":  {
-                                                                               "value":  2.0
-                                                                           },
-                                                     "dof_near_enabled":  {
-                                                                              "value":  false
-                                                                          },
-                                                     "dof_near_transition":  {
-                                                                                 "value":  1.0
-                                                                             },
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  1024,
-                                                                                      "y":  768
-                                                                                  }
-                                                                    },
-                                                     "shadow_atlas_size":  {
-                                                                               "value":  2
-                                                                           },
-                                                     "shadow_filter":  {
-                                                                           "value":  2
-                                                                       },
-                                                     "transparent_bg":  {
-                                                                            "value":  false
-                                                                        },
-                                                     "use_environment":  {
-                                                                             "value":  true
-                                                                         }
-                                                 },
-                                  "position":  [
-                                                   800.0,
-                                                   200.0
-                                               ],
-                                  "type":  "RenderTOP"
-                              },
-                  "soft1":  {
-                                "parameters":  {
-                                                   "damping":  {
-                                                                   "value":  0.97
-                                                               },
-                                                   "floor_collision":  {
-                                                                           "value":  true
-                                                                       },
-                                                   "floor_y":  {
-                                                                   "value":  0.0
-                                                               },
-                                                   "gravity":  {
-                                                                   "value":  -9.8
-                                                               },
-                                                   "iterations":  {
-                                                                      "value":  12
-                                                                  },
-                                                   "pin_mode":  {
-                                                                    "value":  0
-                                                                },
-                                                   "pin_threshold":  {
-                                                                         "value":  0.02
-                                                                     },
-                                                   "rx":  {
-                                                              "value":  0.0
-                                                          },
-                                                   "ry":  {
-                                                              "value":  0.0
-                                                          },
-                                                   "rz":  {
-                                                              "value":  0.0
-                                                          },
-                                                   "stiffness":  {
-                                                                     "value":  0.8
-                                                                 },
-                                                   "sx":  {
-                                                              "value":  1.0
-                                                          },
-                                                   "sy":  {
-                                                              "value":  1.0
-                                                          },
-                                                   "sz":  {
-                                                              "value":  1.0
-                                                          },
-                                                   "tx":  {
-                                                              "value":  0.0
-                                                          },
-                                                   "ty":  {
-                                                              "value":  4.0
-                                                          },
-                                                   "tz":  {
-                                                              "value":  0.0
-                                                          }
-                                               },
-                                "position":  [
-                                                 200.0,
-                                                 0.0
-                                             ],
-                                "type":  "SoftBodyCOMP"
-                            },
-                  "sphere1":  {
-                                  "parameters":  {
-                                                     "height":  {
-                                                                    "value":  2.0
-                                                                },
-                                                     "is_hemisphere":  {
-                                                                           "value":  false
-                                                                       },
-                                                     "radial_segments":  {
-                                                                             "value":  24
-                                                                         },
-                                                     "radius":  {
-                                                                    "value":  1.0
-                                                                },
-                                                     "rings":  {
-                                                                   "value":  12
-                                                               }
-                                                 },
-                                  "position":  [
-                                                   -400.0,
-                                                   0.0
-                                               ],
-                                  "type":  "SphereSOP"
-                              },
-                  "window1":  {
-                                  "position":  [
-                                                   1150,
-                                                   200
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "version":  "1.0.0"
+    "annotations": [
+        {
+            "color": [
+                0.800000011920929,
+                0.899999976158142,
+                1.0,
+                0.800000011920929
+            ],
+            "id": "ann_1",
+            "position": [
+                -450.0,
+                -150.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "text": "Soft Body Jelly Ball\n\nA sphere drops from y=4 onto a floor at y=0.\nNo vertices are pinned (pin_mode=None) so the\nentire ball deforms on impact like jelly.\nTry lowering stiffness for squishier behaviour.",
+            "type": "note"
+        }
+    ],
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "soft1",
+            "to_port": 0
+        },
+        {
+            "from": "grid_floor",
+            "from_port": 0,
+            "to": "geo_floor",
+            "to_port": 0
+        },
+        {
+            "from": "soft1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "geo_floor",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 3
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "generator": "GONODES",
+    "nodes": {
+        "cam1": {
+            "parameters": {
+                "clear_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.100000001490116,
+                        "g": 0.100000001490116,
+                        "r": 0.100000001490116
+                    }
+                },
+                "far": {
+                    "value": 100.0
+                },
+                "fov": {
+                    "value": 75.0
+                },
+                "look_at_x": {
+                    "value": 0.0
+                },
+                "look_at_y": {
+                    "value": 0.0
+                },
+                "look_at_z": {
+                    "value": 0.0
+                },
+                "near": {
+                    "value": 0.05
+                },
+                "ortho_size": {
+                    "value": 10.0
+                },
+                "projection": {
+                    "value": 0
+                },
+                "rx": {
+                    "value": -15.0
+                },
+                "ry": {
+                    "value": 0.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "tx": {
+                    "value": 1.04
+                },
+                "ty": {
+                    "value": 3.0
+                },
+                "tz": {
+                    "value": 4.0
+                },
+                "use_look_at": {
+                    "value": false
+                }
+            },
+            "position": [
+                200.0,
+                400.0
+            ],
+            "type": "CameraCOMP"
+        },
+        "geo1": {
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 1.0,
+                        "g": 0.600000023841858,
+                        "r": 0.200000002980232
+                    }
+                },
+                "cast_shadow": {
+                    "value": 1
+                },
+                "emission_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 0.0
+                    }
+                },
+                "emission_energy": {
+                    "value": 0.0
+                },
+                "metallic": {
+                    "value": 0.1
+                },
+                "roughness": {
+                    "value": 0.3
+                },
+                "rx": {
+                    "value": 0.0
+                },
+                "ry": {
+                    "value": 0.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "sx": {
+                    "value": 1.0
+                },
+                "sy": {
+                    "value": 1.0
+                },
+                "sz": {
+                    "value": 1.0
+                },
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "visible": {
+                    "value": true
+                }
+            },
+            "position": [
+                -100.0,
+                0.0
+            ],
+            "type": "GeometryCOMP"
+        },
+        "geo_floor": {
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.850000023841858,
+                        "g": 0.850000023841858,
+                        "r": 0.850000023841858
+                    }
+                },
+                "cast_shadow": {
+                    "value": 1
+                },
+                "emission_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 0.0
+                    }
+                },
+                "emission_energy": {
+                    "value": 0.0
+                },
+                "metallic": {
+                    "value": 0.0
+                },
+                "roughness": {
+                    "value": 0.8
+                },
+                "rx": {
+                    "value": 0.0
+                },
+                "ry": {
+                    "value": 0.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "sx": {
+                    "value": 1.0
+                },
+                "sy": {
+                    "value": 1.0
+                },
+                "sz": {
+                    "value": 1.0
+                },
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "visible": {
+                    "value": true
+                }
+            },
+            "position": [
+                -100.0,
+                250.0
+            ],
+            "type": "GeometryCOMP"
+        },
+        "grid_floor": {
+            "parameters": {
+                "cols": {
+                    "value": 2
+                },
+                "orientation": {
+                    "value": 0
+                },
+                "rows": {
+                    "value": 2
+                },
+                "size_x": {
+                    "value": 8.0
+                },
+                "size_z": {
+                    "value": 2.0
+                }
+            },
+            "position": [
+                -400.0,
+                250.0
+            ],
+            "type": "GridSOP"
+        },
+        "light1": {
+            "parameters": {
+                "color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 1.0,
+                        "g": 1.0,
+                        "r": 1.0
+                    }
+                },
+                "dir_shadow_mode": {
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "energy": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "omni_range": {
+                    "value": 10.0
+                },
+                "rx": {
+                    "value": -50.0
+                },
+                "ry": {
+                    "value": 25.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "shadow_bias": {
+                    "value": 0.1
+                },
+                "shadow_blur": {
+                    "value": 1.0
+                },
+                "shadow_normal_bias": {
+                    "value": 1.0
+                },
+                "shadow_opacity": {
+                    "value": 1.0
+                },
+                "shadows": {
+                    "value": true
+                },
+                "spot_angle": {
+                    "value": 45.0
+                },
+                "spot_range": {
+                    "value": 10.0
+                },
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 3.0
+                },
+                "type": {
+                    "value": 0
+                },
+                "tz": {
+                    "value": 2.0
+                }
+            },
+            "position": [
+                200.0,
+                550.0
+            ],
+            "type": "LightCOMP"
+        },
+        "merge1": {
+            "dynamic_input_count": 5,
+            "parameters": {
+                "rx": {
+                    "value": 0.0
+                },
+                "ry": {
+                    "value": 0.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "sx": {
+                    "value": 1.0
+                },
+                "sy": {
+                    "value": 1.0
+                },
+                "sz": {
+                    "value": 1.0
+                },
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "visible": {
+                    "value": true
+                }
+            },
+            "position": [
+                500.0,
+                200.0
+            ],
+            "type": "MergeCOMP"
+        },
+        "render1": {
+            "dynamic_input_count": 2,
+            "parameters": {
+                "ambient_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.400000005960464,
+                        "g": 0.300000011920929,
+                        "r": 0.300000011920929
+                    }
+                },
+                "ambient_energy": {
+                    "value": 0.3
+                },
+                "anti_aliasing": {
+                    "value": 2
+                },
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.119999997317791,
+                        "g": 0.100000001490116,
+                        "r": 0.100000001490116
+                    }
+                },
+                "dir_shadow_size": {
+                    "value": 2
+                },
+                "dof_bokeh_shape": {
+                    "value": 2
+                },
+                "dof_bokeh_size": {
+                    "value": 4.0
+                },
+                "dof_far_distance": {
+                    "value": 10.0
+                },
+                "dof_far_enabled": {
+                    "value": false
+                },
+                "dof_far_transition": {
+                    "value": 5.0
+                },
+                "dof_near_distance": {
+                    "value": 2.0
+                },
+                "dof_near_enabled": {
+                    "value": false
+                },
+                "dof_near_transition": {
+                    "value": 1.0
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1024,
+                        "y": 768
+                    }
+                },
+                "shadow_atlas_size": {
+                    "value": 2
+                },
+                "shadow_filter": {
+                    "value": 2
+                },
+                "transparent_bg": {
+                    "value": false
+                },
+                "use_environment": {
+                    "value": true
+                }
+            },
+            "position": [
+                800.0,
+                200.0
+            ],
+            "type": "RenderTOP"
+        },
+        "soft1": {
+            "parameters": {
+                "damping": {
+                    "value": 0.97
+                },
+                "floor_collision": {
+                    "value": true
+                },
+                "floor_y": {
+                    "value": 0.0
+                },
+                "gravity": {
+                    "value": -9.8
+                },
+                "iterations": {
+                    "value": 12
+                },
+                "pin_mode": {
+                    "value": 0
+                },
+                "pin_threshold": {
+                    "value": 0.02
+                },
+                "rx": {
+                    "value": 0.0
+                },
+                "ry": {
+                    "value": 0.0
+                },
+                "rz": {
+                    "value": 0.0
+                },
+                "stiffness": {
+                    "value": 0.8
+                },
+                "sx": {
+                    "value": 1.0
+                },
+                "sy": {
+                    "value": 1.0
+                },
+                "sz": {
+                    "value": 1.0
+                },
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 4.0
+                },
+                "tz": {
+                    "value": 0.0
+                }
+            },
+            "position": [
+                200.0,
+                0.0
+            ],
+            "type": "SoftBodyCOMP"
+        },
+        "sphere1": {
+            "parameters": {
+                "height": {
+                    "value": 2.0
+                },
+                "is_hemisphere": {
+                    "value": false
+                },
+                "radial_segments": {
+                    "value": 24
+                },
+                "radius": {
+                    "value": 1.0
+                },
+                "rings": {
+                    "value": 12
+                }
+            },
+            "position": [
+                -400.0,
+                0.0
+            ],
+            "type": "SphereSOP"
+        },
+        "window1": {
+            "position": [
+                1150,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "version": "1.0.0"
 }

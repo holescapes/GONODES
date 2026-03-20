@@ -4,47 +4,180 @@
     "nodes": {
         "sphere1": {
             "type": "SphereSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "radius": {"value": 1.0},
-                "rows": {"value": 24},
-                "columns": {"value": 24}
+                "radius": {
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "rows": {
+                    "value": 24,
+                    "expression": "(24 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "columns": {
+                    "value": 24
+                }
             }
         },
         "dot1": {
             "type": "DotNode",
-            "position": [400, 100],
+            "position": [
+                400,
+                100
+            ],
             "parameters": {}
         },
         "transform1": {
             "type": "TransformSOP",
-            "position": [700, 0],
+            "position": [
+                700,
+                0
+            ],
             "parameters": {
-                "tx": {"value": 2.0}
+                "tx": {
+                    "value": 2.0
+                }
             }
         },
         "smooth1": {
             "type": "SmoothSOP",
-            "position": [700, 200],
+            "position": [
+                700,
+                200
+            ],
             "parameters": {
-                "strength": {"value": 0.5},
-                "iterations": {"value": 3}
+                "strength": {
+                    "value": 0.5
+                },
+                "iterations": {
+                    "value": 3
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                1000,
+                0
+            ],
+            "parameters": {}
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                1300,
+                200
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 5.0
+                }
+            }
+        },
+        "rendertop1": {
+            "type": "RenderTOP",
+            "position": [
+                1300,
+                0
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1600,
+                0
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "sphere1", "from_port": 0, "to": "dot1", "to_port": 0},
-        {"from": "dot1", "from_port": 0, "to": "transform1", "to_port": 0},
-        {"from": "dot1", "from_port": 0, "to": "smooth1", "to_port": 0}
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "dot1",
+            "to_port": 0
+        },
+        {
+            "from": "dot1",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "dot1",
+            "from_port": 0,
+            "to": "smooth1",
+            "to_port": 0
+        },
+        {
+            "from": "transform1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 1
+        },
+        {
+            "from": "rendertop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Dot Node \u2014 SOP Routing\n\nDot node adapts to the SOP family here.\nA single Sphere feeds through a Dot to branch into\nTransformSOP and SmoothSOP in parallel.\nKeeps wiring clean when one source feeds many destinations.",
-            "position": [-100.0, -120.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

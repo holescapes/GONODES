@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "iterations": {
-                    "value": 5
+                    "value": 5,
+                    "expression": "(5 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "step_size": {
-                    "value": 2.0
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "angle": {
                     "value": 51.4

@@ -4,38 +4,108 @@
     "nodes": {
         "pointcloud1": {
             "type": "DepthPointCloudSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "backend": { "value": 0 },
-                "use_color": { "value": true },
-                "skip": { "value": 2 }
+                "device": {
+                    "value": 0
+                },
+                "use_color": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "skip": {
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                }
             }
         },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                500,
+                300
+            ],
+            "parameters": {}
+        },
         "render1": {
-            "type": "PointCloudRenderTOP",
-            "position": [500, 100],
+            "type": "RenderTOP",
+            "position": [
+                900,
+                200
+            ],
             "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                1300,
+                200
+            ],
             "parameters": {
-                "open": { "value": true }
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "pointcloud1", "from_port": 0, "to": "render1", "to_port": 0 },
-        { "from": "render1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "pointcloud1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Point Cloud — Basic Render\n\nCaptures a dense 3D point cloud from the depth\nsensor, then renders it with PointCloudRenderTOP.\nSkip = 2 uses every other point for performance.\nColor from the sensor's RGB camera is mapped to\neach point via the Cd vertex color attribute.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Point Cloud \u2014 Basic Render\n\nCaptures a dense 3D point cloud from the depth\nsensor, rendered via GeometryCOMP + RenderTOP.\nSkip = 2 uses every other point for performance.\nColor from the sensor's RGB camera is mapped to\neach point via the Cd vertex color attribute.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

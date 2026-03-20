@@ -4,89 +4,199 @@
     "nodes": {
         "grid1": {
             "type": "GridSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "sizex": {"value": 2.0},
-                "sizey": {"value": 2.0},
-                "rows": {"value": 8},
-                "columns": {"value": 8}
+                "sizex": {
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "sizey": {
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "rows": {
+                    "value": 8
+                },
+                "columns": {
+                    "value": 8
+                }
             }
         },
         "grid2": {
             "type": "GridSOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "sizex": {"value": 2.0},
-                "sizey": {"value": 2.0},
-                "rows": {"value": 8},
-                "columns": {"value": 8}
+                "sizex": {
+                    "value": 2.0
+                },
+                "sizey": {
+                    "value": 2.0
+                },
+                "rows": {
+                    "value": 8
+                },
+                "columns": {
+                    "value": 8
+                }
             }
         },
         "transform1": {
             "type": "TransformSOP",
-            "position": [450, 350],
+            "position": [
+                450,
+                350
+            ],
             "parameters": {
-                "tx": {"value": 1.8}
+                "tx": {
+                    "value": 1.8
+                }
             }
         },
         "polystitch1": {
             "type": "PolyStitchSOP",
-            "position": [800, 200],
+            "position": [
+                800,
+                200
+            ],
             "parameters": {
-                "max_distance": {"value": 0.5},
-                "include_inputs": {"value": true}
+                "max_distance": {
+                    "value": 0.5
+                },
+                "include_inputs": {
+                    "value": true
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [1150, 200],
+            "position": [
+                1150,
+                200
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [1150, 400],
+            "position": [
+                1150,
+                400
+            ],
             "parameters": {
-                "ty": {"value": 3.0},
-                "tz": {"value": 0.5}
+                "ty": {
+                    "value": 3.0
+                },
+                "tz": {
+                    "value": 0.5
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [1500, 200],
+            "position": [
+                1500,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1850, 200],
+            "position": [
+                1850,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "grid2", "from_port": 0, "to": "transform1", "to_port": 0},
-        {"from": "grid1", "from_port": 0, "to": "polystitch1", "to_port": 0},
-        {"from": "transform1", "from_port": 0, "to": "polystitch1", "to_port": 1},
-        {"from": "polystitch1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "grid2",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "polystitch1",
+            "to_port": 0
+        },
+        {
+            "from": "transform1",
+            "from_port": 0,
+            "to": "polystitch1",
+            "to_port": 1
+        },
+        {
+            "from": "polystitch1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "PolyStitch SOP \u2014 Basic\n\nTwo grids placed with overlapping boundary edges (1.8 offset\nwith 2.0 size). PolyStitch finds nearest boundary vertices\nwithin max_distance=0.5 and connects them with triangles.\nUseful for joining separate meshes at their edges.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

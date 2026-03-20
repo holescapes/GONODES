@@ -19,7 +19,9 @@
                     }
                 },
                 "edit_alpha": {
-                    "value": true
+                    "value": true,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
                 },
                 "min_size": {
                     "value": {

@@ -18,10 +18,14 @@
             ],
             "parameters": {
                 "direction": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "sort_mode": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "threshold_low": {
                     "value": 0.1

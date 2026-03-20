@@ -4,67 +4,175 @@
     "nodes": {
         "sphere1": {
             "type": "SphereSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "geo1": {
-            "type": "GeometryCOMP",
-            "position": [400, 100],
-            "parameters": {}
+            "type": "BoxSOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "sizex": {
+                    "value": 1.0
+                },
+                "sizey": {
+                    "value": 1.0
+                },
+                "sizez": {
+                    "value": 1.0
+                }
+            }
         },
         "instance1": {
             "type": "InstanceCOMP",
-            "position": [700, 100],
+            "position": [
+                700,
+                100
+            ],
             "parameters": {
-                "count": {"value": 36},
-                "scatter_mode": {"value": 0},
-                "spacing": {"value": 1.0},
-                "albedo_color": {"value": {"_type": "Color", "r": 0.2, "g": 0.6, "b": 1.0, "a": 1.0}},
-                "roughness": {"value": 0.3},
-                "metallic": {"value": 0.5},
-                "scale_rand": {"value": 0.15}
+                "count": {
+                    "value": 36,
+                    "expression": "(36 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "scatter_mode": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "spacing": {
+                    "value": 1.0
+                },
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.2,
+                        "g": 0.6,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                },
+                "roughness": {
+                    "value": 0.3
+                },
+                "metallic": {
+                    "value": 0.5
+                },
+                "scale_rand": {
+                    "value": 0.15
+                }
             }
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [700, 350],
+            "position": [
+                700,
+                350
+            ],
             "parameters": {
-                "ty": {"value": 2.0},
-                "tz": {"value": 6.0},
-                "rx": {"value": -15.0}
+                "ty": {
+                    "value": 2.0
+                },
+                "tz": {
+                    "value": 6.0
+                },
+                "rx": {
+                    "value": -15.0
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [1050, 100],
+            "position": [
+                1050,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1400, 100],
+            "position": [
+                1400,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "sphere1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "instance1", "to_port": 0},
-        {"from": "instance1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "instance1",
+            "to_port": 0
+        },
+        {
+            "from": "instance1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Takes \u2014 Basic Switching Demo\n\nThis patch demonstrates the Take system.\n\n1. Open the Take panel (toggle 'Takes' in toolbar)\n2. Click 'Capture Base' to snapshot current state\n3. Change some parameters (color, count, spacing, etc.)\n4. Type a name and click 'Capture Take'\n5. Click 'Revert to Base' to restore\n6. Click a take in the list to apply it instantly\n\nTakes store only parameters that differ from Base\n(sparse delta), so they are lightweight.",
-            "position": [-150.0, -200.0],
-            "size": [550.0, 200.0],
-            "color": [1.0, 0.9, 0.3, 0.9]
+            "position": [
+                -150.0,
+                -200.0
+            ],
+            "size": [
+                550.0,
+                200.0
+            ],
+            "color": [
+                1.0,
+                0.9,
+                0.3,
+                0.9
+            ]
         }
     ]
 }

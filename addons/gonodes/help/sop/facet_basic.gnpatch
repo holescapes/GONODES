@@ -28,10 +28,14 @@
                     "value": 0
                 },
                 "distance": {
-                    "value": 0.001
+                    "value": 0.001,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "recompute_normals": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

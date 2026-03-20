@@ -4,32 +4,110 @@
     "nodes": {
         "serial_rx1": {
             "type": "SerialReceiveDAT",
-            "position": [300, 200],
+            "position": [
+                300,
+                200
+            ],
             "parameters": {
-                "port": {"value": "COM5"},
-                "baud_rate": {"value": 9600},
-                "delimiter": {"value": 0},
-                "max_rows": {"value": 200},
-                "active": {"value": false}
+                "port": {
+                    "value": "COM5"
+                },
+                "baud_rate": {
+                    "value": 9600
+                },
+                "delimiter": {
+                    "value": 0
+                },
+                "max_rows": {
+                    "value": 200
+                },
+                "active": {
+                    "value": false
+                }
             }
         },
         "evaluate1": {
             "type": "EvaluateDAT",
-            "position": [650, 200],
+            "position": [
+                650,
+                200
+            ],
             "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                950,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                750,
+                200
+            ],
+            "parameters": {
+                "text": {
+                    "value": "DAT Output",
+                    "expression": "str(op(\"evaluate1\"))",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         }
     },
     "connections": [
-        {"from": "serial_rx1", "from_port": 0, "to": "evaluate1", "to_port": 0}
+        {
+            "from": "serial_rx1",
+            "from_port": 0,
+            "to": "evaluate1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Serial Receive DAT \u2014 Arduino Sensor\n\nTypical Arduino setup: COM5 at 9600 baud, newline framed.\nEvaluateDAT downstream can parse CSV sensor values.\nGreat for physical computing / installation work.",
-            "position": [-50.0, -50.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -50.0,
+                -50.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -3,14 +3,18 @@
     "generator": "GONODES",
     "nodes": {
         "src_text": {
-            "type": "TextDAT",
+            "type": "CircleTOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "text": {
-                    "value": "Hello World"
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 128,
+                        "y": 128
+                    }
                 }
             }
         },
@@ -25,7 +29,9 @@
                     "value": 1
                 },
                 "max_pixels": {
-                    "value": 99
+                    "value": 99,
+                    "expression": "(99 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 }
             }
         },

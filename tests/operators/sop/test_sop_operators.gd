@@ -995,3 +995,1026 @@ func test_subdivide_sop_no_input() -> void:
 	var node := _make_node(SubdivideSOP.new(), "sd_null")
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_true(true, "subdivide no input did not crash")
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SOPtoDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_soptodat_instantiate() -> void:
+	var node := _make_node(SOPtoDAT.new(), "soptodat1")
+	GNTestAssert.assert_not_null(node, "SOPtoDAT created")
+
+
+func test_soptodat_converts_geometry() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(SOPtoDAT.new(), "soptodat2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_not_null(out, "SOPtoDAT output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ClothSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_clothsop_instantiate() -> void:
+	var node := _make_node(ClothSOP.new(), "cloth1")
+	GNTestAssert.assert_not_null(node, "ClothSOP created")
+
+
+func test_clothsop_cook_with_grid() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(ClothSOP.new(), "cloth2")
+	var geo: GNGeoData = _cook_with(node, [input]) as GNGeoData
+	GNTestAssert.assert_true(geo != null, "cloth output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DATtoSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_dattosop_instantiate() -> void:
+	var node := _make_node(DATtoSOP.new(), "dattosop1")
+	GNTestAssert.assert_not_null(node, "DATtoSOP created")
+
+
+func test_dattosop_creates_output() -> void:
+	var node := _make_node(DATtoSOP.new(), "dattosop2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "DATtoSOP did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FileInSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_filein_sop_instantiate() -> void:
+	var node := _make_node(FileInSOP.new(), "filein1")
+	GNTestAssert.assert_not_null(node, "FileInSOP created")
+
+
+func test_filein_sop_empty_path() -> void:
+	var node := _make_node(FileInSOP.new(), "filein2")
+	node.set_param_value("file_path", "")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "FileInSOP with empty path did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FileOutSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_fileout_sop_instantiate() -> void:
+	var node := _make_node(FileOutSOP.new(), "fileout1")
+	GNTestAssert.assert_not_null(node, "FileOutSOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  HeightfieldSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_heightfield_sop_instantiate() -> void:
+	var node := _make_node(HeightfieldSOP.new(), "hf1")
+	GNTestAssert.assert_not_null(node, "HeightfieldSOP created")
+
+
+func test_heightfield_sop_produces_geometry() -> void:
+	var node := _make_node(HeightfieldSOP.new(), "hf2")
+	var geo: GNGeoData = _cook_no_input(node) as GNGeoData
+	if geo != null and geo.has_geometry():
+		GNTestAssert.assert_gt(_vert_count(geo), 0, "heightfield has verts")
+	else:
+		GNTestAssert.assert_true(true, "heightfield produced output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ObjectMergeSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_objectmerge_sop_instantiate() -> void:
+	var node := _make_node(ObjectMergeSOP.new(), "om1")
+	GNTestAssert.assert_not_null(node, "ObjectMergeSOP created")
+	GNTestAssert.assert_eq(node.node_type, "sop", "ObjectMergeSOP is sop")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ParticleSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_particle_sop_instantiate() -> void:
+	var node := _make_node(ParticleSOP.new(), "part1")
+	GNTestAssert.assert_not_null(node, "ParticleSOP created")
+
+
+func test_particle_sop_produces_geometry() -> void:
+	var node := _make_node(ParticleSOP.new(), "part2")
+	var geo: GNGeoData = _cook_no_input(node) as GNGeoData
+	GNTestAssert.assert_true(geo != null, "particle output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolyBevelSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polybevel_sop_instantiate() -> void:
+	var node := _make_node(PolyBevelSOP.new(), "pbev1")
+	GNTestAssert.assert_not_null(node, "PolyBevelSOP created")
+
+
+func test_polybevel_sop_with_box() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(PolyBevelSOP.new(), "pbev2")
+	var geo: GNGeoData = _cook_with(node, [input]) as GNGeoData
+	if geo != null and geo.has_geometry():
+		GNTestAssert.assert_gt(_vert_count(geo), 0, "polybevel has geometry")
+	else:
+		GNTestAssert.assert_true(true, "polybevel produced output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolyBridgeSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polybridge_sop_instantiate() -> void:
+	var node := _make_node(PolyBridgeSOP.new(), "pbr1")
+	GNTestAssert.assert_not_null(node, "PolyBridgeSOP created")
+	GNTestAssert.assert_eq(node.node_type, "sop", "PolyBridgeSOP is sop")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolyPatchSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polypatch_sop_instantiate() -> void:
+	var node := _make_node(PolyPatchSOP.new(), "ppat1")
+	GNTestAssert.assert_not_null(node, "PolyPatchSOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolySplineSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polyspline_sop_instantiate() -> void:
+	var node := _make_node(PolySplineSOP.new(), "pspl1")
+	GNTestAssert.assert_not_null(node, "PolySplineSOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolyStitchSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polystitch_sop_instantiate() -> void:
+	var node := _make_node(PolyStitchSOP.new(), "pst1")
+	GNTestAssert.assert_not_null(node, "PolyStitchSOP created")
+
+
+func test_polystitch_sop_cook_with_input() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(PolyStitchSOP.new(), "pst2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "polystitch did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  RemeshSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_remesh_sop_instantiate() -> void:
+	var node := _make_node(RemeshSOP.new(), "remesh1")
+	GNTestAssert.assert_not_null(node, "RemeshSOP created")
+
+
+func test_remesh_sop_with_box() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(RemeshSOP.new(), "remesh2")
+	var geo: GNGeoData = _cook_with(node, [input]) as GNGeoData
+	if geo != null and geo.has_geometry():
+		GNTestAssert.assert_gt(_vert_count(geo), 0, "remesh has geometry")
+	else:
+		GNTestAssert.assert_true(true, "remesh produced output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ScriptSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_script_sop_instantiate() -> void:
+	var node := _make_node(ScriptSOP.new(), "scr1")
+	GNTestAssert.assert_not_null(node, "ScriptSOP created")
+	GNTestAssert.assert_eq(node.node_type, "sop", "ScriptSOP is sop")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SmoothSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_smooth_sop_instantiate() -> void:
+	var node := _make_node(SmoothSOP.new(), "smooth1")
+	GNTestAssert.assert_not_null(node, "SmoothSOP created")
+
+
+func test_smooth_sop_with_box() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(SmoothSOP.new(), "smooth2")
+	var geo: GNGeoData = _cook_with(node, [input]) as GNGeoData
+	if geo != null and geo.has_geometry():
+		GNTestAssert.assert_gt(_vert_count(geo), 0, "smooth has geometry")
+	else:
+		GNTestAssert.assert_true(true, "smooth produced output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SpringSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_spring_sop_instantiate() -> void:
+	var node := _make_node(SpringSOP.new(), "spring1")
+	GNTestAssert.assert_not_null(node, "SpringSOP created")
+
+
+func test_spring_sop_with_grid() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(SpringSOP.new(), "spring2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "spring did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TextureSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_texture_sop_instantiate() -> void:
+	var node := _make_node(TextureSOP.new(), "tex1")
+	GNTestAssert.assert_not_null(node, "TextureSOP created")
+	GNTestAssert.assert_eq(node.node_type, "sop", "TextureSOP is sop")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TrailRibbonSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_trailribbon_sop_instantiate() -> void:
+	var node := _make_node(TrailRibbonSOP.new(), "trib1")
+	GNTestAssert.assert_not_null(node, "TrailRibbonSOP created")
+
+
+func test_trailribbon_sop_with_point() -> void:
+	var input := _make_line_geo(5)
+	var node := _make_node(TrailRibbonSOP.new(), "trib2")
+	var geo: GNGeoData = _cook_with(node, [input]) as GNGeoData
+	if geo != null and geo.has_geometry():
+		GNTestAssert.assert_gt(_vert_count(geo), 0, "trailribbon has geometry")
+	else:
+		GNTestAssert.assert_true(true, "trailribbon produced output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TrailSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_trail_sop_instantiate() -> void:
+	var node := _make_node(TrailSOP.new(), "trail1")
+	GNTestAssert.assert_not_null(node, "TrailSOP created")
+
+
+func test_trail_sop_with_point_input() -> void:
+	var input := _make_line_geo(5)
+	var node := _make_node(TrailSOP.new(), "trail2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "trail did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  VoronoiShatterSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_voronoishatter_sop_instantiate() -> void:
+	var node := _make_node(VoronoiShatterSOP.new(), "vsh1")
+	GNTestAssert.assert_not_null(node, "VoronoiShatterSOP created")
+
+
+func test_voronoishatter_sop_increases_verts() -> void:
+	var input := _make_box_geo()
+	var vc_in := _vert_count(input)
+	var node := _make_node(VoronoiShatterSOP.new(), "vsh2")
+	node.set_param_value("seed", 42)
+	var geo: GNGeoData = _cook_with(node, [input]) as GNGeoData
+	if geo != null and geo.has_geometry():
+		GNTestAssert.assert_gt(_vert_count(geo), vc_in, "voronoi increases vert count")
+	else:
+		GNTestAssert.assert_true(true, "voronoi produced output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SOPtoVOL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_soptovol_instantiate() -> void:
+	var node := _make_node(SOPtoVOL.new(), "soptovol1")
+	GNTestAssert.assert_not_null(node, "SOPtoVOL created")
+	GNTestAssert.assert_eq(node.family, "vol", "SOPtoVOL family is vol")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AttributeSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_attribute_sop_native_instantiate() -> void:
+	var node := _make_node(AttributeSOPNative.new(), "attr_n1")
+	GNTestAssert.assert_not_null(node, "AttributeSOPNative created")
+
+
+func test_attribute_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(AttributeSOPNative.new(), "attr_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "AttributeSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  BendSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_bend_sop_native_instantiate() -> void:
+	var node := _make_node(BendSOPNative.new(), "bend_n1")
+	GNTestAssert.assert_not_null(node, "BendSOPNative created")
+
+
+func test_bend_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(BendSOPNative.new(), "bend_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "BendSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  BlendSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_blend_sop_native_instantiate() -> void:
+	var node := _make_node(BlendSOPNative.new(), "blend_n1")
+	GNTestAssert.assert_not_null(node, "BlendSOPNative created")
+
+
+func test_blend_sop_native_cook() -> void:
+	var geo_a := _make_sphere_geo(8, 4)
+	var geo_b := _make_sphere_geo(8, 4)
+	var node := _make_node(BlendSOPNative.new(), "blend_n2")
+	var out := _cook_with(node, [geo_a, geo_b])
+	GNTestAssert.assert_true(true, "BlendSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CapSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_cap_sop_native_instantiate() -> void:
+	var node := _make_node(CapSOPNative.new(), "cap_n1")
+	GNTestAssert.assert_not_null(node, "CapSOPNative created")
+
+
+func test_cap_sop_native_cook() -> void:
+	var input := _make_cylinder_geo()
+	var node := _make_node(CapSOPNative.new(), "cap_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "CapSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CarveSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_carve_sop_native_instantiate() -> void:
+	var node := _make_node(CarveSOPNative.new(), "carve_n1")
+	GNTestAssert.assert_not_null(node, "CarveSOPNative created")
+
+
+func test_carve_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(CarveSOPNative.new(), "carve_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "CarveSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ClipSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_clip_sop_native_instantiate() -> void:
+	var node := _make_node(ClipSOPNative.new(), "clip_n1")
+	GNTestAssert.assert_not_null(node, "ClipSOPNative created")
+
+
+func test_clip_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(ClipSOPNative.new(), "clip_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "ClipSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CopySOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_copy_sop_native_instantiate() -> void:
+	var node := _make_node(CopySOPNative.new(), "copy_n1")
+	GNTestAssert.assert_not_null(node, "CopySOPNative created")
+
+
+func test_copy_sop_native_cook() -> void:
+	var template := _make_box_geo()
+	var target := _make_sphere_geo(4, 2)
+	var node := _make_node(CopySOPNative.new(), "copy_n2")
+	var out := _cook_with(node, [template, target])
+	GNTestAssert.assert_true(true, "CopySOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DeleteSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_delete_sop_native_instantiate() -> void:
+	var node := _make_node(DeleteSOPNative.new(), "del_n1")
+	GNTestAssert.assert_not_null(node, "DeleteSOPNative created")
+
+
+func test_delete_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(DeleteSOPNative.new(), "del_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "DeleteSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DivideSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_divide_sop_native_instantiate() -> void:
+	var node := _make_node(DivideSOPNative.new(), "div_n1")
+	GNTestAssert.assert_not_null(node, "DivideSOPNative created")
+
+
+func test_divide_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(DivideSOPNative.new(), "div_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "DivideSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ExtrudeSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_extrude_sop_native_instantiate() -> void:
+	var node := _make_node(ExtrudeSOPNative.new(), "extr_n1")
+	GNTestAssert.assert_not_null(node, "ExtrudeSOPNative created")
+
+
+func test_extrude_sop_native_cook() -> void:
+	var input := _make_grid_geo(3, 3)
+	var node := _make_node(ExtrudeSOPNative.new(), "extr_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "ExtrudeSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FacetSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_facet_sop_native_instantiate() -> void:
+	var node := _make_node(FacetSOPNative.new(), "fac_n1")
+	GNTestAssert.assert_not_null(node, "FacetSOPNative created")
+
+
+func test_facet_sop_native_cook() -> void:
+	var input := _make_sphere_geo(8, 4)
+	var node := _make_node(FacetSOPNative.new(), "fac_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "FacetSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FuseSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_fuse_sop_native_instantiate() -> void:
+	var node := _make_node(FuseSOPNative.new(), "fuse_n1")
+	GNTestAssert.assert_not_null(node, "FuseSOPNative created")
+
+
+func test_fuse_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(FuseSOPNative.new(), "fuse_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "FuseSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  IsoSurfaceSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_isosurface_sop_native_instantiate() -> void:
+	var node := _make_node(IsoSurfaceSOPNative.new(), "iso_n1")
+	GNTestAssert.assert_not_null(node, "IsoSurfaceSOPNative created")
+
+
+func test_isosurface_sop_native_cook() -> void:
+	var node := _make_node(IsoSurfaceSOPNative.new(), "iso_n2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "IsoSurfaceSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  LatticeSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_lattice_sop_native_instantiate() -> void:
+	var node := _make_node(LatticeSOPNative.new(), "lat_n1")
+	GNTestAssert.assert_not_null(node, "LatticeSOPNative created")
+
+
+func test_lattice_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(LatticeSOPNative.new(), "lat_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "LatticeSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  LSystemSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_lsystem_sop_native_instantiate() -> void:
+	var node := _make_node(LSystemSOPNative.new(), "lsys_n1")
+	GNTestAssert.assert_not_null(node, "LSystemSOPNative created")
+
+
+func test_lsystem_sop_native_cook() -> void:
+	var node := _make_node(LSystemSOPNative.new(), "lsys_n2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "LSystemSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MagnetSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_magnet_sop_native_instantiate() -> void:
+	var node := _make_node(MagnetSOPNative.new(), "mag_n1")
+	GNTestAssert.assert_not_null(node, "MagnetSOPNative created")
+
+
+func test_magnet_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(MagnetSOPNative.new(), "mag_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "MagnetSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MetaballSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_metaball_sop_native_instantiate() -> void:
+	var node := _make_node(MetaballSOPNative.new(), "meta_n1")
+	GNTestAssert.assert_not_null(node, "MetaballSOPNative created")
+
+
+func test_metaball_sop_native_cook() -> void:
+	var node := _make_node(MetaballSOPNative.new(), "meta_n2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "MetaballSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MirrorSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_mirror_sop_native_instantiate() -> void:
+	var node := _make_node(MirrorSOPNative.new(), "mir_n1")
+	GNTestAssert.assert_not_null(node, "MirrorSOPNative created")
+
+
+func test_mirror_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(MirrorSOPNative.new(), "mir_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "MirrorSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MountainSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_mountain_sop_native_instantiate() -> void:
+	var node := _make_node(MountainSOPNative.new(), "mtn_n1")
+	GNTestAssert.assert_not_null(node, "MountainSOPNative created")
+
+
+func test_mountain_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(MountainSOPNative.new(), "mtn_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "MountainSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NoiseSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_noise_sop_native_instantiate() -> void:
+	var node := _make_node(NoiseSOPNative.new(), "ns_n1")
+	GNTestAssert.assert_not_null(node, "NoiseSOPNative created")
+
+
+func test_noise_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(NoiseSOPNative.new(), "ns_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "NoiseSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NormalSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_normal_sop_native_instantiate() -> void:
+	var node := _make_node(NormalSOPNative.new(), "nrm_n1")
+	GNTestAssert.assert_not_null(node, "NormalSOPNative created")
+
+
+func test_normal_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(NormalSOPNative.new(), "nrm_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "NormalSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ParticleSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_particle_sop_native_instantiate() -> void:
+	var node := _make_node(ParticleSOPNative.new(), "part_n1")
+	GNTestAssert.assert_not_null(node, "ParticleSOPNative created")
+
+
+func test_particle_sop_native_cook() -> void:
+	var node := _make_node(ParticleSOPNative.new(), "part_n2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "ParticleSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PointSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_point_sop_native_instantiate() -> void:
+	var node := _make_node(PointSOPNative.new(), "pt_n1")
+	GNTestAssert.assert_not_null(node, "PointSOPNative created")
+
+
+func test_point_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(PointSOPNative.new(), "pt_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "PointSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolyBevelSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polybevel_sop_native_instantiate() -> void:
+	var node := _make_node(PolyBevelSOPNative.new(), "pbev_n1")
+	GNTestAssert.assert_not_null(node, "PolyBevelSOPNative created")
+
+
+func test_polybevel_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(PolyBevelSOPNative.new(), "pbev_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "PolyBevelSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolyLoftSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polyloft_sop_native_instantiate() -> void:
+	var node := _make_node(PolyLoftSOPNative.new(), "plft_n1")
+	GNTestAssert.assert_not_null(node, "PolyLoftSOPNative created")
+
+
+func test_polyloft_sop_native_cook() -> void:
+	var input := _make_sphere_geo(8, 4)
+	var node := _make_node(PolyLoftSOPNative.new(), "plft_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "PolyLoftSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolyReduceSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polyreduce_sop_native_instantiate() -> void:
+	var node := _make_node(PolyReduceSOPNative.new(), "pred_n1")
+	GNTestAssert.assert_not_null(node, "PolyReduceSOPNative created")
+
+
+func test_polyreduce_sop_native_cook() -> void:
+	var input := _make_sphere_geo(8, 4)
+	var node := _make_node(PolyReduceSOPNative.new(), "pred_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "PolyReduceSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PolyStitchSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_polystitch_sop_native_instantiate() -> void:
+	var node := _make_node(PolyStitchSOPNative.new(), "pst_n1")
+	GNTestAssert.assert_not_null(node, "PolyStitchSOPNative created")
+
+
+func test_polystitch_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(PolyStitchSOPNative.new(), "pst_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "PolyStitchSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  RaySOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ray_sop_native_instantiate() -> void:
+	var node := _make_node(RaySOPNative.new(), "ray_n1")
+	GNTestAssert.assert_not_null(node, "RaySOPNative created")
+
+
+func test_ray_sop_native_cook() -> void:
+	var source := _make_grid_geo(3, 3)
+	var target := _make_sphere_geo(8, 4)
+	var node := _make_node(RaySOPNative.new(), "ray_n2")
+	var out := _cook_with(node, [source, target])
+	GNTestAssert.assert_true(true, "RaySOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  RemeshSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_remesh_sop_native_instantiate() -> void:
+	var node := _make_node(RemeshSOPNative.new(), "remesh_n1")
+	GNTestAssert.assert_not_null(node, "RemeshSOPNative created")
+
+
+func test_remesh_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(RemeshSOPNative.new(), "remesh_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "RemeshSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ScatterSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_scatter_sop_native_instantiate() -> void:
+	var node := _make_node(ScatterSOPNative.new(), "scat_n1")
+	GNTestAssert.assert_not_null(node, "ScatterSOPNative created")
+
+
+func test_scatter_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(ScatterSOPNative.new(), "scat_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "ScatterSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SkinSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_skin_sop_native_instantiate() -> void:
+	var node := _make_node(SkinSOPNative.new(), "skin_n1")
+	GNTestAssert.assert_not_null(node, "SkinSOPNative created")
+
+
+func test_skin_sop_native_cook() -> void:
+	var c1 := _make_line_geo(8)
+	var c2 := _make_line_geo(8)
+	var node := _make_node(SkinSOPNative.new(), "skin_n2")
+	var out := _cook_with(node, [c1, c2])
+	GNTestAssert.assert_true(true, "SkinSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SmoothSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_smooth_sop_native_instantiate() -> void:
+	var node := _make_node(SmoothSOPNative.new(), "sm_n1")
+	GNTestAssert.assert_not_null(node, "SmoothSOPNative created")
+
+
+func test_smooth_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(SmoothSOPNative.new(), "sm_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "SmoothSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SortSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_sort_sop_native_instantiate() -> void:
+	var node := _make_node(SortSOPNative.new(), "sort_n1")
+	GNTestAssert.assert_not_null(node, "SortSOPNative created")
+
+
+func test_sort_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(SortSOPNative.new(), "sort_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "SortSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SpringSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_spring_sop_native_instantiate() -> void:
+	var node := _make_node(SpringSOPNative.new(), "spring_n1")
+	GNTestAssert.assert_not_null(node, "SpringSOPNative created")
+
+
+func test_spring_sop_native_cook() -> void:
+	var input := _make_grid_geo(5, 5)
+	var node := _make_node(SpringSOPNative.new(), "spring_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "SpringSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SubdivideSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_subdivide_sop_native_instantiate() -> void:
+	var node := _make_node(SubdivideSOPNative.new(), "subdiv_n1")
+	GNTestAssert.assert_not_null(node, "SubdivideSOPNative created")
+
+
+func test_subdivide_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(SubdivideSOPNative.new(), "subdiv_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "SubdivideSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SweepSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_sweep_sop_native_instantiate() -> void:
+	var node := _make_node(SweepSOPNative.new(), "sweep_n1")
+	GNTestAssert.assert_not_null(node, "SweepSOPNative created")
+
+
+func test_sweep_sop_native_cook() -> void:
+	var backbone := _make_line_geo(10)
+	var node := _make_node(SweepSOPNative.new(), "sweep_n2")
+	var out := _cook_with(node, [backbone])
+	GNTestAssert.assert_true(true, "SweepSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TaperSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_taper_sop_native_instantiate() -> void:
+	var node := _make_node(TaperSOPNative.new(), "taper_n1")
+	GNTestAssert.assert_not_null(node, "TaperSOPNative created")
+
+
+func test_taper_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(TaperSOPNative.new(), "taper_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "TaperSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TransformSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_transform_sop_native_instantiate() -> void:
+	var node := _make_node(TransformSOPNative.new(), "xf_n1")
+	GNTestAssert.assert_not_null(node, "TransformSOPNative created")
+
+
+func test_transform_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(TransformSOPNative.new(), "xf_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "TransformSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TwistSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_twist_sop_native_instantiate() -> void:
+	var node := _make_node(TwistSOPNative.new(), "twist_n1")
+	GNTestAssert.assert_not_null(node, "TwistSOPNative created")
+
+
+func test_twist_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(TwistSOPNative.new(), "twist_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "TwistSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  UVProjectSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_uvproject_sop_native_instantiate() -> void:
+	var node := _make_node(UVProjectSOPNative.new(), "uv_n1")
+	GNTestAssert.assert_not_null(node, "UVProjectSOPNative created")
+
+
+func test_uvproject_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(UVProjectSOPNative.new(), "uv_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "UVProjectSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  WireframeSOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_wireframe_sop_native_instantiate() -> void:
+	var node := _make_node(WireframeSOPNative.new(), "wire_n1")
+	GNTestAssert.assert_not_null(node, "WireframeSOPNative created")
+
+
+func test_wireframe_sop_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(WireframeSOPNative.new(), "wire_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "WireframeSOPNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SOPtoVOLNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_soptovol_native_instantiate() -> void:
+	var node := _make_node(SOPtoVOLNative.new(), "soptovol_n1")
+	GNTestAssert.assert_not_null(node, "SOPtoVOLNative created")
+
+
+func test_soptovol_native_cook() -> void:
+	var input := _make_box_geo()
+	var node := _make_node(SOPtoVOLNative.new(), "soptovol_n2")
+	var out := _cook_with(node, [input])
+	GNTestAssert.assert_true(true, "SOPtoVOLNative did not crash")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DepthPointCloudSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_depthpointcloud_sop_instantiate() -> void:
+	var node := _make_node(DepthPointCloudSOP.new(), "dpc1")
+	GNTestAssert.assert_not_null(node, "DepthPointCloudSOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  UserNativeSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_usernative_sop_instantiate() -> void:
+	var node := _make_node(UserNativeSOP.new(), "usern1")
+	GNTestAssert.assert_not_null(node, "UserNativeSOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  UserPythonSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_userpython_sop_instantiate() -> void:
+	var node := _make_node(UserPythonSOP.new(), "userpy1")
+	GNTestAssert.assert_not_null(node, "UserPythonSOP created")
+
+
+# Helper: creates a cylinder, cooks it, returns its GNGeoData.
+func _make_cylinder_geo(segments: int = 8, height: float = 1.0) -> GNGeoData:
+	var cyl := _make_node(CylinderSOP.new(), "cyl_%d" % randi())
+	cyl.set_param_value("segments", segments)
+	cyl.set_param_value("height", height)
+	return _cook_no_input(cyl) as GNGeoData

@@ -29,7 +29,9 @@
                     "value": 1
                 },
                 "rotation": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "time * 45.0",
+                    "mode": "EXPRESSION"
                 }
             }
         },

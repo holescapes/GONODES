@@ -29,20 +29,38 @@
                     "value": true
                 },
                 "codec": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "framerate": {
-                    "value": 29
+                    "value": 29,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 },
                 "crf": {
                     "value": 22
                 }
             }
+        },
+        "toptoimg1": {
+            "type": "TOPtoIMG",
+            "position": [
+                300,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "src_ramp",
+            "from_port": 0,
+            "to": "toptoimg1",
+            "to_port": 0
+        },
+        {
+            "from": "toptoimg1",
             "from_port": 0,
             "to": "ffmpegout1",
             "to_port": 0

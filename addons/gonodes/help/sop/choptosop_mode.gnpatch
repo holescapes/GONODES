@@ -3,12 +3,16 @@
     "generator": "GONODES",
     "nodes": {
         "src_sphere": {
-            "type": "SphereSOP",
+            "type": "LFO_CHOP",
             "position": [
                 100,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "frequency": {
+                    "value": 1.0
+                }
+            }
         },
         "choptosop1": {
             "type": "CHOPtoSOP",
@@ -21,10 +25,14 @@
                     "value": 1
                 },
                 "x_scale": {
-                    "value": 0.05
+                    "value": 0.05,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "y_scale": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "max_samples": {
                     "value": 999

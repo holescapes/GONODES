@@ -22,10 +22,14 @@
                     "value": true
                 },
                 "max_lines": {
-                    "value": 100
+                    "value": 100,
+                    "expression": "(100 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "clear": {
-                    "value": false
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

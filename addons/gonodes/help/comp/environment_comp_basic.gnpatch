@@ -1,202 +1,242 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "sphere1":  {
-                                  "type":  "SphereSOP",
-                                  "position":  [
-                                                   -300,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "rows":  32,
-                                                     "columns":  32
-                                                 }
-                              },
-                  "geo1":  {
-                               "type":  "GeometryCOMP",
-                               "position":  [
-                                                0,
-                                                100
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "cam1":  {
-                               "type":  "CameraCOMP",
-                               "position":  [
-                                                0,
-                                                250
-                                            ],
-                               "parameters":  {
-                                                  "tz":  4.0,
-                                                  "ty":  1.0,
-                                                  "rx":  -10.0
-                                              }
-                           },
-                  "light1":  {
-                                 "type":  "LightCOMP",
-                                 "position":  [
-                                                  0,
-                                                  400
-                                              ],
-                                 "parameters":  {
-                                                    "type":  0,
-                                                    "rx":  -45.0,
-                                                    "ry":  30.0,
-                                                    "energy":  1.5
-                                                }
-                             },
-                  "env1":  {
-                               "type":  "EnvironmentCOMP",
-                               "position":  [
-                                                0,
-                                                550
-                                            ],
-                               "parameters":  {
-                                                  "bg_color":  [
-                                                                   0.02,
-                                                                   0.02,
-                                                                   0.05,
-                                                                   1.0
-                                                               ],
-                                                  "ambient_energy":  0.2,
-                                                  "tonemap_mode":  3,
-                                                  "tonemap_exposure":  1.2,
-                                                  "glow_enabled":  true,
-                                                  "glow_intensity":  0.6,
-                                                  "glow_bloom":  0.1,
-                                                  "ssao_enabled":  true,
-                                                  "ssao_radius":  1.5,
-                                                  "ssao_intensity":  2.5
-                                              }
-                           },
-                  "render1":  {
-                                  "type":  "RenderTOP",
-                                  "position":  [
-                                                   400,
-                                                   250
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  [
-                                                                        640,
-                                                                        480
-                                                                    ]
-                                                 }
-                              },
-                  "out1":  {
-                               "type":  "OutputTOP",
-                               "position":  [
-                                                700,
-                                                250
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "window1":  {
-                                  "position":  [
-                                                   1050,
-                                                   250
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "sphere1",
-                            "from_port":  0,
-                            "to":  "geo1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo1",
-                            "from_port":  0,
-                            "to":  "render1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam1",
-                            "from_port":  0,
-                            "to":  "render1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "light1",
-                            "from_port":  0,
-                            "to":  "render1",
-                            "to_port":  2
-                        },
-                        {
-                            "from":  "env1",
-                            "from_port":  0,
-                            "to":  "render1",
-                            "to_port":  3
-                        },
-                        {
-                            "from":  "render1",
-                            "from_port":  0,
-                            "to":  "out1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "out1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Environment COMP — Post-Processing Control\n\nSeparates environment/post-processing from the RenderTOP.\nControls background, ambient, tonemap, glow, SSAO, SSIL, SSR,\nadjustments, and volumetric fog.\n\nConnect to any RenderTOP COMP input.",
-                            "position":  [
-                                             -400.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         500.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          0.6,
-                                          0.9,
-                                          0.6,
-                                          0.8
-                                      ]
-                        },
-                        {
-                            "id":  "ann_2",
-                            "type":  "note",
-                            "text":  "This example enables ACES tonemap, glow bloom,\nand SSAO via the EnvironmentCOMP. The RenderTOP\nstays clean with only resolution/AA/shadow params.",
-                            "position":  [
-                                             350.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                -300,
+                100
+            ],
+            "parameters": {
+                "rows": {
+                    "value": 32
+                },
+                "columns": {
+                    "value": 32
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                0,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                0,
+                250
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 4.0
+                },
+                "ty": {
+                    "value": 1.0
+                },
+                "rx": {
+                    "value": -10.0
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                0,
+                400
+            ],
+            "parameters": {
+                "type": {
+                    "value": 0
+                },
+                "rx": {
+                    "value": -45.0
+                },
+                "ry": {
+                    "value": 30.0
+                },
+                "energy": {
+                    "value": 1.5
+                }
+            }
+        },
+        "env1": {
+            "type": "EnvironmentCOMP",
+            "position": [
+                0,
+                550
+            ],
+            "parameters": {
+                "bg_color": {
+                    "value": [
+                        0.02,
+                        0.02,
+                        0.05,
+                        1.0
                     ]
+                },
+                "ambient_energy": {
+                    "value": 0.2,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "tonemap_mode": {
+                    "value": 3,
+                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "tonemap_exposure": {
+                    "value": 1.2
+                },
+                "glow_enabled": {
+                    "value": true
+                },
+                "glow_intensity": {
+                    "value": 0.6
+                },
+                "glow_bloom": {
+                    "value": 0.1
+                },
+                "ssao_enabled": {
+                    "value": true
+                },
+                "ssao_radius": {
+                    "value": 1.5
+                },
+                "ssao_intensity": {
+                    "value": 2.5
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                400,
+                250
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": [
+                        640,
+                        480
+                    ]
+                }
+            }
+        },
+        "out1": {
+            "type": "NullTOP",
+            "position": [
+                700,
+                250
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1050,
+                250
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 2
+        },
+        {
+            "from": "env1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 3
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "out1",
+            "to_port": 0
+        },
+        {
+            "from": "out1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Environment COMP \u2014 Post-Processing Control\n\nSeparates environment/post-processing from the RenderTOP.\nControls background, ambient, tonemap, glow, SSAO, SSIL, SSR,\nadjustments, and volumetric fog.\n\nConnect to any RenderTOP COMP input.",
+            "position": [
+                -400.0,
+                -150.0
+            ],
+            "size": [
+                500.0,
+                100.0
+            ],
+            "color": [
+                0.6,
+                0.9,
+                0.6,
+                0.8
+            ]
+        },
+        {
+            "id": "ann_2",
+            "type": "note",
+            "text": "This example enables ACES tonemap, glow bloom,\nand SSAO via the EnvironmentCOMP. The RenderTOP\nstays clean with only resolution/AA/shadow params.",
+            "position": [
+                350.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

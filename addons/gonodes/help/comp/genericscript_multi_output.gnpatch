@@ -1,160 +1,141 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "generic1":  {
-                                   "type":  "GenericScriptNode",
-                                   "position":  [
-                                                    200,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "time_dependent":  {
-                                                                             "value":  true
-                                                                         },
-                                                      "code":  {
-                                                                   "value":  "# @input chop  Signal source\n# @output chop Modified signal\n# @output dat  Signal info\n\n# @param float gain 1.0 Output gain multiplier\n# @param float offset 0.0 DC offset\n\nfunc cook():\n\t# ── Output 0 (CHOP): generate a scaled sine ──\n\tvar v = sin(time * 3.0) * par(\"gain\") + par(\"offset\")\n\toutputs[0].set_single_value(\"signal\", v)\n\n\t# ── Output 1 (DAT): info table about the signal ──\n\toutputs[1].set_headers(PackedStringArray([\"key\", \"value\"]))\n\toutputs[1].append_row(PackedStringArray([\"time\", \"%.3f\" % time]))\n\toutputs[1].append_row(PackedStringArray([\"frame\", str(frame)]))\n\toutputs[1].append_row(PackedStringArray([\"signal\", \"%.4f\" % v]))\n\toutputs[1].append_row(PackedStringArray([\"gain\", str(par(\"gain\"))]))"
-                                                               }
-                                                  }
-                               },
-                  "window1":  {
-                                  "position":  [
-                                                   1450,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "box_view":  {
-                                   "type":  "BoxSOP",
-                                   "position":  [
-                                                    500,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    800,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1100,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    800,
-                                                    300
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "box_view",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Generic Script Node — Multi-Output\n\nA family-less scripting node that can produce\nany combination of output types via @output\nannotations.\n\nThis example outputs CHOP + DAT simultaneously.\nUse outputs[0], outputs[1], ... to write to each\noutput port. \u0027op\u0027 is an alias for outputs[0].",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         500.0,
-                                         120.0
-                                     ],
-                            "color":  [
-                                          0.7,
-                                          0.7,
-                                          0.9,
-                                          0.8
-                                      ]
-                        },
-                        {
-                            "id":  "ann_2",
-                            "type":  "note",
-                            "text":  "Each @output creates a typed port:\n  # @output chop → GNChannelData\n  # @output dat  → GNTableData\n  # @output top  → GNTextureData\n  # @output sop  → GNGeoData\n  # @output img  → GNImageData\n  # @output mat  → GNMaterialData",
-                            "position":  [
-                                             500.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         350.0,
-                                         120.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "window1": {
+            "position": [
+                1450,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "box_view": {
+            "type": "BoxSOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                800,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box_view",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Generic Script Node \u2014 Multi-Output\n\nA family-less scripting node that can produce\nany combination of output types via @output\nannotations.\n\nThis example outputs CHOP + DAT simultaneously.\nUse outputs[0], outputs[1], ... to write to each\noutput port. 'op' is an alias for outputs[0].",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                0.7,
+                0.7,
+                0.9,
+                0.8
+            ]
+        },
+        {
+            "id": "ann_2",
+            "type": "note",
+            "text": "Each @output creates a typed port:\n  # @output chop \u2192 GNChannelData\n  # @output dat  \u2192 GNTableData\n  # @output top  \u2192 GNTextureData\n  # @output sop  \u2192 GNGeoData\n  # @output img  \u2192 GNImageData\n  # @output mat  \u2192 GNMaterialData",
+            "position": [
+                500.0,
+                -150.0
+            ],
+            "size": [
+                350.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

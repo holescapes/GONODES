@@ -1,4 +1,4 @@
-﻿class_name ISFTOP
+class_name ISFTOP
 extends GNTopBase
 ## ISF (Interactive Shader Format) shader node.
 ##

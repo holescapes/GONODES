@@ -19,10 +19,14 @@
                     "value": 64
                 },
                 "frequency": {
-                    "value": 4.0
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "amplitude": {
-                    "value": 1.0
+                    "value": 1.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
                 },
                 "octaves": {
                     "value": 4

@@ -1,181 +1,179 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "box1":  {
-                               "type":  "BoxSOP",
-                               "position":  [
-                                                0,
-                                                0
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "transform1":  {
-                                     "type":  "TransformSOP",
-                                     "position":  [
-                                                      250,
-                                                      0
-                                                  ],
-                                     "parameters":  {
-                                                        "tx":  {
-                                                                   "value":  0.5
-                                                               }
-                                                    }
-                                 },
-                  "mirror1":  {
-                                  "type":  "MirrorSOP",
-                                  "position":  [
-                                                   500,
-                                                   0
-                                               ],
-                                  "parameters":  {
-                                                     "axis":  {
-                                                                  "value":  0
-                                                              },
-                                                     "merge":  {
-                                                                   "value":  true
-                                                               }
-                                                 }
-                              },
-                  "null1":  {
-                                "type":  "NullSOP",
-                                "position":  [
-                                                 750,
-                                                 0
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1700,
-                                                   0
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    1050,
-                                                    0
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    1050,
-                                                    200
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1350,
-                                                       0
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  }
-              },
-    "connections":  [
-                        {
-                            "from":  "box1",
-                            "from_port":  0,
-                            "to":  "transform1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "transform1",
-                            "from_port":  0,
-                            "to":  "mirror1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "mirror1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Mirror SOP — Reflect and Merge\n\nTranslates box off-center, mirrors across X=0\nplane, and merges both halves.\nGreat for symmetric modeling workflows.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {}
+        },
+        "transform1": {
+            "type": "TransformSOP",
+            "position": [
+                250,
+                0
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.5
+                }
+            }
+        },
+        "mirror1": {
+            "type": "MirrorSOP",
+            "position": [
+                500,
+                0
+            ],
+            "parameters": {
+                "axis": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "merge": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "null1": {
+            "type": "NullSOP",
+            "position": [
+                750,
+                0
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1700,
+                0
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                1050,
+                0
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                1050,
+                200
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1350,
+                0
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "transform1",
+            "from_port": 0,
+            "to": "mirror1",
+            "to_port": 0
+        },
+        {
+            "from": "mirror1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Mirror SOP \u2014 Reflect and Merge\n\nTranslates box off-center, mirrors across X=0\nplane, and merges both halves.\nGreat for symmetric modeling workflows.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

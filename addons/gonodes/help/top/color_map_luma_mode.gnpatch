@@ -26,10 +26,14 @@
             ],
             "parameters": {
                 "luma_mode": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "intensity": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

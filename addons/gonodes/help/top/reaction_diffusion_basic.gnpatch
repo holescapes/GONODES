@@ -4,41 +4,89 @@
     "nodes": {
         "rd1": {
             "type": "ReactionDiffusionTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "feed_rate": {"value": 0.055},
-                "kill_rate": {"value": 0.062},
-                "speed": {"value": 1.0},
-                "steps_per_frame": {"value": 8},
-                "color_mode": {"value": 0},
-                "brightness": {"value": 1.5}
+                "feed_rate": {
+                    "value": 0.055,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
+                },
+                "kill_rate": {
+                    "value": 0.062,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
+                },
+                "speed": {
+                    "value": 1.0
+                },
+                "steps_per_frame": {
+                    "value": 8
+                },
+                "color_mode": {
+                    "value": 0
+                },
+                "brightness": {
+                    "value": 1.5
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "rd1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "rd1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Reaction-Diffusion TOP \u2014 Basic\n\nGray-Scott model with default (coral-like) parameters.\nf=0.055, k=0.062 produces organic spot/stripe patterns.\n8 sub-steps/frame for visible evolution speed.\nPatterns emerge from the initial seed after ~5 seconds.",
-            "position": [-100.0, -120.0],
-            "size": [500.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                500.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

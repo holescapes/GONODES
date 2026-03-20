@@ -18,13 +18,17 @@
             ],
             "parameters": {
                 "entity": {
-                    "value": 2
+                    "value": 2,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "method": {
                     "value": 2
                 },
                 "bb_min_x": {
-                    "value": -1.0
+                    "value": -1.0,
+                    "expression": "sin(time * 2.0) * 0.2",
+                    "mode": "EXPRESSION"
                 },
                 "bb_min_y": {
                     "value": -1.0

@@ -4,58 +4,128 @@
     "nodes": {
         "spectrum1": {
             "type": "AudioSpectrumCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "bus": {"value": "Master"},
-                "bands": {"value": 128},
-                "fft_size": {"value": 4}
+                "bus": {
+                    "value": "Master"
+                },
+                "bands": {
+                    "value": 128
+                },
+                "fft_size": {
+                    "value": 4
+                }
             }
         },
         "band1": {
             "type": "AudioBandCHOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "num_bands": {"value": 8},
-                "band_names": {"value": "sub,bass,low,low_mid,mid,high_mid,presence,air"},
-                "crossovers": {"value": "40,100,250,500,2000,6000,12000"},
-                "attack": {"value": 0.005},
-                "release": {"value": 0.25},
-                "peak_decay": {"value": 0.995}
+                "num_bands": {
+                    "value": 8,
+                    "expression": "(8 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "band_names": {
+                    "value": "sub,bass,low,low_mid,mid,high_mid,presence,air"
+                },
+                "crossovers": {
+                    "value": "40,100,250,500,2000,6000,12000"
+                },
+                "attack": {
+                    "value": 0.005,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "release": {
+                    "value": 0.25
+                },
+                "peak_decay": {
+                    "value": 0.995
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1300, 100],
+            "position": [
+                1300,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "spectrum1", "from_port": 0, "to": "band1", "to_port": 0},
-        {"from": "band1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "spectrum1",
+            "from_port": 0,
+            "to": "band1",
+            "to_port": 0
+        },
+        {
+            "from": "band1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "AudioBand CHOP \u2014 8-Band EQ\n\n128-band FFT \u2192 8 output bands spanning the full spectrum:\nsub(20-40), bass(40-100), low(100-250), low_mid(250-500),\nmid(500-2k), high_mid(2k-6k), presence(6k-12k), air(12k+).\nLong peak decay (0.995) for smooth peak-hold visualization.",
-            "position": [-100.0, -120.0],
-            "size": [550.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                550.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

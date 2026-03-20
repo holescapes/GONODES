@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "hide_root": {
-                    "value": false
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "hide_folding": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "min_size": {
                     "value": {

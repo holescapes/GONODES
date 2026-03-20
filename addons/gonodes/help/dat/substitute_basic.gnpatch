@@ -1,122 +1,124 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "const1":  {
-                                 "type":  "ConstantDAT",
-                                 "position":  [
-                                                  0,
-                                                  100
-                                              ],
-                                 "parameters":  {
-
-                                                }
-                             },
-                  "sub1":  {
-                               "type":  "SubstituteDAT",
-                               "position":  [
-                                                300,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "find":  {
-                                                               "value":  "hello"
-                                                           },
-                                                  "replace_with":  {
-                                                                       "value":  "world"
-                                                                   },
-                                                  "use_regex":  {
-                                                                    "value":  false
-                                                                },
-                                                  "case_sensitive":  {
-                                                                         "value":  false
-                                                                     },
-                                                  "scope":  {
-                                                                "value":  0
-                                                            }
-                                              }
-                           },
-                  "window1":  {
-                                  "position":  [
-                                                   1000,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "text_view":  {
-                                    "type":  "TextTOP",
-                                    "position":  [
-                                                     650,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "resolution":  {
-                                                                          "value":  {
-                                                                                        "_type":  "Vector2i",
-                                                                                        "x":  512,
-                                                                                        "y":  512
-                                                                                    }
-                                                                      },
-                                                       "text":  {
-                                                                    "value":  "SubstituteDAT output"
-                                                                },
-                                                       "font_size":  {
-                                                                         "value":  24
-                                                                     }
-                                                   }
-                                }
-              },
-    "connections":  [
-                        {
-                            "from":  "const1",
-                            "from_port":  0,
-                            "to":  "sub1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "sub1",
-                            "from_port":  0,
-                            "to":  "text_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "text_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Substitute DAT — Find \u0026 Replace\n\nReplace text in all cells (case-insensitive).\nSupports regex patterns.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "const1": {
+            "type": "ConstantDAT",
+            "position": [
+                0,
+                100
+            ],
+            "parameters": {}
+        },
+        "sub1": {
+            "type": "SubstituteDAT",
+            "position": [
+                300,
+                100
+            ],
+            "parameters": {
+                "find": {
+                    "value": "hello"
+                },
+                "replace_with": {
+                    "value": "world"
+                },
+                "use_regex": {
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "case_sensitive": {
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "scope": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "text_view": {
+            "type": "TextTOP",
+            "position": [
+                650,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "text": {
+                    "value": "SubstituteDAT output"
+                },
+                "font_size": {
+                    "value": 24
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "const1",
+            "from_port": 0,
+            "to": "sub1",
+            "to_port": 0
+        },
+        {
+            "from": "sub1",
+            "from_port": 0,
+            "to": "text_view",
+            "to_port": 0
+        },
+        {
+            "from": "text_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Substitute DAT \u2014 Find & Replace\n\nReplace text in all cells (case-insensitive).\nSupports regex patterns.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

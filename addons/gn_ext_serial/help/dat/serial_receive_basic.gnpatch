@@ -4,25 +4,96 @@
     "nodes": {
         "serial_rx1": {
             "type": "SerialReceiveDAT",
-            "position": [300, 200],
+            "position": [
+                300,
+                200
+            ],
             "parameters": {
-                "port": {"value": "COM3"},
-                "baud_rate": {"value": 9600},
-                "delimiter": {"value": 0},
-                "max_rows": {"value": 100},
-                "active": {"value": false}
+                "port": {
+                    "value": "COM3"
+                },
+                "baud_rate": {
+                    "value": 9600
+                },
+                "delimiter": {
+                    "value": 0
+                },
+                "max_rows": {
+                    "value": 100
+                },
+                "active": {
+                    "value": false
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                600,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                400,
+                200
+            ],
+            "parameters": {
+                "text": {
+                    "value": "DAT Output",
+                    "expression": "str(op(\"serial_rx1\"))",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         }
     },
-    "connections": [],
+    "connections": [
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Serial Receive DAT \u2014 Basic\n\nListens on COM3 at 9600 baud, newline delimiter.\nIncoming messages appear as timestamped rows.\nRequires serial GDExtension for actual hardware I/O.\nIn scaffold mode, table structure works without hardware.",
-            "position": [-50.0, -50.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -50.0,
+                -50.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

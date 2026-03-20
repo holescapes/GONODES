@@ -4,26 +4,99 @@
     "nodes": {
         "mqtt1": {
             "type": "MqttDAT",
-            "position": [500, 200],
+            "position": [
+                500,
+                200
+            ],
             "parameters": {
-                "broker": {"value": "127.0.0.1"},
-                "port": {"value": 1883},
-                "client_id": {"value": "gonodes_sub"},
-                "subscribe": {"value": "sensors/#"},
-                "active": {"value": false},
-                "max_messages": {"value": 50}
+                "broker": {
+                    "value": "127.0.0.1"
+                },
+                "port": {
+                    "value": 1883
+                },
+                "client_id": {
+                    "value": "gonodes_sub"
+                },
+                "subscribe": {
+                    "value": "sensors/#"
+                },
+                "active": {
+                    "value": false
+                },
+                "max_messages": {
+                    "value": 50
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                600,
+                200
+            ],
+            "parameters": {
+                "text": {
+                    "value": "DAT Output",
+                    "expression": "str(op(\"mqtt1\"))",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         }
     },
-    "connections": [],
+    "connections": [
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "MQTT DAT \u2014 Basic Subscribe\n\nConnects to a local Mosquitto broker and subscribes\nto all topics under sensors/#. Incoming messages\nappear as rows in the output table (topic + message).\nSet active=true to connect. Requires a running broker.",
-            "position": [50.0, -50.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                50.0,
+                -50.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

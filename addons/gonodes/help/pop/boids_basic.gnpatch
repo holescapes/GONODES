@@ -4,58 +4,192 @@
     "nodes": {
         "source1": {
             "type": "SourcePOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "max_particles": {"value": 5000},
-                "rate": {"value": 2000.0},
-                "life_min": {"value": 30.0},
-                "life_max": {"value": 60.0},
-                "init_speed": {"value": 2.0},
-                "pscale": {"value": 0.05}
+                "max_particles": {
+                    "value": 5000
+                },
+                "rate": {
+                    "value": 2000.0
+                },
+                "life_min": {
+                    "value": 30.0
+                },
+                "life_max": {
+                    "value": 60.0
+                },
+                "init_speed": {
+                    "value": 2.0
+                },
+                "pscale": {
+                    "value": 0.05
+                }
             }
         },
         "boids1": {
             "type": "BoidsPOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "perception_radius": {"value": 2.0},
-                "avoid_radius": {"value": 0.5},
-                "separation": {"value": 1.5},
-                "alignment": {"value": 1.0},
-                "cohesion": {"value": 1.0},
-                "max_speed": {"value": 5.0},
-                "max_force": {"value": 3.0},
-                "bounds_radius": {"value": 10.0},
-                "bounds_force": {"value": 5.0}
+                "perception_radius": {
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "avoid_radius": {
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "separation": {
+                    "value": 1.5
+                },
+                "alignment": {
+                    "value": 1.0
+                },
+                "cohesion": {
+                    "value": 1.0
+                },
+                "max_speed": {
+                    "value": 5.0
+                },
+                "max_force": {
+                    "value": 3.0
+                },
+                "bounds_radius": {
+                    "value": 10.0
+                },
+                "bounds_force": {
+                    "value": 5.0
+                }
             }
-        },
-        "render1": {
-            "type": "RenderPOP",
-            "position": [800, 100],
-            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1375,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                975,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
+        },
+        "rendertop1": {
+            "type": "RenderTOP",
+            "position": [
+                975,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "renderpop1": {
+            "type": "RenderPOP",
+            "position": [
+                775,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         }
     },
     "connections": [
-        {"from": "source1", "from_port": 0, "to": "boids1", "to_port": 0},
-        {"from": "boids1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "boids1",
+            "to_port": 0
+        },
+        {
+            "from": "boids1",
+            "from_port": 0,
+            "to": "renderpop1",
+            "to_port": 0
+        },
+        {
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 1
+        },
+        {
+            "from": "rendertop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Boids Flocking Simulation\n\nSourcePOP emits particles → BoidsPOP applies Reynolds flocking rules:\n• Separation: steer away from close neighbors\n• Alignment: match average velocity of nearby flock\n• Cohesion: steer toward flock center\n\nSpherical boundary keeps the flock contained.\nAll three weights are adjustable. Try:\n• High separation + low cohesion = scattered\n• High cohesion + low separation = tight swarm\n• High alignment = schooling fish behavior",
-            "position": [-100.0, -170.0],
-            "size": [550.0, 170.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Boids Flocking Simulation\n\nSourcePOP emits particles \u2192 BoidsPOP applies Reynolds flocking rules:\n\u2022 Separation: steer away from close neighbors\n\u2022 Alignment: match average velocity of nearby flock\n\u2022 Cohesion: steer toward flock center\n\nSpherical boundary keeps the flock contained.\nAll three weights are adjustable. Try:\n\u2022 High separation + low cohesion = scattered\n\u2022 High cohesion + low separation = tight swarm\n\u2022 High alignment = schooling fish behavior",
+            "position": [
+                -100.0,
+                -170.0
+            ],
+            "size": [
+                550.0,
+                170.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

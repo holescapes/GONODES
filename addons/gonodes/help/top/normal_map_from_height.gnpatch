@@ -1,97 +1,101 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  100,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "resolution":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Vector2i",
-                                                                                     "x":  512,
-                                                                                     "y":  512
-                                                                                 }
-                                                                   },
-                                                    "scale":  {
-                                                                  "value":  8.0
-                                                              },
-                                                    "monochrome":  {
-                                                                       "value":  true
-                                                                   }
-                                                }
-                             },
-                  "nmap1":  {
-                                "type":  "NormalMapTOP",
-                                "position":  [
-                                                 450,
-                                                 100
-                                             ],
-                                "parameters":  {
-                                                   "strength":  {
-                                                                    "value":  3.0
-                                                                },
-                                                   "invert_y":  {
-                                                                    "value":  false
-                                                                }
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   800,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "nmap1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "nmap1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Normal Map TOP — Height to Normal\n\nGenerates tangent-space normals from height noise.\nStrength amplifies the bump effect.\nInvert Y for DirectX-style normal convention.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 8.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "monochrome": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "nmap1": {
+            "type": "NormalMapTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "strength": {
+                    "value": 3.0
+                },
+                "invert_y": {
+                    "value": false
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "nmap1",
+            "to_port": 0
+        },
+        {
+            "from": "nmap1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Normal Map TOP \u2014 Height to Normal\n\nGenerates tangent-space normals from height noise.\nStrength amplifies the bump effect.\nInvert Y for DirectX-style normal convention.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

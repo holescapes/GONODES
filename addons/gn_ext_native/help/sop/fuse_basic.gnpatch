@@ -4,71 +4,157 @@
     "nodes": {
         "grid1": {
             "type": "GridSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "rows": {"value": 10},
-                "columns": {"value": 10},
-                "sizex": {"value": 4.0},
-                "sizey": {"value": 4.0}
+                "rows": {
+                    "value": 10,
+                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "columns": {
+                    "value": 10,
+                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "sizex": {
+                    "value": 4.0
+                },
+                "sizey": {
+                    "value": 4.0
+                }
             }
         },
         "fuse1": {
             "type": "FuseSOPNative",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "threshold": {"value": 0.01},
-                "recompute_normals": {"value": true}
+                "threshold": {
+                    "value": 0.01
+                },
+                "recompute_normals": {
+                    "value": true
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [800, 300],
+            "position": [
+                800,
+                300
+            ],
             "parameters": {
-                "tx": {"value": 0},
-                "ty": {"value": 2},
-                "tz": {"value": 5}
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 2
+                },
+                "tz": {
+                    "value": 5
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1500, 100],
+            "position": [
+                1500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "grid1", "from_port": 0, "to": "fuse1", "to_port": 0},
-        {"from": "fuse1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "fuse1",
+            "to_port": 0
+        },
+        {
+            "from": "fuse1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Fuse SOP (Native) â€” Merge Coincident Points\n\nMerges vertices closer than 'threshold' distance.\nUseful after boolean/merge ops to weld seams.\nIncrease threshold to fuse more aggressively.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Fuse SOP (Native) \u00e2\u20ac\u201d Merge Coincident Points\n\nMerges vertices closer than 'threshold' distance.\nUseful after boolean/merge ops to weld seams.\nIncrease threshold to fuse more aggressively.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

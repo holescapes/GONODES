@@ -4,86 +4,184 @@
     "nodes": {
         "lfo1": {
             "type": "LFO_CHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "frequency": {"value": 1.0}
+                "frequency": {
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "dot1": {
             "type": "DotNode",
-            "position": [400, 100],
+            "position": [
+                400,
+                100
+            ],
             "parameters": {}
         },
         "math1": {
             "type": "MathCHOP",
-            "position": [650, 50],
+            "position": [
+                650,
+                50
+            ],
             "parameters": {
-                "mult": {"value": 2.0}
+                "mult": {
+                    "value": 2.0
+                }
             }
         },
         "filter1": {
             "type": "FilterCHOP",
-            "position": [650, 200],
+            "position": [
+                650,
+                200
+            ],
             "parameters": {
-                "width": {"value": 0.3}
+                "width": {
+                    "value": 0.3
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [1000, 50],
+            "position": [
+                1000,
+                50
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "choptop2": {
             "type": "CHOPtoTOP",
-            "position": [1000, 200],
+            "position": [
+                1000,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1350, 50],
+            "position": [
+                1350,
+                50
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         },
         "window2": {
             "type": "WindowOUT",
-            "position": [1350, 200],
+            "position": [
+                1350,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": false}
+                "open": {
+                    "value": false
+                }
             }
         }
     },
     "connections": [
-        {"from": "lfo1", "from_port": 0, "to": "dot1", "to_port": 0},
-        {"from": "dot1", "from_port": 0, "to": "math1", "to_port": 0},
-        {"from": "dot1", "from_port": 0, "to": "filter1", "to_port": 0},
-        {"from": "math1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "filter1", "from_port": 0, "to": "choptop2", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0},
-        {"from": "choptop2", "from_port": 0, "to": "window2", "to_port": 0}
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "dot1",
+            "to_port": 0
+        },
+        {
+            "from": "dot1",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 0
+        },
+        {
+            "from": "dot1",
+            "from_port": 0,
+            "to": "filter1",
+            "to_port": 0
+        },
+        {
+            "from": "math1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "filter1",
+            "from_port": 0,
+            "to": "choptop2",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop2",
+            "from_port": 0,
+            "to": "window2",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Dot Node \u2014 Branch Routing\n\nDot node acts as a pass-through routing point.\nSame LFO signal split into two branches:\n\u2022 Math (x2 gain) \u2192 top output\n\u2022 Filter (smoothed) \u2192 bottom output\nDot adapts to any family \u2014 works with TOP, SOP, DAT too.",
-            "position": [-100.0, -120.0],
-            "size": [520.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                520.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -4,70 +4,166 @@
     "nodes": {
         "webcam1": {
             "type": "WebcamIMG",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "bridge1": {
-            "type": "IMGtoTOP",
-            "position": [350, 100],
+            "type": "ImgToTOP",
+            "position": [
+                350,
+                100
+            ],
             "parameters": {}
         },
         "depth1": {
             "type": "DepthEstimateTOP",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "normalize": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "normalize": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "displace1": {
             "type": "DisplaceTOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {
-                "amount": { "value": 0.08 }
+                "amount": {
+                    "value": 0.08
+                }
             }
         },
         "blur1": {
             "type": "BlurTOP",
-            "position": [850, 300],
+            "position": [
+                850,
+                300
+            ],
             "parameters": {
-                "radius": { "value": 3.0 }
+                "radius": {
+                    "value": 3.0
+                }
             }
         },
         "comp1": {
             "type": "CompositeTOP",
-            "position": [1100, 100],
+            "position": [
+                1100,
+                100
+            ],
             "parameters": {
-                "operation": { "value": 0 }
+                "operation": {
+                    "value": 0
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1350, 100],
+            "position": [
+                1350,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
-        { "from": "bridge1", "from_port": 0, "to": "depth1", "to_port": 0 },
-        { "from": "bridge1", "from_port": 0, "to": "displace1", "to_port": 0 },
-        { "from": "depth1", "from_port": 0, "to": "displace1", "to_port": 1 },
-        { "from": "depth1", "from_port": 0, "to": "blur1", "to_port": 0 },
-        { "from": "displace1", "from_port": 0, "to": "comp1", "to_port": 0 },
-        { "from": "blur1", "from_port": 0, "to": "comp1", "to_port": 1 },
-        { "from": "comp1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "depth1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "displace1",
+            "to_port": 0
+        },
+        {
+            "from": "depth1",
+            "from_port": 0,
+            "to": "displace1",
+            "to_port": 1
+        },
+        {
+            "from": "depth1",
+            "from_port": 0,
+            "to": "blur1",
+            "to_port": 0
+        },
+        {
+            "from": "displace1",
+            "from_port": 0,
+            "to": "comp1",
+            "to_port": 0
+        },
+        {
+            "from": "blur1",
+            "from_port": 0,
+            "to": "comp1",
+            "to_port": 1
+        },
+        {
+            "from": "comp1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Estimate — Displacement Effect\n\nDepth map used to displace the original video.\nCreates a parallax/3D-pop effect from 2D footage.\nBlurred depth composited for atmospheric haze.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Estimate \u2014 Displacement Effect\n\nDepth map used to displace the original video.\nCreates a parallax/3D-pop effect from 2D footage.\nBlurred depth composited for atmospheric haze.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

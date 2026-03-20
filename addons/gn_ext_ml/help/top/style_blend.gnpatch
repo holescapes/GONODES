@@ -4,44 +4,100 @@
     "nodes": {
         "webcam1": {
             "type": "WebcamIMG",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "bridge1": {
-            "type": "IMGtoTOP",
-            "position": [350, 100],
+            "type": "ImgToTOP",
+            "position": [
+                350,
+                100
+            ],
             "parameters": {}
         },
         "style1": {
             "type": "StyleTransferTOP",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "strength": { "value": 0.0, "expression": "abs(sin(time * 0.5))" }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "strength": {
+                    "value": 0.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
-        { "from": "bridge1", "from_port": 0, "to": "style1", "to_port": 0 },
-        { "from": "style1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "style1",
+            "to_port": 0
+        },
+        {
+            "from": "style1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Style Transfer — Animated Blend\n\nStrength oscillates via sine expression.\nSmoothly crossfades between original and stylized.\nGreat for VJ transitions and live performance.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Style Transfer \u2014 Animated Blend\n\nStrength oscillates via sine expression.\nSmoothly crossfades between original and stylized.\nGreat for VJ transitions and live performance.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -25,7 +25,9 @@
                     "value": "Param"
                 },
                 "default_val": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },
@@ -94,6 +96,14 @@
                     "value": true
                 }
             }
+        },
+        "tabnames1": {
+            "type": "TableDAT",
+            "position": [
+                0,
+                -100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
@@ -101,19 +111,19 @@
             "from": "btn_child",
             "from_port": 0,
             "to": "tabcontainer1",
-            "to_port": 0
+            "to_port": 1
         },
         {
             "from": "slider_child",
             "from_port": 0,
             "to": "tabcontainer1",
-            "to_port": 0
+            "to_port": 2
         },
         {
             "from": "toggle_child",
             "from_port": 0,
             "to": "tabcontainer1",
-            "to_port": 0
+            "to_port": 3
         },
         {
             "from": "tabcontainer1",
@@ -125,6 +135,12 @@
             "from": "noise_top",
             "from_port": 0,
             "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "tabnames1",
+            "from_port": 0,
+            "to": "tabcontainer1",
             "to_port": 0
         }
     ],

@@ -4,28 +4,91 @@
     "nodes": {
         "skeleton1": {
             "type": "DepthSkeletonCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "backend": { "value": 0 }
+                "device": {
+                    "value": 0
+                }
             }
         },
         "null1": {
             "type": "NullCHOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {}
+        },
+        "choptotop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        { "from": "skeleton1", "from_port": 0, "to": "null1", "to_port": 0 }
+        {
+            "from": "skeleton1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptotop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Skeleton — Basic Tracking\n\nHardware skeleton tracking from Azure Kinect.\nOutputs channels per joint per body:\n  body0:head:tx/ty/tz — position (meters)\n  body0:head:rx/ry/rz — rotation (degrees)\n  body0:head:confidence — 0 to 1\n\n32 joints per body, up to 6 bodies.\nRequires Azure Kinect with Body Tracking SDK.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 140.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Skeleton \u2014 Basic Tracking\n\nHardware skeleton tracking from Azure Kinect.\nOutputs channels per joint per body:\n  body0:head:tx/ty/tz \u2014 position (meters)\n  body0:head:rx/ry/rz \u2014 rotation (degrees)\n  body0:head:confidence \u2014 0 to 1\n\n32 joints per body, up to 6 bodies.\nRequires Azure Kinect with Body Tracking SDK.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                140.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

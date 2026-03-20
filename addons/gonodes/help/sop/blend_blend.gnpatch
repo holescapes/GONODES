@@ -18,10 +18,14 @@
             ],
             "parameters": {
                 "blend": {
-                    "value": 0.25
+                    "value": 0.25,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "blend_normals": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "blend_uvs": {
                     "value": true

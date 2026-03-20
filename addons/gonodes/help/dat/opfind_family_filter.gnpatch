@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "family_filter": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "include_type": {
-                    "value": true
+                    "value": true,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

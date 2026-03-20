@@ -25,10 +25,14 @@
             ],
             "parameters": {
                 "target_percent": {
-                    "value": 50.0
+                    "value": 50.0,
+                    "expression": "(50.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "preserve_boundary": {
-                    "value": true
+                    "value": true,
+                    "expression": "time * 45.0",
+                    "mode": "EXPRESSION"
                 },
                 "boundary_weight": {
                     "value": 10.0

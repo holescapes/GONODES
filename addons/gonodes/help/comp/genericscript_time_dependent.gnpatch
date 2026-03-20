@@ -3,18 +3,14 @@
     "generator": "GONODES",
     "nodes": {
         "noise1": {
-            "type": "NoiseTOP",
+            "type": "NoiseCHOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
+                "length": {
+                    "value": 100
                 }
             }
         },
@@ -26,10 +22,14 @@
             ],
             "parameters": {
                 "time_dependent": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "cook_once": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "force_active": {
                     "value": true
@@ -54,6 +54,14 @@
                     "value": true
                 }
             }
+        },
+        "choptotop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
@@ -65,6 +73,12 @@
         },
         {
             "from": "genericscript1",
+            "from_port": 0,
+            "to": "choptotop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptotop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0

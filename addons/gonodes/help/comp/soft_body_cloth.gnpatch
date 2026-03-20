@@ -1,304 +1,302 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "grid1":  {
-                                "type":  "GridSOP",
-                                "position":  [
-                                                 -400,
-                                                 0
-                                             ],
-                                "parameters":  {
-                                                   "size_x":  {
-                                                                  "value":  4.0
-                                                              },
-                                                   "size_y":  {
-                                                                  "value":  4.0
-                                                              },
-                                                   "rows":  {
-                                                                "value":  20
-                                                            },
-                                                   "cols":  {
-                                                                "value":  20
-                                                            }
-                                               }
-                            },
-                  "geo_cloth":  {
-                                    "type":  "GeometryCOMP",
-                                    "position":  [
-                                                     -100,
-                                                     0
-                                                 ],
-                                    "parameters":  {
-
-                                                   }
-                                },
-                  "soft1":  {
-                                "type":  "SoftBodyCOMP",
-                                "position":  [
-                                                 200,
-                                                 0
-                                             ],
-                                "parameters":  {
-                                                   "tx":  {
-                                                              "value":  0.0
-                                                          },
-                                                   "ty":  {
-                                                              "value":  3.0
-                                                          },
-                                                   "tz":  {
-                                                              "value":  0.0
-                                                          },
-                                                   "rx":  {
-                                                              "value":  -90.0
-                                                          },
-                                                   "iterations":  {
-                                                                      "value":  10
-                                                                  },
-                                                   "gravity":  {
-                                                                   "value":  -9.8
-                                                               },
-                                                   "damping":  {
-                                                                   "value":  0.98
-                                                               },
-                                                   "stiffness":  {
-                                                                     "value":  0.5
-                                                                 },
-                                                   "floor_collision":  {
-                                                                           "value":  true
-                                                                       },
-                                                   "floor_y":  {
-                                                                   "value":  0.0
-                                                               },
-                                                   "pin_mode":  {
-                                                                    "value":  1
-                                                                },
-                                                   "pin_threshold":  {
-                                                                         "value":  0.02
-                                                                     }
-                                               }
-                            },
-                  "box1":  {
-                               "type":  "BoxSOP",
-                               "position":  [
-                                                -400,
-                                                250
-                                            ],
-                               "parameters":  {
-                                                  "size_x":  {
-                                                                 "value":  6.0
-                                                             },
-                                                  "size_y":  {
-                                                                 "value":  0.2
-                                                             },
-                                                  "size_z":  {
-                                                                 "value":  6.0
-                                                             }
-                                              }
-                           },
-                  "geo_floor":  {
-                                    "type":  "GeometryCOMP",
-                                    "position":  [
-                                                     -100,
-                                                     250
-                                                 ],
-                                    "parameters":  {
-
-                                                   }
-                                },
-                  "floor1":  {
-                                 "type":  "StaticBodyCOMP",
-                                 "position":  [
-                                                  200,
-                                                  250
-                                              ],
-                                 "parameters":  {
-                                                    "tx":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "ty":  {
-                                                               "value":  0.0
-                                                           },
-                                                    "tz":  {
-                                                               "value":  0.0
-                                                           }
-                                                }
-                             },
-                  "cam1":  {
-                               "type":  "CameraCOMP",
-                               "position":  [
-                                                200,
-                                                450
-                                            ],
-                               "parameters":  {
-                                                  "tx":  {
-                                                             "value":  5.0
-                                                         },
-                                                  "ty":  {
-                                                             "value":  4.0
-                                                         },
-                                                  "tz":  {
-                                                             "value":  5.0
-                                                         },
-                                                  "look_at":  {
-                                                                  "value":  true
-                                                              },
-                                                  "look_x":  {
-                                                                 "value":  0.0
-                                                             },
-                                                  "look_y":  {
-                                                                 "value":  1.5
-                                                             },
-                                                  "look_z":  {
-                                                                 "value":  0.0
-                                                             }
-                                              }
-                           },
-                  "light1":  {
-                                 "type":  "LightCOMP",
-                                 "position":  [
-                                                  200,
-                                                  600
-                                              ],
-                                 "parameters":  {
-                                                    "light_type":  {
-                                                                       "value":  0
-                                                                   },
-                                                    "rx":  {
-                                                               "value":  -45.0
-                                                           },
-                                                    "ry":  {
-                                                               "value":  30.0
-                                                           }
-                                                }
-                             },
-                  "merge1":  {
-                                 "type":  "MergeCOMP",
-                                 "position":  [
-                                                  500,
-                                                  200
-                                              ],
-                                 "parameters":  {
-
-                                                }
-                             },
-                  "render1":  {
-                                  "type":  "RenderTOP",
-                                  "position":  [
-                                                   800,
-                                                   200
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  1024,
-                                                                                      "y":  768
-                                                                                  }
-                                                                    }
-                                                 }
-                              },
-                  "window1":  {
-                                  "position":  [
-                                                   1150,
-                                                   200
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "grid1",
-                            "from_port":  0,
-                            "to":  "geo_cloth",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_cloth",
-                            "from_port":  0,
-                            "to":  "soft1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "box1",
-                            "from_port":  0,
-                            "to":  "geo_floor",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_floor",
-                            "from_port":  0,
-                            "to":  "floor1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "soft1",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "floor1",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "cam1",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  2
-                        },
-                        {
-                            "from":  "light1",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  3
-                        },
-                        {
-                            "from":  "merge1",
-                            "from_port":  0,
-                            "to":  "render1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "render1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Soft Body Cloth — CPU Verlet Drape Test\n\nA 20×20 grid at y=3 simulates as cloth via\nCPU Verlet integration, draping onto a floor at y=0.\nTop-edge vertices are pinned. Adjust iterations,\nstiffness, and damping to tune behaviour.",
-                            "position":  [
-                                             -450.0,
-                                             -180.0
-                                         ],
-                            "size":  [
-                                         500.0,
-                                         130.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          0.8,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "grid1": {
+            "type": "GridSOP",
+            "position": [
+                -400,
+                0
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 4.0
+                },
+                "size_y": {
+                    "value": 4.0
+                },
+                "rows": {
+                    "value": 20
+                },
+                "cols": {
+                    "value": 20
+                }
+            }
+        },
+        "geo_cloth": {
+            "type": "GeometryCOMP",
+            "position": [
+                -100,
+                0
+            ],
+            "parameters": {}
+        },
+        "soft1": {
+            "type": "SoftBodyCOMP",
+            "position": [
+                200,
+                0
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0,
+                    "expression": "sin(time * 0.8) * 2.0",
+                    "mode": "EXPRESSION"
+                },
+                "ty": {
+                    "value": 3.0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "rx": {
+                    "value": -90.0
+                },
+                "iterations": {
+                    "value": 10
+                },
+                "gravity": {
+                    "value": -9.8
+                },
+                "damping": {
+                    "value": 0.98
+                },
+                "stiffness": {
+                    "value": 0.5
+                },
+                "floor_collision": {
+                    "value": true
+                },
+                "floor_y": {
+                    "value": 0.0
+                },
+                "pin_mode": {
+                    "value": 1
+                },
+                "pin_threshold": {
+                    "value": 0.02
+                }
+            }
+        },
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                -400,
+                250
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 6.0
+                },
+                "size_y": {
+                    "value": 0.2
+                },
+                "size_z": {
+                    "value": 6.0
+                }
+            }
+        },
+        "geo_floor": {
+            "type": "GeometryCOMP",
+            "position": [
+                -100,
+                250
+            ],
+            "parameters": {}
+        },
+        "floor1": {
+            "type": "StaticBodyCOMP",
+            "position": [
+                200,
+                250
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 0.0
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                200,
+                450
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 5.0
+                },
+                "ty": {
+                    "value": 4.0
+                },
+                "tz": {
+                    "value": 5.0
+                },
+                "look_at": {
+                    "value": true
+                },
+                "look_x": {
+                    "value": 0.0
+                },
+                "look_y": {
+                    "value": 1.5
+                },
+                "look_z": {
+                    "value": 0.0
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                200,
+                600
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                },
+                "rx": {
+                    "value": -45.0
+                },
+                "ry": {
+                    "value": 30.0
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                500,
+                200
+            ],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                800,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1024,
+                        "y": 768
+                    }
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1150,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "geo_cloth",
+            "to_port": 0
+        },
+        {
+            "from": "geo_cloth",
+            "from_port": 0,
+            "to": "soft1",
+            "to_port": 0
+        },
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "geo_floor",
+            "to_port": 0
+        },
+        {
+            "from": "geo_floor",
+            "from_port": 0,
+            "to": "floor1",
+            "to_port": 0
+        },
+        {
+            "from": "soft1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "floor1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 3
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Soft Body Cloth \u2014 CPU Verlet Drape Test\n\nA 20\u00d720 grid at y=3 simulates as cloth via\nCPU Verlet integration, draping onto a floor at y=0.\nTop-edge vertices are pinned. Adjust iterations,\nstiffness, and damping to tune behaviour.",
+            "position": [
+                -450.0,
+                -180.0
+            ],
+            "size": [
+                500.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                0.8,
+                0.8
+            ]
+        }
+    ]
 }

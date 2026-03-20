@@ -18,10 +18,14 @@
             ],
             "parameters": {
                 "loft_distance": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "loft_axis": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "subdivisions": {
                     "value": 0

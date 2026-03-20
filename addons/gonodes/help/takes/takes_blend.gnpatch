@@ -4,75 +4,185 @@
     "nodes": {
         "box1": {
             "type": "BoxSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "size_x": {"value": 0.4},
-                "size_y": {"value": 0.4},
-                "size_z": {"value": 0.4}
+                "size_x": {
+                    "value": 0.4
+                },
+                "size_y": {
+                    "value": 0.4
+                },
+                "size_z": {
+                    "value": 0.4
+                }
             }
         },
         "noise_pos": {
             "type": "NoiseCHOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "num_channels": {"value": 3},
-                "channel_names": {"value": "tx,ty,tz"},
-                "roughness": {"value": 0.5},
-                "period": {"value": 2.0}
+                "num_channels": {
+                    "value": 3
+                },
+                "channel_names": {
+                    "value": "tx,ty,tz"
+                },
+                "roughness": {
+                    "value": 0.5
+                },
+                "period": {
+                    "value": 2.0
+                }
             }
         },
         "instance1": {
             "type": "InstanceCOMP",
-            "position": [500, 200],
+            "position": [
+                500,
+                200
+            ],
             "parameters": {
-                "count": {"value": 25},
-                "scatter_mode": {"value": 0},
-                "spacing": {"value": 1.5},
-                "chop_map": {"value": 1},
-                "albedo_color": {"value": {"_type": "Color", "r": 1.0, "g": 0.4, "b": 0.2, "a": 1.0}},
-                "roughness": {"value": 0.4}
+                "count": {
+                    "value": 25,
+                    "expression": "(25 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "scatter_mode": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "spacing": {
+                    "value": 1.5
+                },
+                "chop_map": {
+                    "value": 1
+                },
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "roughness": {
+                    "value": 0.4
+                }
             }
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [500, 450],
+            "position": [
+                500,
+                450
+            ],
             "parameters": {
-                "ty": {"value": 3.0},
-                "tz": {"value": 8.0},
-                "rx": {"value": -20.0}
+                "ty": {
+                    "value": 3.0
+                },
+                "tz": {
+                    "value": 8.0
+                },
+                "rx": {
+                    "value": -20.0
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [850, 200],
+            "position": [
+                850,
+                200
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1200, 200],
+            "position": [
+                1200,
+                200
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "box1", "from_port": 0, "to": "instance1", "to_port": 0},
-        {"from": "noise_pos", "from_port": 0, "to": "instance1", "to_port": 3},
-        {"from": "instance1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "instance1",
+            "to_port": 0
+        },
+        {
+            "from": "noise_pos",
+            "from_port": 0,
+            "to": "instance1",
+            "to_port": 3
+        },
+        {
+            "from": "instance1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Takes \u2014 Blend Transition Demo\n\nDemonstrates smooth blending between takes.\n\n1. Capture Base with the current orange animated scene\n2. Change albedo_color, count, spacing, roughness etc.\n3. Capture as 'Look B'\n4. Use the Blend slider to smoothly interpolate\n   between Base and 'Look B'\n\nFloat, int, Color, and Vector parameters interpolate.\nOther types snap at 50% blend.",
-            "position": [-150.0, -200.0],
-            "size": [500.0, 190.0],
-            "color": [1.0, 0.9, 0.3, 0.9]
+            "position": [
+                -150.0,
+                -200.0
+            ],
+            "size": [
+                500.0,
+                190.0
+            ],
+            "color": [
+                1.0,
+                0.9,
+                0.3,
+                0.9
+            ]
         }
     ]
 }

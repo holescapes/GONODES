@@ -18,10 +18,14 @@
             ],
             "parameters": {
                 "width": {
-                    "value": 255
+                    "value": 255,
+                    "expression": "(255 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "scale": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

@@ -4,20 +4,50 @@
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
-            "position": [-200, 100],
+            "position": [
+                -200,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "noise_type": {"value": 0},
-                "scale": {"value": 4.0},
-                "monochrome": {"value": false}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "noise_type": {
+                    "value": 0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
+                },
+                "scale": {
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "monochrome": {
+                    "value": false
+                }
             }
         },
         "shadertoy1": {
             "type": "ShadertoyTOP",
-            "position": [200, 100],
+            "position": [
+                200,
+                100
+            ],
             "parameters": {
-                "time_dependent": {"value": false},
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "time_dependent": {
+                    "value": false
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
                 "shadertoy_code": {
                     "value": "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n\tvec2 uv = fragCoord / iResolution.xy;\n\tvec4 src = texture(iChannel0, uv);\n\t// Chromatic aberration\n\tfloat offset = 0.005;\n\tfloat r = texture(iChannel0, uv + vec2(offset, 0.0)).r;\n\tfloat g = src.g;\n\tfloat b = texture(iChannel0, uv - vec2(offset, 0.0)).b;\n\tvec3 col = vec3(r, g, b);\n\t// Scanlines\n\tcol *= 0.95 + 0.05 * sin(uv.y * iResolution.y * 3.14159);\n\t// Vignette (clamped to avoid negative pow)\n\tvec2 q = uv - 0.5;\n\tfloat vig = clamp(1.0 - dot(q, q) * 2.5, 0.0, 1.0);\n\tcol *= 0.6 + 0.4 * vig;\n\tfragColor = vec4(col, 1.0);\n}"
                 }
@@ -25,25 +55,57 @@
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [620, 100],
+            "position": [
+                620,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1",     "from_port": 0, "to": "shadertoy1", "to_port": 0},
-        {"from": "shadertoy1", "from_port": 0, "to": "window1",    "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "shadertoy1",
+            "to_port": 0
+        },
+        {
+            "from": "shadertoy1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Shadertoy URL TOP — Effect Example\n\nCRT post-process applied to a NoiseTOP input.\niChannel0 is wired automatically when the node has one input connected.\nThe effect adds chromatic aberration, scanlines and a vignette using texture().\nAny number of input TOPs can be added: each becomes iChannel0, iChannel1, etc.\nEdit shadertoy_code inline or load a preset from the Presets menu.",
-            "position": [-250.0, -200.0],
-            "size": [580.0, 130.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Shadertoy URL TOP \u2014 Effect Example\n\nCRT post-process applied to a NoiseTOP input.\niChannel0 is wired automatically when the node has one input connected.\nThe effect adds chromatic aberration, scanlines and a vignette using texture().\nAny number of input TOPs can be added: each becomes iChannel0, iChannel1, etc.\nEdit shadertoy_code inline or load a preset from the Presets menu.",
+            "position": [
+                -250.0,
+                -200.0
+            ],
+            "size": [
+                580.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

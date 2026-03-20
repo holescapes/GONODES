@@ -1,220 +1,170 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "lfo1": {
-      "type": "LFO_CHOP",
-      "position": [
-        0,
-        450
-      ],
-      "parameters": {
-        "frequency": {
-          "value": 0.15
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSDF",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.6,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "position_x": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "position_y": {
+                    "value": 0
+                },
+                "position_z": {
+                    "value": 0
+                }
+            }
         },
-        "amplitude": {
-          "value": 3.14
+        "box1": {
+            "type": "BoxSDF",
+            "position": [
+                200,
+                350
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 0.5
+                },
+                "size_y": {
+                    "value": 0.5
+                },
+                "size_z": {
+                    "value": 0.5
+                },
+                "position_x": {
+                    "value": 1.5
+                },
+                "position_y": {
+                    "value": 0
+                },
+                "position_z": {
+                    "value": 0
+                }
+            }
         },
-        "offset": {
-          "value": 0.0
+        "union1": {
+            "type": "UnionSDF",
+            "position": [
+                500,
+                200
+            ],
+            "parameters": {}
         },
-        "phase": {
-          "value": 0.0
+        "raymarch1": {
+            "type": "RaymarchSDF",
+            "position": [
+                800,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "cam_distance": {
+                    "value": 6.0
+                },
+                "cam_angle_x": {
+                    "mode": "EXPRESSION",
+                    "value": 0.3,
+                    "expression": "chop(\"lfo1\",\"out\",0)"
+                },
+                "cam_angle_y": {
+                    "mode": "EXPRESSION",
+                    "value": 0.4,
+                    "expression": "chop(\"lfo2\",\"out\",0)"
+                },
+                "fov": {
+                    "value": 60.0
+                },
+                "show_ao": {
+                    "value": true
+                },
+                "soft_shadows": {
+                    "value": true
+                }
+            }
         },
-        "waveform": {
-          "value": 0
-        },
-        "duty_cycle": {
-          "value": 0.5
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
-      }
     },
-    "lfo2": {
-      "type": "LFO_CHOP",
-      "position": [
-        0,
-        630
-      ],
-      "parameters": {
-        "frequency": {
-          "value": 0.1
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "union1",
+            "to_port": 0
         },
-        "amplitude": {
-          "value": 0.6
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "union1",
+            "to_port": 1
         },
-        "offset": {
-          "value": 0.3
+        {
+            "from": "union1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
         },
-        "phase": {
-          "value": 0.0
-        },
-        "waveform": {
-          "value": 0
-        },
-        "duty_cycle": {
-          "value": 0.5
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
         }
-      }
-    },
-    "sphere1": {
-      "type": "SphereSDF",
-      "position": [
-        200,
-        100
-      ],
-      "parameters": {
-        "radius": {
-          "value": 0.6
-        },
-        "position_x": {
-          "value": 0
-        },
-        "position_y": {
-          "value": 0
-        },
-        "position_z": {
-          "value": 0
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Raymarch SDF \u2014 Camera Orbit\n\nLFO1 drives horizontal camera angle.\nLFO2 drives vertical camera angle.\nThe camera orbits around the scene.",
+            "position": [
+                -150,
+                -180
+            ],
+            "size": [
+                520,
+                120
+            ],
+            "color": [
+                1,
+                1,
+                1,
+                0.8
+            ]
         }
-      }
-    },
-    "box1": {
-      "type": "BoxSDF",
-      "position": [
-        200,
-        350
-      ],
-      "parameters": {
-        "size_x": {
-          "value": 0.5
-        },
-        "size_y": {
-          "value": 0.5
-        },
-        "size_z": {
-          "value": 0.5
-        },
-        "position_x": {
-          "value": 1.5
-        },
-        "position_y": {
-          "value": 0
-        },
-        "position_z": {
-          "value": 0
-        }
-      }
-    },
-    "union1": {
-      "type": "UnionSDF",
-      "position": [
-        500,
-        200
-      ],
-      "parameters": {}
-    },
-    "raymarch1": {
-      "type": "RaymarchSDF",
-      "position": [
-        800,
-        200
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
-        },
-        "cam_distance": {
-          "value": 6.0
-        },
-        "cam_angle_x": {
-          "mode": "EXPRESSION",
-          "value": 0.3,
-          "expression": "chop(\"lfo1\",\"out\",0)"
-        },
-        "cam_angle_y": {
-          "mode": "EXPRESSION",
-          "value": 0.4,
-          "expression": "chop(\"lfo2\",\"out\",0)"
-        },
-        "fov": {
-          "value": 60.0
-        },
-        "show_ao": {
-          "value": true
-        },
-        "soft_shadows": {
-          "value": true
-        }
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [
-        1200,
-        200
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
-        },
-        "open": {
-          "value": true
-        }
-      }
-    }
-  },
-  "connections": [
-    {
-      "from": "sphere1",
-      "from_port": 0,
-      "to": "union1",
-      "to_port": 0
-    },
-    {
-      "from": "box1",
-      "from_port": 0,
-      "to": "union1",
-      "to_port": 1
-    },
-    {
-      "from": "union1",
-      "from_port": 0,
-      "to": "raymarch1",
-      "to_port": 0
-    },
-    {
-      "from": "raymarch1",
-      "from_port": 0,
-      "to": "window1",
-      "to_port": 0
-    }
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "Raymarch SDF \u2014 Camera Orbit\n\nLFO1 drives horizontal camera angle.\nLFO2 drives vertical camera angle.\nThe camera orbits around the scene.",
-      "position": [
-        -150,
-        -180
-      ],
-      "size": [
-        520,
-        120
-      ],
-      "color": [
-        1,
-        1,
-        1,
-        0.8
-      ]
-    }
-  ]
+    ]
 }

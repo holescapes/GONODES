@@ -2,31 +2,121 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
+        "constant1": {
+            "type": "ConstantDAT",
+            "position": [
+                -300,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "name\tvalue\nalpha\t1\nbeta\t2\ngamma\t3\ndelta\t4"
+                }
+            }
+        },
         "userpythondat1": {
             "type": "UserPythonDAT",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "auto_reload": {"value": true},
-                "time_dep": {"value": false}
+                "auto_reload": {
+                    "value": true
+                },
+                "time_dep": {
+                    "value": false
+                }
             }
         },
         "null1": {
             "type": "NullDAT",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "DAT Output",
+                    "expression": "str(op(\"null1\"))",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         }
     },
     "connections": [
-        {"from": "userpythondat1", "from_port": 0, "to": "null1", "to_port": 0}
+        {
+            "from": "constant1",
+            "from_port": 0,
+            "to": "userpythondat1",
+            "to_port": 0
+        },
+        {
+            "from": "userpythondat1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "UserPythonDAT \u2014 Python Data Processing\n\nWrite DAT operators in Python for table/text manipulation.\nThe default example filters rows by string match.\nLoad the CSV Parser example for structured CSV parsing.\n\nPython's stdlib (csv, json, re, etc.) is available \u2014\nno need to pip install anything for basic data work.",
-            "position": [-100.0, -100.0],
-            "size": [480.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                480.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

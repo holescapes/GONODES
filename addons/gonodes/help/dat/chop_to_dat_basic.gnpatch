@@ -1,115 +1,119 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "lfo1":  {
-                               "type":  "LFO_CHOP",
-                               "position":  [
-                                                100,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "frequency":  {
-                                                                    "value":  2.0
-                                                                },
-                                                  "amplitude":  {
-                                                                    "value":  1.0
-                                                                }
-                                              }
-                           },
-                  "chop_to_dat1":  {
-                                       "type":  "CHOPDAT",
-                                       "position":  [
-                                                        450,
-                                                        100
-                                                    ],
-                                       "parameters":  {
-                                                          "layout":  {
-                                                                         "value":  0
-                                                                     }
-                                                      }
-                                   },
-                  "window1":  {
-                                  "position":  [
-                                                   1150,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "text_view":  {
-                                    "type":  "TextTOP",
-                                    "position":  [
-                                                     800,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "resolution":  {
-                                                                          "value":  {
-                                                                                        "_type":  "Vector2i",
-                                                                                        "x":  512,
-                                                                                        "y":  512
-                                                                                    }
-                                                                      },
-                                                       "text":  {
-                                                                    "value":  "CHOPDAT output"
-                                                                },
-                                                       "font_size":  {
-                                                                         "value":  24
-                                                                     }
-                                                   }
-                                }
-              },
-    "connections":  [
-                        {
-                            "from":  "lfo1",
-                            "from_port":  0,
-                            "to":  "chop_to_dat1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "chop_to_dat1",
-                            "from_port":  0,
-                            "to":  "text_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "text_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "CHOP to DAT — Channel Data as Table\n\nConverts CHOP channel data to a DAT table.\nEach channel becomes a column or row.\nlayout controls the orientation.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "amplitude": {
+                    "value": 1.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "chop_to_dat1": {
+            "type": "CHOPDAT",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "layout": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "text_view": {
+            "type": "TextTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "text": {
+                    "value": "CHOPDAT output"
+                },
+                "font_size": {
+                    "value": 24
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "chop_to_dat1",
+            "to_port": 0
+        },
+        {
+            "from": "chop_to_dat1",
+            "from_port": 0,
+            "to": "text_view",
+            "to_port": 0
+        },
+        {
+            "from": "text_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CHOP to DAT \u2014 Channel Data as Table\n\nConverts CHOP channel data to a DAT table.\nEach channel becomes a column or row.\nlayout controls the orientation.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

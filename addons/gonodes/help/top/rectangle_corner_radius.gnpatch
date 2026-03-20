@@ -35,10 +35,14 @@
                     }
                 },
                 "corner_radius": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "border_width": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "softness": {
                     "value": 0.0025

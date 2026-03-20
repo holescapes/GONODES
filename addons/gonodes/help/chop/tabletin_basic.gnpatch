@@ -4,44 +4,90 @@
     "nodes": {
         "tabletin1": {
             "type": "TabletInCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "normalize": {"value": true},
-                "active": {"value": true}
+                "normalize": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "active": {
+                    "value": true
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "tabletin1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "tabletin1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "TabletIn CHOP \u2014 Basic\n\nReads pen tablet input: x, y, pressure, tilt_x, tilt_y, button.\nCoordinates are 0\u20131 normalized when 'normalize' is on.\nWorks with Wacom, Huion, and other pen tablets that report pressure.",
-            "position": [-100.0, -120.0],
-            "size": [520.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                520.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -26,10 +26,14 @@
             ],
             "parameters": {
                 "blend_left": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "blend_right": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "blend_top": {
                     "value": 0.5

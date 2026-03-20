@@ -4,71 +4,157 @@
     "nodes": {
         "box1": {
             "type": "BoxSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "sizex": {"value": 1.0},
-                "sizey": {"value": 1.0},
-                "sizez": {"value": 1.0}
+                "sizex": {
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "sizey": {
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "sizez": {
+                    "value": 1.0
+                }
             }
         },
         "polybevel1": {
             "type": "PolyBevelSOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "offset": {"value": 0.08},
-                "divisions": {"value": 3},
-                "roundness": {"value": 0.8}
+                "offset": {
+                    "value": 0.08
+                },
+                "divisions": {
+                    "value": 3
+                },
+                "roundness": {
+                    "value": 0.8
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [800, 300],
+            "position": [
+                800,
+                300
+            ],
             "parameters": {
-                "tx": {"value": 1.5},
-                "ty": {"value": 1.2},
-                "tz": {"value": 2.5}
+                "tx": {
+                    "value": 1.5
+                },
+                "ty": {
+                    "value": 1.2
+                },
+                "tz": {
+                    "value": 2.5
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1500, 100],
+            "position": [
+                1500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "box1", "from_port": 0, "to": "polybevel1", "to_port": 0},
-        {"from": "polybevel1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "polybevel1",
+            "to_port": 0
+        },
+        {
+            "from": "polybevel1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "PolyBevel SOP \u2014 Basic\n\nBox edges beveled with 3 divisions at 0.8 roundness.\nCreates smooth rounded edges on hard-surface geometry.\nReduce divisions to 1 for a simple chamfer.",
-            "position": [-100.0, -100.0],
-            "size": [480.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                480.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

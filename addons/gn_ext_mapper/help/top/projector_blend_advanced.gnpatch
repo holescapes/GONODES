@@ -29,13 +29,17 @@
             ],
             "parameters": {
                 "overlap_start": {
-                    "value": 0.8
+                    "value": 0.8,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "overlap_end": {
-                    "value": 1.2
+                    "value": 1.2,
+                    "expression": "(1.2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "blend_axis": {
-                    "value": 2
+                    "value": 0
                 },
                 "blend_gamma": {
                     "value": 4.4
@@ -72,6 +76,22 @@
                 }
             }
         },
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
         "window1": {
             "type": "WindowOUT",
             "position": [
@@ -98,6 +118,12 @@
             "from_port": 0,
             "to": "projector_blend1",
             "to_port": 0
+        },
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "projector_blend1",
+            "to_port": 1
         },
         {
             "from": "projector_blend1",

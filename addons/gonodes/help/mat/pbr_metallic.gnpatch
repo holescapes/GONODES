@@ -1,165 +1,165 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "pbr1":  {
-                               "type":  "PBR_MAT",
-                               "position":  [
-                                                200,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "albedo_color":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Color",
-                                                                                     "r":  0.8,
-                                                                                     "g":  0.2,
-                                                                                     "b":  0.1,
-                                                                                     "a":  1.0
-                                                                                 }
-                                                                   },
-                                                  "metallic":  {
-                                                                   "value":  0.9
-                                                               },
-                                                  "roughness":  {
-                                                                    "value":  0.15
-                                                                },
-                                                  "specular":  {
-                                                                   "value":  0.5
-                                                               },
-                                                  "emission_enabled":  {
-                                                                           "value":  false
-                                                                       },
-                                                  "cull_mode":  {
-                                                                    "value":  0
-                                                                }
-                                              }
-                           },
-                  "window1":  {
-                                  "position":  [
-                                                   1450,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "box_view":  {
-                                   "type":  "BoxSOP",
-                                   "position":  [
-                                                    500,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    800,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    800,
-                                                    300
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1100,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  }
-              },
-    "connections":  [
-                        {
-                            "from":  "pbr1",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "box_view",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "PBR MAT — Metallic Red\n\nPhysically-based material: polished red metal.\nHigh metallic (0.9), low roughness (0.15).\nConnect to GeometryCOMP MAT input.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "pbr1": {
+            "type": "PBR_MAT",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.8,
+                        "g": 0.2,
+                        "b": 0.1,
+                        "a": 1.0
+                    }
+                },
+                "metallic": {
+                    "value": 0.9,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "roughness": {
+                    "value": 0.15,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "specular": {
+                    "value": 0.5
+                },
+                "emission_enabled": {
+                    "value": false
+                },
+                "cull_mode": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1450,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "box_view": {
+            "type": "BoxSOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                800,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "pbr1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 1
+        },
+        {
+            "from": "box_view",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PBR MAT \u2014 Metallic Red\n\nPhysically-based material: polished red metal.\nHigh metallic (0.9), low roughness (0.15).\nConnect to GeometryCOMP MAT input.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

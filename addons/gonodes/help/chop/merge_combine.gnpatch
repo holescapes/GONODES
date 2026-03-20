@@ -1,146 +1,148 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "lfo1":  {
-                               "type":  "LFO_CHOP",
-                               "position":  [
-                                                100,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "waveform":  {
-                                                                   "value":  0
-                                                               },
-                                                  "frequency":  {
-                                                                    "value":  0.5
-                                                                }
-                                              }
-                           },
-                  "lfo2":  {
-                               "type":  "LFO_CHOP",
-                               "position":  [
-                                                100,
-                                                300
-                                            ],
-                               "parameters":  {
-                                                  "waveform":  {
-                                                                   "value":  1
-                                                               },
-                                                  "frequency":  {
-                                                                    "value":  0.8
-                                                                }
-                                              }
-                           },
-                  "merge1":  {
-                                 "type":  "MergeCHOP",
-                                 "position":  [
-                                                  450,
-                                                  200
-                                              ],
-                                 "parameters":  {
-                                                    "duplicate":  {
-                                                                      "value":  1
-                                                                  }
-                                                }
-                             },
-                  "null1":  {
-                                "type":  "NullCHOP",
-                                "position":  [
-                                                 800,
-                                                 200
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1500,
-                                                   200
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    1150,
-                                                    200
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "lfo1",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "lfo2",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "merge1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Merge CHOP — Combine\n\nTwo LFOs merged with Rename mode.\nDuplicate channels get unique names.\nCombines data from multiple sources.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "frequency": {
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "lfo2": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                300
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 1
+                },
+                "frequency": {
+                    "value": 0.8
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [
+                450,
+                200
+            ],
+            "parameters": {
+                "duplicate": {
+                    "value": 1
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                800,
+                200
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1500,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "lfo2",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Merge CHOP \u2014 Combine\n\nTwo LFOs merged with Rename mode.\nDuplicate channels get unique names.\nCombines data from multiple sources.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

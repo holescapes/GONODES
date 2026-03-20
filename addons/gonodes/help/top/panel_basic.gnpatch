@@ -4,52 +4,122 @@
     "nodes": {
         "slider1": {
             "type": "SliderUI",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "label": { "value": "Brightness" },
-                "min_value": { "value": 0.0 },
-                "max_value": { "value": 1.0 },
-                "default_value": { "value": 0.5 }
+                "label": {
+                    "value": "Brightness"
+                },
+                "min_value": {
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "max_value": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "default_value": {
+                    "value": 0.5
+                }
             }
         },
         "toggle1": {
             "type": "ToggleUI",
-            "position": [100, 250],
+            "position": [
+                100,
+                250
+            ],
             "parameters": {
-                "label": { "value": "Enable" },
-                "default_value": { "value": true }
+                "label": {
+                    "value": "Enable"
+                },
+                "default_value": {
+                    "value": true
+                }
             }
         },
         "panel1": {
             "type": "PanelTOP",
-            "position": [500, 150],
+            "position": [
+                500,
+                150
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "layout": { "value": 0 }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "layout": {
+                    "value": 0
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 150],
+            "position": [
+                900,
+                150
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "slider1", "from_port": 0, "to": "panel1", "to_port": 0 },
-        { "from": "toggle1", "from_port": 0, "to": "panel1", "to_port": 1 },
-        { "from": "panel1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "slider1",
+            "from_port": 0,
+            "to": "panel1",
+            "to_port": 0
+        },
+        {
+            "from": "toggle1",
+            "from_port": 0,
+            "to": "panel1",
+            "to_port": 1
+        },
+        {
+            "from": "panel1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Panel TOP — Render to Texture\n\nPanelTOP collects UI widgets into a SubViewport\nand renders them as a non-interactive TOP texture.\nUseful for recording, screenshots, or feeding UI\ninto shader effects. For interactive panels, wire\nwidgets to WindowOUT panel port via ContainerUI.",
-            "position": [-100.0, -150.0],
-            "size": [500.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Panel TOP \u2014 Render to Texture\n\nPanelTOP collects UI widgets into a SubViewport\nand renders them as a non-interactive TOP texture.\nUseful for recording, screenshots, or feeding UI\ninto shader effects. For interactive panels, wire\nwidgets to WindowOUT panel port via ContainerUI.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

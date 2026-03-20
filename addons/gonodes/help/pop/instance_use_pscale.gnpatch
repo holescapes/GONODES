@@ -18,36 +18,24 @@
             ],
             "parameters": {
                 "max_instances": {
-                    "value": 9999
+                    "value": 9999,
+                    "expression": "(9999 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "use_pscale": {
                     "value": true
                 },
                 "use_color": {
-                    "value": true
-                }
-            }
-        },
-        "renderpop1": {
-            "type": "RenderPOP",
-            "position": [
-                700,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1100,
+                1300,
                 100
             ],
             "parameters": {
@@ -62,6 +50,48 @@
                     "value": true
                 }
             }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
@@ -72,15 +102,39 @@
             "to_port": 0
         },
         {
-            "from": "instance1",
+            "from": "camera1",
             "from_port": 0,
-            "to": "renderpop1",
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
             "to_port": 0
         },
         {
-            "from": "renderpop1",
+            "from": "instance1",
             "from_port": 0,
-            "to": "window1",
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "instance1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
             "to_port": 0
         }
     ],

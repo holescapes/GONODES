@@ -21,7 +21,9 @@
                     "value": 2
                 },
                 "remove_degenerate": {
-                    "value": false
+                    "value": false,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

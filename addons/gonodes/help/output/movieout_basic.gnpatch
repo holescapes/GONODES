@@ -44,20 +44,38 @@
                     "value": 0
                 },
                 "quality": {
-                    "value": 0.9
+                    "value": 0.9,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "start_frame": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "frame_padding": {
                     "value": 4
                 }
             }
+        },
+        "toptoimg1": {
+            "type": "TOPtoIMG",
+            "position": [
+                300,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "src_noise",
+            "from_port": 0,
+            "to": "toptoimg1",
+            "to_port": 0
+        },
+        {
+            "from": "toptoimg1",
             "from_port": 0,
             "to": "movieout1",
             "to_port": 0

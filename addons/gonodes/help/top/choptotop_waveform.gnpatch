@@ -1,126 +1,128 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "lfo1":  {
-                               "type":  "LFOCHOP",
-                               "position":  [
-                                                100,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "frequency":  {
-                                                                    "value":  1.5
-                                                                },
-                                                  "type":  {
-                                                               "value":  0
-                                                           },
-                                                  "amplitude":  {
-                                                                    "value":  1.0
-                                                                }
-                                              }
-                           },
-                  "choptotop1":  {
-                                     "type":  "CHOPtoTOP",
-                                     "position":  [
-                                                      400,
-                                                      100
-                                                  ],
-                                     "parameters":  {
-                                                        "mode":  {
-                                                                     "value":  0
-                                                                 },
-                                                        "resolution":  {
-                                                                           "value":  [
-                                                                                         512,
-                                                                                         256
-                                                                                     ]
-                                                                       },
-                                                        "line_color":  {
-                                                                           "value":  [
-                                                                                         0.2,
-                                                                                         0.8,
-                                                                                         0.2,
-                                                                                         1.0
-                                                                                     ]
-                                                                       },
-                                                        "line_width":  {
-                                                                           "value":  2.0
-                                                                       },
-                                                        "auto_range":  {
-                                                                           "value":  true
-                                                                       }
-                                                    }
-                                 },
-                  "null1":  {
-                                "type":  "NullTOP",
-                                "position":  [
-                                                 700,
-                                                 100
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1050,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "lfo1",
-                            "from_port":  0,
-                            "to":  "choptotop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptotop1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "CHOPtoTOP — Waveform Display\n\nRenders an LFO sine wave as a green waveform texture.\nModes: Waveform (oscilloscope), Heatmap, Graph.\nAuto-range fits the value range automatically.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 1.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "type": {
+                    "value": 0
+                },
+                "amplitude": {
+                    "value": 1.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "choptotop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "mode": {
+                    "value": 0
+                },
+                "resolution": {
+                    "value": [
+                        512,
+                        256
                     ]
+                },
+                "line_color": {
+                    "value": [
+                        0.2,
+                        0.8,
+                        0.2,
+                        1.0
+                    ]
+                },
+                "line_width": {
+                    "value": 2.0
+                },
+                "auto_range": {
+                    "value": true
+                }
+            }
+        },
+        "null1": {
+            "type": "NullTOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1050,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "choptotop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptotop1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CHOPtoTOP \u2014 Waveform Display\n\nRenders an LFO sine wave as a green waveform texture.\nModes: Waveform (oscilloscope), Heatmap, Graph.\nAuto-range fits the value range automatically.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

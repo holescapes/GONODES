@@ -13,10 +13,14 @@
                     "value": 99999
                 },
                 "rate": {
-                    "value": 500.0
+                    "value": 500.0,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 },
                 "life_min": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "life_max": {
                     "value": 1.5
@@ -51,7 +55,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
+                1750,
                 100
             ],
             "parameters": {
@@ -66,6 +70,40 @@
                     "value": true
                 }
             }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1350,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                1350,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
         }
     },
     "connections": [
@@ -77,6 +115,18 @@
         },
         {
             "from": "renderpop1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0

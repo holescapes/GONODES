@@ -1,134 +1,136 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "lfo1":  {
-                               "type":  "LFO_CHOP",
-                               "position":  [
-                                                100,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "waveform":  {
-                                                                   "value":  3
-                                                               },
-                                                  "frequency":  {
-                                                                    "value":  0.5
-                                                                },
-                                                  "amplitude":  {
-                                                                    "value":  2.0
-                                                                }
-                                              }
-                           },
-                  "limit1":  {
-                                 "type":  "LimitCHOP",
-                                 "position":  [
-                                                  450,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "type":  {
-                                                                 "value":  0
-                                                             },
-                                                    "min":  {
-                                                                "value":  -0.5
-                                                            },
-                                                    "max":  {
-                                                                "value":  0.8
-                                                            }
-                                                }
-                             },
-                  "null1":  {
-                                "type":  "NullCHOP",
-                                "position":  [
-                                                 800,
-                                                 100
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1500,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    1150,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "lfo1",
-                            "from_port":  0,
-                            "to":  "limit1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "limit1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Limit CHOP — Clamp\n\nSawtooth LFO (range ±2) clamped to -0.5..0.8.\nUse Loop or Zig-Zag modes for wrapping behavior.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 3,
+                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "frequency": {
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "amplitude": {
+                    "value": 2.0
+                }
+            }
+        },
+        "limit1": {
+            "type": "LimitCHOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "type": {
+                    "value": 0
+                },
+                "min": {
+                    "value": -0.5
+                },
+                "max": {
+                    "value": 0.8
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "limit1",
+            "to_port": 0
+        },
+        {
+            "from": "limit1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Limit CHOP \u2014 Clamp\n\nSawtooth LFO (range \u00b12) clamped to -0.5..0.8.\nUse Loop or Zig-Zag modes for wrapping behavior.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

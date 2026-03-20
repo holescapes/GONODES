@@ -4,70 +4,222 @@
     "nodes": {
         "source1": {
             "type": "SourcePOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "max_particles": {"value": 3000},
-                "rate": {"value": 1500.0},
-                "life_min": {"value": 30.0},
-                "life_max": {"value": 60.0},
-                "init_speed": {"value": 1.5},
-                "pscale": {"value": 0.04}
+                "max_particles": {
+                    "value": 3000
+                },
+                "rate": {
+                    "value": 1500.0
+                },
+                "life_min": {
+                    "value": 30.0
+                },
+                "life_max": {
+                    "value": 60.0
+                },
+                "init_speed": {
+                    "value": 1.5
+                },
+                "pscale": {
+                    "value": 0.04
+                }
             }
         },
         "boids1": {
             "type": "BoidsPOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "perception_radius": {"value": 3.0},
-                "avoid_radius": {"value": 0.3},
-                "separation": {"value": 0.8},
-                "alignment": {"value": 2.0},
-                "cohesion": {"value": 1.5},
-                "max_speed": {"value": 4.0},
-                "max_force": {"value": 2.0},
-                "bounds_radius": {"value": 8.0},
-                "bounds_force": {"value": 4.0}
+                "perception_radius": {
+                    "value": 3.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "avoid_radius": {
+                    "value": 0.3,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "separation": {
+                    "value": 0.8
+                },
+                "alignment": {
+                    "value": 2.0
+                },
+                "cohesion": {
+                    "value": 1.5
+                },
+                "max_speed": {
+                    "value": 4.0
+                },
+                "max_force": {
+                    "value": 2.0
+                },
+                "bounds_radius": {
+                    "value": 8.0
+                },
+                "bounds_force": {
+                    "value": 4.0
+                }
             }
         },
         "trail1": {
             "type": "TrailRibbonSOP",
-            "position": [450, 280],
+            "position": [
+                450,
+                280
+            ],
             "parameters": {
-                "trail_length": {"value": 20},
-                "width": {"value": 0.05},
-                "taper": {"value": 0.9},
-                "max_particles": {"value": 500},
-                "fade_alpha": {"value": true}
+                "trail_length": {
+                    "value": 20
+                },
+                "width": {
+                    "value": 0.05
+                },
+                "taper": {
+                    "value": 0.9
+                },
+                "max_particles": {
+                    "value": 500
+                },
+                "fade_alpha": {
+                    "value": true
+                }
             }
-        },
-        "render1": {
-            "type": "RenderPOP",
-            "position": [800, 100],
-            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1375,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                975,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
+        },
+        "rendertop1": {
+            "type": "RenderTOP",
+            "position": [
+                975,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "renderpop1": {
+            "type": "RenderPOP",
+            "position": [
+                775,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         }
     },
     "connections": [
-        {"from": "source1", "from_port": 0, "to": "boids1", "to_port": 0},
-        {"from": "boids1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "boids1", "from_port": 0, "to": "trail1", "to_port": 0},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "boids1",
+            "to_port": 0
+        },
+        {
+            "from": "boids1",
+            "from_port": 0,
+            "to": "renderpop1",
+            "to_port": 0
+        },
+        {
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 0
+        },
+        {
+            "from": "boids1",
+            "from_port": 0,
+            "to": "trail1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 1
+        },
+        {
+            "from": "rendertop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Boids with Trail Ribbons\n\nBoidsPOP drives flocking, TrailRibbonSOP builds ribbon geometry from trail history.\nHigh alignment (2.0) creates schooling-fish-like behavior.\nTrail ribbons taper from thick (newest) to thin (oldest) with alpha fade.\n\nNote: TrailRibbonSOP caps at max_particles (500 here) for performance.\nIncrease for denser trail coverage.",
-            "position": [-100.0, -150.0],
-            "size": [550.0, 130.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                550.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

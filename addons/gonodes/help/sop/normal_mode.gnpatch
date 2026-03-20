@@ -21,7 +21,9 @@
                     "value": 1
                 },
                 "generate_tangents": {
-                    "value": true
+                    "value": true,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

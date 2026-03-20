@@ -4,43 +4,103 @@
     "nodes": {
         "fluid1": {
             "type": "Fluid2DTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "emitter_pos": {"value": {"_type": "Vector2", "x": 0.5, "y": 0.7}},
-                "emitter_dir": {"value": {"_type": "Vector2", "x": 0.0, "y": -1.0}},
-                "emitter_radius": {"value": 0.04},
-                "emitter_force": {"value": 1.5},
-                "emitter_dye": {"value": 1.0},
-                "velocity_dissipation": {"value": 0.995},
-                "density_dissipation": {"value": 0.98},
-                "vorticity": {"value": 0.3}
+                "emitter_pos": {
+                    "value": {
+                        "_type": "Vector2",
+                        "x": 0.5,
+                        "y": 0.7
+                    }
+                },
+                "emitter_dir": {
+                    "value": {
+                        "_type": "Vector2",
+                        "x": 0.0,
+                        "y": -1.0
+                    }
+                },
+                "emitter_radius": {
+                    "value": 0.04,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "emitter_force": {
+                    "value": 1.5,
+                    "expression": "(1.5 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "emitter_dye": {
+                    "value": 1.0
+                },
+                "velocity_dissipation": {
+                    "value": 0.995
+                },
+                "density_dissipation": {
+                    "value": 0.98
+                },
+                "vorticity": {
+                    "value": 0.3
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "fluid1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "fluid1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Fluid2D TOP \u2014 Basic\n\nSimple upward emitter at bottom center.\nVorticity confinement (0.3) adds swirl detail.\nVelocity dissipation 0.995 keeps motion alive.",
-            "position": [-100.0, -120.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

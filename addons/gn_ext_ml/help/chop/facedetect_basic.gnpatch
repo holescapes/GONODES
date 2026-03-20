@@ -4,52 +4,116 @@
     "nodes": {
         "webcam1": {
             "type": "WebcamIMG",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "bridge1": {
-            "type": "IMGtoTOP",
-            "position": [350, 100],
+            "type": "ImgToTOP",
+            "position": [
+                350,
+                100
+            ],
             "parameters": {}
         },
         "face1": {
             "type": "FaceDetectCHOP",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "detail": { "value": 0 },
-                "min_confidence": { "value": 0.5 }
+                "detail": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "min_confidence": {
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {
-                "mode": { "value": 0 }
+                "mode": {
+                    "value": 0
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1100, 100],
+            "position": [
+                1100,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
-        { "from": "bridge1", "from_port": 0, "to": "face1", "to_port": 0 },
-        { "from": "face1", "from_port": 0, "to": "choptop1", "to_port": 0 },
-        { "from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "face1",
+            "to_port": 0
+        },
+        {
+            "from": "face1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Face Detect — Basic\n\nWebcam -> face mesh landmarks as CHOP channels.\nKey points mode: eyes, nose, mouth, eyebrows, jawline.\nChannels: nose_tip:x, left_eye_outer:y, chin:z, etc.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Face Detect \u2014 Basic\n\nWebcam -> face mesh landmarks as CHOP channels.\nKey points mode: eyes, nose, mouth, eyebrows, jawline.\nChannels: nose_tip:x, left_eye_outer:y, chin:z, etc.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

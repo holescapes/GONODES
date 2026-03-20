@@ -3,17 +3,19 @@
     "generator": "GONODES",
     "nodes": {
         "lfo1": {
-            "type": "LFO_CHOP",
+            "type": "AreaCOMP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "frequency": {
-                    "value": 0.5
+                "mode": {
+                    "value": 0
                 },
-                "amplitude": {
-                    "value": 2.0
+                "mass": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

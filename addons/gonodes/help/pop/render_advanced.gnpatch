@@ -10,28 +10,10 @@
             ],
             "parameters": {}
         },
-        "render1": {
-            "type": "RenderPOP",
-            "position": [
-                400,
-                100
-            ],
-            "parameters": {
-                "point_size": {
-                    "value": 0.1
-                },
-                "use_pscale": {
-                    "value": false
-                },
-                "billboard": {
-                    "value": false
-                }
-            }
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                800,
+                1000,
                 100
             ],
             "parameters": {
@@ -46,17 +28,79 @@
                     "value": true
                 }
             }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                600,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
+        },
+        "rendertop1": {
+            "type": "RenderTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "renderpop1": {
+            "type": "RenderPOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         }
     },
     "connections": [
         {
             "from": "source1",
             "from_port": 0,
-            "to": "render1",
+            "to": "renderpop1",
             "to_port": 0
         },
         {
-            "from": "render1",
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 1
+        },
+        {
+            "from": "rendertop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0

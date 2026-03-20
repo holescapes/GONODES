@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "roughness": {
-                    "value": 0.8
+                    "value": 0.8,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "amplitude": {
-                    "value": 1.0
+                    "value": 1.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
                 }
             }
         },

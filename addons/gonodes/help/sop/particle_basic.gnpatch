@@ -25,7 +25,9 @@
             ],
             "parameters": {
                 "rate": {
-                    "value": 100.0
+                    "value": 100.0,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 },
                 "max_particles": {
                     "value": 10000
@@ -34,7 +36,9 @@
                     "value": 42
                 },
                 "life": {
-                    "value": 2.0
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "life_rand": {
                     "value": 0.0

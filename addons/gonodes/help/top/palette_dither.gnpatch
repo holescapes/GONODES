@@ -26,10 +26,14 @@
             ],
             "parameters": {
                 "palette_size": {
-                    "value": 7
+                    "value": 7,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "dither": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "dither_strength": {
                     "value": 0.25

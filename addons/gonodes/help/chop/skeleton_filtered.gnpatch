@@ -4,53 +4,111 @@
     "nodes": {
         "skeleton1": {
             "type": "SkeletonCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "comp_path": {"value": "geo1"},
-                "bone_filter": {"value": "Arm*"},
-                "local": {"value": true}
+                "comp_path": {
+                    "value": "geo1"
+                },
+                "bone_filter": {
+                    "value": "Arm*"
+                },
+                "local": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "math1": {
             "type": "MathCHOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "mult": {"value": 2.0}
+                "mult": {
+                    "value": 2.0
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1300, 100],
+            "position": [
+                1300,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "skeleton1", "from_port": 0, "to": "math1", "to_port": 0},
-        {"from": "math1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "skeleton1",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 0
+        },
+        {
+            "from": "math1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Skeleton CHOP \u2014 Filtered Bones\n\nReads only bones matching 'Arm*' wildcard filter.\nMath CHOP doubles the values (e.g., amplify rotation).\nUseful for isolating specific bone groups for processing.",
-            "position": [-100.0, -100.0],
-            "size": [480.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                480.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

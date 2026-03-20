@@ -26,22 +26,26 @@
             ],
             "parameters": {
                 "left": {
-                    "value": 0.5
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "right": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "mask_top": {
-                    "value": 0.5
+                    "value": 0.0
                 },
                 "bottom": {
-                    "value": 0.5
+                    "value": 1.0
                 },
                 "feather": {
-                    "value": 0.01
+                    "value": 0.15
                 },
                 "invert": {
-                    "value": true
+                    "value": false
                 }
             }
         },

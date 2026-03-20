@@ -29,10 +29,14 @@
                     "value": true
                 },
                 "speed": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "duration": {
-                    "value": 1.0
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "loop_mode": {
                     "value": 1

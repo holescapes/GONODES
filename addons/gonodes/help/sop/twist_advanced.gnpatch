@@ -18,10 +18,14 @@
             ],
             "parameters": {
                 "angle": {
-                    "value": 1.0
+                    "value": 1.0,
+                    "expression": "time * 45.0",
+                    "mode": "EXPRESSION"
                 },
                 "axis": {
-                    "value": 2
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 }
             }
         },

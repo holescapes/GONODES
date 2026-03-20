@@ -4,56 +4,122 @@
     "nodes": {
         "sphere1": {
             "type": "SphereSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "radial_segments": {"value": 24},
-                "rings": {"value": 12}
+                "radial_segments": {
+                    "value": 24
+                },
+                "rings": {
+                    "value": 12
+                }
             }
         },
         "soptovol1": {
             "type": "SOPtoVOLNative",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "res_x": {"value": 64},
-                "res_y": {"value": 64},
-                "res_z": {"value": 64},
-                "radius": {"value": 0.08},
-                "strength": {"value": 2.0}
+                "res_x": {
+                    "value": 64
+                },
+                "res_y": {
+                    "value": 64
+                },
+                "res_z": {
+                    "value": 64
+                },
+                "radius": {
+                    "value": 0.08,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "strength": {
+                    "value": 2.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "raymarch1": {
             "type": "RaymarchVOL",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "sphere1", "from_port": 0, "to": "soptovol1", "to_port": 0},
-        {"from": "soptovol1", "from_port": 0, "to": "raymarch1", "to_port": 0},
-        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "soptovol1",
+            "to_port": 0
+        },
+        {
+            "from": "soptovol1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "SOP to VOL (Native) \u2014 Point Splatting\n\nSphere vertices splatted into a 64\u00b3 density volume.\nEach point contributes a sphere falloff at radius 0.08.\nNative C++ computes AABB and rasterizes in one pass.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -4,57 +4,125 @@
     "nodes": {
         "noise1": {
             "type": "NoiseVOLNative",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "res_x": {"value": 64},
-                "res_y": {"value": 64},
-                "res_z": {"value": 64},
-                "frequency": {"value": 4.0},
-                "amplitude": {"value": 1.0},
-                "octaves": {"value": 4}
+                "res_x": {
+                    "value": 64
+                },
+                "res_y": {
+                    "value": 64
+                },
+                "res_z": {
+                    "value": 64
+                },
+                "frequency": {
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "amplitude": {
+                    "value": 1.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
+                },
+                "octaves": {
+                    "value": 4
+                }
             }
         },
         "blur1": {
             "type": "BlurVOLNative",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "radius": {"value": 2},
-                "passes": {"value": 2}
+                "radius": {
+                    "value": 2
+                },
+                "passes": {
+                    "value": 2
+                }
             }
         },
         "raymarch1": {
             "type": "RaymarchVOL",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1", "from_port": 0, "to": "blur1", "to_port": 0},
-        {"from": "blur1", "from_port": 0, "to": "raymarch1", "to_port": 0},
-        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "blur1",
+            "to_port": 0
+        },
+        {
+            "from": "blur1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Blur VOL (Native) \u2014 Smoothed Noise Cloud\n\nFBM noise volume blurred with radius 2, 2 passes.\nProduces soft, cloud-like density fields.\nNative C++ multi-pass box blur with ping-pong.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

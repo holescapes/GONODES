@@ -1,82 +1,190 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "sphere1": {
-      "type": "SphereSOP",
-      "position": [100, 100],
-      "parameters": {
-        "radius": {"value": 0.5},
-        "rings": {"value": 16},
-        "radial_segments": {"value": 16}
-      }
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.5
+                },
+                "rings": {
+                    "value": 16
+                },
+                "radial_segments": {
+                    "value": 16
+                }
+            }
+        },
+        "grid1": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                350
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "size_y": {
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "subdivisions_x": {
+                    "value": 20
+                },
+                "subdivisions_y": {
+                    "value": 20
+                }
+            }
+        },
+        "ray1": {
+            "type": "RaySOP",
+            "position": [
+                450,
+                200
+            ],
+            "parameters": {
+                "direction": {
+                    "value": 1
+                },
+                "max_dist": {
+                    "value": 10.0
+                },
+                "offset": {
+                    "value": 0.01
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                750,
+                200
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                750,
+                400
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 2.0
+                },
+                "tz": {
+                    "value": 4.0
+                },
+                "rx": {
+                    "value": -25.0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1050,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1350,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
     },
-    "grid1": {
-      "type": "GridSOP",
-      "position": [100, 350],
-      "parameters": {
-        "size_x": {"value": 4.0},
-        "size_y": {"value": 4.0},
-        "subdivisions_x": {"value": 20},
-        "subdivisions_y": {"value": 20}
-      }
-    },
-    "ray1": {
-      "type": "RaySOP",
-      "position": [450, 200],
-      "parameters": {
-        "direction": {"value": 1},
-        "max_dist": {"value": 10.0},
-        "offset": {"value": 0.01}
-      }
-    },
-    "geo1": {
-      "type": "GeometryCOMP",
-      "position": [750, 200],
-      "parameters": {}
-    },
-    "cam1": {
-      "type": "CameraCOMP",
-      "position": [750, 400],
-      "parameters": {
-        "tx": {"value": 0.0},
-        "ty": {"value": 2.0},
-        "tz": {"value": 4.0},
-        "rx": {"value": -25.0}
-      }
-    },
-    "render1": {
-      "type": "RenderTOP",
-      "position": [1050, 200],
-      "parameters": {
-        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [1350, 200],
-      "parameters": {
-        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-        "open": {"value": true}
-      }
-    }
-  },
-  "connections": [
-    {"from": "grid1", "from_port": 0, "to": "ray1", "to_port": 0},
-    {"from": "sphere1", "from_port": 0, "to": "ray1", "to_port": 1},
-    {"from": "ray1", "from_port": 0, "to": "geo1", "to_port": 0},
-    {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-    {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-    {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "Ray SOP â€” Project Grid onto Sphere\n\nA grid's vertices are projected downward (-Y) onto a sphere.\nRaySOP casts rays from each vertex in the specified direction\nand snaps them to the hit surface. Great for shrinkwrapping.",
-      "position": [50.0, -70.0],
-      "size": [600.0, 110.0],
-      "color": [1.0, 1.0, 1.0, 0.8]
-    }
-  ]
+    "connections": [
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "ray1",
+            "to_port": 0
+        },
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "ray1",
+            "to_port": 1
+        },
+        {
+            "from": "ray1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Ray SOP \u00e2\u20ac\u201d Project Grid onto Sphere\n\nA grid's vertices are projected downward (-Y) onto a sphere.\nRaySOP casts rays from each vertex in the specified direction\nand snaps them to the hit surface. Great for shrinkwrapping.",
+            "position": [
+                50.0,
+                -70.0
+            ],
+            "size": [
+                600.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

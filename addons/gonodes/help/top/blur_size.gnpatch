@@ -26,10 +26,14 @@
             ],
             "parameters": {
                 "size": {
-                    "value": 2.5
+                    "value": 2.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "quality": {
-                    "value": 3
+                    "value": 3,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "method": {
                     "value": 1

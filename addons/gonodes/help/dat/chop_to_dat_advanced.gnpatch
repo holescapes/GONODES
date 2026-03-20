@@ -3,12 +3,21 @@
     "generator": "GONODES",
     "nodes": {
         "src_constant": {
-            "type": "ConstantDAT",
+            "type": "ConstantCHOP",
             "position": [
                 100,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "name0": {
+                    "value": "chan1"
+                },
+                "value0": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
         },
         "chop_to_dat1": {
             "type": "CHOPDAT",

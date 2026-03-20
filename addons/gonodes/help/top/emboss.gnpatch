@@ -1,46 +1,104 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "noise1": {
-      "type": "NoiseTOP",
-      "position": [100, 200],
-      "parameters": {
-        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-        "monochrome": {"value": false},
-        "scale": {"value": 4.0}
-      }
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "monochrome": {
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "scale": {
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "emboss1": {
+            "type": "EmbossTOP",
+            "position": [
+                450,
+                200
+            ],
+            "parameters": {
+                "strength": {
+                    "value": 2.0
+                },
+                "angle": {
+                    "value": 135.0
+                },
+                "height": {
+                    "value": 0.5
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
     },
-    "emboss1": {
-      "type": "EmbossTOP",
-      "position": [450, 200],
-      "parameters": {
-        "strength": {"value": 2.0},
-        "angle": {"value": 135.0},
-        "height": {"value": 0.5}
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [800, 200],
-      "parameters": {
-        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-        "open": {"value": true}
-      }
-    }
-  },
-  "connections": [
-    {"from": "noise1", "from_port": 0, "to": "emboss1", "to_port": 0},
-    {"from": "emboss1", "from_port": 0, "to": "window1", "to_port": 0}
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "Emboss TOP â€” Relief Filter\n\nColored noise is embossed at 135Â° with 2Ã— strength.\nThe emboss shader creates a 3D relief effect by computing\nthe directional difference between neighboring pixels.",
-      "position": [50.0, -50.0],
-      "size": [600.0, 110.0],
-      "color": [1.0, 1.0, 1.0, 0.8]
-    }
-  ]
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "emboss1",
+            "to_port": 0
+        },
+        {
+            "from": "emboss1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Emboss TOP \u00e2\u20ac\u201d Relief Filter\n\nColored noise is embossed at 135\u00c2\u00b0 with 2\u00c3\u2014 strength.\nThe emboss shader creates a 3D relief effect by computing\nthe directional difference between neighboring pixels.",
+            "position": [
+                50.0,
+                -50.0
+            ],
+            "size": [
+                600.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

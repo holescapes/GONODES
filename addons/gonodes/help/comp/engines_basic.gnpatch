@@ -1,127 +1,125 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "box1":  {
-                               "type":  "BoxSOP",
-                               "position":  [
-                                                -400,
-                                                0
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "geo1":  {
-                               "type":  "GeometryCOMP",
-                               "position":  [
-                                                0,
-                                                0
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "engines1":  {
-                                   "type":  "EnginesCOMP",
-                                   "position":  [
-                                                    400,
-                                                    0
-                                                ],
-                                   "parameters":  {
-                                                      "mode":  {
-                                                                   "value":  2
-                                                               },
-                                                      "interval":  {
-                                                                       "value":  10
-                                                                   }
-                                                  }
-                               },
-                  "cam1":  {
-                               "type":  "CameraCOMP",
-                               "position":  [
-                                                400,
-                                                250
-                                            ],
-                               "parameters":  {
-                                                  "tx":  {
-                                                             "value":  0
-                                                         },
-                                                  "ty":  {
-                                                             "value":  1
-                                                         },
-                                                  "tz":  {
-                                                             "value":  4
-                                                         }
-                                              }
-                           },
-                  "render1":  {
-                                  "type":  "RenderTOP",
-                                  "position":  [
-                                                   800,
-                                                   0
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512,
-                                                                                      "y":  512
-                                                                                  }
-                                                                    }
-                                                 }
-                              },
-                  "window1":  {
-                                  "type":  "WindowOUT",
-                                  "position":  [
-                                                   1150,
-                                                   0
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512,
-                                                                                      "y":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 }
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "box1",
-                            "from_port":  0,
-                            "to":  "geo1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo1",
-                            "from_port":  0,
-                            "to":  "engines1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "engines1",
-                            "from_port":  0,
-                            "to":  "render1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam1",
-                            "from_port":  0,
-                            "to":  "render1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  []
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                -400,
+                0
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {}
+        },
+        "engines1": {
+            "type": "EnginesCOMP",
+            "position": [
+                400,
+                0
+            ],
+            "parameters": {
+                "mode": {
+                    "value": 2
+                },
+                "interval": {
+                    "value": 10,
+                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                400,
+                250
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 1
+                },
+                "tz": {
+                    "value": 4
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                800,
+                0
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1150,
+                0
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "engines1",
+            "to_port": 0
+        },
+        {
+            "from": "engines1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": []
 }

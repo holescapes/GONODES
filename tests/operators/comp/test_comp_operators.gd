@@ -243,3 +243,20 @@ func test_in_tunnel_instantiate() -> void:
 func test_out_tunnel_instantiate() -> void:
 	var node := _make_node(OutTunnel.new(), "out1")
 	GNTestAssert.assert_eq(node.node_type, "out_tunnel", "node_type")
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNNativeCompiler
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_native_compiler_instantiate() -> void:
+	var compiler := GNNativeCompiler.new()
+	GNTestAssert.assert_not_null(compiler, "GNNativeCompiler created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNCompatReportPanel
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_compat_report_panel_instantiate() -> void:
+	var panel := GNCompatReportPanel.new()
+	GNTestAssert.assert_not_null(panel, "GNCompatReportPanel created")
+	panel.queue_free()

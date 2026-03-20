@@ -2,25 +2,6 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_circle": {
-            "type": "CircleTOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "radius": {
-                    "value": 0.3
-                }
-            }
-        },
         "spoutintop1": {
             "type": "SpoutInTOP",
             "position": [
@@ -59,12 +40,6 @@
     },
     "connections": [
         {
-            "from": "src_circle",
-            "from_port": 0,
-            "to": "spoutintop1",
-            "to_port": 0
-        },
-        {
             "from": "spoutintop1",
             "from_port": 0,
             "to": "window1",
@@ -75,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SpoutInTOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_spout extension.",
+            "text": "SpoutInTOP — Advanced\n\nMore complex configuration.\nRequires gn_ext_spout extension.",
             "position": [
                 -100.0,
                 -100.0

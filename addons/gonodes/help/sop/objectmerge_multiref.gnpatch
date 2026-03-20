@@ -4,89 +4,194 @@
     "nodes": {
         "torus1": {
             "type": "TorusSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "transform1": {
             "type": "TransformSOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "tx": {"value": 3.0},
-                "ry": {"value": 45.0}
+                "tx": {
+                    "value": 3.0,
+                    "expression": "sin(time * 0.8) * 2.0",
+                    "mode": "EXPRESSION"
+                },
+                "ry": {
+                    "value": 45.0,
+                    "expression": "time * 45.0",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "objectmerge1": {
             "type": "ObjectMergeSOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "sop_path": {"value": "torus1"},
-                "apply_transform": {"value": true}
+                "sop_path": {
+                    "value": "torus1"
+                },
+                "apply_transform": {
+                    "value": true
+                }
             }
         },
         "objectmerge2": {
             "type": "ObjectMergeSOP",
-            "position": [100, 500],
+            "position": [
+                100,
+                500
+            ],
             "parameters": {
-                "sop_path": {"value": "transform1"},
-                "apply_transform": {"value": false}
+                "sop_path": {
+                    "value": "transform1"
+                },
+                "apply_transform": {
+                    "value": false
+                }
             }
         },
         "merge1": {
             "type": "MergeSOP",
-            "position": [450, 400],
+            "position": [
+                450,
+                400
+            ],
             "parameters": {}
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [800, 300],
+            "position": [
+                800,
+                300
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [800, 500],
+            "position": [
+                800,
+                500
+            ],
             "parameters": {
-                "tx": {"value": 2.0},
-                "ty": {"value": 2.0},
-                "tz": {"value": 6.0}
+                "tx": {
+                    "value": 2.0
+                },
+                "ty": {
+                    "value": 2.0
+                },
+                "tz": {
+                    "value": 6.0
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [1150, 300],
+            "position": [
+                1150,
+                300
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1500, 300],
+            "position": [
+                1500,
+                300
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "torus1", "from_port": 0, "to": "transform1", "to_port": 0},
-        {"from": "objectmerge1", "from_port": 0, "to": "merge1", "to_port": 0},
-        {"from": "objectmerge2", "from_port": 0, "to": "merge1", "to_port": 1},
-        {"from": "merge1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "torus1",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "objectmerge1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "objectmerge2",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "ObjectMerge SOP \u2014 Multiple References\n\nTwo ObjectMerge nodes fetching from the same chain.\nFirst gets torus at origin, second gets the transformed\nversion. Both merged into one geo. Demonstrates referencing\ndifferent points in a processing chain.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

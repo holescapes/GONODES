@@ -2,28 +2,6 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_noise": {
-            "type": "NoiseTOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "scale": {
-                    "value": 4.0
-                },
-                "monochrome": {
-                    "value": true
-                }
-            }
-        },
         "syphonintop1": {
             "type": "SyphonInTOP",
             "position": [
@@ -62,12 +40,6 @@
     },
     "connections": [
         {
-            "from": "src_noise",
-            "from_port": 0,
-            "to": "syphonintop1",
-            "to_port": 0
-        },
-        {
             "from": "syphonintop1",
             "from_port": 0,
             "to": "window1",
@@ -78,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SyphonInTOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_syphon extension.",
+            "text": "SyphonInTOP — Basic\n\nDefault settings.\nRequires gn_ext_syphon extension.",
             "position": [
                 -100.0,
                 -100.0

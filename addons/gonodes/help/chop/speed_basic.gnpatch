@@ -10,7 +10,9 @@
             ],
             "parameters": {
                 "value0": {
-                    "value": 0.1
+                    "value": 0.1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

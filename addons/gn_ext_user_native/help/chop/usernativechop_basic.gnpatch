@@ -4,41 +4,95 @@
     "nodes": {
         "usernativechop1": {
             "type": "UserNativeCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "cpp_class": {"value": "MyUserCHOP"},
-                "auto_build": {"value": true},
-                "time_dep": {"value": true}
+                "cpp_class": {
+                    "value": "MyUserCHOP"
+                },
+                "auto_build": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "time_dep": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 256}}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 256}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "usernativechop1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "usernativechop1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "UserNativeCHOP \u2014 Basic C++ Signal\n\nWrite custom CHOP operators in C++ with hot-reload.\nThe default example generates phase-offset sine channels.\n\nClick the node, then 'Edit C++ \u2197' in the inspector.\nUse the Templates menu for CHOP-specific starters,\nor load a full example like Signal Generator.",
-            "position": [-100.0, -100.0],
-            "size": [480.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                480.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

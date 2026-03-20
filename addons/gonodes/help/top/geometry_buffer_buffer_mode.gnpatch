@@ -10,7 +10,9 @@
             ],
             "parameters": {
                 "buffer_mode": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "resolution": {
                     "value": {

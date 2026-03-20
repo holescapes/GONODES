@@ -20,10 +20,14 @@
                     "value": 1
                 },
                 "frequency": {
-                    "value": 4.0
+                    "value": 4.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "duty_cycle": {
-                    "value": 0.25
+                    "value": 0.25,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "color_a": {
                     "value": {

@@ -1,155 +1,157 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "const_a":  {
-                                  "type":  "ConstantCHOP",
-                                  "position":  [
-                                                   100,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "count":  {
-                                                                   "value":  1
-                                                               },
-                                                     "name0":  {
-                                                                   "value":  "val"
-                                                               },
-                                                     "value0":  {
-                                                                    "value":  0.0
-                                                                }
-                                                 }
-                              },
-                  "const_b":  {
-                                  "type":  "ConstantCHOP",
-                                  "position":  [
-                                                   100,
-                                                   250
-                                               ],
-                                  "parameters":  {
-                                                     "count":  {
-                                                                   "value":  1
-                                                               },
-                                                     "name0":  {
-                                                                   "value":  "val"
-                                                               },
-                                                     "value0":  {
-                                                                    "value":  1.0
-                                                                }
-                                                 }
-                              },
-                  "interp1":  {
-                                  "type":  "InterpolateCHOP",
-                                  "position":  [
-                                                   500,
-                                                   150
-                                               ],
-                                  "parameters":  {
-                                                     "blend":  {
-                                                                   "value":  0.5
-                                                               },
-                                                     "curve":  {
-                                                                   "value":  0
-                                                               }
-                                                 }
-                              },
-                  "null1":  {
-                                "type":  "NullCHOP",
-                                "position":  [
-                                                 800,
-                                                 150
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1500,
-                                                   150
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    1150,
-                                                    150
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "const_a",
-                            "from_port":  0,
-                            "to":  "interp1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "const_b",
-                            "from_port":  0,
-                            "to":  "interp1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "interp1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Interpolate CHOP — Blend Two Inputs\n\nBlends constant 0 and constant 1 at 50%.\nResult is 0.5. Change blend for crossfade.\nEasing curves add smooth transitions.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "const_a": {
+            "type": "ConstantCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "count": {
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "name0": {
+                    "value": "val"
+                },
+                "value0": {
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "const_b": {
+            "type": "ConstantCHOP",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "count": {
+                    "value": 1
+                },
+                "name0": {
+                    "value": "val"
+                },
+                "value0": {
+                    "value": 1.0
+                }
+            }
+        },
+        "interp1": {
+            "type": "InterpolateCHOP",
+            "position": [
+                500,
+                150
+            ],
+            "parameters": {
+                "blend": {
+                    "value": 0.5
+                },
+                "curve": {
+                    "value": 0
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                800,
+                150
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1500,
+                150
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                150
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "const_a",
+            "from_port": 0,
+            "to": "interp1",
+            "to_port": 0
+        },
+        {
+            "from": "const_b",
+            "from_port": 0,
+            "to": "interp1",
+            "to_port": 1
+        },
+        {
+            "from": "interp1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Interpolate CHOP \u2014 Blend Two Inputs\n\nBlends constant 0 and constant 1 at 50%.\nResult is 0.5. Change blend for crossfade.\nEasing curves add smooth transitions.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

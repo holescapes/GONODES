@@ -1,116 +1,192 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  100,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "resolution":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Vector2i",
-                                                                                     "x":  512,
-                                                                                     "y":  512
-                                                                                 }
-                                                                   },
-                                                    "scale":  {
-                                                                  "value":  3.0
-                                                              },
-                                                    "monochrome":  {
-                                                                       "value":  false
-                                                                   }
-                                                }
-                             },
-                  "postprocess1":  {
-                                       "type":  "PostProcessTOP",
-                                       "position":  [
-                                                        450,
-                                                        100
-                                                    ],
-                                       "parameters":  {
-                                                          "resolution":  {
-                                                                             "value":  {
-                                                                                           "_type":  "Vector2i",
-                                                                                           "x":  512,
-                                                                                           "y":  512
-                                                                                       }
-                                                                         },
-                                                          "glow_enabled":  {
-                                                                               "value":  true
-                                                                           },
-                                                          "glow_intensity":  {
-                                                                                 "value":  1.5
-                                                                             },
-                                                          "glow_bloom":  {
-                                                                             "value":  0.3
-                                                                         },
-                                                          "adj_brightness":  {
-                                                                                 "value":  1.1
-                                                                             },
-                                                          "adj_contrast":  {
-                                                                               "value":  1.2
-                                                                           },
-                                                          "adj_saturation":  {
-                                                                                 "value":  1.3
-                                                                             }
-                                                      }
-                                   },
-                  "window1":  {
-                                  "position":  [
-                                                   800,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "postprocess1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "postprocess1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Post Process TOP — Glow \u0026 Color Adjust\n\nApplies bloom glow and color adjustments\nto the input texture via a 3D viewport\npost-processing pipeline.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 3.0
+                },
+                "monochrome": {
+                    "value": false
+                }
+            }
+        },
+        "postprocess1": {
+            "type": "EnvironmentCOMP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "glow_enabled": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "glow_intensity": {
+                    "value": 1.5,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
+                },
+                "glow_bloom": {
+                    "value": 0.3
+                },
+                "adj_brightness": {
+                    "value": 1.1
+                },
+                "adj_contrast": {
+                    "value": 1.2
+                },
+                "adj_saturation": {
+                    "value": 1.3
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "rendertop1": {
+            "type": "RenderTOP",
+            "position": [
+                625,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                625,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 5.0
+                }
+            }
+        },
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                50,
+                100
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 1.0
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                250,
+                100
+            ],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "postprocess1",
+            "to_port": 0
+        },
+        {
+            "from": "rendertop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 1
+        },
+        {
+            "from": "postprocess1",
+            "from_port": 0,
+            "to": "rendertop1",
+            "to_port": 2
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Post Process TOP \u2014 Glow & Color Adjust\n\nApplies bloom glow and color adjustments\nto the input texture via a 3D viewport\npost-processing pipeline.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

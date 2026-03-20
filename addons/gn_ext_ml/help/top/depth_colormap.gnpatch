@@ -4,58 +4,136 @@
     "nodes": {
         "webcam1": {
             "type": "WebcamIMG",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "bridge1": {
-            "type": "IMGtoTOP",
-            "position": [350, 100],
+            "type": "ImgToTOP",
+            "position": [
+                350,
+                100
+            ],
             "parameters": {}
         },
         "depth1": {
             "type": "DepthEstimateTOP",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "normalize": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "normalize": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "ramp1": {
             "type": "RampTOP",
-            "position": [600, 300],
+            "position": [
+                600,
+                300
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "lookup1": {
             "type": "LookupTOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1100, 100],
+            "position": [
+                1100,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
-        { "from": "bridge1", "from_port": 0, "to": "depth1", "to_port": 0 },
-        { "from": "depth1", "from_port": 0, "to": "lookup1", "to_port": 0 },
-        { "from": "ramp1", "from_port": 0, "to": "lookup1", "to_port": 1 },
-        { "from": "lookup1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "depth1",
+            "to_port": 0
+        },
+        {
+            "from": "depth1",
+            "from_port": 0,
+            "to": "lookup1",
+            "to_port": 0
+        },
+        {
+            "from": "ramp1",
+            "from_port": 0,
+            "to": "lookup1",
+            "to_port": 1
+        },
+        {
+            "from": "lookup1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Estimate — Color Mapped\n\nDepth map fed through LookupTOP with a color ramp.\nCreates a false-color depth visualization.\nCustomize the ramp gradient for different palettes.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Estimate \u2014 Color Mapped\n\nDepth map fed through LookupTOP with a color ramp.\nCreates a false-color depth visualization.\nCustomize the ramp gradient for different palettes.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

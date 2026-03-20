@@ -2,24 +2,24 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "lfo1": {
-            "type": "LFO_CHOP",
-            "position": [100, 100],
-            "parameters": {
-                "frequency": {"value": 0.3},
-                "amplitude": {"value": 2.0}
-            }
-        },
         "sphere1": {
             "type": "SphereSOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "radius": {"value": 0.5}
+                "radius": {
+                    "value": 0.5
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [450, 200],
+            "position": [
+                450,
+                200
+            ],
             "parameters": {
                 "ty": {
                     "mode": "EXPRESSION",
@@ -30,52 +30,109 @@
         },
         "object1": {
             "type": "ObjectCHOP",
-            "position": [450, 450],
+            "position": [
+                450,
+                450
+            ],
             "parameters": {
-                "comp_path": {"value": "geo1"}
+                "comp_path": {
+                    "value": "geo1"
+                }
             }
         },
         "math1": {
             "type": "MathCHOP",
-            "position": [800, 450],
+            "position": [
+                800,
+                450
+            ],
             "parameters": {
-                "mult": {"value": 0.5}
+                "mult": {
+                    "value": 0.5
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [1150, 300],
+            "position": [
+                1150,
+                300
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1550, 300],
+            "position": [
+                1550,
+                300
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "sphere1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "object1", "from_port": 0, "to": "math1", "to_port": 0},
-        {"from": "math1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "object1",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 0
+        },
+        {
+            "from": "math1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Object CHOP \u2014 Feedback Loop\n\nLFO drives geo1's ty position via expression.\nObject CHOP reads back the transform, Math scales it by 0.5.\nDemonstrates using Object CHOP to read animated COMP transforms.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Object CHOP — Feedback Loop\n\nLFO drives geo1's ty position via expression.\nObject CHOP reads back the transform, Math scales it by 0.5.\nDemonstrates using Object CHOP to read animated COMP transforms.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                520.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

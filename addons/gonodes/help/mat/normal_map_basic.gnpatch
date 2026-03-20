@@ -10,7 +10,9 @@
             ],
             "parameters": {
                 "normal_scale": {
-                    "value": 1.0
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "albedo_color": {
                     "value": {
@@ -22,7 +24,9 @@
                     }
                 },
                 "roughness": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "unlit": {
                     "value": false

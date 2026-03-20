@@ -3,24 +3,19 @@
     "generator": "GONODES",
     "nodes": {
         "src_noise": {
-            "type": "NoiseTOP",
+            "type": "NoiseCHOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
+                "length": {
+                    "value": 100
                 },
-                "scale": {
-                    "value": 4.0
-                },
-                "monochrome": {
-                    "value": true
+                "amplitude": {
+                    "value": 1.0,
+                    "expression": "sin(time) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

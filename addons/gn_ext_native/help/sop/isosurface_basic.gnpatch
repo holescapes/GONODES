@@ -4,63 +4,139 @@
     "nodes": {
         "isosurface1": {
             "type": "IsoSurfaceSOPNative",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "surface_type": {"value": 0},
-                "resolution": {"value": 40},
-                "bounds_size": {"value": 6.28},
-                "threshold": {"value": 0.0},
-                "frequency": {"value": 1.0}
+                "surface_type": {
+                    "value": 0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": 40
+                },
+                "bounds_size": {
+                    "value": 6.28,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "threshold": {
+                    "value": 0.0
+                },
+                "frequency": {
+                    "value": 1.0
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [450, 300],
+            "position": [
+                450,
+                300
+            ],
             "parameters": {
-                "tx": {"value": 0},
-                "ty": {"value": 0},
-                "tz": {"value": 8}
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0
+                },
+                "tz": {
+                    "value": 8
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "isosurface1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "isosurface1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "IsoSurface SOP (Native) â€” Gyroid Surface\n\nMarching-cubes extraction of a Gyroid implicit surface.\nTry switching surface_type to Schwarz-P, Schwarz-D,\nSphere, or Torus. Increase resolution for finer detail.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "IsoSurface SOP (Native) \u00e2\u20ac\u201d Gyroid Surface\n\nMarching-cubes extraction of a Gyroid implicit surface.\nTry switching surface_type to Schwarz-P, Schwarz-D,\nSphere, or Torus. Increase resolution for finer detail.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -29,10 +29,14 @@
             ],
             "parameters": {
                 "bitrate": {
-                    "value": 8002
+                    "value": 8002,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 },
                 "fps": {
-                    "value": 32
+                    "value": 32,
+                    "expression": "(32 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "record": {
                     "value": true

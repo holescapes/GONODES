@@ -4,32 +4,86 @@
     "nodes": {
         "keyframe1": {
             "type": "KeyframeCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "start": {"value": 0.0},
-                "end": {"value": 2.0},
-                "extend": {"value": 0},
-                "count": {"value": 2},
-                "name0": {"value": "ramp_up"},
+                "start": {
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "end": {
+                    "value": 2.0,
+                    "expression": "(2.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "extend": {
+                    "value": 0
+                },
+                "count": {
+                    "value": 2
+                },
+                "name0": {
+                    "value": "ramp_up"
+                },
                 "curve0": {
                     "value": {
                         "_type": "Ramp",
                         "keys": [
-                            {"pos": 0.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 1.0, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0}
+                            {
+                                "pos": 0.0,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 1.0,
+                                "value": 1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            }
                         ]
                     }
                 },
-                "name1": {"value": "pulse"},
+                "name1": {
+                    "value": "pulse"
+                },
                 "curve1": {
                     "value": {
                         "_type": "Ramp",
                         "keys": [
-                            {"pos": 0.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 0.4, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 0.5, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 0.6, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 1.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0}
+                            {
+                                "pos": 0.0,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 0.4,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 0.5,
+                                "value": 1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 0.6,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 1.0,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            }
                         ]
                     }
                 }
@@ -37,22 +91,60 @@
         },
         "keyframe2": {
             "type": "KeyframeCHOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "start": {"value": 0.0},
-                "end": {"value": 3.0},
-                "extend": {"value": 0},
-                "count": {"value": 1},
-                "name0": {"value": "wave"},
+                "start": {
+                    "value": 0.0
+                },
+                "end": {
+                    "value": 3.0
+                },
+                "extend": {
+                    "value": 0
+                },
+                "count": {
+                    "value": 1
+                },
+                "name0": {
+                    "value": "wave"
+                },
                 "curve0": {
                     "value": {
                         "_type": "Ramp",
                         "keys": [
-                            {"pos": 0.0, "value": -1.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 0.25, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 0.5, "value": -1.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 0.75, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0},
-                            {"pos": 1.0, "value": 0.0, "left_tangent": 0.0, "right_tangent": 0.0}
+                            {
+                                "pos": 0.0,
+                                "value": -1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 0.25,
+                                "value": 1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 0.5,
+                                "value": -1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 0.75,
+                                "value": 1.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            },
+                            {
+                                "pos": 1.0,
+                                "value": 0.0,
+                                "left_tangent": 0.0,
+                                "right_tangent": 0.0
+                            }
                         ]
                     }
                 }
@@ -60,48 +152,104 @@
         },
         "sequence1": {
             "type": "SequenceCHOP",
-            "position": [500, 200],
+            "position": [
+                500,
+                200
+            ],
             "parameters": {
-                "duration": {"value": 2.0},
-                "crossfade": {"value": 1.0},
-                "loop": {"value": true}
+                "duration": {
+                    "value": 2.0
+                },
+                "crossfade": {
+                    "value": 1.0
+                },
+                "loop": {
+                    "value": true
+                }
             },
             "dynamic_input_count": 2
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [900, 200],
+            "position": [
+                900,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1300, 200],
+            "position": [
+                1300,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "keyframe1", "from_port": 0, "to": "sequence1", "to_port": 0},
-        {"from": "keyframe2", "from_port": 0, "to": "sequence1", "to_port": 1},
-        {"from": "sequence1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "keyframe1",
+            "from_port": 0,
+            "to": "sequence1",
+            "to_port": 0
+        },
+        {
+            "from": "keyframe2",
+            "from_port": 0,
+            "to": "sequence1",
+            "to_port": 1
+        },
+        {
+            "from": "sequence1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Sequence CHOP \u2014 Crossfade\n\nTwo keyframe clips sequenced with 1s crossfade overlap.\nDemonstrates smooth blending between animated segments.",
-            "position": [-100.0, -120.0],
-            "size": [500.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                500.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

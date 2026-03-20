@@ -4,32 +4,70 @@
     "nodes": {
         "userpythontop1": {
             "type": "UserPythonTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "auto_reload": {"value": true},
-                "time_dep": {"value": true}
+                "auto_reload": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "time_dep": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "userpythontop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "userpythontop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "UserPythonTOP \u2014 Python Texture Generation\n\nWrite TOP operators in Python using NumPy.\nThe default example generates an animated gradient.\nLoad the Gradient example for radial/angular patterns.\n\nPixels are generated CPU-side as (H, W, 4) uint8 arrays\nand uploaded to a texture each frame.",
-            "position": [-100.0, -100.0],
-            "size": [480.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                480.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

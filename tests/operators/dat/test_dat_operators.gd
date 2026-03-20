@@ -504,3 +504,244 @@ func test_osc_in_dat_instantiate() -> void:
 func test_multi_touch_in_dat_instantiate() -> void:
 	var node := _make_node(MultiTouchInDAT.new(), "touch1")
 	GNTestAssert.assert_eq(node.node_type, "multi_touch_in", "node_type")
+# ═══════════════════════════════════════════════════════════════════════════════
+# CueDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_cue_dat_instantiate() -> void:
+	var node := _make_node(CueDAT.new(), "cue1")
+	GNTestAssert.assert_not_null(node, "CueDAT created")
+
+func test_cue_dat_node_type() -> void:
+	var node := _make_node(CueDAT.new(), "cue1")
+	GNTestAssert.assert_eq(node.node_type, "cue", "node_type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DMXDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_dmx_dat_instantiate() -> void:
+	var node := _make_node(DMXDAT.new(), "dmx1")
+	GNTestAssert.assert_not_null(node, "DMXDAT created")
+
+func test_dmx_dat_node_type() -> void:
+	var node := _make_node(DMXDAT.new(), "dmx1")
+	GNTestAssert.assert_eq(node.node_type, "dmx", "node_type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HostInDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_host_in_dat_instantiate() -> void:
+	var node := _make_node(HostInDAT.new(), "host_in1")
+	GNTestAssert.assert_not_null(node, "HostInDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MqttDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_mqtt_dat_instantiate() -> void:
+	var node := _make_node(MqttDAT.new(), "mqtt1")
+	GNTestAssert.assert_not_null(node, "MqttDAT created")
+
+func test_mqtt_dat_set_broker() -> void:
+	var node := _make_node(MqttDAT.new(), "mqtt1")
+	node.set_param_value("broker_url", "mqtt://localhost:1883")
+	GNTestAssert.assert_not_null(node, "MqttDAT with broker param")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PanelExecuteDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_panel_execute_dat_instantiate() -> void:
+	var node := _make_node(PanelExecuteDAT.new(), "panel_exec1")
+	GNTestAssert.assert_not_null(node, "PanelExecuteDAT created")
+
+func test_panel_execute_dat_node_type() -> void:
+	var node := _make_node(PanelExecuteDAT.new(), "panel_exec1")
+	GNTestAssert.assert_eq(node.node_type, "panel_execute", "node_type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RenderPickDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_render_pick_dat_instantiate() -> void:
+	var node := _make_node(RenderPickDAT.new(), "pick1")
+	GNTestAssert.assert_not_null(node, "RenderPickDAT created")
+
+func test_render_pick_dat_node_type() -> void:
+	var node := _make_node(RenderPickDAT.new(), "pick1")
+	GNTestAssert.assert_eq(node.node_type, "render_pick", "node_type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SerialDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_serial_dat_instantiate() -> void:
+	var node := _make_node(SerialDAT.new(), "serial1")
+	GNTestAssert.assert_not_null(node, "SerialDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HostOutDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_host_out_dat_instantiate() -> void:
+	var node := _make_node(HostOutDAT.new(), "host_out1")
+	GNTestAssert.assert_not_null(node, "HostOutDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BlackmagicDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_blackmagic_dat_instantiate() -> void:
+	var node := _make_node(BlackmagicDAT.new(), "bm1")
+	GNTestAssert.assert_not_null(node, "BlackmagicDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DepthSensorDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_depth_sensor_dat_instantiate() -> void:
+	var node := _make_node(DepthSensorDAT.new(), "depth1")
+	GNTestAssert.assert_not_null(node, "DepthSensorDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ObjectDetectDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_object_detect_dat_instantiate() -> void:
+	var node := _make_node(ObjectDetectDAT.new(), "objdet1")
+	GNTestAssert.assert_not_null(node, "ObjectDetectDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNSDFData (data class, not a DAT operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_sdf_data_instantiate() -> void:
+	var data := GNSDFData.new()
+	GNTestAssert.assert_not_null(data, "GNSDFData created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SerialReceiveDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_serial_receive_dat_instantiate() -> void:
+	var node := _make_node(SerialReceiveDAT.new(), "serial_recv1")
+	GNTestAssert.assert_not_null(node, "SerialReceiveDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SerialSendDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_serial_send_dat_instantiate() -> void:
+	var node := _make_node(SerialSendDAT.new(), "serial_send1")
+	GNTestAssert.assert_not_null(node, "SerialSendDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# UserNativeDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_user_native_dat_instantiate() -> void:
+	var node := _make_node(UserNativeDAT.new(), "user_native1")
+	GNTestAssert.assert_not_null(node, "UserNativeDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# UserPythonDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_user_python_dat_instantiate() -> void:
+	var node := _make_node(UserPythonDAT.new(), "user_python1")
+	GNTestAssert.assert_not_null(node, "UserPythonDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNGeoData
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_geo_data_instantiate() -> void:
+	var data := GNGeoData.new()
+	GNTestAssert.assert_not_null(data, "GNGeoData created")
+
+func test_gn_geo_data_is_gn_data() -> void:
+	var data := GNGeoData.new()
+	GNTestAssert.assert_true(data is GNData, "GNGeoData is GNData subclass")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNImageData
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_image_data_instantiate() -> void:
+	var data := GNImageData.new()
+	GNTestAssert.assert_not_null(data, "GNImageData created")
+
+func test_gn_image_data_is_gn_data() -> void:
+	var data := GNImageData.new()
+	GNTestAssert.assert_true(data is GNData, "GNImageData is GNData subclass")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNMaterialData
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_material_data_instantiate() -> void:
+	var data := GNMaterialData.new()
+	GNTestAssert.assert_not_null(data, "GNMaterialData created")
+
+func test_gn_material_data_is_gn_data() -> void:
+	var data := GNMaterialData.new()
+	GNTestAssert.assert_true(data is GNData, "GNMaterialData is GNData subclass")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNParticleData
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_particle_data_instantiate() -> void:
+	var data := GNParticleData.new()
+	GNTestAssert.assert_not_null(data, "GNParticleData created")
+
+func test_gn_particle_data_is_gn_data() -> void:
+	var data := GNParticleData.new()
+	GNTestAssert.assert_true(data is GNData, "GNParticleData is GNData subclass")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNTextureData
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_texture_data_instantiate() -> void:
+	var data := GNTextureData.new()
+	GNTestAssert.assert_not_null(data, "GNTextureData created")
+
+func test_gn_texture_data_is_gn_data() -> void:
+	var data := GNTextureData.new()
+	GNTestAssert.assert_true(data is GNData, "GNTextureData is GNData subclass")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GNVolumeData
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gn_volume_data_instantiate() -> void:
+	var data := GNVolumeData.new()
+	GNTestAssert.assert_not_null(data, "GNVolumeData created")
+
+func test_gn_volume_data_is_gn_data() -> void:
+	var data := GNVolumeData.new()
+	GNTestAssert.assert_true(data is GNData, "GNVolumeData is GNData subclass")

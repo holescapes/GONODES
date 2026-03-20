@@ -1,109 +1,93 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "lfo1":  {
-                               "type":  "LfoCHOP",
-                               "position":  [
-                                                200,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "frequency":  {
-                                                                    "value":  2.0
-                                                                }
-                                              }
-                           },
-                  "script1":  {
-                                  "type":  "ScriptCHOP",
-                                  "position":  [
-                                                   500,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "time_dependent":  {
-                                                                            "value":  true
-                                                                        },
-                                                     "code":  {
-                                                                  "value":  "# Demonstrates set_par() for writable references.\n# This script reads its own LFO and dynamically\n# adjusts the upstream LFO frequency based on time.\n\nfunc cook():\n\t# Read current LFO value\n\tvar lfo_val = chop(\"lfo1\", \"lfo\")\n\top.set_single_value(\"lfo\", lfo_val)\n\n\t# Writable ref: modulate LFO frequency over time\n\t# 2-arg form — sets param on *this* node:\n\t#   set_par(\"my_param\", 42)\n\t# 3-arg form — sets param on *another* node:\n\tvar new_freq = 1.0 + sin(time * 0.5) * 0.8\n\tset_par(\"lfo1\", \"frequency\", new_freq)\n\n\top.set_single_value(\"freq\", new_freq)"
-                                                              }
-                                                 }
-                              },
-                  "window1":  {
-                                  "type":  "WindowOUT",
-                                  "position":  [
-                                                   1200,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512,
-                                                                                      "y":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 }
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    850,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from_node":  "lfo1",
-                            "from_port":  0,
-                            "to_node":  "script1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "script1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "set_par() — Writable Parameter References\n\nModify parameters on any reachable node:\n  set_par(\"param\", value)          — self\n  set_par(\"node\", \"param\", value)  — other node\n\nThe target node is automatically marked dirty.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         500.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          0.9,
-                                          0.8,
-                                          0.5,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "script1": {
+            "type": "ScriptCHOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "time_dependent": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "code": {
+                    "value": "# Demonstrates set_par() for writable references.\n# This script reads its own LFO and dynamically\n# adjusts the upstream LFO frequency based on time.\n\nfunc cook():\n\t# Read current LFO value\n\tvar lfo_val = chop(\"lfo1\", \"lfo\")\n\top.set_single_value(\"lfo\", lfo_val)\n\n\t# Writable ref: modulate LFO frequency over time\n\t# 2-arg form \u2014 sets param on *this* node:\n\t#   set_par(\"my_param\", 42)\n\t# 3-arg form \u2014 sets param on *another* node:\n\tvar new_freq = 1.0 + sin(time * 0.5) * 0.8\n\tset_par(\"lfo1\", \"frequency\", new_freq)\n\n\top.set_single_value(\"freq\", new_freq)"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                850,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "script1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "set_par() \u2014 Writable Parameter References\n\nModify parameters on any reachable node:\n  set_par(\"param\", value)          \u2014 self\n  set_par(\"node\", \"param\", value)  \u2014 other node\n\nThe target node is automatically marked dirty.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                500.0,
+                100.0
+            ],
+            "color": [
+                0.9,
+                0.8,
+                0.5,
+                0.8
+            ]
+        }
+    ]
 }

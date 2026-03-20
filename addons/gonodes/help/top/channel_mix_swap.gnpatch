@@ -1,112 +1,116 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  100,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "resolution":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Vector2i",
-                                                                                     "x":  512,
-                                                                                     "y":  512
-                                                                                 }
-                                                                   },
-                                                    "scale":  {
-                                                                  "value":  3.0
-                                                              },
-                                                    "monochrome":  {
-                                                                       "value":  false
-                                                                   }
-                                                }
-                             },
-                  "chmix1":  {
-                                 "type":  "ChannelMixTOP",
-                                 "position":  [
-                                                  450,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "r_source":  {
-                                                                     "value":  2
-                                                                 },
-                                                    "g_source":  {
-                                                                     "value":  0
-                                                                 },
-                                                    "b_source":  {
-                                                                     "value":  1
-                                                                 },
-                                                    "a_source":  {
-                                                                     "value":  3
-                                                                 },
-                                                    "r_gain":  {
-                                                                   "value":  1.0
-                                                               },
-                                                    "g_gain":  {
-                                                                   "value":  1.0
-                                                               },
-                                                    "b_gain":  {
-                                                                   "value":  0.5
-                                                               }
-                                                }
-                             },
-                  "window1":  {
-                                  "position":  [
-                                                   800,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "chmix1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "chmix1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Channel Mix TOP — Swap Channels\n\nSwaps R→B, G→R, B→G and halves blue gain.\nSources: 0=R, 1=G, 2=B, 3=A, 4=Luma, 5=Zero, 6=One.\nGreat for colour channel experiments.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 3.0
+                },
+                "monochrome": {
+                    "value": false
+                }
+            }
+        },
+        "chmix1": {
+            "type": "ChannelMixTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "r_source": {
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "g_source": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "b_source": {
+                    "value": 1
+                },
+                "a_source": {
+                    "value": 3
+                },
+                "r_gain": {
+                    "value": 1.0
+                },
+                "g_gain": {
+                    "value": 1.0
+                },
+                "b_gain": {
+                    "value": 0.5
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "chmix1",
+            "to_port": 0
+        },
+        {
+            "from": "chmix1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Channel Mix TOP \u2014 Swap Channels\n\nSwaps R\u2192B, G\u2192R, B\u2192G and halves blue gain.\nSources: 0=R, 1=G, 2=B, 3=A, 4=Luma, 5=Zero, 6=One.\nGreat for colour channel experiments.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

@@ -29,28 +29,32 @@
             ],
             "parameters": {
                 "tl_x": {
-                    "value": 1.0
+                    "value": 0.1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "tl_y": {
-                    "value": 1.0
+                    "value": 0.1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "tr_x": {
-                    "value": 2.0
+                    "value": 0.8
                 },
                 "tr_y": {
-                    "value": 1.0
+                    "value": 0.05
                 },
                 "bl_x": {
-                    "value": 1.0
+                    "value": 0.15
                 },
                 "bl_y": {
-                    "value": 2.0
+                    "value": 0.95
                 },
                 "br_x": {
-                    "value": 2.0
+                    "value": 0.9
                 },
                 "br_y": {
-                    "value": 2.0
+                    "value": 0.85
                 }
             }
         },

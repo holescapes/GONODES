@@ -18,13 +18,17 @@
             ],
             "parameters": {
                 "width": {
-                    "value": 256
+                    "value": 256,
+                    "expression": "(256 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "attribute": {
                     "value": "pos"
                 },
                 "scale": {
-                    "value": 1.0
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

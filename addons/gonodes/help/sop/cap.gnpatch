@@ -1,80 +1,184 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "cylinder1": {
-      "type": "CylinderSOP",
-      "position": [100, 200],
-      "parameters": {
-        "radius": {"value": 0.8},
-        "height": {"value": 2.0},
-        "cap_top": {"value": false},
-        "cap_bottom": {"value": false}
-      }
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "cylinder1": {
+            "type": "CylinderSOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.8,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "height": {
+                    "value": 2.0,
+                    "expression": "(2.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "cap_top": {
+                    "value": false
+                },
+                "cap_bottom": {
+                    "value": false
+                }
+            }
+        },
+        "clip1": {
+            "type": "ClipSOP",
+            "position": [
+                400,
+                200
+            ],
+            "parameters": {
+                "axis": {
+                    "value": 1
+                },
+                "offset": {
+                    "value": 0.5
+                },
+                "keep": {
+                    "value": 0
+                }
+            }
+        },
+        "cap1": {
+            "type": "CapSOP",
+            "position": [
+                700,
+                200
+            ],
+            "parameters": {
+                "cap_all": {
+                    "value": true
+                },
+                "flip_cap_normals": {
+                    "value": false
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                1000,
+                200
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                1000,
+                400
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 1.0
+                },
+                "tz": {
+                    "value": 3.5
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1300,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1600,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
     },
-    "clip1": {
-      "type": "ClipSOP",
-      "position": [400, 200],
-      "parameters": {
-        "axis": {"value": 1},
-        "offset": {"value": 0.5},
-        "keep": {"value": 0}
-      }
-    },
-    "cap1": {
-      "type": "CapSOP",
-      "position": [700, 200],
-      "parameters": {
-        "cap_all": {"value": true},
-        "flip_cap_normals": {"value": false}
-      }
-    },
-    "geo1": {
-      "type": "GeometryCOMP",
-      "position": [1000, 200],
-      "parameters": {}
-    },
-    "cam1": {
-      "type": "CameraCOMP",
-      "position": [1000, 400],
-      "parameters": {
-        "tx": {"value": 0.0},
-        "ty": {"value": 1.0},
-        "tz": {"value": 3.5}
-      }
-    },
-    "render1": {
-      "type": "RenderTOP",
-      "position": [1300, 200],
-      "parameters": {
-        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [1600, 200],
-      "parameters": {
-        "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-        "open": {"value": true}
-      }
-    }
-  },
-  "connections": [
-    {"from": "cylinder1", "from_port": 0, "to": "clip1", "to_port": 0},
-    {"from": "clip1", "from_port": 0, "to": "cap1", "to_port": 0},
-    {"from": "cap1", "from_port": 0, "to": "geo1", "to_port": 0},
-    {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-    {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-    {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "Cap SOP â€” Close Open Holes\n\nAn open-ended cylinder is clipped, leaving a hole.\nCapSOP detects the boundary edge loop and fills it\nwith a triangle fan, closing the geometry.",
-      "position": [50.0, -50.0],
-      "size": [600.0, 110.0],
-      "color": [1.0, 1.0, 1.0, 0.8]
-    }
-  ]
+    "connections": [
+        {
+            "from": "cylinder1",
+            "from_port": 0,
+            "to": "clip1",
+            "to_port": 0
+        },
+        {
+            "from": "clip1",
+            "from_port": 0,
+            "to": "cap1",
+            "to_port": 0
+        },
+        {
+            "from": "cap1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Cap SOP \u00e2\u20ac\u201d Close Open Holes\n\nAn open-ended cylinder is clipped, leaving a hole.\nCapSOP detects the boundary edge loop and fills it\nwith a triangle fan, closing the geometry.",
+            "position": [
+                50.0,
+                -50.0
+            ],
+            "size": [
+                600.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

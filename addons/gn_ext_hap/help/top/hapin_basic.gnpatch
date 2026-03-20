@@ -1,32 +1,87 @@
 {
-  "version": "1.0",
-  "description": "HapInTOP — Basic HAP video playback. Load a .mov file encoded with HAP and play it back with GPU-direct DXT upload.",
-  "nodes": {
-    "hapin1": {
-      "type": "hapintop",
-      "position": [200, 200],
-      "params": {
-        "file": "",
-        "play": true,
-        "loop": true,
-        "speed": 1.0,
-        "seek": -1.0
-      }
+    "version": "1.0",
+    "description": "HapInTOP \u2014 Basic HAP video playback. Load a .mov file encoded with HAP and play it back with GPU-direct DXT upload.",
+    "nodes": {
+        "hapin1": {
+            "type": "HapInTOP",
+            "position": [
+                200,
+                200
+            ],
+            "parameters": {
+                "file": {
+                    "value": ""
+                },
+                "play": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "loop": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "speed": {
+                    "value": 1.0
+                },
+                "seek": {
+                    "value": -1.0
+                }
+            }
+        },
+        "null1": {
+            "type": "NullTOP",
+            "position": [
+                600,
+                200
+            ],
+            "parameters": {}
+        },
+        "info1": {
+            "type": "InfoDAT",
+            "position": [
+                200,
+                400
+            ],
+            "parameters": {
+                "text": {
+                    "value": "HapInTOP plays .mov files encoded with the HAP codec.\nDXT-compressed frames upload directly to the GPU \u2014\nno CPU pixel decode needed.\n\nSet the 'file' parameter to a HAP .mov file path.\nSupports HAP (DXT1), HAP Alpha (DXT5), and HAP Q (YCoCg)."
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
     },
-    "null1": {
-      "type": "nulltop",
-      "position": [600, 200],
-      "params": {}
-    },
-    "info1": {
-      "type": "info",
-      "position": [200, 400],
-      "params": {
-        "text": "HapInTOP plays .mov files encoded with the HAP codec.\nDXT-compressed frames upload directly to the GPU —\nno CPU pixel decode needed.\n\nSet the 'file' parameter to a HAP .mov file path.\nSupports HAP (DXT1), HAP Alpha (DXT5), and HAP Q (YCoCg)."
-      }
-    }
-  },
-  "connections": [
-    {"from": "hapin1", "from_port": 0, "to": "null1", "to_port": 0}
-  ]
+    "connections": [
+        {
+            "from": "hapin1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ]
 }

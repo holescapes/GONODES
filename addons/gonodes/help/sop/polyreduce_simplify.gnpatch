@@ -1,174 +1,174 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "sphere1":  {
-                                  "type":  "SphereSOP",
-                                  "position":  [
-                                                   100,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "radius":  {
-                                                                    "value":  1.0
-                                                                },
-                                                     "radial_segments":  {
-                                                                             "value":  64
-                                                                         },
-                                                     "rings":  {
-                                                                   "value":  32
-                                                               }
-                                                 }
-                              },
-                  "polyreduce1":  {
-                                      "type":  "PolyReduceSOP",
-                                      "position":  [
-                                                       400,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "target_percent":  {
-                                                                                "value":  20.0
-                                                                            },
-                                                         "preserve_boundary":  {
-                                                                                   "value":  true
-                                                                               },
-                                                         "boundary_weight":  {
-                                                                                 "value":  10.0
-                                                                             }
-                                                     }
-                                  },
-                  "null1":  {
-                                "type":  "NullSOP",
-                                "position":  [
-                                                 700,
-                                                 100
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1650,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    1000,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    1000,
-                                                    300
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1300,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  }
-              },
-    "connections":  [
-                        {
-                            "from":  "sphere1",
-                            "from_port":  0,
-                            "to":  "polyreduce1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "polyreduce1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "PolyReduce SOP — Mesh Decimation\n\nReduces a high-res sphere to 20% of its triangles.\nUses quadric error metric for quality edge collapse.\nPreserve boundary keeps the silhouette intact.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "radial_segments": {
+                    "value": 64,
+                    "expression": "(64 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "rings": {
+                    "value": 32
+                }
+            }
+        },
+        "polyreduce1": {
+            "type": "PolyReduceSOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "target_percent": {
+                    "value": 20.0
+                },
+                "preserve_boundary": {
+                    "value": true
+                },
+                "boundary_weight": {
+                    "value": 10.0
+                }
+            }
+        },
+        "null1": {
+            "type": "NullSOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1650,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                1000,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1300,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "polyreduce1",
+            "to_port": 0
+        },
+        {
+            "from": "polyreduce1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PolyReduce SOP \u2014 Mesh Decimation\n\nReduces a high-res sphere to 20% of its triangles.\nUses quadric error metric for quality edge collapse.\nPreserve boundary keeps the silhouette intact.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

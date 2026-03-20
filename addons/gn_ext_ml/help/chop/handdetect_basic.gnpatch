@@ -4,52 +4,116 @@
     "nodes": {
         "webcam1": {
             "type": "WebcamIMG",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "bridge1": {
-            "type": "IMGtoTOP",
-            "position": [350, 100],
+            "type": "ImgToTOP",
+            "position": [
+                350,
+                100
+            ],
             "parameters": {}
         },
         "hand1": {
             "type": "HandDetectCHOP",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "max_hands": { "value": 2 },
-                "min_confidence": { "value": 0.5 }
+                "max_hands": {
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "min_confidence": {
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {
-                "mode": { "value": 0 }
+                "mode": {
+                    "value": 0
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1100, 100],
+            "position": [
+                1100,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
-        { "from": "bridge1", "from_port": 0, "to": "hand1", "to_port": 0 },
-        { "from": "hand1", "from_port": 0, "to": "choptop1", "to_port": 0 },
-        { "from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "hand1",
+            "to_port": 0
+        },
+        {
+            "from": "hand1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Hand Detect — Basic\n\nWebcam -> hand landmark detection -> 21 points per hand.\nChannels: hand0:wrist:x, hand0:index_tip:y, etc.\nUp to 2 hands tracked simultaneously.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Hand Detect \u2014 Basic\n\nWebcam -> hand landmark detection -> 21 points per hand.\nChannels: hand0:wrist:x, hand0:index_tip:y, etc.\nUp to 2 hands tracked simultaneously.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

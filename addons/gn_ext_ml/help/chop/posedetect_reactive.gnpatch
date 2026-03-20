@@ -4,67 +4,152 @@
     "nodes": {
         "webcam1": {
             "type": "WebcamIMG",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "bridge1": {
-            "type": "IMGtoTOP",
-            "position": [350, 100],
+            "type": "ImgToTOP",
+            "position": [
+                350,
+                100
+            ],
             "parameters": {}
         },
         "pose1": {
             "type": "PoseDetectCHOP",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "min_confidence": { "value": 0.5 }
+                "min_confidence": {
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "smooth1": {
             "type": "SmoothCHOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {
-                "width": { "value": 0.2 }
+                "width": {
+                    "value": 0.2
+                }
             }
         },
         "noise1": {
             "type": "NoiseTOP",
-            "position": [600, 300],
+            "position": [
+                600,
+                300
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "displace1": {
             "type": "DisplaceTOP",
-            "position": [850, 300],
+            "position": [
+                850,
+                300
+            ],
             "parameters": {
-                "amount": { "value": 0.1, "expression": "chop('smooth1').value('nose:x') * 0.3" }
+                "amount": {
+                    "value": 0.1,
+                    "expression": "chop('smooth1').value('nose:x') * 0.3"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1100, 300],
+            "position": [
+                1100,
+                300
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "webcam1", "from_port": 0, "to": "bridge1", "to_port": 0 },
-        { "from": "bridge1", "from_port": 0, "to": "pose1", "to_port": 0 },
-        { "from": "pose1", "from_port": 0, "to": "smooth1", "to_port": 0 },
-        { "from": "noise1", "from_port": 0, "to": "displace1", "to_port": 0 },
-        { "from": "bridge1", "from_port": 0, "to": "displace1", "to_port": 1 },
-        { "from": "displace1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "pose1",
+            "to_port": 0
+        },
+        {
+            "from": "pose1",
+            "from_port": 0,
+            "to": "smooth1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "displace1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "displace1",
+            "to_port": 1
+        },
+        {
+            "from": "displace1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Pose Detect — Reactive Displacement\n\nNose X position drives noise displacement amount\nvia parameter expression. SmoothCHOP filters jitter.\nBody movement controls visual distortion intensity.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Pose Detect \u2014 Reactive Displacement\n\nNose X position drives noise displacement amount\nvia parameter expression. SmoothCHOP filters jitter.\nBody movement controls visual distortion intensity.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -18,10 +18,14 @@
             ],
             "parameters": {
                 "direction": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "max_dist": {
-                    "value": 50.0
+                    "value": 50.0,
+                    "expression": "(50.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "offset": {
                     "value": 0.5

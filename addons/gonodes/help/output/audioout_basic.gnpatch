@@ -28,10 +28,14 @@
                     "value": false
                 },
                 "gain": {
-                    "value": 1.0
+                    "value": 1.0,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 },
                 "mix_rate": {
-                    "value": 44100.0
+                    "value": 44100.0,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
                 },
                 "buffer_length": {
                     "value": 0.1

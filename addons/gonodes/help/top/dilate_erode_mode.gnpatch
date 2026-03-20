@@ -29,7 +29,9 @@
                     "value": 1
                 },
                 "radius": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

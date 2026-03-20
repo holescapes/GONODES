@@ -32,10 +32,14 @@
             ],
             "parameters": {
                 "length": {
-                    "value": 30
+                    "value": 30,
+                    "expression": "(30 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "delay": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "freeze": {
                     "value": false

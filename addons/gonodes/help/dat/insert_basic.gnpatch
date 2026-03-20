@@ -1,119 +1,121 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "const1":  {
-                                 "type":  "ConstantDAT",
-                                 "position":  [
-                                                  0,
-                                                  100
-                                              ],
-                                 "parameters":  {
-
-                                                }
-                             },
-                  "ins1":  {
-                               "type":  "InsertDAT",
-                               "position":  [
-                                                300,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "mode":  {
-                                                               "value":  0
-                                                           },
-                                                  "index":  {
-                                                                "value":  1
-                                                            },
-                                                  "count":  {
-                                                                "value":  2
-                                                            },
-                                                  "fill_value":  {
-                                                                     "value":  "new"
-                                                                 }
-                                              }
-                           },
-                  "window1":  {
-                                  "position":  [
-                                                   1000,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "text_view":  {
-                                    "type":  "TextTOP",
-                                    "position":  [
-                                                     650,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "resolution":  {
-                                                                          "value":  {
-                                                                                        "_type":  "Vector2i",
-                                                                                        "x":  512,
-                                                                                        "y":  512
-                                                                                    }
-                                                                      },
-                                                       "text":  {
-                                                                    "value":  "InsertDAT output"
-                                                                },
-                                                       "font_size":  {
-                                                                         "value":  24
-                                                                     }
-                                                   }
-                                }
-              },
-    "connections":  [
-                        {
-                            "from":  "const1",
-                            "from_port":  0,
-                            "to":  "ins1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "ins1",
-                            "from_port":  0,
-                            "to":  "text_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "text_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Insert DAT — Add Rows/Columns\n\nInserts 2 rows at index 1 filled with \u0027new\u0027.\nAlso supports column insertion.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "const1": {
+            "type": "ConstantDAT",
+            "position": [
+                0,
+                100
+            ],
+            "parameters": {}
+        },
+        "ins1": {
+            "type": "InsertDAT",
+            "position": [
+                300,
+                100
+            ],
+            "parameters": {
+                "mode": {
+                    "value": 0
+                },
+                "index": {
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "count": {
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "fill_value": {
+                    "value": "new"
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "text_view": {
+            "type": "TextTOP",
+            "position": [
+                650,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "text": {
+                    "value": "InsertDAT output"
+                },
+                "font_size": {
+                    "value": 24
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "const1",
+            "from_port": 0,
+            "to": "ins1",
+            "to_port": 0
+        },
+        {
+            "from": "ins1",
+            "from_port": 0,
+            "to": "text_view",
+            "to_port": 0
+        },
+        {
+            "from": "text_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Insert DAT \u2014 Add Rows/Columns\n\nInserts 2 rows at index 1 filled with 'new'.\nAlso supports column insertion.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

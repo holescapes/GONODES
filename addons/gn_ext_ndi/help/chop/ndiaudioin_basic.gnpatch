@@ -4,40 +4,90 @@
     "nodes": {
         "ndiaudioin1": {
             "type": "NDIAudioInCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "source": { "value": "" },
-                "bandwidth": { "value": 1 }
+                "source": {
+                    "value": ""
+                },
+                "bandwidth": {
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 256 } }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1100, 100],
+            "position": [
+                1100,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 256 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "ndiaudioin1", "from_port": 0, "to": "choptop1", "to_port": 0 },
-        { "from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "ndiaudioin1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NDI Audio In — Basic\n\nReceive NDI audio as CHOP channels.\nDefault bandwidth is 'Audio Only' for efficiency.\nEach audio channel becomes ch0, ch1, etc.\n\nRequires gn_ext_ndi GDExtension — see README.md.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "NDI Audio In \u2014 Basic\n\nReceive NDI audio as CHOP channels.\nDefault bandwidth is 'Audio Only' for efficiency.\nEach audio channel becomes ch0, ch1, etc.\n\nRequires gn_ext_ndi GDExtension \u2014 see README.md.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

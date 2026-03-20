@@ -4,74 +4,172 @@
     "nodes": {
         "metaball1": {
             "type": "MetaballSOPNative",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": 40},
-                "bounds_size": {"value": 5.0},
-                "threshold": {"value": 1.0},
-                "ball_count": {"value": 3},
-                "b0x": {"value": -1.2},
-                "b0y": {"value": 0.0},
-                "b0z": {"value": 0.0},
-                "b0r": {"value": 1.8},
-                "b1x": {"value": 1.2},
-                "b1y": {"value": 0.0},
-                "b1z": {"value": 0.0},
-                "b1r": {"value": 1.8},
-                "b2x": {"value": 0.0},
-                "b2y": {"value": 1.5},
-                "b2z": {"value": 0.0},
-                "b2r": {"value": 1.2}
+                "resolution": {
+                    "value": 40
+                },
+                "bounds_size": {
+                    "value": 5.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "threshold": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "ball_count": {
+                    "value": 3
+                },
+                "b0x": {
+                    "value": -1.2
+                },
+                "b0y": {
+                    "value": 0.0
+                },
+                "b0z": {
+                    "value": 0.0
+                },
+                "b0r": {
+                    "value": 1.8
+                },
+                "b1x": {
+                    "value": 1.2
+                },
+                "b1y": {
+                    "value": 0.0
+                },
+                "b1z": {
+                    "value": 0.0
+                },
+                "b1r": {
+                    "value": 1.8
+                },
+                "b2x": {
+                    "value": 0.0
+                },
+                "b2y": {
+                    "value": 1.5
+                },
+                "b2z": {
+                    "value": 0.0
+                },
+                "b2r": {
+                    "value": 1.2
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [450, 300],
+            "position": [
+                450,
+                300
+            ],
             "parameters": {
-                "tx": {"value": 0},
-                "ty": {"value": 1},
-                "tz": {"value": 5}
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 1
+                },
+                "tz": {
+                    "value": 5
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "metaball1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "metaball1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Metaball SOP (Native) â€” Three Merging Blobs\n\nMarching-cubes isosurface from 3 balls at res 40.\nTwo side-by-side (r=1.8) plus one above (r=1.2)\ncreate a smooth organic merge.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Metaball SOP (Native) \u00e2\u20ac\u201d Three Merging Blobs\n\nMarching-cubes isosurface from 3 balls at res 40.\nTwo side-by-side (r=1.8) plus one above (r=1.2)\ncreate a smooth organic merge.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

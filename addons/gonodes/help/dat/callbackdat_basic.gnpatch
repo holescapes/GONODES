@@ -1,137 +1,116 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "lfo1":  {
-                               "type":  "LfoCHOP",
-                               "position":  [
-                                                200,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "frequency":  {
-                                                                    "value":  0.5
-                                                                },
-                                                  "waveform":  {
-                                                                   "value":  0
-                                                               }
-                                              }
-                           },
-                  "callback1":  {
-                                    "type":  "CallbackDAT",
-                                    "position":  [
-                                                     500,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "on_cook":  {
-                                                                       "value":  "func cook():\n\t# \u0027target\u0027 is the upstream node being observed\n\t# \u0027event\u0027 is \u0027cook\u0027, \u0027event_param\u0027 is null\n\tvar v = target.get_output_data(0)\n\tif v:\n\t\tvar ch = v.get_channel(\"lfo\")\n\t\tif ch and ch.size() \u003e 0:\n\t\t\tprint(\"LFO cooked: \", ch[0])"
-                                                                   },
-                                                       "on_value_change":  {
-                                                                               "value":  "func cook():\n\t# \u0027event_param\u0027 is the name of the changed parameter\n\tprint(\"Param changed: \", event_param)"
-                                                                           }
-                                                   }
-                                },
-                  "window1":  {
-                                  "type":  "WindowOUT",
-                                  "position":  [
-                                                   1200,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512,
-                                                                                      "y":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 }
-                              },
-                  "text_view":  {
-                                    "type":  "TextTOP",
-                                    "position":  [
-                                                     850,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "resolution":  {
-                                                                          "value":  {
-                                                                                        "_type":  "Vector2i",
-                                                                                        "x":  512,
-                                                                                        "y":  512
-                                                                                    }
-                                                                      },
-                                                       "text":  {
-                                                                    "value":  "CallbackDAT output"
-                                                                },
-                                                       "font_size":  {
-                                                                         "value":  24
-                                                                     }
-                                                   }
-                                }
-              },
-    "connections":  [
-                        {
-                            "from_node":  "lfo1",
-                            "from_port":  0,
-                            "to_node":  "callback1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "callback1",
-                            "from_port":  0,
-                            "to":  "text_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "text_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Callback DAT — Event-Driven Scripts\n\nConnect any node to input 0 to observe it.\nCallbacks fire on events:\n  on_start  — runs once on first cook\n  on_cook   — runs each time target cooks\n  on_value_change — when a param changes\n  on_create — when the DAT itself is created\n\nContext variables: target, event, event_param",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         550.0,
-                                         120.0
-                                     ],
-                            "color":  [
-                                          0.5,
-                                          0.8,
-                                          0.5,
-                                          0.8
-                                      ]
-                        },
-                        {
-                            "id":  "ann_2",
-                            "type":  "note",
-                            "text":  "Output is a rolling event log table\nshowing timestamp, event type,\nand details (max 50 rows).",
-                            "position":  [
-                                             500.0,
-                                             250.0
-                                         ],
-                            "size":  [
-                                         300.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "callback1": {
+            "type": "CallbackDAT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "on_cook": {
+                    "value": "func cook():\n\t# 'target' is the upstream node being observed\n\t# 'event' is 'cook', 'event_param' is null\n\tvar v = target.get_output_data(0)\n\tif v:\n\t\tvar ch = v.get_channel(\"lfo\")\n\t\tif ch and ch.size() > 0:\n\t\t\tprint(\"LFO cooked: \", ch[0])"
+                },
+                "on_value_change": {
+                    "value": "func cook():\n\t# 'event_param' is the name of the changed parameter\n\tprint(\"Param changed: \", event_param)"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "text_view": {
+            "type": "TextTOP",
+            "position": [
+                850,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "text": {
+                    "value": "CallbackDAT output"
+                },
+                "font_size": {
+                    "value": 24
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "callback1",
+            "from_port": 0,
+            "to": "text_view",
+            "to_port": 0
+        },
+        {
+            "from": "text_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Callback DAT \u2014 Event-Driven Scripts\n\nConnect any node to input 0 to observe it.\nCallbacks fire on events:\n  on_start  \u2014 runs once on first cook\n  on_cook   \u2014 runs each time target cooks\n  on_value_change \u2014 when a param changes\n  on_create \u2014 when the DAT itself is created\n\nContext variables: target, event, event_param",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                550.0,
+                120.0
+            ],
+            "color": [
+                0.5,
+                0.8,
+                0.5,
+                0.8
+            ]
+        },
+        {
+            "id": "ann_2",
+            "type": "note",
+            "text": "Output is a rolling event log table\nshowing timestamp, event type,\nand details (max 50 rows).",
+            "position": [
+                500.0,
+                250.0
+            ],
+            "size": [
+                300.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

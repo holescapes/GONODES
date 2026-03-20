@@ -4,51 +4,104 @@
     "nodes": {
         "sensordat1": {
             "type": "DepthSensorDAT",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "sensor_kinect": {
             "type": "DepthSensorTOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "stream": { "value": 0 },
-                "backend": { "value": 0 }
+                "stream": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "device": {
+                    "value": 0
+                }
             }
         },
         "sensor_realsense": {
             "type": "DepthSensorTOP",
-            "position": [100, 550],
+            "position": [
+                100,
+                550
+            ],
             "parameters": {
-                "stream": { "value": 0 },
-                "backend": { "value": 1 }
+                "stream": {
+                    "value": 0
+                },
+                "device": {
+                    "value": 1
+                }
             }
         },
         "layout1": {
             "type": "LayoutTOP",
-            "position": [500, 450],
+            "position": [
+                500,
+                450
+            ],
             "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 450],
+            "position": [
+                900,
+                450
+            ],
             "parameters": {
-                "open": { "value": true }
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "sensor_kinect", "from_port": 0, "to": "layout1", "to_port": 0 },
-        { "from": "sensor_realsense", "from_port": 0, "to": "layout1", "to_port": 1 },
-        { "from": "layout1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "sensor_kinect",
+            "from_port": 0,
+            "to": "layout1",
+            "to_port": 0
+        },
+        {
+            "from": "sensor_realsense",
+            "from_port": 0,
+            "to": "layout1",
+            "to_port": 1
+        },
+        {
+            "from": "layout1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Sensor — Multi-Backend Comparison\n\nTwo DepthSensorTOPs: one Azure Kinect, one RealSense.\nLayoutTOP tiles both depth views side-by-side.\nDepthSensorDAT at top shows which devices are\nconnected and what capabilities each has.\n\nThis demonstrates the unified API — same operator,\ndifferent backends, different capability sets.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 130.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Sensor \u2014 Multi-Backend Comparison\n\nTwo DepthSensorTOPs: one Azure Kinect, one RealSense.\nLayoutTOP tiles both depth views side-by-side.\nDepthSensorDAT at top shows which devices are\nconnected and what capabilities each has.\n\nThis demonstrates the unified API \u2014 same operator,\ndifferent backends, different capability sets.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

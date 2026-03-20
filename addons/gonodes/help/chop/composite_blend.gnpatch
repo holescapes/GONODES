@@ -1,146 +1,148 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "lfo_sine":  {
-                                   "type":  "LFO_CHOP",
-                                   "position":  [
-                                                    100,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "freq":  {
-                                                                   "value":  1.0
-                                                               },
-                                                      "waveform":  {
-                                                                       "value":  0
-                                                                   }
-                                                  }
-                               },
-                  "lfo_square":  {
-                                     "type":  "LFO_CHOP",
-                                     "position":  [
-                                                      100,
-                                                      250
-                                                  ],
-                                     "parameters":  {
-                                                        "freq":  {
-                                                                     "value":  3.0
-                                                                 },
-                                                        "waveform":  {
-                                                                         "value":  2
-                                                                     }
-                                                    }
-                                 },
-                  "composite1":  {
-                                     "type":  "CompositeCHOP",
-                                     "position":  [
-                                                      500,
-                                                      150
-                                                  ],
-                                     "parameters":  {
-                                                        "method":  {
-                                                                       "value":  0
-                                                                   }
-                                                    }
-                                 },
-                  "null1":  {
-                                "type":  "NullCHOP",
-                                "position":  [
-                                                 800,
-                                                 150
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1500,
-                                                   150
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    1150,
-                                                    150
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "lfo_sine",
-                            "from_port":  0,
-                            "to":  "composite1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "lfo_square",
-                            "from_port":  0,
-                            "to":  "composite1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "composite1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Composite CHOP — Multi-Input Blend\n\nAverages a sine and square wave together.\nMethods: average, add, max, min.\nDynamic inputs for combining many sources.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo_sine": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "freq": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "waveform": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "lfo_square": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "freq": {
+                    "value": 3.0
+                },
+                "waveform": {
+                    "value": 2
+                }
+            }
+        },
+        "composite1": {
+            "type": "CompositeCHOP",
+            "position": [
+                500,
+                150
+            ],
+            "parameters": {
+                "method": {
+                    "value": 0
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                800,
+                150
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1500,
+                150
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                150
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "lfo_sine",
+            "from_port": 0,
+            "to": "composite1",
+            "to_port": 0
+        },
+        {
+            "from": "lfo_square",
+            "from_port": 0,
+            "to": "composite1",
+            "to_port": 1
+        },
+        {
+            "from": "composite1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Composite CHOP \u2014 Multi-Input Blend\n\nAverages a sine and square wave together.\nMethods: average, add, max, min.\nDynamic inputs for combining many sources.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

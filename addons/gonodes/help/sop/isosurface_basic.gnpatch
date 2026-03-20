@@ -10,13 +10,17 @@
             ],
             "parameters": {
                 "surface_type": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "resolution": {
                     "value": 40
                 },
                 "bounds_size": {
-                    "value": 6.28
+                    "value": 6.28,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "threshold": {
                     "value": 0.0

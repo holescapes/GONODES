@@ -4,69 +4,157 @@
     "nodes": {
         "particle1": {
             "type": "ParticleSOPNative",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "rate": {"value": 500.0},
-                "max_particles": {"value": 5000},
-                "life": {"value": 3.0},
-                "life_rand": {"value": 0.3},
-                "emit_speed": {"value": 2.0},
-                "spread": {"value": 45.0},
-                "gravity": {"value": -5.0},
-                "turbulence": {"value": 1.5},
-                "floor_enabled": {"value": true},
-                "floor_y": {"value": -2.0},
-                "bounce": {"value": 0.4}
+                "rate": {
+                    "value": 500.0,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
+                },
+                "max_particles": {
+                    "value": 5000
+                },
+                "life": {
+                    "value": 3.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "life_rand": {
+                    "value": 0.3
+                },
+                "emit_speed": {
+                    "value": 2.0
+                },
+                "spread": {
+                    "value": 45.0
+                },
+                "gravity": {
+                    "value": -5.0
+                },
+                "turbulence": {
+                    "value": 1.5
+                },
+                "floor_enabled": {
+                    "value": true
+                },
+                "floor_y": {
+                    "value": -2.0
+                },
+                "bounce": {
+                    "value": 0.4
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [450, 300],
+            "position": [
+                450,
+                300
+            ],
             "parameters": {
-                "tx": {"value": 3},
-                "ty": {"value": 2},
-                "tz": {"value": 5}
+                "tx": {
+                    "value": 3
+                },
+                "ty": {
+                    "value": 2
+                },
+                "tz": {
+                    "value": 5
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "particle1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "particle1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Particle SOP (Native) â€” Fountain with Floor\n\n500 particles/sec emitting upward with 45Â° spread.\nGravity pulls them down, floor at y=-2 with bounce.\nTurbulence adds organic motion.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Particle SOP (Native) \u00e2\u20ac\u201d Fountain with Floor\n\n500 particles/sec emitting upward with 45\u00c2\u00b0 spread.\nGravity pulls them down, floor at y=-2 with bounce.\nTurbulence adds organic motion.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

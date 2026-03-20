@@ -1,3 +1,4 @@
+class_name ShadertoyTOP
 extends GNTopBase
 ## Shadertoy GLSL shader node — inline editor + runtime translation pipeline.
 ##

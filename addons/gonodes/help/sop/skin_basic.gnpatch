@@ -25,10 +25,14 @@
             ],
             "parameters": {
                 "close_u": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "close_v": {
-                    "value": false
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "end_caps": {
                     "value": false

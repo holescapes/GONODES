@@ -26,10 +26,14 @@
             ],
             "parameters": {
                 "strength": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
                 },
                 "angle": {
-                    "value": 67.5
+                    "value": 67.5,
+                    "expression": "time * 45.0",
+                    "mode": "EXPRESSION"
                 },
                 "height": {
                     "value": 0.25

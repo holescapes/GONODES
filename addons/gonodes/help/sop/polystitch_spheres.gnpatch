@@ -4,88 +4,196 @@
     "nodes": {
         "sphere1": {
             "type": "SphereSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "rows": {"value": 8},
-                "columns": {"value": 8},
-                "radius": {"value": 1.0}
+                "rows": {
+                    "value": 8,
+                    "expression": "(8 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "columns": {
+                    "value": 8,
+                    "expression": "(8 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "radius": {
+                    "value": 1.0
+                }
             }
         },
         "sphere2": {
             "type": "SphereSOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "rows": {"value": 8},
-                "columns": {"value": 8},
-                "radius": {"value": 1.0}
+                "rows": {
+                    "value": 8
+                },
+                "columns": {
+                    "value": 8
+                },
+                "radius": {
+                    "value": 1.0
+                }
             }
         },
         "transform2": {
             "type": "TransformSOP",
-            "position": [450, 350],
+            "position": [
+                450,
+                350
+            ],
             "parameters": {
-                "tx": {"value": 1.5}
+                "tx": {
+                    "value": 1.5
+                }
             }
         },
         "polystitch1": {
             "type": "PolyStitchSOP",
-            "position": [800, 200],
+            "position": [
+                800,
+                200
+            ],
             "parameters": {
-                "max_distance": {"value": 1.0},
-                "include_inputs": {"value": true}
+                "max_distance": {
+                    "value": 1.0
+                },
+                "include_inputs": {
+                    "value": true
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [1150, 200],
+            "position": [
+                1150,
+                200
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [1150, 400],
+            "position": [
+                1150,
+                400
+            ],
             "parameters": {
-                "tx": {"value": 1.0},
-                "ty": {"value": 1.0},
-                "tz": {"value": 5.0}
+                "tx": {
+                    "value": 1.0
+                },
+                "ty": {
+                    "value": 1.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [1500, 200],
+            "position": [
+                1500,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1850, 200],
+            "position": [
+                1850,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "sphere2", "from_port": 0, "to": "transform2", "to_port": 0},
-        {"from": "sphere1", "from_port": 0, "to": "polystitch1", "to_port": 0},
-        {"from": "transform2", "from_port": 0, "to": "polystitch1", "to_port": 1},
-        {"from": "polystitch1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "sphere2",
+            "from_port": 0,
+            "to": "transform2",
+            "to_port": 0
+        },
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "polystitch1",
+            "to_port": 0
+        },
+        {
+            "from": "transform2",
+            "from_port": 0,
+            "to": "polystitch1",
+            "to_port": 1
+        },
+        {
+            "from": "polystitch1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "PolyStitch SOP \u2014 Sphere Merge\n\nTwo overlapping spheres stitched at their boundaries.\nmax_distance=1.0 finds nearby vertices to connect.\nCreates a merged mesh rather than just overlapping geo.\nUseful for joining organic shapes at contact points.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

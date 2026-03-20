@@ -13,13 +13,17 @@
                     "value": "[b]Hello[/b] World"
                 },
                 "bbcode": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "font_size": {
                     "value": 16
                 },
                 "fit_content": {
-                    "value": true
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "scroll_active": {
                     "value": false

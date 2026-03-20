@@ -1,152 +1,154 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "lfo1":  {
-                               "type":  "LFO_CHOP",
-                               "position":  [
-                                                100,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "waveform":  {
-                                                                   "value":  2
-                                                               },
-                                                  "frequency":  {
-                                                                    "value":  0.3
-                                                                },
-                                                  "amplitude":  {
-                                                                    "value":  1.0
-                                                                }
-                                              }
-                           },
-                  "hold1":  {
-                                "type":  "HoldCHOP",
-                                "position":  [
-                                                 100,
-                                                 300
-                                             ],
-                                "parameters":  {
-                                                   "threshold":  {
-                                                                     "value":  0.5
-                                                                 },
-                                                   "hold_on_start":  {
-                                                                         "value":  true
-                                                                     }
-                                               }
-                            },
-                  "noise1":  {
-                                 "type":  "NoiseCHOP",
-                                 "position":  [
-                                                  100,
-                                                  500
-                                              ],
-                                 "parameters":  {
-                                                    "num_channels":  {
-                                                                         "value":  1
-                                                                     },
-                                                    "roughness":  {
-                                                                      "value":  0.5
-                                                                  }
-                                                }
-                             },
-                  "null1":  {
-                                "type":  "NullCHOP",
-                                "position":  [
-                                                 450,
-                                                 400
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1150,
-                                                   400
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    800,
-                                                    400
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "hold1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "lfo1",
-                            "from_port":  0,
-                            "to":  "hold1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "hold1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Hold CHOP — Sample \u0026 Hold\n\nCaptures noise value when the square-wave\ntrigger (input 2) crosses the threshold.\nOutput holds constant between triggers.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         110.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "frequency": {
+                    "value": 0.3,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
+        },
+        "hold1": {
+            "type": "HoldCHOP",
+            "position": [
+                100,
+                300
+            ],
+            "parameters": {
+                "threshold": {
+                    "value": 0.5
+                },
+                "hold_on_start": {
+                    "value": true
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseCHOP",
+            "position": [
+                100,
+                500
+            ],
+            "parameters": {
+                "num_channels": {
+                    "value": 1
+                },
+                "roughness": {
+                    "value": 0.5
+                }
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                450,
+                400
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1150,
+                400
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                800,
+                400
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "hold1",
+            "to_port": 0
+        },
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "hold1",
+            "to_port": 1
+        },
+        {
+            "from": "hold1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Hold CHOP \u2014 Sample & Hold\n\nCaptures noise value when the square-wave\ntrigger (input 2) crosses the threshold.\nOutput holds constant between triggers.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

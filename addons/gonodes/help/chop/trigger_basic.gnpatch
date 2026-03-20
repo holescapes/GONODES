@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "attack": {
-                    "value": 0.05
+                    "value": 0.05,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "sustain": {
-                    "value": 0.1
+                    "value": 0.1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "release": {
                     "value": 0.3

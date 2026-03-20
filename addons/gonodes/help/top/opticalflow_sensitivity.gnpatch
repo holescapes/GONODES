@@ -33,10 +33,14 @@
                     }
                 },
                 "sensitivity": {
-                    "value": 10.0
+                    "value": 10.0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "smoothing": {
-                    "value": 0.05
+                    "value": 0.05,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "iterations": {
                     "value": 3

@@ -1,103 +1,105 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  100,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "resolution":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Vector2i",
-                                                                                     "x":  512,
-                                                                                     "y":  512
-                                                                                 }
-                                                                   },
-                                                    "scale":  {
-                                                                  "value":  3.0
-                                                              },
-                                                    "monochrome":  {
-                                                                       "value":  false
-                                                                   }
-                                                }
-                             },
-                  "filesave1":  {
-                                    "type":  "TextureSaveOUT",
-                                    "position":  [
-                                                     450,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "active":  {
-                                                                      "value":  false
-                                                                  },
-                                                       "file_path":  {
-                                                                         "value":  "user://output/frame"
-                                                                     },
-                                                       "format":  {
-                                                                      "value":  0
-                                                                  },
-                                                       "auto_number":  {
-                                                                           "value":  true
-                                                                       }
-                                                   }
-                                },
-                  "window1":  {
-                                  "position":  [
-                                                   800,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "filesave1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "filesave1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "File Save TOP — Export\n\nSaves input texture as PNG frames.\nSet \u0027active\u0027 to true to start saving.\nAuto-numbering appends frame index.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 3.0
+                },
+                "monochrome": {
+                    "value": false
+                }
+            }
+        },
+        "filesave1": {
+            "type": "TextureSaveOUT",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "active": {
+                    "value": false
+                },
+                "file_path": {
+                    "value": "user://output/frame"
+                },
+                "format": {
+                    "value": 0
+                },
+                "auto_number": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "filesave1",
+            "to_port": 0
+        },
+        {
+            "from": "filesave1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "File Save TOP \u2014 Export\n\nSaves input texture as PNG frames.\nSet 'active' to true to start saving.\nAuto-numbering appends frame index.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

@@ -1,176 +1,170 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "box1":  {
-                               "type":  "BoxSOP",
-                               "position":  [
-                                                -300,
-                                                50
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "sphere1":  {
-                               "type":  "SphereSOP",
-                               "position":  [
-                                                -300,
-                                                200
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "geo1":  {
-                               "type":  "GeometryCOMP",
-                               "position":  [
-                                                0,
-                                                50
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "geo2":  {
-                               "type":  "GeometryCOMP",
-                               "position":  [
-                                                0,
-                                                200
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "sw1":  {
-                              "type":  "SwitchCOMP",
-                              "position":  [
-                                               350,
-                                               125
-                                           ],
-                              "parameters":  {
-                                                 "index":  {
-                                                               "value":  0
-                                                           }
-                                             }
-                          },
-                  "window1":  {
-                                  "position":  [
-                                                   1000,
-                                                   125
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       650,
-                                                       125
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    350,
-                                                    325
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "box1",
-                            "from_port":  0,
-                            "to":  "geo1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "sphere1",
-                            "from_port":  0,
-                            "to":  "geo2",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo1",
-                            "from_port":  0,
-                            "to":  "sw1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo2",
-                            "from_port":  0,
-                            "to":  "sw1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "sw1",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Switch COMP — Select Input\n\nSelects one of up to 8 component inputs.\nChange \u0027index\u0027 to switch between scenes.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                -300,
+                50
+            ],
+            "parameters": {}
+        },
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                -300,
+                200
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                0,
+                50
+            ],
+            "parameters": {}
+        },
+        "geo2": {
+            "type": "GeometryCOMP",
+            "position": [
+                0,
+                200
+            ],
+            "parameters": {}
+        },
+        "sw1": {
+            "type": "SwitchCOMP",
+            "position": [
+                350,
+                125
+            ],
+            "parameters": {
+                "index": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1000,
+                125
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                650,
+                125
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                350,
+                325
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "geo2",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "sw1",
+            "to_port": 0
+        },
+        {
+            "from": "geo2",
+            "from_port": 0,
+            "to": "sw1",
+            "to_port": 1
+        },
+        {
+            "from": "sw1",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Switch COMP \u2014 Select Input\n\nSelects one of up to 8 component inputs.\nChange 'index' to switch between scenes.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

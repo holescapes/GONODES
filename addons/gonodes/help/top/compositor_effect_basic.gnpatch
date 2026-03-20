@@ -1,132 +1,134 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "box1":  {
-                               "type":  "BoxSOP",
-                               "position":  [
-                                                -400,
-                                                0
-                                            ],
-                               "parameters":  {
-                                                  "size_x":  {
-                                                                 "value":  1.2
-                                                             },
-                                                  "size_y":  {
-                                                                 "value":  1.2
-                                                             },
-                                                  "size_z":  {
-                                                                 "value":  1.2
-                                                             }
-                                              }
-                           },
-                  "geo1":  {
-                               "type":  "GeometryCOMP",
-                               "position":  [
-                                                0,
-                                                0
-                                            ],
-                               "parameters":  {
-
-                                              }
-                           },
-                  "cam1":  {
-                               "type":  "CameraCOMP",
-                               "position":  [
-                                                0,
-                                                280
-                                            ],
-                               "parameters":  {
-                                                  "tx":  {
-                                                             "value":  0.5
-                                                         },
-                                                  "ty":  {
-                                                             "value":  0.8
-                                                         },
-                                                  "tz":  {
-                                                             "value":  4
-                                                         }
-                                              }
-                           },
-                  "compositor1":  {
-                                      "type":  "CompositorEffectTOP",
-                                      "position":  [
-                                                       400,
-                                                       0
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        },
-                                                         "effect_mode":  {
-                                                                             "value":  0
-                                                                         },
-                                                         "threshold":  {
-                                                                           "value":  0.05
-                                                                       },
-                                                         "strength":  {
-                                                                          "value":  1.0
-                                                                      },
-                                                         "tint":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Color",
-                                                                                    "r":  0.0,
-                                                                                    "g":  0.0,
-                                                                                    "b":  0.0,
-                                                                                    "a":  1.0
-                                                                                }
-                                                                  }
-                                                     }
-                                  },
-                  "window1":  {
-                                  "type":  "WindowOUT",
-                                  "position":  [
-                                                   800,
-                                                   0
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512,
-                                                                                      "y":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 }
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "box1",
-                            "from_port":  0,
-                            "to":  "geo1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo1",
-                            "from_port":  0,
-                            "to":  "compositor1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam1",
-                            "from_port":  0,
-                            "to":  "compositor1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "compositor1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  []
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                -400,
+                0
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 1.2
+                },
+                "size_y": {
+                    "value": 1.2
+                },
+                "size_z": {
+                    "value": 1.2
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                0,
+                280
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.5
+                },
+                "ty": {
+                    "value": 0.8
+                },
+                "tz": {
+                    "value": 4
+                }
+            }
+        },
+        "compositor1": {
+            "type": "CompositorEffectTOP",
+            "position": [
+                400,
+                0
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "effect_mode": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "threshold": {
+                    "value": 0.05,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "strength": {
+                    "value": 1.0
+                },
+                "tint": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.0,
+                        "g": 0.0,
+                        "b": 0.0,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                0
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "compositor1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "compositor1",
+            "to_port": 1
+        },
+        {
+            "from": "compositor1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": []
 }

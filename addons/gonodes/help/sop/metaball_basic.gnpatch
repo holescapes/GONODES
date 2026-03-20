@@ -1,180 +1,180 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "metaball1":  {
-                                    "type":  "MetaballSOP",
-                                    "position":  [
-                                                     100,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "resolution":  {
-                                                                          "value":  40
-                                                                      },
-                                                       "bounds_size":  {
-                                                                           "value":  6.0
-                                                                       },
-                                                       "threshold":  {
-                                                                         "value":  1.0
-                                                                     },
-                                                       "ball_count":  {
-                                                                          "value":  3
-                                                                      },
-                                                       "b0x":  {
-                                                                   "value":  -0.8
-                                                               },
-                                                       "b0y":  {
-                                                                   "value":  0.0
-                                                               },
-                                                       "b0r":  {
-                                                                   "value":  1.5
-                                                               },
-                                                       "b1x":  {
-                                                                   "value":  0.8
-                                                               },
-                                                       "b1y":  {
-                                                                   "value":  0.0
-                                                               },
-                                                       "b1r":  {
-                                                                   "value":  1.5
-                                                               },
-                                                       "b2x":  {
-                                                                   "value":  0.0
-                                                               },
-                                                       "b2y":  {
-                                                                   "value":  1.2
-                                                               },
-                                                       "b2r":  {
-                                                                   "value":  1.0
-                                                               }
-                                                   }
-                                },
-                  "null1":  {
-                                "type":  "NullSOP",
-                                "position":  [
-                                                 400,
-                                                 100
-                                             ],
-                                "parameters":  {
-
-                                               }
-                            },
-                  "window1":  {
-                                  "position":  [
-                                                   1350,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    700,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    700,
-                                                    300
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1000,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  }
-              },
-    "connections":  [
-                        {
-                            "from":  "metaball1",
-                            "from_port":  0,
-                            "to":  "null1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "null1",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Metaball SOP — Blobby Blending\n\nThree balls blend together smoothly via marching cubes.\nAdjust threshold and ball positions to control blending.\nConnect a ScatterSOP to the points input for dynamic placement.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "metaball1": {
+            "type": "MetaballSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": 40
+                },
+                "bounds_size": {
+                    "value": 6.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "threshold": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "ball_count": {
+                    "value": 3
+                },
+                "b0x": {
+                    "value": -0.8
+                },
+                "b0y": {
+                    "value": 0.0
+                },
+                "b0r": {
+                    "value": 1.5
+                },
+                "b1x": {
+                    "value": 0.8
+                },
+                "b1y": {
+                    "value": 0.0
+                },
+                "b1r": {
+                    "value": 1.5
+                },
+                "b2x": {
+                    "value": 0.0
+                },
+                "b2y": {
+                    "value": 1.2
+                },
+                "b2r": {
+                    "value": 1.0
+                }
+            }
+        },
+        "null1": {
+            "type": "NullSOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1350,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "metaball1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Metaball SOP \u2014 Blobby Blending\n\nThree balls blend together smoothly via marching cubes.\nAdjust threshold and ball positions to control blending.\nConnect a ScatterSOP to the points input for dynamic placement.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

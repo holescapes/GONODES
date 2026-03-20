@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 4
+                    "value": 4,
+                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "cols": {
-                    "value": 4
+                    "value": 4,
+                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 }
             }
         },

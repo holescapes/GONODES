@@ -4,62 +4,136 @@
     "nodes": {
         "wave1": {
             "type": "WaveCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "waveform": {"value": 0},
-                "frequency": {"value": 1.0},
-                "amplitude": {"value": 1.0}
+                "waveform": {
+                    "value": 0
+                },
+                "frequency": {
+                    "value": 1.0
+                },
+                "amplitude": {
+                    "value": 1.0
+                }
             }
         },
         "fan1": {
             "type": "FanCHOPNative",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "count": {"value": 6},
-                "offset": {"value": 0.15},
-                "operation": {"value": 2},
-                "prefix": {"value": "ch"}
+                "count": {
+                    "value": 6,
+                    "expression": "(6 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "offset": {
+                    "value": 0.15,
+                    "expression": "sin(time * 2.0) * 0.2",
+                    "mode": "EXPRESSION"
+                },
+                "operation": {
+                    "value": 2
+                },
+                "prefix": {
+                    "value": "ch"
+                }
             }
         },
         "null1": {
             "type": "NullCHOP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {}
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1500, 100],
+            "position": [
+                1500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "wave1", "from_port": 0, "to": "fan1", "to_port": 0},
-        {"from": "fan1", "from_port": 0, "to": "null1", "to_port": 0},
-        {"from": "null1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "wave1",
+            "from_port": 0,
+            "to": "fan1",
+            "to_port": 0
+        },
+        {
+            "from": "fan1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Fan CHOP (Native) \u2014 Phase-Shifted Copies\n\nSine wave fanned into 6 channels with 0.15 phase shift each.\nCreates a cascading wave pattern.\nNative C++ generates all fan copies in one pass.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -26,10 +26,14 @@
             ],
             "parameters": {
                 "overlap_start": {
-                    "value": 0.2
+                    "value": 0.2,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "overlap_end": {
-                    "value": 0.3
+                    "value": 0.3,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "blend_axis": {
                     "value": 1
@@ -69,6 +73,25 @@
                 }
             }
         },
+        "src_circle": {
+            "type": "CircleTOP",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "radius": {
+                    "value": 0.3
+                }
+            }
+        },
         "window1": {
             "type": "WindowOUT",
             "position": [
@@ -95,6 +118,12 @@
             "from_port": 0,
             "to": "projector_blend1",
             "to_port": 0
+        },
+        {
+            "from": "src_circle",
+            "from_port": 0,
+            "to": "projector_blend1",
+            "to_port": 1
         },
         {
             "from": "projector_blend1",

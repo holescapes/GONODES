@@ -18,75 +18,6 @@
             ],
             "parameters": {}
         },
-        "light1": {
-            "type": "LightCOMP",
-            "position": [
-                400,
-                300
-            ],
-            "parameters": {
-                "type": {
-                    "value": 0
-                },
-                "tx": {
-                    "value": 0.0
-                },
-                "ty": {
-                    "value": 3.0
-                },
-                "tz": {
-                    "value": 2.0
-                },
-                "rx": {
-                    "value": -45.0
-                },
-                "ry": {
-                    "value": 0.0
-                },
-                "rz": {
-                    "value": 0.0
-                },
-                "color": {
-                    "value": {
-                        "_type": "Color",
-                        "r": 1.0,
-                        "g": 1.0,
-                        "b": 1.0,
-                        "a": 1.0
-                    }
-                },
-                "energy": {
-                    "value": 1.0
-                },
-                "shadows": {
-                    "value": true
-                },
-                "shadow_bias": {
-                    "value": 0.1
-                },
-                "shadow_normal_bias": {
-                    "value": 1.0
-                },
-                "shadow_blur": {
-                    "value": 1.0
-                },
-                "shadow_opacity": {
-                    "value": 1.0
-                },
-                "dir_shadow_mode": {
-                    "value": 0
-                },
-                "omni_range": {
-                    "value": 10.0
-                },
-                "spot_range": {
-                    "value": 10.0
-                },
-                "spot_angle": {
-                    "value": 45.0
-                }
-            }
-        },
         "cam1": {
             "type": "CameraCOMP",
             "position": [
@@ -165,7 +96,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LightCOMP \u2014 Basic\n\nDefault settings.",
+            "text": "LightCOMP — Basic\n\nDefault settings.",
             "position": [
                 -100.0,
                 -100.0

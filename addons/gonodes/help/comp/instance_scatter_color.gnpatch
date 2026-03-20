@@ -4,87 +4,205 @@
     "nodes": {
         "sphere1": {
             "type": "SphereSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "grid1": {
             "type": "GridSOP",
-            "position": [100, 300],
+            "position": [
+                100,
+                300
+            ],
             "parameters": {
-                "rows": {"value": 8},
-                "cols": {"value": 8}
+                "rows": {
+                    "value": 8
+                },
+                "cols": {
+                    "value": 8
+                }
             }
         },
         "scatter1": {
             "type": "ScatterSOP",
-            "position": [350, 300],
+            "position": [
+                350,
+                300
+            ],
             "parameters": {
-                "count": {"value": 50}
+                "count": {
+                    "value": 50
+                }
             }
         },
         "noise_color": {
             "type": "NoiseCHOP",
-            "position": [100, 520],
+            "position": [
+                100,
+                520
+            ],
             "parameters": {
-                "num_channels": {"value": 4},
-                "channel_names": {"value": "r,g,b,a"},
-                "roughness": {"value": 0.2},
-                "period": {"value": 4.0},
-                "seed": {"value": 3}
+                "num_channels": {
+                    "value": 4,
+                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "channel_names": {
+                    "value": "r,g,b,a"
+                },
+                "roughness": {
+                    "value": 0.2,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "period": {
+                    "value": 4.0
+                },
+                "seed": {
+                    "value": 3
+                }
             }
         },
         "instance1": {
             "type": "InstanceCOMP",
-            "position": [650, 200],
+            "position": [
+                650,
+                200
+            ],
             "parameters": {
-                "chop_map": {"value": 4},
-                "scale_rand": {"value": 0.2},
-                "rotation_rand": {"value": 30.0}
+                "chop_map": {
+                    "value": 4
+                },
+                "scale_rand": {
+                    "value": 0.2
+                },
+                "rotation_rand": {
+                    "value": 30.0
+                }
             }
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [650, 520],
+            "position": [
+                650,
+                520
+            ],
             "parameters": {
-                "tx": {"value": 0.0},
-                "ty": {"value": 2.5},
-                "tz": {"value": 6.0},
-                "rx": {"value": -20.0}
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 2.5
+                },
+                "tz": {
+                    "value": 6.0
+                },
+                "rx": {
+                    "value": -20.0
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [1000, 200],
+            "position": [
+                1000,
+                200
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1350, 200],
+            "position": [
+                1350,
+                200
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "sphere1", "from_port": 0, "to": "instance1", "to_port": 0},
-        {"from": "grid1", "from_port": 0, "to": "scatter1", "to_port": 0},
-        {"from": "scatter1", "from_port": 0, "to": "instance1", "to_port": 1},
-        {"from": "noise_color", "from_port": 0, "to": "instance1", "to_port": 3},
-        {"from": "instance1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "instance1",
+            "to_port": 0
+        },
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "scatter1",
+            "to_port": 0
+        },
+        {
+            "from": "scatter1",
+            "from_port": 0,
+            "to": "instance1",
+            "to_port": 1
+        },
+        {
+            "from": "noise_color",
+            "from_port": 0,
+            "to": "instance1",
+            "to_port": 3
+        },
+        {
+            "from": "instance1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Instance COMP \u2014 Scatter + CHOP Color\n\n50 spheres scattered on a grid surface.\nNoiseCHOP drives per-instance color (r,g,b,a).\nScatter provides random positions from point cloud.\nScale and rotation randomization add variety.",
-            "position": [-120.0, -130.0],
-            "size": [500.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -120.0,
+                -130.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

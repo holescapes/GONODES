@@ -4,45 +4,163 @@
     "nodes": {
         "grid1": {
             "type": "GridSOP",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "size_x": {"value": 3.0},
-                "size_y": {"value": 3.0},
-                "rows": {"value": 30},
-                "cols": {"value": 30}
+                "size_x": {
+                    "value": 3.0
+                },
+                "size_y": {
+                    "value": 3.0
+                },
+                "rows": {
+                    "value": 30
+                },
+                "cols": {
+                    "value": 30
+                }
             }
         },
         "cloth1": {
             "type": "ClothSOP",
-            "position": [500, 200],
+            "position": [
+                500,
+                200
+            ],
             "parameters": {
-                "gravity": {"value": -5.0},
-                "damping": {"value": 0.98},
-                "iterations": {"value": 12},
-                "stiffness": {"value": 0.8},
-                "wind": {"value": {"_type": "Vector3", "x": 2.0, "y": 0.5, "z": 1.0}},
-                "pin_mode": {"value": 1},
-                "substeps": {"value": 3.0}
+                "gravity": {
+                    "value": -5.0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
+                },
+                "damping": {
+                    "value": 0.98,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "iterations": {
+                    "value": 12
+                },
+                "stiffness": {
+                    "value": 0.8
+                },
+                "wind": {
+                    "value": {
+                        "_type": "Vector3",
+                        "x": 2.0,
+                        "y": 0.5,
+                        "z": 1.0
+                    }
+                },
+                "pin_mode": {
+                    "value": 1
+                },
+                "substeps": {
+                    "value": 3.0
+                }
             }
         },
         "render1": {
-            "type": "RenderCOMP",
-            "position": [900, 200],
+            "type": "RenderTOP",
+            "position": [
+                900,
+                200
+            ],
             "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                200
+            ],
+            "parameters": {}
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                400
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 5.0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        {"from": "grid1", "from_port": 0, "to": "cloth1", "to_port": 0},
-        {"from": "cloth1", "from_port": 0, "to": "render1", "to_port": 0}
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "cloth1",
+            "to_port": 0
+        },
+        {
+            "from": "cloth1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Cloth SOP \u2014 Wind Flag\n\nLarger 30\u00d730 grid pinned at top corners only.\nWind vector (2, 0.5, 1) creates a flag-blowing\neffect. 12 iterations + 3 substeps for stability.\nLower stiffness (0.8) gives softer drape.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

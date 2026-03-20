@@ -2,22 +2,6 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_ramp": {
-            "type": "RampTOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
         "spoutintop1": {
             "type": "SpoutInTOP",
             "position": [
@@ -56,12 +40,6 @@
     },
     "connections": [
         {
-            "from": "src_ramp",
-            "from_port": 0,
-            "to": "spoutintop1",
-            "to_port": 0
-        },
-        {
             "from": "spoutintop1",
             "from_port": 0,
             "to": "window1",
@@ -72,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SpoutInTOP \u2014 Parameters\n\nShowcases: sender_name, resolution.\nRequires gn_ext_spout extension.",
+            "text": "SpoutInTOP — Parameters\n\nShowcases: sender_name, resolution.\nRequires gn_ext_spout extension.",
             "position": [
                 -100.0,
                 -100.0

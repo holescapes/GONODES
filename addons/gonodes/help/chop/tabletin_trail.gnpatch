@@ -4,60 +4,126 @@
     "nodes": {
         "tabletin1": {
             "type": "TabletInCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "normalize": {"value": false},
-                "active": {"value": true}
+                "normalize": {
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "active": {
+                    "value": true
+                }
             }
         },
         "filter1": {
             "type": "FilterCHOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "width": {"value": 0.2}
+                "width": {
+                    "value": 0.2
+                }
             }
         },
         "trail1": {
             "type": "TrailCHOP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
-                "length": {"value": 120}
+                "length": {
+                    "value": 120
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1550, 100],
+            "position": [
+                1550,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "tabletin1", "from_port": 0, "to": "filter1", "to_port": 0},
-        {"from": "filter1", "from_port": 0, "to": "trail1", "to_port": 0},
-        {"from": "trail1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "tabletin1",
+            "from_port": 0,
+            "to": "filter1",
+            "to_port": 0
+        },
+        {
+            "from": "filter1",
+            "from_port": 0,
+            "to": "trail1",
+            "to_port": 0
+        },
+        {
+            "from": "trail1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "TabletIn CHOP \u2014 Smoothed Trail\n\nRaw pixel coordinates (normalize=false) smoothed through\nFilter CHOP, then captured as a 120-sample history by Trail.\nVisualizes pen movement as a time graph.\nGood for analyzing pen input quality or jitter.",
-            "position": [-100.0, -120.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -4,43 +4,134 @@
     "nodes": {
         "const1": {
             "type": "ConstantCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "value0": { "value": 1.0 },
-                "name0": { "value": "tx" },
-                "value1": { "value": 0.0 },
-                "name1": { "value": "ty" },
-                "value2": { "value": 0.0 },
-                "name2": { "value": "tz" }
+                "value0": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "name0": {
+                    "value": "tx"
+                },
+                "value1": {
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "name1": {
+                    "value": "ty"
+                },
+                "value2": {
+                    "value": 0.0
+                },
+                "name2": {
+                    "value": "tz"
+                }
             }
         },
         "transform1": {
             "type": "TransformCHOP",
-            "position": [400, 100],
+            "position": [
+                400,
+                100
+            ],
             "parameters": {
-                "rx": { "value": 0.0 },
-                "ry": { "value": 45.0 },
-                "rz": { "value": 0.0 }
+                "rx": {
+                    "value": 0.0
+                },
+                "ry": {
+                    "value": 45.0
+                },
+                "rz": {
+                    "value": 0.0
+                }
             }
         },
         "null1": {
             "type": "NullCHOP",
-            "position": [650, 100],
+            "position": [
+                650,
+                100
+            ],
             "parameters": {}
+        },
+        "choptotop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                950,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1250,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        { "from": "const1", "from_port": 0, "to": "transform1", "to_port": 0 },
-        { "from": "transform1", "from_port": 0, "to": "null1", "to_port": 0 }
+        {
+            "from": "const1",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "transform1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "choptotop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Transform CHOP\n\nApplies 3D transform (translate, rotate, scale) to\nxyz channel groups. Auto-detects tx/ty/tz patterns.\n6 transform orders available (SRT, STR, RST, etc.).",
-            "position": [50.0, -50.0],
-            "size": [500.0, 80.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                50.0,
+                -50.0
+            ],
+            "size": [
+                500.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

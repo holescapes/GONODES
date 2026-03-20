@@ -1,100 +1,102 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "filein1":  {
-                                  "type":  "FileInDAT",
-                                  "position":  [
-                                                   200,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "filepath":  {
-                                                                      "value":  "res://addons/gonodes/help/dat/sample.csv"
-                                                                  },
-                                                     "mode":  {
-                                                                  "value":  0
-                                                              },
-                                                     "has_header":  {
-                                                                        "value":  true
-                                                                    }
-                                                 }
-                              },
-                  "window1":  {
-                                  "position":  [
-                                                   900,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "text_view":  {
-                                    "type":  "TextTOP",
-                                    "position":  [
-                                                     550,
-                                                     100
-                                                 ],
-                                    "parameters":  {
-                                                       "resolution":  {
-                                                                          "value":  {
-                                                                                        "_type":  "Vector2i",
-                                                                                        "x":  512,
-                                                                                        "y":  512
-                                                                                    }
-                                                                      },
-                                                       "text":  {
-                                                                    "value":  "FileInDAT output"
-                                                                },
-                                                       "font_size":  {
-                                                                         "value":  24
-                                                                     }
-                                                   }
-                                }
-              },
-    "connections":  [
-                        {
-                            "from":  "filein1",
-                            "from_port":  0,
-                            "to":  "text_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "text_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "File In DAT — Read from Disk\n\nLoads CSV/TSV/JSON/text files.\nAuto-detects format from extension.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "filein1": {
+            "type": "FileInDAT",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "filepath": {
+                    "value": "res://addons/gonodes/help/dat/sample.csv"
+                },
+                "mode": {
+                    "value": 0
+                },
+                "has_header": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "text_view": {
+            "type": "TextTOP",
+            "position": [
+                550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "text": {
+                    "value": "FileInDAT output"
+                },
+                "font_size": {
+                    "value": 24
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "filein1",
+            "from_port": 0,
+            "to": "text_view",
+            "to_port": 0
+        },
+        {
+            "from": "text_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "File In DAT \u2014 Read from Disk\n\nLoads CSV/TSV/JSON/text files.\nAuto-detects format from extension.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

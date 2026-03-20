@@ -302,19 +302,37 @@ def build_comp_chain(focus_node_name, focus_node, extra_nodes=None, extra_conns=
 
 
 def build_pop_chain(focus_node_name, focus_node, extra_nodes=None, extra_conns=None, annotation_text="", win_x=1550):
-    """POP → (source chain) → RenderPOP → WindowOUT"""
+    """POP → (source chain) → RenderPOP → RenderTOP ← CameraCOMP → WindowOUT"""
     nodes = {}
     if extra_nodes:
         nodes.update(extra_nodes)
     nodes[focus_node_name] = focus_node
-    rn, rv = pop_render(x=win_x - 400)
+    rn, rv = pop_render(x=win_x - 800)
     nodes[rn] = rv
+    nodes["camera1"] = {
+        "type": "CameraCOMP",
+        "position": [win_x - 600, 300],
+        "parameters": {
+            "tx": {"value": 0.0},
+            "ty": {"value": 0.0},
+            "tz": {"value": 5.0}
+        }
+    }
+    nodes["render1"] = {
+        "type": "RenderTOP",
+        "position": [win_x - 400, 100],
+        "parameters": {
+            "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+        }
+    }
     wn, wv = window_out(x=win_x)
     nodes[wn] = wv
     conns = []
     if extra_conns:
         conns.extend(extra_conns)
-    conns.append(conn(rn, 0, wn, 0))
+    conns.append(conn(rn, 0, "render1", 0))
+    conns.append(conn("camera1", 0, "render1", 1))
+    conns.append(conn("render1", 0, wn, 0))
     return build_patch(nodes, conns, annotation_text)
 
 

@@ -10,10 +10,14 @@
             ],
             "parameters": {
                 "radius_outer": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "radius_inner": {
-                    "value": 0.3
+                    "value": 0.3,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "height": {
                     "value": 1.0

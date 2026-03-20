@@ -18,13 +18,17 @@
             ],
             "parameters": {
                 "entity": {
-                    "value": 1
+                    "value": 1,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "method": {
                     "value": 1
                 },
                 "start": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "end": {
                     "value": 9

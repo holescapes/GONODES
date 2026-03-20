@@ -3,20 +3,19 @@
     "generator": "GONODES",
     "nodes": {
         "trigger1": {
-            "type": "TriggerCHOP",
+            "type": "AreaCOMP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "attack": {
-                    "value": 0.01
+                "mode": {
+                    "value": 0
                 },
-                "sustain": {
-                    "value": 0.1
-                },
-                "release": {
-                    "value": 0.01
+                "mass": {
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },

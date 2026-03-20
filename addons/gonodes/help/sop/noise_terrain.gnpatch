@@ -1,164 +1,166 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "grid1":  {
-                                "type":  "GridSOP",
-                                "position":  [
-                                                 100,
-                                                 100
-                                             ],
-                                "parameters":  {
-                                                   "size_x":  {
-                                                                  "value":  3.0
-                                                              },
-                                                   "size_z":  {
-                                                                  "value":  3.0
-                                                              },
-                                                   "rows":  {
-                                                                "value":  32
-                                                            },
-                                                   "cols":  {
-                                                                "value":  32
-                                                            }
-                                               }
-                            },
-                  "noise1":  {
-                                 "type":  "NoiseSOP",
-                                 "position":  [
-                                                  450,
-                                                  100
-                                              ],
-                                 "parameters":  {
-                                                    "amplitude":  {
-                                                                      "value":  0.5
-                                                                  },
-                                                    "frequency":  {
-                                                                      "value":  2.0
-                                                                  },
-                                                    "speed":  {
-                                                                  "value":  1.0
-                                                              },
-                                                    "noise_type":  {
-                                                                       "value":  0
-                                                                   }
-                                                }
-                             },
-                  "window1":  {
-                                  "position":  [
-                                                   1400,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    750,
-                                                    100
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    750,
-                                                    300
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1050,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  }
-              },
-    "connections":  [
-                        {
-                            "from":  "grid1",
-                            "from_port":  0,
-                            "to":  "noise1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Noise SOP — Terrain Deformation\n\nDeforms a 32×32 grid with animated simplex noise.\nAmplitude 0.5, frequency 2, speed 1.\nCreates rolling terrain effect.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "grid1": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 3.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "size_z": {
+                    "value": 3.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "rows": {
+                    "value": 32
+                },
+                "cols": {
+                    "value": 32
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseSOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "amplitude": {
+                    "value": 0.5
+                },
+                "frequency": {
+                    "value": 2.0
+                },
+                "speed": {
+                    "value": 1.0
+                },
+                "noise_type": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1400,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                750,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                750,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1050,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "noise1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Noise SOP \u2014 Terrain Deformation\n\nDeforms a 32\u00d732 grid with animated simplex noise.\nAmplitude 0.5, frequency 2, speed 1.\nCreates rolling terrain effect.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

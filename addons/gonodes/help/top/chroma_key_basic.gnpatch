@@ -32,7 +32,9 @@
             ],
             "parameters": {
                 "key_mode": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "key_color": {
                     "value": {
@@ -44,7 +46,9 @@
                     }
                 },
                 "threshold": {
-                    "value": 0.4
+                    "value": 0.4,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "smoothness": {
                     "value": 0.08

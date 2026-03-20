@@ -4,30 +4,104 @@
     "nodes": {
         "usernativedat1": {
             "type": "UserNativeDAT",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "cpp_class": {"value": "MyUserDAT"},
-                "auto_build": {"value": true},
-                "time_dep": {"value": true}
+                "cpp_class": {
+                    "value": "MyUserDAT"
+                },
+                "auto_build": {
+                    "value": true
+                },
+                "time_dep": {
+                    "value": true
+                }
             }
         },
         "null1": {
             "type": "NullDAT",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "DAT Output",
+                    "expression": "str(op(\"null1\"))",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         }
     },
     "connections": [
-        {"from": "usernativedat1", "from_port": 0, "to": "null1", "to_port": 0}
+        {
+            "from": "usernativedat1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "UserNativeDAT \u2014 Basic C++ Table Generator\n\nWrite custom DAT operators in C++ for table/text processing.\nThe default example generates a table with sine values.\nTry loading the CSV Parser example for high-performance\nCSV parsing.\n\nC++ string operations run much faster than GDScript\nfor large datasets (10k+ rows).",
-            "position": [-100.0, -100.0],
-            "size": [480.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                480.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

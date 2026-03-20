@@ -18,7 +18,9 @@
             ],
             "parameters": {
                 "max_rows": {
-                    "value": 102
+                    "value": 102,
+                    "expression": "(102 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "active": {
                     "value": false

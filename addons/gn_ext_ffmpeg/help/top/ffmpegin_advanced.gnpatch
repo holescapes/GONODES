@@ -2,25 +2,6 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_circle": {
-            "type": "CircleTOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "radius": {
-                    "value": 0.3
-                }
-            }
-        },
         "ffmpegin1": {
             "type": "FFmpegInTOP",
             "position": [
@@ -36,16 +17,20 @@
                     }
                 },
                 "play": {
-                    "value": false
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "loop": {
-                    "value": false
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "speed": {
                     "value": 2.0
                 },
                 "seek": {
-                    "value": -2.0
+                    "value": -1.0
                 },
                 "bg_color": {
                     "value": {
@@ -57,7 +42,7 @@
                     }
                 },
                 "volume_db": {
-                    "value": -160.0
+                    "value": -80.0
                 }
             }
         },
@@ -82,12 +67,6 @@
         }
     },
     "connections": [
-        {
-            "from": "src_circle",
-            "from_port": 0,
-            "to": "ffmpegin1",
-            "to_port": 0
-        },
         {
             "from": "ffmpegin1",
             "from_port": 0,

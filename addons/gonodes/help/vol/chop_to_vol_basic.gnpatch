@@ -4,76 +4,180 @@
     "nodes": {
         "lfo1": {
             "type": "LFO_CHOP",
-            "position": [200, 200],
+            "position": [
+                200,
+                200
+            ],
             "parameters": {
-                "frequency": {"value": 0.5},
-                "waveform": {"value": 0},
-                "amplitude": {"value": 1.0},
-                "phase": {"value": 0.0}
+                "frequency": {
+                    "value": 0.5
+                },
+                "waveform": {
+                    "value": 0
+                },
+                "amplitude": {
+                    "value": 1.0
+                },
+                "phase": {
+                    "value": 0.0
+                }
             }
         },
         "noise_chop": {
             "type": "NoiseCHOP",
-            "position": [200, 500],
+            "position": [
+                200,
+                500
+            ],
             "parameters": {
-                "seed": {"value": 42},
-                "channels": {"value": 3},
-                "roughness": {"value": 0.6},
-                "period": {"value": 2.0}
+                "seed": {
+                    "value": 42
+                },
+                "channels": {
+                    "value": 3
+                },
+                "roughness": {
+                    "value": 0.6
+                },
+                "period": {
+                    "value": 2.0
+                }
             }
         },
         "merge_chop": {
             "type": "MergeCHOP",
-            "position": [550, 350],
+            "position": [
+                550,
+                350
+            ],
             "parameters": {}
         },
         "chop_to_vol1": {
             "type": "CHOPtoVOL",
-            "position": [900, 350],
+            "position": [
+                900,
+                350
+            ],
             "parameters": {
-                "res_x": {"value": 32},
-                "res_y": {"value": 32},
-                "res_z": {"value": 32},
-                "mapping": {"value": 0}
+                "res_x": {
+                    "value": 32
+                },
+                "res_y": {
+                    "value": 32
+                },
+                "res_z": {
+                    "value": 32
+                },
+                "mapping": {
+                    "value": 0
+                }
             }
         },
         "raymarch1": {
             "type": "RaymarchVOL",
-            "position": [1250, 350],
+            "position": [
+                1250,
+                350
+            ],
             "parameters": {
-                "width": {"value": 512},
-                "height": {"value": 512},
-                "max_steps": {"value": 100},
-                "step_size": {"value": 0.012},
-                "density_scale": {"value": 4.0},
-                "absorption": {"value": 8.0},
-                "cam_dist": {"value": 2.2}
+                "width": {
+                    "value": 512,
+                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "height": {
+                    "value": 512,
+                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "max_steps": {
+                    "value": 100
+                },
+                "step_size": {
+                    "value": 0.012
+                },
+                "density_scale": {
+                    "value": 4.0
+                },
+                "absorption": {
+                    "value": 8.0
+                },
+                "cam_dist": {
+                    "value": 2.2
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1600, 350],
+            "position": [
+                1600,
+                350
+            ],
             "parameters": {
-                "open": {"value": true},
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+                "open": {
+                    "value": true
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
             }
         }
     },
     "connections": [
-        {"from": "lfo1", "from_port": 0, "to": "merge_chop", "to_port": 0},
-        {"from": "noise_chop", "from_port": 0, "to": "merge_chop", "to_port": 1},
-        {"from": "merge_chop", "from_port": 0, "to": "chop_to_vol1", "to_port": 0},
-        {"from": "chop_to_vol1", "from_port": 0, "to": "raymarch1", "to_port": 0},
-        {"from": "raymarch1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "merge_chop",
+            "to_port": 0
+        },
+        {
+            "from": "noise_chop",
+            "from_port": 0,
+            "to": "merge_chop",
+            "to_port": 1
+        },
+        {
+            "from": "merge_chop",
+            "from_port": 0,
+            "to": "chop_to_vol1",
+            "to_port": 0
+        },
+        {
+            "from": "chop_to_vol1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CHOP to VOL — Channel Data as Voxels\n\nCHOPtoVOL maps channel sample data into a 3D volume.\nLFO + NoiseCHOP merged provide multi-channel input.\n\nUse mapping modes to control how CHOP samples are\ndistributed across voxel slices. The result is raymarched\nfor visual feedback — useful for audio-reactive volumes\nor data-driven volumetric effects.",
-            "position": [-100.0, -100.0],
-            "size": [500.0, 120.0],
-            "color": [0.8, 0.4, 0.2, 0.8]
+            "text": "CHOP to VOL \u2014 Channel Data as Voxels\n\nCHOPtoVOL maps channel sample data into a 3D volume.\nLFO + NoiseCHOP merged provide multi-channel input.\n\nUse mapping modes to control how CHOP samples are\ndistributed across voxel slices. The result is raymarched\nfor visual feedback \u2014 useful for audio-reactive volumes\nor data-driven volumetric effects.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                0.8,
+                0.4,
+                0.2,
+                0.8
+            ]
         }
     ]
 }

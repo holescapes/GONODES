@@ -4,74 +4,164 @@
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "reorder_lum": {
             "type": "ReorderTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "output_r": {"value": 6},
-                "output_g": {"value": 6},
-                "output_b": {"value": 6},
-                "output_a": {"value": 4},
+                "output_r": {
+                    "value": 6,
+                    "expression": "(6 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "output_g": {
+                    "value": 6,
+                    "expression": "(6 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "output_b": {
+                    "value": 6
+                },
+                "output_a": {
+                    "value": 4
+                },
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "reorder_mask": {
             "type": "ReorderTOP",
-            "position": [500, 350],
+            "position": [
+                500,
+                350
+            ],
             "parameters": {
-                "output_r": {"value": 0},
-                "output_g": {"value": 0},
-                "output_b": {"value": 0},
-                "output_a": {"value": 0},
+                "output_r": {
+                    "value": 0
+                },
+                "output_g": {
+                    "value": 0
+                },
+                "output_b": {
+                    "value": 0
+                },
+                "output_a": {
+                    "value": 0
+                },
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         },
         "window2": {
             "type": "WindowOUT",
-            "position": [900, 350],
+            "position": [
+                900,
+                350
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": false}
+                "open": {
+                    "value": false
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1", "from_port": 0, "to": "reorder_lum", "to_port": 0},
-        {"from": "noise1", "from_port": 0, "to": "reorder_mask", "to_port": 0},
-        {"from": "reorder_lum", "from_port": 0, "to": "window1", "to_port": 0},
-        {"from": "reorder_mask", "from_port": 0, "to": "window2", "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "reorder_lum",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "reorder_mask",
+            "to_port": 0
+        },
+        {
+            "from": "reorder_lum",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "reorder_mask",
+            "from_port": 0,
+            "to": "window2",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Reorder TOP \u2014 Techniques\n\nTop: RGB \u2190 Luminance, A \u2190 One = grayscale conversion.\nBottom: RGBA all \u2190 Red = extract red channel as alpha mask.\nUseful for compositing workflows and mask generation.",
-            "position": [-100.0, -100.0],
-            "size": [520.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                520.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

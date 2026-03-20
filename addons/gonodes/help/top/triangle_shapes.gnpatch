@@ -1,164 +1,113 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "tri1":  {
-                               "type":  "TriangleTOP",
-                               "position":  [
-                                                100,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "resolution":  {
-                                                                     "value":  {
-                                                                                   "_type":  "Vector2i",
-                                                                                   "x":  512,
-                                                                                   "y":  512
-                                                                               }
-                                                                 },
-                                                  "shape":  {
-                                                                "value":  0
-                                                            },
-                                                  "size":  {
-                                                               "value":  0.35
-                                                           },
-                                                  "fill_color":  {
-                                                                     "value":  {
-                                                                                   "_type":  "Color",
-                                                                                   "r":  1.0,
-                                                                                   "g":  0.6,
-                                                                                   "b":  0.1,
-                                                                                   "a":  1.0
-                                                                               }
-                                                                 },
-                                                  "bg_color":  {
-                                                                   "value":  {
-                                                                                 "_type":  "Color",
-                                                                                 "r":  0.05,
-                                                                                 "g":  0.05,
-                                                                                 "b":  0.1,
-                                                                                 "a":  1.0
-                                                                             }
-                                                               },
-                                                  "border_width":  {
-                                                                       "value":  0.01
-                                                                   },
-                                                  "border_color":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Color",
-                                                                                     "r":  1.0,
-                                                                                     "g":  1.0,
-                                                                                     "b":  1.0,
-                                                                                     "a":  1.0
-                                                                                 }
-                                                                   },
-                                                  "softness":  {
-                                                                   "value":  0.003
-                                                               }
-                                              }
-                           },
-                  "tri2":  {
-                               "type":  "TriangleTOP",
-                               "position":  [
-                                                100,
-                                                400
-                                            ],
-                               "parameters":  {
-                                                  "resolution":  {
-                                                                     "value":  {
-                                                                                   "_type":  "Vector2i",
-                                                                                   "x":  512,
-                                                                                   "y":  512
-                                                                               }
-                                                                 },
-                                                  "shape":  {
-                                                                "value":  2
-                                                            },
-                                                  "size":  {
-                                                               "value":  0.3
-                                                           },
-                                                  "fill_color":  {
-                                                                     "value":  {
-                                                                                   "_type":  "Color",
-                                                                                   "r":  0.2,
-                                                                                   "g":  0.8,
-                                                                                   "b":  0.4,
-                                                                                   "a":  1.0
-                                                                               }
-                                                                 },
-                                                  "bg_color":  {
-                                                                   "value":  {
-                                                                                 "_type":  "Color",
-                                                                                 "r":  0.05,
-                                                                                 "g":  0.05,
-                                                                                 "b":  0.1,
-                                                                                 "a":  1.0
-                                                                             }
-                                                               },
-                                                  "border_width":  {
-                                                                       "value":  0.015
-                                                                   },
-                                                  "border_color":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Color",
-                                                                                     "r":  0.9,
-                                                                                     "g":  0.9,
-                                                                                     "b":  0.3,
-                                                                                     "a":  1.0
-                                                                                 }
-                                                                   },
-                                                  "rotation":  {
-                                                                   "value":  0.5
-                                                               }
-                                              }
-                           },
-                  "window1":  {
-                                  "position":  [
-                                                   450,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "tri1",
-                            "to":  "window1",
-                            "to_port":  0,
-                            "from_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Triangle TOP — SDF 2D Primitives\n\nShapes: 0=Triangle, 1=Line, 2=Pentagon.\nOrange triangle + rotated green pentagon.\nBorder, fill, rotation, and softness controls.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         420.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "tri1": {
+            "type": "TriangleTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "shape": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "size": {
+                    "value": 0.35,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "fill_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.6,
+                        "b": 0.1,
+                        "a": 1.0
+                    }
+                },
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.05,
+                        "g": 0.05,
+                        "b": 0.1,
+                        "a": 1.0
+                    }
+                },
+                "border_width": {
+                    "value": 0.01
+                },
+                "border_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 1.0,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                },
+                "softness": {
+                    "value": 0.003
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        }
+    },
+    "connections": [
+        {
+            "from": "tri1",
+            "to": "window1",
+            "to_port": 0,
+            "from_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Triangle TOP \u2014 SDF 2D Primitives\n\nShapes: 0=Triangle, 1=Line, 2=Pentagon.\nOrange triangle + rotated green pentagon.\nBorder, fill, rotation, and softness controls.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                420.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

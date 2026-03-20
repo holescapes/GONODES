@@ -3,17 +3,18 @@
     "generator": "GONODES",
     "nodes": {
         "src_grid": {
-            "type": "GridSOP",
+            "type": "NoiseTOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "rows": {
-                    "value": 10
-                },
-                "cols": {
-                    "value": 10
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
                 }
             }
         },
@@ -31,10 +32,14 @@
                     "value": 64
                 },
                 "height_scale": {
-                    "value": 2.0
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "grid_size": {
-                    "value": 10.0
+                    "value": 10.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "threshold": {
                     "value": 0.1

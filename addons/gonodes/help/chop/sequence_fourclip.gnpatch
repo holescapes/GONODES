@@ -4,80 +4,174 @@
     "nodes": {
         "lfo1": {
             "type": "LFO_CHOP",
-            "position": [100, 50],
+            "position": [
+                100,
+                50
+            ],
             "parameters": {
-                "frequency": {"value": 0.8},
-                "amplitude": {"value": 1.0}
+                "frequency": {
+                    "value": 0.8
+                },
+                "amplitude": {
+                    "value": 1.0
+                }
             }
         },
         "noise1": {
             "type": "NoiseCHOP",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "amplitude": {"value": 0.6}
+                "amplitude": {
+                    "value": 0.6
+                }
             }
         },
         "wave1": {
             "type": "WaveCHOP",
-            "position": [100, 350],
+            "position": [
+                100,
+                350
+            ],
             "parameters": {
-                "waveform": {"value": 1},
-                "frequency": {"value": 2.0}
+                "waveform": {
+                    "value": 1
+                },
+                "frequency": {
+                    "value": 2.0
+                }
             }
         },
         "constant1": {
             "type": "ConstantCHOP",
-            "position": [100, 500],
+            "position": [
+                100,
+                500
+            ],
             "parameters": {
-                "value0": {"value": 0.0}
+                "value0": {
+                    "value": 0.0
+                }
             }
         },
         "sequence1": {
             "type": "SequenceCHOP",
-            "position": [500, 200],
+            "position": [
+                500,
+                200
+            ],
             "parameters": {
-                "duration": {"value": 1.5},
-                "crossfade": {"value": 0.0},
-                "loop": {"value": true}
+                "duration": {
+                    "value": 1.5,
+                    "expression": "(1.5 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "crossfade": {
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "loop": {
+                    "value": true
+                }
             },
             "dynamic_input_count": 4
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [900, 200],
+            "position": [
+                900,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1300, 200],
+            "position": [
+                1300,
+                200
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "lfo1", "from_port": 0, "to": "sequence1", "to_port": 0},
-        {"from": "noise1", "from_port": 0, "to": "sequence1", "to_port": 1},
-        {"from": "wave1", "from_port": 0, "to": "sequence1", "to_port": 2},
-        {"from": "constant1", "from_port": 0, "to": "sequence1", "to_port": 3},
-        {"from": "sequence1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "sequence1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "sequence1",
+            "to_port": 1
+        },
+        {
+            "from": "wave1",
+            "from_port": 0,
+            "to": "sequence1",
+            "to_port": 2
+        },
+        {
+            "from": "constant1",
+            "from_port": 0,
+            "to": "sequence1",
+            "to_port": 3
+        },
+        {
+            "from": "sequence1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Sequence CHOP \u2014 Four Clips\n\nFour different waveforms played end-to-end:\nSine \u2192 Noise \u2192 Sawtooth \u2192 Silence.\n1.5s per clip, no crossfade, looping.\nDemonstrates sequencing many dynamic inputs.",
-            "position": [-100.0, -120.0],
-            "size": [480.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                480.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

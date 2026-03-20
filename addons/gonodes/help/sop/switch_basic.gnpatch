@@ -1,167 +1,169 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "sphere1":  {
-                                  "type":  "SphereSOP",
-                                  "position":  [
-                                                   100,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "radius":  {
-                                                                    "value":  1.0
-                                                                }
-                                                 }
-                              },
-                  "torus1":  {
-                                 "type":  "TorusSOP",
-                                 "position":  [
-                                                  100,
-                                                  350
-                                              ],
-                                 "parameters":  {
-                                                    "outer_radius":  {
-                                                                         "value":  1.0
-                                                                     }
-                                                }
-                             },
-                  "switch1":  {
-                                  "type":  "SwitchSOP",
-                                  "position":  [
-                                                   450,
-                                                   200
-                                               ],
-                                  "parameters":  {
-                                                     "index":  {
-                                                                   "value":  0
-                                                               },
-                                                     "blend":  {
-                                                                   "value":  false
-                                                               }
-                                                 }
-                              },
-                  "window1":  {
-                                  "position":  [
-                                                   1400,
-                                                   200
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "geo_view":  {
-                                   "type":  "GeometryCOMP",
-                                   "position":  [
-                                                    750,
-                                                    200
-                                                ],
-                                   "parameters":  {
-
-                                                  }
-                               },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    750,
-                                                    400
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       1050,
-                                                       200
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  }
-              },
-    "connections":  [
-                        {
-                            "from":  "sphere1",
-                            "from_port":  0,
-                            "to":  "switch1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "torus1",
-                            "from_port":  0,
-                            "to":  "switch1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "switch1",
-                            "from_port":  0,
-                            "to":  "geo_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Switch SOP — Select Input\n\nindex=0 outputs sphere, index=1 outputs torus.\nEnable blend for mesh interpolation between inputs.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 1.0
+                }
+            }
+        },
+        "torus1": {
+            "type": "TorusSOP",
+            "position": [
+                100,
+                350
+            ],
+            "parameters": {
+                "outer_radius": {
+                    "value": 1.0
+                }
+            }
+        },
+        "switch1": {
+            "type": "SwitchSOP",
+            "position": [
+                450,
+                200
+            ],
+            "parameters": {
+                "index": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "blend": {
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1400,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                750,
+                200
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                750,
+                400
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1050,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "switch1",
+            "to_port": 0
+        },
+        {
+            "from": "torus1",
+            "from_port": 0,
+            "to": "switch1",
+            "to_port": 1
+        },
+        {
+            "from": "switch1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Switch SOP \u2014 Select Input\n\nindex=0 outputs sphere, index=1 outputs torus.\nEnable blend for mesh interpolation between inputs.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

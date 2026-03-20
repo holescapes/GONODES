@@ -11,12 +11,22 @@
             "parameters": {}
         },
         "geo1": {
-            "type": "GeometryCOMP",
+            "type": "BoxSOP",
             "position": [
                 400,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "sizex": {
+                    "value": 2.0
+                },
+                "sizey": {
+                    "value": 2.0
+                },
+                "sizez": {
+                    "value": 2.0
+                }
+            }
         },
         "area1": {
             "type": "AreaCOMP",
@@ -26,10 +36,14 @@
             ],
             "parameters": {
                 "tx": {
-                    "value": 0.0
+                    "value": 0.0,
+                    "expression": "sin(time * 0.8) * 2.0",
+                    "mode": "EXPRESSION"
                 },
                 "ty": {
-                    "value": 0.0
+                    "value": 0.0,
+                    "expression": "cos(time * 0.6) * 1.5",
+                    "mode": "EXPRESSION"
                 },
                 "tz": {
                     "value": 0.0

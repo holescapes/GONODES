@@ -4,48 +4,150 @@
     "nodes": {
         "source1": {
             "type": "SourcePOPNative",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "max_particles": {"value": 50000},
-                "rate": {"value": 2000.0},
-                "life_min": {"value": 1.0},
-                "life_max": {"value": 3.0},
-                "init_speed": {"value": 1.0},
-                "pscale": {"value": 0.03}
+                "max_particles": {
+                    "value": 50000
+                },
+                "rate": {
+                    "value": 2000.0,
+                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
+                    "mode": "EXPRESSION"
+                },
+                "life_min": {
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "life_max": {
+                    "value": 3.0
+                },
+                "init_speed": {
+                    "value": 1.0
+                },
+                "pscale": {
+                    "value": 0.03
+                }
             }
         },
         "renderpop1": {
             "type": "RenderPOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [800, 100],
+            "position": [
+                1025,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                625,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                625,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
             }
         }
     },
     "connections": [
-        {"from": "source1", "from_port": 0, "to": "renderpop1", "to_port": 0},
-        {"from": "renderpop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "source1",
+            "from_port": 0,
+            "to": "renderpop1",
+            "to_port": 0
+        },
+        {
+            "from": "renderpop1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Source POP (Native) \u2014 Basic Emitter\n\n2000 particles/sec with 1\u20133 second lifespan.\nParticles age, die, and compact automatically.\nNative C++ handles emission with hash-based random.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

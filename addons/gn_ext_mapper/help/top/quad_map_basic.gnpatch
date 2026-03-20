@@ -32,10 +32,14 @@
             ],
             "parameters": {
                 "tl_x": {
-                    "value": 0.0
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "tl_y": {
-                    "value": 0.0
+                    "value": 0.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "tr_x": {
                     "value": 1.0

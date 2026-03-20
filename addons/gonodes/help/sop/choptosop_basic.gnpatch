@@ -3,17 +3,19 @@
     "generator": "GONODES",
     "nodes": {
         "src_grid": {
-            "type": "GridSOP",
+            "type": "ConstantCHOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "rows": {
-                    "value": 10
+                "name0": {
+                    "value": "x"
                 },
-                "cols": {
-                    "value": 10
+                "value0": {
+                    "value": 0.5,
+                    "expression": "sin(time)",
+                    "mode": "EXPRESSION"
                 }
             }
         },

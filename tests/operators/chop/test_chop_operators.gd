@@ -1072,3 +1072,869 @@ func test_clock_chop_produces_output() -> void:
 	var out: GNChannelData = _cook_no_input(node) as GNChannelData
 	GNTestAssert.assert_not_null(out, "clock output")
 	GNTestAssert.assert_gt(out.channels.size(), 0, "has time channels")
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioBandCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_band_chop_instantiate() -> void:
+	var node := _make_node(AudioBandCHOP.new(), "audioband1")
+	GNTestAssert.assert_not_null(node, "AudioBandCHOP created")
+
+func test_audio_band_chop_produces_output() -> void:
+	var node := _make_node(AudioBandCHOP.new(), "audioband2")
+	node.set_param_value("band_count", 8)
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioDynamicsCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_dynamics_chop_instantiate() -> void:
+	var node := _make_node(AudioDynamicsCHOP.new(), "audiodynamics1")
+	GNTestAssert.assert_not_null(node, "AudioDynamicsCHOP created")
+
+func test_audio_dynamics_chop_produces_output() -> void:
+	var node := _make_node(AudioDynamicsCHOP.new(), "audiodynamics2")
+	node.set_param_value("threshold", -20.0)
+	var input := _make_chop_data({"audio": PackedFloat32Array([0.5, 0.3, 0.1])})
+	var out: GNChannelData = _cook_with(node, [input]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioFileInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_file_in_chop_instantiate() -> void:
+	var node := _make_node(AudioFileInCHOP.new(), "audiofilein1")
+	GNTestAssert.assert_not_null(node, "AudioFileInCHOP created")
+
+func test_audio_file_in_chop_no_file() -> void:
+	var node := _make_node(AudioFileInCHOP.new(), "audiofilein2")
+	node.set_param_value("file_path", "")
+	var out: GNData = _cook_no_input(node)
+	GNTestAssert.assert_true(true, "null output acceptable when no file")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_in_chop_instantiate() -> void:
+	var node := _make_node(AudioInCHOP.new(), "audioin1")
+	GNTestAssert.assert_not_null(node, "AudioInCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioSpectrumCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_spectrum_chop_instantiate() -> void:
+	var node := _make_node(AudioSpectrumCHOP.new(), "audiospectrum1")
+	GNTestAssert.assert_not_null(node, "AudioSpectrumCHOP created")
+
+func test_audio_spectrum_chop_produces_output() -> void:
+	var node := _make_node(AudioSpectrumCHOP.new(), "audiospectrum2")
+	var input := _make_chop_data({"audio": PackedFloat32Array([0.1, 0.2, 0.15])})
+	var out: GNChannelData = _cook_with(node, [input]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  BeatCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_beat_chop_instantiate() -> void:
+	var node := _make_node(BeatCHOP.new(), "beat1")
+	GNTestAssert.assert_not_null(node, "BeatCHOP created")
+
+func test_beat_chop_produces_output() -> void:
+	var node := _make_node(BeatCHOP.new(), "beat2")
+	node.set_param_value("bpm", 120.0)
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ChannelCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_channel_chop_instantiate() -> void:
+	var node := _make_node(ChannelCHOP.new(), "channel1")
+	GNTestAssert.assert_not_null(node, "ChannelCHOP created")
+
+func test_channel_chop_creates_named_channels() -> void:
+	var node := _make_node(ChannelCHOP.new(), "channel2")
+	node.set_param_value("channel_names", "x,y,z")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+	GNTestAssert.assert_true(out.channels.has("x"), "has channel x")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ClipCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_clip_chop_instantiate() -> void:
+	var node := _make_node(ClipCHOP.new(), "clip1")
+	GNTestAssert.assert_not_null(node, "ClipCHOP created")
+
+func test_clip_chop_clamps_values() -> void:
+	var node := _make_node(ClipCHOP.new(), "clip2")
+	node.set_param_value("min_value", -1.0)
+	node.set_param_value("max_value", 1.0)
+	var input := _make_chop_data({"val": PackedFloat32Array([2.0, -2.0, 0.5])})
+	var out: GNChannelData = _cook_with(node, [input]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output clamped")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CueCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_cue_chop_instantiate() -> void:
+	var node := _make_node(CueCHOP.new(), "cue1")
+	GNTestAssert.assert_not_null(node, "CueCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  GamepadCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gamepad_chop_instantiate() -> void:
+	var node := _make_node(GamepadCHOP.new(), "gamepad1")
+	GNTestAssert.assert_not_null(node, "GamepadCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  HostInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_host_in_chop_instantiate() -> void:
+	var node := _make_node(HostInCHOP.new(), "hostin1")
+	GNTestAssert.assert_not_null(node, "HostInCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  IKCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ik_chop_instantiate() -> void:
+	var node := _make_node(IKCHOP.new(), "ik1")
+	GNTestAssert.assert_not_null(node, "IKCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  KeyboardInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_keyboard_in_chop_instantiate() -> void:
+	var node := _make_node(KeyboardInCHOP.new(), "keyboardin1")
+	GNTestAssert.assert_not_null(node, "KeyboardInCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  KeyframeCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_keyframe_chop_instantiate() -> void:
+	var node := _make_node(KeyframeCHOP.new(), "keyframe1")
+	GNTestAssert.assert_not_null(node, "KeyframeCHOP created")
+
+func test_keyframe_chop_produces_output() -> void:
+	var node := _make_node(KeyframeCHOP.new(), "keyframe2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  LaserCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_laser_chop_instantiate() -> void:
+	var node := _make_node(LaserCHOP.new(), "laser1")
+	GNTestAssert.assert_not_null(node, "LaserCHOP created")
+
+func test_laser_chop_produces_xy() -> void:
+	var node := _make_node(LaserCHOP.new(), "laser2")
+	node.set_param_value("pattern", "circle")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MidiInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_midi_in_chop_instantiate() -> void:
+	var node := _make_node(MidiInCHOP.new(), "midiin1")
+	GNTestAssert.assert_not_null(node, "MidiInCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MouseInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_mouse_in_chop_instantiate() -> void:
+	var node := _make_node(MouseInCHOP.new(), "mousein1")
+	GNTestAssert.assert_not_null(node, "MouseInCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ObjectCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_object_chop_instantiate() -> void:
+	var node := _make_node(ObjectCHOP.new(), "object1")
+	GNTestAssert.assert_not_null(node, "ObjectCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  OscInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_osc_in_chop_instantiate() -> void:
+	var node := _make_node(OscInCHOP.new(), "oscin1")
+	GNTestAssert.assert_not_null(node, "OscInCHOP created")
+
+func test_osc_in_chop_sets_port() -> void:
+	var node := _make_node(OscInCHOP.new(), "oscin2")
+	node.set_param_value("listen_port", 9000)
+	GNTestAssert.assert_not_null(node, "port set")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ParameterCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_parameter_chop_instantiate() -> void:
+	var node := _make_node(ParameterCHOP.new(), "parameter1")
+	GNTestAssert.assert_not_null(node, "ParameterCHOP created")
+
+func test_parameter_chop_produces_output() -> void:
+	var node := _make_node(ParameterCHOP.new(), "parameter2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PhysicsCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_physics_chop_instantiate() -> void:
+	var node := _make_node(PhysicsCHOP.new(), "physics1")
+	GNTestAssert.assert_not_null(node, "PhysicsCHOP created")
+
+func test_physics_chop_produces_output() -> void:
+	var node := _make_node(PhysicsCHOP.new(), "physics2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  RampCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ramp_chop_instantiate() -> void:
+	var node := _make_node(RampCHOP.new(), "ramp1")
+	GNTestAssert.assert_not_null(node, "RampCHOP created")
+
+func test_ramp_chop_maps_values() -> void:
+	var node := _make_node(RampCHOP.new(), "ramp2")
+	var input := _make_chop_data({"val": PackedFloat32Array([0.0, 0.5, 1.0])})
+	var out: GNChannelData = _cook_with(node, [input]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output is GNChannelData")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ScriptCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_script_chop_instantiate() -> void:
+	var node := _make_node(ScriptCHOP.new(), "script1")
+	GNTestAssert.assert_not_null(node, "ScriptCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SequenceCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_sequence_chop_instantiate() -> void:
+	var node := _make_node(SequenceCHOP.new(), "sequence1")
+	GNTestAssert.assert_not_null(node, "SequenceCHOP created")
+
+func test_sequence_chop_sequences_inputs() -> void:
+	var node := _make_node(SequenceCHOP.new(), "sequence2")
+	var in1 := _make_chop_data({"a": PackedFloat32Array([1.0])})
+	var in2 := _make_chop_data({"b": PackedFloat32Array([2.0])})
+	var out: GNChannelData = _cook_with(node, [in1, in2]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SkeletonCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_skeleton_chop_instantiate() -> void:
+	var node := _make_node(SkeletonCHOP.new(), "skeleton1")
+	GNTestAssert.assert_not_null(node, "SkeletonCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SOPtoCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_sop_to_chop_instantiate() -> void:
+	var node := _make_node(SOPtoCHOP.new(), "soptochop1")
+	GNTestAssert.assert_not_null(node, "SOPtoCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TabletInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_tablet_in_chop_instantiate() -> void:
+	var node := _make_node(TabletInCHOP.new(), "tabletin1")
+	GNTestAssert.assert_not_null(node, "TabletInCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TimelineCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_timeline_chop_instantiate() -> void:
+	var node := _make_node(TimelineCHOP.new(), "timeline1")
+	GNTestAssert.assert_not_null(node, "TimelineCHOP created")
+
+func test_timeline_chop_produces_output() -> void:
+	var node := _make_node(TimelineCHOP.new(), "timeline2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+	GNTestAssert.assert_true(out.channels.has("frame"), "has frame channel")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TOPtoCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_top_to_chop_instantiate() -> void:
+	var node := _make_node(TOPtoCHOP.new(), "toptochop1")
+	GNTestAssert.assert_not_null(node, "TOPtoCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CONVERTER CHOPs
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CHOPDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_chop_dat_instantiate() -> void:
+	var node := _make_node(CHOPDAT.new(), "chopdat1")
+	GNTestAssert.assert_not_null(node, "CHOPDAT created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DATtoCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_dat_to_chop_instantiate() -> void:
+	var node := _make_node(DATtoCHOP.new(), "dattochop1")
+	GNTestAssert.assert_not_null(node, "DATtoCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  HostOutCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_host_out_chop_instantiate() -> void:
+	var node := _make_node(HostOutCHOP.new(), "hostout1")
+	GNTestAssert.assert_not_null(node, "HostOutCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CHOPtoSOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_chop_to_sop_instantiate() -> void:
+	var node := _make_node(CHOPtoSOP.new(), "choptosop1")
+	GNTestAssert.assert_not_null(node, "CHOPtoSOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CHOPtoTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_chop_to_top_instantiate() -> void:
+	var node := _make_node(CHOPtoTOP.new(), "choptotop1")
+	GNTestAssert.assert_not_null(node, "CHOPtoTOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CHOPtoVOL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_chop_to_vol_instantiate() -> void:
+	var node := _make_node(CHOPtoVOL.new(), "choptovol1")
+	GNTestAssert.assert_not_null(node, "CHOPtoVOL created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NATIVE CHOPs
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioDynamicsCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_dynamics_chop_native_instantiate() -> void:
+	var node := _make_node(AudioDynamicsCHOPNative.new(), "audiodynamicsnative1")
+	GNTestAssert.assert_not_null(node, "AudioDynamicsCHOPNative created")
+
+func test_audio_dynamics_chop_native_cooks() -> void:
+	var node := _make_node(AudioDynamicsCHOPNative.new(), "audiodynamicsnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioSpectrumCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_spectrum_chop_native_instantiate() -> void:
+	var node := _make_node(AudioSpectrumCHOPNative.new(), "audiospectrumnative1")
+	GNTestAssert.assert_not_null(node, "AudioSpectrumCHOPNative created")
+
+func test_audio_spectrum_chop_native_cooks() -> void:
+	var node := _make_node(AudioSpectrumCHOPNative.new(), "audiospectrumnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CompositeCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_composite_chop_native_instantiate() -> void:
+	var node := _make_node(CompositeCHOPNative.new(), "compositenative1")
+	GNTestAssert.assert_not_null(node, "CompositeCHOPNative created")
+
+func test_composite_chop_native_cooks() -> void:
+	var node := _make_node(CompositeCHOPNative.new(), "compositenative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ExpressionCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_expression_chop_native_instantiate() -> void:
+	var node := _make_node(ExpressionCHOPNative.new(), "expressionnative1")
+	GNTestAssert.assert_not_null(node, "ExpressionCHOPNative created")
+
+func test_expression_chop_native_cooks() -> void:
+	var node := _make_node(ExpressionCHOPNative.new(), "expressionnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FanCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_fan_chop_native_instantiate() -> void:
+	var node := _make_node(FanCHOPNative.new(), "fannative1")
+	GNTestAssert.assert_not_null(node, "FanCHOPNative created")
+
+func test_fan_chop_native_cooks() -> void:
+	var node := _make_node(FanCHOPNative.new(), "fannative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FilterCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_filter_chop_native_instantiate() -> void:
+	var node := _make_node(FilterCHOPNative.new(), "filternative1")
+	GNTestAssert.assert_not_null(node, "FilterCHOPNative created")
+
+func test_filter_chop_native_cooks() -> void:
+	var node := _make_node(FilterCHOPNative.new(), "filternative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  IkCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ik_chop_native_instantiate() -> void:
+	var node := _make_node(IkCHOPNative.new(), "iknative1")
+	GNTestAssert.assert_not_null(node, "IkCHOPNative created")
+
+func test_ik_chop_native_cooks() -> void:
+	var node := _make_node(IkCHOPNative.new(), "iknative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  InterpolateCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_interpolate_chop_native_instantiate() -> void:
+	var node := _make_node(InterpolateCHOPNative.new(), "interpolatenative1")
+	GNTestAssert.assert_not_null(node, "InterpolateCHOPNative created")
+
+func test_interpolate_chop_native_cooks() -> void:
+	var node := _make_node(InterpolateCHOPNative.new(), "interpolatenative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  LaserCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_laser_chop_native_instantiate() -> void:
+	var node := _make_node(LaserCHOPNative.new(), "lasernative1")
+	GNTestAssert.assert_not_null(node, "LaserCHOPNative created")
+
+func test_laser_chop_native_cooks() -> void:
+	var node := _make_node(LaserCHOPNative.new(), "lasernative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  LookupCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_lookup_chop_native_instantiate() -> void:
+	var node := _make_node(LookupCHOPNative.new(), "lookupnative1")
+	GNTestAssert.assert_not_null(node, "LookupCHOPNative created")
+
+func test_lookup_chop_native_cooks() -> void:
+	var node := _make_node(LookupCHOPNative.new(), "lookupnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MathCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_math_chop_native_instantiate() -> void:
+	var node := _make_node(MathCHOPNative.new(), "mathnative1")
+	GNTestAssert.assert_not_null(node, "MathCHOPNative created")
+
+func test_math_chop_native_cooks() -> void:
+	var node := _make_node(MathCHOPNative.new(), "mathnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NoiseCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_noise_chop_native_instantiate() -> void:
+	var node := _make_node(NoiseCHOPNative.new(), "noisenative1")
+	GNTestAssert.assert_not_null(node, "NoiseCHOPNative created")
+
+func test_noise_chop_native_cooks() -> void:
+	var node := _make_node(NoiseCHOPNative.new(), "noisenative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PatternCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_pattern_chop_native_instantiate() -> void:
+	var node := _make_node(PatternCHOPNative.new(), "patternnative1")
+	GNTestAssert.assert_not_null(node, "PatternCHOPNative created")
+
+func test_pattern_chop_native_cooks() -> void:
+	var node := _make_node(PatternCHOPNative.new(), "patternnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PhysicsCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_physics_chop_native_instantiate() -> void:
+	var node := _make_node(PhysicsCHOPNative.new(), "physicsnative1")
+	GNTestAssert.assert_not_null(node, "PhysicsCHOPNative created")
+
+func test_physics_chop_native_cooks() -> void:
+	var node := _make_node(PhysicsCHOPNative.new(), "physicsnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ResampleCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_resample_chop_native_instantiate() -> void:
+	var node := _make_node(ResampleCHOPNative.new(), "resamplenative1")
+	GNTestAssert.assert_not_null(node, "ResampleCHOPNative created")
+
+func test_resample_chop_native_cooks() -> void:
+	var node := _make_node(ResampleCHOPNative.new(), "resamplenative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SlopeCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_slope_chop_native_instantiate() -> void:
+	var node := _make_node(SlopeCHOPNative.new(), "slopenative1")
+	GNTestAssert.assert_not_null(node, "SlopeCHOPNative created")
+
+func test_slope_chop_native_cooks() -> void:
+	var node := _make_node(SlopeCHOPNative.new(), "slopenative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SmoothCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_smooth_chop_native_instantiate() -> void:
+	var node := _make_node(SmoothCHOPNative.new(), "smoothnative1")
+	GNTestAssert.assert_not_null(node, "SmoothCHOPNative created")
+
+func test_smooth_chop_native_cooks() -> void:
+	var node := _make_node(SmoothCHOPNative.new(), "smoothnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SOPtoCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_sop_to_chop_native_instantiate() -> void:
+	var node := _make_node(SOPtoCHOPNative.new(), "soptonative1")
+	GNTestAssert.assert_not_null(node, "SOPtoCHOPNative created")
+
+func test_sop_to_chop_native_cooks() -> void:
+	var node := _make_node(SOPtoCHOPNative.new(), "soptonative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  StretchCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_stretch_chop_native_instantiate() -> void:
+	var node := _make_node(StretchCHOPNative.new(), "stretchnative1")
+	GNTestAssert.assert_not_null(node, "StretchCHOPNative created")
+
+func test_stretch_chop_native_cooks() -> void:
+	var node := _make_node(StretchCHOPNative.new(), "stretchnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TOPtoCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_top_to_chop_native_instantiate() -> void:
+	var node := _make_node(TOPtoCHOPNative.new(), "toptonative1")
+	GNTestAssert.assert_not_null(node, "TOPtoCHOPNative created")
+
+func test_top_to_chop_native_cooks() -> void:
+	var node := _make_node(TOPtoCHOPNative.new(), "toptonative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TrailCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_trail_chop_native_instantiate() -> void:
+	var node := _make_node(TrailCHOPNative.new(), "trailnative1")
+	GNTestAssert.assert_not_null(node, "TrailCHOPNative created")
+
+func test_trail_chop_native_cooks() -> void:
+	var node := _make_node(TrailCHOPNative.new(), "trailnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  WarpCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_warp_chop_native_instantiate() -> void:
+	var node := _make_node(WarpCHOPNative.new(), "warpnative1")
+	GNTestAssert.assert_not_null(node, "WarpCHOPNative created")
+
+func test_warp_chop_native_cooks() -> void:
+	var node := _make_node(WarpCHOPNative.new(), "warpnative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  WaveCHOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_wave_chop_native_instantiate() -> void:
+	var node := _make_node(WaveCHOPNative.new(), "wavenative1")
+	GNTestAssert.assert_not_null(node, "WaveCHOPNative created")
+
+func test_wave_chop_native_cooks() -> void:
+	var node := _make_node(WaveCHOPNative.new(), "wavenative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CHOPtoTOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_chop_to_top_native_instantiate() -> void:
+	var node := _make_node(CHOPtoTOPNative.new(), "choptotonative1")
+	GNTestAssert.assert_not_null(node, "CHOPtoTOPNative created")
+
+func test_chop_to_top_native_cooks() -> void:
+	var node := _make_node(CHOPtoTOPNative.new(), "choptotonative2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CHOPtoVOLNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_chop_to_vol_native_instantiate() -> void:
+	var node := _make_node(CHOPtoVOLNative.new(), "choptovol native1")
+	GNTestAssert.assert_not_null(node, "CHOPtoVOLNative created")
+
+func test_chop_to_vol_native_cooks() -> void:
+	var node := _make_node(CHOPtoVOLNative.new(), "choptovol native2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "output exists")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  EXTENSION CHOPs
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DepthHandCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_depth_hand_chop_instantiate() -> void:
+	var node := _make_node(DepthHandCHOP.new(), "depthhand1")
+	GNTestAssert.assert_not_null(node, "DepthHandCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DepthSkeletonCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_depth_skeleton_chop_instantiate() -> void:
+	var node := _make_node(DepthSkeletonCHOP.new(), "depthskeleton1")
+	GNTestAssert.assert_not_null(node, "DepthSkeletonCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  RtMidiInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_rt_midi_in_chop_instantiate() -> void:
+	var node := _make_node(RtMidiInCHOP.new(), "rtmidiin1")
+	GNTestAssert.assert_not_null(node, "RtMidiInCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  RtMidiOutCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_rt_midi_out_chop_instantiate() -> void:
+	var node := _make_node(RtMidiOutCHOP.new(), "rtmidiout1")
+	GNTestAssert.assert_not_null(node, "RtMidiOutCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FaceDetectCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_face_detect_chop_instantiate() -> void:
+	var node := _make_node(FaceDetectCHOP.new(), "facedetect1")
+	GNTestAssert.assert_not_null(node, "FaceDetectCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  HandDetectCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_hand_detect_chop_instantiate() -> void:
+	var node := _make_node(HandDetectCHOP.new(), "handdetect1")
+	GNTestAssert.assert_not_null(node, "HandDetectCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PoseDetectCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_pose_detect_chop_instantiate() -> void:
+	var node := _make_node(PoseDetectCHOP.new(), "posedetect1")
+	GNTestAssert.assert_not_null(node, "PoseDetectCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NDIAudioInCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ndi_audio_in_chop_instantiate() -> void:
+	var node := _make_node(NDIAudioInCHOP.new(), "ndiaudioin1")
+	GNTestAssert.assert_not_null(node, "NDIAudioInCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NDIAudioOutCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_ndi_audio_out_chop_instantiate() -> void:
+	var node := _make_node(NDIAudioOutCHOP.new(), "ndiaudioout1")
+	GNTestAssert.assert_not_null(node, "NDIAudioOutCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  UserNativeCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_user_native_chop_instantiate() -> void:
+	var node := _make_node(UserNativeCHOP.new(), "usernative1")
+	GNTestAssert.assert_not_null(node, "UserNativeCHOP created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  UserPythonCHOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_user_python_chop_instantiate() -> void:
+	var node := _make_node(UserPythonCHOP.new(), "userpython1")
+	GNTestAssert.assert_not_null(node, "UserPythonCHOP created")

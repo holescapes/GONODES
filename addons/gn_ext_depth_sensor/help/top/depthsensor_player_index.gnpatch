@@ -4,40 +4,86 @@
     "nodes": {
         "sensor1": {
             "type": "DepthSensorTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "stream": { "value": 3 },
-                "backend": { "value": 0 }
+                "stream": {
+                    "value": 3,
+                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "device": {
+                    "value": 0
+                }
             }
         },
         "level1": {
             "type": "LevelTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "brightness": { "value": 0.2 }
+                "brightness": {
+                    "value": 0.2
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 640, "y": 480 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 640,
+                        "y": 480
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "sensor1", "from_port": 0, "to": "level1", "to_port": 0 },
-        { "from": "level1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "sensor1",
+            "from_port": 0,
+            "to": "level1",
+            "to_port": 0
+        },
+        {
+            "from": "level1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Sensor — Player Index Segmentation\n\nStream = Player Index outputs a color-coded mask\nof tracked bodies (requires Azure Kinect with Body\nTracking SDK). Each person gets a distinct color.\nRealSense does not support this — use SegmentationTOP\nfrom gn_ext_ml as a ML-based alternative.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 130.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Depth Sensor \u2014 Player Index Segmentation\n\nStream = Player Index outputs a color-coded mask\nof tracked bodies (requires Azure Kinect with Body\nTracking SDK). Each person gets a distinct color.\nRealSense does not support this \u2014 use SegmentationTOP\nfrom gn_ext_ml as a ML-based alternative.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

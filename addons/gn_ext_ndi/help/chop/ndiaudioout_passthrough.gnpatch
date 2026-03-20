@@ -4,44 +4,131 @@
     "nodes": {
         "ndiaudioin1": {
             "type": "NDIAudioInCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "source": { "value": "" },
-                "bandwidth": { "value": 0 }
+                "source": {
+                    "value": ""
+                },
+                "bandwidth": {
+                    "value": 1,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "filter1": {
             "type": "FilterCHOP",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {}
         },
         "math1": {
             "type": "MathCHOP",
-            "position": [1100, 100],
+            "position": [
+                1100,
+                100
+            ],
             "parameters": {}
         },
         "ndiaudioout1": {
             "type": "NDIAudioOutCHOP",
-            "position": [1600, 100],
+            "position": [
+                1600,
+                100
+            ],
             "parameters": {
-                "name": { "value": "GoNodes Processed Audio" },
-                "sample_rate": { "value": 48000 }
+                "name": {
+                    "value": "GoNodes Processed Audio"
+                },
+                "sample_rate": {
+                    "value": 48000
+                }
+            }
+        },
+        "choptotop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1900,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                2200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "ndiaudioin1", "from_port": 0, "to": "filter1", "to_port": 0 },
-        { "from": "filter1", "from_port": 0, "to": "math1", "to_port": 0 },
-        { "from": "math1", "from_port": 0, "to": "ndiaudioout1", "to_port": 0 }
+        {
+            "from": "ndiaudioin1",
+            "from_port": 0,
+            "to": "filter1",
+            "to_port": 0
+        },
+        {
+            "from": "filter1",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 0
+        },
+        {
+            "from": "math1",
+            "from_port": 0,
+            "to": "ndiaudioout1",
+            "to_port": 0
+        },
+        {
+            "from": "ndiaudioout1",
+            "from_port": 0,
+            "to": "choptotop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NDI Audio Out — Audio Pass-through\n\nReceives NDI audio, applies filtering\nand gain adjustment, then re-sends as\na new NDI audio stream.\n\nDemonstrates NDI audio routing with\nreal-time CHOP processing in between.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "NDI Audio Out \u2014 Audio Pass-through\n\nReceives NDI audio, applies filtering\nand gain adjustment, then re-sends as\na new NDI audio stream.\n\nDemonstrates NDI audio routing with\nreal-time CHOP processing in between.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

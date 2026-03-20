@@ -28,10 +28,14 @@
                     "value": "pscale"
                 },
                 "source": {
-                    "value": 0
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "value": {
-                    "value": 1.0
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "expression": {
                     "value": "sin(float(i) / float(n) * 6.28)"

@@ -1,116 +1,118 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "noise1":  {
-                                 "type":  "NoiseTOP",
-                                 "position":  [
-                                                  0,
-                                                  100
-                                              ],
-                                 "parameters":  {
-
-                                                }
-                             },
-                  "t2c1":  {
-                               "type":  "TOPtoCHOP",
-                               "position":  [
-                                                300,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "mode":  {
-                                                               "value":  0
-                                                           },
-                                                  "channel_r":  {
-                                                                    "value":  true
-                                                                },
-                                                  "channel_g":  {
-                                                                    "value":  true
-                                                                },
-                                                  "channel_b":  {
-                                                                    "value":  true
-                                                                },
-                                                  "channel_a":  {
-                                                                    "value":  false
-                                                                }
-                                              }
-                           },
-                  "window1":  {
-                                  "position":  [
-                                                   1000,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "choptop1":  {
-                                   "type":  "CHOPtoTOP",
-                                   "position":  [
-                                                    650,
-                                                    100
-                                                ],
-                                   "parameters":  {
-                                                      "resolution":  {
-                                                                         "value":  {
-                                                                                       "_type":  "Vector2i",
-                                                                                       "x":  512,
-                                                                                       "y":  512
-                                                                                   }
-                                                                     }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "noise1",
-                            "from_port":  0,
-                            "to":  "t2c1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "t2c1",
-                            "from_port":  0,
-                            "to":  "choptop1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "choptop1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "TOP to CHOP — Texture to Channels\n\nSamples average RGB from a texture as channels.\nAlso supports center pixel, row, or column modes.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         380.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                0,
+                100
+            ],
+            "parameters": {}
+        },
+        "t2c1": {
+            "type": "TOPtoCHOP",
+            "position": [
+                300,
+                100
+            ],
+            "parameters": {
+                "mode": {
+                    "value": 0
+                },
+                "channel_r": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "channel_g": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "channel_b": {
+                    "value": true
+                },
+                "channel_a": {
+                    "value": false
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                650,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "t2c1",
+            "to_port": 0
+        },
+        {
+            "from": "t2c1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TOP to CHOP \u2014 Texture to Channels\n\nSamples average RGB from a texture as channels.\nAlso supports center pixel, row, or column modes.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                380.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

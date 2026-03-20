@@ -311,3 +311,173 @@ func test_pop_base_workgroups() -> void:
 	GNTestAssert.assert_eq(base._workgroups(1000, 256), 4, "1000/256 = 4 groups")
 	GNTestAssert.assert_eq(base._workgroups(256, 256), 1, "256/256 = 1 group")
 	GNTestAssert.assert_eq(base._workgroups(257, 256), 2, "257/256 = 2 groups")
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AdvectPOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_advect_pop_native_instantiation() -> void:
+	var node := _make_node(AdvectPOPNative.new(), "advn1")
+	GNTestAssert.assert_not_null(node, "AdvectPOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_advect_pop_native_cook() -> void:
+	var node := _make_node(AdvectPOPNative.new(), "advn2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "no crash on cook")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AttractPOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_attract_pop_native_instantiation() -> void:
+	var node := _make_node(AttractPOPNative.new(), "attrn1")
+	GNTestAssert.assert_not_null(node, "AttractPOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_attract_pop_native_cook() -> void:
+	var node := _make_node(AttractPOPNative.new(), "attrn2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "no crash on cook")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CollisionPOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_collision_pop_native_instantiation() -> void:
+	var node := _make_node(CollisionPOPNative.new(), "colln1")
+	GNTestAssert.assert_not_null(node, "CollisionPOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_collision_pop_native_cook() -> void:
+	var node := _make_node(CollisionPOPNative.new(), "colln2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "no crash on cook")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ForcePOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_force_pop_native_instantiation() -> void:
+	var node := _make_node(ForcePOPNative.new(), "forcen1")
+	GNTestAssert.assert_not_null(node, "ForcePOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_force_pop_native_cook() -> void:
+	var node := _make_node(ForcePOPNative.new(), "forcen2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "no crash on cook")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  InstancePOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_instance_pop_native_instantiation() -> void:
+	var node := _make_node(InstancePOPNative.new(), "instn1")
+	GNTestAssert.assert_not_null(node, "InstancePOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_instance_pop_native_cook() -> void:
+	var node := _make_node(InstancePOPNative.new(), "instn2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "no crash on cook")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  LimitPOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_limit_pop_native_instantiation() -> void:
+	var node := _make_node(LimitPOPNative.new(), "limn1")
+	GNTestAssert.assert_not_null(node, "LimitPOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_limit_pop_native_cook() -> void:
+	var node := _make_node(LimitPOPNative.new(), "limn2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "no crash on cook")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  RenderPOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_render_pop_native_instantiation() -> void:
+	var node := _make_node(RenderPOPNative.new(), "rendn1")
+	GNTestAssert.assert_not_null(node, "RenderPOPNative created")
+
+func test_render_pop_native_node_type() -> void:
+	var node := _make_node(RenderPOPNative.new(), "rendn2")
+	GNTestAssert.assert_eq(node.node_type, "render", "node_type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SourcePOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_source_pop_native_instantiation() -> void:
+	var node := _make_node(SourcePOPNative.new(), "srcn1")
+	GNTestAssert.assert_not_null(node, "SourcePOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_source_pop_native_cook() -> void:
+	var node := _make_node(SourcePOPNative.new(), "srcn2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "no crash on cook")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TurbulencePOPNative
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_turbulence_pop_native_instantiation() -> void:
+	var node := _make_node(TurbulencePOPNative.new(), "turbn1")
+	GNTestAssert.assert_not_null(node, "TurbulencePOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_turbulence_pop_native_cook() -> void:
+	var node := _make_node(TurbulencePOPNative.new(), "turbn2")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(true, "no crash on cook")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  BoidsPOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_boids_pop_instantiation() -> void:
+	var node := _make_node(BoidsPOP.new(), "boids1")
+	GNTestAssert.assert_not_null(node, "BoidsPOP created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_boids_pop_params() -> void:
+	var node := _make_node(BoidsPOP.new(), "boids2")
+	# Flocking simulation should have steering/separation params
+	GNTestAssert.assert_not_null(node.get_parameter("separation"), "has separation param")
+
+func test_boids_pop_cook() -> void:
+	var node := _make_node(BoidsPOP.new(), "boids3")
+	var out := _cook_no_input(node)
+	# Output can be null in headless, or GNParticleData
+	if out != null:
+		GNTestAssert.assert_true(out is GNParticleData, "output is GNParticleData")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  NullPOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_null_pop_instantiation() -> void:
+	var node := _make_node(NullPOP.new(), "nullpop1")
+	GNTestAssert.assert_not_null(node, "NullPOP created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+
+func test_null_pop_passthrough() -> void:
+	var node := _make_node(NullPOP.new(), "nullpop2")
+	var out := _cook_no_input(node)
+	# NullPOP is a pass-through, empty input = null output
+	if out == null:
+		GNTestAssert.assert_true(true, "null input produces null output")

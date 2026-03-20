@@ -26,10 +26,14 @@
             ],
             "parameters": {
                 "mix": {
-                    "value": 0.45
+                    "value": 0.45,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "rotate": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "time * 45.0",
+                    "mode": "EXPRESSION"
                 },
                 "reset": {
                     "value": true

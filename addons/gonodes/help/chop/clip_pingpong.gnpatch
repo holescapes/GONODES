@@ -4,55 +4,119 @@
     "nodes": {
         "noise1": {
             "type": "NoiseCHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "amplitude": {"value": 1.0}
+                "amplitude": {
+                    "value": 1.0
+                }
             }
         },
         "clip1": {
             "type": "ClipCHOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "start": {"value": 0.2},
-                "end": {"value": 0.8},
-                "speed": {"value": 1.0},
-                "loop": {"value": 2},
-                "play": {"value": true}
+                "start": {
+                    "value": 0.2,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "end": {
+                    "value": 0.8,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "speed": {
+                    "value": 1.0
+                },
+                "loop": {
+                    "value": 2
+                },
+                "play": {
+                    "value": true
+                }
             }
         },
         "choptop1": {
             "type": "CHOPtoTOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1250, 100],
+            "position": [
+                1250,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 256}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1", "from_port": 0, "to": "clip1", "to_port": 0},
-        {"from": "clip1", "from_port": 0, "to": "choptop1", "to_port": 0},
-        {"from": "choptop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "clip1",
+            "to_port": 0
+        },
+        {
+            "from": "clip1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "Clip CHOP \u2014 Ping-Pong\n\nRecords noise input and plays back the 20%\u201380% trim range\nin ping-pong mode (bounces back and forth).\nGreat for creating looping ambient motion.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

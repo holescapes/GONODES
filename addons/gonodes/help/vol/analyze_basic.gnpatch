@@ -25,10 +25,14 @@
             ],
             "parameters": {
                 "amplitude": {
-                    "value": 0.2
+                    "value": 0.2,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
                 },
                 "frequency": {
-                    "value": 2.0
+                    "value": 2.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
                 },
                 "offset_x": {
                     "value": 0.0

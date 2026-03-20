@@ -1,74 +1,56 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "xml1":  {
-                               "type":  "XMLDAT",
-                               "position":  [
-                                                0,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "source":  {
-                                                                 "value":  0
-                                                             },
-                                                  "xml_string":  {
-                                                                     "value":  "<library>\n  <book id=\"1\" genre=\"sci-fi\">\n    <title>Dune</title>\n    <author>Frank Herbert</author>\n  </book>\n  <book id=\"2\" genre=\"fantasy\">\n    <title>Foundation</title>\n    <author>Isaac Asimov</author>\n  </book>\n</library>"
-                                                                 },
-                                                  "include_text":  {
-                                                                       "value":  true
-                                                                   }
-                                              }
-                           },
-                  "text1":  {
-                                "type":  "TextTOP",
-                                "position":  [
-                                                 500,
-                                                 100
-                                             ],
-                                "parameters":  {
-                                                   "resolution":  {
-                                                                      "value":  {
-                                                                                    "_type":  "Vector2i",
-                                                                                    "x":  512,
-                                                                                    "y":  512
-                                                                                }
-                                                                  },
-                                                   "text":  {
-                                                                "value":  "XMLDAT\nParses XML into a\npath / attribute / value\ntable.\n\nEach row = one attribute\nor text node found\nin the document."
-                                                            },
-                                                   "font_size":  {
-                                                                     "value":  28
-                                                                 }
-                                               }
-                            },
-                  "window1":  {
-                                  "type":  "WindowOUT",
-                                  "position":  [
-                                                   900,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512,
-                                                                                      "y":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 }
-                              }
-              },
-    "connections":  [
-                        {
-                            "from":  "text1",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  []
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "text1": {
+            "type": "TextTOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "text": {
+                    "value": "XMLDAT\nParses XML into a\npath / attribute / value\ntable.\n\nEach row = one attribute\nor text node found\nin the document."
+                },
+                "font_size": {
+                    "value": 28
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "text1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": []
 }

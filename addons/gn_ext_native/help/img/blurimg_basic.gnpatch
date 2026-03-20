@@ -4,56 +4,124 @@
     "nodes": {
         "noise1": {
             "type": "NoiseIMGNative",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "type": {"value": 0},
-                "scale": {"value": 6.0},
-                "octaves": {"value": 4},
-                "persistence": {"value": 0.5},
-                "seed": {"value": 0},
-                "monochrome": {"value": true}
+                "type": {
+                    "value": 0
+                },
+                "scale": {
+                    "value": 6.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "octaves": {
+                    "value": 4
+                },
+                "persistence": {
+                    "value": 0.5,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "seed": {
+                    "value": 0
+                },
+                "monochrome": {
+                    "value": true
+                }
             }
         },
         "blur1": {
             "type": "BlurIMGNative",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "radius": {"value": 12},
-                "passes": {"value": 2}
+                "radius": {
+                    "value": 12
+                },
+                "passes": {
+                    "value": 2
+                }
             }
         },
         "imgtotop1": {
             "type": "ImgToTOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1200, 100],
+            "position": [
+                1200,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1", "from_port": 0, "to": "blur1", "to_port": 0},
-        {"from": "blur1", "from_port": 0, "to": "imgtotop1", "to_port": 0},
-        {"from": "imgtotop1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "blur1",
+            "to_port": 0
+        },
+        {
+            "from": "blur1",
+            "from_port": 0,
+            "to": "imgtotop1",
+            "to_port": 0
+        },
+        {
+            "from": "imgtotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Blur IMG (Native) â€” Heavy Blur on Noise\n\nApplies a 12-pixel radius box blur (2 passes) to\nmonochrome noise. Try increasing radius/passes to\nsee the native C++ speed advantage.",
-            "position": [-100.0, -150.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Blur IMG (Native) \u00e2\u20ac\u201d Heavy Blur on Noise\n\nApplies a 12-pixel radius box blur (2 passes) to\nmonochrome noise. Try increasing radius/passes to\nsee the native C++ speed advantage.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

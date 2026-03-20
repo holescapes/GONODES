@@ -112,3 +112,19 @@ func test_audio_device_out_instantiate() -> void:
 func test_osc_out_instantiate() -> void:
 	var node := _make_node(OscOUT.new(), "osc1")
 	GNTestAssert.assert_eq(node.node_type, "osc_out", "node_type")
+# ═══════════════════════════════════════════════════════════════════════════════
+# HapOUT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_hap_out_instantiate() -> void:
+	var node := _make_node(HapOUT.new(), "hap1")
+	GNTestAssert.assert_eq(node.node_type, "hap", "node_type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OutTunnel
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_out_tunnel_instantiate() -> void:
+	var node := _make_node(OutTunnel.new(), "tunnel1")
+	GNTestAssert.assert_eq(node.node_type, "out_tunnel", "node_type")

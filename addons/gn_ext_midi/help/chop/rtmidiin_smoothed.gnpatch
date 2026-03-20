@@ -10,7 +10,9 @@
             ],
             "parameters": {
                 "lag": {
-                    "value": 0.15
+                    "value": 0.15,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },
@@ -66,7 +68,7 @@
             "to_port": 0
         },
         {
-            "from": "rtmidi1",
+            "from": "lag1",
             "from_port": 0,
             "to": "choptop1",
             "to_port": 0

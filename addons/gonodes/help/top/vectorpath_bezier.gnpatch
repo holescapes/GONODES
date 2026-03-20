@@ -4,50 +4,227 @@
     "nodes": {
         "table1": {
             "type": "TableDAT",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "rows": {"value": 8},
-                "cols": {"value": 7},
-                "r0c0": {"value": "command"},
-                "r0c1": {"value": "x"},
-                "r0c2": {"value": "y"},
-                "r0c3": {"value": "x2"},
-                "r0c4": {"value": "y2"},
-                "r0c5": {"value": "x3"},
-                "r0c6": {"value": "y3"},
-                "r1c0": {"value": "M"}, "r1c1": {"value": "50"}, "r1c2": {"value": "400"},
-                "r2c0": {"value": "C"}, "r2c1": {"value": "50"}, "r2c2": {"value": "50"}, "r2c3": {"value": "200"}, "r2c4": {"value": "50"}, "r2c5": {"value": "250"}, "r2c6": {"value": "200"},
-                "r3c0": {"value": "C"}, "r3c1": {"value": "300"}, "r3c2": {"value": "350"}, "r3c3": {"value": "350"}, "r3c4": {"value": "500"}, "r3c5": {"value": "400"}, "r3c6": {"value": "300"},
-                "r4c0": {"value": "L"}, "r4c1": {"value": "500"}, "r4c2": {"value": "400"},
-                "r5c0": {"value": "Q"}, "r5c1": {"value": "480"}, "r5c2": {"value": "500"}, "r5c3": {"value": "300"}, "r5c4": {"value": "480"},
-                "r6c0": {"value": "L"}, "r6c1": {"value": "100"}, "r6c2": {"value": "480"},
-                "r7c0": {"value": "Z"}
+                "rows": {
+                    "value": 8,
+                    "expression": "(8 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "cols": {
+                    "value": 7,
+                    "expression": "(7 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "r0c0": {
+                    "value": "command"
+                },
+                "r0c1": {
+                    "value": "x"
+                },
+                "r0c2": {
+                    "value": "y"
+                },
+                "r0c3": {
+                    "value": "x2"
+                },
+                "r0c4": {
+                    "value": "y2"
+                },
+                "r0c5": {
+                    "value": "x3"
+                },
+                "r0c6": {
+                    "value": "y3"
+                },
+                "r1c0": {
+                    "value": "M"
+                },
+                "r1c1": {
+                    "value": "50"
+                },
+                "r1c2": {
+                    "value": "400"
+                },
+                "r2c0": {
+                    "value": "C"
+                },
+                "r2c1": {
+                    "value": "50"
+                },
+                "r2c2": {
+                    "value": "50"
+                },
+                "r2c3": {
+                    "value": "200"
+                },
+                "r2c4": {
+                    "value": "50"
+                },
+                "r2c5": {
+                    "value": "250"
+                },
+                "r2c6": {
+                    "value": "200"
+                },
+                "r3c0": {
+                    "value": "C"
+                },
+                "r3c1": {
+                    "value": "300"
+                },
+                "r3c2": {
+                    "value": "350"
+                },
+                "r3c3": {
+                    "value": "350"
+                },
+                "r3c4": {
+                    "value": "500"
+                },
+                "r3c5": {
+                    "value": "400"
+                },
+                "r3c6": {
+                    "value": "300"
+                },
+                "r4c0": {
+                    "value": "L"
+                },
+                "r4c1": {
+                    "value": "500"
+                },
+                "r4c2": {
+                    "value": "400"
+                },
+                "r5c0": {
+                    "value": "Q"
+                },
+                "r5c1": {
+                    "value": "480"
+                },
+                "r5c2": {
+                    "value": "500"
+                },
+                "r5c3": {
+                    "value": "300"
+                },
+                "r5c4": {
+                    "value": "480"
+                },
+                "r6c0": {
+                    "value": "L"
+                },
+                "r6c1": {
+                    "value": "100"
+                },
+                "r6c2": {
+                    "value": "480"
+                },
+                "r7c0": {
+                    "value": "Z"
+                }
             }
         },
         "vp1": {
             "type": "VectorPathTOP",
-            "position": [500, 200],
+            "position": [
+                500,
+                200
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "shape": {"value": 4},
-                "stroke_color": {"value": {"_type": "Color", "r": 1.0, "g": 0.3, "b": 0.5, "a": 1.0}},
-                "stroke_width": {"value": 3.0},
-                "bg_color": {"value": {"_type": "Color", "r": 0.02, "g": 0.02, "b": 0.05, "a": 1.0}},
-                "antialiased": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "shape": {
+                    "value": 4
+                },
+                "stroke_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.3,
+                        "b": 0.5,
+                        "a": 1.0
+                    }
+                },
+                "stroke_width": {
+                    "value": 3.0
+                },
+                "bg_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.02,
+                        "g": 0.02,
+                        "b": 0.05,
+                        "a": 1.0
+                    }
+                },
+                "antialiased": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "table1", "from_port": 0, "to": "vp1", "to_port": 1}
+        {
+            "from": "table1",
+            "from_port": 0,
+            "to": "vp1",
+            "to_port": 1
+        },
+        {
+            "from": "vp1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "VectorPath TOP \u2014 B\u00e9zier Path Commands\n\nTable DAT with SVG-like commands (M, C, Q, L, Z)\ndrives shape=Path Commands mode. Cubic and quadratic\nB\u00e9zier curves create smooth contours. Edit table\nvalues to reshape the path interactively.",
-            "position": [-100.0, -80.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -80.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

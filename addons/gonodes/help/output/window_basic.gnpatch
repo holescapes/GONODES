@@ -4,27 +4,64 @@
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "scale": {"value": 3.0}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 3.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "open": {"value": false},
-                "title": {"value": "GONODES Output"},
-                "monitor": {"value": 0},
-                "window_mode": {"value": 0},
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "vsync": {"value": true}
+                "open": {
+                    "value": false
+                },
+                "title": {
+                    "value": "GONODES Output"
+                },
+                "monitor": {
+                    "value": 0
+                },
+                "window_mode": {
+                    "value": 0
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "vsync": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1", "to": "window1", "from_port": 0, "to_port": 0}
+        {
+            "from": "noise1",
+            "to": "window1",
+            "from_port": 0,
+            "to_port": 0
+        }
     ],
-    "description": "WindowOUT — Display a texture in a standalone OS window. Toggle 'open' to show."
+    "description": "WindowOUT \u2014 Display a texture in a standalone OS window. Toggle 'open' to show."
 }

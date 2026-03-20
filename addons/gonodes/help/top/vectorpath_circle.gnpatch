@@ -4,58 +4,175 @@
     "nodes": {
         "lfo1": {
             "type": "LFO_CHOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "frequency": {"value": 0.3},
-                "amplitude": {"value": 200.0},
-                "offset": {"value": 256.0},
-                "channel_name": {"value": "x0"}
+                "frequency": {
+                    "value": 0.3
+                },
+                "amplitude": {
+                    "value": 200.0
+                },
+                "offset": {
+                    "value": 256.0
+                },
+                "channel_name": {
+                    "value": "x0"
+                }
             }
         },
         "lfo2": {
             "type": "LFO_CHOP",
-            "position": [100, 250],
+            "position": [
+                100,
+                250
+            ],
             "parameters": {
-                "frequency": {"value": 0.5},
-                "amplitude": {"value": 200.0},
-                "offset": {"value": 256.0},
-                "channel_name": {"value": "y0"},
-                "phase": {"value": 0.25}
+                "frequency": {
+                    "value": 0.5
+                },
+                "amplitude": {
+                    "value": 200.0
+                },
+                "offset": {
+                    "value": 256.0
+                },
+                "channel_name": {
+                    "value": "y0"
+                },
+                "phase": {
+                    "value": 0.25
+                }
             }
         },
         "merge1": {
             "type": "MergeCHOP",
-            "position": [400, 175],
+            "position": [
+                400,
+                175
+            ],
             "parameters": {}
         },
         "vp1": {
             "type": "VectorPathTOP",
-            "position": [700, 175],
+            "position": [
+                700,
+                175
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "shape": {"value": 2},
-                "stroke_color": {"value": {"_type": "Color", "r": 0.0, "g": 1.0, "b": 0.5, "a": 1.0}},
-                "stroke_width": {"value": 4.0},
-                "fill": {"value": true},
-                "fill_color": {"value": {"_type": "Color", "r": 0.0, "g": 0.3, "b": 0.2, "a": 0.4}},
-                "radius": {"value": 80.0},
-                "arc_segments": {"value": 128}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "shape": {
+                    "value": 2,
+                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "stroke_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.0,
+                        "g": 1.0,
+                        "b": 0.5,
+                        "a": 1.0
+                    }
+                },
+                "stroke_width": {
+                    "value": 4.0,
+                    "expression": "(4.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "fill": {
+                    "value": true
+                },
+                "fill_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.0,
+                        "g": 0.3,
+                        "b": 0.2,
+                        "a": 0.4
+                    }
+                },
+                "radius": {
+                    "value": 80.0
+                },
+                "arc_segments": {
+                    "value": 128
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1000,
+                175
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "lfo1", "from_port": 0, "to": "merge1", "to_port": 0},
-        {"from": "lfo2", "from_port": 0, "to": "merge1", "to_port": 1},
-        {"from": "merge1", "from_port": 0, "to": "vp1", "to_port": 0}
+        {
+            "from": "lfo1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "lfo2",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "vp1",
+            "to_port": 0
+        },
+        {
+            "from": "vp1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "VectorPath TOP \u2014 Animated Circle\n\nTwo LFOs (sine + cosine via phase offset)\ndrive the center of a circle via x0/y0 channels.\n128-segment anti-aliased outline with translucent\nfill. Great for animated data viz markers.",
-            "position": [-100.0, -80.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -80.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

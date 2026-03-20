@@ -2,56 +2,142 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "button1": {
-            "type": "ButtonCOMP",
-            "position": [100, 100],
-            "parameters": {}
-        },
         "panelexec1": {
             "type": "PanelExecuteDAT",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "panel_path": {"value": "button1"},
-                "max_events": {"value": 10},
-                "log_values": {"value": true},
-                "log_hover": {"value": false},
-                "clear": {"value": false}
+                "panel_path": {
+                    "value": "button1"
+                },
+                "max_events": {
+                    "value": 10
+                },
+                "log_values": {
+                    "value": true
+                },
+                "log_hover": {
+                    "value": false
+                },
+                "clear": {
+                    "value": false
+                }
             }
-        },
-        "button2": {
-            "type": "ButtonCOMP",
-            "position": [100, 350],
-            "parameters": {}
         },
         "panelexec2": {
             "type": "PanelExecuteDAT",
-            "position": [500, 350],
+            "position": [
+                500,
+                350
+            ],
             "parameters": {
-                "panel_path": {"value": "button2"},
-                "max_events": {"value": 10},
-                "log_values": {"value": true},
-                "log_hover": {"value": false},
-                "clear": {"value": false}
+                "panel_path": {
+                    "value": "button2"
+                },
+                "max_events": {
+                    "value": 10
+                },
+                "log_values": {
+                    "value": true
+                },
+                "log_hover": {
+                    "value": false
+                },
+                "clear": {
+                    "value": false
+                }
             }
         },
         "merge1": {
             "type": "MergeDAT",
-            "position": [850, 220],
+            "position": [
+                850,
+                220
+            ],
             "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1150,
+                220
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                950,
+                220
+            ],
+            "parameters": {
+                "text": {
+                    "value": "DAT Output",
+                    "expression": "str(op(\"merge1\"))",
+                    "mode": "EXPRESSION"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         }
     },
     "connections": [
-        {"from": "panelexec1", "from_port": 0, "to": "merge1", "to_port": 0},
-        {"from": "panelexec2", "from_port": 0, "to": "merge1", "to_port": 1}
+        {
+            "from": "panelexec1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "panelexec2",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "PanelExecute DAT \u2014 Multi-Button Logger\n\nTwo separate buttons each with their own PanelExecuteDAT.\nBoth log value changes (press/release) with hover disabled.\nMergeDAT combines both event streams into one table.\nUseful for building custom UI event dispatchers.",
-            "position": [-100.0, -120.0],
-            "size": [520.0, 110.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -120.0
+            ],
+            "size": [
+                520.0,
+                110.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

@@ -18,75 +18,6 @@
             ],
             "parameters": {}
         },
-        "light1": {
-            "type": "LightCOMP",
-            "position": [
-                400,
-                300
-            ],
-            "parameters": {
-                "type": {
-                    "value": 1
-                },
-                "tx": {
-                    "value": 0.5
-                },
-                "ty": {
-                    "value": 1.5
-                },
-                "tz": {
-                    "value": 1.0
-                },
-                "rx": {
-                    "value": -22.5
-                },
-                "ry": {
-                    "value": 0.5
-                },
-                "rz": {
-                    "value": 0.5
-                },
-                "color": {
-                    "value": {
-                        "_type": "Color",
-                        "r": 1.0,
-                        "g": 0.4,
-                        "b": 0.2,
-                        "a": 1.0
-                    }
-                },
-                "energy": {
-                    "value": 0.5
-                },
-                "shadows": {
-                    "value": true
-                },
-                "shadow_bias": {
-                    "value": 0.05
-                },
-                "shadow_normal_bias": {
-                    "value": 0.5
-                },
-                "shadow_blur": {
-                    "value": 0.5
-                },
-                "shadow_opacity": {
-                    "value": 0.5
-                },
-                "dir_shadow_mode": {
-                    "value": 1
-                },
-                "omni_range": {
-                    "value": 5.0
-                },
-                "spot_range": {
-                    "value": 5.0
-                },
-                "spot_angle": {
-                    "value": 22.5
-                }
-            }
-        },
         "cam1": {
             "type": "CameraCOMP",
             "position": [
@@ -165,7 +96,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LightCOMP \u2014 Parameters\n\nShowcases: type, tx, ty.",
+            "text": "LightCOMP — Parameters\n\nShowcases: type, tx, ty.",
             "position": [
                 -100.0,
                 -100.0

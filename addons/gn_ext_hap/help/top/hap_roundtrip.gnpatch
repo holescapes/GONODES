@@ -1,49 +1,102 @@
 {
-  "version": "1.0",
-  "description": "HAP round-trip — Record with HapOutTOP, then play back with HapInTOP for GPU-direct video loop.",
-  "nodes": {
-    "noise1": {
-      "type": "noise",
-      "position": [200, 100],
-      "params": {
-        "resolution": {"_type": "Vector2i", "x": 1280, "y": 720}
-      }
+    "version": "1.0",
+    "description": "HAP round-trip \u2014 Record with HapOutTOP, then play back with HapInTOP for GPU-direct video loop.",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1280,
+                        "y": 720
+                    }
+                }
+            }
+        },
+        "hapout1": {
+            "type": "HapOUT",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "file_path": {
+                    "value": "user://output/roundtrip.mov"
+                },
+                "variant": {
+                    "value": 0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "fps": {
+                    "value": 30,
+                    "expression": "(30 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "record": {
+                    "value": false
+                }
+            }
+        },
+        "hapin1": {
+            "type": "HapInTOP",
+            "position": [
+                200,
+                400
+            ],
+            "parameters": {
+                "file": {
+                    "value": "user://output/roundtrip.mov"
+                },
+                "play": {
+                    "value": true
+                },
+                "loop": {
+                    "value": true
+                },
+                "speed": {
+                    "value": 1.0
+                }
+            }
+        },
+        "null1": {
+            "type": "NullTOP",
+            "position": [
+                600,
+                400
+            ],
+            "parameters": {}
+        },
+        "info1": {
+            "type": "InfoDAT",
+            "position": [
+                200,
+                600
+            ],
+            "parameters": {
+                "text": {
+                    "value": "HAP Round-Trip Demo\n\nTop chain: NoiseTOP \u2192 HapOutTOP (toggle record to capture)\nBottom chain: HapInTOP \u2192 NullTOP (plays back the recorded file)\n\n1. Toggle hapout1 'record' ON for a few seconds\n2. Toggle 'record' OFF to finalize\n3. hapin1 automatically plays back the GPU-direct HAP file"
+                }
+            }
+        }
     },
-    "hapout1": {
-      "type": "hapout",
-      "position": [600, 100],
-      "params": {
-        "file_path": "user://output/roundtrip.mov",
-        "variant": 0,
-        "fps": 30,
-        "record": false
-      }
-    },
-    "hapin1": {
-      "type": "hapintop",
-      "position": [200, 400],
-      "params": {
-        "file": "user://output/roundtrip.mov",
-        "play": true,
-        "loop": true,
-        "speed": 1.0
-      }
-    },
-    "null1": {
-      "type": "nulltop",
-      "position": [600, 400],
-      "params": {}
-    },
-    "info1": {
-      "type": "info",
-      "position": [200, 600],
-      "params": {
-        "text": "HAP Round-Trip Demo\n\nTop chain: NoiseTOP → HapOutTOP (toggle record to capture)\nBottom chain: HapInTOP → NullTOP (plays back the recorded file)\n\n1. Toggle hapout1 'record' ON for a few seconds\n2. Toggle 'record' OFF to finalize\n3. hapin1 automatically plays back the GPU-direct HAP file"
-      }
-    }
-  },
-  "connections": [
-    {"from": "noise1", "from_port": 0, "to": "hapout1", "to_port": 0},
-    {"from": "hapin1", "from_port": 0, "to": "null1", "to_port": 0}
-  ]
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "hapout1",
+            "to_port": 0
+        },
+        {
+            "from": "hapin1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        }
+    ]
 }

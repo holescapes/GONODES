@@ -4,71 +4,157 @@
     "nodes": {
         "sphere1": {
             "type": "SphereSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "radius": {"value": 1.0},
-                "rings": {"value": 32},
-                "radial_segments": {"value": 32}
+                "radius": {
+                    "value": 1.0,
+                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
+                    "mode": "EXPRESSION"
+                },
+                "rings": {
+                    "value": 32,
+                    "expression": "(32 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
+                },
+                "radial_segments": {
+                    "value": 32
+                }
             }
         },
         "polyreduce1": {
             "type": "PolyReduceSOPNative",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "target_percent": {"value": 25.0},
-                "preserve_boundary": {"value": true},
-                "boundary_weight": {"value": 10.0}
+                "target_percent": {
+                    "value": 25.0
+                },
+                "preserve_boundary": {
+                    "value": true
+                },
+                "boundary_weight": {
+                    "value": 10.0
+                }
             }
         },
         "geo1": {
             "type": "GeometryCOMP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {}
         },
         "cam1": {
             "type": "CameraCOMP",
-            "position": [800, 300],
+            "position": [
+                800,
+                300
+            ],
             "parameters": {
-                "tx": {"value": 0},
-                "ty": {"value": 0.5},
-                "tz": {"value": 3}
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
             }
         },
         "render1": {
             "type": "RenderTOP",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1500, 100],
+            "position": [
+                1500,
+                100
+            ],
             "parameters": {
                 "resolution": {
-                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": {"value": true}
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "sphere1", "from_port": 0, "to": "polyreduce1", "to_port": 0},
-        {"from": "polyreduce1", "from_port": 0, "to": "geo1", "to_port": 0},
-        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
-        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
-        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "polyreduce1",
+            "to_port": 0
+        },
+        {
+            "from": "polyreduce1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Poly Reduce SOP (Native) â€” Sphere Decimation\n\nReduces a 32-ring sphere to 25% of its triangles\nusing QEM edge-collapse. Boundary edges are preserved\nwith weight 10. Shows low-poly faceted result.",
-            "position": [-100.0, -150.0],
-            "size": [420.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "Poly Reduce SOP (Native) \u00e2\u20ac\u201d Sphere Decimation\n\nReduces a 32-ring sphere to 25% of its triangles\nusing QEM edge-collapse. Boundary edges are preserved\nwith weight 10. Shows low-poly faceted result.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                420.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

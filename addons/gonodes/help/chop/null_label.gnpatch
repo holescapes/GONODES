@@ -10,7 +10,9 @@
             ],
             "parameters": {
                 "amplitude": {
-                    "value": 0.5
+                    "value": 0.5,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
                 }
             }
         },
