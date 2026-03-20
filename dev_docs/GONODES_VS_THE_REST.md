@@ -397,39 +397,40 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 
 | # | Optimisation | What | Expected Gain | Effort |
 |---|---|---|---|---|
-| 1 | **Expression compilation/caching** | Replace per-frame `Expression.execute()` with pre-compiled GDScript callables. Cache the compiled `Expression` object (already partially done — extend to skip re-parse when source unchanged). | 2–5× faster expression eval. Biggest win for expression-heavy graphs. | Medium |
-| 2 | **Adaptive frame budget** | When frame time exceeds target, automatically reduce SubViewport resolution on non-critical TOPs (e.g., secondary chains, background layers). Priority levels per sink. | Maintain 60fps during spikes. Critical for live performance reliability. | Medium |
-| 3 | **Parallel cook: extend to GPU batch** | Currently CPU nodes parallelise but GPU nodes are strictly sequential. Group independent TOP chains and submit their SubViewport `UPDATE_ONCE` flags in a single batch, letting Godot's renderer parallelise within a frame. | 10–30% GPU utilisation improvement for multi-chain patches. | Medium-High |
-| 4 | **`max_cooks_per_frame` for parallel path** | Currently the frame budget cap only works in the sequential cook path. Extend it to the parallel path — abort remaining topo levels when budget exceeded. | Prevents frame overruns in heavy parallel batches. | Low |
+| 1 | **Hot-reloadable C++ user nodes (`gn_ext_user_native`)** | GDExtension addon: users write single-file C++ operators, compile in 2–8s, hot-reload without restart. Bundled godot-cpp headers + compiler toolchain. Integrated code editor + help system. | **Eliminates the GDScript bottleneck entirely** for power users. Full WorkerThreadPool parallelism. | Medium-High |
+| 2 | **Expression compilation/caching** | Replace per-frame `Expression.execute()` with pre-compiled GDScript callables. Cache the compiled `Expression` object (already partially done — extend to skip re-parse when source unchanged). | 2–5× faster expression eval. Biggest win for expression-heavy graphs. | Medium |
+| 3 | **Adaptive frame budget** | When frame time exceeds target, automatically reduce SubViewport resolution on non-critical TOPs (e.g., secondary chains, background layers). Priority levels per sink. | Maintain 60fps during spikes. Critical for live performance reliability. | Medium |
+| 4 | **Parallel cook: extend to GPU batch** | Currently CPU nodes parallelise but GPU nodes are strictly sequential. Group independent TOP chains and submit their SubViewport `UPDATE_ONCE` flags in a single batch, letting Godot's renderer parallelise within a frame. | 10–30% GPU utilisation improvement for multi-chain patches. | Medium-High |
+| 5 | **`max_cooks_per_frame` for parallel path** | Currently the frame budget cap only works in the sequential cook path. Extend it to the parallel path — abort remaining topo levels when budget exceeded. | Prevents frame overruns in heavy parallel batches. | Low |
 
 ### Tier 2 — Significant Impact, Moderate Effort
 
 | # | Optimisation | What | Expected Gain | Effort |
 |---|---|---|---|---|
-| 5 | **Texture pool / SubViewport recycling** | Maintain a pool of SubViewports grouped by resolution and format. When a TOP changes resolution, swap from pool instead of resizing. Recycle SubViewports from deleted nodes. | Smoother resolution transitions. Reduced GPU memory fragmentation. | Medium |
-| 6 | **Parameter-level dirty tracking** | Track which specific parameter changed on a node (not just "node is dirty"). Consumers that reference only `par("A", "scale")` skip re-eval when `A.seed` changes but `A.scale` doesn't. | Eliminates remaining false-positive expression re-evaluations. Closest to Houdini's parameter-level DAG. | Medium-High |
-| 7 | **GDScript → GDExtension migration for Script operators** | Provide a "compile to C++" path that generates GDExtension wrapper code from a ScriptSOP's GDScript, enabling JIT-like performance for user scripts. | 10–50× speedup for compute-heavy user scripts. | High |
-| 8 | **Async GPU readback** | For TOPtoCHOP, TOPtoIMG, and other GPU→CPU bridges, use `RenderingDevice` async readback with fences instead of synchronous `texture_2d_get()`. | Eliminates GPU stalls on readback. 1–5ms saved per readback node per frame. | Medium |
+| 6 | **Texture pool / SubViewport recycling** | Maintain a pool of SubViewports grouped by resolution and format. When a TOP changes resolution, swap from pool instead of resizing. Recycle SubViewports from deleted nodes. | Smoother resolution transitions. Reduced GPU memory fragmentation. | Medium |
+| 7 | **Embedded Python + NumPy (`gn_ext_python`)** | Embedded CPython 3.13+ with NumPy. Zero-copy `PackedFloat32Array` ↔ `numpy.ndarray` bridge. PythonScriptCHOP, PythonScriptSOP, PythonScriptDAT, PythonScriptIMG. TD-familiar scripting with vectorised C-speed array math. | NumPy vectorised operations 50–200× faster than GDScript per-element loops. Opens Python ecosystem (librosa, OpenCV, scipy). | High |
+| 8 | **Parameter-level dirty tracking** | Track which specific parameter changed on a node (not just "node is dirty"). Consumers that reference only `par("A", "scale")` skip re-eval when `A.seed` changes but `A.scale` doesn't. | Eliminates remaining false-positive expression re-evaluations. Closest to Houdini's parameter-level DAG. | Medium-High |
+| 9 | **Async GPU readback** | For TOPtoCHOP, TOPtoIMG, and other GPU→CPU bridges, use `RenderingDevice` async readback with fences instead of synchronous `texture_2d_get()`. | Eliminates GPU stalls on readback. 1–5ms saved per readback node per frame. | Medium |
 
 ### Tier 3 — Future Architecture, High Effort
 
 | # | Optimisation | What | Expected Gain | Effort |
 |---|---|---|---|---|
-| 9 | **Godot multi-window render queues** | If Godot exposes per-window or per-SubViewport render queues in future versions, use them to parallelise independent TOP chains on the GPU. | Closes the gap with TD's multi-stream GPU cook entirely. | Depends on Godot upstream |
-| 10 | **SOP chain fusion (compiled blocks)** | Analyse linear SOP chains and fuse them into a single operation (e.g., Transform→Normal→Peak becomes one pass). Requires intermediate representation. | Eliminates per-node allocation overhead for deep SOP chains. Houdini-tier optimisation. | Very High |
-| 11 | **VEX-like bytecode VM for expressions** | Replace GDScript `Expression` with a purpose-built stack-based VM that compiles expression strings to bytecode. Optimised for the small expression vocabulary (`chop`, `par`, `fit`, `noise`, `ramp`, etc.). | 5–20× faster expression eval vs `Expression.execute()`. | High |
-| 12 | **Partial frame cook (time-slicing)** | Allow the cook engine to pause mid-topo-order and resume next frame. Low-priority branches cook at reduced framerate (e.g., background chain at 15fps while foreground stays at 60fps). | TD-style adaptive quality without resolution reduction. Smooth degradation under load. | High |
-| 13 | **SPIR-V shader caching** | Cache compiled GLSL→SPIR-V for CustomShaderTOP and compute shaders. Skip recompilation when shader source hasn't changed across sessions. | Faster first-frame boot time. Eliminates shader compilation stutter on patch load. | Medium |
-| 14 | **Compute shader for CHOP math** | Offload array-math CHOPs (Math, Logic, Filter) to GPU compute when channel length × channel count exceeds a threshold (e.g., 10K+ samples). | 10–100× speedup for large CHOP datasets (audio analysis, sensor arrays). | Medium-High |
+| 10 | **Godot multi-window render queues** | If Godot exposes per-window or per-SubViewport render queues in future versions, use them to parallelise independent TOP chains on the GPU. | Closes the gap with TD's multi-stream GPU cook entirely. | Depends on Godot upstream |
+| 11 | **SOP chain fusion (compiled blocks)** | Analyse linear SOP chains and fuse them into a single operation (e.g., Transform→Normal→Peak becomes one pass). Requires intermediate representation. | Eliminates per-node allocation overhead for deep SOP chains. Houdini-tier optimisation. | Very High |
+| 12 | **VEX-like bytecode VM for expressions** | Replace GDScript `Expression` with a purpose-built stack-based VM that compiles expression strings to bytecode. Optimised for the small expression vocabulary (`chop`, `par`, `fit`, `noise`, `ramp`, etc.). | 5–20× faster expression eval vs `Expression.execute()`. | High |
+| 13 | **Partial frame cook (time-slicing)** | Allow the cook engine to pause mid-topo-order and resume next frame. Low-priority branches cook at reduced framerate (e.g., background chain at 15fps while foreground stays at 60fps). | TD-style adaptive quality without resolution reduction. Smooth degradation under load. | High |
+| 14 | **SPIR-V shader caching** | Cache compiled GLSL→SPIR-V for CustomShaderTOP and compute shaders. Skip recompilation when shader source hasn't changed across sessions. | Faster first-frame boot time. Eliminates shader compilation stutter on patch load. | Medium |
+| 15 | **Compute shader for CHOP math** | Offload array-math CHOPs (Math, Logic, Filter) to GPU compute when channel length × channel count exceeds a threshold (e.g., 10K+ samples). | 10–100× speedup for large CHOP datasets (audio analysis, sensor arrays). | Medium-High |
 
 ### Tier 4 — Speculative / Research
 
 | # | Optimisation | What | Notes |
 |---|---|---|---|
-| 15 | **Warp-level GPU scheduling** | Fine-grained GPU work distribution across TOP chains using Vulkan compute queues. | Requires low-level Vulkan access beyond what Godot exposes. |
-| 16 | **Distributed cook (network)** | Split graph across machines — network-transparent node evaluation. | Like Houdini PDG but real-time. Massive undertaking. |
-| 17 | **ML-accelerated shader compilation** | Use trained models to predict optimal shader variants based on input resolution and GPU. | Research territory. |
-| 18 | **GDScript JIT in Godot core** | If Godot ever ships a GDScript JIT compiler, all Script operators get faster for free. | Depends on Godot upstream roadmap. Monitor godot-proposals. |
+| 16 | **Warp-level GPU scheduling** | Fine-grained GPU work distribution across TOP chains using Vulkan compute queues. | Requires low-level Vulkan access beyond what Godot exposes. |
+| 17 | **Distributed cook (network)** | Split graph across machines — network-transparent node evaluation. | Like Houdini PDG but real-time. Massive undertaking. |
+| 18 | **ML-accelerated shader compilation** | Use trained models to predict optimal shader variants based on input resolution and GPU. | Research territory. |
+| 19 | **GDScript JIT in Godot core** | If Godot ever ships a GDScript JIT compiler, all Script operators get faster for free. | Depends on Godot upstream roadmap. Monitor godot-proposals. |
 
 ### Priority Matrix
 
@@ -437,17 +438,17 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
                         IMPACT
                  Low    Medium    High
             ┌─────────┬─────────┬─────────┐
-    Low     │         │   #4    │   #1    │
+    Low     │         │   #5    │   #1    │
             │         │         │         │
   EFFORT    ├─────────┼─────────┼─────────┤
-   Medium   │         │  #5,#13 │ #2,#3,#8│
+   Medium   │         │  #6,#14 │#2,#3,#9 │
             │         │         │         │
             ├─────────┼─────────┼─────────┤
-    High    │         │  #6,#14 │ #7,#10  │
-            │         │         │ #11,#12 │
+    High    │         │  #8,#15 │#4,#7,#11│
+            │         │         │ #12,#13 │
             └─────────┴─────────┴─────────┘
 
-Recommended order: #1 → #4 → #2 → #3 → #8 → #5 → #13 → #6 → #14 → rest
+Recommended order: #1 → #5 → #2 → #3 → #4 → #9 → #6 → #7 → #14 → rest
 ```
 
 ---

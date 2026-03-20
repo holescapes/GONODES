@@ -1,0 +1,36 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "usernativetop1": {
+            "type": "UserNativeTOP",
+            "position": [100, 100],
+            "parameters": {
+                "cpp_class": {"value": "MyUserTOP"},
+                "auto_build": {"value": true},
+                "time_dep": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [500, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "usernativetop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UserNativeTOP \u2014 Basic C++ GPU Shader\n\nWrite custom TOP operators that generate GPU shader code.\nThe default example renders an animated ring pattern.\nTry loading the Game of Life example for interactive cellular\nautomata.\n\nnative_cook() returns shader GLSL + uniforms.\nThe wrapper handles SubViewport submission.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

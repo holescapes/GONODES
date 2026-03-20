@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "usernativedat1": {
+            "type": "UserNativeDAT",
+            "position": [100, 100],
+            "parameters": {
+                "cpp_class": {"value": "MyUserDAT"},
+                "auto_build": {"value": true},
+                "time_dep": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "usernativedat1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UserNativeDAT \u2014 Basic C++ Table Generator\n\nWrite custom DAT operators in C++ for table/text processing.\nThe default example generates a table with sine values.\nTry loading the CSV Parser example for high-performance\nCSV parsing.\n\nC++ string operations run much faster than GDScript\nfor large datasets (10k+ rows).",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

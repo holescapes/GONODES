@@ -1,0 +1,60 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "usernativesop1": {
+            "type": "UserNativeSOP",
+            "position": [100, 100],
+            "parameters": {
+                "cpp_class": {"value": "MyUserSOP"},
+                "auto_build": {"value": true},
+                "time_dep": {"value": true}
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [500, 100],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [500, 300],
+            "parameters": {
+                "tx": {"value": 0},
+                "ty": {"value": 1.5},
+                "tz": {"value": 4}
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1300, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "usernativesop1", "from_port": 0, "to": "geo1", "to_port": 0},
+        {"from": "geo1", "from_port": 0, "to": "render1", "to_port": 0},
+        {"from": "cam1", "from_port": 0, "to": "render1", "to_port": 1},
+        {"from": "render1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "UserNativeSOP \u2014 Basic C++ Geometry\n\nWrite custom SOP operators in C++ with hot-reload.\nThe default example generates a sine-wave deformed grid.\n\nClick the node, then 'Edit C++ \u2197' in the inspector.\nPress Ctrl+B to build. The node reloads automatically.\n\n10-50\u00d7 faster than equivalent GDScript.",
+            "position": [-100.0, -100.0],
+            "size": [480.0, 130.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}
