@@ -387,7 +387,52 @@ callback_dat, chop_to_dat, constant_dat, dat_to_chop, delete_dat, dmx_dat, error
 
 ### gn_ext_native (already C++) — 🟢 COLD
 
-These **are** the C++ native rewrites. The GDScript wrappers just delegate to GDExtension. Already migrated:
+These **are** the C++ native rewrites. The GDScript wrappers just delegate to GDExtension.
+
+**103 native C++ classes** across 9 build phases:
+
+| Phase | Family | Count | Classes |
+|-------|--------|-------|---------|
+| 1–2 | SOP | 11 | Particle, Metaball, PolyReduce, IsoSurface, Ray, Facet, Fuse, Subdivide, Copy, LSystem, Spring |
+| 3 | SOP | 13 | Noise, Mountain, Blend, Scatter, Sweep, Extrude, Bend, Taper, Twist, Lattice, Magnet, PolyLoft, Skin |
+| 4–6 | SOP | 10 | TopToSop, Point, Clip, Sort, UVProject, Attribute, Transform, Divide, Normal, Mirror, Cap, Delete, Carve |
+| 8 | SOP | 5 | Smooth, Remesh, PolyBevel, PolyStitch, Wireframe |
+| **9** | **SOP** | **7** | **Cloth, Texture, Peak, Group, PolySpline, PolyPatch, PolyBridge** |
+| 2–6 | CHOP | 20 | Smooth, Noise, Wave, Math, Filter, Resample, Trail, Slope, Warp, Interpolate, Physics, Pattern, AudioSpectrum, TopToChop, Expression, AudioDynamics, Stretch, Lookup |
+| 8 | CHOP | 5 | IK, SopToChop, Laser, Composite, Fan |
+| **9** | **CHOP** | **3** | **Transform, Lag, Blend** |
+| 1–6 | IMG | 5 | Blur, PixelSort, Noise, EdgeDetect, Checkerboard |
+| 3–5 | TOP | 4 | OpticalFlow, Analyze, ChopToTop, ParticleState |
+| 4–8 | VOL | 9 | MarchingCubes, ChopToVol, Analyze, Fluid, Blur, Noise, Displace, Blend, SopToVol |
+| 4–8 | POP | 9 | Instance, Render, Advect, Attract, Collision, Force, Turbulence, Source, Limit |
+| 7 | Serial | 1 | SerialPort |
+| | **Total** | **103** | |
+
+### Phase 9 — CPU-Hot Audit Migration (2026-03-19)
+
+The Phase 9 batch was identified by auditing all operators for CPU hotspots that lacked C++ bindings:
+
+| Class | Source | Key Optimization |
+|-------|--------|------------------|
+| GNNativeClothSop | `sop/gn_native_cloth_sop.cpp` | Verlet PBD + distance constraints with raw pointer loops, `unordered_set` edge dedup |
+| GNNativeTextureSop | `sop/gn_native_texture_sop.cpp` | Per-vertex UV→pixel sampling (color + displacement modes) |
+| GNNativePeakSop | `sop/gn_native_peak_sop.cpp` | Per-vertex pos + normal × distance |
+| GNNativeGroupSop | `sop/gn_native_group_sop.cpp` | BBox + normal-cone per-vertex classification |
+| GNNativePolySplineSop | `sop/gn_native_polyspline_sop.cpp` | Catmull-Rom spline eval + tube mesh generation |
+| GNNativePolyPatchSop | `sop/gn_native_polypatch_sop.cpp` | Bilinear Coons patch with grid subdivision |
+| GNNativePolyBridgeSop | `sop/gn_native_polybridge_sop.cpp` | Edge loop bridge with Rodrigues' twist rotation |
+| GNNativeTransformChop | `chop/gn_native_transform_chop.cpp` | Precomputed Euler→matrix, per-sample SRT application |
+| GNNativeLagChop | `chop/gn_native_lag_chop.cpp` | Stateful exp smoothing with separate attack/release |
+| GNNativeBlendChop | `chop/gn_native_blend_chop.cpp` | N-input weighted blend with normalization |
+
+### Extension C++ Status
+
+| Extension | C++ Status | Notes |
+|-----------|-----------|-------|
+| gn_ext_ndi | ~95% complete | Full receiver + sender, needs NDI SDK download |
+| gn_ext_depth_sensor | ~95% complete | 3 backends (Azure Kinect, RealSense, Ultraleap), needs vendor SDKs |
+| gn_ext_ml | ~95% complete | ONNX Runtime wrapper (CUDA/DirectML/CoreML), needs ORT download |
+| gn_ext_blackmagic | 100% scaffolded | Full .cpp stub + register_types + SConstruct + build.cfg + .gdextension; needs DeckLink SDK |
 
 **CHOP**: wave_chop_native, warp_chop_native, trail_chop_native, top_to_chop_native, stretch_chop_native, smooth_chop_native, slope_chop_native, resample_chop_native, physics_chop_native, pattern_chop_native, noise_chop_native, math_chop_native, lookup_chop_native, interpolate_chop_native, filter_chop_native, expression_chop_native, audio_spectrum_chop_native, audio_dynamics_chop_native
 

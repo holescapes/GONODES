@@ -249,6 +249,7 @@ description = "What this extension adds"
 section = "My Extension"
 # platforms = ["windows", "macos", "linux"]   # Optional: restrict to specific OSes
 # architectures = ["x86_64", "arm64"]           # Optional: restrict to specific CPU architectures
+# renderers = ["forward_plus", "mobile"]         # Optional: restrict to specific renderers
 # dependencies = ["SomeNativeClass"]             # Optional: required GDExtension classes
 
 [operator.MyOperatorTOP]
@@ -265,9 +266,10 @@ Extensions are auto-discovered by the registry during editor startup via `scan_e
 |-----|---------|
 | `platforms` | Array of OS names (`"windows"`, `"macos"`, `"linux"`, `"android"`, `"ios"`, `"web"`). Extension is skipped on non-matching OSes. Omit to load everywhere. Detected via `OS.get_name().to_lower()`. |
 | `architectures` | Array of CPU architecture names (`"x86_64"`, `"x86_32"`, `"arm64"`, `"arm32"`, etc.). Extension is skipped on non-matching architectures. Omit to load on all architectures. Detected via `Engine.get_architecture_name()`. |
+| `renderers` | Array of Godot renderer names (`"forward_plus"`, `"mobile"`, `"gl_compatibility"`). Extension is skipped if the active renderer doesn't match. Omit to load on all renderers. Detected via `GNGpuContext.get_current_renderer()`. |
 | `dependencies` | Array of GDExtension class names. Extension is skipped if any class is missing from `ClassDB`. |
 
-Checks run in order: platform → architecture → dependency. If any check fails, the extension is silently skipped.
+Checks run in order: platform → architecture → renderer → dependency. If any check fails, the extension is silently skipped.
 
 ### Native Binary Auto-Activation
 

@@ -19,6 +19,7 @@ This folder contains architecture references, build internals, testing infrastru
 | [INTEGRATION.md](INTEGRATION.md) | **Host app developers** | **LibGodot embedding guide** — C API reference (`gonodes_host.h`), GPU context sharing (Vulkan/Metal/OpenGL zero-copy), bridge operators (HostIn/OutTOP, CHOP, DAT), GNEmbeddedHost singleton, hot-reload, parameter encoding, error codes, build instructions, 5 example apps, file map |
 | [TD_HOUDINI_COMPARISON.md](TD_HOUDINI_COMPARISON.md) | Core developers | Architecture deep dive comparing GONODES with TouchDesigner and Houdini — cooking models, data flow, parameter systems, performance, extensibility. Includes gap analysis and prioritized improvement recommendations |
 | [TESTING.md](TESTING.md) | Contributors | Test framework architecture, running tests, writing new tests, coverage matrix, bugs found by tests. 690 automated tests (661 unit + 29 integration) |
+| [NATIVE_AUDIT.md](NATIVE_AUDIT.md) | Core developers | C++ migration audit — every operator classified by CPU intensity (HOT/WARM/COLD), Phase 1–9 migration tracking, 103 native C++ classes, extension C++ status |
 
 
 ## Relationship to Help System

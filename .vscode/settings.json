@@ -9,7 +9,14 @@
         "**/*.pck": true,
         "**/godot-cpp/**": true,
         "**/*.uid": true,
-        "**/*.import": true
+        "**/*.import": true,
+        "**/.venv/**": true,
+        "**/Spout2/**": true,
+        "**/__pycache__/**": true,
+        "**/*.obj": true,
+        "**/*.dblite": true,
+        "**/*.lib": true,
+        "**/*.exp": true
     },
     "search.exclude": {
         "**/.godot": true,
@@ -18,14 +25,28 @@
         "**/templates/**": true,
         "**/*.uid": true,
         "**/*.import": true,
-        "**/*.obj": true
+        "**/*.obj": true,
+        "**/.venv/**": true,
+        "**/Spout2/**": true,
+        "**/__pycache__/**": true,
+        "**/*.dblite": true,
+        "**/*.lib": true,
+        "**/*.exp": true,
+        "**/*.vcxproj": true,
+        "**/*.vcxproj.filters": true,
+        "**/*.sln": true,
+        "**/*.user": true,
+        "**/*.rc": true
     },
     "files.exclude": {
         "**/.godot": true,
         "**/.import": true,
         "**/godot-cpp": true,
         "**/*.uid": true,
-        "**/*.import": true
+        "**/*.import": true,
+        "**/*.obj": true,
+        "**/*.dblite": true,
+        "**/__pycache__": true
     },
     "git.repositoryScanMaxDepth": 1,
     "git.autoRepositoryDetection": "openEditors"

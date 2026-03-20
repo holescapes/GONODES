@@ -321,7 +321,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 ### 6.3 GONODES
 
-- **GDScript core + GDExtension C++ hot-paths**: All operators are GDScript. 92 performance-critical operators (42 SOP, 23 CHOP, 5 IMG, 4 TOP, 9 VOL, 9 POP) have C++ GDExtension implementations via `gn_ext_native` that the GDScript wrappers auto-delegate to when available.
+- **GDScript core + GDExtension C++ hot-paths**: All operators are GDScript. 103 performance-critical operators (46 SOP, 28 CHOP, 5 IMG, 4 TOP, 9 VOL, 9 POP, 1 Serial) have C++ GDExtension implementations via `gn_ext_native` that the GDScript wrappers auto-delegate to when available.
 - **Godot renderer**: TOPs leverage Godot's Vulkan/OpenGL renderer via SubViewport — GPU-accelerated.
 - **GPU compute**: POP (particles via SSBO) and VOL (volumetric via 3D textures) families use compute shaders where `RenderingDevice` is available. ComputeShaderTOP exposes user-written compute GLSL.
 - **Single-threaded cook**: Main thread only. No parallel cook lanes.
@@ -335,7 +335,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
-| Core operator language | C++ | C++ + VEX (JIT) | GDScript + GDExtension C++ (92 native ops) | Partial (hot-paths covered) |
+| Core operator language | C++ | C++ + VEX (JIT) | GDScript + GDExtension C++ (103 native ops) | Partial (hot-paths covered) |
 | GPU pipeline | Native DirectX/OpenGL/Vulkan | Karma GPU, OpenCL | Godot SubViewport (Vulkan/GL) + compute shaders (POP/VOL) | Adequate for real-time |
 | Multi-threaded cook | Yes (TOPs multi-stream) | Yes (SOP internal, PDG farm) | Yes (level-based WorkerThreadPool) | ✓ Implemented |
 | Expression compilation | Python (interpreted) | VEX (JIT compiled) | GDScript Expression (interpreted) | Minor gap |
@@ -371,7 +371,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 - **GDScript scripting**: ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG with runtime compilation.
 - **GLSL shaders**: CustomShaderTOP with `shader_type canvas_item` source, dynamic uniform scanning. ComputeShaderTOP for `shader_type compute` (Vulkan/Forward+ only).
 - **Extension system**: `gn_ext_*` addon folders with `gn_extension.cfg` manifests (platform/architecture/dependency guards). Extensions register operators dynamically. 10 extensions shipped.
-- **GDExtension C++ (implemented)**: 69 native operators via `gn_ext_native` — C++ processor classes with GDScript fallback wrappers.
+- **GDExtension C++ (implemented)**: 103 native operators via `gn_ext_native` — C++ processor classes with GDScript fallback wrappers across 9 build phases.
 - **@param/@input annotations**: Dynamic UI generation from script annotations.
 - **Presets**: Code presets (factory + user) for Script operators.
 
@@ -381,7 +381,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 |---------|--------------|---------|---------|------|
 | User scripting | Python | VEX + Python | GDScript | ✓ Adequate |
 | Shader authoring | GLSL (frag/vert/compute) | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item + compute shader) | ✓ Good |
-| C++ plugin SDK | No | Yes (HDK) | GDExtension (92 native ops implemented) | ✓ Done |
+| C++ plugin SDK | No | Yes (HDK) | GDExtension (103 native ops implemented) | ✓ Done |
 | Asset packaging | No (Projects only) | HDA (full asset package) | SubNetworkNode + .gnpatch | **GAP** (see §11) |
 | Dynamic annotations | No | Spare params, HDA interface | `@param`/`@input` in scripts | ✓ Good |
 | Extension marketplace | No | Orbolt, SideFX Labs | Planned | Future |
@@ -829,7 +829,7 @@ GONODES has **two fluid simulation systems**:
 | # | Suggestion | Why | Effort | Status |
 |---|---|---|---|---|
 | 16 | **2D Fluid TOP** | Screen-space Navier-Stokes for interactive installations | Low | ✅ **Implemented** — Fluid2DTOP with dual viewport feedback |
-| 17 | **Blackmagic / AJA video I/O** | Professional SDI/HDMI capture/output for broadcast | High | ✅ **gn_ext_blackmagic** — scaffold extension with BlackmagicInTOP (capture), BlackmagicOutTOP (output), BlackmagicDAT (device enum). GDExtension C++ header stub; needs DeckLink SDK build. 3 help patches |
+| 17 | **Blackmagic / AJA video I/O** | Professional SDI/HDMI capture/output for broadcast | High | ✅ **gn_ext_blackmagic** — full extension with BlackmagicInTOP (capture), BlackmagicOutTOP (output), BlackmagicDAT (device enum). Complete C++ stub (`gn_blackmagic.cpp` + `register_types.cpp` + `SConstruct` + `build.cfg` + `.gdextension`); needs DeckLink SDK to activate. 3 help patches |
 | 18 | **Trail / Ribbon rendering** | Render particle trails as ribbons/tubes — staple VJ effect | Medium | ✅ **TrailRibbonSOP** — ring buffer trail recording, ribbon mesh with taper, alpha fade, UVs |
 | 19 | **Voronoi / Shatter SOP** | Procedural fracturing for motion graphics | Medium | ✅ **VoronoiShatterSOP** — 3D Voronoi decomposition, Sutherland-Hodgman clipping, interior faces, piece attribute, explode offset |
 | 20 | **Periodic/Tiling Noise** | Seamless tiling for looping content | Low | ✅ **Implemented** — FBM octaves + periodic Perlin in NoiseTOP shader |

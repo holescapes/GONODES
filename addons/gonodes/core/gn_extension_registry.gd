@@ -22,6 +22,9 @@ extends RefCounted
 ##   author = "Your Name"
 ##   description = "H.264/VP9/HAP video codecs for MovieFileInTOP."
 ##   dependencies = ["FFmpegFrameDecoder"]   ; ClassDB classes that must exist
+##   platforms = ["windows", "macos", "linux"]  ; OS filter (omit = all)
+##   architectures = ["x86_64"]                 ; CPU arch filter (omit = all)
+##   renderers = ["forward_plus", "mobile"]     ; renderer filter (omit = all)
 ##   section = "FFmpeg"  ; palette sub-heading (defaults to name)
 ##
 ##   [operator.HAPMovieTOP]
@@ -468,6 +471,22 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 				break
 		if not arch_matched:
 			print("[ExtRegistry] Extension '%s' skipped — architecture '%s' not in %s" % [ext_name, current_arch, str(architectures)])
+			_loaded_extensions.append(folder_name)
+			return
+
+	# ── Renderer check ──
+	# If the manifest declares a "renderers" key, skip on non-matching rendering backends.
+	# Values: "forward_plus", "mobile", "gl_compatibility"
+	var renderers: Array = cfg.get_value("extension", "renderers", [])
+	if renderers.size() > 0:
+		var current_renderer := GNGpuContext.get_current_renderer()
+		var renderer_matched := false
+		for r in renderers:
+			if current_renderer == str(r).strip_edges():
+				renderer_matched = true
+				break
+		if not renderer_matched:
+			print("[ExtRegistry] Extension '%s' skipped — renderer '%s' not in %s" % [ext_name, current_renderer, str(renderers)])
 			_loaded_extensions.append(folder_name)
 			return
 

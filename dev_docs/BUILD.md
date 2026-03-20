@@ -263,11 +263,26 @@ every addon provides binaries for every platform, and missing binaries will
 cause Godot's export to fail.
 
 **Build-time filtering** is handled by the build scripts (see below).
-**Runtime gating** is handled by the extension registry's `platforms` and
-`architectures` keys in `gn_extension.cfg` — see [CONTRIBUTING.md § 5](CONTRIBUTING.md)
-for the full format.  This prevents operators from appearing in the palette
-on unsupported OS/architecture combos even when the `.gdextension` file is
-present (e.g., Syphon on Windows, or Spout on ARM64 Windows).
+**Runtime gating** is handled by the extension registry's `platforms`,
+`architectures`, `renderers`, and `dependencies` keys in `gn_extension.cfg`
+— see [CONTRIBUTING.md § 5](CONTRIBUTING.md) for the full format.  This
+prevents operators from appearing in the palette on unsupported OS/
+architecture/renderer combos even when the `.gdextension` file is present
+(e.g., Syphon on Windows, Spout on ARM64 Windows, or compute-only
+extensions on the Compatibility renderer).
+
+The full runtime guard pipeline (in order):
+
+| Level | Guard | Mechanism |
+|-------|-------|-----------|
+| GDExtension load | Binary exists on disk | `sync_native_extensions()` — `.gdextension` ↔ `.disabled` rename |
+| Extension manifest | `platforms` | `OS.get_name()` match |
+| Extension manifest | `architectures` | `Engine.get_architecture_name()` match |
+| Extension manifest | `renderers` | `GNGpuContext.get_current_renderer()` match |
+| Extension manifest | `dependencies` | `ClassDB.class_exists()` per class |
+| Per-node cook | `requires_compute()` | `GNGpuContext.is_compute_available()` — falls back to `_cook_cpu()` or skips |
+| Per-node cook | `supported_renderers()` | Runtime renderer match or skip with warning badge |
+| Per-node cook | `supported_platforms()` | Runtime OS match or skip with warning badge |
 
 **Auto-activation** is handled by `GNExtensionRegistry.sync_native_extensions()`,
 called from the plugin's `_enter_tree()`.  It renames `.gdextension` files
@@ -434,7 +449,7 @@ See the existing extensions for reference:
 
 | Extension | Path | What it contains |
 |-----------|------|-----------------|
-| `gn_ext_native` | `addons/gn_ext_native/` | C++ native operators + GDScript wrappers |
+| `gn_ext_native` | `addons/gn_ext_native/` | C++ native operators + GDScript wrappers (103 ops, 9 phases) |
 | `gn_ext_shadertoy` | `addons/gn_ext_shadertoy/` | Shadertoy GLSL translator + shader presets |
 | `gn_ext_isf` | `addons/gn_ext_isf/` | ISF shader translator + shader presets |
 | `gn_ext_ffmpeg` | `addons/gn_ext_ffmpeg/` | FFmpeg video I/O operators |
@@ -444,6 +459,13 @@ See the existing extensions for reference:
 | `gn_ext_midi` | `addons/gn_ext_midi/` | Cross-platform MIDI I/O via RtMidi (RtMidiInCHOP, RtMidiOutCHOP) |
 | `gn_ext_gpu_encode` | `addons/gn_ext_gpu_encode/` | Hardware GPU video encoding (MovieFileOutTOP) |
 | `gn_ext_mapper` | `addons/gn_ext_mapper/` | Projection mapping toolkit — GPU warping, edge blend, masking (7 TOPs) |
+| `gn_ext_sdf` | `addons/gn_ext_sdf/` | SDF primitives, booleans, modifiers, materials, renderer (25 ops) |
+| `gn_ext_hap` | `addons/gn_ext_hap/` | HAP codec GPU-direct video (HapInTOP, HapOUT) |
+| `gn_ext_serial` | `addons/gn_ext_serial/` | Serial port send/receive (SerialSendDAT, SerialReceiveDAT) |
+| `gn_ext_ndi` | `addons/gn_ext_ndi/` | NDI video-over-IP (4 ops — requires NDI SDK) |
+| `gn_ext_ml` | `addons/gn_ext_ml/` | ML inference via ONNX Runtime (7 ops — requires ONNX Runtime) |
+| `gn_ext_depth_sensor` | `addons/gn_ext_depth_sensor/` | Depth sensors — Azure Kinect, RealSense, Ultraleap (5 ops) |
+| `gn_ext_blackmagic` | `addons/gn_ext_blackmagic/` | Blackmagic DeckLink I/O (3 ops — requires DeckLink SDK) |
 
 Full details on the required directory layout and the discovery mechanism
 are in [CONTRIBUTING.md → Extension Self-Containment Rule](CONTRIBUTING.md#extension-self-containment-rule).
@@ -451,17 +473,17 @@ are in [CONTRIBUTING.md → Extension Self-Containment Rule](CONTRIBUTING.md#ext
 
 ## Native Library Builds (gn_native)
 
-The `gn_ext_native` extension is a C++ GDExtension that accelerates 69
-CPU-heavy operators (37 SOP, 18 CHOP, 5 IMG, 4 TOP, 3 VOL, 2 POP) with
-native inner loops across 6 build phases.  The GDScript wrapper operators
-in `gn_ext_native` auto-fallback to pure GDScript when the compiled
-binaries are unavailable.
+The `gn_ext_native` extension is a C++ GDExtension that accelerates 103
+CPU-heavy operators (46 SOP, 28 CHOP, 5 IMG, 4 TOP, 9 VOL, 9 POP, 1 Serial)
+with native inner loops across 9 build phases.  The GDScript wrapper
+operators in `gn_ext_native` auto-fallback to pure GDScript when the
+compiled binaries are unavailable.
 
 ### Architecture
 
 ```
 addons/gn_ext_native/
-├── gn_extension.cfg          # Extension descriptor (69 operators)
+├── gn_extension.cfg          # Extension descriptor (103 operators)
 ├── native/                   # C++ GDExtension source
 │   ├── SConstruct            # SCons build configuration
 │   ├── gn_native.gdextension # Library manifest (all platforms + architectures)
@@ -471,12 +493,13 @@ addons/gn_ext_native/
 │   │   ├── linux64/          # Linux x86_64 + ARM64
 │   │   └── macos/            # macOS universal (x86_64 + arm64)
 │   └── src/                  # C++ source files
-│       ├── sop/              # 37 SOP operators (geometry processors)
-│       ├── chop/             # 18 CHOP operators (signal processing)
+│       ├── sop/              # 46 SOP operators (geometry processors)
+│       ├── chop/             # 28 CHOP operators (signal processing)
 │       ├── img/              # 5 IMG operators (CPU image processing)
 │       ├── top/              # 4 TOP operators (texture analysis/bridges)
-│       ├── vol/              # 3 VOL operators (volumetric data)
-│       └── pop/              # 2 POP operators (particle system)
+│       ├── vol/              # 9 VOL operators (volumetric data)
+│       ├── pop/              # 9 POP operators (particle system)
+│       └── serial/           # 1 Serial operator (hardware I/O)
 └── operators/                # GDScript wrappers (auto-fallback)
     ├── sop/
     ├── chop/
