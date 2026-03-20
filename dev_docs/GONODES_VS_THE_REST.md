@@ -268,16 +268,22 @@ GONODES doesn't have this, and it's not obviously needed for real-time workflows
 
 | Feature | TouchDesigner | VVVV | Houdini | GONODES |
 |---|---|---|---|---|
-| User scripting | Python | VL (visual .NET), C# | VEX + Python | GDScript (Script operators) |
+| User scripting | Python | VL (visual .NET), C# | VEX + Python | GDScript (Script ops) + **Python** (`gn_ext_user_python` — NumPy, hot-reload) + **C++** (`gn_ext_user_native` — hot-reload, 2–8s compile) |
 | Shader authoring | GLSL (frag/vert/compute) | HLSL/Stride shaders | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item + compute) + ISF + Shadertoy |
-| C++ plugin SDK | **No** | Yes (vvvv SDK) | Yes (HDK) | GDExtension (103 native ops) |
+| C++ plugin SDK | **No** | Yes (vvvv SDK) | Yes (HDK) | GDExtension (103 native ops) + **UserNative** hot-reload C++ (in-editor compile) |
 | Asset packaging | `.tox` (COMP export) | Nuget packages (gamma) | **HDA** (gold standard) | `.gnasset` (JSON, self-contained) |
 | Event-driven scripting | Parameter Execute DAT | Reactive (VL) | Spare param callbacks | CallbackDAT (on_cook, on_value_change, etc.) |
-| Runtime compilation | Python (always available) | .NET JIT | VEX JIT | GDScript runtime compilation |
+| Runtime compilation | Python (always available) | .NET JIT | VEX JIT | GDScript runtime + **Python** hot-reload + **C++** hot-reload (GDExtension, 2–8s) |
 
 ### Key Insight
 
-TD doesn't let you write C++ operators at all — Python is the only extension path. Houdini has the HDK (full C++ API) but it's complex. GONODES's GDExtension path provides C++ access with a simpler wrapping pattern, and the GDScript fallback means operators work everywhere even without native builds.
+TD doesn't let you write C++ operators at all — Python is the only extension path. Houdini has the HDK (full C++ API) but it's complex. **GONODES now offers three tiers of user scripting** — a unique advantage:
+
+1. **GDScript** (Script operators) — zero setup, instant feedback, adequate for typical patches
+2. **Python** (`gn_ext_user_python`) — NumPy vectorised, TD-familiar, no compilation, full Python ecosystem
+3. **C++** (`gn_ext_user_native`) — maximum performance, full Godot API, 2–8s hot-reload iteration
+
+Both Python and C++ paths include integrated code editors with syntax highlighting, templates, examples, preset systems, and help documentation accessible from within the editor. GDScript fallback means operators work everywhere even without native builds.
 
 ---
 
@@ -397,7 +403,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 
 | # | Optimisation | What | Expected Gain | Effort |
 |---|---|---|---|---|
-| 1 | **Hot-reloadable C++ user nodes (`gn_ext_user_native`)** | GDExtension addon: users write single-file C++ operators, compile in 2–8s, hot-reload without restart. Bundled godot-cpp headers + compiler toolchain. Integrated code editor + help system. | **Eliminates the GDScript bottleneck entirely** for power users. Full WorkerThreadPool parallelism. | Medium-High |
+| 1 | ~~**Hot-reloadable C++ user nodes (`gn_ext_user_native`)**~~ | ✅ **IMPLEMENTED.** GDExtension addon: users write single-file C++ operators, compile in 2–8s, hot-reload without restart. Bundled godot-cpp headers + compiler toolchain. Integrated code editor with templates, examples, presets, and help system. 5 operator wrappers (SOP/CHOP/IMG/TOP/DAT). | **Eliminates the GDScript bottleneck entirely** for power users. Full WorkerThreadPool parallelism. | ~~Medium-High~~ Done |
 | 2 | **Expression compilation/caching** | Replace per-frame `Expression.execute()` with pre-compiled GDScript callables. Cache the compiled `Expression` object (already partially done — extend to skip re-parse when source unchanged). | 2–5× faster expression eval. Biggest win for expression-heavy graphs. | Medium |
 | 3 | **Adaptive frame budget** | When frame time exceeds target, automatically reduce SubViewport resolution on non-critical TOPs (e.g., secondary chains, background layers). Priority levels per sink. | Maintain 60fps during spikes. Critical for live performance reliability. | Medium |
 | 4 | **Parallel cook: extend to GPU batch** | Currently CPU nodes parallelise but GPU nodes are strictly sequential. Group independent TOP chains and submit their SubViewport `UPDATE_ONCE` flags in a single batch, letting Godot's renderer parallelise within a frame. | 10–30% GPU utilisation improvement for multi-chain patches. | Medium-High |
@@ -408,7 +414,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 | # | Optimisation | What | Expected Gain | Effort |
 |---|---|---|---|---|
 | 6 | **Texture pool / SubViewport recycling** | Maintain a pool of SubViewports grouped by resolution and format. When a TOP changes resolution, swap from pool instead of resizing. Recycle SubViewports from deleted nodes. | Smoother resolution transitions. Reduced GPU memory fragmentation. | Medium |
-| 7 | **Embedded Python + NumPy (`gn_ext_python`)** | Embedded CPython 3.13+ with NumPy. Zero-copy `PackedFloat32Array` ↔ `numpy.ndarray` bridge. PythonScriptCHOP, PythonScriptSOP, PythonScriptDAT, PythonScriptIMG. TD-familiar scripting with vectorised C-speed array math. | NumPy vectorised operations 50–200× faster than GDScript per-element loops. Opens Python ecosystem (librosa, OpenCV, scipy). | High |
+| 7 | ~~**Embedded Python + NumPy (`gn_ext_user_python`)**~~ | ✅ **IMPLEMENTED.** Embedded CPython 3.10+ with NumPy. Zero-copy `PackedFloat32Array` ↔ `numpy.ndarray` bridge via C++ GDExtension (`GNPythonRuntime`, `GNPythonProcessor`). 5 operator wrappers (UserPythonSOP/CHOP/IMG/TOP/DAT). Full Python SDK (`gonodes` package), integrated code editor with syntax highlighting, templates, examples, presets, and help system. | NumPy vectorised operations 50–200× faster than GDScript per-element loops. Opens Python ecosystem (librosa, OpenCV, scipy). | ~~High~~ Done |
 | 8 | **Parameter-level dirty tracking** | Track which specific parameter changed on a node (not just "node is dirty"). Consumers that reference only `par("A", "scale")` skip re-eval when `A.seed` changes but `A.scale` doesn't. | Eliminates remaining false-positive expression re-evaluations. Closest to Houdini's parameter-level DAG. | Medium-High |
 | 9 | **Async GPU readback** | For TOPtoCHOP, TOPtoIMG, and other GPU→CPU bridges, use `RenderingDevice` async readback with fences instead of synchronous `texture_2d_get()`. | Eliminates GPU stalls on readback. 1–5ms saved per readback node per frame. | Medium |
 
@@ -438,17 +444,19 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
                         IMPACT
                  Low    Medium    High
             ┌─────────┬─────────┬─────────┐
-    Low     │         │   #5    │   #1    │
+    Low     │         │   #5    │  ✅ #1  │
             │         │         │         │
   EFFORT    ├─────────┼─────────┼─────────┤
    Medium   │         │  #6,#14 │#2,#3,#9 │
             │         │         │         │
             ├─────────┼─────────┼─────────┤
-    High    │         │  #8,#15 │#4,#7,#11│
-            │         │         │ #12,#13 │
+    High    │         │  #8,#15 │#4,#11  │
+            │         │         │✅#7,#12 │
+            │         │         │  #13    │
             └─────────┴─────────┴─────────┘
 
-Recommended order: #1 → #5 → #2 → #3 → #4 → #9 → #6 → #7 → #14 → rest
+✅ = Implemented (#1 gn_ext_user_native, #7 gn_ext_user_python)
+Recommended order: #5 → #2 → #3 → #4 → #9 → #6 → #14 → rest
 ```
 
 ---
@@ -457,11 +465,9 @@ Recommended order: #1 → #5 → #2 → #3 → #4 → #9 → #6 → #7 → #14 �
 
 The single biggest performance gap in GONODES is user-authored Script operators running in GDScript for heavy per-element processing. Two complementary upgrade paths address this, targeting different user profiles.
 
-### 16.1 Hot-Reloadable C++ Nodes (`gn_ext_user_native`)
+### 16.1 Hot-Reloadable C++ Nodes (`gn_ext_user_native`) — ✅ IMPLEMENTED
 
-**Priority: Tier 1 — implement first.**
-
-A new GDExtension addon that lets users write single-file C++ operators, compile in 2–8 seconds, and hot-reload without restarting GONODES.
+**Status: DONE.** Shipped as `gn_ext_user_native` with 5 operator wrappers (UserNativeSOP/CHOP/IMG/TOP/DAT), integrated C++ code editor with syntax highlighting, templates, examples, factory/user preset system, and help documentation. Users write single-file C++ operators, compile in 2–8 seconds via bundled godot-cpp toolchain, and hot-reload without restarting GONODES.
 
 #### Architecture
 
@@ -554,11 +560,11 @@ C++ nodes get **full WorkerThreadPool parallelism for free**. No interpreter, no
 | **VVVV gamma** | .NET C# via Roslyn | Yes (~1–2s) | Excellent |
 | **GONODES (proposed)** | C++ GDExtension hot-reload | Yes (~2–8s) | Good — better than Houdini, close to VVVV |
 
-### 16.2 Embedded Python with NumPy (`gn_ext_python`)
+### 16.2 Embedded Python with NumPy (`gn_ext_user_python`) — ✅ IMPLEMENTED
 
-**Priority: Tier 2 — implement after C++ hot-reload.**
+**Status: DONE.** Shipped as `gn_ext_user_python` with 5 operator wrappers (UserPythonSOP/CHOP/IMG/TOP/DAT), C++ GDExtension runtime (`GNPythonRuntime` singleton + `GNPythonProcessor` per-node), zero-copy NumPy bridge, full Python SDK (`gonodes` package with sop/chop/img/top/dat/params modules), and integrated Python code editor with syntax highlighting, templates, examples, factory/user preset system, and help documentation.
 
-Not because of Python speed (CPython interpretation ≈ GDScript), but because of **NumPy vectorisation** — C-speed array operations accessible from a familiar scripting language. This is exactly how TouchDesigner Python achieves good performance.
+The value is **NumPy vectorisation** — C-speed array operations accessible from a familiar scripting language. This is exactly how TouchDesigner Python achieves good performance.
 
 #### Architecture
 
@@ -640,12 +646,13 @@ This is acceptable: platforms that can't run Python (web/mobile) are unlikely to
 │                     Instant feedback, zero setup,         │
 │                     adequate for typical VJ patches.      │
 │                                                          │
-│  Intermediate/    → Python Script operators (gn_ext_py)  │
-│  TD Refugees        NumPy vectorised, familiar syntax,    │
+│  Intermediate/    → Python Script operators               │
+│  TD Refugees        (gn_ext_user_python) ✅ SHIPPED        │
+│                     NumPy vectorised, familiar syntax,    │
 │                     no compilation step, ecosystem.       │
 │                                                          │
 │  Advanced/        → Hot-reload C++ nodes                 │
-│  Performance        (gn_ext_user_native)                 │
+│  Performance        (gn_ext_user_native) ✅ SHIPPED       │
 │                     Maximum performance, full Godot API,  │
 │                     2–8s iteration cycle.                 │
 └─────────────────────────────────────────────────────────┘
@@ -653,11 +660,11 @@ This is acceptable: platforms that can't run Python (web/mobile) are unlikely to
 
 ### 16.4 Implementation Order
 
-| Phase | What | Why first |
+| Phase | What | Status |
 |---|---|---|
-| **Phase 1** | `gn_ext_user_native` (C++ hot-reload) | Existing `gn_ext_native` architecture proves the GDExtension path. Godot 4.2+ hot-reload exists. Solves the bottleneck completely. Target audience (C++ devs) is comfortable with toolchain setup. |
-| **Phase 2** | `gn_ext_python` (embedded CPython + NumPy) | More infrastructure needed (CPython embedding, NumPy bundling, zero-copy bridge). Win is narrower (specifically vectorised code). But strategically important for TD migration and Python ecosystem access. |
-| **Phase 3** | Python free-threading upgrade | When CPython 3.13 free-threading stabilises, flip the build flag. Near-zero effort, removes last GIL serialisation for Python-heavy patches. |
+| **Phase 1** | `gn_ext_user_native` (C++ hot-reload) | ✅ **DONE** — 5 operators, integrated editor, bundled toolchain, help docs |
+| **Phase 2** | `gn_ext_user_python` (embedded CPython + NumPy) | ✅ **DONE** — 5 operators, C++ GDExtension runtime, Python SDK, integrated editor, help docs |
+| **Phase 3** | Python free-threading upgrade | ⬜ Future — when CPython 3.13 free-threading stabilises, flip the build flag. Near-zero effort, removes last GIL serialisation for Python-heavy patches. |
 
 ---
 
@@ -665,6 +672,6 @@ This is acceptable: platforms that can't run Python (web/mobile) are unlikely to
 
 GONODES is **architecturally competitive** with TouchDesigner for real-time visual art workloads. The cook engine's 3-tier guard system (active set → expression map → input hash) achieves equivalent work-skipping to TD's pull model. The incremental dirty propagation is actually smarter than TD's blanket subtree cascade. Features like non-realtime mode, expression profiling, and the VOL compute pipeline are genuine differentiators.
 
-The honest gaps are: serial GPU cook (Godot limitation), GDScript interpretation overhead for user scripts (mitigated by 103 native ops), and lack of adaptive quality degradation. None are fundamental architectural flaws — they're implementation gaps that the roadmap above addresses incrementally.
+The honest gaps are: serial GPU cook (Godot limitation), ~~GDScript interpretation overhead for user scripts~~ (now mitigated by 103 native ops + `gn_ext_user_native` C++ hot-reload + `gn_ext_user_python` NumPy vectorisation), and lack of adaptive quality degradation. The GDScript bottleneck is **effectively closed** — users now have three scripting tiers (GDScript → Python+NumPy → C++) with integrated editors and help for each.
 
-For the target domain (VJ, generative art, interactive installations at 30–200 nodes), GONODES delivers real-time performance today. The roadmap items would push it toward handling larger, more complex networks and professional production reliability.
+For the target domain (VJ, generative art, interactive installations at 30–200 nodes), GONODES delivers real-time performance today. The remaining roadmap items (expression compilation, adaptive frame budget, GPU batch parallelism) would push it toward handling larger, more complex networks and professional production reliability.

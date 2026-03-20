@@ -369,20 +369,22 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 ### 7.3 GONODES
 
 - **GDScript scripting**: ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG with runtime compilation.
+- **Python scripting** (✅ `gn_ext_user_python`): Embedded CPython + NumPy with zero-copy data bridge. UserPythonSOP/CHOP/IMG/TOP/DAT operators. Full Python SDK (`gonodes` package), integrated code editor with syntax highlighting, templates, examples, presets, and help.
+- **Hot-reload C++ nodes** (✅ `gn_ext_user_native`): Users write single-file C++ operators, compile in 2–8s via bundled godot-cpp toolchain, hot-reload without restart. UserNativeSOP/CHOP/IMG/TOP/DAT operators. Integrated C++ code editor with syntax highlighting, templates, examples, presets, and help.
 - **GLSL shaders**: CustomShaderTOP with `shader_type canvas_item` source, dynamic uniform scanning. ComputeShaderTOP for `shader_type compute` (Vulkan/Forward+ only).
-- **Extension system**: `gn_ext_*` addon folders with `gn_extension.cfg` manifests (platform/architecture/dependency guards). Extensions register operators dynamically. 10 extensions shipped.
+- **Extension system**: `gn_ext_*` addon folders with `gn_extension.cfg` manifests (platform/architecture/dependency guards). Extensions register operators dynamically. 13 extensions shipped.
 - **GDExtension C++ (implemented)**: 103 native operators via `gn_ext_native` — C++ processor classes with GDScript fallback wrappers across 9 build phases.
 - **@param/@input annotations**: Dynamic UI generation from script annotations.
-- **Presets**: Code presets (factory + user) for Script operators.
+- **Presets**: Code presets (factory + user) for Script, Python, and C++ operators.
 
 ### 7.4 Comparison
 
 | Feature | TouchDesigner | Houdini | GONODES | Gap? |
 |---------|--------------|---------|---------|------|
-| User scripting | Python | VEX + Python | GDScript | ✓ Adequate |
+| User scripting | Python | VEX + Python | GDScript + **Python** (NumPy, hot-reload) + **C++** (hot-reload, 2–8s) | ✅ **Three tiers** |
 | Shader authoring | GLSL (frag/vert/compute) | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item + compute shader) | ✓ Good |
-| C++ plugin SDK | No | Yes (HDK) | GDExtension (103 native ops implemented) | ✓ Done |
-| Asset packaging | No (Projects only) | HDA (full asset package) | SubNetworkNode + .gnpatch | **GAP** (see §11) |
+| C++ plugin SDK | No | Yes (HDK) | GDExtension (103 native ops) + **UserNative** hot-reload C++ (in-editor) | ✅ **Better than TD** |
+| Asset packaging | No (Projects only) | HDA (full asset package) | `.gnasset` (JSON, self-contained) | ✓ Done |
 | Dynamic annotations | No | Spare params, HDA interface | `@param`/`@input` in scripts | ✓ Good |
 | Extension marketplace | No | Orbolt, SideFX Labs | Planned | Future |
 

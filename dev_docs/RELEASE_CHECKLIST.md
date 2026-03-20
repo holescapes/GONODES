@@ -68,6 +68,8 @@ These cannot be auto-fetched. Download manually and place in the correct paths.
 | **Azure Kinect SDK** | gn_ext_depth_sensor (optional) | `addons/gn_ext_depth_sensor/native/azure_kinect_sdk/` | Microsoft docs |
 | **Intel RealSense SDK** | gn_ext_depth_sensor (optional) | `addons/gn_ext_depth_sensor/native/realsense_sdk/` | github.com/IntelRealSense/librealsense |
 | **Ultraleap SDK** | gn_ext_depth_sensor (optional) | `addons/gn_ext_depth_sensor/native/ultraleap_sdk/` | ultraleap.com/developers |
+| **Python 3.10+ (embeddable)** | gn_ext_user_python | `addons/gn_ext_user_python/toolchain/python/` | python.org/downloads (embeddable package) |
+| **NumPy** | gn_ext_user_python | Bundled inside toolchain Python or system | `pip install numpy` |
 
 > **Tip:** Extensions with missing SDKs will simply not build. The export script handles this by removing unresolved `.gdextension` files before export.
 
@@ -111,6 +113,7 @@ scons platform=macos arch=x86_64 target=template_release -j8
 | gn_ext_ml | `.dll` | — | `.so` | — | `.dylib` |
 | gn_ext_blackmagic | `.dll` | — | `.so` | — | — |
 | gn_ext_depth_sensor | `.dll` | — | `.so` | — | — |
+| gn_ext_user_python | `.dll` | — | `.so` | — | `.dylib` |
 
 ### Extensions that need NO build (pure GDScript)
 
@@ -140,6 +143,23 @@ The `gn_ext_user_native` extension lets users write custom C++ nodes **at runtim
 - [ ] Test: Drop a UserNativeSOP → Edit C++ → Ctrl+B → confirm it finds headers and compiles
 
 > **Version coupling:** The bundled godot-cpp **must** match the Godot editor version. If the editor is 4.6.1 but toolchain godot-cpp is from 4.5, user-compiled nodes will crash on load due to ABI mismatch.
+
+---
+
+## Phase 3.5: Bundle Python for User Python Nodes
+
+The `gn_ext_user_python` extension embeds CPython to let users write Python operators with NumPy. For this to work without the user installing Python system-wide, we optionally bundle an embeddable Python.
+
+- [ ] Download the **Python embeddable package** for each shipping platform:
+  - Windows: `python-3.12.x-embed-amd64.zip` from python.org
+  - Linux: System Python 3.10+ (document as prerequisite) or bundle AppImage
+  - macOS: Framework Python or Homebrew (document as prerequisite)
+- [ ] Extract into `addons/gn_ext_user_python/toolchain/python/`
+- [ ] Install NumPy into the bundled Python: `python -m pip install numpy --target=<toolchain>/python/Lib/site-packages`
+- [ ] Verify `toolchain/README.md` matches the shipped layout
+- [ ] Test: Drop a UserPythonSOP → Edit Python → write `import numpy as np` → Ctrl+R → confirm it loads
+
+> **Python discovery order:** The extension auto-detects Python in this order: (1) Bundled at `toolchain/python/`, (2) `GONODES_PYTHON_HOME` env var, (3) System Python on PATH. If no Python is found, the extension auto-disables gracefully.
 
 ---
 
@@ -201,6 +221,13 @@ These scripts:
 - [ ] Drop a UserNativeSOP into a patch
 - [ ] Write minimal C++ in the editor → Build (Ctrl+B) → confirm it compiles and cooks
 
+### User Python node test
+
+- [ ] Drop a UserPythonSOP into a patch
+- [ ] Write minimal Python in the editor → Reload (Ctrl+R) → confirm it loads and cooks
+- [ ] Verify NumPy import works: `import numpy as np` in the script
+- [ ] Test all 5 families: UserPythonSOP, UserPythonCHOP, UserPythonIMG, UserPythonTOP, UserPythonDAT
+
 ---
 
 ## Phase 6: Package
@@ -216,8 +243,9 @@ GONODES-v{VERSION}-{platform}/
 │   ├── gonodes/
 │   ├── gn_ext_native/
 │   ├── gn_ext_user_native/
-│   │   └── toolchain/godot-cpp/          ← Pre-built for user C++ nodes
-│   ├── gn_ext_ffmpeg/
+│   │   └── toolchain/godot-cpp/          ← Pre-built for user C++ nodes│   ├─ gn_ext_user_python/
+│   │   ├── sdk/gonodes/                  ← Python SDK package
+│   │   └── toolchain/python/             ← Bundled Python (optional)│   ├── gn_ext_ffmpeg/
 │   │   └── native/bin/ + runtime DLLs
 │   └── ... (all other extensions)
 ├── templates/                            ← Pre-built player binaries

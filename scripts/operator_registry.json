@@ -14,6 +14,60 @@
     ]
   },
   {
+    "class_name": "AudioBandCHOP",
+    "node_type": "audioband",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/audio_band_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "num_bands",
+        "type": "int",
+        "default": 5
+      },
+      {
+        "name": "band_names",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "crossovers",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "attack",
+        "type": "float",
+        "default": 0.02
+      },
+      {
+        "name": "release",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "peak_decay",
+        "type": "float",
+        "default": 0.98
+      },
+      {
+        "name": "gain",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "freq_min",
+        "type": "float",
+        "default": 20.0
+      },
+      {
+        "name": "freq_max",
+        "type": "float",
+        "default": 20000.0
+      }
+    ]
+  },
+  {
     "class_name": "AudioDynamicsCHOP",
     "node_type": "audio_dynamics",
     "family": "chop",
@@ -228,6 +282,59 @@
     ]
   },
   {
+    "class_name": "ChannelCHOP",
+    "node_type": "channel",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/channel_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "count",
+        "type": "int",
+        "default": 3
+      }
+    ]
+  },
+  {
+    "class_name": "ClipCHOP",
+    "node_type": "clip",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/clip_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "start",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "end",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "loop",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "play",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "trigger",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "ClockCHOP",
     "node_type": "clock",
     "family": "chop",
@@ -362,6 +469,50 @@
     ]
   },
   {
+    "class_name": "CueCHOP",
+    "node_type": "cuesequencer",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/cue_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "source",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "timeline",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "go_next",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "go_prev",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "go_to",
+        "type": "int",
+        "default": -1
+      },
+      {
+        "name": "go_to_name",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "apply_data",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "DelayCHOP",
     "node_type": "delay",
     "family": "chop",
@@ -406,6 +557,89 @@
         "name": "end_index",
         "type": "int",
         "default": 0
+      }
+    ]
+  },
+  {
+    "class_name": "DepthHandCHOP",
+    "node_type": "depthhand",
+    "family": "chop",
+    "file": "addons/gn_ext_depth_sensor/operators/chop/depth_hand_chop.gd",
+    "extension": "gn_ext_depth_sensor",
+    "params": [
+      {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "min_confidence",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "finger_filter",
+        "type": "string",
+        "default": "*"
+      },
+      {
+        "name": "timeout_ms",
+        "type": "int",
+        "default": 33
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "rescan",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "DepthSkeletonCHOP",
+    "node_type": "depthskeleton",
+    "family": "chop",
+    "file": "addons/gn_ext_depth_sensor/operators/chop/depth_skeleton_chop.gd",
+    "extension": "gn_ext_depth_sensor",
+    "params": [
+      {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "max_bodies",
+        "type": "int",
+        "default": 6
+      },
+      {
+        "name": "min_confidence",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "joint_filter",
+        "type": "string",
+        "default": "*"
+      },
+      {
+        "name": "timeout_ms",
+        "type": "int",
+        "default": 33
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "rescan",
+        "type": "pulse",
+        "default": null
       }
     ]
   },
@@ -488,6 +722,45 @@
         "name": "after",
         "type": "int",
         "default": 30
+      }
+    ]
+  },
+  {
+    "class_name": "FaceDetectCHOP",
+    "node_type": "facedetect",
+    "family": "chop",
+    "file": "addons/gn_ext_ml/operators/chop/face_detect_chop.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "detail",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "max_faces",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "min_confidence",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -578,6 +851,40 @@
     ]
   },
   {
+    "class_name": "HandDetectCHOP",
+    "node_type": "handdetect",
+    "family": "chop",
+    "file": "addons/gn_ext_ml/operators/chop/hand_detect_chop.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "max_hands",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "min_confidence",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "HoldCHOP",
     "node_type": "hold",
     "family": "chop",
@@ -598,6 +905,25 @@
         "name": "reset",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "HostInCHOP",
+    "node_type": "hostinchop",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/host_in_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "sample_rate",
+        "type": "float",
+        "default": 60.0
       }
     ]
   },
@@ -694,6 +1020,40 @@
         "name": "mode",
         "type": "menu",
         "default": null
+      },
+      {
+        "name": "window",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "KeyframeCHOP",
+    "node_type": "keyframe",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/keyframe_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "start",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "end",
+        "type": "float",
+        "default": 4.0
+      },
+      {
+        "name": "extend",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "count",
+        "type": "int",
+        "default": 1
       }
     ]
   },
@@ -757,6 +1117,60 @@
         "name": "reset",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "LaserCHOP",
+    "node_type": "laser",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/laser_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "pattern",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "points",
+        "type": "int",
+        "default": 200
+      },
+      {
+        "name": "scale",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "rotation",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "animate",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 30.0
+      },
+      {
+        "name": "color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "intensity",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "blank_points",
+        "type": "int",
+        "default": 5
       }
     ]
   },
@@ -915,6 +1329,64 @@
         "name": "scroll",
         "type": "bool",
         "default": true
+      },
+      {
+        "name": "window",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "NDIAudioInCHOP",
+    "node_type": "ndiaudioin",
+    "family": "chop",
+    "file": "addons/gn_ext_ndi/operators/chop/ndi_audio_in_chop.gd",
+    "extension": "gn_ext_ndi",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "bandwidth",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "timeout_ms",
+        "type": "int",
+        "default": 16
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "NDIAudioOutCHOP",
+    "node_type": "ndiaudioout",
+    "family": "chop",
+    "file": "addons/gn_ext_ndi/operators/chop/ndi_audio_out_chop.gd",
+    "extension": "gn_ext_ndi",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "default": "GoNodes Audio"
+      },
+      {
+        "name": "sample_rate",
+        "type": "int",
+        "default": 48000
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -959,6 +1431,20 @@
     "file": "addons/gonodes/operators/chop/null_chop.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "ObjectCHOP",
+    "node_type": "object",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/object_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "comp_path",
+        "type": "string",
+        "default": ""
+      }
+    ]
   },
   {
     "class_name": "OscInCHOP",
@@ -1137,6 +1623,35 @@
         "name": "sleeping",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "PoseDetectCHOP",
+    "node_type": "posedetect",
+    "family": "chop",
+    "file": "addons/gn_ext_ml/operators/chop/pose_detect_chop.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "min_confidence",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -1333,6 +1848,30 @@
     ]
   },
   {
+    "class_name": "SequenceCHOP",
+    "node_type": "sequence",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/sequence_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "duration",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "crossfade",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "loop",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "ShuffleCHOP",
     "node_type": "shuffle",
     "family": "chop",
@@ -1348,6 +1887,30 @@
         "name": "seed",
         "type": "int",
         "default": 0
+      }
+    ]
+  },
+  {
+    "class_name": "SkeletonCHOP",
+    "node_type": "skeleton",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/skeleton_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "comp_path",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "bone_filter",
+        "type": "string",
+        "default": "*"
+      },
+      {
+        "name": "local",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -1579,6 +2142,69 @@
     ]
   },
   {
+    "class_name": "TabletInCHOP",
+    "node_type": "tabletin",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/tabletin_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "normalize",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "TimelineCHOP",
+    "node_type": "timeline",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/timeline_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "start",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "end",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "loop",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "play",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "sync_to_engine",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "trigger",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "TimerCHOP",
     "node_type": "timer",
     "family": "chop",
@@ -1740,6 +2366,59 @@
         "name": "end",
         "type": "float",
         "default": 1.0
+      }
+    ]
+  },
+  {
+    "class_name": "UserNativeCHOP",
+    "node_type": "usernativechop",
+    "family": "chop",
+    "file": "addons/gn_ext_user_native/operators/chop/user_native_chop.gd",
+    "extension": "gn_ext_user_native",
+    "params": [
+      {
+        "name": "cpp_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "cpp_class",
+        "type": "string",
+        "default": "MyUserCHOP"
+      },
+      {
+        "name": "auto_build",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "UserPythonCHOP",
+    "node_type": "userpythonchop",
+    "family": "chop",
+    "file": "addons/gn_ext_user_python/operators/chop/user_python_chop.gd",
+    "extension": "gn_ext_user_python",
+    "params": [
+      {
+        "name": "py_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "auto_reload",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -3326,6 +4005,20 @@
     ]
   },
   {
+    "class_name": "BlackmagicDAT",
+    "node_type": "blackmagic",
+    "family": "dat",
+    "file": "addons/gn_ext_blackmagic/operators/dat/blackmagic_dat.gd",
+    "extension": "gn_ext_blackmagic",
+    "params": [
+      {
+        "name": "rescan",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "CHOPDAT",
     "node_type": "chop_to_dat",
     "family": "dat",
@@ -3418,6 +4111,20 @@
     ]
   },
   {
+    "class_name": "CueDAT",
+    "node_type": "cue",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/cue_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "num_cues",
+        "type": "int",
+        "default": 1
+      }
+    ]
+  },
+  {
     "class_name": "DATtoCHOP",
     "node_type": "dat_to_chop",
     "family": "dat",
@@ -3433,6 +4140,45 @@
         "name": "first_is_name",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "DMXDAT",
+    "node_type": "dmx",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/dmx_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "universe",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "ip",
+        "type": "string",
+        "default": "255.255.255.255"
+      },
+      {
+        "name": "port",
+        "type": "int",
+        "default": 6454
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "channels",
+        "type": "int",
+        "default": 512
       }
     ]
   },
@@ -3457,6 +4203,25 @@
         "name": "end_index",
         "type": "int",
         "default": 0
+      }
+    ]
+  },
+  {
+    "class_name": "DepthSensorDAT",
+    "node_type": "depthsensordat",
+    "family": "dat",
+    "file": "addons/gn_ext_depth_sensor/operators/dat/depth_sensor_dat.gd",
+    "extension": "gn_ext_depth_sensor",
+    "params": [
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "rescan",
+        "type": "pulse",
+        "default": null
       }
     ]
   },
@@ -3561,6 +4326,25 @@
         "name": "include_dirs",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "HostInDAT",
+    "node_type": "hostindat",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/host_in_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -3674,6 +4458,65 @@
     ]
   },
   {
+    "class_name": "MqttDAT",
+    "node_type": "mqtt",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/mqtt_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "broker",
+        "type": "string",
+        "default": "127.0.0.1"
+      },
+      {
+        "name": "port",
+        "type": "int",
+        "default": 1883
+      },
+      {
+        "name": "client_id",
+        "type": "string",
+        "default": "gonodes"
+      },
+      {
+        "name": "username",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "password",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "subscribe",
+        "type": "string",
+        "default": "gonodes/#"
+      },
+      {
+        "name": "publish_topic",
+        "type": "string",
+        "default": "gonodes/out"
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "max_messages",
+        "type": "int",
+        "default": 100
+      },
+      {
+        "name": "clear",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "MultiTouchInDAT",
     "node_type": "multitouchin",
     "family": "dat",
@@ -3689,6 +4532,11 @@
         "name": "normalize",
         "type": "bool",
         "default": false
+      },
+      {
+        "name": "window",
+        "type": "string",
+        "default": ""
       }
     ]
   },
@@ -3769,6 +4617,45 @@
     ]
   },
   {
+    "class_name": "ObjectDetectDAT",
+    "node_type": "objectdetect",
+    "family": "dat",
+    "file": "addons/gn_ext_ml/operators/dat/object_detect_dat.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "confidence",
+        "type": "float",
+        "default": 0.25
+      },
+      {
+        "name": "nms_threshold",
+        "type": "float",
+        "default": 0.45
+      },
+      {
+        "name": "max_detections",
+        "type": "int",
+        "default": 100
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "OscInDAT",
     "node_type": "oscin",
     "family": "dat",
@@ -3799,6 +4686,74 @@
         "name": "clear",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "PanelExecuteDAT",
+    "node_type": "panelexecute",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/panel_execute_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "panel_path",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "max_events",
+        "type": "int",
+        "default": 100
+      },
+      {
+        "name": "log_values",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "log_hover",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "RenderPickDAT",
+    "node_type": "renderpick",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/render_pick_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "render_comp",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "u",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "v",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "max_distance",
+        "type": "float",
+        "default": 1000.0
+      },
+      {
+        "name": "use_input",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -3881,6 +4836,45 @@
         "name": "include_header",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "SerialDAT",
+    "node_type": "serial",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/serial_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "port",
+        "type": "string",
+        "default": "COM3"
+      },
+      {
+        "name": "baud_rate",
+        "type": "int",
+        "default": 9600
+      },
+      {
+        "name": "delimiter",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "max_rows",
+        "type": "int",
+        "default": 100
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear",
+        "type": "pulse",
+        "default": null
       }
     ]
   },
@@ -4035,6 +5029,59 @@
     "file": "addons/gonodes/operators/dat/transpose_dat.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "UserNativeDAT",
+    "node_type": "usernativedat",
+    "family": "dat",
+    "file": "addons/gn_ext_user_native/operators/dat/user_native_dat.gd",
+    "extension": "gn_ext_user_native",
+    "params": [
+      {
+        "name": "cpp_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "cpp_class",
+        "type": "string",
+        "default": "MyUserDAT"
+      },
+      {
+        "name": "auto_build",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "UserPythonDAT",
+    "node_type": "userpythondat",
+    "family": "dat",
+    "file": "addons/gn_ext_user_python/operators/dat/user_python_dat.gd",
+    "extension": "gn_ext_user_python",
+    "params": [
+      {
+        "name": "py_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "auto_reload",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": false
+      }
+    ]
   },
   {
     "class_name": "WebDAT",
@@ -4488,6 +5535,59 @@
     "params": []
   },
   {
+    "class_name": "UserNativeIMG",
+    "node_type": "usernativeimg",
+    "family": "img",
+    "file": "addons/gn_ext_user_native/operators/img/user_native_img.gd",
+    "extension": "gn_ext_user_native",
+    "params": [
+      {
+        "name": "cpp_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "cpp_class",
+        "type": "string",
+        "default": "MyUserIMG"
+      },
+      {
+        "name": "auto_build",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "UserPythonIMG",
+    "node_type": "userpythonimg",
+    "family": "img",
+    "file": "addons/gn_ext_user_python/operators/img/user_python_img.gd",
+    "extension": "gn_ext_user_python",
+    "params": [
+      {
+        "name": "py_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "auto_reload",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "VideoDeviceInIMG",
     "node_type": "videodeviceinimg",
     "family": "img",
@@ -4590,6 +5690,100 @@
         "name": "invert",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "FluidSurfaceMAT",
+    "node_type": "fluid_surface",
+    "family": "mat",
+    "file": "addons/gonodes/operators/mat/fluid_surface_mat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "deep_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "shallow_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "opacity",
+        "type": "float",
+        "default": 0.85
+      },
+      {
+        "name": "fresnel_power",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "fresnel_bias",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "refraction_strength",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "metallic",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "roughness",
+        "type": "float",
+        "default": 0.05
+      },
+      {
+        "name": "specular",
+        "type": "float",
+        "default": 0.8
+      },
+      {
+        "name": "caustics_enabled",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "caustics_scale",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "caustics_speed",
+        "type": "float",
+        "default": 0.8
+      },
+      {
+        "name": "caustics_intensity",
+        "type": "float",
+        "default": 0.4
+      },
+      {
+        "name": "wave_scale",
+        "type": "float",
+        "default": 8.0
+      },
+      {
+        "name": "wave_speed",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "wave_strength",
+        "type": "float",
+        "default": 0.08
+      },
+      {
+        "name": "normal_map_strength",
+        "type": "float",
+        "default": 1.0
       }
     ]
   },
@@ -4905,6 +6099,48 @@
         "name": "crf",
         "type": "int",
         "default": 23
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutCHOP",
+    "node_type": "hostoutchop",
+    "family": "output",
+    "file": "addons/gonodes/operators/output/host_out_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutDAT",
+    "node_type": "hostoutdat",
+    "family": "output",
+    "file": "addons/gonodes/operators/output/host_out_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutTOP",
+    "node_type": "hostout",
+    "family": "output",
+    "file": "addons/gonodes/operators/output/host_out_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
       }
     ]
   },
@@ -5231,6 +6467,60 @@
         "name": "radius",
         "type": "float",
         "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "BoidsPOP",
+    "node_type": "boids",
+    "family": "pop",
+    "file": "addons/gonodes/operators/pop/boids_pop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "perception_radius",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "avoid_radius",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "separation",
+        "type": "float",
+        "default": 1.5
+      },
+      {
+        "name": "alignment",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "cohesion",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "max_speed",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "max_force",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "bounds_radius",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "bounds_force",
+        "type": "float",
+        "default": 5.0
       }
     ]
   },
@@ -5810,6 +7100,65 @@
     ]
   },
   {
+    "class_name": "ClothSOP",
+    "node_type": "cloth",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/cloth_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "gravity",
+        "type": "float",
+        "default": -9.8
+      },
+      {
+        "name": "damping",
+        "type": "float",
+        "default": 0.99
+      },
+      {
+        "name": "iterations",
+        "type": "int",
+        "default": 8
+      },
+      {
+        "name": "stiffness",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "wind_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "wind_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "wind_z",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "pin_mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "substeps",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "reset",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "CopySOP",
     "node_type": "copy",
     "family": "sop",
@@ -5967,6 +7316,50 @@
         "name": "invert",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "DepthPointCloudSOP",
+    "node_type": "depthpointcloud",
+    "family": "sop",
+    "file": "addons/gn_ext_depth_sensor/operators/sop/depth_point_cloud_sop.gd",
+    "extension": "gn_ext_depth_sensor",
+    "params": [
+      {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "use_color",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "skip",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "max_depth",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "timeout_ms",
+        "type": "int",
+        "default": 33
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "rescan",
+        "type": "pulse",
+        "default": null
       }
     ]
   },
@@ -6233,6 +7626,90 @@
         "name": "operation",
         "type": "menu",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "HeightfieldSOP",
+    "node_type": "heightfield",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/heightfield_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "size_x",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "size_z",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "subdivisions",
+        "type": "int",
+        "default": 128
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "octaves",
+        "type": "int",
+        "default": 6
+      },
+      {
+        "name": "frequency",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "lacunarity",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "persistence",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "seed",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "offset_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "offset_z",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "noise_type",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "erosion_iters",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "erosion_strength",
+        "type": "float",
+        "default": 0.05
+      },
+      {
+        "name": "talus_angle",
+        "type": "float",
+        "default": 0.6
       }
     ]
   },
@@ -6768,6 +8245,25 @@
     "params": []
   },
   {
+    "class_name": "ObjectMergeSOP",
+    "node_type": "objectmerge",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/objectmerge_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "sop_path",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "apply_transform",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "ParticleSOP",
     "node_type": "particle",
     "family": "sop",
@@ -6905,6 +8401,49 @@
     ]
   },
   {
+    "class_name": "PolyBevelSOP",
+    "node_type": "polybevel",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/polybevel_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "offset",
+        "type": "float",
+        "default": 0.05
+      },
+      {
+        "name": "divisions",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "roundness",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
+    "class_name": "PolyBridgeSOP",
+    "node_type": "polybridge",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/polybridge_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "divisions",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "twist",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "PolyLoftSOP",
     "node_type": "polyloft",
     "family": "sop",
@@ -6934,6 +8473,25 @@
     ]
   },
   {
+    "class_name": "PolyPatchSOP",
+    "node_type": "polypatch",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/polypatch_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "rows",
+        "type": "int",
+        "default": 10
+      },
+      {
+        "name": "cols",
+        "type": "int",
+        "default": 10
+      }
+    ]
+  },
+  {
     "class_name": "PolyReduceSOP",
     "node_type": "polyreduce",
     "family": "sop",
@@ -6954,6 +8512,59 @@
         "name": "boundary_weight",
         "type": "float",
         "default": 10.0
+      }
+    ]
+  },
+  {
+    "class_name": "PolySplineSOP",
+    "node_type": "polyspline",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/polyspline_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "subdivisions",
+        "type": "int",
+        "default": 8
+      },
+      {
+        "name": "output",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 0.05
+      },
+      {
+        "name": "sides",
+        "type": "int",
+        "default": 8
+      },
+      {
+        "name": "closed",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "PolyStitchSOP",
+    "node_type": "polystitch",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/polystitch_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "max_distance",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "include_inputs",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -7010,6 +8621,30 @@
       },
       {
         "name": "use_hit_normal",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "RemeshSOP",
+    "node_type": "remesh",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/remesh_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "target_edge",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "iterations",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "smooth",
         "type": "bool",
         "default": true
       }
@@ -7195,6 +8830,30 @@
       },
       {
         "name": "recompute_normals",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "SmoothSOP",
+    "node_type": "smooth",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/smooth_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "iterations",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "pin_borders",
         "type": "bool",
         "default": true
       }
@@ -7433,6 +9092,30 @@
     ]
   },
   {
+    "class_name": "TextureSOP",
+    "node_type": "texture",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/texture_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "displacement_scale",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "uv_set",
+        "type": "int",
+        "default": 0
+      }
+    ]
+  },
+  {
     "class_name": "TorusSOP",
     "node_type": "torus",
     "family": "sop",
@@ -7458,6 +9141,45 @@
         "name": "ring_segments",
         "type": "int",
         "default": 16
+      }
+    ]
+  },
+  {
+    "class_name": "TrailRibbonSOP",
+    "node_type": "trailribbon",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/trail_ribbon_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "trail_length",
+        "type": "int",
+        "default": 30
+      },
+      {
+        "name": "width",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "taper",
+        "type": "float",
+        "default": 0.8
+      },
+      {
+        "name": "max_particles",
+        "type": "int",
+        "default": 1000
+      },
+      {
+        "name": "fade_alpha",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -7632,6 +9354,88 @@
     ]
   },
   {
+    "class_name": "UserNativeSOP",
+    "node_type": "usernativesop",
+    "family": "sop",
+    "file": "addons/gn_ext_user_native/operators/sop/user_native_sop.gd",
+    "extension": "gn_ext_user_native",
+    "params": [
+      {
+        "name": "cpp_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "cpp_class",
+        "type": "string",
+        "default": "MyUserSOP"
+      },
+      {
+        "name": "auto_build",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "UserPythonSOP",
+    "node_type": "userpythonsop",
+    "family": "sop",
+    "file": "addons/gn_ext_user_python/operators/sop/user_python_sop.gd",
+    "extension": "gn_ext_user_python",
+    "params": [
+      {
+        "name": "py_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "auto_reload",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "VoronoiShatterSOP",
+    "node_type": "voronoishatter",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/voronoi_shatter_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "num_points",
+        "type": "int",
+        "default": 8
+      },
+      {
+        "name": "seed",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "offset",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "interior_faces",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "WireframeSOP",
     "node_type": "wireframe",
     "family": "sop",
@@ -7678,12 +9482,89 @@
     ]
   },
   {
+    "class_name": "BendSDF",
+    "node_type": "bend_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/bend_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "amount",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "axis",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "BezierMapTOP",
     "node_type": "bezier_map",
     "family": "top",
     "file": "addons/gn_ext_mapper/operators/top/bezier_map_top.gd",
     "extension": "gn_ext_mapper",
     "params": []
+  },
+  {
+    "class_name": "BlackmagicInTOP",
+    "node_type": "blackmagicin",
+    "family": "top",
+    "file": "addons/gn_ext_blackmagic/operators/top/blackmagic_in_top.gd",
+    "extension": "gn_ext_blackmagic",
+    "params": [
+      {
+        "name": "device",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "fps",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "BlackmagicOutTOP",
+    "node_type": "blackmagicout",
+    "family": "top",
+    "file": "addons/gn_ext_blackmagic/operators/top/blackmagic_out_top.gd",
+    "extension": "gn_ext_blackmagic",
+    "params": [
+      {
+        "name": "device",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "fps",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      }
+    ]
   },
   {
     "class_name": "BlurTOP",
@@ -7706,6 +9587,45 @@
         "name": "method",
         "type": "menu",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "BoxSDF",
+    "node_type": "box_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/box_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "size_x",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "size_y",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "size_z",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -7784,6 +9704,40 @@
         "name": "reset",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "CapsuleSDF",
+    "node_type": "capsule_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/capsule_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -8006,6 +9960,40 @@
     ]
   },
   {
+    "class_name": "ConeSDF",
+    "node_type": "cone_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/cone_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "angle",
+        "type": "float",
+        "default": 30.0
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "ConstantTOP",
     "node_type": "constant",
     "family": "top",
@@ -8130,6 +10118,142 @@
     ]
   },
   {
+    "class_name": "CylinderSDF",
+    "node_type": "cylinder_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/cylinder_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "DeformTOP",
+    "node_type": "deform",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/deform_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "DepthEstimateTOP",
+    "node_type": "depthestimate",
+    "family": "top",
+    "file": "addons/gn_ext_ml/operators/top/depth_estimate_top.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "normalize",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "DepthSensorTOP",
+    "node_type": "depthsensor",
+    "family": "top",
+    "file": "addons/gn_ext_depth_sensor/operators/top/depth_sensor_top.gd",
+    "extension": "gn_ext_depth_sensor",
+    "params": [
+      {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "stream",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "max_depth_mm",
+        "type": "int",
+        "default": 5000
+      },
+      {
+        "name": "timeout_ms",
+        "type": "int",
+        "default": 33
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "rescan",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "DepthTOP",
     "node_type": "depth",
     "family": "top",
@@ -8174,6 +10298,30 @@
         "name": "radius",
         "type": "int",
         "default": 2
+      }
+    ]
+  },
+  {
+    "class_name": "DisplaceSDF",
+    "node_type": "displace_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/displace_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "amount",
+        "type": "float",
+        "default": 0.2
+      },
+      {
+        "name": "frequency",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "time_offset",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -8246,6 +10394,30 @@
         "name": "grayscale",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "ElongateSDF",
+    "node_type": "elongate_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/elongate_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "amount_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "amount_y",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "amount_z",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -8385,6 +10557,85 @@
     ]
   },
   {
+    "class_name": "Fluid2DTOP",
+    "node_type": "fluid2d",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/fluid_2d_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "emitter_radius",
+        "type": "float",
+        "default": 0.06
+      },
+      {
+        "name": "emitter_force",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "emitter_dye",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "enable_emitter",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "velocity_dissipation",
+        "type": "float",
+        "default": 0.995
+      },
+      {
+        "name": "density_dissipation",
+        "type": "float",
+        "default": 0.98
+      },
+      {
+        "name": "vorticity",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "pressure",
+        "type": "float",
+        "default": 16.0
+      },
+      {
+        "name": "dye_color_a",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "dye_color_b",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "brightness",
+        "type": "float",
+        "default": 1.5
+      },
+      {
+        "name": "show_velocity",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "GeometryBufferTOP",
     "node_type": "geometry_buffer",
     "family": "top",
@@ -8428,6 +10679,35 @@
     ]
   },
   {
+    "class_name": "GradientSDF",
+    "node_type": "gradient_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/gradient_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "color_near",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "color_far",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "range",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "roughness",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
     "class_name": "GridWarpTOP",
     "node_type": "grid_warp",
     "family": "top",
@@ -8443,6 +10723,40 @@
         "name": "grid_rows",
         "type": "int",
         "default": 4
+      }
+    ]
+  },
+  {
+    "class_name": "GyroidSDF",
+    "node_type": "gyroid_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/gyroid_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "scale",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "thickness",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -8471,6 +10785,20 @@
     ]
   },
   {
+    "class_name": "HostInTOP",
+    "node_type": "hostin",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/host_in_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
     "class_name": "ISFTOP",
     "node_type": "isf",
     "family": "top",
@@ -8493,6 +10821,14 @@
         "default": null
       }
     ]
+  },
+  {
+    "class_name": "IntersectionSDF",
+    "node_type": "intersection_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/intersection_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": []
   },
   {
     "class_name": "LayoutTOP",
@@ -8625,6 +10961,35 @@
     ]
   },
   {
+    "class_name": "MaterialSDF",
+    "node_type": "material_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/material_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "albedo",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "roughness",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "metallic",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "emission",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "MatteTOP",
     "node_type": "matte",
     "family": "top",
@@ -8643,6 +11008,30 @@
       },
       {
         "name": "premultiply",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "MirrorSDF",
+    "node_type": "mirror_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/mirror_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "mirror_x",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "mirror_y",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "mirror_z",
         "type": "bool",
         "default": false
       }
@@ -8755,6 +11144,69 @@
     ]
   },
   {
+    "class_name": "NDIInTOP",
+    "node_type": "ndiin",
+    "family": "top",
+    "file": "addons/gn_ext_ndi/operators/top/ndi_in_top.gd",
+    "extension": "gn_ext_ndi",
+    "params": [
+      {
+        "name": "source",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "bandwidth",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "timeout_ms",
+        "type": "int",
+        "default": 16
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "NDIOutTOP",
+    "node_type": "ndiout",
+    "family": "top",
+    "file": "addons/gn_ext_ndi/operators/top/ndi_out_top.gd",
+    "extension": "gn_ext_ndi",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "default": "GoNodes"
+      },
+      {
+        "name": "fps_n",
+        "type": "int",
+        "default": 30
+      },
+      {
+        "name": "fps_d",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "NoiseTOP",
     "node_type": "noise",
     "family": "top",
@@ -8790,6 +11242,31 @@
         "name": "monochrome",
         "type": "bool",
         "default": true
+      },
+      {
+        "name": "octaves",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "lacunarity",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "gain",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "periodic",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "tile_size",
+        "type": "float",
+        "default": 4.0
       }
     ]
   },
@@ -8819,6 +11296,54 @@
     "file": "addons/gonodes/operators/top/null_top.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "OctahedronSDF",
+    "node_type": "octahedron_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/octahedron_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "size",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "OnionSDF",
+    "node_type": "onion_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/onion_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "thickness",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "layers",
+        "type": "int",
+        "default": 1
+      }
+    ]
   },
   {
     "class_name": "OpticalFlowTOP",
@@ -8958,6 +11483,114 @@
         "name": "softness",
         "type": "float",
         "default": 0.02
+      }
+    ]
+  },
+  {
+    "class_name": "PlaneSDF",
+    "node_type": "plane_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/plane_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "normal_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "normal_y",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "normal_z",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "offset",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "PointCloudRenderTOP",
+    "node_type": "pointcloudrender",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/point_cloud_render_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "width",
+        "type": "int",
+        "default": 512
+      },
+      {
+        "name": "height",
+        "type": "int",
+        "default": 512
+      },
+      {
+        "name": "point_size",
+        "type": "float",
+        "default": 4.0
+      },
+      {
+        "name": "size_attenuation",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "alpha",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "use_particle_color",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "cam_dist",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "cam_yaw",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "cam_pitch",
+        "type": "float",
+        "default": 20.0
+      },
+      {
+        "name": "fov",
+        "type": "float",
+        "default": 60.0
+      },
+      {
+        "name": "near_clip",
+        "type": "float",
+        "default": 0.01
+      },
+      {
+        "name": "far_clip",
+        "type": "float",
+        "default": 100.0
       }
     ]
   },
@@ -9107,6 +11740,40 @@
     ]
   },
   {
+    "class_name": "PyramidSDF",
+    "node_type": "pyramid_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/pyramid_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "base",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 1.5
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "QuadMapTOP",
     "node_type": "quad_map",
     "family": "top",
@@ -9220,6 +11887,184 @@
         "name": "repeat",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "RaymarchSDF",
+    "node_type": "raymarch_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/raymarch_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "max_steps",
+        "type": "int",
+        "default": 128
+      },
+      {
+        "name": "max_dist",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "epsilon",
+        "type": "float",
+        "default": 0.001
+      },
+      {
+        "name": "cam_distance",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "cam_angle_x",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "cam_angle_y",
+        "type": "float",
+        "default": 0.4
+      },
+      {
+        "name": "fov",
+        "type": "float",
+        "default": 60.0
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "light_dir_x",
+        "type": "float",
+        "default": -0.5
+      },
+      {
+        "name": "light_dir_y",
+        "type": "float",
+        "default": 0.8
+      },
+      {
+        "name": "light_dir_z",
+        "type": "float",
+        "default": 0.6
+      },
+      {
+        "name": "ambient",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "show_ao",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "soft_shadows",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "ReactionDiffusionTOP",
+    "node_type": "reactiondiffusion",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/reaction_diffusion_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "feed_rate",
+        "type": "float",
+        "default": 0.055
+      },
+      {
+        "name": "kill_rate",
+        "type": "float",
+        "default": 0.062
+      },
+      {
+        "name": "diffusion_u",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "diffusion_v",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "steps_per_frame",
+        "type": "int",
+        "default": 4
+      },
+      {
+        "name": "seed_radius",
+        "type": "float",
+        "default": 0.05
+      },
+      {
+        "name": "seed_amount",
+        "type": "float",
+        "default": 0.25
+      },
+      {
+        "name": "add_seed",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "color_mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "color_a",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "color_b",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "brightness",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "preset",
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -9381,6 +12226,79 @@
     ]
   },
   {
+    "class_name": "ReorderTOP",
+    "node_type": "reorder",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/reorder_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "output_r",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "output_g",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "output_b",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "output_a",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "RepeatSDF",
+    "node_type": "repeat_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/repeat_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "spacing_x",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "spacing_y",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "spacing_z",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "limit_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "limit_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "limit_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "ResolutionTOP",
     "node_type": "resolution",
     "family": "top",
@@ -9396,6 +12314,20 @@
         "name": "filter",
         "type": "menu",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "RoundSDF",
+    "node_type": "round_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/round_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 0.1
       }
     ]
   },
@@ -9419,20 +12351,15 @@
     ]
   },
   {
-    "class_name": "ShadertoyTOP",
-    "node_type": "shadertoy",
+    "class_name": "SegmentationTOP",
+    "node_type": "segmentation",
     "family": "top",
-    "file": "addons/gn_ext_shadertoy/operators/top/shadertoy_top.gd",
-    "extension": "gn_ext_shadertoy",
+    "file": "addons/gn_ext_ml/operators/top/segmentation_top.gd",
+    "extension": "gn_ext_ml",
     "params": [
       {
-        "name": "time_dependent",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "fetch",
-        "type": "pulse",
+        "name": "model_path",
+        "type": "string",
         "default": null
       },
       {
@@ -9441,19 +12368,29 @@
         "default": null
       },
       {
-        "name": "shadertoy_url",
-        "type": "string",
-        "default": ""
+        "name": "threshold",
+        "type": "float",
+        "default": 0.5
       },
       {
-        "name": "shadertoy_api_key",
-        "type": "string",
-        "default": ""
+        "name": "soft_mask",
+        "type": "bool",
+        "default": false
       },
       {
-        "name": "shadertoy_code",
-        "type": "string",
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "provider",
+        "type": "menu",
         "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -9492,6 +12429,34 @@
         "name": "strength",
         "type": "float",
         "default": 1.0
+      }
+    ]
+  },
+  {
+    "class_name": "SmoothSubtractSDF",
+    "node_type": "smooth_subtract_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/smooth_subtract_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "smoothness",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
+    "class_name": "SmoothUnionSDF",
+    "node_type": "smooth_union_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/smooth_union_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "smoothness",
+        "type": "float",
+        "default": 0.5
       }
     ]
   },
@@ -9546,6 +12511,35 @@
         "name": "slice_pos",
         "type": "float",
         "default": 0.5
+      }
+    ]
+  },
+  {
+    "class_name": "SphereSDF",
+    "node_type": "sphere_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/sphere_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -9680,6 +12674,48 @@
         "default": 8
       }
     ]
+  },
+  {
+    "class_name": "StyleTransferTOP",
+    "node_type": "styletransfer",
+    "family": "top",
+    "file": "addons/gn_ext_ml/operators/top/style_transfer_top.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "SubtractSDF",
+    "node_type": "subtract_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/subtract_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": []
   },
   {
     "class_name": "SwitchTOP",
@@ -9875,6 +12911,40 @@
     ]
   },
   {
+    "class_name": "TorusSDF",
+    "node_type": "torus_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/torus_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "major_radius",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "minor_radius",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "TransformTOP",
     "node_type": "transform",
     "family": "top",
@@ -9944,6 +13014,165 @@
         "name": "softness",
         "type": "float",
         "default": 0.005
+      }
+    ]
+  },
+  {
+    "class_name": "TwistSDF",
+    "node_type": "twist_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/twist_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "amount",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "axis",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "UnionSDF",
+    "node_type": "union_sdf",
+    "family": "top",
+    "file": "addons/gn_ext_sdf/operators/top/union_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": []
+  },
+  {
+    "class_name": "UserNativeTOP",
+    "node_type": "usernativetop",
+    "family": "top",
+    "file": "addons/gn_ext_user_native/operators/top/user_native_top.gd",
+    "extension": "gn_ext_user_native",
+    "params": [
+      {
+        "name": "cpp_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "cpp_class",
+        "type": "string",
+        "default": "MyUserTOP"
+      },
+      {
+        "name": "auto_build",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "UserPythonTOP",
+    "node_type": "userpythontop",
+    "family": "top",
+    "file": "addons/gn_ext_user_python/operators/top/user_python_top.gd",
+    "extension": "gn_ext_user_python",
+    "params": [
+      {
+        "name": "py_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "auto_reload",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "VectorPathTOP",
+    "node_type": "vectorpath",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/vector_path_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "shape",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "stroke_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "stroke_width",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "fill_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "fill",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "closed",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 100.0
+      },
+      {
+        "name": "arc_start",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "arc_end",
+        "type": "float",
+        "default": 360.0
+      },
+      {
+        "name": "arc_segments",
+        "type": "int",
+        "default": 64
+      },
+      {
+        "name": "line_cap",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "antialiased",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -11024,9 +14253,33 @@
         "default": 1.0
       },
       {
+        "name": "vorticity",
+        "type": "float",
+        "default": 0.3
+      },
+      {
         "name": "reset",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "GPUMarchingCubesVOL",
+    "node_type": "gpumarchingcubes",
+    "family": "vol",
+    "file": "addons/gonodes/operators/vol/gpu_marching_cubes_vol.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "max_triangles",
+        "type": "int",
+        "default": 500000
       }
     ]
   },
@@ -11132,6 +14385,85 @@
     "params": []
   },
   {
+    "class_name": "PyroVOL",
+    "node_type": "pyro",
+    "family": "vol",
+    "file": "addons/gonodes/operators/vol/pyro_vol.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "res_x",
+        "type": "int",
+        "default": 64
+      },
+      {
+        "name": "res_y",
+        "type": "int",
+        "default": 64
+      },
+      {
+        "name": "res_z",
+        "type": "int",
+        "default": 64
+      },
+      {
+        "name": "burn_rate",
+        "type": "float",
+        "default": 1.5
+      },
+      {
+        "name": "heat_output",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "smoke_output",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "ignition_temp",
+        "type": "float",
+        "default": 0.2
+      },
+      {
+        "name": "fuel_inject",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "buoyancy",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "cooling",
+        "type": "float",
+        "default": 0.96
+      },
+      {
+        "name": "dissipation",
+        "type": "float",
+        "default": 0.985
+      },
+      {
+        "name": "pressure_iters",
+        "type": "int",
+        "default": 20
+      },
+      {
+        "name": "vorticity",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "RaymarchVOL",
     "node_type": "raymarch",
     "family": "vol",
@@ -11187,6 +14519,46 @@
         "name": "fov",
         "type": "float",
         "default": 60.0
+      },
+      {
+        "name": "light_yaw",
+        "type": "float",
+        "default": 45.0
+      },
+      {
+        "name": "light_pitch",
+        "type": "float",
+        "default": 60.0
+      },
+      {
+        "name": "light_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "light_intensity",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "hg_g",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "shadow_steps",
+        "type": "int",
+        "default": 32
+      },
+      {
+        "name": "ambient",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "emit_color",
+        "type": "color",
+        "default": null
       }
     ]
   },
