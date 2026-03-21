@@ -187,6 +187,8 @@ func test_merge_dat_rows() -> void:
 	var out := _cook_with(node, [t1, t2] as Array[GNData])
 	if out is GNTableData:
 		GNTestAssert.assert_eq(out.num_rows(), 3, "merged 1+2=3 rows")
+		GNTestAssert.assert_eq(out.cell(0, 0), "1", "first row preserved")
+		GNTestAssert.assert_eq(out.cell(2, 0), "5", "last row from input 2")
 
 func test_merge_dat_no_input() -> void:
 	var node := _make_node(MergeDAT.new(), "merge1")
@@ -207,9 +209,9 @@ func test_transpose_dat_swaps_rows_cols() -> void:
 	input.valid = true
 	var out := _cook_with(node, [input] as Array[GNData])
 	if out is GNTableData:
-		# 2 data rows × 3 cols → transposed: rows and cols swap
-		# Exact behavior depends on implementation, but num_cols should change
-		GNTestAssert.assert_not_null(out, "transpose produced output")
+		# Input: 2 data rows × 3 cols → transposed should swap dimensions
+		GNTestAssert.assert_eq(out.num_rows(), 3, "transposed: 3 cols → 3 rows")
+		GNTestAssert.assert_eq(out.num_cols(), 2, "transposed: 2 rows → 2 cols")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -237,6 +239,28 @@ func test_sort_dat_descending() -> void:
 	var out := _cook_with(node, [input] as Array[GNData])
 	if out is GNTableData and out.num_rows() >= 3:
 		GNTestAssert.assert_eq(out.cell(0, 1), "20", "largest first")
+		GNTestAssert.assert_eq(out.cell(2, 1), "5", "smallest last")
+
+
+func test_sort_dat_alphabetic() -> void:
+	var node := _make_node(SortDAT.new(), "sort2")
+	node.set_param_value("sort_col", 0)
+	node.set_param_value("order", 0)  # Ascending
+	node.set_param_value("sort_type", 0)  # Alphabetic
+	var input := _make_test_table()  # name col: alpha, beta, gamma
+	var out := _cook_with(node, [input] as Array[GNData])
+	if out is GNTableData and out.num_rows() >= 3:
+		GNTestAssert.assert_eq(out.cell(0, 0), "alpha", "alpha first")
+		GNTestAssert.assert_eq(out.cell(1, 0), "beta", "beta second")
+		GNTestAssert.assert_eq(out.cell(2, 0), "gamma", "gamma third")
+
+
+func test_sort_dat_preserves_row_count() -> void:
+	var node := _make_node(SortDAT.new(), "sort3")
+	var input := _make_test_table()
+	var out := _cook_with(node, [input] as Array[GNData])
+	if out is GNTableData:
+		GNTestAssert.assert_eq(out.num_rows(), 3, "sort preserves row count")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -257,6 +281,22 @@ func test_switch_dat_instantiate() -> void:
 	GNTestAssert.assert_eq(node.node_type, "switch", "node_type")
 
 
+func test_switch_dat_selects_input() -> void:
+	var t1 := GNTableData.new()
+	t1.set_headers(PackedStringArray(["src"]))
+	t1.append_row(PackedStringArray(["table1"]))
+	t1.valid = true
+	var t2 := GNTableData.new()
+	t2.set_headers(PackedStringArray(["src"]))
+	t2.append_row(PackedStringArray(["table2"]))
+	t2.valid = true
+	var node := _make_node(SwitchDAT.new(), "sw2")
+	node.set_param_value("index", 1)
+	var out := _cook_with(node, [t1, t2] as Array[GNData])
+	if out is GNTableData and out.num_rows() >= 1:
+		GNTestAssert.assert_eq(out.cell(0, 0), "table2", "switch index=1 selects input 2")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # DeleteDAT
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -266,6 +306,14 @@ func test_delete_dat_instantiate() -> void:
 	GNTestAssert.assert_eq(node.node_type, "delete", "node_type")
 
 
+func test_delete_dat_reduces_rows() -> void:
+	var node := _make_node(DeleteDAT.new(), "del2")
+	var input := _make_test_table()  # 3 rows
+	var out := _cook_with(node, [input] as Array[GNData])
+	if out is GNTableData:
+		GNTestAssert.assert_true(out.num_rows() <= 3, "delete does not add rows")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # InsertDAT
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -273,6 +321,14 @@ func test_delete_dat_instantiate() -> void:
 func test_insert_dat_instantiate() -> void:
 	var node := _make_node(InsertDAT.new(), "ins1")
 	GNTestAssert.assert_eq(node.node_type, "insert", "node_type")
+
+
+func test_insert_dat_adds_row() -> void:
+	var node := _make_node(InsertDAT.new(), "ins2")
+	var input := _make_test_table()  # 3 rows
+	var out := _cook_with(node, [input] as Array[GNData])
+	if out is GNTableData:
+		GNTestAssert.assert_true(out.num_rows() >= 3, "insert does not lose rows")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

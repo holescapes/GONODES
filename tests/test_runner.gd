@@ -29,6 +29,7 @@ var _errors: Array[String] = []
 var _current_suite: String = ""
 var _current_test: String = ""
 var _filter: String = ""  # Optional test name filter from CLI
+var _tag: String = ""     # Optional tag filter: core, extension, integration, patch
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -36,18 +37,23 @@ var _filter: String = ""  # Optional test name filter from CLI
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
-	# Parse --test-filter="pattern" from command line
+	# Parse --test-filter="pattern" and --test-tag="tag" from command line
 	for arg in OS.get_cmdline_args():
 		if arg.begins_with("--test-filter="):
 			_filter = arg.substr("--test-filter=".length())
+		elif arg.begins_with("--test-tag="):
+			_tag = arg.substr("--test-tag=".length()).to_lower()
 
 
 func _initialize() -> void:
 	_print_header()
 	var test_scripts := _discover_test_scripts()
 
+	if not _tag.is_empty():
+		test_scripts = _filter_by_tag(test_scripts)
+
 	if test_scripts.is_empty():
-		print("  No test scripts found under res://tests/")
+		print("  No test scripts found (tag=%s)" % [_tag if not _tag.is_empty() else "all"])
 		quit(1)
 		return
 
@@ -79,6 +85,33 @@ func _discover_test_scripts() -> Array[String]:
 		addons_dir.list_dir_end()
 	results.sort()
 	return results
+
+
+## Filters discovered scripts by tag.
+## Tags:
+##   core        — tests/operators/ and tests/test_*.gd (not integration)
+##   integration — tests/integration/
+##   extension   — addons/gn_ext_*/tests/
+##   patch       — tests/integration/test_gnpatch_smoke.gd only
+func _filter_by_tag(scripts: Array[String]) -> Array[String]:
+	var filtered: Array[String] = []
+	for path in scripts:
+		match _tag:
+			"core":
+				if path.begins_with("res://tests/") and not path.contains("/integration/"):
+					filtered.append(path)
+			"integration":
+				if path.contains("/integration/") and not path.contains("gnpatch_smoke"):
+					filtered.append(path)
+			"extension":
+				if path.begins_with("res://addons/gn_ext_"):
+					filtered.append(path)
+			"patch":
+				if path.contains("gnpatch_smoke"):
+					filtered.append(path)
+			_:
+				filtered.append(path)
+	return filtered
 
 
 func _scan_dir(dir_path: String, results: Array[String]) -> void:
@@ -187,6 +220,8 @@ func _print_header() -> void:
 	print("═══════════════════════════════════════════════════")
 	if not _filter.is_empty():
 		print("  Filter: %s" % _filter)
+	if not _tag.is_empty():
+		print("  Tag: %s" % _tag)
 
 
 func _print_summary() -> void:

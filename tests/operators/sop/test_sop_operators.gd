@@ -173,6 +173,19 @@ func test_circle_sop_default() -> void:
 	GNTestAssert.assert_eq(geo.mesh.get_surface_count(), 1, "circle: 1 surface")
 
 
+func test_circle_sop_more_segments() -> void:
+	var lo := _make_node(CircleSOP.new(), "circ_lo")
+	lo.set_param_value("segments", 8)
+	var geo_lo: GNGeoData = _cook_no_input(lo) as GNGeoData
+
+	var hi := _make_node(CircleSOP.new(), "circ_hi")
+	hi.set_param_value("segments", 32)
+	var geo_hi: GNGeoData = _cook_no_input(hi) as GNGeoData
+
+	GNTestAssert.assert_gt(_vert_count(geo_hi), _vert_count(geo_lo),
+		"more segments → more verts")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  CylinderSOP
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -191,6 +204,19 @@ func test_cylinder_sop_cone() -> void:
 	GNTestAssert.assert_true(geo.has_geometry(), "cone has geometry")
 
 
+func test_cylinder_sop_more_segments() -> void:
+	var lo := _make_node(CylinderSOP.new(), "cyl_lo")
+	lo.set_param_value("radial_segments", 6)
+	var geo_lo: GNGeoData = _cook_no_input(lo) as GNGeoData
+
+	var hi := _make_node(CylinderSOP.new(), "cyl_hi")
+	hi.set_param_value("radial_segments", 32)
+	var geo_hi: GNGeoData = _cook_no_input(hi) as GNGeoData
+
+	GNTestAssert.assert_gt(_vert_count(geo_hi), _vert_count(geo_lo),
+		"more radial segments → more verts")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TorusSOP
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -198,6 +224,8 @@ func test_cylinder_sop_cone() -> void:
 func test_torus_sop_default() -> void:
 	var node := _make_node(TorusSOP.new(), "torus1")
 	var geo: GNGeoData = _cook_no_input(node) as GNGeoData
+	GNTestAssert.assert_true(geo.has_geometry(), "torus has geometry")
+	GNTestAssert.assert_gt(_vert_count(geo), 50, "torus has many verts")
 	GNTestAssert.assert_true(geo.has_geometry(), "torus has geometry")
 	GNTestAssert.assert_gt(_vert_count(geo), 100, "torus has many verts")
 

@@ -1,8 +1,8 @@
 # GONODES Testing Guide
 
 > **Audience:** Contributors writing or running tests.  
-> **Last updated:** 2026-03-14  
-> **Total automated tests:** 690 (661 unit + 29 integration) — all passing
+> **Last updated:** 2026-03-21  
+> **Total automated tests:** 1,176 (828 core unit + 61 integration + 287 extension) — all passing
 
 ---
 
@@ -13,21 +13,23 @@
 3. [Running Tests](#3-running-tests)
 4. [Unit Tests](#4-unit-tests)
 5. [Integration Tests](#5-integration-tests)
-6. [Manual Test Scenes](#6-manual-test-scenes)
-7. [Writing New Tests](#7-writing-new-tests)
-8. [What Is and Isn't Tested](#8-what-is-and-isnt-tested)
-9. [Bugs Found by Tests](#9-bugs-found-by-tests)
-10. [Directory Layout](#10-directory-layout)
+6. [Extension Tests](#6-extension-tests)
+7. [Manual Test Scenes](#7-manual-test-scenes)
+8. [Writing New Tests](#8-writing-new-tests)
+9. [What Is and Isn't Tested](#9-what-is-and-isnt-tested)
+10. [Bugs Found by Tests](#10-bugs-found-by-tests)
+11. [Directory Layout](#11-directory-layout)
 
 ---
 
 ## 1. Philosophy
 
-GONODES uses a **three-layer testing strategy** designed around the constraints of a GPU-accelerated, Godot-based node graph:
+GONODES uses a **four-layer testing strategy** designed around the constraints of a GPU-accelerated, Godot-based node graph:
 
 | Layer | Runs | Verifies | Requires GPU? |
 |-------|------|----------|--------------|
 | **Unit tests** | Headless CLI | Individual classes (GNParameter, GNNetwork, GNCookEngine, GNChannelData, GNParamPresetManager) in isolation | No |
+| **Operator tests** | Headless CLI | All 554 operators — instantiation, parameter defaults, cook-without-crash, output type correctness | No |
 | **Integration tests** | Headless CLI | Full `cook_frame()` pipeline through multi-node networks with real operator instances | No |
 | **Manual test scenes** | Editor (visual) | GPU rendering, shader compilation, visual output correctness, interactive parameter tweaking | Yes |
 
@@ -38,7 +40,8 @@ The framework is **completely dependency-free** — no GdUnit4, GUT, or any thir
 - **Non-throwing assertions.** Each test can report multiple failures without aborting early, giving a complete picture of what's wrong.
 - **Scene-tree integration.** Test instances are added to the SceneTree root so `add_child()`, signals, and node lifecycle work identically to production code.
 - **Zero GPU dependency for automated tests.** Unit and integration tests exercise the cook engine, parameter system, network graph, and data model — all CPU-side logic. GPU-dependent operators (TOPs that use SubViewport) are covered by manual test scenes.
-- **Recursive discovery.** The runner scans `tests/` recursively, so adding a new test file in any subfolder (like `tests/integration/`) is automatically picked up.
+- **Recursive discovery.** The runner scans `tests/` recursively and `addons/gn_ext_*/tests/` directories, so adding a test file in any subfolder is automatically picked up.
+- **Self-contained extensions.** Each `gn_ext_*` extension keeps its own test file(s) in `addons/gn_ext_<name>/tests/`, keeping extension code, operators, help patches, and tests co-located.
 
 ---
 
@@ -50,12 +53,13 @@ The framework consists of two core files:
 
 A SceneTree-based runner that:
 
-1. **Discovers** all `test_*.gd` files recursively under `res://tests/` (excluding `test_runner.gd` and `test_assert.gd`).
-2. **Instantiates** each test script as a Node and adds it to `root` so the scene tree is available.
-3. **Collects** all methods starting with `test_` via `get_method_list()`, sorts them alphabetically, and runs them in sequence.
-4. **Invokes lifecycle hooks** if present: `before_all()`, `after_all()`, `before_each()`, `after_each()`.
-5. **Checks** `GNTestAssert._failure_count` after each test method to determine pass/fail.
-6. **Prints** a summary and exits with code 0 (all passed) or 1 (any failures).
+1. **Discovers** all `test_*.gd` files recursively under `res://tests/` and `res://addons/gn_ext_*/tests/` (excluding `test_runner.gd` and `test_assert.gd`).
+2. **Filters** discovered scripts by `--test-tag` (core, integration, extension, patch) and/or `--test-filter` (substring match on method names).
+3. **Instantiates** each test script as a Node and adds it to `root` so the scene tree is available.
+4. **Collects** all methods starting with `test_` via `get_method_list()`, sorts them alphabetically, and runs them in sequence.
+5. **Invokes lifecycle hooks** if present: `before_all()`, `after_all()`, `before_each()`, `after_each()`.
+6. **Checks** `GNTestAssert._failure_count` after each test method to determine pass/fail.
+7. **Prints** a summary and exits with code 0 (all passed) or 1 (any failures).
 
 ### GNTestAssert (`tests/test_assert.gd`)
 
@@ -114,6 +118,24 @@ godot --headless --path /path/to/Gonodes -s tests/test_runner.gd --test-filter=r
 ```
 
 The filter is case-insensitive and matches against test method names using `containsn()`.
+
+### Filter by tag
+
+```bash
+# Run only core unit tests (tests/ except integration/)
+godot --headless -s tests/test_runner.gd --test-tag=core
+
+# Run only integration tests (tests/integration/)
+godot --headless -s tests/test_runner.gd --test-tag=integration
+
+# Run only extension tests (addons/gn_ext_*/tests/)
+godot --headless -s tests/test_runner.gd --test-tag=extension
+
+# Run only the .gnpatch smoke test
+godot --headless -s tests/test_runner.gd --test-tag=patch
+```
+
+Tags and filters can be combined: `--test-tag=core --test-filter=box`
 
 ### Understanding the output
 
@@ -300,13 +322,63 @@ Network serialization (`to_dict()` / `from_dict()`) round-trip fidelity.
 | `test_chain_cook_after_deserialize` | Constant(5) → Math(×2) → Null chain produces 10 after deserialize + cook |
 | `test_node_count_preserved` | Number of nodes matches before and after serialization |
 
+### test_gnpatch_smoke.gd — 4 tests
+
+Bulk smoke test that loads every `.gnpatch` help file across core and extensions (1,382+ patches), deserializes each into a GNNetwork, and verifies structural integrity.
+
+| Test | What it verifies |
+|------|------------------|
+| `test_patches_discovered` | At least 100 `.gnpatch` files found across `addons/gonodes/help/` and `addons/gn_ext_*/help/` |
+| `test_all_patches_load` | Every discovered patch deserializes via `GNNetwork.from_dict()` without error |
+| `test_all_patches_have_nodes` | Every loaded patch contains at least one node (no empty patches) |
+| `test_all_patches_have_valid_connections` | All connections reference nodes that exist in the loaded network (no dangling edges) |
+
+Run the patch smoke test alone: `--test-tag=patch`
+
 ---
 
-## 6. Manual Test Scenes
+## 6. Extension Tests
 
-> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (1,084 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §6.1 below.
+Extension tests live in `addons/gn_ext_<name>/tests/` and are **self-contained** alongside the extension's operators, help patches, and native code. The test runner discovers them automatically by scanning `res://addons/gn_ext_*/tests/` directories.
 
-### 6.1 Help Example Patches (Replacement)
+### Architecture
+
+Each extension has one test file (e.g., `test_<ext>_operators.gd`) that follows the same pattern as core operator tests: `before_each()`/`after_each()` lifecycle, `_make_node()`, `_cook_no_input()`, and `_cook_with()` helpers.
+
+### Extension test inventory (287 tests across 18 files)
+
+| Extension | File | Tests | Key operators |
+|-----------|------|-------|---------------|
+| **gn_ext_native** | `test_native_operators.gd` | 176 | All `*Native` variants: 24 CHOP, 32 SOP, 9 POP, 7 VOL, 5 IMG |
+| **gn_ext_sdf** | `test_sdf_operators.gd` | 53 | All SDF operators + MaterialSDF |
+| **gn_ext_mapper** | `test_mapper_operators.gd` | 14 | BezierMap, EdgeBlend, GridWarp, ProjectionMask, ProjectorBlend, QuadMap, Stoner |
+| **gn_ext_ml** | `test_ml_operators.gd` | 7 | DepthEstimate, Segmentation, StyleTransfer, FaceDetect, HandDetect, PoseDetect, ObjectDetect |
+| **gn_ext_depth_sensor** | `test_depth_sensor_operators.gd` | 5 | DepthSensorTOP/DAT, DepthPointCloudSOP, DepthHandCHOP, DepthSkeletonCHOP |
+| **gn_ext_user_native** | `test_user_native_operators.gd` | 5 | CHOP, TOP, SOP, DAT, IMG user-native variants |
+| **gn_ext_user_python** | `test_user_python_operators.gd` | 5 | CHOP, TOP, SOP, DAT, IMG user-python variants |
+| **gn_ext_ndi** | `test_ndi_operators.gd` | 4 | NDI In/Out TOP, NDI Audio In/Out CHOP |
+| **gn_ext_blackmagic** | `test_blackmagic_operators.gd` | 3 | BlackmagicIn/Out TOP, BlackmagicDAT |
+| **gn_ext_midi** | `test_midi_operators.gd` | 2 | RtMidiIn/Out CHOP |
+| **gn_ext_ffmpeg** | `test_ffmpeg_operators.gd` | 2 | FFmpegInTOP |
+| **gn_ext_hap** | `test_hap_operators.gd` | 2 | HapInTOP |
+| **gn_ext_spout** | `test_spout_operators.gd` | 2 | SpoutIn/Out TOP |
+| **gn_ext_syphon** | `test_syphon_operators.gd` | 2 | SyphonIn/Out TOP |
+| **gn_ext_shadertoy** | `test_shadertoy_operators.gd` | 2 | ShadertoyTOP |
+| **gn_ext_isf** | `test_isf_operators.gd` | 1 | ISFTOP |
+| **gn_ext_gpu_encode** | `test_gpu_encode_operators.gd` | 1 | MovieFileOutTOP |
+| **gn_ext_video_capture** | `test_video_capture_operators.gd` | 1 | VideoDeviceInIMG |
+
+### Adding tests for a new extension operator
+
+Place tests in `addons/gn_ext_<name>/tests/test_<name>_operators.gd`. The runner picks them up automatically — no registration needed.
+
+---
+
+## 7. Manual Test Scenes
+
+> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (1,084 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §7.1 below.
+
+### 7.1 Help Example Patches (Replacement)
 
 Every operator now ships with 3+ `.gnpatch` example files accessible via the `?` help button on each node. These patches provide the same visual verification that manual test scenes provided, but with these advantages:
 
@@ -322,7 +394,7 @@ How to use:
 4. Click "Open Example Patch" at the bottom of the help window
 5. The example loads in a floating editor — enable cooking to see the visual result
 
-### 6.2 Legacy Test Scenes (Deprecated)
+### 7.2 Legacy Test Scenes (Deprecated)
 
 The following scenes in `test_scenes/` tested multi-node integration workflows. They remain in the repo for reference but are superseded by help patches for per-operator verification.
 
@@ -336,7 +408,7 @@ The following scenes in `test_scenes/` tested multi-node integration workflows. 
 
 ---
 
-## 7. Writing New Tests
+## 8. Writing New Tests
 
 ### Adding a unit test
 
@@ -440,7 +512,8 @@ func test_my_chain() -> void:
 
 | Item | Convention |
 |------|-----------|
-| Test file | `test_<subject>.gd` |
+| Core test file | `tests/test_<subject>.gd` or `tests/operators/<family>/test_<family>_operators.gd` |
+| Extension test file | `addons/gn_ext_<name>/tests/test_<name>_operators.gd` |
 | Test method | `test_<what_it_does>()` → `void` |
 | Integration subfolder | `tests/integration/` |
 | Manual scene | `test_scenes/NN_<name>.gnpatch` |
@@ -448,7 +521,7 @@ func test_my_chain() -> void:
 
 ---
 
-## 8. What Is and Isn't Tested
+## 9. What Is and Isn't Tested
 
 ### Covered by automated tests
 
@@ -457,9 +530,13 @@ func test_my_chain() -> void:
 - **GNNetwork** — node add/remove, connection management, topological sort, cycle detection, dirty propagation, rename with connection update, unique ID generation, serialization structure
 - **GNChannelData** — channel I/O, index bounds behavior, missing data handling, metadata tracking, deep copy, family identity
 - **GNParamPresetManager** — clipboard lifecycle, type-safe paste, reset to defaults, null safety
+- **All 554 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
+- **SOP behavioral verification** — vertex counts, geometry presence, subdivision effects, deformation correctness (transform shifts, noise deforms, bend/twist/taper), merge/switch/blend output, position data comparison
+- **DAT behavioral verification** — cell content, row/column counts, sort correctness (ascending/descending, numeric/alphabetic), merge row stacking, transpose dimension swap, switch selection
 - **Full cook pipeline** — `cook_frame()` through real CHOP operator chains (Constant, Math, Merge, Null, Script, LFO), including topo sort, dirty propagation, input gathering, parameter resolution, bypass mode
 - **ScriptCHOP runtime** — dynamic GDScript compilation, `@param` annotation parsing, upstream input reading, multi-channel output, syntax error handling
 - **Network serialization** — `to_dict()` / `from_dict()` round-trip fidelity for nodes, connections, parameters, and expressions; cook correctness after deserialization
+- **Patch integrity** — all 1,382 `.gnpatch` help files load, deserialize, contain nodes, and have valid connections
 
 ### Covered by help example patches (108 patches)
 
@@ -484,18 +561,14 @@ func test_my_chain() -> void:
 | Area | Reason |
 |------|--------|
 | UI widgets | Requires full editor scene, mouse/keyboard input |
-| Hardware I/O | MIDI, OSC, audio, webcam — requires physical devices |
-| File-based preset save/load | Requires `user://` filesystem write access |
-| SOP geometry operators | Mesh data verification needs additional tooling |
-| DAT table operators | Table data verification — planned for future integration tests |
-| IMG family operators | CPU-side image processing — planned for future integration tests |
-| COMP/MAT operators | 3D scene and material pipeline — requires visual verification |
+| Hardware I/O | MIDI, OSC, audio, webcam, serial — requires physical devices |
+| GPU shader output correctness | Operators instantiate and cook, but rendered texture content is not pixel-verified |
 | Performance/stress testing | Needs dedicated benchmarking framework |
 | Cross-platform differences | Linux/macOS shader compilation, arm64 rendering |
 
 ---
 
-## 9. Bugs Found by Tests
+## 10. Bugs Found by Tests
 
 The test suite has already caught production bugs:
 
@@ -507,7 +580,7 @@ The test suite has already caught production bugs:
 
 ---
 
-## 10. Directory Layout
+## 11. Directory Layout
 
 ```
 tests/
@@ -522,36 +595,43 @@ tests/
 ├── test_ramp_chop.gd                       # RampCHOP
 ├── test_shadertoy.gd                       # Shadertoy extension
 ├── test_native_operators.gd                # Native C++ operator wrappers
-├── operators/                              # Per-operator unit tests (all families)
-│   ├── chop/
-│   ├── comp/
-│   ├── dat/
-│   ├── img/
-│   ├── mat/
-│   ├── output/
-│   ├── pop/
-│   ├── sop/
-│   ├── top/
-│   ├── ui/
-│   └── vol/
+├── test_cpu_fallback.gd                    # CPU fallback paths
+├── operators/                              # Per-family core operator tests
+│   ├── chop/test_chop_operators.gd         # 128 tests — core CHOPs only
+│   ├── comp/test_comp_operators.gd
+│   ├── dat/test_dat_operators.gd           # Core DATs + GNData subclass tests
+│   ├── img/test_img_operators.gd           # Core IMGs only
+│   ├── mat/test_mat_operators.gd
+│   ├── output/test_output_operators.gd
+│   ├── pop/test_pop_operators.gd           # Core POPs only
+│   ├── sop/test_sop_operators.gd           # Core SOPs only
+│   ├── top/test_top_operators.gd           # Core TOPs only
+│   ├── ui/test_ui_operators.gd
+│   └── vol/test_vol_operators.gd           # Core VOLs only
 └── integration/
     ├── test_chop_chains.gd                 # CHOP operator chain cooking
+    ├── test_cook_pipeline.gd               # Cook pipeline integration
+    ├── test_gnpatch_smoke.gd               # Load+verify all 1,382 .gnpatch help files
     ├── test_script_chop.gd                 # ScriptCHOP runtime
-    └── test_network_roundtrip.gd           # serialization round-trip
+    └── test_network_roundtrip.gd           # Serialization round-trip
 
-addons/gonodes/help/                        # Help example patches (353 total across core + extensions)
+addons/gn_ext_*/tests/                      # Self-contained extension tests (287 tests)
+├── gn_ext_native/tests/test_native_operators.gd    # 176 tests — all *Native variants
+├── gn_ext_sdf/tests/test_sdf_operators.gd          # 53 tests — all SDF operators
+├── gn_ext_mapper/tests/test_mapper_operators.gd     # 14 tests — projection mapping
+├── gn_ext_ml/tests/test_ml_operators.gd             # 7 tests — ML inference operators
+├── gn_ext_depth_sensor/tests/...                    # 5 tests
+├── gn_ext_user_native/tests/...                     # 5 tests
+├── gn_ext_user_python/tests/...                     # 5 tests
+├── gn_ext_ndi/tests/...                             # 4 tests
+├── gn_ext_blackmagic/tests/...                      # 3 tests
+└── ... (9 more extensions with 1-2 tests each)
+
+addons/gonodes/help/                        # Help example patches (visual verification)
 ├── chop/
 ├── top/
 ├── sop/
 ├── comp/
 ├── dat/
 └── mat/
-
-test_scenes/                                # ⚠️ DEPRECATED — superseded by help patches
-├── README.md                               # Legacy visual verification checklists
-├── 01_chop_chain_basics.gnpatch
-├── 02_script_chop.gnpatch
-├── 03_custom_shader_top.gnpatch
-├── 04_expression_animation.gnpatch
-└── 05_top_compositing_chain.gnpatch
 ```

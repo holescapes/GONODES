@@ -13,6 +13,15 @@ godot --headless -s tests/test_runner.gd
 # Filter tests by name substring
 godot --headless -s tests/test_runner.gd --test-filter=parameter
 
+# Filter by tag (core, integration, extension, patch)
+godot --headless -s tests/test_runner.gd --test-tag=core
+godot --headless -s tests/test_runner.gd --test-tag=integration
+godot --headless -s tests/test_runner.gd --test-tag=extension
+godot --headless -s tests/test_runner.gd --test-tag=patch
+
+# Combine tag + filter
+godot --headless -s tests/test_runner.gd --test-tag=core --test-filter=box
+
 # With Godot on PATH (Windows)
 & "C:\path\to\godot.exe" --headless -s tests/test_runner.gd
 ```
@@ -74,23 +83,36 @@ tests/
 ├── test_channel_data.gd    # GNChannelData: channel ops, deep copy
 ├── test_preset_manager.gd  # GNParamPresetManager: clipboard, reset
 ├── README.md               # This file
-└── operators/              # Per-family operator tests
-    ├── chop/test_chop_operators.gd
-    ├── sop/test_sop_operators.gd
-    ├── top/test_top_operators.gd
-    ├── dat/test_dat_operators.gd
-    ├── comp/test_comp_operators.gd
-    ├── img/test_img_operators.gd
-    ├── mat/test_mat_operators.gd
-    ├── output/test_output_operators.gd
-    └── ui/test_ui_operators.gd
+├── operators/              # Per-family core operator tests
+│   ├── chop/test_chop_operators.gd
+│   ├── sop/test_sop_operators.gd
+│   ├── top/test_top_operators.gd
+│   ├── dat/test_dat_operators.gd
+│   ├── comp/test_comp_operators.gd
+│   ├── img/test_img_operators.gd
+│   ├── mat/test_mat_operators.gd
+│   ├── output/test_output_operators.gd
+│   ├── pop/test_pop_operators.gd
+│   ├── vol/test_vol_operators.gd
+│   └── ui/test_ui_operators.gd
+└── integration/
+    ├── test_chop_chains.gd
+    ├── test_cook_pipeline.gd
+    ├── test_script_chop.gd
+    └── test_network_roundtrip.gd
+
+addons/gn_ext_*/tests/      # Extension tests (self-contained, auto-discovered)
+├── gn_ext_native/tests/test_native_operators.gd
+├── gn_ext_sdf/tests/test_sdf_operators.gd
+├── gn_ext_mapper/tests/test_mapper_operators.gd
+└── ... (18 extensions total)
 ```
 
 ## Adding Tests for New Operators
 
-When you create a new operator, add tests to the matching family file under
-`tests/operators/<family>/`.  For example a new CHOP goes in
-`tests/operators/chop/test_chop_operators.gd`.
+**Core operators** (in `addons/gonodes/operators/`): add tests to the matching family file under `tests/operators/<family>/`.
+
+**Extension operators** (in `addons/gn_ext_*/operators/`): add tests to the extension's own `addons/gn_ext_<name>/tests/test_<name>_operators.gd`. The runner discovers these automatically.
 
 ### Boilerplate
 
