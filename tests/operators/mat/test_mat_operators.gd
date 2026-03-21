@@ -161,27 +161,6 @@ func test_normal_map_mat_instantiate() -> void:
 func test_point_sprite_mat_instantiate() -> void:
 	var node := _make_node(PointSpriteMAT.new(), "ps1")
 	GNTestAssert.assert_eq(node.node_type, "point_sprite", "node_type")
-# FILE 1: c:\MeOwn\Gonodes\tests\operators\mat\test_mat_operators.gd
-# Add these test sections to the end of the file:
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# MaterialSDF
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_material_sdf_instantiate() -> void:
-	var node := _make_node(MaterialSDF.new(), "matsdf1")
-	GNTestAssert.assert_not_null(node, "MaterialSDF created")
-
-func test_material_sdf_node_type() -> void:
-	var node := _make_node(MaterialSDF.new(), "matsdf2")
-	GNTestAssert.assert_eq(node.node_type, "material_sdf", "node_type")
-
-func test_material_sdf_produces_material() -> void:
-	var node := _make_node(MaterialSDF.new(), "matsdf3")
-	var out := _cook_no_input(node)
-	if out is GNMaterialData:
-		GNTestAssert.assert_not_null(out.material, "material exists")
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # FluidSurfaceMAT

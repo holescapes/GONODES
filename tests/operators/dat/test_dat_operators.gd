@@ -598,75 +598,12 @@ func test_host_out_dat_instantiate() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# BlackmagicDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_blackmagic_dat_instantiate() -> void:
-	var node := _make_node(BlackmagicDAT.new(), "bm1")
-	GNTestAssert.assert_not_null(node, "BlackmagicDAT created")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# DepthSensorDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_depth_sensor_dat_instantiate() -> void:
-	var node := _make_node(DepthSensorDAT.new(), "depth1")
-	GNTestAssert.assert_not_null(node, "DepthSensorDAT created")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# ObjectDetectDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_object_detect_dat_instantiate() -> void:
-	var node := _make_node(ObjectDetectDAT.new(), "objdet1")
-	GNTestAssert.assert_not_null(node, "ObjectDetectDAT created")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # GNSDFData (data class, not a DAT operator)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_gn_sdf_data_instantiate() -> void:
 	var data := GNSDFData.new()
 	GNTestAssert.assert_not_null(data, "GNSDFData created")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SerialReceiveDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_serial_receive_dat_instantiate() -> void:
-	var node := _make_node(SerialReceiveDAT.new(), "serial_recv1")
-	GNTestAssert.assert_not_null(node, "SerialReceiveDAT created")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SerialSendDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_serial_send_dat_instantiate() -> void:
-	var node := _make_node(SerialSendDAT.new(), "serial_send1")
-	GNTestAssert.assert_not_null(node, "SerialSendDAT created")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# UserNativeDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_user_native_dat_instantiate() -> void:
-	var node := _make_node(UserNativeDAT.new(), "user_native1")
-	GNTestAssert.assert_not_null(node, "UserNativeDAT created")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# UserPythonDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_user_python_dat_instantiate() -> void:
-	var node := _make_node(UserPythonDAT.new(), "user_python1")
-	GNTestAssert.assert_not_null(node, "UserPythonDAT created")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

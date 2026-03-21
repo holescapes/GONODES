@@ -139,7 +139,7 @@ func _open_port() -> void:
 		if port_name == _last_port and baud == _last_baud:
 			return
 		_serial.close_port()
-	_serial = GNNativeSerialPort.new()
+	_serial = ClassDB.instantiate(&"GNNativeSerialPort")
 	var err: int = _serial.open_port(port_name, baud)
 	if err != OK:
 		push_warning("SerialReceiveDAT: Could not open %s at %d baud" % [port_name, baud])

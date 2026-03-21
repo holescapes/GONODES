@@ -65,6 +65,18 @@ func _initialize() -> void:
 func _discover_test_scripts() -> Array[String]:
 	var results: Array[String] = []
 	_scan_dir("res://tests/", results)
+	# Also discover tests inside each gn_ext_* extension folder
+	var addons_dir := DirAccess.open("res://addons/")
+	if addons_dir != null:
+		addons_dir.list_dir_begin()
+		var folder := addons_dir.get_next()
+		while folder != "":
+			if addons_dir.current_is_dir() and folder.begins_with("gn_ext_"):
+				var ext_test_dir := "res://addons/".path_join(folder).path_join("tests")
+				if DirAccess.dir_exists_absolute(ext_test_dir):
+					_scan_dir(ext_test_dir, results)
+			folder = addons_dir.get_next()
+		addons_dir.list_dir_end()
 	results.sort()
 	return results
 
