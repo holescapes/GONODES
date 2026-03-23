@@ -82,6 +82,31 @@ static func assert_approx(actual: float, expected: float,
 			str(expected), str(actual), str(tolerance), msg])
 
 
+## Asserts that two Vector3s are approximately equal (per-component tolerance).
+static func assert_vec3_approx(actual: Vector3, expected: Vector3,
+		tolerance: float = 0.001, msg: String = "") -> void:
+	if absf(actual.x - expected.x) > tolerance \
+			or absf(actual.y - expected.y) > tolerance \
+			or absf(actual.z - expected.z) > tolerance:
+		_fail("Expected ~%s, got %s (tolerance %s). %s" % [
+			str(expected), str(actual), str(tolerance), msg])
+
+
+## Asserts that two arrays have the same length and equal elements.
+## Works with Array, PackedFloat32Array, PackedStringArray, etc.
+static func assert_array_eq(actual: Variant, expected: Variant,
+		msg: String = "") -> void:
+	var a_size: int = actual.size() if actual != null else -1
+	var e_size: int = expected.size() if expected != null else -1
+	if a_size != e_size:
+		_fail("Array size %d != %d. %s" % [a_size, e_size, msg])
+		return
+	for i in range(a_size):
+		if actual[i] != expected[i]:
+			_fail("Array[%d]: '%s' != '%s'. %s" % [i, str(actual[i]), str(expected[i]), msg])
+			return
+
+
 ## Asserts that [param actual] is greater than [param threshold].
 static func assert_gt(actual: Variant, threshold: Variant, msg: String = "") -> void:
 	if actual <= threshold:

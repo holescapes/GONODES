@@ -12,10 +12,17 @@ extends Window
 ##   2. Editor Guide — keyboard shortcuts, toolbar, inspector, mouse
 ##   3. Expressions & Scripting — expressions, cross-node refs, script operators
 ##   4. Operators Reference — per-family expandable list with descriptions
-##   5. Cook Engine — how cooking works, dirty propagation, active chains
-##   6. Player — standalone runtime, config.json, hotkeys, window management
-##   7. Building — build scripts, Quick Build, export presets, GDExtensions
-##   8. Extensions — how to write GNExtension addons
+##   5. Takes — parameter layer overrides for live performance
+##   6. Timeline & Cues — local timelines, cue sequencer, show automation
+##   7. Sub-Networks — containers, tunnels, grouping, dive navigation
+##   8. Annotations — sticky notes and network boxes
+##   9. Protocols — MIDI, OSC, and DMX setup and usage
+##  10. Parameter Presets — copy/paste, save/load, factory presets
+##  11. Cook Engine — how cooking works, dirty propagation, active chains
+##  12. Player — standalone runtime, config.json, hotkeys, window management
+##  13. Building — build scripts, Quick Build, export presets, GDExtensions
+##  14. Extensions — how to write GNExtension addons
+##  15. Troubleshooting — common issues, debugging, performance tips
 ##
 ## Opened via:  Toolbar "Help" button  or  F1
 
@@ -27,10 +34,17 @@ const _SECTION_ICONS := {
 	"editor": "🔧",
 	"expressions": "📐",
 	"operators": "📋",
+	"takes": "🎚️",
+	"timeline": "⏱️",
+	"sub_networks": "📦",
+	"annotations": "📝",
+	"protocols": "📡",
+	"presets": "💾",
 	"cook_engine": "⚙️",
 	"player": "🎮",
 	"building": "🏗️",
 	"extensions": "🔌",
+	"troubleshooting": "🩹",
 }
 
 ## Map of sidebar keys → markdown file paths (relative to HELP_DIR).
@@ -38,10 +52,17 @@ const _SECTION_FILES := {
 	"getting_started": "getting_started.md",
 	"editor": "editor.md",
 	"expressions": "expressions.md",
+	"takes": "takes.md",
+	"timeline": "timeline.md",
+	"sub_networks": "sub_networks.md",
+	"annotations": "annotations.md",
+	"protocols": "protocols.md",
+	"presets": "presets.md",
 	"cook_engine": "cook_engine.md",
 	"player": "player.md",
 	"building": "building.md",
 	"extensions": "extensions.md",
+	"troubleshooting": "troubleshooting.md",
 }
 
 ## Dark background to match per-node help windows.
@@ -185,11 +206,20 @@ func _build_sidebar() -> void:
 
 	_build_operator_tree(ops_item)
 
-	# More sections with inline TOC
+	# Workflow & features sections
+	_add_section_with_toc("takes", "%s  Takes" % _SECTION_ICONS["takes"])
+	_add_section_with_toc("timeline", "%s  Timeline & Cues" % _SECTION_ICONS["timeline"])
+	_add_section_with_toc("sub_networks", "%s  Sub-Networks" % _SECTION_ICONS["sub_networks"])
+	_add_section_with_toc("annotations", "%s  Annotations" % _SECTION_ICONS["annotations"])
+	_add_section_with_toc("protocols", "%s  Protocols (MIDI / OSC / DMX)" % _SECTION_ICONS["protocols"])
+	_add_section_with_toc("presets", "%s  Parameter Presets" % _SECTION_ICONS["presets"])
+
+	# Engine & infrastructure sections
 	_add_section_with_toc("cook_engine", "%s  Cook Engine" % _SECTION_ICONS["cook_engine"])
 	_add_section_with_toc("player", "%s  Player" % _SECTION_ICONS["player"])
 	_add_section_with_toc("building", "%s  Building" % _SECTION_ICONS["building"])
 	_add_section_with_toc("extensions", "%s  Extensions" % _SECTION_ICONS["extensions"])
+	_add_section_with_toc("troubleshooting", "%s  Troubleshooting" % _SECTION_ICONS["troubleshooting"])
 
 
 func _add_section_item(key: String, display_text: String) -> TreeItem:

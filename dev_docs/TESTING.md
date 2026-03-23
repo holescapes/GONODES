@@ -2,7 +2,7 @@
 
 > **Audience:** Contributors writing or running tests.  
 > **Last updated:** 2026-03-21  
-> **Total automated tests:** 1,176 (828 core unit + 61 integration + 287 extension) — all passing
+> **Total automated tests:** 1,184 (828 core unit + 69 integration + 287 extension) — all passing
 
 ---
 
@@ -72,6 +72,7 @@ A static assertion library (`class_name GNTestAssert`) with 15+ assertions acros
 
 **Numeric assertions:**
 - `assert_approx(actual, expected, tolerance, msg)` — float equality within tolerance
+- `assert_vec3_approx(actual, expected, tolerance, msg)` — Vector3 per-component tolerance
 - `assert_gt(actual, threshold, msg)` / `assert_lt(actual, threshold, msg)`
 - `assert_in_range(actual, min_val, max_val, msg)`
 
@@ -82,6 +83,7 @@ A static assertion library (`class_name GNTestAssert`) with 15+ assertions acros
 **Collection assertions:**
 - `assert_size(collection, expected_size, msg)` — works with Array, Dictionary, PackedStringArray
 - `assert_has_key(dict, key, msg)`
+- `assert_array_eq(actual, expected, msg)` — element-by-element equality for any array type
 
 **Type assertions:**
 - `assert_is(actual, type_name, msg)` — checks class name or script class name
@@ -334,6 +336,21 @@ Bulk smoke test that loads every `.gnpatch` help file across core and extensions
 | `test_all_patches_have_valid_connections` | All connections reference nodes that exist in the loaded network (no dangling edges) |
 
 Run the patch smoke test alone: `--test-tag=patch`
+
+### test_cook_chain.gd — 8 tests
+
+Multi-node cook chain integration tests that wire real operators through GNNetwork connections and cook via `GNCookEngine.cook_frame()`. Verifies the full pipeline: input gathering, topological sort, dirty propagation, and output correctness.
+
+| Test | What it verifies |
+|------|------------------|
+| `test_box_into_transform_sop` | Box → TransformSOP(ty=5) — all verts shifted up |
+| `test_box_into_null_sop_passthrough` | Box → NullSOP passes geometry through |
+| `test_sop_three_node_chain` | Box → Transform → Null — end of chain has valid output |
+| `test_constant_into_null_chop` | Constant(42) → NullCHOP preserves value |
+| `test_constant_into_math_chop` | Constant(10) → Math(gain=2) produces 20 |
+| `test_constant_dat_into_null_dat` | ConstantDAT → NullDAT passes data through |
+| `test_dat_into_transpose_chain` | TextDAT(CSV) → TransposeDAT produces rows |
+| `test_dirty_propagation_through_chain` | Upstream param change propagates through to downstream |
 
 ---
 
@@ -610,6 +627,7 @@ tests/
 │   └── vol/test_vol_operators.gd           # Core VOLs only
 └── integration/
     ├── test_chop_chains.gd                 # CHOP operator chain cooking
+    ├── test_cook_chain.gd                  # Multi-node cook chain (SOP/CHOP/DAT end-to-end)
     ├── test_cook_pipeline.gd               # Cook pipeline integration
     ├── test_gnpatch_smoke.gd               # Load+verify all 1,382 .gnpatch help files
     ├── test_script_chop.gd                 # ScriptCHOP runtime
