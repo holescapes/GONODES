@@ -10,7 +10,6 @@ var _prev_values: Dictionary = {}  # channel_name -> float (state for IIR)
 func _init() -> void:
 	node_type = "filter"
 	time_dependent = true
-	node_description = "Smooth/filter channels with low-pass or high-pass."
 
 
 func _init_ports() -> void:

@@ -11,7 +11,6 @@ var _tex_rect: TextureRect = null
 
 func _init() -> void:
 	node_type = "texture_rect"
-	node_description = "Displays a TOP texture. Optional MAT input for shader overlay."
 
 
 func _init_ports() -> void:

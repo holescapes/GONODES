@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "color_map"
-	node_description = "Remap grayscale values through a color gradient / ramp texture."
 
 
 func _init_ports() -> void:

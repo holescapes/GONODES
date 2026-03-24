@@ -8,7 +8,6 @@ enum KernelType { SOBEL, PREWITT }
 
 func _init() -> void:
 	node_type = "edge_detect"
-	node_description = "CPU edge detection (Sobel / Prewitt). Outputs grayscale edges."
 
 
 func _init_ports() -> void:

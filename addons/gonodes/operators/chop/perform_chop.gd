@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "perform"
-	node_description = "System performance metrics as CHOP channels."
 	time_dependent = true
 
 

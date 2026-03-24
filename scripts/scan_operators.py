@@ -75,26 +75,10 @@ def scan_ops(base_dir, ext_name=None):
     return results
 
 all_ops = scan_ops('addons/gonodes/operators')
-ext_dirs = [
-    ('addons/gn_ext_isf/operators', 'gn_ext_isf'),
-    ('addons/gn_ext_shadertoy/operators', 'gn_ext_shadertoy'),
-    ('addons/gn_ext_ffmpeg/operators', 'gn_ext_ffmpeg'),
-    ('addons/gn_ext_spout/operators', 'gn_ext_spout'),
-    ('addons/gn_ext_syphon/operators', 'gn_ext_syphon'),
-    ('addons/gn_ext_video_capture/operators', 'gn_ext_video_capture'),
-    ('addons/gn_ext_midi/operators', 'gn_ext_midi'),
-    ('addons/gn_ext_gpu_encode/operators', 'gn_ext_gpu_encode'),
-    ('addons/gn_ext_mapper/operators', 'gn_ext_mapper'),
-    ('addons/gn_ext_ndi/operators', 'gn_ext_ndi'),
-    ('addons/gn_ext_ml/operators', 'gn_ext_ml'),
-    ('addons/gn_ext_blackmagic/operators', 'gn_ext_blackmagic'),
-    ('addons/gn_ext_depth_sensor/operators', 'gn_ext_depth_sensor'),
-    ('addons/gn_ext_sdf/operators', 'gn_ext_sdf'),
-    ('addons/gn_ext_user_native/operators', 'gn_ext_user_native'),
-    ('addons/gn_ext_user_python/operators', 'gn_ext_user_python'),
-]
-for ed, en in ext_dirs:
-    all_ops.extend(scan_ops(ed, en))
+# Auto-discover extensions: any addons/gn_ext_*/operators directory
+for entry in sorted(os.listdir('addons')):
+    if entry.startswith('gn_ext_') and os.path.isdir(os.path.join('addons', entry, 'operators')):
+        all_ops.extend(scan_ops(os.path.join('addons', entry, 'operators'), entry))
 
 all_ops.sort(key=lambda x: (x['family'], x['class_name']))
 

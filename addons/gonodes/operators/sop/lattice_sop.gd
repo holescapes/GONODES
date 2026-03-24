@@ -13,7 +13,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "lattice"
-	node_description = "Free-form deformation via control-point lattice."
 
 
 func _init_ports() -> void:

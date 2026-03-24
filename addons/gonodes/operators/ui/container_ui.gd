@@ -19,7 +19,6 @@ var _current_layout: int = -1
 
 func _init() -> void:
 	node_type = "container"
-	node_description = "Layout container for grouping UI widgets (VBox, HBox, Grid)."
 
 
 func _init_ports() -> void:

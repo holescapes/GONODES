@@ -13,7 +13,6 @@ const SHADER_PATH := "res://addons/gonodes/shaders/top/reorder_top.gdshader"
 
 func _init() -> void:
 	node_type = "reorder"
-	node_description = "Reorder/swizzle texture RGBA channels."
 
 
 func _init_ports() -> void:

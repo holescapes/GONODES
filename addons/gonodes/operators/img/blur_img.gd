@@ -5,7 +5,6 @@ extends GNImgBase
 
 func _init() -> void:
 	node_type = "blur"
-	node_description = "CPU box blur filter. Separate horizontal/vertical passes."
 
 
 func _init_ports() -> void:

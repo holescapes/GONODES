@@ -10,7 +10,6 @@ var _prev_values: Dictionary = {}  # channel_name -> float
 func _init() -> void:
 	node_type = "lag"
 	time_dependent = true
-	node_description = "Attack/release smoothing on channels."
 
 
 func _init_ports() -> void:

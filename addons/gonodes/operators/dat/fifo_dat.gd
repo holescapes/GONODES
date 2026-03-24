@@ -15,7 +15,6 @@ var _cached_headers: PackedStringArray = PackedStringArray()
 func _init() -> void:
 	node_type = "fifo"
 	time_dependent = true
-	node_description = "FIFO row buffer — accumulates rows across cooks."
 
 
 func _init_ports() -> void:

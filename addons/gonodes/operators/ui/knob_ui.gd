@@ -14,7 +14,6 @@ var _drag_start_val: float = 0.0
 
 func _init() -> void:
 	node_type = "knob"
-	node_description = "Rotary knob — drag vertically to adjust. Custom drawn dial."
 
 
 func _init_parameters() -> void:

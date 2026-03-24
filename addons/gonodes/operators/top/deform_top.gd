@@ -13,7 +13,6 @@ const SHADER_PATH := "res://addons/gonodes/shaders/top/deform_top.gdshader"
 
 func _init() -> void:
 	node_type = "deform"
-	node_description = "Deform texture using displacement map."
 
 
 func _init_ports() -> void:

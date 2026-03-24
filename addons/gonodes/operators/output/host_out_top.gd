@@ -17,7 +17,6 @@ var _output_height: int = 0
 
 func _init() -> void:
 	node_type = "host_out"
-	node_description = "Export texture to host application (LibGodot embedding)."
 	is_sink = true
 
 

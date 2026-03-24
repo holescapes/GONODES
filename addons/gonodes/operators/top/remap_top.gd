@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "remap"
-	node_description = "Remap pixels via UV displacement map or 1D LUT value remap."
 
 
 func _init_ports() -> void:

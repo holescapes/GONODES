@@ -10,7 +10,6 @@ var _last_res: Vector2i = Vector2i.ZERO
 
 func _init() -> void:
 	node_type = "svg"
-	node_description = "Render SVG vector graphics to a texture at arbitrary resolution."
 
 
 func _init_ports() -> void:

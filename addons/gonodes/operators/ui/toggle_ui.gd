@@ -9,7 +9,6 @@ var _check: CheckButton = null
 
 func _init() -> void:
 	node_type = "toggle"
-	node_description = "Toggle switch (CheckButton). Outputs 0 or 1."
 
 
 func _init_parameters() -> void:

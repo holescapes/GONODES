@@ -5,7 +5,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "switch"
-	node_description = "Switch between multiple SOP inputs by index (auto-grow ports)."
 
 
 func _init_ports() -> void:

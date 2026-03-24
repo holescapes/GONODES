@@ -7,7 +7,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "threshold"
-	node_description = "Binary black/white threshold with optional softness."
 
 
 func _init_ports() -> void:

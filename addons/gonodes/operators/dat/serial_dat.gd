@@ -19,7 +19,6 @@ var _max_rows: int = 100
 func _init() -> void:
 	node_type = "serial"
 	time_dependent = true
-	node_description = "Serial port communication (COM port read/write)."
 
 
 func _init_ports() -> void:

@@ -12,7 +12,6 @@ var _playback_pos: float = 0.0
 func _init() -> void:
 	node_type = "time_machine"
 	time_dependent = true
-	node_description = "Delay/rewind/scrub through a frame buffer with speed and direction control."
 
 
 func _init_ports() -> void:

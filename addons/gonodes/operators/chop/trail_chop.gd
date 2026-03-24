@@ -15,7 +15,6 @@ var _buffers: Dictionary = {}
 func _init() -> void:
 	node_type = "trail"
 	time_dependent = true
-	node_description = "Record input channels over time as a scrolling buffer."
 
 
 func _init_ports() -> void:

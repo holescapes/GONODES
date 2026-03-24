@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "copy"
-	node_description = "Copy/add channels from B onto A."
 
 
 func _init_ports() -> void:

@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "layout"
-	node_description = "Tile N input textures into a grid mosaic (up to 8 inputs)."
 
 
 func _init_ports() -> void:

@@ -24,7 +24,6 @@ var _was_playing: bool = false
 func _init() -> void:
 	node_type = "timeline"
 	time_dependent = true
-	node_description = "Independent local timeline with transport controls."
 
 
 func _init_ports() -> void:

@@ -20,7 +20,6 @@ var _active: bool = false
 func _init() -> void:
 	node_type = "audio_device"
 	time_dependent = true
-	node_description = "Output CHOP channels to audio device as PCM audio."
 
 
 func _init_ports() -> void:

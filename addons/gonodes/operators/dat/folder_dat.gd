@@ -5,7 +5,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "folder"
-	node_description = "List directory contents as a table."
 
 
 ## DirAccess directory listing — not available on web.

@@ -11,7 +11,6 @@ var _prev_in: Dictionary = {}  # channel -> float (for edge detection)
 func _init() -> void:
 	node_type = "trigger"
 	time_dependent = true
-	node_description = "One-shot trigger pulse on threshold crossing."
 
 
 func _init_ports() -> void:

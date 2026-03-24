@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "file_in"
-	node_description = "Read a file (CSV, TSV, JSON, or text) from disk into a table."
 
 
 ## Local filesystem access — not available on web (no FileAccess to arbitrary paths).

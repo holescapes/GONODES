@@ -19,7 +19,6 @@ var _cached_comp: GNCompBase = null
 
 func _init() -> void:
 	node_type = "physics"
-	node_description = "Reads transform & velocity channels from a physics body COMP."
 
 
 func _init_ports() -> void:

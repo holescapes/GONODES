@@ -11,7 +11,6 @@ var _material: StandardMaterial3D = null
 
 func _init() -> void:
 	node_type = "pbr"
-	node_description = "Physically-based rendering material (StandardMaterial3D)."
 
 
 func _init_ports() -> void:

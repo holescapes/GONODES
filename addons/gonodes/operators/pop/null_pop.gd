@@ -8,7 +8,6 @@ extends GNPopBase
 func _init() -> void:
 	super._init()
 	node_type = "null"
-	node_description = "Pass-through for feedback loops, organization, and references."
 
 
 func _init_ports() -> void:

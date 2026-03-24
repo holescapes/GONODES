@@ -22,7 +22,6 @@ const MAX_CUES := 64
 
 func _init() -> void:
 	node_type = "cue"
-	node_description = "Cue list manager — named cues with timing, transitions, and parameter overrides."
 
 
 func _init_ports() -> void:

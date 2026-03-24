@@ -8,7 +8,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "circle"
-	node_description = "SDF circle or ring shape with fill/border/softness."
 
 
 func _init_ports() -> void:

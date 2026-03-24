@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "channel_mix"
-	node_description = "Swap/remap RGBA channels with per-channel source and gain."
 
 
 func _init_ports() -> void:

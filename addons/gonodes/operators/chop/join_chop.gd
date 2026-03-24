@@ -7,7 +7,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "join"
-	node_description = "Concatenate channels from multiple inputs in time."
 
 
 func _init_ports() -> void:

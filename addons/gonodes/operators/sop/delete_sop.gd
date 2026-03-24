@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "delete"
-	node_description = "Delete faces/points by index, range, or bounding box."
 
 
 func _init_ports() -> void:

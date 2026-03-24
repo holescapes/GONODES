@@ -17,7 +17,6 @@ var _was_active: bool = false
 
 func _init() -> void:
 	node_type = "image_save"
-	node_description = "Save CPU Image to disk (PNG, WebP, EXR). Activate the toggle to write."
 
 
 ## Disk write — not available on web.

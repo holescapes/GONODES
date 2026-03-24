@@ -22,7 +22,6 @@ var _has_prev_frame: bool = false
 func _init() -> void:
 	node_type = "optical_flow"
 	time_dependent = true
-	node_description = "Motion vector estimation between frames (Horn-Schunck GLSL, cross-platform)."
 
 
 func _init_ports() -> void:

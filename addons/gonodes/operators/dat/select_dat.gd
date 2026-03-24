@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "select"
-	node_description = "Select rows and columns from a table by range."
 
 
 func _init_ports() -> void:

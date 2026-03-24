@@ -47,7 +47,6 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 func _init() -> void:
 	node_type = "render"
 	time_dependent = true
-	node_description = "Renders a 3D COMP scene into a 2D texture. Connect an EnvironmentCOMP for post-processing."
 
 
 func _init_ports() -> void:

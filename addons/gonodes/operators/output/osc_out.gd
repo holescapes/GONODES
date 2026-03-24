@@ -25,7 +25,6 @@ enum SendMode { INDIVIDUAL, BUNDLE }
 func _init() -> void:
 	node_type = "osc_out"
 	time_dependent = true
-	node_description = "Send CHOP channels as OSC messages over UDP."
 
 
 func _init_ports() -> void:

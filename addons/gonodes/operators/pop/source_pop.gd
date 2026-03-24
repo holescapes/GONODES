@@ -11,7 +11,6 @@ var _cpu_particle_data: GNParticleData = null  # CPU fallback storage
 func _init() -> void:
 	super._init()
 	node_type = "source"
-	node_description = "Emit particles from SOP geometry or a point."
 	time_dependent = true
 
 

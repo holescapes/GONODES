@@ -11,7 +11,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "sop_to_chop"
-	node_description = "Convert SOP vertex attributes to CHOP channels."
 
 
 func _init_ports() -> void:

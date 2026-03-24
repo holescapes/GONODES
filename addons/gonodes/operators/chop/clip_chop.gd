@@ -23,7 +23,6 @@ var _recorded: GNChannelData = null
 func _init() -> void:
 	node_type = "clip"
 	time_dependent = true
-	node_description = "Play back CHOP data with transport controls."
 
 
 func _init_ports() -> void:

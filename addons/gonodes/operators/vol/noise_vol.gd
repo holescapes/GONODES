@@ -6,7 +6,6 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "noise"
-	node_description = "Generate 3D noise density volume (FBM/Perlin)."
 	time_dependent = true  # shader uses elapsed_time * speed
 
 

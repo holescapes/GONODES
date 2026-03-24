@@ -27,7 +27,6 @@ var active_window_name: String = ""
 func _init() -> void:
 	node_type = "mouse_in"
 	time_dependent = true
-	node_description = "Output mouse position, delta, buttons, and scroll as channels."
 
 
 func _init_ports() -> void:

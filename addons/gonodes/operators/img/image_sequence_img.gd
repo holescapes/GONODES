@@ -26,7 +26,6 @@ var _current_frame_idx: int = -1
 func _init() -> void:
 	node_type = "image_sequence"
 	time_dependent = true
-	node_description = "Plays a numbered image sequence as animated CPU Image frames."
 
 
 func _init_ports() -> void:

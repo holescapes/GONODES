@@ -11,7 +11,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "ray"
-	node_description = "Project vertices onto a target surface via raycasting."
 
 
 func _init_ports() -> void:

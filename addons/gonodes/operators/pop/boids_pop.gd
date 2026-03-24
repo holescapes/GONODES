@@ -7,7 +7,6 @@ extends GNPopBase
 func _init() -> void:
 	super._init()
 	node_type = "boids"
-	node_description = "Flocking boids simulation — separation, alignment, cohesion."
 	time_dependent = true
 
 

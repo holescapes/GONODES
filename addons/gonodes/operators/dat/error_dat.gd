@@ -10,7 +10,6 @@ var _rows: Array[PackedStringArray] = []
 
 func _init() -> void:
 	node_type = "error"
-	node_description = "Capture system warnings and errors as a table."
 	time_dependent = true
 	GNLogger.log_sink = _on_log
 

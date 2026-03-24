@@ -11,7 +11,6 @@ var _checkbox: CheckBox = null
 
 func _init() -> void:
 	node_type = "check_box"
-	node_description = "Standard checkbox with label. Outputs 0/1 toggle state."
 
 
 func _init_parameters() -> void:

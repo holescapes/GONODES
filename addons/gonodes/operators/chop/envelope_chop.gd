@@ -11,7 +11,6 @@ var _peak_val: Dictionary = {}  # channel -> float (for peak hold/decay)
 func _init() -> void:
 	node_type = "envelope"
 	time_dependent = true
-	node_description = "RMS / peak envelope follower for channels."
 
 
 func _init_ports() -> void:

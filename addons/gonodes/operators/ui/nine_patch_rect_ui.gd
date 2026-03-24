@@ -10,7 +10,6 @@ var _nine: NinePatchRect = null
 
 func _init() -> void:
 	node_type = "nine_patch_rect"
-	node_description = "Stretchable nine-patch texture from TOP input."
 
 
 func _init_ports() -> void:

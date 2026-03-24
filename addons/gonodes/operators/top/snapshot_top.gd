@@ -67,7 +67,6 @@ var _current_mode: int = -1
 func _init() -> void:
 	super._init()
 	node_type = "snapshot"
-	node_description = "Render any non-TOP data as a TOP texture (same as viewer)."
 
 
 func _init_ports() -> void:

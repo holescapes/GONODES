@@ -15,7 +15,6 @@ const MAX_BUFFER_LINES := 1000
 
 func _init() -> void:
 	node_type = "web_socket"
-	node_description = "WebSocket client/server communication."
 	time_dependent = true
 
 

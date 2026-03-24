@@ -9,7 +9,6 @@ var _out_tex: GNTextureData = null
 func _init() -> void:
 	super._init()
 	node_type = "raymarch"
-	node_description = "Render a volume as a 2D image via GPU ray-marching."
 
 
 func _init_ports() -> void:

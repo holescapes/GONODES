@@ -8,7 +8,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "rectangle"
-	node_description = "SDF rounded rectangle with fill/border/softness."
 
 
 func _init_ports() -> void:

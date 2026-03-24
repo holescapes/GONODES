@@ -12,7 +12,6 @@ enum Operation { ADD, SUBTRACT, MULTIPLY, DIVIDE, ABS, SIN, COS, POW }
 
 func _init() -> void:
 	node_type = "math"
-	node_description = "Per-sample math on CHOP channels."
 
 
 func _init_ports() -> void:

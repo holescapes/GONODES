@@ -11,7 +11,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "warp"
-	node_description = "Time-warp / retime channel data."
 
 
 func _init_ports() -> void:

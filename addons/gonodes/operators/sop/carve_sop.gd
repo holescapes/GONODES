@@ -20,7 +20,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "carve"
-	node_description = "Trim mesh by parametric U range."
 
 
 func _init_ports() -> void:

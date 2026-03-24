@@ -8,7 +8,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "lookup"
-	node_description = "Remap colors via a lookup table / ramp texture."
 
 
 func _init_ports() -> void:

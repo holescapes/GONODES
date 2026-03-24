@@ -12,7 +12,6 @@ var _prev_managed: Array[Control] = []
 
 func _init() -> void:
 	node_type = "split_container"
-	node_description = "Splits two UI inputs with a draggable divider."
 
 
 func _init_ports() -> void:

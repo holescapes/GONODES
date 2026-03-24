@@ -13,7 +13,6 @@ var _touches: Dictionary = {}  # touch_index -> { x, y, pressure, phase }
 
 func _init() -> void:
 	node_type = "multi_touch_in"
-	node_description = "Multi-touch screen input as a table."
 	time_dependent = true
 
 

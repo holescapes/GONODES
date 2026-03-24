@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "divide"
-	node_description = "Triangulate or clean mesh topology."
 
 
 func _init_ports() -> void:

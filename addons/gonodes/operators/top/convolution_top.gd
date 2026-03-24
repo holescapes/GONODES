@@ -16,7 +16,6 @@ const PRESETS := {
 
 func _init() -> void:
 	node_type = "convolution"
-	node_description = "Custom NxN kernel convolution with presets (Emboss, Sharpen, Edge, Ridge)."
 
 
 func _init_ports() -> void:

@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "mono"
-	node_description = "Grayscale conversion with Rec.709, Rec.601, Average, or Desaturate method."
 
 
 func _init_ports() -> void:

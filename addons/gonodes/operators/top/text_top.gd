@@ -11,7 +11,6 @@ var _loaded_font_path: String = ""
 
 func _init() -> void:
 	node_type = "text"
-	node_description = "Renders text to a texture via a Label in a SubViewport."
 
 
 func _init_ports() -> void:

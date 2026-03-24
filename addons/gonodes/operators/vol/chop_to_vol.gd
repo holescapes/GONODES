@@ -12,7 +12,6 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "chop_to_vol"
-	node_description = "Convert CHOP channel data to a 3D volume."
 
 
 func _init_ports() -> void:

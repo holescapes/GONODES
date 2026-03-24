@@ -7,7 +7,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "fan"
-	node_description = "Fan a single channel into multiple spread copies."
 
 
 func _init_ports() -> void:

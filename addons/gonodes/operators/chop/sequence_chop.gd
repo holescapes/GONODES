@@ -17,7 +17,6 @@ extends GNChopBase
 func _init() -> void:
 	node_type = "sequence"
 	time_dependent = true
-	node_description = "Sequence CHOP inputs end-to-end in time."
 	_enable_dynamic_inputs(GNFamily.Type.CHOP)
 
 

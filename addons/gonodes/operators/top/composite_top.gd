@@ -11,7 +11,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "composite"
-	node_description = "Blend two textures (Add, Multiply, Over, Screen, etc.)."
 
 
 func _init_ports() -> void:

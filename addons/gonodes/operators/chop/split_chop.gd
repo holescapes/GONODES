@@ -7,7 +7,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "split"
-	node_description = "Split channels by group size or select one channel."
 
 
 func _init_ports() -> void:

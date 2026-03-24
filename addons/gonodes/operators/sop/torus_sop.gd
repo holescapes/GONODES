@@ -5,7 +5,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "torus"
-	node_description = "Generate a torus mesh."
 
 
 func _init_ports() -> void:

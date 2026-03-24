@@ -47,7 +47,6 @@ var _last_code: String = ""
 
 func _init() -> void:
 	node_type = "script"
-	node_description = "User-scripted DAT. Write GDScript to generate or transform table/text data."
 
 
 func _init_ports() -> void:

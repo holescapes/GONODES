@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "premultiply"
-	node_description = "Premultiply or unpremultiply alpha."
 
 
 func _init_ports() -> void:

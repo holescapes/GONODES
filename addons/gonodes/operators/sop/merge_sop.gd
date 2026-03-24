@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "merge"
-	node_description = "Merge multiple meshes into one."
 
 
 func _init_ports() -> void:

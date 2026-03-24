@@ -36,7 +36,6 @@ var _rng := RandomNumberGenerator.new()
 
 func _init() -> void:
 	node_type = "particle"
-	node_description = "CPU particle emitter from SOP surface."
 	time_dependent = true
 
 

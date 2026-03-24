@@ -6,7 +6,6 @@ extends GNPopBase
 func _init() -> void:
 	super._init()
 	node_type = "instance"
-	node_description = "Copy SOP geometry onto each particle. Outputs SOP geometry."
 
 
 func _init_ports() -> void:

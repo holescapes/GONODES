@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "fit"
-	node_description = "Aspect-aware resize: Fit, Fill, Stretch, or Letterbox with border color."
 
 
 func _init_ports() -> void:

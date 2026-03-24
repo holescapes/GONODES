@@ -12,7 +12,6 @@ extends GNChopBase
 func _init() -> void:
 	node_type = "skeleton"
 	time_dependent = true
-	node_description = "Read skeleton bone transforms as CHOP channels."
 
 
 func _init_ports() -> void:

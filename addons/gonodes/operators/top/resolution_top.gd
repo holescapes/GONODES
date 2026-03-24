@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "resolution"
-	node_description = "Resize a texture to a different resolution."
 
 
 func _init_ports() -> void:

@@ -34,7 +34,6 @@ var _ui_root: BoxContainer = null
 func _init() -> void:
 	node_type = "panel"
 	time_dependent = true
-	node_description = "Render UI widgets to a texture (non-interactive). For interactive panels, wire to WindowOUT panel port."
 
 
 func _init_ports() -> void:

@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "subdivide"
-	node_description = "Subdivide triangles into 4 sub-triangles."
 
 
 func _init_ports() -> void:

@@ -18,7 +18,6 @@ var _last_anim_hash: int = 0
 func _init() -> void:
 	node_type = "animation"
 	time_dependent = true
-	node_description = "AnimationPlayer wrapper for keyframe animation on COMP properties."
 
 
 func _init_ports() -> void:

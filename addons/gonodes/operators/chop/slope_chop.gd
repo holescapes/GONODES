@@ -15,7 +15,6 @@ var _prev_d1: Dictionary = {}  # channel_name → last 1st-derivative value
 func _init() -> void:
 	node_type = "slope"
 	time_dependent = true
-	node_description = "Derivative (rate-of-change) of input channels — 1st or 2nd order."
 
 
 func _init_ports() -> void:

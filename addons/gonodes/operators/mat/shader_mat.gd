@@ -17,7 +17,6 @@ var _last_shader_code: String = ""
 
 func _init() -> void:
 	node_type = "shader"
-	node_description = "Custom shader material (ShaderMaterial)."
 
 
 func _init_ports() -> void:

@@ -230,7 +230,6 @@ var _compositor: Compositor      = null
 func _init() -> void:
 	super._init()
 	node_type        = "compositor_effect"
-	node_description = "Render 3D scene with pipeline-level compositor effect (outline, fog, depth view). Requires Godot 4.3+."
 
 
 func _init_parameters() -> void:

@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "radial_blur"
-	node_description = "Zoom / radial blur from a configurable center."
 
 
 func _init_ports() -> void:

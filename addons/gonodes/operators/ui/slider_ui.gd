@@ -10,7 +10,6 @@ var _slider: HSlider = null
 
 func _init() -> void:
 	node_type = "slider"
-	node_description = "Horizontal slider. Outputs a float value within a range."
 
 
 func _init_parameters() -> void:

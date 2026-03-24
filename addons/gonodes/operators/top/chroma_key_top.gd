@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "chroma_key"
-	node_description = "Green-screen / chroma key / luma key with spill suppression."
 
 
 func _init_ports() -> void:

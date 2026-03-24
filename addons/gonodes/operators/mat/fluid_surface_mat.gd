@@ -12,7 +12,6 @@ var _material: ShaderMaterial = null
 
 func _init() -> void:
 	node_type = "fluid_surface"
-	node_description = "Fluid surface material — Fresnel, refraction, caustics, wave normals."
 
 
 func _init_ports() -> void:

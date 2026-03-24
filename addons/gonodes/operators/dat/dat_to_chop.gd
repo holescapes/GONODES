@@ -7,7 +7,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "dat_to_chop"
-	node_description = "Convert DAT table into CHOP channels."
 
 
 func _init_ports() -> void:

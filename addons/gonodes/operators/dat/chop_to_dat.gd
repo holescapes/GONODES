@@ -7,7 +7,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "chop_to_dat"
-	node_description = "Convert CHOP channels into a DAT table."
 
 
 func _init_ports() -> void:

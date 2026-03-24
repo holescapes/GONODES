@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "sort"
-	node_description = "Sort table rows by a column."
 
 
 func _init_ports() -> void:

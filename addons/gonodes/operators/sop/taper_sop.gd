@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "taper"
-	node_description = "Taper geometry along an axis."
 
 
 func _init_ports() -> void:

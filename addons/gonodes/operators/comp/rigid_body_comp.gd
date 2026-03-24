@@ -22,7 +22,6 @@ var _last_mesh: Mesh = null
 
 func _init() -> void:
 	node_type = "rigid_body"
-	node_description = "RigidBody3D with collision shape — dynamic physics object."
 
 
 func _init_ports() -> void:

@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "insert"
-	node_description = "Insert rows or columns into a table."
 
 
 func _init_ports() -> void:

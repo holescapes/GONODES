@@ -9,7 +9,6 @@ extends GNChopBase
 func _init() -> void:
 	node_type = "expression"
 	time_dependent = true
-	node_description = "Evaluate per-channel math expressions."
 
 
 func _init_ports() -> void:

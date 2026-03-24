@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "blend"
-	node_description = "Morph/blend between two geometries."
 
 
 func _init_ports() -> void:

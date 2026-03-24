@@ -61,7 +61,6 @@ var _last_code: String = ""
 
 func _init() -> void:
 	node_type = "scriptimg"
-	node_description = "User-scripted IMG. Write GDScript to generate or transform CPU-side Images."
 
 
 func _init_ports() -> void:

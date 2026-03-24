@@ -10,7 +10,6 @@ var _expr: Expression = null
 
 func _init() -> void:
 	node_type = "evaluate"
-	node_description = "Evaluate expressions in table cells (e.g. =1+2)."
 
 
 func _init_ports() -> void:

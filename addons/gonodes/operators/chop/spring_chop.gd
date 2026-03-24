@@ -11,7 +11,6 @@ var _vel: Dictionary = {}  # channel -> current velocity
 func _init() -> void:
 	node_type = "spring"
 	time_dependent = true
-	node_description = "Damped spring oscillator on channel values."
 
 
 func _init_ports() -> void:

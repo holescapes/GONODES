@@ -14,7 +14,6 @@ var _material_v: ShaderMaterial = null
 
 func _init() -> void:
 	node_type = "blur"
-	node_description = "Two-pass separable blur (Gaussian or Box)."
 
 
 func _init_ports() -> void:

@@ -11,7 +11,6 @@ var _progress: TextureProgressBar = null
 
 func _init() -> void:
 	node_type = "texture_progress_bar"
-	node_description = "Textured progress bar with TOP layers. Optional CHOP driver."
 
 
 func _init_ports() -> void:

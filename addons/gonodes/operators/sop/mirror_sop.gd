@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "mirror"
-	node_description = "Mirror geometry across a plane."
 
 
 func _init_ports() -> void:

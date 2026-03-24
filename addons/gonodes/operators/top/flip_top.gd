@@ -7,7 +7,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "flip"
-	node_description = "Mirror texture horizontally and/or vertically."
 
 
 func _init_ports() -> void:

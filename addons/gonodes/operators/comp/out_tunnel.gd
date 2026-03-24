@@ -26,10 +26,6 @@ var tunnel_label: String = "out"
 
 func _init() -> void:
 	node_type = "out_tunnel"
-	node_description = "Output tunnel — sends data outside the sub-network.\n" + \
-		"Each OutTunnel maps to one output port on the parent SubNetworkNode.\n" + \
-		"Set the Family parameter to match the data type you want to output.\n" + \
-		"The Index parameter controls port ordering on the parent."
 	family = GNFamily.Type.COMP  # Tunnels are structural — live in COMP family
 	time_dependent = false
 	# OutTunnels are structural sinks inside the inner graph — they must always

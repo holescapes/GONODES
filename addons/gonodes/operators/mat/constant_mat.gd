@@ -11,7 +11,6 @@ var _material: StandardMaterial3D = null
 
 func _init() -> void:
 	node_type = "constant"
-	node_description = "Flat unlit (constant) material — no lighting applied."
 
 
 func _init_ports() -> void:

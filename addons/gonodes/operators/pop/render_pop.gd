@@ -11,7 +11,6 @@ var _scene_node: Node3D = null
 func _init() -> void:
 	super._init()
 	node_type = "render"
-	node_description = "Render particles as point cloud or billboards in 3D viewport."
 	family = GNFamily.Type.COMP  # Outputs to COMP chain for RenderTOP
 
 

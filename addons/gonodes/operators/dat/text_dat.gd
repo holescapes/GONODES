@@ -7,7 +7,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "text"
-	node_description = "Hold plain text content."
 
 
 func _init_ports() -> void:

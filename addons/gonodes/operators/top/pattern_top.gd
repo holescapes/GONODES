@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "pattern"
-	node_description = "Procedural patterns: stripes, checkerboard, concentric, grid, dots."
 
 
 func _init_ports() -> void:

@@ -9,7 +9,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "cap"
-	node_description = "Close open boundary holes with triangle fan caps."
 
 
 func _init_ports() -> void:

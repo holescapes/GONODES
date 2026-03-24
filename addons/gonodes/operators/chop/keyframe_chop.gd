@@ -23,7 +23,6 @@ var _last_count: int = -1
 func _init() -> void:
 	node_type = "keyframe"
 	time_dependent = true
-	node_description = "Keyframe curve animation → CHOP channels."
 
 
 func _init_ports() -> void:

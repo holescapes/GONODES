@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "extrude"
-	node_description = "Extrude faces along normals."
 
 
 func _init_ports() -> void:

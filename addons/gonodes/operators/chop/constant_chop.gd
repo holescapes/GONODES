@@ -12,7 +12,6 @@ var _last_count: int = -1
 
 func _init() -> void:
 	node_type = "constant"
-	node_description = "Output constant channel values."
 
 
 func _init_ports() -> void:

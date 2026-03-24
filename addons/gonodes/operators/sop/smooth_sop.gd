@@ -11,7 +11,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "smooth"
-	node_description = "Laplacian vertex smoothing (relaxation)."
 
 
 func _init_ports() -> void:

@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "sweep"
-	node_description = "Sweep a cross-section along a curve."
 
 
 func _init_ports() -> void:

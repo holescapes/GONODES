@@ -19,7 +19,6 @@ var _host_dirty: bool = false
 
 func _init() -> void:
 	node_type = "host_in"
-	node_description = "Receive texture from host application (LibGodot embedding)."
 	time_dependent = true
 
 

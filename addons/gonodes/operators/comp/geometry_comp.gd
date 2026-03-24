@@ -20,7 +20,6 @@ var _fallback_material: StandardMaterial3D = null
 
 func _init() -> void:
 	node_type = "geo"
-	node_description = "Place SOP mesh into a 3D scene with material."
 
 
 func _init_ports() -> void:

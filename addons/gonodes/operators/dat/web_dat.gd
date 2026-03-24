@@ -25,7 +25,6 @@ var _http_request: HTTPRequest = null
 func _init() -> void:
 	node_type = "web"
 	time_dependent = false
-	node_description = "Fetch data from a URL via HTTP."
 
 
 func _init_ports() -> void:

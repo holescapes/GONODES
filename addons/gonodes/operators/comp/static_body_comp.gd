@@ -19,7 +19,6 @@ var _last_mesh: Mesh = null
 
 func _init() -> void:
 	node_type = "static_body"
-	node_description = "StaticBody3D — immovable collision surface (ground, walls)."
 
 
 func _init_ports() -> void:

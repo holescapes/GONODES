@@ -5,7 +5,6 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "blend"
-	node_description = "Combine two volumes (add, subtract, multiply, max, min, mix)."
 
 
 func _init_ports() -> void:

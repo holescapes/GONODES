@@ -128,7 +128,6 @@ var _tex_input_count: int = 0
 func _init() -> void:
 	node_type = "compute_shader"
 	time_dependent = true
-	node_description = "GPU compute shader (GLSL 450) with storage image output and auto-detected parameters."
 
 
 func requires_compute() -> bool:

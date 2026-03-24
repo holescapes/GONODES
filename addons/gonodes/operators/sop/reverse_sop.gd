@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "reverse"
-	node_description = "Reverse triangle winding order and flip normals."
 
 
 func _init_ports() -> void:

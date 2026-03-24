@@ -89,7 +89,6 @@ var _embedded_root: Control = null
 
 func _init() -> void:
 	node_type = "window"
-	node_description = "Display a texture and/or interactive UI panel in a standalone OS window."
 
 
 func _init_ports() -> void:

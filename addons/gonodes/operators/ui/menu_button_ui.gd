@@ -11,7 +11,6 @@ var _last_selected: int = -1
 
 func _init() -> void:
 	node_type = "menu_button"
-	node_description = "Button with popup menu from DAT data."
 
 
 func _init_ports() -> void:

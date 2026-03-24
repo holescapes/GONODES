@@ -8,7 +8,6 @@ var _prev_data: GNChannelData = null
 
 func _init() -> void:
 	node_type = "feedback"
-	node_description = "Previous frame's CHOP data for feedback loops."
 	time_dependent = true
 
 

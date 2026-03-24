@@ -6,7 +6,6 @@ extends GNPopBase
 func _init() -> void:
 	super._init()
 	node_type = "advect"
-	node_description = "Advect particles through a VOL velocity field."
 	time_dependent = true
 
 

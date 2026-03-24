@@ -18,7 +18,6 @@ var _button: float = 0.0
 func _init() -> void:
 	node_type = "tablet_in"
 	time_dependent = true
-	node_description = "Pen tablet / stylus input as CHOP channels."
 
 
 func _init_ports() -> void:

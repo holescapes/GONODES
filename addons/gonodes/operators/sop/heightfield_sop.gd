@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "heightfield"
-	node_description = "Procedural terrain heightfield with noise layers and erosion."
 
 
 func _init_ports() -> void:

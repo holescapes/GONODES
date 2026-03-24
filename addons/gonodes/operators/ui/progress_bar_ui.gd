@@ -10,7 +10,6 @@ var _bar: ProgressBar = null
 
 func _init() -> void:
 	node_type = "progress_bar"
-	node_description = "Progress bar. Optional CHOP input drives value. Shows percentage."
 
 
 func _init_ports() -> void:

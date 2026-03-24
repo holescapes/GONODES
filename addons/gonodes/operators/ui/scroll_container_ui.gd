@@ -13,7 +13,6 @@ var _prev_managed: Array[Control] = []
 
 func _init() -> void:
 	node_type = "scroll_container"
-	node_description = "Scrollable container for child UI widgets."
 
 
 func _init_ports() -> void:

@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "wireframe"
-	node_description = "Convert triangles to wireframe lines."
 
 
 func _init_ports() -> void:

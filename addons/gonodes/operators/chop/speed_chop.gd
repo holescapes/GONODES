@@ -10,7 +10,6 @@ var _accum: Dictionary = {}  # channel_name -> float
 func _init() -> void:
 	node_type = "speed"
 	time_dependent = true
-	node_description = "Integrate input over time (velocity to position)."
 
 
 func _init_ports() -> void:

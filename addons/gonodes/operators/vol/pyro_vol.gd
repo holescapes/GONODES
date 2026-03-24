@@ -22,7 +22,6 @@ var _last_res: Vector3i = Vector3i.ZERO
 func _init() -> void:
 	super._init()
 	node_type = "pyro"
-	node_description = "Pyro fire/smoke simulation — combustion, buoyancy, and turbulence."
 	time_dependent = true
 
 

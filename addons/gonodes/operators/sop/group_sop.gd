@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "group"
-	node_description = "Create point/primitive groups by criteria."
 
 
 func _init_ports() -> void:

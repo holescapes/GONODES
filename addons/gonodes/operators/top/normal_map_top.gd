@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "normal_map"
-	node_description = "Generate a tangent-space normal map from a height/displacement texture."
 
 
 func _init_ports() -> void:

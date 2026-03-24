@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "skin"
-	node_description = "Skin cross-sections into a mesh surface."
 	_enable_dynamic_inputs(GNFamily.Type.SOP, "section", "Cross-section")
 
 

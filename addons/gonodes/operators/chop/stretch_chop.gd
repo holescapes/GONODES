@@ -7,7 +7,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "stretch"
-	node_description = "Time-stretch channels by resampling to a new length."
 
 
 func _init_ports() -> void:

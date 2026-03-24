@@ -6,7 +6,6 @@ extends GNPopBase
 func _init() -> void:
 	super._init()
 	node_type = "limit"
-	node_description = "Kill particles by age, bounds, or speed. Clamp particle velocities."
 
 
 func _init_ports() -> void:

@@ -5,7 +5,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "file_out"
-	node_description = "Export geometry to a Wavefront OBJ file."
 
 
 ## Local filesystem access — not available on web.

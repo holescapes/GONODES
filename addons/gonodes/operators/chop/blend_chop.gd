@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "blend"
-	node_description = "Sample-by-sample weighted blend of multiple CHOP inputs."
 
 
 func _init_ports() -> void:

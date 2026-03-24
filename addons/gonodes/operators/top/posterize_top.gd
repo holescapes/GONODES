@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "posterize"
-	node_description = "Reduce color levels for a posterization effect."
 
 
 func _init_ports() -> void:

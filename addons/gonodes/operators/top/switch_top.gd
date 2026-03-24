@@ -7,7 +7,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "switch"
-	node_description = "Select one of multiple texture inputs by index (auto-grow ports)."
 
 
 func _init_ports() -> void:

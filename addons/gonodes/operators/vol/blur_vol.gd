@@ -5,7 +5,6 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "blur"
-	node_description = "3D Gaussian blur on a volume."
 
 
 func _init_ports() -> void:

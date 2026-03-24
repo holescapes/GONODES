@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "projection"
-	node_description = "UV projection mapping: planar, cylindrical, or spherical."
 
 
 func _init_ports() -> void:

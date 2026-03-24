@@ -26,7 +26,6 @@ var _total_written: int = 0
 
 func _init() -> void:
 	node_type = "movie_out"
-	node_description = "Save image sequence to disk (numbered PNG/WebP frames)."
 
 
 ## Disk write — not available on web.

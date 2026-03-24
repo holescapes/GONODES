@@ -36,7 +36,6 @@ void fragment() {
 
 func _init() -> void:
 	node_type = "line"
-	node_description = "Line/wireframe rendering material with stipple."
 
 
 func _init_ports() -> void:

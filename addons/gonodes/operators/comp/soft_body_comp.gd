@@ -28,7 +28,6 @@ var _source_mesh_ref: Mesh = null         # track upstream mesh for change detec
 
 func _init() -> void:
 	node_type = "soft_body"
-	node_description = "CPU Verlet cloth — deformable physics mesh (cloth, jelly, soft objects)."
 	time_dependent = true
 
 

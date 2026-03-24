@@ -7,7 +7,6 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "null"
-	node_description = "Pass-through for organization and references."
 
 
 func _init_ports() -> void:

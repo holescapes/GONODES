@@ -7,7 +7,6 @@ extends GNChopBase
 func _init() -> void:
 	node_type = "clock"
 	time_dependent = true
-	node_description = "System time, frames, and BPM beat clock."
 
 
 func _init_ports() -> void:

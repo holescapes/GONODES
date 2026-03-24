@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "clip"
-	node_description = "Clip geometry against a plane."
 
 
 func _init_ports() -> void:

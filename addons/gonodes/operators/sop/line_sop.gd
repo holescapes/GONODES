@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "line"
-	node_description = "Generate a line strip."
 
 
 func _init_ports() -> void:

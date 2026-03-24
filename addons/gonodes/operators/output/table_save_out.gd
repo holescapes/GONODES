@@ -9,7 +9,6 @@ enum Format { CSV, TSV, JSON, TEXT }
 
 func _init() -> void:
 	node_type = "table_save"
-	node_description = "Export table/text to disk (CSV, TSV, JSON, plain text). Activate the toggle to write."
 
 
 ## Disk write — not available on web.

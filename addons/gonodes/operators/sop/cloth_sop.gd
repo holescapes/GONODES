@@ -27,7 +27,6 @@ var _source_prim: int = Mesh.PRIMITIVE_TRIANGLES
 func _init() -> void:
 	node_type = "cloth"
 	time_dependent = true
-	node_description = "Verlet cloth simulation — gravity, wind, pin constraints."
 
 
 func _init_ports() -> void:

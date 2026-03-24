@@ -10,7 +10,6 @@ var _rtl: RichTextLabel = null
 
 func _init() -> void:
 	node_type = "rich_text_label"
-	node_description = "BBCode rich text label. Optional DAT input for content."
 
 
 func _init_ports() -> void:

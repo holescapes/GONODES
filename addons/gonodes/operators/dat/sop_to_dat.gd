@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "sop_to_dat"
-	node_description = "Convert SOP geometry info to a table."
 
 
 func _init_ports() -> void:

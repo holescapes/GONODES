@@ -12,7 +12,6 @@ var _last_count: int = -1
 
 func _init() -> void:
 	node_type = "rename"
-	node_description = "Rename channels from input."
 
 
 func _init_ports() -> void:

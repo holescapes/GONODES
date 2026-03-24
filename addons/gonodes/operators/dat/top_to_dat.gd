@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "top_to_dat"
-	node_description = "Convert TOP texture metadata or pixel data to a table."
 
 
 func _init_ports() -> void:

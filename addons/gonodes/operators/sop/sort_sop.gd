@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "sort"
-	node_description = "Sort vertices by axis, distance, or randomly."
 
 
 func _init_ports() -> void:

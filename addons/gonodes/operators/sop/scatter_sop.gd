@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "scatter"
-	node_description = "Scatter random points on mesh surface."
 
 
 func _init_ports() -> void:

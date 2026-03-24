@@ -37,7 +37,6 @@ enum Pattern {
 func _init() -> void:
 	node_type = "laser"
 	time_dependent = true
-	node_description = "Laser point-list generator. Outputs XY + RGB + intensity channels for laser DAC output. Built-in test patterns. Hardware output deferred to DAC-specific GDExtensions."
 
 
 func _init_ports() -> void:

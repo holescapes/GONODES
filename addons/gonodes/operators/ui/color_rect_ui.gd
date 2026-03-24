@@ -12,7 +12,6 @@ var _click_value: float = 0.0
 
 func _init() -> void:
 	node_type = "color_rect"
-	node_description = "Colored rectangle. Optional MAT input for shader overlay. Clickable."
 
 
 func _init_ports() -> void:

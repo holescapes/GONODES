@@ -9,7 +9,6 @@ var _noise: FastNoiseLite = null
 func _init() -> void:
 	node_type = "noise"
 	time_dependent = true
-	node_description = "Displace vertices with 3D noise."
 
 
 func _init_ports() -> void:

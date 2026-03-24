@@ -11,7 +11,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "sop"
-	node_description = "Bridge two polygon edge loops with connecting faces."
 
 
 func _init_ports() -> void:

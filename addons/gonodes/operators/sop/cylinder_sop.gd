@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "cylinder"
-	node_description = "Generate a cylinder mesh."
 
 
 func _init_ports() -> void:

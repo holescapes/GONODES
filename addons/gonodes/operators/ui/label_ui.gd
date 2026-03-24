@@ -10,7 +10,6 @@ var _label: Label = null
 
 func _init() -> void:
 	node_type = "label"
-	node_description = "Text label. Optionally displays CHOP channel values."
 
 
 func _init_ports() -> void:

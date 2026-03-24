@@ -7,7 +7,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "composite"
-	node_description = "Weighted blend of channels from multiple inputs."
 
 
 func _init_ports() -> void:

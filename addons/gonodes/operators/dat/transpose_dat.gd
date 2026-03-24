@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "transpose"
-	node_description = "Transpose a table (swap rows and columns)."
 
 
 func _init_ports() -> void:

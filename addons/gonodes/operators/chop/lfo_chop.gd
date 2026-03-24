@@ -13,7 +13,6 @@ var _phase_accum: float = 0.0
 func _init() -> void:
 	node_type = "lfo"
 	time_dependent = true
-	node_description = "Low-frequency oscillator (sine, triangle, square, etc.)."
 
 
 func _init_ports() -> void:

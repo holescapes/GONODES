@@ -8,7 +8,6 @@ extends GNChopBase
 func _init() -> void:
 	node_type = "noise"
 	time_dependent = true
-	node_description = "Generate smooth noise channels over time."
 
 ## Internal time accumulator for continuous noise evolution.
 var _time_accum: float = 0.0

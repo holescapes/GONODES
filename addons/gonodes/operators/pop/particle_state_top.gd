@@ -9,7 +9,6 @@ var _cached_texture: GNTextureData = null
 func _init() -> void:
 	family = GNFamily.Type.TOP
 	node_type = "particle_state"
-	node_description = "Visualize particle attributes as a 2D texture (POP→TOP bridge)."
 
 
 func initialize(p_id: String) -> void:

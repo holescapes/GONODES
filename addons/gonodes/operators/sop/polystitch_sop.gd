@@ -11,7 +11,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "poly_stitch"
-	node_description = "Stitch polygon boundaries by connecting nearest vertices."
 
 
 func _init_ports() -> void:

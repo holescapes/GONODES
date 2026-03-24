@@ -23,7 +23,6 @@ var _peaks: PackedFloat32Array = PackedFloat32Array()
 func _init() -> void:
 	node_type = "audio_band"
 	time_dependent = true
-	node_description = "Multi-band frequency analysis with envelope followers for VJ-reactive visuals."
 
 
 func _init_ports() -> void:

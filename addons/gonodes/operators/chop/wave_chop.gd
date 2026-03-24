@@ -10,7 +10,6 @@ enum Waveform { SINE, TRIANGLE, SQUARE, SAWTOOTH, PULSE, RAMP }
 func _init() -> void:
 	node_type = "wave"
 	time_dependent = true
-	node_description = "Advanced waveform generator with multi-channel support."
 
 
 func _init_ports() -> void:

@@ -30,7 +30,6 @@ var _rx_sequence: int = 0
 func _init() -> void:
 	node_type = "dmx"
 	time_dependent = true
-	node_description = "DMX lighting via Art-Net (UDP). Sends and receives DMX-512 data using Godot's built-in PacketPeerUDP — no external libraries needed."
 
 
 func _init_ports() -> void:

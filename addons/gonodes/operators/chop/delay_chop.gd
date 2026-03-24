@@ -10,7 +10,6 @@ var _write_idx: int = 0
 func _init() -> void:
 	node_type = "delay"
 	time_dependent = true
-	node_description = "Delay channel values by N frames."
 
 
 func _init_ports() -> void:

@@ -24,7 +24,6 @@ static var _tables_initialized: bool = false
 
 func _init() -> void:
 	node_type = "metaball"
-	node_description = "Metaball implicit surface via marching cubes."
 	if not _tables_initialized:
 		_init_marching_cubes_tables()
 		_tables_initialized = true

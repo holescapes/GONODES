@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "grid"
-	node_description = "Generate a subdivided planar grid."
 
 
 func _init_ports() -> void:

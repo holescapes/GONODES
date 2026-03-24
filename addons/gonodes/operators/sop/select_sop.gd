@@ -16,7 +16,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "select"
-	node_description = "Keep geometry matching a filter criterion (range, bbox, expression, every Nth)."
 
 
 func _init_ports() -> void:

@@ -15,7 +15,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "poly_reduce"
-	node_description = "Mesh decimation via quadric error metric edge collapse."
 
 
 func _init_ports() -> void:

@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "substitute"
-	node_description = "Find and replace text in table cells or text."
 
 
 func _init_ports() -> void:

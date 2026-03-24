@@ -9,7 +9,6 @@ var _picker: ColorPickerButton = null
 
 func _init() -> void:
 	node_type = "color_picker"
-	node_description = "Color picker button. Outputs RGBA channels as state."
 
 
 func _init_parameters() -> void:

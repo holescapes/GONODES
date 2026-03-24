@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "normal"
-	node_description = "Recompute, flip, or facet vertex normals."
 
 
 func _init_ports() -> void:

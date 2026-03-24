@@ -11,7 +11,6 @@ var _managed_child: Control = null
 
 func _init() -> void:
 	node_type = "margin_container"
-	node_description = "Wraps a UI widget with configurable margins."
 
 
 func _init_ports() -> void:

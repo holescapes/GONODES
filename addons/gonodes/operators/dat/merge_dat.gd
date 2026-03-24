@@ -7,7 +7,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "merge"
-	node_description = "Merge two tables (append rows or columns)."
 
 
 func _init_ports() -> void:

@@ -7,7 +7,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "cross"
-	node_description = "Linear crossfade between two textures."
 
 
 func _init_ports() -> void:

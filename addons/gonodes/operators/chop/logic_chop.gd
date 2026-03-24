@@ -9,7 +9,6 @@ enum LogicOp { AND, OR, XOR, NAND, NOR, NOT }
 
 func _init() -> void:
 	node_type = "logic"
-	node_description = "Boolean logic operations on channels."
 
 
 func _init_ports() -> void:

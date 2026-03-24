@@ -10,7 +10,6 @@ var _prev_in: Dictionary = {}  # channel -> float (for edge detection)
 func _init() -> void:
 	node_type = "count"
 	time_dependent = true
-	node_description = "Count rising edges on input channels."
 
 
 func _init_ports() -> void:

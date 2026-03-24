@@ -8,7 +8,6 @@ extends GNCompBase
 
 func _init() -> void:
 	node_type = "switch"
-	node_description = "Select one of multiple component inputs."
 
 
 func _init_ports() -> void:

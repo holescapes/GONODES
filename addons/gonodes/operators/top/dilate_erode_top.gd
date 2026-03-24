@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "dilate_erode"
-	node_description = "Morphological dilate (expand) and erode (shrink) with circular footprint."
 
 
 func _init_ports() -> void:

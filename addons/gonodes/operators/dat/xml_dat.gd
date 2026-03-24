@@ -14,7 +14,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "xml"
-	node_description = "Parse XML document into a flat path/attribute/value table."
 
 
 func _init_ports() -> void:

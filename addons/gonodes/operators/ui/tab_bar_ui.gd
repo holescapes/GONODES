@@ -10,7 +10,6 @@ var _tab_bar: TabBar = null
 
 func _init() -> void:
 	node_type = "tab_bar"
-	node_description = "Tab bar from DAT data. Outputs selected tab index."
 
 
 func _init_ports() -> void:

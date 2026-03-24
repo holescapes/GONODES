@@ -11,7 +11,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "voronoi_shatter"
-	node_description = "Fracture geometry using 3D Voronoi decomposition."
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.SOP, false, "Geometry to fracture")

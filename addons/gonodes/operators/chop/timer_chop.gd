@@ -13,7 +13,6 @@ var _prev_reset: float = 0.0
 func _init() -> void:
 	node_type = "timer"
 	time_dependent = true
-	node_description = "Count up in seconds with start/stop/reset triggers."
 
 
 func _init_ports() -> void:

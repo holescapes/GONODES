@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "bend"
-	node_description = "Bend geometry along an axis using circular arc deformation."
 
 
 func _init_ports() -> void:

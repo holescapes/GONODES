@@ -11,7 +11,6 @@ var _current_text: String = ""
 
 func _init() -> void:
 	node_type = "text_edit"
-	node_description = "Multi-line text editor. Optional DAT input for initial content."
 
 
 func _init_ports() -> void:

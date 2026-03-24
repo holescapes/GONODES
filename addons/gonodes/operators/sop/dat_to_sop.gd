@@ -12,7 +12,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "dat_to_sop"
-	node_description = "Convert DAT table rows to SOP points."
 
 
 func _init_ports() -> void:

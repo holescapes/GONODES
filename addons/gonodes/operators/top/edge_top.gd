@@ -7,7 +7,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "edge"
-	node_description = "Sobel edge detection with configurable strength."
 
 
 func _init_ports() -> void:

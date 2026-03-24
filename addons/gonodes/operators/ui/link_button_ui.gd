@@ -10,7 +10,6 @@ var _link_btn: LinkButton = null
 
 func _init() -> void:
 	node_type = "link_button"
-	node_description = "Clickable text link button."
 
 
 func _init_parameters() -> void:

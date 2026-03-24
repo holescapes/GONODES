@@ -21,7 +21,6 @@ const MAX_BUFFER_LINES := 1000
 
 func _init() -> void:
 	node_type = "network"
-	node_description = "TCP/UDP network send/receive."
 
 
 func _init_ports() -> void:

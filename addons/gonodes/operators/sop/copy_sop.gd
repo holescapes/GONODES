@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "copy"
-	node_description = "Copy geometry onto points of another mesh."
 
 
 func _init_ports() -> void:

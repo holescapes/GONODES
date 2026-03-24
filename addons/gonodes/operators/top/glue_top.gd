@@ -7,7 +7,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "glue"
-	node_description = "Pack multiple textures into a grid atlas."
 
 
 func _init_ports() -> void:

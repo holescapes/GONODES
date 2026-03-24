@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "transform"
-	node_description = "Translate, rotate, and scale geometry."
 
 
 func _init_ports() -> void:

@@ -7,7 +7,6 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "marching_cubes"
-	node_description = "Extract iso-surface mesh from volume (marching cubes)."
 
 
 func _init_ports() -> void:

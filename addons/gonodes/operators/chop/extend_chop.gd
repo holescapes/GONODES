@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "extend"
-	node_description = "Extend channel samples (hold, cycle, mirror, slope)."
 
 
 func _init_ports() -> void:

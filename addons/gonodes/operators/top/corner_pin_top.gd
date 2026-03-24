@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "corner_pin"
-	node_description = "4-point perspective warp for projection mapping and keystone correction."
 
 
 func _init_ports() -> void:

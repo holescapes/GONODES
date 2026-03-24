@@ -12,7 +12,6 @@ extends GNChopBase
 func _init() -> void:
 	node_type = "parameter"
 	time_dependent = true
-	node_description = "Read another node's parameters as CHOP channels."
 
 
 func _init_ports() -> void:

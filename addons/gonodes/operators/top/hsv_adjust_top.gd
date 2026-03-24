@@ -8,7 +8,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "hsv_adjust"
-	node_description = "Hue offset, saturation, and value (brightness) adjustment."
 
 
 func _init_ports() -> void:

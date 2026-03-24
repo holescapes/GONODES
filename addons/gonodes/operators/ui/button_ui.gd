@@ -14,7 +14,6 @@ var _press_impulse: bool = false
 
 func _init() -> void:
 	node_type = "button"
-	node_description = "Interactive push button. Outputs press impulse and toggle state."
 
 
 func _init_parameters() -> void:

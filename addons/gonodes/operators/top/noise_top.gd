@@ -11,7 +11,6 @@ var _shader: Shader = null
 func _init() -> void:
 	node_type = "noise"
 	time_dependent = true
-	node_description = "Procedural noise texture (Simplex, Perlin, Voronoi, White). GPU shader."
 
 
 func _init_ports() -> void:

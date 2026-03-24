@@ -12,7 +12,6 @@ var _items: Array[TreeItem] = []
 
 func _init() -> void:
 	node_type = "tree"
-	node_description = "Tree view built from DAT table data."
 
 
 func _init_ports() -> void:

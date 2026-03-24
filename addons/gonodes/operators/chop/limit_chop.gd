@@ -8,7 +8,6 @@ enum LimitType { CLAMP, LOOP, ZIGZAG }
 
 func _init() -> void:
 	node_type = "limit"
-	node_description = "Clamp, loop, or zig-zag values within bounds."
 
 
 func _init_ports() -> void:

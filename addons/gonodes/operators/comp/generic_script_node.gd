@@ -81,7 +81,6 @@ var _parsed_outputs: Array = []
 func _init() -> void:
 	family = GNFamily.Type.COMP  # Gray / neutral color in graph
 	node_type = "script"
-	node_description = "Multi-output scripting node. Write GDScript with @output annotations to produce any combination of data types."
 
 
 func _init_ports() -> void:

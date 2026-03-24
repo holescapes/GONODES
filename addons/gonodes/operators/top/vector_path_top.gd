@@ -18,7 +18,6 @@ var _bg: ColorRect = null
 
 func _init() -> void:
 	node_type = "vector_path"
-	node_description = "Anti-aliased 2D vector path rendering (lines, curves, shapes)."
 
 
 func _init_ports() -> void:

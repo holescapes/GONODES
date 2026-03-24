@@ -10,7 +10,6 @@ var _current_type: int = -1  # Track which type was last created
 
 func _init() -> void:
 	node_type = "light"
-	node_description = "Provide a Light3D for 3D rendering."
 
 
 func _init_ports() -> void:

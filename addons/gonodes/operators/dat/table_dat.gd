@@ -9,7 +9,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "table"
-	node_description = "Manual editable data table (CSV-style)."
 
 
 func _init_ports() -> void:

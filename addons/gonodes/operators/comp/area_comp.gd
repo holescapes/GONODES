@@ -19,7 +19,6 @@ var _fallback_material: StandardMaterial3D = null
 
 func _init() -> void:
 	node_type = "area"
-	node_description = "Area3D — force field / gravity zone (attract, repel, wind, zero-G)."
 
 
 func _init_ports() -> void:

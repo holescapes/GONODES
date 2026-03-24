@@ -12,7 +12,6 @@ extends GNChopBase
 func _init() -> void:
 	node_type = "gamepad"
 	time_dependent = true
-	node_description = "Output gamepad stick, trigger, and button channels."
 
 
 func _init_ports() -> void:

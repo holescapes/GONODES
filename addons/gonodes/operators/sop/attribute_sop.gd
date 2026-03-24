@@ -8,7 +8,6 @@ extends GNSopBase
 func _init() -> void:
 	node_type = "attribute"
 	time_dependent = true
-	node_description = "Create/modify per-vertex point attributes."
 
 
 func _init_ports() -> void:

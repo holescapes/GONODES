@@ -16,7 +16,6 @@ enum SurfaceType { GYROID, SCHWARZ_P, SCHWARZ_D, SPHERE, TORUS, CUSTOM }
 
 func _init() -> void:
 	node_type = "isosurface"
-	node_description = "Analytic implicit surface via marching cubes."
 	# Guarantee marching cubes tables exist.
 	if not MetaballSOP._tables_initialized:
 		MetaballSOP._init_marching_cubes_tables()

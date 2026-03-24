@@ -5,7 +5,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "file_in"
-	node_description = "Import geometry from an OBJ, glTF, or resource file."
 
 
 ## Local filesystem access — not available on web.

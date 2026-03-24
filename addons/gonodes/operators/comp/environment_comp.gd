@@ -21,7 +21,6 @@ var _world_env_node: WorldEnvironment = null
 
 func _init() -> void:
 	node_type = "environment"
-	node_description = "Environment settings for 3D rendering — background, lighting, post-processing."
 
 
 func _init_ports() -> void:

@@ -27,7 +27,6 @@ var _prev_trigger_val: float = 0.0
 func _init() -> void:
 	node_type = "cue_sequencer"
 	time_dependent = true
-	node_description = "Cue sequencer — reads cue table and outputs current cue state as CHOP channels."
 
 
 func _init_ports() -> void:

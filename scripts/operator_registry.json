@@ -15,7 +15,7 @@
   },
   {
     "class_name": "AudioBandCHOP",
-    "node_type": "audioband",
+    "node_type": "audio_band",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/audio_band_chop.gd",
     "extension": null,
@@ -113,7 +113,7 @@
   },
   {
     "class_name": "AudioFileInCHOP",
-    "node_type": "audiofilein",
+    "node_type": "audio_file_in",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/audio_file_in_chop.gd",
     "extension": null,
@@ -157,7 +157,7 @@
   },
   {
     "class_name": "AudioInCHOP",
-    "node_type": "audioin",
+    "node_type": "audio_in",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/audio_in_chop.gd",
     "extension": null,
@@ -186,7 +186,7 @@
   },
   {
     "class_name": "AudioSpectrumCHOP",
-    "node_type": "audiospectrum",
+    "node_type": "audio_spectrum",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/audio_spectrum_chop.gd",
     "extension": null,
@@ -470,7 +470,7 @@
   },
   {
     "class_name": "CueCHOP",
-    "node_type": "cuesequencer",
+    "node_type": "cue_sequencer",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/cue_chop.gd",
     "extension": null,
@@ -910,7 +910,7 @@
   },
   {
     "class_name": "HostInCHOP",
-    "node_type": "hostinchop",
+    "node_type": "host_in",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/host_in_chop.gd",
     "extension": null,
@@ -1006,7 +1006,7 @@
   },
   {
     "class_name": "KeyboardInCHOP",
-    "node_type": "keyboardin",
+    "node_type": "keyboard_in",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/keyboard_in_chop.gd",
     "extension": null,
@@ -1276,7 +1276,7 @@
   },
   {
     "class_name": "MidiInCHOP",
-    "node_type": "midiin",
+    "node_type": "midi_in",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/midi_in_chop.gd",
     "extension": null,
@@ -1310,7 +1310,7 @@
   },
   {
     "class_name": "MouseInCHOP",
-    "node_type": "mousein",
+    "node_type": "mouse_in",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/mouse_in_chop.gd",
     "extension": null,
@@ -1448,7 +1448,7 @@
   },
   {
     "class_name": "OscInCHOP",
-    "node_type": "oscin",
+    "node_type": "osc_in",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/osc_in_chop.gd",
     "extension": null,
@@ -1782,7 +1782,7 @@
   },
   {
     "class_name": "SOPtoCHOP",
-    "node_type": "soptochop",
+    "node_type": "sop_to_chop",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/sop_to_chop.gd",
     "extension": null,
@@ -1801,7 +1801,7 @@
   },
   {
     "class_name": "ScriptCHOP",
-    "node_type": "scriptchop",
+    "node_type": "script",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/script_chop.gd",
     "extension": null,
@@ -2109,7 +2109,7 @@
   },
   {
     "class_name": "TOPtoCHOP",
-    "node_type": "toptochop",
+    "node_type": "top_to_chop",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/top_to_chop.gd",
     "extension": null,
@@ -2143,7 +2143,7 @@
   },
   {
     "class_name": "TabletInCHOP",
-    "node_type": "tabletin",
+    "node_type": "tablet_in",
     "family": "chop",
     "file": "addons/gonodes/operators/chop/tabletin_chop.gd",
     "extension": null,
@@ -3067,7 +3067,7 @@
   },
   {
     "class_name": "GenericScriptNode",
-    "node_type": "genericscript",
+    "node_type": "script",
     "family": "comp",
     "file": "addons/gonodes/operators/comp/generic_script_node.gd",
     "extension": null,
@@ -3566,7 +3566,7 @@
   },
   {
     "class_name": "MergeCOMP",
-    "node_type": "merge_comp",
+    "node_type": "merge",
     "family": "comp",
     "file": "addons/gonodes/operators/comp/merge_comp.gd",
     "extension": null,
@@ -3978,7 +3978,7 @@
   },
   {
     "class_name": "SubNetworkNode",
-    "node_type": "subnet",
+    "node_type": "sub_network",
     "family": "comp",
     "file": "addons/gonodes/operators/comp/sub_network_node.gd",
     "extension": null,
@@ -4034,7 +4034,7 @@
   },
   {
     "class_name": "CallbackDAT",
-    "node_type": "callbackdat",
+    "node_type": "callback",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/callback_dat.gd",
     "extension": null,
@@ -4278,7 +4278,7 @@
   },
   {
     "class_name": "FileInDAT",
-    "node_type": "filein",
+    "node_type": "file_in",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/file_in_dat.gd",
     "extension": null,
@@ -4331,7 +4331,7 @@
   },
   {
     "class_name": "HostInDAT",
-    "node_type": "hostindat",
+    "node_type": "host_in",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/host_in_dat.gd",
     "extension": null,
@@ -4425,7 +4425,7 @@
   },
   {
     "class_name": "MidiInDAT",
-    "node_type": "midiin",
+    "node_type": "midi_in",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/midi_in_dat.gd",
     "extension": null,
@@ -4518,7 +4518,7 @@
   },
   {
     "class_name": "MultiTouchInDAT",
-    "node_type": "multitouchin",
+    "node_type": "multi_touch_in",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/multi_touch_in_dat.gd",
     "extension": null,
@@ -4594,7 +4594,7 @@
   },
   {
     "class_name": "OPFindDAT",
-    "node_type": "opfind",
+    "node_type": "op_find",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/op_find_dat.gd",
     "extension": null,
@@ -4657,7 +4657,7 @@
   },
   {
     "class_name": "OscInDAT",
-    "node_type": "oscin",
+    "node_type": "osc_in",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/osc_in_dat.gd",
     "extension": null,
@@ -4691,7 +4691,7 @@
   },
   {
     "class_name": "PanelExecuteDAT",
-    "node_type": "panelexecute",
+    "node_type": "panel_execute",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/panel_execute_dat.gd",
     "extension": null,
@@ -4725,7 +4725,7 @@
   },
   {
     "class_name": "RenderPickDAT",
-    "node_type": "renderpick",
+    "node_type": "render_pick",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/render_pick_dat.gd",
     "extension": null,
@@ -4778,7 +4778,7 @@
   },
   {
     "class_name": "ScriptDAT",
-    "node_type": "scriptdat",
+    "node_type": "script",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/script_dat.gd",
     "extension": null,
@@ -4873,6 +4873,89 @@
       },
       {
         "name": "clear",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "SerialReceiveDAT",
+    "node_type": "serial_receive",
+    "family": "dat",
+    "file": "addons/gn_ext_serial/operators/dat/serial_receive_dat.gd",
+    "extension": "gn_ext_serial",
+    "params": [
+      {
+        "name": "port",
+        "type": "string",
+        "default": "COM3"
+      },
+      {
+        "name": "baud_rate",
+        "type": "int",
+        "default": 9600
+      },
+      {
+        "name": "delimiter",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "max_rows",
+        "type": "int",
+        "default": 100
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "SerialSendDAT",
+    "node_type": "serial_send",
+    "family": "dat",
+    "file": "addons/gn_ext_serial/operators/dat/serial_send_dat.gd",
+    "extension": "gn_ext_serial",
+    "params": [
+      {
+        "name": "port",
+        "type": "string",
+        "default": "COM3"
+      },
+      {
+        "name": "baud_rate",
+        "type": "int",
+        "default": 9600
+      },
+      {
+        "name": "line_ending",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "send_now",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "continuous",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear_log",
         "type": "pulse",
         "default": null
       }
@@ -5119,7 +5202,7 @@
   },
   {
     "class_name": "WebServerDAT",
-    "node_type": "webserver",
+    "node_type": "web_server",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/web_server_dat.gd",
     "extension": null,
@@ -5153,7 +5236,7 @@
   },
   {
     "class_name": "WebSocketDAT",
-    "node_type": "websocket",
+    "node_type": "web_socket",
     "family": "dat",
     "file": "addons/gonodes/operators/dat/web_socket_dat.gd",
     "extension": null,
@@ -5221,7 +5304,7 @@
   },
   {
     "class_name": "BlurIMG",
-    "node_type": "blurimg",
+    "node_type": "blur",
     "family": "img",
     "file": "addons/gonodes/operators/img/blur_img.gd",
     "extension": null,
@@ -5240,7 +5323,7 @@
   },
   {
     "class_name": "CheckerboardIMG",
-    "node_type": "checkerboardimg",
+    "node_type": "checkerboard",
     "family": "img",
     "file": "addons/gonodes/operators/img/checkerboard_img.gd",
     "extension": null,
@@ -5279,7 +5362,7 @@
   },
   {
     "class_name": "EdgeDetectIMG",
-    "node_type": "edgedetectimg",
+    "node_type": "edge_detect",
     "family": "img",
     "file": "addons/gonodes/operators/img/edge_detect_img.gd",
     "extension": null,
@@ -5308,7 +5391,7 @@
   },
   {
     "class_name": "ImageFileInIMG",
-    "node_type": "imagefileinimg",
+    "node_type": "image_file_in",
     "family": "img",
     "file": "addons/gonodes/operators/img/image_file_in_img.gd",
     "extension": null,
@@ -5327,7 +5410,7 @@
   },
   {
     "class_name": "ImageSequenceIMG",
-    "node_type": "imagesequenceimg",
+    "node_type": "image_sequence",
     "family": "img",
     "file": "addons/gonodes/operators/img/image_sequence_img.gd",
     "extension": null,
@@ -5366,7 +5449,7 @@
   },
   {
     "class_name": "ImgToTOP",
-    "node_type": "imgtotop",
+    "node_type": "img_to_top",
     "family": "img",
     "file": "addons/gonodes/operators/img/img_to_top.gd",
     "extension": null,
@@ -5374,7 +5457,7 @@
   },
   {
     "class_name": "NoiseIMG",
-    "node_type": "noiseimg",
+    "node_type": "noise",
     "family": "img",
     "file": "addons/gonodes/operators/img/noise_img.gd",
     "extension": null,
@@ -5436,7 +5519,7 @@
   },
   {
     "class_name": "PixelSortIMG",
-    "node_type": "pixelsortimg",
+    "node_type": "pixel_sort",
     "family": "img",
     "file": "addons/gonodes/operators/img/pixel_sort_img.gd",
     "extension": null,
@@ -5470,7 +5553,7 @@
   },
   {
     "class_name": "ScreenGrabIMG",
-    "node_type": "screengrab",
+    "node_type": "screen_grab",
     "family": "img",
     "file": "addons/gonodes/operators/img/screen_grab_img.gd",
     "extension": null,
@@ -5528,7 +5611,7 @@
   },
   {
     "class_name": "TOPtoIMG",
-    "node_type": "toptoimg",
+    "node_type": "top_to_img",
     "family": "img",
     "file": "addons/gonodes/operators/img/top_to_img.gd",
     "extension": null,
@@ -5618,7 +5701,7 @@
   },
   {
     "class_name": "WebcamIMG",
-    "node_type": "webcamimg",
+    "node_type": "webcam",
     "family": "img",
     "file": "addons/gonodes/operators/img/webcam_img.gd",
     "extension": null,
@@ -5828,7 +5911,7 @@
   },
   {
     "class_name": "NormalMapMAT",
-    "node_type": "normalmap",
+    "node_type": "normal_map",
     "family": "mat",
     "file": "addons/gonodes/operators/mat/normal_map_mat.gd",
     "extension": null,
@@ -5939,7 +6022,7 @@
   },
   {
     "class_name": "PointSpriteMAT",
-    "node_type": "pointsprite",
+    "node_type": "point_sprite",
     "family": "mat",
     "file": "addons/gonodes/operators/mat/point_sprite_mat.gd",
     "extension": null,
@@ -6041,7 +6124,7 @@
   },
   {
     "class_name": "AudioDeviceOUT",
-    "node_type": "audioout",
+    "node_type": "audio_device",
     "family": "output",
     "file": "addons/gonodes/operators/output/audio_device_out.gd",
     "extension": null,
@@ -6070,7 +6153,7 @@
   },
   {
     "class_name": "FFmpegOUT",
-    "node_type": "ffmpegout",
+    "node_type": "ffmpeg",
     "family": "output",
     "file": "addons/gonodes/operators/output/ffmpeg_out.gd",
     "extension": null,
@@ -6103,8 +6186,37 @@
     ]
   },
   {
+    "class_name": "HapOUT",
+    "node_type": "hap_out",
+    "family": "output",
+    "file": "addons/gn_ext_hap/operators/output/hap_out.gd",
+    "extension": "gn_ext_hap",
+    "params": [
+      {
+        "name": "file_path",
+        "type": "string",
+        "default": "user://output/video.mov"
+      },
+      {
+        "name": "variant",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "fps",
+        "type": "int",
+        "default": 30
+      },
+      {
+        "name": "record",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "HostOutCHOP",
-    "node_type": "hostoutchop",
+    "node_type": "host_out_chop",
     "family": "output",
     "file": "addons/gonodes/operators/output/host_out_chop.gd",
     "extension": null,
@@ -6118,7 +6230,7 @@
   },
   {
     "class_name": "HostOutDAT",
-    "node_type": "hostoutdat",
+    "node_type": "host_out_dat",
     "family": "output",
     "file": "addons/gonodes/operators/output/host_out_dat.gd",
     "extension": null,
@@ -6132,7 +6244,7 @@
   },
   {
     "class_name": "HostOutTOP",
-    "node_type": "hostout",
+    "node_type": "host_out",
     "family": "output",
     "file": "addons/gonodes/operators/output/host_out_top.gd",
     "extension": null,
@@ -6146,7 +6258,7 @@
   },
   {
     "class_name": "ImageSaveOUT",
-    "node_type": "imagesave",
+    "node_type": "image_save",
     "family": "output",
     "file": "addons/gonodes/operators/output/image_save_out.gd",
     "extension": null,
@@ -6185,7 +6297,7 @@
   },
   {
     "class_name": "MovieOUT",
-    "node_type": "movieout",
+    "node_type": "movie_out",
     "family": "output",
     "file": "addons/gonodes/operators/output/movie_out.gd",
     "extension": null,
@@ -6229,7 +6341,7 @@
   },
   {
     "class_name": "OscOUT",
-    "node_type": "oscout",
+    "node_type": "osc_out",
     "family": "output",
     "file": "addons/gonodes/operators/output/osc_out.gd",
     "extension": null,
@@ -6263,7 +6375,7 @@
   },
   {
     "class_name": "RecordOUT",
-    "node_type": "recordout",
+    "node_type": "record",
     "family": "output",
     "file": "addons/gonodes/operators/output/record_out.gd",
     "extension": null,
@@ -6302,7 +6414,7 @@
   },
   {
     "class_name": "TableSaveOUT",
-    "node_type": "tablesave",
+    "node_type": "table_save",
     "family": "output",
     "file": "addons/gonodes/operators/output/table_save_out.gd",
     "extension": null,
@@ -6331,7 +6443,7 @@
   },
   {
     "class_name": "TextureSaveOUT",
-    "node_type": "texturesave",
+    "node_type": "texture_save",
     "family": "output",
     "file": "addons/gonodes/operators/output/texture_save_out.gd",
     "extension": null,
@@ -6956,7 +7068,7 @@
   },
   {
     "class_name": "CHOPtoSOP",
-    "node_type": "choptosop",
+    "node_type": "chop_to_sop",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/chop_to_sop.gd",
     "extension": null,
@@ -7228,7 +7340,7 @@
   },
   {
     "class_name": "DATtoSOP",
-    "node_type": "dattosop",
+    "node_type": "dat_to_sop",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/dat_to_sop.gd",
     "extension": null,
@@ -7437,7 +7549,7 @@
   },
   {
     "class_name": "FileInSOP",
-    "node_type": "filein",
+    "node_type": "file_in",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/file_in_sop.gd",
     "extension": null,
@@ -7451,7 +7563,7 @@
   },
   {
     "class_name": "FileOutSOP",
-    "node_type": "fileout",
+    "node_type": "file_out",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/file_out_sop.gd",
     "extension": null,
@@ -8246,7 +8358,7 @@
   },
   {
     "class_name": "ObjectMergeSOP",
-    "node_type": "objectmerge",
+    "node_type": "sop",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/objectmerge_sop.gd",
     "extension": null,
@@ -8402,7 +8514,7 @@
   },
   {
     "class_name": "PolyBevelSOP",
-    "node_type": "polybevel",
+    "node_type": "poly_bevel",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/polybevel_sop.gd",
     "extension": null,
@@ -8426,7 +8538,7 @@
   },
   {
     "class_name": "PolyBridgeSOP",
-    "node_type": "polybridge",
+    "node_type": "sop",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/polybridge_sop.gd",
     "extension": null,
@@ -8445,7 +8557,7 @@
   },
   {
     "class_name": "PolyLoftSOP",
-    "node_type": "polyloft",
+    "node_type": "poly_loft",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/polyloft_sop.gd",
     "extension": null,
@@ -8474,7 +8586,7 @@
   },
   {
     "class_name": "PolyPatchSOP",
-    "node_type": "polypatch",
+    "node_type": "poly_patch",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/polypatch_sop.gd",
     "extension": null,
@@ -8493,7 +8605,7 @@
   },
   {
     "class_name": "PolyReduceSOP",
-    "node_type": "polyreduce",
+    "node_type": "poly_reduce",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/polyreduce_sop.gd",
     "extension": null,
@@ -8517,7 +8629,7 @@
   },
   {
     "class_name": "PolySplineSOP",
-    "node_type": "polyspline",
+    "node_type": "poly_spline",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/polyspline_sop.gd",
     "extension": null,
@@ -8551,7 +8663,7 @@
   },
   {
     "class_name": "PolyStitchSOP",
-    "node_type": "polystitch",
+    "node_type": "poly_stitch",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/polystitch_sop.gd",
     "extension": null,
@@ -8700,7 +8812,7 @@
   },
   {
     "class_name": "ScriptSOP",
-    "node_type": "scriptsop",
+    "node_type": "sop",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/script_sop.gd",
     "extension": null,
@@ -9025,7 +9137,7 @@
   },
   {
     "class_name": "TOPtoSOP",
-    "node_type": "toptosop",
+    "node_type": "top_to_sop",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/top_to_sop.gd",
     "extension": null,
@@ -9093,7 +9205,7 @@
   },
   {
     "class_name": "TextureSOP",
-    "node_type": "texture",
+    "node_type": "sop",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/texture_sop.gd",
     "extension": null,
@@ -9146,7 +9258,7 @@
   },
   {
     "class_name": "TrailRibbonSOP",
-    "node_type": "trailribbon",
+    "node_type": "trail_ribbon",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/trail_ribbon_sop.gd",
     "extension": null,
@@ -9326,7 +9438,7 @@
   },
   {
     "class_name": "UVProjectSOP",
-    "node_type": "uvproject",
+    "node_type": "uv_project",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/uv_project_sop.gd",
     "extension": null,
@@ -9408,7 +9520,7 @@
   },
   {
     "class_name": "VoronoiShatterSOP",
-    "node_type": "voronoishatter",
+    "node_type": "voronoi_shatter",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/voronoi_shatter_sop.gd",
     "extension": null,
@@ -9631,7 +9743,7 @@
   },
   {
     "class_name": "CHOPtoTOP",
-    "node_type": "choptotop",
+    "node_type": "chop_to_top",
     "family": "top",
     "file": "addons/gonodes/operators/top/chop_to_top.gd",
     "extension": null,
@@ -9932,7 +10044,7 @@
   },
   {
     "class_name": "ComputeShaderTOP",
-    "node_type": "compute",
+    "node_type": "compute_shader",
     "family": "top",
     "file": "addons/gonodes/operators/top/compute_shader_top.gd",
     "extension": null,
@@ -10090,7 +10202,7 @@
   },
   {
     "class_name": "CustomShaderTOP",
-    "node_type": "glsl",
+    "node_type": "custom_shader",
     "family": "top",
     "file": "addons/gonodes/operators/top/custom_shader_top.gd",
     "extension": null,
@@ -10558,7 +10670,7 @@
   },
   {
     "class_name": "Fluid2DTOP",
-    "node_type": "fluid2d",
+    "node_type": "fluid_2d",
     "family": "top",
     "file": "addons/gonodes/operators/top/fluid_2d_top.gd",
     "extension": null,
@@ -10785,8 +10897,37 @@
     ]
   },
   {
+    "class_name": "HapInTOP",
+    "node_type": "hapintop",
+    "family": "top",
+    "file": "addons/gn_ext_hap/operators/top/hap_in_top.gd",
+    "extension": "gn_ext_hap",
+    "params": [
+      {
+        "name": "play",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "loop",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "seek",
+        "type": "float",
+        "default": -1.0
+      }
+    ]
+  },
+  {
     "class_name": "HostInTOP",
-    "node_type": "hostin",
+    "node_type": "host_in",
     "family": "top",
     "file": "addons/gonodes/operators/top/host_in_top.gd",
     "extension": null,
@@ -11058,7 +11199,7 @@
   },
   {
     "class_name": "MovieFileInTOP",
-    "node_type": "moviefilein",
+    "node_type": "movie_file_in",
     "family": "top",
     "file": "addons/gonodes/operators/top/movie_file_in_top.gd",
     "extension": null,
@@ -11347,7 +11488,7 @@
   },
   {
     "class_name": "OpticalFlowTOP",
-    "node_type": "opticalflow",
+    "node_type": "optical_flow",
     "family": "top",
     "file": "addons/gonodes/operators/top/optical_flow_top.gd",
     "extension": null,
@@ -11517,7 +11658,7 @@
   },
   {
     "class_name": "PointCloudRenderTOP",
-    "node_type": "pointcloudrender",
+    "node_type": "point_cloud_render",
     "family": "top",
     "file": "addons/gonodes/operators/top/point_cloud_render_top.gd",
     "extension": null,
@@ -11976,7 +12117,7 @@
   },
   {
     "class_name": "ReactionDiffusionTOP",
-    "node_type": "reactiondiffusion",
+    "node_type": "reaction_diffusion",
     "family": "top",
     "file": "addons/gonodes/operators/top/reaction_diffusion_top.gd",
     "extension": null,
@@ -12391,6 +12532,45 @@
         "name": "active",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "ShadertoyTOP",
+    "node_type": "shadertoy",
+    "family": "top",
+    "file": "addons/gn_ext_shadertoy/operators/top/shadertoy_top.gd",
+    "extension": "gn_ext_shadertoy",
+    "params": [
+      {
+        "name": "time_dependent",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "fetch",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "shadertoy_url",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "shadertoy_api_key",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "shadertoy_code",
+        "type": "string",
+        "default": null
       }
     ]
   },
@@ -13099,7 +13279,7 @@
   },
   {
     "class_name": "VectorPathTOP",
-    "node_type": "vectorpath",
+    "node_type": "vector_path",
     "family": "top",
     "file": "addons/gonodes/operators/top/vector_path_top.gd",
     "extension": null,
@@ -13202,7 +13382,7 @@
   },
   {
     "class_name": "CheckBoxUI",
-    "node_type": "checkbox",
+    "node_type": "check_box",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/check_box_ui.gd",
     "extension": null,
@@ -13226,7 +13406,7 @@
   },
   {
     "class_name": "ColorPickerUI",
-    "node_type": "colorpicker",
+    "node_type": "color_picker",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/color_picker_ui.gd",
     "extension": null,
@@ -13250,7 +13430,7 @@
   },
   {
     "class_name": "ColorRectUI",
-    "node_type": "colorrect",
+    "node_type": "color_rect",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/color_rect_ui.gd",
     "extension": null,
@@ -13332,7 +13512,7 @@
   },
   {
     "class_name": "ItemListUI",
-    "node_type": "itemlist",
+    "node_type": "item_list",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/item_list_ui.gd",
     "extension": null,
@@ -13434,7 +13614,7 @@
   },
   {
     "class_name": "LineEditUI",
-    "node_type": "lineedit",
+    "node_type": "line_edit",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/line_edit_ui.gd",
     "extension": null,
@@ -13468,7 +13648,7 @@
   },
   {
     "class_name": "LinkButtonUI",
-    "node_type": "linkbutton",
+    "node_type": "link_button",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/link_button_ui.gd",
     "extension": null,
@@ -13492,7 +13672,7 @@
   },
   {
     "class_name": "MarginContainerUI",
-    "node_type": "margincontainer",
+    "node_type": "margin_container",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/margin_container_ui.gd",
     "extension": null,
@@ -13526,7 +13706,7 @@
   },
   {
     "class_name": "MenuButtonUI",
-    "node_type": "menubutton",
+    "node_type": "menu_button",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/menu_button_ui.gd",
     "extension": null,
@@ -13545,7 +13725,7 @@
   },
   {
     "class_name": "NinePatchRectUI",
-    "node_type": "ninepatchrect",
+    "node_type": "nine_patch_rect",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/nine_patch_rect_ui.gd",
     "extension": null,
@@ -13584,7 +13764,7 @@
   },
   {
     "class_name": "PanelContainerUI",
-    "node_type": "panelcontainer",
+    "node_type": "panel_container",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/panel_container_ui.gd",
     "extension": null,
@@ -13613,7 +13793,7 @@
   },
   {
     "class_name": "ProgressBarUI",
-    "node_type": "progressbar",
+    "node_type": "progress_bar",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/progress_bar_ui.gd",
     "extension": null,
@@ -13652,7 +13832,7 @@
   },
   {
     "class_name": "RichTextLabelUI",
-    "node_type": "richtextlabel",
+    "node_type": "rich_text_label",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/rich_text_label_ui.gd",
     "extension": null,
@@ -13691,7 +13871,7 @@
   },
   {
     "class_name": "ScrollContainerUI",
-    "node_type": "scrollcontainer",
+    "node_type": "scroll_container",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/scroll_container_ui.gd",
     "extension": null,
@@ -13773,7 +13953,7 @@
   },
   {
     "class_name": "SpinBoxUI",
-    "node_type": "spinbox",
+    "node_type": "spin_box",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/spin_box_ui.gd",
     "extension": null,
@@ -13822,7 +14002,7 @@
   },
   {
     "class_name": "SplitContainerUI",
-    "node_type": "splitcontainer",
+    "node_type": "split_container",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/split_container_ui.gd",
     "extension": null,
@@ -13851,7 +14031,7 @@
   },
   {
     "class_name": "TabBarUI",
-    "node_type": "tabbar",
+    "node_type": "tab_bar",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/tab_bar_ui.gd",
     "extension": null,
@@ -13880,7 +14060,7 @@
   },
   {
     "class_name": "TabContainerUI",
-    "node_type": "tabcontainer",
+    "node_type": "tab_container",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/tab_container_ui.gd",
     "extension": null,
@@ -13899,7 +14079,7 @@
   },
   {
     "class_name": "TextEditUI",
-    "node_type": "textedit",
+    "node_type": "text_edit",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/text_edit_ui.gd",
     "extension": null,
@@ -13928,7 +14108,7 @@
   },
   {
     "class_name": "TextureButtonUI",
-    "node_type": "texturebutton",
+    "node_type": "texture_button",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/texture_button_ui.gd",
     "extension": null,
@@ -13952,7 +14132,7 @@
   },
   {
     "class_name": "TextureProgressBarUI",
-    "node_type": "textureprogressbar",
+    "node_type": "texture_progress_bar",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/texture_progress_bar_ui.gd",
     "extension": null,
@@ -13991,7 +14171,7 @@
   },
   {
     "class_name": "TextureRectUI",
-    "node_type": "texturerect",
+    "node_type": "texture_rect",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/texture_rect_ui.gd",
     "extension": null,
@@ -14063,7 +14243,7 @@
   },
   {
     "class_name": "XYPadUI",
-    "node_type": "xypad",
+    "node_type": "xy_pad",
     "family": "ui",
     "file": "addons/gonodes/operators/ui/xy_pad_ui.gd",
     "extension": null,
@@ -14169,7 +14349,7 @@
   },
   {
     "class_name": "CHOPtoVOL",
-    "node_type": "choptovol",
+    "node_type": "chop_to_vol",
     "family": "vol",
     "file": "addons/gonodes/operators/vol/chop_to_vol.gd",
     "extension": null,
@@ -14266,7 +14446,7 @@
   },
   {
     "class_name": "GPUMarchingCubesVOL",
-    "node_type": "gpumarchingcubes",
+    "node_type": "gpu_marching_cubes",
     "family": "vol",
     "file": "addons/gonodes/operators/vol/gpu_marching_cubes_vol.gd",
     "extension": null,
@@ -14285,7 +14465,7 @@
   },
   {
     "class_name": "MarchingCubesVOL",
-    "node_type": "marchingcubes",
+    "node_type": "marching_cubes",
     "family": "vol",
     "file": "addons/gonodes/operators/vol/marching_cubes_vol.gd",
     "extension": null,
@@ -14564,7 +14744,7 @@
   },
   {
     "class_name": "SOPtoVOL",
-    "node_type": "soptovol",
+    "node_type": "sop_to_vol",
     "family": "vol",
     "file": "addons/gonodes/operators/vol/sop_to_vol.gd",
     "extension": null,

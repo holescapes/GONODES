@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "emboss"
-	node_description = "Emboss relief filter with adjustable angle and strength."
 
 
 func _init_ports() -> void:

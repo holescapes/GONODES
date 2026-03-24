@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "switch"
-	node_description = "Switch between multiple DAT inputs by index (auto-grow ports)."
 
 
 func _init_ports() -> void:

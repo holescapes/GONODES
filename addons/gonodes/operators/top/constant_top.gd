@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "constant"
-	node_description = "Solid color texture."
 
 
 func _init_ports() -> void:

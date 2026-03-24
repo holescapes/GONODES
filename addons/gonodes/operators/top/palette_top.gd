@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "palette"
-	node_description = "Quantize image colors to a palette texture with optional dithering."
 
 
 func _init_ports() -> void:

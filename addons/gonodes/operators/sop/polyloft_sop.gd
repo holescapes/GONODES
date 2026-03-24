@@ -11,7 +11,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "poly_loft"
-	node_description = "Loft polygon surface between cross-section rings."
 
 
 func _init_ports() -> void:

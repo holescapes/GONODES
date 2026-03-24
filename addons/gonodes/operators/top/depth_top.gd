@@ -10,7 +10,6 @@ var _depth_canvas: ColorRect = null
 
 func _init() -> void:
 	node_type = "depth"
-	node_description = "Extract depth buffer from a RenderTOP as a grayscale texture."
 
 
 func _init_ports() -> void:

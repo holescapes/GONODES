@@ -7,7 +7,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "crop"
-	node_description = "Crop a UV sub-region from the input texture."
 
 
 func _init_ports() -> void:

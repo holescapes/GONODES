@@ -13,7 +13,6 @@ var _dragging: bool = false
 
 func _init() -> void:
 	node_type = "xy_pad"
-	node_description = "2D XY pad — click/drag to set position. Outputs normalized x, y."
 
 
 func _init_parameters() -> void:

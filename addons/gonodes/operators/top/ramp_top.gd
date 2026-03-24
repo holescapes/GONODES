@@ -8,7 +8,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "ramp"
-	node_description = "Gradient ramp generator (horizontal, vertical, radial, circular)."
 
 
 func _init_ports() -> void:

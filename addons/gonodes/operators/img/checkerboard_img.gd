@@ -5,7 +5,6 @@ extends GNImgBase
 
 func _init() -> void:
 	node_type = "checkerboard"
-	node_description = "CPU checkerboard pattern generator."
 
 
 func _init_ports() -> void:

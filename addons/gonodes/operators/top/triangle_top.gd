@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "triangle"
-	node_description = "Draw 2D SDF shapes: triangle, line, or pentagon with fill, border, and softness."
 
 
 func _init_ports() -> void:

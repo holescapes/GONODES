@@ -7,7 +7,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "displace"
-	node_description = "Distort one texture using another as a displacement map."
 
 
 func _init_ports() -> void:

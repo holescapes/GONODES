@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "font"
-	node_description = "Generate 3D text geometry."
 
 
 func _init_ports() -> void:

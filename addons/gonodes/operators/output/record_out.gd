@@ -24,7 +24,6 @@ var _prev_reset: bool = false
 
 func _init() -> void:
 	node_type = "record"
-	node_description = "Record CHOP channels over time to buffer. Save to CSV/JSON."
 
 
 ## Disk write on save — not available on web.

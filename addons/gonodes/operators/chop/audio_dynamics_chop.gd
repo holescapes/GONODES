@@ -15,7 +15,6 @@ var _env: Dictionary = {}
 func _init() -> void:
 	node_type = "audio_dynamics"
 	time_dependent = true
-	node_description = "Compressor / Limiter / Expander / Gate dynamics processor."
 
 
 func _init_ports() -> void:

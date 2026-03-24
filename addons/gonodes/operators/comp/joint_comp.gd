@@ -17,7 +17,6 @@ var _current_joint_type: int = -1
 
 func _init() -> void:
 	node_type = "joint"
-	node_description = "Joint3D constraint between two physics bodies (hinge, pin, slider, etc.)."
 
 
 func _init_ports() -> void:

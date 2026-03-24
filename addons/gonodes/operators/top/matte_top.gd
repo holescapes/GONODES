@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "matte"
-	node_description = "Apply alpha from a second texture with channel selection."
 
 
 func _init_ports() -> void:

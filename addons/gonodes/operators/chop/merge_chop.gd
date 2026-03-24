@@ -7,7 +7,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "merge"
-	node_description = "Merge channels from multiple CHOP inputs (auto-grow ports)."
 
 
 func _init_ports() -> void:

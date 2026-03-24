@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "luma_blur"
-	node_description = "Luminance-weighted selective blur (bright or dark areas blurred more)."
 
 
 func _init_ports() -> void:

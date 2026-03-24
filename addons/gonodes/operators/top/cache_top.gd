@@ -10,7 +10,6 @@ var _total_written: int = 0
 
 func _init() -> void:
 	node_type = "cache"
-	node_description = "Frame buffer — stores N frames for delay, freeze, and time-scrubbing."
 
 
 func _init_ports() -> void:

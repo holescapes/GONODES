@@ -9,7 +9,6 @@ var _camera: Camera3D = null
 
 func _init() -> void:
 	node_type = "camera"
-	node_description = "Provide a Camera3D for 3D rendering."
 
 
 func _init_ports() -> void:

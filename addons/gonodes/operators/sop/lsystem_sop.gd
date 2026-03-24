@@ -30,7 +30,6 @@ const MAX_STRING_LENGTH := 500000  # Safety limit for production string
 
 func _init() -> void:
 	node_type = "lsystem"
-	node_description = "L-System fractal/branching geometry from formal grammar."
 
 
 func _init_ports() -> void:

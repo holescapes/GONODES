@@ -8,7 +8,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "mountain"
-	node_description = "Noise-based vertex displacement along normals."
 
 
 func _init_ports() -> void:

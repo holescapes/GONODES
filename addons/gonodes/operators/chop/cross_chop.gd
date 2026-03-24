@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "cross"
-	node_description = "Crossfade between two CHOP inputs."
 
 
 func _init_ports() -> void:

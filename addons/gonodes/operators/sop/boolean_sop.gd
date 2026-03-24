@@ -7,7 +7,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "boolean"
-	node_description = "Boolean union/intersect/subtract two meshes via CSG."
 
 
 func _init_ports() -> void:

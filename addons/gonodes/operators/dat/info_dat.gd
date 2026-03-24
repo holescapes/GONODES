@@ -8,7 +8,6 @@ extends GNDatBase
 func _init() -> void:
 	node_type = "info"
 	time_dependent = true
-	node_description = "Output system info (FPS, frame, memory, etc.)."
 
 
 func _init_ports() -> void:

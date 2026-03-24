@@ -11,7 +11,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "remesh"
-	node_description = "Retopologize mesh to uniform triangle density."
 
 
 func _init_ports() -> void:

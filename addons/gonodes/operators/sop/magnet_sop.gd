@@ -12,7 +12,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "magnet"
-	node_description = "Deform geometry by attracting/repelling vertices toward points."
 
 
 func _init_ports() -> void:

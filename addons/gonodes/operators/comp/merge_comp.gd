@@ -19,7 +19,6 @@ var _managed_children: Array[Node3D] = []
 
 func _init() -> void:
 	node_type = "merge"
-	node_description = "Merge multiple COMPs into a scene group."
 
 
 func _init_ports() -> void:

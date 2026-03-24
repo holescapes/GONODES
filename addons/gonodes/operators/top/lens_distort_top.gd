@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "lens_distort"
-	node_description = "Barrel, pincushion, and fisheye lens distortion with chromatic aberration."
 
 
 func _init_ports() -> void:

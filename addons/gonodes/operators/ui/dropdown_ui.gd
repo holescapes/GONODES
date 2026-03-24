@@ -9,7 +9,6 @@ var _option: OptionButton = null
 
 func _init() -> void:
 	node_type = "dropdown"
-	node_description = "Dropdown menu. Outputs selected index and normalized value."
 
 
 func _init_parameters() -> void:

@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "circle"
-	node_description = "Generate a circle or disc mesh."
 
 
 func _init_ports() -> void:

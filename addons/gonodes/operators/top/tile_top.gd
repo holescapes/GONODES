@@ -7,7 +7,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "tile"
-	node_description = "Tile/repeat a texture with optional mirroring."
 
 
 func _init_ports() -> void:

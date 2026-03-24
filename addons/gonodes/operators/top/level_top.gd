@@ -9,7 +9,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "level"
-	node_description = "Brightness, contrast, gamma, invert, and opacity adjustments."
 
 
 func _init_ports() -> void:

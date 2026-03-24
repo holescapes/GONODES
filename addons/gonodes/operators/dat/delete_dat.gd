@@ -5,7 +5,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "delete"
-	node_description = "Delete rows or columns from a table."
 
 
 func _init_ports() -> void:

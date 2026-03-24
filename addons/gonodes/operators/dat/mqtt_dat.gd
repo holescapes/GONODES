@@ -39,7 +39,6 @@ const PING_INTERVAL := 30.0  # seconds
 func _init() -> void:
 	node_type = "mqtt"
 	time_dependent = true
-	node_description = "MQTT 3.1.1 client — publish/subscribe IoT messaging via TCP."
 
 
 func _init_ports() -> void:

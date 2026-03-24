@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "trim"
-	node_description = "Extract a sample sub-range from channels."
 
 
 func _init_ports() -> void:

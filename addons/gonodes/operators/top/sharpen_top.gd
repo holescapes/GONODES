@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "sharpen"
-	node_description = "Unsharp mask sharpening with adjustable strength and radius."
 
 
 func _init_ports() -> void:

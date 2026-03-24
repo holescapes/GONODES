@@ -8,7 +8,6 @@ extends GNCompBase
 
 func _init() -> void:
 	node_type = "null"
-	node_description = "Pass-through component for wire organization."
 
 
 func _init_ports() -> void:

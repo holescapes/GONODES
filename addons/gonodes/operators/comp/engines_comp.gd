@@ -24,7 +24,6 @@ var _frame_count: int    = 0
 func _init() -> void:
 	node_type     = "engines"
 	time_dependent = true
-	node_description = "Cook throttle — live, snapshot, or interval update modes for performance isolation."
 
 
 func _init_ports() -> void:

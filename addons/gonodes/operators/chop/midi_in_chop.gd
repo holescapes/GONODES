@@ -42,7 +42,6 @@ var _device_filter: int = -1
 func _init() -> void:
 	node_type = "midi_in"
 	time_dependent = true
-	node_description = "Receive MIDI note, CC, pitch bend as CHOP channels."
 
 
 func _init_ports() -> void:

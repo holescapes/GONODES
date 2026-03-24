@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "switch"
-	node_description = "Select one of multiple CHOP inputs by index (auto-grow ports)."
 
 
 func _init_ports() -> void:

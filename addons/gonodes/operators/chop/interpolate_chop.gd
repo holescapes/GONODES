@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "interpolate"
-	node_description = "Blend between two channel inputs with easing curves."
 
 
 func _init_ports() -> void:

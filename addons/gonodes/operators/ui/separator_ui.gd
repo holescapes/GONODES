@@ -11,7 +11,6 @@ var _current_vertical: bool = false
 
 func _init() -> void:
 	node_type = "separator"
-	node_description = "Horizontal or vertical separator line."
 
 
 func _init_parameters() -> void:

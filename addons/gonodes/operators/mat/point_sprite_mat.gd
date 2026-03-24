@@ -12,7 +12,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "point_sprite"
-	node_description = "Renders vertices as point sprites."
 
 
 func _init_ports() -> void:

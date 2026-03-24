@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "analyze"
-	node_description = "Per-pixel min/max/average/sum statistics over a neighbourhood kernel."
 
 
 func _init_ports() -> void:

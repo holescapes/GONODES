@@ -13,7 +13,6 @@ var _y2: Dictionary = {}  # channel -> prev output[n-2]
 func _init() -> void:
 	node_type = "smooth"
 	time_dependent = true
-	node_description = "Biquad Butterworth filter (LP/HP/BP) on channels."
 
 
 func _init_ports() -> void:

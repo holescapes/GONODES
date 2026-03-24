@@ -6,7 +6,6 @@ extends GNPopBase
 func _init() -> void:
 	super._init()
 	node_type = "force"
-	node_description = "Apply gravity, wind, and drag forces to particles."
 	time_dependent = true
 
 

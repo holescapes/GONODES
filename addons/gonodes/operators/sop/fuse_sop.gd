@@ -10,7 +10,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "fuse"
-	node_description = "Merge coincident vertices within a distance threshold."
 
 
 func _init_ports() -> void:

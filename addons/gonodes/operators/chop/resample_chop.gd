@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "resample"
-	node_description = "Resample channels to a new length or rate."
 
 
 func _init_ports() -> void:

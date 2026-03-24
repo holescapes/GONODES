@@ -10,7 +10,6 @@ var _tex_btn: TextureButton = null
 
 func _init() -> void:
 	node_type = "texture_button"
-	node_description = "Clickable texture button with normal/pressed/hover TOPs."
 
 
 func _init_ports() -> void:

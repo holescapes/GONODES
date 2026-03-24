@@ -10,7 +10,6 @@ var _prev_trigger: float = 0.0
 func _init() -> void:
 	node_type = "hold"
 	time_dependent = true
-	node_description = "Sample-and-hold: capture input on trigger."
 
 
 func _init_ports() -> void:

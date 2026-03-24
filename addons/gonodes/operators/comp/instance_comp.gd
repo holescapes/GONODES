@@ -26,7 +26,6 @@ var _fallback_material: StandardMaterial3D = null
 
 func _init() -> void:
 	node_type = "instance"
-	node_description = "MultiMesh instancing — thousands of copies in one draw call."
 
 
 func _init_ports() -> void:

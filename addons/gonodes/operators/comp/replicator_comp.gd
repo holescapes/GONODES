@@ -20,7 +20,6 @@ var _last_config_hash: int = 0
 
 func _init() -> void:
 	node_type = "replicator"
-	node_description = "Create N copies of a template operator with per-instance parameter overrides."
 
 
 func _init_ports() -> void:

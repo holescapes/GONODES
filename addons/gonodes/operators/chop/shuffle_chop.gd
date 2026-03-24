@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "shuffle"
-	node_description = "Reorder, reverse, or sort channels."
 
 
 func _init_ports() -> void:

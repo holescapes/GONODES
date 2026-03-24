@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "facet"
-	node_description = "Unique / consolidate vertices for flat or smooth shading."
 
 
 func _init_ports() -> void:

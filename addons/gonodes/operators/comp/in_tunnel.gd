@@ -27,10 +27,6 @@ var tunnel_label: String = "in"
 
 func _init() -> void:
 	node_type = "in_tunnel"
-	node_description = "Input tunnel — receives data from outside the sub-network.\n" + \
-		"Each InTunnel maps to one input port on the parent SubNetworkNode.\n" + \
-		"Set the Family parameter to match the data type you want to receive.\n" + \
-		"The Index parameter controls port ordering on the parent."
 	family = GNFamily.Type.COMP  # Tunnels are structural — live in COMP family
 	# Tunnels are never time-dependent on their own; they are written to externally.
 	time_dependent = false

@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "primitive"
-	node_description = "Compute per-primitive attributes (normals, area, centroid)."
 
 
 func _init_ports() -> void:

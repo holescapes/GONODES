@@ -18,7 +18,6 @@ var _initialized: bool = false
 func _init() -> void:
 	node_type = "spring"
 	time_dependent = true
-	node_description = "Damped spring vertex deformer — vertices spring toward input positions."
 
 
 func _init_ports() -> void:

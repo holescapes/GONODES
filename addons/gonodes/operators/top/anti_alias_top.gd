@@ -5,7 +5,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "anti_alias"
-	node_description = "Simplified FXAA anti-aliasing with configurable strength."
 
 
 func _init_ports() -> void:

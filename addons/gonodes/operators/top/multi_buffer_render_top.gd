@@ -23,7 +23,6 @@ var _normal_tex_data: GNTextureData = null
 func _init() -> void:
 	super._init()
 	node_type = "multi_buffer_render"
-	node_description = "Multi-buffer 3D renderer: outputs color, depth, and normal textures."
 
 
 func _init_ports() -> void:

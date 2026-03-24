@@ -6,7 +6,6 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "slope"
-	node_description = "Image gradient / derivative: horizontal (dx), vertical (dy), or magnitude."
 
 
 func _init_ports() -> void:

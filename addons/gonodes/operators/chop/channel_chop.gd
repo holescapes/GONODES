@@ -17,7 +17,6 @@ var _last_count: int = -1
 
 func _init() -> void:
 	node_type = "channel"
-	node_description = "Named channels from parameter values."
 
 
 func _init_ports() -> void:

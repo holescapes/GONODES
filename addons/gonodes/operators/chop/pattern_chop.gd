@@ -11,7 +11,6 @@ var _rng: RandomNumberGenerator = null
 
 func _init() -> void:
 	node_type = "pattern"
-	node_description = "Generate multi-sample patterns (ramp, sine, step, etc.)."
 
 
 func _init_ports() -> void:

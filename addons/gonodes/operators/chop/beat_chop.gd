@@ -20,7 +20,6 @@ var _last_beat_time: float = 0.0
 func _init() -> void:
 	node_type = "beat"
 	time_dependent = true
-	node_description = "Beat/onset detection from audio CHOP input for music-reactive visuals."
 
 
 func _init_ports() -> void:

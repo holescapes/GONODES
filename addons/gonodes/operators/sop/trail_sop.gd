@@ -12,7 +12,6 @@ var _filled: bool = false
 func _init() -> void:
 	node_type = "trail"
 	time_dependent = true
-	node_description = "Record input centroid as a line trail over time."
 
 
 func _init_ports() -> void:

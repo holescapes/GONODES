@@ -7,7 +7,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "transform"
-	node_description = "2D translate, rotate, and scale with extend modes."
 
 
 func _init_ports() -> void:

@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "select"
-	node_description = "Select/rename specific channels from input."
 
 
 func _init_ports() -> void:

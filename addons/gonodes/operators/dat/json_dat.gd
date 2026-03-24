@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "json"
-	node_description = "Parse or generate JSON from/to table data."
 
 
 func _init_ports() -> void:

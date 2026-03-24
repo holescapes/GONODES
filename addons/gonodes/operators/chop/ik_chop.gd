@@ -14,7 +14,6 @@ const TOLERANCE := 0.001
 
 func _init() -> void:
 	node_type = "ik"
-	node_description = "FABRIK inverse kinematics chain solver."
 
 
 func _init_ports() -> void:

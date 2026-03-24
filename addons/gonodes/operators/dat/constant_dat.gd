@@ -6,7 +6,6 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "constant"
-	node_description = "Table with user-defined constant values."
 
 
 func _init_ports() -> void:

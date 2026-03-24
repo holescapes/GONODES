@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "lookup"
-	node_description = "Index into a sample array using another channel's value."
 
 
 func _init_ports() -> void:

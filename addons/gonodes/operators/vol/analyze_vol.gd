@@ -8,7 +8,6 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "analyze"
-	node_description = "Compute volume density statistics → CHOP output."
 
 
 func _init_ports() -> void:

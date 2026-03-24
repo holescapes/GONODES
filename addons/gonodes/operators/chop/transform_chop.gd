@@ -6,7 +6,6 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "transform"
-	node_description = "3D transform on xyz channel groups."
 
 
 func _init_ports() -> void:

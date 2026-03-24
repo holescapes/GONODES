@@ -11,7 +11,6 @@ extends GNNode
 
 func _init() -> void:
 	node_type = "dot"
-	node_description = "Wire routing point — pass-through for any data type."
 	# Dot adapts to connected family; default to CHOP
 	family = GNFamily.Type.CHOP
 

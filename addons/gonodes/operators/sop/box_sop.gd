@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "box"
-	node_description = "Generate a box (cuboid) mesh."
 
 
 func _init_ports() -> void:

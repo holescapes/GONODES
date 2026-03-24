@@ -20,7 +20,6 @@ extends RenderTOP
 func _init() -> void:
 	super._init()
 	node_type        = "geometry_buffer"
-	node_description = "Render 3D COMP scene with debug buffer output: Color, Unshaded, Normals, or Wireframe."
 
 
 func _init_parameters() -> void:

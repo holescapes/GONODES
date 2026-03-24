@@ -5,7 +5,6 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "displace"
-	node_description = "Warp a volume by a velocity field."
 
 
 func _init_ports() -> void:

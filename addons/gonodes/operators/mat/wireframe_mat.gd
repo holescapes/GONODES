@@ -11,7 +11,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "wireframe"
-	node_description = "Wireframe rendering material."
 
 
 func _init_ports() -> void:

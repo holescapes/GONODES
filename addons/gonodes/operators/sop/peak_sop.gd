@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "peak"
-	node_description = "Push vertices along normals."
 
 
 func _init_ports() -> void:

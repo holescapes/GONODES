@@ -14,7 +14,6 @@ var _last_res: Vector3i = Vector3i.ZERO
 func _init() -> void:
 	super._init()
 	node_type = "fluid"
-	node_description = "Navier-Stokes fluid simulation (advection, pressure solve, projection)."
 	time_dependent = true
 
 

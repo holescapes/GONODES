@@ -23,7 +23,6 @@ var _last_count: int = -1
 
 func _init() -> void:
 	node_type = "ramp"
-	node_description = "Dynamic ramp curves → CHOP channels."
 
 
 func _init_ports() -> void:

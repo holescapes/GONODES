@@ -6,7 +6,6 @@ extends GNMatBase
 
 func _init() -> void:
 	node_type = "null"
-	node_description = "Pass-through for organization and references."
 
 
 func _init_ports() -> void:

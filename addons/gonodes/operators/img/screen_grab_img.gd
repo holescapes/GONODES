@@ -9,7 +9,6 @@ extends GNImgBase
 func _init() -> void:
 	node_type = "screen_grab"
 	time_dependent = true
-	node_description = "Capture viewport contents as a CPU Image."
 
 
 func _init_ports() -> void:

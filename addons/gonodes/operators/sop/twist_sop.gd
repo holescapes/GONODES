@@ -6,7 +6,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "twist"
-	node_description = "Twist geometry around an axis."
 
 
 func _init_ports() -> void:

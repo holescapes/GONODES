@@ -12,7 +12,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "depth"
-	node_description = "Visualize scene depth as grayscale."
 
 
 func _init_ports() -> void:

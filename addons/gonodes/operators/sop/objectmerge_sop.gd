@@ -11,7 +11,6 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "sop"
-	node_description = "Fetch geometry from another SOP by path reference."
 
 
 func _init_ports() -> void:
