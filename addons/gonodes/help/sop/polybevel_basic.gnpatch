@@ -8,31 +8,17 @@
                 100,
                 100
             ],
-            "parameters": {
-                "sizex": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "sizey": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "sizez": {
-                    "value": 1.0
-                }
-            }
+            "parameters": {}
         },
-        "polybevel1": {
+        "bevel1": {
             "type": "PolyBevelSOP",
             "position": [
-                450,
+                400,
                 100
             ],
             "parameters": {
                 "offset": {
-                    "value": 0.08
+                    "value": 0.15
                 },
                 "divisions": {
                     "value": 3
@@ -42,97 +28,26 @@
                 }
             }
         },
-        "geo1": {
-            "type": "GeometryCOMP",
+        "null1": {
+            "type": "NullSOP",
             "position": [
-                800,
+                700,
                 100
             ],
             "parameters": {}
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                800,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 1.5
-                },
-                "ty": {
-                    "value": 1.2
-                },
-                "tz": {
-                    "value": 2.5
-                }
-            }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1500,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
         }
     },
     "connections": [
         {
             "from": "box1",
             "from_port": 0,
-            "to": "polybevel1",
+            "to": "bevel1",
             "to_port": 0
         },
         {
-            "from": "polybevel1",
+            "from": "bevel1",
             "from_port": 0,
-            "to": "geo1",
-            "to_port": 0
-        },
-        {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
-            "from_port": 0,
-            "to": "window1",
+            "to": "null1",
             "to_port": 0
         }
     ],
@@ -140,13 +55,13 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolyBevel SOP \u2014 Basic\n\nBox edges beveled with 3 divisions at 0.8 roundness.\nCreates smooth rounded edges on hard-surface geometry.\nReduce divisions to 1 for a simple chamfer.",
+            "text": "PolyBevelSOP — Rounded Edges\n\nBevels a box with 3 divisions and high roundness.\nTry adjusting offset and roundness.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                480.0,
+                400.0,
                 100.0
             ],
             "color": [

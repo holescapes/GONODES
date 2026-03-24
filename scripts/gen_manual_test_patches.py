@@ -239,9 +239,9 @@ MAT_OPS = [
     ("LineMAT",        None, "Verify: renders edges/wireframe with configurable line width and color"),
     ("NormalMapMAT",   None, "Verify: visualizes surface normals as RGB colors on geometry"),
     ("NullMAT",        None, "Verify: passes material through unchanged to downstream"),
-    ("PBR_MAT",        None, "Verify: physically-based shading; adjust roughness/metallic and confirm"),
+    ("PbrMAT",         None, "Verify: physically-based shading; adjust roughness/metallic and confirm"),
     ("PointSpriteMAT", None, "Verify: renders points as textured sprites (needs POP or point geometry)"),
-    ("Shader_MAT",     None, "Verify: custom shader compiles and applies to geometry; check error log"),
+    ("ShaderMAT",      None, "Verify: custom shader compiles and applies to geometry; check error log"),
     ("WireframeMAT",   None, "Verify: renders geometry as wireframe only (no filled faces)"),
 ]
 

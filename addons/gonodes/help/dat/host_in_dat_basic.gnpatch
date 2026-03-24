@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "host1": {
+            "type": "HostInDAT",
+            "position": [200, 100],
+            "parameters": {
+                "label": {"value": "config"},
+                "mode": {"value": 0}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "host1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostInDAT — External Data\n\nReceives table or text data from the host via LibGONODES.\nSet label to identify this input. Mode selects Table or Text format.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

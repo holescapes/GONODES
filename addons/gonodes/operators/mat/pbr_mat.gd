@@ -1,4 +1,4 @@
-class_name PBR_MAT
+class_name PbrMAT
 extends GNMatBase
 ## Standard PBR material operator — wraps Godot's StandardMaterial3D.
 ##

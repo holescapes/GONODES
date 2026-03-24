@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "osc1": {
+            "type": "OscInCHOP",
+            "position": [200, 100],
+            "parameters": {
+                "port": {"value": 8000},
+                "active": {"value": true},
+                "max_channels": {"value": 64}
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "osc1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "OscInCHOP — OSC Receiver\n\nListens for OSC messages on port 8000.\nEach unique address becomes a CHOP channel. Use address_filter to narrow scope.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

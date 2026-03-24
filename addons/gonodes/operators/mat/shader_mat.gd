@@ -1,4 +1,4 @@
-class_name Shader_MAT
+class_name ShaderMAT
 extends GNMatBase
 ## Custom shader material operator — wraps Godot's ShaderMaterial.
 ##
@@ -72,7 +72,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 				_shader = loaded as Shader
 				_last_shader_code = ""
 		else:
-			GNLogger.error("Shader_MAT", "'%s' — file '%s' is not a valid Shader" % [id, shader_file])
+			GNLogger.error("ShaderMAT", "'%s' — file '%s' is not a valid Shader" % [id, shader_file])
 	else:
 		shader_code = get_param_value("shader_code")
 		if shader_code != _last_shader_code:

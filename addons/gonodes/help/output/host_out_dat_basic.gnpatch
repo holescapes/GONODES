@@ -1,0 +1,31 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "const1": {
+            "type": "ConstantDAT",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "hout1": {
+            "type": "HostOutDAT",
+            "position": [400, 100],
+            "parameters": {
+                "label": {"value": "status"}
+            }
+        }
+    },
+    "connections": [
+        {"from": "const1", "from_port": 0, "to": "hout1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostOutDAT — Export Data\n\nExposes table/text data to the host application via LibGONODES.\nSet label to identify this output. Only active when embedded.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

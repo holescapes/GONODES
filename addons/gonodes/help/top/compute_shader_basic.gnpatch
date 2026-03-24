@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "comp1": {
+            "type": "ComputeShaderTOP",
+            "position": [200, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "time_dependent": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullTOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "comp1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ComputeShaderTOP — GPU Compute\n\nRuns a GLSL compute shader that writes to an output texture.\nEdit shader_code to write custom compute kernels. Push constants become parameters.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

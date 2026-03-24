@@ -1,0 +1,28 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "pad1": {
+            "type": "XYPadUI",
+            "position": [200, 100],
+            "parameters": {
+                "label": {"value": "Position"},
+                "size": {"value": 200},
+                "cursor_color": {"value": {"_type": "Color", "r": 0.2, "g": 0.8, "b": 1.0, "a": 1.0}},
+                "default_x": {"value": 0.5},
+                "default_y": {"value": 0.5}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "XYPadUI — 2D Controller\n\nClick and drag to set X/Y position (0–1 range).\nRead values via chop(\"pad1\", \"x\") and chop(\"pad1\", \"y\").\nPlace inside a PanelTOP for interactive control panels.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

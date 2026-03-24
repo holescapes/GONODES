@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "spec1": {
+            "type": "AudioSpectrumCHOP",
+            "position": [200, 100],
+            "parameters": {
+                "bands": {"value": 32},
+                "smoothing": {"value": 0.9},
+                "active": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "spec1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioSpectrumCHOP — FFT Analyzer\n\n32-band spectrum analyzer on the Master audio bus.\nIncrease smoothing for slower decay. Adjust freq range to focus on bass or treble.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1478,22 +1478,22 @@ func _build_stress_test_network() -> void:
 	# MAT nodes (4)
 	# ═══════════════════════════════════════════════════════════════════════
 	col_x = 2600
-	var mat1 := _stress_add(PBR_MAT.new(), "mat_blue", col_x, 0)
+	var mat1 := _stress_add(PbrMAT.new(), "mat_blue", col_x, 0)
 	mat1.get_parameter("albedo_color").set_value(Color(0.1, 0.3, 0.9))
 	mat1.get_parameter("metallic").set_value(0.8)
 	mat1.get_parameter("roughness").set_value(0.15)
 
-	var mat2 := _stress_add(PBR_MAT.new(), "mat_red", col_x, 200)
+	var mat2 := _stress_add(PbrMAT.new(), "mat_red", col_x, 200)
 	mat2.get_parameter("albedo_color").set_value(Color(0.9, 0.15, 0.1))
 	mat2.get_parameter("emission_enabled").set_value(true)
 	mat2.get_parameter("emission_color").set_value(Color(0.9, 0.1, 0.05))
 	mat2.get_parameter("emission_energy").set_value(0.6)
 
-	var mat3 := _stress_add(PBR_MAT.new(), "mat_green", col_x, 400)
+	var mat3 := _stress_add(PbrMAT.new(), "mat_green", col_x, 400)
 	mat3.get_parameter("albedo_color").set_value(Color(0.1, 0.8, 0.2))
 	mat3.get_parameter("roughness").set_value(0.9)
 
-	var mat4 := _stress_add(PBR_MAT.new(), "mat_chrome", col_x, 600)
+	var mat4 := _stress_add(PbrMAT.new(), "mat_chrome", col_x, 600)
 	mat4.get_parameter("albedo_color").set_value(Color(0.85, 0.85, 0.9))
 	mat4.get_parameter("metallic").set_value(0.8)
 	mat4.get_parameter("roughness").set_value(0.15)

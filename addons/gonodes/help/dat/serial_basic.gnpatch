@@ -1,0 +1,34 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "serial1": {
+            "type": "SerialDAT",
+            "position": [200, 100],
+            "parameters": {
+                "port": {"value": "COM3"},
+                "baud_rate": {"value": 115200},
+                "active": {"value": false},
+                "max_rows": {"value": 100}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "serial1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SerialDAT — Serial Port\n\nReads serial data (Arduino, DMX, sensors) at 115200 baud.\nSet port to your device (COM3, /dev/ttyUSB0). Active=false until connected.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "cues1": {
+            "type": "ConstantDAT",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "cue1": {
+            "type": "CueCHOP",
+            "position": [400, 100],
+            "parameters": {
+                "source": {"value": 1},
+                "apply_data": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [700, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "cues1", "from_port": 0, "to": "cue1", "to_port": 0},
+        {"from": "cue1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CueCHOP — Manual Sequencer\n\nReads cue data from a DAT table in Manual mode.\nUse go_next pulse to advance through cues.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -59,7 +59,7 @@ Full 3D rendering integrated into the texture pipeline:
 ```
 GridSOP → TransformSOP → GeometryCOMP ─┐
                 ↑            ↑          │
-           PBR_MAT      CameraCOMP   ├─→ RenderTOP → texture output
+           PbrMAT       CameraCOMP   ├─→ RenderTOP → texture output
                          LightCOMP    │
                          MergeCOMP  ──┘
 ```

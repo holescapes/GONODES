@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "pick1": {
+            "type": "RenderPickDAT",
+            "position": [200, 100],
+            "parameters": {
+                "u": {"value": 0.5},
+                "v": {"value": 0.5},
+                "use_input": {"value": false}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "pick1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "RenderPickDAT — 3D Picking\n\nRaycasts into a RenderTOP's 3D scene at (u,v) coordinates.\nOutputs hit object name, position, normal, and distance.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

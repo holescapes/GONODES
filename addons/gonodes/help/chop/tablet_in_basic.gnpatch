@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "tab1": {
+            "type": "TabletInCHOP",
+            "position": [200, 100],
+            "parameters": {
+                "active": {"value": true},
+                "normalize": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "tab1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TabletInCHOP — Pen/Tablet\n\nCaptures pen position, pressure, and tilt from a graphics tablet.\nEnable normalize for 0–1 range output.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

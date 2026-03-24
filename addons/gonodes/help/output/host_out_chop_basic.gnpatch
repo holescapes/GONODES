@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFOCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 2.0}
+            }
+        },
+        "hout1": {
+            "type": "HostOutCHOP",
+            "position": [400, 100],
+            "parameters": {
+                "label": {"value": "audio_level"}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "hout1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostOutCHOP — Export Channels\n\nExposes channel data to the host application via LibGONODES.\nSet label to identify this output point. Only active when embedded.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

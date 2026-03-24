@@ -8,7 +8,7 @@ extends GNCompBase
 ## Architecture:
 ##   SOP → GeometryCOMP → StaticBodyCOMP → MergeCOMP → RenderTOP
 ##              ↑
-##          PBR_MAT
+##          PbrMAT
 
 var _static_body: StaticBody3D = null
 var _collision_shape: CollisionShape3D = null

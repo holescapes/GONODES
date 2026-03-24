@@ -2,134 +2,56 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_grid": {
-            "type": "GridSOP",
+        "sphere1": {
+            "type": "SphereSOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
                 "rows": {
-                    "value": 10
+                    "value": 32
                 },
-                "cols": {
-                    "value": 10
+                "columns": {
+                    "value": 32
                 }
             }
         },
-        "polyreduce1": {
+        "reduce1": {
             "type": "PolyReduceSOP",
             "position": [
-                450,
+                400,
                 100
             ],
             "parameters": {
                 "target_percent": {
-                    "value": 50.0,
-                    "expression": "(50.0 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 25.0
                 },
                 "preserve_boundary": {
-                    "value": true,
-                    "expression": "time * 45.0",
-                    "mode": "EXPRESSION"
-                },
-                "boundary_weight": {
-                    "value": 10.0
+                    "value": true
                 }
             }
         },
-        "geo_view": {
-            "type": "GeometryCOMP",
+        "null1": {
+            "type": "NullSOP",
             "position": [
                 700,
                 100
             ],
             "parameters": {}
-        },
-        "cam_view": {
-            "type": "CameraCOMP",
-            "position": [
-                700,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 0.5
-                },
-                "tz": {
-                    "value": 3
-                }
-            }
-        },
-        "render_view": {
-            "type": "RenderTOP",
-            "position": [
-                1000,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1550,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
         }
     },
     "connections": [
         {
-            "from": "src_grid",
+            "from": "sphere1",
             "from_port": 0,
-            "to": "polyreduce1",
+            "to": "reduce1",
             "to_port": 0
         },
         {
-            "from": "polyreduce1",
+            "from": "reduce1",
             "from_port": 0,
-            "to": "geo_view",
-            "to_port": 0
-        },
-        {
-            "from": "geo_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 0
-        },
-        {
-            "from": "cam_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 1
-        },
-        {
-            "from": "render_view",
-            "from_port": 0,
-            "to": "window1",
+            "to": "null1",
             "to_port": 0
         }
     ],
@@ -137,7 +59,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolyReduceSOP \u2014 Basic\n\nDefault settings.",
+            "text": "PolyReduceSOP — Decimation\n\nReduces a high-poly sphere to 25% of original faces.\nToggle preserve_boundary to protect edge loops.",
             "position": [
                 -100.0,
                 -100.0

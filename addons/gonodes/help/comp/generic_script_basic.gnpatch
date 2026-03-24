@@ -1,0 +1,31 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "gs1": {
+            "type": "GenericScriptNode",
+            "position": [200, 100],
+            "parameters": {
+                "time_dependent": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "gs1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "GenericScriptNode — Multi-Output Script\n\nUnlike per-family scripts, outputs any combination of data types.\nUse # @output annotations to define typed output ports.\nUse # @input and # @param for dynamic inputs and parameters.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

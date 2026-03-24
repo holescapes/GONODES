@@ -2,179 +2,77 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "grid1": {
+        "grid_a": {
             "type": "GridSOP",
             "position": [
                 100,
+                50
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 1.0
+                },
+                "size_y": {
+                    "value": 1.0
+                }
+            }
+        },
+        "grid_b": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 1.0
+                },
+                "size_y": {
+                    "value": 1.0
+                }
+            }
+        },
+        "stitch1": {
+            "type": "PolyStitchSOP",
+            "position": [
+                400,
                 100
             ],
             "parameters": {
-                "sizex": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "sizey": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "rows": {
-                    "value": 8
-                },
-                "columns": {
-                    "value": 8
-                }
-            }
-        },
-        "grid2": {
-            "type": "GridSOP",
-            "position": [
-                100,
-                350
-            ],
-            "parameters": {
-                "sizex": {
-                    "value": 2.0
-                },
-                "sizey": {
-                    "value": 2.0
-                },
-                "rows": {
-                    "value": 8
-                },
-                "columns": {
-                    "value": 8
-                }
-            }
-        },
-        "transform1": {
-            "type": "TransformSOP",
-            "position": [
-                450,
-                350
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 1.8
-                }
-            }
-        },
-        "polystitch1": {
-            "type": "PolyStitchSOP",
-            "position": [
-                800,
-                200
-            ],
-            "parameters": {
                 "max_distance": {
-                    "value": 0.5
+                    "value": 2.0
                 },
                 "include_inputs": {
                     "value": true
                 }
             }
         },
-        "geo1": {
-            "type": "GeometryCOMP",
+        "null1": {
+            "type": "NullSOP",
             "position": [
-                1150,
-                200
+                700,
+                100
             ],
             "parameters": {}
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                1150,
-                400
-            ],
-            "parameters": {
-                "ty": {
-                    "value": 3.0
-                },
-                "tz": {
-                    "value": 0.5
-                }
-            }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                1500,
-                200
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1850,
-                200
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
         }
     },
     "connections": [
         {
-            "from": "grid2",
+            "from": "grid_a",
             "from_port": 0,
-            "to": "transform1",
+            "to": "stitch1",
             "to_port": 0
         },
         {
-            "from": "grid1",
+            "from": "grid_b",
             "from_port": 0,
-            "to": "polystitch1",
-            "to_port": 0
-        },
-        {
-            "from": "transform1",
-            "from_port": 0,
-            "to": "polystitch1",
+            "to": "stitch1",
             "to_port": 1
         },
         {
-            "from": "polystitch1",
+            "from": "stitch1",
             "from_port": 0,
-            "to": "geo1",
-            "to_port": 0
-        },
-        {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
-            "from_port": 0,
-            "to": "window1",
+            "to": "null1",
             "to_port": 0
         }
     ],
@@ -182,14 +80,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolyStitch SOP \u2014 Basic\n\nTwo grids placed with overlapping boundary edges (1.8 offset\nwith 2.0 size). PolyStitch finds nearest boundary vertices\nwithin max_distance=0.5 and connects them with triangles.\nUseful for joining separate meshes at their edges.",
+            "text": "PolyStitchSOP — Bridge Grids\n\nStitches two grids at their nearest boundary edges.\nAdjust max_distance to control the stitch reach.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                520.0,
-                110.0
+                400.0,
+                100.0
             ],
             "color": [
                 1.0,

@@ -3,7 +3,7 @@
     "generator": "GONODES_manual_test",
     "nodes": {
         "test": {
-            "class_name": "PBR_MAT",
+            "class_name": "PbrMAT",
             "position": [
                 0,
                 0
@@ -16,7 +16,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MANUAL TEST: PBR_MAT\n\nVerify: physically-based shading; adjust roughness/metallic and confirm",
+            "text": "MANUAL TEST: PbrMAT\n\nVerify: physically-based shading; adjust roughness/metallic and confirm",
             "position": [
                 -120.0,
                 -140.0

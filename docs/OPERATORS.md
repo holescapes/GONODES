@@ -4024,7 +4024,7 @@ Wraps a `RigidBody3D` with `CollisionShape3D` for dynamic physics simulation. Ta
 
 **Inputs:** `comp_in` (COMP — typically GeometryCOMP providing mesh + material), `force_in` (CHOP, optional — channels: `force_x/y/z`, `impulse_x/y/z`, `torque_x/y/z`).
 
-**Architecture:** `SOP → GeometryCOMP → RigidBodyCOMP → MergeCOMP → RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+**Architecture:** `SOP → GeometryCOMP → RigidBodyCOMP → MergeCOMP → RenderTOP` (with PbrMAT wired to GeometryCOMP).
 
 **How it works:** Resolves the upstream COMP's `MeshInstance3D` and mirrors its mesh, material, visibility, and shadow settings onto an internal `MeshInstance3D`. Collision shape is auto-generated from the upstream mesh. In Dynamic mode, Godot's physics engine (Jolt) controls the transform. CHOP force input is applied every cook (Dynamic mode only).
 
@@ -4045,7 +4045,7 @@ Wraps a `StaticBody3D` — an immovable collider for floors, walls, and obstacle
 
 **Inputs:** `comp_in` (COMP — typically GeometryCOMP providing mesh + material).
 
-**Architecture:** `SOP → GeometryCOMP → StaticBodyCOMP → MergeCOMP → RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+**Architecture:** `SOP → GeometryCOMP → StaticBodyCOMP → MergeCOMP → RenderTOP` (with PbrMAT wired to GeometryCOMP).
 
 **How it works:** Resolves the upstream COMP's `MeshInstance3D` and mirrors its mesh, material, visibility, and shadow settings onto an internal `MeshInstance3D`. Defaults to Trimesh collision (accurate for complex static geometry). Transform is applied every cook.
 
@@ -4070,7 +4070,7 @@ Wraps a `SoftBody3D` for deformable mesh physics (cloth, jelly, rubber). Takes a
 
 **Inputs:** `comp_in` (COMP — typically GeometryCOMP providing mesh + material).
 
-**Architecture:** `SOP → GeometryCOMP → SoftBodyCOMP → MergeCOMP → RenderTOP` (with PBR_MAT wired to GeometryCOMP).
+**Architecture:** `SOP → GeometryCOMP → SoftBodyCOMP → MergeCOMP → RenderTOP` (with PbrMAT wired to GeometryCOMP).
 
 **How it works:** Resolves the upstream COMP's `MeshInstance3D` and copies its mesh, material, visibility, and shadow settings. The mesh is assigned **once** (SoftBody3D doesn't support live mesh swapping). Physics parameters are updated every cook. High `linear_stiffness` = rigid cloth; high `pressure_coefficient` = inflated balloon.
 

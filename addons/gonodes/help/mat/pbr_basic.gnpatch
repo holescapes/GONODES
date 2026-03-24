@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "pbr1": {
-            "type": "PBR_MAT",
+            "type": "PbrMAT",
             "position": [
                 100,
                 100
@@ -169,7 +169,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PBR_MAT \u2014 Basic\n\nDefault settings.",
+            "text": "PbrMAT \u2014 Basic\n\nDefault settings.",
             "position": [
                 -100.0,
                 -100.0

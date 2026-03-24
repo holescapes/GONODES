@@ -1,0 +1,24 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "subnet1": {
+            "type": "SubNetworkNode",
+            "position": [200, 100],
+            "parameters": {
+                "label": {"value": "My Subnet"}
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SubNetworkNode — Nested Graph\n\nContains an inner network with its own nodes and connections.\nDouble-click to dive inside. Use InTunnel/OutTunnel for data I/O.\nPorts sync automatically from tunnel nodes.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

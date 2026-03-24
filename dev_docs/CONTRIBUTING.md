@@ -144,15 +144,17 @@ func _cook(inputs: Array) -> GNGeoData:
 
 ### 4.2 Registry Entry
 
-Register your operator in `addons/gonodes/core/gn_extension_registry.gd` inside `_register_core_operators()`:
+Add an entry to `addons/gonodes/gn_core.cfg` (INI format, one section per operator):
 
-```gdscript
-_reg("MyNewSOP", "sop", MyNewSOP, "Short sentence describing what this operator does.")
+```ini
+[operator.MyNewSOP]
+
+family="SOP"
+script="res://addons/gonodes/operators/sop/my_new_sop.gd"
+description="Short sentence describing what this operator does."
 ```
 
-The four arguments are: registry key (must match `class_name`), family string, class reference, description.
-
-If your operator belongs to a logical sub-section, place it near related operators with a comment header.
+The section name must match the `class_name` in your GDScript file. Place it near related operators alphabetically.
 
 ### 4.3 Help Example Patch (REQUIRED — Hard Rule 25.21)
 
@@ -585,6 +587,21 @@ overrides unless they have non-data state to display (COMP, UI, OUT).
 | MAT | `GNMatBase` | `GNMaterialData` |
 | IMG | `GNImgBase` | `GNImageData` |
 | UI | `GNUiBase` | `null` (Control via API) |
+
+### Thread Safety
+
+The cook engine supports optional parallel cooking (`GNNetwork.multithreading_enabled`).
+By default, `GNNode.thread_safe = true`. Override it to `false` in `_init()` for operators
+that use external I/O, hardware handles, or non-reentrant APIs:
+
+```gdscript
+func _init() -> void:
+	thread_safe = false   # Uses hardware I/O — must cook on main thread
+```
+
+All I/O-bound operators (audio input, MIDI, serial, OSC, webcam, NDI, Spout, etc.)
+should set `thread_safe = false`. The cook engine serialises these into a single-threaded
+batch while still running safe operators in parallel.
 
 ---
 

@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "hout1": {
+            "type": "HostOutTOP",
+            "position": [400, 100],
+            "parameters": {
+                "label": {"value": "main_output"}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "hout1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostOutTOP — Export Texture\n\nExposes a texture to the host application via LibGONODES.\nSet label to identify this output. Only active when embedded.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

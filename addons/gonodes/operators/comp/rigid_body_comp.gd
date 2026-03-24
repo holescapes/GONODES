@@ -9,7 +9,7 @@ extends GNCompBase
 ## Architecture:
 ##   SOP → GeometryCOMP → RigidBodyCOMP → MergeCOMP → RenderTOP
 ##              ↑                ↑ (optional)
-##          PBR_MAT          CHOP (forces)
+##          PbrMAT           CHOP (forces)
 
 var _rigid_body: RigidBody3D = null
 var _collision_shape: CollisionShape3D = null

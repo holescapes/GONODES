@@ -9,7 +9,7 @@ extends GNCompBase
 ## Architecture:
 ##   SOP → GeometryCOMP → SoftBodyCOMP → MergeCOMP → RenderTOP
 ##              ↑
-##          PBR_MAT
+##          PbrMAT
 
 # ── Simulation state ─────────────────────────────────────────────────────────
 var _mesh_inst: MeshInstance3D = null

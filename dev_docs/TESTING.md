@@ -672,7 +672,7 @@ func test_my_chain() -> void:
 - **UI (31 patches)** — one per widget (ButtonUI, SliderUI, KnobUI, XYPadUI, etc.)
 - **POP (12 patches)** — one per particle operator (SourcePOP, ForcePOP, BoidsPOP, RenderPOP, etc.)
 - **VOL (13 patches)** — one per volume operator (NoiseVOL, FluidVOL, MarchingCubesVOL, RaymarchVOL, etc.)
-- **MAT (10 patches)** — one per material (PBR_MAT, WireframeMAT, Shader_MAT, etc.)
+- **MAT (10 patches)** — one per material (PbrMAT, WireframeMAT, ShaderMAT, etc.)
 - **IMG (13 patches)** — one per image operator (NoiseIMG, BlurIMG, PixelSortIMG, ImgToTOP, etc.)
 - **OUTPUT (12 patches)** — one per output operator (WindowOUT, MovieOUT, OscOUT, etc.)
 

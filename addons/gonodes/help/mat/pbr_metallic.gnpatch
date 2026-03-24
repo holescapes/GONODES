@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "pbr1": {
-            "type": "PBR_MAT",
+            "type": "PbrMAT",
             "position": [
                 200,
                 100

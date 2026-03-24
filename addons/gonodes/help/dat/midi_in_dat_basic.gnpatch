@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "midi1": {
+            "type": "MidiInDAT",
+            "position": [200, 100],
+            "parameters": {
+                "active": {"value": true},
+                "max_rows": {"value": 50}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "midi1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MidiInDAT — MIDI Event Log\n\nLogs incoming MIDI messages as table rows.\nEach row contains: type, channel, note, velocity, timestamp.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

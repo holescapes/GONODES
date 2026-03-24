@@ -672,7 +672,7 @@ The following TD operators were evaluated and **excluded** from this batch, with
 | Clip CHOP | **TrimCHOP** | Clipping/trimming ranges handled by TrimCHOP |
 | CHOP Execute DAT | **CallbackDAT** | CallbackDAT covers all execute-on-event patterns |
 | SOP Execute DAT | **CallbackDAT** | Same pattern — CallbackDAT is generalised |
-| Phong MAT | **PBR_MAT** | PBR_MAT covers Phong-like workflows via roughness=1.0 |
+| Phong MAT | **PbrMAT** | PbrMAT covers Phong-like workflows via roughness=1.0 |
 | Screen Grab TOP | **ScreenGrabIMG** | Already in IMG family as ScreenGrabIMG |
 
 #### Requires External Libraries (Roadmap)
@@ -796,7 +796,7 @@ GONODES has **two fluid simulation systems**:
 
 | Visual Feature | Current State | Enhancement |
 |---|---|---|
-| Translucent fluid surface | MarchingCubes + PBR_MAT | Dedicated FluidSurfaceMAT (subsurface, refraction, Fresnel) |
+| Translucent fluid surface | MarchingCubes + PbrMAT | Dedicated FluidSurfaceMAT (subsurface, refraction, Fresnel) |
 | Temperature / buoyancy | Not present | Temperature field + upward force in FluidVOL |
 | Multiple species | Single density channel | Multi-channel density (RGBA32F already supports it) |
 | Multi-pass lighting | Henyey-Greenstein + shadow rays | Phase functions, directional light, ambient, emission color |

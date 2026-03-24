@@ -3,7 +3,7 @@
     "generator":  "GONODES",
     "nodes":  {
                   "shader1":  {
-                                  "type":  "Shader_MAT",
+                                  "type":  "ShaderMAT",
                                   "position":  [
                                                    200,
                                                    100

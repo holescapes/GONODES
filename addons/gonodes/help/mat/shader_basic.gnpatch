@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "shader1": {
-            "type": "Shader_MAT",
+            "type": "ShaderMAT",
             "position": [
                 100,
                 100
@@ -163,7 +163,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Shader_MAT \u2014 Basic\n\nDefault settings.",
+            "text": "ShaderMAT \u2014 Basic\n\nDefault settings.",
             "position": [
                 -100.0,
                 -100.0

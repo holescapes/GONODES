@@ -9,130 +9,49 @@
                 100
             ],
             "parameters": {
-                "sizex": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "sizey": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
                 "rows": {
-                    "value": 2
+                    "value": 4
                 },
-                "columns": {
-                    "value": 2
+                "cols": {
+                    "value": 4
                 }
             }
         },
-        "polypatch1": {
+        "patch1": {
             "type": "PolyPatchSOP",
             "position": [
-                450,
+                400,
                 100
             ],
             "parameters": {
                 "rows": {
-                    "value": 16
+                    "value": 20
                 },
                 "cols": {
-                    "value": 16
+                    "value": 20
                 }
             }
         },
-        "geo1": {
-            "type": "GeometryCOMP",
+        "null1": {
+            "type": "NullSOP",
             "position": [
-                800,
+                700,
                 100
             ],
             "parameters": {}
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                800,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 1.5
-                },
-                "ty": {
-                    "value": 2.0
-                },
-                "tz": {
-                    "value": 3.0
-                }
-            }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1500,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
         }
     },
     "connections": [
         {
             "from": "grid1",
             "from_port": 0,
-            "to": "polypatch1",
+            "to": "patch1",
             "to_port": 0
         },
         {
-            "from": "polypatch1",
+            "from": "patch1",
             "from_port": 0,
-            "to": "geo1",
-            "to_port": 0
-        },
-        {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
-            "from_port": 0,
-            "to": "window1",
+            "to": "null1",
             "to_port": 0
         }
     ],
@@ -140,13 +59,13 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolyPatch SOP \u2014 Basic\n\nBuilds a bilinear Coons patch from the 4 corner vertices\nof a 2\u00d72 grid. 16\u00d716 subdivision creates a smooth surface.\nEdit the grid corner positions to reshape the patch.",
+            "text": "PolyPatchSOP — High-Res Patch\n\nUpsamples a coarse 4×4 grid to a smooth 20×20 patch.\nUseful for displacement or deformation targets.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                480.0,
+                400.0,
                 100.0
             ],
             "color": [

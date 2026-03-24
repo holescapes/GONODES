@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "touch1": {
+            "type": "MultiTouchInDAT",
+            "position": [200, 100],
+            "parameters": {
+                "active": {"value": true},
+                "normalize": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "touch1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MultiTouchInDAT — Touch Points\n\nTracks active touch points from touchscreens.\nEach row: id, x, y, pressure. Enable normalize for 0–1 coords.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

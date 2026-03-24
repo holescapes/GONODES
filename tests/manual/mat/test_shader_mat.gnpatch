@@ -3,7 +3,7 @@
     "generator": "GONODES_manual_test",
     "nodes": {
         "test": {
-            "class_name": "Shader_MAT",
+            "class_name": "ShaderMAT",
             "position": [
                 0,
                 0
@@ -16,7 +16,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MANUAL TEST: Shader_MAT\n\nVerify: custom shader compiles and applies to geometry; check error log",
+            "text": "MANUAL TEST: ShaderMAT\n\nVerify: custom shader compiles and applies to geometry; check error log",
             "position": [
                 -120.0,
                 -140.0

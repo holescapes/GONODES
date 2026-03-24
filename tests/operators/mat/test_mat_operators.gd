@@ -38,28 +38,28 @@ func _cook_no_input(node: GNNode) -> GNData:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PBR_MAT
+# PbrMAT
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_pbr_mat_instantiate() -> void:
-	var node := _make_node(PBR_MAT.new(), "pbr1")
+	var node := _make_node(PbrMAT.new(), "pbr1")
 	GNTestAssert.assert_eq(node.node_type, "pbr", "node_type")
 
 func test_pbr_mat_default_params() -> void:
-	var node := _make_node(PBR_MAT.new(), "pbr1")
+	var node := _make_node(PbrMAT.new(), "pbr1")
 	GNTestAssert.assert_approx(node.get_param_value("metallic"), 0.0, 0.001, "metallic default")
 	GNTestAssert.assert_approx(node.get_param_value("roughness"), 0.5, 0.001, "roughness default")
 
 func test_pbr_mat_produces_material() -> void:
-	var node := _make_node(PBR_MAT.new(), "pbr1")
+	var node := _make_node(PbrMAT.new(), "pbr1")
 	var out := _cook_no_input(node)
-	GNTestAssert.assert_not_null(out, "PBR_MAT output")
+	GNTestAssert.assert_not_null(out, "PbrMAT output")
 	if out is GNMaterialData:
 		GNTestAssert.assert_not_null(out.material, "material exists")
 		GNTestAssert.assert_true(out.material is StandardMaterial3D, "is StandardMaterial3D")
 
 func test_pbr_mat_albedo_color() -> void:
-	var node := _make_node(PBR_MAT.new(), "pbr1")
+	var node := _make_node(PbrMAT.new(), "pbr1")
 	node.set_param_value("albedo_color", Color.RED)
 	var out := _cook_no_input(node)
 	if out is GNMaterialData and out.material is StandardMaterial3D:
@@ -68,7 +68,7 @@ func test_pbr_mat_albedo_color() -> void:
 		GNTestAssert.assert_approx(mat.albedo_color.g, 0.0, 0.01, "green channel")
 
 func test_pbr_mat_metallic_roughness() -> void:
-	var node := _make_node(PBR_MAT.new(), "pbr1")
+	var node := _make_node(PbrMAT.new(), "pbr1")
 	node.set_param_value("metallic", 1.0)
 	node.set_param_value("roughness", 0.1)
 	var out := _cook_no_input(node)
@@ -110,11 +110,11 @@ func test_constant_mat_color() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Shader_MAT
+# ShaderMAT
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_shader_mat_instantiate() -> void:
-	var node := _make_node(Shader_MAT.new(), "shader1")
+	var node := _make_node(ShaderMAT.new(), "shader1")
 	GNTestAssert.assert_eq(node.node_type, "shader", "node_type")
 
 

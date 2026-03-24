@@ -2,159 +2,35 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "sphere1": {
-            "type": "SphereSOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "radius": {
-                    "value": 1.0
-                }
-            }
-        },
-        "geo1": {
-            "type": "GeometryCOMP",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {}
-        },
-        "objectmerge1": {
+        "om1": {
             "type": "ObjectMergeSOP",
             "position": [
-                450,
-                350
+                200,
+                100
             ],
             "parameters": {
                 "sop_path": {
-                    "value": "sphere1"
+                    "value": "grid1"
                 },
                 "apply_transform": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
-                }
-            }
-        },
-        "noise1": {
-            "type": "NoiseSOPNative",
-            "position": [
-                800,
-                350
-            ],
-            "parameters": {
-                "amplitude": {
-                    "value": 0.2
-                }
-            }
-        },
-        "geo2": {
-            "type": "GeometryCOMP",
-            "position": [
-                1150,
-                350
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 3.0
-                }
-            }
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                1150,
-                550
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 1.5
-                },
-                "tz": {
-                    "value": 5.0
-                }
-            }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                1500,
-                200
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1850,
-                200
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullSOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
-            "from": "sphere1",
+            "from": "om1",
             "from_port": 0,
-            "to": "geo1",
-            "to_port": 0
-        },
-        {
-            "from": "objectmerge1",
-            "from_port": 0,
-            "to": "noise1",
-            "to_port": 0
-        },
-        {
-            "from": "noise1",
-            "from_port": 0,
-            "to": "geo2",
-            "to_port": 0
-        },
-        {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "geo2",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
-            "from_port": 0,
-            "to": "window1",
+            "to": "null1",
             "to_port": 0
         }
     ],
@@ -162,14 +38,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ObjectMerge SOP \u2014 Basic\n\nFetches geometry from 'sphere1' by reference, then applies\nnoise deformation. Both the original sphere (left) and the\ndeformed copy (right, offset +3x) are rendered.\nUseful for reusing geometry across different SOP chains.",
+            "text": "ObjectMergeSOP — Basic\n\nFetches geometry from another SOP by node path.\nSet sop_path to the ID of any SOP in the network.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                520.0,
-                110.0
+                400.0,
+                100.0
             ],
             "color": [
                 1.0,

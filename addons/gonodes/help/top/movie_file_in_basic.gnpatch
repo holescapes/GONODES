@@ -1,0 +1,34 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "movie1": {
+            "type": "MovieFileInTOP",
+            "position": [200, 100],
+            "parameters": {
+                "play": {"value": true},
+                "loop": {"value": true},
+                "speed": {"value": 1.0},
+                "resolution": {"value": {"_type": "Vector2i", "x": 640, "y": 480}}
+            }
+        },
+        "null1": {
+            "type": "NullTOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "movie1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MovieFileInTOP — Video Playback\n\nPlays an .ogv video file as a texture stream.\nSet file parameter to the video path. Adjust speed for slow-mo or fast playback.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

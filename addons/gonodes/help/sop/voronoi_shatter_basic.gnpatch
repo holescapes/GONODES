@@ -1,0 +1,40 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSOP",
+            "position": [100, 100],
+            "parameters": {}
+        },
+        "voronoi1": {
+            "type": "VoronoiShatterSOP",
+            "position": [400, 100],
+            "parameters": {
+                "num_points": {"value": 12},
+                "seed": {"value": 42},
+                "offset": {"value": 0.01},
+                "interior_faces": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullSOP",
+            "position": [700, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "box1", "from_port": 0, "to": "voronoi1", "to_port": 0},
+        {"from": "voronoi1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "VoronoiShatterSOP — Fracture\n\n12-piece Voronoi shatter with small gap offset.\nChange seed for different break patterns.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

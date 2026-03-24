@@ -2,188 +2,71 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "circle1": {
+        "circle_a": {
             "type": "CircleSOP",
             "position": [
                 100,
-                100
+                50
             ],
             "parameters": {
                 "radius": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "divisions": {
-                    "value": 12,
-                    "expression": "(12 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 }
             }
         },
-        "transform1": {
-            "type": "TransformSOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "ty": {
-                    "value": -1.0
-                }
-            }
-        },
-        "circle2": {
+        "circle_b": {
             "type": "CircleSOP",
             "position": [
                 100,
-                350
+                250
             ],
             "parameters": {
                 "radius": {
-                    "value": 0.8
-                },
-                "divisions": {
-                    "value": 12
-                }
-            }
-        },
-        "transform2": {
-            "type": "TransformSOP",
-            "position": [
-                100,
-                350
-            ],
-            "parameters": {
-                "ty": {
                     "value": 1.0
                 }
             }
         },
-        "polybridge1": {
+        "bridge1": {
             "type": "PolyBridgeSOP",
             "position": [
-                500,
-                200
+                400,
+                100
             ],
             "parameters": {
                 "divisions": {
                     "value": 4
                 },
                 "twist": {
-                    "value": 30.0
+                    "value": 45.0
                 }
             }
         },
-        "geo1": {
-            "type": "GeometryCOMP",
+        "null1": {
+            "type": "NullSOP",
             "position": [
-                850,
-                200
+                700,
+                100
             ],
             "parameters": {}
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                850,
-                400
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 2.0
-                },
-                "ty": {
-                    "value": 1.0
-                },
-                "tz": {
-                    "value": 3.0
-                }
-            }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                1200,
-                200
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1550,
-                200
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
         }
     },
     "connections": [
         {
-            "from": "circle1",
+            "from": "circle_a",
             "from_port": 0,
-            "to": "transform1",
+            "to": "bridge1",
             "to_port": 0
         },
         {
-            "from": "circle2",
+            "from": "circle_b",
             "from_port": 0,
-            "to": "transform2",
-            "to_port": 0
-        },
-        {
-            "from": "transform1",
-            "from_port": 0,
-            "to": "polybridge1",
-            "to_port": 0
-        },
-        {
-            "from": "transform2",
-            "from_port": 0,
-            "to": "polybridge1",
+            "to": "bridge1",
             "to_port": 1
         },
         {
-            "from": "polybridge1",
+            "from": "bridge1",
             "from_port": 0,
-            "to": "geo1",
-            "to_port": 0
-        },
-        {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
-            "from_port": 0,
-            "to": "window1",
+            "to": "null1",
             "to_port": 0
         }
     ],
@@ -191,13 +74,13 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolyBridge SOP \u2014 Basic\n\nBridges two circle edge loops separated vertically.\n4 divisions with 30\u00b0 twist creates a twisted tube.\nWorks with any two open-edge-loop geometries.",
+            "text": "PolyBridgeSOP — Twisted Bridge\n\nBridges two circles with 4 subdivisions and 45° twist.\nChange divisions and twist to reshape the surface.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                480.0,
+                400.0,
                 100.0
             ],
             "color": [

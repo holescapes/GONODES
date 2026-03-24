@@ -1,0 +1,31 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "host1": {
+            "type": "HostInTOP",
+            "position": [200, 100],
+            "parameters": {
+                "label": {"value": "video_feed"}
+            }
+        },
+        "null1": {
+            "type": "NullTOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "host1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostInTOP — External Texture\n\nReceives texture data from the host application via LibGONODES.\nSet label to identify this input point. Only active when embedded.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1320,8 +1320,8 @@ GONODES/
 - [x] **MAT family** — material operators with per-object material binding:
   - `GNMaterialData` data type wrapping Godot's `Material` base class.
   - `GNMatBase` family base class with `_prepare_output()` helper and material label preview.
-  - `PBR_MAT` — StandardMaterial3D wrapper: albedo color, metallic, roughness, specular, emission (toggle/color/energy), normal scale, transparency mode (Disabled/Alpha/Alpha Scissor/Depth Pre-Pass), alpha scissor threshold, cull mode (Back/Front/Disabled), triplanar UV. 3 optional TOP inputs (albedo texture, normal map, ORM texture).
-  - `Shader_MAT` — ShaderMaterial wrapper: inline shader code (string param) or external `.gdshader` file. 8 float uniforms (u0–u7), 2 color uniforms (color0, color1), 2 optional TOP inputs (tex0, tex1). Lazy shader recompilation (only when source changes).
+  - `PbrMAT` — StandardMaterial3D wrapper: albedo color, metallic, roughness, specular, emission (toggle/color/energy), normal scale, transparency mode (Disabled/Alpha/Alpha Scissor/Depth Pre-Pass), alpha scissor threshold, cull mode (Back/Front/Disabled), triplanar UV. 3 optional TOP inputs (albedo texture, normal map, ORM texture).
+  - `ShaderMAT` — ShaderMaterial wrapper: inline shader code (string param) or external `.gdshader` file. 8 float uniforms (u0–u7), 2 color uniforms (color0, color1), 2 optional TOP inputs (tex0, tex1). Lazy shader recompilation (only when source changes).
   - GeometryCOMP updated: 3 inputs (SOP, MAT, TOP). MAT input overrides fallback PBR; when disconnected, built-in PBR params still work.
 - [x] **MergeCOMP** — groups multiple COMP scene nodes under a single Node3D parent:
   - Dynamic input COMP ports (auto-grow). Full transform params (t/r/s xyz) + visible toggle.
@@ -1742,7 +1742,7 @@ GONODES/
 ### Near-term
 - [x] SOP family (procedural geometry: Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Transform, Noise, Subdivide, Wireframe, Merge, Null, Switch)
 - [x] DAT family (Constant, Text, Select, Merge, Transpose, Sort, Evaluate, Switch, bridges)
-- [x] MAT family (PBR_MAT, Shader_MAT)
+- [x] MAT family (PbrMAT, ShaderMAT)
 - [x] COMP family (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP + RenderTOP bridge)
 - [x] Physics COMPs (RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP + PhysicsCHOP readback)
 - [x] Keyboard shortcuts and workflow polish (Alt+A palette, context menu shortcuts, per-node preview toggle)
@@ -3271,7 +3271,7 @@ SOP Chain (geometry)    MAT Layer        COMP Layer (3D scene)              TOP 
 │ GridSOP  │→→│TransformSOP│──→──┐       │              │                     │           │
 └──────────┘  └────────────┘     ├──→─── │GeometryCOMP  │ (MeshInstance3D)─┐  │           │
                    ├─────────┐  │       │              │                  │  │           │
-                   │ PBR_MAT │──→──┘     └──────────────┘                  ├──│ RenderTOP │→→ texture
+                   │ PbrMAT  │──→──┘     └──────────────┘                  ├──│ RenderTOP │→→ texture
                    └─────────┘           ├──────────────┐                  │  │           │   output
                                          │ CameraCOMP   │ (Camera3D) ─────┤  │           │
                                          └──────────────┘                  │  │           │

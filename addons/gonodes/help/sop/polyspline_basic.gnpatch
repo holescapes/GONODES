@@ -8,152 +8,46 @@
                 100,
                 100
             ],
-            "parameters": {
-                "length": {
-                    "value": 3.0
-                },
-                "divisions": {
-                    "value": 6
-                }
-            }
+            "parameters": {}
         },
-        "noise1": {
-            "type": "NoiseSOPNative",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {
-                "amplitude": {
-                    "value": 0.5
-                }
-            }
-        },
-        "polyspline1": {
+        "spline1": {
             "type": "PolySplineSOP",
             "position": [
-                800,
+                400,
                 100
             ],
             "parameters": {
                 "subdivisions": {
-                    "value": 16,
-                    "expression": "(16 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 16
                 },
                 "output": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "radius": {
-                    "value": 0.08
-                },
-                "sides": {
-                    "value": 8
-                },
-                "closed": {
-                    "value": false
+                    "value": 0.1
                 }
             }
         },
-        "geo1": {
-            "type": "GeometryCOMP",
+        "null1": {
+            "type": "NullSOP",
             "position": [
-                1150,
+                700,
                 100
             ],
             "parameters": {}
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                1150,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 1.0
-                },
-                "ty": {
-                    "value": 1.0
-                },
-                "tz": {
-                    "value": 4.0
-                }
-            }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                1500,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1850,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
         }
     },
     "connections": [
         {
             "from": "line1",
             "from_port": 0,
-            "to": "noise1",
+            "to": "spline1",
             "to_port": 0
         },
         {
-            "from": "noise1",
+            "from": "spline1",
             "from_port": 0,
-            "to": "polyspline1",
-            "to_port": 0
-        },
-        {
-            "from": "polyspline1",
-            "from_port": 0,
-            "to": "geo1",
-            "to_port": 0
-        },
-        {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
-            "from_port": 0,
-            "to": "window1",
+            "to": "null1",
             "to_port": 0
         }
     ],
@@ -161,13 +55,13 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolySpline SOP \u2014 Tube Output\n\nLine \u2192 Noise deformation \u2192 Catmull-Rom spline as a tube.\n16 subdivisions for smooth curves, 8-sided tube with 0.08 radius.\nSwitch output to 'Line' (0) or 'Ribbon' (2) for other shapes.",
+            "text": "PolySplineSOP — Tube Output\n\nSmooths a line into a tube with 16 subdivisions.\nSwitch output mode between Line, Tube, and Ribbon.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                520.0,
+                400.0,
                 100.0
             ],
             "color": [

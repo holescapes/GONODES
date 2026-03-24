@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "midi1": {
+            "type": "MidiInCHOP",
+            "position": [200, 100],
+            "parameters": {
+                "active": {"value": true},
+                "normalize_velocity": {"value": true}
+            }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "midi1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MidiInCHOP — MIDI Controller\n\nReceives MIDI note and CC data from all devices.\nSet device to filter a specific port. Velocity is normalized 0–1.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

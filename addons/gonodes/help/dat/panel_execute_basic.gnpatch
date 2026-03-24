@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "panel1": {
+            "type": "PanelExecuteDAT",
+            "position": [200, 100],
+            "parameters": {
+                "max_events": {"value": 50},
+                "log_values": {"value": true},
+                "log_hover": {"value": false}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "panel1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PanelExecuteDAT — UI Event Log\n\nLogs panel interaction events (click, drag, value change).\nSet panel_path to target a specific UI widget. Enable log_hover for motion events.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "osc1": {
+            "type": "OscInDAT",
+            "position": [200, 100],
+            "parameters": {
+                "port": {"value": 9000},
+                "active": {"value": true},
+                "max_rows": {"value": 50}
+            }
+        },
+        "null1": {
+            "type": "NullDAT",
+            "position": [500, 100],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {"from": "osc1", "from_port": 0, "to": "null1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "OscInDAT — OSC Message Log\n\nLogs incoming OSC messages as table rows on port 9000.\nEach row: address, args, timestamp. Use address_filter to narrow scope.",
+            "position": [-100.0, -100.0],
+            "size": [400.0, 100.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}
