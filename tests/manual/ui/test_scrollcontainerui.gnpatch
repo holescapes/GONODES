@@ -1,0 +1,36 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES_manual_test",
+    "nodes": {
+        "test": {
+            "class_name": "ScrollContainerUI",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {}
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MANUAL TEST: ScrollContainerUI\n\nVerify: provides scrollable viewport for child UI content",
+            "position": [
+                -120.0,
+                -140.0
+            ],
+            "size": [
+                480.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                0.6,
+                0.9
+            ]
+        }
+    ]
+}

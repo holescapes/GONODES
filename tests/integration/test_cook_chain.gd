@@ -120,7 +120,8 @@ func test_constant_into_math_chop() -> void:
 	c.set_param_value("name0", "x")
 	c.set_param_value("value0", 10.0)
 	var m := _add(MathCHOP.new(), "math1")
-	m.set_param_value("gain", 2.0)
+	m.set_param_value("operation", 2)  # Multiply
+	m.set_param_value("operand", 2.0)
 	_wire("const1", 0, "math1", 0)
 	_cook_frame()
 
@@ -147,11 +148,11 @@ func test_constant_dat_into_null_dat() -> void:
 
 
 func test_dat_into_transpose_chain() -> void:
-	var td := _add(TextDAT.new(), "text1")
-	td.set_param_value("text", "a,b,c\n1,2,3\n4,5,6")
-	td.set_param_value("output_mode", 1)  # CSV table mode
+	var td := _add(TableDAT.new(), "tbl1")
+	td.set_param_value("cols", 3)
+	td.set_param_value("rows", 2)
 	var tr := _add(TransposeDAT.new(), "tr1")
-	_wire("text1", 0, "tr1", 0)
+	_wire("tbl1", 0, "tr1", 0)
 	_cook_frame()
 
 	var out: GNTableData = tr.cached_output as GNTableData

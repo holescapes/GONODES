@@ -5,7 +5,7 @@ extends GNDatBase
 
 
 func _init() -> void:
-	node_type = "opfind"
+	node_type = "op_find"
 	node_description = "Search the network for operators by family and name."
 
 

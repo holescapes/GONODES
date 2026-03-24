@@ -23,7 +23,10 @@
                 100
             ],
             "parameters": {
-                "gain": {
+                "operation": {
+                    "value": 2
+                },
+                "operand": {
                     "value": 0.3
                 }
             }

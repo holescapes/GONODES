@@ -11,6 +11,7 @@ var _frame_count: int = 0
 
 func _init() -> void:
 	node_type = "feedback"
+	time_dependent = true
 	node_description = "Blends current frame with previous frame for trails/echoes."
 
 

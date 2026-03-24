@@ -10,7 +10,7 @@ var _out_tex: GNTextureData = null
 
 
 func _init() -> void:
-	node_type = "pointcloudrender"
+	node_type = "point_cloud_render"
 	time_dependent = true
 	node_description = "Render a point cloud/particle system to a 2D image."
 

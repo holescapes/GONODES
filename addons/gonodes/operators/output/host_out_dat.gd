@@ -11,7 +11,7 @@ var _output_json: String = ""
 
 
 func _init() -> void:
-	node_type = "hostoutdat"
+	node_type = "host_out_dat"
 	node_description = "Export table/text data to host application (LibGodot embedding)."
 	is_sink = true
 

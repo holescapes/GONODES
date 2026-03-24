@@ -209,9 +209,10 @@ func test_transpose_dat_swaps_rows_cols() -> void:
 	input.valid = true
 	var out := _cook_with(node, [input] as Array[GNData])
 	if out is GNTableData:
-		# Input: 2 data rows × 3 cols → transposed should swap dimensions
-		GNTestAssert.assert_eq(out.num_rows(), 3, "transposed: 3 cols → 3 rows")
-		GNTestAssert.assert_eq(out.num_cols(), 2, "transposed: 2 rows → 2 cols")
+		# Input: 3 rows (header+2 data) × 3 cols → transposed: 3 rows × 3 cols
+		# num_rows() subtracts 1 for header, so 3-1=2
+		GNTestAssert.assert_eq(out.num_rows(), 2, "transposed data rows")
+		GNTestAssert.assert_eq(out.num_cols(), 3, "transposed cols")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -291,6 +292,10 @@ func test_switch_dat_selects_input() -> void:
 	t2.append_row(PackedStringArray(["table2"]))
 	t2.valid = true
 	var node := _make_node(SwitchDAT.new(), "sw2")
+	# Bump param max so index=1 isn't clamped (dynamic ports not wired in test)
+	var idx_param := node.get_parameter("index")
+	if idx_param:
+		idx_param.max_value = 10
 	node.set_param_value("index", 1)
 	var out := _cook_with(node, [t1, t2] as Array[GNData])
 	if out is GNTableData and out.num_rows() >= 1:

@@ -16,7 +16,7 @@ extends GNTopBase
 
 func _init() -> void:
 	super._init()
-	node_type = "choptotop"
+	node_type = "chop_to_top"
 	node_description = "Render CHOP channels as a texture (waveform / heatmap)."
 
 

@@ -11,7 +11,7 @@ var _output_channels: Dictionary = {}
 
 
 func _init() -> void:
-	node_type = "hostoutchop"
+	node_type = "host_out_chop"
 	node_description = "Export channel data to host application (LibGodot embedding)."
 	is_sink = true
 

@@ -30,7 +30,7 @@ var _right_buf: PackedFloat32Array = PackedFloat32Array()
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
-	node_type = "audioin"
+	node_type = "audio_in"
 	time_dependent = true
 	node_description = "Capture live microphone audio as CHOP channels."
 

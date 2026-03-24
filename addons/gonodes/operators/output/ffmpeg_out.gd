@@ -40,7 +40,7 @@ var _ffmpeg_checked: bool = false
 
 
 func _init() -> void:
-	node_type = "ffmpegout"
+	node_type = "ffmpeg"
 	node_description = "Encode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, AV1, ProRes)."
 
 

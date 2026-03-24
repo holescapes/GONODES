@@ -21,14 +21,12 @@
                 100
             ],
             "parameters": {
-                "gain": {
+                "operation": {
+                    "value": 2
+                },
+                "operand": {
                     "value": 2.0,
                     "expression": "0.5 + 0.5 * sin(time * 4.0)",
-                    "mode": "EXPRESSION"
-                },
-                "offset": {
-                    "value": 0.5,
-                    "expression": "sin(time * 2.0) * 0.2",
                     "mode": "EXPRESSION"
                 }
             }
@@ -93,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Math CHOP \u2014 Basic\n\nScales LFO by 2x and adds 0.5 offset.",
+            "text": "Math CHOP \u2014 Basic\n\nMultiplies LFO output by 2x.\nDemonstrates single-operation math processing.",
             "position": [
                 -100.0,
                 -100.0

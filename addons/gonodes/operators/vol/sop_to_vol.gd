@@ -6,7 +6,7 @@ extends GNVolBase
 
 func _init() -> void:
 	super._init()
-	node_type = "soptovol"
+	node_type = "sop_to_vol"
 	node_description = "Rasterize SOP geometry into a density volume."
 
 

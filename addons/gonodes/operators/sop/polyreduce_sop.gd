@@ -14,7 +14,7 @@ extends GNSopBase
 ## This is a CPU implementation suited for later C++ porting.
 
 func _init() -> void:
-	node_type = "polyreduce"
+	node_type = "poly_reduce"
 	node_description = "Mesh decimation via quadric error metric edge collapse."
 
 

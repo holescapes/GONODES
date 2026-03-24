@@ -17,7 +17,7 @@ const BYTES_PER_TRI: int = FLOATS_PER_TRI * 4  # 96 bytes
 
 func _init() -> void:
 	super._init()
-	node_type = "gpumarchingcubes"
+	node_type = "gpu_marching_cubes"
 	node_description = "GPU-accelerated iso-surface extraction via marching cubes compute shader."
 
 

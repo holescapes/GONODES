@@ -13,7 +13,7 @@ var _total_encoded: int = 0
 
 
 func _init() -> void:
-	node_type = "hapout"
+	node_type = "hap_out"
 	time_dependent = true
 	node_description = "Encode texture to HAP .mov video for GPU-direct playback."
 	if ClassDB.class_exists("GNHapEncoder"):

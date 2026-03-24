@@ -26,7 +26,7 @@ def get_chop_patches():
             node("AnalyzeCHOP", 400, 100, {"function": p(1)}),
             extra_nodes={
                 "wave1": node("WaveCHOP", 100, 100, {"waveform": p(0), "frequency": p(3.0), "amplitude": p(1.0)}),
-                "math1": node("MathCHOP", 250, 100, {"gain": p(0.5)}),
+                "math1": node("MathCHOP", 250, 100, {"operation": p(2), "operand": p(0.5)}),
             },
             extra_conns=[conn("wave1", 0, "math1", 0), conn("math1", 0, "analyze1", 0)],
             annotation_text="Analyze CHOP — Peak\n\nTracks peak value of a scaled sine wave.\nUseful for envelope following.")),
@@ -101,7 +101,7 @@ def get_chop_patches():
             node("AudioSpectrumCHOP", 400, 100, {}),
             extra_nodes={
                 "lfo1": node("LFO_CHOP", 100, 100, {"frequency": p(2.0)}),
-                "math1": node("MathCHOP", 250, 100, {"gain": p(0.3)}),
+                "math1": node("MathCHOP", 250, 100, {"operation": p(2), "operand": p(0.3)}),
             },
             extra_conns=[conn("lfo1", 0, "math1", 0), conn("math1", 0, "spec1", 0)],
             annotation_text="Audio Spectrum — Modulated\n\nSpectrum of an amplitude-modulated LFO.\nShows changing frequency content.")),
@@ -216,9 +216,9 @@ def get_chop_patches():
             annotation_text="Constant CHOP — Multi-Channel\n\nOutputs three constant channels (1.0, 0.5, 0.0).\nUseful for RGB color values.")),
         ("constant_math", build_chop_chain("const1",
             node("ConstantCHOP", 100, 100, {"value0": p(2.0)}),
-            extra_nodes={"math1": node("MathCHOP", 400, 100, {"gain": p(3.0), "offset": p(1.0)})},
+            extra_nodes={"math1": node("MathCHOP", 400, 100, {"operation": p(2), "operand": p(3.0)})},
             extra_conns=[conn("const1", 0, "math1", 0)],
-            annotation_text="Constant CHOP — Math Chain\n\nConstant 2.0 scaled by 3x + 1 offset = 7.0.\nDemonstrates math processing.")),
+            annotation_text="Constant CHOP — Math Chain\n\nConstant 2.0 multiplied by 3.0 = 6.0.\nDemonstrates math processing.")),
     ]
 
     # ── CopyCHOP ──
@@ -447,7 +447,7 @@ def get_chop_patches():
             node("FeedbackCHOP", 400, 100, {}),
             extra_nodes={
                 "trigger1": node("TriggerCHOP", 100, 100, {"attack": p(0.01), "release": p(0.5)}),
-                "math1": node("MathCHOP", 600, 100, {"gain": p(0.95)}),
+                "math1": node("MathCHOP", 600, 100, {"operation": p(2), "operand": p(0.95)}),
             },
             extra_conns=[conn("trigger1", 0, "math1", 0), conn("fb1", 0, "math1", 1)],
             annotation_text="Feedback CHOP — Decay\n\nTrigger impulse decays via 0.95x feedback.\nExponential decay pattern.")),
@@ -728,10 +728,10 @@ def get_chop_patches():
     # ── MathCHOP ──
     patches["math"] = [
         ("math_basic", build_chop_chain("math1",
-            node("MathCHOP", 400, 100, {"gain": p(2.0), "offset": p(0.5)}),
+            node("MathCHOP", 400, 100, {"operation": p(2), "operand": p(2.0)}),
             extra_nodes={"lfo1": node("LFO_CHOP", 100, 100, {"frequency": p(1.0)})},
             extra_conns=[conn("lfo1", 0, "math1", 0)],
-            annotation_text="Math CHOP — Basic\n\nScales LFO by 2x and adds 0.5 offset.")),
+            annotation_text="Math CHOP — Basic\n\nMultiplies LFO output by 2x.\nDemonstrates single-operation math processing.")),
         ("math_multiply", build_chop_chain("math1",
             node("MathCHOP", 400, 100, {}),
             extra_nodes={
@@ -741,10 +741,10 @@ def get_chop_patches():
             extra_conns=[conn("lfo1", 0, "math1", 0), conn("noise1", 0, "math1", 1)],
             annotation_text="Math CHOP — Multiply Two Signals\n\nLFO multiplied by noise.\nAmplitude modulation effect.")),
         ("math_normalize", build_chop_chain("math1",
-            node("MathCHOP", 400, 100, {"gain": p(1.0), "offset": p(0.5)}),
+            node("MathCHOP", 400, 100, {"operation": p(0), "operand": p(0.5)}),
             extra_nodes={"noise1": node("NoiseCHOP", 100, 100, {"amplitude": p(1.0)})},
             extra_conns=[conn("noise1", 0, "math1", 0)],
-            annotation_text="Math CHOP — Offset to 0-1\n\nShifts [-1,1] noise to [0,1] range.\nUseful for driving parameters.")),
+            annotation_text="Math CHOP — Offset to 0-1\n\nAdds 0.5 to shift [-1,1] noise towards [0,1].\nUseful for driving parameters.")),
     ]
 
     # ── MergeCHOP ──
@@ -846,7 +846,7 @@ def get_chop_patches():
             node("NullCHOP", 400, 100, {}),
             extra_nodes={
                 "lfo1": node("LFO_CHOP", 100, 100, {"frequency": p(1.0)}),
-                "math1": node("MathCHOP", 600, 250, {"gain": p(2.0)}),
+                "math1": node("MathCHOP", 600, 250, {"operation": p(2), "operand": p(2.0)}),
             },
             extra_conns=[conn("lfo1", 0, "null1", 0), conn("null1", 0, "math1", 0)],
             annotation_text="Null CHOP — Branch Point\n\nNull as branch point for multiple downstream.\nKeeps network organized.")),
@@ -881,7 +881,7 @@ def get_chop_patches():
             annotation_text="Parameter CHOP — Basic\n\nExports node parameters as CHOP channels.\nUseful for parameter visualization.")),
         ("parameter_chained", build_chop_chain("param1",
             node("ParameterCHOP", 100, 100, {}),
-            extra_nodes={"math1": node("MathCHOP", 400, 100, {"gain": p(2.0)})},
+            extra_nodes={"math1": node("MathCHOP", 400, 100, {"operation": p(2), "operand": p(2.0)})},
             extra_conns=[conn("param1", 0, "math1", 0)],
             annotation_text="Parameter CHOP — Processed\n\nParameter values scaled by Math.\nDrives downstream effects.")),
         ("parameter_trail", build_chop_chain("param1",
@@ -901,9 +901,9 @@ def get_chop_patches():
             annotation_text="Pattern CHOP — Long\n\n100-sample pattern.\nMore detail in the lookup.")),
         ("pattern_math", build_chop_chain("pat1",
             node("PatternCHOP", 100, 100, {}),
-            extra_nodes={"math1": node("MathCHOP", 400, 100, {"gain": p(0.5), "offset": p(0.5)})},
+            extra_nodes={"math1": node("MathCHOP", 400, 100, {"operation": p(2), "operand": p(0.5)})},
             extra_conns=[conn("pat1", 0, "math1", 0)],
-            annotation_text="Pattern CHOP — Normalized\n\nPattern scaled to [0, 1] range via Math.\nReady for parameter driving.")),
+            annotation_text="Pattern CHOP — Scaled\n\nPattern scaled by 0.5 via Math.\nUseful for attenuating signal range.")),
     ]
 
     # ── PerformCHOP ──
@@ -949,14 +949,14 @@ def get_chop_patches():
             annotation_text="Ramp CHOP — Basic\n\nLinear ramp from 0 to 1.\nFundamental for gradients and transitions.")),
         ("ramp_shaped", build_chop_chain("ramp1",
             node("RampCHOP", 100, 100, {}),
-            extra_nodes={"math1": node("MathCHOP", 400, 100, {"power": p(2.0)})},
+            extra_nodes={"math1": node("MathCHOP", 400, 100, {"operation": p(7), "operand": p(2.0)})},
             extra_conns=[conn("ramp1", 0, "math1", 0)],
             annotation_text="Ramp CHOP — Shaped\n\nRamp raised to power 2.\nCreates ease-in curve.")),
         ("ramp_inverted", build_chop_chain("ramp1",
             node("RampCHOP", 100, 100, {}),
-            extra_nodes={"math1": node("MathCHOP", 400, 100, {"gain": p(-1.0), "offset": p(1.0)})},
+            extra_nodes={"math1": node("MathCHOP", 400, 100, {"operation": p(2), "operand": p(-1.0)})},
             extra_conns=[conn("ramp1", 0, "math1", 0)],
-            annotation_text="Ramp CHOP — Inverted\n\nRamp reversed (1 to 0) via Math.\nUseful for fade-out effects.")),
+            annotation_text="Ramp CHOP — Negated\n\nRamp negated via Multiply by -1.\nUseful for inverting signal direction.")),
     ]
 
     # ── RenameCHOP ──
@@ -1166,7 +1166,7 @@ def get_chop_patches():
             node("SplitCHOP", 400, 100, {}),
             extra_nodes={
                 "noise1": node("NoiseCHOP", 100, 100, {"channels": p(6)}),
-                "math1": node("MathCHOP", 600, 100, {"gain": p(2.0)}),
+                "math1": node("MathCHOP", 600, 100, {"operation": p(2), "operand": p(2.0)}),
             },
             extra_conns=[conn("noise1", 0, "split1", 0), conn("split1", 0, "math1", 0)],
             annotation_text="Split CHOP — Process One\n\nSplit 6-channel noise, process one branch.\nSelective channel processing.")),

@@ -11,7 +11,7 @@ const MAX_REQUESTS := 100
 
 
 func _init() -> void:
-	node_type = "webserver"
+	node_type = "web_server"
 	node_description = "HTTP server — serves responses, logs requests as table."
 	time_dependent = true
 

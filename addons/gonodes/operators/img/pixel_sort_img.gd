@@ -13,7 +13,7 @@ enum SortMode { BRIGHTNESS, HUE, SATURATION, RED, GREEN, BLUE }
 
 
 func _init() -> void:
-	node_type = "pixelsortimg"
+	node_type = "pixel_sort"
 	node_description = "CPU pixel sorting glitch effect (sort pixel spans by brightness/hue)."
 
 

@@ -89,7 +89,8 @@ func _discover_test_scripts() -> Array[String]:
 
 ## Filters discovered scripts by tag.
 ## Tags:
-##   core        — tests/operators/ and tests/test_*.gd (not integration)
+##   core        — tests/operators/ and tests/test_*.gd (not integration/functional)
+##   functional  — tests/functional/
 ##   integration — tests/integration/
 ##   extension   — addons/gn_ext_*/tests/
 ##   patch       — tests/integration/test_gnpatch_smoke.gd only
@@ -98,7 +99,12 @@ func _filter_by_tag(scripts: Array[String]) -> Array[String]:
 	for path in scripts:
 		match _tag:
 			"core":
-				if path.begins_with("res://tests/") and not path.contains("/integration/"):
+				if path.begins_with("res://tests/") \
+						and not path.contains("/integration/") \
+						and not path.contains("/functional/"):
+					filtered.append(path)
+			"functional":
+				if path.contains("/functional/"):
 					filtered.append(path)
 			"integration":
 				if path.contains("/integration/") and not path.contains("gnpatch_smoke"):

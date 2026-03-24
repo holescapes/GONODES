@@ -14,7 +14,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "choptosop"
+	node_type = "chop_to_sop"
 	node_description = "Convert CHOP channels to SOP point geometry."
 
 

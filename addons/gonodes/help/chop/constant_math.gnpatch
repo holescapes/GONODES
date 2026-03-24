@@ -9,14 +9,12 @@
                 100
             ],
             "parameters": {
-                "gain": {
+                "operation": {
+                    "value": 2
+                },
+                "operand": {
                     "value": 3.0,
                     "expression": "0.5 + 0.5 * sin(time * 4.0)",
-                    "mode": "EXPRESSION"
-                },
-                "offset": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.2",
                     "mode": "EXPRESSION"
                 }
             }
@@ -77,7 +75,7 @@
             "to_port": 0
         },
         {
-            "from": "const1",
+            "from": "math1",
             "from_port": 0,
             "to": "choptop1",
             "to_port": 0
@@ -93,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Constant CHOP \u2014 Math Chain\n\nConstant 2.0 scaled by 3x + 1 offset = 7.0.\nDemonstrates math processing.",
+            "text": "Constant CHOP \u2014 Math Chain\n\nConstant 2.0 multiplied by 3.0 = 6.0.\nDemonstrates math processing.",
             "position": [
                 -100.0,
                 -100.0

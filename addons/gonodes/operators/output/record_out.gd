@@ -23,7 +23,7 @@ var _prev_reset: bool = false
 
 
 func _init() -> void:
-	node_type = "recordout"
+	node_type = "record"
 	node_description = "Record CHOP channels over time to buffer. Save to CSV/JSON."
 
 

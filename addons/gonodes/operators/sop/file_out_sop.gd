@@ -4,7 +4,7 @@ extends GNSopBase
 ## Reads ArrayMesh surfaces and writes standard Wavefront OBJ.
 
 func _init() -> void:
-	node_type = "fileout"
+	node_type = "file_out"
 	node_description = "Export geometry to a Wavefront OBJ file."
 
 

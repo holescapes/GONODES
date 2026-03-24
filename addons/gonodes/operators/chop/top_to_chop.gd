@@ -11,7 +11,7 @@ extends GNChopBase
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
-	node_type = "toptochop"
+	node_type = "top_to_chop"
 	node_description = "Sample TOP texture pixels as CHOP channels."
 
 

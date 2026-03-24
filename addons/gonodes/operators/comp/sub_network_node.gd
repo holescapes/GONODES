@@ -40,7 +40,7 @@ var _ports_dirty: bool = true
 
 
 func _init() -> void:
-	node_type = "subnet"
+	node_type = "sub_network"
 	node_description = "Sub-network — contains a nested node graph.\n" + \
 		"Double-click to dive in. Use Ctrl+G on a selection to group nodes into one.\n" + \
 		"Ports are auto-generated from InTunnel/OutTunnel nodes inside.\n" + \

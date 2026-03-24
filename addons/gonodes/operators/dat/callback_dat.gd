@@ -82,7 +82,7 @@ var _pending_events: Array[Dictionary] = []
 
 
 func _init() -> void:
-	node_type = "callbackdat"
+	node_type = "callback"
 	node_description = "Event-driven callback DAT. Named GDScript snippets fire on node events (onCook, onValueChange, onStart, onCreate)."
 
 

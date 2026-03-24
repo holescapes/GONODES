@@ -54,7 +54,7 @@ func test_noise_vol_instantiation() -> void:
 
 func test_noise_vol_default_params() -> void:
 	var node := _make_node(NoiseVOL.new(), "noise2")
-	GNTestAssert.assert_not_null(node.get_parameter("resolution"), "has resolution param")
+	GNTestAssert.assert_not_null(node.get_parameter("res_x"), "has res_x param")
 	GNTestAssert.assert_not_null(node.get_parameter("frequency"), "has frequency param")
 	GNTestAssert.assert_not_null(node.get_parameter("amplitude"), "has amplitude param")
 
@@ -80,8 +80,8 @@ func test_blend_vol_instantiation() -> void:
 
 func test_blend_vol_params() -> void:
 	var node := _make_node(BlendVOL.new(), "blend2")
-	GNTestAssert.assert_not_null(node.get_parameter("mode"), "has mode param")
-	GNTestAssert.assert_not_null(node.get_parameter("mix"), "has mix param")
+	GNTestAssert.assert_not_null(node.get_parameter("operation"), "has operation param")
+	GNTestAssert.assert_not_null(node.get_parameter("mix_factor"), "has mix_factor param")
 
 func test_blend_vol_no_input() -> void:
 	var node := _make_node(BlendVOL.new(), "blend3")
@@ -123,7 +123,7 @@ func test_displace_vol_instantiation() -> void:
 
 func test_displace_vol_params() -> void:
 	var node := _make_node(DisplaceVOL.new(), "disp2")
-	GNTestAssert.assert_not_null(node.get_parameter("scale"), "has scale param")
+	GNTestAssert.assert_not_null(node.get_parameter("strength"), "has strength param")
 
 func test_displace_vol_no_input() -> void:
 	var node := _make_node(DisplaceVOL.new(), "disp3")
@@ -142,8 +142,8 @@ func test_fluid_vol_instantiation() -> void:
 
 func test_fluid_vol_params() -> void:
 	var node := _make_node(FluidVOL.new(), "fluid2")
-	GNTestAssert.assert_not_null(node.get_parameter("resolution"), "has resolution param")
-	GNTestAssert.assert_not_null(node.get_parameter("pressure_iterations"), "has pressure_iterations param")
+	GNTestAssert.assert_not_null(node.get_parameter("res_x"), "has res_x param")
+	GNTestAssert.assert_not_null(node.get_parameter("pressure_iters"), "has pressure_iters param")
 
 func test_fluid_vol_time_dependent() -> void:
 	var node := _make_node(FluidVOL.new(), "fluid3")
@@ -193,7 +193,7 @@ func test_raymarch_vol_instantiation() -> void:
 
 func test_raymarch_vol_params() -> void:
 	var node := _make_node(RaymarchVOL.new(), "rm2")
-	GNTestAssert.assert_not_null(node.get_parameter("step_count"), "has step_count param")
+	GNTestAssert.assert_not_null(node.get_parameter("max_steps"), "has max_steps param")
 	GNTestAssert.assert_not_null(node.get_parameter("density_scale"), "has density_scale param")
 
 func test_raymarch_vol_output_family() -> void:
@@ -221,7 +221,7 @@ func test_sop_to_vol_instantiation() -> void:
 
 func test_sop_to_vol_params() -> void:
 	var node := _make_node(SOPtoVOL.new(), "s2v2")
-	GNTestAssert.assert_not_null(node.get_parameter("resolution"), "has resolution param")
+	GNTestAssert.assert_not_null(node.get_parameter("res_x"), "has res_x param")
 
 func test_sop_to_vol_input_family() -> void:
 	var node := _make_node(SOPtoVOL.new(), "s2v3")

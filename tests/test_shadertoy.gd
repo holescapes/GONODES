@@ -36,8 +36,8 @@ func test_translator_basic_gradient() -> void:
 		"mainImage should become fragment()")
 	GNTestAssert.assert_contains(result.godot_code, "COLOR",
 		"fragColor should become COLOR")
-	GNTestAssert.assert_contains(result.godot_code, "FRAGCOORD",
-		"fragCoord should become FRAGCOORD")
+	GNTestAssert.assert_contains(result.godot_code, "UV * gn_resolution",
+		"fragCoord should become UV * gn_resolution")
 	GNTestAssert.assert_contains(result.godot_code, "TIME",
 		"iTime should become TIME")
 
@@ -96,7 +96,7 @@ func test_translator_custom_param_names() -> void:
 	GNTestAssert.assert_contains(result.godot_code, "void fragment()",
 		"mainImage(out vec4 col, in vec2 fc) → fragment()")
 	GNTestAssert.assert_contains(result.godot_code, "COLOR", "col → COLOR")
-	GNTestAssert.assert_contains(result.godot_code, "FRAGCOORD", "fc → FRAGCOORD")
+	GNTestAssert.assert_contains(result.godot_code, "UV * gn_resolution", "fc → UV * gn_resolution")
 
 
 func test_translator_strips_version_and_precision() -> void:

@@ -9,7 +9,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "polypatch"
+	node_type = "poly_patch"
 	node_description = "Smooth polynomial patch from boundary curves."
 
 

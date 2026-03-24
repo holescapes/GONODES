@@ -8,7 +8,7 @@ extends GNImgBase
 
 
 func _init() -> void:
-	node_type = "toptoimg"
+	node_type = "top_to_img"
 	node_description = "Convert TOP (GPU Texture) to IMG (CPU Image). Bridge operator."
 
 

@@ -27,7 +27,7 @@ var _setup_done: bool = false
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
-	node_type = "audiospectrum"
+	node_type = "audio_spectrum"
 	time_dependent = true
 	node_description = "FFT spectrum analysis — frequency bands as CHOP channels."
 

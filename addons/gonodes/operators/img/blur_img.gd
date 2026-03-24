@@ -4,7 +4,7 @@ extends GNImgBase
 ## Applies a configurable-radius box blur.  For GPU blur, use BlurTOP.
 
 func _init() -> void:
-	node_type = "blurimg"
+	node_type = "blur"
 	node_description = "CPU box blur filter. Separate horizontal/vertical passes."
 
 

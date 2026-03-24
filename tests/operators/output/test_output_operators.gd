@@ -118,7 +118,7 @@ func test_osc_out_instantiate() -> void:
 
 func test_hap_out_instantiate() -> void:
 	var node := _make_node(HapOUT.new(), "hap1")
-	GNTestAssert.assert_eq(node.node_type, "hap", "node_type")
+	GNTestAssert.assert_eq(node.node_type, "hap_out", "node_type")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -39,6 +39,6 @@ func test_ffmpeg_in_top_instantiate() -> void:
 
 func test_ffmpeg_in_top_set_file() -> void:
 	var node := _make_node(FFmpegInTOP.new(), "ffin2")
-	node.set_param_value("file_path", "test.mp4")
-	var param: Variant = node.get_param_value("file_path")
-	GNTestAssert.assert_eq(param, "test.mp4", "file_path param set")
+	node.set_param_value("file", "test.mp4")
+	var param: Variant = node.get_param_value("file")
+	GNTestAssert.assert_eq(param, "test.mp4", "file param set")

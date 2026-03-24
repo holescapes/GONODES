@@ -62,7 +62,7 @@ var _last_code: String = ""
 
 
 func _init() -> void:
-	node_type = "scriptsop"
+	node_type = "sop"
 	node_description = "User-scripted SOP. Write GDScript to generate or transform 3D geometry."
 
 

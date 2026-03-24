@@ -9,14 +9,12 @@
                 100
             ],
             "parameters": {
-                "gain": {
-                    "value": -1.0,
-                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
-                    "mode": "EXPRESSION"
+                "operation": {
+                    "value": 2
                 },
-                "offset": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.2",
+                "operand": {
+                    "value": -1.0,
+                    "expression": "-1.0 * (0.5 + 0.5 * sin(time * 4.0))",
                     "mode": "EXPRESSION"
                 }
             }
@@ -89,7 +87,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Ramp CHOP \u2014 Inverted\n\nRamp reversed (1 to 0) via Math.\nUseful for fade-out effects.",
+            "text": "Ramp CHOP \u2014 Negated\n\nRamp negated via Multiply by -1.\nUseful for inverting signal direction.",
             "position": [
                 -100.0,
                 -100.0

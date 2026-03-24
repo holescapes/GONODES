@@ -10,7 +10,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "objectmerge"
+	node_type = "sop"
 	node_description = "Fetch geometry from another SOP by path reference."
 
 

@@ -9,7 +9,7 @@ var _rtl: RichTextLabel = null
 
 
 func _init() -> void:
-	node_type = "richtextlabel"
+	node_type = "rich_text_label"
 	node_description = "BBCode rich text label. Optional DAT input for content."
 
 

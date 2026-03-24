@@ -10,7 +10,7 @@ var _tex: ImageTexture = null
 
 
 func _init() -> void:
-	node_type = "imgtotop"
+	node_type = "img_to_top"
 	node_description = "Convert IMG (CPU Image) to TOP (GPU Texture). Bridge operator."
 
 

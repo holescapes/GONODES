@@ -8,7 +8,7 @@ var _spinbox: SpinBox = null
 
 
 func _init() -> void:
-	node_type = "spinbox"
+	node_type = "spin_box"
 	node_description = "Numeric input with increment/decrement buttons."
 
 

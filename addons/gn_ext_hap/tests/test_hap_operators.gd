@@ -39,6 +39,6 @@ func test_hap_in_top_instantiate() -> void:
 
 func test_hap_in_top_set_file() -> void:
 	var node := _make_node(HapInTOP.new(), "hapin2")
-	node.set_param_value("file_path", "test.mov")
-	var param: Variant = node.get_param_value("file_path")
-	GNTestAssert.assert_eq(param, "test.mov", "file_path param set")
+	node.set_param_value("file", "test.mov")
+	var param: Variant = node.get_param_value("file")
+	GNTestAssert.assert_eq(param, "test.mov", "file param set")

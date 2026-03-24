@@ -20,7 +20,7 @@ var _camera_feed: CameraFeed = null
 
 
 func _init() -> void:
-	node_type = "webcamimg"
+	node_type = "webcam"
 	time_dependent = true
 	node_description = "Live webcam/camera feed as a CPU Image. Chain → ImgToTOP for GPU."
 

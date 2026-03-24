@@ -5,7 +5,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "uvproject"
+	node_type = "uv_project"
 	node_description = "Project UV coordinates onto geometry."
 
 

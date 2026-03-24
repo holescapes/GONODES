@@ -12,7 +12,7 @@ var _current_text: String = ""
 
 
 func _init() -> void:
-	node_type = "lineedit"
+	node_type = "line_edit"
 	node_description = "Single-line text field. Outputs text length and submit state."
 
 

@@ -9,7 +9,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "polybevel"
+	node_type = "poly_bevel"
 	node_description = "Bevel polygon edges with offset and rounding."
 
 

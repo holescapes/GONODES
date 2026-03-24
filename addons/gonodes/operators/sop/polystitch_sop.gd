@@ -10,7 +10,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "polystitch"
+	node_type = "poly_stitch"
 	node_description = "Stitch polygon boundaries by connecting nearest vertices."
 
 

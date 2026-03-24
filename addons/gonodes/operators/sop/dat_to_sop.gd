@@ -11,7 +11,7 @@ extends GNSopBase
 ## Additional columns can be stored as point attributes on the output geo.
 
 func _init() -> void:
-	node_type = "dattosop"
+	node_type = "dat_to_sop"
 	node_description = "Convert DAT table rows to SOP points."
 
 

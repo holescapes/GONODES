@@ -13,7 +13,7 @@ var _last_trail_length: int = 0
 
 
 func _init() -> void:
-	node_type = "trailribbon"
+	node_type = "trail_ribbon"
 	time_dependent = true
 	node_description = "Build ribbon mesh from particle trails."
 

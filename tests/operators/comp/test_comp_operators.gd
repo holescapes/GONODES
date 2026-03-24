@@ -80,8 +80,9 @@ func test_camera_comp_default_params() -> void:
 
 func test_camera_comp_cooks_without_input() -> void:
 	var node := _make_node(CameraCOMP.new(), "cam1")
-	var out := _cook_no_input(node)
-	GNTestAssert.assert_not_null(out, "camera produces output")
+	_cook_no_input(node)
+	# CameraCOMP returns null data — it provides a Camera3D scene node instead
+	GNTestAssert.assert_not_null(node.get_camera(), "camera produces Camera3D node")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -98,8 +99,9 @@ func test_light_comp_default_energy() -> void:
 
 func test_light_comp_cooks_without_input() -> void:
 	var node := _make_node(LightCOMP.new(), "light1")
-	var out := _cook_no_input(node)
-	GNTestAssert.assert_not_null(out, "light produces output")
+	_cook_no_input(node)
+	# LightCOMP returns null data — it provides a Light3D scene node instead
+	GNTestAssert.assert_not_null(node.get_light(), "light produces Light3D node")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

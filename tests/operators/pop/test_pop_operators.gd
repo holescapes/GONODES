@@ -172,7 +172,7 @@ func test_limit_pop_instantiation() -> void:
 
 func test_limit_pop_params() -> void:
 	var node := _make_node(LimitPOP.new(), "lim2")
-	GNTestAssert.assert_not_null(node.get_parameter("max_age"), "has max_age param")
+	GNTestAssert.assert_not_null(node.get_parameter("kill_outside"), "has kill_outside param")
 
 func test_limit_pop_no_input() -> void:
 	var node := _make_node(LimitPOP.new(), "lim3")
@@ -191,7 +191,7 @@ func test_advect_pop_instantiation() -> void:
 
 func test_advect_pop_params() -> void:
 	var node := _make_node(AdvectPOP.new(), "adv2")
-	GNTestAssert.assert_not_null(node.get_parameter("scale"), "has scale param")
+	GNTestAssert.assert_not_null(node.get_parameter("strength"), "has strength param")
 
 func test_advect_pop_no_input() -> void:
 	var node := _make_node(AdvectPOP.new(), "adv3")

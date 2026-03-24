@@ -20,7 +20,7 @@ var _needs_reset: bool = true
 
 
 func _init() -> void:
-	node_type = "fluid2d"
+	node_type = "fluid_2d"
 	time_dependent = true
 	node_description = "2D fluid simulation with advection, vorticity, and dye injection."
 

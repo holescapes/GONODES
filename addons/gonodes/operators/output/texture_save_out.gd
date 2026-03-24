@@ -16,7 +16,7 @@ var _was_active: bool = false
 
 
 func _init() -> void:
-	node_type = "texturesave"
+	node_type = "texture_save"
 	node_description = "Save GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write."
 
 

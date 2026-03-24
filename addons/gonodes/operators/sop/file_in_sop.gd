@@ -4,7 +4,7 @@ extends GNSopBase
 ## Uses Godot's ResourceLoader for glTF/.tres, and manual parsing for OBJ.
 
 func _init() -> void:
-	node_type = "filein"
+	node_type = "file_in"
 	node_description = "Import geometry from an OBJ, glTF, or resource file."
 
 

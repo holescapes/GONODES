@@ -25,6 +25,12 @@ func _init_parameters() -> void:
 	_rebuild_channel_slots(1)
 
 
+func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
+	if param_name == "count":
+		_rebuild_channel_slots(int(_new_value))
+	super._on_parameter_changed(param_name, _new_value)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Dynamic Slot Management
 # ═══════════════════════════════════════════════════════════════════════════════

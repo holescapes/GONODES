@@ -11,7 +11,7 @@ var _prev_managed: Array[Control] = []
 
 
 func _init() -> void:
-	node_type = "tabcontainer"
+	node_type = "tab_container"
 	node_description = "Tabbed container. Each UI input is a tab page."
 
 

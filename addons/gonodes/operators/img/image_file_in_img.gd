@@ -16,7 +16,7 @@ var _loaded_image: Image = null
 
 
 func _init() -> void:
-	node_type = "imagefileinimg"
+	node_type = "image_file_in"
 	node_description = "Loads an image file (PNG, JPG, WebP, HDR, EXR, etc.) as a CPU Image."
 
 

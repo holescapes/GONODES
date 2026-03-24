@@ -10,7 +10,7 @@ var _list: ItemList = null
 
 
 func _init() -> void:
-	node_type = "itemlist"
+	node_type = "item_list"
 	node_description = "Selectable item list from DAT data. Optional TOP icon."
 
 

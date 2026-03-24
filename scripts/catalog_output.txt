@@ -1,0 +1,2368 @@
+
+============================================================
+  ROOT — 1 operators
+============================================================
+
+  DotNode
+    node_type: "dot"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  []
+
+============================================================
+  CHOP — 77 operators
+============================================================
+
+  AnalyzeCHOP
+    node_type: "analyze"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['function']
+
+  AudioBandCHOP
+    node_type: "audioband"
+    inputs:  [spectrum:CHOP]
+    outputs: [out:CHOP]
+    params:  ['num_bands', 'band_names', 'crossovers', 'attack', 'release', 'peak_decay', 'gain', 'freq_min', 'freq_max']
+
+  AudioDynamicsCHOP
+    node_type: "audio_dynamics"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['mode', 'threshold', 'ratio', 'attack', 'release', 'makeup', 'reset']
+
+  AudioFileInCHOP
+    node_type: "audiofilein"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['file', 'play', 'loop', 'volume', 'seek_pos', 'buffer_size', 'stereo', 'mute_output']
+
+  AudioInCHOP
+    node_type: "audioin"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['active', 'buffer_size', 'stereo', 'gain']
+
+  AudioSpectrumCHOP
+    node_type: "audiospectrum"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['bus', 'active', 'bands', 'freq_min', 'freq_max', 'smoothing', 'fft_size']
+
+  BeatCHOP
+    node_type: "beat"
+    inputs:  [audio:CHOP]
+    outputs: [out:CHOP]
+    params:  ['sensitivity', 'decay', 'history_size', 'min_interval', 'bpm_default']
+
+  BlendCHOP
+    node_type: "blend"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['weight', 'method']
+
+  ChannelCHOP
+    node_type: "channel"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['count']
+
+  ClipCHOP
+    node_type: "clip"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['start', 'end', 'speed', 'loop', 'play', 'trigger']
+
+  ClockCHOP
+    node_type: "clock"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['bpm', 'time_channels', 'beat_channels', 'beats_per_bar']
+
+  CompositeCHOP
+    node_type: "composite"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['operation', 'weights']
+
+  ConstantCHOP
+    node_type: "constant"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['count']
+
+  CopyCHOP
+    node_type: "copy"
+    inputs:  [a:CHOP, b:CHOP]
+    outputs: [out:CHOP]
+    params:  ['operation', 'pass_non_matching']
+
+  CountCHOP
+    node_type: "count"
+    inputs:  [in:CHOP, reset:CHOP]
+    outputs: [out:CHOP]
+    params:  ['threshold', 'step', 'limit_min', 'limit_max', 'overflow', 'reset_all']
+
+  CrossCHOP
+    node_type: "cross"
+    inputs:  [A:CHOP, B:CHOP]
+    outputs: [out:CHOP]
+    params:  ['cross']
+
+  CueCHOP
+    node_type: "cuesequencer"
+    inputs:  [cues:DAT, trigger:CHOP]
+    outputs: [out:CHOP]
+    params:  ['source', 'timeline', 'go_next', 'go_prev', 'go_to', 'go_to_name', 'apply_data']
+
+  DelayCHOP
+    node_type: "delay"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['frames', 'reset']
+
+  DeleteCHOP
+    node_type: "delete"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['scope', 'pattern', 'start_index', 'end_index']
+
+  EnvelopeCHOP
+    node_type: "envelope"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['mode', 'window', 'decay', 'reset']
+
+  ExpressionCHOP
+    node_type: "expression"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['expr', 'samples', 'channels']
+
+  ExtendCHOP
+    node_type: "extend"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['left', 'right', 'before', 'after']
+
+  FanCHOP
+    node_type: "fan"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['count', 'offset', 'operation', 'prefix']
+
+  FeedbackCHOP
+    node_type: "feedback"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['reset']
+
+  FilterCHOP
+    node_type: "filter"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['type', 'cutoff', 'reset']
+
+  GamepadCHOP
+    node_type: "gamepad"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['device', 'deadzone']
+
+  HoldCHOP
+    node_type: "hold"
+    inputs:  [in:CHOP, trigger:CHOP]
+    outputs: [out:CHOP]
+    params:  ['threshold', 'hold_on_start', 'reset']
+
+  HostInCHOP
+    node_type: "hostinchop"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['label', 'sample_rate']
+
+  IKCHOP
+    node_type: "ik"
+    inputs:  [target:CHOP]
+    outputs: [out:CHOP]
+    params:  ['num_joints', 'bone_length', 'target_x', 'target_y', 'target_z', 'iterations', 'constrain_y']
+
+  InterpolateCHOP
+    node_type: "interpolate"
+    inputs:  [a:CHOP, b:CHOP]
+    outputs: [out:CHOP]
+    params:  ['blend', 'curve']
+
+  JoinCHOP
+    node_type: "join"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['overlap']
+
+  KeyboardInCHOP
+    node_type: "keyboardin"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['keys', 'mode', 'window']
+
+  KeyframeCHOP
+    node_type: "keyframe"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['start', 'end', 'extend', 'count']
+
+  LFO_CHOP
+    node_type: "lfo"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['waveform', 'frequency', 'amplitude', 'offset', 'phase', 'duty_cycle']
+
+  LagCHOP
+    node_type: "lag"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['attack', 'release', 'reset']
+
+  LaserCHOP
+    node_type: "laser"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['pattern', 'points', 'scale', 'rotation', 'animate', 'speed', 'color', 'intensity', 'blank_points']
+
+  LimitCHOP
+    node_type: "limit"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['type', 'min', 'max']
+
+  LogicCHOP
+    node_type: "logic"
+    inputs:  [in1:CHOP, in2:CHOP]
+    outputs: [out:CHOP]
+    params:  ['operation', 'threshold']
+
+  LookupCHOP
+    node_type: "lookup"
+    inputs:  [table:CHOP, index:CHOP]
+    outputs: [out:CHOP]
+    params:  ['interpolate', 'extend']
+
+  MathCHOP
+    node_type: "math"
+    inputs:  [in1:CHOP, in2:CHOP]
+    outputs: [out:CHOP]
+    params:  ['operation', 'operand', 'channel_name']
+
+  MergeCHOP
+    node_type: "merge"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['duplicate']
+
+  MidiInCHOP
+    node_type: "midiin"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['active', 'device', 'channel_filter', 'normalize_velocity', 'reset']
+
+  MouseInCHOP
+    node_type: "mousein"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['normalized', 'buttons', 'scroll', 'window']
+
+  NoiseCHOP
+    node_type: "noise"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['num_channels', 'channel_names', 'roughness', 'period', 'seed']
+
+  NullCHOP
+    node_type: "null"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  []
+
+  ObjectCHOP
+    node_type: "object"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['comp_path']
+
+  OscInCHOP
+    node_type: "oscin"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['port', 'active', 'address_filter', 'normalize_names', 'max_channels', 'reset']
+
+  ParameterCHOP
+    node_type: "parameter"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['node_path', 'parameters']
+
+  PatternCHOP
+    node_type: "pattern"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['type', 'length', 'channels', 'from_value', 'to_value', 'cycles', 'seed']
+
+  PerformCHOP
+    node_type: "perform"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['fps', 'frame_time', 'frame_count', 'memory', 'gpu_time']
+
+  PhysicsCHOP
+    node_type: "physics"
+    inputs:  [comp_in:COMP]
+    outputs: [out:CHOP]
+    params:  ['position', 'rotation', 'scale', 'linear_vel', 'angular_vel', 'speed', 'sleeping']
+
+  RampCHOP
+    node_type: "ramp"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['samples', 'count']
+
+  RenameCHOP
+    node_type: "rename"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['renames']
+
+  ResampleCHOP
+    node_type: "resample"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['method', 'samples', 'rate', 'quality']
+
+  SOPtoCHOP
+    node_type: "soptochop"
+    inputs:  [in:SOP]
+    outputs: [out:CHOP]
+    params:  ['attribute', 'max_points']
+
+  ScriptCHOP
+    node_type: "scriptchop"
+    inputs:  [in0:CHOP]
+    outputs: [out:CHOP]
+    params:  ['time_dependent', 'cook_once', 'force_active', 'code']
+
+  SelectCHOP
+    node_type: "select"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['pattern', 'rename']
+
+  SequenceCHOP
+    node_type: "sequence"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['duration', 'crossfade', 'loop']
+
+  ShuffleCHOP
+    node_type: "shuffle"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['method', 'seed']
+
+  SkeletonCHOP
+    node_type: "skeleton"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['comp_path', 'bone_filter', 'local']
+
+  SlopeCHOP
+    node_type: "slope"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['order', 'normalize', 'multiply', 'reset']
+
+  SmoothCHOP
+    node_type: "smooth"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['type', 'cutoff', 'q', 'reset']
+
+  SpeedCHOP
+    node_type: "speed"
+    inputs:  [in:CHOP, reset:CHOP]
+    outputs: [out:CHOP]
+    params:  ['scale', 'clamp', 'min', 'max', 'reset_all']
+
+  SplitCHOP
+    node_type: "split"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['mode', 'index', 'group_size', 'group_index']
+
+  SpringCHOP
+    node_type: "spring"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['stiffness', 'damping', 'mass', 'reset']
+
+  StretchCHOP
+    node_type: "stretch"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['mode', 'factor', 'length', 'interpolate']
+
+  SwitchCHOP
+    node_type: "switch"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['index']
+
+  TOPtoCHOP
+    node_type: "toptochop"
+    inputs:  [in:TOP]
+    outputs: [out:CHOP]
+    params:  ['mode', 'channel_r', 'channel_g', 'channel_b', 'channel_a']
+
+  TabletInCHOP
+    node_type: "tabletin"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['normalize', 'active']
+
+  TimelineCHOP
+    node_type: "timeline"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['start', 'end', 'speed', 'loop', 'play', 'sync_to_engine', 'trigger']
+
+  TimerCHOP
+    node_type: "timer"
+    inputs:  [start:CHOP, reset:CHOP]
+    outputs: [out:CHOP]
+    params:  ['length', 'loop', 'auto_start', 'speed']
+
+  TrailCHOP
+    node_type: "trail"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['length', 'active']
+
+  TransformCHOP
+    node_type: "transform"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'order']
+
+  TriggerCHOP
+    node_type: "trigger"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['threshold', 'attack', 'peak', 'decay', 'retrigger']
+
+  TrimCHOP
+    node_type: "trim"
+    inputs:  [in:CHOP]
+    outputs: [out:CHOP]
+    params:  ['unit', 'start', 'end']
+
+  WarpCHOP
+    node_type: "warp"
+    inputs:  [in:CHOP, warp:CHOP]
+    outputs: [out:CHOP]
+    params:  ['speed', 'offset', 'output_length', 'interpolation']
+
+  WaveCHOP
+    node_type: "wave"
+    inputs:  [(none)]
+    outputs: [out:CHOP]
+    params:  ['waveform', 'channels', 'length', 'frequency', 'amplitude', 'offset', 'phase', 'phase_step']
+
+============================================================
+  COMP — 20 operators
+============================================================
+
+  AnimationCOMP
+    node_type: "animation"
+    inputs:  [comp:COMP]
+    outputs: [out:COMP]
+    params:  ['active', 'speed', 'duration', 'loop_mode', 'tx_start', 'tx_end', 'ty_start', 'ty_end', 'tz_start', 'tz_end', 'rx_start', 'rx_end', 'ry_start', 'ry_end', 'rz_start', 'rz_end', 'sx_start', 'sx_end', 'sy_start', 'sy_end', 'sz_start', 'sz_end']
+
+  AreaCOMP
+    node_type: "area"
+    inputs:  [geo_in:SOP]
+    outputs: [out:COMP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'shape', 'shape_radius', 'gravity_override', 'gravity_space', 'gravity_strength', 'gravity_dir_x', 'gravity_dir_y', 'gravity_dir_z', 'linear_damp_override', 'linear_damp', 'angular_damp_override', 'angular_damp', 'priority', 'show_shape', 'shape_color']
+
+  CameraCOMP
+    node_type: "camera"
+    inputs:  [(none)]
+    outputs: [out:COMP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'use_look_at', 'look_at_x', 'look_at_y', 'look_at_z', 'projection', 'fov', 'ortho_size', 'near', 'far', 'clear_color']
+
+  EnginesCOMP
+    node_type: "engines"
+    inputs:  [in:COMP]
+    outputs: [out:COMP]
+    params:  ['mode', 'snap', 'interval']
+
+  EnvironmentCOMP
+    node_type: "environment"
+    inputs:  [(none)]
+    outputs: [out:COMP]
+    params:  ['bg_mode', 'bg_color', 'bg_energy', 'ambient_enabled', 'ambient_color', 'ambient_energy', 'tonemap_mode', 'tonemap_exposure', 'tonemap_white', 'glow_enabled', 'glow_intensity', 'glow_strength', 'glow_bloom', 'glow_hdr_threshold', 'glow_blend_mode', 'ssao_enabled', 'ssao_radius', 'ssao_intensity', 'ssao_power', 'ssil_enabled', 'ssil_radius', 'ssil_intensity', 'ssil_sharpness', 'ssil_normal_rejection', 'ssr_enabled', 'ssr_max_steps', 'ssr_fade_in', 'ssr_fade_out', 'ssr_depth_tolerance', 'adj_enabled', 'adj_brightness', 'adj_contrast', 'adj_saturation', 'fog_enabled', 'fog_density', 'fog_albedo', 'fog_emission', 'fog_emission_energy', 'fog_length']
+
+  GenericScriptNode
+    node_type: "genericscript"
+    inputs:  [in0:CHOP]
+    outputs: [out0:CHOP, out1:DAT]
+    params:  ['time_dependent', 'cook_once', 'force_active', 'code']
+
+  GeometryCOMP
+    node_type: "geo"
+    inputs:  [geo_in:SOP, mat_in:MAT, tex_in:TOP]
+    outputs: [out:COMP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'albedo_color', 'metallic', 'roughness', 'emission_energy', 'emission_color', 'visible', 'cast_shadow']
+
+  InTunnel
+    node_type: "in_tunnel"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['index', 'family', 'label']
+
+  InstanceCOMP
+    node_type: "instance"
+    inputs:  [template:SOP, points:SOP, mat_in:MAT, chop_in:CHOP]
+    outputs: [out:COMP]
+    params:  ['count', 'scatter_mode', 'spacing', 'seed', 'tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'align_to_normal', 'scale_rand', 'rotation_rand', 'albedo_color', 'metallic', 'roughness', 'visible', 'cast_shadow', 'chop_map']
+
+  JointCOMP
+    node_type: "joint"
+    inputs:  [body_a:COMP, body_b:COMP]
+    outputs: [out:COMP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'joint_type', 'exclude_collision', 'hinge_limit', 'hinge_lower', 'hinge_upper', 'hinge_motor', 'hinge_motor_speed', 'hinge_motor_force', 'slider_lower', 'slider_upper', 'cone_swing', 'cone_twist', 'cone_softness', 'cone_relaxation', 'dof_lock_lin_x', 'dof_lock_lin_y', 'dof_lock_lin_z', 'dof_lock_ang_x', 'dof_lock_ang_y', 'dof_lock_ang_z']
+
+  LightCOMP
+    node_type: "light"
+    inputs:  [(none)]
+    outputs: [out:COMP]
+    params:  ['type', 'tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'color', 'energy', 'shadows', 'shadow_bias', 'shadow_normal_bias', 'shadow_blur', 'shadow_opacity', 'dir_shadow_mode', 'omni_range', 'spot_range', 'spot_angle']
+
+  MergeCOMP
+    node_type: "merge_comp"
+    inputs:  [(none)]
+    outputs: [out:COMP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'visible']
+
+  NullCOMP
+    node_type: "null"
+    inputs:  [in:COMP]
+    outputs: [out:COMP]
+    params:  []
+
+  OutTunnel
+    node_type: "out_tunnel"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['index', 'family', 'label']
+
+  ReplicatorCOMP
+    node_type: "replicator"
+    inputs:  [template:COMP, table:DAT]
+    outputs: [out:COMP]
+    params:  ['count', 'template_type', 'prefix', 'active']
+
+  RigidBodyCOMP
+    node_type: "rigid_body"
+    inputs:  [comp_in:COMP, force_in:CHOP]
+    outputs: [out:COMP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'mode', 'mass', 'gravity_scale', 'friction', 'bounce', 'linear_damp', 'angular_damp', 'init_vel_x', 'init_vel_y', 'init_vel_z', 'lock_rot_x', 'lock_rot_y', 'lock_rot_z', 'collision_shape', 'ccd']
+
+  SoftBodyCOMP
+    node_type: "soft_body"
+    inputs:  [comp_in:COMP]
+    outputs: [out:COMP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'iterations', 'gravity', 'damping', 'stiffness', 'floor_collision', 'floor_y', 'pin_mode', 'pin_threshold']
+
+  StaticBodyCOMP
+    node_type: "static_body"
+    inputs:  [comp_in:COMP]
+    outputs: [out:COMP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'friction', 'bounce', 'collision_shape']
+
+  SubNetworkNode
+    node_type: "subnet"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['label']
+
+  SwitchCOMP
+    node_type: "switch"
+    inputs:  [in%d:COMP]
+    outputs: [out:COMP]
+    params:  ['index']
+
+============================================================
+  DAT — 41 operators
+============================================================
+
+  CHOPDAT
+    node_type: "chop_to_dat"
+    inputs:  [chop_in:CHOP]
+    outputs: [out:DAT]
+    params:  ['layout']
+
+  CallbackDAT
+    node_type: "callbackdat"
+    inputs:  [target:CHOP]
+    outputs: [out:DAT]
+    params:  ['time_dependent', 'active', 'log_events', 'on_start', 'on_cook', 'on_value_change', 'on_create']
+
+  ConstantDAT
+    node_type: "constant"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['col0', 'col1', 'col2', 'col3', 'r%dc%d']
+
+  CueDAT
+    node_type: "cue"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['num_cues']
+
+  DATtoCHOP
+    node_type: "dat_to_chop"
+    inputs:  [dat_in:DAT]
+    outputs: [out:CHOP]
+    params:  ['layout', 'first_is_name']
+
+  DMXDAT
+    node_type: "dmx"
+    inputs:  [values:CHOP]
+    outputs: [out:DAT]
+    params:  ['mode', 'universe', 'ip', 'port', 'active', 'channels']
+
+  DeleteDAT
+    node_type: "delete"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['mode', 'start_index', 'end_index']
+
+  ErrorDAT
+    node_type: "error"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['level_filter', 'max_rows', 'clear']
+
+  EvaluateDAT
+    node_type: "evaluate"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  []
+
+  FIFODAT
+    node_type: "fifo"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['max_rows', 'active']
+
+  FileInDAT
+    node_type: "filein"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['filepath', 'mode', 'has_header']
+
+  FolderDAT
+    node_type: "folder"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['path', 'recursive', 'filter', 'include_dirs']
+
+  HostInDAT
+    node_type: "hostindat"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['label', 'mode']
+
+  InfoDAT
+    node_type: "info"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  []
+
+  InsertDAT
+    node_type: "insert"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['mode', 'index', 'count', 'fill_value']
+
+  JSONDAT
+    node_type: "json"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['mode', 'json_string', 'pretty']
+
+  MergeDAT
+    node_type: "merge"
+    inputs:  [in1:DAT, in2:DAT]
+    outputs: [out:DAT]
+    params:  ['mode']
+
+  MidiInDAT
+    node_type: "midiin"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['active', 'device', 'channel_filter', 'max_rows', 'clear']
+
+  MqttDAT
+    node_type: "mqtt"
+    inputs:  [publish:DAT]
+    outputs: [out:DAT]
+    params:  ['broker', 'port', 'client_id', 'username', 'password', 'subscribe', 'publish_topic', 'active', 'max_messages', 'clear']
+
+  MultiTouchInDAT
+    node_type: "multitouchin"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['active', 'normalize', 'window']
+
+  NetworkDAT
+    node_type: "network"
+    inputs:  [send:DAT]
+    outputs: [out:DAT]
+    params:  ['protocol', 'mode', 'address', 'port', 'active', 'max_lines', 'clear_buffer']
+
+  NullDAT
+    node_type: "null"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  []
+
+  OPFindDAT
+    node_type: "opfind"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['family_filter', 'name_pattern', 'include_type']
+
+  OscInDAT
+    node_type: "oscin"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['port', 'max_rows', 'active', 'address_filter', 'clear']
+
+  PanelExecuteDAT
+    node_type: "panelexecute"
+    inputs:  [panel:CHOP]
+    outputs: [out:DAT]
+    params:  ['panel_path', 'max_events', 'log_values', 'log_hover', 'clear']
+
+  RenderPickDAT
+    node_type: "renderpick"
+    inputs:  [uv:CHOP]
+    outputs: [out:DAT]
+    params:  ['render_comp', 'u', 'v', 'max_distance', 'use_input']
+
+  SOPtoDAT
+    node_type: "sop_to_dat"
+    inputs:  [in:SOP]
+    outputs: [out:DAT]
+    params:  ['attribute', 'max_points']
+
+  ScriptDAT
+    node_type: "scriptdat"
+    inputs:  [in0:DAT]
+    outputs: [out:DAT]
+    params:  ['time_dependent', 'cook_once', 'force_active', 'code']
+
+  SelectDAT
+    node_type: "select"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['row_start', 'row_end', 'col_start', 'col_end', 'include_header']
+
+  SerialDAT
+    node_type: "serial"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['port', 'baud_rate', 'delimiter', 'max_rows', 'active', 'clear']
+
+  SortDAT
+    node_type: "sort"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['sort_col', 'order', 'sort_type']
+
+  SubstituteDAT
+    node_type: "substitute"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['find', 'replace_with', 'use_regex', 'case_sensitive', 'scope', 'scope_index']
+
+  SwitchDAT
+    node_type: "switch"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['index']
+
+  TOPtoDAT
+    node_type: "top_to_dat"
+    inputs:  [in:TOP]
+    outputs: [out:DAT]
+    params:  ['mode', 'max_pixels']
+
+  TableDAT
+    node_type: "table"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  ['rows', 'cols', 'headers', 'data', 'merge_input']
+
+  TextDAT
+    node_type: "text"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['text']
+
+  TransposeDAT
+    node_type: "transpose"
+    inputs:  [in:DAT]
+    outputs: [out:DAT]
+    params:  []
+
+  WebDAT
+    node_type: "web"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['url', 'method', 'body', 'content_type', 'auto_parse']
+
+  WebServerDAT
+    node_type: "webserver"
+    inputs:  [response:DAT]
+    outputs: [out:DAT]
+    params:  ['port', 'active', 'content_type', 'max_requests', 'clear']
+
+  WebSocketDAT
+    node_type: "websocket"
+    inputs:  [send:DAT]
+    outputs: [out:DAT]
+    params:  ['mode', 'url', 'port', 'active', 'max_lines', 'clear']
+
+  XMLDAT
+    node_type: "xml"
+    inputs:  [(none)]
+    outputs: [out:DAT]
+    params:  ['source', 'xml_string', 'file_path', 'include_text']
+
+============================================================
+  IMG — 13 operators
+============================================================
+
+  BlurIMG
+    node_type: "blurimg"
+    inputs:  [in:IMG]
+    outputs: [out:IMG]
+    params:  ['radius', 'passes']
+
+  CheckerboardIMG
+    node_type: "checkerboardimg"
+    inputs:  [(none)]
+    outputs: [out:IMG]
+    params:  ['resolution', 'cells_x', 'cells_y', 'color_a', 'color_b', 'softness']
+
+  EdgeDetectIMG
+    node_type: "edgedetectimg"
+    inputs:  [in:IMG]
+    outputs: [out:IMG]
+    params:  ['kernel', 'strength', 'invert', 'color_edges']
+
+  ImageFileInIMG
+    node_type: "imagefileinimg"
+    inputs:  [(none)]
+    outputs: [out:IMG]
+    params:  ['file', 'resolution', 'reload']
+
+  ImageSequenceIMG
+    node_type: "imagesequenceimg"
+    inputs:  [(none)]
+    outputs: [out:IMG]
+    params:  ['file', 'resolution', 'play', 'speed', 'index', 'loop_mode', 'preload_all']
+
+  ImgToTOP
+    node_type: "imgtotop"
+    inputs:  [in:IMG]
+    outputs: [out:TOP]
+    params:  []
+
+  NoiseIMG
+    node_type: "noiseimg"
+    inputs:  [(none)]
+    outputs: [out:IMG]
+    params:  ['resolution', 'type', 'scale', 'offset_x', 'offset_y', 'octaves', 'persistence', 'seed', 'monochrome']
+
+  NullIMG
+    node_type: "null"
+    inputs:  [in:IMG]
+    outputs: [out:IMG]
+    params:  []
+
+  PixelSortIMG
+    node_type: "pixelsortimg"
+    inputs:  [in:IMG]
+    outputs: [out:IMG]
+    params:  ['direction', 'sort_mode', 'threshold_low', 'threshold_high', 'reverse']
+
+  ScreenGrabIMG
+    node_type: "screengrab"
+    inputs:  [(none)]
+    outputs: [out:IMG]
+    params:  ['source', 'res_x', 'res_y', 'active']
+
+  ScriptIMG
+    node_type: "scriptimg"
+    inputs:  [in0:IMG]
+    outputs: [out:IMG]
+    params:  ['time_dependent', 'cook_once', 'force_active', 'code']
+
+  TOPtoIMG
+    node_type: "toptoimg"
+    inputs:  [in:TOP]
+    outputs: [out:IMG]
+    params:  []
+
+  WebcamIMG
+    node_type: "webcamimg"
+    inputs:  [(none)]
+    outputs: [out:IMG]
+    params:  ['device', 'resolution', 'active', 'mirror_h']
+
+============================================================
+  MAT — 10 operators
+============================================================
+
+  ConstantMAT
+    node_type: "constant"
+    inputs:  [color_tex:TOP]
+    outputs: [out:MAT]
+    params:  ['color', 'alpha', 'cull_mode']
+
+  DepthMAT
+    node_type: "depth"
+    inputs:  [(none)]
+    outputs: [out:MAT]
+    params:  ['near_val', 'far_val', 'invert']
+
+  FluidSurfaceMAT
+    node_type: "fluid_surface"
+    inputs:  [normal_map:TOP]
+    outputs: [out:MAT]
+    params:  ['deep_color', 'shallow_color', 'opacity', 'fresnel_power', 'fresnel_bias', 'refraction_strength', 'metallic', 'roughness', 'specular', 'caustics_enabled', 'caustics_scale', 'caustics_speed', 'caustics_intensity', 'wave_scale', 'wave_speed', 'wave_strength', 'normal_map_strength']
+
+  LineMAT
+    node_type: "line"
+    inputs:  [(none)]
+    outputs: [out:MAT]
+    params:  ['color', 'width', 'alpha', 'stipple_scale', 'stipple_ratio', 'cull_mode']
+
+  NormalMapMAT
+    node_type: "normalmap"
+    inputs:  [normal_tex:TOP, albedo_tex:TOP]
+    outputs: [out:MAT]
+    params:  ['normal_scale', 'albedo_color', 'roughness', 'unlit', 'cull_mode']
+
+  NullMAT
+    node_type: "null"
+    inputs:  [in:MAT]
+    outputs: [out:MAT]
+    params:  []
+
+  PBR_MAT
+    node_type: "pbr"
+    inputs:  [albedo_tex:TOP, normal_tex:TOP, orm_tex:TOP]
+    outputs: [out:MAT]
+    params:  ['albedo_color', 'metallic', 'roughness', 'specular', 'emission_enabled', 'emission_color', 'emission_energy', 'normal_scale', 'transparency', 'alpha_scissor_threshold', 'cull_mode', 'uv1_triplanar']
+
+  PointSpriteMAT
+    node_type: "pointsprite"
+    inputs:  [tex_in:TOP]
+    outputs: [out:MAT]
+    params:  ['color', 'point_size']
+
+  Shader_MAT
+    node_type: "shader"
+    inputs:  [tex0:TOP, tex1:TOP]
+    outputs: [out:MAT]
+    params:  ['shader_code', 'shader_file', 'u0', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'u7', 'color0', 'color1']
+
+  WireframeMAT
+    node_type: "wireframe"
+    inputs:  [(none)]
+    outputs: [out:MAT]
+    params:  ['color', 'alpha']
+
+============================================================
+  OUTPUT — 12 operators
+============================================================
+
+  AudioDeviceOUT
+    node_type: "audioout"
+    inputs:  [in:CHOP]
+    outputs: [(none — sink)]
+    params:  ['active', 'gain', 'mix_rate', 'buffer_length']
+
+  FFmpegOUT
+    node_type: "ffmpegout"
+    inputs:  [in:IMG]
+    outputs: [(none — sink)]
+    params:  ['active', 'output_file', 'codec', 'framerate', 'crf']
+
+  HostOutCHOP
+    node_type: "hostoutchop"
+    inputs:  [in:CHOP]
+    outputs: [(none — sink)]
+    params:  ['label']
+
+  HostOutDAT
+    node_type: "hostoutdat"
+    inputs:  [in:DAT]
+    outputs: [(none — sink)]
+    params:  ['label']
+
+  HostOutTOP
+    node_type: "hostout"
+    inputs:  [in:TOP]
+    outputs: [(none — sink)]
+    params:  ['label']
+
+  ImageSaveOUT
+    node_type: "imagesave"
+    inputs:  [in:IMG]
+    outputs: [(none — sink)]
+    params:  ['active', 'file_path', 'format', 'quality', 'auto_number', 'start_frame']
+
+  MovieOUT
+    node_type: "movieout"
+    inputs:  [in:IMG]
+    outputs: [(none — sink)]
+    params:  ['active', 'output_folder', 'file_prefix', 'format', 'quality', 'start_frame', 'frame_padding']
+
+  OscOUT
+    node_type: "oscout"
+    inputs:  [in:CHOP]
+    outputs: [(none — sink)]
+    params:  ['host', 'port', 'active', 'prefix', 'send_mode']
+
+  RecordOUT
+    node_type: "recordout"
+    inputs:  [in:CHOP]
+    outputs: [(none — sink)]
+    params:  ['active', 'max_samples', 'save', 'reset', 'file_path', 'format']
+
+  TableSaveOUT
+    node_type: "tablesave"
+    inputs:  [in:DAT]
+    outputs: [(none — sink)]
+    params:  ['active', 'file_path', 'format', 'include_header']
+
+  TextureSaveOUT
+    node_type: "texturesave"
+    inputs:  [in:TOP]
+    outputs: [(none — sink)]
+    params:  ['active', 'file_path', 'format', 'quality', 'auto_number', 'start_frame']
+
+  WindowOUT
+    node_type: "window"
+    inputs:  [in:TOP, panel:UI]
+    outputs: [(none — sink)]
+    params:  ['open', 'title', 'monitor', 'window_mode', 'resolution', 'position', 'always_on_top', 'vsync']
+
+============================================================
+  POP — 12 operators
+============================================================
+
+  AdvectPOP
+    node_type: "advect"
+    inputs:  [pop_in:POP, vol_in:VOL]
+    outputs: [out:POP]
+    params:  ['strength', 'add_mode']
+
+  AttractPOP
+    node_type: "attract"
+    inputs:  [pop_in:POP]
+    outputs: [out:POP]
+    params:  ['target_x', 'target_y', 'target_z', 'strength', 'radius']
+
+  BoidsPOP
+    node_type: "boids"
+    inputs:  [pop_in:POP]
+    outputs: [out:POP]
+    params:  ['perception_radius', 'avoid_radius', 'separation', 'alignment', 'cohesion', 'max_speed', 'max_force', 'bounds_radius', 'bounds_force']
+
+  CollisionPOP
+    node_type: "collision"
+    inputs:  [pop_in:POP]
+    outputs: [out:POP]
+    params:  ['ground_y', 'bounce', 'friction', 'kill_below']
+
+  ForcePOP
+    node_type: "force"
+    inputs:  [pop_in:POP]
+    outputs: [out:POP]
+    params:  ['gravity_x', 'gravity_y', 'gravity_z', 'wind_x', 'wind_y', 'wind_z', 'drag']
+
+  InstancePOP
+    node_type: "instance"
+    inputs:  [pop_in:POP, geo_in:SOP]
+    outputs: [out:SOP]
+    params:  ['max_instances', 'use_pscale', 'use_color']
+
+  LimitPOP
+    node_type: "limit"
+    inputs:  [pop_in:POP]
+    outputs: [out:POP]
+    params:  ['bbox_min_x', 'bbox_min_y', 'bbox_min_z', 'bbox_max_x', 'bbox_max_y', 'bbox_max_z', 'max_speed', 'kill_outside']
+
+  NullPOP
+    node_type: "null"
+    inputs:  [in:POP]
+    outputs: [out:POP]
+    params:  []
+
+  ParticleStateTOP
+    node_type: "particle_state"
+    inputs:  [pop_in:POP]
+    outputs: [out:TOP]
+    params:  ['width', 'attribute', 'scale']
+
+  RenderPOP
+    node_type: "render"
+    inputs:  [pop_in:POP]
+    outputs: [out:COMP]
+    params:  ['point_size', 'use_pscale', 'billboard']
+
+  SourcePOP
+    node_type: "source"
+    inputs:  [geo_in:SOP]
+    outputs: [out:POP]
+    params:  ['max_particles', 'rate', 'life_min', 'life_max', 'init_speed', 'pscale', 'reset']
+
+  TurbulencePOP
+    node_type: "turbulence"
+    inputs:  [pop_in:POP]
+    outputs: [out:POP]
+    params:  ['amplitude', 'frequency', 'roughness', 'octaves', 'speed']
+
+============================================================
+  SOP — 75 operators
+============================================================
+
+  AttributeSOP
+    node_type: "attribute"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['name', 'source', 'value', 'expression', 'seed', 'rand_min', 'rand_max']
+
+  BendSOP
+    node_type: "bend"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['angle', 'axis', 'origin', 'length_val']
+
+  BlendSOP
+    node_type: "blend"
+    inputs:  [geo_a:SOP, geo_b:SOP]
+    outputs: [out:SOP]
+    params:  ['blend', 'blend_normals', 'blend_uvs']
+
+  BooleanSOP
+    node_type: "boolean"
+    inputs:  [a:SOP, b:SOP]
+    outputs: [out:SOP]
+    params:  ['operation']
+
+  BoxSOP
+    node_type: "box"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['size_x', 'size_y', 'size_z', 'subdivide_w', 'subdivide_h', 'subdivide_d']
+
+  CHOPtoSOP
+    node_type: "choptosop"
+    inputs:  [in:CHOP]
+    outputs: [out:SOP]
+    params:  ['mode', 'x_scale', 'y_scale', 'max_samples', 'center_x']
+
+  CapSOP
+    node_type: "cap"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['cap_all', 'flip_cap_normals']
+
+  CarveSOP
+    node_type: "carve"
+    inputs:  [geo:SOP]
+    outputs: [out:SOP]
+    params:  ['first_u', 'second_u', 'extract', 'use_uvs', 'axis', 'use_position']
+
+  CircleSOP
+    node_type: "circle"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['radius', 'segments', 'type', 'orientation']
+
+  ClipSOP
+    node_type: "clip"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['plane', 'origin', 'keep_above']
+
+  ClothSOP
+    node_type: "cloth"
+    inputs:  [geo:SOP]
+    outputs: [out:SOP]
+    params:  ['gravity', 'damping', 'iterations', 'stiffness', 'wind_x', 'wind_y', 'wind_z', 'pin_mode', 'substeps', 'reset']
+
+  CopySOP
+    node_type: "copy"
+    inputs:  [template:SOP, points:SOP]
+    outputs: [out:SOP]
+    params:  ['align_to_normal', 'scale', 'use_point_scale']
+
+  CylinderSOP
+    node_type: "cylinder"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['top_radius', 'bottom_radius', 'height', 'radial_segments', 'rings', 'cap_top', 'cap_bottom']
+
+  DATtoSOP
+    node_type: "dattosop"
+    inputs:  [in:DAT]
+    outputs: [out:SOP]
+    params:  ['mode', 'max_rows']
+
+  DeleteSOP
+    node_type: "delete"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['entity', 'method', 'start', 'end', 'bmin_x', 'bmin_y', 'bmin_z', 'bmax_x', 'bmax_y', 'bmax_z', 'percent', 'seed', 'invert']
+
+  DivideSOP
+    node_type: "divide"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['mode', 'remove_degenerate']
+
+  ExtrudeSOP
+    node_type: "extrude"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['distance', 'output_sides', 'output_front', 'output_back']
+
+  FacetSOP
+    node_type: "facet"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['mode', 'distance', 'recompute_normals']
+
+  FileInSOP
+    node_type: "filein"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['file', 'reload']
+
+  FileOutSOP
+    node_type: "fileout"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['file', 'write']
+
+  FontSOP
+    node_type: "font"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['text', 'font_size', 'depth', 'horizontal_align']
+
+  FuseSOP
+    node_type: "fuse"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['threshold', 'recompute_normals']
+
+  GridSOP
+    node_type: "grid"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['size_x', 'size_z', 'rows', 'cols', 'orientation']
+
+  GroupSOP
+    node_type: "group"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['group_name', 'entity', 'method', 'bb_min_x', 'bb_min_y', 'bb_min_z', 'bb_max_x', 'bb_max_y', 'bb_max_z', 'dir_x', 'dir_y', 'dir_z', 'spread_angle', 'range_pattern', 'operation']
+
+  HeightfieldSOP
+    node_type: "heightfield"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['size_x', 'size_z', 'subdivisions', 'height', 'octaves', 'frequency', 'lacunarity', 'persistence', 'seed', 'offset_x', 'offset_z', 'noise_type', 'erosion_iters', 'erosion_strength', 'talus_angle']
+
+  IsoSurfaceSOP
+    node_type: "isosurface"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['surface_type', 'resolution', 'bounds_size', 'threshold', 'frequency', 'major_radius', 'minor_radius', 'expression']
+
+  LSystemSOP
+    node_type: "lsystem"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['axiom', 'rule_a', 'rule_b', 'rule_c', 'iterations', 'step_size', 'angle', 'step_scale', 'angle_rand', 'seed', 'tube_radius', 'tube_sides', 'taper', 'gravity']
+
+  LatticeSOP
+    node_type: "lattice"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['div_x', 'div_y', 'div_z', 'amplitude', 'frequency', 'seed']
+
+  LineSOP
+    node_type: "line"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['points', 'direction', 'length']
+
+  MagnetSOP
+    node_type: "magnet"
+    inputs:  [geo:SOP, attractors:SOP]
+    outputs: [out:SOP]
+    params:  ['strength', 'radius', 'falloff', 'exponent', 'affect_normals', 'att_x', 'att_y', 'att_z']
+
+  MergeSOP
+    node_type: "merge"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  []
+
+  MetaballSOP
+    node_type: "metaball"
+    inputs:  [points:SOP]
+    outputs: [out:SOP]
+    params:  ['resolution', 'bounds_size', 'threshold', 'default_radius', 'ball_count', 'b0x', 'b0y', 'b0z', 'b0r', 'b1x', 'b1y', 'b1z', 'b1r', 'b2x', 'b2y', 'b2z', 'b2r', 'b3x', 'b3y', 'b3z', 'b3r']
+
+  MirrorSOP
+    node_type: "mirror"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['plane', 'origin', 'merge', 'reverse_winding']
+
+  MountainSOP
+    node_type: "mountain"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['height', 'frequency', 'octaves', 'lacunarity', 'persistence', 'seed', 'noise_type', 'offset_x', 'offset_y', 'offset_z']
+
+  NoiseSOP
+    node_type: "noise"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['amplitude', 'frequency', 'offset_x', 'offset_y', 'offset_z', 'speed', 'noise_type', 'displace_axis', 'seed']
+
+  NormalSOP
+    node_type: "normal"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['mode', 'generate_tangents']
+
+  NullSOP
+    node_type: "null"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  []
+
+  ObjectMergeSOP
+    node_type: "objectmerge"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['sop_path', 'apply_transform']
+
+  ParticleSOP
+    node_type: "particle"
+    inputs:  [emitter:SOP, attractor:SOP]
+    outputs: [out:SOP]
+    params:  ['rate', 'max_particles', 'seed', 'life', 'life_rand', 'emit_speed', 'speed_rand', 'spread', 'gravity', 'drag', 'turbulence', 'attract_force', 'floor_enabled', 'floor_y', 'bounce', 'reset']
+
+  PeakSOP
+    node_type: "peak"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['distance', 'recompute_normals']
+
+  PointSOP
+    node_type: "point"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['expr_x', 'expr_y', 'expr_z', 'recompute_normals']
+
+  PolyBevelSOP
+    node_type: "polybevel"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['offset', 'divisions', 'roundness']
+
+  PolyBridgeSOP
+    node_type: "polybridge"
+    inputs:  [geo_a:SOP, geo_b:SOP]
+    outputs: [out:SOP]
+    params:  ['divisions', 'twist']
+
+  PolyLoftSOP
+    node_type: "polyloft"
+    inputs:  [section1:SOP, section2:SOP]
+    outputs: [out:SOP]
+    params:  ['loft_distance', 'loft_axis', 'subdivisions', 'close_caps']
+
+  PolyPatchSOP
+    node_type: "polypatch"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['rows', 'cols']
+
+  PolyReduceSOP
+    node_type: "polyreduce"
+    inputs:  [geo:SOP]
+    outputs: [out:SOP]
+    params:  ['target_percent', 'preserve_boundary', 'boundary_weight']
+
+  PolySplineSOP
+    node_type: "polyspline"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['subdivisions', 'output', 'radius', 'sides', 'closed']
+
+  PolyStitchSOP
+    node_type: "polystitch"
+    inputs:  [geo_a:SOP, geo_b:SOP]
+    outputs: [out:SOP]
+    params:  ['max_distance', 'include_inputs']
+
+  PrimitiveSOP
+    node_type: "primitive"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['face_normals', 'face_area', 'face_centroid', 'face_id']
+
+  RaySOP
+    node_type: "ray"
+    inputs:  [source:SOP, target:SOP]
+    outputs: [out:SOP]
+    params:  ['direction', 'max_dist', 'offset', 'use_hit_normal']
+
+  RemeshSOP
+    node_type: "remesh"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['target_edge', 'iterations', 'smooth']
+
+  ReverseSOP
+    node_type: "reverse"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['reverse_winding', 'flip_normals']
+
+  ScatterSOP
+    node_type: "scatter"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['count', 'seed', 'emit_normals', 'emit_uvs']
+
+  ScriptSOP
+    node_type: "scriptsop"
+    inputs:  [in0:SOP]
+    outputs: [out:SOP]
+    params:  ['time_dependent', 'cook_once', 'force_active', 'code']
+
+  SelectSOP
+    node_type: "select"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['entity', 'method', 'start', 'end', 'bmin_x', 'bmin_y', 'bmin_z', 'bmax_x', 'bmax_y', 'bmax_z', 'expression', 'step', 'offset', 'invert']
+
+  SkinSOP
+    node_type: "skin"
+    inputs:  [section_0:SOP]
+    outputs: [out:SOP]
+    params:  ['close_u', 'close_v', 'end_caps', 'recompute_normals']
+
+  SmoothSOP
+    node_type: "smooth"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['iterations', 'strength', 'pin_borders']
+
+  SortSOP
+    node_type: "sort"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['method', 'px', 'py', 'pz', 'seed']
+
+  SphereSOP
+    node_type: "sphere"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['radius', 'height', 'radial_segments', 'rings', 'is_hemisphere']
+
+  SpringSOP
+    node_type: "spring"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['stiffness', 'damping', 'mass', 'reset', 'max_displacement']
+
+  SubdivideSOP
+    node_type: "subdivide"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['iterations']
+
+  SweepSOP
+    node_type: "sweep"
+    inputs:  [backbone:SOP, profile:SOP]
+    outputs: [out:SOP]
+    params:  ['scale', 'profile_segs', 'close_profile', 'close_backbone', 'end_caps']
+
+  SwitchSOP
+    node_type: "switch"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['index']
+
+  TOPtoSOP
+    node_type: "toptosop"
+    inputs:  [in:TOP]
+    outputs: [out:SOP]
+    params:  ['mode', 'resolution', 'height_scale', 'grid_size', 'threshold', 'channel']
+
+  TaperSOP
+    node_type: "taper"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['scale_start', 'scale_end', 'axis', 'profile']
+
+  TextureSOP
+    node_type: "texture"
+    inputs:  [geo:SOP, tex:TOP]
+    outputs: [out:SOP]
+    params:  ['mode', 'displacement_scale', 'uv_set']
+
+  TorusSOP
+    node_type: "torus"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['inner_radius', 'outer_radius', 'rings', 'ring_segments']
+
+  TrailRibbonSOP
+    node_type: "trailribbon"
+    inputs:  [pop_in:POP]
+    outputs: [out:SOP]
+    params:  ['trail_length', 'width', 'taper', 'max_particles', 'fade_alpha', 'active']
+
+  TrailSOP
+    node_type: "trail"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['length', 'active']
+
+  TransformSOP
+    node_type: "transform"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'order']
+
+  TubeSOP
+    node_type: "tube"
+    inputs:  [(none)]
+    outputs: [out:SOP]
+    params:  ['radius_outer', 'radius_inner', 'height', 'segments', 'rows', 'caps', 'orientation']
+
+  TwistSOP
+    node_type: "twist"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['angle', 'axis']
+
+  UVProjectSOP
+    node_type: "uvproject"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['mode', 'axis', 'scale_u', 'scale_v']
+
+  VoronoiShatterSOP
+    node_type: "voronoishatter"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  ['num_points', 'seed', 'offset', 'interior_faces']
+
+  WireframeSOP
+    node_type: "wireframe"
+    inputs:  [in:SOP]
+    outputs: [out:SOP]
+    params:  []
+
+============================================================
+  TOP — 72 operators
+============================================================
+
+  AnalyzeTOP
+    node_type: "analyze"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['mode', 'kernel_size']
+
+  AntiAliasTOP
+    node_type: "anti_alias"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['strength', 'edge_threshold']
+
+  BlurTOP
+    node_type: "blur"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['size', 'quality', 'method']
+
+  CHOPtoTOP
+    node_type: "choptotop"
+    inputs:  [in:CHOP]
+    outputs: [out:TOP]
+    params:  ['mode', 'resolution', 'background', 'line_color', 'line_width', 'min_val', 'max_val', 'auto_range']
+
+  CacheTOP
+    node_type: "cache"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['length', 'delay', 'freeze', 'reset']
+
+  ChannelMixTOP
+    node_type: "channel_mix"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['r_source', 'g_source', 'b_source', 'a_source', 'r_gain', 'g_gain', 'b_gain', 'a_gain']
+
+  ChromaKeyTOP
+    node_type: "chroma_key"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['key_mode', 'key_color', 'threshold', 'smoothness', 'spill_reduction']
+
+  CircleTOP
+    node_type: "circle"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'fill_color', 'bg_color', 'center', 'radius', 'border_width', 'softness']
+
+  ColorMapTOP
+    node_type: "color_map"
+    inputs:  [in:TOP, gradient:TOP]
+    outputs: [out:TOP]
+    params:  ['luma_mode', 'intensity']
+
+  CompositeTOP
+    node_type: "composite"
+    inputs:  [A:TOP, B:TOP]
+    outputs: [out:TOP]
+    params:  ['operation', 'opacity']
+
+  CompositorEffectTOP
+    node_type: "compositor_effect"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['effect_mode', 'effect_threshold', 'effect_strength', 'effect_color']
+
+  ComputeShaderTOP
+    node_type: "compute"
+    inputs:  [in%d:TOP]
+    outputs: [out:TOP]
+    params:  ['time_dependent', 'cook_once', 'resolution', 'shader_code']
+
+  ConstantTOP
+    node_type: "constant"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'color', 'alpha']
+
+  ConvolutionTOP
+    node_type: "convolution"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['preset', 'kernel_size', 'divisor', 'bias']
+
+  CornerPinTOP
+    node_type: "corner_pin"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['top_left', 'top_right', 'bottom_left', 'bottom_right', 'bg_color']
+
+  CropTOP
+    node_type: "crop"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['resolution', 'left_top', 'right_bottom']
+
+  CrossTOP
+    node_type: "cross"
+    inputs:  [A:TOP, B:TOP]
+    outputs: [out:TOP]
+    params:  ['cross']
+
+  CustomShaderTOP
+    node_type: "glsl"
+    inputs:  [in0:TOP, in%d:TOP]
+    outputs: [out:TOP]
+    params:  ['time_dependent', 'cook_once', 'resolution', 'shader_code']
+
+  DeformTOP
+    node_type: "deform"
+    inputs:  [in:TOP, deform:TOP]
+    outputs: [out:TOP]
+    params:  ['strength', 'mode', 'resolution']
+
+  DepthTOP
+    node_type: "depth"
+    inputs:  [render:TOP]
+    outputs: [out:TOP]
+    params:  ['near', 'far', 'invert', 'resolution']
+
+  DilateErodeTOP
+    node_type: "dilate_erode"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['mode', 'radius']
+
+  DisplaceTOP
+    node_type: "displace"
+    inputs:  [source:TOP, displace:TOP]
+    outputs: [out:TOP]
+    params:  ['weight', 'method', 'scale']
+
+  EdgeTOP
+    node_type: "edge"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['strength', 'grayscale']
+
+  EmbossTOP
+    node_type: "emboss"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['strength', 'angle', 'height']
+
+  FeedbackTOP
+    node_type: "feedback"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['mix', 'translate', 'rotate', 'scale', 'reset']
+
+  FitTOP
+    node_type: "fit"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['fit_mode', 'resolution', 'border_color']
+
+  FlipTOP
+    node_type: "flip"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['flip_x', 'flip_y']
+
+  Fluid2DTOP
+    node_type: "fluid2d"
+    inputs:  [dye:TOP]
+    outputs: [out:TOP]
+    params:  ['resolution', 'emitter_pos', 'emitter_dir', 'emitter_radius', 'emitter_force', 'emitter_dye', 'enable_emitter', 'velocity_dissipation', 'density_dissipation', 'vorticity', 'pressure', 'dye_color_a', 'dye_color_b', 'brightness', 'show_velocity', 'reset']
+
+  GeometryBufferTOP
+    node_type: "geometry_buffer"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['buffer_mode']
+
+  GlueTOP
+    node_type: "glue"
+    inputs:  [in1:TOP, in2:TOP, in3:TOP, in4:TOP]
+    outputs: [out:TOP]
+    params:  ['resolution', 'layout', 'padding', 'background']
+
+  HSVAdjustTOP
+    node_type: "hsv_adjust"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['hue_offset', 'saturation', 'value']
+
+  HostInTOP
+    node_type: "hostin"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['label']
+
+  LayoutTOP
+    node_type: "layout"
+    inputs:  [in0:TOP, in1:TOP, :TOP]
+    outputs: [out:TOP]
+    params:  ['resolution', 'columns', 'bg_color']
+
+  LensDistortTOP
+    node_type: "lens_distort"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['k1', 'k2', 'chromatic_aberration', 'bg_color']
+
+  LevelTOP
+    node_type: "level"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['brightness', 'contrast', 'gamma', 'invert', 'opacity']
+
+  LookupTOP
+    node_type: "lookup"
+    inputs:  [source:TOP, ramp:TOP]
+    outputs: [out:TOP]
+    params:  ['index_by']
+
+  LumaBlurTOP
+    node_type: "luma_blur"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['blur_size', 'quality', 'luma_threshold', 'blur_bright']
+
+  MatteTOP
+    node_type: "matte"
+    inputs:  [in:TOP, matte:TOP]
+    outputs: [out:TOP]
+    params:  ['matte_channel', 'invert', 'premultiply']
+
+  MonoTOP
+    node_type: "mono"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['method', 'mix']
+
+  MovieFileInTOP
+    node_type: "moviefilein"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['file', 'resolution', 'play', 'loop', 'speed', 'seek', 'bg_color']
+
+  MultiBufferRenderTOP
+    node_type: "multi_buffer_render"
+    inputs:  [(none)]
+    outputs: [out:TOP, depth:TOP, normal:TOP]
+    params:  ['depth_enabled', 'normal_enabled']
+
+  NoiseTOP
+    node_type: "noise"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'noise_type', 'scale', 'offset', 'time_offset', 'seed', 'monochrome', 'octaves', 'lacunarity', 'gain', 'periodic', 'tile_size']
+
+  NormalMapTOP
+    node_type: "normal_map"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['strength', 'invert_y']
+
+  NullTOP
+    node_type: "null"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  []
+
+  OpticalFlowTOP
+    node_type: "opticalflow"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['resolution', 'sensitivity', 'smoothing', 'iterations']
+
+  PaletteTOP
+    node_type: "palette"
+    inputs:  [in:TOP, palette:TOP]
+    outputs: [out:TOP]
+    params:  ['palette_size', 'dither', 'dither_strength']
+
+  PanelTOP
+    node_type: "panel"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'bg_color', 'transparent_bg', 'layout', 'padding', 'spacing']
+
+  PatternTOP
+    node_type: "pattern"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'type', 'frequency', 'duty_cycle', 'color_a', 'color_b', 'rotation', 'softness']
+
+  PointCloudRenderTOP
+    node_type: "pointcloudrender"
+    inputs:  [pop:POP]
+    outputs: [out:TOP]
+    params:  ['width', 'height', 'point_size', 'size_attenuation', 'alpha', 'use_particle_color', 'color', 'bg_color', 'cam_dist', 'cam_yaw', 'cam_pitch', 'fov', 'near_clip', 'far_clip']
+
+  PosterizeTOP
+    node_type: "posterize"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['levels']
+
+  PremultiplyTOP
+    node_type: "premultiply"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['mode']
+
+  ProjectionTOP
+    node_type: "projection"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['mode', 'uv_offset', 'uv_scale', 'rotation']
+
+  RadialBlurTOP
+    node_type: "radial_blur"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['strength', 'samples', 'center_x', 'center_y']
+
+  RampTOP
+    node_type: "ramp"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'type', 'color_a', 'color_b', 'center', 'phase', 'repeat']
+
+  ReactionDiffusionTOP
+    node_type: "reactiondiffusion"
+    inputs:  [seed:TOP]
+    outputs: [out:TOP]
+    params:  ['resolution', 'feed_rate', 'kill_rate', 'diffusion_u', 'diffusion_v', 'speed', 'steps_per_frame', 'seed_pos', 'seed_radius', 'seed_amount', 'add_seed', 'color_mode', 'color_a', 'color_b', 'brightness', 'invert', 'reset', 'preset']
+
+  RectangleTOP
+    node_type: "rectangle"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'fill_color', 'bg_color', 'center', 'size', 'corner_radius', 'border_width', 'softness']
+
+  RemapTOP
+    node_type: "remap"
+    inputs:  [in:TOP, map:TOP]
+    outputs: [out:TOP]
+    params:  ['mode', 'strength']
+
+  RenderTOP
+    node_type: "render"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'bg_color', 'transparent_bg', 'use_environment', 'ambient_energy', 'ambient_color', 'anti_aliasing', 'shadow_atlas_size', 'dir_shadow_size', 'shadow_filter', 'dof_far_enabled', 'dof_far_distance', 'dof_far_transition', 'dof_near_enabled', 'dof_near_distance', 'dof_near_transition', 'dof_bokeh_size', 'dof_bokeh_shape']
+
+  ReorderTOP
+    node_type: "reorder"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['output_r', 'output_g', 'output_b', 'output_a', 'resolution']
+
+  ResolutionTOP
+    node_type: "resolution"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['resolution', 'filter']
+
+  SVGTOP
+    node_type: "svg"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'svg_path']
+
+  SharpenTOP
+    node_type: "sharpen"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['strength', 'radius']
+
+  SlopeTOP
+    node_type: "slope"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['output', 'strength']
+
+  SnapshotTOP
+    node_type: "snapshot"
+    inputs:  [in:SOP]
+    outputs: [out:TOP]
+    params:  ['mode', 'resolution', 'orbit_yaw', 'orbit_pitch', 'orbit_distance', 'wireframe', 'point_size', 'vol_view', 'slice_pos']
+
+  SwitchTOP
+    node_type: "switch"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['index', 'blend']
+
+  TextTOP
+    node_type: "text"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['text', 'resolution', 'font_file', 'font_size', 'font_color', 'bg_color', 'align_h', 'align_v', 'word_wrap']
+
+  ThresholdTOP
+    node_type: "threshold"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['threshold', 'softness', 'use_alpha']
+
+  TileTOP
+    node_type: "tile"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['repeat', 'offset', 'mirror_x', 'mirror_y']
+
+  TimeMachineTOP
+    node_type: "time_machine"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['length', 'speed', 'position', 'wrap_mode', 'freeze', 'reset']
+
+  TransformTOP
+    node_type: "transform"
+    inputs:  [in:TOP]
+    outputs: [out:TOP]
+    params:  ['translate', 'rotate', 'scale', 'pivot', 'extend']
+
+  TriangleTOP
+    node_type: "triangle"
+    inputs:  [(none)]
+    outputs: [out:TOP]
+    params:  ['resolution', 'shape', 'size', 'fill_color', 'bg_color', 'border_width', 'border_color', 'rotation', 'softness']
+
+  VectorPathTOP
+    node_type: "vectorpath"
+    inputs:  [points:CHOP, commands:DAT]
+    outputs: [out:TOP]
+    params:  ['resolution', 'shape', 'stroke_color', 'stroke_width', 'fill_color', 'fill', 'closed', 'bg_color', 'radius', 'arc_start', 'arc_end', 'arc_segments', 'line_cap', 'antialiased']
+
+============================================================
+  UI — 31 operators
+============================================================
+
+  ButtonUI
+    node_type: "button"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['label', 'toggle_mode', 'min_size']
+
+  CheckBoxUI
+    node_type: "checkbox"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['label', 'default_on', 'min_size']
+
+  ColorPickerUI
+    node_type: "colorpicker"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['default_color', 'edit_alpha', 'min_size']
+
+  ColorRectUI
+    node_type: "colorrect"
+    inputs:  [mat:MAT]
+    outputs: [out:UI]
+    params:  ['color', 'min_size']
+
+  ContainerUI
+    node_type: "container"
+    inputs:  [(none)]
+    outputs: [out:UI]
+    params:  ['layout', 'spacing', 'padding', 'columns', 'min_size']
+
+  DropdownUI
+    node_type: "dropdown"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['label', 'items', 'default_index', 'min_size']
+
+  ItemListUI
+    node_type: "itemlist"
+    inputs:  [dat:DAT, top:TOP]
+    outputs: [out:UI]
+    params:  ['allow_reselect', 'max_columns', 'icon_size', 'min_size']
+
+  KnobUI
+    node_type: "knob"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['label', 'min_val', 'max_val', 'default_val', 'size', 'knob_color']
+
+  LabelUI
+    node_type: "label"
+    inputs:  [chop:CHOP]
+    outputs: [out:UI]
+    params:  ['text', 'font_size', 'font_color', 'h_align', 'min_size']
+
+  LineEditUI
+    node_type: "lineedit"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['placeholder', 'default_text', 'max_length', 'editable', 'min_size']
+
+  LinkButtonUI
+    node_type: "linkbutton"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['text', 'underline', 'min_size']
+
+  MarginContainerUI
+    node_type: "margincontainer"
+    inputs:  [ui:UI]
+    outputs: [out:UI]
+    params:  ['left', 'top', 'right', 'bottom', 'min_size']
+
+  MenuButtonUI
+    node_type: "menubutton"
+    inputs:  [dat:DAT]
+    outputs: [out:UI]
+    params:  ['label', 'min_size']
+
+  NinePatchRectUI
+    node_type: "ninepatchrect"
+    inputs:  [top:TOP]
+    outputs: [out:UI]
+    params:  ['patch_left', 'patch_top', 'patch_right', 'patch_bottom', 'draw_center', 'min_size']
+
+  PanelContainerUI
+    node_type: "panelcontainer"
+    inputs:  [(none)]
+    outputs: [out:UI]
+    params:  ['bg_color', 'corner_radius', 'padding', 'min_size']
+
+  ProgressBarUI
+    node_type: "progressbar"
+    inputs:  [chop:CHOP]
+    outputs: [out:UI]
+    params:  ['min_val', 'max_val', 'default_val', 'chop_channel', 'show_percentage', 'min_size']
+
+  RichTextLabelUI
+    node_type: "richtextlabel"
+    inputs:  [dat:DAT]
+    outputs: [out:UI]
+    params:  ['text', 'bbcode', 'font_size', 'fit_content', 'scroll_active', 'min_size']
+
+  ScrollContainerUI
+    node_type: "scrollcontainer"
+    inputs:  [(none)]
+    outputs: [out:UI]
+    params:  ['h_scroll', 'v_scroll', 'min_size']
+
+  SeparatorUI
+    node_type: "separator"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['vertical', 'min_size']
+
+  SliderUI
+    node_type: "slider"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['label', 'min_val', 'max_val', 'step', 'default_val', 'min_size']
+
+  SpinBoxUI
+    node_type: "spinbox"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['min_val', 'max_val', 'step', 'default_val', 'prefix', 'suffix', 'editable', 'min_size']
+
+  SplitContainerUI
+    node_type: "splitcontainer"
+    inputs:  [ui_a:UI, ui_b:UI]
+    outputs: [out:UI]
+    params:  ['vertical', 'offset', 'collapsed', 'min_size']
+
+  TabBarUI
+    node_type: "tabbar"
+    inputs:  [dat:DAT]
+    outputs: [out:UI]
+    params:  ['default_tab', 'closable', 'drag_reorder', 'min_size']
+
+  TabContainerUI
+    node_type: "tabcontainer"
+    inputs:  [dat:DAT]
+    outputs: [out:UI]
+    params:  ['default_tab', 'min_size']
+
+  TextEditUI
+    node_type: "textedit"
+    inputs:  [dat:DAT]
+    outputs: [out:UI]
+    params:  ['placeholder', 'editable', 'wrap_mode', 'min_size']
+
+  TextureButtonUI
+    node_type: "texturebutton"
+    inputs:  [normal:TOP, pressed:TOP, hover:TOP]
+    outputs: [out:UI]
+    params:  ['toggle_mode', 'stretch', 'min_size']
+
+  TextureProgressBarUI
+    node_type: "textureprogressbar"
+    inputs:  [chop:CHOP, under:TOP, progress:TOP, over:TOP]
+    outputs: [out:UI]
+    params:  ['min_val', 'max_val', 'default_val', 'chop_channel', 'fill_mode', 'min_size']
+
+  TextureRectUI
+    node_type: "texturerect"
+    inputs:  [top:TOP, mat:MAT]
+    outputs: [out:UI]
+    params:  ['stretch_mode', 'min_size', 'expand_mode']
+
+  ToggleUI
+    node_type: "toggle"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['label', 'default_on', 'min_size']
+
+  TreeUI
+    node_type: "tree"
+    inputs:  [dat:DAT]
+    outputs: [out:UI]
+    params:  ['hide_root', 'hide_folding', 'min_size']
+
+  XYPadUI
+    node_type: "xypad"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['label', 'size', 'pad_color', 'cursor_color', 'default_x', 'default_y']
+
+============================================================
+  VOL — 13 operators
+============================================================
+
+  AnalyzeVOL
+    node_type: "analyze"
+    inputs:  [vol:VOL]
+    outputs: [stats:CHOP]
+    params:  ['histogram', 'hist_bins']
+
+  BlendVOL
+    node_type: "blend"
+    inputs:  [vol_a:VOL, vol_b:VOL]
+    outputs: [out:VOL]
+    params:  ['operation', 'mix_factor', 'scale_a', 'scale_b']
+
+  BlurVOL
+    node_type: "blur"
+    inputs:  [vol_in:VOL]
+    outputs: [out:VOL]
+    params:  ['radius', 'passes']
+
+  CHOPtoVOL
+    node_type: "choptovol"
+    inputs:  [chop:CHOP]
+    outputs: [out:VOL]
+    params:  ['res_x', 'res_y', 'res_z', 'mode', 'channel']
+
+  DisplaceVOL
+    node_type: "displace"
+    inputs:  [vol_in:VOL, vel_in:VOL]
+    outputs: [out:VOL]
+    params:  ['strength']
+
+  FluidVOL
+    node_type: "fluid"
+    inputs:  [density_in:VOL, vel_in:VOL, obstacle:VOL]
+    outputs: [density_out:VOL, velocity_out:VOL]
+    params:  ['res_x', 'res_y', 'res_z', 'dissipation', 'pressure_iters', 'density_add', 'vorticity', 'reset']
+
+  GPUMarchingCubesVOL
+    node_type: "gpumarchingcubes"
+    inputs:  [vol:VOL]
+    outputs: [mesh:SOP]
+    params:  ['threshold', 'max_triangles']
+
+  MarchingCubesVOL
+    node_type: "marchingcubes"
+    inputs:  [vol:VOL]
+    outputs: [mesh:SOP]
+    params:  ['threshold', 'smooth_normals']
+
+  NoiseVOL
+    node_type: "noise"
+    inputs:  [(none)]
+    outputs: [(none — sink)]
+    params:  ['res_x', 'res_y', 'res_z', 'frequency', 'amplitude', 'octaves', 'lacunarity', 'gain', 'offset_x', 'offset_y', 'offset_z', 'speed', 'format']
+
+  NullVOL
+    node_type: "null"
+    inputs:  [in:VOL]
+    outputs: [out:VOL]
+    params:  []
+
+  PyroVOL
+    node_type: "pyro"
+    inputs:  [fuel_in:VOL, vel_in:VOL, obstacle:VOL]
+    outputs: [density_out:VOL, temp_out:VOL, velocity_out:VOL]
+    params:  ['res_x', 'res_y', 'res_z', 'burn_rate', 'heat_output', 'smoke_output', 'ignition_temp', 'fuel_inject', 'buoyancy', 'cooling', 'dissipation', 'pressure_iters', 'vorticity', 'reset']
+
+  RaymarchVOL
+    node_type: "raymarch"
+    inputs:  [vol:VOL]
+    outputs: [image:TOP]
+    params:  ['width', 'height', 'max_steps', 'step_size', 'density_scale', 'absorption', 'cam_dist', 'cam_yaw', 'cam_pitch', 'fov', 'light_yaw', 'light_pitch', 'light_color', 'light_intensity', 'hg_g', 'shadow_steps', 'ambient', 'emit_color']
+
+  SOPtoVOL
+    node_type: "soptovol"
+    inputs:  [geo:SOP]
+    outputs: [out:VOL]
+    params:  ['res_x', 'res_y', 'res_z', 'radius', 'strength', 'padding']
+
+
+============================================================
+  CROSS-FAMILY OUTPUT OPERATORS
+============================================================
+  GenericScriptNode (dir=comp) outputs CHOP (expected COMP)
+  GenericScriptNode (dir=comp) outputs DAT (expected COMP)
+  DATtoCHOP (dir=dat) outputs CHOP (expected DAT)
+  ImgToTOP (dir=img) outputs TOP (expected IMG)
+  InstancePOP (dir=pop) outputs SOP (expected POP)
+  ParticleStateTOP (dir=pop) outputs TOP (expected POP)
+  RenderPOP (dir=pop) outputs COMP (expected POP)
+  AnalyzeVOL (dir=vol) outputs CHOP (expected VOL)
+  GPUMarchingCubesVOL (dir=vol) outputs SOP (expected VOL)
+  MarchingCubesVOL (dir=vol) outputs SOP (expected VOL)
+  RaymarchVOL (dir=vol) outputs TOP (expected VOL)
+
+============================================================
+  CROSS-FAMILY INPUT OPERATORS (inputs from different family)
+============================================================
+  CueCHOP (dir=chop) has cross-family inputs: cues:DAT
+  PhysicsCHOP (dir=chop) has cross-family inputs: comp_in:COMP
+  SOPtoCHOP (dir=chop) has cross-family inputs: in:SOP
+  TOPtoCHOP (dir=chop) has cross-family inputs: in:TOP
+  AreaCOMP (dir=comp) has cross-family inputs: geo_in:SOP
+  GenericScriptNode (dir=comp) has cross-family inputs: in0:CHOP
+  GeometryCOMP (dir=comp) has cross-family inputs: geo_in:SOP, mat_in:MAT, tex_in:TOP
+  InstanceCOMP (dir=comp) has cross-family inputs: template:SOP, points:SOP, mat_in:MAT, chop_in:CHOP
+  ReplicatorCOMP (dir=comp) has cross-family inputs: table:DAT
+  RigidBodyCOMP (dir=comp) has cross-family inputs: force_in:CHOP
+  CallbackDAT (dir=dat) has cross-family inputs: target:CHOP
+  CHOPDAT (dir=dat) has cross-family inputs: chop_in:CHOP
+  DMXDAT (dir=dat) has cross-family inputs: values:CHOP
+  PanelExecuteDAT (dir=dat) has cross-family inputs: panel:CHOP
+  RenderPickDAT (dir=dat) has cross-family inputs: uv:CHOP
+  SOPtoDAT (dir=dat) has cross-family inputs: in:SOP
+  TOPtoDAT (dir=dat) has cross-family inputs: in:TOP
+  TOPtoIMG (dir=img) has cross-family inputs: in:TOP
+  ConstantMAT (dir=mat) has cross-family inputs: color_tex:TOP
+  FluidSurfaceMAT (dir=mat) has cross-family inputs: normal_map:TOP
+  NormalMapMAT (dir=mat) has cross-family inputs: normal_tex:TOP, albedo_tex:TOP
+  PBR_MAT (dir=mat) has cross-family inputs: albedo_tex:TOP, normal_tex:TOP, orm_tex:TOP
+  PointSpriteMAT (dir=mat) has cross-family inputs: tex_in:TOP
+  Shader_MAT (dir=mat) has cross-family inputs: tex0:TOP, tex1:TOP
+  AdvectPOP (dir=pop) has cross-family inputs: vol_in:VOL
+  InstancePOP (dir=pop) has cross-family inputs: geo_in:SOP
+  SourcePOP (dir=pop) has cross-family inputs: geo_in:SOP
+  CHOPtoSOP (dir=sop) has cross-family inputs: in:CHOP
+  DATtoSOP (dir=sop) has cross-family inputs: in:DAT
+  TextureSOP (dir=sop) has cross-family inputs: tex:TOP
+  TOPtoSOP (dir=sop) has cross-family inputs: in:TOP
+  TrailRibbonSOP (dir=sop) has cross-family inputs: pop_in:POP
+  CHOPtoTOP (dir=top) has cross-family inputs: in:CHOP
+  PointCloudRenderTOP (dir=top) has cross-family inputs: pop:POP
+  SnapshotTOP (dir=top) has cross-family inputs: in:SOP
+  VectorPathTOP (dir=top) has cross-family inputs: points:CHOP, commands:DAT
+  CHOPtoVOL (dir=vol) has cross-family inputs: chop:CHOP
+  SOPtoVOL (dir=vol) has cross-family inputs: geo:SOP

@@ -2,7 +2,7 @@
 
 > **Audience:** Contributors writing or running tests.  
 > **Last updated:** 2026-03-21  
-> **Total automated tests:** 1,184 (828 core unit + 69 integration + 287 extension) — all passing
+> **Total automated tests:** ~1,380 (828 core unit + 69 integration + 287 extension + ~196 functional) — all passing
 
 ---
 
@@ -13,12 +13,14 @@
 3. [Running Tests](#3-running-tests)
 4. [Unit Tests](#4-unit-tests)
 5. [Integration Tests](#5-integration-tests)
-6. [Extension Tests](#6-extension-tests)
-7. [Manual Test Scenes](#7-manual-test-scenes)
-8. [Writing New Tests](#8-writing-new-tests)
-9. [What Is and Isn't Tested](#9-what-is-and-isnt-tested)
-10. [Bugs Found by Tests](#10-bugs-found-by-tests)
-11. [Directory Layout](#11-directory-layout)
+6. [Functional Tests](#6-functional-tests)
+7. [Extension Tests](#7-extension-tests)
+8. [Manual Test Patches](#8-manual-test-patches)
+9. [Manual Test Scenes (Legacy)](#9-manual-test-scenes-legacy)
+10. [Writing New Tests](#10-writing-new-tests)
+11. [What Is and Isn't Tested](#11-what-is-and-isnt-tested)
+12. [Bugs Found by Tests](#12-bugs-found-by-tests)
+13. [Directory Layout](#13-directory-layout)
 
 ---
 
@@ -30,8 +32,9 @@ GONODES uses a **four-layer testing strategy** designed around the constraints o
 |-------|------|----------|--------------|
 | **Unit tests** | Headless CLI | Individual classes (GNParameter, GNNetwork, GNCookEngine, GNChannelData, GNParamPresetManager) in isolation | No |
 | **Operator tests** | Headless CLI | All 554 operators — instantiation, parameter defaults, cook-without-crash, output type correctness | No |
+| **Functional tests** | Headless CLI | Output **correctness** — vertex positions, channel values, table contents, bounding boxes, topology changes | No |
 | **Integration tests** | Headless CLI | Full `cook_frame()` pipeline through multi-node networks with real operator instances | No |
-| **Manual test scenes** | Editor (visual) | GPU rendering, shader compilation, visual output correctness, interactive parameter tweaking | Yes |
+| **Manual test patches** | Editor (visual) | GPU rendering, shader compilation, visual output, particle systems, volumetrics, materials | Yes |
 
 The framework is **completely dependency-free** — no GdUnit4, GUT, or any third-party test plugin. Everything is pure GDScript that ships with the project and runs via Godot's `--headless` mode.
 
@@ -124,8 +127,11 @@ The filter is case-insensitive and matches against test method names using `cont
 ### Filter by tag
 
 ```bash
-# Run only core unit tests (tests/ except integration/)
+# Run only core unit tests (tests/ except integration/ and functional/)
 godot --headless -s tests/test_runner.gd --test-tag=core
+
+# Run only functional correctness tests (tests/functional/)
+godot --headless -s tests/test_runner.gd --test-tag=functional
 
 # Run only integration tests (tests/integration/)
 godot --headless -s tests/test_runner.gd --test-tag=integration
@@ -354,7 +360,61 @@ Multi-node cook chain integration tests that wire real operators through GNNetwo
 
 ---
 
-## 6. Extension Tests
+## 6. Functional Tests
+
+Functional tests live in `tests/functional/` and verify **output correctness** — not just that operators instantiate or cook without errors, but that the results contain the right values. Run them with `--test-tag=functional`.
+
+### test_sop_functional.gd — ~70 tests
+
+Verifies SOP operators produce geometrically correct output.
+
+| Category | Examples |
+|----------|----------|
+| **Generator bounds** | BoxSOP vertices within `±size/2`, SphereSOP vertices on sphere surface, GridSOP flat on Y=0 |
+| **Transform correctness** | TransformSOP(tx=10) shifts all verts right, scale=2 doubles AABB, rotation preserves vert count |
+| **Topology changes** | SubdivideSOP increases vert count, MergeSOP vert sum = inputs' sum, FuseSOP reduces duplicate verts |
+| **Normal correctness** | NormalSOP flip mode negates normals, recompute produces unit-length normals, ReverseSOP flips winding |
+| **Deformation** | PeakSOP grows AABB, NoiseSOP displaces verts, BendSOP/TwistSOP/TaperSOP modify positions |
+| **Clip / Delete** | ClipSOP removes verts below plane, DeleteSOP reduces vert count |
+| **Scatter** | ScatterSOP outputs exact requested count, same seed = same positions |
+| **Copy / Extrude** | CopySOP multiplies template by point count, ExtrudeSOP adds geometry |
+| **Procedural generators** | MetaballSOP, IsoSurfaceSOP, HeightfieldSOP, LSystemSOP all produce valid geometry |
+| **Complex ops** | VoronoiShatterSOP produces multiple surfaces, BooleanSOP executes, WireframeSOP adds tube geometry |
+
+### test_chop_functional.gd — ~70 tests
+
+Verifies CHOP operators produce correct channel values.
+
+| Category | Examples |
+|----------|----------|
+| **Generators** | ConstantCHOP value match, WaveCHOP sine in [-1,1], LFO amplitude range, NoiseCHOP has variation |
+| **Math** | MathCHOP add/multiply/abs with constant operand, two-input add, AbsoluteCHOP makes positive |
+| **Merge / Split** | MergeCHOP combines channels from both inputs, SplitCHOP extracts single channel |
+| **Analysis** | AnalyzeCHOP max/min extract correct values, SlopeCHOP of ramp is positive, of constant is zero |
+| **Mapping** | MapCHOP remaps [0,1] → [0,100], QuantizeCHOP snaps to step, LimitCHOP clamps to range |
+| **Time-domain** | LagCHOP smooths step transitions, DelayCHOP shifts signal, SpeedCHOP integrates |
+| **Logic** | LogicCHOP AND truth table, CompareCHOP greater-than threshold |
+| **Crossfade** | CrossCHOP at weight=0.5 produces midpoint, InterpolateCHOP blends two inputs |
+| **Rename / Select** | RenameCHOP changes channel name and removes old, SelectCHOP filters by wildcard pattern |
+| **Passthrough** | NullCHOP preserves value, SwitchCHOP selects correct input |
+
+### test_dat_functional.gd — ~56 tests
+
+Verifies DAT operators produce correct table/text content.
+
+| Category | Examples |
+|----------|----------|
+| **Generators** | TableDAT outputs table, TextDAT text matches, ConstantDAT value present, CSVDAT parses CSV rows |
+| **Sort / Filter** | SortDAT ascending by column, FilterDAT by pattern reduces rows, UniqueDAT removes duplicates |
+| **Merge / Split** | MergeDAT stacks rows (sum), TransposeDAT swaps rows↔cols, double transpose restores original |
+| **Modify** | SubstituteDAT find/replace, DeleteDAT removes rows, InsertDAT adds rows, RenameDAT changes headers |
+| **Format** | JSONDAT parse/generate, XMLDAT parse, YAMLDAT parse, ConvertDAT table→text, FormatDAT with template |
+| **Lookup** | LookupDAT finds row by key, ConcatenateDAT joins text |
+| **Passthrough** | NullDAT preserves table and text, SwitchDAT selects correct input |
+
+---
+
+## 7. Extension Tests
 
 Extension tests live in `addons/gn_ext_<name>/tests/` and are **self-contained** alongside the extension's operators, help patches, and native code. The test runner discovers them automatically by scanning `res://addons/gn_ext_*/tests/` directories.
 
@@ -391,7 +451,42 @@ Place tests in `addons/gn_ext_<name>/tests/test_<name>_operators.gd`. The runner
 
 ---
 
-## 7. Manual Test Scenes
+## 8. Manual Test Patches
+
+Manual test patches live in `tests/manual/<family>/` and provide **human-assisted visual testing** for operators that require GPU, scene tree, or hardware that can't run headlessly. There is exactly **one `.gnpatch` per operator** so failures can be isolated to a single node. Each patch includes a yellow sticky note explaining what to verify.
+
+### Structure
+
+- **183 patches** — one per operator across 8 families
+- Filter operators receive a minimal upstream source (e.g., NoiseTOP feeds BlurTOP) so they have data to process
+- Generator operators stand alone with no upstream
+- A yellow sticky note on each patch names the operator under test and describes what to verify
+- Generated by `scripts/gen_manual_test_patches.py` — re-run after adding new operators
+
+### How to use
+
+1. Open the GONODES editor
+2. File → Open Patch → navigate to `tests/manual/<family>/`
+3. Load a patch — read the sticky note instructions
+4. Enable cooking and verify the visual result matches expectations
+5. Mark pass/fail in your test log
+
+### Family coverage
+
+| Family | Patches | What to verify |
+|--------|---------|----------------|
+| **TOP** | 72 | Texture output, GPU rendering, compositing, filters, generators |
+| **COMP** | 20 | Scene tree integration, 3D viewport, physics, sub-networks |
+| **UI** | 31 | Widget rendering, interaction, layout, value output |
+| **POP** | 12 | Particle emission, forces, behaviors, rendering |
+| **VOL** | 13 | Volumetric rendering, simulation, marching cubes, filters |
+| **MAT** | 10 | Material appearance, shading, custom shaders |
+| **IMG** | 13 | CPU image processing, I/O, conversion |
+| **OUTPUT** | 12 | External output routing (file, window, network, device) |
+
+---
+
+## 9. Manual Test Scenes (Legacy)
 
 > **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (1,084 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §7.1 below.
 
@@ -425,7 +520,7 @@ The following scenes in `test_scenes/` tested multi-node integration workflows. 
 
 ---
 
-## 8. Writing New Tests
+## 10. Writing New Tests
 
 ### Adding a unit test
 
@@ -538,7 +633,7 @@ func test_my_chain() -> void:
 
 ---
 
-## 9. What Is and Isn't Tested
+## 11. What Is and Isn't Tested
 
 ### Covered by automated tests
 
@@ -549,7 +644,10 @@ func test_my_chain() -> void:
 - **GNParamPresetManager** — clipboard lifecycle, type-safe paste, reset to defaults, null safety
 - **All 554 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
 - **SOP behavioral verification** — vertex counts, geometry presence, subdivision effects, deformation correctness (transform shifts, noise deforms, bend/twist/taper), merge/switch/blend output, position data comparison
+- **SOP functional verification** — vertex positions within bounds, AABB size changes after scale/peak/extrude, normal directions after flip/recompute, scatter point counts, copy multiplication, clip plane enforcement, sort ordering, fuse deduplication
 - **DAT behavioral verification** — cell content, row/column counts, sort correctness (ascending/descending, numeric/alphabetic), merge row stacking, transpose dimension swap, switch selection
+- **DAT functional verification** — SortDAT ascending value order, SubstituteDAT find/replace correctness, TransposeDAT double-transpose identity, CSV parse with header/cell verification, UniqueDAT deduplication count, FilterDAT row reduction, JSON/XML/YAML parse output
+- **CHOP functional verification** — MathCHOP arithmetic correctness (5+3=8, 4×2.5=10), WaveCHOP sine range [-1,1], MergeCHOP channel union, LimitCHOP clamping, SlopeCHOP derivative sign, RenameCHOP name change, SelectCHOP wildcard filtering, LogicCHOP truth tables, CompareCHOP thresholds, MapCHOP range remapping
 - **Full cook pipeline** — `cook_frame()` through real CHOP operator chains (Constant, Math, Merge, Null, Script, LFO), including topo sort, dirty propagation, input gathering, parameter resolution, bypass mode
 - **ScriptCHOP runtime** — dynamic GDScript compilation, `@param` annotation parsing, upstream input reading, multi-channel output, syntax error handling
 - **Network serialization** — `to_dict()` / `from_dict()` round-trip fidelity for nodes, connections, parameters, and expressions; cook correctness after deserialization
@@ -565,6 +663,17 @@ func test_my_chain() -> void:
 - **DAT table operations** — All 16 DAT node types with data manipulation examples
 - **SOP geometry** — All 15 SOP node types with mesh generation/processing examples
 - **MAT materials** — PBR metallic/emissive + programmable shader examples
+
+### Covered by manual test patches (34 patches in `tests/manual/`)
+
+- **TOP (72 patches)** — one per texture operator (NoiseTOP, BlurTOP, CompositeTOP, RenderTOP, etc.)
+- **COMP (20 patches)** — one per component (GeometryCOMP, CameraCOMP, RigidBodyCOMP, SubNetworkNode, etc.)
+- **UI (31 patches)** — one per widget (ButtonUI, SliderUI, KnobUI, XYPadUI, etc.)
+- **POP (12 patches)** — one per particle operator (SourcePOP, ForcePOP, BoidsPOP, RenderPOP, etc.)
+- **VOL (13 patches)** — one per volume operator (NoiseVOL, FluidVOL, MarchingCubesVOL, RaymarchVOL, etc.)
+- **MAT (10 patches)** — one per material (PBR_MAT, WireframeMAT, Shader_MAT, etc.)
+- **IMG (13 patches)** — one per image operator (NoiseIMG, BlurIMG, PixelSortIMG, ImgToTOP, etc.)
+- **OUTPUT (12 patches)** — one per output operator (WindowOUT, MovieOUT, OscOUT, etc.)
 
 ### Covered by legacy manual test scenes (deprecated)
 
@@ -585,7 +694,7 @@ func test_my_chain() -> void:
 
 ---
 
-## 10. Bugs Found by Tests
+## 12. Bugs Found by Tests
 
 The test suite has already caught production bugs:
 
@@ -597,7 +706,7 @@ The test suite has already caught production bugs:
 
 ---
 
-## 11. Directory Layout
+## 13. Directory Layout
 
 ```
 tests/
@@ -613,7 +722,7 @@ tests/
 ├── test_shadertoy.gd                       # Shadertoy extension
 ├── test_native_operators.gd                # Native C++ operator wrappers
 ├── test_cpu_fallback.gd                    # CPU fallback paths
-├── operators/                              # Per-family core operator tests
+├── operators/                              # Per-family core operator tests (structural)
 │   ├── chop/test_chop_operators.gd         # 128 tests — core CHOPs only
 │   ├── comp/test_comp_operators.gd
 │   ├── dat/test_dat_operators.gd           # Core DATs + GNData subclass tests
@@ -625,13 +734,26 @@ tests/
 │   ├── top/test_top_operators.gd           # Core TOPs only
 │   ├── ui/test_ui_operators.gd
 │   └── vol/test_vol_operators.gd           # Core VOLs only
-└── integration/
-    ├── test_chop_chains.gd                 # CHOP operator chain cooking
-    ├── test_cook_chain.gd                  # Multi-node cook chain (SOP/CHOP/DAT end-to-end)
-    ├── test_cook_pipeline.gd               # Cook pipeline integration
-    ├── test_gnpatch_smoke.gd               # Load+verify all 1,382 .gnpatch help files
-    ├── test_script_chop.gd                 # ScriptCHOP runtime
-    └── test_network_roundtrip.gd           # Serialization round-trip
+├── functional/                             # Output correctness tests (--test-tag=functional)
+│   ├── test_sop_functional.gd              # ~70 tests — geometry value verification
+│   ├── test_chop_functional.gd             # ~70 tests — channel value verification
+│   └── test_dat_functional.gd              # ~56 tests — table/text content verification
+├── integration/
+│   ├── test_chop_chains.gd                 # CHOP operator chain cooking
+│   ├── test_cook_chain.gd                  # Multi-node cook chain (SOP/CHOP/DAT end-to-end)
+│   ├── test_cook_pipeline.gd               # Cook pipeline integration
+│   ├── test_gnpatch_smoke.gd               # Load+verify all 1,382 .gnpatch help files
+│   ├── test_script_chop.gd                 # ScriptCHOP runtime
+│   └── test_network_roundtrip.gd           # Serialization round-trip
+└── manual/                                 # Human-assisted visual test patches (183 patches)
+    ├── top/                                # 72 patches — one per GPU texture operator
+    ├── comp/                               # 20 patches — one per scene component
+    ├── ui/                                 # 31 patches — one per UI widget
+    ├── pop/                                # 12 patches — one per particle operator
+    ├── vol/                                # 13 patches — one per volume operator
+    ├── mat/                                # 10 patches — one per material operator
+    ├── img/                                # 13 patches — one per image operator
+    └── output/                             # 12 patches — one per output operator
 
 addons/gn_ext_*/tests/                      # Self-contained extension tests (287 tests)
 ├── gn_ext_native/tests/test_native_operators.gd    # 176 tests — all *Native variants

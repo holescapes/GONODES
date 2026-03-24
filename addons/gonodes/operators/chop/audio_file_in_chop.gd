@@ -33,7 +33,7 @@ var _right_buf: PackedFloat32Array = PackedFloat32Array()
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
-	node_type = "audiofilein"
+	node_type = "audio_file_in"
 	time_dependent = true
 	node_description = "Play audio file (WAV/OGG) and output waveform as CHOP channels."
 

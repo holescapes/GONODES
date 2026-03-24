@@ -15,7 +15,7 @@ var _awaiting_video_size: bool = false
 
 
 func _init() -> void:
-	node_type = "moviefilein"
+	node_type = "movie_file_in"
 	time_dependent = true
 	node_description = "Plays a video file (.ogv) as a texture stream. Godot's native VideoStreamPlayer."
 

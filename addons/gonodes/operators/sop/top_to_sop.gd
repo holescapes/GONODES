@@ -14,7 +14,7 @@ extends GNSopBase
 ## workflows.
 
 func _init() -> void:
-	node_type = "toptosop"
+	node_type = "top_to_sop"
 	node_description = "Convert TOP texture to SOP heightfield or point cloud."
 
 

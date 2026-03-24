@@ -268,6 +268,13 @@ func _on_topology_changed(_arg: Variant = null) -> void:
 func _on_connection_changed(_arg: Variant = null) -> void:
 	_active_set_dirty = true
 	_consumer_counts_dirty = true
+	# Invalidate the downstream node's input hash so the hash guard doesn't
+	# falsely skip a re-cook after rewiring (e.g., two upstreams with the
+	# same timestamp would otherwise produce an identical hash).
+	if _arg is GNConnection:
+		var to_node: GNNode = network.nodes.get(_arg.to_node, null)
+		if to_node:
+			to_node._last_cook_input_hash = -1
 
 
 ## Reorders this node's children so that GNNode instances appear in topological
@@ -531,6 +538,22 @@ func cook_frame(delta: float) -> void:
 			for node in cpu_batch:
 				if _cooked_this_frame.has(node.id):
 					_dirty_immediate_downstream(node.id)
+
+			# Re-check expression consumers within the same level that were
+			# skipped because their expression source also cooked in this level.
+			# Without this second pass, chop()/par() refs between nodes at the
+			# same depth would lag one frame behind.
+			for node in level:
+				if _cooked_this_frame.has(node.id) or not node.is_active:
+					continue
+				if _should_eval_expressions(node) and _try_expression_dirty(node):
+					_cooked_this_frame[node.id] = true
+					var r2 := _cook_single_node(node)
+					if r2 == 1:
+						cooked_count += 1
+						_dirty_immediate_downstream(node.id)
+					elif r2 == 0:
+						skipped_count += 1
 	else:
 		# Sequential cook path (original)
 		for node in topo_order:
@@ -640,12 +663,13 @@ func _compute_cook_input_hash(node: GNNode, inputs: Array[GNData]) -> int:
 	for param_name in node.spare_parameters:
 		var param: GNParameter = node.spare_parameters[param_name]
 		h = h * 31 + hash(param.get_resolved_value())
-	# Hash input data timestamps — if upstream re-cooked, timestamp changes
+	# Hash input data timestamps — if upstream re-cooked, timestamp changes.
+	# Use a sentinel for null so that null vs timestamp-0 are distinct.
 	for inp in inputs:
 		if inp != null:
 			h = h * 37 + inp.timestamp
 		else:
-			h = h * 37
+			h = h * 37 + 2654435761
 	# Time-dependent nodes: include frame timing so hash always differs
 	if node.time_dependent:
 		h = h * 41 + hash(elapsed_time)
@@ -1628,8 +1652,7 @@ func _cook_single_node(node: GNNode) -> int:
 
 	# ── Input hash guard (Tier 2) ──
 	var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
-	if cook_input_hash == node._last_cook_input_hash:
-		node.clear_dirty()
+	if cook_input_hash == node._last_cook_input_hash and not node.dirty:
 		return 0
 	node._last_cook_input_hash = cook_input_hash
 
@@ -1747,8 +1770,7 @@ func _cook_cpu_batch_parallel(batch: Array) -> void:
 		_resolve_node_parameters(node)
 		var inputs: Array[GNData] = _gather_inputs(node)
 		var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
-		if cook_input_hash == node._last_cook_input_hash:
-			node.clear_dirty()
+		if cook_input_hash == node._last_cook_input_hash and not node.dirty:
 			continue
 		node._last_cook_input_hash = cook_input_hash
 		prepared.append({"node": node, "inputs": inputs})

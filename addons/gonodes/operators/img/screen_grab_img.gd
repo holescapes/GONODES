@@ -7,7 +7,7 @@ extends GNImgBase
 ## and outputs it as GNImageData.  Chain → ImgToTOP if you need a GPU texture.
 
 func _init() -> void:
-	node_type = "screengrab"
+	node_type = "screen_grab"
 	time_dependent = true
 	node_description = "Capture viewport contents as a CPU Image."
 

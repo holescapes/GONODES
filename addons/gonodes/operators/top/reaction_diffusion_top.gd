@@ -19,7 +19,7 @@ var _needs_reset: bool = true
 
 
 func _init() -> void:
-	node_type = "reactiondiffusion"
+	node_type = "reaction_diffusion"
 	time_dependent = true
 	node_description = "Gray-Scott reaction-diffusion — generative pattern synthesis."
 

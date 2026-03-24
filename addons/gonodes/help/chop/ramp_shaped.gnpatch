@@ -9,7 +9,10 @@
                 100
             ],
             "parameters": {
-                "power": {
+                "operation": {
+                    "value": 7
+                },
+                "operand": {
                     "value": 2.0,
                     "expression": "0.8 + 0.2 * sin(time * 3.0)",
                     "mode": "EXPRESSION"

@@ -9,7 +9,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "polyspline"
+	node_type = "poly_spline"
 	node_description = "Smooth Catmull-Rom spline curve or tube from points."
 
 

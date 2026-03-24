@@ -62,7 +62,7 @@ var _dynamic_param_names: PackedStringArray = PackedStringArray()
 
 
 func _init() -> void:
-	node_type = "glsl"
+	node_type = "custom_shader"
 	time_dependent = true  # Default on — user can toggle off via parameter
 	node_description = "User-editable GLSL shader with auto-detected texture inputs from uniform declarations."
 

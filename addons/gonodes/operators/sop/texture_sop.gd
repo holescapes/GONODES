@@ -9,7 +9,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "texture"
+	node_type = "sop"
 	node_description = "Apply TOP texture to SOP geometry (vertex color or displacement)."
 
 

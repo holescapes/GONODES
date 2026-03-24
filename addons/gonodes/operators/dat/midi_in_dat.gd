@@ -26,7 +26,7 @@ var _device_filter: int = -1
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
-	node_type = "midiin"
+	node_type = "midi_in"
 	time_dependent = true
 	node_description = "Log raw MIDI messages into a DAT table."
 

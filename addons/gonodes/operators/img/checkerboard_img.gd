@@ -4,7 +4,7 @@ extends GNImgBase
 ## Produces a 2-color grid of configurable cell size.
 
 func _init() -> void:
-	node_type = "checkerboardimg"
+	node_type = "checkerboard"
 	node_description = "CPU checkerboard pattern generator."
 
 

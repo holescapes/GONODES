@@ -12,7 +12,7 @@ var _prev_managed: Array[Control] = []
 
 
 func _init() -> void:
-	node_type = "panelcontainer"
+	node_type = "panel_container"
 	node_description = "Styled panel container for child UI widgets."
 
 

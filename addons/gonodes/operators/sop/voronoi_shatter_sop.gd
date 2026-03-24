@@ -10,7 +10,7 @@ extends GNSopBase
 ## point_attrib "piece" stores the fragment index per vertex.
 
 func _init() -> void:
-	node_type = "voronoishatter"
+	node_type = "voronoi_shatter"
 	node_description = "Fracture geometry using 3D Voronoi decomposition."
 
 func _init_ports() -> void:

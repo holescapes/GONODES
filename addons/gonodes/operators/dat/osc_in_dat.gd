@@ -22,7 +22,7 @@ var _max_messages: int = 100
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
-	node_type = "oscin"
+	node_type = "osc_in"
 	time_dependent = true
 	node_description = "Receive OSC messages into a DAT table via UDP."
 

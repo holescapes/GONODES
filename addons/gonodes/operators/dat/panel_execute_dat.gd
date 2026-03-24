@@ -12,7 +12,7 @@ var _max_events: int = 100
 
 
 func _init() -> void:
-	node_type = "panelexecute"
+	node_type = "panel_execute"
 	time_dependent = true
 	node_description = "Log panel/UI events as DAT table rows."
 

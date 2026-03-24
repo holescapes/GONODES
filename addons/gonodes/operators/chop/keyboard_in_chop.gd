@@ -21,7 +21,7 @@ var active_window_name: String = ""
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _init() -> void:
-	node_type = "keyboardin"
+	node_type = "keyboard_in"
 	time_dependent = true
 	node_description = "Output keyboard key states as CHOP channels."
 

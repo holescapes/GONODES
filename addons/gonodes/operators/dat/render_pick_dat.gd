@@ -10,7 +10,7 @@ extends GNDatBase
 
 
 func _init() -> void:
-	node_type = "renderpick"
+	node_type = "render_pick"
 	time_dependent = true
 	node_description = "Pick 3D objects from render by screen coordinates."
 

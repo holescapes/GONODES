@@ -10,7 +10,7 @@ extends GNSopBase
 ## by translating it along the loft_axis by loft_distance.
 
 func _init() -> void:
-	node_type = "polyloft"
+	node_type = "poly_loft"
 	node_description = "Loft polygon surface between cross-section rings."
 
 

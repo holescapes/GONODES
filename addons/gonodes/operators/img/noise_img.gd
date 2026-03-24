@@ -10,7 +10,7 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
 func _init() -> void:
-	node_type = "noiseimg"
+	node_type = "noise"
 	node_description = "CPU procedural noise image (value noise, white noise)."
 
 

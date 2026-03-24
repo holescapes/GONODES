@@ -9,7 +9,7 @@ var _material: StandardMaterial3D = null
 
 
 func _init() -> void:
-	node_type = "normalmap"
+	node_type = "normal_map"
 	node_description = "Normal-map visualization material."
 
 
