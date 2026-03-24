@@ -18,6 +18,7 @@ var _pitch_bend: float = 0.0
 func _init() -> void:
 	node_type = "rtmidiin"
 	time_dependent = true
+	thread_safe = false  # native GNMidiIn I/O
 	node_description = "Receive MIDI via RtMidi native library."
 	if ClassDB.class_exists("GNMidiIn"):
 		_midi_in = ClassDB.instantiate("GNMidiIn")

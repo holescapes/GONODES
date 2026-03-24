@@ -56,6 +56,13 @@ scons platform=windows arch=x86_64 -j4
 | `gn_ext_video_capture` | All | `gn_video_capture` | Webcam/capture devices |
 | `gn_ext_gpu_encode` | Windows, macOS | `gn_gpu_encode` | Hardware H.264 encoding |
 | `gn_ext_midi` | All | `gn_midi` | MIDI I/O via RtMidi |
+| `gn_ext_ndi` | All | `gn_ndi` | NDI video/audio I/O |
+| `gn_ext_ml` | All | `gn_ml` | ONNX Runtime ML inference |
+| `gn_ext_depth_sensor` | All | `gn_depth_sensor` | Azure Kinect + RealSense + Ultraleap |
+| `gn_ext_blackmagic` | Windows, macOS | `gn_blackmagic` | Blackmagic capture card I/O |
+| `gn_ext_serial` | All | — | Serial port I/O (depends on gn_native) |
+| `gn_ext_user_native` | All | `gn_user_native` | User C++ operator hot-reload |
+| `gn_ext_user_python` | All | `gn_user_python` | User Python operator hot-reload |
 
 Extensions that don't support the target platform are auto-skipped.
 

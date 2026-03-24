@@ -27,6 +27,7 @@ var _last_baud: int = 0
 func _init() -> void:
 	node_type = "serial_send"
 	time_dependent = true
+	thread_safe = false  # native serial port I/O
 	node_description = "Serial port sender. Transmits DAT rows or CHOP values over a COM/tty port. Uses native C++ serial I/O when gn_ext_native is loaded."
 	_has_native = ClassDB.class_exists(&"GNNativeSerialPort")
 

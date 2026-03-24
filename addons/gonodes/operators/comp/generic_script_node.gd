@@ -81,6 +81,7 @@ var _parsed_outputs: Array = []
 func _init() -> void:
 	family = GNFamily.Type.COMP  # Gray / neutral color in graph
 	node_type = "script"
+	thread_safe = false  # user code can call set_par / network_*
 
 
 func _init_ports() -> void:

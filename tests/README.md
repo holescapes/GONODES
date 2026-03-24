@@ -82,8 +82,13 @@ tests/
 ├── test_network.gd         # GNNetwork: graph model, topo sort, dirty prop
 ├── test_channel_data.gd    # GNChannelData: channel ops, deep copy
 ├── test_preset_manager.gd  # GNParamPresetManager: clipboard, reset
+├── test_ramp_and_annotations.gd  # Ramp params + canvas annotations
+├── test_ramp_chop.gd       # RampCHOP dynamic slots
+├── test_shadertoy.gd       # Shadertoy extension
+├── test_native_operators.gd # Native C++ operator wrappers
+├── test_cpu_fallback.gd    # POP/VOL CPU fallback paths
 ├── README.md               # This file
-├── operators/              # Per-family core operator tests
+├── operators/              # Per-family core operator tests (11 families)
 │   ├── chop/test_chop_operators.gd
 │   ├── sop/test_sop_operators.gd
 │   ├── top/test_top_operators.gd
@@ -95,13 +100,19 @@ tests/
 │   ├── pop/test_pop_operators.gd
 │   ├── vol/test_vol_operators.gd
 │   └── ui/test_ui_operators.gd
+├── functional/             # Output correctness tests
+│   ├── test_sop_functional.gd
+│   ├── test_chop_functional.gd
+│   └── test_dat_functional.gd
 └── integration/
     ├── test_chop_chains.gd
+    ├── test_cook_chain.gd
     ├── test_cook_pipeline.gd
+    ├── test_gnpatch_smoke.gd
     ├── test_script_chop.gd
     └── test_network_roundtrip.gd
 
-addons/gn_ext_*/tests/      # Extension tests (self-contained, auto-discovered)
+addons/gn_ext_*/tests/      # Extension tests (18 extensions, auto-discovered)
 ├── gn_ext_native/tests/test_native_operators.gd
 ├── gn_ext_sdf/tests/test_sdf_operators.gd
 ├── gn_ext_mapper/tests/test_mapper_operators.gd

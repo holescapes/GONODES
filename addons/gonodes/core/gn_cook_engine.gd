@@ -67,7 +67,8 @@ var editor_mode: bool = false
 ## When true, CPU-family nodes (CHOP, SOP, DAT, IMG) at the same topological
 ## level are cooked in parallel using WorkerThreadPool.  GPU-family nodes
 ## (TOP, POP, VOL) always cook on the main thread (Godot renderer constraint).
-## Requires _threads_available = true (false on web).
+## Requires _threads_available = true (false on web) AND the patch must have
+## multithreading_enabled == true  (opt-in per patch, off by default).
 var parallel_cook_enabled: bool = true
 
 ## Minimum number of cookable CPU nodes at a topo level to trigger parallel
@@ -495,7 +496,8 @@ func cook_frame(delta: float) -> void:
 
 	# Parallel cook path: group nodes into topo levels and cook independent
 	# CPU-family nodes within each level concurrently.
-	var _use_parallel := parallel_cook_enabled and _threads_available
+	# Requires: engine-level parallel_cook_enabled + platform threads + patch opt-in.
+	var _use_parallel := parallel_cook_enabled and _threads_available and network.multithreading_enabled
 	if _use_parallel:
 		var levels: Array = network.get_topological_levels()
 		for level in levels:
@@ -602,8 +604,12 @@ func _pre_cook_pass(delta: float) -> void:
 ## Builds the reverse expression-consumer map: for each upstream node
 ## referenced by an expression, maps upstream_id → [consumer_node_ids].
 ## Rebuilt alongside the active set (event-driven, not per-frame).
+## Also feeds expression edges into the network's topological level builder
+## so that expression-linked nodes are forced into different levels for
+## thread-safe parallel cooking.
 func _rebuild_expr_consumer_map() -> void:
 	_expr_consumer_map.clear()
+	var expr_edges: Array = []
 	for node_id in _active_set:
 		var refs: Array[String] = _get_expression_refs(node_id)
 		for ref_id in refs:
@@ -612,6 +618,11 @@ func _rebuild_expr_consumer_map() -> void:
 			var consumers: Array = _expr_consumer_map[ref_id]
 			if node_id not in consumers:
 				consumers.append(node_id)
+			# ref_id → node_id is a dependency edge (node_id reads ref_id)
+			expr_edges.append([ref_id, node_id])
+	# Inject into network so _compute_topological_levels includes them
+	network._expression_edges = expr_edges
+	network._topo_levels_dirty = true
 
 
 ## Returns true if this node's expressions should be re-evaluated this frame.
@@ -1759,9 +1770,12 @@ func _cook_single_node(node: GNNode) -> int:
 ## Pre-resolves parameters and gathers inputs on the main thread (these
 ## access the network graph which is not thread-safe), then dispatches
 ## the actual _cook() calls to worker threads.
+## Nodes with thread_safe == false are cooked sequentially after the parallel
+## batch completes (they may call set_par, network_*, or use I/O objects).
 func _cook_cpu_batch_parallel(batch: Array) -> void:
 	# Phase 1: Main-thread preparation (graph reads are not thread-safe)
-	var prepared: Array[Dictionary] = []
+	var parallel_prepared: Array[Dictionary] = []
+	var sequential_prepared: Array[Dictionary] = []
 	for node in batch:
 		node.current_delta = current_delta
 		node.elapsed_time = elapsed_time
@@ -1773,35 +1787,57 @@ func _cook_cpu_batch_parallel(batch: Array) -> void:
 		if cook_input_hash == node._last_cook_input_hash and not node.dirty:
 			continue
 		node._last_cook_input_hash = cook_input_hash
-		prepared.append({"node": node, "inputs": inputs})
+		var entry := {"node": node, "inputs": inputs}
+		if node.thread_safe:
+			parallel_prepared.append(entry)
+		else:
+			sequential_prepared.append(entry)
 
-	if prepared.is_empty():
-		return
+	# Phase 2: Dispatch thread-safe _cook() calls to worker threads
+	if not parallel_prepared.is_empty():
+		var task_ids: Array[int] = []
+		for entry in parallel_prepared:
+			var n: GNNode = entry["node"]
+			var inp: Array[GNData] = entry["inputs"]
+			var tid := WorkerThreadPool.add_task(func():
+				var start_us := Time.get_ticks_usec()
+				var result: GNData = n._cook(inp)
+				n.cook_time_ms = (Time.get_ticks_usec() - start_us) / 1000.0
+				if result != null:
+					result.valid = true
+					result.timestamp = frame_count
+				n.cached_output = result
+				n.cook_valid = result != null
+				n.clear_dirty()
+			)
+			task_ids.append(tid)
 
-	# Phase 2: Dispatch _cook() calls to worker threads
-	var task_ids: Array[int] = []
-	for entry in prepared:
+		# Phase 3: Wait for all parallel tasks
+		for tid in task_ids:
+			WorkerThreadPool.wait_for_task_completion(tid)
+
+	# Phase 3b: Cook non-thread-safe nodes sequentially on main thread
+	for entry in sequential_prepared:
 		var n: GNNode = entry["node"]
 		var inp: Array[GNData] = entry["inputs"]
-		var tid := WorkerThreadPool.add_task(func():
-			var start_us := Time.get_ticks_usec()
-			var result: GNData = n._cook(inp)
-			n.cook_time_ms = (Time.get_ticks_usec() - start_us) / 1000.0
-			if result != null:
-				result.valid = true
-				result.timestamp = frame_count
-			n.cached_output = result
-			n.cook_valid = result != null
-			n.clear_dirty()
-		)
-		task_ids.append(tid)
-
-	# Phase 3: Wait for all tasks
-	for tid in task_ids:
-		WorkerThreadPool.wait_for_task_completion(tid)
+		var start_us := Time.get_ticks_usec()
+		var result: GNData = n._cook(inp)
+		n.cook_time_ms = (Time.get_ticks_usec() - start_us) / 1000.0
+		if result != null:
+			result.valid = true
+			result.timestamp = frame_count
+		n.cached_output = result
+		n.cook_valid = result != null
+		n.clear_dirty()
 
 	# Phase 4: Post-cook (main thread) — emit signals, tag shared, track
-	for entry in prepared:
+	for entry in parallel_prepared:
+		var n: GNNode = entry["node"]
+		n.node_cooked.emit(n.id)
+		_cooked_this_frame[n.id] = true
+		if n.cached_output != null:
+			n.cached_output._shared = _consumer_counts.get(n.id, 0) > 1
+	for entry in sequential_prepared:
 		var n: GNNode = entry["node"]
 		n.node_cooked.emit(n.id)
 		_cooked_this_frame[n.id] = true

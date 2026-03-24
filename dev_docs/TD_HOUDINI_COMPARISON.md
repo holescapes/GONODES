@@ -246,10 +246,10 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 |---------|--------------|---------|---------|------|
 | Expression language | Python | HScript + VEX | GDScript Expression | ✓ adequate |
 | Parameter-level deps | Partial (CHOP export) | Full dependency DAG | Expression dep map (`_expr_consumer_map`) + value-compare gate + input hash guard | ✓ Functionally equivalent |
-| Ramp parameter type | No (workaround via LookupTOP) | Yes (first-class, `chramp()`) | No | **GAP** |
+| Ramp parameter type | No (workaround via LookupTOP) | Yes (first-class, `chramp()`) | Yes (RAMP type + GNRampEditor curve widget + `ramp()` expression function) | ✅ Implemented |
 | Multiparm / dynamic groups | No | Yes | No | Gap (minor) |
 | Keyframe animation | Yes (basic timeline) | Yes (full animation editor) | Yes (KeyframeCHOP + ramp curves) | ✅ Implemented |
-| Custom user parameters | Yes (on COMPs) | Yes (spare params, HDAs) | `@param` in Script ops only | Gap (minor) |
+| Custom user parameters | Yes (on COMPs) | Yes (spare params, HDAs) | Yes (spare params on all nodes + `@param` in Script ops) | ✅ Implemented |
 | Demand-driven expression eval | Yes | Yes | Inline per cook frame | ✓ adequate |
 | Autocomplete | Yes (Python) | Yes (HScript, VEX) | Yes (CodeEdit) | ✓ |
 | Profiling per param | No | No | Yes (Âµs per expression) | GONODES advantage |
@@ -440,8 +440,8 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 | Multi-pane layout | Limited (COMP-based) | Full multi-pane | Single pane + float windows | Gap (minor) |
 | Inline previews | Rich (textures, graphs) | Basic (wireframe) | Labels + textures | ✓ Good |
 | Data spreadsheet | Grid-like viewer | Full spreadsheet | GNViewerPanel Tree spreadsheet | ✓ Viewer-level |
-| Network boxes / annotations | No | Yes (color boxes + stickies) | No | **GAP** |
-| Dot/routing nodes | No | Yes | No | Gap (minor) |
+| Network boxes / annotations | No | Yes (color boxes + stickies) | Yes (GNNetworkBox + GNStickyNote) | ✅ Implemented |
+| Dot/routing nodes | No | Yes | Yes (DotNode) | ✅ Implemented |
 | Viewport handles | Limited | Full 3D handles | No | Gap (not real-time relevant) |
 | Node badges | Some (error, cook flag) | Rich (warnings, time dep, bypass, lock, HDA badge) | Bypass ⏩, Lock ??, Perf ms, Bookmark # | ✓ Good |
 | Quick-add | Tab search | Tab search + radial | Tab search + drop-wire filter | ✓ Good |
@@ -489,7 +489,7 @@ Houdini's type system is **attribute-centric** — data is geometry with arbitra
 |---------|--------------|---------|---------|------|
 | Basic sub-networks | Yes (COMPs) | Yes (subnets) | Yes (SubNetworkNode) | ✓ |
 | Reusable asset format | `.tox` (COMP export) | `.hda` (full asset) | `.gnasset` (JSON, self-contained) | ✓ Implemented |
-| Custom parameter interface | Yes (COMP params) | Yes (HDA type properties) | Partial (`@param` scripts) | **GAP** |
+| Custom parameter interface | Yes (COMP params) | Yes (HDA type properties) | Yes (spare params + .gnasset promotion) | ✅ Implemented |
 | Version control | No | Yes (HDA versioning) | No | Gap (minor) |
 | Named I/O with labels | Yes (In/Out operators) | Yes (named inputs/outputs) | Yes (InTunnel/OutTunnel) | ✓ |
 | Asset distribution | File sharing | OTL libraries + Orbolt | Extension system (gn_ext_*) | ✓ Architecture exists |

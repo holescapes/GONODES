@@ -32,6 +32,7 @@ var _right_buf: PackedFloat32Array = PackedFloat32Array()
 func _init() -> void:
 	node_type = "audio_in"
 	time_dependent = true
+	thread_safe = false  # AudioServer I/O
 
 
 func _init_ports() -> void:

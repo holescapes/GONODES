@@ -2,7 +2,7 @@
 
 > **Audience:** Contributors writing or running tests.  
 > **Last updated:** 2026-03-21  
-> **Total automated tests:** ~1,380 (828 core unit + 69 integration + 287 extension + ~196 functional) — all passing
+> **Total automated tests:** 1,331 (1,044 core + 287 extension) across 48 test files — all passing
 
 ---
 
@@ -158,7 +158,7 @@ Tags and filters can be combined: `--test-tag=core --test-filter=box`
   ✗ test_some_broken_test — Expected '42' == '43'. values should match
 
 ═══════════════════════════════════════════════════
-  FAILED — 689/690 passed, 1 failed
+  ALL PASSED — 1331 tests
 
     ✗ test_chop_chains::test_some_broken_test — Expected '42' == '43'. values should match
 ═══════════════════════════════════════════════════
@@ -422,7 +422,7 @@ Extension tests live in `addons/gn_ext_<name>/tests/` and are **self-contained**
 
 Each extension has one test file (e.g., `test_<ext>_operators.gd`) that follows the same pattern as core operator tests: `before_each()`/`after_each()` lifecycle, `_make_node()`, `_cook_no_input()`, and `_cook_with()` helpers.
 
-### Extension test inventory (287 tests across 18 files)
+### Extension test inventory (287 tests across 18 extensions)
 
 | Extension | File | Tests | Key operators |
 |-----------|------|-------|---------------|
@@ -488,13 +488,13 @@ Manual test patches live in `tests/manual/<family>/` and provide **human-assiste
 
 ## 9. Manual Test Scenes (Legacy)
 
-> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (1,084 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §7.1 below.
+> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (1,382 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §7.1 below.
 
 ### 7.1 Help Example Patches (Replacement)
 
 Every operator now ships with 3+ `.gnpatch` example files accessible via the `?` help button on each node. These patches provide the same visual verification that manual test scenes provided, but with these advantages:
 
-- **Per-operator coverage** — 108 patches vs 8 multi-node test scenes
+- **Per-operator coverage** — 1,382 patches vs 8 multi-node test scenes
 - **Discoverable** — click `?` on any node to see its examples
 - **Required for new operators** — Hard Rule 25.21 mandates help patches for every new node
 - **Self-contained** — each patch tests one operator in isolation
@@ -642,7 +642,7 @@ func test_my_chain() -> void:
 - **GNNetwork** — node add/remove, connection management, topological sort, cycle detection, dirty propagation, rename with connection update, unique ID generation, serialization structure
 - **GNChannelData** — channel I/O, index bounds behavior, missing data handling, metadata tracking, deep copy, family identity
 - **GNParamPresetManager** — clipboard lifecycle, type-safe paste, reset to defaults, null safety
-- **All 554 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
+- **All 545 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
 - **SOP behavioral verification** — vertex counts, geometry presence, subdivision effects, deformation correctness (transform shifts, noise deforms, bend/twist/taper), merge/switch/blend output, position data comparison
 - **SOP functional verification** — vertex positions within bounds, AABB size changes after scale/peak/extrude, normal directions after flip/recompute, scatter point counts, copy multiplication, clip plane enforcement, sort ordering, fuse deduplication
 - **DAT behavioral verification** — cell content, row/column counts, sort correctness (ascending/descending, numeric/alphabetic), merge row stacking, transpose dimension swap, switch selection
@@ -652,8 +652,9 @@ func test_my_chain() -> void:
 - **ScriptCHOP runtime** — dynamic GDScript compilation, `@param` annotation parsing, upstream input reading, multi-channel output, syntax error handling
 - **Network serialization** — `to_dict()` / `from_dict()` round-trip fidelity for nodes, connections, parameters, and expressions; cook correctness after deserialization
 - **Patch integrity** — all 1,382 `.gnpatch` help files load, deserialize, contain nodes, and have valid connections
+- **Thread safety** — `GNNetwork.multithreading_enabled` toggle (off by default, serialized in `.gnpatch`), `GNNode.thread_safe` per-operator flag, expression edge injection into topo levels, parallel batch splitting of safe/unsafe nodes
 
-### Covered by help example patches (108 patches)
+### Covered by help example patches (1,382 patches)
 
 - **GPU rendering** — All 28 TOP operators have visual example patches
 - **Shader compilation** — `glsl_radial_wave.gnpatch` demonstrates CustomShaderTOP

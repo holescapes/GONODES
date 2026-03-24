@@ -92,13 +92,13 @@ incompatible nodes instead of crashing.
   (TOP, CHOP, SOP, DAT, MAT, COMP, IMG, UI, OUT) work normally.  The
   textport log shows a one-time warning at startup.
 
-### Future: CPU fallback paths
+### CPU Fallback Paths (✅ Implemented)
 
-CPU fallback implementations for POP and VOL are on the roadmap (post-Phase 7)
-but not yet implemented.  When they are, each POP/VOL operator would gain a
-`_cook_cpu()` code path invoked automatically when compute is unavailable,
-enabling basic particle and volume workflows on Compatibility/WebGL2 at
-reduced performance.
+CPU fallback implementations for POP and VOL are implemented. Each POP/VOL
+operator has a `_cook_cpu()` code path invoked automatically when compute
+shaders are unavailable, enabling basic particle and volume workflows on
+Compatibility/WebGL2 at reduced performance. See Section 34 (Mobile/Web
+Export) in GONODES_CONTEXT.md for details.
 
 
 ## Toolbar Layout

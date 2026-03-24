@@ -83,6 +83,7 @@ var _pending_events: Array[Dictionary] = []
 
 func _init() -> void:
 	node_type = "callback"
+	thread_safe = false  # event handlers call set_par / network_*
 
 
 func _init_ports() -> void:

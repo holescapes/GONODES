@@ -20,7 +20,7 @@ This folder contains architecture references, build internals, testing infrastru
 | [TD_HOUDINI_COMPARISON.md](TD_HOUDINI_COMPARISON.md) | Core developers | Architecture deep dive comparing GONODES with TouchDesigner and Houdini — cooking models, data flow, parameter systems, performance, extensibility. Includes gap analysis and prioritized improvement recommendations |
 | [GONODES_VS_THE_REST.md](GONODES_VS_THE_REST.md) | Core developers, architects | Feature-by-feature comparison of GONODES vs TouchDesigner, VVVV, Houdini. 16 sections + 19-item optimization roadmap. Covers C++/Python scripting strategy |
 | [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) | **Release engineers** | **Step-by-step release process** — dependency setup, godot-cpp builds, native extension compilation, template export, Quick Build validation, libgonodes, version coupling rules, packaging. Use this for every release |
-| [TESTING.md](TESTING.md) | Contributors | Test framework architecture, running tests, writing new tests, coverage matrix, bugs found by tests. 690 automated tests (661 unit + 29 integration) |
+| [TESTING.md](TESTING.md) | Contributors | Test framework architecture, running tests, writing new tests, coverage matrix, bugs found by tests. 1,331 automated tests across 48 files (1,044 core + 287 extension) |
 | [NATIVE_AUDIT.md](NATIVE_AUDIT.md) | Core developers | C++ migration audit — every operator classified by CPU intensity (HOT/WARM/COLD), Phase 1–9 migration tracking, 103 native C++ classes, extension C++ status |
 
 

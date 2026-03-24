@@ -21,6 +21,7 @@ const MAX_BUFFER_LINES := 1000
 
 func _init() -> void:
 	node_type = "network"
+	thread_safe = false  # TCP/UDP I/O
 
 
 func _init_ports() -> void:

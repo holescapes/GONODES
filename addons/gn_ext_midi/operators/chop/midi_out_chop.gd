@@ -15,6 +15,7 @@ var _prev_note_states: PackedFloat32Array = PackedFloat32Array()
 func _init() -> void:
 	node_type = "rtmidiout"
 	time_dependent = true
+	thread_safe = false  # native GNMidiOut I/O
 	is_sink = true
 	node_description = "Send MIDI via RtMidi native library."
 	if ClassDB.class_exists("GNMidiOut"):

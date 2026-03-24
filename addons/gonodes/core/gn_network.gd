@@ -573,6 +573,11 @@ func _compute_topological_order() -> Array[GNNode]:
 var _topo_levels_cache: Array = []  # Array[Array[GNNode]]
 var _topo_levels_dirty: bool = true
 
+## Expression-derived dependency edges: Array of [from_id, to_id] pairs.
+## Set by the cook engine after scanning parameter expressions.
+## Injected into _compute_topological_levels() as additional adjacency.
+var _expression_edges: Array = []
+
 func get_topological_levels() -> Array:
 	if not _topo_levels_dirty and not _topo_dirty:
 		return _topo_levels_cache
@@ -590,10 +595,21 @@ func _compute_topological_levels() -> Array:
 		adjacency[node_id] = []
 		depth[node_id] = 0
 
+	# Wire connections
 	for conn in connections:
 		if nodes.has(conn.from_node) and nodes.has(conn.to_node):
 			adjacency[conn.from_node].append(conn.to_node)
 			in_degree[conn.to_node] += 1
+
+	# Expression reference edges — if node B reads node A via chop()/par()/op(),
+	# A must cook at an earlier level than B for thread-safe parallel cooking.
+	for expr_edge in _expression_edges:
+		var from_id: String = expr_edge[0]
+		var to_id: String = expr_edge[1]
+		if nodes.has(from_id) and nodes.has(to_id):
+			if to_id not in adjacency[from_id]:
+				adjacency[from_id].append(to_id)
+				in_degree[to_id] += 1
 
 	# Kahn's with level tracking
 	var queue: Array[String] = []
@@ -789,6 +805,11 @@ func get_connection_count() -> int:
 
 ## Serializes the entire network (nodes + connections) to a Dictionary.
 ## This is the canonical save format — can be written to JSON.
+## Patch-level setting: enable multi-threaded parallel cooking.
+## Off by default (experimental).  User can opt in per patch.
+var multithreading_enabled: bool = false
+
+
 func to_dict() -> Dictionary:
 	var d: Dictionary = {
 		"version": "1.0.0",
@@ -839,6 +860,10 @@ func to_dict() -> Dictionary:
 				ann_d["color"] = [1.0, 1.0, 1.0, 1.0]
 			ann_array.append(ann_d)
 		d["annotations"] = ann_array
+
+	# Patch-level settings
+	if multithreading_enabled:
+		d["multithreading_enabled"] = true
 
 	return d
 
@@ -949,6 +974,9 @@ func from_dict(d: Dictionary) -> bool:
 				if num_part.is_valid_int():
 					_annotation_counter = maxi(_annotation_counter, int(num_part))
 		GNLogger.info("Network", "Loaded %d annotation(s)" % annotations.size())
+
+	# Patch-level settings
+	multithreading_enabled = d.get("multithreading_enabled", false)
 
 	return true
 

@@ -5,6 +5,10 @@ extends GNChopBase
 ## Uses AudioStreamPlayer + AudioEffectCapture to capture playback PCM data.
 ## Transport controls: play, pause, seek, loop.
 ##
+## The **file** parameter also accepts HTTP/HTTPS URLs.  When a URL is provided,
+## the audio is fetched asynchronously via GNUrlCache, cached on disk, and loaded
+## on the next cook once the download completes.
+##
 ## Output channels:
 ##   left   — left channel waveform
 ##   right  — right channel waveform (stereo files only)
@@ -35,6 +39,7 @@ var _right_buf: PackedFloat32Array = PackedFloat32Array()
 func _init() -> void:
 	node_type = "audio_file_in"
 	time_dependent = true
+	thread_safe = false  # AudioStreamPlayer + URL fetching use the scene tree
 
 
 func _init_ports() -> void:
@@ -76,6 +81,18 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	var sample_rate: float = float(AudioServer.get_mix_rate())
 	var out: GNChannelData = _prepare_output(sample_rate)
+
+	# URL support — fetch via cache, cook with local path once ready
+	if GNUrlCache.is_url(file_path):
+		var result: Dictionary = GNUrlCache.resolve_url(file_path, self)
+		match result.status:
+			"ready":
+				file_path = result.path
+			"pending":
+				return out  # placeholder until download completes
+			"error":
+				GNLogger.warn("AudioFileInCHOP", "'%s' — URL fetch error: %s" % [id, result.error])
+				return out
 
 	# Load / reload audio file
 	if file_path != _current_file:

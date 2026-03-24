@@ -42,6 +42,7 @@ var _device_filter: int = -1
 func _init() -> void:
 	node_type = "midi_in"
 	time_dependent = true
+	thread_safe = false  # OS MIDI I/O
 
 
 func _init_ports() -> void:

@@ -39,6 +39,7 @@ const PING_INTERVAL := 30.0  # seconds
 func _init() -> void:
 	node_type = "mqtt"
 	time_dependent = true
+	thread_safe = false  # StreamPeerTCP I/O
 
 
 func _init_ports() -> void:

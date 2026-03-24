@@ -27,6 +27,7 @@ var _prev_trigger_val: float = 0.0
 func _init() -> void:
 	node_type = "cue_sequencer"
 	time_dependent = true
+	thread_safe = false  # calls engine.set_par() on other nodes
 
 
 func _init_ports() -> void:

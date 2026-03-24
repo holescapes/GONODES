@@ -91,6 +91,11 @@ var preview_enabled: bool = true
 ## without cooking. If no inputs exist, it outputs null.
 var bypass: bool = false
 
+## Whether this node's _cook() is safe to run on a worker thread.
+## Default true.  Override to false in operators that call set_par(),
+## network_add_node(), or use non-thread-safe I/O (StreamPeerTCP, AudioServer, etc.).
+var thread_safe: bool = true
+
 ## When true, the node is locked: parameter values cannot be changed by the user
 ## (inspector controls are disabled). Cook still proceeds normally.
 var locked: bool = false

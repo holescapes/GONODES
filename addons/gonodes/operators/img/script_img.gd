@@ -61,6 +61,7 @@ var _last_code: String = ""
 
 func _init() -> void:
 	node_type = "scriptimg"
+	thread_safe = false  # user code can call set_par / network_*
 
 
 func _init_ports() -> void:

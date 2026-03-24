@@ -24,6 +24,7 @@ var _max_messages: int = 100
 func _init() -> void:
 	node_type = "osc_in"
 	time_dependent = true
+	thread_safe = false  # PacketPeerUDP I/O
 
 
 func _init_ports() -> void:

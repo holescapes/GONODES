@@ -1,0 +1,44 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "AudioFileInCHOP — load audio from a URL (WAV/OGG)",
+    "nodes": {
+        "audiofilein1": {
+            "type": "AudioFileInCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "file": {
+                    "value": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Test_oridge.ogg"
+                },
+                "play": {
+                    "value": true
+                },
+                "loop": {
+                    "value": true
+                },
+                "buffer_size": {
+                    "value": 1024
+                }
+            }
+        },
+        "null_chop": {
+            "type": "NullCHOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {
+            "from": "audiofilein1",
+            "from_port": 0,
+            "to": "null_chop",
+            "to_port": 0
+        }
+    ]
+}

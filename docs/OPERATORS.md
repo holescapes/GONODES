@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **380 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 10 extension addons.
+> **545 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 19 extension addons.
 
 ---
 
@@ -16,7 +16,7 @@
 - [OUT — Output Operators](#out--output-operators)
 - [UI — User Interface Operators](#ui--user-interface-operators)
 
-> **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (1,084 total).
+> **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (1,382 total).
 >
 > ### Help Patch Hard Rule
 > Every help example patch **MUST**:

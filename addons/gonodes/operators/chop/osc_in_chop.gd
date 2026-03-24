@@ -26,6 +26,7 @@ var _channel_values: Dictionary = {}  # channel_name → float
 func _init() -> void:
 	node_type = "osc_in"
 	time_dependent = true
+	thread_safe = false  # PacketPeerUDP I/O
 
 
 func _init_ports() -> void:

@@ -19,23 +19,23 @@ If you've used TouchDesigner, Max/MSP, vvvv, or VUO, you know the workflow: conn
 
 ## Features at a Glance
 
-**371 operators** across **11 families**, plus **69 native C++ accelerated operators** and **11 extensions**.  
+**545 operators** across **11 families**, plus **92 native C++ accelerated operators** and **19 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
 
 | Family | What It Processes | Examples |
 |--------|-------------------|----------|
-| **TOP** (83) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
-| **CHOP** (76) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
-| **SOP** (71) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
-| **DAT** (37) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
+| **TOP** (129) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
+| **CHOP** (112) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
+| **SOP** (120) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
+| **DAT** (47) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
 | **COMP** (20) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
-| **POP** (10) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
-| **VOL** (11) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
-| **MAT** (9) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
-| **IMG** (14) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab |
-| **OUT** (9) | Output & export | WindowOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
+| **POP** (20) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
+| **VOL** (22) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
+| **MAT** (10) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
+| **IMG** (21) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab |
+| **OUT** (13) | Output & export | WindowOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
 | **UI** (31) | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer |
 
 ### Live Expression System
@@ -91,6 +91,12 @@ Physics simulation (Jolt), environment/post-processing, instancing, animation �
 | **Mapper** | Projection mapping toolkit — QuadMap, BezierMap, GridWarp, EdgeBlend, and more |
 | **SDF** | Signed distance field composition — 10 primitives, 5 booleans, 8 modifiers, raymarcher |
 | **Serial** | Serial port I/O for hardware communication (Arduino, DMX controllers, sensors) |
+| **NDI** | NDI video/audio I/O — send and receive over the network |
+| **ML** | ONNX Runtime ML inference — pose, hand, face, depth, style, segmentation, detection |
+| **Depth Sensor** | Azure Kinect + RealSense + Ultraleap — depth, color, skeleton, hand tracking |
+| **Blackmagic** | Blackmagic Design capture card input/output |
+| **User Native** | Write custom C++ operators in-editor with hot-reload |
+| **User Python** | Write custom Python operators with NumPy |
 
 ### Scripting
 
@@ -125,11 +131,11 @@ Press **F2** to open the debug system:
 
 ### Help System
 
-Every operator has a **?** button that opens auto-generated documentation (inputs, outputs, parameters, description) plus hand-written guides where available. **1,084 example patches** — 3+ per operator — open in floating editor windows so your work stays untouched.
+Every operator has a **?** button that opens auto-generated documentation (inputs, outputs, parameters, description) plus hand-written guides where available. **1,382 example patches** — 3+ per operator — open in floating editor windows so your work stays untouched.
 
 ### Testing
 
-**690 automated tests** covering the cook engine, parameter system, data types, serialization, and operator behavior.
+**1,331 automated tests** across 48 test files covering the cook engine, parameter system, data types, serialization, and operator behavior.
 
 ---
 

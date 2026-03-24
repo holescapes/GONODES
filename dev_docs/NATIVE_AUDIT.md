@@ -30,7 +30,7 @@ The cook engine itself has moderate per-node overhead each frame:
 
 ---
 
-## SOP Family — `addons/gonodes/operators/sop/` (71 files)
+## SOP Family — `addons/gonodes/operators/sop/` (75 files)
 
 ### 🔴 HOT (26 operators)
 
@@ -116,7 +116,7 @@ The cook engine itself has moderate per-node overhead each frame:
 
 ---
 
-## CHOP Family — `addons/gonodes/operators/chop/` (74 files)
+## CHOP Family — `addons/gonodes/operators/chop/` (77 files)
 
 ### 🔴 HOT (14 operators)
 
@@ -209,7 +209,7 @@ The cook engine itself has moderate per-node overhead each frame:
 
 ---
 
-## TOP Family — `addons/gonodes/operators/top/` (68 files)
+## TOP Family — `addons/gonodes/operators/top/` (72 files)
 
 ### 🔴 HOT (1 operator)
 
@@ -264,7 +264,7 @@ analyze, anti_alias, blur, cache, channel_mix, chroma_key, circle, color_map, co
 
 ---
 
-## VOL Family — `addons/gonodes/operators/vol/` (11 files)
+## VOL Family — `addons/gonodes/operators/vol/` (13 files)
 
 **Architecture note**: All VOL operators have dual paths: GPU `_cook()` using compute shaders and CPU `_cook_cpu()` fallback. The GPU path is COLD (just dispatches compute). The CPU fallback is where the heat is.
 
@@ -292,7 +292,7 @@ analyze, anti_alias, blur, cache, channel_mix, chroma_key, circle, color_map, co
 
 ---
 
-## POP Family — `addons/gonodes/operators/pop/` (11 files)
+## POP Family — `addons/gonodes/operators/pop/` (12 files)
 
 **Architecture note**: Like VOL, all POP operators have GPU `_cook()` (compute shader on SSBO) and CPU `_cook_cpu()` fallback. GPU path is COLD. CPU fallback is HOT.
 
@@ -334,7 +334,7 @@ geometry_comp, camera_comp, light_comp, environment_comp, instance_comp, animati
 
 ---
 
-## MAT Family — `addons/gonodes/operators/mat/` (9 files)
+## MAT Family — `addons/gonodes/operators/mat/` (10 files)
 
 ### 🟢 ALL COLD
 
@@ -364,7 +364,7 @@ button_ui, check_box_ui, color_picker_ui, color_rect_ui, container_ui, dropdown_
 
 ---
 
-## DAT Family — `addons/gonodes/operators/dat/` (39 files)
+## DAT Family — `addons/gonodes/operators/dat/` (41 files)
 
 ### 🟡 WARM (4 operators)
 

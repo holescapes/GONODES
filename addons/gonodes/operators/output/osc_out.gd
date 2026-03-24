@@ -25,6 +25,7 @@ enum SendMode { INDIVIDUAL, BUNDLE }
 func _init() -> void:
 	node_type = "osc_out"
 	time_dependent = true
+	thread_safe = false  # PacketPeerUDP I/O
 
 
 func _init_ports() -> void:

@@ -6,6 +6,10 @@ extends GNImgBase
 ## formats are supported: PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR,
 ## and Godot texture resources (.tres/.res).
 ##
+## The **file** parameter also accepts HTTP/HTTPS URLs.  When a URL is provided,
+## the image is fetched asynchronously via GNUrlCache, cached on disk, and loaded
+## on the next cook once the download completes.
+##
 ## Chain → ImgToTOP if you need a GPU texture downstream.
 
 ## Path of the currently loaded file — avoids reloading every cook.
@@ -17,6 +21,7 @@ var _loaded_image: Image = null
 
 func _init() -> void:
 	node_type = "image_file_in"
+	thread_safe = false  # URL fetching uses HTTPRequest / scene tree
 
 
 func _init_ports() -> void:
@@ -46,6 +51,18 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		set_param_value("reload", false)
 		_loaded_file_path = ""
 		_loaded_image = null
+
+	# URL support — fetch via cache, cook with local path once ready
+	if GNUrlCache.is_url(file_path):
+		var result: Dictionary = GNUrlCache.resolve_url(file_path, self)
+		match result.status:
+			"ready":
+				file_path = result.path
+			"pending":
+				return out  # placeholder until download completes
+			"error":
+				GNLogger.warn("ImageFileInIMG", "'%s' — URL fetch error: %s" % [id, result.error])
+				return out
 
 	# Load image if path changed.
 	if file_path != _loaded_file_path:

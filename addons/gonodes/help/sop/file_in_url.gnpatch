@@ -1,0 +1,126 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "FileInSOP — load a glTF model from a URL",
+    "nodes": {
+        "filein1": {
+            "type": "FileInSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "file": {
+                    "value": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/Box/glTF-Binary/Box.glb"
+                }
+            }
+        },
+        "transform1": {
+            "type": "TransformSOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "ry": {
+                    "value": 0,
+                    "expression": "time * 45.0",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                800,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "filein1",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "transform1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ]
+}

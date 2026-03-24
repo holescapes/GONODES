@@ -25,6 +25,7 @@ var _http_request: HTTPRequest = null
 func _init() -> void:
 	node_type = "web"
 	time_dependent = false
+	thread_safe = false  # HTTPRequest I/O
 
 
 func _init_ports() -> void:

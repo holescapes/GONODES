@@ -1,0 +1,67 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "ImageFileInIMG — load an image from a URL",
+    "nodes": {
+        "imagefileinimg1": {
+            "type": "ImageFileInIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "file": {
+                    "value": "https://picsum.photos/512/512.jpg"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "imgtotop1": {
+            "type": "ImgToTOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "imagefileinimg1",
+            "from_port": 0,
+            "to": "imgtotop1",
+            "to_port": 0
+        },
+        {
+            "from": "imgtotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ]
+}

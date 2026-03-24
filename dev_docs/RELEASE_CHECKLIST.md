@@ -42,7 +42,7 @@ The single godot-cpp copy lives at `addons/gn_ext_native/native/godot-cpp/`.
 - [ ] If missing, clone it:
   ```bash
   cd addons/gn_ext_native/native
-  git clone --depth 1 --branch godot-4.2-stable https://github.com/godotengine/godot-cpp.git
+  git clone --depth 1 --branch godot-4.6-stable https://github.com/godotengine/godot-cpp.git
   ```
 - [ ] Build for each target platform (once per Godot version bump):
   ```bash
@@ -137,7 +137,7 @@ The `gn_ext_user_native` extension lets users write custom C++ nodes **at runtim
 - [ ] Copy `addons/gn_ext_native/native/godot-cpp/` into `addons/gn_ext_user_native/toolchain/godot-cpp/`
   - Include: headers (`include/`, `gen/include/`), pre-built static libs (`bin/`)
   - Exclude: `.git/`, `test/`, `doc/`, object files (`*.o`, `*.obj`)
-- [ ] Verify the bundled godot-cpp was built from the **same branch** as the Godot editor version (e.g., `godot-4.2-stable` for Godot 4.6.x)
+- [ ] Verify the bundled godot-cpp was built from the **same branch** as the Godot editor version (e.g., `godot-4.6-stable` for Godot 4.6.x)
 - [ ] Verify static libs exist for **all shipping platforms** (at minimum: Windows x86_64, Linux x86_64, macOS arm64)
 - [ ] Verify `toolchain/README.md` matches the shipped layout
 - [ ] Test: Drop a UserNativeSOP → Edit C++ → Ctrl+B → confirm it finds headers and compiles
@@ -299,7 +299,7 @@ GONODES has several components that **must stay version-locked**. A mismatch cau
 | Component A | Component B | Must match? | What breaks |
 |-------------|-------------|-------------|-------------|
 | Godot editor | Export templates | **Exact version** | Export fails or Player crashes on launch |
-| Godot editor | godot-cpp | **Same branch** (e.g., `godot-4.2-stable`) | GDExtension ABI mismatch → crash |
+| Godot editor | godot-cpp | **Same branch** (e.g., `godot-4.6-stable`) | GDExtension ABI mismatch → crash |
 | godot-cpp (main build) | godot-cpp (user_native toolchain) | **Identical** | User C++ nodes crash when loaded |
 | libgodot.dll | libgonodes.dll | **Same Godot version** | ABI mismatch → host app crash |
 | Player .pck | Player binary | **Same export** | Missing resources or script errors |

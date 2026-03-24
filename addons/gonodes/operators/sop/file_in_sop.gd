@@ -2,9 +2,18 @@ class_name FileInSOP
 extends GNSopBase
 ## Imports geometry from a file (OBJ, glTF, or Godot .tres/.res).
 ## Uses Godot's ResourceLoader for glTF/.tres, and manual parsing for OBJ.
+##
+## The **file** parameter also accepts HTTP/HTTPS URLs.  When a URL is provided,
+## the file is fetched asynchronously via GNUrlCache, cached on disk, and loaded
+## on the next cook once the download completes.
+
+## Tracks the last URL that was resolved, to avoid spamming fetch requests.
+var _last_url: String = ""
+
 
 func _init() -> void:
 	node_type = "file_in"
+	thread_safe = false  # URL fetching uses HTTPRequest / scene tree
 
 
 ## Local filesystem access — not available on web.
@@ -29,6 +38,18 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var path: String = get_param_value("file").strip_edges()
 	if path.is_empty():
 		return geo
+
+	# URL support — fetch via cache, cook with local path once ready
+	if GNUrlCache.is_url(path):
+		var result: Dictionary = GNUrlCache.resolve_url(path, self)
+		match result.status:
+			"ready":
+				path = result.path
+			"pending":
+				return geo  # placeholder until download completes
+			"error":
+				GNLogger.warn("FileInSOP", "'%s' — URL fetch error: %s" % [id, result.error])
+				return geo
 
 	var ext: String = path.get_extension().to_lower()
 
