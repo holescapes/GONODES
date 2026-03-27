@@ -30,7 +30,7 @@ For the full development journal with implementation details, see
 - Added headless guard to SDF boot script
 
 ### Documentation
-- Updated all docs to reflect 533 operators across 13 families
+- Updated all docs to reflect 534 operators across 13 families
 - Updated test counts to 1,355 across 31+ test files
 - Created `dev_docs/EXTENSIONS.md` — extension system architecture deep-dive
 - Created `dev_docs/DATA_TYPES.md` — data type hierarchy and COW model

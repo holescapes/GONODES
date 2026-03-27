@@ -706,7 +706,7 @@ jobs:
           The Player is a standalone runtime — download, unzip, place your `.gnpatch` file alongside it with a `config.json`, and run. No Godot editor needed.
 
           ### Editor
-          Full GONODES project with pre-compiled native extension binaries. Open in Godot ${{ env.GODOT_VERSION }}. Includes all 533 operators, 1,355 tests, and 18 extensions.
+          Full GONODES project with pre-compiled native extension binaries. Open in Godot ${{ env.GODOT_VERSION }}. Includes all 534 operators, 1,355 tests, and 18 extensions.
 
           ### Requirements
           - **Godot ${{ env.GODOT_VERSION }}** (for the Editor distribution)

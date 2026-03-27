@@ -167,7 +167,13 @@ See the **Building** help section for how to prepare Player templates and detail
 
 The Player doesn't require WindowOUT nodes. Patches that only use file-save operators (ImageSaveOUT, TextureSaveOUT, TableSaveOUT, MovieOUT, FFmpegOUT, RecordOUT) or network-output nodes (OscOUT) run headless — the cook engine keeps their chains alive via `is_sink = true`.
 
-For **Script operators** with side effects (HTTP, hardware control, etc.), enable the **Force Active** toggle so the script acts as a sink:
+### SinkOUT — Keep-Alive for Any Chain
+
+For chains that have no natural output (no file write, no display, no network send), drop a **SinkOUT** at the end. It accepts any data family and acts as a no-op sink — the chain stays alive and cooking without producing any side effects. Toggle its **Active** parameter OFF to pause the chain.
+
+### Force Active — Script Operators as Sinks
+
+For **Script operators** with side effects (HTTP, hardware control, etc.), enable the **Force Active** toggle so the script itself acts as a sink:
 
 | Parameter      | Setting | Why                                      |
 |----------------|---------|------------------------------------------|

@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **533 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
+> **534 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
 
 ---
 
@@ -4387,6 +4387,20 @@ Pass-through. Forwards input material unchanged. Useful for wire organization, e
 ## OUT — Output Operators
 
 Output operators are terminal/sink nodes that display or save results. They extend `GNOutBase`, belong to the OUT family, and have `is_sink = true`. They have inputs but no data outputs — they are the endpoints of the cook graph.
+
+---
+
+#### SinkOUT
+
+Keep-alive sink — holds its upstream chain active without producing output. Accepts any data family via adaptive input port. Use this to keep headless processing chains alive when there is no WindowOUT, file-save, or network output downstream.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | true | When ON the node acts as a sink, keeping its chain cooking |
+
+**Input 0:** `in` (any family — adapts to whatever is connected).
+
+**How it works:** Extends `GNOutBase` with `is_sink` toggled by the `active` parameter. Overrides `can_accept_connection()` to accept any data family (like DotNode). The `_cook()` method is a no-op — data flows in and is consumed without processing. Toggle Active OFF to suspend the chain without deleting the node.
 
 ---
 

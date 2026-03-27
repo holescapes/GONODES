@@ -19,7 +19,7 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**533 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
+**534 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
@@ -35,7 +35,7 @@ Parallel level-based cook engine, named output ports, dot routing nodes, and key
 | **VOL** (22) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
 | **MAT** (10) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
 | **IMG** (18) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab |
-| **OUT** (13) | Output & export | WindowOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
+| **OUT** (14) | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
 | **UI** (31) | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer |
 | **SDF** (26) | Signed distance fields | Box, Sphere, Torus, Boolean ops, Bend, Twist, Raymarch |
 | **SCRIPT** (3) | User scripting | GDScript, Python, C++ — template-based multi-family output |
@@ -151,7 +151,7 @@ Click **Build** in the editor and your patch becomes a standalone application �
 - **Quick Build** — one-click export copies a pre-built Player binary + your `.gnpatch` + assets + `config.json` to a folder. Double-click to run.
 - **8 platform targets** — Windows (x86_64, ARM64), macOS (universal), Linux (x86_64, ARM64), Android, iOS, and Web (HTML5/WebAssembly).
 - **Multi-window** — each WindowOUT opens an independent OS window, auto-positioned across displays. The Player auto-opens all windows on launch.
-- **Headless mode** — patches without WindowOUTs still cook: file-save operators, OSC/MIDI output, and `Force Active` scripts keep the engine alive at near-zero idle.
+- **Headless mode** — patches without WindowOUTs still cook: file-save operators, OSC/MIDI output, `SinkOUT` (keep-alive for any chain), and `Force Active` scripts keep the engine alive at near-zero idle.
 - **Renderer fallback** — Forward+ (Vulkan/D3D12/Metal) with automatic fallback to Compatibility (OpenGL 3.3/WebGL2). GPU particles and compute volumes gracefully degrade on OpenGL.
 - **config.json** — minimal config alongside the executable: `{ "patch": "MyShow.gnpatch" }`. Override via `--patch <path>` CLI.
 

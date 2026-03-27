@@ -144,6 +144,7 @@ via the `is_sink` mechanism on file-save operators and `Force Active` scripts.
 **How `is_sink` works:** During `GNCookEngine._compute_active_set()`, BFS
 starts from all nodes where `is_sink == true`. This includes:
 - WindowOUT (always)
+- SinkOUT (when Active = ON; accepts any family — pure keep-alive, no side effects)
 - TextureSaveOUT, ImageSaveOUT, TableSaveOUT, MovieOUT, FFmpegOUT, RecordOUT (always)
 - OscOUT (always)
 - Script operators with `Force Active = ON` (parameter-driven)

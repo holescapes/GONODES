@@ -1,0 +1,52 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                }
+            }
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [450, 100],
+            "parameters": {}
+        },
+        "sink1": {
+            "type": "SinkOUT",
+            "position": [800, 100],
+            "parameters": {
+                "active": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [800, 350],
+            "parameters": {
+                "resolution": {
+                    "value": {"_type": "Vector2i", "x": 512, "y": 512}
+                },
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "level1", "to_port": 0},
+        {"from": "level1", "from_port": 0, "to": "sink1", "to_port": 0},
+        {"from": "noise1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SinkOUT \u2014 Headless Chain\n\nThe Noise\u2192Level chain is kept alive by SinkOUT.\nIt has no window or viewer \u2014 perfect for headless mode.\nThe WindowOUT below shows the raw noise for reference only.",
+            "position": [-100.0, -150.0],
+            "size": [400.0, 110.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}
