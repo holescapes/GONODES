@@ -345,9 +345,13 @@ GONODESPlayer-v{VERSION}-{platform}/
 ## Phase 7: Post-Release
 
 - [ ] Update `CHANGELOG.md`
-- [ ] Push release tag
-- [ ] Upload packages to distribution channel
-- [ ] Verify download links work
+- [ ] Push release tag → triggers `.github/workflows/release.yml`
+  - Builds all native extensions (5 platforms)
+  - Runs headless test suite
+  - Exports Player templates (Windows, Linux, macOS)
+  - Packages Editor distributions
+  - Creates GitHub Release with all artifacts attached
+- [ ] Verify GitHub Release page: all downloads present, correct sizes
 - [ ] Announce release
 
 ---

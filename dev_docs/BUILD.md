@@ -920,10 +920,19 @@ addons/gn_ext_midi/native/bin/
 
 ## CI Pipelines
 
-GONODES has two tiers of CI:
+GONODES has three workflow files in `.github/workflows/`:
 
-1. **Player/Editor exports** — build the Godot Player binaries via build scripts
-2. **Native library builds** — compile all C++ GDExtensions for all platform targets
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `build-extensions.yml` | Extension/build file changes | Incremental native library builds (all platforms) |
+| `tests.yml` | Push to main/dev/release, PRs | Build native libs (Linux) → run headless test suite |
+| `release.yml` | Version tags (`v*`), manual | Full release: native libs (all platforms) → tests → Player exports → Editor packages → GitHub Release |
+
+### Quick summary
+
+- **Dev cycle:** push code → `tests.yml` compiles Linux extensions, runs 1,355 tests headless.
+- **Release:** push a `v*` tag → `release.yml` builds everything, creates a GitHub Release with downloads.
+- **Native-only:** `build-extensions.yml` runs when only native C++ code changes, skips Player export.
 
 ### Native Library CI
 
@@ -999,6 +1008,25 @@ The complete release build flow:
 
 The build scripts are designed for unattended use.  Exit code = number of
 failed exports (0 = all succeeded).
+
+### Automated Releases
+
+The `release.yml` workflow is the recommended way to cut a release:
+
+```bash
+git tag v0.2.0-alpha
+git push origin v0.2.0-alpha
+```
+
+This triggers the full pipeline: native extension builds (5 platforms) →
+tests → Player exports (Windows, Linux, macOS) → Editor packaging →
+GitHub Release with all artifacts attached. No local build needed.
+
+Tags containing `alpha`, `beta`, `rc`, or `dev` are automatically marked
+as pre-releases. The workflow can also be triggered manually from the
+Actions tab with a custom version string.
+
+### Local builds
 
 ```bash
 # GitHub Actions (Linux runner)

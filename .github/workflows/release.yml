@@ -1,0 +1,728 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GONODES — Release Build & Publish
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Triggered by pushing a version tag (v*). Builds everything from scratch:
+#   1. Native C++ extensions (all platforms)
+#   2. gn_ext_native (godot-cpp operators)
+#   3. Headless test suite
+#   4. Player templates (Godot export for 5 desktop targets)
+#   5. Editor + Player release packages
+#   6. GitHub Release with all artifacts
+#
+# Manual trigger (workflow_dispatch) is also available for testing.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v0.1.0-alpha)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  GODOT_VERSION: "4.6.1"
+  SCONS_FLAGS: "target=template_release -j4"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PHASE 1: Build native extensions (per-platform, parallel)
+# ─────────────────────────────────────────────────────────────────────────────
+
+jobs:
+
+  # ── Resolve version tag ─────────────────────────────────────────────────
+  version:
+    runs-on: ubuntu-22.04
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      is_prerelease: ${{ steps.resolve.outputs.is_prerelease }}
+    steps:
+      - name: Resolve version
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "is_prerelease=${{ inputs.prerelease }}" >> "$GITHUB_OUTPUT"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+            # Pre-release if tag contains alpha, beta, rc, or dev
+            if echo "$TAG" | grep -qiE '(alpha|beta|rc|dev)'; then
+              echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+  # ── Discover buildable extensions ───────────────────────────────────────
+  discover:
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.scan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan extensions
+        id: scan
+        run: python3 build/ci_discover.py >> "$GITHUB_OUTPUT"
+
+  # ── Build godot-cpp (shared dependency) ─────────────────────────────────
+  build-godot-cpp:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04,  platform: linux,   arch: x86_64 }
+          - { os: ubuntu-22.04,  platform: linux,   arch: arm64  }
+          - { os: macos-14,      platform: macos,   arch: arm64  }
+          - { os: macos-14,      platform: macos,   arch: x86_64 }
+          - { os: windows-2022,  platform: windows, arch: x86_64 }
+          - { os: windows-2022,  platform: windows, arch: arm64  }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install SCons
+        run: pip3 install scons
+
+      - name: Install ARM64 cross-compiler
+        if: matrix.platform == 'linux' && matrix.arch == 'arm64'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq g++-aarch64-linux-gnu
+
+      - name: Build godot-cpp
+        working-directory: addons/gn_ext_native/native/godot-cpp
+        run: scons platform=${{ matrix.platform }} arch=${{ matrix.arch }} ${{ env.SCONS_FLAGS }}
+
+      - name: Upload godot-cpp
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-cpp-${{ matrix.platform }}-${{ matrix.arch }}
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+          retention-days: 1
+
+  # ── Build gn_ext_native (92 C++ operators) ──────────────────────────────
+  build-native:
+    needs: build-godot-cpp
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04,  platform: linux,   arch: x86_64 }
+          - { os: ubuntu-22.04,  platform: linux,   arch: arm64  }
+          - { os: macos-14,      platform: macos,   arch: arm64  }
+          - { os: macos-14,      platform: macos,   arch: x86_64 }
+          - { os: windows-2022,  platform: windows, arch: x86_64 }
+          - { os: windows-2022,  platform: windows, arch: arm64  }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install SCons
+        run: pip3 install scons
+
+      - name: Install ARM64 cross-compiler
+        if: matrix.platform == 'linux' && matrix.arch == 'arm64'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq g++-aarch64-linux-gnu
+
+      - name: Download godot-cpp
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-${{ matrix.platform }}-${{ matrix.arch }}
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+
+      - name: Build gn_ext_native
+        working-directory: addons/gn_ext_native/native
+        run: scons platform=${{ matrix.platform }} arch=${{ matrix.arch }} ${{ env.SCONS_FLAGS }}
+
+      - name: Upload native binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: gn_ext_native-${{ matrix.platform }}-${{ matrix.arch }}
+          path: addons/gn_ext_native/native/bin/
+          retention-days: 1
+
+  # ── Build other extensions (dynamic matrix) ─────────────────────────────
+  build-extensions-linux:
+    needs: [discover, build-godot-cpp]
+    if: needs.discover.outputs.matrix != '[]'
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check platform support
+        id: check
+        run: |
+          python3 -c "
+          import configparser, sys
+          cp = configparser.ConfigParser()
+          cp.read('addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          sys.exit(0 if 'linux' in plats else 1)
+          " && echo "supported=true" >> "$GITHUB_OUTPUT" || echo "supported=false" >> "$GITHUB_OUTPUT"
+
+      - name: Install build tools
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3 python3-pip g++ g++-aarch64-linux-gnu pkg-config
+          pip3 install scons
+
+      - name: Download godot-cpp (x86_64)
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-linux-x86_64
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+
+      - name: Build (Linux x86_64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=linux arch=x86_64 $SCONS_FLAGS
+
+      - name: Build (Linux ARM64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=linux arch=arm64 $SCONS_FLAGS
+
+      - name: Upload
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-linux
+          path: addons/${{ matrix.ext }}/native/bin/
+          retention-days: 1
+
+  build-extensions-macos:
+    needs: [discover, build-godot-cpp]
+    if: needs.discover.outputs.matrix != '[]'
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check platform support
+        id: check
+        run: |
+          python3 -c "
+          import configparser, sys
+          cp = configparser.ConfigParser()
+          cp.read('addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          sys.exit(0 if 'macos' in plats else 1)
+          " && echo "supported=true" >> "$GITHUB_OUTPUT" || echo "supported=false" >> "$GITHUB_OUTPUT"
+
+      - name: Install SCons
+        if: steps.check.outputs.supported == 'true'
+        run: pip3 install scons
+
+      - name: Download godot-cpp (arm64)
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-macos-arm64
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+
+      - name: Build (macOS arm64 + x86_64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=macos arch=arm64 $SCONS_FLAGS
+          scons ext=${{ matrix.ext }} platform=macos arch=x86_64 $SCONS_FLAGS
+
+      - name: Create universal binaries
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          BIN_DIR="addons/${{ matrix.ext }}/native/bin/macos"
+          if [ -d "$BIN_DIR" ]; then
+            cd "$BIN_DIR"
+            for ARM_LIB in $(find . -name "*arm64*" -type f); do
+              X86_LIB=$(echo "$ARM_LIB" | sed 's/\.arm64/.x86_64/')
+              UNIVERSAL=$(echo "$ARM_LIB" | sed 's/\.arm64//')
+              if [ -f "$X86_LIB" ]; then
+                lipo -create "$ARM_LIB" "$X86_LIB" -output "$UNIVERSAL"
+              fi
+            done
+          fi
+
+      - name: Upload
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-macos
+          path: addons/${{ matrix.ext }}/native/bin/
+          retention-days: 1
+
+  build-extensions-windows:
+    needs: [discover, build-godot-cpp]
+    if: needs.discover.outputs.matrix != '[]'
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check platform support
+        id: check
+        shell: python
+        run: |
+          import configparser, os
+          cp = configparser.ConfigParser()
+          cp.read(r'addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f"supported={'true' if 'windows' in plats else 'false'}\n")
+
+      - name: Install SCons
+        if: steps.check.outputs.supported == 'true'
+        run: pip install scons
+
+      - name: Download godot-cpp (x86_64)
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-windows-x86_64
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+
+      - name: Build (Windows x86_64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=windows arch=x86_64 $env:SCONS_FLAGS
+
+      - name: Build (Windows ARM64)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=windows arch=arm64 $env:SCONS_FLAGS
+
+      - name: Upload
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-windows
+          path: addons/${{ matrix.ext }}/native/bin/
+          retention-days: 1
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PHASE 2: Run headless test suite
+  # ─────────────────────────────────────────────────────────────────────────
+
+  test:
+    needs: [build-native, build-extensions-linux]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: |
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          wget -q "$GODOT_URL" -O godot.zip
+          unzip -q godot.zip
+          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+
+      # Download Linux native binaries so GDExtension operators load
+      - name: Download gn_ext_native binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: gn_ext_native-linux-x86_64
+          path: addons/gn_ext_native/native/bin/
+
+      - name: Download extension binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-linux'
+          path: _ext_bins/
+          merge-multiple: false
+
+      - name: Place extension binaries
+        run: |
+          for dir in _ext_bins/*/; do
+            ext_name=$(basename "$dir" | sed 's/-linux$//')
+            if [ -d "$dir" ]; then
+              mkdir -p "addons/$ext_name/native/bin/"
+              cp -r "$dir"* "addons/$ext_name/native/bin/" 2>/dev/null || true
+            fi
+          done
+
+      - name: Run test suite
+        run: |
+          # Import project first (generates .godot/ cache)
+          godot --headless --import . 2>/dev/null || true
+          # Run tests
+          godot --headless -s tests/test_runner.gd 2>&1 | tee test_results.txt
+          # Check exit code from output (runner prints ALL PASSED or FAILED)
+          if grep -q "ALL PASSED" test_results.txt; then
+            echo "✅ All tests passed"
+          else
+            echo "❌ Tests failed"
+            exit 1
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test_results.txt
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PHASE 3: Export Player templates (per-platform)
+  # ─────────────────────────────────────────────────────────────────────────
+
+  export-player-windows:
+    needs: [test, build-native, build-extensions-windows]
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot + export templates
+        shell: pwsh
+        run: |
+          $godotUrl = "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_win64.exe.zip"
+          $tplUrl = "https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_export_templates.tpz"
+          Invoke-WebRequest $godotUrl -OutFile godot.zip
+          Expand-Archive godot.zip -DestinationPath godot_bin
+          $godot = Get-ChildItem godot_bin -Filter "*.exe" -Recurse | Select-Object -First 1
+          Copy-Item $godot.FullName "godot.exe"
+          Invoke-WebRequest $tplUrl -OutFile templates.tpz
+          $tplDir = "$env:APPDATA\Godot\export_templates\${{ env.GODOT_VERSION }}.stable"
+          New-Item -ItemType Directory -Force -Path $tplDir | Out-Null
+          Expand-Archive templates.tpz -DestinationPath _tpl_tmp
+          Copy-Item _tpl_tmp\templates\* $tplDir -Recurse -Force
+
+      - name: Download native binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-windows*'
+          path: _bins/
+          merge-multiple: false
+
+      - name: Place binaries
+        shell: pwsh
+        run: |
+          Get-ChildItem _bins -Directory | ForEach-Object {
+            $extName = $_.Name -replace '-windows.*$',''
+            $targetDir = "addons/$extName/native/bin"
+            if (Test-Path "addons/$extName") {
+              New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+              Copy-Item "$($_.FullName)\*" $targetDir -Recurse -Force
+            }
+          }
+
+      - name: Export Player (Windows x86_64)
+        shell: pwsh
+        run: |
+          # Swap main scene to player
+          $proj = Get-Content project.godot -Raw -Encoding UTF8
+          $proj = $proj -replace 'run/main_scene="res://scenes/gn_editor.tscn"', 'run/main_scene="res://scenes/player_main.tscn"'
+          Set-Content project.godot -Value $proj -Encoding UTF8
+          # Import project
+          .\godot.exe --headless --import . 2>$null; $true
+          # Export
+          New-Item -ItemType Directory -Force -Path "dist/windows_x86_64" | Out-Null
+          .\godot.exe --headless --export-release "Player Windows x86_64" "dist/windows_x86_64/GONODESPlayer.exe"
+
+      - name: Package
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist/windows_x86_64/*" -DestinationPath "GONODESPlayer-windows-x86_64.zip"
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-windows-x86_64
+          path: GONODESPlayer-windows-x86_64.zip
+          retention-days: 7
+
+  export-player-linux:
+    needs: [test, build-native, build-extensions-linux]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot + export templates
+        run: |
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          TPL_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          wget -q "$GODOT_URL" -O godot.zip
+          unzip -q godot.zip
+          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot
+          wget -q "$TPL_URL" -O templates.tpz
+          TPL_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$TPL_DIR"
+          unzip -q templates.tpz -d _tpl_tmp
+          cp -r _tpl_tmp/templates/* "$TPL_DIR/"
+
+      - name: Download native binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-linux*'
+          path: _bins/
+          merge-multiple: false
+
+      - name: Place binaries
+        run: |
+          for dir in _bins/*/; do
+            ext_name=$(basename "$dir" | sed 's/-linux.*$//')
+            if [ -d "addons/$ext_name" ]; then
+              mkdir -p "addons/$ext_name/native/bin/"
+              cp -r "$dir"* "addons/$ext_name/native/bin/" 2>/dev/null || true
+            fi
+          done
+
+      - name: Export Player (Linux x86_64)
+        run: |
+          # Swap main scene to player
+          sed -i 's|run/main_scene="res://scenes/gn_editor.tscn"|run/main_scene="res://scenes/player_main.tscn"|' project.godot
+          # Import
+          ./godot --headless --import . 2>/dev/null || true
+          # Export
+          mkdir -p dist/linux_x86_64
+          ./godot --headless --export-release "Player Linux x86_64" "dist/linux_x86_64/GONODESPlayer"
+
+      - name: Package
+        run: |
+          cd dist/linux_x86_64
+          tar czf ../../GONODESPlayer-linux-x86_64.tar.gz *
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-linux-x86_64
+          path: GONODESPlayer-linux-x86_64.tar.gz
+          retention-days: 7
+
+  export-player-macos:
+    needs: [test, build-native, build-extensions-macos]
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot + export templates
+        run: |
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_macos.universal.zip"
+          TPL_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          wget -q "$GODOT_URL" -O godot.zip
+          unzip -q godot.zip
+          GODOT_BIN=$(find . -name "Godot*" -type f -perm +111 | head -1)
+          cp "$GODOT_BIN" godot
+          chmod +x godot
+          wget -q "$TPL_URL" -O templates.tpz
+          TPL_DIR="$HOME/Library/Application Support/Godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$TPL_DIR"
+          unzip -q templates.tpz -d _tpl_tmp
+          cp -r _tpl_tmp/templates/* "$TPL_DIR/"
+
+      - name: Download native binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-macos*'
+          path: _bins/
+          merge-multiple: false
+
+      - name: Place binaries
+        run: |
+          for dir in _bins/*/; do
+            ext_name=$(basename "$dir" | sed 's/-macos.*$//')
+            if [ -d "addons/$ext_name" ]; then
+              mkdir -p "addons/$ext_name/native/bin/"
+              cp -r "$dir"* "addons/$ext_name/native/bin/" 2>/dev/null || true
+            fi
+          done
+
+      - name: Export Player (macOS universal)
+        run: |
+          sed -i '' 's|run/main_scene="res://scenes/gn_editor.tscn"|run/main_scene="res://scenes/player_main.tscn"|' project.godot
+          ./godot --headless --import . 2>/dev/null || true
+          mkdir -p dist/macos
+          ./godot --headless --export-release "Player macOS" "dist/macos/GONODESPlayer.zip"
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-macos
+          path: dist/macos/GONODESPlayer.zip
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PHASE 4: Package Editor distribution (source + binaries)
+  # ─────────────────────────────────────────────────────────────────────────
+
+  package-editor:
+    needs: [test, build-native, build-extensions-linux, build-extensions-macos, build-extensions-windows]
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - { platform: windows, pattern: '*-windows*', ext: zip }
+          - { platform: linux,   pattern: '*-linux*',   ext: tar.gz }
+          - { platform: macos,   pattern: '*-macos*',   ext: tar.gz }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download native binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ matrix.pattern }}
+          path: _bins/
+          merge-multiple: false
+
+      - name: Place all binaries
+        run: |
+          for dir in _bins/*/; do
+            ext_name=$(basename "$dir" | sed -E 's/-(windows|linux|macos).*$//')
+            if [ -d "addons/$ext_name" ]; then
+              mkdir -p "addons/$ext_name/native/bin/"
+              cp -r "$dir"* "addons/$ext_name/native/bin/" 2>/dev/null || true
+            fi
+          done
+
+      - name: Remove build artifacts not needed in distribution
+        run: |
+          # Remove C++ source code (binaries are sufficient)
+          find addons/gn_ext_*/native/src -type f -name "*.cpp" -o -name "*.c" -o -name "*.cc" -o -name "*.h" -o -name "*.mm" | head -0 || true
+          # Remove godot-cpp (large, only needed for compilation)
+          rm -rf addons/gn_ext_native/native/godot-cpp
+          # Remove CI/build infrastructure
+          rm -rf .github .gitlab-ci.yml
+          # Remove dev-only files
+          rm -rf build/__pycache__ scripts/__pycache__
+
+      - name: Package
+        run: |
+          DIST_NAME="GONODES-${{ matrix.platform }}"
+          if [ "${{ matrix.ext }}" = "zip" ]; then
+            cd .. && zip -r "Gonodes/$DIST_NAME.zip" Gonodes/ -x "Gonodes/.git/*" "Gonodes/_bins/*" "Gonodes/_tpl_tmp/*"
+          else
+            cd .. && tar czf "Gonodes/$DIST_NAME.tar.gz" --exclude='.git' --exclude='_bins' --exclude='_tpl_tmp' Gonodes/
+          fi
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: editor-${{ matrix.platform }}
+          path: GONODES-${{ matrix.platform }}.${{ matrix.ext }}
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PHASE 5: Create GitHub Release
+  # ─────────────────────────────────────────────────────────────────────────
+
+  release:
+    needs:
+      - version
+      - test
+      - export-player-windows
+      - export-player-linux
+      - export-player-macos
+      - package-editor
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release_artifacts/
+
+      - name: Collect release files
+        run: |
+          mkdir -p release_files
+          # Player builds
+          cp release_artifacts/player-windows-x86_64/*.zip release_files/ 2>/dev/null || true
+          cp release_artifacts/player-linux-x86_64/*.tar.gz release_files/ 2>/dev/null || true
+          cp release_artifacts/player-macos/*.zip release_files/ 2>/dev/null || true
+          # Editor builds
+          for f in release_artifacts/editor-*/*; do
+            cp "$f" release_files/ 2>/dev/null || true
+          done
+          # Rename with version
+          TAG="${{ needs.version.outputs.tag }}"
+          cd release_files
+          for f in *; do
+            NEW_NAME=$(echo "$f" | sed "s/GONODES/GONODES-${TAG}/")
+            if [ "$f" != "$NEW_NAME" ]; then
+              mv "$f" "$NEW_NAME"
+            fi
+          done
+          echo "=== Release files ==="
+          ls -la
+
+      - name: Generate release notes
+        run: |
+          TAG="${{ needs.version.outputs.tag }}"
+          cat > release_notes.md << 'NOTES_EOF'
+          ## GONODES $TAG
+
+          ### Downloads
+
+          | Platform | Player (runtime) | Editor (full project) |
+          |----------|-------------------|----------------------|
+          | **Windows x86_64** | `GONODESPlayer-*-windows-x86_64.zip` | `GONODES-*-windows.zip` |
+          | **Linux x86_64** | `GONODESPlayer-*-linux-x86_64.tar.gz` | `GONODES-*-linux.tar.gz` |
+          | **macOS (universal)** | `GONODESPlayer-*-macos.zip` | `GONODES-*-macos.tar.gz` |
+
+          ### Player
+          The Player is a standalone runtime — download, unzip, place your `.gnpatch` file alongside it with a `config.json`, and run. No Godot editor needed.
+
+          ### Editor
+          Full GONODES project with pre-compiled native extension binaries. Open in Godot ${{ env.GODOT_VERSION }}. Includes all 533 operators, 1,355 tests, and 18 extensions.
+
+          ### Requirements
+          - **Godot ${{ env.GODOT_VERSION }}** (for the Editor distribution)
+          - **GPU:** Vulkan/D3D12/Metal recommended (Forward+). OpenGL 3.3 works but GPU particles and volumes are unavailable.
+
+          See [CHANGELOG.md](CHANGELOG.md) for what's new.
+          NOTES_EOF
+          # Replace $TAG in the notes
+          sed -i "s/\$TAG/$TAG/g" release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: "GONODES ${{ needs.version.outputs.tag }}"
+          body_path: release_notes.md
+          prerelease: ${{ needs.version.outputs.is_prerelease == 'true' }}
+          files: release_files/*
+          fail_on_unmatched_files: false

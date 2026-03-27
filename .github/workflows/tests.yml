@@ -1,0 +1,182 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GONODES — CI Tests
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Runs the headless test suite on every push/PR. Builds only the Linux native
+# extensions (fastest) so GDExtension operators are available during tests.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: Tests
+
+on:
+  push:
+    branches: [main, dev, 'release/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.6.1"
+  SCONS_FLAGS: "target=template_release -j4"
+
+jobs:
+
+  discover:
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.scan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan extensions
+        id: scan
+        run: python3 build/ci_discover.py >> "$GITHUB_OUTPUT"
+
+  build-godot-cpp:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install SCons
+        run: pip3 install scons
+      - name: Build godot-cpp (Linux x86_64)
+        working-directory: addons/gn_ext_native/native/godot-cpp
+        run: scons platform=linux arch=x86_64 ${{ env.SCONS_FLAGS }}
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-cpp-linux
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+          retention-days: 1
+
+  build-native:
+    needs: build-godot-cpp
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install SCons
+        run: pip3 install scons
+      - name: Download godot-cpp
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-linux
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+      - name: Build gn_ext_native
+        working-directory: addons/gn_ext_native/native
+        run: scons platform=linux arch=x86_64 ${{ env.SCONS_FLAGS }}
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-linux
+          path: addons/gn_ext_native/native/bin/
+          retention-days: 1
+
+  build-extensions:
+    needs: [discover, build-godot-cpp]
+    if: needs.discover.outputs.matrix != '[]'
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ext: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Check Linux support
+        id: check
+        run: |
+          python3 -c "
+          import configparser, sys
+          cp = configparser.ConfigParser()
+          cp.read('addons/${{ matrix.ext }}/native/build.cfg')
+          plats = [s.strip() for s in cp.get('library','platforms',fallback='windows,macos,linux').split(',')]
+          sys.exit(0 if 'linux' in plats else 1)
+          " && echo "supported=true" >> "$GITHUB_OUTPUT" || echo "supported=false" >> "$GITHUB_OUTPUT"
+      - name: Install build tools
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq g++ pkg-config
+          pip3 install scons
+      - name: Download godot-cpp
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-linux
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+      - name: Build
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          cd build
+          scons ext=${{ matrix.ext }} platform=linux arch=x86_64 $SCONS_FLAGS
+      - name: Upload
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ext }}-linux
+          path: addons/${{ matrix.ext }}/native/bin/
+          retention-days: 1
+
+  test:
+    needs: [build-native, build-extensions]
+    if: always() && needs.build-native.result == 'success'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: |
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -O godot.zip
+          unzip -q godot.zip
+          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+
+      - name: Download gn_ext_native
+        uses: actions/download-artifact@v4
+        with:
+          name: native-linux
+          path: addons/gn_ext_native/native/bin/
+
+      - name: Download extension binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-linux'
+          path: _ext_bins/
+          merge-multiple: false
+        continue-on-error: true
+
+      - name: Place extension binaries
+        run: |
+          if [ -d _ext_bins ]; then
+            for dir in _ext_bins/*/; do
+              ext_name=$(basename "$dir" | sed 's/-linux$//')
+              if [ -d "addons/$ext_name" ]; then
+                mkdir -p "addons/$ext_name/native/bin/"
+                cp -r "$dir"* "addons/$ext_name/native/bin/" 2>/dev/null || true
+              fi
+            done
+          fi
+
+      - name: Import project
+        run: godot --headless --import . 2>/dev/null || true
+
+      - name: Run tests
+        run: |
+          godot --headless -s tests/test_runner.gd 2>&1 | tee test_results.txt
+          if grep -q "ALL PASSED" test_results.txt; then
+            echo "✅ All tests passed"
+          else
+            echo "❌ Tests failed"
+            exit 1
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test_results.txt
+          retention-days: 30
