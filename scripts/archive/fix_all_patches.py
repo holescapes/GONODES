@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Fix ALL remaining gnpatch issues in a single pass.
+[ARCHIVED] Fix ALL remaining gnpatch issues in a single pass.
+Note: Per-family script operators (ScriptCHOP/DAT/SOP/IMG, GenericScriptNode)
+were consolidated into GDScriptSCRIPT with template dropdown in March 2026.
+This script references the old class names and file paths from before that change.
+
 Categories:
 1. InstancePOP→RenderPOP → replace with GeometryCOMP chain
 2. SDF orphan LFOs → wire expressions to SDF params

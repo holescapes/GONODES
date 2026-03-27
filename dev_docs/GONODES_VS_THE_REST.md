@@ -1,8 +1,27 @@
 # GONODES vs the Rest of the Bunch
 
-> **Date:** 2026-03-20
+> **Date:** 2026-03-20 (consolidated 2026-03-25 — merged TD_HOUDINI_COMPARISON.md)
 > **Audience:** Core developers, architecture reviewers, prospective contributors
-> **Purpose:** Comprehensive cook-flow and real-time efficiency comparison between GONODES, TouchDesigner, VVVV, and Houdini — with an actionable optimisation roadmap.
+> **Purpose:** Comprehensive cook-flow and real-time efficiency comparison between GONODES, TouchDesigner, VVVV, and Houdini — with an actionable optimisation roadmap, operator coverage audit, and feature parity tracker.
+>
+> Many feature-audit items from the original TD/Houdini comparison have been implemented:
+> - ✅ Ramp parameter type with curve editor
+> - ✅ Network boxes + sticky notes
+> - ✅ Audio Band CHOP — multi-band frequency analysis with envelope followers
+> - ✅ 2D Fluid TOP — Navier-Stokes feedback shader with dual viewport
+> - ✅ Reaction-Diffusion TOP — Gray-Scott generative patterns, 7 presets
+> - ✅ FluidVOL vorticity confinement + obstacle collision
+> - ✅ Timeline / Cue system — TimelineCHOP, CueDAT, CueCHOP, Editor Timeline UI
+> - ✅ Periodic/Tiling Noise — FBM octaves + periodic Perlin in NoiseTOP shader
+> - ✅ Fluid Surface MAT — Fresnel, refraction, Voronoi caustics, wave normals
+> - ✅ Pyro Emitter VOL — fuel/combustion/buoyancy/cooling GPU pipeline
+> - ✅ HeightfieldSOP — FBM terrain + thermal erosion
+> - ✅ GPU Marching Cubes — compute shader with atomic append
+> - ✅ Boids/Flocking POP — Reynolds rules compute shader
+> - ✅ Trail/Ribbon SOP — particle trail ribbon renderer
+> - ✅ gn_ext_ndi (4 operators), gn_ext_ml (7 operators), gn_ext_depth_sensor (5 operators)
+> - ✅ gn_ext_blackmagic (scaffold), ClothSOP, VectorPathTOP, MqttDAT
+> - Remaining: FLIP Fluid (#23). See §18 for full tracker.
 
 ---
 
@@ -24,6 +43,9 @@
 14. [Bottom Line for Real-Time Apps](#14-bottom-line-for-real-time-apps)
 15. [Optimisation Roadmap](#15-optimisation-roadmap)
 16. [Solving the GDScript Bottleneck — Python & Hot-Reload C++](#16-solving-the-gdscript-bottleneck--python--hot-reload-c-nodes)
+17. [Architecture Gap Checklist](#17-architecture-gap-checklist)
+18. [Feature Parity Audit & Roadmap](#18-feature-parity-audit--roadmap)
+19. [Operator Coverage Audit](#19-operator-coverage-audit)
 
 ---
 
@@ -35,10 +57,10 @@
 | **Cook paradigm** | Pull-based, demand-driven per frame | Push-based (beta: everything runs; gamma: hybrid with .NET JIT) | Pull-based, demand-driven on dependency change | Push-based, topo-sorted per frame with 3-tier guards |
 | **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | GDScript (operators) + 103 C++ GDExtension native ops |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan — multi-stream | DirectX 11 (beta); Stride/Vulkan (gamma) | Karma GPU (offline), OpenCL | Godot Vulkan/GLES3 SubViewport + RenderingDevice compute |
-| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI |
+| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | 348 operators across 11 families |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | 533 operators across 13 families (TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT) |
 
 ---
 
@@ -164,7 +186,7 @@ Pure GDScript operators are ~10–50× slower than equivalent C++ for data-heavy
 **Where the GDScript tax matters:**
 - **Shader-driven work (TOP/POP/VOL):** Zero impact — GPU does the heavy lifting
 - **CHOP signal processing:** GDScript handles hundreds of channels at 60fps. It's fine.
-- **Heavy SOP geometry (100K+ vertices in user scripts):** This is the pain point. Built-in native SOPs are fast, but ScriptSOP is bounded by GDScript.
+- **Heavy SOP geometry (100K+ vertices in user scripts):** This is the pain point. Built-in native SOPs are fast, but GDScriptSCRIPT (SOP template) is bounded by GDScript.
 
 ### vs VVVV gamma
 
@@ -353,7 +375,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 
 ### 13.2 GDScript Interpretation Overhead (vs C++/VEX/.NET JIT)
 
-**Gap:** Pure GDScript is ~10–50× slower than C++ for per-element data processing. User-written ScriptSOP with per-vertex logic is the weakest link.
+**Gap:** Pure GDScript is ~10–50× slower than C++ for per-element data processing. User-written GDScriptSCRIPT (SOP template) with per-vertex logic is the weakest link.
 
 **Mitigation:** 103 C++ native operators cover built-in hot paths. GPU work (TOP/POP/VOL) is unaffected.
 
@@ -578,7 +600,7 @@ The value is **NumPy vectorisation** — C-speed array operations accessible fro
 │  │   ├─ PackedFloat32Array ↔ numpy.ndarray   │
 │  │   ├─ GNChannelData ↔ dict of ndarrays     │
 │  │   └─ GNGeoData ↔ structured arrays        │
-│  └─ PythonScriptCHOP, PythonScriptSOP, etc.  │
+│  └─ PythonSCRIPT (template-based per-family) │
 └──────────────────────────────────────────────┘
 ```
 
@@ -675,3 +697,171 @@ GONODES is **architecturally competitive** with TouchDesigner for real-time visu
 The honest gaps are: serial GPU cook (Godot limitation), ~~GDScript interpretation overhead for user scripts~~ (now mitigated by 103 native ops + `gn_ext_user_native` C++ hot-reload + `gn_ext_user_python` NumPy vectorisation), and lack of adaptive quality degradation. The GDScript bottleneck is **effectively closed** — users now have three scripting tiers (GDScript → Python+NumPy → C++) with integrated editors and help for each.
 
 For the target domain (VJ, generative art, interactive installations at 30–200 nodes), GONODES delivers real-time performance today. The remaining roadmap items (expression compilation, adaptive frame budget, GPU batch parallelism) would push it toward handling larger, more complex networks and professional production reliability.
+
+---
+
+## 17. Architecture Gap Checklist
+
+> Consolidated from the original TD_HOUDINI_COMPARISON.md gap analysis. Tracks architectural recommendations from the TD/Houdini comparison.
+
+| # | Recommendation | Priority | Status |
+|---|---|---|---|
+| A | Parameter-level dependency tracking | High | ✅ **Implemented** — 3-layer expression dep system (consumer map + selective re-eval + value-compare gate + input hash) |
+| B | Ramp / curve parameter type | High | ✅ **Implemented** — `ValueType.RAMP` + GNRampEditor + `ramp()` expression |
+| C | Reusable asset package (.gnasset) | High | ✅ **Implemented** — GNCustomOperator + promotion wizard + 3-dir scan + edit-in-place. Phase 4 (global sync) ✅ done |
+| D | Multi-threaded cook engine | High | ✅ **Implemented** — level-based WorkerThreadPool dispatch |
+| E | Data spreadsheet / table viewer | Medium | ✅ **Resolved** — GNViewerPanel Tree spreadsheet + GNWaveformView |
+| F | Network boxes + sticky notes | Medium | ✅ **Implemented** |
+| G | Keyframe animation system | Medium | ✅ **Implemented** — KeyframeCHOP + SequenceCHOP + ClipCHOP + ChannelCHOP |
+| H | CHOP waveform display | Medium | ✅ **Resolved** — GNWaveformView in viewer panel |
+| I | Named output ports | Low | ✅ **Implemented** — `GNPort.label` + `display_name()` on all ports |
+| J | Dot / routing nodes | Low | ✅ **Implemented** — DotNode operator |
+| K | Takes / parameter layer overrides | Low | ✅ **Implemented** — GNTakeManager (capture, blend, save/load `.gntake`) |
+
+**All 11 architecture gap items are resolved.** No open architectural gaps remain vs TD or Houdini for the real-time target domain.
+
+---
+
+## 18. Feature Parity Audit & Roadmap
+
+> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (533 operators across 13 families).
+
+### 18.1 Feature Coverage Matrix
+
+| TD Feature Area | TD Implementation | GONODES Status |
+|---|---|---|
+| **Texture processing** | 90+ TOPs | **70 TOPs** — ~80% parity, strong |
+| **Channel/signal** | 70+ CHOPs | **74 CHOPs** — near parity |
+| **Geometry** | 50+ SOPs | **71 SOPs** — exceeds TD in some areas |
+| **Data tables** | 30+ DATs | **37 DATs** — near parity |
+| **Materials** | ~10 MATs | **9 MATs** — solid |
+| **Components** | COMPs (containers, 3D scenes, panels) | **20 COMPs** — good, physics included |
+| **GPU Particles** | Particle SOP/POP network | **10 POP operators** — SSBO compute pipeline |
+| **3D Volumes** | Not native (3D texture workarounds) | **11 VOL operators** — **GONODES leads here** |
+| **UI Widgets** | Panel COMP widgets | **31 UI operators** — comparable |
+| **Shader authoring** | GLSL TOP, Compute Shader TOP | CustomShaderTOP + ComputeShaderTOP + ISF + Shadertoy — strong |
+| **Video I/O** | Theora, HAP, FFMPEG, NDI, Blackmagic | HAP, FFmpeg, GPU Encode, Theora, NDI, **Blackmagic** (scaffold) |
+| **Texture sharing** | Spout (Win), Syphon (Mac) | **Both implemented** |
+| **Projection mapping** | Stoner, Kantan Mapper (plugins) | **gn_ext_mapper** built-in |
+| **Audio** | Audio analysis, synthesis, device I/O | AudioIn, AudioSpectrum, AudioBand, AudioDynamics, Beat, AudioDeviceOUT |
+| **MIDI** | MIDI In/Out | **gn_ext_midi** (RtMidiIn + RtMidiOut) |
+| **OSC** | OSC In/Out | OscOutOUT + OscInDAT/OscInCHOP |
+| **Serial** | Serial DAT | **gn_ext_serial** |
+| **Physics** | Bullet (legacy) | **Jolt physics COMPs** — modern, better |
+| **SDF rendering** | Not built-in | **SDF (core)** — GONODES leads |
+| **Embed in host apps** | TouchEngine SDK | **LibGodot + libgonodes C API** — comparable |
+| **Custom operators** | C++ or Python .tox | **.gnasset + Script operators** |
+| **Fluid simulation** | NVIDIA Flex (plugin), GLSL workarounds | **FluidVOL (3D NS) + Fluid2DTOP (2D NS)** |
+| **Machine Learning** | TensorFlow, MediaPipe plugins | ✅ `gn_ext_ml` — ONNX Runtime (7 operators) |
+| **AR/Face Tracking** | Kinect, Leap, MediaPipe | ✅ FaceDetectCHOP, PoseDetectCHOP, HandDetectCHOP |
+| **Depth Sensors** | Kinect, RealSense, ZED, Orbbec, Leap | ✅ `gn_ext_depth_sensor` — Azure Kinect + RealSense + Ultraleap |
+| **IoT/MQTT** | Not built-in (Python plugin) | ✅ MqttDAT — MQTT 3.1.1 client |
+| **2D Vector Graphics** | GLSL workarounds | ✅ VectorPathTOP — anti-aliased Bézier rendering |
+| **Cloth/Fabric Sim** | SOP-level (legacy) | ✅ ClothSOP — Verlet PBD |
+| **Asset Instance Sync** | Inline references (auto-update) | ✅ Global .gnasset sync |
+
+### 18.2 Houdini Features Worth Borrowing
+
+| Houdini Concept | Relevance | GONODES Status |
+|---|---|---|
+| VEX/CVEX wrangle nodes | GDScript node-level scripting | GDScriptSCRIPT (CHOP/SOP/DAT/IMG templates) — ✅ covered |
+| HDA (Houdini Digital Assets) | Reusable operator packages | .gnasset + SubNetwork — ✅ covered |
+| Attribute system | Rich per-element data | AttributeSOP — partial (no vertex attrs on data type) |
+| PDG (Task Graph) | Batch/async processing | Not applicable for real-time |
+| FLIP Fluids | Particle-in-cell hybrid | ⬜ Future (see #23 below) |
+| Pyro (sparse volumes) | Fire/smoke/explosion | ✅ PyroVOL |
+| Wire/Cloth/Hair solvers | Specialized sim | ✅ ClothSOP + Jolt soft body |
+| Crowds/Agents | Mass animation instancing | InstanceCOMP partially covers |
+| Terrain (HeightfieldSOP) | Generative landscapes | ✅ HeightfieldSOP |
+| For-Each loops | Iterative per-piece processing | ReplicatorCOMP |
+| Spare parameters | Add params to any node | ✅ Implemented |
+| Takes (parameter layers) | Named param snapshots | ✅ GNTakeManager |
+
+### 18.3 Improvement Roadmap — Tier 1 (High Impact)
+
+| # | Suggestion | Status |
+|---|---|---|
+| 1 | Audio Input + Analysis | ✅ AudioBandCHOP |
+| 2 | NDI In/Out extension | ✅ gn_ext_ndi (4 operators) |
+| 3 | OSC In CHOP/DAT | ✅ OscInDAT + OscInCHOP |
+| 4 | Fluid Surface Rendering | ✅ FluidSurfaceMAT |
+| 5 | FluidVOL Obstacle Collision | ✅ GPU + CPU obstacle injection |
+| 6 | Timeline / Cue System | ✅ TimelineCHOP + CueDAT + CueCHOP + Editor UI |
+| 7 | Vorticity Confinement | ✅ GPU compute + CPU fallback |
+
+### 18.4 Improvement Roadmap — Tier 2 (Feature Extensions)
+
+| # | Suggestion | Status |
+|---|---|---|
+| 8 | Pyro-Style Emitter VOL | ✅ PyroVOL (11-step GPU pipeline) |
+| 9 | Cloth/Softbody SOP | ✅ ClothSOP (Verlet PBD) |
+| 10 | Machine Learning Bridge | ✅ gn_ext_ml (7 operators, ONNX Runtime) |
+| 11 | Reaction-Diffusion TOP | ✅ 7 presets, 3 color modes |
+| 12 | Multi-Pass RaymarchVOL Lighting | ✅ HG phase + shadow rays |
+| 13 | HeightfieldSOP | ✅ FBM + thermal erosion |
+| 14 | Instancer improvements | ✅ chop_map Color/Scale, SOP Cd |
+| 15 | Point Cloud rendering | ✅ PointCloudRenderTOP |
+
+### 18.5 Improvement Roadmap — Tier 3 (Polish & Advanced)
+
+| # | Suggestion | Status |
+|---|---|---|
+| 16 | 2D Fluid TOP | ✅ Fluid2DTOP |
+| 17 | Blackmagic / AJA video I/O | ✅ gn_ext_blackmagic (scaffold) |
+| 18 | Trail / Ribbon rendering | ✅ TrailRibbonSOP |
+| 19 | Voronoi / Shatter SOP | ✅ VoronoiShatterSOP |
+| 20 | Periodic/Tiling Noise | ✅ FBM + periodic Perlin |
+| 21 | GPU Marching Cubes | ✅ Compute shader + atomic append |
+| 22 | Boids / Flocking POP | ✅ Reynolds rules compute |
+| 23 | **FLIP Fluid (Houdini-style)** | ⬜ Future — hybrid particle-grid (very high effort) |
+| 24 | Global .gnasset Instance Sync | ✅ Recursive network walk on save |
+| 25 | Depth Sensor Extension | ✅ gn_ext_depth_sensor (5 operators, 3 backends) |
+| 26 | MQTT IoT Messaging | ✅ MqttDAT |
+| 27 | 2D Vector Path Rendering | ✅ VectorPathTOP |
+
+**Overall: 26 of 27 items implemented (96%).** Only FLIP Fluid remains.
+
+---
+
+## 19. Operator Coverage Audit
+
+> Consolidated from the original TD_HOUDINI_COMPARISON.md §12. Documents operators added to close TD coverage gaps.
+
+### 19.1 Operators Added (from TD gap analysis)
+
+| Family | Operator | TD Equivalent | Notes |
+|--------|----------|--------------|-------|
+| CHOP | **FeedbackCHOP** | Feedback CHOP | Previous-frame data for feedback loops |
+| CHOP | **BlendCHOP** | Blend CHOP | Weighted blend of 2-8 inputs, 4 easing modes |
+| CHOP | **PerformCHOP** | Perform CHOP | FPS, frame_time, memory, frame_count |
+| CHOP | **TransformCHOP** | Transform CHOP | 3D transform on xyz channel groups |
+| DAT | **WebServerDAT** | Web Server DAT | HTTP server via TCPServer |
+| DAT | **WebSocketDAT** | WebSocket DAT | WebSocket client/server |
+| DAT | **ErrorDAT** | Error DAT | Hooks GNLogger.log_sink |
+| DAT | **FolderDAT** | Folder DAT | Directory listing with glob filter |
+| DAT | **MultiTouchInDAT** | Multi Touch In DAT | Touch events as table rows |
+| SOP | **FileInSOP** | File In SOP | OBJ/glTF/Resource import |
+| SOP | **FileOutSOP** | File Out SOP | OBJ export with pass-through |
+| SOP | **GroupSOP** | Group SOP | BBox/Normal/Range/All grouping |
+| SOP | **PrimitiveSOP** | Primitive SOP | Per-prim normals, area, centroid |
+| SOP | **BlendSOP** | Blend SOP | Vertex-level morph |
+| MAT | **NormalMapMAT** | Phong MAT | StandardMaterial3D with normal maps |
+| MAT | **LineMAT** | Line MAT | Wireframe with stipple |
+
+### 19.2 Excluded TD Operators — Rationale
+
+**Covered by existing GONODES operators:**
+- TCP/IP DAT, UDP In/Out DAT → **NetworkDAT** (TCP + UDP)
+- Shift CHOP → **WarpCHOP**
+- Cycle CHOP → **ExtendCHOP**
+- Clip CHOP → **TrimCHOP**
+- CHOP/SOP Execute DAT → **CallbackDAT**
+- Phong MAT → **PbrMAT** (roughness=1.0)
+- Screen Grab TOP → **ScreenGrabIMG**
+
+**Require external libraries (extension roadmap):**
+- NDI → ✅ gn_ext_ndi (implemented)
+- Syphon → ✅ gn_ext_syphon (implemented)
+- Spout → ✅ gn_ext_spout (implemented)
+- MIDI Out → ✅ gn_ext_midi RtMidiOutCHOP (implemented)
+- Laser DAC → ⬜ Deferred (EtherDream/Helios/ShowNET need GDExtensions)

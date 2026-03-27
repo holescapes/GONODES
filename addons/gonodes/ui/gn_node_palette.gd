@@ -91,7 +91,7 @@ func _populate_tree(filter: String) -> void:
 
 	# Iterate families in enum order (driven by GNFamily.FAMILY_NAMES).
 	# No hardcoded list — new families are picked up automatically.
-	for family_enum: GNFamily.Type in GNFamily.FAMILY_NAMES:
+	for family_enum: int in GNFamily.FAMILY_NAMES:
 		var family_name: String = GNFamily.FAMILY_NAMES[family_enum]
 		if not registry_sectioned.has(family_name):
 			continue

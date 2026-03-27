@@ -1800,35 +1800,6 @@
     ]
   },
   {
-    "class_name": "ScriptCHOP",
-    "node_type": "script",
-    "family": "chop",
-    "file": "addons/gonodes/operators/chop/script_chop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "time_dependent",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "cook_once",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "force_active",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "code",
-        "type": "string",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "SelectCHOP",
     "node_type": "select",
     "family": "chop",
@@ -2366,59 +2337,6 @@
         "name": "end",
         "type": "float",
         "default": 1.0
-      }
-    ]
-  },
-  {
-    "class_name": "UserNativeCHOP",
-    "node_type": "usernativechop",
-    "family": "chop",
-    "file": "addons/gn_ext_user_native/operators/chop/user_native_chop.gd",
-    "extension": "gn_ext_user_native",
-    "params": [
-      {
-        "name": "cpp_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "cpp_class",
-        "type": "string",
-        "default": "MyUserCHOP"
-      },
-      {
-        "name": "auto_build",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": true
-      }
-    ]
-  },
-  {
-    "class_name": "UserPythonCHOP",
-    "node_type": "userpythonchop",
-    "family": "chop",
-    "file": "addons/gn_ext_user_python/operators/chop/user_python_chop.gd",
-    "extension": "gn_ext_user_python",
-    "params": [
-      {
-        "name": "py_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "auto_reload",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": true
       }
     ]
   },
@@ -3062,35 +2980,6 @@
         "name": "fog_length",
         "type": "float",
         "default": 64.0
-      }
-    ]
-  },
-  {
-    "class_name": "GenericScriptNode",
-    "node_type": "script",
-    "family": "comp",
-    "file": "addons/gonodes/operators/comp/generic_script_node.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "time_dependent",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "cook_once",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "force_active",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "code",
-        "type": "string",
-        "default": null
       }
     ]
   },
@@ -4777,35 +4666,6 @@
     ]
   },
   {
-    "class_name": "ScriptDAT",
-    "node_type": "script",
-    "family": "dat",
-    "file": "addons/gonodes/operators/dat/script_dat.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "time_dependent",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "cook_once",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "force_active",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "code",
-        "type": "string",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "SelectDAT",
     "node_type": "select",
     "family": "dat",
@@ -5112,59 +4972,6 @@
     "file": "addons/gonodes/operators/dat/transpose_dat.gd",
     "extension": null,
     "params": []
-  },
-  {
-    "class_name": "UserNativeDAT",
-    "node_type": "usernativedat",
-    "family": "dat",
-    "file": "addons/gn_ext_user_native/operators/dat/user_native_dat.gd",
-    "extension": "gn_ext_user_native",
-    "params": [
-      {
-        "name": "cpp_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "cpp_class",
-        "type": "string",
-        "default": "MyUserDAT"
-      },
-      {
-        "name": "auto_build",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": true
-      }
-    ]
-  },
-  {
-    "class_name": "UserPythonDAT",
-    "node_type": "userpythondat",
-    "family": "dat",
-    "file": "addons/gn_ext_user_python/operators/dat/user_python_dat.gd",
-    "extension": "gn_ext_user_python",
-    "params": [
-      {
-        "name": "py_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "auto_reload",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": false
-      }
-    ]
   },
   {
     "class_name": "WebDAT",
@@ -5581,94 +5388,12 @@
     ]
   },
   {
-    "class_name": "ScriptIMG",
-    "node_type": "scriptimg",
-    "family": "img",
-    "file": "addons/gonodes/operators/img/script_img.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "time_dependent",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "cook_once",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "force_active",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "code",
-        "type": "string",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "TOPtoIMG",
     "node_type": "top_to_img",
     "family": "img",
     "file": "addons/gonodes/operators/img/top_to_img.gd",
     "extension": null,
     "params": []
-  },
-  {
-    "class_name": "UserNativeIMG",
-    "node_type": "usernativeimg",
-    "family": "img",
-    "file": "addons/gn_ext_user_native/operators/img/user_native_img.gd",
-    "extension": "gn_ext_user_native",
-    "params": [
-      {
-        "name": "cpp_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "cpp_class",
-        "type": "string",
-        "default": "MyUserIMG"
-      },
-      {
-        "name": "auto_build",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "UserPythonIMG",
-    "node_type": "userpythonimg",
-    "family": "img",
-    "file": "addons/gn_ext_user_python/operators/img/user_python_img.gd",
-    "extension": "gn_ext_user_python",
-    "params": [
-      {
-        "name": "py_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "auto_reload",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": false
-      }
-    ]
   },
   {
     "class_name": "VideoDeviceInIMG",
@@ -5952,7 +5677,7 @@
     "params": []
   },
   {
-    "class_name": "PBR_MAT",
+    "class_name": "PbrMAT",
     "node_type": "pbr",
     "family": "mat",
     "file": "addons/gonodes/operators/mat/pbr_mat.gd",
@@ -6040,7 +5765,7 @@
     ]
   },
   {
-    "class_name": "Shader_MAT",
+    "class_name": "ShaderMAT",
     "node_type": "shader",
     "family": "mat",
     "file": "addons/gonodes/operators/mat/shader_mat.gd",
@@ -6791,30 +6516,6 @@
     "params": []
   },
   {
-    "class_name": "ParticleStateTOP",
-    "node_type": "particle_state",
-    "family": "pop",
-    "file": "addons/gonodes/operators/pop/particle_state_top.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "width",
-        "type": "int",
-        "default": 256
-      },
-      {
-        "name": "attribute",
-        "type": "string",
-        "default": "pos"
-      },
-      {
-        "name": "scale",
-        "type": "float",
-        "default": 1.0
-      }
-    ]
-  },
-  {
     "class_name": "RenderPOP",
     "node_type": "render",
     "family": "pop",
@@ -6915,6 +6616,809 @@
         "default": 0.5
       }
     ]
+  },
+  {
+    "class_name": "GDScriptSCRIPT",
+    "node_type": "script",
+    "family": "script",
+    "file": "addons/gonodes/operators/script/gdscript_script.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "template",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "time_dependent",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "cook_once",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "force_active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "code",
+        "type": "string",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "NativeSCRIPT",
+    "node_type": "nativescript",
+    "family": "script",
+    "file": "addons/gn_ext_user_native/operators/script/native_script.gd",
+    "extension": "gn_ext_user_native",
+    "params": [
+      {
+        "name": "template",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "cpp_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "cpp_class",
+        "type": "string",
+        "default": "MyUserCHOP"
+      },
+      {
+        "name": "auto_build",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "PythonSCRIPT",
+    "node_type": "pythonscript",
+    "family": "script",
+    "file": "addons/gn_ext_user_python/operators/script/python_script.gd",
+    "extension": "gn_ext_user_python",
+    "params": [
+      {
+        "name": "template",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "py_source",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "auto_reload",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "time_dep",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "BendSDF",
+    "node_type": "bend_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/bend_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "amount",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "axis",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "BoxSDF",
+    "node_type": "box_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/box_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "size_x",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "size_y",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "size_z",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "CapsuleSDF",
+    "node_type": "capsule_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/capsule_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "ConeSDF",
+    "node_type": "cone_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/cone_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "angle",
+        "type": "float",
+        "default": 30.0
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "CylinderSDF",
+    "node_type": "cylinder_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/cylinder_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "DisplaceSDF",
+    "node_type": "displace_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/displace_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "amount",
+        "type": "float",
+        "default": 0.2
+      },
+      {
+        "name": "frequency",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "time_offset",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "ElongateSDF",
+    "node_type": "elongate_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/elongate_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "amount_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "amount_y",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "amount_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "GradientSDF",
+    "node_type": "gradient_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/gradient_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "color_near",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "color_far",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "range",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "roughness",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
+    "class_name": "GyroidSDF",
+    "node_type": "gyroid_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/gyroid_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "scale",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "thickness",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "IntersectionSDF",
+    "node_type": "intersection_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/intersection_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": []
+  },
+  {
+    "class_name": "MaterialSDF",
+    "node_type": "material_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/material_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "albedo",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "roughness",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "metallic",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "emission",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "MirrorSDF",
+    "node_type": "mirror_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/mirror_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "mirror_x",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "mirror_y",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "mirror_z",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "OctahedronSDF",
+    "node_type": "octahedron_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/octahedron_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "size",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "OnionSDF",
+    "node_type": "onion_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/onion_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "thickness",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "layers",
+        "type": "int",
+        "default": 1
+      }
+    ]
+  },
+  {
+    "class_name": "PlaneSDF",
+    "node_type": "plane_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/plane_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "normal_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "normal_y",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "normal_z",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "offset",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "PyramidSDF",
+    "node_type": "pyramid_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/pyramid_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "base",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "height",
+        "type": "float",
+        "default": 1.5
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "RaymarchSDF",
+    "node_type": "raymarch_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/raymarch_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "max_steps",
+        "type": "int",
+        "default": 128
+      },
+      {
+        "name": "max_dist",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "epsilon",
+        "type": "float",
+        "default": 0.001
+      },
+      {
+        "name": "cam_distance",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "cam_angle_x",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "cam_angle_y",
+        "type": "float",
+        "default": 0.4
+      },
+      {
+        "name": "fov",
+        "type": "float",
+        "default": 60.0
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "light_dir_x",
+        "type": "float",
+        "default": -0.5
+      },
+      {
+        "name": "light_dir_y",
+        "type": "float",
+        "default": 0.8
+      },
+      {
+        "name": "light_dir_z",
+        "type": "float",
+        "default": 0.6
+      },
+      {
+        "name": "ambient",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "show_ao",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "soft_shadows",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "RepeatSDF",
+    "node_type": "repeat_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/repeat_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "spacing_x",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "spacing_y",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "spacing_z",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "limit_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "limit_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "limit_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "RoundSDF",
+    "node_type": "round_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/round_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 0.1
+      }
+    ]
+  },
+  {
+    "class_name": "SmoothSubtractSDF",
+    "node_type": "smooth_subtract_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/smooth_subtract_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "smoothness",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
+    "class_name": "SmoothUnionSDF",
+    "node_type": "smooth_union_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/smooth_union_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "smoothness",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
+    "class_name": "SphereSDF",
+    "node_type": "sphere_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/sphere_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "SubtractSDF",
+    "node_type": "subtract_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/subtract_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": []
+  },
+  {
+    "class_name": "TorusSDF",
+    "node_type": "torus_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/torus_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "major_radius",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "minor_radius",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "position_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "position_z",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "TwistSDF",
+    "node_type": "twist_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/twist_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "amount",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "axis",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "UnionSDF",
+    "node_type": "union_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/union_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": []
   },
   {
     "class_name": "AttributeSOP",
@@ -8811,35 +9315,6 @@
     ]
   },
   {
-    "class_name": "ScriptSOP",
-    "node_type": "sop",
-    "family": "sop",
-    "file": "addons/gonodes/operators/sop/script_sop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "time_dependent",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "cook_once",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "force_active",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "code",
-        "type": "string",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "SelectSOP",
     "node_type": "select",
     "family": "sop",
@@ -9466,59 +9941,6 @@
     ]
   },
   {
-    "class_name": "UserNativeSOP",
-    "node_type": "usernativesop",
-    "family": "sop",
-    "file": "addons/gn_ext_user_native/operators/sop/user_native_sop.gd",
-    "extension": "gn_ext_user_native",
-    "params": [
-      {
-        "name": "cpp_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "cpp_class",
-        "type": "string",
-        "default": "MyUserSOP"
-      },
-      {
-        "name": "auto_build",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "UserPythonSOP",
-    "node_type": "userpythonsop",
-    "family": "sop",
-    "file": "addons/gn_ext_user_python/operators/sop/user_python_sop.gd",
-    "extension": "gn_ext_user_python",
-    "params": [
-      {
-        "name": "py_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "auto_reload",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": false
-      }
-    ]
-  },
-  {
     "class_name": "VoronoiShatterSOP",
     "node_type": "voronoi_shatter",
     "family": "sop",
@@ -9590,25 +10012,6 @@
         "name": "edge_threshold",
         "type": "float",
         "default": 0.125
-      }
-    ]
-  },
-  {
-    "class_name": "BendSDF",
-    "node_type": "bend_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/bend_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "amount",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "axis",
-        "type": "menu",
-        "default": null
       }
     ]
   },
@@ -9703,45 +10106,6 @@
     ]
   },
   {
-    "class_name": "BoxSDF",
-    "node_type": "box_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/box_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "size_x",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "size_y",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "size_z",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
-      }
-    ]
-  },
-  {
     "class_name": "CHOPtoTOP",
     "node_type": "chop_to_top",
     "family": "top",
@@ -9816,40 +10180,6 @@
         "name": "reset",
         "type": "bool",
         "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "CapsuleSDF",
-    "node_type": "capsule_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/capsule_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "radius",
-        "type": "float",
-        "default": 0.3
-      },
-      {
-        "name": "height",
-        "type": "float",
-        "default": 2.0
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
       }
     ]
   },
@@ -10072,40 +10402,6 @@
     ]
   },
   {
-    "class_name": "ConeSDF",
-    "node_type": "cone_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/cone_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "angle",
-        "type": "float",
-        "default": 30.0
-      },
-      {
-        "name": "height",
-        "type": "float",
-        "default": 2.0
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
-      }
-    ]
-  },
-  {
     "class_name": "ConstantTOP",
     "node_type": "constant",
     "family": "top",
@@ -10226,40 +10522,6 @@
         "name": "shader_code",
         "type": "string",
         "default": null
-      }
-    ]
-  },
-  {
-    "class_name": "CylinderSDF",
-    "node_type": "cylinder_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/cylinder_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "radius",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "height",
-        "type": "float",
-        "default": 2.0
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
       }
     ]
   },
@@ -10414,30 +10676,6 @@
     ]
   },
   {
-    "class_name": "DisplaceSDF",
-    "node_type": "displace_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/displace_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "amount",
-        "type": "float",
-        "default": 0.2
-      },
-      {
-        "name": "frequency",
-        "type": "float",
-        "default": 5.0
-      },
-      {
-        "name": "time_offset",
-        "type": "float",
-        "default": 0.0
-      }
-    ]
-  },
-  {
     "class_name": "DisplaceTOP",
     "node_type": "displace",
     "family": "top",
@@ -10506,30 +10744,6 @@
         "name": "grayscale",
         "type": "bool",
         "default": true
-      }
-    ]
-  },
-  {
-    "class_name": "ElongateSDF",
-    "node_type": "elongate_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/elongate_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "amount_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "amount_y",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "amount_z",
-        "type": "float",
-        "default": 0.0
       }
     ]
   },
@@ -10791,35 +11005,6 @@
     ]
   },
   {
-    "class_name": "GradientSDF",
-    "node_type": "gradient_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/gradient_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "color_near",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "color_far",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "range",
-        "type": "float",
-        "default": 2.0
-      },
-      {
-        "name": "roughness",
-        "type": "float",
-        "default": 0.5
-      }
-    ]
-  },
-  {
     "class_name": "GridWarpTOP",
     "node_type": "grid_warp",
     "family": "top",
@@ -10835,40 +11020,6 @@
         "name": "grid_rows",
         "type": "int",
         "default": 4
-      }
-    ]
-  },
-  {
-    "class_name": "GyroidSDF",
-    "node_type": "gyroid_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/gyroid_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "scale",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "thickness",
-        "type": "float",
-        "default": 0.1
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
       }
     ]
   },
@@ -10962,14 +11113,6 @@
         "default": null
       }
     ]
-  },
-  {
-    "class_name": "IntersectionSDF",
-    "node_type": "intersection_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/intersection_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": []
   },
   {
     "class_name": "LayoutTOP",
@@ -11102,35 +11245,6 @@
     ]
   },
   {
-    "class_name": "MaterialSDF",
-    "node_type": "material_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/material_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "albedo",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "roughness",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "metallic",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "emission",
-        "type": "float",
-        "default": 0.0
-      }
-    ]
-  },
-  {
     "class_name": "MatteTOP",
     "node_type": "matte",
     "family": "top",
@@ -11149,30 +11263,6 @@
       },
       {
         "name": "premultiply",
-        "type": "bool",
-        "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "MirrorSDF",
-    "node_type": "mirror_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/mirror_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "mirror_x",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "mirror_y",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "mirror_z",
         "type": "bool",
         "default": false
       }
@@ -11439,54 +11529,6 @@
     "params": []
   },
   {
-    "class_name": "OctahedronSDF",
-    "node_type": "octahedron_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/octahedron_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "size",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
-      }
-    ]
-  },
-  {
-    "class_name": "OnionSDF",
-    "node_type": "onion_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/onion_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "thickness",
-        "type": "float",
-        "default": 0.1
-      },
-      {
-        "name": "layers",
-        "type": "int",
-        "default": 1
-      }
-    ]
-  },
-  {
     "class_name": "OpticalFlowTOP",
     "node_type": "optical_flow",
     "family": "top",
@@ -11579,6 +11621,30 @@
     ]
   },
   {
+    "class_name": "ParticleStateTOP",
+    "node_type": "particle_state",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/particle_state_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "width",
+        "type": "int",
+        "default": 256
+      },
+      {
+        "name": "attribute",
+        "type": "string",
+        "default": "pos"
+      },
+      {
+        "name": "scale",
+        "type": "float",
+        "default": 1.0
+      }
+    ]
+  },
+  {
     "class_name": "PatternTOP",
     "node_type": "pattern",
     "family": "top",
@@ -11624,35 +11690,6 @@
         "name": "softness",
         "type": "float",
         "default": 0.02
-      }
-    ]
-  },
-  {
-    "class_name": "PlaneSDF",
-    "node_type": "plane_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/plane_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "normal_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "normal_y",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "normal_z",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "offset",
-        "type": "float",
-        "default": 0.0
       }
     ]
   },
@@ -11881,40 +11918,6 @@
     ]
   },
   {
-    "class_name": "PyramidSDF",
-    "node_type": "pyramid_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/pyramid_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "base",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "height",
-        "type": "float",
-        "default": 1.5
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
-      }
-    ]
-  },
-  {
     "class_name": "QuadMapTOP",
     "node_type": "quad_map",
     "family": "top",
@@ -12028,90 +12031,6 @@
         "name": "repeat",
         "type": "bool",
         "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "RaymarchSDF",
-    "node_type": "raymarch_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/raymarch_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
-      },
-      {
-        "name": "max_steps",
-        "type": "int",
-        "default": 128
-      },
-      {
-        "name": "max_dist",
-        "type": "float",
-        "default": 50.0
-      },
-      {
-        "name": "epsilon",
-        "type": "float",
-        "default": 0.001
-      },
-      {
-        "name": "cam_distance",
-        "type": "float",
-        "default": 5.0
-      },
-      {
-        "name": "cam_angle_x",
-        "type": "float",
-        "default": 0.3
-      },
-      {
-        "name": "cam_angle_y",
-        "type": "float",
-        "default": 0.4
-      },
-      {
-        "name": "fov",
-        "type": "float",
-        "default": 60.0
-      },
-      {
-        "name": "bg_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "light_dir_x",
-        "type": "float",
-        "default": -0.5
-      },
-      {
-        "name": "light_dir_y",
-        "type": "float",
-        "default": 0.8
-      },
-      {
-        "name": "light_dir_z",
-        "type": "float",
-        "default": 0.6
-      },
-      {
-        "name": "ambient",
-        "type": "float",
-        "default": 0.15
-      },
-      {
-        "name": "show_ao",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "soft_shadows",
-        "type": "bool",
-        "default": true
       }
     ]
   },
@@ -12401,45 +12320,6 @@
     ]
   },
   {
-    "class_name": "RepeatSDF",
-    "node_type": "repeat_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/repeat_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "spacing_x",
-        "type": "float",
-        "default": 3.0
-      },
-      {
-        "name": "spacing_y",
-        "type": "float",
-        "default": 3.0
-      },
-      {
-        "name": "spacing_z",
-        "type": "float",
-        "default": 3.0
-      },
-      {
-        "name": "limit_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "limit_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "limit_z",
-        "type": "float",
-        "default": 0.0
-      }
-    ]
-  },
-  {
     "class_name": "ResolutionTOP",
     "node_type": "resolution",
     "family": "top",
@@ -12455,20 +12335,6 @@
         "name": "filter",
         "type": "menu",
         "default": null
-      }
-    ]
-  },
-  {
-    "class_name": "RoundSDF",
-    "node_type": "round_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/round_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "radius",
-        "type": "float",
-        "default": 0.1
       }
     ]
   },
@@ -12613,34 +12479,6 @@
     ]
   },
   {
-    "class_name": "SmoothSubtractSDF",
-    "node_type": "smooth_subtract_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/smooth_subtract_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "smoothness",
-        "type": "float",
-        "default": 0.5
-      }
-    ]
-  },
-  {
-    "class_name": "SmoothUnionSDF",
-    "node_type": "smooth_union_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/smooth_union_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "smoothness",
-        "type": "float",
-        "default": 0.5
-      }
-    ]
-  },
-  {
     "class_name": "SnapshotTOP",
     "node_type": "snapshot",
     "family": "top",
@@ -12691,35 +12529,6 @@
         "name": "slice_pos",
         "type": "float",
         "default": 0.5
-      }
-    ]
-  },
-  {
-    "class_name": "SphereSDF",
-    "node_type": "sphere_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/sphere_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "radius",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
       }
     ]
   },
@@ -12888,14 +12697,6 @@
         "default": true
       }
     ]
-  },
-  {
-    "class_name": "SubtractSDF",
-    "node_type": "subtract_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/subtract_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": []
   },
   {
     "class_name": "SwitchTOP",
@@ -13091,40 +12892,6 @@
     ]
   },
   {
-    "class_name": "TorusSDF",
-    "node_type": "torus_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/torus_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "major_radius",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "minor_radius",
-        "type": "float",
-        "default": 0.3
-      },
-      {
-        "name": "position_x",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_y",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "position_z",
-        "type": "float",
-        "default": 0.0
-      }
-    ]
-  },
-  {
     "class_name": "TransformTOP",
     "node_type": "transform",
     "family": "top",
@@ -13194,86 +12961,6 @@
         "name": "softness",
         "type": "float",
         "default": 0.005
-      }
-    ]
-  },
-  {
-    "class_name": "TwistSDF",
-    "node_type": "twist_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/twist_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "amount",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "axis",
-        "type": "menu",
-        "default": null
-      }
-    ]
-  },
-  {
-    "class_name": "UnionSDF",
-    "node_type": "union_sdf",
-    "family": "top",
-    "file": "addons/gn_ext_sdf/operators/top/union_sdf.gd",
-    "extension": "gn_ext_sdf",
-    "params": []
-  },
-  {
-    "class_name": "UserNativeTOP",
-    "node_type": "usernativetop",
-    "family": "top",
-    "file": "addons/gn_ext_user_native/operators/top/user_native_top.gd",
-    "extension": "gn_ext_user_native",
-    "params": [
-      {
-        "name": "cpp_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "cpp_class",
-        "type": "string",
-        "default": "MyUserTOP"
-      },
-      {
-        "name": "auto_build",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": true
-      }
-    ]
-  },
-  {
-    "class_name": "UserPythonTOP",
-    "node_type": "userpythontop",
-    "family": "top",
-    "file": "addons/gn_ext_user_python/operators/top/user_python_top.gd",
-    "extension": "gn_ext_user_python",
-    "params": [
-      {
-        "name": "py_source",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "auto_reload",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "time_dep",
-        "type": "bool",
-        "default": true
       }
     ]
   },

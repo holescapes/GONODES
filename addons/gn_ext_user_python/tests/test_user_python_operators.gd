@@ -30,45 +30,49 @@ func _make_node(node: GNNode, id: String) -> GNNode:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# UserPythonCHOP
+# PythonSCRIPT — consolidated Python scripting node
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_user_python_chop_instantiate() -> void:
-	var node := _make_node(UserPythonCHOP.new(), "userpythonchop1")
-	GNTestAssert.assert_not_null(node, "UserPythonCHOP created")
+func test_python_script_instantiate() -> void:
+	var node := _make_node(PythonSCRIPT.new(), "pythonscript1")
+	GNTestAssert.assert_not_null(node, "PythonSCRIPT created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.SCRIPT, "PythonSCRIPT family is SCRIPT")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# UserPythonTOP
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_user_python_top_instantiate() -> void:
-	var node := _make_node(UserPythonTOP.new(), "userpythontop1")
-	GNTestAssert.assert_not_null(node, "UserPythonTOP created")
+func test_python_script_template_chop() -> void:
+	var node := _make_node(PythonSCRIPT.new(), "pythonscript_chop")
+	node.set_param_value("template", PythonSCRIPT.Template.CHOP)
+	GNTestAssert.assert_eq(node._current_template, PythonSCRIPT.Template.CHOP, "Template is CHOP")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# UserPythonSOP
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_user_python_sop_instantiate() -> void:
-	var node := _make_node(UserPythonSOP.new(), "userpythonsop1")
-	GNTestAssert.assert_not_null(node, "UserPythonSOP created")
+func test_python_script_template_sop() -> void:
+	var node := _make_node(PythonSCRIPT.new(), "pythonscript_sop")
+	node._apply_template(PythonSCRIPT.Template.SOP)
+	GNTestAssert.assert_eq(node._current_template, PythonSCRIPT.Template.SOP, "Template is SOP")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# UserPythonDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_user_python_dat_instantiate() -> void:
-	var node := _make_node(UserPythonDAT.new(), "userpythondat1")
-	GNTestAssert.assert_not_null(node, "UserPythonDAT created")
+func test_python_script_template_dat() -> void:
+	var node := _make_node(PythonSCRIPT.new(), "pythonscript_dat")
+	node._apply_template(PythonSCRIPT.Template.DAT)
+	GNTestAssert.assert_eq(node._current_template, PythonSCRIPT.Template.DAT, "Template is DAT")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# UserPythonIMG
-# ═══════════════════════════════════════════════════════════════════════════════
+func test_python_script_template_img() -> void:
+	var node := _make_node(PythonSCRIPT.new(), "pythonscript_img")
+	node._apply_template(PythonSCRIPT.Template.IMG)
+	GNTestAssert.assert_eq(node._current_template, PythonSCRIPT.Template.IMG, "Template is IMG")
 
-func test_user_python_img_instantiate() -> void:
-	var node := _make_node(UserPythonIMG.new(), "userpythonimg1")
-	GNTestAssert.assert_not_null(node, "UserPythonIMG created")
+
+func test_python_script_template_top() -> void:
+	var node := _make_node(PythonSCRIPT.new(), "pythonscript_top")
+	node._apply_template(PythonSCRIPT.Template.TOP)
+	GNTestAssert.assert_eq(node._current_template, PythonSCRIPT.Template.TOP, "Template is TOP")
+
+
+func test_python_script_preview_default() -> void:
+	var node := _make_node(PythonSCRIPT.new(), "pythonscript_preview")
+	var label := Label.new()
+	node.update_preview_control(label)
+	# No cook yet, preview should be empty
+	GNTestAssert.assert_eq(label.text, "", "Preview empty before first cook")
+	label.free()

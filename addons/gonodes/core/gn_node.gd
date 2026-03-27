@@ -16,7 +16,7 @@ extends Node
 @export var node_type: String = ""
 
 ## Which operator family this node belongs to.
-@export var family: GNFamily.Type = GNFamily.Type.TOP
+@export var family: int = GNFamily.Type.TOP
 
 ## Human-readable description of this operator for the palette tooltip.
 var node_description: String = ""
@@ -169,7 +169,7 @@ func supported_platforms() -> PackedStringArray:
 var _dynamic_input: bool = false
 
 ## Family type for dynamically created input ports.
-var _dynamic_input_family: GNFamily.Type = GNFamily.Type.TOP
+var _dynamic_input_family: int = GNFamily.Type.TOP
 
 ## Port name prefix for dynamic inputs (e.g., "in" → "in0", "in1", …).
 var _dynamic_input_prefix: String = "in"
@@ -238,17 +238,9 @@ func _pre_cook(delta: float) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Creates the preview Control for this node's inline graph display.
-## Uses the first output port's family type to decide between a TextureRect
-## (TOP) or a Label (everything else).  Override in subclasses that need
-## non-data-based previews (COMP scene nodes, UI widgets, etc.).
+## Family base classes override this (GNTopBase returns a TextureRect,
+## all others return a Label).  This fallback creates a Label.
 func create_preview_control() -> Control:
-	# TOP output → texture thumbnail
-	if output_ports.size() > 0 and output_ports[0].family == GNFamily.Type.TOP:
-		var tex_rect := TextureRect.new()
-		tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		return tex_rect
-	# Everything else → label
 	var label := Label.new()
 	label.add_theme_font_size_override("font_size", 10)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -257,11 +249,10 @@ func create_preview_control() -> Control:
 	return label
 
 
-## Updates the preview control from cached_output.  Dispatches by the actual
-## output data type so cross-family nodes (e.g. a VOL that outputs a texture)
-## get the correct preview automatically.  For multi-output nodes the first
-## output (cached_output) is previewed; use a Null node to inspect others.
-## Override in subclasses with non-data previews (COMP, UI, OUT).
+## Updates the preview control from cached_output.  Family base classes override
+## this with type-specific logic (GNTopBase → TextureRect, GNChopBase → channel
+## labels, etc.).  This fallback handles nodes that don't extend a family base
+## (e.g. GDScriptSCRIPT / PythonSCRIPT) by delegating to the data's get_preview_text().
 func update_preview_control(control: Control) -> void:
 	if cached_output == null:
 		if control is Label:
@@ -270,92 +261,15 @@ func update_preview_control(control: Control) -> void:
 			(control as TextureRect).texture = null
 		return
 
-	# ── Texture (TOP) ──────────────────────────────────────────────────
+	# Texture data → TextureRect (for cross-family nodes outputting textures)
 	if cached_output is GNTextureData:
 		if control is TextureRect:
 			(control as TextureRect).texture = (cached_output as GNTextureData).texture
 		return
 
-	# Everything below uses a Label
-	if not (control is Label):
-		return
-	var label: Label = control as Label
-
-	# ── Channel data (CHOP) ────────────────────────────────────────────
-	if cached_output is GNChannelData:
-		var ch_data: GNChannelData = cached_output as GNChannelData
-		var lines := PackedStringArray()
-		for ch_name in ch_data.channels:
-			var samples: PackedFloat32Array = ch_data.channels[ch_name]
-			if samples.size() > 0:
-				lines.append("%s: %.3f" % [ch_name, samples[samples.size() - 1]])
-			else:
-				lines.append("%s: —" % ch_name)
-		label.text = "\n".join(lines) if lines.size() > 0 else ""
-
-	# ── Geometry (SOP) ─────────────────────────────────────────────────
-	elif cached_output is GNGeoData:
-		var geo: GNGeoData = cached_output as GNGeoData
-		if geo.has_geometry() and geo.mesh != null:
-			var verts: int = 0
-			var surfs: int = geo.mesh.get_surface_count()
-			for s in range(surfs):
-				var arrays: Array = geo.mesh.surface_get_arrays(s)
-				if arrays[Mesh.ARRAY_VERTEX] != null:
-					verts += (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
-			label.text = "%d verts\n%d surfaces" % [verts, surfs]
-		else:
-			label.text = "no geo"
-
-	# ── Table (DAT) ────────────────────────────────────────────────────
-	elif cached_output is GNTableData:
-		var tbl: GNTableData = cached_output as GNTableData
-		if tbl.table.is_empty():
-			label.text = "(empty)"
-		else:
-			var lines := PackedStringArray()
-			if tbl.has_header and tbl.table.size() > 0:
-				lines.append(" | ".join(tbl.table[0]))
-			var data_start: int = 1 if tbl.has_header else 0
-			var max_rows: int = mini(tbl.table.size() - data_start, 3)
-			for r in range(max_rows):
-				lines.append(" | ".join(tbl.table[data_start + r]))
-			if tbl.table.size() - data_start > 3:
-				lines.append("… +%d rows" % (tbl.table.size() - data_start - 3))
-			label.text = "\n".join(lines)
-
-	# ── Image (IMG) ────────────────────────────────────────────────────
-	elif cached_output is GNImageData:
-		var img_data: GNImageData = cached_output as GNImageData
-		if img_data.image != null:
-			var res: Vector2i = img_data.resolution
-			label.text = "%d×%d\n%s" % [res.x, res.y, _preview_format_name(img_data.format)]
-		else:
-			label.text = "no image"
-
-	# ── Particles (POP) ────────────────────────────────────────────────
-	elif cached_output is GNParticleData:
-		var pd: GNParticleData = cached_output as GNParticleData
-		label.text = "%d particles" % pd.particle_count
-
-	# ── Volume (VOL) ──────────────────────────────────────────────────
-	elif cached_output is GNVolumeData:
-		var vd: GNVolumeData = cached_output as GNVolumeData
-		label.text = "%dx%dx%d\n%s" % [
-			vd.resolution.x, vd.resolution.y, vd.resolution.z,
-			vd.field_name]
-
-	# ── Material (MAT) ────────────────────────────────────────────────
-	elif cached_output is GNMaterialData:
-		var mat_data: GNMaterialData = cached_output as GNMaterialData
-		if mat_data.material != null:
-			label.text = mat_data.material_label
-		else:
-			label.text = "no material"
-
-	# ── Unknown / unhandled ────────────────────────────────────────────
-	else:
-		label.text = ""
+	# Everything else → Label via polymorphic get_preview_text()
+	if control is Label:
+		(control as Label).text = cached_output.get_preview_text()
 
 
 ## Short human-readable name for Image.Format (used by IMG preview).
@@ -370,6 +284,7 @@ static func _preview_format_name(fmt: Image.Format) -> String:
 		Image.FORMAT_RF: return "RF"
 		Image.FORMAT_RGF: return "RGF"
 		_: return "fmt:%d" % fmt
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Initialization
@@ -395,7 +310,7 @@ func initialize(p_id: String) -> void:
 
 ## Adds an input port and returns it.  [param port_label] overrides the
 ## display name in the UI when set (see [method GNPort.display_name]).
-func add_input(port_name: String, port_family: GNFamily.Type,
+func add_input(port_name: String, port_family: int,
 		multi: bool = false, desc: String = "", port_label: String = "") -> GNPort:
 	var port := GNPort.create(port_name, port_family, input_ports.size(), true, multi, desc, port_label)
 	input_ports.append(port)
@@ -404,7 +319,7 @@ func add_input(port_name: String, port_family: GNFamily.Type,
 
 ## Adds an output port and returns it.  [param port_label] overrides the
 ## display name in the UI when set (see [method GNPort.display_name]).
-func add_output(port_name: String, port_family: GNFamily.Type,
+func add_output(port_name: String, port_family: int,
 		desc: String = "", port_label: String = "") -> GNPort:
 	var port := GNPort.create(port_name, port_family, output_ports.size(), false, false, desc, port_label)
 	output_ports.append(port)
@@ -434,7 +349,7 @@ func get_output_port(index: int) -> GNPort:
 ## [param port_family] — GNFamily.Type for every port.
 ## [param name_prefix] — port names become "prefix0", "prefix1", …
 ## [param desc_prefix] — port descriptions become "Prefix 0", "Prefix 1", …
-func set_input_count(count: int, port_family: GNFamily.Type,
+func set_input_count(count: int, port_family: int,
 		name_prefix: String = "in", desc_prefix: String = "Input") -> void:
 	count = maxi(count, 0)
 	if count == input_ports.size():
@@ -449,7 +364,7 @@ func set_input_count(count: int, port_family: GNFamily.Type,
 
 ## Replaces all output ports with [param count] sequentially-named ports.
 ## Same semantics as [method set_input_count] but for outputs.
-func set_output_count(count: int, port_family: GNFamily.Type,
+func set_output_count(count: int, port_family: int,
 		name_prefix: String = "out", desc_prefix: String = "Output") -> void:
 	count = maxi(count, 0)
 	if count == output_ports.size():
@@ -471,7 +386,7 @@ func set_output_count(count: int, port_family: GNFamily.Type,
 ## Creates [param initial_count] numbered input ports (default 1).
 ## After every connection/disconnection the network calls
 ## [method update_dynamic_inputs] to ensure one trailing empty slot exists.
-func _enable_dynamic_inputs(port_family: GNFamily.Type,
+func _enable_dynamic_inputs(port_family: int,
 		name_prefix: String = "in", desc_prefix: String = "Input",
 		initial_count: int = 1) -> void:
 	_dynamic_input = true

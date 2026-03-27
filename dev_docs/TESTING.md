@@ -1,8 +1,8 @@
 # GONODES Testing Guide
 
 > **Audience:** Contributors writing or running tests.  
-> **Last updated:** 2026-03-21  
-> **Total automated tests:** 1,331 (1,044 core + 287 extension) across 48 test files — all passing
+> **Last updated:** 2026-03-27  
+> **Total automated tests:** 1,355 across 31+ test files — all passing
 
 ---
 
@@ -31,7 +31,7 @@ GONODES uses a **four-layer testing strategy** designed around the constraints o
 | Layer | Runs | Verifies | Requires GPU? |
 |-------|------|----------|--------------|
 | **Unit tests** | Headless CLI | Individual classes (GNParameter, GNNetwork, GNCookEngine, GNChannelData, GNParamPresetManager) in isolation | No |
-| **Operator tests** | Headless CLI | All 554 operators — instantiation, parameter defaults, cook-without-crash, output type correctness | No |
+| **Operator tests** | Headless CLI | All 533 operators — instantiation, parameter defaults, cook-without-crash, output type correctness | No |
 | **Functional tests** | Headless CLI | Output **correctness** — vertex positions, channel values, table contents, bounding boxes, topology changes | No |
 | **Integration tests** | Headless CLI | Full `cook_frame()` pipeline through multi-node networks with real operator instances | No |
 | **Manual test patches** | Editor (visual) | GPU rendering, shader compilation, visual output, particle systems, volumetrics, materials | Yes |
@@ -158,7 +158,7 @@ Tags and filters can be combined: `--test-tag=core --test-filter=box`
   ✗ test_some_broken_test — Expected '42' == '43'. values should match
 
 ═══════════════════════════════════════════════════
-  ALL PASSED — 1331 tests
+  ALL PASSED — 1355 tests
 
     ✗ test_chop_chains::test_some_broken_test — Expected '42' == '43'. values should match
 ═══════════════════════════════════════════════════
@@ -167,7 +167,7 @@ Tags and filters can be combined: `--test-tag=core --test-filter=box`
 - `✓` = passed
 - `✗` = one or more assertions failed (the first failure message is shown)
 - Exit code `0` = all passed, `1` = failures present
-- `SCRIPT ERROR` lines from expected error-path tests (e.g., syntax error in ScriptCHOP) are normal
+- `SCRIPT ERROR` lines from expected error-path tests (e.g., syntax error in GDScriptSCRIPT) are normal
 
 ---
 
@@ -305,7 +305,7 @@ End-to-end CHOP operator chain cooking.
 
 ### test_script_chop.gd — 7 tests
 
-ScriptCHOP operator with runtime GDScript compilation.
+GDScriptSCRIPT operator (CHOP template) with runtime GDScript compilation.
 
 | Test | What it verifies |
 |------|------------------|
@@ -315,7 +315,7 @@ ScriptCHOP operator with runtime GDScript compilation.
 | `test_script_chop_reads_input` | Filter script reads upstream ConstantCHOP input and multiplies by 2 |
 | `test_script_chop_multi_channel` | Script creating 3 channels (`x`, `y`, `z`) produces correct multi-channel output |
 | `test_script_chop_syntax_error_graceful` | Intentionally broken syntax doesn't crash — node cooks with error state |
-| `test_script_to_math_chain` | ScriptCHOP(10) → MathCHOP(×3) produces 30 through the full pipeline |
+| `test_script_to_math_chain` | GDScriptSCRIPT(10) → MathCHOP(×3) produces 30 through the full pipeline |
 
 ### test_network_roundtrip.gd — 6 tests
 
@@ -332,7 +332,7 @@ Network serialization (`to_dict()` / `from_dict()`) round-trip fidelity.
 
 ### test_gnpatch_smoke.gd — 4 tests
 
-Bulk smoke test that loads every `.gnpatch` help file across core and extensions (1,382+ patches), deserializes each into a GNNetwork, and verifies structural integrity.
+Bulk smoke test that loads every `.gnpatch` help file across core and extensions (1,413 patches), deserializes each into a GNNetwork, and verifies structural integrity.
 
 | Test | What it verifies |
 |------|------------------|
@@ -427,7 +427,7 @@ Each extension has one test file (e.g., `test_<ext>_operators.gd`) that follows 
 | Extension | File | Tests | Key operators |
 |-----------|------|-------|---------------|
 | **gn_ext_native** | `test_native_operators.gd` | 176 | All `*Native` variants: 24 CHOP, 32 SOP, 9 POP, 7 VOL, 5 IMG |
-| **gn_ext_sdf** | `test_sdf_operators.gd` | 53 | All SDF operators + MaterialSDF |
+| **core (SDF)** | `test_sdf_operators.gd` | 53 | All SDF operators + MaterialSDF |
 | **gn_ext_mapper** | `test_mapper_operators.gd` | 14 | BezierMap, EdgeBlend, GridWarp, ProjectionMask, ProjectorBlend, QuadMap, Stoner |
 | **gn_ext_ml** | `test_ml_operators.gd` | 7 | DepthEstimate, Segmentation, StyleTransfer, FaceDetect, HandDetect, PoseDetect, ObjectDetect |
 | **gn_ext_depth_sensor** | `test_depth_sensor_operators.gd` | 5 | DepthSensorTOP/DAT, DepthPointCloudSOP, DepthHandCHOP, DepthSkeletonCHOP |
@@ -488,13 +488,13 @@ Manual test patches live in `tests/manual/<family>/` and provide **human-assiste
 
 ## 9. Manual Test Scenes (Legacy)
 
-> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (1,382 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §7.1 below.
+> **⚠️ DEPRECATED** — Per-operator visual testing is now handled by **help example patches** (1,413 `.gnpatch` files across `addons/gonodes/help/<family>/` and extension help directories). The legacy `test_scenes/` folder is retained for reference but is no longer the primary visual verification method. See §7.1 below.
 
 ### 7.1 Help Example Patches (Replacement)
 
 Every operator now ships with 3+ `.gnpatch` example files accessible via the `?` help button on each node. These patches provide the same visual verification that manual test scenes provided, but with these advantages:
 
-- **Per-operator coverage** — 1,382 patches vs 8 multi-node test scenes
+- **Per-operator coverage** — 1,413 patches vs 8 multi-node test scenes
 - **Discoverable** — click `?` on any node to see its examples
 - **Required for new operators** — Hard Rule 25.21 mandates help patches for every new node
 - **Self-contained** — each patch tests one operator in isolation
@@ -642,7 +642,7 @@ func test_my_chain() -> void:
 - **GNNetwork** — node add/remove, connection management, topological sort, cycle detection, dirty propagation, rename with connection update, unique ID generation, serialization structure
 - **GNChannelData** — channel I/O, index bounds behavior, missing data handling, metadata tracking, deep copy, family identity
 - **GNParamPresetManager** — clipboard lifecycle, type-safe paste, reset to defaults, null safety
-- **All 545 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
+- **All 533 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
 - **SOP behavioral verification** — vertex counts, geometry presence, subdivision effects, deformation correctness (transform shifts, noise deforms, bend/twist/taper), merge/switch/blend output, position data comparison
 - **SOP functional verification** — vertex positions within bounds, AABB size changes after scale/peak/extrude, normal directions after flip/recompute, scatter point counts, copy multiplication, clip plane enforcement, sort ordering, fuse deduplication
 - **DAT behavioral verification** — cell content, row/column counts, sort correctness (ascending/descending, numeric/alphabetic), merge row stacking, transpose dimension swap, switch selection
@@ -651,10 +651,10 @@ func test_my_chain() -> void:
 - **Full cook pipeline** — `cook_frame()` through real CHOP operator chains (Constant, Math, Merge, Null, Script, LFO), including topo sort, dirty propagation, input gathering, parameter resolution, bypass mode
 - **ScriptCHOP runtime** — dynamic GDScript compilation, `@param` annotation parsing, upstream input reading, multi-channel output, syntax error handling
 - **Network serialization** — `to_dict()` / `from_dict()` round-trip fidelity for nodes, connections, parameters, and expressions; cook correctness after deserialization
-- **Patch integrity** — all 1,382 `.gnpatch` help files load, deserialize, contain nodes, and have valid connections
+- **Patch integrity** — all 1,413 `.gnpatch` help files load, deserialize, contain nodes, and have valid connections
 - **Thread safety** — `GNNetwork.multithreading_enabled` toggle (off by default, serialized in `.gnpatch`), `GNNode.thread_safe` per-operator flag, expression edge injection into topo levels, parallel batch splitting of safe/unsafe nodes
 
-### Covered by help example patches (1,382 patches)
+### Covered by help example patches (1,413 patches)
 
 - **GPU rendering** — All 28 TOP operators have visual example patches
 - **Shader compilation** — `glsl_radial_wave.gnpatch` demonstrates CustomShaderTOP
@@ -743,7 +743,7 @@ tests/
 │   ├── test_chop_chains.gd                 # CHOP operator chain cooking
 │   ├── test_cook_chain.gd                  # Multi-node cook chain (SOP/CHOP/DAT end-to-end)
 │   ├── test_cook_pipeline.gd               # Cook pipeline integration
-│   ├── test_gnpatch_smoke.gd               # Load+verify all 1,382 .gnpatch help files
+│   ├── test_gnpatch_smoke.gd               # Load+verify all 1,413 .gnpatch help files
 │   ├── test_script_chop.gd                 # ScriptCHOP runtime
 │   └── test_network_roundtrip.gd           # Serialization round-trip
 └── manual/                                 # Human-assisted visual test patches (183 patches)
@@ -758,7 +758,7 @@ tests/
 
 addons/gn_ext_*/tests/                      # Self-contained extension tests (287 tests)
 ├── gn_ext_native/tests/test_native_operators.gd    # 176 tests — all *Native variants
-├── gn_ext_sdf/tests/test_sdf_operators.gd          # 53 tests — all SDF operators
+├── tests/operators/sdf/test_sdf_operators.gd          # 53 tests — all SDF operators
 ├── gn_ext_mapper/tests/test_mapper_operators.gd     # 14 tests — projection mapping
 ├── gn_ext_ml/tests/test_ml_operators.gd             # 7 tests — ML inference operators
 ├── gn_ext_depth_sensor/tests/...                    # 5 tests

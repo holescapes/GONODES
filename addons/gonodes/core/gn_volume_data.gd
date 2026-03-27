@@ -36,8 +36,16 @@ var is_cpu: bool = false
 var cpu_data: PackedFloat32Array = PackedFloat32Array()
 
 
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	return GNFamily.Type.VOL
+
+
+func get_preview_text() -> String:
+	return "%dx%dx%d\n%s" % [resolution.x, resolution.y, resolution.z, field_name]
+
+
+func get_data_summary() -> String:
+	return "%dx%dx%d" % [resolution.x, resolution.y, resolution.z]
 
 
 func invalidate() -> void:

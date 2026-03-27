@@ -395,10 +395,10 @@ These **are** the C++ native rewrites. The GDScript wrappers just delegate to GD
 |-------|--------|-------|---------|
 | 1–2 | SOP | 11 | Particle, Metaball, PolyReduce, IsoSurface, Ray, Facet, Fuse, Subdivide, Copy, LSystem, Spring |
 | 3 | SOP | 13 | Noise, Mountain, Blend, Scatter, Sweep, Extrude, Bend, Taper, Twist, Lattice, Magnet, PolyLoft, Skin |
-| 4–6 | SOP | 10 | TopToSop, Point, Clip, Sort, UVProject, Attribute, Transform, Divide, Normal, Mirror, Cap, Delete, Carve |
+| 4–6 | SOP | 13 | TopToSop, Point, Clip, Sort, UVProject, Attribute, Transform, Divide, Normal, Mirror, Cap, Delete, Carve |
 | 8 | SOP | 5 | Smooth, Remesh, PolyBevel, PolyStitch, Wireframe |
 | **9** | **SOP** | **7** | **Cloth, Texture, Peak, Group, PolySpline, PolyPatch, PolyBridge** |
-| 2–6 | CHOP | 20 | Smooth, Noise, Wave, Math, Filter, Resample, Trail, Slope, Warp, Interpolate, Physics, Pattern, AudioSpectrum, TopToChop, Expression, AudioDynamics, Stretch, Lookup |
+| 2–6 | CHOP | 18 | Smooth, Noise, Wave, Math, Filter, Resample, Trail, Slope, Warp, Interpolate, Physics, Pattern, AudioSpectrum, TopToChop, Expression, AudioDynamics, Stretch, Lookup |
 | 8 | CHOP | 5 | IK, SopToChop, Laser, Composite, Fan |
 | **9** | **CHOP** | **3** | **Transform, Lag, Blend** |
 | 1–6 | IMG | 5 | Blur, PixelSort, Noise, EdgeDetect, Checkerboard |
@@ -446,7 +446,7 @@ The Phase 9 batch was identified by auditing all operators for CPU hotspots that
 
 **POP**: render_pop_native, instance_pop_native
 
-### gn_ext_sdf (20 files) — 🟢 ALL COLD
+### SDF (core) (20 files) — 🟢 ALL COLD
 
 All SDF operators compose GLSL shader graphs. No CPU loops. Pure GPU.
 
@@ -559,4 +559,4 @@ POP: instance, render
 
 *VOL/POP HOT ratings are for CPU fallback paths only — GPU primary paths are COLD.
 
-**Bottom line**: ~64 operators (13.5%) are CPU-heavy and benefit from C++ rewrite. ~38 of those already had native counterparts in `gn_ext_native`. **Phase 8 migration complete:** All 23 remaining unmigrated HOT operators (5 SOP, 5 CHOP, 6 VOL, 7 POP) now have C++ GDExtension implementations. Total native operators: 92 (42 SOP, 23 CHOP, 5 IMG, 4 TOP, 9 VOL, 9 POP). Zero HOT operators remain in pure GDScript.
+**Bottom line**: ~64 operators (13.5%) are CPU-heavy and benefit from C++ rewrite. ~38 of those already had native counterparts in `gn_ext_native`. **Phase 8 migration complete:** All 23 remaining unmigrated HOT operators (5 SOP, 5 CHOP, 6 VOL, 7 POP) now have C++ GDExtension implementations. **Phase 9 added** 10 more (7 SOP, 3 CHOP). Total native operators: 103 (49 SOP, 26 CHOP, 5 IMG, 4 TOP, 9 VOL, 9 POP, 1 Serial). Zero HOT operators remain in pure GDScript.

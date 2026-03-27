@@ -45,4 +45,9 @@ func _prepare_output() -> GNMaterialData:
 	return _cached_mat_data
 
 
+func update_preview_control(control: Control) -> void:
+	if control is Label:
+		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
+
+
 

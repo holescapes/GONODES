@@ -999,24 +999,24 @@ def get_chop_patches():
             annotation_text="Resample CHOP — Downsample\n\nReduces to 10 samples/sec.\nCreates aliased/stepped look.")),
     ]
 
-    # ── ScriptCHOP ──
-    patches["scriptchop"] = [
-        ("scriptchop_basic", build_chop_chain("script1",
-            node("ScriptCHOP", 100, 100, {}),
-            annotation_text="Script CHOP — Basic\n\nCustom GDScript-driven CHOP.\nEdit script to define output channels.")),
-        ("scriptchop_input", build_chop_chain("script1",
-            node("ScriptCHOP", 400, 100, {}),
+    # ── GDScriptSCRIPT (CHOP template) ──
+    patches["script"] = [
+        ("script_basic", build_chop_chain("script1",
+            node("GDScriptSCRIPT", 100, 100, {}),
+            annotation_text="GDScript SCRIPT — Basic\n\nCustom GDScript-driven CHOP.\nEdit script to define output channels.")),
+        ("script_input", build_chop_chain("script1",
+            node("GDScriptSCRIPT", 400, 100, {}),
             extra_nodes={"lfo1": node("LFO_CHOP", 100, 100, {"frequency": p(1.0)})},
             extra_conns=[conn("lfo1", 0, "script1", 0)],
-            annotation_text="Script CHOP — With Input\n\nScript receives LFO input.\nProcess and transform in GDScript.")),
-        ("scriptchop_multi", build_chop_chain("script1",
-            node("ScriptCHOP", 400, 100, {}),
+            annotation_text="GDScript SCRIPT — With Input\n\nScript receives LFO input.\nProcess and transform in GDScript.")),
+        ("script_multi", build_chop_chain("script1",
+            node("GDScriptSCRIPT", 400, 100, {}),
             extra_nodes={
                 "noise1": node("NoiseCHOP", 100, 50, {}),
                 "lfo1": node("LFO_CHOP", 100, 200, {"frequency": p(2.0)}),
             },
             extra_conns=[conn("noise1", 0, "script1", 0), conn("lfo1", 0, "script1", 1)],
-            annotation_text="Script CHOP — Multi-Input\n\nTwo inputs for custom script processing.\nCombine signals in code.")),
+            annotation_text="GDScript SCRIPT — Multi-Input\n\nTwo inputs for custom script processing.\nCombine signals in code.")),
     ]
 
     # ── SelectCHOP ──

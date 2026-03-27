@@ -459,7 +459,6 @@ See the existing extensions for reference:
 | `gn_ext_midi` | `addons/gn_ext_midi/` | Cross-platform MIDI I/O via RtMidi (RtMidiInCHOP, RtMidiOutCHOP) |
 | `gn_ext_gpu_encode` | `addons/gn_ext_gpu_encode/` | Hardware GPU video encoding (MovieFileOutTOP) |
 | `gn_ext_mapper` | `addons/gn_ext_mapper/` | Projection mapping toolkit — GPU warping, edge blend, masking (7 TOPs) |
-| `gn_ext_sdf` | `addons/gn_ext_sdf/` | SDF primitives, booleans, modifiers, materials, renderer (25 ops) |
 | `gn_ext_hap` | `addons/gn_ext_hap/` | HAP codec GPU-direct video (HapInTOP, HapOUT) |
 | `gn_ext_serial` | `addons/gn_ext_serial/` | Serial port send/receive (SerialSendDAT, SerialReceiveDAT) |
 | `gn_ext_ndi` | `addons/gn_ext_ndi/` | NDI video-over-IP (4 ops — requires NDI SDK) |

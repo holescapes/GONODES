@@ -1,6 +1,6 @@
 # GONODES
 
-**Real-time node-based visual programming, built on [Godot 4.6](https://godotengine.org). Inspired by [TouchDesigner](https://derivative.ca).**
+**Real-time node-based visual programming, built on [Godot 4.6](https://godotengine.org). Inspired by [TouchDesigner](https://derivative.ca) and [Houdini](https://www.sidefx.com).**
 
 Wire operators together, tweak parameters live, see results instantly — then export your patch as a standalone app on any platform Godot supports.
 
@@ -8,7 +8,7 @@ Wire operators together, tweak parameters live, see results instantly — then e
 
 ## Why GONODES?
 
-If you've used TouchDesigner, Max/MSP, vvvv, or VUO, you know the workflow: connect nodes, data flows through wires, visuals appear in real time. GONODES brings that to Godot — with some unique advantages:
+If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workflow: connect nodes, data flows through wires, results appear in real time. GONODES brings that to Godot — with some unique advantages:
 
 - **Ship anywhere.** Export patches as standalone apps on Windows, macOS, Linux, Android, iOS, and Web — no runtime license fees.
 - **GPU-powered.** Vulkan, Metal, D3D12, and OpenGL rendering. Compute shaders for GPU particles and volumetrics.
@@ -19,24 +19,26 @@ If you've used TouchDesigner, Max/MSP, vvvv, or VUO, you know the workflow: conn
 
 ## Features at a Glance
 
-**545 operators** across **11 families**, plus **92 native C++ accelerated operators** and **19 extensions**.  
+**533 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
 
 | Family | What It Processes | Examples |
 |--------|-------------------|----------|
-| **TOP** (129) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
-| **CHOP** (112) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
-| **SOP** (120) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
-| **DAT** (47) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
-| **COMP** (20) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
+| **TOP** (101) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
+| **CHOP** (109) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
+| **SOP** (117) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
+| **DAT** (44) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
+| **COMP** (19) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
 | **POP** (20) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
 | **VOL** (22) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
 | **MAT** (10) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
-| **IMG** (21) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab |
+| **IMG** (18) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab |
 | **OUT** (13) | Output & export | WindowOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
 | **UI** (31) | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer |
+| **SDF** (26) | Signed distance fields | Box, Sphere, Torus, Boolean ops, Bend, Twist, Raymarch |
+| **SCRIPT** (3) | User scripting | GDScript, Python, C++ — template-based multi-family output |
 
 ### Live Expression System
 
@@ -98,13 +100,17 @@ Physics simulation (Jolt), environment/post-processing, instancing, animation �
 | **User Native** | Write custom C++ operators in-editor with hot-reload |
 | **User Python** | Write custom Python operators with NumPy |
 
+Extensions can go far beyond adding operators — they can define **entirely new data families** with custom port types, wire colors, data classes, and palette sections. The SDF extension demonstrates this: it registers a new "SDF" family at runtime, complete with 40+ operators, custom data type (`GNSDFData`), and its own wire color. No core code modification is required to add a new family. See [CONTRIBUTING.md §5](dev_docs/CONTRIBUTING.md) for the full extension authoring guide.
+
 ### Scripting
 
-Six script-capable operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG, GenericScriptNode, CallbackDAT) with runtime GDScript compilation:
+Three consolidated SCRIPT family nodes (GDScriptSCRIPT, PythonSCRIPT, NativeSCRIPT) plus CallbackDAT:
 
+- Template dropdown selects target context (CHOP, SOP, DAT, IMG, TOP, Generic)
+- `par("name")` reads custom parameters declared via annotations
 - Read and **write** parameters across the graph with `set_par()`
 - Procedurally create/destroy nodes and connections via the Network API
-- GenericScriptNode outputs any family via `# @output` annotations
+- GDScriptSCRIPT Generic template outputs any family via `# @output` annotations
 - CallbackDAT fires on cook, param change, creation, or startup
 
 ### Debug & Profiling
@@ -119,10 +125,11 @@ Press **F2** to open the debug system:
 ### Workflow
 
 - **Smart wiring** — drop a wire on empty canvas → filtered palette shows only compatible operators → auto-connect
-- **Sub-networks** — Ctrl+G to group, Enter to dive, Backspace to exit
-- **Custom operators** — save sub-networks as `.gnasset` files; they appear in the palette like built-in nodes
+- **Sub-networks** — Ctrl+G to group, Enter to dive, Backspace to exit (Houdini-style dive navigation)
+- **Custom operators** — save sub-networks as `.gnasset` files; they appear in the palette like built-in nodes (inspired by Houdini's Digital Assets / HDAs)
 - **Presets** — save/load parameter states; copy between nodes of the same type
 - **Spare parameters** — add any param type to any node (Houdini-style)
+- **User C++ / Python operators** — write custom operators in C++ or Python with hot-reload (inspired by Houdini's HDK and Python SOPs)
 - **Ramp curves** — cubic Hermite ramp parameter type with visual curve editor
 - **Annotations** — network boxes and sticky notes for graph organization
 - **Quick Build** — one-click export to standalone app for any platform
@@ -131,11 +138,24 @@ Press **F2** to open the debug system:
 
 ### Help System
 
-Every operator has a **?** button that opens auto-generated documentation (inputs, outputs, parameters, description) plus hand-written guides where available. **1,382 example patches** — 3+ per operator — open in floating editor windows so your work stays untouched.
+Every operator has a **?** button that opens auto-generated documentation (inputs, outputs, parameters, description) plus hand-written guides where available. **1,413 example patches** — 3+ per operator — open in floating editor windows so your work stays untouched.
 
 ### Testing
 
-**1,331 automated tests** across 48 test files covering the cook engine, parameter system, data types, serialization, and operator behavior.
+**1,355 automated tests** across 31+ test files covering all 13 families, the cook engine, parameter system, data types, serialization, and operator behavior.
+
+### GONODES Player — Standalone Export
+
+Click **Build** in the editor and your patch becomes a standalone application — no Godot editor required at runtime.
+
+- **Quick Build** — one-click export copies a pre-built Player binary + your `.gnpatch` + assets + `config.json` to a folder. Double-click to run.
+- **8 platform targets** — Windows (x86_64, ARM64), macOS (universal), Linux (x86_64, ARM64), Android, iOS, and Web (HTML5/WebAssembly).
+- **Multi-window** — each WindowOUT opens an independent OS window, auto-positioned across displays. The Player auto-opens all windows on launch.
+- **Headless mode** — patches without WindowOUTs still cook: file-save operators, OSC/MIDI output, and `Force Active` scripts keep the engine alive at near-zero idle.
+- **Renderer fallback** — Forward+ (Vulkan/D3D12/Metal) with automatic fallback to Compatibility (OpenGL 3.3/WebGL2). GPU particles and compute volumes gracefully degrade on OpenGL.
+- **config.json** — minimal config alongside the executable: `{ "patch": "MyShow.gnpatch" }`. Override via `--patch <path>` CLI.
+
+Player templates are pre-built once via `scripts/build_templates.ps1` (or `.sh`) and stored in `templates/`. Rebuild after upgrading Godot. See [dev_docs/PLAYER.md](dev_docs/PLAYER.md) for internals and [dev_docs/BUILD.md](dev_docs/BUILD.md) for the build system.
 
 ---
 
@@ -197,6 +217,32 @@ scons --list-extensions
 
 Extensions that don't support the target platform are silently skipped. See [build/README.md](build/README.md) for the full reference, or [dev_docs/BUILD.md](dev_docs/BUILD.md) for CI pipelines, cross-compilation, and Player template builds.
 
+### GN Extensions — Operator Packs
+
+GONODES has its own extension system built on top of Godot's GDExtension. A **GN Extension** is a folder under `addons/gn_ext_<name>/` with a `gn_extension.cfg` manifest that registers operators, declares platform requirements, and lists dependencies. The registry auto-discovers and loads them at startup.
+
+GN Extensions can range from **pure GDScript** (no compilation needed) to **full C++ GDExtension** addons with native binaries. Three shipped extensions demonstrate the pure-GDScript approach — zero external dependencies, no build step, just operators + shaders in a folder:
+
+| Extension | Operators | What It Does |
+|-----------|-----------|-------------|
+| **gn_ext_shadertoy** | 1 | Paste/fetch Shadertoy GLSL shaders, auto-translated to Godot |
+| **gn_ext_isf** | 1 | ISF v2 interactive shader format with multi-pass and auto-parameter generation |
+| **gn_ext_mapper** | 5 | Projection mapping — quad pin, bezier warp, grid warp, edge blend, mask |
+
+These exist as extensions rather than core operators specifically to serve as **templates for building your own packs**. Copy one, rename the folder, edit `gn_extension.cfg`, add your operators — that's it. No C++ required.
+
+Extensions that *do* use C++ for hardware I/O or performance (NDI, MIDI, Spout, depth sensors, ML inference, etc.) follow the same pattern but add a `native/` directory with a `SConstruct` and C++ source. See [dev_docs/CONTRIBUTING.md](dev_docs/CONTRIBUTING.md) for the full extension authoring guide.
+
+### Sharing Packs — .gnasset & Extensions
+
+GONODES supports two distribution formats:
+
+- **`.gnasset` files** — Self-contained JSON operator packages. Right-click any SubNetwork → "Promote to Custom Asset" to create one. Recipients drop the file into `custom_operators/` or `user://gonodes_assets/` and it appears in the palette immediately. Good for individual custom operators and small reusable modules.
+
+- **GN Extension folders** — For larger packs (multiple operators, shaders, help docs, tests), distribute an `addons/gn_ext_<name>/` folder. Users copy it into their project's `addons/` directory. The registry picks it up automatically — no code changes, no registration calls.
+
+Both formats work today. A dedicated asset browser and community sharing portal are on the roadmap.
+
 ---
 
 ## Architecture
@@ -206,7 +252,7 @@ Extensions that don't support the target platform are silently skipped. See [bui
 │  UI Layer                                   │
 │  Node graph, Inspector, Viewer, Debug       │
 ├─────────────────────────────────────────────┤
-│  Operator Library (371 + extensions)        │
+│  Operator Library (402 + extensions)        │
 │  TOPs, CHOPs, SOPs, POPs, VOLs, DATs,      │
 │  MATs, COMPs, IMGs, OUTs, UIs              │
 ├─────────────────────────────────────────────┤
@@ -233,7 +279,7 @@ For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT
 - ~~Multi-threaded cook engine~~ — **Done.** Level-based parallelism via `WorkerThreadPool`. CPU families (CHOP, SOP, DAT, IMG) cook in parallel within each topological level; GPU families (TOP, POP, VOL) remain on main thread.
 - ~~Event-driven expression evaluation~~ — **Done.** Expression consumer map (`_expr_consumer_map`) replaces per-frame polling; expressions only re-evaluate when referenced upstream nodes actually cook.
 - ~~Output sinks (Spout, MIDI, OSC, Audio)~~ — **Done.** SpoutOutTOP, RtMidiOutCHOP, OscOUT, AudioDeviceOUT — all with `is_sink = true`.
-- ~~Generic multi-output ScriptNode~~ — **Done.** `GenericScriptNode` (COMP family) with `# @output` annotations for any mix of data types.
+- ~~Generic multi-output ScriptNode~~ — **Done.** `GDScriptSCRIPT` (SCRIPT family) with `# @output` annotations for any mix of data types. Template dropdown for CHOP/SOP/DAT/IMG starting code.
 - ~~JSON serialization (.gnpatch)~~ — **Done.** `.gnpatch` JSON format used for all patch files, including cross-app portability via libgonodes C API.
 - ~~FFmpeg GDExtension~~ — **Done.** FFmpegInTOP (decode: H.264, H.265, VP9, AV1, ProRes + all FFmpeg codecs), FFmpegOUT (encode: H.264, H.265, VP9, AV1, ProRes via CLI), MovieFileOutTOP (GPU hardware H.264/H.265 encode via MF/VideoToolbox).
 - ~~HAP codec~~ — **Done.** `gn_ext_hap` GDExtension with HapInTOP (GPU-direct DXT playback, zero CPU decode) and HapOutTOP (DXT compress + Snappy + MOV mux). Supports HAP, HAP Alpha, HAP Q variants.
@@ -241,6 +287,20 @@ For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT
 - FxPlug / FFGL plugin export
 - Laser DAC drivers — EtherDream, Helios, ShowNET (GDExtension; data model via LaserCHOP ready)
 - Network collaboration (shared editing)
+
+### LibGONODES — Embeddable Engine
+
+The `libgonodes/` directory contains a complete C shared library for embedding GONODES in any host application — VJ tools, media servers, game engines, creative coding frameworks. Five working example apps are included:
+
+| Example | What It Demonstrates |
+|---------|---------------------|
+| `vulkan_host/` | Vulkan shared GPU context — zero-copy texture exchange |
+| `metal_host/` | Metal shared device — zero-copy on macOS/iOS |
+| `opengl_host/` | OpenGL shared context — legacy GPU path |
+| `sdl_host/` | SDL2 window — cross-platform minimal embedding |
+| `params_demo/` | Parameter introspection and live control from the host |
+
+See [libgonodes/README.md](libgonodes/README.md) and [dev_docs/INTEGRATION.md](dev_docs/INTEGRATION.md) for the full API reference.
 
 ---
 
@@ -252,12 +312,25 @@ Start by reading [GONODES_CONTEXT.md](GONODES_CONTEXT.md) for the architecture o
 
 ## License
 
-TBD
+MIT License — see [LICENSE](LICENSE) for the full text.
+
+GONODES is free and open source. You can use it for personal projects, commercial products,
+installations, performances, and embedded applications without restrictions or royalties.
+
+Third-party dependencies ship under their own licenses (see `addons/gn_ext_*/` for per-extension details):
+- Godot Engine — MIT
+- godot-cpp — MIT
+- FFmpeg (gn_ext_ffmpeg) — LGPL 2.1+ (dynamically linked)
+- RtMidi (gn_ext_midi) — MIT-like
+- Spout SDK (gn_ext_spout) — BSD 2-Clause
+- ONNX Runtime (gn_ext_ml) — MIT
 
 ---
 
 ## Acknowledgments
 
-- [Derivative TouchDesigner](https://derivative.ca) — for pioneering real-time node-based visual programming
-- [Godot Engine](https://godotengine.org) — for being an incredible open-source foundation
-- [VUO](https://vuo.org) — for proving embeddable node-based compositions work in host apps
+- [SideFX Houdini](https://www.sidefx.com) — the gold standard of procedural content creation. Houdini's HDK, digital assets, VEX, and deep procedural philosophy directly inspired GONODES' custom operator system, sub-network packaging, spare parameters, and the cook engine's dependency-driven evaluation model.
+- [Derivative TouchDesigner](https://derivative.ca) — for pioneering real-time node-based visual programming. The operator family model (TOP/CHOP/SOP/DAT/COMP/MAT), wire-based data flow, live expression system, and performance-first design are all rooted in TouchDesigner's vision.
+- [Godot Engine](https://godotengine.org) — for being an incredible open-source foundation that makes all of this possible
+- [VUO](https://vuo.org) — for proving embeddable node-based compositions work in host applications
+- [Max/MSP](https://cycling74.com) and [vvvv](https://vvvv.org) — for decades of innovation in visual programming for media art

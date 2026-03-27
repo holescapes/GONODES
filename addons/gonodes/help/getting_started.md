@@ -18,7 +18,13 @@ GONODES organizes operators into families based on the type of data they process
 | **DAT**  | Data operators — tables, text, and structured data |
 | **SOP**  | Surface operators — 3D geometry generation        |
 | **MAT**  | Material operators — shader materials for 3D      |
-| **COMP** | Component operators — 3D scene objects and sub-networks || **UI** | User interface operators — interactive 2D widgets for control panels || **OUT** | Final output sinks for rendering and display    |
+| **COMP** | Component operators — 3D scene objects and sub-networks |
+| **UI**   | User interface operators — interactive 2D widgets for control panels |
+| **OUT**  | Final output sinks for rendering and display    |
+| **POP**  | GPU particle operators — compute shader particle systems |
+| **VOL**  | Volumetric operators — 3D texture volumes, fluid sim, marching cubes |
+| **SDF**  | Signed distance field operators — primitives, booleans, modifiers |
+| **SCRIPT** | User scripting operators — GDScript, Python, C++ |
 
 ---
 
@@ -62,13 +68,14 @@ to navigate back up. The breadcrumb bar at the top shows your current location.
 
 ### Script Operators
 
-Five script operator types let you write custom logic:
+Three consolidated SCRIPT family operators let you write custom logic:
 
-- **ScriptCHOP** — custom channel processing
-- **ScriptDAT** — custom data table generation
-- **ScriptSOP** — custom geometry generation
-- **ScriptIMG** — custom image processing
-- **GenericScriptNode** — multi-family output (CHOP + DAT + IMG)
+- **GDScriptSCRIPT** — GDScript scripting with template dropdown (CHOP, SOP, DAT, IMG, TOP, Generic)
+- **PythonSCRIPT** — Python scripting with NumPy (CHOP, SOP, DAT, IMG, TOP)
+- **NativeSCRIPT** — hot-reloadable C++ scripting (CHOP, SOP, DAT, IMG, TOP)
+
+All three use `par("name")` / `params.get("name")` to read custom parameters
+declared via annotations. Wire a Null of the target family to view output.
 
 Each has a code editor with presets accessible from the inspector.
 

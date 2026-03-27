@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""One-shot script to update stale info in GONODES_CONTEXT.md."""
+"""[ARCHIVED] One-shot script to update stale info in GONODES_CONTEXT.md.
+Note: References to ScriptCHOP/SOP/DAT/IMG and GenericScriptNode are from
+before the March 2026 script consolidation into GDScriptSCRIPT."""
 import re
 
 fp = "GONODES_CONTEXT.md"

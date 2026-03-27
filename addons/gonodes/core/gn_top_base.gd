@@ -54,6 +54,21 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.TOP, "Texture output")
 
 
+func create_preview_control() -> Control:
+	var tex_rect := TextureRect.new()
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	return tex_rect
+
+
+func update_preview_control(control: Control) -> void:
+	if control is TextureRect:
+		if cached_output is GNTextureData:
+			(control as TextureRect).texture = (cached_output as GNTextureData).texture
+		else:
+			(control as TextureRect).texture = null
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Input Helpers
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -8,7 +8,7 @@ extends RefCounted
 var port_name: String = ""
 
 ## The operator family this port accepts or produces.
-var family: GNFamily.Type = GNFamily.Type.TOP
+var family: int = GNFamily.Type.TOP
 
 ## Port index on the node (0-based, within input or output group).
 var index: int = 0
@@ -36,7 +36,7 @@ func display_name() -> String:
 
 
 ## Creates a new port with the given configuration.
-static func create(p_name: String, p_family: GNFamily.Type, p_index: int,
+static func create(p_name: String, p_family: int, p_index: int,
 		p_is_input: bool, p_multi_input: bool = false,
 		p_description: String = "", p_label: String = "") -> GNPort:
 	var port := GNPort.new()

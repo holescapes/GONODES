@@ -56,7 +56,7 @@ description = "Another operator in the same extension."
 
 | Field       | Required | Description                                       |
 |-------------|----------|---------------------------------------------------|
-| family      | Yes      | TOP, CHOP, DAT, SOP, IMG, MAT, COMP, UI, or OUT  |
+| family      | Yes      | TOP, CHOP, DAT, SOP, IMG, MAT, COMP, UI, OUT, POP, VOL, SDF, or SCRIPT |
 | script      | Yes      | Resource path to the operator GDScript             |
 | description | No       | One-line tooltip text                              |
 | section     | No       | Overrides extension-level section for this operator|
@@ -202,14 +202,14 @@ Ports of popular Shadertoy shaders to GONODES TOP operators.
 - Several Shadertoy-derived visual effects
 - Auto-translated from GLSL to Godot shading language
 
-### gn_ext_sdf
+### SDF (Core Family)
 
-Composable SDF (Signed Distance Field) raymarching toolkit — 26 operators.
+> **Note:** SDF operators are now a core family (12th family type), no longer an extension.
+> See `addons/gonodes/operators/sdf/` for the 26 operators and `addons/gonodes/help/sdf/` for help patches.
 
 - **10 Primitives**: SphereSDF, BoxSDF, TorusSDF, CylinderSDF, CapsuleSDF, PlaneSDF, ConeSDF, PyramidSDF, OctahedronSDF, GyroidSDF
 - **5 Booleans**: UnionSDF, IntersectionSDF, SubtractSDF, SmoothUnionSDF, SmoothSubtractSDF
 - **8 Domain Modifiers**: RepeatSDF, MirrorSDF, TwistSDF, BendSDF, ElongateSDF, RoundSDF, OnionSDF, DisplaceSDF
 - **2 Material**: MaterialSDF (PBR albedo/roughness/metallic), GradientSDF (distance-based coloring)
-- **1 Renderer**: RaymarchSDF TOP — compiles SDF AST to GLSL, renders with orbit camera, AO, soft shadows
-- SDF nodes output `GNSDFData` (AST tree); RaymarchSDF outputs standard `GNTextureData` (TOP)
-- 78 help patches (3 per operator, animated with LFO-driven `chop()` expressions)
+- **1 Renderer**: RaymarchSDF — compiles SDF AST to GLSL, renders with orbit camera, AO, soft shadows (outputs TOP texture)
+- SDF ports carry `GNSDFData` (AST tree); only RaymarchSDF bridges SDF→TOP

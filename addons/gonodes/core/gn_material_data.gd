@@ -13,8 +13,18 @@ var material: Material = null
 var material_label: String = ""
 
 
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	return GNFamily.Type.MAT
+
+
+func get_preview_text() -> String:
+	if material != null:
+		return material_label
+	return "no material"
+
+
+func get_data_summary() -> String:
+	return material_label if material != null else ""
 
 
 func invalidate() -> void:

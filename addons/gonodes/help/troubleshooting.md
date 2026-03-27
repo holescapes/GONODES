@@ -167,6 +167,77 @@ is normal and only happens once per shader variant.
 
 ---
 
+## GPU Compute Operators (POP, VOL)
+
+### Compute Shader Requirements
+
+POP (GPU particles) and VOL (volumetric) operators require compute shaders,
+which are only available on **Forward+** and **Mobile** renderers. The
+**Compatibility** renderer (OpenGL 3.3 / WebGL2) does not support compute.
+
+### "My POP/VOL nodes show a ⚠ badge and don't cook"
+
+This means compute shaders are unavailable on your current renderer.
+
+**Check your renderer:**
+- Forward+ (Vulkan/D3D12/Metal) — compute available ✅
+- Mobile (Vulkan/Metal simplified) — compute available ✅
+- Compatibility (OpenGL 3.3/WebGL2) — no compute ❌
+
+**Fixes:**
+- Ensure you're running on Forward+ or Mobile renderer (check the Godot
+  editor title bar or console output at startup).
+- On older GPUs or VMs, Godot may silently fall back to Compatibility.
+- On Web exports, compute is never available (WebGL2 has no compute).
+- The ⚠ badge and skip behavior are correct — the engine gracefully
+  degrades so the rest of your graph keeps working.
+
+### "GPU particles look different on different machines"
+
+Floating-point precision varies between GPUs. POP operators use SSBO compute
+with 32-bit floats, but results may differ slightly between NVIDIA and AMD,
+or between desktop and mobile GPUs. This is expected for particle systems.
+
+### CPU Fallback
+
+ParticleSOP provides a CPU-based particle system as an alternative to POP
+operators. It runs on all renderers including Compatibility and Web. Use it
+when you need particle effects on platforms without compute support.
+
+---
+
+## SDF Operators
+
+### "SDF operators are missing from the palette"
+
+The SDF family is provided by the `gn_ext_sdf` extension. Check:
+
+1. The `addons/gn_ext_sdf/` folder exists with `gn_extension.cfg`.
+2. The extension isn't being skipped by platform/renderer guards.
+3. Check the console at startup for extension loading messages.
+
+### "SDF viewer shows 'Empty SDF tree'"
+
+SDF nodes build a tree of signed distance field instructions. If the viewer
+shows "Empty SDF tree", the upstream SDF chain has no valid data. Check:
+
+1. The SDF chain starts with a primitive (SphereSDF, BoxSDF, etc.).
+2. Boolean operators (UnionSDF, IntersectSDF, SubtractSDF) have at least
+   two connected inputs.
+3. The RaymarchSDF node is connected at the end — it renders the SDF tree
+   into a texture (TOP output).
+
+### "SDF raymarching is slow"
+
+RaymarchSDF runs a shader-based raymarcher every frame. To improve performance:
+
+- Lower the resolution parameter on RaymarchSDF.
+- Reduce max steps (default is 128 — try 64 for previewing).
+- Simplify the SDF tree — deep nesting with many smooth booleans is expensive.
+- Use the Perf overlay to measure actual cook time.
+
+---
+
 ## Keyboard Quick Reference
 
 | Key | Action |

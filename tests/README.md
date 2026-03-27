@@ -88,7 +88,7 @@ tests/
 ├── test_native_operators.gd # Native C++ operator wrappers
 ├── test_cpu_fallback.gd    # POP/VOL CPU fallback paths
 ├── README.md               # This file
-├── operators/              # Per-family core operator tests (11 families)
+├── operators/              # Per-family core operator tests (13 families)
 │   ├── chop/test_chop_operators.gd
 │   ├── sop/test_sop_operators.gd
 │   ├── top/test_top_operators.gd
@@ -114,7 +114,7 @@ tests/
 
 addons/gn_ext_*/tests/      # Extension tests (18 extensions, auto-discovered)
 ├── gn_ext_native/tests/test_native_operators.gd
-├── gn_ext_sdf/tests/test_sdf_operators.gd
+├── tests/operators/sdf/test_sdf_operators.gd
 ├── gn_ext_mapper/tests/test_mapper_operators.gd
 └── ... (18 extensions total)
 ```

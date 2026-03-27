@@ -56,8 +56,16 @@ var cpu_masses: PackedFloat32Array = PackedFloat32Array()
 var cpu_pscales: PackedFloat32Array = PackedFloat32Array()
 
 
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	return GNFamily.Type.POP
+
+
+func get_preview_text() -> String:
+	return "%d particles" % particle_count
+
+
+func get_data_summary() -> String:
+	return "%dp" % particle_count
 
 
 func invalidate() -> void:

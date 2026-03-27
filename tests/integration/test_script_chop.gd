@@ -1,7 +1,7 @@
 extends Node
-## Integration tests — ScriptCHOP: user-scripted CHOP operator.
+## Integration tests — GDScriptSCRIPT: user-scripted CHOP operator.
 ##
-## Tests verify that ScriptCHOP correctly compiles user code, produces
+## Tests verify that GDScriptSCRIPT correctly compiles user code, produces
 ## output channels, and responds to parameter/annotation changes through
 ## a full cook_frame() cycle.
 
@@ -54,8 +54,9 @@ func _get_chop_output(node: GNNode) -> GNChannelData:
 
 func test_script_chop_basic_output() -> void:
 	## A simple script that sets one channel to a constant.
-	var s := _make_node(ScriptCHOP, "script1")
-	s.set_param_value("code", """
+	var s := _make_node(GDScriptSCRIPT, "script1")
+	s.set_param_value("code", """# @output chop Result
+
 func cook():
 	op.set_single_value("result", 42.0)
 """.strip_edges())
@@ -73,8 +74,9 @@ func cook():
 
 func test_script_chop_uses_time() -> void:
 	## Script outputs time * 100.  With elapsed_time=1.0, should be 100.
-	var s := _make_node(ScriptCHOP, "script1")
-	s.set_param_value("code", """
+	var s := _make_node(GDScriptSCRIPT, "script1")
+	s.set_param_value("code", """# @output chop Result
+
 func cook():
 	op.set_single_value("t", time * 100.0)
 """.strip_edges())
@@ -92,8 +94,9 @@ func cook():
 
 func test_script_chop_custom_param() -> void:
 	## Script declares @param float gain and uses par("gain").
-	var s := _make_node(ScriptCHOP, "script1")
-	s.set_param_value("code", """# @param float gain 5.0 Volume gain
+	var s := _make_node(GDScriptSCRIPT, "script1")
+	s.set_param_value("code", """# @output chop Result
+# @param float gain 5.0 Volume gain
 
 func cook():
 	op.set_single_value("out", par("gain") * 2.0)
@@ -114,13 +117,14 @@ func cook():
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_script_chop_reads_input() -> void:
-	## ConstantCHOP(val=7) → ScriptCHOP that reads input and doubles it.
+	## ConstantCHOP(val=7) → GDScriptSCRIPT that reads input and doubles it.
 	var c := _make_node(ConstantCHOP, "const1")
 	c.set_param_value("name0", "sig")
 	c.set_param_value("value0", 7.0)
 
-	var s := _make_node(ScriptCHOP, "script1")
-	s.set_param_value("code", """# @input chop  Upstream data
+	var s := _make_node(GDScriptSCRIPT, "script1")
+	s.set_param_value("code", """# @output chop Result
+# @input chop  Upstream data
 
 func cook():
 	if inputs.size() > 0 and inputs[0] != null:
@@ -145,8 +149,9 @@ func cook():
 
 func test_script_chop_multi_channel() -> void:
 	## Script outputs 3 channels with distinct values.
-	var s := _make_node(ScriptCHOP, "script1")
-	s.set_param_value("code", """
+	var s := _make_node(GDScriptSCRIPT, "script1")
+	s.set_param_value("code", """# @output chop Result
+
 func cook():
 	op.set_single_value("x", 1.0)
 	op.set_single_value("y", 2.0)
@@ -170,7 +175,7 @@ func cook():
 func test_script_chop_syntax_error_graceful() -> void:
 	## A script with broken syntax should not crash.
 	## It should produce null or empty output.
-	var s := _make_node(ScriptCHOP, "script1")
+	var s := _make_node(GDScriptSCRIPT, "script1")
 	s.set_param_value("code", """
 func cook():
 	this is not valid gdscript !!!
@@ -187,9 +192,10 @@ func cook():
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_script_to_math_chain() -> void:
-	## ScriptCHOP(outputs val=10) → MathCHOP(Multiply by 3) should produce 30.
-	var s := _make_node(ScriptCHOP, "script1")
-	s.set_param_value("code", """
+	## GDScriptSCRIPT(outputs val=10) → MathCHOP(Multiply by 3) should produce 30.
+	var s := _make_node(GDScriptSCRIPT, "script1")
+	s.set_param_value("code", """# @output chop Result
+
 func cook():
 	op.set_single_value("val", 10.0)
 """.strip_edges())

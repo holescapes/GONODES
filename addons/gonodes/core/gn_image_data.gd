@@ -14,8 +14,31 @@ var resolution: Vector2i = Vector2i(256, 256)
 var format: Image.Format = Image.FORMAT_RGBA8
 
 
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	return GNFamily.Type.IMG
+
+
+func get_preview_text() -> String:
+	if image != null:
+		return "%d×%d\n%s" % [resolution.x, resolution.y, _format_name(format)]
+	return "no image"
+
+
+func get_data_summary() -> String:
+	return "%d×%d" % [resolution.x, resolution.y]
+
+
+static func _format_name(fmt: Image.Format) -> String:
+	match fmt:
+		Image.FORMAT_RGBA8: return "RGBA8"
+		Image.FORMAT_RGB8: return "RGB8"
+		Image.FORMAT_L8: return "L8"
+		Image.FORMAT_LA8: return "LA8"
+		Image.FORMAT_RGBAF: return "RGBAF"
+		Image.FORMAT_RGBAH: return "RGBAH"
+		Image.FORMAT_RF: return "RF"
+		Image.FORMAT_RGF: return "RGF"
+		_: return "fmt:%d" % fmt
 
 
 ## Returns the aspect ratio (width / height).  Returns 1.0 if height is zero.

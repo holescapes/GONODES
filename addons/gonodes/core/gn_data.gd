@@ -20,9 +20,21 @@ var _shared: bool = false
 
 ## Returns the operator family this data type belongs to.
 ## Must be overridden by subclasses.
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	push_error("GNData.get_family() called on base class — must override in subclass")
 	return GNFamily.Type.TOP  # Fallback
+
+
+## Returns a multi-line string for the on-node inline preview label.
+## Override in subclasses to show family-specific summaries.
+func get_preview_text() -> String:
+	return ""
+
+
+## Returns a compact one-line string for debug overlays and status bars.
+## Override in subclasses to show family-specific dimension info.
+func get_data_summary() -> String:
+	return ""
 
 
 ## Marks this data as invalid and resets its state.

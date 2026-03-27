@@ -3,7 +3,7 @@ extends Node
 ##
 ## SDF operators produce GNSDFData containing an AST tree structure.
 ## Primitives (box, sphere, etc.) create leaf nodes; modifiers (bend, twist)
-## wrap children. All belong to the TOP family.
+## wrap children. All belong to the SDF family.
 
 var _network: GNNetwork
 var _engine: GNCookEngine

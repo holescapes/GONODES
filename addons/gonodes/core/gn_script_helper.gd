@@ -40,8 +40,9 @@ const _TYPE_MAP: Dictionary = {
 	"file":   GNParameter.ValueType.FILE,
 }
 
-## Maps family annotation strings to GNFamily.Type.
-const _FAMILY_MAP: Dictionary = {
+## Maps family annotation strings to family IDs.
+## Extensions can append to this via GNScriptHelper.register_script_family().
+static var _FAMILY_MAP: Dictionary = {
 	"top":  GNFamily.Type.TOP,
 	"img":  GNFamily.Type.IMG,
 	"chop": GNFamily.Type.CHOP,
@@ -50,6 +51,12 @@ const _FAMILY_MAP: Dictionary = {
 	"comp": GNFamily.Type.COMP,
 	"mat":  GNFamily.Type.MAT,
 }
+
+
+## Registers a new family name for @input/@output annotation parsing.
+## Call this after GNFamily.register_family() to make the family usable in scripts.
+static func register_script_family(name_lower: String, family_id: int) -> void:
+	_FAMILY_MAP[name_lower] = family_id
 
 ## Preamble injected before user code.  Provides context variables and helper
 ## methods so the user script can call par(), chop(), op(), etc.
@@ -384,10 +391,10 @@ static func _parse_default(type_name: String, default_str: String) -> Variant:
 
 ## Parsed input annotation record.
 class InputAnnotation:
-	var family: GNFamily.Type
+	var family: int
 	var description: String
 
-	func _init(p_family: GNFamily.Type, p_desc: String) -> void:
+	func _init(p_family: int, p_desc: String) -> void:
 		family = p_family
 		description = p_desc
 
@@ -409,7 +416,7 @@ static func parse_input_annotations(code: String) -> Array:
 			GNLogger.warn("ScriptHelper", "Unknown @input family '%s'" % family_name)
 			continue
 
-		var family_type: GNFamily.Type = _FAMILY_MAP[family_name]
+		var family_type: int = _FAMILY_MAP[family_name]
 		if desc.is_empty():
 			desc = "%s input %d" % [family_name.to_upper(), result.size()]
 
@@ -421,12 +428,12 @@ static func parse_input_annotations(code: String) -> Array:
 # Annotation Parsing — @output
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Parsed output annotation record (used by GenericScriptNode for multi-output).
+## Parsed output annotation record (used by GDScriptSCRIPT for multi-output).
 class OutputAnnotation:
-	var family: GNFamily.Type
+	var family: int
 	var description: String
 
-	func _init(p_family: GNFamily.Type, p_desc: String) -> void:
+	func _init(p_family: int, p_desc: String) -> void:
 		family = p_family
 		description = p_desc
 
@@ -448,7 +455,7 @@ static func parse_output_annotations(code: String) -> Array:
 			GNLogger.warn("ScriptHelper", "Unknown @output family '%s'" % family_name)
 			continue
 
-		var family_type: GNFamily.Type = _FAMILY_MAP[family_name]
+		var family_type: int = _FAMILY_MAP[family_name]
 		if desc.is_empty():
 			desc = "%s output %d" % [family_name.to_upper(), result.size()]
 
@@ -457,8 +464,8 @@ static func parse_output_annotations(code: String) -> Array:
 
 
 ## Creates a fresh GNData subclass instance for the given family type.
-## Used by GenericScriptNode to pre-populate multi-output data objects.
-static func create_data_for_family(family: GNFamily.Type) -> GNData:
+## Used by GDScriptSCRIPT to pre-populate multi-output data objects.
+static func create_data_for_family(family: int) -> GNData:
 	match family:
 		GNFamily.Type.CHOP:
 			return GNChannelData.new()
@@ -472,6 +479,10 @@ static func create_data_for_family(family: GNFamily.Type) -> GNData:
 			return GNImageData.new()
 		GNFamily.Type.MAT:
 			return GNMaterialData.new()
+	# Extension families — delegate to the registry
+	var ext_data := GNFamily.create_data_for_family(family)
+	if ext_data != null:
+		return ext_data as GNData
 	return GNData.new()
 
 

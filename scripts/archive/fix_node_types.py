@@ -1,4 +1,6 @@
-"""Fix all node_type values from smashed-together to snake_case."""
+"""[ARCHIVED] Fix all node_type values from smashed-together to snake_case.
+Note: Per-family script operators referenced here were consolidated into
+GDScriptSCRIPT/PythonSCRIPT/NativeSCRIPT in March 2026."""
 import os
 
 fixes = [

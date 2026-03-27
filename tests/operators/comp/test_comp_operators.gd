@@ -222,11 +222,12 @@ func test_joint_comp_instantiate() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# GenericScriptNode
+# GDScriptSCRIPT (GENERIC template)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_generic_script_node_instantiate() -> void:
-	var node := _make_node(GenericScriptNode.new(), "script1")
+func test_gdscript_script_generic_template() -> void:
+	var node := _make_node(GDScriptSCRIPT.new(), "script1")
+	GNTestAssert.assert_not_null(node, "GDScriptSCRIPT created")
 	GNTestAssert.assert_eq(node.node_type, "script", "node_type")
 
 

@@ -298,7 +298,7 @@ Toggle from the toolbar dropdown or press **W** to cycle.
 4. The node, all wire references, and expression references update automatically:
    - All `chop()`, `op()`, `top()`, `sop()`, `dat()`, `mat()`, `vol()`, `img()`, `output()`, `par()`, `set_par()` references
    - Per-component expressions on Vector2/3/4 and Color parameters
-   - Script operator code bodies (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG, GenericScriptNode)
+   - Script operator code bodies (GDScriptSCRIPT, PythonSCRIPT, NativeSCRIPT)
    - CallbackDAT callback slots (on_start, on_cook, on_value_change, on_create)
    - Hierarchical paths: `"subnet1/old_name"` → `"subnet1/new_name"`
 5. Empty names or unchanged names are ignored

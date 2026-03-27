@@ -332,27 +332,8 @@ func _draw_data_flow() -> void:
 
 
 ## Returns a compact data dimension string for the given output data.
-func _format_data_label(data: GNData, node: GNNode) -> String:
-	if data is GNTextureData:
-		var td: GNTextureData = data as GNTextureData
-		return "%d×%d" % [td.resolution.x, td.resolution.y]
-	elif data is GNImageData:
-		var id: GNImageData = data as GNImageData
-		return "%d×%d" % [id.resolution.x, id.resolution.y]
-	elif data is GNChannelData:
-		var cd: GNChannelData = data as GNChannelData
-		var ch_count: int = cd.channels.size()
-		var length: int = cd.length
-		if length <= 1:
-			return "%dch" % ch_count
-		return "%dch×%d" % [ch_count, length]
-	elif data is GNGeoData:
-		var gd_data: GNGeoData = data as GNGeoData
-		return "%dv" % gd_data.vertex_count
-	elif data is GNTableData:
-		var td: GNTableData = data as GNTableData
-		return "%d×%d" % [td.num_rows(), td.num_cols()]
-	return ""
+func _format_data_label(data: GNData, _node: GNNode) -> String:
+	return data.get_data_summary() if data != null else ""
 
 
 ## Estimates the Y offset of a port on a node view. Approximate — based on

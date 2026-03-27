@@ -181,7 +181,7 @@ UI: `_control_node`, OUT: sink status).
 
 ### Multi-Output Nodes
 
-Nodes with multiple outputs (e.g. GenericScriptNode, MultiBufferRenderTOP)
+Nodes with multiple outputs (e.g. GDScriptSCRIPT Generic template, MultiBufferRenderTOP)
 preview **output port 0** (`cached_output`). To inspect other outputs, wire
 them into a **Null node** of the appropriate family and select that Null
 node in the viewer.
@@ -192,7 +192,7 @@ NullDAT, NullIMG, NullPOP, NullVOL, NullMAT, NullCOMP.
 
 ## Script Operators — Force Active (Implementation)
 
-All four Script operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG)
+The consolidated GDScriptSCRIPT operator (with CHOP/SOP/DAT/IMG/Generic templates)
 have a **Force Active** toggle.  When enabled, the node's `is_sink`
 property returns `true`, which causes the cook engine to include it in
 the active chain BFS even without a downstream WindowOUT or file-save node.
@@ -232,7 +232,7 @@ into the patch and Player binary — no config overrides needed.
 ## Cook Model — Deep Dive
 
 > User-facing overview is in `help/cook_engine.md`. For cross-system comparison
-> with TouchDesigner/Houdini, see `TD_HOUDINI_COMPARISON.md`.
+> with TouchDesigner/Houdini/VVVV, see `GONODES_VS_THE_REST.md`.
 
 GONODES uses a **demand-driven flat-pass** cook architecture — a hybrid of
 push and pull that avoids unnecessary work while keeping execution simple.

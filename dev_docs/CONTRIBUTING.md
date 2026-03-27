@@ -1,6 +1,6 @@
 # Contributing to GONODES
 
-> **Last updated:** 2026-03-10  
+> **Last updated:** 2026-03-27  
 > **Godot version:** 4.6.1 stable  
 > **GDScript only** — no C++/GDExtension contributions to core (extensions may use GDExtension)
 
@@ -28,7 +28,7 @@
 ## 1. Before You Start
 
 - Read `GONODES_CONTEXT.md` at the project root — it is the single source of truth for architecture, conventions, and hard rules.
-- Skim the operator family you plan to work in (TOP, CHOP, DAT, SOP, COMP, MAT, IMG, OUT, UI) by reading 2–3 existing operators in `addons/gonodes/operators/<family>/`.
+- Skim the operator family you plan to work in (TOP, CHOP, DAT, SOP, COMP, MAT, IMG, OUT, UI, POP, VOL, SCRIPT) by reading 2–3 existing operators in `addons/gonodes/operators/<family>/`.
 - Run the test suite to confirm a clean baseline (see [§9](#9-testing-requirements)).
 - Check the roadmap section in `GONODES_CONTEXT.md` (§28.8) for planned work — avoid duplicating effort.
 
@@ -54,9 +54,17 @@ addons/gonodes/
 │   ├── sop/        # SOP example patches
 │   ├── comp/       # COMP example patches
 │   ├── dat/        # DAT example patches
-│   └── mat/        # MAT example patches
+│   ├── mat/        # MAT example patches
+│   ├── script/     # SCRIPT example patches
+│   └── output/     # OUT example patches
 ├── presets/        # Script/shader presets
 └── shaders/        # Shared .gdshader files
+
+addons/gn_ext_*/    # Extension plugins (SDF, ISF, Shadertoy, MIDI, Spout, NDI, etc.)
+├── gn_extension.cfg  # Extension manifest
+├── boot.gd           # Optional: runtime registration hooks for UI integration
+├── operators/         # Extension operator scripts
+└── help/              # Extension help patches
 
 dev_docs/           # Developer documentation (this folder)
 docs/               # Public-facing documentation (OPERATORS.md, etc.)
@@ -64,6 +72,8 @@ tests/              # Automated test suite
   ├── test_runner.gd
   ├── test_assert.gd
   ├── test_*.gd     # Unit tests
+  ├── functional/   # Functional tests (multi-operator chains)
+  ├── operators/    # Per-family operator tests
   └── integration/  # Integration tests
 ```
 
@@ -465,6 +475,107 @@ This keeps patches portable — the same `.gnpatch` works on every platform with
 | RtMidiOutCHOP | all | desktop + mobile | No MIDI on web |
 | File I/O (11 ops) | all | desktop + mobile | No FileAccess on web |
 | WindowOUT | all | all | Platform-adaptive (not restricted) |
+
+---
+
+### Extension Capabilities — What Extensions Can Do
+
+The extension system goes well beyond adding operators to existing families. Extensions can **define entirely new data families** — introducing new port types, wire colors, data classes, and palette sections without modifying any core code.
+
+#### Defining a New Family
+
+Add a `[family.<NAME>]` section to `gn_extension.cfg`:
+
+```ini
+[extension]
+name = "My Custom Family"
+section = "MyFamily"
+
+[family.MYTYPE]
+color = "0.2,0.8,0.4"
+data_script = "res://addons/gn_ext_myext/core/my_data.gd"
+
+[operator.GeneratorMYTYPE]
+family = "MYTYPE"
+script = "res://addons/gn_ext_myext/operators/generator.gd"
+description = "Generates custom data"
+```
+
+The registry calls `GNFamily.register_family("MYTYPE", Color(0.2, 0.8, 0.4))` which:
+- Assigns a runtime ID (≥ 1000) — interchangeable with core enum values throughout all APIs
+- Stores the display name in `GNFamily.FAMILY_NAMES[id]` → `"MYTYPE"`
+- Stores the wire color in `GNFamily.FAMILY_COLORS[id]`
+- Loads `data_script` and registers a data factory via `GNFamily.register_data_factory()`
+- Registers the name for `@input`/`@output` annotation parsing in script nodes via `GNScriptHelper.register_script_family()`
+
+The **palette**, **wire colors**, **port compatibility**, **drop-wire-to-add-node filtering**, and **auto-connect** all work automatically for the new family. The SDF extension (`gn_ext_sdf/`) is the reference implementation — 40+ operators across a custom family with its own data type.
+
+#### What Works Automatically for Extension Families
+
+| Feature | Status | How |
+|---------|--------|-----|
+| Named family ID | ✅ | `GNFamily.FAMILY_NAMES[id]` returns the registered name |
+| Wire color | ✅ | `GNFamily.get_color(id)` returns the registered color |
+| Palette section | ✅ | Palette iterates `GNFamily.FAMILY_NAMES` dynamically |
+| Port compatibility | ✅ | `port.family` is `int` — direct equality check |
+| Drop-wire filtering | ✅ | `get_operators_accepting_family()` works with any int ID |
+| Auto-connect | ✅ | Port matching is simple equality — no special handling |
+| Custom data class | ✅ | `register_data_factory()` → used by script nodes for `# @output` |
+| Script annotations | ✅ | `# @input mytype` / `# @output mytype` work after registration |
+| Help patches | ✅ | Auto-discovered from `<ext_dir>/help/<family>/` |
+| Presets | ✅ | Auto-discovered from `<ext_dir>/presets/<folder>/` |
+
+#### Extension UI Integration Registries
+
+Core UI components provide static registries so extensions can integrate without
+modifying core code. Extensions register their hooks from a `boot_script` declared
+in `gn_extension.cfg`, which the extension registry calls after loading operators.
+
+**1. Viewer Panel** (`gn_viewer_panel.gd`)
+
+`GNViewerPanel.register_display_handler(data_class_name, handler_callable)` — extensions
+register a `Callable(output: GNData, viewer: GNViewerPanel)` that the viewer calls
+when the pinned node's output matches the registered class name. Handlers use
+`viewer.show_info()` or `viewer.show_texture()` to display content.
+
+**2. Code Editor** (`gn_code_editor.gd`)
+
+`GNCodeEditor.register_code_language(param_name, config)` — extensions register a
+Dictionary with `"preset_folder"`, `"highlighter"` (Callable), and `"ref_text"` keys.
+The code editor uses this to provide syntax highlighting, preset load/save, and
+reference text for extension-defined code parameters.
+
+**3. Param Row** (`gn_param_row.gd`)
+
+`GNParamRow.register_code_param(param_name)` — extensions register parameter names
+that should get the windowed code-editor "Edit" button in the inspector.
+
+**Boot script example** (`gn_extension.cfg`):
+```ini
+[extension]
+name="My Extension"
+boot_script="res://addons/gn_ext_mine/boot.gd"
+```
+
+```gdscript
+# boot.gd
+extends RefCounted
+
+static func boot() -> void:
+    GNParamRow.register_code_param("my_code")
+    GNCodeEditor.register_code_language("my_code", {
+        "preset_folder": "my_ext",
+        "highlighter": _apply_highlighter,
+        "ref_text": "my_var, my_func()",
+    })
+
+static func _apply_highlighter(code_edit: CodeEdit) -> void:
+    var h := CodeHighlighter.new()
+    # ... configure highlighter ...
+    code_edit.syntax_highlighter = h
+```
+
+> **Principle:** The goal is for extensions to be fully self-contained and able to extend even core UI capabilities. The palette, wire system, port system, and cook engine are already fully extensible. The viewer and code editor need the registry pattern applied to reach the same level.
 
 ---
 

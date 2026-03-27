@@ -273,7 +273,7 @@ Paste the copied reference directly into any expression field.
 
 ## Writable References — `set_par()`
 
-All Script operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG, GenericScriptNode,
+All SCRIPT family operators (GDScriptSCRIPT, PythonSCRIPT, NativeSCRIPT,
 CallbackDAT) can **write** parameter values on other nodes, not just read them.
 
 ### `set_par(node_id, param_name, value)` or `set_par(param_name, value)`
@@ -380,7 +380,7 @@ if info.get("valid", false):
 ### Complete Example — Procedural Graph Building
 
 ```gdscript
-# In a ScriptCHOP or GenericScriptNode with cook_once = true:
+# In a GDScriptSCRIPT with cook_once = true:
 func cook():
     # Build a noise → level → composite chain
     var n1 = network_add_node("NoiseTOP")

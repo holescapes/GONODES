@@ -19,8 +19,27 @@ var text: String = ""
 var is_table: bool = true
 
 
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	return GNFamily.Type.DAT
+
+
+func get_preview_text() -> String:
+	if table.is_empty():
+		return "(empty)"
+	var lines := PackedStringArray()
+	if has_header and table.size() > 0:
+		lines.append(" | ".join(table[0]))
+	var data_start: int = 1 if has_header else 0
+	var max_rows: int = mini(table.size() - data_start, 3)
+	for r in range(max_rows):
+		lines.append(" | ".join(table[data_start + r]))
+	if table.size() - data_start > 3:
+		lines.append("… +%d rows" % (table.size() - data_start - 3))
+	return "\n".join(lines)
+
+
+func get_data_summary() -> String:
+	return "%d×%d" % [num_rows(), num_cols()]
 
 
 # ─── Table Dimensions ─────────────────────────────────────────────────────────

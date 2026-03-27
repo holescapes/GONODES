@@ -58,6 +58,11 @@ func _get_input_vol(inputs: Array[GNData], port: int = 0) -> GNVolumeData:
 	return null
 
 
+func update_preview_control(control: Control) -> void:
+	if control is Label:
+		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Texture Helpers
 # ═══════════════════════════════════════════════════════════════════════════════

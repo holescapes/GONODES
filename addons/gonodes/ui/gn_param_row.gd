@@ -426,37 +426,43 @@ func _create_string_control() -> Control:
 
 
 ## Returns true if this row represents a code parameter that should get the
-## windowed code-editor UI:  "code" on Script operators / GenericScriptNode,
-## callback params on CallbackDAT, or "shader_code" on CustomShaderTOP.
+## windowed code-editor UI. Core recognizes "code" on GDScriptSCRIPT,
+## callback params on CallbackDAT, and "shader_code" on CustomShaderTOP.
+## Extensions register additional code params via register_code_param().
 func _is_code_editor_param() -> bool:
 	if owner_node == null or param == null:
 		return false
-	# Per-family Script operators + GenericScriptNode
-	if param.param_name == "code" and _is_script_node():
+	# Extension-registered code params
+	if _ext_code_params.has(param.param_name):
 		return true
-	# CallbackDAT callback code params
+	# Core: GDScriptSCRIPT "code" param
+	if param.param_name == "code" and owner_node.node_type == "script":
+		return true
+	# Core: CallbackDAT callback code params
 	if owner_node.node_type == "callbackdat" and param.param_name in [
 		"on_start", "on_cook", "on_value_change", "on_create"]:
 		return true
+	# Core: shader_code (CustomShaderTOP, ShaderMAT)
 	if param.param_name == "shader_code":
 		return true
-	if param.param_name == "isf_code":
-		return true
-	if param.param_name == "shadertoy_code":
-		return true
 	return false
 
 
-## Returns true if this node is any kind of script operator (ScriptCHOP,
-## ScriptDAT, ScriptSOP, ScriptIMG, GenericScriptNode).
-func _is_script_node() -> bool:
-	if owner_node == null:
-		return false
-	if owner_node.node_type.begins_with("script"):
-		return true
-	if owner_node.node_type == "genericscript":
-		return true
-	return false
+# ═══════════════════════════════════════════════════════════════════════════════
+# Extension Code Param Registry
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Extension-registered code parameter names that should get the code editor UI.
+## Extensions call register_code_param() from their boot script.
+static var _ext_code_params: Dictionary = {}
+
+## Register a parameter name as a code-editor-eligible param.
+## The param row will show an "Edit \u2197" button for this param.
+##
+## Example (in gn_ext_isf boot.gd):
+##   GNParamRow.register_code_param("isf_code")
+static func register_code_param(param_name: String) -> void:
+	_ext_code_params[param_name] = true
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

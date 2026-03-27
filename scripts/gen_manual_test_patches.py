@@ -150,7 +150,7 @@ COMP_OPS = [
     ("CameraCOMP",       None, "Verify: adds a camera to the scene tree with configurable FOV/position"),
     ("EnginesCOMP",      None, "Verify: manages sub-engine instances (check scene tree for child engines)"),
     ("EnvironmentCOMP",  None, "Verify: sets scene environment (sky, fog, ambient light, tonemap)"),
-    ("GenericScriptNode", None, "Verify: runs a user GDScript; check output and error log"),
+    ("GDScriptSCRIPT", None, "Verify: runs a user GDScript; check output and error log"),
     ("GeometryCOMP",     None, "Verify: creates a mesh in 3D viewport (default cube or assigned SOP)"),
     ("InstanceCOMP",     None, "Verify: creates multiple instances of a source geometry at positions"),
     ("InTunnel",         None, "Verify: receives data from an OutTunnel (sub-network input port)"),
@@ -256,7 +256,7 @@ IMG_OPS = [
     ("NullIMG",          NOISE_IMG, "Verify: output is identical to input (pure passthrough)"),
     ("PixelSortIMG",     NOISE_IMG, "Verify: glitch-art pixel sorting visible; column/row streaks appear"),
     ("ScreenGrabIMG",    None,      "Verify: captures current screen/window content as an image"),
-    ("ScriptIMG",        None,      "Verify: runs GDScript to generate an image; check output and error log"),
+    ("GDScriptSCRIPT",        None,      "Verify: runs GDScript to generate an image; check output and error log"),
     ("TOPtoIMG",         None,      "Verify: converts GPU Texture (TOP) to CPU Image; needs TOP input"),
     ("WebcamIMG",        None,      "Verify: captures webcam feed (needs camera hardware connected)"),
 ]

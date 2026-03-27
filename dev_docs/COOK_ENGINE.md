@@ -401,7 +401,77 @@ SubNetwork's `_cook()`. This enables:
 
 ---
 
-## 9. Roadmap
+## 9. Debugging Cook Issues
+
+### "My node isn't cooking"
+
+**Check the active chain.** Only nodes that feed a live sink (WindowOUT,
+RenderTOP with a viewer, Force Active nodes) are cooked. If your node is
+disconnected from all sinks, it won't cook — by design.
+
+1. Press **F2** to open the debug panel.
+2. Switch to the **Active Chains** tab.
+3. Find your target sink — your node should appear in its upstream tree.
+4. If missing, trace the wire path and find the break.
+
+**Check bypass.** A bypassed node (⏩ indicator) passes input through unchanged.
+Press **B** to toggle.
+
+**Check compute requirement.** POP and VOL operators require compute shaders
+(Forward+ or Mobile renderer). On Compatibility/OpenGL, they show a ⚠ badge
+and are skipped. Check the console for "Requires compute shaders" warnings.
+
+### "My expression isn't updating"
+
+Expressions only re-evaluate when their source node actually cooks. The
+expression consumer map tracks which expressions depend on which nodes.
+
+1. Press **F2** → **Parameter References** tab.
+2. Find your expression — verify the source node ID is correct.
+3. Check if the source node is in the active chain.
+4. Check if the source node is actually dirty (producing new values).
+
+**Value-compare gate:** Even when an expression re-evaluates, the node is
+only marked dirty if the resolved value actually changed. If the source
+produces the same value, the downstream node won't re-cook.
+
+### "My node cooks every frame even though nothing changes"
+
+Check if the node is `time_dependent`. Time-dependent nodes (LFO, Noise,
+POP operators, etc.) mark themselves dirty every frame during the pre-cook
+pass. This is correct behavior.
+
+For non-time-dependent nodes that shouldn't cook every frame:
+1. Enable the **Perf** overlay to see cook times.
+2. Enable the **dirty propagation flash** layer (debug overlay) — orange
+   borders flash on nodes dirtied each frame.
+3. Check upstream: something is dirtying the chain. Follow the flash upstream.
+
+### "Data corruption at fan-out"
+
+If the same upstream image/mesh/channel data appears mutated when viewed
+from different downstream nodes, the issue is a missing `_mutable_input()` call.
+
+1. Check the **Cook Chain** tab — verify consumer counts for the shared node.
+2. The shared node's output should have `_shared = true`.
+3. Verify the downstream operator calls `_mutable_input(data)` before modifying.
+4. Script operators: you must call `inputs[0].duplicate_data()` manually.
+
+### Useful Debug Tools
+
+| Tool | Access | What It Shows |
+|------|--------|---------------|
+| Debug Panel | F2 | Cook chain, active chains, param references |
+| Cook Order Badges | F2 overlay toggle | Topological order number on each node |
+| Active Dimming | F2 overlay toggle | Inactive nodes at 40% opacity |
+| Dirty Flash | F2 overlay toggle | Orange border on nodes dirtied this frame |
+| Data Flow Annotations | F2 overlay toggle | Data dimensions on wires (512×512, 3ch×128, etc.) |
+| Perf Overlay | Toolbar "Perf" | Per-node cook time in milliseconds |
+| VRAM Monitor | Toolbar "VRAM" | GPU memory usage |
+
+---
+
+## 10. Roadmap
 
 | Tier | Feature | Status |
 |---|---|---|

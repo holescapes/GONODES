@@ -15,8 +15,26 @@ var sample_rate: float = 60.0
 var length: int = 1
 
 
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	return GNFamily.Type.CHOP
+
+
+func get_preview_text() -> String:
+	var lines := PackedStringArray()
+	for ch_name in channels:
+		var samples: PackedFloat32Array = channels[ch_name]
+		if samples.size() > 0:
+			lines.append("%s: %.3f" % [ch_name, samples[samples.size() - 1]])
+		else:
+			lines.append("%s: —" % ch_name)
+	return "\n".join(lines) if lines.size() > 0 else ""
+
+
+func get_data_summary() -> String:
+	var ch_count: int = channels.size()
+	if length <= 1:
+		return "%dch" % ch_count
+	return "%dch×%d" % [ch_count, length]
 
 
 ## Returns the sample array for a named channel, or an empty array if not found.

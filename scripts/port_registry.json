@@ -980,8 +980,8 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/resample_chop.gd"
   },
-  "ScriptCHOP": {
-    "class_name": "ScriptCHOP",
+  "GDScriptSCRIPT": {
+    "class_name": "GDScriptSCRIPT",
     "family": "CHOP",
     "inputs": [
       {
@@ -1513,8 +1513,8 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/environment_comp.gd"
   },
-  "GenericScriptNode": {
-    "class_name": "GenericScriptNode",
+  "GDScriptSCRIPT": {
+    "class_name": "GDScriptSCRIPT",
     "family": "COMP",
     "inputs": [
       {
@@ -2269,8 +2269,8 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/render_pick_dat.gd"
   },
-  "ScriptDAT": {
-    "class_name": "ScriptDAT",
+  "GDScriptSCRIPT": {
+    "class_name": "GDScriptSCRIPT",
     "family": "DAT",
     "inputs": [
       {
@@ -2735,8 +2735,8 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/img/screen_grab_img.gd"
   },
-  "ScriptIMG": {
-    "class_name": "ScriptIMG",
+  "GDScriptSCRIPT": {
+    "class_name": "GDScriptSCRIPT",
     "family": "IMG",
     "inputs": [
       {
@@ -4447,8 +4447,8 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/scatter_sop.gd"
   },
-  "ScriptSOP": {
-    "class_name": "ScriptSOP",
+  "GDScriptSCRIPT": {
+    "class_name": "GDScriptSCRIPT",
     "family": "SOP",
     "inputs": [
       {

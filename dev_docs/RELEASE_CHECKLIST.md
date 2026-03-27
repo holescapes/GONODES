@@ -123,7 +123,6 @@ These just ship as-is — no compilation step:
 - `gn_ext_isf`
 - `gn_ext_mapper`
 - `gn_ext_serial`
-- `gn_ext_sdf`
 - `gn_ext_user_native` (SDK headers + GDScript wrappers only — user compiles at runtime)
 
 ---
@@ -227,6 +226,82 @@ These scripts:
 - [ ] Write minimal Python in the editor → Reload (Ctrl+R) → confirm it loads and cooks
 - [ ] Verify NumPy import works: `import numpy as np` in the script
 - [ ] Test all 5 families: UserPythonSOP, UserPythonCHOP, UserPythonIMG, UserPythonTOP, UserPythonDAT
+
+### Automated test suite
+
+- [ ] Run: `godot --headless -s tests/test_runner.gd` — **ALL PASSED**, zero failures
+- [ ] Run patch smoke: `godot --headless -s tests/test_runner.gd --test-tag=patch` — all help patches parse
+
+### Manual QA — visual & workflow verification
+
+The automated suite covers CPU-side logic. This section catches GPU rendering issues,
+editor UX problems, and visual correctness that headless tests cannot verify.
+
+**Estimated time: 3–4 hours total.**
+
+#### Phase A: Editor smoke (30 min)
+
+- [ ] Open editor — graph canvas renders, no visual glitches
+- [ ] Alt+A palette opens, type-filter works, family tabs work
+- [ ] Add one node from each family — all appear in graph with correct color
+- [ ] Wire two nodes — connection draws, data flows, viewer updates
+- [ ] Inspector panel shows parameters for selected node
+- [ ] Ctrl+S / Ctrl+O — save and reload patch, verify identical
+- [ ] Ctrl+Z / Ctrl+Y — undo/redo works for add, delete, wire, param change
+- [ ] Ctrl+C / Ctrl+V — copy/paste nodes preserves params and wiring
+- [ ] F2 debug overlay — cook chain, active chains, graph overlay all display
+- [ ] Viewer modes — texture preview, channel graph, table view, 3D viewport
+
+#### Phase B: Help patch walkthrough (2 hours)
+
+Open the `?` help for 5–10 operators per family. Verify each patch loads,
+nodes cook without errors, and visual output looks correct.
+
+**Priority: visual families first, data families last.**
+
+| Family | Sample operators to check | What to verify |
+|--------|--------------------------|----------------|
+| **TOP** | NoiseTOP, CompositeTOP, BlurTOP, FeedbackTOP, RenderTOP, CustomShaderTOP, DeformTOP, ChromaKeyTOP | Textures render, animated params move, shader compilation |
+| **COMP** | GeometryCOMP, CameraCOMP, LightCOMP, RigidBodyCOMP, InstanceCOMP, SubNetworkNode | 3D scene assembles, physics simulates, subnets dive/exit |
+| **POP** | SourcePOP, ForcePOP, TurbulencePOP, CollisionPOP, RenderPOP | Particles spawn, move, collide, render to texture |
+| **VOL** | NoiseVOL, FluidVOL, MarchingCubesVOL, RaymarchVOL | Volumes generate, fluid simulates, surface extracts |
+| **MAT** | PbrMAT, ShaderMAT, WireframeMAT, ConstantMAT | Materials apply to geometry, shader compiles |
+| **IMG** | NoiseIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG | CPU images generate and display correctly |
+| **UI** | SliderUI, ButtonUI, KnobUI, XYPadUI, ColorPickerUI | Widgets render in PanelTOP, interaction works |
+| **SOP** | GridSOP, BooleanSOP, NoiseSOP, ExtrudeSOP, VoronoiShatterSOP | Geometry generates, deforms, topology correct |
+| **CHOP** | LFOCHOP, KeyframeCHOP, MathCHOP, AudioSpectrumCHOP, MidiInCHOP | Channels animate, math applies, I/O receives |
+| **DAT** | ConstantDAT, WebDAT, JsonDAT, EvaluateDAT, ScriptDAT | Tables populate, data transforms, scripts execute |
+| **OUT** | WindowOUT, RenderTOP→WindowOUT pipeline | Window opens on display, resize works |
+
+#### Phase C: End-to-end pipelines (30 min)
+
+- [ ] **3D rendering pipeline:** `GridSOP → TransformSOP → GeometryCOMP + PbrMAT + CameraCOMP + LightCOMP → MergeCOMP → RenderTOP → WindowOUT` — renders lit geometry
+- [ ] **Audio-reactive visuals:** `AudioSpectrumCHOP → MathCHOP → expression on NoiseTOP scale → CompositeTOP → WindowOUT` — visuals react to audio
+- [ ] **Particle system:** `SourcePOP → ForcePOP → TurbulencePOP → RenderPOP → NullTOP` — particles flow
+- [ ] **Data pipeline:** `WebDAT → JsonDAT → SelectDAT → EvaluateDAT → NullDAT` — data flows through
+- [ ] **Sub-network:** Create BaseCOMP, dive in, add InTunnel + OutTunnel + internal nodes, exit, wire external ports — data passes through
+- [ ] **Expressions:** Wire `LFOCHOP`, reference it via `chop("lfo1", "out")` in a TOP param — value updates per frame
+- [ ] **Save/load round-trip:** Build a 10+ node patch with expressions, subnets, and annotations → save → close → reopen → verify identical layout, params, and cooking
+
+#### Phase D: Export & Player (30 min)
+
+- [ ] Quick Build to Windows — produces working standalone
+- [ ] Launch exported player — patch loads from config.json, renders correctly
+- [ ] Player hotkeys: Escape (quit), F1 (debug overlay), F11 (fullscreen)
+- [ ] If macOS available: Quick Build to macOS — verify .app runs
+- [ ] If Linux available: Quick Build to Linux — verify binary runs
+
+#### Phase E: Extension hardware I/O (if hardware available)
+
+- [ ] **MIDI:** Connect controller → MidiInCHOP receives notes/CC
+- [ ] **Webcam:** VideoCaptureTOP shows live camera feed
+- [ ] **Spout/Syphon:** Send/receive texture with another app (Resolume, OBS)
+- [ ] **Serial:** Arduino connected → SerialDAT receives data
+- [ ] **NDI:** Send/receive over network
+- [ ] **Audio:** AudioInCHOP captures microphone, AudioDeviceOUT plays to speakers
+
+> **Note:** Phase E is hardware-dependent — skip items where hardware is unavailable.
+> If all of Phases A–D pass, the release is safe to ship.
 
 ---
 

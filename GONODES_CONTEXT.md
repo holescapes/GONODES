@@ -1,7 +1,7 @@
 # GONODES — LLM Context File
 
 > **Last updated:** 2026-03-24
-> **Status:** Phase 6 Complete — **Mobile/Web Export Phases 1-8 ALL COMPLETE.** **New: 2-Layer Logging & Warning System** $([char]0x2014) editor-only diagnostics: Layer 1 per-node warning/error badges (`node_warning`/`node_error` on GNNode, $([char]0x2605)/$([char]0x2716) overlay on GNNodeView, self-healing per-frame clear), Layer 2 Textport log panel (GNLogPanel 500-entry ring buffer, GNLogger singleton, debug/info/warn/error levels, filter buttons, color-coded RichTextLabel). `GNCookEngine.editor_mode` flag gates all status tracking $([char]0x2014) exported player builds have zero overhead. WindowOUT fan-out detection warns when two WindowOUTs share the same UI widget. **New: Native Acceleration GDExtension** (`gn_ext_native`) — C++ GDExtension with 92 native operators across 6 families (42 SOP, 23 CHOP, 5 IMG, 4 TOP, 9 VOL, 9 POP) built in 6 phases. GDScript wrapper operators auto-fallback to pure GDScript when C++ binaries are unavailable. Zero preload() calls — all operators registered by class_name. **Viewer panel IMG stability fix** — cached ImageTexture reuse prevents per-frame texture recreation flicker. **COW viewer-aware consumer counts** — cook engine now counts viewer sinks as additional consumers so in-place operators (BlurIMG, PixelSortIMG) properly duplicate upstream data when viewed. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowOUT open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 204 operators across 8 families (57 TOP, 14 IMG, 52 CHOP, 25 DAT, 39 SOP, 13 COMP, 6 MAT, 1 OUT). New: file save/export operators (ImageSaveOUT/TOP/DAT, MovieOUT, FFmpegOUT, RecordOUT), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** — 1,382 `.gnpatch` example files across all 11 help families providing 3+ visual demos per operator. `test_scenes/` deprecated — help patches replace manual test scenes as the primary visual verification method. **New: 23 additional TOPs** — AnalyzeTOP, CacheTOP, TimeMachineTOP, ChannelMixTOP, ChromaKeyTOP, ColorMapTOP, DepthTOP, FitTOP, LayoutTOP, MonoTOP, NormalMapTOP, SharpenTOP, ConvolutionTOP, CornerPinTOP, DilateErodeTOP, LensDistortTOP, LumaBlurTOP, PatternTOP, ProjectionTOP, RemapTOP, SlopeTOP, SVGTOP, TriangleTOP — closing the TouchDesigner TOP gap. **New: 20 additional CHOPs** — SmoothCHOP, SpringCHOP, DelayCHOP, EnvelopeCHOP, AnalyzeCHOP, ClockCHOP, InterpolateCHOP, LookupCHOP, StretchCHOP, ResampleCHOP, TrimCHOP, ExtendCHOP, JoinCHOP, ShuffleCHOP, SplitCHOP, FanCHOP, DeleteCHOP, CopyCHOP, CompositeCHOP, ExpressionCHOP — signal processing, time manipulation, and channel management. **New: 17 additional SOPs** — NormalSOP, ReverseSOP, PeakSOP, SortSOP, FacetSOP, DeleteSOP, ScatterSOP, MirrorSOP, ClipSOP, ExtrudeSOP, CopySOP, PointSOP, AttributeSOP, BooleanSOP, TubeSOP, SweepSOP, SkinSOP — closing the TouchDesigner SOP/CHOP gap. All utilize Godot features (SurfaceTool, CSGMesh3D, Expression class, RandomNumberGenerator, parallel transport frames). **New: 36 additional operators closing the final TouchDesigner gap** — 6 TOPs (MatteTOP, PremultiplyTOP, PosterizeTOP, RadialBlurTOP, AntiAliasTOP, PaletteTOP), 7 CHOPs (KeyboardInCHOP, MouseInCHOP, GamepadCHOP, ParameterCHOP, TrailCHOP, SOPtoCHOP, TOPtoCHOP), 10 DATs (FileInDAT, JSONDAT, WebDAT, SubstituteDAT, InsertDAT, DeleteDAT, FIFODAT, SOPtoDAT, TOPtoDAT, OPFindDAT), 7 SOPs (BendSOP, TwistSOP, TaperSOP, FontSOP, TrailSOP, UVProjectSOP, DivideSOP), 2 COMPs (NullCOMP, SwitchCOMP), 4 MATs (ConstantMAT, WireframeMAT, PointSpriteMAT, DepthMAT). Total: 204 operators. 7 complex operators deferred to roadmap (ScreenGrabTOP, InstanceCOMP, AnimationCOMP, SpringSOP, ParticleSOP, AudioDeviceOUT). **New: EnvironmentCOMP** — dedicated environment/post-processing COMP (background, ambient, tonemap, glow, SSAO, SSIL, SSR, adjustments, volumetric fog) extracted from RenderTOP. RenderTOP keeps lightweight fallback env (bg color + ambient) when no EnvironmentCOMP is connected; full post-processing requires EnvironmentCOMP. Total: 205 operators (12 COMP). 6 complex operators remain deferred. **New: Advanced Scripting Infrastructure** — GenericScriptNode (family-less multi-output via `# @output` annotations, extends GNNode directly, COMP family for gray color), CallbackDAT (event-driven scripting — observes upstream node signals: `on_start`, `on_cook`, `on_value_change`, `on_create` with rolling event log table), `set_par()` writable parameter references (2-arg self / 3-arg cross-node, auto-dirty-propagation), Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) for procedural graph construction from scripts. All new functions injected into GNScriptHelper preamble — available in every Script operator. Total: 207 operators (13 COMP, 25 DAT). 6 complex operators remain deferred. **New: Main Help Window + Help System Improvements** — (1) GNMainHelpWindow centralized reference hub (sidebar Tree + content pane, Markdown→BBCode via GNMarkdownRenderer), opened via "📖 Help" toolbar button or F1 key, 5 guide .md files in `help/`. (2) Code editor integration fixed for GenericScriptNode + CallbackDAT. (3) 35 preset examples across 7 script/shader categories. (4) CustomShaderTOP GLSL preset folder. (5) Help patch naming convention fixed. (6) Help .md files at `help/` root — folders reserved for operator .gnpatch files. (7) Added Player and Building help sections from dev_docs/ folder content. (8) Renamed `docs/` to `dev_docs/` — developer/advanced docs refocused for contributors. Total: 7 help .md files. **New: 13 advanced operators** — 4 SOP generators (LSystemSOP, MetaballSOP, IsoSurfaceSOP, ParticleSOP), 3 SOP deformers (MagnetSOP, CarveSOP, PolyReduceSOP), 4 cross-family bridges (CHOPtoSOP, DATtoSOP, TOPtoSOP, CHOPtoTOP), 1 COMP (InstanceCOMP — MultiMesh instancing). LSystemSOP: L-System grammar turtle geometry with tube extrusion and taper. MetaballSOP + IsoSurfaceSOP: marching cubes implicit surfaces (shared MC lookup tables). ParticleSOP: CPU particle system with emitter surface, gravity, turbulence, floor collision, attractor. MagnetSOP: vertex attraction/repulsion deformer with 4 falloff modes. CarveSOP: parametric U-range mesh trimming for reveal/wipe. PolyReduceSOP: quadric error metric edge-collapse decimation. CHOPtoSOP/DATtoSOP/TOPtoSOP: cross-family data conversion to geometry. CHOPtoTOP: CPU-rendered waveform/heatmap/graph visualisation. InstanceCOMP: MultiMeshInstance3D instancing with point cloud placement, CHOP animation, per-instance randomisation. InstanceCOMP and ParticleSOP moved from deferred roadmap to implemented. Total: 221 operators (59 TOP, 14 IMG, 52 CHOP, 25 DAT, 50 SOP, 14 COMP, 6 MAT, 1 output). All 4 previously-deferred operators now implemented: ScreenGrabIMG (viewport capture → CPU Image), AnimationCOMP (AnimationPlayer wrapper for keyframe animation on COMP transforms), SpringSOP (damped spring vertex deformer), AudioDeviceOUT (CHOP → AudioStreamGenerator PCM output). Total: 225 operators (59 TOP, 15 IMG, 53 CHOP, 25 DAT, 51 SOP, 15 COMP, 6 MAT, 1 output). Zero deferred operators remain. 16 new help `.gnpatch` example files added for all new operators. **New: 15 TD-parity operators (Tier 1+2)** — 3 TOPs (OpticalFlowTOP Horn-Schunck motion vectors, GlueTOP grid atlas packer, EmbossTOP relief filter shader), 3 CHOPs (BeatCHOP energy-based onset detection, IKCHOP FABRIK inverse kinematics, WarpCHOP time-warp retime), 6 SOPs (FuseSOP spatial-hash vertex merge, RaySOP Möller-Trumbore raycast projection, CapSOP boundary-hole triangle fan cap, LatticeSOP FFD trilinear lattice deformer, PolyLoftSOP cross-section lofting, MountainSOP noise vertex displacement), 2 DATs (TableDAT manual CSV editor, NetworkDAT TCP/UDP via Godot StreamPeerTCP/PacketPeerUDP), 1 COMP (ReplicatorCOMP table-driven replicator with hash change detection). Total: 288 operators (63 TOP, 12 IMG, 61 CHOP, 29 DAT, 57 SOP, 20 COMP, 6 MAT, 9 OUT, 31 UI). 1,140 core help `.gnpatch` example files (197 CHOP, 198 TOP, 188 SOP, 104 DAT, 61 COMP, 27 MAT, 39 IMG, 28 OUT, 99 UI, 35 POP, 34 VOL, 4 bridge) + 242 extension patches = 1,382 total — 3+ patches per operator, ALL ending with WindowOUT (512×512, open=true) via meaningful family-appropriate visualization chains per Hard Rule 25.22. Zero deferred operators remain. **New: UI family — interactive 2D widgets** — Separated-context architecture: interactive panels wire to WindowOUT panel port (SubViewportContainer-based native input), render-to-texture panels wire through PanelTOP → TOP chain (pixels only). GNUiBase base class (extends GNNode, manages `_control_node: Control`). 31 UI widgets (8 original: ButtonUI, SliderUI, ToggleUI, LabelUI, KnobUI, XYPadUI, DropdownUI, ContainerUI; 23 new across 4 tiers: TextureRectUI, ColorRectUI, LineEditUI, TextEditUI, ProgressBarUI, SpinBoxUI, ColorPickerUI, RichTextLabelUI, ScrollContainerUI, TabContainerUI, SplitContainerUI, MarginContainerUI, PanelContainerUI, TreeUI, ItemListUI, TabBarUI, MenuButtonUI, CheckBoxUI, TextureButtonUI, SeparatorUI, NinePatchRectUI, LinkButtonUI, TextureProgressBarUI). GNPanelSource deprecated — panel_sources removed from GNTextureData and all TOPs. WindowOUT has two input ports: port 0 (TOP, background texture), port 1 (UI, interactive panel with SubViewportContainer). PanelTOP is render-to-texture only (non-interactive), with CHOP output for widget state. Total: 288 operators (63 TOP, 12 IMG, 61 CHOP, 29 DAT, 57 SOP, 20 COMP, 6 MAT, 9 OUT, 31 UI). **RenderTOP pass-through COMP resolution** — `_resolve_comp_scene_node()` walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP) to find scene nodes; AnimationCOMP now sets `_scene_node` from upstream during cook. **TouchDesigner parity: ~80% surface coverage** — deep audit confirmed many "gaps" are false (GONODES operators cover multiple TD equivalents under different names). Key equivalences: CompositeTOP covers Under/Multiply/Screen/Overlay/Add/etc. (blend modes), ChannelMixTOP covers Reorder (channel swizzle), LevelTOP covers Threshold/Contrast/Gamma, BlurTOP covers DirectionalBlur via kernel_size param, ResampleCHOP covers Speed (playback rate), MergeCHOP covers Join (concatenation mode). **Roadmap: GPU Particles (POP family)** -- IMPLEMENTED (section 35). 10 POP operators + 7 GLSL compute shaders. SSBO-based GPU particle system (GNPopBase), GNGpuContext singleton, ParticleStateTOP bridge. **Roadmap: Volumetric 3D Textures (VOL family)** -- IMPLEMENTED (section 35). 10 VOL operators + 11 GLSL compute shaders. 3D texture volumes (GNVolBase), Navier-Stokes fluid sim, marching cubes, raymarcher, POP-VOL advection. Total: 545 operators (129 TOP, 21 IMG, 112 CHOP, 47 DAT, 120 SOP, 20 POP, 22 VOL, 20 COMP, 10 MAT, 13 OUT, 31 UI). 11 families. 19 GDExtension addons (native, shadertoy, isf, ffmpeg, hap, spout, syphon, video_capture, midi, gpu_encode, mapper, ndi, ml, depth_sensor, sdf, serial, blackmagic, user_native, user_python). **Roadmap: Custom Operator Assets (.gnasset) — IMPLEMENTED.** GNCustomOperator runtime class (extends SubNetworkNode) with `load_from_asset()`, parameter proxying, compact serialization. GNAssetPromotionDialog wizard for identity + promoted param selection. `scan_custom_assets()` called at startup in editor and player. Scanned from 3 directories: `res://addons/gonodes/assets/`, `res://custom_operators/`, `user://gonodes_assets/`. **Roadmap: Spare Parameters — IMPLEMENTED.** Houdini-style add-any-param-to-any-node system: `spare_parameters` Dictionary on GNNode, `add_spare_parameter()`/`remove_spare_parameter()`, inspector "Spare Parameters" collapsible section, full serialization in .gnpatch, types: Float, Int, Bool, String, Color, Vector2, Vector2i. **New: MultiBufferRenderTOP** — 3-output RenderTOP variant (color, depth, normal) with secondary SubViewports sharing primary's World3D. **New: CI Pipelines for Native Builds** — Unified build system: `build/gn_build.py` shared module + declarative `build.cfg` per extension + `build/SConstruct` root orchestrator. GitHub Actions (`.github/workflows/build-extensions.yml`) with dynamic matrix discovery + GitLab CI (`.gitlab-ci.yml`) for 5 platform targets: Linux x86_64, Linux ARM64 (cross-compile), macOS universal (lipo), Windows x86_64, Windows ARM64. Auto-discovers any extension with `native/build.cfg` — no workflow edits needed when adding new extensions. Per-extension SConstructs are thin 6-line shims delegating to `gn_build.py`. **New: ARM64 GDExtension Support** — `gn_native.gdextension` expanded with ARM64 paths for Linux + Windows. **New: Debug Window & Overlay System** — F2 toggles docked debug panel (3 tabs: Cook Chain table with topo order/status/cook time, Active Chains tree rooted at sinks, Parameter References with expression cross-refs and set_par() writes, click-to-select navigates graph). Graph overlay with 5 independently toggleable layers: cook order badges (#N), active chain dimming (40% opacity on inactive nodes), dirty propagation flash (orange border on nodes dirtied this frame, fades over ~0.3s), sink labels (colored halo rings + upstream dots), data flow annotations (data dimensions on wires — resolution for TOP/IMG, channel count×length for CHOP, vertex count for SOP, rows×cols for DAT). `GNDebugPanel` (docked tabs, ui/), `GNDebugOverlay` (canvas overlay, ui/), `last_topo_order` exposed on GNCookEngine. Respects editor/engine separation — all UI in ui/, reads from engine's existing public properties. **New: InstanceCOMP per-instance color & uniform scale** — chop_map expanded to 6 modes: Off, Position (tx/ty/tz), Scale (sx/sy/sz), Rotation Y, Color (r/g/b/a), Uniform Scale (s). CHOP channels r/g/b/a drive per-instance color via MultiMesh.use_colors. Channel s drives uniform XYZ scale. SOP Cd point attribute auto-detected as fallback color source. GNGeoData.get_point_attrib_color() reads PackedColorArray or packed float arrays. 3 new help patches: instance_chop_color, instance_chop_scale, instance_scatter_color. **New: Take System (GNTakeManager)** — Named parameter layer overrides for live performance. capture_base() snapshots all params, capture_take() stores sparse delta (only changed params), apply_take() instant switch, revert_to_base(), blend_take() with type-aware lerp (float/int/Color/Vector2/3/4; others snap at t>=0.5). Serialization to .gntake JSON. GNTakePanel editor UI: list, capture, apply, revert, blend slider (0-100%), save/load dialogs. Toolbar toggle button. 2 help patches (takes_basic, takes_blend) + takes.md help guide.
+> **Status:** Phase 6 Complete — **Mobile/Web Export Phases 1-8 ALL COMPLETE.** **New: 2-Layer Logging & Warning System** $([char]0x2014) editor-only diagnostics: Layer 1 per-node warning/error badges (`node_warning`/`node_error` on GNNode, $([char]0x2605)/$([char]0x2716) overlay on GNNodeView, self-healing per-frame clear), Layer 2 Textport log panel (GNLogPanel 500-entry ring buffer, GNLogger singleton, debug/info/warn/error levels, filter buttons, color-coded RichTextLabel). `GNCookEngine.editor_mode` flag gates all status tracking $([char]0x2014) exported player builds have zero overhead. WindowOUT fan-out detection warns when two WindowOUTs share the same UI widget. **New: Native Acceleration GDExtension** (`gn_ext_native`) — C++ GDExtension with 92 native operators across 6 families (42 SOP, 23 CHOP, 5 IMG, 4 TOP, 9 VOL, 9 POP) built in 6 phases. GDScript wrapper operators auto-fallback to pure GDScript when C++ binaries are unavailable. Zero preload() calls — all operators registered by class_name. **Viewer panel IMG stability fix** — cached ImageTexture reuse prevents per-frame texture recreation flicker. **COW viewer-aware consumer counts** — cook engine now counts viewer sinks as additional consumers so in-place operators (BlurIMG, PixelSortIMG) properly duplicate upstream data when viewed. Save/load, copy/paste, undo/redo, live node previews with per-node toggle, family base classes, right-click context menu, performance profiling overlay, stress test (59 nodes). GNExtensionRegistry dynamic operator architecture with input-family cache for port-aware filtering. 3D scene pipeline (SOP→MAT→COMP→RenderTOP) live with per-object materials, shadow system, and MergeCOMP scene composition. WindowOUT open/close toggle. Active chain cooking (only cook nodes feeding live sinks). Scripting operators (GDScriptSCRIPT) with runtime GDScript compilation, @param/@input annotations, dynamic ports, presets. IMG family for CPU-side image processing (NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP bridge) with lightweight text preview (no GPU upload). Drop-wire-to-add-node workflow: drop a wire on empty canvas → filtered palette (only compatible operators) → auto-connect + ghost wire visual. Dynamic palette family iteration from GNFamily.FAMILY_NAMES. Windowed code editor (GNCodeEditor) for Script operators and CustomShaderTOP with syntax highlighting, preset integration, and "Edit ↗" button in param row. Phases 1–6 complete. 204 operators across 8 families (57 TOP, 14 IMG, 52 CHOP, 25 DAT, 39 SOP, 13 COMP, 6 MAT, 1 OUT). New: file save/export operators (ImageSaveOUT/TOP/DAT, MovieOUT, FFmpegOUT, RecordOUT), WebcamIMG, TOPtoIMG bridge. Still-image input operators moved to IMG family (ImageFileInIMG, ImageSequenceIMG) for CPU-first pipeline; video operators stay as TOPs (MovieFileInTOP, FFmpegInTOP) since Godot only exposes decoded frames as GPU textures. Cook-once pulse on Script/CustomShader operators. Clean editor/engine separation — headless execution carries zero UI overhead. **New: RAMP parameter type** with curve editor (cubic Hermite interpolation, GNRampEditor widget, `ramp()` expression function). **New: Canvas annotations** — network boxes and sticky notes for graph organization (GNNetworkBox, GNStickyNote), serialized in .gnpatch files. **New: RampCHOP** — dynamic ramp curve CHOP with 1–16 user-editable ramp slots, multi-sample output, serialization round-trip, `from_dict()` override for dynamic slot restoration. **New: Spare Parameters** added to long-term roadmap (Houdini-style add-any-param-to-any-node). **New: Wire replacement** — connecting to an occupied input auto-disconnects the old wire (with compound undo). **New: Operator palette sections** — sub-sections within family groups (e.g. "Shadertoy" under TOPs) with extension-level auto-section inheritance. **New: PostProcessTOP merged into RenderTOP** — camera/environment post-processing FX (glow, DOF near+far with bokeh, tonemap, SSAO, SSIL, SSR, adjustments, volumetric fog) integrated directly into RenderTOP. **New: Jolt Physics COMPs** — RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP for full physics simulation within RenderTOP's isolated World3D. PhysicsCHOP bridge reads back transform/velocity/sleeping state. RenderTOP generic COMP fallback adopts any GNCompBase subclass. **New: Help system example patches** — 1,413 `.gnpatch` example files across all 11 help families providing 3+ visual demos per operator. `test_scenes/` deprecated — help patches replace manual test scenes as the primary visual verification method. **New: 23 additional TOPs** — AnalyzeTOP, CacheTOP, TimeMachineTOP, ChannelMixTOP, ChromaKeyTOP, ColorMapTOP, DepthTOP, FitTOP, LayoutTOP, MonoTOP, NormalMapTOP, SharpenTOP, ConvolutionTOP, CornerPinTOP, DilateErodeTOP, LensDistortTOP, LumaBlurTOP, PatternTOP, ProjectionTOP, RemapTOP, SlopeTOP, SVGTOP, TriangleTOP — closing the TouchDesigner TOP gap. **New: 20 additional CHOPs** — SmoothCHOP, SpringCHOP, DelayCHOP, EnvelopeCHOP, AnalyzeCHOP, ClockCHOP, InterpolateCHOP, LookupCHOP, StretchCHOP, ResampleCHOP, TrimCHOP, ExtendCHOP, JoinCHOP, ShuffleCHOP, SplitCHOP, FanCHOP, DeleteCHOP, CopyCHOP, CompositeCHOP, ExpressionCHOP — signal processing, time manipulation, and channel management. **New: 17 additional SOPs** — NormalSOP, ReverseSOP, PeakSOP, SortSOP, FacetSOP, DeleteSOP, ScatterSOP, MirrorSOP, ClipSOP, ExtrudeSOP, CopySOP, PointSOP, AttributeSOP, BooleanSOP, TubeSOP, SweepSOP, SkinSOP — closing the TouchDesigner SOP/CHOP gap. All utilize Godot features (SurfaceTool, CSGMesh3D, Expression class, RandomNumberGenerator, parallel transport frames). **New: 36 additional operators closing the final TouchDesigner gap** — 6 TOPs (MatteTOP, PremultiplyTOP, PosterizeTOP, RadialBlurTOP, AntiAliasTOP, PaletteTOP), 7 CHOPs (KeyboardInCHOP, MouseInCHOP, GamepadCHOP, ParameterCHOP, TrailCHOP, SOPtoCHOP, TOPtoCHOP), 10 DATs (FileInDAT, JSONDAT, WebDAT, SubstituteDAT, InsertDAT, DeleteDAT, FIFODAT, SOPtoDAT, TOPtoDAT, OPFindDAT), 7 SOPs (BendSOP, TwistSOP, TaperSOP, FontSOP, TrailSOP, UVProjectSOP, DivideSOP), 2 COMPs (NullCOMP, SwitchCOMP), 4 MATs (ConstantMAT, WireframeMAT, PointSpriteMAT, DepthMAT). Total: 204 operators. 7 complex operators deferred to roadmap (ScreenGrabTOP, InstanceCOMP, AnimationCOMP, SpringSOP, ParticleSOP, AudioDeviceOUT). **New: EnvironmentCOMP** — dedicated environment/post-processing COMP (background, ambient, tonemap, glow, SSAO, SSIL, SSR, adjustments, volumetric fog) extracted from RenderTOP. RenderTOP keeps lightweight fallback env (bg color + ambient) when no EnvironmentCOMP is connected; full post-processing requires EnvironmentCOMP. Total: 205 operators (12 COMP). 6 complex operators remain deferred. **New: Advanced Scripting Infrastructure** — GDScriptSCRIPT (multi-output via `# @output` annotations, extends GNNode directly, COMP family for gray color), CallbackDAT (event-driven scripting — observes upstream node signals: `on_start`, `on_cook`, `on_value_change`, `on_create` with rolling event log table), `set_par()` writable parameter references (2-arg self / 3-arg cross-node, auto-dirty-propagation), Network API (`network_add_node`, `network_remove_node`, `network_connect`, `network_disconnect`, `network_node_ids`, `network_node_info`) for procedural graph construction from scripts. All new functions injected into GNScriptHelper preamble — available in every Script operator. Total: 207 operators (13 COMP, 25 DAT). 6 complex operators remain deferred. **New: Main Help Window + Help System Improvements** — (1) GNMainHelpWindow centralized reference hub (sidebar Tree + content pane, Markdown→BBCode via GNMarkdownRenderer), opened via "📖 Help" toolbar button or F1 key, 5 guide .md files in `help/`. (2) Code editor integration fixed for GDScriptSCRIPT + CallbackDAT. (3) 35 preset examples across 7 script/shader categories. (4) CustomShaderTOP GLSL preset folder. (5) Help patch naming convention fixed. (6) Help .md files at `help/` root — folders reserved for operator .gnpatch files. (7) Added Player and Building help sections from dev_docs/ folder content. (8) Renamed `docs/` to `dev_docs/` — developer/advanced docs refocused for contributors. Total: 7 help .md files. **New: 13 advanced operators** — 4 SOP generators (LSystemSOP, MetaballSOP, IsoSurfaceSOP, ParticleSOP), 3 SOP deformers (MagnetSOP, CarveSOP, PolyReduceSOP), 4 cross-family bridges (CHOPtoSOP, DATtoSOP, TOPtoSOP, CHOPtoTOP), 1 COMP (InstanceCOMP — MultiMesh instancing). LSystemSOP: L-System grammar turtle geometry with tube extrusion and taper. MetaballSOP + IsoSurfaceSOP: marching cubes implicit surfaces (shared MC lookup tables). ParticleSOP: CPU particle system with emitter surface, gravity, turbulence, floor collision, attractor. MagnetSOP: vertex attraction/repulsion deformer with 4 falloff modes. CarveSOP: parametric U-range mesh trimming for reveal/wipe. PolyReduceSOP: quadric error metric edge-collapse decimation. CHOPtoSOP/DATtoSOP/TOPtoSOP: cross-family data conversion to geometry. CHOPtoTOP: CPU-rendered waveform/heatmap/graph visualisation. InstanceCOMP: MultiMeshInstance3D instancing with point cloud placement, CHOP animation, per-instance randomisation. InstanceCOMP and ParticleSOP moved from deferred roadmap to implemented. Total: 221 operators (59 TOP, 14 IMG, 52 CHOP, 25 DAT, 50 SOP, 14 COMP, 6 MAT, 1 output). All 4 previously-deferred operators now implemented: ScreenGrabIMG (viewport capture → CPU Image), AnimationCOMP (AnimationPlayer wrapper for keyframe animation on COMP transforms), SpringSOP (damped spring vertex deformer), AudioDeviceOUT (CHOP → AudioStreamGenerator PCM output). Total: 225 operators (59 TOP, 15 IMG, 53 CHOP, 25 DAT, 51 SOP, 15 COMP, 6 MAT, 1 output). Zero deferred operators remain. 16 new help `.gnpatch` example files added for all new operators. **New: 15 TD-parity operators (Tier 1+2)** — 3 TOPs (OpticalFlowTOP Horn-Schunck motion vectors, GlueTOP grid atlas packer, EmbossTOP relief filter shader), 3 CHOPs (BeatCHOP energy-based onset detection, IKCHOP FABRIK inverse kinematics, WarpCHOP time-warp retime), 6 SOPs (FuseSOP spatial-hash vertex merge, RaySOP Möller-Trumbore raycast projection, CapSOP boundary-hole triangle fan cap, LatticeSOP FFD trilinear lattice deformer, PolyLoftSOP cross-section lofting, MountainSOP noise vertex displacement), 2 DATs (TableDAT manual CSV editor, NetworkDAT TCP/UDP via Godot StreamPeerTCP/PacketPeerUDP), 1 COMP (ReplicatorCOMP table-driven replicator with hash change detection). Total: 288 operators (63 TOP, 12 IMG, 61 CHOP, 29 DAT, 57 SOP, 20 COMP, 6 MAT, 9 OUT, 31 UI). 1,171 core help `.gnpatch` example files (197 CHOP, 198 TOP, 188 SOP, 104 DAT, 61 COMP, 27 MAT, 39 IMG, 28 OUT, 99 UI, 35 POP, 34 VOL, 4 bridge) + 242 extension patches = 1,413 total — 3+ patches per operator, ALL ending with WindowOUT (512×512, open=true) via meaningful family-appropriate visualization chains per Hard Rule 25.22. Zero deferred operators remain. **New: UI family — interactive 2D widgets** — Separated-context architecture: interactive panels wire to WindowOUT panel port (SubViewportContainer-based native input), render-to-texture panels wire through PanelTOP → TOP chain (pixels only). GNUiBase base class (extends GNNode, manages `_control_node: Control`). 31 UI widgets (8 original: ButtonUI, SliderUI, ToggleUI, LabelUI, KnobUI, XYPadUI, DropdownUI, ContainerUI; 23 new across 4 tiers: TextureRectUI, ColorRectUI, LineEditUI, TextEditUI, ProgressBarUI, SpinBoxUI, ColorPickerUI, RichTextLabelUI, ScrollContainerUI, TabContainerUI, SplitContainerUI, MarginContainerUI, PanelContainerUI, TreeUI, ItemListUI, TabBarUI, MenuButtonUI, CheckBoxUI, TextureButtonUI, SeparatorUI, NinePatchRectUI, LinkButtonUI, TextureProgressBarUI). GNPanelSource deprecated — panel_sources removed from GNTextureData and all TOPs. WindowOUT has two input ports: port 0 (TOP, background texture), port 1 (UI, interactive panel with SubViewportContainer). PanelTOP is render-to-texture only (non-interactive), with CHOP output for widget state. Total: 288 operators (63 TOP, 12 IMG, 61 CHOP, 29 DAT, 57 SOP, 20 COMP, 6 MAT, 9 OUT, 31 UI). **RenderTOP pass-through COMP resolution** — `_resolve_comp_scene_node()` walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP) to find scene nodes; AnimationCOMP now sets `_scene_node` from upstream during cook. **TouchDesigner parity: ~80% surface coverage** — deep audit confirmed many "gaps" are false (GONODES operators cover multiple TD equivalents under different names). Key equivalences: CompositeTOP covers Under/Multiply/Screen/Overlay/Add/etc. (blend modes), ChannelMixTOP covers Reorder (channel swizzle), LevelTOP covers Threshold/Contrast/Gamma, BlurTOP covers DirectionalBlur via kernel_size param, ResampleCHOP covers Speed (playback rate), MergeCHOP covers Join (concatenation mode). **Roadmap: GPU Particles (POP family)** -- IMPLEMENTED (section 35). 10 POP operators + 7 GLSL compute shaders. SSBO-based GPU particle system (GNPopBase), GNGpuContext singleton, ParticleStateTOP bridge. **Roadmap: Volumetric 3D Textures (VOL family)** -- IMPLEMENTED (section 35). 10 VOL operators + 11 GLSL compute shaders. 3D texture volumes (GNVolBase), Navier-Stokes fluid sim, marching cubes, raymarcher, POP-VOL advection. Total: 545 operators (129 TOP, 21 IMG, 112 CHOP, 47 DAT, 120 SOP, 20 POP, 22 VOL, 20 COMP, 10 MAT, 13 OUT, 31 UI). 12 families. 18 GDExtension addons (native, shadertoy, isf, ffmpeg, hap, spout, syphon, video_capture, midi, gpu_encode, mapper, ndi, ml, depth_sensor, sdf, serial, blackmagic, user_native, user_python). **Roadmap: Custom Operator Assets (.gnasset) — IMPLEMENTED.** GNCustomOperator runtime class (extends SubNetworkNode) with `load_from_asset()`, parameter proxying, compact serialization. GNAssetPromotionDialog wizard for identity + promoted param selection. `scan_custom_assets()` called at startup in editor and player. Scanned from 3 directories: `res://addons/gonodes/assets/`, `res://custom_operators/`, `user://gonodes_assets/`. **Roadmap: Spare Parameters — IMPLEMENTED.** Houdini-style add-any-param-to-any-node system: `spare_parameters` Dictionary on GNNode, `add_spare_parameter()`/`remove_spare_parameter()`, inspector "Spare Parameters" collapsible section, full serialization in .gnpatch, types: Float, Int, Bool, String, Color, Vector2, Vector2i. **New: MultiBufferRenderTOP** — 3-output RenderTOP variant (color, depth, normal) with secondary SubViewports sharing primary's World3D. **New: CI Pipelines for Native Builds** — Unified build system: `build/gn_build.py` shared module + declarative `build.cfg` per extension + `build/SConstruct` root orchestrator. GitHub Actions (`.github/workflows/build-extensions.yml`) with dynamic matrix discovery + GitLab CI (`.gitlab-ci.yml`) for 5 platform targets: Linux x86_64, Linux ARM64 (cross-compile), macOS universal (lipo), Windows x86_64, Windows ARM64. Auto-discovers any extension with `native/build.cfg` — no workflow edits needed when adding new extensions. Per-extension SConstructs are thin 6-line shims delegating to `gn_build.py`. **New: ARM64 GDExtension Support** — `gn_native.gdextension` expanded with ARM64 paths for Linux + Windows. **New: Debug Window & Overlay System** — F2 toggles docked debug panel (3 tabs: Cook Chain table with topo order/status/cook time, Active Chains tree rooted at sinks, Parameter References with expression cross-refs and set_par() writes, click-to-select navigates graph). Graph overlay with 5 independently toggleable layers: cook order badges (#N), active chain dimming (40% opacity on inactive nodes), dirty propagation flash (orange border on nodes dirtied this frame, fades over ~0.3s), sink labels (colored halo rings + upstream dots), data flow annotations (data dimensions on wires — resolution for TOP/IMG, channel count×length for CHOP, vertex count for SOP, rows×cols for DAT). `GNDebugPanel` (docked tabs, ui/), `GNDebugOverlay` (canvas overlay, ui/), `last_topo_order` exposed on GNCookEngine. Respects editor/engine separation — all UI in ui/, reads from engine's existing public properties. **New: InstanceCOMP per-instance color & uniform scale** — chop_map expanded to 6 modes: Off, Position (tx/ty/tz), Scale (sx/sy/sz), Rotation Y, Color (r/g/b/a), Uniform Scale (s). CHOP channels r/g/b/a drive per-instance color via MultiMesh.use_colors. Channel s drives uniform XYZ scale. SOP Cd point attribute auto-detected as fallback color source. GNGeoData.get_point_attrib_color() reads PackedColorArray or packed float arrays. 3 new help patches: instance_chop_color, instance_chop_scale, instance_scatter_color. **New: Take System (GNTakeManager)** — Named parameter layer overrides for live performance. capture_base() snapshots all params, capture_take() stores sparse delta (only changed params), apply_take() instant switch, revert_to_base(), blend_take() with type-aware lerp (float/int/Color/Vector2/3/4; others snap at t>=0.5). Serialization to .gntake JSON. GNTakePanel editor UI: list, capture, apply, revert, blend slider (0-100%), save/load dialogs. Toolbar toggle button. 2 help patches (takes_basic, takes_blend) + takes.md help guide.
 
 ---
 
@@ -436,7 +436,7 @@ func remove_annotation(ann_id: String) -> bool
 **`rename_node()` updates:** nodes dictionary key, `GNNode.id`, `GNNode.name`, all `GNConnection.from_node`/`to_node` references, and expression strings across all parameters in the network via regex-based path-segment replacement (`_update_expressions_for_rename()`). The rename engine handles:
 - **Main expressions** on every parameter in EXPRESSION mode
 - **Per-component expressions** (Vector2/3/4, Color) — recompiled after text replacement
-- **Script operator code** (`scriptchop`, `scriptdat`, `scriptsop`, `scriptimg`, `genericscript`) — the `code` parameter's GDScript source is scanned and updated
+- **Script operator code** (`script`) — the `code` parameter's GDScript source is scanned and updated
 - **CallbackDAT callback slots** (`on_start`, `on_cook`, `on_value_change`, `on_create`)
 - **Hierarchical paths** — `"subnet1/old_id"` → `"subnet1/new_id"` via per-segment matching (splits by `/`, replaces exact segments only)
 - **All reference functions** — `chop[sfi]()`, `op()`, `top()`, `sop()`, `dat()`, `mat()`, `vol()`, `img()`, `output()`, `par[sfi]()`, `set_par()`
@@ -1354,22 +1354,22 @@ GONODES/
 - [x] README and basic documentation
 
 ### Phase 7: Creative Tools, Performance & Workflow
-- [x] **ScriptCHOP** — user-editable GDScript for custom channel processing:
+- [x] **GDScriptSCRIPT** — user-editable GDScript for custom channel processing:
   - Runtime GDScript compilation via `GDScript.new()` + `reload()`.
   - `cook()` entry point with `me`, `inputs`, `op` (GNChannelData), `time`, `frame`, `dt` context.
   - `@param` annotations for dynamic inspector parameters.
   - `@input` annotations for dynamic multi-family input ports.
   - Optional `setup()` runs once after compilation. Instance reused across frames.
   - `time_dependent` toggle (default off). `from_dict()` override for save/load.
-- [x] **ScriptDAT** — user-editable GDScript for table/text processing:
-  - Same architecture as ScriptCHOP. `op` is GNTableData.
+- [x] **GDScriptSCRIPT** — user-editable GDScript for table/text processing:
+  - Same architecture as GDScriptSCRIPT. `op` is GNTableData.
   - Default template builds a row table with configurable columns.
-- [x] **ScriptIMG** — CPU-side pixel generation via GDScript:
+- [x] **GDScriptSCRIPT** — CPU-side pixel generation via GDScript:
   - `op` is GNImageData with `set_image(img)` method.
   - Extends GNImgBase — no SubViewport, pure CPU Image.
   - Replaces ScriptTOP (CPU image work separated from GPU TOP pipeline).
   - Use ImgToTOP bridge to convert output to GPU texture.
-- [x] **ScriptSOP** — procedural geometry via GDScript:
+- [x] **GDScriptSCRIPT** — procedural geometry via GDScript:
   - `op` is GNGeoData. User builds mesh via SurfaceTool then `op.set_from_surface_tool(st)`.
   - Default template scatters random points in a sphere.
 - [x] **GNScriptHelper** — shared static helper class for all 4 Script operators:
@@ -1381,7 +1381,7 @@ GONODES/
   - **Generators:** `NoiseIMG` (value/white noise via FastNoiseLite), `CheckerboardIMG` (configurable grid).
   - **Filters:** `BlurIMG` (separable box blur), `EdgeDetectIMG` (Sobel/Prewitt), `PixelSortIMG` (glitch art).
   - **Bridge:** `ImgToTOP` — uploads CPU Image to GPU ImageTexture for TOP pipeline. `TOPtoIMG` — GPU→CPU readback (reverse).
-  - **Scripting:** `ScriptIMG` — user GDScript with `@param`/`@input` annotations.
+  - **Scripting:** `GDScriptSCRIPT` — user GDScript with `@param`/`@input` annotations.
   - **Sinks:** `ImageSaveOUT` (save to disk), `MovieOUT` (image sequence), `FFmpegOUT` (video encode via CLI).
   - User presets at `user://gonodes_presets/<family>/` (load/save via static methods).
   - Dynamic param rebuild with value preservation (same pattern as CustomShaderTOP).
@@ -1505,7 +1505,7 @@ GONODES/
   - All output operators set `is_sink = true` so active-chain cooking keeps them alive.
   - Common UX: `active` bool param — when checked, saving occurs every cook. Toggle off to stop.
 - [x] **TOPtoIMG bridge** — GPU Texture → CPU Image conversion (`Texture2D.get_image()`). Reverse of ImgToTOP.
-- [x] **Cook-once pulse** for Script operators (ScriptCHOP/DAT/SOP/IMG) and CustomShaderTOP:
+- [x] **Cook-once pulse** for Script operators (GDScriptSCRIPT) and CustomShaderTOP:
   - New `cook_once` bool param (default OFF). Toggle ON → forces one cook, auto-resets to OFF.
   - Implemented in `_pre_cook()`: calls `mark_dirty()` then `set_param_value("cook_once", false)`.
   - Flexible in combination with `time_dependent`: TD=OFF + cook_once = cook exactly when pulsed.
@@ -1578,11 +1578,11 @@ GONODES/
     button or F1 key. Uses `GNMarkdownRenderer` (`addons/gonodes/ui/gn_markdown_renderer.gd`)
     for Markdown→BBCode conversion. See Section 29 for full details.
   - **108 example patches** across all 6 help families (see Hard Rule 25.21):
-    - CHOP: 32 patches covering all 31 node types (lfo, noise, constant, math, wave, pattern, filter, lag, cross, merge, hold, speed, count, trigger, timer, logic, limit, switch, select, rename, ramp, RecordOUT, physics, scriptchop, audiofilein, audioin, audiospectrum, midiin, oscin, oscout, null)
+    - CHOP: 32 patches covering all 31 node types (lfo, noise, constant, math, wave, pattern, filter, lag, cross, merge, hold, speed, count, trigger, timer, logic, limit, switch, select, rename, ramp, RecordOUT, physics, script, audiofilein, audioin, audiospectrum, midiin, oscin, oscout, null)
     - TOP: 29 patches covering all 28 node types (noise, blur, circle, composite, constant, crop, cross, displace, edge, feedback, flip, hsv_adjust, level, lookup, ramp, rectangle, text, threshold, tile, transform, resolution, switch, null, TextureSaveOUT, moviefilein, glsl, postprocess, render)
-    - SOP: 15 patches covering all 15 node types (box, circle, cylinder, grid, line, sphere, torus, noise, transform, merge, subdivide, wireframe, null, switch, scriptsop)
+    - SOP: 15 patches covering all 15 node types (box, circle, cylinder, grid, line, sphere, torus, noise, transform, merge, subdivide, wireframe, null, switch, script)
     - COMP: 13 patches covering all 12 node types (camera×2, geo, light, rigid_body, static_body, joint, area, soft_body, merge_comp, subnet, in_tunnel, out_tunnel)
-    - DAT: 16 patches covering all 16 node types (constant, text, scriptdat, sort, transpose, select, merge, evaluate, chop_to_dat, dat_to_chop, null, switch, info, TableSaveOUT, midiin, oscin)
+    - DAT: 16 patches covering all 16 node types (constant, text, script, sort, transpose, select, merge, evaluate, chop_to_dat, dat_to_chop, null, switch, info, TableSaveOUT, midiin, oscin)
     - MAT: 3 patches covering all 2 node types (pbr×2, shader)
   - Folder structure:
     ```
@@ -1608,7 +1608,7 @@ GONODES/
     │   └── ...
     ├── dat/                               # 16 patches
     │   ├── constant_basic.gnpatch
-    │   ├── scriptdat_table.gnpatch
+    │   ├── script_dat_table.gnpatch
     │   └── ...
     └── mat/                               # 3 patches
         ├── pbr_metallic.gnpatch
@@ -1818,7 +1818,7 @@ GONODES/
   - Requires validation: warn if a parallel region contains main-thread-affine nodes (TOPs, UI).
   - Deferred until Tier 3 infrastructure is stable.
 - [x] **Input hash guard (Tier 2 — parameter-level cook skipping)** — before cooking a dirty node, hashes all resolved parameter values + upstream input data timestamps. If hash matches last frame, the cook is skipped entirely (not just propagation — the node doesn't execute `_cook()` at all). 100% accurate for parameter-driven changes. Time-dependent nodes include frame timing in hash so they always cook. `_dirty_immediate_downstream()` marks only direct successors when a node does cook — cascade continues in topo order. Replaces the former output fingerprinting approach (`compute_fingerprint()` / `is_gpu_resident()` removed from all GNData classes).
-- ~~GPU compute shaders for CHOPs~~ — **REMOVED.** CPU readback latency (upload SSBO → dispatch → fence → readback) negates parallelism gains for typical CHOP data sizes (control-rate: ~4 KB, audio-rate: ~172 KB/ch). CHOPs need data back on CPU for expressions, parameter driving, and cook engine hashing. Already covered by 92 native C++ operators via GDExtension (pointer arithmetic inner loops within 2-3× of GPU compute for these sizes). Users needing extreme parallel processing can use ComputeShaderTOP (stays on GPU) or ScriptCHOP with native helper.
+- ~~GPU compute shaders for CHOPs~~ — **REMOVED.** CPU readback latency (upload SSBO → dispatch → fence → readback) negates parallelism gains for typical CHOP data sizes (control-rate: ~4 KB, audio-rate: ~172 KB/ch). CHOPs need data back on CPU for expressions, parameter driving, and cook engine hashing. Already covered by 92 native C++ operators via GDExtension (pointer arithmetic inner loops within 2-3× of GPU compute for these sizes). Users needing extreme parallel processing can use ComputeShaderTOP (stays on GPU) or GDScriptSCRIPT with native helper.
 - [x] **Cook engine Tier 1 optimizations** — three quick wins implemented:
   - **Active-only pre-cook**: `_pre_cook_pass()` skips inactive nodes entirely.
   - **Expression consumer map**: `_should_eval_expressions()` checks whether upstream sources cooked this frame before re-evaluating expressions. Avoids per-frame polling of every expression on every active node.
@@ -1874,7 +1874,7 @@ GONODES/
 - [ ] Asset/patch marketplace
 - [x] Mobile/web export for patches — **Phase 1-8 ALL COMPLETE** (renderer/platform detection, shader audit, CPU fallback for POP/VOL, export presets, thread detection, WindowOUT embedded mode, web runtime JS bridge, export compatibility report UI). See Section 34.
 - [ ] ~~**ListCOMP**~~ — **DEPRIORITIZED.** Godot's built-in Tree and ItemList nodes cover most data-grid needs. Existing TreeUI and ItemListUI operators already wrap these. A full TD-style ListCOMP with column definitions, click-to-sort, and scroll virtualization would be a large effort for marginal gain over what `TreeUI` with `columns` param already provides. Revisit if users request it.
-- [x] **SDF Composition Extension** (`gn_ext_sdf`) — **IMPLEMENTED** (26 operators + 78 help patches):
+- [x] **SDF Family** (core, 12th family) — **IMPLEMENTED** (26 operators + 78 help patches):
   - **Not a new family** — intermediate data is a `GNSDFData` (extends GNData) carrying an SDF scene-graph AST. Final node compiles to GLSL and renders to GNTextureData (TOP output).
   - **SDF Primitives** (10): SphereSDF, BoxSDF, TorusSDF, CylinderSDF, CapsuleSDF, PlaneSDF, ConeSDF, PyramidSDF, OctahedronSDF, GyroidSDF
   - **Boolean Operators** (5): UnionSDF, IntersectionSDF, SubtractSDF, SmoothUnionSDF, SmoothSubtractSDF
@@ -2227,7 +2227,7 @@ Full cook-cycle tests that exercise the entire `cook_frame()` pipeline through r
 ```
 tests/integration/
 ├── test_chop_chains.gd        # 13 tests — Constant→Math→Null chains, merge, bypass, expressions, dirty propagation, diamond topology
-├── test_script_chop.gd        # 7 tests — ScriptCHOP generator/filter, @param annotations, time var, syntax error recovery, script→math chain
+├── test_script_chop.gd        # 7 tests — GDScriptSCRIPT generator/filter, @param annotations, time var, syntax error recovery, script→math chain
 ├── test_network_roundtrip.gd  # 6 tests — Serialization round-trip: empty network, params, connections, expression mode, cook-after-deserialize
 ```
 
@@ -2241,7 +2241,7 @@ tests/integration/
 test_scenes/                           # ⚠️ DEPRECATED — use help patches instead
 ├── README.md                          # Legacy checklists (kept for reference)
 ├── 01_chop_chain_basics.gnpatch       # → covered by chop/ help patches
-├── 02_script_chop.gnpatch             # → covered by scriptchop_generator.gnpatch
+├── 02_script_chop.gnpatch             # → covered by script_chop_generator.gnpatch
 ├── 03_custom_shader_top.gnpatch       # → covered by glsl_radial_wave.gnpatch
 ├── 04_expression_animation.gnpatch    # → covered by lfo_basic + circle_basic patches
 ├── 05_top_compositing_chain.gnpatch   # → covered by composite_blend + edge_detect + level patches
@@ -3404,7 +3404,7 @@ Thread-safe parallel cooking is implemented with three safeguards:
 
 1. **Expression edges in topological levels.** `_rebuild_expr_consumer_map()` builds expression dependency edges (e.g., `chop("B","out")` → A depends on B) and injects them into `network._expression_edges`. `_compute_topological_levels()` adds these to the Kahn's algorithm adjacency graph so expression-linked nodes never land on the same parallel level.
 
-2. **Per-operator `thread_safe` flag.** `GNNode.thread_safe: bool = true` (default). Operators that call `set_par()` on other nodes, use the Network API (`network_add_node`, etc.), or rely on non-thread-safe I/O are marked `thread_safe = false`. Currently 19 operators are marked unsafe: all Script operators (ScriptCHOP/SOP/DAT/IMG, GenericScriptNode, CallbackDAT), CueCHOP, and all I/O operators (MqttDAT, NetworkDAT, OscOUT, OscInCHOP, OscInDAT, WebDAT, AudioInCHOP, MidiInCHOP, RtMidiInCHOP, RtMidiOutCHOP, SerialReceiveDAT, SerialSendDAT).
+2. **Per-operator `thread_safe` flag.** `GNNode.thread_safe: bool = true` (default). Operators that call `set_par()` on other nodes, use the Network API (`network_add_node`, etc.), or rely on non-thread-safe I/O are marked `thread_safe = false`. Currently 19 operators are marked unsafe: all Script operators (GDScriptSCRIPT, PythonSCRIPT, NativeSCRIPT, CallbackDAT), CueCHOP, and all I/O operators (MqttDAT, NetworkDAT, OscOUT, OscInCHOP, OscInDAT, WebDAT, AudioInCHOP, MidiInCHOP, RtMidiInCHOP, RtMidiOutCHOP, SerialReceiveDAT, SerialSendDAT).
 
 3. **Parallel batch splitting.** `_cook_cpu_batch_parallel()` separates each topo level into `parallel_prepared` (thread_safe=true) and `sequential_prepared` (thread_safe=false). Thread-safe nodes dispatch to `WorkerThreadPool`; unsafe nodes cook sequentially on the main thread after the parallel batch completes.
 
@@ -3652,7 +3652,7 @@ The editor UI is built on Godot's `GraphEdit` and `GraphNode` controls with bidi
 
 ### Operator Registry
 
-> **Note:** This section describes the historical Phase 3 approach. The hardcoded dictionary was replaced by `GNExtensionRegistry` — core operators are declared in `addons/gonodes/gn_core.cfg` manifest (376 operators) and loaded via `_load_extension()`. Extension operators come from `gn_ext_*/gn_extension.cfg` manifests (169 operators across 19 extensions). No hardcoded dictionary exists.
+> **Note:** This section describes the historical Phase 3 approach. The hardcoded dictionary was replaced by `GNExtensionRegistry` — core operators are declared in `addons/gonodes/gn_core.cfg` manifest (402 operators) and loaded via `_load_extension()`. Extension operators come from `gn_ext_*/gn_extension.cfg` manifests (143 operators across 18 extensions). No hardcoded dictionary exists.
 
 ### Signal Flow
 
@@ -3995,7 +3995,7 @@ This section documents the scripting operator system: operators where the user w
 2. **Stable API contract** — Each Script operator defines a fixed output type (per family) but dynamic input ports and parameters via comment annotations. User code plugs into `cook()` and optionally `setup()`.
 3. **Graceful failure** — GDScript compilation errors are caught. Runtime errors print to console but don't crash the network. The operator falls back to its last-good cached output.
 4. **Hot-reload** — Code changes trigger recompilation + `setup()` re-run without restarting the cook engine. The compiled instance is reused across frames (state persists).
-5. **Per-family, not generic** — Each Script operator belongs to its family (ScriptCHOP extends GNChopBase, etc.), inheriting family colors, preview, output helpers. A generic multi-output ScriptNode is on the roadmap.
+5. **Consolidated SCRIPT family** — All script nodes (GDScriptSCRIPT, PythonSCRIPT, NativeSCRIPT) use the SCRIPT family with template dropdown. Preview shows cook time + status only.
 
 ### 27.2 Implemented: CustomShaderTOP (GLSL TOP)
 
@@ -4007,7 +4007,7 @@ See CustomShaderTOP source for full implementation details (uniform parsing, dyn
 
 ### 27.3 Implemented: Script Operators (GDScript)
 
-**Status: ✅ Done — ScriptCHOP, ScriptDAT, ScriptSOP, ScriptIMG**
+**Status: ✅ Done — GDScriptSCRIPT**
 
 All four share `GNScriptHelper` for compilation, annotation parsing, and execution.
 
@@ -4015,10 +4015,10 @@ All four share `GNScriptHelper` for compilation, annotation parsing, and executi
 
 | Operator | Extends | Output Type | `node_type` | `op` object |
 |----------|---------|-------------|-------------|-------------|
-| ScriptCHOP | GNChopBase | GNChannelData | `"scriptchop"` | GNChannelData (`add_channel`, `set_single_value`, etc.) |
-| ScriptDAT | GNDatBase | GNTableData | `"scriptdat"` | GNTableData (`set_headers`, `append_row`, `set_text`, etc.) |
-| ScriptSOP | GNSopBase | GNGeoData | `"scriptsop"` | GNGeoData (`set_from_surface_tool`, `set_surface_arrays`, etc.) |
-| ScriptIMG | GNImgBase | GNImageData | `"scriptimg"` | GNImageData (`set_image(img)`, `image`, `resolution`, etc.) |
+| GDScriptSCRIPT | GNChopBase | GNChannelData | `"script"` | GNChannelData (`add_channel`, `set_single_value`, etc.) |
+| GDScriptSCRIPT | GNDatBase | GNTableData | `"script"` | GNTableData (`set_headers`, `append_row`, `set_text`, etc.) |
+| GDScriptSCRIPT | GNSopBase | GNGeoData | `"script"` | GNGeoData (`set_from_surface_tool`, `set_surface_arrays`, etc.) |
+| GDScriptSCRIPT | GNImgBase | GNImageData | `"script"` | GNImageData (`set_image(img)`, `image`, `resolution`, etc.) |
 
 #### 27.3.2 Execution Engine — Runtime GDScript Compilation
 
@@ -4133,7 +4133,7 @@ Dynamic input ports with per-port family type:
 
 Ports are rebuilt when annotations change, same `ports_changed.emit()` pattern. No `@input` annotations = no input ports (generator mode).
 
-**Cross-family inputs:** A ScriptIMG can accept IMG + CHOP + DAT inputs simultaneously:
+**Cross-family inputs:** A GDScriptSCRIPT can accept IMG + CHOP + DAT inputs simultaneously:
 ```gdscript
 # @input img   Background image
 # @input chop  Animation data
@@ -4156,14 +4156,14 @@ All Script operators share two static (non-annotation) parameters:
 
 `time_dependent` is respected via `_pre_cook()` override (same pattern as CustomShaderTOP).
 
-#### 27.3.7 ScriptIMG — CPU Image Output
+#### 27.3.7 GDScriptSCRIPT — CPU Image Output
 
-ScriptIMG extends GNImgBase (not GNTopBase) — pure CPU Image pipeline:
+GDScriptSCRIPT extends GNImgBase (not GNTopBase) — pure CPU Image pipeline:
 - **No SubViewport** — output is `GNImageData` wrapping a CPU `Image`
 - **`op` is GNImageData** — the user calls `op.set_image(img)` to publish output
 - **No `execute_cook()` override needed** — GNImgBase uses GNNode's default (no viewport logic)
 - **Use ImgToTOP** to convert to GPU texture for the TOP pipeline
-- **Complementary to CustomShaderTOP** — use ScriptIMG for CPU logic, CustomShaderTOP for GPU shaders
+- **Complementary to CustomShaderTOP** — use GDScriptSCRIPT for CPU logic, CustomShaderTOP for GPU shaders
 
 ### 27.4 IMG Family — CPU Image Operators
 
@@ -4173,7 +4173,7 @@ The IMG family provides CPU-side image processing as a first-class citizen, clea
 
 #### CPU-First Input Philosophy
 
-**Principle:** When source data originates on the CPU (files on disk, camera feeds, procedural generation), the operator should live in the **IMG family** and output `GNImageData`. The user explicitly bridges to GPU via `→ ImgToTOP` only when needed. This gives maximum flexibility — CPU processing (ScriptIMG, BlurIMG, OpenCV via GDExtension, etc.) can happen *before* any GPU upload, and users who never need GPU textures avoid the upload entirely.
+**Principle:** When source data originates on the CPU (files on disk, camera feeds, procedural generation), the operator should live in the **IMG family** and output `GNImageData`. The user explicitly bridges to GPU via `→ ImgToTOP` only when needed. This gives maximum flexibility — CPU processing (GDScriptSCRIPT, BlurIMG, OpenCV via GDExtension, etc.) can happen *before* any GPU upload, and users who never need GPU textures avoid the upload entirely.
 
 **Rationale for the split:**
 
@@ -4208,7 +4208,7 @@ The IMG family provides CPU-side image processing as a first-class citizen, clea
 | BlurIMG | Filter | Separable box blur with sliding-window accumulator. Multi-pass for Gaussian approximation. |
 | EdgeDetectIMG | Filter | Sobel or Prewitt 3×3 kernels. Grayscale or color-encoded gradient direction. |
 | PixelSortIMG | Filter | Glitch art pixel sorting. Sort by brightness/hue/saturation/channel. Threshold-controlled spans. |
-| ScriptIMG | Scripting | User GDScript with `@param`/`@input` annotations. Full GNScriptHelper integration. |
+| GDScriptSCRIPT | Scripting | User GDScript with `@param`/`@input` annotations. Full GNScriptHelper integration. |
 | ImgToTOP | Bridge | Uploads CPU Image to GPU ImageTexture → GNTextureData output. Overrides `execute_cook()` to skip SubViewport logic. |
 | TOPtoIMG | Bridge | GPU Texture → CPU Image via `get_image()`. Reverse of ImgToTOP. |
 | ImageSaveOUT | Sink | Saves CPU Image to disk (PNG/WebP/EXR). `active` toggle, auto-numbering, quality param. `is_sink = true`. |
@@ -4237,22 +4237,22 @@ The IMG family provides CPU-side image processing as a first-class citizen, clea
 **Storage layout:**
 ```
 res://addons/gonodes/presets/          # Factory (read-only, ships with addon)
-    scriptchop/
+    script/
         sine_waves.gd
         smooth_channels.gd
         beat_clock.gd
-    scriptdat/
+    script/
         chop_to_table.gd
         empty_table.gd
-    scriptsop/
+    script/
         scatter_points.gd
         wave_deform.gd
-    scriptimg/
+    script/
         gradient.gd
         cpu_threshold.gd
 
 user://gonodes_presets/                 # User (read-write, created on first save)
-    scriptchop/
+    script/
         my_custom_lfo.gd
     ...
 ```
@@ -4308,7 +4308,7 @@ Uses Godot's `RenderingDevice` compute shader API for massively parallel GPU ope
 
 **Status: ✅ Done**
 
-A family-less node with annotated output ports (`# @output chop`, `# @output top`). Extends `GNNode` directly with `family = GNFamily.Type.COMP` for gray/neutral color. Multi-output via `outputs[]` array — each `# @output` annotation creates a typed output port with a pre-prepared `GNData` subclass. The per-family Script operators remain the 90% use case; GenericScriptNode is for advanced multi-output pipelines.
+A family-less node with annotated output ports (`# @output chop`, `# @output top`). Extends `GNNode` directly with `family = GNFamily.Type.COMP` for gray/neutral color. Multi-output via `outputs[]` array — each `# @output` annotation creates a typed output port with a pre-prepared `GNData` subclass. The per-family Script operators remain the 90% use case; GDScriptSCRIPT is for advanced multi-output pipelines.
 
 **File:** `addons/gonodes/operators/comp/generic_script_node.gd`
 
@@ -4351,10 +4351,10 @@ Six functions available in all Script operators for runtime graph manipulation:
 | Priority | Operator | Status |
 |----------|----------|--------|
 | ✅ Done | CustomShaderTOP | GPU shaders with dynamic uniforms |
-| ✅ Done | ScriptCHOP | GDScript channel generation/processing |
-| ✅ Done | ScriptDAT | GDScript table/text generation/processing |
-| ✅ Done | ScriptSOP | GDScript geometry generation/processing |
-| ✅ Done | ScriptIMG | CPU-side Image manipulation via GDScript |
+| ✅ Done | GDScriptSCRIPT | GDScript channel generation/processing |
+| ✅ Done | GDScriptSCRIPT | GDScript table/text generation/processing |
+| ✅ Done | GDScriptSCRIPT | GDScript geometry generation/processing |
+| ✅ Done | GDScriptSCRIPT | CPU-side Image manipulation via GDScript |
 | ✅ Done | IMG family | NoiseIMG, CheckerboardIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG, ImgToTOP, TOPtoIMG, ImageSaveOUT, MovieOUT, FFmpegOUT |
 | ✅ Done | Output operators | TextureSaveOUT, TableSaveOUT, RecordOUT — file save sinks with `active` toggle |
 | ✅ Done | WebcamIMG | Live camera feed as CPU Image via CameraServer |
@@ -4375,7 +4375,7 @@ GONODES uses a dynamic operator registry (`GNExtensionRegistry`) to manage all o
 
 ### 28.2 Registry Singleton
 
-`GNExtensionRegistry` is a `RefCounted`-based lazy singleton accessed via `GNExtensionRegistry.instance()`. It is initialized on first access, at which point all 376 core operators are declared in `gn_core.cfg` and loaded via `_load_extension()`. Extension scanning happens explicitly via `scan_extensions()`, called during editor startup (`gn_editor.gd._ready()`).
+`GNExtensionRegistry` is a `RefCounted`-based lazy singleton accessed via `GNExtensionRegistry.instance()`. It is initialized on first access, at which point all 402 core operators are declared in `gn_core.cfg` and loaded via `_load_extension()`. Extension scanning happens explicitly via `scan_extensions()`, called during editor startup (`gn_editor.gd._ready()`).
 
 ### 28.3 OperatorEntry
 
@@ -4451,7 +4451,7 @@ If any guard fails, the extension is skipped with a warning and marked as loaded
 ### 28.7 Loading Flow
 
 1. **Editor startup** → `gn_editor.gd._ready()` calls `GNExtensionRegistry.instance().scan_extensions()`
-2. **First access** → `instance()` creates the singleton and loads `gn_core.cfg` via `_load_extension()` (376 core operators)
+2. **First access** → `instance()` creates the singleton and loads `gn_core.cfg` via `_load_extension()` (402 core operators)
 3. **scan_extensions()** → iterates `res://addons/gn_ext_*/gn_extension.cfg`, checks platform/architecture/dependencies, loads operator scripts
 4. **Palette/Factory** → `GNGraphEditor.get_operator_registry()` and `_create_operator_instance()` delegate to the registry
 5. **Palette tooltips** → `GNNodePalette._get_operator_description()` delegates to registry
@@ -4609,9 +4609,11 @@ Comprehensive session covering code editor integration fixes, preset creation, h
 
 ### 30.1 Code Editor Integration Fixes
 
-**Problem:** GenericScriptNode and CallbackDAT lacked "Edit ↗" code editor buttons in the inspector.
+> **Note:** Section 30.1–30.3 describe fixes made before the script consolidation (§31+). The per-family script operators (ScriptCHOP, ScriptDAT, etc.) and GenericScriptNode referenced here have since been replaced by the unified GDScriptSCRIPT operator with a Template dropdown. The `presets/genericscript/` folder was merged into `presets/script/`.
 
-- **`gn_param_row.gd`** — `_is_code_editor_param()` only matched `node_type.begins_with("script")`. GenericScriptNode uses `node_type = "genericscript"` (doesn't start with "script"), and CallbackDAT's callback params (`on_start`, `on_cook`, `on_value_change`, `on_create`) weren't recognized.
+**Problem:** GDScriptSCRIPT and CallbackDAT lacked "Edit ↗" code editor buttons in the inspector.
+
+- **`gn_param_row.gd`** — `_is_code_editor_param()` only matched `node_type.begins_with("script")`. GDScriptSCRIPT uses `node_type = "genericscript"` (doesn't start with "script"), and CallbackDAT's callback params (`on_start`, `on_cook`, `on_value_change`, `on_create`) weren't recognized.
   - Added `_is_script_node()` helper returning true for `begins_with("script")` OR `== "genericscript"`
   - Expanded `_is_code_editor_param()` to recognize genericscript's `"code"` param and callbackdat's callback params
 - **`gn_code_editor.gd`** — `_get_preset_folder()` returned "" for genericscript/callbackdat/shader_code.
@@ -4624,10 +4626,10 @@ Created 22 new presets + verified 13 existing, bringing all 7 script/shader cate
 
 | Folder | New Presets | Total |
 |--------|-------------|-------|
-| `presets/scriptchop/` | additive_harmonics.gd, envelope_follower.gd | 5 |
-| `presets/scriptdat/` | fibonacci_table.gd, json_parser.gd, random_table.gd, system_info.gd | 6 |
-| `presets/scriptsop/` | fibonacci_sphere.gd, ring_mesh.gd, parametric_column.gd | 5 |
-| `presets/scriptimg/` | fractal_noise.gd, concentric_rings.gd, color_correct.gd | 5 |
+| `presets/script/` | additive_harmonics.gd, envelope_follower.gd | 5 |
+| `presets/script/` | fibonacci_table.gd, json_parser.gd, random_table.gd, system_info.gd | 6 |
+| `presets/script/` | fibonacci_sphere.gd, ring_mesh.gd, parametric_column.gd | 5 |
+| `presets/script/` | fractal_noise.gd, concentric_rings.gd, color_correct.gd | 5 |
 | `presets/genericscript/` | triple_output_oscillator.gd, signal_analyzer.gd, network_inspector.gd | 5 |
 | `presets/callbackdat/` | on_create_init.gd, param_guard.gd, cook_profiler.gd | 5 |
 | `presets/glsl/` (NEW) | plasma.gdshader, voronoi.gdshader, radial_warp.gdshader, kaleidoscope.gdshader, gradient_map.gdshader | 5 |
@@ -4640,9 +4642,9 @@ Created 22 new presets + verified 13 existing, bringing all 7 script/shader cate
 
 | Old Name | New Name | Now shows on |
 |----------|----------|--------------|
-| `set_par_demo.gnpatch` | `scriptchop_set_par.gnpatch` | ScriptCHOP |
-| `network_api_demo.gnpatch` | `scriptdat_network_api.gnpatch` | ScriptDAT |
-| `generic_script_multi_output.gnpatch` | `genericscript_multi_output.gnpatch` | GenericScriptNode |
+| `set_par_demo.gnpatch` | `script_set_par.gnpatch` | GDScriptSCRIPT |
+| `network_api_demo.gnpatch` | `script_network_api.gnpatch` | GDScriptSCRIPT |
+| `generic_script_multi_output.gnpatch` | `script_multi_output.gnpatch` | GDScriptSCRIPT |
 | `callback_dat_basic.gnpatch` | `callbackdat_basic.gnpatch` | CallbackDAT |
 
 ### 30.4 Main Help Window (GNMainHelpWindow)
@@ -4817,7 +4819,7 @@ Built a complete C++ GDExtension source tree for 69 CPU-heavy operators across 6
 ### 31.5 Updated Totals
 
 - **288 operators** (63 TOP, 12 IMG, 61 CHOP, 29 DAT, 57 SOP, 20 COMP, 6 MAT, 9 OUT, 31 UI)
-- **1,084 help patches** (1,014 core + 70 extension) across all 11 families — 3+ per operator
+- **1,084 help patches** (1,014 core + 70 extension) across all 12 families — 3+ per operator
 - Zero deferred operators remain
 
 ---
@@ -4908,7 +4910,7 @@ All in `operators/ui/`, extend GNUiBase:
 ### 33.8 Updated Totals
 
 - **288 operators** (63 TOP, 12 IMG, 61 CHOP, 29 DAT, 57 SOP, 20 COMP, 6 MAT, 9 OUT, 31 UI)
-- **1,084 help patches** (1,014 core + 70 extension) across all 11 families — 3+ per operator
+- **1,084 help patches** (1,014 core + 70 extension) across all 12 families — 3+ per operator
 - 10 operator families: TOP, IMG, CHOP, SOP, POP, DAT, MAT, COMP, UI, OUT
 
 ---
@@ -4946,7 +4948,7 @@ Two new GPU-accelerated operator families implemented, bringing the total to **1
 - **GNVolumeData** (`core/gn_volume_data.gd`): `GNData` subclass wrapping GPU 3D texture (`RID`). Fields: `rd_texture`, `resolution` (Vector3i), `bounds` (AABB), `data_format`, `channel_count`, `field_name`. `duplicate_data()` does GPU-to-GPU texture copy. `has_volume()`, `voxel_count()`, `bytes_per_voxel()` helpers.
 - **GNPopBase** (`core/gn_pop_base.gd`): Base class for POP operators. `STANDARD_STRIDE = 64` bytes. `_get_standard_layout()` returns canonical attribute offsets. `_allocate_particles()`, `_encode_push_constants()`, `_workgroups()` helpers. All POP operators are `time_dependent = true`.
 - **GNVolBase** (`core/gn_vol_base.gd`): Base class for VOL operators. `_create_volume()`, `_acquire_volume()` (pooled), `_channels_for_format()`, `_encode_push_constants()`, `_workgroups_3d()`, `_f32()`/`_i32()` byte encoding helpers.
-- **GNFamily enum**: `VOL` added with rose color. 11 families: TOP, IMG, CHOP, SOP, POP, VOL, DAT, MAT, COMP, UI, OUT.
+- **GNFamily enum**: `VOL` added with rose color. 12 families: TOP, IMG, CHOP, SOP, POP, VOL, DAT, MAT, COMP, UI, OUT, SDF.
 
 ### 35.3 POP Operators (10)
 
@@ -5014,8 +5016,8 @@ All 20 POP+VOL operators registered in `gn_extension_registry.gd`:
 
 - **545 operators** (129 TOP, 21 IMG, 112 CHOP, 47 DAT, 120 SOP, 20 POP, 22 VOL, 20 COMP, 10 MAT, 13 OUT, 31 UI)
 - **11 operator families**: TOP, IMG, CHOP, SOP, POP, VOL, DAT, MAT, COMP, UI, OUT
-- **19 GDExtension addons**: gn_ext_native (92 C++ operators), gn_ext_shadertoy, gn_ext_isf, gn_ext_ffmpeg, gn_ext_hap, gn_ext_spout, gn_ext_syphon, gn_ext_video_capture, gn_ext_midi, gn_ext_gpu_encode, gn_ext_mapper, gn_ext_ndi, gn_ext_ml, gn_ext_depth_sensor, gn_ext_sdf, gn_ext_serial, gn_ext_blackmagic, gn_ext_user_native, gn_ext_user_python
-- **1,382 help patches** (1,140 core + 242 extension) across all 11 families — 3+ per operator
+- **18 GDExtension addons**: gn_ext_native (92 C++ operators), gn_ext_shadertoy, gn_ext_isf, gn_ext_ffmpeg, gn_ext_hap, gn_ext_spout, gn_ext_syphon, gn_ext_video_capture, gn_ext_midi, gn_ext_gpu_encode, gn_ext_mapper, gn_ext_ndi, gn_ext_ml, gn_ext_depth_sensor, gn_ext_serial, gn_ext_blackmagic, gn_ext_user_native, gn_ext_user_python
+- **1,413 help patches** (1,171 core + 242 extension) across all 12 families — 3+ per operator
 - **18 GLSL compute shaders** (7 POP + 11 VOL)
 - POP and VOL roadmap items moved to implemented. Custom Operator Assets (.gnasset) remains on roadmap.
 
@@ -5267,7 +5269,7 @@ Operators that require local filesystem, CLI, or platform-specific hardware:
 |-----------|-----------|---------------|
 | `gn_ext_isf` | ISFTOP (1) | Pure `canvas_item` shader compilation |
 | `gn_ext_shadertoy` | ShadertoyTOP (1) | Pure `canvas_item` shader + HTTP |
-| `gn_ext_sdf` | 26 SDF operators | Shader AST → `canvas_item` raymarcher |
+| SDF (core) | 26 SDF operators | Shader AST → `canvas_item` raymarcher |
 | `gn_ext_mapper` | 7 projection/warp TOPs | Pure `canvas_item` shaders |
 | `gn_ext_native` | 64 accelerated ops | Runtime ClassDB fallback to GDScript |
 
@@ -5400,7 +5402,7 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 
 ### Updated Totals
 
-Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI, +6 NDI ext, +7 ML ext, +5 depth sensor ext). 11 families. 14 GDExtension addons.
+Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VOL, 20 COMP, 10 MAT, 9 OUT, 31 UI, +6 NDI ext, +7 ML ext, +5 depth sensor ext). 12 families. 14 GDExtension addons.
 
 ### New Operators Added (Roadmap Batch)
 

@@ -1362,12 +1362,14 @@ func test_ramp_chop_maps_values() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  ScriptCHOP
+#  GDScriptSCRIPT (CHOP template)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_script_chop_instantiate() -> void:
-	var node := _make_node(ScriptCHOP.new(), "script1")
-	GNTestAssert.assert_not_null(node, "ScriptCHOP created")
+func test_gdscript_script_chop_template() -> void:
+	var node := _make_node(GDScriptSCRIPT.new(), "script1")
+	node.set_param_value("template", GDScriptSCRIPT.Template.CHOP)
+	GNTestAssert.assert_not_null(node, "GDScriptSCRIPT created")
+	GNTestAssert.assert_eq(node.node_type, "script", "node_type")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

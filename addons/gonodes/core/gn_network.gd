@@ -173,8 +173,10 @@ func rename_node(old_id: String, new_id: String) -> bool:
 
 
 ## Node types whose "code" parameter contains GDScript with node references.
+## After the script consolidation, all GDScript scripting uses the unified
+## "script" node_type (GDScriptSCRIPT).
 var _SCRIPT_NODE_TYPES: PackedStringArray = PackedStringArray([
-	"scriptchop", "scriptdat", "scriptsop", "scriptimg", "genericscript",
+	"script",
 ])
 
 ## CallbackDAT code parameters (multiple script slots, not "code").

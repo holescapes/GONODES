@@ -235,7 +235,7 @@ var _input_family_cache: Dictionary = {}
 
 ## Returns operator names that have at least one input port matching [param family].
 ## Instantiates each operator once to inspect its ports, then caches the result.
-func get_operators_accepting_family(family: GNFamily.Type) -> Array[String]:
+func get_operators_accepting_family(family: int) -> Array[String]:
 	if _input_family_cache.has(family):
 		return _input_family_cache[family]
 
@@ -279,7 +279,7 @@ func _build_input_family_cache() -> void:
 
 
 ## Returns operator names that have at least one output port matching [param family].
-func get_operators_producing_family(family: GNFamily.Type) -> Array[String]:
+func get_operators_producing_family(family: int) -> Array[String]:
 	if _input_family_cache.is_empty():
 		_build_input_family_cache()
 	var key_str := "output:%d" % family
@@ -506,6 +506,26 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 			print("[ExtRegistry] Extension '%s' skipped — missing dependency '%s'" % [ext_name, dep_class])
 			return
 
+	# ── Register extension families ──
+	# Sections named "family.<NAME>" declare custom port types.
+	for section in cfg.get_sections():
+		if not section.begins_with("family."):
+			continue
+		var fam_name := section.substr("family.".length())
+		var color_str: String = cfg.get_value(section, "color", "0.5,0.5,0.5")
+		var parts := color_str.split(",")
+		var color := Color(parts[0].to_float(), parts[1].to_float(), parts[2].to_float()) if parts.size() >= 3 else Color.WHITE
+		var fam_id := GNFamily.register_family(fam_name, color)
+		# Register data factory if the extension provides one
+		var factory_script: String = cfg.get_value(section, "data_script", "")
+		if not factory_script.is_empty() and ResourceLoader.exists(factory_script):
+			var fac_scr: GDScript = load(factory_script) as GDScript
+			if fac_scr != null:
+				GNFamily.register_data_factory(fam_id, func(): return fac_scr.new())
+		# Register for @input/@output annotation parsing in script nodes
+		GNScriptHelper.register_script_family(fam_name.to_lower(), fam_id)
+		print("[ExtRegistry] Registered family '%s' (id=%d)" % [fam_name, fam_id])
+
 	# ── Register operators ──
 	# Sections named "operator.<ClassName>" declare individual operators.
 	var registered_count := 0
@@ -549,6 +569,22 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 
 	_loaded_extensions.append(folder_name)
 	print("[ExtRegistry] Loaded extension '%s' (%d operators)" % [ext_name, registered_count])
+
+	# ── Run boot script ──
+	# If the manifest declares a "boot_script" key, load and call its boot() method.
+	# Boot scripts register extension hooks into core UI registries (viewer display
+	# handlers, code editor languages, param row code params, etc.).
+	var boot_path: String = cfg.get_value("extension", "boot_script", "")
+	if not boot_path.is_empty():
+		if ResourceLoader.exists(boot_path):
+			var boot_scr: GDScript = load(boot_path) as GDScript
+			if boot_scr != null and boot_scr.has_method("boot"):
+				boot_scr.boot()
+				print("[ExtRegistry] Ran boot script for '%s'" % ext_name)
+			else:
+				print("[ExtRegistry] Boot script '%s' has no static boot() method" % boot_path)
+		else:
+			print("[ExtRegistry] Boot script not found: '%s'" % boot_path)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

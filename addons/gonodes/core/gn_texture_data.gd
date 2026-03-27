@@ -17,8 +17,20 @@ var resolution: Vector2i = Vector2i(512, 512)
 var format: Image.Format = Image.FORMAT_RGBA8
 
 
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	return GNFamily.Type.TOP
+
+
+func get_preview_text() -> String:
+	if texture != null:
+		return "%dx%d" % [resolution.x, resolution.y]
+	return ""
+
+
+func get_data_summary() -> String:
+	if texture != null:
+		return "%d×%d" % [resolution.x, resolution.y]
+	return ""
 
 
 ## Returns the aspect ratio (width / height).  Returns 1.0 if height is zero.

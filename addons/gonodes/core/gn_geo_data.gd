@@ -27,8 +27,24 @@ var vertex_count: int = 0
 var point_attribs: Dictionary = {}
 
 
-func get_family() -> GNFamily.Type:
+func get_family() -> int:
 	return GNFamily.Type.SOP
+
+
+func get_preview_text() -> String:
+	if has_geometry() and mesh != null:
+		var verts: int = 0
+		var surfs: int = mesh.get_surface_count()
+		for s in range(surfs):
+			var arrays: Array = mesh.surface_get_arrays(s)
+			if arrays[Mesh.ARRAY_VERTEX] != null:
+				verts += (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+		return "%d verts\n%d surfaces" % [verts, surfs]
+	return "no geo"
+
+
+func get_data_summary() -> String:
+	return "%dv" % vertex_count
 
 
 # ─── Mesh Building Helpers ─────────────────────────────────────────────────────

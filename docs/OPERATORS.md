@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **545 operators** across 11 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, plus native C++ acceleration variants and 19 extension addons.
+> **533 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
 
 ---
 
@@ -16,7 +16,7 @@
 - [OUT — Output Operators](#out--output-operators)
 - [UI — User Interface Operators](#ui--user-interface-operators)
 
-> **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (1,382 total).
+> **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (1,413 total).
 >
 > ### Help Patch Hard Rule
 > Every help example patch **MUST**:
@@ -3901,7 +3901,7 @@ COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Go
 **Total: 12 operators.**
 
 > Note: SubNetworkNode, InTunnel, OutTunnel are internal system nodes.
-> NullCOMP, SwitchCOMP, EnvironmentCOMP, and GenericScriptNode are utility nodes.
+> NullCOMP, SwitchCOMP, and EnvironmentCOMP are utility nodes.
 
 ---
 
@@ -4200,22 +4200,25 @@ Separating environment from rendering allows one environment shared across multi
 
 ---
 
-### Scripting (New)
+### Scripting (SCRIPT Family)
 
 ---
 
-#### GenericScriptNode
+#### GDScriptSCRIPT
 
-Multi-output scripting node. Unlike per-family Script operators which produce a single output of their family type, GenericScriptNode can output **any combination** of data types simultaneously via `# @output` annotations.
+Consolidated GDScript scripting node. A Template dropdown selects the target context (Generic, CHOP, SOP, DAT, IMG). The Generic template supports multi-output via `# @output` annotations.
 
-Extends `GNNode` directly (not a family base class). Uses COMP family for neutral gray color in the graph.
+Extends `GNNode` directly. Uses SCRIPT family.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| template | Enum | Generic | Starting code template (Generic, CHOP, SOP, DAT, IMG) |
 | time_dependent | Bool | false | Re-cook every frame |
 | cook_once | Bool | false | Pulse: force single cook, auto-resets |
 | force_active | Bool | false | Keep active without downstream sink |
 | code | String | (default) | GDScript with cook(), @output, @input, @param annotations |
+
+**Preview:** Shows cook time and status (`0.8ms | OK` or `ERR | message`). No viewer — wire a Null of the target family to inspect output.
 
 **Annotations:**
 
@@ -4616,7 +4619,7 @@ This means **cross-family nodes** automatically get the correct preview. For exa
 
 COMP, UI, and OUT families override `update_preview_control()` because they display non-data state (`_scene_node`, `_control_node`, sink status).
 
-**Multi-output nodes** (GenericScriptNode, MultiBufferRenderTOP) preview output port 0 (`cached_output`). To inspect other outputs, wire them into a **Null node** of the matching family and select that Null in the viewer. Every family has a Null pass-through: NullTOP, NullCHOP, NullSOP, NullDAT, NullIMG, NullPOP, NullVOL, NullMAT, NullCOMP.
+**Multi-output nodes** (GDScriptSCRIPT Generic template, MultiBufferRenderTOP) preview output port 0 (`cached_output`). To inspect other outputs, wire them into a **Null node** of the matching family and select that Null in the viewer. Every family has a Null pass-through: NullTOP, NullCHOP, NullSOP, NullDAT, NullIMG, NullPOP, NullVOL, NullMAT, NullCOMP.
 
 ### Node Palette Keyboard Navigation
 
@@ -4758,7 +4761,8 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_gpu_encode** | MovieFileOutTOP | Hardware GPU video encoding to H.264 MP4 (MF/VideoToolbox) |
 | **gn_ext_mapper** | QuadMapTOP, BezierMapTOP, GridWarpTOP, EdgeBlendTOP, ProjectionMaskTOP, StonerTOP, ProjectorBlendTOP | GPU projection mapping — bezier/quad/grid warp, edge blend, masking |
 | **gn_ext_hap** | HapInTOP, HapOUT | GPU-direct HAP video codec — DXT-compressed frames upload to GPU with zero CPU decode. Supports HAP, HAP Alpha, HAP Q variants in QuickTime MOV containers |
-| **gn_ext_sdf** | 26 operators (10 primitives, 5 booleans, 8 modifiers, 2 materials, 1 renderer) | Composable SDF raymarching — build 3D scenes from SDF primitives with boolean ops, domain modifiers, and materials, rendered via RaymarchSDF TOP |
+
+> **Note:** SDF operators (26 total — 10 primitives, 5 booleans, 8 domain modifiers, 2 materials, 1 renderer) were promoted from `gn_ext_sdf` to **core** as the 12th family type. See the SDF section above.
 
 ---
 

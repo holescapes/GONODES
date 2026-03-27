@@ -288,7 +288,7 @@ def auto_gen_dat(op_info, variant):
     generators = {"constant", "text", "info", "oscin", "midiin", "json", "web",
                   "webserver", "websocket", "filein", "folder", "error",
                   "multitouchin", "table", "network", "xml", "opfind",
-                  "callbackdat", "scriptdat"}
+                  "callbackdat"}
 
     if nt in generators:
         return build_dat_chain(f"{nt}1",
@@ -311,7 +311,7 @@ def auto_gen_img(op_info, variant):
     ann = make_annotations(op_info, variant)
 
     generators = {"noiseimg", "checkerboardimg", "imagefileinimg", "imagesequenceimg",
-                  "screengrab", "webcamimg", "videodeviceinimg", "scriptimg"}
+                  "screengrab", "webcamimg", "videodeviceinimg"}
     if nt == "imgtotop":
         # Special: needs IMG input → outputs TOP directly
         return build_top_chain(f"{nt}1",
@@ -520,8 +520,8 @@ def auto_gen_comp(op_info, variant):
         conns_list.append(conn("choptop1", 0, wn, 0))
         return build_patch(nodes, conns_list, ann)
 
-    # GenericScriptNode
-    elif nt == "genericscript":
+    # GDScriptSCRIPT (consolidated script operator with template dropdown)
+    elif nt == "script":
         nodes = {
             "noise1": node("NoiseTOP", 100, 100, {"resolution": vec2i(512, 512)}),
             f"{nt}1": node(cn, 400, 100, param_set),

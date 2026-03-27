@@ -1,6 +1,8 @@
 """
-Fix FLAT_PARAM issues in gnpatch files — wrap flat values in {"value": ...}.
+[ARCHIVED] Fix FLAT_PARAM issues in gnpatch files — wrap flat values in {"value": ...}.
 Fix known ORPHAN nodes by either wiring them or removing them.
+Note: References to scriptchop/genericscript patches are from before the
+March 2026 script consolidation. Help patches were moved to help/script/.
 Delete this file after use.
 """
 import json, os, glob, re

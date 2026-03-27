@@ -847,7 +847,7 @@ func _try_auto_connect_pending(new_node: GNNode) -> void:
 		return
 
 	# Read all pending info before clearing
-	var family: GNFamily.Type = _pending_connection.get("family", -1)
+	var family: int = _pending_connection.get("family", -1)
 	var direction: String = _pending_connection.get("direction", "")
 	var from_node_id: String = _pending_connection.get("from_node", "")
 	var from_port: int = _pending_connection.get("from_port", -1)
@@ -2917,7 +2917,7 @@ func group_selected_into_subnet() -> void:
 			continue
 		var source_node: GNNode = network.get_node_by_id(conn.from_node)
 		var source_port: GNPort = source_node.get_output_port(conn.from_port) if source_node else null
-		var port_family: GNFamily.Type = source_port.family if source_port else GNFamily.Type.TOP
+		var port_family: int = source_port.family if source_port else GNFamily.Type.TOP
 
 		var tunnel := InTunnel.new()
 		tunnel.tunnel_index = in_tunnel_index
@@ -2944,7 +2944,7 @@ func group_selected_into_subnet() -> void:
 			continue
 		var source_node: GNNode = network.get_node_by_id(conn.from_node)
 		var source_port: GNPort = source_node.get_output_port(conn.from_port) if source_node else null
-		var port_family: GNFamily.Type = source_port.family if source_port else GNFamily.Type.TOP
+		var port_family: int = source_port.family if source_port else GNFamily.Type.TOP
 
 		var tunnel := OutTunnel.new()
 		tunnel.tunnel_index = out_tunnel_index

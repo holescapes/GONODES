@@ -3,18 +3,51 @@ extends Control
 ## Family-aware viewer panel that displays the output of any node family.
 ##
 ## Replaces the old TextureRect-only viewer. Switches visualization mode
-## based on the pinned node's family:
-##   • TOP  — Full-resolution TextureRect with pan/zoom (1:1 pixel mode)
-##   • IMG  — Same as TOP (uploads Image → ImageTexture)
-##   • CHOP — GNWaveformView (GPU-accelerated _draw() polylines)
-##   • DAT  — Tree spreadsheet widget (scrollable, column headers)
-##   • SOP  — SubViewport with Camera3D + MeshInstance3D (lazy, 3D)
-##   • MAT  — SubViewport with preview sphere (lazy, 3D)
-##   • COMP — Info label (shows inner node count)
+## based on the pinned node's **output data type** (not family):
+##   • GNTextureData  — Full-resolution TextureRect with pan/zoom (1:1 pixel mode)
+##   • GNImageData    — Same as TOP (uploads Image → ImageTexture)
+##   • GNChannelData  — GNWaveformView (GPU-accelerated _draw() polylines)
+##   • GNTableData    — Tree spreadsheet widget (scrollable, column headers)
+##   • GNGeoData      — SubViewport with Camera3D + MeshInstance3D (lazy, 3D)
+##   • GNMaterialData — SubViewport with preview sphere (lazy, 3D)
+##   • GNParticleData — MultiMesh point cloud
+##   • GNVolumeData   — Three orthogonal slices + MIP
+##   • Extension data — via register_display_handler()
 ##
 ## Only one child visualization is visible at a time.
 ## The 3D SubViewport is allocated lazily — if you never view a SOP or MAT,
 ## no SubViewport is created.
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Extension Display Handler Registry
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Extension-registered display handlers.
+## Key: GDScript class name (String, e.g. "GNSDFData")
+## Value: Callable(output: GNData, viewer: GNViewerPanel)
+## The callable should call viewer._show_info(), viewer._show_texture(), etc.
+static var _ext_display_handlers: Dictionary = {}
+
+## Register a custom display handler for an extension data type.
+## Extensions call this during _enter_tree() so the viewer knows how to
+## display their custom GNData subclass.
+##
+## Example (in gn_ext_sdf plugin.gd _enter_tree):
+##   GNViewerPanel.register_display_handler("GNSDFData", func(output, viewer):
+##       var sd = output as GNSDFData
+##       if sd.sdf_tree.is_empty():
+##           viewer.show_info("Empty SDF tree", "")
+##       else:
+##           viewer.show_info(sd.get_preview_text(), "hash: %d" % sd.tree_hash))
+static func register_display_handler(data_class_name: String, handler: Callable) -> void:
+	_ext_display_handlers[data_class_name] = handler
+
+## Public helper: show a texture in the viewer. Used by extension display handlers.
+func show_texture(tex: Texture2D, info: String) -> void:
+	_show_texture(tex, info)
+	_update_zoom_label()
+
 
 ## Background color for the panel.
 const BG_COLOR := Color(0.06, 0.06, 0.08)
@@ -28,7 +61,7 @@ const BG_COLOR := Color(0.06, 0.06, 0.08)
 var node_id: String = ""
 
 ## The family of the currently viewed node (cached for mode switching).
-var _current_family: GNFamily.Type = GNFamily.Type.TOP
+var _current_family: int = GNFamily.Type.TOP
 
 ## Toolbar
 var _toolbar: HBoxContainer = null
@@ -778,6 +811,23 @@ func _show_info(text: String, info_bar_text: String = "") -> void:
 	_info_bar.text = info_bar_text
 
 
+## Public API for extension display handlers.
+## Extensions call viewer.show_info(text, info_bar) from their display handler.
+func show_info(text: String, info_bar_text: String = "") -> void:
+	_show_info(text, info_bar_text)
+
+
+## Public API for extension display handlers.
+## Call this before setting up your custom display.
+func hide_all_displays() -> void:
+	_hide_all_displays()
+
+
+## Returns the content rect (Rect2) available for custom extension displays.
+func get_content_rect() -> Rect2:
+	return _get_content_rect()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Display Management
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -918,23 +968,19 @@ func update_from_node(node: GNNode) -> void:
 		return
 
 	if output is GNChannelData:
-		var ch_data: GNChannelData = output as GNChannelData
-		_show_waveform(ch_data)
+		_show_waveform(output as GNChannelData)
 		return
 
 	if output is GNTableData:
-		var tbl: GNTableData = output as GNTableData
-		_show_spreadsheet(tbl)
+		_show_spreadsheet(output as GNTableData)
 		return
 
 	if output is GNGeoData:
-		var geo: GNGeoData = output as GNGeoData
-		_show_3d_mesh(geo)
+		_show_3d_mesh(output as GNGeoData)
 		return
 
 	if output is GNMaterialData:
-		var mat: GNMaterialData = output as GNMaterialData
-		_show_material(mat)
+		_show_material(output as GNMaterialData)
 		return
 
 	if output is GNParticleData:
@@ -951,6 +997,14 @@ func update_from_node(node: GNNode) -> void:
 			_show_vol_slices(vd)
 			return
 		_show_info("No VOL output", "")
+		return
+
+	# ── Extension-registered display handlers ──
+	var data_class_name := output.get_class()
+	if _ext_display_handlers.has(data_class_name):
+		_hide_all_displays()
+		var handler: Callable = _ext_display_handlers[data_class_name]
+		handler.call(output, self)
 		return
 
 	# ── Family-specific fallbacks for nodes with no typed output ──
