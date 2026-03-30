@@ -7,6 +7,7 @@
  *   • Injecting DAT table data (JSON arrays)
  *   • Reading output textures, CHOP channels, DAT tables
  *   • Introspection: listing nodes, parameters, connections
+ *   • Host I/O manifest: querying the patch interface contract
  *   • Registering a parameter change callback
  *
  * Build:
@@ -66,6 +67,22 @@ static void demo_introspection(gonodes_instance_t gn) {
     const char* conns_json = gonodes_list_connections(gn);
     if (conns_json)
         printf("Connections: %s\n", conns_json);
+}
+
+
+static void demo_host_io(gonodes_instance_t gn) {
+    printf("\n═══ Host I/O Manifest ═══\n");
+
+    const char* io_json = gonodes_get_host_io(gn);
+    if (io_json && io_json[0] != '\0' && strcmp(io_json, "{}") != 0) {
+        printf("Manifest:\n%s\n", io_json);
+        printf("\nThe host can use this JSON to auto-discover:\n");
+        printf("  - Which texture/CHOP/DAT inputs the patch expects\n");
+        printf("  - Which outputs the patch produces\n");
+        printf("  - Which parameters are exposed for host control\n");
+    } else {
+        printf("No Host I/O manifest — patch has no bridge operators.\n");
+    }
 }
 
 
@@ -278,6 +295,7 @@ int main(int argc, char* argv[]) {
     /* ── Run All Demos ──────────────────────────────────────────────── */
 
     demo_introspection(gn);
+    demo_host_io(gn);
     demo_set_parameters(gn);
     demo_read_parameters(gn);
     demo_chop_injection(gn);

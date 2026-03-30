@@ -4,6 +4,9 @@
  * Demonstrates embedding GONODES with a GLFW + OpenGL 3.3 context.
  * Simpler than the SDL example — focused on OpenGL context sharing.
  *
+ * After loading, the Host I/O manifest is queried via gonodes_get_host_io()
+ * to discover the patch's declared inputs, outputs, and exposed parameters.
+ *
  * Build:
  *   cd libgonodes/build && cmake .. && cmake --build . --target opengl_host
  *
@@ -152,6 +155,15 @@ int main(int argc, char* argv[]) {
     }
 
     gonodes_set_auto_reload(gn, 1, 0.5);
+
+    /* ── Query Host I/O Manifest ────────────────────────────────────── */
+
+    const char* host_io = gonodes_get_host_io(gn);
+    if (host_io && host_io[0] != '\0') {
+        printf("[GL Host] Host I/O Manifest:\n%s\n", host_io);
+    } else {
+        printf("[GL Host] No Host I/O manifest in patch.\n");
+    }
 
     /* ── Render Setup ───────────────────────────────────────────────── */
 

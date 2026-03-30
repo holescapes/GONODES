@@ -5,6 +5,11 @@ and data I/O** — no GPU or windowing library needed (headless mode).
 
 ## What It Demonstrates
 
+### Host I/O Manifest
+- **`gonodes_get_host_io(gn)`** — query the patch's declared interface
+- Auto-discover inputs (texture/CHOP/DAT), outputs, and exposed parameters
+- Use the manifest JSON to build UI bindings, validate requirements
+
 ### Parameter Types
 - **Float**: `gonodes_set_parameter(gn, "noise1", "scale", "8.0")`
 - **Integer**: `gonodes_set_parameter(gn, "noise1", "seed", "42")`

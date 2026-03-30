@@ -1,0 +1,172 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sensor_in": {
+            "type": "HostInCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "label": {
+                    "value": "Sensor channels"
+                }
+            }
+        },
+        "filter1": {
+            "type": "FilterCHOP",
+            "position": [400, 300],
+            "parameters": {
+                "filter_type": {
+                    "value": 0
+                },
+                "filter_width": {
+                    "value": 3.0
+                }
+            }
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [700, 300],
+            "parameters": {
+                "operation": {
+                    "value": 0
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [700, 100],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1280,
+                        "y": 720
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": false
+                }
+            }
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [1000, 100],
+            "parameters": {
+                "brightness": {
+                    "value": 1.0
+                },
+                "gamma": {
+                    "value": 1.0
+                }
+            }
+        },
+        "vis_out": {
+            "type": "HostOutTOP",
+            "position": [1300, 100],
+            "parameters": {
+                "label": {
+                    "value": "Visualization"
+                }
+            }
+        },
+        "data_out": {
+            "type": "HostOutCHOP",
+            "position": [1000, 300],
+            "parameters": {
+                "label": {
+                    "value": "Processed sensor data"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sensor_in",
+            "from_port": 0,
+            "to": "filter1",
+            "to_port": 0
+        },
+        {
+            "from": "filter1",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 0
+        },
+        {
+            "from": "math1",
+            "from_port": 0,
+            "to": "data_out",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "level1",
+            "to_port": 0
+        },
+        {
+            "from": "level1",
+            "from_port": 0,
+            "to": "vis_out",
+            "to_port": 0
+        }
+    ],
+    "host_io": {
+        "inputs": [
+            {
+                "label": "Sensor channels",
+                "family": "CHOP",
+                "node": "sensor_in",
+                "required": true
+            }
+        ],
+        "outputs": [
+            {
+                "label": "Visualization",
+                "family": "TOP",
+                "node": "vis_out"
+            },
+            {
+                "label": "Processed sensor data",
+                "family": "CHOP",
+                "node": "data_out"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Filter width",
+                "node": "filter1",
+                "param": "filter_width",
+                "type": "float",
+                "range": [0.1, 20.0]
+            },
+            {
+                "label": "Noise scale",
+                "node": "noise1",
+                "param": "scale",
+                "type": "float",
+                "range": [0.1, 50.0]
+            },
+            {
+                "label": "Brightness",
+                "node": "level1",
+                "param": "brightness",
+                "type": "float",
+                "range": [0.0, 4.0]
+            }
+        ]
+    },
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Sensor Visualization Patch — sensor_viz.gnpatch\n\nCross-family processing: CHOP sensor data drives both\na texture visualization and filtered channel output.\n\nCHOP path: sensor in → Filter → Math → CHOP out.\nTOP path: Noise (driven by sensor data) → Level → TOP out.\n\nHost I/O: 1 CHOP in, 1 TOP + 1 CHOP out.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 150.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

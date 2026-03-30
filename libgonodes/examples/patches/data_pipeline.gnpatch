@@ -1,0 +1,172 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "raw_data": {
+            "type": "HostInDAT",
+            "position": [100, 100],
+            "parameters": {
+                "label": {
+                    "value": "Raw sensor table"
+                }
+            }
+        },
+        "triggers": {
+            "type": "HostInCHOP",
+            "position": [100, 400],
+            "parameters": {
+                "label": {
+                    "value": "Trigger pulses"
+                }
+            }
+        },
+        "select1": {
+            "type": "SelectDAT",
+            "position": [400, 100],
+            "parameters": {
+                "start_row": {
+                    "value": 0
+                },
+                "end_row": {
+                    "value": -1
+                }
+            }
+        },
+        "eval1": {
+            "type": "EvalDAT",
+            "position": [700, 100],
+            "parameters": {}
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [400, 400],
+            "parameters": {
+                "operation": {
+                    "value": 0
+                }
+            }
+        },
+        "filter1": {
+            "type": "FilterCHOP",
+            "position": [700, 400],
+            "parameters": {
+                "filter_type": {
+                    "value": 0
+                },
+                "filter_width": {
+                    "value": 5.0
+                }
+            }
+        },
+        "out_table": {
+            "type": "HostOutDAT",
+            "position": [1000, 100],
+            "parameters": {
+                "label": {
+                    "value": "Processed table"
+                }
+            }
+        },
+        "out_channels": {
+            "type": "HostOutCHOP",
+            "position": [1000, 400],
+            "parameters": {
+                "label": {
+                    "value": "Filtered channels"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "raw_data",
+            "from_port": 0,
+            "to": "select1",
+            "to_port": 0
+        },
+        {
+            "from": "select1",
+            "from_port": 0,
+            "to": "eval1",
+            "to_port": 0
+        },
+        {
+            "from": "eval1",
+            "from_port": 0,
+            "to": "out_table",
+            "to_port": 0
+        },
+        {
+            "from": "triggers",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 0
+        },
+        {
+            "from": "math1",
+            "from_port": 0,
+            "to": "filter1",
+            "to_port": 0
+        },
+        {
+            "from": "filter1",
+            "from_port": 0,
+            "to": "out_channels",
+            "to_port": 0
+        }
+    ],
+    "host_io": {
+        "inputs": [
+            {
+                "label": "Raw sensor table",
+                "family": "DAT",
+                "node": "raw_data",
+                "required": true
+            },
+            {
+                "label": "Trigger pulses",
+                "family": "CHOP",
+                "node": "triggers",
+                "required": false
+            }
+        ],
+        "outputs": [
+            {
+                "label": "Processed table",
+                "family": "DAT",
+                "node": "out_table"
+            },
+            {
+                "label": "Filtered channels",
+                "family": "CHOP",
+                "node": "out_channels"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Filter width",
+                "node": "filter1",
+                "param": "filter_width",
+                "type": "float",
+                "range": [0.1, 50.0]
+            },
+            {
+                "label": "Filter type",
+                "node": "filter1",
+                "param": "filter_type",
+                "type": "int",
+                "range": [0, 3]
+            }
+        ]
+    },
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Data Pipeline Patch — data_pipeline.gnpatch\n\nHeadless data processing: no texture I/O at all.\nDAT path: table in → Select → Eval → table out.\nCHOP path: trigger pulses → Math → Filter → channels out.\n\nHost I/O: 1 DAT + 1 CHOP in, 1 DAT + 1 CHOP out.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 150.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

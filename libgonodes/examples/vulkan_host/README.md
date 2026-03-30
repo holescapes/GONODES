@@ -8,6 +8,7 @@ Demonstrates GONODES embedding with a **Vulkan** rendering context for
 - Creating a Vulkan instance, physical device, logical device, and queue
 - Sharing the entire Vulkan device with GONODES via `gonodes_gpu_context_t`
 - Loading a `.gnpatch` and cooking in a headless loop
+- Querying the **Host I/O manifest** via `gonodes_get_host_io()`
 - Reading the output `VkImage` handle directly — no CPU copies
 - Performance stats via `gonodes_get_stats()`
 

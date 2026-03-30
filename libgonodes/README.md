@@ -189,6 +189,25 @@ const char* conns = gonodes_list_connections(gn);
 // [{"from":"noise1","from_port":0,"to":"comp1","to_port":0}, ...]
 ```
 
+## Host I/O Manifest
+
+Each `.gnpatch` can declare a standardized interface via the `host_io` key.
+The host queries it after loading to discover inputs, outputs, and exposed
+parameters without hardcoding node IDs:
+
+```c
+const char* io = gonodes_get_host_io(gn);
+// {
+//   "inputs":  [{"label":"Camera A", "family":"TOP", "node":"cam_a", "required":true}, ...],
+//   "outputs": [{"label":"Mixed output", "family":"TOP", "node":"main_out"}],
+//   "parameters": [{"label":"Mix amount", "node":"comp1", "param":"mix", "type":"float", "range":[0,1]}]
+// }
+```
+
+If the patch author didn't write a manifest, one is auto-generated from any
+HostIn/HostOut bridge operators found in the network.  See
+[INTEGRATION.md](../dev_docs/INTEGRATION.md) for the full format spec.
+
 ## Examples
 
 | Example | Renderer | Description |
@@ -198,6 +217,16 @@ const char* conns = gonodes_list_connections(gn);
 | [opengl_host](examples/opengl_host/) | OpenGL 3.3 | GLFW window, GL context sharing |
 | [metal_host](examples/metal_host/) | Metal | macOS MTKView, MTLTexture blit |
 | [params_demo](examples/params_demo/) | Headless | All parameter types, CHOP/DAT I/O |
+
+### Example Patches
+
+| Patch | Inputs | Outputs | Purpose |
+|-------|--------|---------|---------|
+| [show.gnpatch](examples/patches/show.gnpatch) | 1 CHOP | 1 TOP | Basic noise visualization (used by visual hosts) |
+| [params_test.gnpatch](examples/patches/params_test.gnpatch) | 3 CHOP + 1 DAT | 1 TOP + 1 CHOP + 1 DAT | Full parameter/I/O demo |
+| [video_mixer.gnpatch](examples/patches/video_mixer.gnpatch) | 2 TOP + 1 CHOP | 1 TOP | Two-camera composite mixer |
+| [data_pipeline.gnpatch](examples/patches/data_pipeline.gnpatch) | 1 DAT + 1 CHOP | 1 DAT + 1 CHOP | Headless data processing (no textures) |
+| [sensor_viz.gnpatch](examples/patches/sensor_viz.gnpatch) | 1 CHOP | 1 TOP + 1 CHOP | Cross-family sensor visualization |
 
 ### Example Patches
 

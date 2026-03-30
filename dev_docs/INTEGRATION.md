@@ -190,6 +190,7 @@ const char* gonodes_list_nodes(inst);              // JSON array of all nodes
 const char* gonodes_get_node_info(inst, node_id);  // Detailed node info
 const char* gonodes_list_parameters(inst, node_id);// Parameters on a node
 const char* gonodes_list_connections(inst);         // All wire connections
+const char* gonodes_get_host_io(inst);             // Host I/O manifest (see below)
 ```
 
 ### Callbacks
@@ -248,6 +249,97 @@ The host references bridge nodes by their **node ID** strings (e.g., `"sensor_da
 
 ---
 
+## Host I/O Manifest
+
+The **Host I/O manifest** is a standardized contract that declares a patch's interface for embedded host applications.  It lives as the top-level `"host_io"` key in `.gnpatch` files and is accessible at runtime via the `gonodes_get_host_io()` C API function.
+
+### Why
+
+Without a manifest, every host app must discover bridge operators through introspection and guess which node IDs to bind.  Node IDs are arbitrary — one patch uses `"cam1"`, another uses `"video_input"`.  The manifest solves this by giving bridge nodes semantic labels, declaring required vs. optional inputs, and exposing selected parameters as first-class controls.
+
+The same `.gnpatch` file works across Unity, Unreal, Max/MSP, VDMX, or any custom host.  The host reads the manifest, auto-creates UI bindings and texture slots, and wires to the declared node IDs.
+
+### Format
+
+```json
+{
+  "version": "1.0.0",
+  "host_io": {
+    "inputs": [
+      {"label": "Camera Feed", "family": "TOP", "node": "host_cam_in", "required": true},
+      {"label": "Audio Analysis", "family": "CHOP", "node": "host_audio_in", "required": false},
+      {"label": "Config Table", "family": "DAT", "node": "host_config_in", "required": false}
+    ],
+    "outputs": [
+      {"label": "Main Output", "family": "TOP", "node": "host_main_out"},
+      {"label": "Data Export", "family": "CHOP", "node": "host_data_out"}
+    ],
+    "parameters": [
+      {"label": "Intensity", "node": "level1", "param": "brightness", "type": "float", "range": [0.0, 1.0]},
+      {"label": "Tint Color", "node": "bg1", "param": "color", "type": "color"}
+    ]
+  },
+  "nodes": { ... },
+  "connections": [ ... ]
+}
+```
+
+### Fields
+
+| Key | Required | Description |
+|-----|----------|-------------|
+| `inputs` | no | Array of HostIn* bridge operator descriptors |
+| `outputs` | no | Array of HostOut* bridge operator descriptors |
+| `parameters` | no | Array of exposed parameters from any node in the graph |
+
+**Input/Output entries:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | string | Human-readable name (for host UI generation) |
+| `family` | string | Data family: `"TOP"`, `"CHOP"`, or `"DAT"` |
+| `node` | string | Node ID in the patch (used with `gonodes_set_input_*` / `gonodes_get_output_*`) |
+| `required` | bool | (inputs only) Whether the host must provide this input |
+
+**Parameter entries:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | string | Display name for host UI |
+| `node` | string | Node ID containing the parameter |
+| `param` | string | Parameter name on the node |
+| `type` | string | Parameter type: `"float"`, `"int"`, `"bool"`, `"string"`, `"color"`, `"vector2"` |
+| `range` | array | (optional) `[min, max]` for numeric types |
+
+### Auto-Generation
+
+If no manifest is authored, `GNNetwork.generate_host_io()` scans the network for HostIn*/HostOut* bridge operators and builds one automatically.  Labels are taken from each bridge operator's `label` parameter (falls back to the node ID).
+
+The auto-generated manifest does not include the `parameters` array — that must be authored manually by the patch designer to select which controls to expose.
+
+### C API
+
+```c
+// Returns the host_io manifest as a JSON string.
+// Auto-generates from bridge operators if not authored.
+// Returns "{}" if no patch loaded or no bridge operators found.
+const char* gonodes_get_host_io(gonodes_instance_t inst);
+```
+
+### Editor Workflow
+
+The **Host I/O** button on the editor toolbar opens a dialog showing the current manifest as editable JSON.  Use **Regenerate from Bridge Operators** to scan the network, or edit the JSON directly and click **Apply Changes**.  The manifest is saved with the patch on the next File > Save.
+
+### Backward Compatibility
+
+Patches without a `host_io` key work exactly as before — the host uses introspection APIs (`gonodes_list_nodes`, `gonodes_get_node_info`) to discover bridge operators by type.  The manifest is purely additive.
+
+### Coexistence with WindowOUT
+
+A patch can have both WindowOUTs (for standalone Player mode) and HostOutTOPs (for embedded mode).  The manifest only references HostOut* nodes.  When running as a Player, WindowOUTs work normally; when embedded, the host reads from HostOutTOPs and WindowOUTs are ignored (no OS windows in headless).
+
+---
+
 ## GNEmbeddedHost Singleton
 
 The GDScript singleton `GNEmbeddedHost` (`addons/gonodes/core/gn_embedded_host.gd`) replaces `player_main.gd` for embedded operation.  It:
@@ -256,7 +348,7 @@ The GDScript singleton `GNEmbeddedHost` (`addons/gonodes/core/gn_embedded_host.g
 2. Polls for commands from the C API (patch load/unload/reload)
 3. Flushes host input data into bridge operators before each cook
 4. Collects output data from bridge operators after each cook
-5. Publishes introspection JSON (node list, parameters, connections)
+5. Publishes introspection JSON (node list, parameters, connections, host I/O manifest)
 6. Manages stateful hot-reload (saves/restores CHOP values and timer positions)
 
 The C API communicates with GNEmbeddedHost via environment variables during the LibGodot iteration loop.  This is a pragmatic bridge that works with Godot 4.6's current embedding surface; a future version may use direct ClassDB singleton calls when Godot stabilizes its external scripting interface.

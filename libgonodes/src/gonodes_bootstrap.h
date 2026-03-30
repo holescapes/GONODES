@@ -43,6 +43,7 @@ struct gonodes_instance_s {
     char* cached_connections_json;
     char* cached_table_json;
     char* cached_param_value_json;
+    char* cached_host_io_json;
 
     /* Callbacks. */
     gonodes_param_changed_fn on_param_changed;

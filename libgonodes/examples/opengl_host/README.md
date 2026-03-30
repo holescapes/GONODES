@@ -7,6 +7,7 @@ Minimal GONODES embedding with **GLFW + OpenGL 3.3**.
 - Creating a GLFW window with an OpenGL 3.3 Core context
 - Extracting the platform-specific GL context handle (HGLRC on Windows)
 - Sharing it with GONODES for same-context texture access
+- Querying the **Host I/O manifest** via `gonodes_get_host_io()`
 - Rendering the GONODES output texture to the window
 
 ## Build

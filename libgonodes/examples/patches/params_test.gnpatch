@@ -145,11 +145,95 @@
             "to_port": 0
         }
     ],
+    "host_io": {
+        "inputs": [
+            {
+                "label": "LFO from host",
+                "family": "CHOP",
+                "node": "host_lfo",
+                "required": false
+            },
+            {
+                "label": "Transform channels",
+                "family": "CHOP",
+                "node": "host_chop",
+                "required": false
+            },
+            {
+                "label": "Waveform data",
+                "family": "CHOP",
+                "node": "host_wave",
+                "required": false
+            },
+            {
+                "label": "Sensor table from host",
+                "family": "DAT",
+                "node": "host_dat",
+                "required": false
+            }
+        ],
+        "outputs": [
+            {
+                "label": "Texture output",
+                "family": "TOP",
+                "node": "host_out_tex"
+            },
+            {
+                "label": "Channel output",
+                "family": "CHOP",
+                "node": "host_out_chop"
+            },
+            {
+                "label": "Table output",
+                "family": "DAT",
+                "node": "host_out_dat"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Noise scale",
+                "node": "noise1",
+                "param": "scale",
+                "type": "float",
+                "range": [0.1, 100.0]
+            },
+            {
+                "label": "Noise seed",
+                "node": "noise1",
+                "param": "seed",
+                "type": "int"
+            },
+            {
+                "label": "Monochrome",
+                "node": "noise1",
+                "param": "monochrome",
+                "type": "bool"
+            },
+            {
+                "label": "Resolution",
+                "node": "noise1",
+                "param": "resolution",
+                "type": "Vector2i"
+            },
+            {
+                "label": "Text content",
+                "node": "text1",
+                "param": "text",
+                "type": "string"
+            },
+            {
+                "label": "Constant color",
+                "node": "constant1",
+                "param": "color",
+                "type": "Color"
+            }
+        ]
+    },
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LibGONODES Parameters Demo Patch — params_test.gnpatch\n\nUsed by the params_demo example to exercise the full C API:\n  • Parameter get/set on noise1, text1, constant1\n  • CHOP injection (host_lfo, host_chop, host_wave)\n  • DAT injection (host_dat)\n  • Texture output (host_out_tex ← noise1)\n  • CHOP output (host_out_chop ← host_chop passthrough)\n  • DAT output (host_out_dat ← host_dat passthrough)\n  • Introspection: list_nodes, list_connections\n  • Parameter change callback",
+            "text": "LibGONODES Parameters Demo Patch — params_test.gnpatch\n\nUsed by the params_demo example to exercise the full C API:\n  • Parameter get/set on noise1, text1, constant1\n  • CHOP injection (host_lfo, host_chop, host_wave)\n  • DAT injection (host_dat)\n  • Texture output (host_out_tex from noise1)\n  • CHOP output (host_out_chop from host_chop passthrough)\n  • DAT output (host_out_dat from host_dat passthrough)\n\nHost I/O manifest declares 3 CHOP + 1 DAT inputs, 1 TOP + 1 CHOP + 1 DAT outputs.",
             "position": [-150.0, -200.0],
             "size": [600.0, 250.0],
             "color": [1.0, 1.0, 1.0, 0.8]

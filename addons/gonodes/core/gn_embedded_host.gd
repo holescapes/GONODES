@@ -434,6 +434,9 @@ func _publish_introspection() -> void:
 		OS.set_environment("GONODES_COOK_TIME_MS", "%.3f" % cook_engine.frame_cook_time_ms)
 		OS.set_environment("GONODES_COOK_COUNT", str(cook_engine.frame_count))
 
+	# Publish host I/O manifest.
+	OS.set_environment("GONODES_HOST_IO", get_host_io())
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Internal: Stateful Reload
@@ -485,6 +488,19 @@ func _restore_runtime_state() -> void:
 
 	_saved_chop_values.clear()
 	_saved_timer_positions.clear()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Host I/O Manifest
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns the host_io manifest JSON for the loaded patch.
+## If the patch has no authored manifest, auto-generates one from bridge operators.
+## Returns "{}" if no patch is loaded.
+func get_host_io() -> String:
+	if not patch_loaded or network == null:
+		return "{}"
+	return network.get_host_io_json()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

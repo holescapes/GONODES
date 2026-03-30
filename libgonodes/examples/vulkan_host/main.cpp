@@ -6,6 +6,9 @@
  * with LibGodot for zero-copy texture sharing, then renders the output
  * to a window via a VkSwapchain blit.
  *
+ * After loading, the Host I/O manifest is queried via gonodes_get_host_io()
+ * to discover the patch's declared inputs, outputs, and exposed parameters.
+ *
  * This example uses the Vulkan API directly (no windowing library) with
  * platform-specific surface creation.  For a simpler approach with SDL2,
  * see the sdl_host example.
@@ -182,6 +185,15 @@ int main(int argc, char* argv[]) {
     }
 
     gonodes_set_auto_reload(gn, 1, 0.5);
+
+    /* ── Query Host I/O Manifest ────────────────────────────────────── */
+
+    const char* host_io = gonodes_get_host_io(gn);
+    if (host_io && host_io[0] != '\0') {
+        printf("[Vulkan Host] Host I/O Manifest:\n%s\n", host_io);
+    } else {
+        printf("[Vulkan Host] No Host I/O manifest in patch.\n");
+    }
 
     /* ── Headless Cook Loop (no presentation) ───────────────────────── */
     /* In a real app, you'd create a swapchain and blit the output VkImage.

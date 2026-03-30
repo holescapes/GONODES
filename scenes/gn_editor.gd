@@ -654,6 +654,74 @@ func _on_build_pressed() -> void:
 	_export_dialog.show_for_patch(_current_file_path, network)
 
 
+func _on_host_io_pressed() -> void:
+	if network == null:
+		return
+
+	var dlg := AcceptDialog.new()
+	dlg.title = "Host I/O Manifest"
+	dlg.min_size = Vector2i(600, 500)
+
+	var vbox := VBoxContainer.new()
+	dlg.add_child(vbox)
+
+	var desc := Label.new()
+	desc.text = "Declares this patch's interface for host applications.\nAuto-generated from HostIn/HostOut bridge operators."
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD
+	vbox.add_child(desc)
+
+	var text_edit := TextEdit.new()
+	text_edit.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	text_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_edit.custom_minimum_size = Vector2(580, 350)
+	var manifest_json: String = network.get_host_io_json()
+	# Pretty-print
+	var json := JSON.new()
+	if json.parse(manifest_json) == OK:
+		text_edit.text = JSON.stringify(json.data, "\t")
+	else:
+		text_edit.text = manifest_json
+	vbox.add_child(text_edit)
+
+	var btn_row := HBoxContainer.new()
+	btn_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(btn_row)
+
+	var btn_gen := Button.new()
+	btn_gen.text = "Regenerate from Bridge Operators"
+	btn_gen.tooltip_text = "Scan network for HostIn*/HostOut* nodes and rebuild the manifest"
+	btn_gen.pressed.connect(func():
+		network.generate_host_io()
+		var refreshed: String = network.get_host_io_json()
+		var j := JSON.new()
+		if j.parse(refreshed) == OK:
+			text_edit.text = JSON.stringify(j.data, "\t")
+		else:
+			text_edit.text = refreshed
+	)
+	btn_row.add_child(btn_gen)
+
+	var btn_apply := Button.new()
+	btn_apply.text = "Apply Changes"
+	btn_apply.tooltip_text = "Save the edited manifest into the patch (will be written on next File > Save)"
+	btn_apply.pressed.connect(func():
+		var j := JSON.new()
+		if j.parse(text_edit.text) == OK and j.data is Dictionary:
+			network.host_io = j.data
+			GNLogger.info("Editor", "Host I/O manifest updated (%d inputs, %d outputs)" % [
+				(j.data as Dictionary).get("inputs", []).size(),
+				(j.data as Dictionary).get("outputs", []).size()])
+		else:
+			GNLogger.warn("Editor", "Host I/O manifest is not valid JSON — not applied")
+	)
+	btn_row.add_child(btn_apply)
+
+	dlg.confirmed.connect(func(): dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+	add_child(dlg)
+	dlg.popup_centered()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Viewer Windows
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -850,6 +918,12 @@ func _setup_toolbar() -> void:
 	btn_build.tooltip_text = "Export patch as a standalone application (Quick Build)"
 	btn_build.pressed.connect(_on_build_pressed)
 	row1.add_child(btn_build)
+
+	var btn_host_io := Button.new()
+	btn_host_io.text = "Host I/O"
+	btn_host_io.tooltip_text = "View / edit the Host I/O manifest for embedded integration"
+	btn_host_io.pressed.connect(_on_host_io_pressed)
+	row1.add_child(btn_host_io)
 
 	row1.add_child(VSeparator.new())
 

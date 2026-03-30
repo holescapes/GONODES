@@ -84,6 +84,7 @@ void gonodes_destroy(gonodes_instance_t inst) {
     gn_free_cached(&inst->cached_connections_json);
     gn_free_cached(&inst->cached_table_json);
     gn_free_cached(&inst->cached_param_value_json);
+    gn_free_cached(&inst->cached_host_io_json);
 
     free(inst);
 }
@@ -536,6 +537,18 @@ const char* gonodes_list_connections(gonodes_instance_t inst) {
     gn_free_cached(&inst->cached_connections_json);
     inst->cached_connections_json = gn_strdup(val);
     return inst->cached_connections_json;
+}
+
+
+const char* gonodes_get_host_io(gonodes_instance_t inst) {
+    VALIDATE(inst, nullptr);
+
+    const char* val = getenv("GONODES_HOST_IO");
+    if (!val) return "{}";
+
+    gn_free_cached(&inst->cached_host_io_json);
+    inst->cached_host_io_json = gn_strdup(val);
+    return inst->cached_host_io_json;
 }
 
 

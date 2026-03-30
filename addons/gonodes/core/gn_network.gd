@@ -811,6 +811,12 @@ func get_connection_count() -> int:
 ## Off by default (experimental).  User can opt in per patch.
 var multithreading_enabled: bool = false
 
+## Host I/O manifest — declares the patch's interface for embedded host apps.
+## Serialized as the top-level "host_io" key in .gnpatch files.
+## Structure: { "inputs": [...], "outputs": [...], "parameters": [...] }
+## See dev_docs/INTEGRATION.md for the full specification.
+var host_io: Dictionary = {}
+
 
 func to_dict() -> Dictionary:
 	var d: Dictionary = {
@@ -866,6 +872,10 @@ func to_dict() -> Dictionary:
 	# Patch-level settings
 	if multithreading_enabled:
 		d["multithreading_enabled"] = true
+
+	# Host I/O manifest
+	if not host_io.is_empty():
+		d["host_io"] = host_io
 
 	return d
 
@@ -980,6 +990,9 @@ func from_dict(d: Dictionary) -> bool:
 	# Patch-level settings
 	multithreading_enabled = d.get("multithreading_enabled", false)
 
+	# Host I/O manifest
+	host_io = d.get("host_io", {})
+
 	return true
 
 
@@ -1051,3 +1064,82 @@ func _clear_all() -> void:
 
 func _to_string() -> String:
 	return "[GNNetwork: %d nodes, %d connections]" % [nodes.size(), connections.size()]
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Host I/O Manifest
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Auto-generates a host_io manifest by scanning the network for HostIn*/HostOut*
+## bridge operators and collecting their labels. Overwrites the current host_io.
+## Call this from the editor's "Generate Host I/O" action.
+func generate_host_io() -> Dictionary:
+	var inputs: Array = []
+	var outputs: Array = []
+
+	for node_id in nodes:
+		var node: GNNode = nodes[node_id]
+		var label_val: String = ""
+		var label_param: GNParameter = node.get_parameter("label")
+		if label_param != null:
+			label_val = str(label_param.value)
+
+		match node.node_type:
+			"host_in":
+				inputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "TOP",
+					"node": node_id,
+					"required": true,
+				})
+			"host_in_chop":
+				inputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "CHOP",
+					"node": node_id,
+					"required": true,
+				})
+			"host_in_dat":
+				inputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "DAT",
+					"node": node_id,
+					"required": false,
+				})
+			"host_out":
+				outputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "TOP",
+					"node": node_id,
+				})
+			"host_out_chop":
+				outputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "CHOP",
+					"node": node_id,
+				})
+			"host_out_dat":
+				outputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "DAT",
+					"node": node_id,
+				})
+
+	var manifest: Dictionary = {}
+	if not inputs.is_empty():
+		manifest["inputs"] = inputs
+	if not outputs.is_empty():
+		manifest["outputs"] = outputs
+
+	host_io = manifest
+	return manifest
+
+
+## Returns the host_io manifest as a JSON string. If no manifest was authored,
+## auto-generates one from bridge operators in the network.
+func get_host_io_json() -> String:
+	if host_io.is_empty():
+		generate_host_io()
+	if host_io.is_empty():
+		return "{}"
+	return JSON.stringify(host_io)

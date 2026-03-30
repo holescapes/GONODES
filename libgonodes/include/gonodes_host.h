@@ -438,6 +438,31 @@ GONODES_API const char* gonodes_list_parameters(
  */
 GONODES_API const char* gonodes_list_connections(gonodes_instance_t inst);
 
+/**
+ * Get the Host I/O manifest for the loaded patch.
+ *
+ * Returns a JSON object describing the patch's standardized interface:
+ * - "inputs":  array of {label, family, node, required} for HostIn* nodes
+ * - "outputs": array of {label, family, node} for HostOut* nodes
+ * - "parameters": array of {label, node, param, type, range} for exposed controls
+ *
+ * If the patch author didn't write a manifest, one is auto-generated from
+ * any HostIn/HostOut bridge operators in the network.
+ *
+ * Host apps use this to auto-create UI bindings, texture slots, and
+ * audio routing.  The same patch works across all host applications.
+ *
+ * @return JSON string.  "{}" if no patch is loaded or no bridge ops found.
+ *         Valid until next cook frame or patch load.
+ *
+ * Example:
+ * @code
+ *     const char* io = gonodes_get_host_io(gn);
+ *     // Parse JSON → discover 2 texture inputs, 1 CHOP output, etc.
+ * @endcode
+ */
+GONODES_API const char* gonodes_get_host_io(gonodes_instance_t inst);
+
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /*  Callbacks                                                                */
 /* ═══════════════════════════════════════════════════════════════════════════ */

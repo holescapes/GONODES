@@ -1,0 +1,164 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "cam_a": {
+            "type": "HostInTOP",
+            "position": [100, 100],
+            "parameters": {
+                "label": {
+                    "value": "Camera A"
+                }
+            }
+        },
+        "cam_b": {
+            "type": "HostInTOP",
+            "position": [100, 400],
+            "parameters": {
+                "label": {
+                    "value": "Camera B"
+                }
+            }
+        },
+        "mix_ctrl": {
+            "type": "HostInCHOP",
+            "position": [100, 700],
+            "parameters": {
+                "label": {
+                    "value": "Mix control"
+                }
+            }
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [500, 250],
+            "parameters": {
+                "operation": {
+                    "value": 0
+                },
+                "mix": {
+                    "value": 0.5
+                }
+            }
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [800, 250],
+            "parameters": {
+                "brightness": {
+                    "value": 1.0
+                },
+                "contrast": {
+                    "value": 1.0
+                },
+                "gamma": {
+                    "value": 1.0
+                }
+            }
+        },
+        "main_out": {
+            "type": "HostOutTOP",
+            "position": [1100, 250],
+            "parameters": {
+                "label": {
+                    "value": "Mixed output"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "cam_a",
+            "from_port": 0,
+            "to": "comp1",
+            "to_port": 0
+        },
+        {
+            "from": "cam_b",
+            "from_port": 0,
+            "to": "comp1",
+            "to_port": 1
+        },
+        {
+            "from": "comp1",
+            "from_port": 0,
+            "to": "level1",
+            "to_port": 0
+        },
+        {
+            "from": "level1",
+            "from_port": 0,
+            "to": "main_out",
+            "to_port": 0
+        }
+    ],
+    "host_io": {
+        "inputs": [
+            {
+                "label": "Camera A",
+                "family": "TOP",
+                "node": "cam_a",
+                "required": true
+            },
+            {
+                "label": "Camera B",
+                "family": "TOP",
+                "node": "cam_b",
+                "required": true
+            },
+            {
+                "label": "Mix control",
+                "family": "CHOP",
+                "node": "mix_ctrl",
+                "required": false
+            }
+        ],
+        "outputs": [
+            {
+                "label": "Mixed output",
+                "family": "TOP",
+                "node": "main_out"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Composite operation",
+                "node": "comp1",
+                "param": "operation",
+                "type": "int",
+                "range": [0, 15]
+            },
+            {
+                "label": "Mix amount",
+                "node": "comp1",
+                "param": "mix",
+                "type": "float",
+                "range": [0.0, 1.0]
+            },
+            {
+                "label": "Brightness",
+                "node": "level1",
+                "param": "brightness",
+                "type": "float",
+                "range": [0.0, 4.0]
+            },
+            {
+                "label": "Contrast",
+                "node": "level1",
+                "param": "contrast",
+                "type": "float",
+                "range": [0.0, 4.0]
+            }
+        ]
+    },
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Video Mixer Patch — video_mixer.gnpatch\n\nTwo texture inputs (Camera A + B) composited together.\nA CHOP input controls the mix crossfader.\nOutput is the blended/leveled texture.\n\nHost I/O: 2 TOP + 1 CHOP in, 1 TOP out.",
+            "position": [-100.0, -100.0],
+            "size": [500.0, 150.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

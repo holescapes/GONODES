@@ -7,6 +7,7 @@ on macOS.
 
 - Creating an `MTLDevice` and `MTLCommandQueue`
 - Sharing them with GONODES via `gonodes_gpu_context_t`
+- Querying the **Host I/O manifest** via `gonodes_get_host_io()`
 - Using an `MTKView` delegate for the render loop
 - Blitting the output `MTLTexture` directly to the `CAMetalDrawable`
 - Zero-copy: the texture lives on the same GPU — no staging copies

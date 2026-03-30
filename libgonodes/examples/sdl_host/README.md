@@ -7,6 +7,7 @@ General-purpose GONODES embedding using **SDL2 + OpenGL 3.3**.
 - Creating an SDL2 window with OpenGL context
 - Sharing the GL context with GONODES via `gonodes_gpu_context_t`
 - Loading a `.gnpatch` and cooking each frame
+- Querying the **Host I/O manifest** via `gonodes_get_host_io()`
 - Injecting an LFO value into a `HostInCHOP` node
 - Rendering the output texture from a `HostOutTOP` as a fullscreen quad
 - Auto-reload on patch file change
@@ -36,7 +37,16 @@ The included `show.gnpatch` contains:
 2. **noise1** (`NoiseTOP`) — animated noise driven by the host's LFO
 3. **host_out** (`HostOutTOP`) — the texture rendered to screen
 
-You can swap in your own patch — just keep the node IDs matching.
+The patch includes a `host_io` manifest that declares these inputs/outputs.
+The host logs the manifest JSON after loading:
+
+```c
+const char* host_io = gonodes_get_host_io(gn);
+printf("Host I/O: %s\n", host_io);
+```
+
+You can swap in your own patch — just keep the node IDs matching, or use
+the manifest to discover them at runtime.
 
 ## Dependencies
 

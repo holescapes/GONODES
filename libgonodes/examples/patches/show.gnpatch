@@ -51,11 +51,43 @@
             "to_port": 0
         }
     ],
+    "host_io": {
+        "inputs": [
+            {
+                "label": "LFO from host",
+                "family": "CHOP",
+                "node": "host_lfo",
+                "required": false
+            }
+        ],
+        "outputs": [
+            {
+                "label": "Main output",
+                "family": "TOP",
+                "node": "host_out"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Noise scale",
+                "node": "noise1",
+                "param": "scale",
+                "type": "float",
+                "range": [0.1, 50.0]
+            },
+            {
+                "label": "Noise resolution",
+                "node": "noise1",
+                "param": "resolution",
+                "type": "Vector2i"
+            }
+        ]
+    },
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LibGONODES Example Patch — show.gnpatch\n\nUsed by the SDL, OpenGL, Vulkan, and Metal host examples.\n\nThe host injects an LFO into \"host_lfo\" (HostInCHOP)\nand reads the rendered texture from \"host_out\" (HostOutTOP).\n\nThe host drives noise1.time_offset via parameter API\nor uses the LFO channel to animate the noise.",
+            "text": "LibGONODES Example Patch — show.gnpatch\n\nUsed by the SDL, OpenGL, Vulkan, and Metal host examples.\n\nThe host injects an LFO into \"host_lfo\" (HostInCHOP)\nand reads the rendered texture from \"host_out\" (HostOutTOP).\n\nThe host drives noise1.time_offset via parameter API\nor uses the LFO channel to animate the noise.\n\nHost I/O manifest declares 1 CHOP input + 1 TOP output.",
             "position": [-100.0, -150.0],
             "size": [550.0, 180.0],
             "color": [1.0, 1.0, 1.0, 0.8]

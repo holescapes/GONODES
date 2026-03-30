@@ -6,6 +6,9 @@
  * LibGodot for zero-copy texture access, then renders the output texture
  * to an NSWindow via a CAMetalLayer blit.
  *
+ * After loading, the Host I/O manifest is queried via gonodes_get_host_io()
+ * to discover the patch's declared inputs, outputs, and exposed parameters.
+ *
  * Build (macOS only):
  *   cd libgonodes/build && cmake .. && cmake --build . --target metal_host
  *
@@ -166,6 +169,15 @@ int main(int argc, char* argv[]) {
         }
 
         gonodes_set_auto_reload(gn, 1, 0.5);
+
+        /* ── Query Host I/O Manifest ────────────────────────────────── */
+
+        const char* host_io = gonodes_get_host_io(gn);
+        if (host_io && host_io[0] != '\0') {
+            printf("[Metal Host] Host I/O Manifest:\n%s\n", host_io);
+        } else {
+            printf("[Metal Host] No Host I/O manifest in patch.\n");
+        }
 
         /* ── NSApplication + Window + MTKView ───────────────────────── */
 
