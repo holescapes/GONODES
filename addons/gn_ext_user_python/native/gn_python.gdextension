@@ -1,0 +1,12 @@
+[configuration]
+entry_symbol = "gn_python_library_init"
+compatibility_minimum = "4.1"
+reloadable = false
+
+[libraries]
+windows.debug.x86_64 = "res://addons/gn_ext_user_python/native/bin/win64/libgn_python.windows.template_release.x86_64.dll"
+windows.release.x86_64 = "res://addons/gn_ext_user_python/native/bin/win64/libgn_python.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/gn_ext_user_python/native/bin/linux64/libgn_python.linux.template_release.x86_64.so"
+linux.release.x86_64 = "res://addons/gn_ext_user_python/native/bin/linux64/libgn_python.linux.template_release.x86_64.so"
+macos.debug = "res://addons/gn_ext_user_python/native/bin/macos/libgn_python.macos.template_release.dylib"
+macos.release = "res://addons/gn_ext_user_python/native/bin/macos/libgn_python.macos.template_release.dylib"

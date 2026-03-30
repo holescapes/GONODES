@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **534 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
+> **535 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
 
 ---
 

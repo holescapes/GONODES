@@ -45,6 +45,9 @@
                 },
                 "word_wrap": {
                     "value": false
+                },
+                "font_file": {
+                    "value": "res://addons/gonodes/help/media/Pacifico-Regular.ttf"
                 }
             }
         },
@@ -80,7 +83,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextTOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "TextTOP — Advanced\n\nMore complex configuration.",
             "position": [
                 -100.0,
                 -100.0

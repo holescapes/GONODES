@@ -26,6 +26,9 @@
                     "value": true,
                     "expression": "sin(time * 2.0) * 0.5 + 0.5",
                     "mode": "EXPRESSION"
+                },
+                "file": {
+                    "value": "res://addons/gonodes/help/media/sample_tone.wav"
                 }
             }
         },
@@ -89,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Audio File In \u2014 Spectrum\n\nAudio file piped through spectrum analyzer.\nVisualizes frequency content.",
+            "text": "Audio File In — Spectrum\n\nAudio file piped through spectrum analyzer.\nVisualizes frequency content.",
             "position": [
                 -100.0,
                 -100.0

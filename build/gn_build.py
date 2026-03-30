@@ -22,7 +22,9 @@ Or from the root SConstruct:
 import os
 import sys
 import configparser
+import json
 import platform as _platform
+import subprocess
 
 # SCons builtins needed: Environment, Glob, File, Default, Exit, ARGUMENTS, Dir
 from SCons.Script import *  # noqa: F403
@@ -101,6 +103,7 @@ def parse_build_cfg(cfg_path):
     for plat in ALL_PLATFORMS:
         cfg[plat] = {
             "libs":       get_list(plat, "libs") if cp.has_section(plat) else [],
+            "lib_dirs":   get_list(plat, "lib_dirs") if cp.has_section(plat) else [],
             "frameworks": get_list(plat, "frameworks") if cp.has_section(plat) else [],
             "defines":    get_list(plat, "defines") if cp.has_section(plat) else [],
             "objcxx_sources": get_list(plat, "objcxx_sources") if cp.has_section(plat) else [],
@@ -137,6 +140,32 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
     out_dir = os.path.join(native_dir, BIN_DIRS[plat])
     lib_ext = LIB_EXTENSIONS[plat]
 
+    # ── Python SDK auto-discovery (for extensions with [python] section) ──
+    python_cfg = None
+    python_config_script = os.path.join(native_dir, "python_config.py")
+    if os.path.isfile(python_config_script):
+        # Use GONODES_PYTHON_HOME or the toolchain embeddable if available
+        toolchain_python = os.path.join(native_dir, "..", "toolchain", "python", "python.exe")
+        py_exe = os.environ.get("GONODES_PYTHON_HOME", "")
+        if py_exe:
+            py_exe = os.path.join(py_exe, "python.exe") if os.path.isdir(py_exe) else py_exe
+        elif os.path.isfile(toolchain_python):
+            py_exe = toolchain_python
+        else:
+            py_exe = sys.executable  # fallback to current Python
+
+        try:
+            result = subprocess.run(
+                [py_exe, python_config_script, "--json"],
+                capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0:
+                python_cfg = json.loads(result.stdout)
+                print(f"  Python SDK: {python_cfg.get('version_full', '?')} "
+                      f"(lib={python_cfg.get('lib_name', '?')})")
+        except Exception as e:
+            print(f"  WARNING: python_config.py failed: {e}")
+
     if plat == "windows":
         env = Environment(tools=["default", "msvc"])
         env.Append(CPPPATH=common_cpppath)
@@ -162,6 +191,8 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
         # Platform-specific system libs
         for lib in cfg["windows"]["libs"]:
             env.Append(LIBS=[lib])
+        for d in cfg["windows"]["lib_dirs"]:
+            env.Append(LIBPATH=[os.path.join(native_dir, d)])
         for d in cfg["windows"]["defines"]:
             env.Append(CPPDEFINES=[d])
 
@@ -190,6 +221,8 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
         # Frameworks
         for fw in cfg["macos"]["frameworks"]:
             env.Append(FRAMEWORKS=[fw])
+        for d in cfg["macos"]["lib_dirs"]:
+            env.Append(LIBPATH=[os.path.join(native_dir, d)])
         for d in cfg["macos"]["defines"]:
             env.Append(CPPDEFINES=[d])
 
@@ -217,8 +250,26 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
 
         for lib in cfg["linux"]["libs"]:
             env.Append(LIBS=[lib])
+        for d in cfg["linux"]["lib_dirs"]:
+            env.Append(LIBPATH=[os.path.join(native_dir, d)])
         for d in cfg["linux"]["defines"]:
             env.Append(CPPDEFINES=[d])
+
+    # ── Inject Python SDK paths (discovered above) ──
+    if python_cfg:
+        inc = python_cfg.get("include_dir", "")
+        if inc and os.path.isdir(inc):
+            env.Append(CPPPATH=[inc])
+        lib_dir = python_cfg.get("lib_dir", "")
+        if lib_dir and os.path.isdir(lib_dir):
+            env.Append(LIBPATH=[lib_dir])
+        lib_name = python_cfg.get("lib_name", "")
+        if lib_name:
+            # Override the hardcoded lib from build.cfg with the discovered one
+            env.Append(LIBS=[lib_name])
+        np_inc = python_cfg.get("numpy_include", "")
+        if np_inc and os.path.isdir(np_inc):
+            env.Append(CPPPATH=[np_inc])
 
     return env, suffix, out_dir, lib_ext
 

@@ -6138,6 +6138,20 @@
     ]
   },
   {
+    "class_name": "SinkOUT",
+    "node_type": "sink",
+    "family": "output",
+    "file": "addons/gonodes/operators/output/sink_out.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "TableSaveOUT",
     "node_type": "table_save",
     "family": "output",

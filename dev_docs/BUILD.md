@@ -486,8 +486,8 @@ addons/gn_ext_native/
 ├── native/                   # C++ GDExtension source
 │   ├── SConstruct            # SCons build configuration
 │   ├── gn_native.gdextension # Library manifest (all platforms + architectures)
-│   ├── godot-cpp/            # Submodule — godot-cpp bindings
-│   ├── bin/                  # Compiled binaries per platform
+│   ├── godot-cpp/            # Cloned at setup time (not tracked in git)
+│   ├── bin/                  # Compiled binaries per platform (gitignored)
 │   │   ├── win64/            # Windows x86_64 + ARM64
 │   │   ├── linux64/          # Linux x86_64 + ARM64
 │   │   └── macos/            # macOS universal (x86_64 + arm64)
@@ -513,11 +513,11 @@ addons/gn_ext_native/
 Prerequisites: Python 3, SCons, a C++ compiler (MSVC on Windows, g++ on Linux, clang on macOS).
 
 ```bash
-# 1. Initialize the godot-cpp submodule (first time only)
-cd addons/gn_ext_native/native
-git submodule update --init --recursive
+# 1. Fetch all dependencies (first time only, from repo root)
+python setup_deps.py --core
 
 # 2. Build for the current platform
+cd addons/gn_ext_native/native
 scons platform=windows arch=x86_64 target=template_release -j4   # Windows
 scons platform=linux   arch=x86_64 target=template_release -j4   # Linux
 scons platform=macos   arch=arm64  target=template_release -j4   # macOS (Apple Silicon)
@@ -578,7 +578,7 @@ can build a GDExtension that plugs into the GONODES operator model.
    rules above.
 
 2. **Add a `native/` subfolder** for C++ source, a `SConstruct` build
-   script, and a `godot-cpp/` submodule (or symlink to a shared one).
+   script. godot-cpp is shared from `gn_ext_native/native/godot-cpp/` (cloned by `setup_deps.py`).
 
 3. **Write C++ processor classes** that extend `godot::RefCounted`.
    Expose a `process()` (or similar) method via `ClassDB::bind_methods()`.
@@ -775,12 +775,12 @@ defines = <linux defines if any>
 
 - **Python 3.x** and **SCons 4.x** (`pip install scons`)
 - **C++ compiler**: MSVC on Windows, g++ on Linux, clang on macOS
-- **godot-cpp** submodule initialized and built in `gn_ext_native/native/godot-cpp/`
+- **godot-cpp** cloned and built in `gn_ext_native/native/godot-cpp/`
 
 ```bash
-# First time: initialize and build godot-cpp
-cd addons/gn_ext_native/native
-git submodule update --init --recursive
+# First time: fetch dependencies and build godot-cpp (from repo root)
+python setup_deps.py --core
+cd addons/gn_ext_native/native/godot-cpp
 scons platform=<PLATFORM> arch=<ARCH> target=template_release -j4
 ```
 
@@ -958,6 +958,11 @@ A single unified workflow with two stages:
 2. **Build** — 5 platform jobs per extension (auto-skips unsupported platforms)
    plus 5 dedicated jobs for `gn_ext_native` (uses its own SConstruct)
 
+Each job clones godot-cpp (`--depth 1 --branch 4.5`) after checkout since
+it is not tracked in git. Windows Spout builds also clone the Spout2 SDK.
+Extension-specific SDKs (ONNX Runtime, CPython) are fetched by their
+`setup_*.py` scripts via a "Setup vendor SDK" step.
+
 Triggers on changes to `addons/gn_ext_*/native/**`, `build/**`, or the
 workflow file, plus manual dispatch.
 
@@ -1117,7 +1122,13 @@ writing it back produces mojibake: `—` (em-dash) becomes `Ã¢â‚¬â€`,
 | **gn_ext_native (special case)** | |
 | `addons/gn_ext_native/native/SConstruct`     | godot-cpp SConstruct (builds godot-cpp + native operators) |
 | `addons/gn_ext_native/native/gn_native.gdextension` | GDExtension manifest (all 5 platforms) |
-| `addons/gn_ext_native/native/godot-cpp/`     | Submodule — godot-cpp bindings |
+| `addons/gn_ext_native/native/godot-cpp/`     | Cloned by `setup_deps.py` — godot-cpp bindings (gitignored) |
 | **CI workflows** | |
 | `.github/workflows/build-extensions.yml`      | GitHub Actions — unified native build (all extensions) |
+| `.github/workflows/tests.yml`                 | GitHub Actions — build + run headless test suite |
+| `.github/workflows/release.yml`               | GitHub Actions — full release pipeline (build → test → export → publish) |
 | `.gitlab-ci.yml`                              | GitLab CI — unified native build (all extensions) |
+| **Dependency setup** | |
+| `setup_deps.py`                               | Root setup script — clones godot-cpp, Spout2, runs extension SDKs |
+| `addons/gn_ext_ml/setup_ml.py`                | Downloads ONNX Runtime SDK + pre-trained models |
+| `addons/gn_ext_user_python/setup_python.py`   | Downloads embeddable CPython + NumPy |

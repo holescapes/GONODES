@@ -7,6 +7,9 @@ module handles everything else.
 ## Quick Start
 
 ```bash
+# First time: fetch godot-cpp and other dependencies (from repo root)
+python setup_deps.py --core
+
 cd build
 
 # Build everything for the current platform:
@@ -140,7 +143,7 @@ defines = MY_LINUX_DEFINE
 - Prebuilt external `.lib`/`.a`/`.dll` files are NOT handled by `build.cfg` —
   put them in `native/lib/<platform>/` and add link flags manually if needed.
 - godot-cpp includes are set up automatically from the shared checkout at
-  `addons/gn_ext_native/native/godot-cpp/`.
+  `addons/gn_ext_native/native/godot-cpp/` (cloned by `setup_deps.py`).
 
 ### SConstruct shim (optional, for standalone builds)
 

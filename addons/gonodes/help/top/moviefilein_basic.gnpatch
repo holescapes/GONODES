@@ -10,7 +10,7 @@
             ],
             "parameters": {
                 "file": {
-                    "value": ""
+                    "value": "res://addons/gonodes/help/media/sample_video.ogv"
                 },
                 "resolution": {
                     "value": {
@@ -66,7 +66,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Movie File In TOP \u2014 Video Playback\n\nLoads and plays back a video file.\nSet 'file' to a video path (OGV, MP4).\nLoop and speed controls available.",
+            "text": "Movie File In TOP — Video Playback\n\nLoads and plays back a video file.\nSet 'file' to a video path (OGV, MP4).\nLoop and speed controls available.",
             "position": [
                 -100.0,
                 -150.0

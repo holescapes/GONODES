@@ -4,6 +4,9 @@
 // Must be included before any standard headers per Python docs.
 #include <Python.h>
 
+#include <string>
+#include <unordered_map>
+
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/array.hpp>

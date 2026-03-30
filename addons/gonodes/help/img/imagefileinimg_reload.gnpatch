@@ -20,6 +20,9 @@
                     "value": true,
                     "expression": "sin(time * 2.0) * 0.5 + 0.5",
                     "mode": "EXPRESSION"
+                },
+                "file": {
+                    "value": "res://addons/gonodes/help/media/sample_image.jpg"
                 }
             }
         },
@@ -69,7 +72,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ImageFileInIMG \u2014 Parameters\n\nShowcases: resolution, reload.",
+            "text": "ImageFileInIMG — Parameters\n\nShowcases: resolution, reload.",
             "position": [
                 -100.0,
                 -100.0

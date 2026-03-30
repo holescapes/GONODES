@@ -4,30 +4,61 @@
     "nodes": {
         "audio1": {
             "type": "AudioFileInCHOP",
-            "position": [200, 100],
+            "position": [
+                200,
+                100
+            ],
             "parameters": {
-                "play": {"value": true},
-                "loop": {"value": true},
-                "volume": {"value": -6.0}
+                "play": {
+                    "value": true
+                },
+                "loop": {
+                    "value": true
+                },
+                "volume": {
+                    "value": -6.0
+                },
+                "file": {
+                    "value": "res://addons/gonodes/help/media/sample_tone.wav"
+                }
             }
         },
         "null1": {
             "type": "NullCHOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {}
         }
     },
     "connections": [
-        {"from": "audio1", "from_port": 0, "to": "null1", "to_port": 0}
+        {
+            "from": "audio1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "AudioFileInCHOP — Playback\n\nPlays an audio file as channel data.\nSet file parameter to a .wav or .ogg path. Adjust volume in dB.",
-            "position": [-100.0, -100.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

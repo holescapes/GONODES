@@ -27,6 +27,9 @@
                 },
                 "stereo": {
                     "value": true
+                },
+                "file": {
+                    "value": "res://addons/gonodes/help/media/sample_tone.wav"
                 }
             }
         },
@@ -98,7 +101,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Audio File In CHOP \u2014 Player\n\nLoads a WAV or OGG audio file.\nSet the 'file' parameter and enable 'play'.\nOutputs stereo waveform data as channels.",
+            "text": "Audio File In CHOP — Player\n\nLoads a WAV or OGG audio file.\nSet the 'file' parameter and enable 'play'.\nOutputs stereo waveform data as channels.",
             "position": [
                 -100.0,
                 -150.0

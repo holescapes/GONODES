@@ -7,8 +7,20 @@ TouchDesigner, OBS with Spout plugin, etc.).
 ## Requirements
 
 - **Windows only** — Spout uses DirectX 11 shared textures, which is a Windows-specific API.
-- **godot-cpp** — shared via junction from `gn_ext_native/native/godot-cpp/`.
-- **Spout2 SDK** — included as git clone in `native/Spout2/`.
+- **godot-cpp** — shared from `gn_ext_native/native/godot-cpp/` (cloned by `setup_deps.py`).
+- **Spout2 SDK** — cloned by `setup_deps.py` into `native/Spout2/` (gitignored).
+
+## Setup
+
+```bash
+# From repo root (if not already done):
+python setup_deps.py
+```
+
+Or manually:
+```bash
+git clone --depth 1 https://github.com/leadedge/Spout2.git addons/gn_ext_spout/native/Spout2
+```
 
 ## Building
 

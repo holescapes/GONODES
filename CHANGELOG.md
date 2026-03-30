@@ -9,6 +9,45 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-03-29 — Host I/O Manifest, SinkOUT, CI Workflows, Example Apps
+
+### New Operators (1)
+- **SinkOUT** — multi-family keep-alive sink for headless chains. Accepts any
+  family input, toggleable `active` parameter controls `is_sink` status. No
+  viewer, no window — pure cook-chain preservation.
+
+### New Features
+- **Host I/O Manifest** — standardized `.gnpatch` interface contract for
+  LibGodot embedding. Patches declare inputs (texture/CHOP/DAT), outputs, and
+  exposed parameters in a `host_io` JSON key. Auto-generated from bridge
+  operators if not authored manually.
+  - `gn_network.gd`: `host_io` variable, `generate_host_io()`, serialization
+  - `gn_embedded_host.gd`: `get_host_io()`, `GONODES_HOST_IO` env var
+  - `gonodes_host.h`: `gonodes_get_host_io()` C API function
+  - Editor: "Host I/O" toolbar button + manifest dialog with JSON editor
+- **GitHub Actions CI/CD** — two new workflows:
+  - `release.yml` — full release pipeline on `v*` tags (build, test, export, release)
+  - `tests.yml` — headless test suite on push/PR
+
+### Example Apps
+- All 5 host examples (sdl_host, vulkan_host, opengl_host, metal_host,
+  params_demo) now query `gonodes_get_host_io()` after patch load
+- 3 new example patches with varied I/O profiles:
+  - `video_mixer.gnpatch` — 2 TOP + 1 CHOP in, 1 TOP out (camera mixing)
+  - `data_pipeline.gnpatch` — 1 DAT + 1 CHOP in, 1 DAT + 1 CHOP out (headless)
+  - `sensor_viz.gnpatch` — 1 CHOP in, 1 TOP + 1 CHOP out (cross-family)
+- Existing patches (`show.gnpatch`, `params_test.gnpatch`) updated with
+  `host_io` manifests
+
+### Documentation
+- Updated all docs to 535 operators, 14 OUT family operators
+- `dev_docs/INTEGRATION.md` — full Host I/O Manifest section (format spec,
+  auto-generation, C API, editor workflow, backward compatibility)
+- `libgonodes/README.md` — Host I/O section + example patches table
+- All example READMEs updated for Host I/O
+
+---
+
 ## 2026-03-27 — Full Codebase Audit & Script Consolidation
 
 ### Architecture
@@ -30,7 +69,7 @@ For the full development journal with implementation details, see
 - Added headless guard to SDF boot script
 
 ### Documentation
-- Updated all docs to reflect 534 operators across 13 families
+- Updated all docs to reflect 535 operators across 13 families
 - Updated test counts to 1,355 across 31+ test files
 - Created `dev_docs/EXTENSIONS.md` — extension system architecture deep-dive
 - Created `dev_docs/DATA_TYPES.md` — data type hierarchy and COW model

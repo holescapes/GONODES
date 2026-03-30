@@ -980,26 +980,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/resample_chop.gd"
   },
-  "GDScriptSCRIPT": {
-    "class_name": "GDScriptSCRIPT",
-    "family": "CHOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in0",
-        "type": "CHOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/chop/script_chop.gd"
-  },
   "SelectCHOP": {
     "class_name": "SelectCHOP",
     "family": "CHOP",
@@ -1512,31 +1492,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/environment_comp.gd"
-  },
-  "GDScriptSCRIPT": {
-    "class_name": "GDScriptSCRIPT",
-    "family": "COMP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in0",
-        "type": "CHOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out0",
-        "type": "CHOP"
-      },
-      {
-        "port": 1,
-        "name": "out1",
-        "type": "DAT"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/comp/generic_script_node.gd"
   },
   "GeometryCOMP": {
     "class_name": "GeometryCOMP",
@@ -2269,26 +2224,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/render_pick_dat.gd"
   },
-  "GDScriptSCRIPT": {
-    "class_name": "GDScriptSCRIPT",
-    "family": "DAT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in0",
-        "type": "DAT"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "DAT"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/dat/script_dat.gd"
-  },
   "SelectDAT": {
     "class_name": "SelectDAT",
     "family": "DAT",
@@ -2735,26 +2670,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/img/screen_grab_img.gd"
   },
-  "GDScriptSCRIPT": {
-    "class_name": "GDScriptSCRIPT",
-    "family": "IMG",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in0",
-        "type": "IMG"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "IMG"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/img/script_img.gd"
-  },
   "TOPtoIMG": {
     "class_name": "TOPtoIMG",
     "family": "IMG",
@@ -2902,8 +2817,8 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/mat/null_mat.gd"
   },
-  "PBR_MAT": {
-    "class_name": "PBR_MAT",
+  "PbrMAT": {
+    "class_name": "PbrMAT",
     "family": "MAT",
     "inputs": [
       {
@@ -2952,8 +2867,8 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/mat/point_sprite_mat.gd"
   },
-  "Shader_MAT": {
-    "class_name": "Shader_MAT",
+  "ShaderMAT": {
+    "class_name": "ShaderMAT",
     "family": "MAT",
     "inputs": [
       {
@@ -3116,6 +3031,20 @@
     "outputs": [],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/output/record_out.gd"
+  },
+  "SinkOUT": {
+    "class_name": "SinkOUT",
+    "family": "OUT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/output/sink_out.gd"
   },
   "TableSaveOUT": {
     "class_name": "TableSaveOUT",
@@ -3334,26 +3263,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/pop/null_pop.gd"
   },
-  "ParticleStateTOP": {
-    "class_name": "ParticleStateTOP",
-    "family": "TOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "pop_in",
-        "type": "POP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/pop/particle_state_top.gd"
-  },
   "RenderPOP": {
     "class_name": "RenderPOP",
     "family": "COMP",
@@ -3413,6 +3322,31 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/pop/turbulence_pop.gd"
+  },
+  "GDScriptSCRIPT": {
+    "class_name": "GDScriptSCRIPT",
+    "family": "SCRIPT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in0",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out0",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "out1",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/script/gdscript_script.gd"
   },
   "AttributeSOP": {
     "class_name": "AttributeSOP",
@@ -4446,26 +4380,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/scatter_sop.gd"
-  },
-  "GDScriptSCRIPT": {
-    "class_name": "GDScriptSCRIPT",
-    "family": "SOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in0",
-        "type": "SOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/sop/script_sop.gd"
   },
   "SelectSOP": {
     "class_name": "SelectSOP",
@@ -5824,6 +5738,26 @@
     ],
     "dynamic_inputs": "UI",
     "file": "addons/gonodes/operators/top/panel_top.gd"
+  },
+  "ParticleStateTOP": {
+    "class_name": "ParticleStateTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "pop_in",
+        "type": "POP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/particle_state_top.gd"
   },
   "PatternTOP": {
     "class_name": "PatternTOP",
@@ -9765,290 +9699,135 @@
   "BendSDF": {
     "class_name": "BendSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/bend_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/bend_sdf.gd"
   },
   "BoxSDF": {
     "class_name": "BoxSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/box_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/box_sdf.gd"
   },
   "CapsuleSDF": {
     "class_name": "CapsuleSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/capsule_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/capsule_sdf.gd"
   },
   "ConeSDF": {
     "class_name": "ConeSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/cone_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/cone_sdf.gd"
   },
   "CylinderSDF": {
     "class_name": "CylinderSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/cylinder_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/cylinder_sdf.gd"
   },
   "DisplaceSDF": {
     "class_name": "DisplaceSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/displace_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/displace_sdf.gd"
   },
   "ElongateSDF": {
     "class_name": "ElongateSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/elongate_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/elongate_sdf.gd"
   },
   "GradientSDF": {
     "class_name": "GradientSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/gradient_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/gradient_sdf.gd"
   },
   "GyroidSDF": {
     "class_name": "GyroidSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/gyroid_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/gyroid_sdf.gd"
   },
   "IntersectionSDF": {
     "class_name": "IntersectionSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_a",
-        "type": "TOP"
-      },
-      {
-        "port": 1,
-        "name": "sdf_b",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/intersection_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/intersection_sdf.gd"
   },
   "MaterialSDF": {
     "class_name": "MaterialSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/material_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/material_sdf.gd"
   },
   "MirrorSDF": {
     "class_name": "MirrorSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/mirror_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/mirror_sdf.gd"
   },
   "OctahedronSDF": {
     "class_name": "OctahedronSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/octahedron_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/octahedron_sdf.gd"
   },
   "OnionSDF": {
     "class_name": "OnionSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/onion_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/onion_sdf.gd"
   },
   "PlaneSDF": {
     "class_name": "PlaneSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/plane_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/plane_sdf.gd"
   },
   "PyramidSDF": {
     "class_name": "PyramidSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/pyramid_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/pyramid_sdf.gd"
   },
   "RaymarchSDF": {
     "class_name": "RaymarchSDF",
     "family": "TOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
@@ -10057,195 +9836,79 @@
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/raymarch_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/raymarch_sdf.gd"
   },
   "RepeatSDF": {
     "class_name": "RepeatSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/repeat_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/repeat_sdf.gd"
   },
   "RoundSDF": {
     "class_name": "RoundSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/round_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/round_sdf.gd"
   },
   "SmoothSubtractSDF": {
     "class_name": "SmoothSubtractSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_a",
-        "type": "TOP"
-      },
-      {
-        "port": 1,
-        "name": "sdf_b",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/smooth_subtract_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/smooth_subtract_sdf.gd"
   },
   "SmoothUnionSDF": {
     "class_name": "SmoothUnionSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_a",
-        "type": "TOP"
-      },
-      {
-        "port": 1,
-        "name": "sdf_b",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/smooth_union_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/smooth_union_sdf.gd"
   },
   "SphereSDF": {
     "class_name": "SphereSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/sphere_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/sphere_sdf.gd"
   },
   "SubtractSDF": {
     "class_name": "SubtractSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_a",
-        "type": "TOP"
-      },
-      {
-        "port": 1,
-        "name": "sdf_b",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/subtract_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/subtract_sdf.gd"
   },
   "TorusSDF": {
     "class_name": "TorusSDF",
     "family": null,
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/torus_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/torus_sdf.gd"
   },
   "TwistSDF": {
     "class_name": "TwistSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/twist_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/twist_sdf.gd"
   },
   "UnionSDF": {
     "class_name": "UnionSDF",
     "family": null,
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sdf_a",
-        "type": "TOP"
-      },
-      {
-        "port": 1,
-        "name": "sdf_b",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "inputs": [],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_sdf/operators/top/union_sdf.gd"
+    "file": "addons/gn_ext_sdf/operators/sdf/union_sdf.gd"
   },
   "SerialReceiveDAT": {
     "class_name": "SerialReceiveDAT",
@@ -10363,199 +10026,21 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_syphon/operators/top/syphon_out_top.gd"
   },
-  "UserNativeCHOP": {
-    "class_name": "UserNativeCHOP",
-    "family": "CHOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "CHOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_native/operators/chop/user_native_chop.gd"
-  },
-  "UserNativeDAT": {
-    "class_name": "UserNativeDAT",
-    "family": "DAT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "DAT"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "DAT"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_native/operators/dat/user_native_dat.gd"
-  },
-  "UserNativeIMG": {
-    "class_name": "UserNativeIMG",
-    "family": "IMG",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "IMG"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "IMG"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_native/operators/img/user_native_img.gd"
-  },
-  "UserNativeSOP": {
-    "class_name": "UserNativeSOP",
-    "family": "SOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "SOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_native/operators/sop/user_native_sop.gd"
-  },
-  "UserNativeTOP": {
-    "class_name": "UserNativeTOP",
-    "family": "TOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_native/operators/top/user_native_top.gd"
-  },
-  "UserPythonCHOP": {
-    "class_name": "UserPythonCHOP",
-    "family": "CHOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "CHOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_python/operators/chop/user_python_chop.gd"
-  },
-  "UserPythonDAT": {
-    "class_name": "UserPythonDAT",
-    "family": "DAT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "DAT"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "DAT"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_python/operators/dat/user_python_dat.gd"
-  },
-  "UserPythonIMG": {
-    "class_name": "UserPythonIMG",
-    "family": "IMG",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "IMG"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "IMG"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_python/operators/img/user_python_img.gd"
-  },
-  "UserPythonSOP": {
-    "class_name": "UserPythonSOP",
-    "family": "SOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "SOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_python/operators/sop/user_python_sop.gd"
-  },
-  "UserPythonTOP": {
-    "class_name": "UserPythonTOP",
-    "family": "TOP",
+  "NativeSCRIPT": {
+    "class_name": "NativeSCRIPT",
+    "family": "SCRIPT",
     "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
+    "outputs": [],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_user_python/operators/top/user_python_top.gd"
+    "file": "addons/gn_ext_user_native/operators/script/native_script.gd"
+  },
+  "PythonSCRIPT": {
+    "class_name": "PythonSCRIPT",
+    "family": "SCRIPT",
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_user_python/operators/script/python_script.gd"
   },
   "VideoDeviceInIMG": {
     "class_name": "VideoDeviceInIMG",

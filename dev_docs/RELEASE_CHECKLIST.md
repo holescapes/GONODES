@@ -37,12 +37,14 @@ Step-by-step guide for every release build. Do not skip steps — platform-speci
 ### godot-cpp (shared by all native extensions)
 
 The single godot-cpp copy lives at `addons/gn_ext_native/native/godot-cpp/`.
+It is **not tracked in git** — it's cloned by `setup_deps.py` and by CI workflows.
 
 - [ ] Confirm it exists: `ls addons/gn_ext_native/native/godot-cpp/SConstruct`
-- [ ] If missing, clone it:
+- [ ] If missing, fetch it:
   ```bash
-  cd addons/gn_ext_native/native
-  git clone --depth 1 --branch godot-4.6-stable https://github.com/godotengine/godot-cpp.git
+  python setup_deps.py --core
+  # or manually:
+  git clone --depth 1 --branch 4.5 https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
   ```
 - [ ] Build for each target platform (once per Godot version bump):
   ```bash
@@ -149,12 +151,15 @@ The `gn_ext_user_native` extension lets users write custom C++ nodes **at runtim
 
 The `gn_ext_user_python` extension embeds CPython to let users write Python operators with NumPy. For this to work without the user installing Python system-wide, we optionally bundle an embeddable Python.
 
-- [ ] Download the **Python embeddable package** for each shipping platform:
+- [ ] Run the automated setup script:
+  ```bash
+  python addons/gn_ext_user_python/setup_python.py
+  ```
+  This downloads the embeddable CPython + dev headers + NumPy into `toolchain/python/`.
+- [ ] Alternatively, download manually for each shipping platform:
   - Windows: `python-3.12.x-embed-amd64.zip` from python.org
   - Linux: System Python 3.10+ (document as prerequisite) or bundle AppImage
   - macOS: Framework Python or Homebrew (document as prerequisite)
-- [ ] Extract into `addons/gn_ext_user_python/toolchain/python/`
-- [ ] Install NumPy into the bundled Python: `python -m pip install numpy --target=<toolchain>/python/Lib/site-packages`
 - [ ] Verify `toolchain/README.md` matches the shipped layout
 - [ ] Test: Drop a UserPythonSOP → Edit Python → write `import numpy as np` → Ctrl+R → confirm it loads
 

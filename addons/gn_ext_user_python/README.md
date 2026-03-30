@@ -23,7 +23,25 @@ The C++ GDExtension embeds CPython via `Py_Initialize()` and provides:
 - **GIL management**: Acquired/released around each `cook()` call.
 - **Module hot-reload**: `importlib.reload()` on Ctrl+R.
 
-## Requirements
+## Quick Setup (Recommended)
+
+Run the automated setup script to download CPython + NumPy:
+
+```bash
+python addons/gn_ext_user_python/setup_python.py
+```
+
+On Windows this downloads the embeddable CPython package, installs pip +
+NumPy, and enables the `.gdextension` file. On Linux/macOS it verifies
+system Python and dev headers.
+
+Options:
+- `--python-version 3.12.8` — use a specific Python version
+- `--skip-numpy` — skip NumPy installation
+
+After setup, build: `scons ext=gn_ext_user_python platform=<your_platform>`
+
+## Requirements (Manual Setup)
 
 - Python 3.10+ (embeddable or system)
 - NumPy (`pip install numpy`)

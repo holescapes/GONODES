@@ -19,7 +19,7 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**534 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
+**535 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
@@ -199,9 +199,13 @@ GONODES works out of the box with pure GDScript. Native C++ extensions provide a
 ```bash
 # Prerequisites: Python 3, SCons, C++ compiler
 pip install scons
+
+# Fetch all dependencies (godot-cpp, Spout2 SDK, extension SDKs):
+python setup_deps.py
+
+# Build godot-cpp + native operators:
 cd addons/gn_ext_native/native
-git submodule update --init --recursive
-scons platform=windows arch=x86_64 -j4      # Build godot-cpp + native operators
+scons platform=windows arch=x86_64 -j4
 
 # Build all other extensions (HAP, MIDI, Spout, etc.):
 cd ../../../build

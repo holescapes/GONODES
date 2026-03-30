@@ -36,6 +36,9 @@
                 },
                 "volume": {
                     "value": -6.0
+                },
+                "file": {
+                    "value": "res://addons/gonodes/help/media/sample_tone.wav"
                 }
             }
         },
@@ -99,7 +102,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Audio File In \u2014 With Dynamics\n\nAudio file with compression applied.\nSmooths out volume peaks.",
+            "text": "Audio File In — With Dynamics\n\nAudio file with compression applied.\nSmooths out volume peaks.",
             "position": [
                 -100.0,
                 -100.0

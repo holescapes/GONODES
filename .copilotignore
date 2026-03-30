@@ -1,7 +1,6 @@
 .godot/
 .import/
 templates/
-assets/
 **/godot-cpp/
 **/*.pck
 **/*.import

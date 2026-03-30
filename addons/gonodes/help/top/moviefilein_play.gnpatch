@@ -56,6 +56,9 @@
                         "b": 0.2,
                         "a": 1.0
                     }
+                },
+                "file": {
+                    "value": "res://addons/gonodes/help/media/sample_video.ogv"
                 }
             }
         },
@@ -97,7 +100,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MovieFileInTOP \u2014 Parameters\n\nShowcases: resolution, play, loop.",
+            "text": "MovieFileInTOP — Parameters\n\nShowcases: resolution, play, loop.",
             "position": [
                 -100.0,
                 -100.0

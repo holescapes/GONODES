@@ -84,19 +84,25 @@ tests/              # Automated test suite
 ## 3. Development Setup
 
 1. Clone the repository.
-2. Open the project in **Godot 4.6.1** (stable).
-3. The editor scene is `scenes/gn_editor.tscn` — run it to launch the GONODES editor.
-4. Run tests:
+2. Run `python setup_deps.py` to fetch godot-cpp, Spout2 SDK, and extension SDKs.
+   - Use `python setup_deps.py --core` for just godot-cpp and Spout2 (skip ONNX, Python SDKs).
+   - Use `python setup_deps.py --list` to see what would be fetched.
+3. Open the project in **Godot 4.6.1** (stable).
+4. The editor scene is `scenes/gn_editor.tscn` — run it to launch the GONODES editor.
+5. Run tests:
    ```powershell
    godot --headless --path "C:\MeOwn\Gonodes" -s tests/test_runner.gd
    ```
-5. No external dependencies are required for core development.
+6. No external dependencies are required for core GDScript development. The setup script is only needed if you want to build native C++ extensions.
 
 ---
 
 ## 4. Contributing a New Operator
 
-This is the most common contribution type. Every new operator **must** include all of the following:
+This is the most common contribution type. Every new operator **must** include all of the following.
+
+> **Full checklist:** See [NEW_OPERATOR_CHECKLIST.md](NEW_OPERATOR_CHECKLIST.md) for the complete step-by-step with derived-artifact commands.
+> **Automated verification:** Run `python scripts/verify_new_operator.py <ClassName>` to validate all touchpoints.
 
 ### 4.1 The Operator Script
 
@@ -113,7 +119,7 @@ extends GNSopBase
 func _init() -> void:
     node_type = "mynew"
     family = GNFamily.Type.SOP
-    node_description = "Short sentence describing what this operator does."
+    # Description lives in gn_core.cfg, NOT here
 
 func _init_ports() -> void:
     # Every port MUST have a description (last argument)
@@ -142,8 +148,8 @@ func _cook(inputs: Array) -> GNGeoData:
 **Mandatory elements in `_init()`:**
 - `node_type` — lowercase string identifier (unique across all operators)
 - `family` — `GNFamily.Type.<FAMILY>`
-- `node_description` — one-sentence purpose description (shown in palette tooltips)
 - `time_dependent = true` only if the operator genuinely changes every frame
+- **Do NOT set `node_description` here** — the description is defined in the `.cfg` file and injected at runtime by `gn_extension_registry.gd`
 
 **Mandatory elements in `_init_ports()`:**
 - Every `add_input()` and `add_output()` call must include a description string as the last argument.
@@ -227,6 +233,22 @@ Update `docs/OPERATORS.md`:
 - Update the family operator count.
 - Update the Quick Reference table at the bottom (count + operator name).
 - Update the header total count.
+
+### 4.5 Verification
+
+Run the automated checker to confirm nothing was missed:
+
+```bash
+python scripts/verify_new_operator.py MyNewSOP
+```
+
+The script checks: `.gd` file exists, metadata (`node_type`/`family`/`description`), `.cfg` registration, help patches present, `operator_registry.json` entry, `port_registry.json` entry, `docs/OPERATORS.md` listing, and test coverage.
+
+To verify doc counts are consistent across all files:
+
+```bash
+python scripts/verify_new_operator.py --counts
+```
 
 ---
 
@@ -590,7 +612,7 @@ User writes .h file (extending gn::GNUserNode)
         ↓
 GNNativeCompiler (core/gn_native_compiler.gd)
   ├─ SCons build (primary) or direct compiler fallback (MSVC/GCC/Clang)
-  ├─ Links against godot-cpp (toolchain/ → GODOT_CPP_PATH env → gn_ext_native/)
+  ├─ Links against godot-cpp (cloned by `setup_deps.py` → GODOT_CPP_PATH env → gn_ext_native/)
   └─ Produces .dll/.so/.dylib
         ↓
 GNNativeReloader (core/gn_native_reloader.gd)
@@ -644,7 +666,7 @@ Any changes to the SDK headers, build system, or wrapper operators affect the re
 - SDK header changes → update `toolchain/README.md`, examples, templates
 - Build system changes → update both `gn_native_compiler.gd` and `build_user_node.py`
 - New param types → update all 5 wrappers + SDK `gn_user_types.h`
-- godot-cpp version changes → must re-bundle in `toolchain/godot-cpp/` (see `RELEASE_CHECKLIST.md` Phase 3)
+- godot-cpp version changes → update branch in `setup_deps.py` + re-run + re-bundle in `toolchain/godot-cpp/` (see `RELEASE_CHECKLIST.md` Phase 3)
 
 ---
 
@@ -843,7 +865,7 @@ A node must NOT cook if nothing changed. Only cook when: `time_dependent = true`
 
 ### Hard Rule 25.14: Tooltip Descriptions Mandatory
 
-Every operator must provide: (1) `node_description` in `_init()`, (2) description string on every `add_input()`/`add_output()` call, (3) description string on every `GNParameter.create_*()` call.
+Every operator must provide: (1) a `description=` field in its `.cfg` entry (single source of truth, injected at runtime), (2) description string on every `add_input()`/`add_output()` call, (3) description string on every `GNParameter.create_*()` call.
 
 ### Hard Rule 25.20: Editor/Engine Separation
 
@@ -867,7 +889,8 @@ Before submitting, verify every item:
 
 - [ ] Operator script in `addons/gonodes/operators/<family>/`
 - [ ] Extends the correct family base class
-- [ ] `node_type`, `family`, and `node_description` set in `_init()`
+- [ ] `node_type` and `family` set in `_init()`
+- [ ] `description=` present in the `.cfg` entry
 - [ ] All ports have description strings
 - [ ] All parameters have description strings, labels, sensible defaults and ranges
 - [ ] Registered in `gn_extension_registry.gd` → `_register_core_operators()`

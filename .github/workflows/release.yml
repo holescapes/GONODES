@@ -34,6 +34,7 @@ on:
 env:
   GODOT_VERSION: "4.6.1"
   SCONS_FLAGS: "target=template_release -j4"
+  GODOTCPP_BRANCH: "4.5"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PHASE 1: Build native extensions (per-platform, parallel)
@@ -91,8 +92,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch ${{ env.GODOTCPP_BRANCH }} https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
       - name: Install SCons
         run: pip3 install scons
@@ -130,8 +132,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch ${{ env.GODOTCPP_BRANCH }} https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
       - name: Install SCons
         run: pip3 install scons
@@ -170,8 +173,9 @@ jobs:
         ext: ${{ fromJson(needs.discover.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch $GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
       - name: Check platform support
         id: check
@@ -228,8 +232,9 @@ jobs:
         ext: ${{ fromJson(needs.discover.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch $GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
       - name: Check platform support
         id: check
@@ -293,8 +298,13 @@ jobs:
         ext: ${{ fromJson(needs.discover.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch $env:GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
+
+      - name: Clone Spout2 SDK (if building gn_ext_spout)
+        if: matrix.ext == 'gn_ext_spout'
+        run: git clone --depth 1 https://github.com/leadedge/Spout2.git addons/gn_ext_spout/native/Spout2
 
       - name: Check platform support
         id: check
@@ -706,7 +716,7 @@ jobs:
           The Player is a standalone runtime — download, unzip, place your `.gnpatch` file alongside it with a `config.json`, and run. No Godot editor needed.
 
           ### Editor
-          Full GONODES project with pre-compiled native extension binaries. Open in Godot ${{ env.GODOT_VERSION }}. Includes all 534 operators, 1,355 tests, and 18 extensions.
+          Full GONODES project with pre-compiled native extension binaries. Open in Godot ${{ env.GODOT_VERSION }}. Includes all 535 operators, 1,355 tests, and 18 extensions.
 
           ### Requirements
           - **Godot ${{ env.GODOT_VERSION }}** (for the Editor distribution)

@@ -122,6 +122,20 @@ func test_hap_out_instantiate() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# SinkOUT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_sink_out_instantiate() -> void:
+	var node := _make_node(SinkOUT.new(), "sink1")
+	GNTestAssert.assert_eq(node.node_type, "sink", "node_type")
+
+
+func test_sink_out_active_default() -> void:
+	var node := _make_node(SinkOUT.new(), "sink2")
+	GNTestAssert.assert_eq(node.get_param_value("active"), true, "active defaults to true")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # OutTunnel
 # ═══════════════════════════════════════════════════════════════════════════════
 

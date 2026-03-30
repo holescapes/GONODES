@@ -18,6 +18,7 @@ on:
 env:
   GODOT_VERSION: "4.6.1"
   SCONS_FLAGS: "target=template_release -j4"
+  GODOTCPP_BRANCH: "4.5"
 
 jobs:
 
@@ -35,8 +36,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch $GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
       - name: Install SCons
         run: pip3 install scons
       - name: Build godot-cpp (Linux x86_64)
@@ -54,8 +55,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch $GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
       - name: Install SCons
         run: pip3 install scons
       - name: Download godot-cpp
@@ -83,8 +84,8 @@ jobs:
         ext: ${{ fromJson(needs.discover.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch $GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
       - name: Check Linux support
         id: check
         run: |

@@ -14,7 +14,23 @@
 | **SegmentationTOP** | TOP | Person/background segmentation — binary/soft mask |
 | **ObjectDetectDAT** | DAT | Object detection (YOLOv8) — table of bounding boxes + labels |
 
-## Requirements
+## Quick Setup (Recommended)
+
+Run the automated setup script to download the ONNX Runtime SDK and all
+pre-trained models in one step:
+
+```bash
+python addons/gn_ext_ml/setup_ml.py
+```
+
+Options:
+- `--sdk-only` — download SDK only, skip models
+- `--models-only` — download models only, skip SDK
+- `--version 1.19.2` — use a specific ONNX Runtime version
+
+After setup, build: `cd addons/gn_ext_ml/native && scons platform=<your_platform>`
+
+## Requirements (Manual Setup)
 
 ### ONNX Runtime SDK
 

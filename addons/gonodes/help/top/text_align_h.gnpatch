@@ -45,6 +45,9 @@
                 },
                 "word_wrap": {
                     "value": true
+                },
+                "font_file": {
+                    "value": "res://addons/gonodes/help/media/JetBrainsMono-Regular.ttf"
                 }
             }
         },
@@ -80,7 +83,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextTOP \u2014 Parameters\n\nShowcases: text, resolution, font_size.",
+            "text": "TextTOP — Parameters\n\nShowcases: text, resolution, font_size.",
             "position": [
                 -100.0,
                 -100.0
