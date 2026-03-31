@@ -8,10 +8,16 @@ var _processor: RefCounted = null
 func _init() -> void:
 	super._init()
 	node_type = "noise"
-	time_dependent = true
 	node_description = "FBM value noise volume generator — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeNoiseVol"):
 		_processor = ClassDB.instantiate("GNNativeNoiseVol")
+
+
+## Auto-set time_dependent based on the speed parameter.
+func _pre_cook(_delta: float) -> void:
+	time_dependent = get_param_value("speed") != 0.0
+	if time_dependent:
+		mark_dirty()
 
 
 func _init_ports() -> void:

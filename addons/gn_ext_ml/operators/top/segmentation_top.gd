@@ -18,7 +18,6 @@ const MODEL_H := 256
 
 func _init() -> void:
 	node_type = "segmentation"
-	time_dependent = true
 	node_description = "Person segmentation — outputs a mask texture. Requires gn_ext_ml."
 
 func supported_platforms() -> PackedStringArray:

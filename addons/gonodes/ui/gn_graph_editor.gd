@@ -66,6 +66,9 @@ enum _CtxID {
 	MAKE_UNIQUE,
 	REPROMOTE_ASSET,
 	ADD_SPARE_PARAM,
+	COPY_AS_JSON,
+	COPY_DEBUG_INFO,
+	COPY_NETWORK_JSON,
 	## Dynamic IDs for preset loading start here (100+).
 	LOAD_PARAM_PRESET_BASE = 100,
 }
@@ -2098,6 +2101,16 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item(output_ref_label, _CtxID.COPY_OUTPUT_REF)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_OUTPUT_REF), not single_selected)
 
+	_context_menu.add_separator()
+
+	_context_menu.add_item("Copy as JSON", _CtxID.COPY_AS_JSON)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_AS_JSON), not has_selection)
+
+	_context_menu.add_item("Copy Debug Info", _CtxID.COPY_DEBUG_INFO)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_DEBUG_INFO), not single_selected)
+
+	_context_menu.add_item("Copy Network JSON", _CtxID.COPY_NETWORK_JSON)
+
 	_context_menu.position = Vector2i(screen_pos)
 	_context_menu.reset_size()
 	_context_menu.popup()
@@ -2189,11 +2202,124 @@ func _on_context_menu_id_pressed(id: int) -> void:
 				repromote_asset_requested.emit(sel3[0])
 		_CtxID.ADD_SPARE_PARAM:
 			_show_add_spare_param_dialog()
+		_CtxID.COPY_AS_JSON:
+			_copy_selected_as_json()
+		_CtxID.COPY_DEBUG_INFO:
+			_copy_debug_info_to_clipboard()
+		_CtxID.COPY_NETWORK_JSON:
+			_copy_network_json_to_clipboard()
 		_:
 			# Dynamic preset load IDs
 			if id >= _CtxID.LOAD_PARAM_PRESET_BASE:
 				var preset_idx: int = id - _CtxID.LOAD_PARAM_PRESET_BASE
 				_load_param_preset(preset_idx)
+
+
+## Copies selected nodes + connections as JSON to the OS clipboard.
+func _copy_selected_as_json() -> void:
+	if network == null:
+		return
+	var selected_ids: Array[String] = _get_selected_node_ids()
+	if selected_ids.is_empty():
+		return
+
+	var nodes_data: Dictionary = {}
+	for node_id in selected_ids:
+		var node: GNNode = network.nodes.get(node_id, null)
+		if node:
+			nodes_data[node_id] = node.to_dict()
+
+	var conns_data: Array = []
+	for conn in network.connections:
+		if selected_ids.has(conn.from_node) and selected_ids.has(conn.to_node):
+			conns_data.append({
+				"from": conn.from_node,
+				"from_port": conn.from_port,
+				"to": conn.to_node,
+				"to_port": conn.to_port,
+			})
+
+	var payload := {"nodes": nodes_data, "connections": conns_data}
+	var json_text := JSON.stringify(payload, "  ")
+	DisplayServer.clipboard_set(json_text)
+	GNLogger.info("GraphEditor", "Copied %d node(s) as JSON (%d bytes)" % [
+		nodes_data.size(), json_text.length()])
+
+
+## Copies a single node's debug state to the OS clipboard.
+func _copy_debug_info_to_clipboard() -> void:
+	var selected := _get_selected_node_ids()
+	if selected.size() != 1 or network == null:
+		return
+	var node: GNNode = network.get_node_by_id(selected[0])
+	if node == null:
+		return
+
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("=== %s ===" % node.id)
+	lines.append("Type: %s" % node.node_type)
+	lines.append("Family: %s" % GNFamily.get_family_name(node.family))
+	lines.append("Class: %s" % node.get_script().get_global_name())
+	lines.append("Dirty: %s" % str(node.dirty))
+	lines.append("Active: %s" % str(node.is_active))
+	lines.append("Cook valid: %s" % str(node.cook_valid))
+	lines.append("Cook time: %.3f ms" % node.cook_time_ms)
+	lines.append("Time dependent: %s" % str(node.time_dependent))
+	lines.append("Bypass: %s" % str(node.bypass))
+	lines.append("Locked: %s" % str(node.locked))
+	lines.append("")
+
+	# Parameters
+	lines.append("--- Parameters ---")
+	for param_name in node.get_parameter_names():
+		var param: GNParameter = node.get_parameter(param_name)
+		if param:
+			var mode_str := ""
+			if param.mode == GNParameter.Mode.EXPRESSION:
+				mode_str = " [expr: %s]" % param.expression
+			lines.append("  %s = %s%s" % [param_name, str(param.value), mode_str])
+	lines.append("")
+
+	# Output
+	lines.append("--- Output ---")
+	if node.cached_output != null:
+		lines.append("  Type: %s" % node.cached_output.get_class())
+		lines.append("  Valid: %s" % str(node.cached_output.valid))
+		lines.append("  Timestamp: %d" % node.cached_output.timestamp)
+		lines.append("  Summary: %s" % node.cached_output.get_data_summary())
+	else:
+		lines.append("  (null)")
+	lines.append("")
+
+	# Connections
+	lines.append("--- Connections ---")
+	var in_conns := network.get_input_connections(node.id)
+	for conn in in_conns:
+		lines.append("  IN:  %s:%d -> :%d" % [conn.from_node, conn.from_port, conn.to_port])
+	var out_conns := network.get_output_connections(node.id)
+	for conn in out_conns:
+		lines.append("  OUT: :%d -> %s:%d" % [conn.from_port, conn.to_node, conn.to_port])
+
+	if node.node_warning != "":
+		lines.append("")
+		lines.append("WARNING: %s" % node.node_warning)
+	if node.node_error != "":
+		lines.append("")
+		lines.append("ERROR: %s" % node.node_error)
+
+	var text := "\n".join(lines)
+	DisplayServer.clipboard_set(text)
+	GNLogger.info("GraphEditor", "Copied debug info for '%s' (%d bytes)" % [
+		node.id, text.length()])
+
+
+## Copies the entire network as JSON to the OS clipboard.
+func _copy_network_json_to_clipboard() -> void:
+	if network == null:
+		return
+	var json_text := JSON.stringify(network.to_dict(), "  ")
+	DisplayServer.clipboard_set(json_text)
+	GNLogger.info("GraphEditor", "Copied network JSON (%d bytes)" % json_text.length())
 
 
 ## Copies an expression-ready op("node_id") path for the selected node.

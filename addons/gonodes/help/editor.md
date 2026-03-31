@@ -105,6 +105,9 @@ Greyed-out items require a selection, clipboard content, or ≥2 nodes.
 | **Align Horizontal** | H             | Align selected nodes to same Y (needs 2+)          |
 | **Align Vertical** | —               | Align selected nodes to same X (needs 2+)          |
 | **Node Help**      | —               | Open help window (needs exactly 1 node selected)   |
+| **Copy as JSON**   | —               | Copies selected nodes + connections as JSON         |
+| **Copy Debug Info** | —              | Copies single node's full debug state dump          |
+| **Copy Network JSON** | —            | Copies entire network as JSON                       |
 
 ### Quick-Access Keys (not in context menu)
 
@@ -426,6 +429,65 @@ godot --rendering-method mobile
 godot --rendering-method gl_compatibility
 ```
 
+---
+
+## Debug Panel & Overlay
+
+Press **F2** or click the **Debug** toolbar button to toggle the debug system.
+
+### Debug Panel (3 Tabs)
+
+The panel docks below the graph canvas. Double-click any row to select and
+scroll to that node.
+
+| Tab | Shows | Columns |
+|-----|-------|---------|
+| **Cook Chain** | All nodes in topological cook order | #, Node, Family, Status, Cook (ms), Active |
+| **Active Chains** | Tree rooted at each sink, showing upstream dependencies | Node, Family, Cook (ms) |
+| **Param Refs** | All expression-mode parameters and their cross-references | Source Node, Parameter, Expression, References, Eval (μs) |
+
+**Multi-select:** Ctrl+click or Shift+click to select multiple rows in any tab.
+
+**Clipboard buttons (toolbar):**
+
+| Button | Shortcut | Action |
+|--------|----------|--------|
+| **Copy Selected** | Ctrl+C | Copies selected rows as tab-separated text (with headers) |
+| **Copy All** | — | Copies every row from the current tab to clipboard |
+
+The output is tab-separated values, ready for pasting into spreadsheets,
+text editors, or chat.
+
+### Graph Overlay (5 Layers)
+
+When Debug is active, toggle individual overlay layers with the sub-buttons:
+
+| Toggle | Layer | What it shows |
+|--------|-------|---------------|
+| **#Order** | Cook order badges | Small `#N` on each node's top-left |
+| **Dim** | Active chain dimming | Inactive nodes drawn at 40% opacity |
+| **Dirty** | Dirty propagation flash | Orange border flash on nodes dirtied this frame |
+| **Sinks** | Sink labels | Colored halo rings on sinks, dots on upstream |
+| **Flow** | Data flow annotations | Data dimensions on wires (resolution, channels, vertices, etc.) |
+
+---
+
+## Clipboard Export (Context Menu)
+
+Three context menu entries for sharing node networks and debug information:
+
+| Menu Item | Needs | What it copies |
+|-----------|-------|----------------|
+| **Copy as JSON** | 1+ nodes selected | Selected nodes + their connections as pretty-printed JSON |
+| **Copy Debug Info** | Exactly 1 node | Full state dump: type, family, params, output, connections, warnings, cook time |
+| **Copy Network JSON** | — | Entire network (all nodes, connections, metadata) as JSON |
+
+**Use cases:**
+- Share a node configuration with someone via chat or email
+- Paste debug info into a bug report
+- Archive the full network state for comparison
+
+---
 
 ## Settings Persistence
 

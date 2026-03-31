@@ -69,6 +69,17 @@ func update_preview_control(control: Control) -> void:
 			(control as TextureRect).texture = null
 
 
+func display_in_viewer(viewer) -> void:
+	if cached_output is GNTextureData:
+		var tex_data: GNTextureData = cached_output as GNTextureData
+		if tex_data.texture:
+			viewer.show_texture(tex_data.texture,
+				"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
+			viewer.update_zoom_label()
+			return
+	viewer.show_info("No texture output", "")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Input Helpers
 # ═══════════════════════════════════════════════════════════════════════════════

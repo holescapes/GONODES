@@ -17,7 +17,6 @@ const MODEL_H := 256
 
 func _init() -> void:
 	node_type = "styletransfer"
-	time_dependent = true
 	node_description = "Neural style transfer — apply artistic styles. Requires gn_ext_ml."
 
 func supported_platforms() -> PackedStringArray:

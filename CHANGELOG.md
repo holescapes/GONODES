@@ -9,6 +9,55 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-03-30 — Viewer Refactor, time_dependent Audit, Clipboard Export, Debug Panel UX
+
+### Architecture
+- **Viewer refactor — node-driven display dispatch:** Added `display_in_viewer(viewer)`
+  virtual method to `GNNode` base class. All 10 family base classes (TOP, IMG,
+  CHOP, DAT, SOP, MAT, COMP, POP, VOL, UI) override it with family-appropriate
+  visualization. `GNViewerPanel.update_from_node()` simplified from ~100-line
+  if/elif cascade to a single `node.display_in_viewer(self)` call. Legacy
+  extension display handlers preserved via `has_ext_display_handler()` /
+  `call_ext_display_handler()` fallback in the GNNode base.
+- **GNViewerPanel public API:** New typed methods — `show_image()`,
+  `show_waveform()`, `show_spreadsheet()`, `show_3d_mesh()`, `show_material()`,
+  `show_pop_particles()`, `show_vol_slices()`, `show_ui_preview()`,
+  `update_zoom_label()` — called by family bases instead of the viewer
+  switching modes internally.
+
+### Bug Fixes
+- **TOPtoIMG black output fix:** `get_image()` on ViewportTexture during cook
+  returned stale/black pixels because the upstream SubViewport hadn't rendered
+  yet (Godot defers viewport rendering to end-of-frame). Fixed with a
+  `_readback_pending` one-frame delay pattern — first cook returns previous
+  cache and schedules a second cook via `mark_dirty()`, second cook performs
+  the actual GPU→CPU readback.
+- **time_dependent audit — 8 operators fixed:** Removed incorrect
+  `time_dependent = true` from operators that are pure functions of their inputs:
+  - Core: PointCloudRenderTOP, HostInTOP, FIFODAT, HostInDAT
+  - ML extension: StyleTransferTOP, SegmentationTOP, DepthEstimateTOP,
+    ObjectDetectDAT
+  These operators were unnecessarily re-cooking every frame.
+
+### New Features
+- **Graph editor clipboard export** — three new context menu items:
+  - "Copy as JSON" — selected nodes + connections as pretty-printed JSON
+  - "Copy Debug Info" — single node's full state dump (type, family, params,
+    output summary, connections, warnings, time_dependent, cook_time)
+  - "Copy Network JSON" — entire network as JSON (all nodes + connections)
+- **Debug panel clipboard & multi-select:**
+  - All three Tree tabs (Cook Chain, Active Chains, Param Refs) now support
+    multi-row selection (Ctrl+click, Shift+click)
+  - "Copy Selected" button — copies selected rows as tab-separated text with
+    column headers (also bound to Ctrl+C)
+  - "Copy All" button — copies every row from the current tab to clipboard
+    (preserves tree hierarchy indentation for Active Chains tab)
+
+### Documentation
+- Updated EDITOR.md, help/editor.md, help/troubleshooting.md, GONODES_CONTEXT.md
+
+---
+
 ## 2026-03-29 — Host I/O Manifest, SinkOUT, CI Workflows, Example Apps
 
 ### New Operators (1)

@@ -2,15 +2,21 @@ class_name NoiseCHOP
 extends GNChopBase
 ## Generates smooth noise channels over time.
 ## Each channel produces a continuous noise signal seeded differently.
-## Always time-dependent (cooks every frame).
+## Time-dependent when speed > 0 (auto-detected each frame).
 
 
 func _init() -> void:
 	node_type = "noise"
-	time_dependent = true
 
 ## Internal time accumulator for continuous noise evolution.
 var _time_accum: float = 0.0
+
+
+## Auto-set time_dependent based on the speed parameter.
+func _pre_cook(_delta: float) -> void:
+	time_dependent = get_param_value("speed") != 0.0
+	if time_dependent:
+		mark_dirty()
 
 
 func _init_ports() -> void:
@@ -24,6 +30,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01, "", "Octave detail (0 = smooth, 1 = rough)"))
 	add_parameter(GNParameter.create_float("period", 1.0, 0.01, 100.0, 0.01, "", "Time period of noise cycle"))
 	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "", "Random seed"))
+	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, 10.0, 0.01, "Speed", "Time evolution speed (0 = frozen)"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
@@ -34,7 +41,8 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var seed_val: int = get_param_value("seed")
 
 	# Advance time accumulator using engine-injected delta
-	_time_accum += current_delta
+	var speed: float = get_param_value("speed")
+	_time_accum += current_delta * speed
 
 	# Parse channel names (comma-separated) or auto-generate
 	var ch_names: PackedStringArray = _parse_channel_names(names_str, num_ch)

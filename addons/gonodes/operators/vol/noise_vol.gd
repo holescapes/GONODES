@@ -6,7 +6,14 @@ extends GNVolBase
 func _init() -> void:
 	super._init()
 	node_type = "noise"
-	time_dependent = true  # shader uses elapsed_time * speed
+
+
+## Auto-set time_dependent based on the speed parameter.
+## When speed == 0 the noise is static — no reason to cook every frame.
+func _pre_cook(_delta: float) -> void:
+	time_dependent = get_param_value("speed") != 0.0
+	if time_dependent:
+		mark_dirty()
 
 
 func _init_parameters() -> void:

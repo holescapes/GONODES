@@ -43,6 +43,19 @@ static var _ext_display_handlers: Dictionary = {}
 static func register_display_handler(data_class_name: String, handler: Callable) -> void:
 	_ext_display_handlers[data_class_name] = handler
 
+
+## Returns true if a legacy extension display handler exists for the given class.
+func has_ext_display_handler(data_class_name: String) -> bool:
+	return _ext_display_handlers.has(data_class_name)
+
+
+## Invokes a legacy extension display handler for the given data class.
+func call_ext_display_handler(data_class_name: String, output) -> void:
+	if _ext_display_handlers.has(data_class_name):
+		_hide_all_displays()
+		var handler: Callable = _ext_display_handlers[data_class_name]
+		handler.call(output, self)
+
 ## Public helper: show a texture in the viewer. Used by extension display handlers.
 func show_texture(tex: Texture2D, info: String) -> void:
 	_show_texture(tex, info)
@@ -828,6 +841,67 @@ func get_content_rect() -> Rect2:
 	return _get_content_rect()
 
 
+## Public: display a CPU-side Image with auto-cached ImageTexture.
+## Handles efficient upload (create once, update in-place, re-layout on resize).
+func show_image(image: Image, info: String) -> void:
+	var needs_layout := false
+	if _img_texture == null:
+		_img_texture = ImageTexture.create_from_image(image)
+		needs_layout = true
+	else:
+		var old_size := _img_texture.get_size()
+		_img_texture.update(image)
+		if Vector2i(_img_texture.get_size()) != Vector2i(old_size):
+			needs_layout = true
+	if needs_layout:
+		_show_texture(_img_texture, info)
+		_update_zoom_label()
+	else:
+		if _info_bar:
+			_info_bar.text = info
+
+
+## Public: display CHOP waveform.
+func show_waveform(ch_data: GNChannelData) -> void:
+	_show_waveform(ch_data)
+
+
+## Public: display DAT spreadsheet.
+func show_spreadsheet(tbl: GNTableData) -> void:
+	_show_spreadsheet(tbl)
+
+
+## Public: display SOP 3D mesh in orbit viewport.
+func show_3d_mesh(geo_data: GNGeoData) -> void:
+	_show_3d_mesh(geo_data)
+
+
+## Public: display MAT preview sphere.
+func show_material(mat_data: GNMaterialData) -> void:
+	_show_material(mat_data)
+
+
+## Public: display POP point cloud.
+func show_pop_particles(pd: GNParticleData) -> void:
+	_show_pop_particles(pd)
+
+
+## Public: display VOL orthogonal slices + MIP.
+func show_vol_slices(vd: GNVolumeData) -> void:
+	_show_vol_slices(vd)
+
+
+## Public: display UI widget snapshot.  Accepts a GNUiBase (untyped to avoid
+## import dependency from extensions).
+func show_ui_preview(ui_node) -> void:
+	_show_ui_preview(ui_node)
+
+
+## Public: refresh the zoom percentage label.
+func update_zoom_label() -> void:
+	_update_zoom_label()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Display Management
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -914,10 +988,11 @@ func set_target(p_node_id: String) -> void:
 
 
 ## Main update entry point — called each cook frame by the editor.
-## Reads the node's cached_output and routes to the correct display mode.
-## Display mode is determined by the OUTPUT DATA TYPE, not the node's family.
-## This ensures cross-family nodes (InstancePOP→SOP, MarchingCubesVOL→SOP,
-## RaymarchVOL→TOP, AnalyzeVOL→CHOP) get the correct viewer.
+## Delegates display to the node's own display_in_viewer() virtual method.
+## Each family base class (GNTopBase, GNChopBase, etc.) provides the default
+## visualization; individual operators can override for custom display.
+## Legacy extension handlers (register_display_handler) are checked as a
+## fallback for extensions that haven't migrated to the virtual method.
 func update_from_node(node: GNNode) -> void:
 	if node == null:
 		_hide_all_displays()
@@ -930,97 +1005,10 @@ func update_from_node(node: GNNode) -> void:
 	var family_color := GNFamily.get_color(family)
 	_update_toolbar(family_name, node.id, family_color)
 
-	var output: GNData = node.cached_output
-
-	# ── Route by OUTPUT DATA TYPE (handles cross-family nodes correctly) ──
-	if output is GNTextureData:
-		var tex_data: GNTextureData = output as GNTextureData
-		if tex_data.texture:
-			_show_texture(tex_data.texture,
-				"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
-			_update_zoom_label()
-			return
-		_show_info("No texture output", "")
-		return
-
-	if output is GNImageData:
-		var img_data: GNImageData = output as GNImageData
-		if img_data.image != null and not img_data.image.is_empty():
-			var info := "%dx%d" % [img_data.resolution.x, img_data.resolution.y]
-			var needs_layout := false
-			if _img_texture == null:
-				_img_texture = ImageTexture.create_from_image(img_data.image)
-				needs_layout = true
-			else:
-				var old_size := _img_texture.get_size()
-				_img_texture.update(img_data.image)
-				if Vector2i(_img_texture.get_size()) != Vector2i(old_size):
-					needs_layout = true
-			if needs_layout:
-				_show_texture(_img_texture, info)
-				_update_zoom_label()
-			else:
-				if _info_bar:
-					_info_bar.text = info
-			return
-		_img_texture = null
-		_show_info("No IMG output", "")
-		return
-
-	if output is GNChannelData:
-		_show_waveform(output as GNChannelData)
-		return
-
-	if output is GNTableData:
-		_show_spreadsheet(output as GNTableData)
-		return
-
-	if output is GNGeoData:
-		_show_3d_mesh(output as GNGeoData)
-		return
-
-	if output is GNMaterialData:
-		_show_material(output as GNMaterialData)
-		return
-
-	if output is GNParticleData:
-		var pd: GNParticleData = output as GNParticleData
-		if pd.particle_count > 0:
-			_show_pop_particles(pd)
-			return
-		_show_info("No POP output", "")
-		return
-
-	if output is GNVolumeData:
-		var vd: GNVolumeData = output as GNVolumeData
-		if vd.has_volume():
-			_show_vol_slices(vd)
-			return
-		_show_info("No VOL output", "")
-		return
-
-	# ── Extension-registered display handlers ──
-	var data_class_name := output.get_class()
-	if _ext_display_handlers.has(data_class_name):
-		_hide_all_displays()
-		var handler: Callable = _ext_display_handlers[data_class_name]
-		handler.call(output, self)
-		return
-
-	# ── Family-specific fallbacks for nodes with no typed output ──
-	match family:
-		GNFamily.Type.COMP:
-			_show_info("COMP: %s" % node.node_type, "Component operator")
-		GNFamily.Type.UI:
-			if node is GNUiBase:
-				_show_ui_preview(node as GNUiBase)
-			else:
-				_show_info("No UI output", "")
-		_:
-			if output == null:
-				_show_info("No output", "")
-			else:
-				_show_info("Unsupported output type", "")
+	# Primary path: let the node decide how to display itself.
+	# Family base classes provide sensible defaults; individual operators
+	# can override display_in_viewer() for custom visualization.
+	node.display_in_viewer(self)
 
 
 ## Clears the viewer display.

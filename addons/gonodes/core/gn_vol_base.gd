@@ -63,6 +63,15 @@ func update_preview_control(control: Control) -> void:
 		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
 
 
+func display_in_viewer(viewer) -> void:
+	if cached_output is GNVolumeData:
+		var vd: GNVolumeData = cached_output as GNVolumeData
+		if vd.has_volume():
+			viewer.show_vol_slices(vd)
+			return
+	viewer.show_info("No VOL output", "")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Texture Helpers
 # ═══════════════════════════════════════════════════════════════════════════════

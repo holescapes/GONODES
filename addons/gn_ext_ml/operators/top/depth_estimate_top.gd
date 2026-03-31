@@ -17,7 +17,6 @@ const MODEL_H := 256
 
 func _init() -> void:
 	node_type = "depthestimate"
-	time_dependent = true
 	node_description = "Monocular depth estimation — outputs a depth map. Requires gn_ext_ml."
 
 func supported_platforms() -> PackedStringArray:

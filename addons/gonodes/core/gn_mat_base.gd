@@ -50,4 +50,11 @@ func update_preview_control(control: Control) -> void:
 		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
 
 
+func display_in_viewer(viewer) -> void:
+	if cached_output is GNMaterialData:
+		viewer.show_material(cached_output as GNMaterialData)
+		return
+	viewer.show_info("No MAT output", "")
+
+
 

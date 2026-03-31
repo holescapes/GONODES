@@ -19,7 +19,6 @@ var _host_dirty: bool = false
 
 func _init() -> void:
 	node_type = "host_in"
-	time_dependent = true
 
 
 func _init_ports() -> void:

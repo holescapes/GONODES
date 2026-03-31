@@ -141,6 +141,13 @@ func update_preview_control(control: Control) -> void:
 			label.text = "no widget"
 
 
+func display_in_viewer(viewer) -> void:
+	if _control_node != null:
+		viewer.show_ui_preview(self)
+		return
+	viewer.show_info("No UI output", "")
+
+
 ## Called by WindowOUT to deliver input events to overlay content.
 ## event position is in SubViewport coordinates.
 ## Return true if the event was handled.

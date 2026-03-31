@@ -24,6 +24,9 @@ var _tab_container: TabContainer
 var _cook_chain_tree: Tree
 var _active_chain_tree: Tree
 var _param_ref_tree: Tree
+var _toolbar: HBoxContainer
+var _copy_selected_btn: Button
+var _copy_all_btn: Button
 
 ## Throttle: update at most every N frames to avoid UI overhead.
 const _UPDATE_INTERVAL_FRAMES := 6
@@ -46,10 +49,35 @@ func _init() -> void:
 	sb.content_margin_bottom = 2.0
 	add_theme_stylebox_override("panel", sb)
 
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+	vbox.size_flags_vertical = SIZE_EXPAND_FILL
+	add_child(vbox)
+
+	# Toolbar
+	_toolbar = HBoxContainer.new()
+	_toolbar.size_flags_horizontal = SIZE_EXPAND_FILL
+
+	_copy_selected_btn = Button.new()
+	_copy_selected_btn.text = "Copy Selected"
+	_copy_selected_btn.tooltip_text = "Copy selected rows to clipboard (Ctrl+C)"
+	_copy_selected_btn.flat = true
+	_copy_selected_btn.pressed.connect(_copy_selected_rows)
+	_toolbar.add_child(_copy_selected_btn)
+
+	_copy_all_btn = Button.new()
+	_copy_all_btn.text = "Copy All"
+	_copy_all_btn.tooltip_text = "Copy all rows from current tab to clipboard"
+	_copy_all_btn.flat = true
+	_copy_all_btn.pressed.connect(_copy_all_rows)
+	_toolbar.add_child(_copy_all_btn)
+
+	vbox.add_child(_toolbar)
+
 	_tab_container = TabContainer.new()
 	_tab_container.size_flags_horizontal = SIZE_EXPAND_FILL
 	_tab_container.size_flags_vertical = SIZE_EXPAND_FILL
-	add_child(_tab_container)
+	vbox.add_child(_tab_container)
 
 	# Tab 1: Cook Chain
 	_cook_chain_tree = _create_tree("Cook Chain")
@@ -109,7 +137,7 @@ func _create_tree(tab_name: String) -> Tree:
 	tree.size_flags_vertical = SIZE_EXPAND_FILL
 	tree.allow_reselect = true
 	tree.hide_root = true
-	tree.select_mode = Tree.SELECT_ROW
+	tree.select_mode = Tree.SELECT_MULTI
 	tree.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	_tab_container.add_child(tree)
 	return tree
@@ -368,3 +396,88 @@ func _emit_selected_from_tree(tree: Tree) -> void:
 func toggle_cook_sort() -> void:
 	_cook_sort_mode = "time" if _cook_sort_mode == "order" else "order"
 	_update_cook_chain()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Clipboard
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_C and event.ctrl_pressed:
+			_copy_selected_rows()
+			get_viewport().set_input_as_handled()
+
+
+func _copy_selected_rows() -> void:
+	var tree := _get_active_tree()
+	if tree == null:
+		return
+	var lines: PackedStringArray = []
+	# Header
+	if tree.column_titles_visible:
+		var header: PackedStringArray = []
+		for col in range(tree.columns):
+			header.append(tree.get_column_title(col))
+		lines.append("\t".join(header))
+	# Selected rows
+	var item: TreeItem = tree.get_next_selected(null)
+	while item != null:
+		lines.append(_item_to_tsv(item, tree.columns))
+		item = tree.get_next_selected(item)
+	if lines.size() <= 1:
+		return  # nothing selected (only header)
+	DisplayServer.clipboard_set("\n".join(lines))
+
+
+func _copy_all_rows() -> void:
+	var tree := _get_active_tree()
+	if tree == null:
+		return
+	var lines: PackedStringArray = []
+	# Header
+	if tree.column_titles_visible:
+		var header: PackedStringArray = []
+		for col in range(tree.columns):
+			header.append(tree.get_column_title(col))
+		lines.append("\t".join(header))
+	# All rows (recursive for Active Chains tree)
+	var root := tree.get_root()
+	if root != null:
+		_collect_items_recursive(root, tree.columns, lines, 0)
+	if lines.size() <= 1:
+		return  # empty table
+	DisplayServer.clipboard_set("\n".join(lines))
+
+
+func _get_active_tree() -> Tree:
+	match _tab_container.current_tab:
+		0: return _cook_chain_tree
+		1: return _active_chain_tree
+		2: return _param_ref_tree
+	return null
+
+
+func _item_to_tsv(item: TreeItem, col_count: int) -> String:
+	var cols: PackedStringArray = []
+	for col in range(col_count):
+		cols.append(item.get_text(col))
+	return "\t".join(cols)
+
+
+func _collect_items_recursive(parent: TreeItem, col_count: int,
+		lines: PackedStringArray, depth: int) -> void:
+	var child := parent.get_first_child()
+	while child != null:
+		var prefix := "  ".repeat(depth) if depth > 0 else ""
+		var cols: PackedStringArray = []
+		for col in range(col_count):
+			var text := child.get_text(col)
+			if col == 0 and not prefix.is_empty():
+				text = prefix + text
+			cols.append(text)
+		lines.append("\t".join(cols))
+		_collect_items_recursive(child, col_count, lines, depth + 1)
+		child = child.get_next()

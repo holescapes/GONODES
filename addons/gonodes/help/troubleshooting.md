@@ -52,6 +52,28 @@ Editor, Network, Extensions, etc. Errors route to Godot's `push_error()`,
 warnings to `push_warning()`, and info/debug to `print()`. Check the
 Godot Output panel for messages.
 
+### Debug Panel (F2)
+
+Press **F2** to open the debug panel below the graph. Three tabs:
+
+- **Cook Chain** — see every node's cook order, status, and timing
+- **Active Chains** — tree view of which nodes feed each sink
+- **Param Refs** — all expressions and what they reference
+
+Multi-select rows (Ctrl+click, Shift+click) and use **Copy Selected** or
+**Copy All** to export debug data to clipboard as tab-separated text.
+
+### Clipboard Export (Right-Click)
+
+Three context menu items for sharing debug information:
+
+- **Copy Debug Info** — select one node, right-click → copies its full state
+  (type, params, output, connections, warnings, cook time) as JSON
+- **Copy as JSON** — copies selected nodes + connections as JSON
+- **Copy Network JSON** — copies the entire network as JSON
+
+Paste into a text editor, bug report, or chat for easy sharing.
+
 ---
 
 ## Common Issues
@@ -97,6 +119,30 @@ Godot Output panel for messages.
 **Fix:** Enable `shader_baker/enabled=true` in your export preset. This
 pre-compiles shaders during the build step. For development, the stutter
 is normal and only happens once per shader variant.
+
+### "TOPtoIMG shows black on first frame"
+
+**Symptom:** TOPtoIMG produces a black image for the first frame after a
+change, then shows the correct image on the next frame.
+
+**Explanation:** This is expected behavior. TOPtoIMG reads pixels from an
+upstream TOP's ViewportTexture, but Godot defers viewport rendering to end
+of frame. The operator uses a one-frame delay: the first cook caches the
+current image and schedules a re-cook; the second cook reads the freshly
+rendered pixels. This means the output is always one frame behind the
+upstream TOP. For most workflows this is imperceptible.
+
+### "Node re-cooks every frame even though nothing changed"
+
+**Symptom:** A node shows as active and cooking every frame in the debug
+panel Cook Chain tab, even though its inputs haven't changed.
+
+**Causes:**
+1. The node has `time_dependent` enabled — nodes like LFO, Noise, Clock,
+   and Timer re-cook every frame by design.
+2. An upstream node is time-dependent — dirty flags propagate downstream.
+3. An expression references `time`, `frame`, or `dt` — the expression
+   system marks the parameter dirty each frame.
 
 ### "GDExtension DLL not found"
 

@@ -35,7 +35,6 @@ const MODEL_H := 640
 
 func _init() -> void:
 	node_type = "objectdetect"
-	time_dependent = true
 	node_description = "Object detection — table of bounding boxes. Requires gn_ext_ml."
 
 func supported_platforms() -> PackedStringArray:

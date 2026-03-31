@@ -33,13 +33,12 @@ var _new_nodes_adopted: bool = false
 
 
 ## Override execute_cook: for 3D viewports the render mode must stay at
-## UPDATE_ALWAYS so the physics simulation is captured every frame.
-## The base GNTopBase.execute_cook sets UPDATE_ONCE, which is correct
-## for 2D TOPs but wrong for a 3D render with physics.
+## UPDATE_ALWAYS when cooking every frame, so the physics simulation is
+## captured.  When cook_every_frame is off, uses UPDATE_ONCE (default TOP
+## behavior) to avoid wasted GPU work.
 func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 	var result := super.execute_cook(inputs, frame)
-	# Restore UPDATE_ALWAYS — the parent just set UPDATE_ONCE on our viewport.
-	if _viewport != null:
+	if _viewport != null and get_param_value("cook_every_frame"):
 		_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	return result
 
@@ -47,6 +46,13 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 func _init() -> void:
 	node_type = "render"
 	time_dependent = true
+
+
+## Respect the cook_every_frame toggle.
+func _pre_cook(_delta: float) -> void:
+	time_dependent = get_param_value("cook_every_frame")
+	if time_dependent:
+		mark_dirty()
 
 
 func _init_ports() -> void:
@@ -93,6 +99,10 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("dof_bokeh_shape",
 		PackedStringArray(["Box", "Hexagon", "Circle"]), 2,
 		"Bokeh Shape", "Shape of the depth-of-field bokeh"))
+
+	# Cook behavior
+	add_parameter(GNParameter.create_bool("cook_every_frame", true,
+		"Cook Every Frame", "When off, only re-renders when inputs or parameters change"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

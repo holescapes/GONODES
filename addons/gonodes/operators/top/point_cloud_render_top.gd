@@ -11,7 +11,6 @@ var _out_tex: GNTextureData = null
 
 func _init() -> void:
 	node_type = "point_cloud_render"
-	time_dependent = true
 
 func _init_ports() -> void:
 	add_input("pop", GNFamily.Type.POP, true, "Particle data to render", "Particles")

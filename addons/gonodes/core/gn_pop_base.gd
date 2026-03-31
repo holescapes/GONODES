@@ -92,6 +92,15 @@ func update_preview_control(control: Control) -> void:
 		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
 
 
+func display_in_viewer(viewer) -> void:
+	if cached_output is GNParticleData:
+		var pd: GNParticleData = cached_output as GNParticleData
+		if pd.particle_count > 0:
+			viewer.show_pop_particles(pd)
+			return
+	viewer.show_info("No POP output", "")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Output Helpers
 # ═══════════════════════════════════════════════════════════════════════════════

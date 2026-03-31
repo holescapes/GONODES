@@ -14,7 +14,6 @@ var _cached_headers: PackedStringArray = PackedStringArray()
 
 func _init() -> void:
 	node_type = "fifo"
-	time_dependent = true
 
 
 func _init_ports() -> void:

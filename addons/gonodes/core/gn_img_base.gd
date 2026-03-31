@@ -50,6 +50,16 @@ func _prepare_image() -> GNImageData:
 	return _cached_image_data
 
 
+func display_in_viewer(viewer) -> void:
+	if cached_output is GNImageData:
+		var img_data: GNImageData = cached_output as GNImageData
+		if img_data.image != null and not img_data.image.is_empty():
+			viewer.show_image(img_data.image,
+				"%dx%d" % [img_data.resolution.x, img_data.resolution.y])
+			return
+	viewer.show_info("No IMG output", "")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Input Helpers
 # ═══════════════════════════════════════════════════════════════════════════════

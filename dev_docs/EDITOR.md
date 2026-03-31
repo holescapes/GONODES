@@ -179,6 +179,35 @@ The logic lives in `GNNode.create_preview_control()` and
 these unless they have non-data state to display (COMP: `_scene_node`,
 UI: `_control_node`, OUT: sink status).
 
+### Node-Driven Viewer Display (display_in_viewer)
+
+The docked viewer panel uses a **node-driven dispatch** pattern rather than
+a centralized type-switch.  Each node controls its own viewer presentation:
+
+1. `GNNode.display_in_viewer(viewer)` — virtual method on the base class.
+   The `viewer` parameter is untyped (`Variant`) to avoid a core→UI
+   circular dependency.
+2. All 10 family base classes override this method to call the appropriate
+   typed API method on `GNViewerPanel`:
+   - `GNTopBase` / `GNImgBase` → `viewer.show_image()`
+   - `GNChopBase` → `viewer.show_waveform()`
+   - `GNDatBase` → `viewer.show_spreadsheet()`
+   - `GNSopBase` → `viewer.show_3d_mesh()`
+   - `GNMatBase` → `viewer.show_material()`
+   - `GNCompBase` → routes by output data type (texture/geo/default)
+   - `GNPopBase` → `viewer.show_pop_particles()`
+   - `GNVolBase` → `viewer.show_vol_slices()`
+   - `GNUiBase` → `viewer.show_ui_preview(self)`
+3. `GNViewerPanel.update_from_node()` is a single line:
+   `node.display_in_viewer(self)` (plus toolbar label update).
+4. **Legacy extension handlers** are preserved: the GNNode base fallback
+   checks `viewer.has_ext_display_handler()` for registered extension
+   display handlers (e.g., SDF extension) before falling back to a
+   generic text preview.
+
+This pattern makes adding viewer support for new families or custom nodes
+trivial — just override `display_in_viewer()` on the base class.
+
 ### Multi-Output Nodes
 
 Nodes with multiple outputs (e.g. GDScriptSCRIPT Generic template, MultiBufferRenderTOP)
@@ -280,6 +309,15 @@ nodes.
 The panel (`GNDebugPanel`) docks below the graph canvas and updates every
 6 frames (throttled to avoid UI overhead).  Only the currently visible tab
 is refreshed.
+
+**Clipboard & multi-select:**  All three Tree tabs use `SELECT_MULTI` for
+Ctrl+click / Shift+click row selection.  A toolbar above the tabs provides:
+- **Copy Selected** — copies selected rows as tab-separated values (TSV)
+  with column headers. Also bound to **Ctrl+C** when the panel is visible.
+- **Copy All** — copies every row from the current tab.  For Active Chains,
+  tree hierarchy is preserved with indentation on the first column.
+
+Output is ready for pasting into spreadsheets, text editors, or chat.
 
 #### Tab 1 — Cook Chain
 
@@ -416,10 +454,12 @@ verify that a SOP is producing the expected vertex count.
 ### Implementation Details
 
 - **Panel:** `GNDebugPanel` (`addons/gonodes/ui/gn_debug_panel.gd`) — 3-tab
-  `PanelContainer` with `TabContainer` + `Tree` widgets.  Each Tree row
-  stores the `node_id` as metadata for click-to-navigate.  Emits
-  `node_selected(node_id)` on double-click, which the editor routes to
-  `gn_graph_editor.scroll_to_node()`.
+  `PanelContainer` with `VBoxContainer` → toolbar (`HBoxContainer` with
+  "Copy Selected" + "Copy All" buttons) + `TabContainer` + `Tree` widgets.
+  All trees use `SELECT_MULTI`.  Each Tree row stores the `node_id` as
+  metadata for click-to-navigate.  Emits `node_selected(node_id)` on
+  double-click, which the editor routes to `gn_graph_editor.scroll_to_node()`.
+  Ctrl+C captured via `_unhandled_key_input()` copies selected rows as TSV.
 - **Overlay:** `GNDebugOverlay` (`addons/gonodes/ui/gn_debug_overlay.gd`) —
   `Control` node added as child of `GraphEdit`.  Uses `_draw()` for badges,
   dirty flash borders, data flow pills, and sink halos.  Active dimming
@@ -441,6 +481,41 @@ verify that a SOP is producing the expected vertex count.
   nothing from `core/` at the module level — references to `GNCookEngine`
   and `GNNetwork` are set at runtime by `gn_editor.gd`.  Hard Rule 25.20
   is fully respected.
+
+
+## Clipboard Export (Context Menu)
+
+Three context menu items in the graph editor for sharing and debugging:
+
+### Copy as JSON
+
+Serializes selected nodes + their internal connections as pretty-printed JSON
+to the system clipboard.  Uses `GNNode.to_dict()` for each selected node and
+filters `GNNetwork.connections` to only include wires between selected nodes.
+
+### Copy Debug Info
+
+Single-node diagnostic dump.  Requires exactly one node selected.  Includes:
+- `node_type`, `family`, `id`
+- All parameters (name, mode, value, expression if active)
+- `output_summary` (from `GNData.get_data_summary()`)
+- Input and output connections
+- `time_dependent`, `is_sink`, `cook_valid`, `cook_time_ms`
+- `dirty` flag and any `node_warning` / `node_error` strings
+
+### Copy Network JSON
+
+Serializes the entire `GNNetwork.to_dict()` (all nodes, connections,
+metadata, annotations) as pretty-printed JSON to clipboard.
+
+### Implementation
+
+All three are defined in `gn_graph_editor.gd`:
+- `_CtxID.COPY_AS_JSON`, `_CtxID.COPY_DEBUG_INFO`, `_CtxID.COPY_NETWORK_JSON`
+  enum values in `_show_context_menu()`
+- `_copy_selected_as_json()`, `_copy_debug_info_to_clipboard()`,
+  `_copy_network_json_to_clipboard()` methods
+- Uses `DisplayServer.clipboard_set()` for OS clipboard access
 
 
 ## Settings Persistence

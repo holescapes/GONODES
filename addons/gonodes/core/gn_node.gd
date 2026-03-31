@@ -287,6 +287,44 @@ static func _preview_format_name(fmt: Image.Format) -> String:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Viewer Display — Per-Node Viewer Visualization
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Displays this node's output in the docked/floating viewer panel.
+## Family base classes override this to provide type-specific visualization
+## (texture, waveform, 3D mesh, spreadsheet, etc.).  Individual operators can
+## further override for custom display (e.g. a COMP showing its composed scene
+## rather than raw pass-through geometry).
+##
+## The [param viewer] parameter is untyped to avoid a core → UI dependency.
+## It exposes public helper methods:
+##   viewer.show_texture(tex, info)      — 2D texture with pan/zoom
+##   viewer.show_image(image, info)      — CPU Image (auto-cached ImageTexture)
+##   viewer.show_waveform(channel_data)  — CHOP waveform polylines
+##   viewer.show_spreadsheet(table_data) — DAT table grid
+##   viewer.show_3d_mesh(geo_data)       — SOP 3D viewport with orbit camera
+##   viewer.show_material(mat_data)      — MAT preview sphere
+##   viewer.show_pop_particles(pop_data) — POP point cloud
+##   viewer.show_vol_slices(vol_data)    — VOL orthogonal slices + MIP
+##   viewer.show_ui_preview(control)     — UI widget snapshot
+##   viewer.show_info(text, info_bar)    — Plain text label
+##   viewer.hide_all_displays()          — Clear all displays
+##   viewer.update_zoom_label()          — Refresh zoom indicator
+func display_in_viewer(viewer) -> void:
+	# Fallback: check legacy extension handler registry (keyed by data class name).
+	# Extensions that register via GNViewerPanel.register_display_handler() are
+	# supported here so existing extensions continue to work without changes.
+	if cached_output != null:
+		var data_class_name := cached_output.get_class()
+		if viewer.has_ext_display_handler(data_class_name):
+			viewer.call_ext_display_handler(data_class_name, cached_output)
+			return
+		viewer.show_info(cached_output.get_preview_text(), "")
+	else:
+		viewer.show_info("No output", "")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Initialization
 # ═══════════════════════════════════════════════════════════════════════════════
 
