@@ -1,0 +1,452 @@
+{
+    "generator": "GONODES",
+    "description": "TOP family smoke test — every core TOP operator. Generators on the left feed into effect chains. Select any node and check the viewer to verify output.",
+    "connections": [
+        {"from": "noise1", "from_port": 0, "to": "blur1", "to_port": 0},
+        {"from": "blur1", "from_port": 0, "to": "sharpen1", "to_port": 0},
+        {"from": "sharpen1", "from_port": 0, "to": "level1", "to_port": 0},
+        {"from": "level1", "from_port": 0, "to": "hsv1", "to_port": 0},
+        {"from": "hsv1", "from_port": 0, "to": "threshold1", "to_port": 0},
+        {"from": "threshold1", "from_port": 0, "to": "mono1", "to_port": 0},
+
+        {"from": "constant1", "from_port": 0, "to": "transform1", "to_port": 0},
+        {"from": "transform1", "from_port": 0, "to": "flip1", "to_port": 0},
+        {"from": "flip1", "from_port": 0, "to": "crop1", "to_port": 0},
+        {"from": "crop1", "from_port": 0, "to": "fit1", "to_port": 0},
+        {"from": "fit1", "from_port": 0, "to": "resolution1", "to_port": 0},
+        {"from": "resolution1", "from_port": 0, "to": "tile1", "to_port": 0},
+
+        {"from": "circle1", "from_port": 0, "to": "edge1", "to_port": 0},
+        {"from": "edge1", "from_port": 0, "to": "dilate_erode1", "to_port": 0},
+        {"from": "dilate_erode1", "from_port": 0, "to": "anti_alias1", "to_port": 0},
+        {"from": "anti_alias1", "from_port": 0, "to": "normal_map1", "to_port": 0},
+        {"from": "normal_map1", "from_port": 0, "to": "slope1", "to_port": 0},
+
+        {"from": "rectangle1", "from_port": 0, "to": "emboss1", "to_port": 0},
+        {"from": "emboss1", "from_port": 0, "to": "posterize1", "to_port": 0},
+        {"from": "posterize1", "from_port": 0, "to": "radial_blur1", "to_port": 0},
+        {"from": "radial_blur1", "from_port": 0, "to": "luma_blur1", "to_port": 0},
+        {"from": "luma_blur1", "from_port": 0, "to": "convolution1", "to_port": 0},
+
+        {"from": "triangle1", "from_port": 0, "to": "channel_mix1", "to_port": 0},
+        {"from": "channel_mix1", "from_port": 0, "to": "reorder1", "to_port": 0},
+        {"from": "reorder1", "from_port": 0, "to": "premultiply1", "to_port": 0},
+        {"from": "premultiply1", "from_port": 0, "to": "color_map1", "to_port": 0},
+
+        {"from": "pattern1", "from_port": 0, "to": "lens_distort1", "to_port": 0},
+        {"from": "lens_distort1", "from_port": 0, "to": "corner_pin1", "to_port": 0},
+        {"from": "corner_pin1", "from_port": 0, "to": "projection1", "to_port": 0},
+        {"from": "projection1", "from_port": 0, "to": "deform1", "to_port": 0},
+
+        {"from": "ramp1", "from_port": 0, "to": "palette1", "to_port": 0},
+        {"from": "palette1", "from_port": 0, "to": "remap1", "to_port": 0},
+        {"from": "remap1", "from_port": 0, "to": "matte1", "to_port": 0},
+
+        {"from": "text1", "from_port": 0, "to": "displace1", "to_port": 0},
+        {"from": "noise1", "from_port": 0, "to": "displace1", "to_port": 1},
+        {"from": "displace1", "from_port": 0, "to": "analyze1", "to_port": 0},
+
+        {"from": "svg1", "from_port": 0, "to": "chroma_key1", "to_port": 0},
+        {"from": "chroma_key1", "from_port": 0, "to": "depth1", "to_port": 0},
+
+        {"from": "noise1", "from_port": 0, "to": "composite1", "to_port": 0},
+        {"from": "circle1", "from_port": 0, "to": "composite1", "to_port": 1},
+
+        {"from": "noise1", "from_port": 0, "to": "cross1", "to_port": 0},
+        {"from": "constant1", "from_port": 0, "to": "cross1", "to_port": 1},
+
+        {"from": "noise1", "from_port": 0, "to": "layout1", "to_port": 0},
+        {"from": "circle1", "from_port": 0, "to": "layout1", "to_port": 1},
+
+        {"from": "noise1", "from_port": 0, "to": "lookup1", "to_port": 0},
+        {"from": "ramp1", "from_port": 0, "to": "lookup1", "to_port": 1},
+
+        {"from": "noise1", "from_port": 0, "to": "glue1", "to_port": 0},
+
+        {"from": "noise1", "from_port": 0, "to": "optical_flow1", "to_port": 0},
+
+        {"from": "noise1", "from_port": 0, "to": "cache1", "to_port": 0},
+        {"from": "cache1", "from_port": 0, "to": "time_machine1", "to_port": 0},
+
+        {"from": "noise1", "from_port": 0, "to": "snapshot1", "to_port": 0},
+
+        {"from": "noise1", "from_port": 0, "to": "null1", "to_port": 0},
+
+        {"from": "noise1", "from_port": 0, "to": "feedback1", "to_port": 0},
+
+        {"from": "noise1", "from_port": 0, "to": "switch1", "to_port": 0},
+        {"from": "circle1", "from_port": 0, "to": "switch1", "to_port": 1},
+
+        {"from": "null1", "from_port": 0, "to": "window_out1", "to_port": 0}
+    ],
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [0.0, 0.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "constant1": {
+            "type": "ConstantTOP",
+            "position": [0.0, 200.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "color": {"value": {"_type": "Color", "r": 0.2, "g": 0.4, "b": 0.8, "a": 1.0}}
+            }
+        },
+        "circle1": {
+            "type": "CircleTOP",
+            "position": [0.0, 400.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "rectangle1": {
+            "type": "RectangleTOP",
+            "position": [0.0, 600.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "triangle1": {
+            "type": "TriangleTOP",
+            "position": [0.0, 800.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "pattern1": {
+            "type": "PatternTOP",
+            "position": [0.0, 1000.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "ramp1": {
+            "type": "RampTOP",
+            "position": [0.0, 1200.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "text1": {
+            "type": "TextTOP",
+            "position": [0.0, 1400.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "text": {"value": "GONODES SMOKE TEST"}
+            }
+        },
+        "svg1": {
+            "type": "SVGTOP",
+            "position": [0.0, 1600.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "vector_path1": {
+            "type": "VectorPathTOP",
+            "position": [0.0, 1800.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+
+        "blur1": {
+            "type": "BlurTOP",
+            "position": [300.0, 0.0],
+            "parameters": {}
+        },
+        "sharpen1": {
+            "type": "SharpenTOP",
+            "position": [500.0, 0.0],
+            "parameters": {}
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [700.0, 0.0],
+            "parameters": {}
+        },
+        "hsv1": {
+            "type": "HSVAdjustTOP",
+            "position": [900.0, 0.0],
+            "parameters": {}
+        },
+        "threshold1": {
+            "type": "ThresholdTOP",
+            "position": [1100.0, 0.0],
+            "parameters": {}
+        },
+        "mono1": {
+            "type": "MonoTOP",
+            "position": [1300.0, 0.0],
+            "parameters": {}
+        },
+
+        "transform1": {
+            "type": "TransformTOP",
+            "position": [300.0, 200.0],
+            "parameters": {}
+        },
+        "flip1": {
+            "type": "FlipTOP",
+            "position": [500.0, 200.0],
+            "parameters": {}
+        },
+        "crop1": {
+            "type": "CropTOP",
+            "position": [700.0, 200.0],
+            "parameters": {}
+        },
+        "fit1": {
+            "type": "FitTOP",
+            "position": [900.0, 200.0],
+            "parameters": {}
+        },
+        "resolution1": {
+            "type": "ResolutionTOP",
+            "position": [1100.0, 200.0],
+            "parameters": {}
+        },
+        "tile1": {
+            "type": "TileTOP",
+            "position": [1300.0, 200.0],
+            "parameters": {}
+        },
+
+        "edge1": {
+            "type": "EdgeTOP",
+            "position": [300.0, 400.0],
+            "parameters": {}
+        },
+        "dilate_erode1": {
+            "type": "DilateErodeTOP",
+            "position": [500.0, 400.0],
+            "parameters": {}
+        },
+        "anti_alias1": {
+            "type": "AntiAliasTOP",
+            "position": [700.0, 400.0],
+            "parameters": {}
+        },
+        "normal_map1": {
+            "type": "NormalMapTOP",
+            "position": [900.0, 400.0],
+            "parameters": {}
+        },
+        "slope1": {
+            "type": "SlopeTOP",
+            "position": [1100.0, 400.0],
+            "parameters": {}
+        },
+
+        "emboss1": {
+            "type": "EmbossTOP",
+            "position": [300.0, 600.0],
+            "parameters": {}
+        },
+        "posterize1": {
+            "type": "PosterizeTOP",
+            "position": [500.0, 600.0],
+            "parameters": {}
+        },
+        "radial_blur1": {
+            "type": "RadialBlurTOP",
+            "position": [700.0, 600.0],
+            "parameters": {}
+        },
+        "luma_blur1": {
+            "type": "LumaBlurTOP",
+            "position": [900.0, 600.0],
+            "parameters": {}
+        },
+        "convolution1": {
+            "type": "ConvolutionTOP",
+            "position": [1100.0, 600.0],
+            "parameters": {}
+        },
+
+        "channel_mix1": {
+            "type": "ChannelMixTOP",
+            "position": [300.0, 800.0],
+            "parameters": {}
+        },
+        "reorder1": {
+            "type": "ReorderTOP",
+            "position": [500.0, 800.0],
+            "parameters": {}
+        },
+        "premultiply1": {
+            "type": "PremultiplyTOP",
+            "position": [700.0, 800.0],
+            "parameters": {}
+        },
+        "color_map1": {
+            "type": "ColorMapTOP",
+            "position": [900.0, 800.0],
+            "parameters": {}
+        },
+
+        "lens_distort1": {
+            "type": "LensDistortTOP",
+            "position": [300.0, 1000.0],
+            "parameters": {}
+        },
+        "corner_pin1": {
+            "type": "CornerPinTOP",
+            "position": [500.0, 1000.0],
+            "parameters": {}
+        },
+        "projection1": {
+            "type": "ProjectionTOP",
+            "position": [700.0, 1000.0],
+            "parameters": {}
+        },
+        "deform1": {
+            "type": "DeformTOP",
+            "position": [900.0, 1000.0],
+            "parameters": {}
+        },
+
+        "palette1": {
+            "type": "PaletteTOP",
+            "position": [300.0, 1200.0],
+            "parameters": {}
+        },
+        "remap1": {
+            "type": "RemapTOP",
+            "position": [500.0, 1200.0],
+            "parameters": {}
+        },
+        "matte1": {
+            "type": "MatteTOP",
+            "position": [700.0, 1200.0],
+            "parameters": {}
+        },
+
+        "displace1": {
+            "type": "DisplaceTOP",
+            "position": [300.0, 1400.0],
+            "parameters": {}
+        },
+        "analyze1": {
+            "type": "AnalyzeTOP",
+            "position": [500.0, 1400.0],
+            "parameters": {}
+        },
+
+        "chroma_key1": {
+            "type": "ChromaKeyTOP",
+            "position": [300.0, 1600.0],
+            "parameters": {}
+        },
+        "depth1": {
+            "type": "DepthTOP",
+            "position": [500.0, 1600.0],
+            "parameters": {}
+        },
+
+        "composite1": {
+            "type": "CompositeTOP",
+            "position": [300.0, 2000.0],
+            "parameters": {}
+        },
+        "cross1": {
+            "type": "CrossTOP",
+            "position": [300.0, 2200.0],
+            "parameters": {}
+        },
+        "layout1": {
+            "type": "LayoutTOP",
+            "position": [300.0, 2400.0],
+            "parameters": {}
+        },
+        "lookup1": {
+            "type": "LookupTOP",
+            "position": [300.0, 2600.0],
+            "parameters": {}
+        },
+        "glue1": {
+            "type": "GlueTOP",
+            "position": [300.0, 2800.0],
+            "parameters": {}
+        },
+        "optical_flow1": {
+            "type": "OpticalFlowTOP",
+            "position": [300.0, 3000.0],
+            "parameters": {}
+        },
+
+        "cache1": {
+            "type": "CacheTOP",
+            "position": [300.0, 3200.0],
+            "parameters": {}
+        },
+        "time_machine1": {
+            "type": "TimeMachineTOP",
+            "position": [500.0, 3200.0],
+            "parameters": {}
+        },
+        "snapshot1": {
+            "type": "SnapshotTOP",
+            "position": [300.0, 3400.0],
+            "parameters": {}
+        },
+        "feedback1": {
+            "type": "FeedbackTOP",
+            "position": [300.0, 3600.0],
+            "parameters": {}
+        },
+        "switch1": {
+            "type": "SwitchTOP",
+            "position": [300.0, 3800.0],
+            "parameters": {}
+        },
+
+        "null1": {
+            "type": "NullTOP",
+            "position": [1500.0, 0.0],
+            "parameters": {}
+        },
+
+        "reaction_diffusion1": {
+            "type": "ReactionDiffusionTOP",
+            "position": [0.0, 2000.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}
+            }
+        },
+        "fluid_2d1": {
+            "type": "Fluid2DTOP",
+            "position": [0.0, 2200.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}
+            }
+        },
+        "custom_shader1": {
+            "type": "CustomShaderTOP",
+            "position": [0.0, 2400.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "compute_shader1": {
+            "type": "ComputeShaderTOP",
+            "position": [0.0, 2600.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}
+            }
+        },
+
+        "window_out1": {
+            "type": "WindowOUT",
+            "position": [1700.0, 0.0],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "version": "1.0"
+}

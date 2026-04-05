@@ -247,6 +247,7 @@ func inspect(node: GNNode) -> void:
 		var row := GNParamRow.new()
 		row.network = network
 		row.setup(param, node)
+		row.visible = param.visible
 
 		if param.display_group != "" and param.display_group == current_group:
 			# Continue the existing group row
@@ -309,6 +310,12 @@ func _on_parameters_changed(node_id: String) -> void:
 func _on_node_cooked(node_id: String) -> void:
 	if _current_node == null or _current_node.id != node_id:
 		return
+
+	# Sync param row visibility (operators may show/hide params based on mode)
+	for p_name in _param_rows:
+		var param: GNParameter = _current_node.get_parameter(p_name)
+		if param:
+			_param_rows[p_name].visible = param.visible
 
 	var base_text := "%s  |  %s  |  %.2fms" % [
 		GNFamily.get_family_name(_current_node.family),

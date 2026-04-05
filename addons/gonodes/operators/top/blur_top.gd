@@ -23,9 +23,9 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("size", 5.0, 0.0, 100.0, 0.1, "Blur Size", "Blur radius in pixels"))
-	add_parameter(GNParameter.create_int("quality", 4, 1, 8, "", "Samples per direction (higher = smoother)"))
+	add_parameter(GNParameter.create_int("quality", 4, 1, 16, "", "Samples within the blur radius (higher = smoother)"))
 	add_parameter(GNParameter.create_enum("method",
-		PackedStringArray(["Gaussian", "Box"]), 0, "", "Blur algorithm"))
+		PackedStringArray(["Gaussian", "Box", "Triangle", "Sinc", "Hanning", "Blackman", "Bump"]), 0, "", "Blur filter type"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -39,6 +39,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var blur_size: float = get_param_value("size")
 	var quality_val: int = get_param_value("quality")
+	var method_val: int = get_param_value("method")
 
 	# Match viewport sizes to input
 	if _viewport_h.size != res:
@@ -50,6 +51,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material_h.set_shader_parameter("direction", Vector2(1.0, 0.0))
 	_material_h.set_shader_parameter("blur_size", blur_size)
 	_material_h.set_shader_parameter("quality", quality_val)
+	_material_h.set_shader_parameter("method", method_val)
 
 	# Vertical pass: reads horizontal pass output
 	var h_tex: ViewportTexture = _viewport_h.get_texture()
@@ -58,6 +60,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material_v.set_shader_parameter("direction", Vector2(0.0, 1.0))
 	_material_v.set_shader_parameter("blur_size", blur_size)
 	_material_v.set_shader_parameter("quality", quality_val)
+	_material_v.set_shader_parameter("method", method_val)
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data

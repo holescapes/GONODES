@@ -312,17 +312,33 @@ Brightness, contrast, gamma, and invert adjustments.
 
 ---
 
-#### BlurTOP
+#### BloomTOP
 
-Gaussian or box blur.
+Bloom / glow effect using Dual Kawase blur. Extracts bright areas, blurs them through a downsample/upsample chain, then composites the glow back onto the original.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| size | Float | 5.0 | 0.0–100.0 | Blur radius |
-| quality | Int | 4 | 1–8 | Sample count per direction |
-| method | Enum | Gaussian | Gaussian, Box | Blur algorithm |
+| threshold | Float | 0.8 | 0.0–5.0 | Luminance threshold for bloom extraction |
+| knee | Float | 0.1 | 0.0–1.0 | Soft knee width around the threshold |
+| intensity | Float | 1.0 | 0.0–5.0 | Bloom glow strength |
+| levels | Int | 4 | 1–6 | Downsample/upsample levels (more = wider bloom) |
+| blend | Enum | Screen | Screen, Add, Soft Light | How bloom is composited with the original |
 
-**How it works:** Two-pass separable blur — horizontal pass into an intermediate SubViewport, then vertical pass into the output SubViewport. Each pass samples multiple texels along one axis weighted by a Gaussian (or uniform for box). Two shader materials, two viewports.
+**How it works:** Four-stage pipeline: (1) threshold shader extracts bright pixels with soft knee, (2) Dual Kawase downsample chain halves resolution per level (5 bilinear taps each), (3) upsample chain doubles resolution back (8 bilinear taps each), (4) composite shader blends the blurred glow with the original using Screen, Add, or Soft Light. Very efficient — far fewer samples than equivalent separable Gaussian.
+
+---
+
+#### BlurTOP
+
+Separable blur with 7 filter types matching TouchDesigner's Blur TOP.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| size | Float | 5.0 | 0.0–100.0 | Blur radius in pixels |
+| quality | Int | 4 | 1–16 | Samples within the blur radius (higher = smoother) |
+| method | Enum | Gaussian | Gaussian, Box, Triangle, Sinc, Hanning, Blackman, Bump | Blur filter type |
+
+**How it works:** Two-pass separable blur — horizontal pass into an intermediate SubViewport, then vertical pass into the output SubViewport. Quality controls how many evenly-spaced samples fill the blur radius. Filter types: Gaussian (exp falloff), Box (uniform), Triangle (linear falloff), Sinc (sin(πx)/πx — ringing), Hanning (raised cosine), Blackman (tighter than Hanning), Bump (inverted Gaussian — heavier at edges).
 
 ---
 

@@ -10096,6 +10096,40 @@
     ]
   },
   {
+    "class_name": "BloomTOP",
+    "node_type": "bloom",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/bloom_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.8
+      },
+      {
+        "name": "knee",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "intensity",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "levels",
+        "type": "int",
+        "default": 4
+      },
+      {
+        "name": "blend",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "BlurTOP",
     "node_type": "blur",
     "family": "top",

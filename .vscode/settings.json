@@ -49,5 +49,24 @@
         "**/__pycache__": true
     },
     "git.repositoryScanMaxDepth": 1,
-    "git.autoRepositoryDetection": "openEditors"
+    "git.autoRepositoryDetection": "openEditors",
+
+    // ── Tame heavy extensions ──────────────────────────────────────────
+    // C++ IntelliSense: disable for this workspace (no day-to-day C++ editing)
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.autocomplete": "disabled",
+    "C_Cpp.errorSquiggles": "disabled",
+
+    // Pylance: only analyze open files, ignore SDK/examples
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.exclude": [
+        "**/addons/gn_ext_user_python/**",
+        "**/addons/gn_ext_*/native/**",
+        "**/build/**",
+        "**/.venv/**"
+    ],
+
+    // CMake: don't auto-configure (only needed for libgonodes builds)
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false
 }

@@ -90,6 +90,10 @@ var is_pulse: bool = false
 ## non-empty display_group are rendered side-by-side in one inspector row.
 @export var display_group: String = ""
 
+## When false, the parameter is hidden in the inspector UI.
+## Used by operators that show/hide params based on mode (e.g. SnapshotTOP).
+var visible: bool = true
+
 # ─── Expression Mode (MVP) ────────────────────────────────────────────────────
 
 ## The expression string (GDScript syntax), e.g.: chop("lfo1").value("out") * 10.0
