@@ -1,0 +1,42 @@
+{
+    "nodes": {
+        "glsl_multi1": {
+            "type": "GLSLMultiTOP",
+            "position": [300, 200],
+            "parameters": {
+                "shader_code": "shader_type canvas_item;\nuniform float speed = 1.0;\nuniform float scale = 3.0;\nuniform vec4 color_a : source_color = vec4(0.1, 0.3, 0.8, 1.0);\nuniform vec4 color_b : source_color = vec4(0.9, 0.5, 0.1, 1.0);\n\nvoid fragment() {\n\tvec2 uv = UV * scale;\n\tfloat t = TIME * speed;\n\tfloat n1 = sin(uv.x * 2.0 + t) * cos(uv.y * 3.0 - t * 0.7);\n\tfloat n2 = sin(uv.x * 5.0 - t * 1.3) * cos(uv.y * 4.0 + t);\n\n\tgn_out0 = mix(color_a, color_b, n1 * 0.5 + 0.5);\n\tgn_out1 = vec4(vec3(n2 * 0.5 + 0.5), 1.0);\n}",
+                "resolution": {"_type": "Vector2i", "x": 512, "y": 512}
+            }
+        },
+        "layout1": {
+            "type": "LayoutTOP",
+            "position": [600, 200],
+            "parameters": {
+                "columns": 2,
+                "resolution": {"_type": "Vector2i", "x": 1024, "y": 512}
+            }
+        },
+        "text1": {
+            "type": "TextTOP",
+            "position": [300, 50],
+            "parameters": {
+                "text": "GLSLMultiTOP — Generator (no inputs)\n\nNo gn_tex uniforms = generator mode.\nResolution param auto-appears.\nAnimated with TIME built-in.\nCustom uniforms: speed, scale, color_a, color_b.",
+                "font_size": 18,
+                "resolution": {"_type": "Vector2i", "x": 512, "y": 512}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 200],
+            "parameters": {
+                "resolution": {"_type": "Vector2i", "x": 512, "y": 512},
+                "open": true
+            }
+        }
+    },
+    "connections": [
+        {"from": "glsl_multi1", "from_port": 0, "to": "layout1", "to_port": 0},
+        {"from": "glsl_multi1", "from_port": 1, "to": "layout1", "to_port": 1},
+        {"from": "layout1", "from_port": 0, "to": "window1", "to_port": 0}
+    ]
+}

@@ -1,10 +1,16 @@
 class_name SelectSOP
 extends GNSopBase
-## Keep a subset of geometry matching a filter criterion.
+## Selects geometry from a SOP — by wire OR by wireless name reference.
+##
+## When the 'sop' parameter names a remote SOP, its output is used as
+## the source (no wire needed).  When 'sop' is empty, the wired input is
+## used instead.  Geometry filtering (range, bounding box, expression,
+## every-Nth) applies in both modes.
+##
+## Matches TouchDesigner's Select SOP: remote reference + element filter.
 ##
 ## The complement of DeleteSOP — SelectSOP keeps matching geometry and
-## discards the rest.  Supports all the same methods as DeleteSOP, plus
-## an expression mode and an Every-Nth stepping mode.
+## discards the rest.
 ##
 ## Expression variables (per-element GDScript):
 ##   i     — element index (face or point)
@@ -13,17 +19,21 @@ extends GNSopBase
 ##
 ## Set "Invert" to discard matching elements and keep the rest.
 
+var _network_cache: GNNetwork = null
+
 
 func _init() -> void:
 	node_type = "select"
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry (used when 'sop' is empty)")
 	add_output("out", GNFamily.Type.SOP, "Selected geometry")
 
 
 func _init_parameters() -> void:
+	add_parameter(GNParameter.create_node_ref("sop", GNFamily.Type.SOP,
+		"SOP", "Name (id) of a remote SOP to reference (empty = use wired input)"))
 	add_parameter(GNParameter.create_enum("entity",
 		PackedStringArray(["Triangles (Faces)", "Points"]), 0, "",
 		"Select triangles or individual points"))
@@ -56,9 +66,21 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in_geo: GNGeoData = _require_input_geo(inputs)
+	# Resolve source: wireless reference takes priority over wired input
+	var in_geo: GNGeoData = null
+	var remote_id: String = get_param_value("sop")
+
+	if not remote_id.is_empty():
+		in_geo = _resolve_remote_sop(remote_id)
+	else:
+		in_geo = _require_input_geo(inputs)
+
 	if in_geo == null:
+		if not remote_id.is_empty():
+			node_warning = "Remote SOP '%s' not found or has no output" % remote_id
 		return null
+
+	node_warning = ""
 
 	if _cached_geo == null:
 		_cached_geo = GNGeoData.new()
@@ -222,3 +244,17 @@ func _select_points(arrays: Array, out_mesh: ArrayMesh, method: int, invert: boo
 	out_arrays[Mesh.ARRAY_TEX_UV]  = out_uvs     if not out_uvs.is_empty()     else null
 	out_arrays[Mesh.ARRAY_INDEX]   = out_indices
 	out_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out_arrays)
+
+
+func _resolve_remote_sop(target_id: String) -> GNGeoData:
+	if _network_cache == null or not is_instance_valid(_network_cache):
+		var p = get_parent()
+		while p != null and not (p is GNNetwork):
+			p = p.get_parent()
+		_network_cache = p as GNNetwork
+	if _network_cache == null:
+		return null
+	var target: GNNode = _network_cache.get_node_by_id(target_id)
+	if target == null or target.family != GNFamily.Type.SOP:
+		return null
+	return target.cached_output as GNGeoData if target.cached_output is GNGeoData else null

@@ -15,6 +15,8 @@
 - [MAT — Material Operators](#mat--material-operators)
 - [OUT — Output Operators](#out--output-operators)
 - [UI — User Interface Operators](#ui--user-interface-operators)
+- [POP — Point Operators](#pop--point-operators)
+- [VOL — Volume Operators](#vol--volume-operators)
 
 > **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (1,413 total).
 >
@@ -239,6 +241,79 @@ User-editable GPU shader with live recompilation.
 **Built-in uniforms:** `gn_resolution` (vec2), Godot's built-in `TIME`.
 
 **How it works:** User provides a complete `shader_type canvas_item;` shader string. The operator compiles it into a `Shader` resource and applies it. On compilation failure, the last working shader is kept. Recompilation only happens when the code text changes. Time-dependent — `TIME` uniform updates automatically.
+
+---
+
+#### GLSLMultiTOP
+
+Multi-output fragment shader — same Godot Shading Language as CustomShaderTOP, but with multiple output ports. Uses **single-pass MRT** on Vulkan (Forward+/Mobile) via automatic transpilation to GLSL 450, with **automatic multi-pass fallback** on Compatibility/Web.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output resolution (generator mode only) |
+| shader_code | String | *(template)* | — | Full `shader_type canvas_item;` shader using `gn_out0`..`gn_out7` |
+| time_dependent | Bool | true | — | Re-cook every frame |
+| cook_once | Bool | false | — | Pulse: force single cook |
+
+**Inputs:** Up to 8 texture inputs (`gn_tex0`–`gn_tex7`) — auto-detected from shader code.
+
+**Outputs:** Up to 8 output ports — auto-detected from `gn_out0`–`gn_out7` assignments in shader code.
+
+**Dynamic uniforms:** Same as CustomShaderTOP — `uniform float`, `int`, `bool`, `vec2`, `vec4` declarations auto-create inspector parameters.
+
+##### How to Write a GLSLMultiTOP Shader
+
+Write exactly as you would for CustomShaderTOP, but assign to `gn_out0`, `gn_out1`, etc. instead of `COLOR`:
+
+```glsl
+shader_type canvas_item;
+uniform sampler2D gn_tex0 : hint_default_white;
+uniform float edge_strength = 5.0;
+
+void fragment() {
+    vec4 src = texture(gn_tex0, UV);
+    float luma = dot(src.rgb, vec3(0.299, 0.587, 0.114));
+    vec3 chroma = src.rgb - vec3(luma);
+    vec3 edges = fwidth(src.rgb) * edge_strength;
+
+    gn_out0 = src;                             // → output port 0: passthrough
+    gn_out1 = vec4(vec3(luma), src.a);        // → output port 1: luminance
+    gn_out2 = vec4(chroma + 0.5, src.a);     // → output port 2: chrominance
+    gn_out3 = vec4(edges, 1.0);              // → output port 3: edges
+}
+```
+
+- Output ports are created automatically based on the highest `gn_outN` seen
+- `gn_out` variables are local `vec4`s — you can read them after assignment (e.g. `gn_out1 = blur(gn_out0);`)
+- All `gn_tex`, `gn_resolution`, `TIME`, and custom uniform features work identically to CustomShaderTOP
+- If you only use `gn_out0`, it behaves exactly like CustomShaderTOP (single pass, no overhead)
+
+##### How It Works: Dual-Path Architecture
+
+**MRT path (Forward+ / Mobile — Vulkan):**
+GLSLMultiTOP auto-transpiles your canvas_item code to GLSL 450 behind the scenes. The transpiler converts `gn_outN` assignments into `layout(location = N) out vec4` MRT outputs, maps uniforms to push constants, and maps `gn_tex` samplers to descriptor set bindings. A RenderingDevice framebuffer with N color attachments renders ALL outputs in a **single draw call** — identical to TouchDesigner's GLSL Multi TOP.
+
+**Fallback path (Compatibility / Web — OpenGL):**
+When RenderingDevice is unavailable, GLSLMultiTOP generates N shader variants from your code. Each variant declares `gn_out0..N` as local `vec4`s, runs your full fragment body, then assigns `COLOR = gn_outN;`. Each variant renders to its own SubViewport. The fallback is **automatic** — no code changes needed.
+
+The operator logs which path it chose at initialization.
+
+##### Performance & Gotchas
+
+- **MRT path:** True single-pass — 1 draw call regardless of output count. GPU→CPU readback per output (~1ms at 512×512 RGBA8).
+- **Fallback path:** N passes for N outputs. For 2–4 outputs at ≤1080p, overhead is <1ms. Dead-code elimination may reduce cost below theoretical N× multiplier.
+- **MRT transpiler limitations:** Basic features (texture, mix, clamp, smoothstep, UV, TIME, dFdx/dFdy, fwidth) work. SCREEN_TEXTURE and custom varyings are NOT supported in MRT mode — use CustomShaderTOP + SelectTOP for those.
+- **For 6+ outputs with complex shaders on Compatibility**, consider ComputeShaderTOP instead (single pass, but Forward+ only).
+- **Generator mode** — if no `gn_tex` uniforms are declared, a resolution parameter auto-appears (same as CustomShaderTOP).
+- **Maximum 8 outputs** (gn_out0..gn_out7). Most GPUs support 8 MRT slots.
+
+##### When to Use Which Shader Operator
+
+| Operator | Outputs | Language | Renderer | Best For |
+|----------|---------|----------|----------|----------|
+| **CustomShaderTOP** | 1 | canvas_item | All | Single-output effects, filters |
+| **GLSLMultiTOP** | 1–8 | canvas_item | **All** (MRT on Vulkan, fallback on GL) | Multi-output splits, decompositions |
+| **ComputeShaderTOP** | 1–N | Compute GLSL 450 | Forward+ only | Heavy multi-output, read-write buffers |
 
 ---
 
@@ -978,6 +1053,9 @@ Playback controller over a frame buffer with speed, scrub, and wrap modes.
 
 **Inputs:** `in` (TOP — typically from CacheTOP). **How it works:** Reads from input CacheTOP's buffer. Speed/position controls which stored frame to output.
 
+> **Workflow: Cache + SelectTOP for multi-tap delay**
+> Wire your source → CacheTOP (length=120) → TimeMachineTOP for scrubbing / speed control.  For accessing specific past frames without speed ramp, wire CacheTOP → multiple SelectTOPs each pointing at the same CacheTOP but with different `delay` values on CacheTOP copies — or use a single CacheTOP and tap it from multiple TimeMachineTOPs with different `position` values for multi-head playback (echo effects, motion trails, compare frames).
+
 ---
 
 ### Simulation / Generative
@@ -1072,6 +1150,47 @@ Select one of up to 4 inputs by index.
 **Inputs:** `in0`, `in1`, `in2`, `in3` (all TOP).
 
 **How it works:** Returns the texture from the selected input index. Falls back to the first valid input if the selected index has no connection.
+
+---
+
+#### SelectTOP
+
+Reference a remote TOP node by name — outputs its texture without a wire connection. Essential for complex networks where wiring every reference would create spaghetti.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| top | String | "" | Name (id) of the TOP node to reference |
+
+**No inputs** — references by name instead of wire.
+**Output:** `out` (TOP) — the referenced node's texture (zero-copy GPU reference).
+
+**How it works:** Walks the scene tree to find the parent `GNNetwork`, looks up the target node by ID, validates that it is a TOP family operator, and returns its `cached_output` directly. If the target is not found or hasn't cooked yet, outputs nothing. Equivalent to TouchDesigner's Select TOP.
+
+> **Tip:** Use SelectTOP to branch a texture to multiple consumers without forking wires. The referenced node is added to the active set automatically since GNNetwork tracks all dependencies.
+
+---
+
+#### LimitTOP
+
+Clamp pixel values to a min/max range. Two modes: Per-Channel (independent RGBA clamp) or Luminance (scale RGB to keep perceived brightness within range, preserving colour ratios).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Per-Channel | Per-Channel / Luminance | Clamping method |
+| min_r | Float | 0.0 | 0.0–1.0 | Minimum red (Per-Channel) |
+| max_r | Float | 1.0 | 0.0–1.0 | Maximum red (Per-Channel) |
+| min_g | Float | 0.0 | 0.0–1.0 | Minimum green (Per-Channel) |
+| max_g | Float | 1.0 | 0.0–1.0 | Maximum green (Per-Channel) |
+| min_b | Float | 0.0 | 0.0–1.0 | Minimum blue (Per-Channel) |
+| max_b | Float | 1.0 | 0.0–1.0 | Maximum blue (Per-Channel) |
+| min_a | Float | 0.0 | 0.0–1.0 | Minimum alpha (Per-Channel) |
+| max_a | Float | 1.0 | 0.0–1.0 | Maximum alpha (Per-Channel) |
+| min_luma | Float | 0.0 | 0.0–1.0 | Minimum luminance (Luminance mode) |
+| max_luma | Float | 1.0 | 0.0–1.0 | Maximum luminance (Luminance mode) |
+
+**Input:** `in` (TOP). **Shader:** `limit.gdshader`.
+
+**How it works:** In Per-Channel mode, each RGBA component is independently clamped to its min/max. In Luminance mode, the Rec.709 luminance is computed and RGB is uniformly scaled so the luminance fits within [min_luma, max_luma], preserving the pixel's colour ratios.
 
 ---
 
@@ -1238,6 +1357,16 @@ Use `ImgToTOP` to bridge IMG output into the GPU TOP pipeline.
 #### NullIMG
 
 Pass-through. Forwards input image unchanged. Useful for wire organization, expression references, and inspecting multi-output ports.
+
+---
+
+#### SelectIMG
+
+Reference a remote IMG by name or pass through wired input. When the `img` parameter names a remote IMG node, its output is used without a wire. When empty, the wired input passes through.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| img | String | "" | Remote IMG node name (empty = use wired input) |
 
 ---
 
@@ -1479,14 +1608,15 @@ Event counter with rising-edge detection.
 
 #### SelectCHOP
 
-Filter and rename channels by pattern.
+Select channels from a CHOP — by wire or by wireless name reference. When the `chop` parameter names a remote CHOP, its output is used (no wire needed). When empty, the wired input is used. Channel name filtering and renaming apply in both modes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
+| chop | String | "" | — | Remote CHOP node name (empty = use wired input) |
 | pattern | String | "*" | — | Channel name pattern (e.g., `*`, `tx,ty`, `chan*`) |
 | rename | String | "" | — | Comma-separated rename list (empty = keep names) |
 
-**How it works:** Matches channel names against wildcard patterns. Supports `*` (match all), `prefix*`, `*suffix`. Comma-separated patterns for multiple matches. Optionally renames matched channels in order.
+**How it works:** When `chop` is set, looks up the named node in the parent GNNetwork and uses its cached output. Otherwise reads from the wired input. Matches channel names against wildcard patterns (`*`, `prefix*`, `*suffix`). Optionally renames matched channels in order. The remote target is automatically included in the cook engine's active set and topological sort via `get_remote_dependencies()`.
 
 ---
 
@@ -2325,10 +2455,11 @@ OSC message receiver. **Currently a stub** — UDP/OSC networking is not yet imp
 
 #### SelectDAT
 
-Extract row/column subsets by index range.
+Select rows/columns from a DAT — by wire or by wireless name reference. When the `dat` parameter names a remote DAT, its output is used (no wire needed). When empty, the wired input is used. Row/column range filtering applies in both modes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
+| dat | String | "" | — | Remote DAT node name (empty = use wired input) |
 | row_start | Int | 0 | 0+ | First row (inclusive) |
 | row_end | Int | -1 | -1+ | Last row (-1 = all) |
 | col_start | Int | 0 | 0+ | First column (inclusive) |
@@ -2999,6 +3130,26 @@ Merge multiple geometries into one. No parameters.
 #### NullSOP
 
 Pass-through.
+
+---
+
+#### SelectSOP
+
+Select geometry from a SOP — by wire or by wireless name reference. When the `sop` parameter names a remote SOP, its output is used (no wire needed). When empty, the wired input is used. Element filtering (range, bounding box, expression, every-Nth) applies in both modes.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| sop | String | "" | Remote SOP node name (empty = use wired input) |
+| entity | Enum | Triangles | Triangles (Faces) / Points |
+| method | Enum | By Range | By Range / By Bounding Box / By Expression / Every Nth |
+| start | Int | 0 | First element index (Range mode) |
+| end | Int | 50 | Last element index, inclusive (Range mode) |
+| bmin_x/y/z | Float | -0.5 | Bounding box min (BBox mode) |
+| bmax_x/y/z | Float | 0.5 | Bounding box max (BBox mode) |
+| expression | String | "i % 2 == 0" | GDScript bool expression (vars: i, x, y, z, count) |
+| step | Int | 2 | Keep every Nth element (Every Nth mode) |
+| offset | Int | 0 | Starting offset (Every Nth mode) |
+| invert | Bool | false | Invert selection (discard matching, keep non-matching) |
 
 ---
 
@@ -4148,6 +4299,16 @@ Pass-through component for wire organization. Forwards input component unchanged
 
 ---
 
+#### SelectCOMP
+
+Reference a remote COMP by name or pass through wired input. When the `comp` parameter names a remote COMP node, its output is used without a wire. When empty, the wired input passes through.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| comp | String | "" | Remote COMP node name (empty = use wired input) |
+
+---
+
 #### SwitchCOMP
 
 Select one of up to 8 component inputs by index.
@@ -4396,6 +4557,16 @@ Pass-through. Forwards input material unchanged. Useful for wire organization, e
 
 ---
 
+#### SelectMAT
+
+Reference a remote MAT by name or pass through wired input. When the `mat` parameter names a remote MAT node, its output is used without a wire. When empty, the wired input passes through.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mat | String | "" | Remote MAT node name (empty = use wired input) |
+
+---
+
 ## OUT — Output Operators
 
 Output operators are terminal/sink nodes that display or save results. They extend `GNOutBase`, belong to the OUT family, and have `is_sink = true`. They have inputs but no data outputs — they are the endpoints of the cook graph.
@@ -4625,6 +4796,171 @@ Textured progress bar with TOP layers and CHOP driver.
 
 ---
 
+## POP — Point Operators
+
+GPU-accelerated particle system based on SSBO compute shaders. The pipeline flows: **SourcePOP** (emitter) → processor chain (Force, Turbulence, Collision, etc.) → bridge operators (RenderPOP, InstancePOP) for visualization. All POP processors modify the SSBO in-place.
+
+### SourcePOP
+Emits particles from SOP geometry points or from origin. Generator: allocates the SSBO and emits new particles each frame.
+- **Inputs:** `geo_in` (SOP, optional — emitter geometry)
+- **Outputs:** `out` (POP)
+- **Parameters:** `max_particles` (INT, 100000 — pool size), `rate` (FLOAT, 1000.0 — particles/sec), `life_min` (FLOAT, 1.0), `life_max` (FLOAT, 3.0), `init_speed` (FLOAT, 1.0), `pscale` (FLOAT, 0.05), `reset` (PULSE)
+
+### ForcePOP
+Applies directional forces (gravity, wind) and drag to particles.
+- **Inputs:** `pop_in` (POP)
+- **Outputs:** `out` (POP)
+- **Parameters:** `gravity_x/y/z` (FLOAT, 0/-9.81/0), `wind_x/y/z` (FLOAT, 0/0/0), `drag` (FLOAT, 0.01)
+
+### TurbulencePOP
+Applies curl noise turbulence to particle velocities.
+- **Inputs:** `pop_in` (POP)
+- **Outputs:** `out` (POP)
+- **Parameters:** `amplitude` (FLOAT, 2.0), `frequency` (FLOAT, 1.0), `roughness` (FLOAT, 0.5), `octaves` (INT, 3), `speed` (FLOAT, 0.5)
+
+### CollisionPOP
+Ground plane collision with bounce and friction.
+- **Inputs:** `pop_in` (POP)
+- **Outputs:** `out` (POP)
+- **Parameters:** `ground_y` (FLOAT, 0.0), `bounce` (FLOAT, 0.3), `friction` (FLOAT, 0.1), `kill_below` (FLOAT, -1000.0)
+
+### AttractPOP
+Point attractor — pulls particles toward a target position.
+- **Inputs:** `pop_in` (POP)
+- **Outputs:** `out` (POP)
+- **Parameters:** `target_x/y/z` (FLOAT, 0/1/0), `strength` (FLOAT, 10.0), `radius` (FLOAT, 0.0 — 0=infinite)
+
+### LimitPOP
+Kills particles by age, bounding box, or speed limit.
+- **Inputs:** `pop_in` (POP)
+- **Outputs:** `out` (POP)
+- **Parameters:** `bbox_min_x/y/z` (FLOAT, -10), `bbox_max_x/y/z` (FLOAT, 10), `max_speed` (FLOAT, 0.0 — 0=no limit), `kill_outside` (BOOL, true)
+
+### AdvectPOP
+Advects particles using a 3D velocity field from a VOL operator.
+- **Inputs:** `pop_in` (POP), `vol_in` (VOL — velocity field)
+- **Outputs:** `out` (POP)
+- **Parameters:** `strength` (FLOAT, 1.0), `add_mode` (BOOL, true — add vs replace velocity)
+
+### BoidsPOP
+Flocking/boids simulation using Reynolds rules (separation, alignment, cohesion). Brute-force O(n²) neighbor search via compute shader — performant up to ~50k particles.
+- **Inputs:** `pop_in` (POP)
+- **Outputs:** `out` (POP)
+- **Parameters:** `perception_radius` (FLOAT, 2.0), `avoid_radius` (FLOAT, 0.5), `separation/alignment/cohesion` (FLOAT, 1.5/1.0/1.0), `max_speed` (FLOAT, 5.0), `max_force` (FLOAT, 3.0), `bounds_radius` (FLOAT, 10.0), `bounds_force` (FLOAT, 5.0)
+
+### InstancePOP
+Copies SOP geometry onto each particle position. Bridge: reads POP SSBO → outputs GNGeoData (SOP) via CPU readback.
+- **Inputs:** `pop_in` (POP), `geo_in` (SOP — instance geometry)
+- **Outputs:** `out` (SOP)
+- **Parameters:** `max_instances` (INT, 10000), `use_pscale` (BOOL, true), `use_color` (BOOL, true)
+
+### RenderPOP
+Renders particles as point cloud or billboards into a COMP scene. Bridge: reads POP SSBO → outputs COMP-compatible scene node.
+- **Inputs:** `pop_in` (POP)
+- **Outputs:** `out` (COMP)
+- **Parameters:** `point_size` (FLOAT, 0.05), `use_pscale` (BOOL, true), `billboard` (BOOL, true)
+
+### NullPOP
+Pass-through — forwards particle data unchanged. Essential for feedback loops.
+- **Inputs:** `in` (POP)
+- **Outputs:** `out` (POP)
+
+### SelectPOP
+Wireless POP reference. When `pop` names a remote POP, outputs its data. Otherwise passes through wired input.
+- **Inputs:** `in` (POP, optional)
+- **Outputs:** `out` (POP)
+- **Parameters:** `pop` (NODE_REF/POP)
+
+---
+
+## VOL — Volume Operators
+
+GPU 3D texture processing via compute shaders. Volumes are `Texture3D` objects (typically R16F or R32F format). The pipeline supports Navier-Stokes fluid simulation, pyro fire/smoke, noise generation, and cross-family bridges to SOP (marching cubes) and TOP (raymarching).
+
+### NoiseVOL
+Generates a 3D FBM noise density volume.
+- **Outputs:** `out` (VOL)
+- **Parameters:** `res_x/y/z` (INT, 64), `frequency` (FLOAT, 4.0), `amplitude` (FLOAT, 1.0), `octaves` (INT, 4), `lacunarity` (FLOAT, 2.0), `gain` (FLOAT, 0.5), `offset_x/y/z` (FLOAT, 0), `speed` (FLOAT, 0.0 — animate over time), `format` (STRING, "R32F")
+
+### FluidVOL
+Navier-Stokes fluid simulation. Time-dependent: maintains velocity + density fields across frames. Includes vorticity confinement and obstacle support.
+- **Inputs:** `density_in` (VOL, optional — injected each frame), `vel_in` (VOL, optional — external force), `obstacle` (VOL — mask, R>0.5=solid)
+- **Outputs:** `density_out` (VOL), `velocity_out` (VOL)
+- **Parameters:** `res_x/y/z` (INT, 64), `dissipation` (FLOAT, 0.98), `pressure_iters` (INT, 20), `density_add` (FLOAT, 1.0), `vorticity` (FLOAT, 0.3), `reset` (PULSE)
+
+### PyroVOL
+Fire/smoke simulation extending FluidVOL with combustion: fuel burns → temperature rises → buoyancy → smoke density.
+- **Inputs:** `fuel_in` (VOL, optional), `vel_in` (VOL, optional), `obstacle` (VOL — mask)
+- **Outputs:** `density_out` (VOL — smoke), `temp_out` (VOL — temperature), `velocity_out` (VOL)
+- **Parameters:** `res_x/y/z` (INT, 64), `burn_rate` (FLOAT, 1.5), `heat_output` (FLOAT, 3.0), `smoke_output` (FLOAT, 1.0), `ignition_temp` (FLOAT, 0.2), `fuel_inject` (FLOAT, 1.0), `buoyancy` (FLOAT, 2.0), `cooling` (FLOAT, 0.96), `dissipation` (FLOAT, 0.985), `pressure_iters` (INT, 20), `vorticity` (FLOAT, 0.5), `reset` (PULSE)
+
+### BlendVOL
+Blends two volumes with configurable operations (add, subtract, multiply, max, min, mix).
+- **Inputs:** `vol_a` (VOL), `vol_b` (VOL)
+- **Outputs:** `out` (VOL)
+- **Parameters:** `operation` (STRING, "add"), `mix_factor` (FLOAT, 0.5), `scale_a` (FLOAT, 1.0), `scale_b` (FLOAT, 1.0)
+
+### BlurVOL
+3D Gaussian blur on a volume. Ping-pong output.
+- **Inputs:** `vol_in` (VOL)
+- **Outputs:** `out` (VOL)
+- **Parameters:** `radius` (INT, 1 — voxels), `passes` (INT, 1)
+
+### DisplaceVOL
+Warps a density volume by a velocity field.
+- **Inputs:** `vol_in` (VOL — density), `vel_in` (VOL — velocity RGBA)
+- **Outputs:** `out` (VOL)
+- **Parameters:** `strength` (FLOAT, 1.0)
+
+### AnalyzeVOL
+Reads back a volume to CPU and outputs statistics as CHOP channels (min, max, mean, sum, nonzero_count, total_voxels). Optional histogram.
+- **Inputs:** `vol` (VOL)
+- **Outputs:** `stats` (CHOP)
+- **Parameters:** `histogram` (BOOL, false), `hist_bins` (INT, 64)
+
+### RaymarchVOL
+Volume ray-march renderer → 2D image (TOP). Front-to-back compositing with Beer-Lambert absorption, Henyey-Greenstein scattering, shadow rays, and self-emission.
+- **Inputs:** `vol` (VOL)
+- **Outputs:** `image` (TOP)
+- **Parameters:** `width/height` (INT, 512), `max_steps` (INT, 128), `step_size` (FLOAT, 0.01), `density_scale` (FLOAT, 5.0), `absorption` (FLOAT, 10.0), `cam_dist` (FLOAT, 1.5), `cam_yaw/cam_pitch` (FLOAT, 0/20), `fov` (FLOAT, 60), `light_yaw/light_pitch` (FLOAT, 45/60), `light_color` (COLOR), `light_intensity` (FLOAT, 2.0), `hg_g` (FLOAT, 0.3), `shadow_steps` (INT, 32), `ambient` (FLOAT, 0.15), `emit_color` (COLOR)
+
+### MarchingCubesVOL
+Extracts iso-surface from a volume → SOP mesh. CPU readback with Bourke marching cubes algorithm.
+- **Inputs:** `vol` (VOL)
+- **Outputs:** `mesh` (SOP)
+- **Parameters:** `threshold` (FLOAT, 0.5), `smooth_normals` (BOOL, true)
+
+### GPUMarchingCubesVOL
+GPU-accelerated marching cubes via compute shader with atomic append buffer. 10–100× faster than CPU MarchingCubesVOL above ~32³.
+- **Inputs:** `vol` (VOL)
+- **Outputs:** `mesh` (SOP)
+- **Parameters:** `threshold` (FLOAT, 0.5), `max_triangles` (INT, 500000)
+
+### SOPtoVOL
+Rasterizes SOP point cloud/mesh vertices into a 3D density volume. GPU compute shader for fast parallel voxelization.
+- **Inputs:** `geo` (SOP)
+- **Outputs:** `out` (VOL)
+- **Parameters:** `res_x/y/z` (INT, 64), `radius` (FLOAT, 0.05), `strength` (FLOAT, 1.0), `padding` (FLOAT, 0.1)
+
+### CHOPtoVOL
+Converts CHOP channel data into a 3D volume. Modes: slice (each channel → one Z-slice), stack (first channel replicated), map (tx/ty/tz channels to field values).
+- **Inputs:** `chop` (CHOP)
+- **Outputs:** `out` (VOL)
+- **Parameters:** `res_x/y/z` (INT, 64), `mode` (ENUM: slice/stack/map), `channel` (STRING)
+
+### NullVOL
+Pass-through — forwards volume data unchanged.
+- **Inputs:** `in` (VOL)
+- **Outputs:** `out` (VOL)
+
+### SelectVOL
+Wireless VOL reference. When `vol` names a remote VOL, outputs its data. Otherwise passes through wired input.
+- **Inputs:** `in` (VOL, optional)
+- **Outputs:** `out` (VOL)
+- **Parameters:** `vol` (NODE_REF/VOL)
+
+---
+
 ## Editor Features
 
 ### Viewer Panel UI Preview
@@ -4762,20 +5098,20 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 71 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion, PointCloudRender |
+| **TOP** | 74 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, GLSLMulti, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Select, Limit, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion, PointCloudRender |
 *(Note: 17 additional TOPs via extensions — see Extension Operators below)* |
 | **CHOP** | 74 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn |
 | **DAT** | 37 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX, RenderPick, PanelExecute |
 | **SOP** | 74 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, TrailRibbon, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch, VoronoiShatter |
-| **COMP** | 20 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
-| **MAT** | 10 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null |
-| **IMG** | 13 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null |
+| **COMP** | 21 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Select, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
+| **MAT** | 11 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null, Select |
+| **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null, Select |
 | **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
 | **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
-| **POP** | 11 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null — *SSBO-based compute pipeline* |
-| **VOL** | 13 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
+| **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
+| **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **362** | |
+| **Total** | **372** | |
 
 ### Extension Operators (not included in count above)
 

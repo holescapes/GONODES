@@ -94,6 +94,14 @@ var is_pulse: bool = false
 ## Used by operators that show/hide params based on mode (e.g. SnapshotTOP).
 var visible: bool = true
 
+## When >= -1, this string parameter stores a node-reference ID.
+## The value is a GNFamily.Type enum value indicating the expected target
+## family, or -1 for "any family".  Default -2 means "not a node reference".
+## Used by the base-class get_remote_dependencies() / get_node_reference_params()
+## (no operator override needed) and by the inspector UI to show a filtered
+## node-picker dropdown.
+var node_ref_family: int = -2
+
 # ─── Expression Mode (MVP) ────────────────────────────────────────────────────
 
 ## The expression string (GDScript syntax), e.g.: chop("lfo1").value("out") * 10.0
@@ -313,6 +321,28 @@ static func create_string(p_name: String, p_default: String,
 	param.value = p_default
 	param.fallback_value = p_default
 	param.resolved_value = p_default
+	return param
+
+
+## Factory method to create a node-reference STRING parameter.
+## The resulting parameter stores a node ID string and is automatically
+## picked up by the base-class get_remote_dependencies() (no override
+## needed) and by the inspector UI (filtered node-picker dropdown).
+## [param p_ref_family] is a GNFamily.Type value for the expected target
+## family, or -1 for "any family".
+static func create_node_ref(p_name: String, p_ref_family: int,
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
+	var param := GNParameter.new()
+	param.param_name = p_name
+	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
+	param.description = p_description
+	param.value_type = ValueType.STRING
+	param.default_value = ""
+	param.value = ""
+	param.fallback_value = ""
+	param.resolved_value = ""
+	param.node_ref_family = p_ref_family
 	return param
 
 

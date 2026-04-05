@@ -20,7 +20,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("render_comp", "",
+	add_parameter(GNParameter.create_node_ref("render_comp", GNFamily.Type.COMP,
 		"Render COMP", "Node ID of the Camera/Render COMP to pick from"))
 	add_parameter(GNParameter.create_float("u", 0.5, 0.0, 1.0, 0.001,
 		"U", "Horizontal pick coordinate (0–1)"))

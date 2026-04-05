@@ -18,7 +18,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("comp_path", "",
+	add_parameter(GNParameter.create_node_ref("comp_path", GNFamily.Type.COMP,
 		"COMP Path", "Node ID of the COMP to read (e.g. camera1, geo1)"))
 
 

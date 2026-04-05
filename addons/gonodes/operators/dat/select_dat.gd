@@ -1,7 +1,14 @@
 class_name SelectDAT
 extends GNDatBase
-## Selects specific rows and/or columns from an input table.
-## Supports range-based row/column selection.
+## Selects rows/columns from a DAT — by wire OR by wireless name reference.
+##
+## When the 'dat' parameter names a remote DAT, its output is used as
+## the source (no wire needed).  When 'dat' is empty, the wired input is
+## used instead.  Row/column range filtering applies in both modes.
+##
+## Matches TouchDesigner's Select DAT: remote reference + subset filter.
+
+var _network_cache: GNNetwork = null
 
 
 func _init() -> void:
@@ -9,11 +16,13 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Input table")
+	add_input("in", GNFamily.Type.DAT, false, "Input table (used when 'dat' is empty)")
 	add_output("out", GNFamily.Type.DAT, "Selected subset")
 
 
 func _init_parameters() -> void:
+	add_parameter(GNParameter.create_node_ref("dat", GNFamily.Type.DAT,
+		"DAT", "Name (id) of a remote DAT to reference (empty = use wired input)"))
 	add_parameter(GNParameter.create_int("row_start", 0, 0, null, "Row Start", "First row index"))
 	add_parameter(GNParameter.create_int("row_end", -1, -1, null, "Row End", "Last row index (-1 = end)"))
 	add_parameter(GNParameter.create_int("col_start", 0, 0, null, "Col Start", "First column index"))
@@ -22,9 +31,23 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in_dat: GNTableData = inputs[0] as GNTableData if inputs.size() > 0 and inputs[0] is GNTableData else null
+	# Resolve source: wireless reference takes priority over wired input
+	var in_dat: GNTableData = null
+	var remote_id: String = get_param_value("dat")
+
+	if not remote_id.is_empty():
+		in_dat = _resolve_remote_dat(remote_id)
+	else:
+		in_dat = inputs[0] as GNTableData if inputs.size() > 0 and inputs[0] is GNTableData else null
+
 	if in_dat == null or not in_dat.is_table:
+		if not remote_id.is_empty():
+			node_warning = "Remote DAT '%s' not found or has no table output" % remote_id
+		else:
+			node_warning = ""
 		return null
+
+	node_warning = ""
 
 	if _cached_table == null:
 		_cached_table = GNTableData.new()
@@ -65,3 +88,17 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_cached_table.is_table = true
 	return _cached_table
+
+
+func _resolve_remote_dat(target_id: String) -> GNTableData:
+	if _network_cache == null or not is_instance_valid(_network_cache):
+		var p = get_parent()
+		while p != null and not (p is GNNetwork):
+			p = p.get_parent()
+		_network_cache = p as GNNetwork
+	if _network_cache == null:
+		return null
+	var target: GNNode = _network_cache.get_node_by_id(target_id)
+	if target == null or target.family != GNFamily.Type.DAT:
+		return null
+	return target.cached_output as GNTableData if target.cached_output is GNTableData else null

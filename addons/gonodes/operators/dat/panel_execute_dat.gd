@@ -22,7 +22,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("panel_path", "",
+	add_parameter(GNParameter.create_node_ref("panel_path", GNFamily.Type.UI,
 		"Panel Path", "Node ID of the panel/UI operator to monitor"))
 	add_parameter(GNParameter.create_int("max_events", 100, 1, 10000,
 		"Max Events", "Maximum events to keep in table"))

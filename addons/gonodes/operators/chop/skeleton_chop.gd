@@ -19,7 +19,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("comp_path", "",
+	add_parameter(GNParameter.create_node_ref("comp_path", GNFamily.Type.COMP,
 		"COMP Path", "Node ID of the Skeleton3D COMP"))
 	add_parameter(GNParameter.create_string("bone_filter", "*",
 		"Bone Filter", "Wildcard pattern for bone names (* = all)"))

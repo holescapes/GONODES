@@ -18,7 +18,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("sop_path", "",
+	add_parameter(GNParameter.create_node_ref("sop_path", GNFamily.Type.SOP,
 		"SOP Path", "Node ID of the SOP to fetch geometry from"))
 	add_parameter(GNParameter.create_bool("apply_transform", false,
 		"Apply Transform", "Apply the source node's transform to the geometry"))

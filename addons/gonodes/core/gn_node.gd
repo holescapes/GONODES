@@ -224,6 +224,38 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return null
 
 
+## Override to declare wireless (non-wire) dependencies on other nodes.
+## Returns an array of node IDs that this node reads from without a wire
+## connection (e.g. SelectTOP referencing a remote TOP by name).
+## The cook engine uses this to include those nodes in the active set
+## and to order them before this node in the topological sort.
+## Default implementation scans all parameters for node_ref_family >= -1
+## (created via GNParameter.create_node_ref) and returns their non-empty
+## values.  Only override if you need custom logic beyond param scanning.
+func get_remote_dependencies() -> Array[String]:
+	var deps: Array[String] = []
+	for p: GNParameter in parameters.values():
+		if p.node_ref_family >= -1:
+			var val: String = str(p.value)
+			if not val.is_empty():
+				deps.append(val)
+	return deps
+
+
+## Returns a Dictionary mapping parameter names to their expected target
+## family type (GNFamily.Type enum value, or -1 for any).  Used by the
+## rename system to propagate ID changes and by the inspector UI to show
+## a filtered node-picker dropdown.
+## Default implementation scans all parameters for node_ref_family >= -1.
+## Only override if you need custom logic beyond param scanning.
+func get_node_reference_params() -> Dictionary:
+	var refs: Dictionary = {}
+	for p: GNParameter in parameters.values():
+		if p.node_ref_family >= -1:
+			refs[p.param_name] = p.node_ref_family
+	return refs
+
+
 ## Optional override — called once per frame before cook, even when not dirty.
 ## Useful for time-dependent nodes to check if they should mark themselves dirty.
 ##

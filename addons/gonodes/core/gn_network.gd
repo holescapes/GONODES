@@ -165,6 +165,10 @@ func rename_node(old_id: String, new_id: String) -> bool:
 	# and handles hierarchical paths containing the old ID as a segment.
 	_update_expressions_for_rename(old_id, new_id)
 
+	# Update wireless node-reference string parameters (Select operators,
+	# ParameterCHOP, etc.) that store the old node ID by name.
+	_update_wireless_refs_for_rename(old_id, new_id)
+
 	_invalidate_topo()
 	GNLogger.info("Network", "Node renamed: '%s' → '%s'" % [old_id, new_id])
 	node_renamed.emit(old_id, new_id)
@@ -283,6 +287,30 @@ func _replace_path_segment(path: String, old_id: String, new_id: String) -> Stri
 	if changed:
 		return "/".join(segments)
 	return path
+
+
+## Updates node-reference string parameters across the entire network when a
+## node is renamed.  Covers Select operators (wireless "top"/"chop"/etc.),
+## ParameterCHOP ("node_path"), ObjectMergeSOP ("sop_path"),
+## ObjectCHOP/SkeletonCHOP ("comp_path"), RenderPickDAT ("render_comp"),
+## PanelExecuteDAT ("panel_path"), and any future operator that overrides
+## get_node_reference_params().
+func _update_wireless_refs_for_rename(old_id: String, new_id: String) -> void:
+	for n_id in nodes:
+		var n: GNNode = nodes[n_id]
+		var ref_params: Dictionary = n.get_node_reference_params()
+		for param_name in ref_params:
+			var param: GNParameter = n.parameters.get(param_name, null)
+			if param == null:
+				continue
+			var val: String = str(param.value)
+			if val == old_id:
+				n.set_param_value(param_name, new_id)
+			elif "/" in val:
+				# Handle hierarchical paths: "subnet/old_id" → "subnet/new_id"
+				var updated := _replace_path_segment(val, old_id, new_id)
+				if updated != val:
+					n.set_param_value(param_name, updated)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -542,6 +570,18 @@ func _compute_topological_order() -> Array[GNNode]:
 			adjacency[conn.from_node].append(conn.to_node)
 			in_degree[conn.to_node] += 1
 
+	# Remote (wireless) dependency edges — operators like SelectTOP and
+	# ParameterCHOP declare dependencies on nodes they reference by name.
+	# The referenced node must cook before the referencing node.
+	for node_id in nodes:
+		var node: GNNode = nodes[node_id]
+		var remote_deps: Array[String] = node.get_remote_dependencies()
+		for dep_id in remote_deps:
+			if nodes.has(dep_id) and dep_id not in adjacency.get(dep_id, []):
+				if node_id not in adjacency[dep_id]:
+					adjacency[dep_id].append(node_id)
+					in_degree[node_id] += 1
+
 	# Seed the queue with zero-in-degree nodes
 	var queue: Array[String] = []
 	for node_id in in_degree:
@@ -612,6 +652,16 @@ func _compute_topological_levels() -> Array:
 			if to_id not in adjacency[from_id]:
 				adjacency[from_id].append(to_id)
 				in_degree[to_id] += 1
+
+	# Remote (wireless) dependency edges — same as in _compute_topological_order.
+	for node_id in nodes:
+		var node: GNNode = nodes[node_id]
+		var remote_deps: Array[String] = node.get_remote_dependencies()
+		for dep_id in remote_deps:
+			if nodes.has(dep_id):
+				if node_id not in adjacency[dep_id]:
+					adjacency[dep_id].append(node_id)
+					in_degree[node_id] += 1
 
 	# Kahn's with level tracking
 	var queue: Array[String] = []

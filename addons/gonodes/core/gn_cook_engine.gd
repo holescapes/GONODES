@@ -254,9 +254,13 @@ func _on_network_node_added(node_id: String) -> void:
 
 ## Called when any node's parameter changes (value or mode).
 ## Expression edits may change which nodes are referenced, so we
-## invalidate the active set. This fires rarely (user interaction only).
+## invalidate the active set. Remote dependencies (get_remote_dependencies)
+## may also change, so invalidate topological order too.
+## This fires rarely (user interaction only).
 func _on_node_param_changed(_node_id: String, _param_name: String) -> void:
 	_active_set_dirty = true
+	if network != null:
+		network._mark_topo_dirty()
 
 
 ## Called when a node is removed — invalidates the active set.
@@ -348,7 +352,8 @@ func _compute_active_set() -> Dictionary:
 		return active
 
 	# BFS upstream using cached adjacency (get_input_connections)
-	# AND expression references (chop/op/top/sop/dat/mat calls).
+	# AND expression references (chop/op/top/sop/dat/mat calls)
+	# AND remote dependencies (get_remote_dependencies — wireless refs).
 	# Expression refs are implicit dependencies — if an active node reads
 	# chop("lfo1", "out"), then lfo1 must also be active.
 	while not queue.is_empty():
@@ -368,6 +373,15 @@ func _compute_active_set() -> Dictionary:
 			if network.nodes.has(ref_id) and not active.has(ref_id):
 				active[ref_id] = true
 				queue.append(ref_id)
+
+		# Follow remote (wireless) dependencies declared by operators
+		var node: GNNode = network.nodes.get(current_id, null)
+		if node != null:
+			var remote_refs: Array[String] = node.get_remote_dependencies()
+			for ref_id in remote_refs:
+				if network.nodes.has(ref_id) and not active.has(ref_id):
+					active[ref_id] = true
+					queue.append(ref_id)
 
 	return active
 

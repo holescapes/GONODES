@@ -1,0 +1,36 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "ramp1": {
+            "type": "RampTOP",
+            "position": [100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "type": {"value": 0}
+            }
+        },
+        "limit1": {
+            "type": "LimitTOP",
+            "position": [500, 100],
+            "parameters": {
+                "mode": {"value": 1},
+                "min_luma": {"value": 0.3},
+                "max_luma": {"value": 0.7}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [900, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "ramp1", "from_port": 0, "to": "limit1", "to_port": 0},
+        {"from": "limit1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "description": "LimitTOP in Luminance mode — scales RGB to keep perceived brightness within [0.3, 0.7], preserving colour ratios."
+}

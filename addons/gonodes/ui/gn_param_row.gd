@@ -380,6 +380,10 @@ func _create_bool_control() -> Control:
 
 
 func _create_string_control() -> Control:
+	# Node-reference params get a filtered dropdown instead of a text area
+	if param.node_ref_family >= -1:
+		return _create_node_ref_control()
+
 	var edit := TextEdit.new()
 	edit.text = str(param.value)
 	edit.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -411,6 +415,89 @@ func _create_string_control() -> Control:
 		return vbox
 
 	return edit
+
+
+## Creates a dropdown (OptionButton) for node-reference string parameters.
+## Lists only nodes whose family matches the param's node_ref_family filter
+## (-1 = show all families).  Shows a warning icon if the current value
+## points to a node of the wrong family.
+func _create_node_ref_control() -> Control:
+	var ob := OptionButton.new()
+	ob.size_flags_horizontal = SIZE_EXPAND_FILL
+	ob.custom_minimum_size = Vector2(0, 28)
+	ob.allow_reselect = true
+
+	_populate_node_ref_dropdown(ob)
+
+	# Select the current value
+	var cur_val: String = str(param.value)
+	var found := false
+	for i in range(ob.item_count):
+		if ob.get_item_metadata(i) == cur_val:
+			ob.selected = i
+			found = true
+			break
+	if not found and not cur_val.is_empty():
+		# Value references a node that doesn't match filter — add it with warning
+		ob.add_item("\u26a0 %s (wrong family)" % cur_val)
+		ob.set_item_metadata(ob.item_count - 1, cur_val)
+		ob.selected = ob.item_count - 1
+
+	ob.item_selected.connect(_on_node_ref_selected.bind(ob))
+	# Refresh list when dropdown is opened (nodes may have been added/removed)
+	ob.pressed.connect(_populate_node_ref_dropdown.bind(ob))
+	return ob
+
+
+## Populates the OptionButton with matching node IDs from the network.
+func _populate_node_ref_dropdown(ob: OptionButton) -> void:
+	var cur_val: String = str(param.value)
+	ob.clear()
+	ob.add_item("(none)")
+	ob.set_item_metadata(0, "")
+
+	if network == null:
+		return
+
+	var ref_family: int = param.node_ref_family
+	var own_id: String = owner_node.node_id if owner_node != null else ""
+	var sorted_ids: Array = network.nodes.keys()
+	sorted_ids.sort()
+
+	for n_id in sorted_ids:
+		if n_id == own_id:
+			continue  # Don't list self
+		var n: GNNode = network.nodes[n_id]
+		if ref_family == -1 or n.family == ref_family:
+			ob.add_item(n_id)
+			ob.set_item_metadata(ob.item_count - 1, n_id)
+		elif n_id == cur_val:
+			# Current value points to a wrong-family node — show with warning
+			var fam_name: String = GNFamily.FAMILY_NAMES.get(n.family, "?")
+			ob.add_item("\u26a0 %s (%s)" % [n_id, fam_name])
+			ob.set_item_metadata(ob.item_count - 1, n_id)
+
+	# Re-select current value after repopulate
+	for i in range(ob.item_count):
+		if ob.get_item_metadata(i) == cur_val:
+			ob.selected = i
+			break
+
+
+func _on_node_ref_selected(idx: int, ob: OptionButton) -> void:
+	if _updating:
+		return
+	var new_val: String = ob.get_item_metadata(idx)
+	if new_val != str(param.value):
+		param.set_value(new_val)
+		# Show warning if the selected node has the wrong family
+		if not new_val.is_empty() and network != null and param.node_ref_family >= 0:
+			var target: GNNode = network.nodes.get(new_val, null)
+			if target != null and target.family != param.node_ref_family:
+				var expected: String = GNFamily.FAMILY_NAMES.get(param.node_ref_family, "?")
+				var actual: String = GNFamily.FAMILY_NAMES.get(target.family, "?")
+				if owner_node != null:
+					owner_node.node_warning = "Target '%s' is %s, expected %s" % [new_val, actual, expected]
 
 
 ## Returns true if this row represents a code parameter that should get the

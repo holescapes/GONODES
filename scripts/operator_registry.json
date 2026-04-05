@@ -1807,6 +1807,11 @@
     "extension": null,
     "params": [
       {
+        "name": "chop",
+        "type": "string",
+        "default": ""
+      },
+      {
         "name": "pattern",
         "type": "string",
         "default": "*"
@@ -3521,6 +3526,20 @@
     "params": []
   },
   {
+    "class_name": "SelectCOMP",
+    "node_type": "select",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/select_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "comp",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
     "class_name": "OutTunnel",
     "node_type": "out_tunnel",
     "family": "comp",
@@ -4673,6 +4692,11 @@
     "extension": null,
     "params": [
       {
+        "name": "dat",
+        "type": "string",
+        "default": ""
+      },
+      {
         "name": "row_start",
         "type": "int",
         "default": 0
@@ -5325,6 +5349,20 @@
     "params": []
   },
   {
+    "class_name": "SelectIMG",
+    "node_type": "select",
+    "family": "img",
+    "file": "addons/gonodes/operators/img/select_img.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "img",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
     "class_name": "PixelSortIMG",
     "node_type": "pixel_sort",
     "family": "img",
@@ -5675,6 +5713,20 @@
     "file": "addons/gonodes/operators/mat/null_mat.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "SelectMAT",
+    "node_type": "select",
+    "family": "mat",
+    "file": "addons/gonodes/operators/mat/select_mat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mat",
+        "type": "string",
+        "default": ""
+      }
+    ]
   },
   {
     "class_name": "PbrMAT",
@@ -6528,6 +6580,20 @@
     "file": "addons/gonodes/operators/pop/null_pop.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "SelectPOP",
+    "node_type": "select",
+    "family": "pop",
+    "file": "addons/gonodes/operators/pop/select_pop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "pop",
+        "type": "string",
+        "default": ""
+      }
+    ]
   },
   {
     "class_name": "RenderPOP",
@@ -9336,6 +9402,11 @@
     "extension": null,
     "params": [
       {
+        "name": "sop",
+        "type": "string",
+        "default": ""
+      },
+      {
         "name": "entity",
         "type": "menu",
         "default": null
@@ -10549,6 +10620,35 @@
     "node_type": "custom_shader",
     "family": "top",
     "file": "addons/gonodes/operators/top/custom_shader_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "time_dependent",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "cook_once",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "shader_code",
+        "type": "string",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "GLSLMultiTOP",
+    "node_type": "glsl_multi",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/glsl_multi_top.gd",
     "extension": null,
     "params": [
       {
@@ -12766,6 +12866,84 @@
     ]
   },
   {
+    "class_name": "SelectTOP",
+    "node_type": "select",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/select_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "top",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "LimitTOP",
+    "node_type": "limit",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/limit_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "enum",
+        "default": 0
+      },
+      {
+        "name": "min_r",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_r",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_g",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_g",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_b",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_b",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_a",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_a",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_luma",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_luma",
+        "type": "float",
+        "default": 1.0
+      }
+    ]
+  },
+  {
     "class_name": "SyphonInTOP",
     "node_type": "syphonintop",
     "family": "top",
@@ -14298,6 +14476,20 @@
     "file": "addons/gonodes/operators/vol/null_vol.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "SelectVOL",
+    "node_type": "select",
+    "family": "vol",
+    "file": "addons/gonodes/operators/vol/select_vol.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "vol",
+        "type": "string",
+        "default": ""
+      }
+    ]
   },
   {
     "class_name": "PyroVOL",
