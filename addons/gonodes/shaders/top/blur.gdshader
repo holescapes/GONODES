@@ -10,8 +10,6 @@ uniform float blur_size : hint_range(0.0, 100.0) = 5.0;
 uniform int quality : hint_range(1, 16) = 4;
 uniform int method : hint_range(0, 6) = 0;
 
-const float PI = 3.14159265358979;
-
 float compute_weight(float norm, int m) {
 	if (m == 1) {
 		return 1.0; // Box: uniform
@@ -20,7 +18,10 @@ float compute_weight(float norm, int m) {
 	} else if (m == 3) {
 		// Sinc: sin(pi*x)/(pi*x)
 		float x = norm * PI;
-		return (norm < 0.001) ? 1.0 : sin(x) / x;
+		if (norm < 0.001) {
+			return 1.0;
+		}
+		return sin(x) / x;
 	} else if (m == 4) {
 		// Hanning (raised cosine)
 		return 0.5 + 0.5 * cos(PI * norm);
@@ -28,8 +29,8 @@ float compute_weight(float norm, int m) {
 		// Blackman window
 		return 0.42 + 0.5 * cos(PI * norm) + 0.08 * cos(2.0 * PI * norm);
 	} else if (m == 6) {
-		// Bump: inverted Gaussian — heavier at edges
-		return 1.0 - exp(-3.0 * norm * norm);
+		// Bump: cosine-squared bell curve — wider than Gaussian, no tails
+		return max(cos(PI * 0.5 * norm), 0.0);
 	}
 	// Default: Gaussian
 	return exp(-3.0 * norm * norm);
