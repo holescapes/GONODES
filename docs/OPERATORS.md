@@ -4437,7 +4437,11 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 
 > **Architecture note — process_mode:** GNNode sets `process_mode = PROCESS_MODE_DISABLED` during `initialize()` so operators don't run Godot's `_process()` (all cooking is driven by GNCookEngine). However, Godot propagates process_mode to child nodes, so the Window would also become DISABLED — blocking GUI event dispatch entirely (buttons, sliders, etc. stop responding). The fix: WindowOUT explicitly sets `_window.process_mode = Node.PROCESS_MODE_ALWAYS` in `_ensure_window()`. This has zero performance cost — it simply re-enables standard Godot GUI dispatch for the Window subtree.
 
-**Known issue:** Cannot ESC out of fullscreen/borderless mode from the output window. Workaround: change Window Mode back to Windowed from the inspector.
+**Multi-monitor best practice:** Always use the `monitor` parameter to place the window on the target display — do not drag the window manually between screens. Manually dragging may cause tearing on Windows because DWM doesn't cleanly hand off the GPU swapchain to the new display's refresh cycle. When `monitor` is changed programmatically (or from the inspector), WindowOUT positions the Window directly on the target display before presenting, which avoids this issue entirely.
+
+**DPI:** Godot's DisplayServer reports screen positions and sizes in logical (DPI-scaled) coordinates, so multi-monitor setups with mixed DPI scales work correctly without manual compensation.
+
+**Keyboard shortcut:** Press **ESC** inside the output window to revert Fullscreen or Borderless mode back to Windowed.
 
 ---
 

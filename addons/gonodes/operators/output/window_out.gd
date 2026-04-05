@@ -20,8 +20,14 @@ extends GNOutBase
 ## compositor.
 ##
 ## NOTE: Always use the 'monitor' parameter to assign the output display.
-## Manually dragging the window to another screen causes tearing because
+## Manually dragging the window to another screen may cause tearing because
 ## Windows DWM doesn't re-sync the GPU swapchain to the new display.
+## When 'monitor' is changed, WindowOUT positions the Window directly on the
+## target display before presenting, avoiding the DWM handoff issue.
+##
+## DPI: Godot's DisplayServer returns screen positions/sizes in logical
+## (DPI-scaled) coordinates, so multi-monitor setups with mixed DPI scales
+## work correctly — no manual DPI compensation is needed.
 
 ## Window mode options matching Godot's Window.Mode.
 enum WindowMode { WINDOWED, FULLSCREEN, BORDERLESS }
@@ -37,6 +43,13 @@ var _window_created: bool = false
 
 ## Whether window-level params need re-applying (set by own param changes only).
 var _window_params_dirty: bool = true
+
+## Previous layout-affecting param values — used to skip repositioning
+## when only cosmetic params (always_on_top, vsync, title) change.
+var _prev_monitor: int = -1
+var _prev_position: Vector2i = Vector2i(-2, -2)
+var _prev_window_mode: int = -1
+var _prev_resolution: Vector2i = Vector2i(-1, -1)
 
 ## Root container for UI widget layout — direct child of Window.
 var _panel_ui_root: BoxContainer = null
@@ -147,10 +160,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			_window.visible = should_open
 			if should_open:
 				GNLogger.info("WindowOUT", "'%s' output window re-opened via parameter" % id)
-
-	# Apply lightweight params every frame (title, texture)
-	if _window != null and not _embedded_mode:
-		_window.title = get_param_value("title")
 
 	# Apply heavyweight window params only when OUR params changed
 	# (not when upstream input changes mark us cook-dirty)
@@ -344,8 +353,17 @@ func _apply_window_params() -> void:
 			var screen_size := DisplayServer.screen_get_size(target_monitor)
 			_window.size = screen_size
 
-	# Position the window on the target monitor
-	_position_on_monitor(monitor_idx, pos, mode_idx)
+	# Only reposition when layout-affecting params actually changed —
+	# cosmetic changes (always_on_top, vsync, title) must not move the window.
+	var layout_changed := (monitor_idx != _prev_monitor or pos != _prev_position
+		or mode_idx != _prev_window_mode or res != _prev_resolution)
+	_prev_monitor = monitor_idx
+	_prev_position = pos
+	_prev_window_mode = mode_idx
+	_prev_resolution = res
+
+	if layout_changed:
+		_position_on_monitor(monitor_idx, pos, mode_idx)
 
 
 ## Positions the window on the specified monitor.
