@@ -198,15 +198,21 @@ func _update_cook_chain() -> void:
 		if not is_active:
 			item.set_text(3, "inactive")
 			item.set_custom_color(3, Color(0.5, 0.5, 0.5, 0.6))
-		elif node.cook_valid:
-			item.set_text(3, "✓ cooked")
-			item.set_custom_color(3, Color(0.4, 1.0, 0.4))
-		elif not node.dirty:
+		elif node.cooked_this_frame and node.cook_valid:
+			item.set_text(3, "⟳ cooking")
+			item.set_custom_color(3, Color(0.3, 0.8, 1.0))
+		elif node.cook_valid and not node.dirty:
 			item.set_text(3, "— cached")
 			item.set_custom_color(3, Color(0.6, 0.6, 0.6))
-		else:
+		elif node.dirty:
+			item.set_text(3, "● dirty")
+			item.set_custom_color(3, Color(1.0, 0.7, 0.2))
+		elif not node.cook_valid:
 			item.set_text(3, "✗ error")
 			item.set_custom_color(3, Color(1.0, 0.35, 0.3))
+		else:
+			item.set_text(3, "— cached")
+			item.set_custom_color(3, Color(0.6, 0.6, 0.6))
 
 		# Column 4: cook time
 		var cook_ms := node.cook_time_ms

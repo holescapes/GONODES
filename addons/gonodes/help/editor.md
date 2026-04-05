@@ -479,6 +479,20 @@ scroll to that node.
 | **Active Chains** | Tree rooted at each sink, showing upstream dependencies | Node, Family, Cook (ms) |
 | **Param Refs** | All expression-mode parameters and their cross-references | Source Node, Parameter, Expression, References, Eval (μs) |
 
+**Cook Chain status column:**
+
+| Status | Color | Meaning |
+|--------|-------|---------|
+| **⟳ cooking** | Cyan | Node was actually cooked this frame (time-dependent, param changed, or first cook) |
+| **— cached** | Gray | Valid output from a previous cook; skipped this frame (no work done) |
+| **● dirty** | Orange | Marked dirty but hasn't cooked yet (waiting in queue) |
+| **✗ error** | Red | Last cook failed (returned null) |
+| **inactive** | Dim gray | Not in any active chain (no sink downstream) |
+
+A static node (e.g. ConstantTOP) will show "⟳ cooking" once on creation, then
+settle to "— cached" on every subsequent frame. A time-dependent node (e.g.
+RenderTOP, MovieFileInTOP) shows "⟳ cooking" every frame while active.
+
 **Multi-select:** Ctrl+click or Shift+click to select multiple rows in any tab.
 
 **Clipboard buttons (toolbar):**

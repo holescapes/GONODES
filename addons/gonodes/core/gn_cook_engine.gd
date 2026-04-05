@@ -493,6 +493,7 @@ func cook_frame(delta: float) -> void:
 		for node in topo_order:
 			node.node_warning = ""
 			node.node_error = ""
+			node.cooked_this_frame = false
 
 	# Parallel cook path: group nodes into topo levels and cook independent
 	# CPU-family nodes within each level concurrently.

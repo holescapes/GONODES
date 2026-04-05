@@ -55,6 +55,9 @@ var cook_time_ms: float = 0.0
 ## True if the last cook completed without errors.
 var cook_valid: bool = false
 
+## True if this node was actually cooked during the current frame.
+var cooked_this_frame: bool = false
+
 ## Hash of the last cook's inputs (resolved param values + input timestamps).
 ## Used by the cook engine's input hash guard (Tier 2) to skip redundant cooks
 ## when parameters and inputs haven't changed since the previous frame.
@@ -602,6 +605,7 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 	var end_time := Time.get_ticks_usec()
 
 	cook_time_ms = (end_time - start_time) / 1000.0
+	cooked_this_frame = true
 
 	if result != null:
 		result.timestamp = frame
