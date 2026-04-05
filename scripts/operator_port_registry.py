@@ -187,7 +187,7 @@ OPERATOR_PORT_REGISTRY = {
     "GamepadCHOP": {"family": "CHOP", "inputs": [], "outputs": [{"port": 0, "name": "out", "type": "CHOP"}], "dynamic_inputs": None},
     "GDScriptSCRIPT": {"family": "COMP", "inputs": [{"port": 0, "name": "in0", "type": "CHOP"}], "outputs": [{"port": 0, "name": "out0", "type": "CHOP"}, {"port": 1, "name": "out1", "type": "DAT"}], "dynamic_inputs": None},
     "GeometryBufferTOP": {"family": "TOP", "inputs": [], "outputs": [{"port": 0, "name": "out", "type": "TOP"}], "dynamic_inputs": "COMP"},
-    "GeometryCOMP": {"family": "COMP", "inputs": [{"port": 0, "name": "geo_in", "type": "SOP"}, {"port": 1, "name": "mat_in", "type": "MAT"}, {"port": 2, "name": "tex_in", "type": "TOP"}], "outputs": [{"port": 0, "name": "out", "type": "COMP"}], "dynamic_inputs": None},
+    "GeometryCOMP": {"family": "COMP", "inputs": [{"port": 0, "name": "geo_in", "type": "SOP"}, {"port": 1, "name": "mat_in", "type": "MAT"}], "outputs": [{"port": 0, "name": "out", "type": "COMP"}], "dynamic_inputs": None},
     "GlueTOP": {"family": "TOP", "inputs": [{"port": 0, "name": "in1", "type": "TOP"}, {"port": 1, "name": "in2", "type": "TOP"}, {"port": 2, "name": "in3", "type": "TOP"}, {"port": 3, "name": "in4", "type": "TOP"}], "outputs": [{"port": 0, "name": "out", "type": "TOP"}], "dynamic_inputs": None},
     "GradientSDF": {"family": None, "inputs": [{"port": 0, "name": "sdf_in", "type": "TOP"}], "outputs": [{"port": 0, "name": "out", "type": "TOP"}], "dynamic_inputs": None},
     "GridSOP": {"family": "SOP", "inputs": [], "outputs": [{"port": 0, "name": "out", "type": "SOP"}], "dynamic_inputs": None},

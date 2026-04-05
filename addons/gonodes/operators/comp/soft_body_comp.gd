@@ -41,12 +41,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "X position"))
 	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Y position"))
 	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Z position"))
-	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Rotation X (degrees)"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Rotation Y (degrees)"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Rotation Z (degrees)"))
-	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Scale X"))
-	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Scale Y"))
-	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Scale Z"))
+	add_parameter(GNParameter.create_float("rx", 0.0, null, null, 0.1, "Rotate X", "Rotation X (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, null, null, 0.1, "Rotate Y", "Rotation Y (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, null, null, 0.1, "Rotate Z", "Rotation Z (degrees)"))
+	add_parameter(GNParameter.create_float("sx", 1.0, null, null, 0.01, "Scale X", "Scale X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, null, null, 0.01, "Scale Y", "Scale Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, null, null, 0.01, "Scale Z", "Scale Z"))
 
 	# ── Simulation ───────────────────────────────────────────────────────
 	add_parameter(GNParameter.create_int("iterations", 8, 1, 40,
@@ -376,6 +376,24 @@ func destroy_scene_node() -> void:
 	_positions = PackedVector3Array()
 	_prev_positions = PackedVector3Array()
 	super.destroy_scene_node()
+
+
+func display_in_viewer(viewer) -> void:
+	if _mesh_inst != null and _mesh_inst.mesh != null and _mesh_inst.mesh is ArrayMesh:
+		var geo := GNGeoData.new()
+		geo.mesh = _mesh_inst.mesh as ArrayMesh
+		geo.vertex_count = geo.mesh.get_surface_count()
+		var mat: Material = _mesh_inst.material_override
+		if mat != null:
+			viewer.show_3d_mesh_with_material(geo, mat)
+		else:
+			viewer.show_3d_mesh(geo)
+		var verts: int = _positions.size() if _positions != null else 0
+		viewer.set_info_overlay("SoftBody — %d verts  Iter: %d" % [verts, get_param_value("iterations")])
+		return
+	var verts: int = _positions.size() if _positions != null else 0
+	viewer.show_info("SoftBody — %d vertices\nIterations: %d" % [
+		verts, get_param_value("iterations")], "SoftBodyCOMP")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -31,12 +31,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "X position"))
 	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Y position"))
 	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Z position"))
-	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Rotation X"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Rotation Y"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Rotation Z"))
-	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Scale X"))
-	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Scale Y"))
-	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Scale Z"))
+	add_parameter(GNParameter.create_float("rx", 0.0, null, null, 0.1, "Rotate X", "Rotation X"))
+	add_parameter(GNParameter.create_float("ry", 0.0, null, null, 0.1, "Rotate Y", "Rotation Y"))
+	add_parameter(GNParameter.create_float("rz", 0.0, null, null, 0.1, "Rotate Z", "Rotation Z"))
+	add_parameter(GNParameter.create_float("sx", 1.0, null, null, 0.01, "Scale X", "Scale X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, null, null, 0.01, "Scale Y", "Scale Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, null, null, 0.01, "Scale Z", "Scale Z"))
 
 	# ── Area Shape (used when no SOP input) ──────────────────────────────
 	add_parameter(GNParameter.create_enum("shape",

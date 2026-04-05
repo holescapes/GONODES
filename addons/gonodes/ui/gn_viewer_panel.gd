@@ -131,6 +131,15 @@ var _3d_mesh_instance: MeshInstance3D = null
 var _3d_light: DirectionalLight3D = null
 var _3d_display: TextureRect = null   ## Shows the SubViewport output
 
+## Material override applied to the mesh when viewing COMPs with materials.
+var _3d_material_override: Material = null
+
+## Extra MeshInstance3Ds temporarily added for multi-mesh viewer (MergeCOMP, etc.).
+var _3d_extra_meshes: Array[MeshInstance3D] = []
+
+## Semi-transparent text overlay on top of the 3D display (set by operators).
+var _3d_info_overlay: Label = null
+
 ## Orbit camera state
 var _orbit_yaw: float = 45.0
 var _orbit_pitch: float = -30.0
@@ -205,6 +214,10 @@ var _info_label: Label = null
 # ─── Info bar (bottom) ────────────────────────────────────────────────────────
 
 var _info_bar: Label = null
+
+# ─── Resize debounce ─────────────────────────────────────────────────────────
+
+var _resize_timer: Timer = null
 
 ## When true, 3D SubViewports (SOP/MAT) are pre-allocated via call_deferred
 ## in _ready() to avoid a hitch on first view.  Set to true for the docked
@@ -291,6 +304,14 @@ func _ready() -> void:
 	# Deferred warm-up: pre-create 3D viewports so first SOP/MAT click has no hitch
 	if eager_3d:
 		call_deferred("_warm_up_3d")
+
+	# Debounced resize: fires once after the user finishes dragging the panel edge
+	_resize_timer = Timer.new()
+	_resize_timer.one_shot = true
+	_resize_timer.wait_time = 0.15
+	_resize_timer.timeout.connect(_on_resize_settled)
+	add_child(_resize_timer)
+	resized.connect(_on_panel_resized)
 
 
 ## Content area rect (below toolbar, above info bar).
@@ -639,11 +660,27 @@ func _ensure_3d_viewport() -> void:
 	_3d_display.gui_input.connect(_on_3d_gui_input)
 	_3d_display.mouse_exited.connect(func() -> void: _orbit_dragging = false)
 
+	# Overlay label (top-left of 3D display, semi-transparent)
+	_3d_info_overlay = Label.new()
+	_3d_info_overlay.visible = false
+	_3d_info_overlay.mouse_filter = MOUSE_FILTER_IGNORE
+	_3d_info_overlay.add_theme_font_size_override("font_size", 11)
+	_3d_info_overlay.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9, 0.85))
+	_3d_info_overlay.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
+	_3d_info_overlay.add_theme_constant_override("shadow_offset_x", 1)
+	_3d_info_overlay.add_theme_constant_override("shadow_offset_y", 1)
+	add_child(_3d_info_overlay)
+
 	_update_orbit_camera()
 
 
-func _show_3d_mesh(geo_data: GNGeoData) -> void:
+func _show_3d_mesh(geo_data: GNGeoData, material: Material = null) -> void:
 	_ensure_3d_viewport()
+	_clear_extra_meshes()
+
+	# Apply or clear material override
+	_3d_material_override = material
+	_3d_mesh_instance.material_override = material
 
 	# Fast path — if already showing 3D, just update mesh (preserve orbit state)
 	if _3d_display.visible:
@@ -688,6 +725,68 @@ func _show_3d_mesh(geo_data: GNGeoData) -> void:
 	# Info
 	_info_bar.text = "%d verts, %d surfaces" % [geo_data.vertex_count,
 		geo_data.mesh.get_surface_count() if geo_data.mesh else 0]
+
+
+## Removes any extra MeshInstance3Ds added by show_3d_scene().
+func _clear_extra_meshes() -> void:
+	for mi in _3d_extra_meshes:
+		if is_instance_valid(mi) and mi.get_parent() != null:
+			mi.get_parent().remove_child(mi)
+			mi.queue_free()
+	_3d_extra_meshes.clear()
+
+
+## Shows multiple meshes with optional per-mesh materials in the 3D orbit viewer.
+## entries: Array of { "mesh": Mesh, "material": Material or null, "transform": Transform3D }
+func _show_3d_scene(entries: Array, info_text: String) -> void:
+	_ensure_3d_viewport()
+	_clear_extra_meshes()
+
+	# Primary mesh instance shows the first entry
+	_3d_mesh_instance.mesh = null
+	_3d_mesh_instance.material_override = null
+	_3d_mesh_instance.transform = Transform3D.IDENTITY
+
+	if entries.size() > 0:
+		var first: Dictionary = entries[0]
+		_3d_mesh_instance.mesh = first.get("mesh")
+		_3d_mesh_instance.material_override = first.get("material")
+		var xform = first.get("transform")
+		if xform is Transform3D:
+			_3d_mesh_instance.transform = xform
+
+	# Additional entries get their own MeshInstance3D in the viewport
+	for i in range(1, entries.size()):
+		var entry: Dictionary = entries[i]
+		var mi := MeshInstance3D.new()
+		mi.name = "ScenePreview_%d" % i
+		mi.mesh = entry.get("mesh")
+		mi.material_override = entry.get("material")
+		var xform = entry.get("transform")
+		if xform is Transform3D:
+			mi.transform = xform
+		_3d_viewport.add_child(mi)
+		_3d_extra_meshes.append(mi)
+
+	if not _3d_display.visible:
+		_hide_all_displays()
+		_3d_display.visible = true
+		_fit_btn.visible = false
+		_zoom_label.visible = false
+		_wireframe_btn.visible = true
+
+		var content := _get_content_rect()
+		_3d_display.position = content.position
+		_3d_display.size = content.size
+		_3d_viewport.size = _snap_size(content.size)
+	else:
+		var content := _get_content_rect()
+		_3d_viewport.size = _snap_size(content.size)
+
+	_apply_wireframe_mode()
+	_update_gizmo_scale()
+	_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	_info_bar.text = info_text
 
 
 ## Orbit camera input on the 3D display (left-click or middle-click to orbit).
@@ -876,6 +975,17 @@ func show_3d_mesh(geo_data: GNGeoData) -> void:
 	_show_3d_mesh(geo_data)
 
 
+## Public: display SOP 3D mesh with a material applied (for COMPs).
+func show_3d_mesh_with_material(geo_data: GNGeoData, material: Material) -> void:
+	_show_3d_mesh(geo_data, material)
+
+
+## Public: display multiple meshes in a composed 3D scene (for MergeCOMP, etc.).
+## entries: Array of { "mesh": Mesh, "material": Material, "transform": Transform3D }
+func show_3d_scene(entries: Array, info_text: String) -> void:
+	_show_3d_scene(entries, info_text)
+
+
 ## Public: display MAT preview sphere.
 func show_material(mat_data: GNMaterialData) -> void:
 	_show_material(mat_data)
@@ -900,6 +1010,22 @@ func show_ui_preview(ui_node) -> void:
 ## Public: refresh the zoom percentage label.
 func update_zoom_label() -> void:
 	_update_zoom_label()
+
+
+## Public: show a semi-transparent text overlay on top of the 3D display.
+## Call after show_3d_mesh / show_3d_scene.  Pass "" to hide.
+func set_info_overlay(text: String) -> void:
+	if _3d_info_overlay == null:
+		return
+	if text.is_empty():
+		_3d_info_overlay.visible = false
+		return
+	_3d_info_overlay.text = text
+	_3d_info_overlay.visible = true
+	# Position at top-left of the 3D display content area
+	var content := _get_content_rect()
+	_3d_info_overlay.position = content.position + Vector2(6, 4)
+	_3d_info_overlay.size = Vector2(content.size.x - 12, content.size.y * 0.4)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -939,6 +1065,8 @@ func _hide_all_displays() -> void:
 		_wireframe_btn.visible = false
 	if _info_bar:
 		_info_bar.text = ""
+	if _3d_info_overlay:
+		_3d_info_overlay.visible = false
 
 
 ## Snaps a size to the nearest 64px boundary (avoids SubViewport resize churn).
@@ -947,6 +1075,80 @@ func _snap_size(s: Vector2) -> Vector2i:
 		maxi(64, snappedi(int(s.x), 64)),
 		maxi(64, snappedi(int(s.y), 64))
 	)
+
+
+## Restart the debounce timer on every resize event.
+func _on_panel_resized() -> void:
+	_resize_timer.start()
+
+
+## Called once after resizing has stopped for 0.15s.
+## Resizes all active SubViewports + display rects to the new content area.
+func _on_resize_settled() -> void:
+	var content := _get_content_rect()
+	var snapped := _snap_size(content.size)
+
+	# ── TOP / IMG ──
+	if _tex_clip and _tex_clip.visible:
+		_tex_clip.position = content.position
+		_tex_clip.size = content.size
+		_apply_tex_transform()
+
+	# ── CHOP ──
+	if _waveform and _waveform.visible:
+		_waveform.position = content.position
+		_waveform.size = content.size
+
+	# ── DAT ──
+	if _spreadsheet and _spreadsheet.visible:
+		_spreadsheet.position = content.position
+		_spreadsheet.size = content.size
+
+	# ── SOP (3D) ──
+	if _3d_display and _3d_display.visible:
+		_3d_display.position = content.position
+		_3d_display.size = content.size
+		if _3d_viewport:
+			_3d_viewport.size = snapped
+			_3d_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+	# ── MAT ──
+	if _mat_display and _mat_display.visible:
+		_mat_display.position = content.position
+		_mat_display.size = content.size
+		if _mat_viewport:
+			_mat_viewport.size = snapped
+			_mat_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+	# ── UI ──
+	if _ui_display and _ui_display.visible:
+		_ui_display.position = content.position
+		_ui_display.size = content.size
+		if _ui_viewport:
+			_ui_viewport.size = snapped
+			_ui_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+	# ── POP ──
+	if _pop_display and _pop_display.visible:
+		_pop_display.position = content.position
+		_pop_display.size = content.size
+		if _pop_viewport:
+			_pop_viewport.size = snapped
+			_pop_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+	# ── VOL ──
+	if _vol_container and _vol_container.visible:
+		_vol_container.position = content.position
+		_vol_container.size = content.size
+
+	# ── Info label ──
+	if _info_label and _info_label.visible:
+		_info_label.position = content.position
+		_info_label.size = content.size
+
+	# ── 3D info overlay ──
+	if _3d_info_overlay and _3d_info_overlay.visible:
+		_3d_info_overlay.position = content.position + Vector2(6, 4)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

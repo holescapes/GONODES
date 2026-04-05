@@ -1,164 +1,192 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "geo_a":  {
-                                "type":  "GeometryCOMP",
-                                "position":  [
-                                                 100,
-                                                 100
-                                             ],
-                                "parameters":  {
-                                                   "tx":  {
-                                                              "value":  -1.5
-                                                          },
-                                                   "albedo_color":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Color",
-                                                                                      "r":  1.0,
-                                                                                      "g":  0.3,
-                                                                                      "b":  0.3,
-                                                                                      "a":  1.0
-                                                                                  }
-                                                                    }
-                                               }
-                            },
-                  "geo_b":  {
-                                "type":  "GeometryCOMP",
-                                "position":  [
-                                                 100,
-                                                 350
-                                             ],
-                                "parameters":  {
-                                                   "tx":  {
-                                                              "value":  1.5
-                                                          },
-                                                   "albedo_color":  {
-                                                                        "value":  {
-                                                                                      "_type":  "Color",
-                                                                                      "r":  0.3,
-                                                                                      "g":  0.3,
-                                                                                      "b":  1.0,
-                                                                                      "a":  1.0
-                                                                                  }
-                                                                    }
-                                               }
-                            },
-                  "merge1":  {
-                                 "type":  "MergeCOMP",
-                                 "position":  [
-                                                  450,
-                                                  200
-                                              ],
-                                 "parameters":  {
-
-                                                }
-                             },
-                  "window1":  {
-                                  "position":  [
-                                                   1100,
-                                                   200
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       750,
-                                                       200
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    450,
-                                                    400
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "geo_a",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "geo_b",
-                            "from_port":  0,
-                            "to":  "merge1",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "merge1",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Merge COMP — Combine 3D Objects\n\nCombines red and blue geometry COMPs\ninto a single COMP output for RenderTOP.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         80.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "geo_a": {
+            "type": "GeometryCOMP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": -1.5
+                }
+            }
+        },
+        "geo_b": {
+            "type": "GeometryCOMP",
+            "position": [
+                100,
+                350
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 1.5
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                450,
+                200
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "position": [
+                1100,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                750,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                450,
+                400
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "mat_a": {
+            "type": "PbrMAT",
+            "position": [
+                -100,
+                300
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.3,
+                        "b": 0.3,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "mat_b": {
+            "type": "PbrMAT",
+            "position": [
+                -100,
+                550
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.3,
+                        "g": 0.3,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "geo_a",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "geo_b",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "mat_a",
+            "from_port": 0,
+            "to": "geo_a",
+            "to_port": 1
+        },
+        {
+            "from": "mat_b",
+            "from_port": 0,
+            "to": "geo_b",
+            "to_port": 1
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Merge COMP — Combine 3D Objects\n\nCombines red and blue geometry COMPs\ninto a single COMP output for RenderTOP.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

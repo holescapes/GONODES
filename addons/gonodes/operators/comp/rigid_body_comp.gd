@@ -35,12 +35,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "Initial X position"))
 	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Initial Y position"))
 	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Initial Z position"))
-	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Initial rotation X (degrees)"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Initial rotation Y (degrees)"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Initial rotation Z (degrees)"))
-	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Scale X"))
-	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Scale Y"))
-	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Scale Z"))
+	add_parameter(GNParameter.create_float("rx", 0.0, null, null, 0.1, "Rotate X", "Initial rotation X (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, null, null, 0.1, "Rotate Y", "Initial rotation Y (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, null, null, 0.1, "Rotate Z", "Initial rotation Z (degrees)"))
+	add_parameter(GNParameter.create_float("sx", 1.0, null, null, 0.01, "Scale X", "Scale X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, null, null, 0.01, "Scale Y", "Scale Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, null, null, 0.01, "Scale Z", "Scale Z"))
 
 	# ── Physics Mode ─────────────────────────────────────────────────────
 	add_parameter(GNParameter.create_enum("mode",
@@ -258,6 +258,28 @@ func destroy_scene_node() -> void:
 ## Returns the RigidBody3D node.
 func get_rigid_body() -> RigidBody3D:
 	return _rigid_body
+
+
+func display_in_viewer(viewer) -> void:
+	if _mesh_instance != null and _mesh_instance.mesh != null and _mesh_instance.mesh is ArrayMesh:
+		var geo := GNGeoData.new()
+		geo.mesh = _mesh_instance.mesh as ArrayMesh
+		geo.vertex_count = geo.mesh.get_surface_count()
+		var mat: Material = _mesh_instance.material_override
+		if mat != null:
+			viewer.show_3d_mesh_with_material(geo, mat)
+		else:
+			viewer.show_3d_mesh(geo)
+		var mode_names := ["Dynamic", "Kinematic", "Static"]
+		var mode: int = get_param_value("mode")
+		var mode_name: String = mode_names[mode] if mode >= 0 and mode < 3 else "?"
+		viewer.set_info_overlay("%s  Mass: %.1f  Bounce: %.2f" % [mode_name, get_param_value("mass"), get_param_value("bounce")])
+		return
+	var mode_names := ["Dynamic", "Kinematic", "Static"]
+	var mode: int = get_param_value("mode")
+	var mode_name: String = mode_names[mode] if mode >= 0 and mode < 3 else "Unknown"
+	viewer.show_info("RigidBody (%s)\nMass: %.2f" % [mode_name, get_param_value("mass")], "RigidBodyCOMP")
+
 
 
 ## Walks the network to find the upstream COMP connected to the comp_in port.

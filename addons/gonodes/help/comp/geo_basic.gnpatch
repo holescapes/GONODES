@@ -1,148 +1,163 @@
 {
-    "version":  "1.0.0",
-    "generator":  "GONODES",
-    "nodes":  {
-                  "geo1":  {
-                               "type":  "GeometryCOMP",
-                               "position":  [
-                                                200,
-                                                100
-                                            ],
-                               "parameters":  {
-                                                  "tx":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "ty":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "tz":  {
-                                                             "value":  0.0
-                                                         },
-                                                  "sx":  {
-                                                             "value":  1.0
-                                                         },
-                                                  "sy":  {
-                                                             "value":  1.0
-                                                         },
-                                                  "sz":  {
-                                                             "value":  1.0
-                                                         },
-                                                  "albedo_color":  {
-                                                                       "value":  {
-                                                                                     "_type":  "Color",
-                                                                                     "r":  0.3,
-                                                                                     "g":  0.6,
-                                                                                     "b":  0.9,
-                                                                                     "a":  1.0
-                                                                                 }
-                                                                   },
-                                                  "metallic":  {
-                                                                   "value":  0.4
-                                                               },
-                                                  "roughness":  {
-                                                                    "value":  0.3
-                                                                },
-                                                  "visible":  {
-                                                                  "value":  true
-                                                              },
-                                                  "cast_shadow":  {
-                                                                      "value":  true
-                                                                  }
-                                              }
-                           },
-                  "window1":  {
-                                  "position":  [
-                                                   850,
-                                                   100
-                                               ],
-                                  "parameters":  {
-                                                     "resolution":  {
-                                                                        "value":  {
-                                                                                      "y":  512,
-                                                                                      "_type":  "Vector2i",
-                                                                                      "x":  512
-                                                                                  }
-                                                                    },
-                                                     "open":  {
-                                                                  "value":  true
-                                                              }
-                                                 },
-                                  "type":  "WindowOUT"
-                              },
-                  "render_view":  {
-                                      "type":  "RenderTOP",
-                                      "position":  [
-                                                       500,
-                                                       100
-                                                   ],
-                                      "parameters":  {
-                                                         "resolution":  {
-                                                                            "value":  {
-                                                                                          "_type":  "Vector2i",
-                                                                                          "x":  512,
-                                                                                          "y":  512
-                                                                                      }
-                                                                        }
-                                                     }
-                                  },
-                  "cam_view":  {
-                                   "type":  "CameraCOMP",
-                                   "position":  [
-                                                    200,
-                                                    300
-                                                ],
-                                   "parameters":  {
-                                                      "tx":  {
-                                                                 "value":  0
-                                                             },
-                                                      "ty":  {
-                                                                 "value":  0.5
-                                                             },
-                                                      "tz":  {
-                                                                 "value":  3
-                                                             }
-                                                  }
-                               }
-              },
-    "connections":  [
-                        {
-                            "from":  "geo1",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  0
-                        },
-                        {
-                            "from":  "cam_view",
-                            "from_port":  0,
-                            "to":  "render_view",
-                            "to_port":  1
-                        },
-                        {
-                            "from":  "render_view",
-                            "from_port":  0,
-                            "to":  "window1",
-                            "to_port":  0
-                        }
-                    ],
-    "annotations":  [
-                        {
-                            "id":  "ann_1",
-                            "type":  "note",
-                            "text":  "Geometry COMP — 3D Object\n\nHolds geometry from SOP input with PBR material.\nBlue metallic surface (metallic 0.4, rough 0.3).\nConnect a SOP to provide the mesh data.",
-                            "position":  [
-                                             -100.0,
-                                             -150.0
-                                         ],
-                            "size":  [
-                                         400.0,
-                                         100.0
-                                     ],
-                            "color":  [
-                                          1.0,
-                                          1.0,
-                                          1.0,
-                                          0.8
-                                      ]
-                        }
-                    ]
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 0.0
+                },
+                "sx": {
+                    "value": 1.0
+                },
+                "sy": {
+                    "value": 1.0
+                },
+                "sz": {
+                    "value": 1.0
+                },
+                "visible": {
+                    "value": true
+                },
+                "cast_shadow": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "position": [
+                850,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "y": 512,
+                        "_type": "Vector2i",
+                        "x": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            },
+            "type": "WindowOUT"
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                200,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "mat_1": {
+            "type": "PbrMAT",
+            "position": [
+                0,
+                300
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.3,
+                        "g": 0.6,
+                        "b": 0.9,
+                        "a": 1.0
+                    }
+                },
+                "metallic": {
+                    "value": 0.4
+                },
+                "roughness": {
+                    "value": 0.3
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "mat_1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 1
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Geometry COMP — 3D Object\n\nHolds geometry from SOP input.\nMaterial set via PbrMAT input (blue metallic surface).\nConnect a SOP to provide the mesh data.",
+            "position": [
+                -100.0,
+                -150.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

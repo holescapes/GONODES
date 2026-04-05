@@ -152,7 +152,7 @@ its parameters. Each parameter row has interactive controls:
 
 Every parameter has a small **C/E button** on the left:
 
-- **C** (Constant) — value is set directly via the spinbox, slider, color
+- **C** (Constant) — value is set directly via the numeric field, color
   picker, checkbox, or dropdown. This is the default mode.
 - **E** (Expression) — value is computed by a GDScript expression string
   every cook frame. A text field appears for entering the expression.
@@ -172,12 +172,45 @@ Multi-dimensional parameters show **per-component** C/E toggles:
 Each axis (X, Y, Z, W / R, G, B, A) can independently be in Constant or
 Expression mode, just like TouchDesigner.
 
+### Numeric Fields (GNFloatField — Houdini-style virtual slider)
+
+All Float and Int parameters use a unified **GNFloatField** control — a
+Houdini-inspired numeric field with virtual slider drag and a ladder
+multiplier popup.
+
+**Interactions:**
+
+| Action | Effect |
+|--------|--------|
+| **Click** | Enter text editing mode — type any value, press Enter to confirm, Escape to cancel |
+| **Ctrl+Click** | Reset parameter to its default value |
+| **Horizontal drag** | Virtual slider — scrub the value smoothly using the active sensitivity tier |
+| **Shift + drag** | Fine mode (sensitivity ÷ 10) |
+| **Ctrl + drag** | Coarse mode (sensitivity × 10) |
+| **Middle-button drag** | Open the **ladder popup** — drag vertically to select a sensitivity tier (no value change during selection). All other UI is blocked while the ladder is open. |
+
+**Ladder popup:** When you middle-click and drag, a popup appears to the left
+of the field showing multiplier tiers from ×0.001 (finest) to ×100 (coarsest).
+Drag up from the origin for coarser tiers, down for finer. The active tier is
+highlighted with a blue bar and shows the real per-pixel sensitivity (e.g.
+"0.01/px") beside the multiplier label. Release middle-button to confirm your
+tier selection — subsequent left-drag scrubs at the new sensitivity.
+
+During ladder pick, a full-screen input blocker prevents any other UI element
+from highlighting or receiving mouse events.
+
+**Ranged vs. rangeless:** Parameters with defined min/max (e.g. Energy 0–16)
+show a subtle **fill bar** behind the value text indicating position within
+the range. Rangeless parameters (e.g. Translate X, Rotate Y) show a darker
+background with small **◂ ▸ arrow indicators** at the edges — the value is
+completely unclamped.
+
 ### Value Controls by Type
 
 | Type      | Control                                                         |
 |-----------|-----------------------------------------------------------------|
-| Float     | SpinBox (drag to scrub, type to set)                            |
-| Int       | SpinBox (integer steps)                                         |
+| Float     | GNFloatField (virtual slider drag, ladder, click-to-type)       |
+| Int       | GNFloatField in integer mode (same interactions, integer steps) |
 | Bool      | CheckBox                                                        |
 | String    | LineEdit                                                        |
 | Enum      | OptionButton (dropdown)                                         |

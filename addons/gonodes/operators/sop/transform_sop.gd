@@ -17,12 +17,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "Translation along X"))
 	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Translation along Y"))
 	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Translation along Z"))
-	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Rotation around X (degrees)"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Rotation around Y (degrees)"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Rotation around Z (degrees)"))
-	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Scale along X"))
-	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Scale along Y"))
-	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Scale along Z"))
+	add_parameter(GNParameter.create_float("rx", 0.0, null, null, 0.1, "Rotate X", "Rotation around X (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, null, null, 0.1, "Rotate Y", "Rotation around Y (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, null, null, 0.1, "Rotate Z", "Rotation around Z (degrees)"))
+	add_parameter(GNParameter.create_float("sx", 1.0, null, null, 0.01, "Scale X", "Scale along X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, null, null, 0.01, "Scale Y", "Scale along Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, null, null, 0.01, "Scale Z", "Scale along Z"))
 	add_parameter(GNParameter.create_enum("order",
 		PackedStringArray(["SRT", "STR", "RST", "RTS", "TSR", "TRS"]), 0, "Transform Order", "Order of transform operations"))
 

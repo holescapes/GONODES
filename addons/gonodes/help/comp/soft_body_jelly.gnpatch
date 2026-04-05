@@ -74,6 +74,18 @@
             "to": "window1",
             "to_port": 0,
             "from_port": 0
+        },
+        {
+            "from": "mat_1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 1
+        },
+        {
+            "from": "mat_floor",
+            "from_port": 0,
+            "to": "geo_floor",
+            "to_port": 1
         }
     ],
     "generator": "GONODES",
@@ -143,35 +155,8 @@
         },
         "geo1": {
             "parameters": {
-                "albedo_color": {
-                    "value": {
-                        "_type": "Color",
-                        "a": 1.0,
-                        "b": 1.0,
-                        "g": 0.600000023841858,
-                        "r": 0.200000002980232
-                    }
-                },
                 "cast_shadow": {
                     "value": 1
-                },
-                "emission_color": {
-                    "value": {
-                        "_type": "Color",
-                        "a": 1.0,
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 0.0
-                    }
-                },
-                "emission_energy": {
-                    "value": 0.0
-                },
-                "metallic": {
-                    "value": 0.1
-                },
-                "roughness": {
-                    "value": 0.3
                 },
                 "rx": {
                     "value": 0.0
@@ -212,35 +197,8 @@
         },
         "geo_floor": {
             "parameters": {
-                "albedo_color": {
-                    "value": {
-                        "_type": "Color",
-                        "a": 1.0,
-                        "b": 0.850000023841858,
-                        "g": 0.850000023841858,
-                        "r": 0.850000023841858
-                    }
-                },
                 "cast_shadow": {
                     "value": 1
-                },
-                "emission_color": {
-                    "value": {
-                        "_type": "Color",
-                        "a": 1.0,
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 0.0
-                    }
-                },
-                "emission_energy": {
-                    "value": 0.0
-                },
-                "metallic": {
-                    "value": 0.0
-                },
-                "roughness": {
-                    "value": 0.8
                 },
                 "rx": {
                     "value": 0.0
@@ -598,6 +556,78 @@
                 }
             },
             "type": "WindowOUT"
+        },
+        "mat_1": {
+            "type": "PbrMAT",
+            "position": [
+                -300.0,
+                200.0
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 1.0,
+                        "g": 0.600000023841858,
+                        "r": 0.200000002980232
+                    }
+                },
+                "emission_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 0.0
+                    }
+                },
+                "emission_energy": {
+                    "value": 0.0
+                },
+                "metallic": {
+                    "value": 0.1
+                },
+                "roughness": {
+                    "value": 0.3
+                }
+            }
+        },
+        "mat_floor": {
+            "type": "PbrMAT",
+            "position": [
+                -300.0,
+                450.0
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.850000023841858,
+                        "g": 0.850000023841858,
+                        "r": 0.850000023841858
+                    }
+                },
+                "emission_color": {
+                    "value": {
+                        "_type": "Color",
+                        "a": 1.0,
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 0.0
+                    }
+                },
+                "emission_energy": {
+                    "value": 0.0
+                },
+                "metallic": {
+                    "value": 0.0
+                },
+                "roughness": {
+                    "value": 0.8
+                }
+            }
         }
     },
     "version": "1.0.0"

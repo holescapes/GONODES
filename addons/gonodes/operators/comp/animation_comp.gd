@@ -38,45 +38,45 @@ func _init_parameters() -> void:
 		1, "Loop", "Animation loop mode"))
 
 	# Translate keyframes (start → end)
-	add_parameter(GNParameter.create_float("tx_start", 0.0, -100.0, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("tx_start", 0.0, null, null, 0.01,
 		"TX Start", "Translate X at t=0"))
-	add_parameter(GNParameter.create_float("tx_end", 0.0, -100.0, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("tx_end", 0.0, null, null, 0.01,
 		"TX End", "Translate X at t=duration"))
-	add_parameter(GNParameter.create_float("ty_start", 0.0, -100.0, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("ty_start", 0.0, null, null, 0.01,
 		"TY Start", "Translate Y at t=0"))
-	add_parameter(GNParameter.create_float("ty_end", 0.0, -100.0, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("ty_end", 0.0, null, null, 0.01,
 		"TY End", "Translate Y at t=duration"))
-	add_parameter(GNParameter.create_float("tz_start", 0.0, -100.0, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("tz_start", 0.0, null, null, 0.01,
 		"TZ Start", "Translate Z at t=0"))
-	add_parameter(GNParameter.create_float("tz_end", 0.0, -100.0, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("tz_end", 0.0, null, null, 0.01,
 		"TZ End", "Translate Z at t=duration"))
 
 	# Rotate keyframes (start → end, degrees)
-	add_parameter(GNParameter.create_float("rx_start", 0.0, -360.0, 360.0, 0.1,
+	add_parameter(GNParameter.create_float("rx_start", 0.0, null, null, 0.1,
 		"RX Start", "Rotate X at t=0 (degrees)"))
-	add_parameter(GNParameter.create_float("rx_end", 0.0, -360.0, 360.0, 0.1,
+	add_parameter(GNParameter.create_float("rx_end", 0.0, null, null, 0.1,
 		"RX End", "Rotate X at t=duration (degrees)"))
-	add_parameter(GNParameter.create_float("ry_start", 0.0, -360.0, 360.0, 0.1,
+	add_parameter(GNParameter.create_float("ry_start", 0.0, null, null, 0.1,
 		"RY Start", "Rotate Y at t=0 (degrees)"))
-	add_parameter(GNParameter.create_float("ry_end", 360.0, -360.0, 360.0, 0.1,
+	add_parameter(GNParameter.create_float("ry_end", 360.0, null, null, 0.1,
 		"RY End", "Rotate Y at t=duration (degrees)"))
-	add_parameter(GNParameter.create_float("rz_start", 0.0, -360.0, 360.0, 0.1,
+	add_parameter(GNParameter.create_float("rz_start", 0.0, null, null, 0.1,
 		"RZ Start", "Rotate Z at t=0 (degrees)"))
-	add_parameter(GNParameter.create_float("rz_end", 0.0, -360.0, 360.0, 0.1,
+	add_parameter(GNParameter.create_float("rz_end", 0.0, null, null, 0.1,
 		"RZ End", "Rotate Z at t=duration (degrees)"))
 
 	# Scale keyframes (start → end)
-	add_parameter(GNParameter.create_float("sx_start", 1.0, 0.001, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("sx_start", 1.0, null, null, 0.01,
 		"SX Start", "Scale X at t=0"))
-	add_parameter(GNParameter.create_float("sx_end", 1.0, 0.001, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("sx_end", 1.0, null, null, 0.01,
 		"SX End", "Scale X at t=duration"))
-	add_parameter(GNParameter.create_float("sy_start", 1.0, 0.001, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("sy_start", 1.0, null, null, 0.01,
 		"SY Start", "Scale Y at t=0"))
-	add_parameter(GNParameter.create_float("sy_end", 1.0, 0.001, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("sy_end", 1.0, null, null, 0.01,
 		"SY End", "Scale Y at t=duration"))
-	add_parameter(GNParameter.create_float("sz_start", 1.0, 0.001, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("sz_start", 1.0, null, null, 0.01,
 		"SZ Start", "Scale Z at t=0"))
-	add_parameter(GNParameter.create_float("sz_end", 1.0, 0.001, 100.0, 0.01,
+	add_parameter(GNParameter.create_float("sz_end", 1.0, null, null, 0.01,
 		"SZ End", "Scale Z at t=duration"))
 
 
@@ -230,6 +230,29 @@ func destroy_scene_node() -> void:
 	# Clear _scene_node WITHOUT freeing it — we don't own it (it belongs to
 	# the upstream COMP).  super.destroy_scene_node() would queue_free() it.
 	_scene_node = null
+
+
+func display_in_viewer(viewer) -> void:
+	# Show the upstream mesh with material (the animated scene node).
+	if _scene_node != null and _scene_node is MeshInstance3D:
+		var mi: MeshInstance3D = _scene_node as MeshInstance3D
+		if mi.mesh != null and mi.mesh is ArrayMesh:
+			var geo := GNGeoData.new()
+			geo.mesh = mi.mesh as ArrayMesh
+			geo.vertex_count = geo.mesh.get_surface_count()
+			var mat: Material = mi.material_override
+			if mat != null:
+				viewer.show_3d_mesh_with_material(geo, mat)
+			else:
+				viewer.show_3d_mesh(geo)
+			var active: String = "Playing" if get_param_value("active") else "Paused"
+			viewer.set_info_overlay("%s  %.1fs  x%.1f" % [active, get_param_value("duration"), get_param_value("speed")])
+			return
+	var active: String = "Playing" if get_param_value("active") else "Paused"
+	var dur: float = get_param_value("duration")
+	var speed: float = get_param_value("speed")
+	viewer.show_info("Animation — %s\nDuration: %.2fs  Speed: %.2fx" % [active, dur, speed], "AnimationCOMP")
+
 
 
 func _notification(what: int) -> void:

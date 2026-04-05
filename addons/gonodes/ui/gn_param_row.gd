@@ -35,8 +35,8 @@ var _updating: bool = false
 ## Per-component C/E toggle buttons.  indexed same as GNParameter.component_modes.
 var _comp_mode_btns: Array[Button] = []
 
-## Per-component spinboxes (constant mode widgets).
-var _comp_spins: Array[SpinBox] = []
+## Per-component numeric fields (constant mode widgets).
+var _comp_fields: Array[GNFloatField] = []
 
 ## Per-component expression LineEdits (expression mode widgets).
 var _comp_expr_edits: Array[LineEdit] = []
@@ -247,22 +247,23 @@ func _build_multi_component_ui() -> void:
 		comp_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 		row.add_child(comp_label)
 
-		# SpinBox (visible in constant mode)
-		var spin := SpinBox.new()
+		# GNFloatField (visible in constant mode)
+		var field := GNFloatField.new()
 		if is_color:
-			spin.min_value = 0.0
-			spin.max_value = 1.0
-			spin.step = 0.01
+			field.min_value = 0.0
+			field.max_value = 1.0
+			field.step = 0.01
 		else:
-			spin.min_value = -9999
-			spin.max_value = 9999
-			spin.step = param.step
-		spin.value = param.get_component_value(i)
-		spin.size_flags_horizontal = SIZE_EXPAND_FILL
-		var spin_idx := i
-		spin.value_changed.connect(func(val: float) -> void: _on_comp_spin_changed(spin_idx, val))
-		row.add_child(spin)
-		_comp_spins.append(spin)
+			field.min_value = null
+			field.max_value = null
+			field.step = param.step
+		field.value = param.get_component_value(i)
+		field.default_value = field.value
+		field.size_flags_horizontal = SIZE_EXPAND_FILL
+		var field_idx := i
+		field.value_changed.connect(func(val: float) -> void: _on_comp_field_changed(field_idx, val))
+		row.add_child(field)
+		_comp_fields.append(field)
 
 		# Expression LineEdit (visible in expression mode)
 		var expr_edit := LineEdit.new()
@@ -339,41 +340,28 @@ func _create_value_control() -> Control:
 
 
 func _create_float_control() -> Control:
-	var hbox := HBoxContainer.new()
-	hbox.size_flags_horizontal = SIZE_EXPAND_FILL
-	hbox.add_theme_constant_override("separation", 4)
-
-	var slider := HSlider.new()
-	slider.min_value = param.min_value if param.min_value != null else 0.0
-	slider.max_value = param.max_value if param.max_value != null else 10.0
-	slider.step = param.step
-	slider.value = float(param.value)
-	slider.size_flags_horizontal = SIZE_EXPAND_FILL
-	slider.custom_minimum_size = Vector2(80, 0)
-	slider.value_changed.connect(_on_float_slider_changed)
-	hbox.add_child(slider)
-
-	var spinbox := SpinBox.new()
-	spinbox.min_value = slider.min_value
-	spinbox.max_value = slider.max_value
-	spinbox.step = param.step
-	spinbox.value = float(param.value)
-	spinbox.custom_minimum_size = Vector2(70, 0)
-	spinbox.value_changed.connect(_on_float_spinbox_changed)
-	hbox.add_child(spinbox)
-
-	return hbox
+	var field := GNFloatField.new()
+	field.value = float(param.value)
+	field.min_value = param.min_value
+	field.max_value = param.max_value
+	field.step = param.step
+	field.default_value = float(param.default_value)
+	field.size_flags_horizontal = SIZE_EXPAND_FILL
+	field.value_changed.connect(_on_float_field_changed)
+	return field
 
 
 func _create_int_control() -> Control:
-	var spinbox := SpinBox.new()
-	spinbox.min_value = param.min_value if param.min_value != null else 0
-	spinbox.max_value = param.max_value if param.max_value != null else 100
-	spinbox.step = 1
-	spinbox.value = int(param.value)
-	spinbox.size_flags_horizontal = SIZE_EXPAND_FILL
-	spinbox.value_changed.connect(_on_int_changed)
-	return spinbox
+	var field := GNFloatField.new()
+	field.integer_mode = true
+	field.value = float(int(param.value))
+	field.min_value = param.min_value
+	field.max_value = param.max_value
+	field.step = 1.0
+	field.default_value = float(int(param.default_value))
+	field.size_flags_horizontal = SIZE_EXPAND_FILL
+	field.value_changed.connect(_on_int_field_changed)
+	return field
 
 
 func _create_bool_control() -> Control:
@@ -517,25 +505,27 @@ func _create_vector2_control() -> Control:
 	var x_val: float = vec_val.x if vec_val else 0.0
 	var y_val: float = vec_val.y if vec_val else 0.0
 
-	var x_spin := SpinBox.new()
-	x_spin.prefix = "X"
-	x_spin.min_value = -9999
-	x_spin.max_value = 9999
-	x_spin.step = param.step
-	x_spin.value = x_val
-	x_spin.size_flags_horizontal = SIZE_EXPAND_FILL
-	x_spin.value_changed.connect(_on_vector2_x_changed)
-	hbox.add_child(x_spin)
+	var x_field := GNFloatField.new()
+	x_field.min_value = null
+	x_field.max_value = null
+	x_field.step = param.step
+	x_field.value = x_val
+	x_field.default_value = x_val
+	x_field.suffix = "  X"
+	x_field.size_flags_horizontal = SIZE_EXPAND_FILL
+	x_field.value_changed.connect(_on_vector2_x_changed)
+	hbox.add_child(x_field)
 
-	var y_spin := SpinBox.new()
-	y_spin.prefix = "Y"
-	y_spin.min_value = -9999
-	y_spin.max_value = 9999
-	y_spin.step = param.step
-	y_spin.value = y_val
-	y_spin.size_flags_horizontal = SIZE_EXPAND_FILL
-	y_spin.value_changed.connect(_on_vector2_y_changed)
-	hbox.add_child(y_spin)
+	var y_field := GNFloatField.new()
+	y_field.min_value = null
+	y_field.max_value = null
+	y_field.step = param.step
+	y_field.value = y_val
+	y_field.default_value = y_val
+	y_field.suffix = "  Y"
+	y_field.size_flags_horizontal = SIZE_EXPAND_FILL
+	y_field.value_changed.connect(_on_vector2_y_changed)
+	hbox.add_child(y_field)
 
 	return hbox
 
@@ -703,35 +693,13 @@ func _open_file_browse_dialog(option: OptionButton) -> void:
 # Value Change Handlers — UI → Model
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func _on_float_slider_changed(val: float) -> void:
+func _on_float_field_changed(val: float) -> void:
 	if _updating:
 		return
-	_updating = true
 	param.set_value(val)
-	# Sync spinbox
-	var hbox := _control as HBoxContainer
-	if hbox and hbox.get_child_count() > 1:
-		var spinbox: SpinBox = hbox.get_child(1) as SpinBox
-		if spinbox:
-			spinbox.value = val
-	_updating = false
 
 
-func _on_float_spinbox_changed(val: float) -> void:
-	if _updating:
-		return
-	_updating = true
-	param.set_value(val)
-	# Sync slider
-	var hbox := _control as HBoxContainer
-	if hbox and hbox.get_child_count() > 0:
-		var slider: HSlider = hbox.get_child(0) as HSlider
-		if slider:
-			slider.value = val
-	_updating = false
-
-
-func _on_int_changed(val: float) -> void:
+func _on_int_field_changed(val: float) -> void:
 	if _updating:
 		return
 	param.set_value(int(val))
@@ -869,11 +837,18 @@ func _on_comp_mode_toggle(idx: int) -> void:
 	_update_comp_mode_display(idx)
 
 
-## Called when a per-component spinbox changes.
-func _on_comp_spin_changed(idx: int, val: float) -> void:
+## Called when a per-component GNFloatField changes.
+func _on_comp_field_changed(idx: int, val: float) -> void:
 	if _updating:
 		return
 	param.set_component_value(idx, val)
+	# Sync the ColorPickerButton swatch when editing R/G/B/A components
+	if param.value_type == GNParameter.ValueType.COLOR:
+		var picker := _control as ColorPickerButton
+		if picker:
+			_updating = true
+			picker.color = param.value
+			_updating = false
 
 
 ## Called when a per-component expression is submitted.
@@ -908,14 +883,14 @@ func _update_comp_mode_display(idx: int) -> void:
 	if idx >= _comp_mode_btns.size():
 		return
 	var btn := _comp_mode_btns[idx]
-	var spin := _comp_spins[idx]
+	var field := _comp_fields[idx]
 	var expr_edit := _comp_expr_edits[idx]
 	var comp_mode: int = param.component_modes[idx]
 
 	if comp_mode == GNParameter.Mode.EXPRESSION:
 		btn.text = "E"
 		btn.modulate = Color(0.8, 0.6, 0.2)  # Orange
-		spin.visible = false
+		field.visible = false
 		expr_edit.visible = true
 		if not expr_edit.has_focus():
 			expr_edit.text = param.component_expressions[idx]
@@ -939,7 +914,7 @@ func _update_comp_mode_display(idx: int) -> void:
 	else:
 		btn.text = "C"
 		btn.modulate = Color(0.5, 0.8, 0.5)  # Green
-		spin.visible = true
+		field.visible = true
 		expr_edit.visible = false
 		if idx < _comp_expand_btns.size():
 			_comp_expand_btns[idx].visible = false
@@ -978,15 +953,15 @@ func _update_comp_expression_status() -> void:
 				_comp_resolved_labels[i].tooltip_text = str(comp_val)
 
 
-## Syncs per-component spinbox values from the parameter model.
+## Syncs per-component field values from the parameter model.
 func _update_comp_value_display() -> void:
 	if _updating:
 		return
 	_updating = true
-	var count := mini(_comp_spins.size(), param.get_component_count())
+	var count := mini(_comp_fields.size(), param.get_component_count())
 	for i in range(count):
-		if _comp_spins[i].visible:
-			_comp_spins[i].value = param.get_component_value(i)
+		if _comp_fields[i].visible:
+			_comp_fields[i].set_value_no_signal(param.get_component_value(i))
 	_updating = false
 
 
@@ -1237,18 +1212,13 @@ func _update_value_display() -> void:
 
 	match param.value_type:
 		GNParameter.ValueType.FLOAT:
-			var hbox := _control as HBoxContainer
-			if hbox and hbox.get_child_count() >= 2:
-				var slider: HSlider = hbox.get_child(0) as HSlider
-				var spinbox: SpinBox = hbox.get_child(1) as SpinBox
-				if slider:
-					slider.value = float(param.get_resolved_value())
-				if spinbox:
-					spinbox.value = float(param.get_resolved_value())
+			var field := _control as GNFloatField
+			if field:
+				field.set_value_no_signal(float(param.get_resolved_value()))
 		GNParameter.ValueType.INT:
-			var spinbox := _control as SpinBox
-			if spinbox:
-				spinbox.value = int(param.get_resolved_value())
+			var field := _control as GNFloatField
+			if field:
+				field.set_value_no_signal(float(int(param.get_resolved_value())))
 		GNParameter.ValueType.BOOL:
 			if param.is_pulse:
 				return  # Pulse buttons have no toggle state to refresh
@@ -1274,12 +1244,12 @@ func _update_value_display() -> void:
 			var hbox := _control as HBoxContainer
 			if hbox and hbox.get_child_count() >= 2:
 				var vec_val = param.get_resolved_value()
-				var x_spin: SpinBox = hbox.get_child(0) as SpinBox
-				var y_spin: SpinBox = hbox.get_child(1) as SpinBox
-				if x_spin:
-					x_spin.value = vec_val.x
-				if y_spin:
-					y_spin.value = vec_val.y
+				var x_field: GNFloatField = hbox.get_child(0) as GNFloatField
+				var y_field: GNFloatField = hbox.get_child(1) as GNFloatField
+				if x_field:
+					x_field.set_value_no_signal(vec_val.x)
+				if y_field:
+					y_field.set_value_no_signal(vec_val.y)
 		GNParameter.ValueType.FILE:
 			var hbox := _control as HBoxContainer
 			if hbox and hbox.get_child_count() >= 1:

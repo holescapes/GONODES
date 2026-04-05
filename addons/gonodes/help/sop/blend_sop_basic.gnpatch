@@ -16,7 +16,7 @@
                 500.0,
                 80.0
             ],
-            "text": "Blend SOP \u2014 Shape Morphing\n\nMorphs between two spheres: A (tall) and B (squashed disc).\nblend=0 shows sphere A, blend=1 shows sphere B.\nBoth inputs must have matching vertex counts (same topology).",
+            "text": "Blend SOP — Shape Morphing\n\nMorphs between two spheres: A (tall) and B (squashed disc).\nblend=0 shows sphere A, blend=1 shows sphere B.\nBoth inputs must have matching vertex counts (same topology).",
             "type": "note"
         }
     ],
@@ -149,35 +149,8 @@
         },
         "geo1": {
             "parameters": {
-                "albedo_color": {
-                    "value": {
-                        "_type": "Color",
-                        "a": 1.0,
-                        "b": 1.0,
-                        "g": 1.0,
-                        "r": 1.0
-                    }
-                },
                 "cast_shadow": {
                     "value": 1
-                },
-                "emission_color": {
-                    "value": {
-                        "_type": "Color",
-                        "a": 1.0,
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 0.0
-                    }
-                },
-                "emission_energy": {
-                    "value": 0.0
-                },
-                "metallic": {
-                    "value": 0.0
-                },
-                "roughness": {
-                    "value": 0.5
                 },
                 "rx": {
                     "value": 0.0

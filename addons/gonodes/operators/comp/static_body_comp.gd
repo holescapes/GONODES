@@ -31,12 +31,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "X position"))
 	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Y position"))
 	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Z position"))
-	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Rotation X (degrees)"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Rotation Y (degrees)"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Rotation Z (degrees)"))
-	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Scale X"))
-	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Scale Y"))
-	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Scale Z"))
+	add_parameter(GNParameter.create_float("rx", 0.0, null, null, 0.1, "Rotate X", "Rotation X (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, null, null, 0.1, "Rotate Y", "Rotation Y (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, null, null, 0.1, "Rotate Z", "Rotation Z (degrees)"))
+	add_parameter(GNParameter.create_float("sx", 1.0, null, null, 0.01, "Scale X", "Scale X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, null, null, 0.01, "Scale Y", "Scale Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, null, null, 0.01, "Scale Z", "Scale Z"))
 
 	# ── Physics Properties ───────────────────────────────────────────────
 	add_parameter(GNParameter.create_float("friction", 1.0, 0.0, 2.0, 0.01,
@@ -152,6 +152,24 @@ func destroy_scene_node() -> void:
 ## Returns the StaticBody3D node.
 func get_static_body() -> StaticBody3D:
 	return _static_body
+
+
+func display_in_viewer(viewer) -> void:
+	if _mesh_instance != null and _mesh_instance.mesh != null and _mesh_instance.mesh is ArrayMesh:
+		var geo := GNGeoData.new()
+		geo.mesh = _mesh_instance.mesh as ArrayMesh
+		geo.vertex_count = geo.mesh.get_surface_count()
+		var mat: Material = _mesh_instance.material_override
+		if mat != null:
+			viewer.show_3d_mesh_with_material(geo, mat)
+		else:
+			viewer.show_3d_mesh(geo)
+		viewer.set_info_overlay("StaticBody  Friction: %.2f  Bounce: %.2f" % [
+			get_param_value("friction"), get_param_value("bounce")])
+		return
+	viewer.show_info("StaticBody\nFriction: %.2f  Bounce: %.2f" % [
+		get_param_value("friction"), get_param_value("bounce")], "StaticBodyCOMP")
+
 
 
 ## Walks the network to find the upstream COMP connected to the comp_in port.

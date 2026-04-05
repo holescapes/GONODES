@@ -52,12 +52,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "Group X offset"))
 	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Group Y offset"))
 	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Group Z offset"))
-	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Group rotation X"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Group rotation Y"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Group rotation Z"))
-	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Group scale X"))
-	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Group scale Y"))
-	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Group scale Z"))
+	add_parameter(GNParameter.create_float("rx", 0.0, null, null, 0.1, "Rotate X", "Group rotation X"))
+	add_parameter(GNParameter.create_float("ry", 0.0, null, null, 0.1, "Rotate Y", "Group rotation Y"))
+	add_parameter(GNParameter.create_float("rz", 0.0, null, null, 0.1, "Rotate Z", "Group rotation Z"))
+	add_parameter(GNParameter.create_float("sx", 1.0, null, null, 0.01, "Scale X", "Group scale X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, null, null, 0.01, "Scale Y", "Group scale Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, null, null, 0.01, "Scale Z", "Group scale Z"))
 
 	# Per-instance variation
 	add_parameter(GNParameter.create_bool("align_to_normal", true, "",
@@ -301,6 +301,24 @@ func destroy_scene_node() -> void:
 
 func get_multi_mesh_instance() -> MultiMeshInstance3D:
 	return _multi_mesh_instance
+
+
+func display_in_viewer(viewer) -> void:
+	# Show the template mesh with the active material in the 3D orbit viewer.
+	if _multi_mesh != null and _multi_mesh.mesh != null:
+		var geo := GNGeoData.new()
+		geo.mesh = _multi_mesh.mesh as ArrayMesh if _multi_mesh.mesh is ArrayMesh else null
+		if geo.mesh != null:
+			geo.vertex_count = geo.mesh.get_surface_count()
+			var mat: Material = _multi_mesh_instance.material_override if _multi_mesh_instance else null
+			if mat != null:
+				viewer.show_3d_mesh_with_material(geo, mat)
+			else:
+				viewer.show_3d_mesh(geo)
+			viewer.set_info_overlay("%d instances" % _multi_mesh.instance_count)
+			return
+	var count: int = _multi_mesh.instance_count if _multi_mesh else 0
+	viewer.show_info("%d instances" % count, "InstanceCOMP")
 
 
 ## Preview override showing instance count.

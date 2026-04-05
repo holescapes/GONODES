@@ -3907,23 +3907,19 @@ COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Go
 
 #### GeometryCOMP
 
-Wraps a `MeshInstance3D`. Takes SOP geometry and optionally a TOP texture, placing them into a 3D scene.
+Wraps a `MeshInstance3D`. Takes SOP geometry and optionally a MAT material, placing them into a 3D scene.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | tx, ty, tz | Float | 0.0 | — | Translation |
 | rx, ry, rz | Float | 0.0 | -360–360 | Rotation in degrees |
 | sx, sy, sz | Float | 1.0 | 0.001–100.0 | Scale |
-| albedo_color | Color | White | — | Base material color |
-| metallic | Float | 0.0 | 0.0–1.0 | Metallic shading |
-| roughness | Float | 0.5 | 0.0–1.0 | Surface roughness |
-| emission_energy | Float | 0.0 | 0.0–16.0 | Emission brightness |
-| emission_color | Color | Black | — | Emission color |
 | visible | Bool | true | — | Show/hide |
+| cast_shadow | Enum | On | Off/On/Double-Sided/Shadows Only | Shadow casting mode |
 
-**Inputs:** `geo_in` (SOP — geometry to display), `tex_in` (TOP — optional albedo texture).
+**Inputs:** `geo_in` (SOP — geometry to display), `mat_in` (MAT — optional material override).
 
-**How it works:** Creates a `MeshInstance3D` with a `StandardMaterial3D`. Each cook, applies the SOP mesh, transform, material properties, and optional TOP texture as albedo map. The MeshInstance3D is **not** added as a child of the COMP node — instead, RenderTOP discovers it via `get_mesh_instance()` and adopts it into its SubViewport.
+**How it works:** Creates a `MeshInstance3D`. Each cook, applies the SOP mesh and transform. When a MAT input is connected, its material is used directly via `material_override`. When no MAT is connected, a basic default `StandardMaterial3D` is used. The MeshInstance3D is **not** added as a child of the COMP node — instead, RenderTOP discovers it via `get_mesh_instance()` and adopts it into its SubViewport.
 
 ---
 

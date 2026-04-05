@@ -24,9 +24,9 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("ty", 3.0, null, null, 0.01, "Translate Y", "Light Y position"))
 	add_parameter(GNParameter.create_float("tz", 2.0, null, null, 0.01, "Translate Z", "Light Z position"))
 	# Rotation
-	add_parameter(GNParameter.create_float("rx", -45.0, -90.0, 90.0, 0.1, "Rotate X", "Light pitch (degrees)"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Light yaw (degrees)"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Light roll (degrees)"))
+	add_parameter(GNParameter.create_float("rx", -45.0, null, null, 0.1, "Rotate X", "Light pitch (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, null, null, 0.1, "Rotate Y", "Light yaw (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, null, null, 0.1, "Rotate Z", "Light roll (degrees)"))
 	# Properties
 	add_parameter(GNParameter.create_color("color", Color.WHITE, "Color", "Light colour"))
 	add_parameter(GNParameter.create_float("energy", 1.0, 0.0, 16.0, 0.1, "Energy", "Light intensity"))
@@ -118,5 +118,116 @@ func destroy_scene_node() -> void:
 ## Returns the Light3D node. Called by RenderTOP.
 func get_light() -> Light3D:
 	return _light
+
+
+func display_in_viewer(viewer) -> void:
+	if _light == null:
+		viewer.show_info("No light", "LightCOMP")
+		return
+
+	# Build a gizmo mesh representing the light type
+	var gizmo_mesh: ArrayMesh = _build_light_gizmo()
+	var gizmo_mat := StandardMaterial3D.new()
+	gizmo_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	gizmo_mat.albedo_color = _light.light_color
+	gizmo_mat.albedo_color.a = 0.9
+	gizmo_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+
+	var entries: Array = [
+		{"mesh": gizmo_mesh, "material": gizmo_mat, "transform": Transform3D.IDENTITY},
+	]
+	viewer.show_3d_scene(entries, "LightCOMP")
+
+	# Info overlay
+	var type_names := ["Directional", "Omni", "Spot"]
+	var type_name: String = type_names[_current_type] if _current_type >= 0 and _current_type < 3 else "Unknown"
+	var energy: float = _light.light_energy
+	var shadows: String = "Shadows On" if _light.shadow_enabled else "Shadows Off"
+	var extra := ""
+	if _light is OmniLight3D:
+		extra = "  Range: %.1f" % (_light as OmniLight3D).omni_range
+	elif _light is SpotLight3D:
+		extra = "  Range: %.1f  Angle: %.0f°" % [(_light as SpotLight3D).spot_range, (_light as SpotLight3D).spot_angle]
+	viewer.set_info_overlay("%s  Energy: %.1f\n%s%s" % [type_name, energy, shadows, extra])
+
+
+## Builds a wireframe gizmo mesh for the current light type.
+func _build_light_gizmo() -> ArrayMesh:
+	var verts := PackedVector3Array()
+
+	match _current_type:
+		0:  # Directional — arrow pointing down -Z
+			var shaft_len := 1.5
+			var head_len := 0.3
+			var head_r := 0.15
+			# Central shaft
+			verts.append(Vector3.ZERO)
+			verts.append(Vector3(0, 0, -shaft_len))
+			# Arrow head
+			var tip := Vector3(0, 0, -shaft_len - head_len)
+			for i in range(8):
+				var a: float = TAU * i / 8.0
+				var base_pt := Vector3(cos(a) * head_r, sin(a) * head_r, -shaft_len)
+				verts.append(base_pt)
+				verts.append(tip)
+			# Parallel rays
+			for offset in [Vector3(0.4, 0, 0), Vector3(-0.4, 0, 0), Vector3(0, 0.4, 0), Vector3(0, -0.4, 0)]:
+				verts.append(offset)
+				verts.append(offset + Vector3(0, 0, -shaft_len))
+
+		1:  # Omni — wireframe sphere
+			var r: float = minf((_light as OmniLight3D).omni_range * 0.15, 1.5)
+			var segs := 24
+			for ring in range(3):  # XY, XZ, YZ rings
+				for i in range(segs):
+					var a0: float = TAU * i / segs
+					var a1: float = TAU * (i + 1) / segs
+					var p0: Vector3
+					var p1: Vector3
+					match ring:
+						0:  # XY
+							p0 = Vector3(cos(a0) * r, sin(a0) * r, 0)
+							p1 = Vector3(cos(a1) * r, sin(a1) * r, 0)
+						1:  # XZ
+							p0 = Vector3(cos(a0) * r, 0, sin(a0) * r)
+							p1 = Vector3(cos(a1) * r, 0, sin(a1) * r)
+						2:  # YZ
+							p0 = Vector3(0, cos(a0) * r, sin(a0) * r)
+							p1 = Vector3(0, cos(a1) * r, sin(a1) * r)
+					verts.append(p0)
+					verts.append(p1)
+			# Small cross at center
+			var c := 0.1
+			verts.append_array([Vector3(-c,0,0), Vector3(c,0,0),
+				Vector3(0,-c,0), Vector3(0,c,0), Vector3(0,0,-c), Vector3(0,0,c)])
+
+		2:  # Spot — cone
+			var spot: SpotLight3D = _light as SpotLight3D
+			var range_f: float = minf(spot.spot_range * 0.2, 2.0)
+			var angle_rad: float = deg_to_rad(spot.spot_angle)
+			var cone_r: float = tan(angle_rad) * range_f
+			var segs := 16
+			# Cone ring at the end
+			for i in range(segs):
+				var a0: float = TAU * i / segs
+				var a1: float = TAU * (i + 1) / segs
+				var p0 := Vector3(cos(a0) * cone_r, sin(a0) * cone_r, -range_f)
+				var p1 := Vector3(cos(a1) * cone_r, sin(a1) * cone_r, -range_f)
+				verts.append(p0)
+				verts.append(p1)
+			# Lines from origin to cone edge
+			for i in range(4):
+				var a: float = TAU * i / 4.0
+				verts.append(Vector3.ZERO)
+				verts.append(Vector3(cos(a) * cone_r, sin(a) * cone_r, -range_f))
+
+	var arr := []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = verts
+	var mesh := ArrayMesh.new()
+	if verts.size() > 0:
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
+	return mesh
+
 
 

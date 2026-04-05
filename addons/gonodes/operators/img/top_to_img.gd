@@ -41,9 +41,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# ViewportTextures lag one frame: the upstream TOP sets UPDATE_ONCE
 	# during its cook, but the viewport doesn't render until end-of-frame.
 	# Schedule a second cook next frame to read the fresh pixels.
+	# NOTE: call_deferred is required because execute_cook() calls
+	# clear_dirty() after _cook() returns — a direct mark_dirty() here
+	# would be immediately cleared.
 	if tex_data.texture is ViewportTexture and not _readback_pending:
 		_readback_pending = true
-		mark_dirty()
+		call_deferred("mark_dirty")
 		# Return previous cache if available (avoids visual flash to black)
 		if _cached_image_data != null and _cached_image_data.image != null:
 			return _cached_image_data

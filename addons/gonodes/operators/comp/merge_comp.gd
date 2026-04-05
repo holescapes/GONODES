@@ -31,12 +31,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("tx", 0.0, null, null, 0.01, "Translate X", "Group X position"))
 	add_parameter(GNParameter.create_float("ty", 0.0, null, null, 0.01, "Translate Y", "Group Y position"))
 	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01, "Translate Z", "Group Z position"))
-	add_parameter(GNParameter.create_float("rx", 0.0, -360.0, 360.0, 0.1, "Rotate X", "Group rotation X (degrees)"))
-	add_parameter(GNParameter.create_float("ry", 0.0, -360.0, 360.0, 0.1, "Rotate Y", "Group rotation Y (degrees)"))
-	add_parameter(GNParameter.create_float("rz", 0.0, -360.0, 360.0, 0.1, "Rotate Z", "Group rotation Z (degrees)"))
-	add_parameter(GNParameter.create_float("sx", 1.0, 0.001, 100.0, 0.01, "Scale X", "Group scale X"))
-	add_parameter(GNParameter.create_float("sy", 1.0, 0.001, 100.0, 0.01, "Scale Y", "Group scale Y"))
-	add_parameter(GNParameter.create_float("sz", 1.0, 0.001, 100.0, 0.01, "Scale Z", "Group scale Z"))
+	add_parameter(GNParameter.create_float("rx", 0.0, null, null, 0.1, "Rotate X", "Group rotation X (degrees)"))
+	add_parameter(GNParameter.create_float("ry", 0.0, null, null, 0.1, "Rotate Y", "Group rotation Y (degrees)"))
+	add_parameter(GNParameter.create_float("rz", 0.0, null, null, 0.1, "Rotate Z", "Group rotation Z (degrees)"))
+	add_parameter(GNParameter.create_float("sx", 1.0, null, null, 0.01, "Scale X", "Group scale X"))
+	add_parameter(GNParameter.create_float("sy", 1.0, null, null, 0.01, "Scale Y", "Group scale Y"))
+	add_parameter(GNParameter.create_float("sz", 1.0, null, null, 0.01, "Scale Z", "Group scale Z"))
 	add_parameter(GNParameter.create_bool("visible", true, "Visible", "Show or hide the entire group"))
 
 
@@ -77,6 +77,46 @@ func destroy_scene_node() -> void:
 ## which brings all children along automatically.
 func get_group_node() -> Node3D:
 	return _group_node
+
+
+func display_in_viewer(viewer) -> void:
+	# Collect all child meshes for 3D scene display
+	var entries: Array = []
+	for child in _managed_children:
+		if not is_instance_valid(child):
+			continue
+		if child is MeshInstance3D:
+			var mi: MeshInstance3D = child as MeshInstance3D
+			if mi.mesh != null and mi.mesh is ArrayMesh:
+				entries.append({
+					"mesh": mi.mesh,
+					"material": mi.material_override,
+					"transform": mi.transform,
+				})
+		elif child is MultiMeshInstance3D:
+			# Show just the template mesh from MultiMesh
+			var mmi: MultiMeshInstance3D = child as MultiMeshInstance3D
+			if mmi.multimesh != null and mmi.multimesh.mesh != null and mmi.multimesh.mesh is ArrayMesh:
+				entries.append({
+					"mesh": mmi.multimesh.mesh,
+					"material": mmi.material_override,
+					"transform": Transform3D.IDENTITY,
+				})
+
+	if entries.size() > 0:
+		viewer.show_3d_scene(entries, "MergeCOMP")
+		# Info overlay
+		var child_count: int = _managed_children.size()
+		var mesh_count: int = entries.size()
+		var vis: String = "visible" if _group_node != null and _group_node.visible else "hidden"
+		viewer.set_info_overlay("%d children, %d meshes\n%s" % [child_count, mesh_count, vis])
+		return
+
+	# Fallback: info text
+	var child_count: int = _managed_children.size()
+	var vis: String = "visible" if _group_node != null and _group_node.visible else "hidden"
+	viewer.show_info("Merge Group — %d children\n%s" % [child_count, vis], "MergeCOMP")
+
 
 
 ## Populates the group node with children from upstream COMP connections.

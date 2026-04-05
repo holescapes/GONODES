@@ -44,33 +44,6 @@
                 "sz": {
                     "value": 2.0
                 },
-                "albedo_color": {
-                    "value": {
-                        "_type": "Color",
-                        "r": 0.2,
-                        "g": 0.6,
-                        "b": 1.0,
-                        "a": 1.0
-                    }
-                },
-                "metallic": {
-                    "value": 1.0
-                },
-                "roughness": {
-                    "value": 1.0
-                },
-                "emission_energy": {
-                    "value": 1.0
-                },
-                "emission_color": {
-                    "value": {
-                        "_type": "Color",
-                        "r": 0.2,
-                        "g": 0.6,
-                        "b": 1.0,
-                        "a": 1.0
-                    }
-                },
                 "visible": {
                     "value": false
                 },
@@ -131,6 +104,42 @@
                     "value": true
                 }
             }
+        },
+        "mat_1": {
+            "type": "PbrMAT",
+            "position": [
+                200,
+                300
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.2,
+                        "g": 0.6,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                },
+                "metallic": {
+                    "value": 1.0
+                },
+                "roughness": {
+                    "value": 1.0
+                },
+                "emission_energy": {
+                    "value": 1.0
+                },
+                "emission_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.2,
+                        "g": 0.6,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                }
+            }
         }
     },
     "connections": [
@@ -157,13 +166,19 @@
             "from_port": 0,
             "to": "window1",
             "to_port": 0
+        },
+        {
+            "from": "mat_1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 1
         }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GeometryCOMP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "GeometryCOMP — Advanced\n\nMore complex configuration.",
             "position": [
                 -100.0,
                 -100.0

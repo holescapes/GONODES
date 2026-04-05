@@ -13,8 +13,7 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
-	add_parameter(GNParameter.create_color("color", Color.BLACK, "", "Fill color"))
-	add_parameter(GNParameter.create_float("alpha", 1.0, 0.0, 1.0, 0.01, "", "Alpha override"))
+	add_parameter(GNParameter.create_color("color", Color.BLACK, "", "Fill color (RGBA)"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
@@ -22,12 +21,10 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	var res: Vector2i = get_param_value("resolution")
 	var col: Color = get_param_value("color")
-	var alpha_val: float = get_param_value("alpha")
 
 	if _viewport.size != res:
 		_viewport.size = res
 
-	col.a = alpha_val
 	_canvas.color = col
 
 	_cached_tex_data.resolution = res

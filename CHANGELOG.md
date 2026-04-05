@@ -9,6 +9,17 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-04-01 — Houdini-Style Parameter Controls & Rangeless Transforms
+
+### UI
+- **GNFloatField — Houdini-style numeric control:** New `GNFloatField` widget replaces all HSlider+SpinBox combos for Float/Int inspector params. Click to type, horizontal drag for virtual slider, middle-button drag for ladder tier picker (×0.001 through ×100 with per-pixel sensitivity display), Shift=fine (÷10), Ctrl=coarse (×10), Ctrl+Click=reset to default. Ranged params show a fill bar; rangeless params show darker background with ◂ ▸ arrow indicators. Full-screen input blocker during ladder pick prevents accidental UI interaction.
+- **Viewer auto-resize:** Viewer panel SubViewports (SOP, MAT, POP, UI) and all display rects now auto-resize when the panel is resized. Uses a debounced timer (0.15s) so the resize fires once after the user finishes dragging — no continuous re-rendering during the drag.
+
+### Parameters
+- **Rangeless transform params:** All translate, rotate, and scale parameters across 14 operator files (11 COMPs + TransformSOP + TransformCHOP + TransformSOPNative) changed from hardcoded numeric ranges to fully unclamped (`null` min/max). Rotation was previously clamped to ±360° or ±90°, scale to 0.001–100, animation translate to ±100 — all now rangeless.
+
+---
+
 ## 2026-03-30 — Viewer Refactor, time_dependent Audit, Clipboard Export, Debug Panel UX
 
 ### Architecture

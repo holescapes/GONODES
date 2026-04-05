@@ -44,33 +44,6 @@
                 "sz": {
                     "value": 0.5
                 },
-                "albedo_color": {
-                    "value": {
-                        "_type": "Color",
-                        "r": 1.0,
-                        "g": 0.4,
-                        "b": 0.2,
-                        "a": 1.0
-                    }
-                },
-                "metallic": {
-                    "value": 0.5
-                },
-                "roughness": {
-                    "value": 0.25
-                },
-                "emission_energy": {
-                    "value": 0.5
-                },
-                "emission_color": {
-                    "value": {
-                        "_type": "Color",
-                        "r": 1.0,
-                        "g": 0.4,
-                        "b": 0.2,
-                        "a": 1.0
-                    }
-                },
                 "visible": {
                     "value": true
                 },
@@ -131,6 +104,42 @@
                     "value": true
                 }
             }
+        },
+        "mat_1": {
+            "type": "PbrMAT",
+            "position": [
+                200,
+                300
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                },
+                "metallic": {
+                    "value": 0.5
+                },
+                "roughness": {
+                    "value": 0.25
+                },
+                "emission_energy": {
+                    "value": 0.5
+                },
+                "emission_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                }
+            }
         }
     },
     "connections": [
@@ -157,13 +166,19 @@
             "from_port": 0,
             "to": "window1",
             "to_port": 0
+        },
+        {
+            "from": "mat_1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 1
         }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GeometryCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "text": "GeometryCOMP — Parameters\n\nShowcases: tx, ty, tz.",
             "position": [
                 -100.0,
                 -100.0
