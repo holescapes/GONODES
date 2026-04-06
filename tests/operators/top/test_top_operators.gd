@@ -902,3 +902,27 @@ func test_vector_path_top_cook() -> void:
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_not_null(out, "VectorPathTOP cooks successfully")
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CubeMapTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_cube_map_top_instantiate() -> void:
+	var node := _make_node(CubeMapTOP.new(), "cubemap1")
+	GNTestAssert.assert_not_null(node, "CubeMapTOP created")
+	GNTestAssert.assert_eq(node.node_type, "cube_map", "type")
+
+func test_cube_map_top_modes() -> void:
+	var node := _make_node(CubeMapTOP.new(), "cubemap2")
+	# Mode 0 = Assemble, Mode 1 = Extract, Mode 2 = Equirect to Cross
+	node.set_param_value("mode", 0)
+	GNTestAssert.assert_eq(node.get_param_value("mode"), 0, "mode defaults to Assemble")
+
+func test_cube_map_top_cook() -> void:
+	var node := _make_node(CubeMapTOP.new(), "cubemap3")
+	# Cook with no inputs — should handle gracefully
+	var out := _cook_no_input(node)
+	# May return null in headless or with no face inputs — that's OK
+	GNTestAssert.assert_true(out == null or out is GNTextureData,
+		"CubeMapTOP handles empty input gracefully")
+

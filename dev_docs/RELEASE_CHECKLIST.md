@@ -6,7 +6,9 @@ Step-by-step guide for every release build. Do not skip steps — platform-speci
 
 ## Phase 0: Version & Branch
 
-- [ ] Confirm Godot version matches `project.godot` (`config/features` → currently **4.6.1**)
+- [ ] Confirm Godot version matches `versions.env` → `GODOT_VERSION` (currently **4.6.1**)
+- [ ] Confirm godot-cpp branch matches `versions.env` → `GODOTCPP_BRANCH` (currently **4.5**)
+- [ ] Run `python scripts/check_versions.py` to verify CI workflows match `versions.env`
 - [ ] Tag release branch (e.g., `release/v1.2.0`)
 - [ ] Update version string in `project.godot` → `config/version`
 
@@ -43,7 +45,7 @@ It is **not tracked in git** — it's cloned by `setup_deps.py` and by CI workfl
 - [ ] If missing, fetch it:
   ```bash
   python setup_deps.py --core
-  # or manually:
+  # or manually (branch read from versions.env → GODOTCPP_BRANCH):
   git clone --depth 1 --branch 4.5 https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
   ```
 - [ ] Build for each target platform (once per Godot version bump):

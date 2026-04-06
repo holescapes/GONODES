@@ -297,11 +297,12 @@ func _invalidate_port_cache() -> void:
 # Native GDExtension Activation
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Scans `res://addons/gn_ext_*/native/` for `.gdextension` and
-## `.gdextension.disabled` files.  For each one, checks whether the native
-## binary for the current platform actually exists.  If it does, ensures the
-## file has the `.gdextension` extension (active).  If it doesn't, renames
-## it to `.gdextension.disabled` so Godot won't attempt to load it.
+## Scans `res://addons/gn_ext_*/` for `.gdextension` and
+## `.gdextension.disabled` files in any subdirectory.  For each one, checks
+## whether the native binary for the current platform actually exists.  If it
+## does, ensures the file has the `.gdextension` extension (active).  If it
+## doesn't, renames it to `.gdextension.disabled` so Godot won't attempt to
+## load it.
 ##
 ## Call this from the plugin's `_enter_tree()`.  Changes only take effect on
 ## the *next* Godot restart (because Godot loads GDExtensions at engine init,
@@ -320,10 +321,19 @@ static func sync_native_extensions() -> bool:
 	var folder_name := dir.get_next()
 	while folder_name != "":
 		if dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
-			var native_dir_path := addons_path + "/" + folder_name + "/native"
-			if DirAccess.dir_exists_absolute(native_dir_path):
-				if _sync_native_dir(native_dir_path):
-					changed = true
+			var ext_path := addons_path + "/" + folder_name
+			# Scan every subdirectory inside the extension for .gdextension files.
+			var ext_dir := DirAccess.open(ext_path)
+			if ext_dir != null:
+				ext_dir.list_dir_begin()
+				var sub_name := ext_dir.get_next()
+				while sub_name != "":
+					if ext_dir.current_is_dir():
+						var sub_path := ext_path + "/" + sub_name
+						if _sync_native_dir(sub_path):
+							changed = true
+					sub_name = ext_dir.get_next()
+				ext_dir.list_dir_end()
 		folder_name = dir.get_next()
 	dir.list_dir_end()
 
@@ -332,7 +342,7 @@ static func sync_native_extensions() -> bool:
 	return changed
 
 
-## Scans a single `native/` directory for `.gdextension` / `.gdextension.disabled`
+## Scans a single subdirectory for `.gdextension` / `.gdextension.disabled`
 ## files and activates or deactivates them based on whether the library exists.
 static func _sync_native_dir(native_dir_path: String) -> bool:
 	var nd := DirAccess.open(native_dir_path)

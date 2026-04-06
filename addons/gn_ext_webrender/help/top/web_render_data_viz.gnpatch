@@ -1,0 +1,49 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "WebRenderTOP — Data visualization. Uses D3.js-style canvas rendering to display animated data driven by GONODES expressions.",
+    "nodes": {
+        "lfo1": {
+            "type": "LfoChop",
+            "position": [-200, 100],
+            "parameters": {
+                "type": {"value": 0},
+                "frequency": {"value": 0.3},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "web1": {
+            "type": "WebRenderTOP",
+            "position": [300, 200],
+            "parameters": {
+                "mode": {"value": 1},
+                "html": {"value": "<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { margin: 0; background: #0d1117; overflow: hidden; font-family: 'Segoe UI', sans-serif; }\n  canvas { display: block; }\n  #title {\n    position: fixed; top: 20px; left: 30px;\n    color: #58a6ff; font-size: 24px; font-weight: 600;\n  }\n  #subtitle {\n    position: fixed; top: 52px; left: 30px;\n    color: #8b949e; font-size: 14px;\n  }\n</style>\n</head>\n<body>\n<div id=\"title\">Real-Time Metrics</div>\n<div id=\"subtitle\">Updated each cook frame via JavaScript param</div>\n<canvas id=\"c\"></canvas>\n<script>\nconst canvas = document.getElementById('c');\nconst ctx = canvas.getContext('2d');\ncanvas.width = window.innerWidth;\ncanvas.height = window.innerHeight;\n\nconst MAX_POINTS = 200;\nconst channels = [\n  { data: [], color: '#58a6ff', label: 'Channel A' },\n  { data: [], color: '#3fb950', label: 'Channel B' },\n  { data: [], color: '#f0883e', label: 'Channel C' }\n];\n\nfunction pushValue(chIdx, val) {\n  channels[chIdx].data.push(val);\n  if (channels[chIdx].data.length > MAX_POINTS)\n    channels[chIdx].data.shift();\n}\n\nfunction draw() {\n  const w = canvas.width, h = canvas.height;\n  const pad = { top: 90, bottom: 40, left: 30, right: 30 };\n  const plotW = w - pad.left - pad.right;\n  const plotH = h - pad.top - pad.bottom;\n\n  ctx.fillStyle = '#0d1117';\n  ctx.fillRect(0, 0, w, h);\n\n  // Grid\n  ctx.strokeStyle = '#21262d';\n  ctx.lineWidth = 1;\n  for (let i = 0; i <= 4; i++) {\n    const y = pad.top + (plotH / 4) * i;\n    ctx.beginPath();\n    ctx.moveTo(pad.left, y);\n    ctx.lineTo(w - pad.right, y);\n    ctx.stroke();\n  }\n\n  // Channel lines\n  channels.forEach(ch => {\n    if (ch.data.length < 2) return;\n    ctx.beginPath();\n    ctx.strokeStyle = ch.color;\n    ctx.lineWidth = 2;\n    ctx.lineJoin = 'round';\n    ch.data.forEach((v, i) => {\n      const x = pad.left + (i / (MAX_POINTS - 1)) * plotW;\n      const y = pad.top + plotH / 2 - (v * plotH / 2);\n      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);\n    });\n    ctx.stroke();\n  });\n\n  // Legend\n  channels.forEach((ch, i) => {\n    const lx = w - pad.right - 140;\n    const ly = pad.top + 20 + i * 22;\n    ctx.fillStyle = ch.color;\n    ctx.fillRect(lx, ly - 6, 12, 12);\n    ctx.fillStyle = '#c9d1d9';\n    ctx.font = '13px sans-serif';\n    ctx.fillText(ch.label, lx + 18, ly + 4);\n  });\n}\n\n// Called by the JavaScript param each cook\nwindow.gonodesPush = function(a, b, c) {\n  pushValue(0, a);\n  pushValue(1, b);\n  pushValue(2, c);\n  draw();\n};\n\nsetInterval(() => {\n  const t = performance.now() * 0.001;\n  pushValue(0, Math.sin(t * 1.5) * 0.8);\n  pushValue(1, Math.cos(t * 0.8) * 0.6);\n  pushValue(2, Math.sin(t * 2.3 + 1.0) * 0.4);\n  draw();\n}, 33);\n</script>\n</body>\n</html>"},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+                "fps": {"value": 30},
+                "javascript": {"value": "// Push new data points each cook\nvar t = performance.now() * 0.001;\nif (window.gonodesPush) {\n  window.gonodesPush(\n    Math.sin(t * 1.5) * 0.8,\n    Math.cos(t * 0.8) * 0.6,\n    Math.sin(t * 2.3 + 1.0) * 0.4\n  );\n}"},
+                "active": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [800, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "web1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "WebRenderTOP — Data Visualization\n\nA scrolling multi-channel waveform display rendered\nin the browser via Canvas 2D. The JS param pushes\nnew data points each cook frame.\n\nPattern: Define a window.gonodesPush() function in\nthe HTML, then call it from the 'javascript' param\nto bridge GONODES data into the browser.\n\nUse expressions on the JS param to pass live\nCHOP/parameter values into the visualization.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 190.0],
+            "color": [0.2, 0.6, 1.0, 0.8]
+        }
+    ]
+}

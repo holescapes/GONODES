@@ -955,7 +955,20 @@ func from_dict(d: Dictionary) -> bool:
 
 		var node: GNNode = registry.create_instance(op_type)
 		if node == null:
-			GNLogger.warn("Network", "Skipping node '%s': unknown type '%s'" % [node_id, op_type])
+			# Create a placeholder so the node is preserved in the network
+			# and connections to/from it survive.  The original serialized data
+			# is stored for lossless re-save.
+			node = GNNode.new()
+			node._placeholder_data = nd.duplicate(true)
+			node.node_type = op_type
+			node.family = _infer_family_from_type(op_type)
+			node.node_error = "Missing operator: %s" % op_type
+			node.initialize(node_id)
+			# Restore position from the saved dict
+			node.from_dict(nd)
+			nodes[node_id] = node
+			GNLogger.warn("Network",
+				"Node '%s': unknown type '%s' — loaded as placeholder" % [node_id, op_type])
 			continue
 
 		node.initialize(node_id)
@@ -965,7 +978,27 @@ func from_dict(d: Dictionary) -> bool:
 		GNLogger.debug("Network", "Loaded node '%s' (%s)" % [node_id, op_type])
 
 	# ── Reconstruct connections ──
+	# First pass: ensure placeholder nodes have enough ports for all connections.
 	var conns_array: Array = d["connections"]
+	for cd in conns_array:
+		var from_id: String = cd.get("from", "")
+		var to_id: String = cd.get("to", "")
+		var from_port: int = int(cd.get("from_port", 0))
+		var to_port: int = int(cd.get("to_port", 0))
+		# Grow placeholder output ports
+		var from_node: GNNode = nodes.get(from_id, null)
+		if from_node != null and from_node.is_placeholder():
+			while from_node.output_ports.size() <= from_port:
+				from_node.add_output("out%d" % from_node.output_ports.size(),
+					from_node.family, "Placeholder output")
+		# Grow placeholder input ports
+		var to_node_p: GNNode = nodes.get(to_id, null)
+		if to_node_p != null and to_node_p.is_placeholder():
+			while to_node_p.input_ports.size() <= to_port:
+				to_node_p.add_input("in%d" % to_node_p.input_ports.size(),
+					to_node_p.family, false, "Placeholder input")
+
+	# Second pass: create connections.
 	for cd in conns_array:
 		var from_id: String = cd.get("from", "")
 		var to_id: String = cd.get("to", "")
@@ -1110,6 +1143,18 @@ func _clear_all() -> void:
 		node.queue_free()
 	nodes.clear()
 	_invalidate_topo()
+
+
+## Infers the GNFamily.Type from an operator type name by matching the trailing
+## family suffix (e.g. "WebRenderTOP" → TOP, "RtMidiInCHOP" → CHOP).
+## Returns COMP as fallback for unrecognizable names.
+static func _infer_family_from_type(op_type: String) -> int:
+	var upper := op_type.to_upper()
+	# Check suffixes longest-first to avoid false matches (e.g. SCRIPT before SOP)
+	for suffix in ["SCRIPT", "CHOP", "COMP", "TOP", "SOP", "DAT", "MAT", "IMG", "POP", "VOL", "OUT", "SDF", "UI"]:
+		if upper.ends_with(suffix):
+			return GNFamily.string_to_type(suffix)
+	return GNFamily.Type.COMP
 
 
 func _to_string() -> String:

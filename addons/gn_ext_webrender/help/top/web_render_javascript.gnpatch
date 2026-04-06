@@ -1,0 +1,61 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "WebRenderTOP — JavaScript execution. Runs a JS snippet every cook to dynamically update the page.",
+    "nodes": {
+        "lfo1": {
+            "type": "LfoChop",
+            "position": [-200, 100],
+            "parameters": {
+                "type": {"value": 0},
+                "frequency": {"value": 0.5},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "web1": {
+            "type": "WebRenderTOP",
+            "position": [300, 200],
+            "parameters": {
+                "mode": {"value": 1},
+                "html": {"value": "<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body {\n    margin: 0; background: #111;\n    display: flex; align-items: center; justify-content: center;\n    height: 100vh; font-family: monospace;\n  }\n  #counter {\n    font-size: 10vw; color: #0ff;\n    text-shadow: 0 0 40px rgba(0,255,255,0.5);\n    transition: transform 0.1s;\n  }\n  #label {\n    font-size: 2vw; color: #888; margin-top: 1em;\n  }\n</style>\n</head>\n<body>\n  <div style=\"text-align:center\">\n    <div id=\"counter\">0</div>\n    <div id=\"label\">updated via JavaScript param</div>\n  </div>\n</body>\n</html>"},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+                "fps": {"value": 30},
+                "javascript": {
+                    "value": "// This runs every cook frame\nlet count = Math.floor(performance.now() / 100);\ndocument.getElementById('counter').innerText = count;\nlet scale = 1.0 + Math.sin(performance.now() * 0.003) * 0.1;\ndocument.getElementById('counter').style.transform = `scale(${scale})`;",
+                    "expression": "",
+                    "mode": "CONSTANT"
+                },
+                "active": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [800, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "web1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "WebRenderTOP — JavaScript Execution\n\nThe 'javascript' parameter runs a JS snippet\nevery cook frame inside the browser context.\n\nUse this to dynamically update DOM elements,\nread data from CHOP expressions, or trigger\nanimations from the GONODES graph.\n\nEdit the JS in the code editor for syntax highlighting.",
+            "position": [-50.0, -50.0],
+            "size": [500.0, 160.0],
+            "color": [0.2, 0.6, 1.0, 0.8]
+        },
+        {
+            "id": "ann_2",
+            "type": "note",
+            "text": "Tip: Use expressions to pass CHOP/TOP values\ninto JS via string interpolation:\n\njavascript expression:\n  \"document.getElementById('val').innerText = '\" + str(chop('lfo1', 'out')) + \"'\"",
+            "position": [-250.0, 50.0],
+            "size": [400.0, 120.0],
+            "color": [1.0, 0.9, 0.3, 0.7]
+        }
+    ]
+}

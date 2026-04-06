@@ -43,6 +43,41 @@ Rebuild the templates whenever you:
 >
 > When you upgrade Godot, also update the Godot export templates:
 > **Editor → Manage Export Templates → Download for Current Version**.
+> Also update `versions.env` at the project root (see below).
+
+
+## Dependency Version Management
+
+All external dependency versions are centralized in `versions.env` at the
+project root.  This is the **single source of truth** — `setup_deps.py`,
+CI workflows, and the release checklist all read from it.
+
+```bash
+# versions.env
+GODOT_VERSION=4.6.1
+GODOTCPP_BRANCH=4.5
+```
+
+### Upgrading Godot or godot-cpp
+
+1. Edit `versions.env` with the new values.
+2. Run `python scripts/check_versions.py` to verify all CI workflows match.
+3. Fix any reported mismatches in `.github/workflows/*.yml`.
+4. Run `python setup_deps.py --core` to re-fetch godot-cpp at the new branch.
+5. Rebuild godot-cpp and all native extensions (see Phase 2 in
+   [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)).
+6. Rebuild Player templates (see below).
+
+### Validation
+
+```bash
+python scripts/check_versions.py
+# Output: "All CI workflows match versions.env ✓"
+```
+
+The script scans every `.yml`/`.yaml` file under `.github/workflows/` for
+`GODOT_VERSION:` and `GODOTCPP_BRANCH:` entries and verifies they match
+`versions.env`.  Run it in CI as a pre-flight check to prevent version drift.
 
 
 ## Prerequisites
@@ -285,11 +320,14 @@ The full runtime guard pipeline (in order):
 | Per-node cook | `supported_platforms()` | Runtime OS match or skip with warning badge |
 
 **Auto-activation** is handled by `GNExtensionRegistry.sync_native_extensions()`,
-called from the plugin's `_enter_tree()`.  It renames `.gdextension` files
-whose platform binary is missing to `.gdextension.disabled` (so Godot won't
-try to load them), and renames them back when the binary appears.  This
-eliminates the `GDExtension dynamic library not found` console errors that
-occur when extensions are checked in but not yet compiled on the current
+called from the plugin's `_enter_tree()`.  It scans every subdirectory
+within each `gn_ext_*` folder for `.gdextension` files whose platform
+binary is missing, renaming them to
+`.gdextension.disabled` (so Godot won't try to load them).  When the
+binary appears, the file is renamed back.  This keeps all native
+artifacts inside the extension folder (self-containment) and eliminates
+the `GDExtension dynamic library not found` console errors that occur
+when extensions are checked in but not yet compiled on the current
 machine.  See [CONTRIBUTING.md § 5 — Native Binary Auto-Activation](CONTRIBUTING.md)
 for the full behaviour.
 

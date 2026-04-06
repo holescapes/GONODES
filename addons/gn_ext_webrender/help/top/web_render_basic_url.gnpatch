@@ -1,0 +1,39 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "WebRenderTOP — Basic URL mode. Loads a web page and renders it to a texture.",
+    "nodes": {
+        "web1": {
+            "type": "WebRenderTOP",
+            "position": [200, 200],
+            "parameters": {
+                "mode": {"value": 0},
+                "url": {"value": "https://godotengine.org"},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+                "fps": {"value": 30},
+                "active": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [700, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "web1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "WebRenderTOP — Basic URL\n\nLoads a live web page via Chromium CEF and outputs\nthe rendered page as a texture.\n\nChange the 'url' parameter to load any website.\n\nRequires gn_ext_webrender extension with cef_artifacts/\ninside the extension folder.",
+            "position": [-50.0, -50.0],
+            "size": [500.0, 140.0],
+            "color": [0.2, 0.6, 1.0, 0.8]
+        }
+    ]
+}

@@ -645,12 +645,12 @@ static func get_preset_list(family_folder: String) -> Array:
 
 
 ## Scans a directory for code preset files.
-## Recognised extensions: .gd, .gdshader, .fs, .glsl, .frag, .isf
+## Recognised extensions: .gd, .gdshader, .fs, .glsl, .frag, .isf, .html, .js
 static func _scan_preset_dir(dir_path: String, is_factory: bool, result: Array) -> void:
 	var dir := DirAccess.open(dir_path)
 	if dir == null:
 		return
-	const EXTS := [".gd", ".gdshader", ".fs", ".glsl", ".frag", ".isf"]
+	const EXTS := [".gd", ".gdshader", ".fs", ".glsl", ".frag", ".isf", ".html", ".js"]
 	dir.list_dir_begin()
 	var fname := dir.get_next()
 	while fname != "":

@@ -30,7 +30,24 @@ platform/architecture/renderer guards, and the dependency system.
 
 Extensions are self-contained Godot addon folders under `res://addons/gn_ext_*/`.
 Core GONODES code has **zero** hardcoded references to any extension — all
-coupling flows through three registration mechanisms:
+coupling flows through registration mechanisms that extensions call from
+their boot scripts or declare in their manifest.
+
+### Design Philosophy: Self-Containment
+
+The core principle is that **deleting an extension folder removes all traces
+of that extension** from the editor. No orphaned references, no broken
+imports, no palette entries left behind. This is enforced by two rules:
+
+1. **Core never imports from extensions.** No `preload()`, no `class_name`
+   references, no hardcoded checks for extension-specific types. All
+   coupling flows through generic registries (dictionaries keyed by string).
+2. **Extensions own all their assets.** Operators, presets, help patches,
+   native binaries, and even third-party SDK artifacts (like CEF) live
+   inside the extension folder. Nothing goes in `addons/gonodes/` or the
+   project root.
+
+### Registration Flow
 
 ```
 gn_extension.cfg (declarative manifest)
@@ -39,9 +56,10 @@ gn_extension.cfg (declarative manifest)
        ├─→ GNFamily.register_family()                 ← new families
        └─→ boot.gd::boot()                           ← runtime hooks
               │
-              ├─→ GNViewerPanel.register_display_handler()   ← viewer
+              ├─→ GNViewerPanel.register_display_handler()   ← viewer display
               ├─→ GNCodeEditor.register_code_language()      ← code editor
-              └─→ GNParamRow.register_code_param()           ← param inspector
+              ├─→ GNParamRow.register_code_param()           ← param inspector
+              └─→ GNNode.handle_viewer_input()               ← input forwarding (virtual override)
 ```
 
 This means you can delete any `gn_ext_*` folder and GONODES continues to
@@ -244,9 +262,30 @@ static func boot() -> void:
 | Hook | What It Registers | Example |
 |------|-------------------|---------|
 | `GNViewerPanel.register_display_handler()` | Custom viewer for new data types | SDF extension shows SDF tree text |
+| `GNNode.handle_viewer_input()` | Viewer input forwarding (virtual override) | WebRender forwards mouse/keyboard to CEF |
 | `GNCodeEditor.register_code_language()` | Syntax highlighting + presets | ISF extension registers `.fs` highlighting |
 | `GNParamRow.register_code_param()` | "Edit ↗" button on specific params | Shadertoy registers `shader_code` param |
 | `GNScriptHelper.register_script_family()` | Script annotation families | Extension adds `"sdf"` to `@output` options |
+
+### Viewer Input Forwarding
+
+Operators that need to receive mouse/keyboard events from the viewer
+(e.g. interactive web pages, touchable UI widgets) override `GNNode`'s
+virtual method:
+
+```gdscript
+func handle_viewer_input(event: InputEvent, local_pos: Vector2) -> bool:
+    # Process the event, return true to consume it (skips viewer pan/zoom)
+    return false
+```
+
+This is a **generic virtual** on the base node class — the viewer panel
+calls it without any knowledge of the specific operator. No viewer
+branching or type checks. The operator decides whether to consume the
+event. If it returns `false`, the viewer's default pan/zoom handling runs.
+
+Example: WebRenderTOP overrides this to forward mouse clicks and
+keyboard events to the Chromium browser.
 
 ### Headless Guard
 
@@ -323,6 +362,25 @@ When a parameter with a registered name appears in the inspector, an
 parameter. Core code uses this for `code`, `shader_code`, etc. Extensions
 register their own parameter names (e.g. `isf_code`, `shader_code`).
 
+### 6.4 Viewer Input Forwarding
+
+**File:** `addons/gonodes/core/gn_node.gd`
+
+```gdscript
+func handle_viewer_input(_event: InputEvent, _local_pos: Vector2) -> bool:
+    return false  # Override in operator to consume events
+```
+
+Unlike the other hooks which use static registries, input forwarding uses
+a **virtual method override** on the operator itself. The viewer panel calls
+`handle_viewer_input()` on whichever node is currently displayed — without
+knowing its type. If the method returns `true`, the event is consumed and
+the viewer's default pan/zoom is skipped.
+
+This pattern is used by WebRenderTOP to forward mouse/keyboard events to
+the Chromium browser. Any operator can use it — no registration needed,
+just override the virtual.
+
 ---
 
 ## 7. Platform, Architecture & Renderer Guards
@@ -375,16 +433,39 @@ addons/gn_ext_myext/
 ├── operators/                # Operator scripts
 │   └── top/
 │       └── my_custom_top.gd
+├── presets/                  # Code/shader presets (auto-discovered)
+│   └── myformat/
 ├── help/                     # Help patches (.gnpatch)
 │   └── top/
 │       └── my_custom_top_basic.gnpatch
 ├── tests/                    # Extension tests
 │   └── test_myext_operators.gd
-└── native/                   # C++ source (if GDExtension-based)
-    ├── build.cfg             # Build manifest for gn_build.py
-    ├── src/
-    └── SConstruct            # 6-line shim delegating to build/gn_build.py
+├── native/                   # C++ source (if GDExtension-based)
+│   ├── build.cfg             # Build manifest for gn_build.py
+│   ├── src/
+│   └── SConstruct            # 6-line shim delegating to build/gn_build.py
+└── cef_artifacts/            # Third-party SDK artifacts (if applicable)
+    └── gdcef.gdextension.disabled
 ```
+
+**Key rule:** Everything lives inside the extension folder — including
+third-party binary artifacts like CEF. Never place extension assets in
+`addons/gonodes/` or the project root.
+
+### Native Binary Auto-Activation
+
+`.gdextension` files ship as `.gdextension.disabled` by default.
+`GNExtensionRegistry.sync_native_extensions()` (called from the plugin's
+`_enter_tree()`) scans **every subdirectory** within each `gn_ext_*`
+folder for `.gdextension` files. If the platform binary exists on disk, the
+file is renamed to `.gdextension` (activated). If the binary is missing,
+it's renamed to `.gdextension.disabled` (silenced). Changes take effect
+on the next Godot restart.
+
+This means:
+- **Extension installed without binaries?** No startup warnings.
+- **Binaries compiled or downloaded?** Auto-activated on next launch.
+- **Binaries deleted?** Auto-deactivated on next launch.
 
 The test runner automatically discovers `test_*.gd` files under
 `addons/gn_ext_*/tests/`.
@@ -477,3 +558,4 @@ family name string.
 | `gn_ext_depth_sensor` | No | — | Depth cameras |
 | `gn_ext_blackmagic` | No | — | Blackmagic capture |
 | `gn_ext_serial` | No | — | Serial port I/O |
+| `gn_ext_webrender` | Yes | Code params (`html`, `javascript`), code languages (HTML, JS), input handler | 1 TOP — Web page to texture via CEF |

@@ -1,0 +1,48 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "WebRenderTOP — WebGL shader. Renders a full-screen fragment shader using WebGL2 inside the browser.",
+    "nodes": {
+        "web1": {
+            "type": "WebRenderTOP",
+            "position": [200, 200],
+            "parameters": {
+                "mode": {"value": 1},
+                "html": {"value": "<!DOCTYPE html>\n<html>\n<head>\n<style>body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>\n</head>\n<body>\n<canvas id=\"c\"></canvas>\n<script>\nconst canvas = document.getElementById('c');\nconst gl = canvas.getContext('webgl2');\ncanvas.width = window.innerWidth;\ncanvas.height = window.innerHeight;\n\nconst vs = `#version 300 es\nin vec2 a_pos;\nvoid main() { gl_Position = vec4(a_pos, 0, 1); }`;\n\nconst fs = `#version 300 es\nprecision highp float;\nuniform float u_time;\nuniform vec2 u_res;\nout vec4 fragColor;\n\nvoid main() {\n  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);\n  float d = length(uv);\n  float a = atan(uv.y, uv.x);\n  // Kaleidoscope fold\n  float k = 6.0;\n  float angle = mod(a, 6.28318 / k) - 3.14159 / k;\n  vec2 p = vec2(cos(angle), sin(angle)) * d;\n  // Animated pattern\n  float v = sin(p.x * 10.0 - u_time * 2.0) * cos(p.y * 10.0 + u_time);\n  v += sin(d * 8.0 - u_time * 3.0) * 0.5;\n  vec3 col = 0.5 + 0.5 * cos(u_time + vec3(0, 2, 4) + v * 3.14);\n  col *= smoothstep(1.2, 0.1, d);\n  fragColor = vec4(col, 1.0);\n}`;\n\nfunction compile(type, src) {\n  const s = gl.createShader(type);\n  gl.shaderSource(s, src);\n  gl.compileShader(s);\n  return s;\n}\nconst prog = gl.createProgram();\ngl.attachShader(prog, compile(gl.VERTEX_SHADER, vs));\ngl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fs));\ngl.linkProgram(prog);\ngl.useProgram(prog);\n\nconst buf = gl.createBuffer();\ngl.bindBuffer(gl.ARRAY_BUFFER, buf);\ngl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);\nconst loc = gl.getAttribLocation(prog, 'a_pos');\ngl.enableVertexAttribArray(loc);\ngl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);\n\nconst uTime = gl.getUniformLocation(prog, 'u_time');\nconst uRes = gl.getUniformLocation(prog, 'u_res');\n\nfunction render(t) {\n  gl.viewport(0, 0, canvas.width, canvas.height);\n  gl.uniform1f(uTime, t * 0.001);\n  gl.uniform2f(uRes, canvas.width, canvas.height);\n  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);\n  requestAnimationFrame(render);\n}\nrequestAnimationFrame(render);\n</script>\n</body>\n</html>"},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 1024}},
+                "fps": {"value": 60},
+                "active": {"value": true}
+            }
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [700, 200],
+            "parameters": {
+                "operation": {"value": 0},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 1024}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1100, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 1024}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "web1", "from_port": 0, "to": "comp1", "to_port": 0},
+        {"from": "comp1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "WebRenderTOP — WebGL Shader\n\nA full-screen WebGL2 fragment shader running in the browser.\nThe kaleidoscope pattern is rendered by the GPU inside Chromium.\n\nWebRenderTOP captures the browser's rendered output as a texture,\nwhich can then be composited with other GONODES TOPs.\n\nThis demonstrates using the browser as a shader playground —\ncompare with ShadertoyTOP for native Godot GLSL shaders.",
+            "position": [-50.0, -50.0],
+            "size": [540.0, 160.0],
+            "color": [0.2, 0.6, 1.0, 0.8]
+        }
+    ]
+}

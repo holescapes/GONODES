@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; background: #111; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function draw(t) {
+  ctx.fillStyle = 'rgba(17, 17, 17, 0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  for (let i = 0; i < 200; i++) {
+    const angle = (i / 200) * Math.PI * 2 + t * 0.001;
+    const r = 100 + Math.sin(angle * 3 + t * 0.002) * 80;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    const hue = (i * 1.8 + t * 0.05) % 360;
+    ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+    ctx.beginPath();
+    ctx.arc(x, y, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>

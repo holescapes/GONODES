@@ -85,8 +85,10 @@ tests/              # Automated test suite
 
 1. Clone the repository.
 2. Run `python setup_deps.py` to fetch godot-cpp, Spout2 SDK, and extension SDKs.
+   - Dependency versions (Godot, godot-cpp branch) are read from `versions.env` at the project root — the single source of truth.
    - Use `python setup_deps.py --core` for just godot-cpp and Spout2 (skip ONNX, Python SDKs).
    - Use `python setup_deps.py --list` to see what would be fetched.
+   - Run `python scripts/check_versions.py` to verify CI workflows match `versions.env`.
 3. Open the project in **Godot 4.6.1** (stable).
 4. The editor scene is `scenes/gn_editor.tscn` — run it to launch the GONODES editor.
 5. Run tests:
@@ -310,7 +312,7 @@ Checks run in order: platform → architecture → renderer → dependency. If a
 
 Godot auto-discovers `.gdextension` files at engine startup — before any GDScript runs. If a `.gdextension` references a library that doesn't exist on disk, Godot logs noisy `GDExtension dynamic library not found` errors every time the editor starts. This is a common situation during development: you may have the GDScript operators written but haven't compiled the C++ yet, or you're working on a machine without the SDK installed.
 
-The extension registry solves this with **auto-activation**. On every editor launch, `GNExtensionRegistry.sync_native_extensions()` (called from the plugin's `_enter_tree()`) scans all `gn_ext_*/native/` directories for `.gdextension` and `.gdextension.disabled` files:
+The extension registry solves this with **auto-activation**. On every editor launch, `GNExtensionRegistry.sync_native_extensions()` (called from the plugin's `_enter_tree()`) scans **every subdirectory** inside each `gn_ext_*` folder for `.gdextension` and `.gdextension.disabled` files:
 
 | Condition | Action |
 |-----------|--------|
@@ -332,7 +334,7 @@ All the same rules apply to extension operators: descriptions, help patches, par
 
 ### Extension Self-Containment Rule
 
-**An extension must be entirely self-contained inside its `addons/gn_ext_<name>/` folder. Never place extension assets in `addons/gonodes/`.**
+**An extension must be entirely self-contained inside its `addons/gn_ext_<name>/` folder. Never place extension assets in `addons/gonodes/` or the project root.**
 
 | Asset type | Where it lives |
 |---|---|
@@ -341,7 +343,26 @@ All the same rules apply to extension operators: descriptions, help patches, par
 | Parameter presets | `presets/params/` |
 | Help patches | `help/<family>/` |
 | Shared helper scripts | Root of extension folder (e.g. `depth_sensor_helper.gd`) |
-| Textures, data files | anywhere inside the extension folder |
+| Textures, data files | Anywhere inside the extension folder |
+| Native C++ source | `native/` |
+| Third-party SDK binaries | `cef_artifacts/`, `native/bin/`, or similar — inside the extension |
+
+**Why:** Core never imports from extensions. All coupling is through generic
+registries (dictionaries keyed by string). Deleting an extension folder removes
+all traces — operators, presets, help patches, native binaries, and runtime
+registrations — without any orphaned references or broken imports.
+
+**Code editor customization** (syntax highlighting, preset folders, "Edit ↗"
+buttons) lives entirely in the extension's `boot.gd`. Core provides the
+registration API (`GNCodeEditor.register_code_language()`,
+`GNParamRow.register_code_param()`); extensions call it. Remove the extension
+and the customization disappears.
+
+**Viewer behavior** follows the same rule. Custom data display goes through
+`GNViewerPanel.register_display_handler()` in the boot script. Input
+forwarding uses the `handle_viewer_input()` virtual on `GNNode` — the
+operator overrides it, not the viewer. The viewer has zero knowledge of
+extension-specific types.
 
 The core discovery systems find these automatically — no registration is needed:
 - `gn_script_helper.get_preset_list()` scans `gn_ext_*/presets/<folder>/` for all installed extensions.

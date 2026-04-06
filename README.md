@@ -99,8 +99,23 @@ Physics simulation (Jolt), environment/post-processing, instancing, animation �
 | **Blackmagic** | Blackmagic Design capture card input/output |
 | **User Native** | Write custom C++ operators in-editor with hot-reload |
 | **User Python** | Write custom Python operators with NumPy |
+| **Web Render** | Render web pages (HTML/CSS/JS/WebGL) to texture via Chromium CEF — URL or inline HTML mode, mouse/keyboard input forwarding, live JS execution |
 
 Extensions can go far beyond adding operators — they can define **entirely new data families** with custom port types, wire colors, data classes, and palette sections. The SDF extension demonstrates this: it registers a new "SDF" family at runtime, complete with 40+ operators, custom data type (`GNSDFData`), and its own wire color. No core code modification is required to add a new family. See [CONTRIBUTING.md §5](dev_docs/CONTRIBUTING.md) for the full extension authoring guide.
+
+#### Extension Self-Containment
+
+Every extension is **fully self-contained** inside its `addons/gn_ext_<name>/` folder. Core GONODES has zero hardcoded references to any extension. Delete an extension folder and everything — operators, help patches, presets, native binaries — disappears cleanly.
+
+Extensions customize the editor through **registration hooks** provided by core:
+
+- **Operators** — declared in `gn_extension.cfg`, auto-discovered by the registry
+- **Code editors** — `boot.gd` calls `GNCodeEditor.register_code_language()` and `GNParamRow.register_code_param()` to add syntax highlighting, presets, and "Edit ↗" buttons for extension-specific params (e.g. HTML, JavaScript, ISF, GLSL)
+- **Viewer display** — `GNViewerPanel.register_display_handler()` for custom data visualization; `GNNode.handle_viewer_input()` virtual for input forwarding (e.g. mouse → CEF browser)
+- **New families** — `GNFamily.register_family()` creates entirely new data types with custom wire colors, palette sections, and data classes
+- **Native binaries** — `.gdextension` files ship as `.disabled` by default; `sync_native_extensions()` auto-activates them when the platform binary exists on disk, silencing Godot's startup warnings on machines where the binary hasn't been compiled
+
+This design means anyone can write, distribute, and install an extension without touching a single line of core code.
 
 ### Scripting
 
@@ -192,6 +207,18 @@ git clone https://github.com/your-username/gonodes.git
 
 **Requirements:** Godot 4.6 or later. Windows, macOS, or Linux for the editor. Exported patches run on all Godot-supported platforms.
 
+### Dependency Version Management
+
+All external dependency versions (Godot, godot-cpp branch) are centralized in a single file at the project root:
+
+```bash
+# versions.env — single source of truth
+GODOT_VERSION=4.6.1
+GODOTCPP_BRANCH=4.5
+```
+
+`setup_deps.py` reads from `versions.env` automatically. CI workflows reference the same file. To upgrade Godot or godot-cpp, edit **only** `versions.env` — then run `python scripts/check_versions.py` to verify all CI workflows match.
+
 ### Building Native Extensions (optional)
 
 GONODES works out of the box with pure GDScript. Native C++ extensions provide acceleration for CPU-heavy operators and hardware I/O. A unified build system compiles all extensions from a single entry point:
@@ -201,6 +228,7 @@ GONODES works out of the box with pure GDScript. Native C++ extensions provide a
 pip install scons
 
 # Fetch all dependencies (godot-cpp, Spout2 SDK, extension SDKs):
+# Dependency versions are centralized in versions.env at the project root.
 python setup_deps.py
 
 # Build godot-cpp + native operators:
@@ -232,6 +260,7 @@ GN Extensions can range from **pure GDScript** (no compilation needed) to **full
 | **gn_ext_shadertoy** | 1 | Paste/fetch Shadertoy GLSL shaders, auto-translated to Godot |
 | **gn_ext_isf** | 1 | ISF v2 interactive shader format with multi-pass and auto-parameter generation |
 | **gn_ext_mapper** | 5 | Projection mapping — quad pin, bezier warp, grid warp, edge blend, mask |
+| **gn_ext_webrender** | 1 | Render web pages to texture via Chromium CEF — URL or inline HTML, input forwarding |
 
 These exist as extensions rather than core operators specifically to serve as **templates for building your own packs**. Copy one, rename the folder, edit `gn_extension.cfg`, add your operators — that's it. No C++ required.
 

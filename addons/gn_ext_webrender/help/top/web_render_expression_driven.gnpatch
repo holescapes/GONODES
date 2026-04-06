@@ -1,0 +1,78 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "WebRenderTOP — Expression-driven. Demonstrates driving browser content from GONODES expressions and LFO values.",
+    "nodes": {
+        "lfo1": {
+            "type": "LfoChop",
+            "position": [-200, 100],
+            "parameters": {
+                "type": {"value": 0},
+                "frequency": {"value": 0.25},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "lfo2": {
+            "type": "LfoChop",
+            "position": [-200, 350],
+            "parameters": {
+                "type": {"value": 1},
+                "frequency": {"value": 0.4},
+                "amplitude": {"value": 1.0}
+            }
+        },
+        "web1": {
+            "type": "WebRenderTOP",
+            "position": [300, 200],
+            "parameters": {
+                "mode": {"value": 1},
+                "html": {"value": "<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body {\n    margin: 0; background: #000; overflow: hidden;\n    display: flex; align-items: center; justify-content: center;\n    height: 100vh;\n  }\n  .ring {\n    position: absolute;\n    border: 3px solid;\n    border-radius: 50%;\n    transition: all 0.05s linear;\n  }\n  #info {\n    position: fixed; bottom: 20px; right: 20px;\n    color: #666; font: 12px monospace;\n    text-align: right;\n  }\n</style>\n</head>\n<body>\n<div id=\"info\">Waiting for expressions...</div>\n<script>\nconst body = document.body;\nconst N = 8;\nconst rings = [];\nfor (let i = 0; i < N; i++) {\n  const el = document.createElement('div');\n  el.className = 'ring';\n  body.appendChild(el);\n  rings.push(el);\n}\nconst info = document.getElementById('info');\n\nwindow.gonodesUpdate = function(valA, valB) {\n  const cx = window.innerWidth / 2;\n  const cy = window.innerHeight / 2;\n  rings.forEach((el, i) => {\n    const phase = i / N;\n    const size = 60 + i * 40 + valA * 30;\n    const hue = (phase * 360 + valB * 180) % 360;\n    const x = cx + Math.cos(phase * 6.28 + valA * 3.14) * (50 + i * 15);\n    const y = cy + Math.sin(phase * 6.28 + valB * 3.14) * (50 + i * 15);\n    el.style.width = size + 'px';\n    el.style.height = size + 'px';\n    el.style.left = (x - size/2) + 'px';\n    el.style.top = (y - size/2) + 'px';\n    el.style.borderColor = `hsl(${hue}, 80%, 55%)`;\n    el.style.opacity = 0.6 + phase * 0.4;\n  });\n  info.textContent = `A: ${valA.toFixed(3)}  B: ${valB.toFixed(3)}`;\n};\n</script>\n</body>\n</html>"},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 1024}},
+                "fps": {"value": 30},
+                "javascript": {
+                    "value": "",
+                    "expression": "\"window.gonodesUpdate(\" + str(chop('lfo1', 'out')) + \",\" + str(chop('lfo2', 'out')) + \")\"",
+                    "mode": "EXPRESSION"
+                },
+                "active": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [800, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 1024}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "web1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "WebRenderTOP — Expression-Driven\n\nThe 'javascript' param uses an EXPRESSION that\nbuilds a JS function call from CHOP values.\n\nEach cook frame, the expression evaluates to:\n  window.gonodesUpdate(0.42, -0.7)\n... with live LFO values substituted.\n\nThis is the key pattern for bridging GONODES\ndata into web content: define a JS function in\nthe HTML, then call it via expression.",
+            "position": [-50.0, -50.0],
+            "size": [500.0, 190.0],
+            "color": [0.2, 0.6, 1.0, 0.8]
+        },
+        {
+            "id": "ann_2",
+            "type": "note",
+            "text": "LFO A — drives ring positions\n(sine wave, 0.25 Hz)",
+            "position": [-240.0, 50.0],
+            "size": [220.0, 60.0],
+            "color": [1.0, 0.9, 0.3, 0.7]
+        },
+        {
+            "id": "ann_3",
+            "type": "note",
+            "text": "LFO B — drives ring colors\n(square wave, 0.4 Hz)",
+            "position": [-240.0, 300.0],
+            "size": [220.0, 60.0],
+            "color": [1.0, 0.9, 0.3, 0.7]
+        }
+    ]
+}

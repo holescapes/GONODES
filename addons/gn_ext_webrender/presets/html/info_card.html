@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: linear-gradient(135deg, #0a0a2e, #1a1a4e);
+    color: #eee;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  .card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    max-width: 400px;
+  }
+  h1 {
+    font-size: 2em;
+    background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  p { color: #aaa; line-height: 1.6; }
+  .clock {
+    font-size: 3em;
+    font-weight: 200;
+    letter-spacing: 4px;
+    margin-top: 20px;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>GONODES</h1>
+  <p>WebRenderTOP &mdash; HTML/CSS rendered to texture via Chromium CEF</p>
+  <div class="clock" id="clock">00:00:00</div>
+</div>
+<script>
+function tick() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('en-US', { hour12: false });
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>

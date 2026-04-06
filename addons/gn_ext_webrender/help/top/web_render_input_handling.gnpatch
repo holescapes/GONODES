@@ -1,0 +1,47 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "WebRenderTOP — Input handling. Demonstrates mouse and keyboard forwarding from the GONODES viewer to the browser.",
+    "nodes": {
+        "web1": {
+            "type": "WebRenderTOP",
+            "position": [200, 200],
+            "parameters": {
+                "mode": {"value": 1},
+                "html": {"value": "<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body {\n    margin: 0; background: #0a0a0a; overflow: hidden;\n    font-family: 'Segoe UI', sans-serif;\n  }\n  canvas { display: block; cursor: crosshair; }\n  #hud {\n    position: fixed; top: 16px; left: 16px;\n    color: #0ff; font-size: 14px; font-family: monospace;\n    pointer-events: none;\n  }\n  #keys {\n    position: fixed; bottom: 16px; left: 16px;\n    color: #ff0; font-size: 14px; font-family: monospace;\n    pointer-events: none;\n  }\n</style>\n</head>\n<body>\n<canvas id=\"c\"></canvas>\n<div id=\"hud\">Move mouse over viewer to draw</div>\n<div id=\"keys\">Last key: (none)</div>\n<script>\nconst canvas = document.getElementById('c');\nconst ctx = canvas.getContext('2d');\nconst hud = document.getElementById('hud');\nconst keys = document.getElementById('keys');\ncanvas.width = window.innerWidth;\ncanvas.height = window.innerHeight;\n\nlet drawing = false;\nlet hue = 0;\n\ncanvas.addEventListener('mousedown', e => {\n  drawing = true;\n  ctx.beginPath();\n  ctx.moveTo(e.clientX, e.clientY);\n});\n\ncanvas.addEventListener('mousemove', e => {\n  hud.textContent = `Mouse: ${e.clientX}, ${e.clientY}`;\n  if (!drawing) return;\n  hue = (hue + 1) % 360;\n  ctx.strokeStyle = `hsl(${hue}, 90%, 60%)`;\n  ctx.lineWidth = 3;\n  ctx.lineCap = 'round';\n  ctx.lineTo(e.clientX, e.clientY);\n  ctx.stroke();\n  ctx.beginPath();\n  ctx.moveTo(e.clientX, e.clientY);\n});\n\ncanvas.addEventListener('mouseup', () => { drawing = false; });\n\ndocument.addEventListener('keydown', e => {\n  keys.textContent = `Last key: ${e.key} (code: ${e.code})`;\n  if (e.key === 'c') {\n    ctx.clearRect(0, 0, canvas.width, canvas.height);\n    hud.textContent = 'Canvas cleared!';\n  }\n});\n</script>\n</body>\n</html>"},
+                "resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+                "fps": {"value": 60},
+                "active": {"value": true}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [700, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "web1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "WebRenderTOP — Input Handling\n\nMouse and keyboard events from the GONODES viewer\nare forwarded to the Chromium browser.\n\n• Click and drag in the viewer to draw on the canvas\n• Move the mouse to see coordinates in the HUD\n• Press 'C' to clear the canvas\n\nInput forwarding uses handle_viewer_input() on GNNode,\nwhich WebRenderTOP overrides to send events to CEF.",
+            "position": [-50.0, -50.0],
+            "size": [520.0, 180.0],
+            "color": [0.2, 0.6, 1.0, 0.8]
+        },
+        {
+            "id": "ann_2",
+            "type": "note",
+            "text": "FPS is set to 60 for smooth\nmouse tracking. Lower it for\nless CPU usage when input\nresponsiveness isn't needed.",
+            "position": [200.0, 420.0],
+            "size": [260.0, 90.0],
+            "color": [1.0, 0.9, 0.3, 0.7]
+        }
+    ]
+}

@@ -21,7 +21,25 @@ import sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
-GODOTCPP_BRANCH = "4.5"
+
+def _load_versions_env() -> dict:
+    """Read key=value pairs from versions.env at project root."""
+    env_file = os.path.join(ROOT, "versions.env")
+    vals = {}
+    if os.path.isfile(env_file):
+        with open(env_file, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" in line:
+                    k, v = line.split("=", 1)
+                    vals[k.strip()] = v.strip()
+    return vals
+
+_VERSIONS = _load_versions_env()
+
+GODOTCPP_BRANCH = _VERSIONS.get("GODOTCPP_BRANCH", "4.5")
 GODOTCPP_REPO = "https://github.com/godotengine/godot-cpp.git"
 GODOTCPP_DIR = os.path.join(ROOT, "addons", "gn_ext_native", "native", "godot-cpp")
 

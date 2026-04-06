@@ -335,6 +335,42 @@
 			"from_port": 0,
 			"to": "null1",
 			"to_port": 0
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "bloom1",
+			"to_port": 0
+		},
+		{
+			"from": "bloom1",
+			"from_port": 0,
+			"to": "limit1",
+			"to_port": 0
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "glsl_multi1",
+			"to_port": 0
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "cube_map1",
+			"to_port": 0
+		},
+		{
+			"from": "render1",
+			"from_port": 0,
+			"to": "geo_buffer1",
+			"to_port": 0
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "compositor_effect1",
+			"to_port": 0
 		}
 	],
 	"generator": "GONODES",
@@ -2127,6 +2163,246 @@
 				0.0
 			],
 			"type": "WindowOUT"
+		},
+		"bloom1": {
+			"type": "BloomTOP",
+			"position": [
+				2100.0,
+				0.0
+			],
+			"parameters": {
+				"intensity": {
+					"value": 1.0
+				},
+				"threshold": {
+					"value": 0.8
+				}
+			}
+		},
+		"chop_to_top1": {
+			"type": "CHOPtoTOP",
+			"position": [
+				2100.0,
+				200.0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"mode": {
+					"value": 0
+				}
+			}
+		},
+		"compositor_effect1": {
+			"type": "CompositorEffectTOP",
+			"position": [
+				2100.0,
+				400.0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"cube_map1": {
+			"type": "CubeMapTOP",
+			"position": [
+				2100.0,
+				600.0
+			],
+			"parameters": {
+				"mode": {
+					"value": 0
+				},
+				"output_size": {
+					"value": 512
+				}
+			}
+		},
+		"glsl_multi1": {
+			"type": "GLSLMultiTOP",
+			"position": [
+				2100.0,
+				800.0
+			],
+			"parameters": {
+				"num_passes": {
+					"value": 2
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"geo_buffer1": {
+			"type": "GeometryBufferTOP",
+			"position": [
+				2100.0,
+				1000.0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				}
+			}
+		},
+		"host_in1": {
+			"type": "HostInTOP",
+			"position": [
+				2100.0,
+				1200.0
+			],
+			"parameters": {
+				"label": {
+					"value": "host_texture"
+				}
+			}
+		},
+		"limit1": {
+			"type": "LimitTOP",
+			"position": [
+				2100.0,
+				1400.0
+			],
+			"parameters": {
+				"mode": {
+					"value": 0
+				}
+			}
+		},
+		"movie_file_in1": {
+			"type": "MovieFileInTOP",
+			"position": [
+				2100.0,
+				1600.0
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"loop": {
+					"value": true
+				}
+			}
+		},
+		"multi_buffer1": {
+			"type": "MultiBufferRenderTOP",
+			"position": [
+				2100.0,
+				1800.0
+			],
+			"parameters": {
+				"buffer_count": {
+					"value": 2
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"panel1": {
+			"type": "PanelTOP",
+			"position": [
+				2100.0,
+				2000.0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"particle_state1": {
+			"type": "ParticleStateTOP",
+			"position": [
+				2100.0,
+				2200.0
+			],
+			"parameters": {
+				"max_particles": {
+					"value": 1024
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"point_cloud_render1": {
+			"type": "PointCloudRenderTOP",
+			"position": [
+				2100.0,
+				2400.0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"point_size": {
+					"value": 2.0
+				}
+			}
+		},
+		"render1": {
+			"type": "RenderTOP",
+			"position": [
+				2100.0,
+				2600.0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				}
+			}
+		},
+		"select1": {
+			"type": "SelectTOP",
+			"position": [
+				2100.0,
+				2800.0
+			],
+			"parameters": {
+				"select_path": {
+					"value": ""
+				}
+			}
 		}
 	},
 	"version": "1.0.0"

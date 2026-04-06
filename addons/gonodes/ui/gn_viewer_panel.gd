@@ -73,6 +73,9 @@ const BG_COLOR := Color(0.06, 0.06, 0.08)
 ## The node ID currently targeted by this viewer.
 var node_id: String = ""
 
+## Weak reference to the currently displayed GNNode (for input forwarding).
+var _displayed_node: WeakRef = WeakRef.new()
+
 ## The family of the currently viewed node (cached for mode switching).
 var _current_family: int = GNFamily.Type.TOP
 
@@ -424,7 +427,16 @@ func _on_tex_clip_resized() -> void:
 
 
 ## Handles mouse input for pan (left-click or middle-click drag) and zoom (scroll wheel).
+## If the displayed node's handle_viewer_input() returns true, the event is
+## consumed and pan/zoom is skipped.
 func _on_tex_gui_input(event: InputEvent) -> void:
+	var node: GNNode = _displayed_node.get_ref() as GNNode
+	if node != null:
+		var local_pos := Vector2.ZERO
+		if event is InputEventMouse:
+			local_pos = (event as InputEventMouse).position
+		if node.handle_viewer_input(event, local_pos):
+			return
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event
 		if mb.button_index == MOUSE_BUTTON_LEFT or mb.button_index == MOUSE_BUTTON_MIDDLE:
@@ -1196,6 +1208,7 @@ func set_target(p_node_id: String) -> void:
 ## Legacy extension handlers (register_display_handler) are checked as a
 ## fallback for extensions that haven't migrated to the virtual method.
 func update_from_node(node: GNNode) -> void:
+	_displayed_node = weakref(node) if node != null else WeakRef.new()
 	if node == null:
 		_hide_all_displays()
 		_update_toolbar("", "")

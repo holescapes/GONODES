@@ -410,3 +410,79 @@ func test_wire_replacement_emits_signals() -> void:
 
 	_network.connection_removed.disconnect(on_removed)
 	_network.connection_added.disconnect(on_added)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Placeholder / Missing Operator Handling
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_from_dict_unknown_type_creates_placeholder() -> void:
+	var data := {
+		"nodes": {
+			"real": {"type": "NoiseTOP", "position": [0.0, 0.0], "parameters": {}},
+			"fake": {"type": "NonExistentTOP", "position": [200.0, 0.0], "parameters": {"x": {"value": 1}}}
+		},
+		"connections": [
+			{"from": "real", "from_port": 0, "to": "fake", "to_port": 0}
+		]
+	}
+	var ok := _network.from_dict(data)
+	GNTestAssert.assert_true(ok, "from_dict should succeed even with unknown operators")
+	GNTestAssert.assert_eq(_network.nodes.size(), 2, "both nodes should exist")
+
+	var placeholder: GNNode = _network.nodes.get("fake", null)
+	GNTestAssert.assert_not_null(placeholder, "placeholder node exists")
+	if placeholder:
+		GNTestAssert.assert_true(placeholder.is_placeholder(), "flagged as placeholder")
+		GNTestAssert.assert_eq(placeholder.node_type, "NonExistentTOP", "preserves type name")
+		GNTestAssert.assert_eq(placeholder.family, GNFamily.Type.TOP, "infers family from suffix")
+		GNTestAssert.assert_true(placeholder.node_error.length() > 0, "has error message")
+
+	GNTestAssert.assert_eq(_network.connections.size(), 1,
+		"connection to placeholder is preserved")
+
+
+func test_placeholder_roundtrip_preserves_data() -> void:
+	var data := {
+		"nodes": {
+			"n1": {"type": "NoiseTOP", "position": [0.0, 0.0], "parameters": {}},
+			"n2": {"type": "FutureSDF", "position": [300.0, 100.0], "parameters": {
+				"detail": {"value": 8}, "label": {"value": "hi"}
+			}}
+		},
+		"connections": [
+			{"from": "n1", "from_port": 0, "to": "n2", "to_port": 0}
+		]
+	}
+	_network.from_dict(data)
+	var reserialized := _network.to_dict()
+
+	GNTestAssert.assert_true(reserialized["nodes"].has("n2"), "placeholder survives save")
+	var n2d: Dictionary = reserialized["nodes"]["n2"]
+	GNTestAssert.assert_eq(n2d["type"], "FutureSDF", "type preserved")
+	GNTestAssert.assert_true(n2d.has("parameters"), "params preserved")
+	GNTestAssert.assert_eq(reserialized["connections"].size(), 1, "connection preserved")
+
+
+func test_placeholder_family_inference() -> void:
+	# Tests family inference from type name suffixes
+	var data := {
+		"nodes": {
+			"a": {"type": "FooCHOP", "position": [0.0, 0.0], "parameters": {}},
+			"b": {"type": "BarSOP", "position": [100.0, 0.0], "parameters": {}},
+			"c": {"type": "BazDAT", "position": [200.0, 0.0], "parameters": {}},
+			"d": {"type": "UnknownGadget", "position": [300.0, 0.0], "parameters": {}}
+		},
+		"connections": []
+	}
+	_network.from_dict(data)
+
+	var a: GNNode = _network.nodes.get("a")
+	var b: GNNode = _network.nodes.get("b")
+	var c: GNNode = _network.nodes.get("c")
+	var d: GNNode = _network.nodes.get("d")
+
+	if a: GNTestAssert.assert_eq(a.family, GNFamily.Type.CHOP, "CHOP inferred for FooCHOP")
+	if b: GNTestAssert.assert_eq(b.family, GNFamily.Type.SOP, "SOP inferred for BarSOP")
+	if c: GNTestAssert.assert_eq(c.family, GNFamily.Type.DAT, "DAT inferred for BazDAT")
+	if d: GNTestAssert.assert_eq(d.family, GNFamily.Type.COMP, "COMP fallback for unknown suffix")

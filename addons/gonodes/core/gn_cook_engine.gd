@@ -503,10 +503,12 @@ func cook_frame(delta: float) -> void:
 
 	# Clear per-node status before cooking — self-healing: stale warnings/errors
 	# from previous frames are wiped and only re-set if the problem persists.
+	# Placeholder nodes keep their error (it is structural, not per-cook).
 	if editor_mode:
 		for node in topo_order:
-			node.node_warning = ""
-			node.node_error = ""
+			if not node.is_placeholder():
+				node.node_warning = ""
+				node.node_error = ""
 			node.cooked_this_frame = false
 
 	# Parallel cook path: group nodes into topo levels and cook independent
@@ -1664,6 +1666,14 @@ func _is_gpu_family(node: GNNode) -> bool:
 ## compute check, renderer/platform check, execute_cook).
 ## Returns 1 if the node was cooked, 0 if skipped.
 func _cook_single_node(node: GNNode) -> int:
+	# Placeholder nodes (missing operator type) are never cooked — they preserve
+	# their error badge and produce no output.
+	if node.is_placeholder():
+		node.cook_valid = false
+		node.cook_time_ms = 0.0
+		node.clear_dirty()
+		return 0
+
 	# Inject timing context
 	node.current_delta = current_delta
 	node.elapsed_time = elapsed_time

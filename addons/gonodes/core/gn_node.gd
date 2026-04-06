@@ -126,6 +126,17 @@ var node_warning: String = ""
 ## badge on the GraphNode in the editor.
 var node_error: String = ""
 
+## When non-empty, this node is a placeholder for an operator type that could
+## not be loaded (missing extension, newer GONODES version, etc.).  Holds the
+## original serialized Dictionary so it can be re-saved without data loss.
+## Connections to/from the placeholder are preserved.  The cook engine skips
+## placeholders.
+var _placeholder_data: Dictionary = {}
+
+## Returns true if this node is a load-time placeholder for a missing operator.
+func is_placeholder() -> bool:
+	return not _placeholder_data.is_empty()
+
 ## Whether this node requires GPU compute shader support (RenderingDevice).
 ## Override to return true in operators that use compute shaders (POP, VOL,
 ## ComputeShaderTOP, CompositorEffectTOP).  The cook engine checks this before
@@ -357,6 +368,15 @@ func display_in_viewer(viewer) -> void:
 		viewer.show_info(cached_output.get_preview_text(), "")
 	else:
 		viewer.show_info("No output", "")
+
+
+## Called by the viewer panel when the user interacts with this node's display.
+## Override to handle mouse/keyboard input forwarded from the viewer.
+## [param event]: The Godot InputEvent (mouse button, motion, key, etc.).
+## [param local_pos]: Mouse position relative to the display area (0,0 = top-left).
+## Return [code]true[/code] to consume the event (viewer skips its own handling).
+func handle_viewer_input(_event: InputEvent, _local_pos: Vector2) -> bool:
+	return false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -686,6 +706,14 @@ func _to_string() -> String:
 ## The "type" field uses the GDScript class_name (e.g. "NoiseTOP") which matches
 ## the GNExtensionRegistry key, NOT the short node_type (e.g. "noise").
 func to_dict() -> Dictionary:
+	# Placeholder nodes preserve the original serialized data so re-saving a patch
+	# that contains operators from missing extensions doesn't lose information.
+	if not _placeholder_data.is_empty():
+		# Update only the position (user may have moved it in the editor)
+		var d := _placeholder_data.duplicate(true)
+		d["position"] = [graph_position.x, graph_position.y]
+		return d
+
 	# Use the GDScript class_name — it matches the registry key exactly.
 	var registry_type: String = get_script().get_global_name()
 	var d: Dictionary = {
