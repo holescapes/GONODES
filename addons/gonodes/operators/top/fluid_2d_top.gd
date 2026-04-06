@@ -68,9 +68,16 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
 	var do_reset: bool = get_param_value("reset")
 
-	# Build simulation + render viewports on first cook or resolution change
-	if _sim_viewport == null or _last_res != res:
+	# Build VPs once on first cook
+	if _sim_viewport == null:
 		_build_pipeline(res)
+		_last_res = res
+		_needs_reset = true
+
+	# Resize existing VPs when resolution changes (no rebuild needed)
+	if _last_res != res:
+		_sim_viewport.size = res
+		_render_viewport.size = res
 		_last_res = res
 		_needs_reset = true
 
@@ -113,21 +120,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if _needs_reset:
 		_needs_reset = false
 
-	# Resize if needed
-	if _sim_viewport.size != res:
-		_sim_viewport.size = res
-		_render_viewport.size = res
-
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
 
-## Build the dual-viewport pipeline: sim (feedback) → render (colorize).
+## Build the dual-viewport pipeline (called once on first cook).
 func _build_pipeline(res: Vector2i) -> void:
-	# Clean up old viewports
-	for child in get_children():
-		child.queue_free()
-
 	# --- Simulation viewport (feedback loop) ---
 	_sim_viewport = SubViewport.new()
 	_sim_viewport.name = "VP_Sim_%s" % id

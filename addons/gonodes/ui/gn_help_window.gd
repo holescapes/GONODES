@@ -149,6 +149,15 @@ func _build_help_content() -> void:
 	bb += "[font_size=14][color=#888888]%s  •  %s[/color][/font_size]\n\n" % [
 		gn_node.node_type, family_name]
 
+	# ── Deprecation notice ──
+	if gn_node.deprecated:
+		bb += "[bgcolor=#442200][color=#ffaa33]⊘ DEPRECATED[/color]"
+		if not gn_node.deprecation_message.is_empty():
+			bb += "  —  %s" % gn_node.deprecation_message
+		if not gn_node.deprecated_replacement.is_empty():
+			bb += "\n[color=#aaaaaa]Replacement:[/color]  [b]%s[/b]" % gn_node.deprecated_replacement
+		bb += "[/bgcolor]\n\n"
+
 	if not custom_content.is_empty():
 		# ── Custom .md content ──
 		bb += custom_content + "\n\n"

@@ -143,7 +143,7 @@ Press **F2** to open the debug system:
 - **Sub-networks** — Ctrl+G to group, Enter to dive, Backspace to exit (Houdini-style dive navigation)
 - **Custom operators** — save sub-networks as `.gnasset` files; they appear in the palette like built-in nodes (inspired by Houdini's Digital Assets / HDAs)
 - **Presets** — save/load parameter states; copy between nodes of the same type
-- **Spare parameters** — add any param type to any node (Houdini-style)
+- **Spare parameters** — right-click any node → *Add Spare Parameter* to attach custom Float, Int, Bool, String, Color, or Vector params. Optionally set min/max range for numeric types. Drive them with expressions just like built-in params. Saved with the patch (Houdini-style)
 - **User C++ / Python operators** — write custom operators in C++ or Python with hot-reload (inspired by Houdini's HDK and Python SOPs)
 - **Ramp curves** — cubic Hermite ramp parameter type with visual curve editor
 - **Annotations** — network boxes and sticky notes for graph organization

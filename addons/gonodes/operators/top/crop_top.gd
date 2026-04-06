@@ -18,6 +18,9 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output Resolution", "Output texture resolution"))
 	add_parameter(GNParameter.create_vector2("left_top", Vector2(0.0, 0.0), "", "Top-left UV corner of crop region"))
 	add_parameter(GNParameter.create_vector2("right_bottom", Vector2(1.0, 1.0), "", "Bottom-right UV corner of crop region"))
+	add_parameter(GNParameter.create_enum("edge_mode",
+		PackedStringArray(["Clamp", "Repeat", "Mirror", "Zero"]), 0, "Edge Mode",
+		"How to handle UVs outside source bounds"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -39,6 +42,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("source_tex", tex_in.texture)
 	_material.set_shader_parameter("crop_left_top", lt)
 	_material.set_shader_parameter("crop_right_bottom", rb)
+	_material.set_shader_parameter("edge_mode", get_param_value("edge_mode"))
 
 	_cached_tex_data.resolution = res
 

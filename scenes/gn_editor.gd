@@ -127,6 +127,7 @@ func _ready() -> void:
 	# Initialize extension registry — scan for gn_ext_* addon manifests
 	GNExtensionRegistry.instance().scan_extensions()
 	GNExtensionRegistry.instance().scan_custom_assets()
+	GNExtensionRegistry.instance().scan_deprecation()
 
 	_setup_network()
 	_setup_cook_engine()

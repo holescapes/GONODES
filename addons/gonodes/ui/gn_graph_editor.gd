@@ -69,6 +69,8 @@ enum _CtxID {
 	COPY_AS_JSON,
 	COPY_DEBUG_INFO,
 	COPY_NETWORK_JSON,
+	DELETE_WIRES,
+	INSERT_NODE_ON_WIRE,
 	## Dynamic IDs for preset loading start here (100+).
 	LOAD_PARAM_PRESET_BASE = 100,
 }
@@ -164,6 +166,24 @@ var _box_drag_pre_box_pos: Vector2 = Vector2.ZERO
 
 ## The ann_id of the box currently being dragged (empty if none).
 var _box_drag_ann_id: String = ""
+
+## Currently selected wires.  Each entry is a connection dict:
+## { "from_node": String, "from_port": int, "to_node": String, "to_port": int }
+var _selected_wires: Array[Dictionary] = []
+
+## When non-empty, a wire drag-to-insert is in progress.  The user clicked a
+## wire and dragged it — on release we open the palette filtered to operators
+## that can sit between the two connected nodes.
+## Keys: "from_node", "from_port", "to_node", "to_port", "family"
+var _wire_insert_pending: Dictionary = {}
+
+## Distance threshold (in local/screen pixels) for wire click hit-testing.
+const _WIRE_HIT_DISTANCE := 10.0
+
+## Origin of the current box-select drag (local/screen coords).  Set on left
+## mouse-down over empty canvas so we can build the actual selection rect on
+## mouse-up and use it for wire intersection testing.
+var _box_select_origin: Vector2 = Vector2(-1, -1)
 
 ## Signal emitted when an operator node is selected (for external inspector/viewer hookup).
 signal operator_selected(node_id: String)
@@ -332,6 +352,14 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
+	# Delete key — delete selected wires (runs before GraphEdit consumes the
+	# key for node deletion, so both wires and nodes are removed together).
+	if event is InputEventKey and event.pressed and not event.is_echo():
+		if event.keycode == KEY_DELETE and not event.ctrl_pressed:
+			if not _selected_wires.is_empty():
+				_delete_selected_wires()
+				# Don't accept — let GraphEdit also process node deletion.
+
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			_spawn_position = (get_local_mouse_position() + scroll_offset) / zoom
@@ -339,15 +367,65 @@ func _gui_input(event: InputEvent) -> void:
 			# Select the node under the cursor so the context menu targets it.
 			_select_node_under_cursor(_spawn_position)
 
+			# If right-clicking on a wire (not on a node), auto-select it
+			# so "Delete Wire(s)" / "Insert Node on Wire" are enabled.
+			if _get_node_id_at(_spawn_position).is_empty():
+				var wire_rc := get_closest_connection_at_point(
+						get_local_mouse_position(), _WIRE_HIT_DISTANCE)
+				if not wire_rc.is_empty():
+					var w := _wire_dict_from_graphedit(wire_rc)
+					if _find_wire_index(w) < 0:
+						_selected_wires = [w]
+						_expr_ref_overlay.queue_redraw()
+
 			_show_context_menu(get_screen_position() + get_local_mouse_position())
 			accept_event()
 		elif event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
-			# Double left-click on empty space → open add node palette
-			var graph_pos: Vector2 = (get_local_mouse_position() + scroll_offset) / zoom
+			# Double left-click — check wire first, then empty space
 			if not _is_node_at_position(get_local_mouse_position()):
-				_spawn_position = graph_pos
-				_palette.popup_at(get_global_mouse_position())
-				accept_event()
+				var wire_hit := get_closest_connection_at_point(get_local_mouse_position(), _WIRE_HIT_DISTANCE)
+				if not wire_hit.is_empty():
+					# Double-click on wire → insert node into this wire
+					var w := _wire_dict_from_graphedit(wire_hit)
+					_selected_wires = [w]
+					_begin_wire_insert(w)
+					_expr_ref_overlay.queue_redraw()
+					accept_event()
+				else:
+					# Double left-click on empty space → open add node palette
+					var graph_pos: Vector2 = (get_local_mouse_position() + scroll_offset) / zoom
+					_spawn_position = graph_pos
+					_palette.popup_at(get_global_mouse_position())
+					accept_event()
+		elif event.button_index == MOUSE_BUTTON_LEFT and not event.double_click:
+			# Single left-click — check if user clicked a wire
+			if not _is_node_at_position(get_local_mouse_position()):
+				var hit := get_closest_connection_at_point(get_local_mouse_position(), _WIRE_HIT_DISTANCE)
+				if not hit.is_empty():
+					if not event.shift_pressed:
+						_selected_wires.clear()
+						_deselect_all()
+					# Toggle: if already selected, remove; else add
+					var already := _find_wire_index(hit)
+					if already >= 0:
+						_selected_wires.remove_at(already)
+					else:
+						_selected_wires.append(_wire_dict_from_graphedit(hit))
+					_expr_ref_overlay.queue_redraw()
+					accept_event()
+				else:
+					# Clicked empty space (not wire, not node) → clear wire selection
+					if not event.shift_pressed:
+						_selected_wires.clear()
+						_expr_ref_overlay.queue_redraw()
+					# Record origin for box-select wire detection on release
+					_box_select_origin = get_local_mouse_position()
+
+	# Mouse release after dragging — check for box-select wire inclusion
+	if event is InputEventMouseButton and not event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_update_wire_box_selection()
+			_box_select_origin = Vector2(-1, -1)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -459,6 +537,7 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	view.dive_into_requested.connect(func(nid: String) -> void: dive_into_requested.emit(nid))
 	view.viewer_pin_requested.connect(func(nid: String) -> void: viewer_pin_requested.emit(nid))
 	node.parameters_changed.connect(func(_nid: String) -> void: _expr_refs_dirty = true)
+	node.parameter_changed.connect(func(_nid: String, _pname: String) -> void: _expr_refs_dirty = true)
 	add_child(view)
 	_node_views[node.id] = view
 
@@ -537,10 +616,23 @@ func _on_connection_request(from_node: StringName, from_port: int,
 
 
 ## User disconnects a wire (right-click drag or right_disconnects).
+## We guard with a proximity check — only allow if the mouse is close to the
+## input port, preventing accidental disconnects from clicking mid-wire.
+const _DISCONNECT_PORT_THRESHOLD := 6.0  # pixels in local space
+
 func _on_disconnection_request(from_node: StringName, from_port: int,
 		to_node: StringName, to_port: int) -> void:
 	if network == null:
 		return
+
+	# Check that the click was near the input port, not mid-wire.
+	var to_view: GNNodeView = _node_views.get(String(to_node), null)
+	if to_view != null:
+		var port_local: Vector2 = to_view.get_input_port_position(to_port)
+		var port_screen: Vector2 = (to_view.position_offset + port_local - scroll_offset / zoom) * zoom
+		var mouse_pos := get_local_mouse_position()
+		if mouse_pos.distance_to(port_screen) > _DISCONNECT_PORT_THRESHOLD:
+			return  # Too far from the port — ignore the disconnect.
 
 	var fn := String(from_node)
 	var tn := String(to_node)
@@ -686,8 +778,6 @@ func _on_delete_nodes_request(node_names: Array[StringName]) -> void:
 	_undo_redo.add_undo_method(_ur_restore_nodes.bind(nodes_snapshot, conns_snapshot))
 	_undo_redo.commit_action(false)
 
-
-## User clicks a node in the graph (GraphEdit built-in signal).
 func _on_graphedit_node_selected(gn: Node) -> void:
 	if gn is GNNodeView:
 		var view: GNNodeView = gn as GNNodeView
@@ -823,6 +913,9 @@ func _on_palette_node_selected(operator_type: String) -> void:
 	# Auto-connect if this node was spawned from a dropped connection
 	_try_auto_connect_pending(node)
 
+	# Splice into wire if this was a wire drag-to-insert
+	_try_wire_insert_splice(node)
+
 	GNLogger.info("GraphEditor", "Spawned '%s' (%s) at %s" % [
 		unique_id, operator_type, str(_spawn_position)])
 
@@ -832,6 +925,7 @@ func _on_palette_node_selected(operator_type: String) -> void:
 func _on_palette_closed() -> void:
 	_pending_connection = {}
 	_ghost_wire = {}
+	_wire_insert_pending = {}
 	_expr_ref_overlay.queue_redraw()
 
 
@@ -1243,6 +1337,9 @@ func update_expr_refs() -> void:
 ## and the ghost wire when a connection is pending (dropped on empty canvas).
 ## Connected to [member _expr_ref_overlay]'s `draw` signal.
 func _draw_expr_ref_lines() -> void:
+	# --- Selected wire highlights ---
+	_draw_selected_wires()
+
 	# --- Ghost wire (pending connection drop) ---
 	_draw_ghost_wire()
 
@@ -1712,6 +1809,11 @@ func toggle_shortcut_overlay() -> void:
 		["V", "Align Vertically"],
 		["Ctrl + L", "Auto-Layout Graph"],
 		["W", "Cycle Wire Style"],
+		["─── Wire Selection ───", ""],
+		["Click Wire", "Select Wire"],
+		["Shift + Click Wire", "Add Wire to Selection"],
+		["Delete", "Delete Selected Wires/Nodes"],
+		["Dbl-Click Wire", "Insert Node on Wire"],
 		["─── File ───", ""],
 		["Ctrl + N", "New Patch"],
 		["Ctrl + O", "Open Patch"],
@@ -1787,8 +1889,389 @@ func set_wire_style(idx: int) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Node Bookmarks
+# Wire Selection & Drag-to-Insert
 # ═══════════════════════════════════════════════════════════════════════════════
+
+## Converts a GraphEdit connection dict (StringName keys) to our canonical form.
+func _wire_dict_from_graphedit(d: Dictionary) -> Dictionary:
+	return {
+		"from_node": String(d.get("from_node", d.get("from", ""))),
+		"from_port": int(d.get("from_port", 0)),
+		"to_node": String(d.get("to_node", d.get("to", ""))),
+		"to_port": int(d.get("to_port", 0)),
+	}
+
+
+## Returns the index in _selected_wires matching the given connection, or -1.
+func _find_wire_index(conn: Dictionary) -> int:
+	var fn := String(conn.get("from_node", conn.get("from", "")))
+	var fp := int(conn.get("from_port", 0))
+	var tn := String(conn.get("to_node", conn.get("to", "")))
+	var tp := int(conn.get("to_port", 0))
+	for i in range(_selected_wires.size()):
+		var w: Dictionary = _selected_wires[i]
+		if w["from_node"] == fn and w["from_port"] == fp \
+				and w["to_node"] == tn and w["to_port"] == tp:
+			return i
+	return -1
+
+
+## Deletes all currently selected wires with undo support.
+func _delete_selected_wires() -> void:
+	if _selected_wires.is_empty() or network == null:
+		return
+
+	var to_delete := _selected_wires.duplicate()
+	_selected_wires.clear()
+
+	_undo_redo.create_action("Delete %d wire(s)" % to_delete.size())
+	for w in to_delete:
+		var fn: String = w["from_node"]
+		var fp: int = w["from_port"]
+		var tn: String = w["to_node"]
+		var tp: int = w["to_port"]
+		network.disconnect_nodes(fn, fp, tn, tp)
+		_undo_redo.add_do_method(_ur_disconnect.bind(fn, fp, tn, tp))
+		_undo_redo.add_undo_method(_ur_connect.bind(fn, fp, tn, tp))
+	_undo_redo.commit_action(false)
+
+	_expr_ref_overlay.queue_redraw()
+	GNLogger.info("GraphEditor", "Deleted %d wire(s)" % to_delete.size())
+
+
+## After a box-select gesture ends, select wires that intersect the actual
+## drag rectangle.  This allows selecting a single wire by drawing a box
+## across it, even without selecting either endpoint node.
+func _update_wire_box_selection() -> void:
+	if _box_select_origin.x < 0:
+		return  # No box-select gesture was in progress
+
+	var release_pos := get_local_mouse_position()
+	# Build the rect in local (screen) space from the two corners
+	var top_left := Vector2(
+		minf(_box_select_origin.x, release_pos.x),
+		minf(_box_select_origin.y, release_pos.y))
+	var bot_right := Vector2(
+		maxf(_box_select_origin.x, release_pos.x),
+		maxf(_box_select_origin.y, release_pos.y))
+	var local_rect := Rect2(top_left, bot_right - top_left)
+
+	# Skip tiny rects (plain clicks, not real box drags)
+	if local_rect.size.x < 4.0 and local_rect.size.y < 4.0:
+		return
+
+	var intersecting: Array = get_connections_intersecting_with_rect(local_rect)
+	var changed := false
+	for conn_dict in intersecting:
+		var w := _wire_dict_from_graphedit(conn_dict)
+		if _find_wire_index(w) < 0:
+			_selected_wires.append(w)
+			changed = true
+
+	if changed:
+		_expr_ref_overlay.queue_redraw()
+
+
+## Clears wire selection.  Called when the user clicks empty space or Escape.
+func deselect_wires() -> void:
+	if not _selected_wires.is_empty():
+		_selected_wires.clear()
+		_expr_ref_overlay.queue_redraw()
+
+
+## Returns the port position in graph-content space for a given node/port.
+func _get_port_graph_pos(node_id: String, port_idx: int, is_output: bool) -> Vector2:
+	var view: GNNodeView = _node_views.get(node_id, null)
+	if view == null:
+		return Vector2.ZERO
+	var local_pos: Vector2
+	if is_output:
+		local_pos = view.get_output_port_position(port_idx)
+	else:
+		local_pos = view.get_input_port_position(port_idx)
+	return view.position_offset + local_pos
+
+
+## Draws highlight outlines on selected wires, matching the actual curve.
+## Uses GraphEdit.get_connection_line() so straight / curved / right-angle
+## styles are all respected.
+func _draw_selected_wires() -> void:
+	if _selected_wires.is_empty():
+		return
+
+	var highlight_color := Color(1.0, 0.85, 0.2, 0.9)  # Gold/yellow
+	var highlight_width := connection_lines_thickness
+	var glow_color := Color(1.0, 0.85, 0.2, 0.15)
+	var glow_width := connection_lines_thickness + 4.0
+
+	for w in _selected_wires:
+		var from_graph := _get_port_graph_pos(w["from_node"], w["from_port"], true)
+		var to_graph := _get_port_graph_pos(w["to_node"], w["to_port"], false)
+
+		# Convert to overlay (local screen) space
+		var p1 := (from_graph - scroll_offset / zoom) * zoom
+		var p2 := (to_graph - scroll_offset / zoom) * zoom
+
+		# Ask GraphEdit for the actual bezier / straight / right-angle points
+		var pts: PackedVector2Array = get_connection_line(p1, p2)
+		if pts.size() >= 2:
+			_expr_ref_overlay.draw_polyline(pts, glow_color, glow_width, true)
+			_expr_ref_overlay.draw_polyline(pts, highlight_color, highlight_width, true)
+		else:
+			# Fallback for degenerate case
+			_expr_ref_overlay.draw_line(p1, p2, highlight_color, highlight_width, true)
+
+
+## Initiates a wire drag-to-insert: the user has selected a wire by clicking it,
+## then drags on it.  When released, opens a filtered palette showing operators
+## that can sit between the two connected nodes (accepts the output family as
+## input AND produces the input family as output).
+func _begin_wire_insert(wire: Dictionary) -> void:
+	if network == null:
+		return
+
+	var from_node: GNNode = network.get_node_by_id(wire["from_node"])
+	var to_node: GNNode = network.get_node_by_id(wire["to_node"])
+	if from_node == null or to_node == null:
+		return
+
+	var out_port: GNPort = from_node.get_output_port(wire["from_port"])
+	var in_port: GNPort = to_node.get_input_port(wire["to_port"])
+	if out_port == null or in_port == null:
+		return
+
+	# For insert, the new node must accept the upstream family AND produce
+	# the downstream family.  Often these are the same (e.g. TOP→TOP→TOP).
+	_wire_insert_pending = {
+		"from_node": wire["from_node"],
+		"from_port": wire["from_port"],
+		"to_node": wire["to_node"],
+		"to_port": wire["to_port"],
+		"out_family": out_port.family,
+		"in_family": in_port.family,
+	}
+
+	# Position the new node at the midpoint of the two connected nodes
+	var from_view: GNNodeView = _node_views.get(wire["from_node"], null)
+	var to_view: GNNodeView = _node_views.get(wire["to_node"], null)
+	if from_view and to_view:
+		_spawn_position = (from_view.position_offset + to_view.position_offset) / 2.0
+	else:
+		_spawn_position = (get_local_mouse_position() + scroll_offset) / zoom
+
+	# Get operators that accept the upstream family as input
+	var registry := GNExtensionRegistry.instance()
+	var accept_in := registry.get_operators_accepting_family(out_port.family)
+
+	# If the families differ (rare — e.g. TOP→IMG bridge), also filter by
+	# output family.  In the common case (same family), this is a no-op.
+	var allowed := PackedStringArray()
+	if out_port.family == in_port.family:
+		for op_name in accept_in:
+			allowed.append(op_name)
+	else:
+		var produce_out := registry.get_operators_producing_family(in_port.family)
+		var produce_set: Dictionary = {}
+		for op_name in produce_out:
+			produce_set[op_name] = true
+		for op_name in accept_in:
+			if produce_set.has(op_name):
+				allowed.append(op_name)
+
+	_palette.popup_at_filtered(
+		get_screen_position() + get_local_mouse_position(), allowed)
+
+
+## Called from _on_palette_node_selected — if _wire_insert_pending is active,
+## splices the new node into the existing wire.
+func _try_wire_insert_splice(new_node: GNNode) -> void:
+	if _wire_insert_pending.is_empty():
+		return
+
+	var wp := _wire_insert_pending
+	_wire_insert_pending = {}
+
+	var fn: String = wp["from_node"]
+	var fp: int = wp["from_port"]
+	var tn: String = wp["to_node"]
+	var tp: int = wp["to_port"]
+	var out_family: int = wp["out_family"]
+	var in_family: int = wp["in_family"]
+
+	# Find the first compatible input port on the new node
+	var new_input_port: int = -1
+	for port: GNPort in new_node.input_ports:
+		if port.family == out_family:
+			new_input_port = port.index
+			break
+	if new_input_port < 0:
+		return
+
+	# Find the first compatible output port on the new node
+	var new_output_port: int = -1
+	for port: GNPort in new_node.output_ports:
+		if port.family == in_family:
+			new_output_port = port.index
+			break
+	if new_output_port < 0:
+		return
+
+	# Remove the old wire
+	network.disconnect_nodes(fn, fp, tn, tp)
+	# Also force-remove the visual wire in case the signal handler missed it
+	# (can happen if GraphEdit's internal state holds a stale connection).
+	disconnect_node(fn, fp, tn, tp)
+
+	# Connect: old_from → new_node → old_to
+	var ok1 := network.connect_nodes(fn, fp, new_node.id, new_input_port)
+	var ok2 := network.connect_nodes(new_node.id, new_output_port, tn, tp)
+	# Force visual wires in case signal-based add didn't fire
+	connect_node(fn, fp, new_node.id, new_input_port)
+	connect_node(new_node.id, new_output_port, tn, tp)
+
+	# Record undo
+	_undo_redo.create_action("Insert %s into wire" % new_node.id)
+	_undo_redo.add_do_method(_ur_disconnect.bind(fn, fp, tn, tp))
+	_undo_redo.add_do_method(_ur_connect.bind(fn, fp, new_node.id, new_input_port))
+	_undo_redo.add_do_method(_ur_connect.bind(new_node.id, new_output_port, tn, tp))
+	_undo_redo.add_undo_method(_ur_disconnect.bind(fn, fp, new_node.id, new_input_port))
+	_undo_redo.add_undo_method(_ur_disconnect.bind(new_node.id, new_output_port, tn, tp))
+	_undo_redo.add_undo_method(_ur_connect.bind(fn, fp, tn, tp))
+
+	_selected_wires.clear()
+	_expr_ref_overlay.queue_redraw()
+
+	# Animate surrounding nodes apart if there isn't enough room.
+	# Returns the original positions of all moved nodes for undo.
+	var moved := _make_room_for_insert(fn, tn, new_node.id)
+	if not moved.is_empty():
+		# On undo, animate nodes back to their original positions.
+		_undo_redo.add_undo_method(_ur_animate_positions.bind(moved))
+	_undo_redo.commit_action(false)
+
+	if ok1 and ok2:
+		GNLogger.info("GraphEditor", "Inserted '%s' between %s:%d → %s:%d" % [
+			new_node.id, fn, fp, tn, tp])
+	else:
+		GNLogger.warn("GraphEditor", "Wire insert partially failed: %s → %s → %s" % [
+			fn, new_node.id, tn])
+
+
+## Checks whether the new node fits between the upstream and downstream nodes.
+## If the horizontal gap is too tight, cascades a push outward so no nodes
+## overlap.  Returns a dict of { node_id: original_position } for all nodes
+## that were moved (empty if no push was needed).
+const _INSERT_PAD := 40.0  # Extra pixels of breathing room on each side.
+const _INSERT_ANIM_DURATION := 0.25  # Seconds for the slide animation.
+
+func _make_room_for_insert(from_id: String, to_id: String, new_id: String) -> Dictionary:
+	var new_view: GNNodeView = _node_views.get(new_id, null)
+	if new_view == null:
+		return {}
+
+	var new_width: float = new_view.size.x
+	var needed_half: float = new_width / 2.0 + _INSERT_PAD
+
+	# Collect all node views sorted by X position for collision cascading.
+	var all_views: Array[GNNodeView] = []
+	for nid in _node_views:
+		all_views.append(_node_views[nid])
+	all_views.sort_custom(func(a: GNNodeView, b: GNNodeView) -> bool:
+		return a.position_offset.x < b.position_offset.x)
+
+	# Build a map of original positions before any moves.
+	var original_positions: Dictionary = {}  # node_id → Vector2
+	var targets: Dictionary = {}  # node_id → Vector2 (final position)
+
+	# ── Push left chain (from_id and everything to its left) ──
+	var from_view: GNNodeView = _node_views.get(from_id, null)
+	if from_view != null:
+		var new_center_x: float = new_view.position_offset.x + new_width / 2.0
+		var from_right: float = from_view.position_offset.x + from_view.size.x
+		var required_right: float = new_center_x - needed_half
+		if from_right > required_right:
+			var push_left: float = from_right - required_right
+			# Push from_view left, then cascade to anything it now overlaps.
+			_cascade_push(from_view, -push_left, all_views, original_positions, targets)
+
+	# ── Push right chain (to_id and everything to its right) ──
+	var to_view: GNNodeView = _node_views.get(to_id, null)
+	if to_view != null:
+		var new_center_x: float = new_view.position_offset.x + new_width / 2.0
+		var to_left: float = to_view.position_offset.x
+		var required_left: float = new_center_x + needed_half
+		if to_left < required_left:
+			var push_right: float = required_left - to_left
+			_cascade_push(to_view, push_right, all_views, original_positions, targets)
+
+	if targets.is_empty():
+		return {}
+
+	# Animate all affected nodes to their targets.
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.set_ease(Tween.EASE_OUT)
+	tw.set_trans(Tween.TRANS_CUBIC)
+	for nid in targets:
+		var v: GNNodeView = _node_views.get(nid, null)
+		if v != null:
+			tw.tween_property(v, "position_offset", targets[nid], _INSERT_ANIM_DURATION)
+	tw.finished.connect(func():
+		for nid2 in targets:
+			var v2: GNNodeView = _node_views.get(nid2, null)
+			if v2 != null and v2.gn_node:
+				v2.gn_node.graph_position = v2.position_offset
+	)
+
+	return original_positions
+
+
+## Pushes [param start_view] by [param delta_x] (negative = left, positive = right)
+## and recursively pushes any node it would collide with in that direction.
+## Records original positions and final targets for undo and animation.
+func _cascade_push(start_view: GNNodeView, delta_x: float,
+		all_views: Array[GNNodeView], original_positions: Dictionary,
+		targets: Dictionary) -> void:
+	var nid: String = start_view.name
+	# Prevent infinite recursion — if already targeted, skip.
+	if targets.has(nid):
+		return
+	# Record original position.
+	original_positions[nid] = start_view.position_offset
+
+	var new_pos := start_view.position_offset + Vector2(delta_x, 0)
+	targets[nid] = new_pos
+
+	var new_left: float = new_pos.x
+	var new_right: float = new_pos.x + start_view.size.x
+
+	# Check if the new position overlaps with a neighbour in the push direction.
+	if delta_x < 0:
+		# Pushing left — cascade into nodes that are to our left.
+		for v in all_views:
+			if v == start_view or targets.has(v.name):
+				continue
+			var v_right: float = v.position_offset.x + v.size.x
+			# Only consider nodes whose right edge was to the left of (or touching)
+			# our original left edge — i.e., nodes that are to our left.
+			if v_right <= start_view.position_offset.x + 1.0:
+				if v_right + _INSERT_PAD > new_left:
+					var push: float = v_right + _INSERT_PAD - new_left
+					_cascade_push(v, -push, all_views, original_positions, targets)
+	else:
+		# Pushing right — cascade into nodes that are to our right.
+		for v in all_views:
+			if v == start_view or targets.has(v.name):
+				continue
+			var v_left: float = v.position_offset.x
+			# Only consider nodes whose left edge was to the right of (or touching)
+			# our original right edge.
+			var orig_right: float = start_view.position_offset.x + start_view.size.x
+			if v_left >= orig_right - 1.0:
+				if v_left < new_right + _INSERT_PAD:
+					var push: float = new_right + _INSERT_PAD - v_left
+					_cascade_push(v, push, all_views, original_positions, targets)
+
 
 ## Sets a bookmark (Ctrl+1-9) for the currently selected single node.
 func set_bookmark(slot: int) -> void:
@@ -1902,7 +2385,15 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 
 	_context_menu.add_item("Delete", _CtxID.DELETE)
 	_context_menu.set_item_shortcut(_context_menu.get_item_index(_CtxID.DELETE), _shortcut(KEY_DELETE), true)
-	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.DELETE), not has_selection)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.DELETE), not has_selection and _selected_wires.is_empty())
+
+	var has_wires := not _selected_wires.is_empty()
+	_context_menu.add_item("Delete Wire(s)", _CtxID.DELETE_WIRES)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.DELETE_WIRES), not has_wires)
+
+	var single_wire := _selected_wires.size() == 1
+	_context_menu.add_item("Insert Node on Wire...", _CtxID.INSERT_NODE_ON_WIRE)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.INSERT_NODE_ON_WIRE), not single_wire)
 
 	_context_menu.add_separator()
 
@@ -2137,6 +2628,13 @@ func _on_context_menu_id_pressed(id: int) -> void:
 					selected.append(StringName(view_name))
 			if not selected.is_empty():
 				_on_delete_nodes_request(selected)
+			elif not _selected_wires.is_empty():
+				_delete_selected_wires()
+		_CtxID.DELETE_WIRES:
+			_delete_selected_wires()
+		_CtxID.INSERT_NODE_ON_WIRE:
+			if _selected_wires.size() == 1:
+				_begin_wire_insert(_selected_wires[0])
 		_CtxID.SELECT_ALL:
 			for view_name in _node_views:
 				_node_views[view_name].selected = true
@@ -2754,6 +3252,11 @@ func _on_begin_node_move() -> void:
 ## Called every frame — syncs annotation transforms on scroll/zoom changes,
 ## and applies group-move deltas during active node drags.
 func _process(_delta: float) -> void:
+	# Redraw overlay when scroll/zoom changes (keeps wire highlights and
+	# expression ref lines aligned with the graph content).
+	if zoom != _last_zoom or scroll_offset != _last_scroll:
+		_expr_ref_overlay.queue_redraw()
+
 	# Fast path: nothing to do if no annotations exist and no node drag is active.
 	if _annotation_views.is_empty() and not _node_drag_active:
 		return
@@ -2909,6 +3412,23 @@ func _ur_set_positions(positions: Dictionary) -> void:
 			node.graph_position = pos
 			if _node_views.has(node_id):
 				_node_views[node_id].position_offset = pos
+
+
+## Like _ur_set_positions but animates the move with a tween.
+## Used by undo of wire-insert so nodes slide back smoothly.
+func _ur_animate_positions(positions: Dictionary) -> void:
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.set_ease(Tween.EASE_OUT)
+	tw.set_trans(Tween.TRANS_CUBIC)
+	for node_id in positions:
+		var pos: Vector2 = positions[node_id]
+		var node: GNNode = network.get_node_by_id(node_id) if network else null
+		if node:
+			node.graph_position = pos
+		if _node_views.has(node_id):
+			tw.tween_property(_node_views[node_id], "position_offset",
+					pos, _INSERT_ANIM_DURATION)
 
 
 ## Renames a node.
@@ -3338,6 +3858,37 @@ func _show_add_spare_param_dialog() -> void:
 	type_option.add_item("Vector2i", GNParameter.ValueType.VECTOR2I)
 	vbox.add_child(type_option)
 
+	# --- Range row (visible for Float / Int) ---
+	var range_box := HBoxContainer.new()
+	range_box.name = "RangeRow"
+	range_box.add_theme_constant_override("separation", 8)
+	var min_lbl := Label.new()
+	min_lbl.text = "Min:"
+	min_lbl.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	range_box.add_child(min_lbl)
+	var min_edit := LineEdit.new()
+	min_edit.placeholder_text = "(none)"
+	min_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	min_edit.tooltip_text = "Leave empty for no minimum"
+	range_box.add_child(min_edit)
+	var max_lbl := Label.new()
+	max_lbl.text = "Max:"
+	max_lbl.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	range_box.add_child(max_lbl)
+	var max_edit := LineEdit.new()
+	max_edit.placeholder_text = "(none)"
+	max_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	max_edit.tooltip_text = "Leave empty for no maximum"
+	range_box.add_child(max_edit)
+	vbox.add_child(range_box)
+
+	# Show range row only for numeric types
+	var _update_range_vis := func() -> void:
+		var sel_id: int = type_option.get_selected_id()
+		range_box.visible = (sel_id == GNParameter.ValueType.FLOAT or sel_id == GNParameter.ValueType.INT)
+	_update_range_vis.call()
+	type_option.item_selected.connect(func(_idx: int) -> void: _update_range_vis.call())
+
 	var label_lbl := Label.new()
 	label_lbl.text = "Display label (optional):"
 	vbox.add_child(label_lbl)
@@ -3369,12 +3920,28 @@ func _show_add_spare_param_dialog() -> void:
 		if p_label.is_empty():
 			p_label = p_name.capitalize()
 
+		# Parse optional range
+		var mn_text: String = min_edit.text.strip_edges()
+		var mx_text: String = max_edit.text.strip_edges()
+		var mn_val: Variant = null
+		var mx_val: Variant = null
+		if vt == GNParameter.ValueType.FLOAT:
+			if mn_text.is_valid_float():
+				mn_val = mn_text.to_float()
+			if mx_text.is_valid_float():
+				mx_val = mx_text.to_float()
+		elif vt == GNParameter.ValueType.INT:
+			if mn_text.is_valid_int():
+				mn_val = mn_text.to_int()
+			if mx_text.is_valid_int():
+				mx_val = mx_text.to_int()
+
 		var param: GNParameter = null
 		match vt:
 			GNParameter.ValueType.FLOAT:
-				param = GNParameter.create_float(p_name, 0.0, null, null, 0.01, p_label)
+				param = GNParameter.create_float(p_name, 0.0, mn_val, mx_val, 0.01, p_label)
 			GNParameter.ValueType.INT:
-				param = GNParameter.create_int(p_name, 0, null, null, p_label)
+				param = GNParameter.create_int(p_name, 0, mn_val, mx_val, p_label)
 			GNParameter.ValueType.BOOL:
 				param = GNParameter.create_bool(p_name, false, p_label)
 			GNParameter.ValueType.STRING:

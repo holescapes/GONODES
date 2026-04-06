@@ -1,10 +1,15 @@
 class_name ResolutionTOP
 extends GNTopBase
 ## Resizes an input texture to a target resolution using a SubViewport.
+## @deprecated Use FitTOP instead — it supports Fit, Fill, Stretch, Native
+## modes plus Linear/Nearest filtering in a single node.
 
 
 func _init() -> void:
 	node_type = "resolution"
+	deprecated = true
+	deprecation_message = "Use FitTOP instead — it supports Fit, Fill, Stretch, and Native modes plus filtering."
+	deprecated_replacement = "FitTOP"
 
 
 func _init_ports() -> void:

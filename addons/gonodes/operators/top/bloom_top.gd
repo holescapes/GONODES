@@ -20,7 +20,7 @@ var _up_canvases: Array[TextureRect] = []
 
 var _composite_vp: SubViewport = null
 var _composite_mat: ShaderMaterial = null
-var _composite_canvas: ColorRect = null
+var _composite_canvas: TextureRect = null
 
 var _shader_threshold: Shader = null
 var _shader_down: Shader = null
@@ -29,6 +29,7 @@ var _shader_composite: Shader = null
 
 var _initialized: bool = false
 var _last_levels: int = 0
+var _pipeline_dirty: bool = false
 
 
 func _init() -> void:
@@ -114,6 +115,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if _composite_vp.size != res:
 		_composite_vp.size = res
 		_composite_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# The TextureRect needs a texture to draw; use the original input.
+	# The shader reads original_tex and glow_tex explicitly via uniforms.
+	_composite_canvas.texture = tex_in.texture
 	_composite_mat.set_shader_parameter("original_tex", tex_in.texture)
 	_composite_mat.set_shader_parameter("glow_tex", current_tex)
 	_composite_mat.set_shader_parameter("intensity", intensity_val)
@@ -121,6 +125,19 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
+
+
+## Override to schedule a second cook whenever the VP pipeline is rebuilt.
+## On the first cook after creation/rebuild, the composite VP has never rendered
+## so downstream TOPs read an empty ViewportTexture.  A deferred mark_dirty()
+## forces a second cook on the next frame — by then the VPs have rendered and
+## the downstream can sample valid content.
+func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
+	var result := super.execute_cook(inputs, frame)
+	if _pipeline_dirty:
+		_pipeline_dirty = false
+		call_deferred("mark_dirty")
+	return result
 
 
 func _setup_pipeline(res: Vector2i, levels: int) -> void:
@@ -171,11 +188,17 @@ func _setup_pipeline(res: Vector2i, levels: int) -> void:
 		_down_mats.append(mat)
 		_down_canvases.append(canvas)
 
-	# Upsample chain
+	# Upsample chain — created in reverse order so that the scene-tree child
+	# order matches the data-flow dependency: up[levels-1] renders first
+	# (reads from the last downsample VP), then up[levels-2] reads from
+	# up[levels-1], and so on down to up[0] which produces full-res output.
 	_up_vps.clear()
 	_up_mats.clear()
 	_up_canvases.clear()
-	for i in range(levels):
+	_up_vps.resize(levels)
+	_up_mats.resize(levels)
+	_up_canvases.resize(levels)
+	for i in range(levels - 1, -1, -1):
 		var up_size: Vector2i
 		if i == 0:
 			up_size = res
@@ -191,19 +214,26 @@ func _setup_pipeline(res: Vector2i, levels: int) -> void:
 		canvas.material = mat
 		vp.add_child(canvas)
 		canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		_up_vps.append(vp)
-		_up_mats.append(mat)
-		_up_canvases.append(canvas)
+		_up_vps[i] = vp
+		_up_mats[i] = mat
+		_up_canvases[i] = canvas
 
-	# Composite pass
+	# Composite pass — uses a TextureRect with original_tex as its .texture so
+	# that the canvas is guaranteed to draw even on renderers that skip empty
+	# ColorRects.  The shader reads original_tex and glow_tex explicitly.
 	_composite_vp = _create_viewport("VP_composite_%s" % id, res)
 	_composite_mat = ShaderMaterial.new()
 	_composite_mat.shader = _shader_composite
-	_composite_canvas = ColorRect.new()
+	_composite_canvas = TextureRect.new()
 	_composite_canvas.name = "Canvas_Composite"
+	_composite_canvas.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_composite_canvas.stretch_mode = TextureRect.STRETCH_SCALE
 	_composite_canvas.material = _composite_mat
 	_composite_vp.add_child(_composite_canvas)
 	_composite_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	# Mark pipeline as just rebuilt so execute_cook schedules a re-cook
+	_pipeline_dirty = true
 
 	# Output texture from composite viewport
 	_cached_tex_data = GNTextureData.new()
@@ -216,15 +246,22 @@ func _setup_pipeline(res: Vector2i, levels: int) -> void:
 
 
 func _cleanup_pipeline() -> void:
+	# Remove old VPs from the tree immediately (not just queue_free) so they
+	# don't participate in the current frame's render pass.  queue_free alone
+	# leaves them as children until end-of-frame, polluting the render order.
 	for vp in _down_vps:
 		if is_instance_valid(vp):
+			remove_child(vp)
 			vp.queue_free()
 	for vp in _up_vps:
 		if is_instance_valid(vp):
+			remove_child(vp)
 			vp.queue_free()
 	if is_instance_valid(_threshold_vp):
+		remove_child(_threshold_vp)
 		_threshold_vp.queue_free()
 	if is_instance_valid(_composite_vp):
+		remove_child(_composite_vp)
 		_composite_vp.queue_free()
 	_down_vps.clear()
 	_down_mats.clear()

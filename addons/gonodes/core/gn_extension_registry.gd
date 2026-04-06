@@ -71,6 +71,9 @@ class OperatorEntry:
 	var extension_dir: String   ## Extension base dir (e.g. "res://addons/gn_ext_shadertoy") or "" for core
 	var requires_compute: bool  ## True if the operator needs compute shaders
 	var requires_renderers: PackedStringArray  ## e.g. ["forward_plus"] — empty = all
+	var deprecated: bool                       ## True if the operator is deprecated
+	var deprecation_message: String            ## Reason / migration guidance
+	var deprecated_replacement: String         ## Class name of the replacement operator
 
 	func _init(p_family: String, p_script: GDScript, p_desc: String,
 			p_source: String = "core", p_section: String = "",
@@ -83,6 +86,9 @@ class OperatorEntry:
 		extension_dir = p_ext_dir
 		requires_compute = false
 		requires_renderers = PackedStringArray()
+		deprecated = false
+		deprecation_message = ""
+		deprecated_replacement = ""
 
 
 ## class_name → OperatorEntry
@@ -132,6 +138,11 @@ func create_instance(class_name_key: String) -> GNNode:
 		# Inject description from manifest so it is the single source of truth.
 		if not entry.description.is_empty():
 			node.node_description = entry.description
+		# Cache deprecation info from the instance onto the registry entry
+		if node.deprecated and not entry.deprecated:
+			entry.deprecated = true
+			entry.deprecation_message = node.deprecation_message
+			entry.deprecated_replacement = node.deprecated_replacement
 		return node as GNNode
 	GNLogger.error("ExtRegistry", "Script for '%s' does not extend GNNode" % class_name_key)
 	node.free()
@@ -191,6 +202,29 @@ func get_description(class_name_key: String) -> String:
 ## Returns true if the operator is registered.
 func has_operator(class_name_key: String) -> bool:
 	return _operators.has(class_name_key)
+
+
+## Returns true if the named operator is deprecated.
+func is_deprecated(class_name_key: String) -> bool:
+	var entry: OperatorEntry = _operators.get(class_name_key, null)
+	return entry != null and entry.deprecated
+
+
+## Probes all registered operators for deprecation status by instantiating each
+## script once.  Called once at startup so the palette can show deprecation
+## styling without the user having to create every node first.
+func scan_deprecation() -> void:
+	for op_name in _operators:
+		var entry: OperatorEntry = _operators[op_name]
+		if entry.deprecated or entry.op_script == null:
+			continue
+		var probe = entry.op_script.new()
+		if probe is GNNode and probe.deprecated:
+			entry.deprecated = true
+			entry.deprecation_message = probe.deprecation_message
+			entry.deprecated_replacement = probe.deprecated_replacement
+		if probe is Node:
+			probe.queue_free()
 
 
 ## Returns the full OperatorEntry for a registered operator, or null.

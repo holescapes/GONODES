@@ -3,7 +3,7 @@ shader_type canvas_item;
 // Each pass halves the resolution, spreading the blur cheaply.
 
 uniform sampler2D source_tex : hint_default_white;
-uniform vec2 texel_size = vec2(1.0 / 512.0, 1.0 / 512.0);
+uniform vec2 texel_size = vec2(0.001953125, 0.001953125);
 
 void fragment() {
 	vec2 uv = UV;

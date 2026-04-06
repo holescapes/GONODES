@@ -284,6 +284,55 @@ RaymarchSDF runs a shader-based raymarcher every frame. To improve performance:
 
 ---
 
+## Multi-Monitor DPI / Scaling Issues
+
+### "Editor layout scrambles when resizing across monitors with different DPI"
+
+**Symptoms:** Moving or resizing the Godot editor (or a WindowOUT window)
+between monitors that have different display scaling (e.g., 150% on your
+laptop and 100% on an external monitor) causes the editor UI to become
+misaligned, overlapping, or scrambled. The issue may persist even after
+moving the window back to the original monitor.
+
+**Root cause:** This is a **known Godot Engine limitation**, not a GONODES
+bug. Godot currently uses "system DPI aware" mode on Windows, meaning it
+reads the primary monitor's scale factor and applies it globally. It does
+not yet support per-monitor DPI awareness, so moving windows between
+monitors with different scale factors causes layout miscalculations in
+Godot's internal Control layout tree.
+
+GONODES (including WindowOUT) does not manipulate DPI or content scale
+settings — the issue is entirely within Godot's windowing/UI layer.
+
+**Workaround:** Set all your monitors to the **same display scaling
+percentage** in your operating system settings:
+
+- **Windows:** Settings → Display → Scale → set the same percentage on
+  all monitors (e.g., 100% on all, or 125% on all)
+- **Linux (X11):** Use `xrandr` or your desktop environment's display
+  settings to match DPI across screens
+- **Linux (Wayland):** Per-monitor scaling may work better depending on
+  your compositor, but is still not fully supported by Godot
+
+**Status:** Waiting for Godot Engine to implement per-monitor DPI
+awareness. Track progress on these upstream issues:
+
+- [godotengine/godot#56341](https://github.com/godotengine/godot/issues/56341)
+  — *Implement support for seamless display scaling on Windows and Linux*
+  (root feature request, open since Dec 2021)
+- [godotengine/godot#84948](https://github.com/godotengine/godot/issues/84948)
+  — *Resolution issue with dual monitors with different DPI*
+- [godotengine/godot#86943](https://github.com/godotengine/godot/pull/86943)
+  — PR: *Use PER_MONITOR_DPI_AWARE option if it's supported by OS*
+- [godotengine/godot#111271](https://github.com/godotengine/godot/issues/111271)
+  — *UI and viewport scale become incorrect when using Stretch across
+  monitors with different DPI scaling*
+
+Once Godot ships per-monitor DPI support, this issue should resolve
+automatically with no changes needed on the GONODES side.
+
+---
+
 ## Keyboard Quick Reference
 
 | Key | Action |
@@ -295,6 +344,10 @@ RaymarchSDF runs a shader-based raymarcher every frame. To improve performance:
 | **F** | Fit view to selection |
 | **M** | Toggle minimap |
 | **W** | Cycle wire style |
+| **Click wire** | Select wire |
+| **Shift+Click wire** | Add wire to selection |
+| **Delete** | Delete selected nodes/wires |
+| **Double-click wire** | Insert node on wire |
 | **H** / **V** | Align horizontal / vertical |
 | **Ctrl+L** | Auto-layout graph |
 | **Ctrl+G** | Group into sub-network |

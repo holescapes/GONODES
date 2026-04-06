@@ -810,6 +810,7 @@ func _ensure_fallback_viewports(count: int, size: Vector2i) -> void:
 
 	while _fb_viewports.size() > count:
 		var idx := _fb_viewports.size() - 1
+		remove_child(_fb_viewports[idx])
 		_fb_viewports[idx].queue_free()
 		_fb_viewports.remove_at(idx)
 		_fb_shaders.remove_at(idx)

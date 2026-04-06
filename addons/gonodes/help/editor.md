@@ -64,10 +64,14 @@ available per session. Re-assigning a slot replaces the previous bookmark.
 |-------------------------------|------------------------------------------------|
 | **Left-click** node           | Select node (deselects others)                  |
 | **Shift + Left-click** node   | Add/remove node from selection                  |
-| **Left-drag** on empty space  | Box-select (rubber-band selection)              |
+| **Left-click** wire           | Select wire (deselects other wires)             |
+| **Shift + Left-click** wire   | Toggle wire in/out of selection                 |
+| **Double-click** wire         | Insert a new node on that wire                  |
+| **Left-drag** on empty space  | Box-select (rubber-band selection for nodes and wires) |
 | **Left-drag** a node          | Move node (snaps to 20px grid)                  |
 | **Left-drag** from port       | Start a wire connection                         |
 | **Right-click** on empty space / node | Open the **context menu**               |
+| **Right-click** wire          | Select wire and open context menu               |
 | **Right-drag** from an input port | Disconnect the wire (right-disconnects mode) |
 | **Scroll wheel**              | Zoom in/out (0.25× – 2.5×, step 0.1)          |
 | **Middle-click drag**         | Pan the graph canvas                            |
@@ -94,7 +98,7 @@ Greyed-out items require a selection, clipboard content, or ≥2 nodes.
 | **Cut**            | Ctrl + X        | Cut (copy then delete)                              |
 | **Paste**          | Ctrl + V        | Paste at cursor position (IDs get `_copy` suffix)   |
 | **Duplicate**      | Ctrl + D        | Copy + paste in one step                            |
-| **Delete**         | Delete          | Remove selected nodes and their wires               |
+| **Delete**         | Delete          | Remove selected nodes and/or wires              |
 | **Select All**     | Ctrl + A        | Select every node in the graph                      |
 | **Undo**           | Ctrl + Z        | Undo last graph action                              |
 | **Redo**           | Ctrl + Y        | Redo last undone action                             |
@@ -104,10 +108,13 @@ Greyed-out items require a selection, clipboard content, or ≥2 nodes.
 | **Lock: ON/OFF**   | L               | Toggle lock on selected nodes                       |
 | **Align Horizontal** | H             | Align selected nodes to same Y (needs 2+)          |
 | **Align Vertical** | —               | Align selected nodes to same X (needs 2+)          |
+| **Add Spare Parameter…** | —         | Add a custom parameter to the selected node (needs 1 selected) |
 | **Node Help**      | —               | Open help window (needs exactly 1 node selected)   |
 | **Copy as JSON**   | —               | Copies selected nodes + connections as JSON         |
 | **Copy Debug Info** | —              | Copies single node's full debug state dump          |
 | **Copy Network JSON** | —            | Copies entire network as JSON                       |
+| **Delete Wires**   | Delete          | Remove selected wires (shown when wires are selected) |
+| **Insert Node on Wire** | —          | Insert a node on the selected wire (filtered palette) |
 
 ### Quick-Access Keys (not in context menu)
 
@@ -172,17 +179,20 @@ Multi-dimensional parameters show **per-component** C/E toggles:
 Each axis (X, Y, Z, W / R, G, B, A) can independently be in Constant or
 Expression mode, just like TouchDesigner.
 
-### Numeric Fields (GNFloatField — Houdini-style virtual slider)
+### Numeric Fields (Houdini-style virtual slider)
 
-All Float and Int parameters use a unified **GNFloatField** control — a
-Houdini-inspired numeric field with virtual slider drag and a ladder
-multiplier popup.
+Float and Int parameters each have their own dedicated control —
+**GNFloatField** and **GNIntField** — both extending a shared
+**GNNumericField** base class.  They share the same interaction model
+(click-to-type, drag-to-scrub, ladder popup) but differ in value type,
+ladder tiers, and visual extras.
 
-**Interactions:**
+**Interactions (both Float and Int):**
 
 | Action | Effect |
 |--------|--------|
 | **Click** | Enter text editing mode — type any value, press Enter to confirm, Escape to cancel |
+| **Click outside** | Applies text and exits edit mode |
 | **Ctrl+Click** | Reset parameter to its default value |
 | **Horizontal drag** | Virtual slider — scrub the value smoothly using the active sensitivity tier |
 | **Shift + drag** | Fine mode (sensitivity ÷ 10) |
@@ -190,7 +200,8 @@ multiplier popup.
 | **Middle-button drag** | Open the **ladder popup** — drag vertically to select a sensitivity tier (no value change during selection). All other UI is blocked while the ladder is open. |
 
 **Ladder popup:** When you middle-click and drag, a popup appears to the left
-of the field showing multiplier tiers from ×0.001 (finest) to ×100 (coarsest).
+of the field showing multiplier tiers.  Float fields range from ×0.001 (finest)
+to ×100 (coarsest).  Int fields range from ×1 to ×100 (no sub-integer tiers).
 Drag up from the origin for coarser tiers, down for finer. The active tier is
 highlighted with a blue bar and shows the real per-pixel sensitivity (e.g.
 "0.01/px") beside the multiplier label. Release middle-button to confirm your
@@ -202,20 +213,25 @@ from highlighting or receiving mouse events.
 **Ranged vs. rangeless:** Parameters with defined min/max (e.g. Energy 0–16)
 show a subtle **fill bar** behind the value text indicating position within
 the range. Rangeless parameters (e.g. Translate X, Rotate Y) show a darker
-background with small **◂ ▸ arrow indicators** at the edges — the value is
-completely unclamped.
+background — the value is completely unclamped.
+
+**Int-specific extras:** Ranged Int fields show clickable **◂ ▸ step arrows**
+at the left and right edges — click to decrement/increment by 1.  Int drag
+uses an internal float accumulator so sub-integer mouse movements don't get
+lost; the displayed value only jumps when the accumulator crosses an integer
+boundary.
 
 ### Value Controls by Type
 
 | Type      | Control                                                         |
 |-----------|-----------------------------------------------------------------|
 | Float     | GNFloatField (virtual slider drag, ladder, click-to-type)       |
-| Int       | GNFloatField in integer mode (same interactions, integer steps) |
+| Int       | GNIntField (integer steps, ◂ ▸ arrows on ranged, int ladder)   |
 | Bool      | CheckBox                                                        |
 | String    | LineEdit                                                        |
 | Enum      | OptionButton (dropdown)                                         |
 | Color     | ColorPickerButton + per-component RGBA spinboxes                |
-| Vector2/3/4 | Per-component spinboxes (one per axis)                        |
+| Vector2/3/4 | Per-component GNFloatField (one per axis)                     |
 | File      | FileDialog button (filters by allowed extensions)               |
 
 ### Locked Nodes
@@ -226,6 +242,24 @@ When a node is **locked** (??), the inspector **immediately** updates:
 - Shows **"?? LOCKED"** in the status label
 
 Unlock with the **L** key or the context menu to resume editing.
+
+### Spare Parameters
+
+You can add **spare (custom) parameters** to any node via the context menu:
+**right-click → Add Spare Parameter…**
+
+The dialog lets you choose:
+- **Name** — internal parameter name (e.g. `my_scale`)
+- **Type** — Float, Int, Bool, String, Color, Vector2, Vector2i
+- **Min / Max** (Float and Int only) — optional range bounds.  Leave empty
+  for a rangeless parameter.  When set, the numeric field shows a fill bar
+  (and Int fields get ◂ ▸ step arrows).
+- **Display label** — optional human-readable label (defaults to the
+  capitalized name)
+
+Spare parameters appear in the inspector alongside built-in parameters
+and can use expressions just like any other parameter.  They are saved
+and restored with the patch.
 
 ---
 
@@ -313,6 +347,40 @@ Open with **Alt + A** or **right-click → Add Node…**
 
 Wires are type-checked — you can only connect ports of matching families
 (CHOP→CHOP, TOP→TOP, etc.). Invalid connections are silently rejected.
+
+### Selecting Wires
+
+| Action                              | Result                              |
+|-------------------------------------|-------------------------------------|
+| **Left-click** a wire               | Select it (deselects other wires)   |
+| **Shift + Left-click** a wire       | Toggle wire in/out of selection     |
+| **Box-select** (drag on empty space)| Selects all wires intersecting the rectangle |
+| **Right-click** a wire              | Auto-selects the wire and opens context menu |
+
+Selected wires are highlighted in gold, following the actual wire curve.
+
+### Deleting Wires
+
+| Action                              | Result                              |
+|-------------------------------------|-------------------------------------|
+| **Delete** key with wires selected  | Removes selected wires (with undo)  |
+| Right-click → **Delete Wires**      | Same as Delete key                  |
+
+Wire deletion is fully undoable (Ctrl+Z).
+
+### Inserting a Node on a Wire
+
+**Double-click** a wire to insert a new node inline:
+
+1. Double-click the wire — a filtered operator palette opens showing only
+   operators whose first input accepts the upstream family.
+2. Pick an operator — it is created and spliced into the wire automatically.
+3. If there isn't enough room, surrounding nodes slide apart with a smooth
+   animation to make space (cascade push).
+
+The entire operation (disconnect old wire, create node, connect new wires,
+reposition nodes) is a single undo action.  Pressing Ctrl+Z undoes the
+insert and smoothly animates nodes back to their original positions.
 
 ### Wire Styles
 

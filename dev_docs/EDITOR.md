@@ -483,6 +483,106 @@ verify that a SOP is producing the expected vertex count.
   is fully respected.
 
 
+## Wire Interactions — Implementation
+
+Wire selection, deletion, and inline insertion are handled in
+`gn_graph_editor.gd`.  All wire operations support full undo/redo.
+
+### State Variables
+
+| Variable | Type | Purpose |
+|----------|------|---------|
+| `_selected_wires` | `Array[Dictionary]` | Currently selected wires (each dict has `from_node`, `from_port`, `to_node`, `to_port`) |
+| `_wire_insert_pending` | `Dictionary` | Wire targeted for double-click insert (cleared after palette closes) |
+| `_box_select_origin` | `Vector2` | Mouse-down position for box-select rectangle tracking |
+| `_WIRE_HIT_DISTANCE` | `float` (10.0) | Max pixel distance for `get_closest_connection_at_point()` hit test |
+| `_DISCONNECT_PORT_THRESHOLD` | `float` (6.0) | Proximity guard — disconnect requests are rejected unless the mouse is within this distance of the input port |
+
+### Wire Click Selection
+
+Single left-click on a wire (detected in `_gui_input`) calls
+`get_closest_connection_at_point(mouse_pos, _WIRE_HIT_DISTANCE)`.  If a
+wire is found:
+
+- Without Shift: clears all selected wires, selects the clicked wire.
+- With Shift: toggles the clicked wire in/out of `_selected_wires`.
+- `accept_event()` is called to prevent GraphEdit's built-in
+  `right_disconnects` from interpreting the click as a disconnect.
+
+### Wire Box Selection
+
+`_update_wire_box_selection()` tracks `_box_select_origin` on mouse-down
+over empty canvas space.  On mouse-up, it builds the actual drag rectangle
+and calls `get_connections_intersecting_with_rect(rect)`.  Tiny rectangles
+(< 4px in either dimension) are ignored to avoid accidental selection from
+simple clicks.
+
+### Wire Deletion
+
+The **Delete** key is handled in `_gui_input` (fires before GraphEdit's
+built-in handler consumes the event).  If `_selected_wires` is non-empty,
+`_delete_selected_wires()` removes them with undo support.  Wire deletion
+is also available via the context menu item `_CtxID.DELETE_WIRES`.
+
+### Wire Highlight Rendering
+
+`_draw_selected_wires()` renders gold highlights over selected wires.
+It uses `get_connection_line(from_pos, to_pos)` to obtain the actual
+bezier/straight/right-angle `PackedVector2Array`, then draws with
+`draw_polyline()`.  This ensures the highlight exactly follows the current
+wire style rather than drawing a straight line override.
+
+### Double-Click Wire Insert
+
+Double-clicking a wire calls `_begin_wire_insert(wire)`, which:
+
+1. Stores the wire in `_wire_insert_pending`.
+2. Opens the operator palette filtered to operators whose input port 0
+   accepts the upstream node's output family.
+3. When the user selects an operator, `_try_wire_insert_splice()`:
+   - Disconnects the original wire.
+   - Connects upstream → new node (port 0) → downstream.
+   - Calls explicit `disconnect_node()` / `connect_node()` on GraphEdit
+     to keep visual state in sync.
+   - All operations are recorded in a single undo action.
+
+### Cascade Push Animation
+
+When a node is inserted on a wire, `_make_room_for_insert()` checks if
+there's enough horizontal gap for the new node.  If not, it calls
+`_cascade_push()` which recursively pushes downstream (or upstream) nodes
+apart:
+
+- Each pushed node tweens to its new position (0.25s ease-out cubic).
+- Nodes that would collide with already-pushed nodes are recursively
+  cascaded.
+- An infinite-recursion guard (`targets.has(nid)` early return) prevents
+  cycles in feedback-connected graphs.
+- The function returns a `Dictionary` mapping `node_id → original_position`
+  for undo.
+
+### Undo for Position Animation
+
+`_ur_animate_positions(positions_dict)` is recorded in the undo action
+alongside the wire splice.  On undo, it tweens all affected nodes back to
+their original positions rather than snapping them, giving smooth visual
+feedback.
+
+### Disconnect Proximity Guard
+
+`right_disconnects = true` is set on the GraphEdit so users can disconnect
+wires by dragging from an input port.  However, clicking mid-wire would
+also trigger a disconnect.  To prevent this, `_on_disconnection_request()`
+checks whether the mouse is within `_DISCONNECT_PORT_THRESHOLD` (6px) of
+the input port.  Disconnects originating from mid-wire clicks are rejected.
+
+### Right-Click Wire Context Menu
+
+Right-clicking on a wire auto-selects it (if not already selected) and
+shows context menu items including `_CtxID.DELETE_WIRES` and
+`_CtxID.INSERT_NODE_ON_WIRE`.
+
+
 ## Clipboard Export (Context Menu)
 
 Three context menu items in the graph editor for sharing and debugging:
@@ -578,7 +678,34 @@ their own help patches too (see §28.10 in the context file).
 | `scenes/gn_editor.tscn`                 | Editor scene layout             |
 | `addons/gonodes/ui/gn_graph_editor.gd`  | Graph canvas (GraphEdit)        |
 | `addons/gonodes/ui/gn_param_inspector.gd`| Right-panel parameter inspector|
+| `addons/gonodes/ui/gn_numeric_field.gd`  | Shared base for numeric param widgets (GNNumericField) |
+| `addons/gonodes/ui/gn_float_field.gd`    | Float param widget (GNFloatField extends GNNumericField) |
+| `addons/gonodes/ui/gn_int_field.gd`      | Int param widget (GNIntField extends GNNumericField) |
 | `addons/gonodes/ui/gn_export_dialog.gd` | Quick Build dialog              |
 | `addons/gonodes/ui/gn_debug_panel.gd`   | Debug panel (cook chain, active chains, param refs) |
 | `addons/gonodes/ui/gn_debug_overlay.gd` | Debug graph overlay (5 toggleable layers) |
 | `addons/gonodes/core/gn_patch_exporter.gd`| Build/copy logic              |
+
+---
+
+## Known Limitations
+
+### Multi-Monitor DPI Scaling
+
+Godot uses `PROCESS_SYSTEM_DPI_AWARE` on Windows (reads only the primary
+monitor's scale factor). It does **not** yet support per-monitor DPI
+awareness (`PROCESS_PER_MONITOR_DPI_AWARE`). Moving the editor or a
+WindowOUT window between monitors with different scaling percentages causes
+layout scrambling in Godot's internal Control tree.
+
+**GONODES does not manipulate DPI or `content_scale` in any way** — the
+issue is entirely upstream. WindowOUT creates a plain `Window` with no DPI
+overrides.
+
+Upstream tracking:
+- [godotengine/godot#56341](https://github.com/godotengine/godot/issues/56341) — root feature request (seamless multi-monitor DPI)
+- [godotengine/godot#86943](https://github.com/godotengine/godot/pull/86943) — PR for `PER_MONITOR_DPI_AWARE`
+- [godotengine/godot#84948](https://github.com/godotengine/godot/issues/84948) — dual-monitor resolution mismatch
+- [godotengine/godot#111271](https://github.com/godotengine/godot/issues/111271) — Stretch mode + different DPI
+
+User-facing docs: `help/troubleshooting.md` → "Multi-Monitor DPI / Scaling Issues".

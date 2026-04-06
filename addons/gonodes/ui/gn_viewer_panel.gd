@@ -1096,6 +1096,7 @@ func _on_panel_resized() -> void:
 
 ## Called once after resizing has stopped for 0.15s.
 ## Resizes all active SubViewports + display rects to the new content area.
+## Auto-fits the texture so it stays fully visible after the resize.
 func _on_resize_settled() -> void:
 	var content := _get_content_rect()
 	var snapped := _snap_size(content.size)
@@ -1104,7 +1105,7 @@ func _on_resize_settled() -> void:
 	if _tex_clip and _tex_clip.visible:
 		_tex_clip.position = content.position
 		_tex_clip.size = content.size
-		_apply_tex_transform()
+		_fit_to_panel()
 
 	# ── CHOP ──
 	if _waveform and _waveform.visible:

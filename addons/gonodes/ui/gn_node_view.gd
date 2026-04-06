@@ -68,6 +68,12 @@ func setup(node: GNNode) -> void:
 	var title_color := family_color
 	var title_color_sel := family_color.lightened(0.25)
 
+	# Desaturate title bar for deprecated nodes
+	if node.deprecated:
+		title_color = title_color.darkened(0.3)
+		title_color.s *= 0.4
+		title_color_sel = title_color.lightened(0.15)
+
 	# Create StyleBoxFlat for the title bar
 	var sb_title := StyleBoxFlat.new()
 	sb_title.bg_color = title_color
@@ -133,6 +139,10 @@ func setup(node: GNNode) -> void:
 
 	# Add warning/error status badge to the title bar
 	_setup_status_badge()
+
+	# Add deprecation badge to the title bar
+	if node.deprecated:
+		_setup_deprecation_badge()
 
 	# Track position changes
 	position_offset_changed.connect(_on_position_changed)
@@ -457,6 +467,26 @@ func update_status_badge() -> void:
 	else:
 		_status_badge.visible = false
 		_status_badge.tooltip_text = ""
+
+
+## Creates a permanent deprecation badge (⊘) in the title bar.
+func _setup_deprecation_badge() -> void:
+	var titlebar: HBoxContainer = get_titlebar_hbox()
+	if titlebar == null:
+		return
+	var badge := Label.new()
+	badge.text = "\u2298"  # ⊘
+	badge.add_theme_font_size_override("font_size", 14)
+	badge.add_theme_color_override("font_color", Color(1.0, 0.6, 0.2, 0.9))
+	badge.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+	badge.add_theme_constant_override("outline_size", 3)
+	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	badge.mouse_filter = Control.MOUSE_FILTER_PASS
+	var tip := "DEPRECATED"
+	if not gn_node.deprecation_message.is_empty():
+		tip += " — " + gn_node.deprecation_message
+	badge.tooltip_text = tip
+	titlebar.add_child(badge)
 
 
 ## Handler for GNNode.ports_changed — triggers a slot rebuild.

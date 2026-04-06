@@ -39,8 +39,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_material.set_shader_parameter("source_tex", source.texture)
 	if ramp_tex != null:
-		_material.set_shader_parameter("ramp_tex", ramp_tex.texture)
-	_material.set_shader_parameter("index_channel", index_mode)
+		_material.set_shader_parameter("lookup_tex", ramp_tex.texture)
+	_material.set_shader_parameter("lookup_channel", index_mode)
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data

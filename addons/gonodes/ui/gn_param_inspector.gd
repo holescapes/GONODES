@@ -10,6 +10,9 @@ var _current_node: GNNode = null
 ## Map of param_name → GNParamRow for the current node.
 var _param_rows: Dictionary = {}
 
+## Ordered list of GNParamRows for Tab navigation (matches visual order).
+var _row_order: Array = []
+
 ## Reference to the network (for expression context display).
 var network: GNNetwork = null
 
@@ -268,6 +271,9 @@ func inspect(node: GNNode) -> void:
 			_vbox.add_child(row)
 
 		_param_rows[p_name] = row
+		_row_order.append(row)
+		row.tab_next_requested.connect(_on_row_tab_next.bind(row))
+		row.tab_prev_requested.connect(_on_row_tab_prev.bind(row))
 
 	# Apply lock state — disable all param rows when node is locked
 	_apply_lock_state()
@@ -385,6 +391,39 @@ func _clear_rows() -> void:
 		_vbox.remove_child(row)
 		row.queue_free()
 	_param_rows.clear()
+	_row_order.clear()
+
+
+## Navigates Tab forward: finds the next visible row after `from_row` and focuses it.
+func _on_row_tab_next(from_row: GNParamRow) -> void:
+	var idx := _row_order.find(from_row)
+	if idx < 0:
+		return
+	for i in range(idx + 1, _row_order.size()):
+		var row: GNParamRow = _row_order[i]
+		if row.visible and row.grab_value_focus():
+			return
+	# Wrap around: try from the beginning
+	for i in range(0, idx):
+		var row: GNParamRow = _row_order[i]
+		if row.visible and row.grab_value_focus():
+			return
+
+
+## Navigates Shift+Tab backward: finds the previous visible row before `from_row`.
+func _on_row_tab_prev(from_row: GNParamRow) -> void:
+	var idx := _row_order.find(from_row)
+	if idx < 0:
+		return
+	for i in range(idx - 1, -1, -1):
+		var row: GNParamRow = _row_order[i]
+		if row.visible and row.grab_value_focus():
+			return
+	# Wrap around: try from the end
+	for i in range(_row_order.size() - 1, idx, -1):
+		var row: GNParamRow = _row_order[i]
+		if row.visible and row.grab_value_focus():
+			return
 
 
 ## Shows the "no selection" state.

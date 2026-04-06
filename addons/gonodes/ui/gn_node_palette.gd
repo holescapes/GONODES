@@ -154,9 +154,16 @@ func _populate_tree(filter: String) -> void:
 			# Add operators under the parent (family or section)
 			for op_name in filtered_ops:
 				var op_item := _tree.create_item(parent_item)
-				op_item.set_text(0, op_name)
+				var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
+				if entry != null and entry.deprecated:
+					op_item.set_text(0, "\u29b8 " + op_name + "  (deprecated)")
+					op_item.set_custom_color(0, Color(0.5, 0.5, 0.5))
+				else:
+					op_item.set_text(0, op_name)
 				op_item.set_metadata(0, op_name)
 				var desc := _get_operator_description(op_name)
+				if entry != null and entry.deprecated and not entry.deprecation_message.is_empty():
+					desc = "\u26a0 DEPRECATED: " + entry.deprecation_message + ("\n" + desc if not desc.is_empty() else "")
 				if not desc.is_empty():
 					op_item.set_tooltip_text(0, desc)
 

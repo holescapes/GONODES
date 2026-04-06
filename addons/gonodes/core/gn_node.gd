@@ -126,6 +126,21 @@ var node_warning: String = ""
 ## badge on the GraphNode in the editor.
 var node_error: String = ""
 
+# ─── Deprecation ───────────────────────────────────────────────────────────────
+
+## When true, this operator is deprecated.  Set in the subclass _init().
+## Deprecated operators remain fully functional but show visual warnings.
+var deprecated: bool = false
+
+## Human-readable deprecation message (e.g. "Use FitTOP instead — it supports
+## all fit modes plus filtering.").  Shown in the title bar tooltip, help
+## window, and palette.
+var deprecation_message: String = ""
+
+## Class name of the recommended replacement operator (e.g. "FitTOP").
+## Used by the help window to link to the replacement.
+var deprecated_replacement: String = ""
+
 ## When non-empty, this node is a placeholder for an operator type that could
 ## not be loaded (missing extension, newer GONODES version, etc.).  Holds the
 ## original serialized Dictionary so it can be re-saved without data loss.

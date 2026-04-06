@@ -73,6 +73,13 @@ var _code_editor: Window = null
 ## Context popup for right-clicking the parameter name label.
 var _param_context_menu: PopupMenu = null
 
+## Emitted when the user presses Tab in this row's value control.
+## The inspector uses this to jump to the next row.
+signal tab_next_requested()
+
+## Emitted when the user presses Shift+Tab in this row's value control.
+signal tab_prev_requested()
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Construction
@@ -93,6 +100,7 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 	_mode_btn = Button.new()
 	_mode_btn.custom_minimum_size = Vector2(24, 24)
 	_mode_btn.tooltip_text = "Click to toggle CONSTANT / EXPRESSION mode"
+	_mode_btn.focus_mode = Control.FOCUS_NONE
 	_mode_btn.pressed.connect(_on_mode_toggle)
 	add_child(_mode_btn)
 
@@ -132,6 +140,7 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 		_expr_edit.text = param.expression
 		_expr_edit.text_submitted.connect(_on_expression_submitted)
 		_expr_edit.focus_exited.connect(_on_expression_focus_lost)
+		_expr_edit.gui_input.connect(_on_expr_gui_input)
 		_expr_edit.visible = false
 		_value_container.add_child(_expr_edit)
 
@@ -154,6 +163,7 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 		_expand_btn.add_theme_font_size_override("font_size", 12)
 		_expand_btn.flat = true
 		_expand_btn.visible = false
+		_expand_btn.focus_mode = Control.FOCUS_NONE
 		_expand_btn.pressed.connect(func() -> void: _open_expression_editor(-1))
 		_value_container.add_child(_expand_btn)
 
@@ -190,6 +200,7 @@ func _build_multi_component_ui() -> void:
 	_expr_edit.text = param.expression
 	_expr_edit.text_submitted.connect(_on_expression_submitted)
 	_expr_edit.focus_exited.connect(_on_expression_focus_lost)
+	_expr_edit.gui_input.connect(_on_expr_gui_input)
 	_expr_edit.visible = false
 	_value_container.add_child(_expr_edit)
 
@@ -210,6 +221,7 @@ func _build_multi_component_ui() -> void:
 	_expand_btn.add_theme_font_size_override("font_size", 12)
 	_expand_btn.flat = true
 	_expand_btn.visible = false
+	_expand_btn.focus_mode = Control.FOCUS_NONE
 	_expand_btn.pressed.connect(func() -> void: _open_expression_editor(-1))
 	_value_container.add_child(_expand_btn)
 
@@ -234,6 +246,7 @@ func _build_multi_component_ui() -> void:
 		mode_btn.custom_minimum_size = Vector2(22, 22)
 		mode_btn.add_theme_font_size_override("font_size", 10)
 		mode_btn.tooltip_text = "Toggle %s between CONSTANT / EXPRESSION" % labels[i]
+		mode_btn.focus_mode = Control.FOCUS_NONE
 		var comp_idx := i  # capture for lambda
 		mode_btn.pressed.connect(func() -> void: _on_comp_mode_toggle(comp_idx))
 		row.add_child(mode_btn)
@@ -258,10 +271,11 @@ func _build_multi_component_ui() -> void:
 			field.max_value = null
 			field.step = param.step
 		field.value = param.get_component_value(i)
-		field.default_value = field.value
+		field.default_value = _get_default_component(i)
 		field.size_flags_horizontal = SIZE_EXPAND_FILL
 		var field_idx := i
 		field.value_changed.connect(func(val: float) -> void: _on_comp_field_changed(field_idx, val))
+		field.tab_requested.connect(_on_field_tab)
 		row.add_child(field)
 		_comp_fields.append(field)
 
@@ -297,6 +311,7 @@ func _build_multi_component_ui() -> void:
 		expand_btn.add_theme_font_size_override("font_size", 11)
 		expand_btn.flat = true
 		expand_btn.visible = false
+		expand_btn.focus_mode = Control.FOCUS_NONE
 		var expand_idx := i
 		expand_btn.pressed.connect(func() -> void: _open_expression_editor(expand_idx))
 		row.add_child(expand_btn)
@@ -348,19 +363,19 @@ func _create_float_control() -> Control:
 	field.default_value = float(param.default_value)
 	field.size_flags_horizontal = SIZE_EXPAND_FILL
 	field.value_changed.connect(_on_float_field_changed)
+	field.tab_requested.connect(_on_field_tab)
 	return field
 
 
 func _create_int_control() -> Control:
-	var field := GNFloatField.new()
-	field.integer_mode = true
-	field.value = float(int(param.value))
+	var field := GNIntField.new()
+	field.value = int(param.value)
 	field.min_value = param.min_value
 	field.max_value = param.max_value
-	field.step = 1.0
-	field.default_value = float(int(param.default_value))
+	field.default_value = int(param.default_value)
 	field.size_flags_horizontal = SIZE_EXPAND_FILL
 	field.value_changed.connect(_on_int_field_changed)
+	field.tab_requested.connect(_on_field_tab)
 	return field
 
 
@@ -786,10 +801,10 @@ func _on_float_field_changed(val: float) -> void:
 	param.set_value(val)
 
 
-func _on_int_field_changed(val: float) -> void:
+func _on_int_field_changed(val: int) -> void:
 	if _updating:
 		return
-	param.set_value(int(val))
+	param.set_value(val)
 
 
 func _on_pulse_pressed() -> void:
@@ -888,6 +903,78 @@ func _on_ramp_changed(new_keys: Array) -> void:
 # Expression Handling
 # ═══════════════════════════════════════════════════════════════════════════════
 
+## Releases focus from any focused text control when the user clicks outside it.
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton) or not event.pressed:
+		return
+	# Check main expression field
+	if _expr_edit and _expr_edit.has_focus() and _expr_edit.visible:
+		if not _expr_edit.get_global_rect().has_point(event.global_position):
+			_expr_edit.release_focus()
+			return
+	# Check per-component expression fields
+	for edit in _comp_expr_edits:
+		if edit and edit.has_focus() and edit.visible:
+			if not edit.get_global_rect().has_point(event.global_position):
+				edit.release_focus()
+				return
+	# Check string TextEdit controls (plain and code params)
+	var text_edit: TextEdit = _code_edit if _code_edit != null else (_control as TextEdit if _control is TextEdit else null)
+	if text_edit and text_edit.has_focus() and text_edit.visible:
+		if not text_edit.get_global_rect().has_point(event.global_position):
+			text_edit.release_focus()
+			return
+
+
+## Grabs focus on this row's primary value control (for Tab navigation).
+## Returns true if focus was successfully grabbed.
+func grab_value_focus() -> bool:
+	if _control and _control.visible and _control is GNNumericField:
+		(_control as GNNumericField)._enter_edit_mode()
+		return true
+	if _expr_edit and _expr_edit.visible:
+		_expr_edit.grab_focus()
+		return true
+	if _control and _control.visible:
+		if _control is CheckBox or _control is OptionButton or _control is LineEdit or _control is TextEdit:
+			_control.grab_focus()
+			return true
+	# Multi-component: focus the first visible field
+	if _is_multi_component:
+		for field in _comp_fields:
+			if field and field.visible:
+				field._enter_edit_mode()
+				return true
+		for edit in _comp_expr_edits:
+			if edit and edit.visible:
+				edit.grab_focus()
+				return true
+	return false
+
+
+## Routes a GNNumericField's tab_requested signal to the row-level signals.
+func _on_field_tab(forward: bool) -> void:
+	if forward:
+		tab_next_requested.emit()
+	else:
+		tab_prev_requested.emit()
+
+
+## Handles Tab/Shift+Tab in expression LineEdits to navigate between rows.
+func _on_expr_gui_input(event: InputEvent) -> void:
+	if event is InputEventKey and (event as InputEventKey).pressed:
+		var key := event as InputEventKey
+		if key.keycode == KEY_TAB:
+			if _expr_edit and _expr_edit.has_focus():
+				_apply_expression_text(_expr_edit.text)
+				_expr_edit.release_focus()
+			if key.shift_pressed:
+				tab_prev_requested.emit()
+			else:
+				tab_next_requested.emit()
+			accept_event()
+
+
 func _on_expression_submitted(text: String) -> void:
 	_apply_expression_text(text)
 
@@ -922,6 +1009,29 @@ func _on_comp_mode_toggle(idx: int) -> void:
 		# Switch back to constant
 		param.set_component_constant(idx)
 	_update_comp_mode_display(idx)
+
+
+## Extracts a single component from the parameter's default_value.
+func _get_default_component(idx: int) -> float:
+	var dv: Variant = param.default_value
+	match param.value_type:
+		GNParameter.ValueType.VECTOR2:
+			var v: Vector2 = dv if dv is Vector2 else Vector2.ZERO
+			return v.x if idx == 0 else v.y
+		GNParameter.ValueType.VECTOR2I:
+			var v: Vector2i = dv if dv is Vector2i else Vector2i.ZERO
+			return float(v.x if idx == 0 else v.y)
+		GNParameter.ValueType.VECTOR3:
+			var v: Vector3 = dv if dv is Vector3 else Vector3.ZERO
+			return [v.x, v.y, v.z][idx] if idx < 3 else 0.0
+		GNParameter.ValueType.VECTOR4:
+			var v: Vector4 = dv if dv is Vector4 else Vector4.ZERO
+			return [v.x, v.y, v.z, v.w][idx] if idx < 4 else 0.0
+		GNParameter.ValueType.COLOR:
+			var c: Color = dv if dv is Color else Color.BLACK
+			return [c.r, c.g, c.b, c.a][idx] if idx < 4 else 0.0
+		_:
+			return 0.0
 
 
 ## Called when a per-component GNFloatField changes.
@@ -1301,11 +1411,15 @@ func _update_value_display() -> void:
 		GNParameter.ValueType.FLOAT:
 			var field := _control as GNFloatField
 			if field:
+				field.min_value = param.min_value
+				field.max_value = param.max_value
 				field.set_value_no_signal(float(param.get_resolved_value()))
 		GNParameter.ValueType.INT:
-			var field := _control as GNFloatField
+			var field := _control as GNIntField
 			if field:
-				field.set_value_no_signal(float(int(param.get_resolved_value())))
+				field.min_value = param.min_value
+				field.max_value = param.max_value
+				field.set_value_no_signal(int(param.get_resolved_value()))
 		GNParameter.ValueType.BOOL:
 			if param.is_pulse:
 				return  # Pulse buttons have no toggle state to refresh
