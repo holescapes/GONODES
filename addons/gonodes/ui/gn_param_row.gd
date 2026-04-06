@@ -275,7 +275,8 @@ func _build_multi_component_ui() -> void:
 		field.size_flags_horizontal = SIZE_EXPAND_FILL
 		var field_idx := i
 		field.value_changed.connect(func(val: float) -> void: _on_comp_field_changed(field_idx, val))
-		field.tab_requested.connect(_on_field_tab)
+		var tab_idx := i
+		field.tab_requested.connect(func(fwd: bool) -> void: _on_comp_field_tab(tab_idx, fwd))
 		row.add_child(field)
 		_comp_fields.append(field)
 
@@ -288,6 +289,8 @@ func _build_multi_component_ui() -> void:
 		var expr_idx := i
 		expr_edit.text_submitted.connect(func(text: String) -> void: _on_comp_expr_submitted(expr_idx, text))
 		expr_edit.focus_exited.connect(func() -> void: _on_comp_expr_focus_lost(expr_idx))
+		var gui_idx := i
+		expr_edit.gui_input.connect(func(ev: InputEvent) -> void: _on_comp_expr_gui_input(gui_idx, ev))
 		row.add_child(expr_edit)
 		_comp_expr_edits.append(expr_edit)
 
@@ -952,11 +955,27 @@ func grab_value_focus() -> bool:
 	return false
 
 
-## Routes a GNNumericField's tab_requested signal to the row-level signals.
+## Routes a scalar GNNumericField's tab_requested signal to row-level signals.
 func _on_field_tab(forward: bool) -> void:
 	if forward:
 		tab_next_requested.emit()
 	else:
+		tab_prev_requested.emit()
+
+
+## Routes a per-component field's Tab, cycling through siblings first.
+func _on_comp_field_tab(comp_idx: int, forward: bool) -> void:
+	if forward:
+		for i in range(comp_idx + 1, _comp_fields.size()):
+			if _comp_fields[i].visible:
+				_comp_fields[i]._enter_edit_mode()
+				return
+		tab_next_requested.emit()
+	else:
+		for i in range(comp_idx - 1, -1, -1):
+			if _comp_fields[i].visible:
+				_comp_fields[i]._enter_edit_mode()
+				return
 		tab_prev_requested.emit()
 
 
@@ -973,6 +992,37 @@ func _on_expr_gui_input(event: InputEvent) -> void:
 			else:
 				tab_next_requested.emit()
 			accept_event()
+
+
+## Handles Tab/Shift+Tab in per-component expression LineEdits, cycling siblings first.
+func _on_comp_expr_gui_input(comp_idx: int, event: InputEvent) -> void:
+	if not (event is InputEventKey) or not (event as InputEventKey).pressed:
+		return
+	var key := event as InputEventKey
+	if key.keycode != KEY_TAB:
+		return
+	# Commit current component's expression
+	if comp_idx >= 0 and comp_idx < _comp_expr_edits.size():
+		var edit: LineEdit = _comp_expr_edits[comp_idx]
+		if edit.has_focus():
+			_on_comp_expr_submitted(comp_idx, edit.text)
+			edit.release_focus()
+	var forward := not key.shift_pressed
+	if forward:
+		for i in range(comp_idx + 1, _comp_expr_edits.size()):
+			if _comp_expr_edits[i].visible:
+				_comp_expr_edits[i].grab_focus()
+				accept_event()
+				return
+		tab_next_requested.emit()
+	else:
+		for i in range(comp_idx - 1, -1, -1):
+			if _comp_expr_edits[i].visible:
+				_comp_expr_edits[i].grab_focus()
+				accept_event()
+				return
+		tab_prev_requested.emit()
+	accept_event()
 
 
 func _on_expression_submitted(text: String) -> void:
