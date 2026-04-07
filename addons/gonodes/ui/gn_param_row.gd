@@ -13,6 +13,9 @@ var owner_node: GNNode = null
 ## Network reference for expression editor autocomplete.
 var network: GNNetwork = null
 
+## Shared undo/redo stack (set by GNParamInspector from the graph editor).
+var undo_redo: UndoRedo = null
+
 ## Mode label showing C/E/B/X badge.
 var _mode_btn: Button = null
 
@@ -507,7 +510,7 @@ func _on_node_ref_selected(idx: int, ob: OptionButton) -> void:
 		return
 	var new_val: String = ob.get_item_metadata(idx)
 	if new_val != str(param.value):
-		param.set_value(new_val)
+		_set_value_with_undo(new_val)
 		# Show warning if the selected node has the wrong family
 		if not new_val.is_empty() and network != null and param.node_ref_family >= 0:
 			var target: GNNode = network.nodes.get(new_val, null)
@@ -574,7 +577,7 @@ func _open_code_editor() -> void:
 ## Handles confirmed code from the windowed editor — applies it to the param
 ## and syncs the inline TextEdit.
 func _on_code_editor_committed(text: String, _param_name: String) -> void:
-	param.set_value(text)
+	_set_value_with_undo(text)
 	if _code_edit != null:
 		_code_edit.text = text
 	if owner_node:
@@ -777,7 +780,7 @@ func _open_file_browse_dialog(option: OptionButton) -> void:
 		# Convert to project-relative if inside project folder
 		var proj_dir: String = owner_node.project_dir if owner_node != null else ""
 		var saveable := GNResourceLoader.to_saveable(path, proj_dir)
-		param.set_value(saveable)
+		_set_value_with_undo(saveable)
 		_populate_file_dropdown(option)
 		dialog.queue_free()
 	)
@@ -798,16 +801,47 @@ func _open_file_browse_dialog(option: OptionButton) -> void:
 # Value Change Handlers — UI → Model
 # ═══════════════════════════════════════════════════════════════════════════════
 
+## Records a parameter value change in the undo stack (if available) then applies it.
+## Uses merge mode so rapid drag edits collapse into a single undo step.
+func _set_value_with_undo(new_value: Variant, mergeable: bool = false) -> void:
+	if undo_redo == null:
+		param.set_value(new_value)
+		return
+	var old_value: Variant = param.value
+	var p := param  # capture for lambdas
+	undo_redo.create_action("Set %s.%s" % [owner_node.id if owner_node else "?", param.param_name],
+		UndoRedo.MERGE_ALL if mergeable else UndoRedo.MERGE_DISABLE)
+	undo_redo.add_do_method(Callable(p, "set_value").bind(new_value))
+	undo_redo.add_undo_method(Callable(p, "set_value").bind(old_value))
+	undo_redo.commit_action()
+
+
+## Snapshot-based undo for complex changes (mode toggles, expressions, bulk ops).
+## Takes a before snapshot, runs the callable, then records a restore-based undo.
+func _do_with_snapshot_undo(action_name: String, callable: Callable) -> void:
+	if undo_redo == null:
+		callable.call()
+		return
+	var before: Dictionary = param.to_dict()
+	callable.call()
+	var after: Dictionary = param.to_dict()
+	var p := param
+	undo_redo.create_action(action_name)
+	undo_redo.add_do_method(Callable(p, "restore_snapshot").bind(after))
+	undo_redo.add_undo_method(Callable(p, "restore_snapshot").bind(before))
+	undo_redo.commit_action(false)  # already applied
+
+
 func _on_float_field_changed(val: float) -> void:
 	if _updating:
 		return
-	param.set_value(val)
+	_set_value_with_undo(val, true)
 
 
 func _on_int_field_changed(val: int) -> void:
 	if _updating:
 		return
-	param.set_value(val)
+	_set_value_with_undo(val, true)
 
 
 func _on_pulse_pressed() -> void:
@@ -818,7 +852,7 @@ func _on_pulse_pressed() -> void:
 func _on_bool_changed(pressed: bool) -> void:
 	if _updating:
 		return
-	param.set_value(pressed)
+	_set_value_with_undo(pressed)
 	var cb := _control as CheckBox
 	if cb:
 		cb.text = "On" if pressed else "Off"
@@ -827,7 +861,7 @@ func _on_bool_changed(pressed: bool) -> void:
 func _on_string_changed(text: String) -> void:
 	if _updating:
 		return
-	param.set_value(text)
+	_set_value_with_undo(text, true)
 
 
 ## Called when the TextEdit for a string parameter loses focus — commits the value.
@@ -836,19 +870,19 @@ func _on_string_focus_lost(edit: TextEdit) -> void:
 		return
 	var new_text := edit.text
 	if new_text != str(param.value):
-		param.set_value(new_text)
+		_set_value_with_undo(new_text)
 
 
 func _on_enum_changed(idx: int) -> void:
 	if _updating:
 		return
-	param.set_value(idx)
+	_set_value_with_undo(idx)
 
 
 func _on_color_changed(color: Color) -> void:
 	if _updating:
 		return
-	param.set_value(color)
+	_set_value_with_undo(color, true)
 
 
 func _on_vector2_x_changed(val: float) -> void:
@@ -856,9 +890,9 @@ func _on_vector2_x_changed(val: float) -> void:
 		return
 	var current = param.value
 	if param.value_type == GNParameter.ValueType.VECTOR2I:
-		param.set_value(Vector2i(int(val), current.y))
+		_set_value_with_undo(Vector2i(int(val), current.y), true)
 	else:
-		param.set_value(Vector2(val, current.y))
+		_set_value_with_undo(Vector2(val, current.y), true)
 
 
 func _on_vector2_y_changed(val: float) -> void:
@@ -866,9 +900,9 @@ func _on_vector2_y_changed(val: float) -> void:
 		return
 	var current = param.value
 	if param.value_type == GNParameter.ValueType.VECTOR2I:
-		param.set_value(Vector2i(current.x, int(val)))
+		_set_value_with_undo(Vector2i(current.x, int(val)), true)
 	else:
-		param.set_value(Vector2(current.x, val))
+		_set_value_with_undo(Vector2(current.x, val), true)
 
 
 func _on_file_option_selected(idx: int) -> void:
@@ -881,11 +915,11 @@ func _on_file_option_selected(idx: int) -> void:
 	if option == null:
 		return
 	var path: String = option.get_item_metadata(idx)
-	param.set_value(path)
+	_set_value_with_undo(path)
 
 
 func _on_file_clear_pressed() -> void:
-	param.set_value("")
+	_set_value_with_undo("")
 	# Reset dropdown to "(none)"
 	var hbox := _control as HBoxContainer
 	if hbox and hbox.get_child_count() >= 1:
@@ -897,7 +931,7 @@ func _on_file_clear_pressed() -> void:
 func _on_ramp_changed(new_keys: Array) -> void:
 	if _updating:
 		return
-	param.set_value(new_keys)
+	_set_value_with_undo(new_keys)
 	if owner_node:
 		owner_node.mark_dirty()
 
@@ -1035,12 +1069,14 @@ func _on_expression_focus_lost() -> void:
 
 
 func _apply_expression_text(text: String) -> void:
-	if text.strip_edges().is_empty():
-		# Empty expression → revert to constant mode
-		param.set_constant()
-	else:
-		if text != param.expression:
-			param.set_expression(text)
+	_do_with_snapshot_undo("Expression %s" % param.param_name, func() -> void:
+		if text.strip_edges().is_empty():
+			# Empty expression → revert to constant mode
+			param.set_constant()
+		else:
+			if text != param.expression:
+				param.set_expression(text)
+	)
 	_update_mode_display()
 
 
@@ -1050,14 +1086,16 @@ func _apply_expression_text(text: String) -> void:
 
 ## Toggles a single component between CONSTANT and EXPRESSION mode.
 func _on_comp_mode_toggle(idx: int) -> void:
-	if param.component_modes[idx] == GNParameter.Mode.CONSTANT:
-		# Switch to expression mode
-		var expr_text: String = param.component_expressions[idx]
-		_comp_expr_edits[idx].text = expr_text
-		param.set_component_expression(idx, expr_text)
-	else:
-		# Switch back to constant
-		param.set_component_constant(idx)
+	_do_with_snapshot_undo("Toggle comp %d mode %s" % [idx, param.param_name], func() -> void:
+		if param.component_modes[idx] == GNParameter.Mode.CONSTANT:
+			# Switch to expression mode
+			var expr_text: String = param.component_expressions[idx]
+			_comp_expr_edits[idx].text = expr_text
+			param.set_component_expression(idx, expr_text)
+		else:
+			# Switch back to constant
+			param.set_component_constant(idx)
+	)
 	_update_comp_mode_display(idx)
 
 
@@ -1088,7 +1126,22 @@ func _get_default_component(idx: int) -> float:
 func _on_comp_field_changed(idx: int, val: float) -> void:
 	if _updating:
 		return
-	param.set_component_value(idx, val)
+	# set_component_value calls set_value internally, so capture old whole-value for undo
+	if undo_redo != null:
+		var old_value: Variant = param.value
+		var p := param
+		var new_value_after: Variant
+		# Build the new composite value manually to avoid double-setting
+		param.set_component_value(idx, val)
+		new_value_after = param.value
+		# Now record it without re-applying (undo restores old, redo restores new)
+		undo_redo.create_action("Set %s.%s[%d]" % [owner_node.id if owner_node else "?", param.param_name, idx],
+			UndoRedo.MERGE_ALL)
+		undo_redo.add_do_method(Callable(p, "set_value").bind(new_value_after))
+		undo_redo.add_undo_method(Callable(p, "set_value").bind(old_value))
+		undo_redo.commit_action(false)  # false = don't execute do (already done)
+	else:
+		param.set_component_value(idx, val)
 	# Sync the ColorPickerButton swatch when editing R/G/B/A components
 	if param.value_type == GNParameter.ValueType.COLOR:
 		var picker := _control as ColorPickerButton
@@ -1111,11 +1164,13 @@ func _on_comp_expr_focus_lost(idx: int) -> void:
 
 ## Applies/compiles a per-component expression (or reverts to constant if empty).
 func _apply_comp_expression(idx: int, text: String) -> void:
-	if text.strip_edges().is_empty():
-		param.set_component_constant(idx)
-	else:
-		if text != param.component_expressions[idx]:
-			param.set_component_expression(idx, text)
+	_do_with_snapshot_undo("Comp expr %d %s" % [idx, param.param_name], func() -> void:
+		if text.strip_edges().is_empty():
+			param.set_component_constant(idx)
+		else:
+			if text != param.component_expressions[idx]:
+				param.set_component_expression(idx, text)
+	)
 	_update_comp_mode_display(idx)
 
 
@@ -1217,48 +1272,50 @@ func _update_comp_value_display() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _on_mode_toggle() -> void:
-	if _is_multi_component:
-		# For multi-component params the master button cycles between:
-		#   C  →  E (whole-parameter expression)
-		#   E  →  C (revert to constant, but preserve expression text)
-		var has_whole_expr := (param.mode == GNParameter.Mode.EXPRESSION
-				and not param.expression.is_empty())
-		if has_whole_expr:
-			# ── Whole expression active → revert to CONSTANT ──
-			# Preserve param.expression so the user can toggle back without
-			# losing their work.  Only reset the compiled state / mode.
-			param.mode = GNParameter.Mode.CONSTANT
-			param._compiled_expression = null
-			param._expression_valid = false
-			param.expression_error = ""
-			param.mode_changed.emit(param.param_name, param.mode)
-		elif param.mode == GNParameter.Mode.EXPRESSION and param.expression.is_empty():
-			# Per-component expressions active (or stuck empty-expression state)
-			# → revert to CONSTANT as well
-			param.mode = GNParameter.Mode.CONSTANT
-			param.mode_changed.emit(param.param_name, param.mode)
-		else:
-			# ── CONSTANT → switch to whole expression ──
-			# Re-enable the preserved expression text (may be empty for first use)
-			if _expr_edit:
-				_expr_edit.text = param.expression
-			if param.expression.is_empty():
-				# No previous expression — just flip mode so the LineEdit appears
-				param.mode = GNParameter.Mode.EXPRESSION
+	_do_with_snapshot_undo("Toggle mode %s" % param.param_name, func() -> void:
+		if _is_multi_component:
+			# For multi-component params the master button cycles between:
+			#   C  →  E (whole-parameter expression)
+			#   E  →  C (revert to constant, but preserve expression text)
+			var has_whole_expr := (param.mode == GNParameter.Mode.EXPRESSION
+					and not param.expression.is_empty())
+			if has_whole_expr:
+				# ── Whole expression active → revert to CONSTANT ──
+				# Preserve param.expression so the user can toggle back without
+				# losing their work.  Only reset the compiled state / mode.
+				param.mode = GNParameter.Mode.CONSTANT
+				param._compiled_expression = null
+				param._expression_valid = false
+				param.expression_error = ""
+				param.mode_changed.emit(param.param_name, param.mode)
+			elif param.mode == GNParameter.Mode.EXPRESSION and param.expression.is_empty():
+				# Per-component expressions active (or stuck empty-expression state)
+				# → revert to CONSTANT as well
+				param.mode = GNParameter.Mode.CONSTANT
 				param.mode_changed.emit(param.param_name, param.mode)
 			else:
-				# Re-compile the preserved expression text
-				param.set_expression(param.expression)
-	else:
-		# Scalar parameter toggle
-		match param.mode:
-			GNParameter.Mode.CONSTANT:
-				# C → E
-				_expr_edit.text = param.expression
-				param.set_expression(param.expression)
-			GNParameter.Mode.EXPRESSION:
-				# E → C
-				param.set_constant()
+				# ── CONSTANT → switch to whole expression ──
+				# Re-enable the preserved expression text (may be empty for first use)
+				if _expr_edit:
+					_expr_edit.text = param.expression
+				if param.expression.is_empty():
+					# No previous expression — just flip mode so the LineEdit appears
+					param.mode = GNParameter.Mode.EXPRESSION
+					param.mode_changed.emit(param.param_name, param.mode)
+				else:
+					# Re-compile the preserved expression text
+					param.set_expression(param.expression)
+		else:
+			# Scalar parameter toggle
+			match param.mode:
+				GNParameter.Mode.CONSTANT:
+					# C → E
+					_expr_edit.text = param.expression
+					param.set_expression(param.expression)
+				GNParameter.Mode.EXPRESSION:
+					# E → C
+					param.set_constant()
+	)
 	_update_mode_display()
 
 
@@ -1561,18 +1618,24 @@ func _on_expr_editor_committed(text: String, p_param: GNParameter, component_idx
 	if p_param != param:
 		return
 
+	_do_with_snapshot_undo("Expr editor %s" % param.param_name, func() -> void:
+		if component_idx < 0:
+			# Main scalar expression
+			param.set_expression(text)
+		else:
+			# Per-component expression
+			if component_idx < param.component_expressions.size():
+				param.component_expressions[component_idx] = text
+				param.component_modes[component_idx] = GNParameter.Mode.EXPRESSION
+				param._compile_component_expression(component_idx)
+	)
+
 	if component_idx < 0:
-		# Main scalar expression
-		param.set_expression(text)
 		if _expr_edit != null and not _expr_edit.has_focus():
 			_expr_edit.text = text
 		_update_mode_display()
 	else:
-		# Per-component expression
 		if component_idx < param.component_expressions.size():
-			param.component_expressions[component_idx] = text
-			param.component_modes[component_idx] = GNParameter.Mode.EXPRESSION
-			param._compile_component_expression(component_idx)
 			_update_comp_mode_display(component_idx)
 
 	# Mark the owner node dirty so the network recooks

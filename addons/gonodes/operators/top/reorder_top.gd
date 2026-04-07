@@ -13,6 +13,9 @@ const SHADER_PATH := "res://addons/gonodes/shaders/top/reorder_top.gdshader"
 
 func _init() -> void:
 	node_type = "reorder"
+	deprecated = true
+	deprecation_message = "Use ChannelMixTOP instead — it supports channel remapping plus per-channel gain."
+	deprecated_replacement = "ChannelMixTOP"
 
 
 func _init_ports() -> void:

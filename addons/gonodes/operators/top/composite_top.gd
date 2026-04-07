@@ -45,8 +45,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# Set shader uniforms — input textures are GPU references (zero-copy)
 	_material.set_shader_parameter("texture_a", tex_a.texture)
-	if tex_b != null:
-		_material.set_shader_parameter("texture_b", tex_b.texture)
+	_material.set_shader_parameter("texture_b", tex_b.texture if tex_b != null else null)
 	_material.set_shader_parameter("operation", op_idx)
 	_material.set_shader_parameter("opacity", opacity_val)
 

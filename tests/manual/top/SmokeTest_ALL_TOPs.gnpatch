@@ -55,60 +55,6 @@
 			"to_port": 0
 		},
 		{
-			"from": "rectangle1",
-			"from_port": 0,
-			"to": "emboss1",
-			"to_port": 0
-		},
-		{
-			"from": "emboss1",
-			"from_port": 0,
-			"to": "posterize1",
-			"to_port": 0
-		},
-		{
-			"from": "posterize1",
-			"from_port": 0,
-			"to": "radial_blur1",
-			"to_port": 0
-		},
-		{
-			"from": "radial_blur1",
-			"from_port": 0,
-			"to": "luma_blur1",
-			"to_port": 0
-		},
-		{
-			"from": "luma_blur1",
-			"from_port": 0,
-			"to": "convolution1",
-			"to_port": 0
-		},
-		{
-			"from": "triangle1",
-			"from_port": 0,
-			"to": "channel_mix1",
-			"to_port": 0
-		},
-		{
-			"from": "channel_mix1",
-			"from_port": 0,
-			"to": "reorder1",
-			"to_port": 0
-		},
-		{
-			"from": "reorder1",
-			"from_port": 0,
-			"to": "premultiply1",
-			"to_port": 0
-		},
-		{
-			"from": "premultiply1",
-			"from_port": 0,
-			"to": "color_map1",
-			"to_port": 0
-		},
-		{
 			"from": "pattern1",
 			"from_port": 0,
 			"to": "lens_distort1",
@@ -319,12 +265,6 @@
 			"to_port": 0
 		},
 		{
-			"from": "tile1",
-			"from_port": 0,
-			"to": "OUTChain2",
-			"to_port": 0
-		},
-		{
 			"from": "OUTChain1",
 			"from_port": 0,
 			"to": "switch2",
@@ -340,12 +280,6 @@
 			"from": "switch2",
 			"from_port": 0,
 			"to": "window_out1",
-			"to_port": 0
-		},
-		{
-			"from": "text1",
-			"from_port": 0,
-			"to": "edge1",
 			"to_port": 0
 		},
 		{
@@ -389,6 +323,114 @@
 			"from_port": 0,
 			"to": "tile1",
 			"to_port": 0
+		},
+		{
+			"from": "tile1",
+			"from_port": 0,
+			"to": "radial_blur1",
+			"to_port": 0
+		},
+		{
+			"from": "radial_blur1",
+			"from_port": 0,
+			"to": "convolution1",
+			"to_port": 0
+		},
+		{
+			"from": "convolution1",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "text1",
+			"from_port": 0,
+			"to": "posterize1",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 3
+		},
+		{
+			"from": "color_map1",
+			"from_port": 0,
+			"to": "luma_blur1",
+			"to_port": 0
+		},
+		{
+			"from": "triangle1",
+			"from_port": 0,
+			"to": "composite2",
+			"to_port": 1
+		},
+		{
+			"from": "composite2",
+			"from_port": 0,
+			"to": "channel_mix1",
+			"to_port": 0
+		},
+		{
+			"from": "channel_mix1",
+			"from_port": 0,
+			"to": "reorder1",
+			"to_port": 0
+		},
+		{
+			"from": "reorder1",
+			"from_port": 0,
+			"to": "emboss1",
+			"to_port": 0
+		},
+		{
+			"from": "emboss1",
+			"from_port": 0,
+			"to": "color_map1",
+			"to_port": 0
+		},
+		{
+			"from": "ramp3",
+			"from_port": 0,
+			"to": "color_map1",
+			"to_port": 1
+		},
+		{
+			"from": "luma_blur1",
+			"from_port": 0,
+			"to": "reaction_diffusion1",
+			"to_port": 0
+		},
+		{
+			"from": "reaction_diffusion1",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "text1",
+			"from_port": 0,
+			"to": "edge1",
+			"to_port": 0
+		},
+		{
+			"from": "rectangle1",
+			"from_port": 0,
+			"to": "composite3",
+			"to_port": 0
+		},
+		{
+			"from": "triangle1",
+			"from_port": 0,
+			"to": "composite3",
+			"to_port": 1
+		},
+		{
+			"from": "composite3",
+			"from_port": 0,
+			"to": "composite2",
+			"to_port": 0
 		}
 	],
 	"generator": "GONODES",
@@ -396,21 +438,28 @@
 		"OUTChain1": {
 			"position": [
 				1780.0,
-				-140.0
+				-200.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain2": {
 			"position": [
-				1780.0,
-				200.0
+				1760.0,
+				180.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain3": {
 			"position": [
-				1780.0,
+				1760.0,
 				400.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain4": {
+			"position": [
+				1780.0,
+				860.0
 			],
 			"type": "NullTOP"
 		},
@@ -439,7 +488,7 @@
 				}
 			},
 			"position": [
-				700.0,
+				740.0,
 				400.0
 			],
 			"type": "AntiAliasTOP"
@@ -464,7 +513,7 @@
 			},
 			"position": [
 				580.0,
-				-140.0
+				-200.0
 			],
 			"type": "BloomTOP"
 		},
@@ -481,8 +530,8 @@
 				}
 			},
 			"position": [
-				210.0,
-				-140.0
+				220.0,
+				-200.0
 			],
 			"type": "BlurTOP"
 		},
@@ -525,18 +574,18 @@
 					"value": 1.0
 				},
 				"g_source": {
-					"value": 1
+					"value": 0
 				},
 				"r_gain": {
-					"value": 1.0
+					"value": 1.3
 				},
 				"r_source": {
-					"value": 0
+					"value": 2
 				}
 			},
 			"position": [
-				140.0,
-				980.0
+				560.0,
+				860.0
 			],
 			"type": "ChannelMixTOP"
 		},
@@ -665,22 +714,22 @@
 			},
 			"position": [
 				-40.0,
-				200.0
+				180.0
 			],
 			"type": "CircleTOP"
 		},
 		"color_map1": {
 			"parameters": {
 				"intensity": {
-					"value": 1.0
+					"value": 0.58
 				},
 				"luma_mode": {
 					"value": 0
 				}
 			},
 			"position": [
-				880.0,
-				980.0
+				1180.0,
+				860.0
 			],
 			"type": "ColorMapTOP"
 		},
@@ -696,6 +745,36 @@
 			"position": [
 				175.0,
 				2000.0
+			],
+			"type": "CompositeTOP"
+		},
+		"composite2": {
+			"parameters": {
+				"opacity": {
+					"value": 0.84
+				},
+				"operation": {
+					"value": 0
+				}
+			},
+			"position": [
+				380.0,
+				860.0
+			],
+			"type": "CompositeTOP"
+		},
+		"composite3": {
+			"parameters": {
+				"opacity": {
+					"value": 1.0
+				},
+				"operation": {
+					"value": 5
+				}
+			},
+			"position": [
+				220.0,
+				860.0
 			],
 			"type": "CompositeTOP"
 		},
@@ -852,21 +931,21 @@
 		"convolution1": {
 			"parameters": {
 				"bias": {
-					"value": 0.0
+					"value": 0.5
 				},
 				"divisor": {
-					"value": 1.0
+					"value": 1.78
 				},
 				"kernel_size": {
-					"value": 3
+					"value": 6
 				},
 				"preset": {
 					"value": 1
 				}
 			},
 			"position": [
-				1100.0,
-				780.0
+				1540.0,
+				180.0
 			],
 			"type": "ConvolutionTOP"
 		},
@@ -911,7 +990,7 @@
 				}
 			},
 			"position": [
-				480.0,
+				440.0,
 				1180.0
 			],
 			"type": "CornerPinTOP"
@@ -944,8 +1023,8 @@
 				}
 			},
 			"position": [
-				700.0,
-				200.0
+				560.0,
+				180.0
 			],
 			"type": "CropTOP"
 		},
@@ -1014,7 +1093,7 @@
 				}
 			},
 			"position": [
-				880.0,
+				840.0,
 				1180.0
 			],
 			"type": "DeformTOP"
@@ -1054,7 +1133,7 @@
 				}
 			},
 			"position": [
-				460.0,
+				560.0,
 				400.0
 			],
 			"type": "DilateErodeTOP"
@@ -1078,7 +1157,7 @@
 				}
 			},
 			"position": [
-				1300.0,
+				1320.0,
 				400.0
 			],
 			"type": "DisplaceTOP"
@@ -1093,7 +1172,7 @@
 				}
 			},
 			"position": [
-				240.0,
+				380.0,
 				400.0
 			],
 			"type": "EdgeTOP"
@@ -1101,18 +1180,18 @@
 		"emboss1": {
 			"parameters": {
 				"angle": {
-					"value": 135.0
+					"value": 212.0
 				},
 				"height": {
-					"value": 0.5
+					"value": 0.54
 				},
 				"strength": {
-					"value": 1.0
+					"value": 1.45
 				}
 			},
 			"position": [
-				180.0,
-				780.0
+				980.0,
+				860.0
 			],
 			"type": "EmbossTOP"
 		},
@@ -1174,8 +1253,8 @@
 				}
 			},
 			"position": [
-				920.0,
-				200.0
+				740.0,
+				180.0
 			],
 			"type": "FitTOP"
 		},
@@ -1189,8 +1268,8 @@
 				}
 			},
 			"position": [
-				500.0,
-				200.0
+				380.0,
+				180.0
 			],
 			"type": "FlipTOP"
 		},
@@ -1436,7 +1515,7 @@
 			},
 			"position": [
 				1400.0,
-				-140.0
+				-200.0
 			],
 			"type": "HSVAdjustTOP"
 		},
@@ -1490,7 +1569,7 @@
 				}
 			},
 			"position": [
-				140.0,
+				240.0,
 				1180.0
 			],
 			"type": "LensDistortTOP"
@@ -1515,7 +1594,7 @@
 			},
 			"position": [
 				760.0,
-				-140.0
+				-200.0
 			],
 			"type": "LevelTOP"
 		},
@@ -1541,7 +1620,7 @@
 				}
 			},
 			"position": [
-				1320.0,
+				1300.0,
 				600.0
 			],
 			"type": "LFO_CHOP"
@@ -1608,7 +1687,7 @@
 			},
 			"position": [
 				1180.0,
-				-140.0
+				-200.0
 			],
 			"type": "LookupTOP"
 		},
@@ -1618,18 +1697,18 @@
 					"value": true
 				},
 				"blur_size": {
-					"value": 4.0
+					"value": 6.50000000000001
 				},
 				"luma_threshold": {
-					"value": 0.5
+					"value": 1.0
 				},
 				"quality": {
-					"value": 4
+					"value": 8
 				}
 			},
 			"position": [
-				880.0,
-				780.0
+				1380.0,
+				860.0
 			],
 			"type": "LumaBlurTOP"
 		},
@@ -1662,7 +1741,7 @@
 			},
 			"position": [
 				1580.0,
-				-140.0
+				-200.0
 			],
 			"type": "MonoTOP"
 		},
@@ -1842,8 +1921,8 @@
 				}
 			},
 			"position": [
-				-11.0,
-				-140.0
+				-20.0,
+				-200.0
 			],
 			"type": "NoiseTOP"
 		},
@@ -1895,8 +1974,8 @@
 				}
 			},
 			"position": [
-				1100.0,
-				580.0
+				1120.0,
+				600.0
 			],
 			"type": "NoiseTOP"
 		},
@@ -2057,7 +2136,7 @@
 				}
 			},
 			"position": [
-				-40.0,
+				-80.0,
 				1180.0
 			],
 			"type": "PatternTOP"
@@ -2128,12 +2207,12 @@
 		"posterize1": {
 			"parameters": {
 				"levels": {
-					"value": 4
+					"value": 26
 				}
 			},
 			"position": [
-				480.0,
-				780.0
+				780.0,
+				640.0
 			],
 			"type": "PosterizeTOP"
 		},
@@ -2144,8 +2223,8 @@
 				}
 			},
 			"position": [
-				680.0,
-				980.0
+				1080.0,
+				1400.0
 			],
 			"type": "PremultiplyTOP"
 		},
@@ -2173,7 +2252,7 @@
 				}
 			},
 			"position": [
-				680.0,
+				640.0,
 				1180.0
 			],
 			"type": "ProjectionTOP"
@@ -2181,21 +2260,21 @@
 		"radial_blur1": {
 			"parameters": {
 				"center_x": {
-					"value": 0.5
+					"value": 0.81
 				},
 				"center_y": {
-					"value": 0.5
+					"value": 0.0
 				},
 				"samples": {
-					"value": 16
+					"value": 39
 				},
 				"strength": {
-					"value": 0.1
+					"value": 0.27
 				}
 			},
 			"position": [
-				680.0,
-				780.0
+				1320.0,
+				180.0
 			],
 			"type": "RadialBlurTOP"
 		},
@@ -2295,7 +2374,57 @@
 			},
 			"position": [
 				960.0,
-				20.0
+				-20.0
+			],
+			"type": "RampTOP"
+		},
+		"ramp3": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"phase": {
+					"value": -0.230000000000001
+				},
+				"repeat": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"type": {
+					"value": 2
+				}
+			},
+			"position": [
+				980.0,
+				1040.0
 			],
 			"type": "RampTOP"
 		},
@@ -2305,7 +2434,7 @@
 					"value": false
 				},
 				"brightness": {
-					"value": 1.0
+					"value": 2.4
 				},
 				"color_a": {
 					"value": {
@@ -2326,22 +2455,22 @@
 					}
 				},
 				"color_mode": {
-					"value": 0
+					"value": 1
 				},
 				"diffusion_u": {
-					"value": 1.0
+					"value": 0.79
 				},
 				"diffusion_v": {
-					"value": 0.5
+					"value": 0.17
 				},
 				"feed_rate": {
-					"value": 0.055
+					"value": 0.078
 				},
 				"invert": {
 					"value": false
 				},
 				"kill_rate": {
-					"value": 0.062
+					"value": 0.061
 				},
 				"preset": {
 					"value": 0
@@ -2357,7 +2486,7 @@
 					}
 				},
 				"seed_amount": {
-					"value": 0.25
+					"value": 0.07
 				},
 				"seed_pos": {
 					"value": {
@@ -2367,18 +2496,20 @@
 					}
 				},
 				"seed_radius": {
-					"value": 0.05
+					"value": 0.3
 				},
 				"speed": {
-					"value": 1.0
+					"value": 3.8
 				},
 				"steps_per_frame": {
-					"value": 4
+					"expression": "chop(\"timer1\", \"timer_seconds\")",
+					"mode": "EXPRESSION",
+					"value": 6
 				}
 			},
 			"position": [
-				-105.0,
-				2000.0
+				1560.0,
+				860.0
 			],
 			"type": "ReactionDiffusionTOP"
 		},
@@ -2410,9 +2541,9 @@
 					"value": {
 						"_type": "Color",
 						"a": 1.0,
-						"b": 1.0,
-						"g": 1.0,
-						"r": 1.0
+						"b": 0.0302734375,
+						"g": 0.0302734375,
+						"r": 0.96875
 					}
 				},
 				"resolution": {
@@ -2434,7 +2565,7 @@
 				}
 			},
 			"position": [
-				-60.0,
+				-80.0,
 				780.0
 			],
 			"type": "RectangleTOP"
@@ -2559,8 +2690,8 @@
 				}
 			},
 			"position": [
-				380.0,
-				980.0
+				780.0,
+				860.0
 			],
 			"type": "ReorderTOP"
 		},
@@ -2578,8 +2709,8 @@
 				}
 			},
 			"position": [
-				1120.0,
-				200.0
+				900.0,
+				180.0
 			],
 			"type": "ResolutionTOP"
 		},
@@ -2605,8 +2736,8 @@
 				}
 			},
 			"position": [
-				386.0,
-				-140.0
+				380.0,
+				-200.0
 			],
 			"type": "SharpenTOP"
 		},
@@ -2620,7 +2751,7 @@
 				}
 			},
 			"position": [
-				1127.0,
+				1100.0,
 				400.0
 			],
 			"type": "SlopeTOP"
@@ -2691,6 +2822,9 @@
 				"blend": {
 					"value": false
 				},
+				"blend_pos": {
+					"value": 0.0
+				},
 				"index": {
 					"value": 0
 				}
@@ -2702,10 +2836,13 @@
 			"type": "SwitchTOP"
 		},
 		"switch2": {
-			"dynamic_input_count": 4,
+			"dynamic_input_count": 5,
 			"parameters": {
 				"blend": {
 					"value": false
+				},
+				"blend_pos": {
+					"value": 0.0
 				},
 				"index": {
 					"value": 0
@@ -2713,7 +2850,7 @@
 			},
 			"position": [
 				2120.0,
-				-140.0
+				-200.0
 			],
 			"type": "SwitchTOP"
 		},
@@ -2783,7 +2920,7 @@
 			},
 			"position": [
 				960.0,
-				-140.0
+				-200.0
 			],
 			"type": "ThresholdTOP"
 		},
@@ -2811,8 +2948,8 @@
 				}
 			},
 			"position": [
-				1400.0,
-				200.0
+				1100.0,
+				180.0
 			],
 			"type": "TileTOP"
 		},
@@ -2842,6 +2979,27 @@
 				3200.0
 			],
 			"type": "TimeMachineTOP"
+		},
+		"timer1": {
+			"parameters": {
+				"auto_start": {
+					"value": true
+				},
+				"length": {
+					"value": 10.0
+				},
+				"loop": {
+					"value": true
+				},
+				"speed": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				1560.0,
+				1100.0
+			],
+			"type": "TimerCHOP"
 		},
 		"transform1": {
 			"parameters": {
@@ -2874,8 +3032,8 @@
 				}
 			},
 			"position": [
-				220.0,
-				200.0
+				200.0,
+				180.0
 			],
 			"type": "TransformTOP"
 		},
@@ -2884,8 +3042,8 @@
 				"bg_color": {
 					"value": {
 						"_type": "Color",
-						"a": 1.0,
-						"b": 0.0,
+						"a": 0.443137258291245,
+						"b": 0.43529412150383,
 						"g": 0.0,
 						"r": 0.0
 					}
@@ -2906,9 +3064,9 @@
 					"value": {
 						"_type": "Color",
 						"a": 1.0,
-						"b": 1.0,
-						"g": 1.0,
-						"r": 1.0
+						"b": 0.197219848632813,
+						"g": 0.91796875,
+						"r": 0.861660242080688
 					}
 				},
 				"resolution": {
@@ -2932,7 +3090,7 @@
 				}
 			},
 			"position": [
-				-40.0,
+				-80.0,
 				980.0
 			],
 			"type": "TriangleTOP"
@@ -3047,7 +3205,7 @@
 			},
 			"position": [
 				2320.0,
-				-140.0
+				-200.0
 			],
 			"type": "WindowOUT"
 		}

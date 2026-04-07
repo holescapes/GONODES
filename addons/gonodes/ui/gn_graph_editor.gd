@@ -536,6 +536,9 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	view.help_requested.connect(func(nid: String) -> void: help_requested.emit(nid))
 	view.dive_into_requested.connect(func(nid: String) -> void: dive_into_requested.emit(nid))
 	view.viewer_pin_requested.connect(func(nid: String) -> void: viewer_pin_requested.emit(nid))
+	view.bypass_toggled.connect(_on_node_bypass_toggled)
+	view.lock_toggled.connect(_on_node_lock_toggled)
+	view.preview_toggled.connect(_on_node_preview_toggled)
 	node.parameters_changed.connect(func(_nid: String) -> void: _expr_refs_dirty = true)
 	node.parameter_changed.connect(func(_nid: String, _pname: String) -> void: _expr_refs_dirty = true)
 	add_child(view)
@@ -1145,6 +1148,51 @@ func _toggle_selected_lock() -> void:
 		operator_selected.emit(selected_ids[0])
 	GNLogger.info("GraphEditor", "Lock %s on %d node(s)" % [
 		"ON" if new_state else "OFF", selected_ids.size()])
+
+
+## Handles bypass toggle from a node view's title bar button.
+func _on_node_bypass_toggled(node_id: String) -> void:
+	if network == null:
+		return
+	var node: GNNode = network.get_node_by_id(node_id)
+	if node == null:
+		return
+	node.bypass = not node.bypass
+	node.mark_dirty()
+	var view: GNNodeView = _node_views.get(node_id, null)
+	if view != null:
+		view.update_bypass_lock_visuals()
+
+
+## Handles lock toggle from a node view's title bar button.
+func _on_node_lock_toggled(node_id: String) -> void:
+	if network == null:
+		return
+	var node: GNNode = network.get_node_by_id(node_id)
+	if node == null:
+		return
+	node.locked = not node.locked
+	var view: GNNodeView = _node_views.get(node_id, null)
+	if view != null:
+		view.update_bypass_lock_visuals()
+	operator_selected.emit(node_id)
+
+
+## Handles preview toggle from a node view's title bar button.
+func _on_node_preview_toggled(node_id: String) -> void:
+	if network == null:
+		return
+	var node: GNNode = network.get_node_by_id(node_id)
+	if node == null:
+		return
+	node.preview_enabled = not node.preview_enabled
+	var view: GNNodeView = _node_views.get(node_id, null)
+	if view != null:
+		if node.preview_enabled:
+			view.show_preview()
+		else:
+			view.hide_preview()
+		view.update_bypass_lock_visuals()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -2,62 +2,11 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "circle1": {
-            "type": "CircleSOP",
+        "src_ramp": {
+            "type": "RampTOP",
             "position": [
                 100,
-                100
-            ],
-            "parameters": {
-                "radius": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "segments": {
-                    "value": 32,
-                    "expression": "(32 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
-                },
-                "type": {
-                    "value": 0
-                },
-                "orientation": {
-                    "value": 0
-                }
-            }
-        },
-        "geo_view": {
-            "type": "GeometryCOMP",
-            "position": [
-                700,
-                100
-            ],
-            "parameters": {}
-        },
-        "cam_view": {
-            "type": "CameraCOMP",
-            "position": [
-                700,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 0.5
-                },
-                "tz": {
-                    "value": 3
-                }
-            }
-        },
-        "render_view": {
-            "type": "RenderTOP",
-            "position": [
-                1000,
-                100
+                200
             ],
             "parameters": {
                 "resolution": {
@@ -69,11 +18,51 @@
                 }
             }
         },
+        "posterize1": {
+            "type": "PosterizeTOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "levels": {
+                    "value": 4,
+                    "expression": "int(abs(sin(time)) * 14.0) + 2",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "posterize2": {
+            "type": "PosterizeTOP",
+            "position": [
+                500,
+                300
+            ],
+            "parameters": {
+                "levels": {
+                    "value": 8
+                }
+            }
+        },
+        "switch1": {
+            "type": "SwitchTOP",
+            "position": [
+                850,
+                200
+            ],
+            "parameters": {
+                "index": {
+                    "value": 0,
+                    "expression": "int(time) % 2",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
-                100
+                1200,
+                200
             ],
             "parameters": {
                 "resolution": {
@@ -91,25 +80,31 @@
     },
     "connections": [
         {
-            "from": "circle1",
+            "from": "src_ramp",
             "from_port": 0,
-            "to": "geo_view",
+            "to": "posterize1",
             "to_port": 0
         },
         {
-            "from": "geo_view",
+            "from": "src_ramp",
             "from_port": 0,
-            "to": "render_view",
+            "to": "posterize2",
             "to_port": 0
         },
         {
-            "from": "cam_view",
+            "from": "posterize1",
             "from_port": 0,
-            "to": "render_view",
+            "to": "switch1",
+            "to_port": 0
+        },
+        {
+            "from": "posterize2",
+            "from_port": 0,
+            "to": "switch1",
             "to_port": 1
         },
         {
-            "from": "render_view",
+            "from": "switch1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -119,15 +114,24 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CircleSOP \u2014 Basic\n\nDefault settings.",
+            "text": "PosterizeTOP \u2014 Advanced\n\nTwo PosterizeTOPs with different level counts fed into a SwitchTOP.\nThe top path uses an expression to animate levels (2\u201316) over time.\nThe bottom path uses a fixed 8-level posterize.\nA SwitchTOP alternates between them every second.",
             "position": [
-                -100.0,
-                -100.0
+                50.0,
+                -120.0
             ],
             "size": [
-                400.0,
-                100.0
+                850.0,
+                110.0
             ],
+            "color": [
+                0.6,
+                0.2,
+                0.8,
+                0.15
+            ]
+        }
+    ]
+}
             "color": [
                 1.0,
                 1.0,

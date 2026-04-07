@@ -6,17 +6,49 @@ Common issues, debugging techniques, and performance tips for GONODES.
 
 ## Debugging Tools
 
-### Node Error & Warning Badges
+### Node Errors & Warnings
 
-Nodes display status badges in their title bar:
+Nodes display **ERR** (red) and **WRN** (yellow) badges on the right side of
+the title bar's bottom row. Hover over the badge to see the full message.
 
-| Badge | Color | Meaning |
-|-------|-------|---------|
-| ✖ | Red | Cook error — hover for details |
-| ⚠ | Yellow | Warning — hover for details |
+#### Errors (red ERR badge)
 
-Errors and warnings are set during `cook()` and cleared each cycle.
-If a badge persists, the issue recurs every frame.
+Errors mean the node **cannot produce valid output**. Downstream nodes
+receive null input (same as a disconnected port).
+
+| Cause | Example message |
+|-------|-----------------|
+| Runtime exception in `_cook()` | `"Division by zero in expression"` |
+| Shader / compute compile failure | `"Shader compilation failed: ..."` |
+| Missing operator type (extension not loaded) | `"Missing operator: HapInTOP"` |
+| Custom operator asset load failure | `"Failed to load asset: res://..."` |
+| Expression compilation error | `"Parse error at column 5"` |
+
+#### Warnings (yellow WRN badge)
+
+Warnings mean the node **works but something is degraded or misconfigured**.
+
+| Cause | Example message |
+|-------|-----------------|
+| Native library not available | `"MIDI requires the native gn_ext_midi library."` |
+| Device/port open failure | `"Failed to open MIDI output port 2."` |
+| CPU fallback active (no compute shaders) | `"Running CPU fallback (no compute shaders)"` |
+| Renderer doesn't support feature | `"Requires compute shaders (unavailable on this renderer)"` |
+| Renderer not supported at all | `"Not supported on 'Compatibility' renderer"` |
+| Node reference type mismatch | `"Target 'noise1' is CHOP, expected TOP"` |
+| C++ script compile/build error | `"C++ compile error: ..."` |
+| SDF remote target not found | `"Remote SDF 'sdf1' not found or has no output"` |
+
+#### Lifecycle
+
+Both `node_error` and `node_warning` are **cleared at the start of each cook
+cycle** and re-set by the cook engine or the node's `_cook()` method if the
+condition still applies. This means:
+
+- Badges disappear automatically when you fix the problem.
+- A badge that persists means the issue recurs every frame.
+- In exported player builds, badges are not displayed (no editor UI), but
+  errors still route to `push_error()` / the GNLogger.
 
 ### Bypass (B Key)
 

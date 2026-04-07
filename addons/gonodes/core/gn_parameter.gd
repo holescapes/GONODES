@@ -479,6 +479,14 @@ func reset() -> void:
 	value_changed.emit(param_name, value)
 
 
+## Restores parameter state from a snapshot (Dictionary from to_dict()) and
+## emits change signals so the UI refreshes. Used by undo/redo.
+func restore_snapshot(snapshot: Dictionary) -> void:
+	from_dict(snapshot)
+	value_changed.emit(param_name, value)
+	mode_changed.emit(param_name, mode)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Mode Switching
 # ═══════════════════════════════════════════════════════════════════════════════

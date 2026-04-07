@@ -41,47 +41,46 @@ void fragment() {
         float d = length(UV - vec2(0.5));
         float v_init = (d < 0.1) ? 0.25 : 0.0;
         COLOR = vec4(1.0, v_init, 0.0, 1.0);
-        return;
-    }
+    } else {
+        vec2 ts = 1.0 / resolution;
+        vec2 uv = UV;
 
-    vec2 ts = 1.0 / resolution;
-    vec2 uv = UV;
+        vec2 state = texture(screen_texture, uv).rg;
+        float u = state.r;
+        float v = state.g;
 
-    vec2 state = texture(screen_texture, uv).rg;
-    float u = state.r;
-    float v = state.g;
+        // Multiple sub-steps for faster pattern evolution
+        for (int i = 0; i < steps_per_frame; i++) {
+            vec2 lap = laplacian(screen_texture, uv, ts);
 
-    // Multiple sub-steps for faster pattern evolution
-    for (int i = 0; i < steps_per_frame; i++) {
-        vec2 lap = laplacian(screen_texture, uv, ts);
+            float reaction = u * v * v;
+            float du = diffusion_u * lap.r - reaction + feed_rate * (1.0 - u);
+            float dv = diffusion_v * lap.g + reaction - (feed_rate + kill_rate) * v;
 
-        float reaction = u * v * v;
-        float du = diffusion_u * lap.r - reaction + feed_rate * (1.0 - u);
-        float dv = diffusion_v * lap.g + reaction - (feed_rate + kill_rate) * v;
+            u += du * time_step;
+            v += dv * time_step;
 
-        u += du * time_step;
-        v += dv * time_step;
-
-        u = clamp(u, 0.0, 1.0);
-        v = clamp(v, 0.0, 1.0);
-    }
-
-    // Seed injection (circle)
-    if (add_seed) {
-        float d = length(uv - seed_pos);
-        if (d < seed_radius) {
-            v = max(v, seed_amount);
-            u = min(u, 1.0 - seed_amount * 0.5);
+            u = clamp(u, 0.0, 1.0);
+            v = clamp(v, 0.0, 1.0);
         }
-    }
 
-    // Seed from input texture
-    if (use_seed_texture) {
-        float seed_val = texture(seed_texture, uv).r;
-        if (seed_val > 0.5) {
-            v = max(v, seed_amount * seed_val);
+        // Seed injection (circle)
+        if (add_seed) {
+            float d = length(uv - seed_pos);
+            if (d < seed_radius) {
+                v = max(v, seed_amount);
+                u = min(u, 1.0 - seed_amount * 0.5);
+            }
         }
-    }
 
-    COLOR = vec4(u, v, 0.0, 1.0);
+        // Seed from input texture
+        if (use_seed_texture) {
+            float seed_val = texture(seed_texture, uv).r;
+            if (seed_val > 0.5) {
+                v = max(v, seed_amount * seed_val);
+            }
+        }
+
+        COLOR = vec4(u, v, 0.0, 1.0);
+    }
 }

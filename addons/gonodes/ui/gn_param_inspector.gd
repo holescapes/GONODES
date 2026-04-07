@@ -16,6 +16,9 @@ var _row_order: Array = []
 ## Reference to the network (for expression context display).
 var network: GNNetwork = null
 
+## Shared undo/redo stack (passed from the graph editor via gn_editor.gd).
+var undo_redo: UndoRedo = null
+
 ## UI elements
 var _scroll: ScrollContainer = null
 var _vbox: VBoxContainer = null
@@ -249,6 +252,7 @@ func inspect(node: GNNode) -> void:
 
 		var row := GNParamRow.new()
 		row.network = network
+		row.undo_redo = undo_redo
 		row.setup(param, node)
 		row.visible = param.visible
 
@@ -461,6 +465,41 @@ func _set_children_mouse_filter(node: Control, filter: Control.MouseFilter) -> v
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Bulk Param Undo Helper
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Snapshots all parameters before a bulk operation, runs the callable, then
+## records a single undo action that restores every parameter to its prior state.
+func _do_bulk_param_undo(action_name: String, callable: Callable) -> void:
+	if undo_redo == null or _current_node == null:
+		callable.call()
+		return
+	# Snapshot before
+	var before: Dictionary = {}
+	for pname in _current_node.parameters:
+		before[pname] = _current_node.parameters[pname].to_dict()
+	callable.call()
+	# Snapshot after
+	var after: Dictionary = {}
+	for pname in _current_node.parameters:
+		after[pname] = _current_node.parameters[pname].to_dict()
+	# Record undo
+	var node := _current_node
+	undo_redo.create_action(action_name)
+	undo_redo.add_do_method(func() -> void:
+		for pname in after:
+			if node.parameters.has(pname):
+				node.parameters[pname].restore_snapshot(after[pname])
+	)
+	undo_redo.add_undo_method(func() -> void:
+		for pname in before:
+			if node.parameters.has(pname):
+				node.parameters[pname].restore_snapshot(before[pname])
+	)
+	undo_redo.commit_action(false)  # already applied
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Preset Toolbar Handlers
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -477,18 +516,24 @@ func _on_copy_pressed() -> void:
 func _on_paste_pressed() -> void:
 	if _current_node == null:
 		return
-	var applied := GNParamPresetManager.paste_params(_current_node)
-	if applied > 0:
-		_current_node.parameters_changed.emit(_current_node.id)
+	var node := _current_node
+	_do_bulk_param_undo("Paste params %s" % node.id, func() -> void:
+		var applied := GNParamPresetManager.paste_params(node)
+		if applied > 0:
+			node.parameters_changed.emit(node.id)
+	)
 
 
 ## Reset all parameters to factory defaults.
 func _on_reset_pressed() -> void:
 	if _current_node == null:
 		return
-	var count := GNParamPresetManager.reset_to_defaults(_current_node)
-	if count > 0:
-		_current_node.parameters_changed.emit(_current_node.id)
+	var node := _current_node
+	_do_bulk_param_undo("Reset params %s" % node.id, func() -> void:
+		var count := GNParamPresetManager.reset_to_defaults(node)
+		if count > 0:
+			node.parameters_changed.emit(node.id)
+	)
 
 
 ## Populates and handles the Presets dropdown menu.
@@ -518,10 +563,13 @@ func _on_preset_menu_id_pressed(id: int) -> void:
 		var op_type: String = _current_node.get_script().get_global_name()
 		var presets := GNParamPresetManager.get_preset_list(op_type)
 		if preset_idx >= 0 and preset_idx < presets.size():
-			var applied := GNParamPresetManager.load_preset(
-				_current_node, presets[preset_idx]["path"])
-			if applied > 0:
-				_current_node.parameters_changed.emit(_current_node.id)
+			var node := _current_node
+			var path: String = presets[preset_idx]["path"]
+			_do_bulk_param_undo("Load preset %s" % node.id, func() -> void:
+				var applied := GNParamPresetManager.load_preset(node, path)
+				if applied > 0:
+					node.parameters_changed.emit(node.id)
+			)
 
 
 ## Called when the Presets MenuButton is about to show — populates items dynamically.
@@ -636,16 +684,21 @@ func _refresh_preset_dropdown() -> void:
 func _on_preset_dropdown_selected(idx: int) -> void:
 	if _updating_dropdown or _current_node == null:
 		return
+	var node := _current_node
 	if idx == 0:
 		# "[Default]" selected — reset to factory defaults
-		var count := GNParamPresetManager.reset_to_defaults(_current_node)
-		if count > 0:
-			_current_node.parameters_changed.emit(_current_node.id)
+		_do_bulk_param_undo("Reset params %s" % node.id, func() -> void:
+			var count := GNParamPresetManager.reset_to_defaults(node)
+			if count > 0:
+				node.parameters_changed.emit(node.id)
+		)
 		return
 	# Preset entries start at index 1 → _cached_presets index = idx - 1
 	var preset_idx: int = idx - 1
 	if preset_idx >= 0 and preset_idx < _cached_presets.size():
-		var applied := GNParamPresetManager.load_preset(
-			_current_node, _cached_presets[preset_idx]["path"])
-		if applied > 0:
-			_current_node.parameters_changed.emit(_current_node.id)
+		var path: String = _cached_presets[preset_idx]["path"]
+		_do_bulk_param_undo("Load preset %s" % node.id, func() -> void:
+			var applied := GNParamPresetManager.load_preset(node, path)
+			if applied > 0:
+				node.parameters_changed.emit(node.id)
+		)

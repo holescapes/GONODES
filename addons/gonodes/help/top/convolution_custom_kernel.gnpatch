@@ -1,0 +1,105 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 5.0
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "convolve_custom": {
+            "type": "ConvolutionTOP",
+            "position": [
+                500,
+                200
+            ],
+            "parameters": {
+                "preset": {
+                    "value": 0
+                },
+                "kernel_size": {
+                    "value": 3
+                },
+                "divisor": {
+                    "value": 1.0,
+                    "expression": "abs(sin(time)) * 3.0 + 1.0",
+                    "mode": "EXPRESSION"
+                },
+                "bias": {
+                    "value": 0.5
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "convolve_custom",
+            "to_port": 0
+        },
+        {
+            "from": "convolve_custom",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ConvolutionTOP \u2014 Custom Kernel via Expressions\n\nPreset is set to 'Custom' (index 0), which starts as an identity kernel.\nThe Custom preset uses center=1.0, all others=0.0 (passthrough).\n\nTo build your own kernel, set individual kernel weights via expressions\non the ConvolutionTOP's internal kernel array. For example, this patch\nanimates the divisor to create a pulsing effect on the identity output.\n\nFor a full custom kernel, you would typically:\n1. Set preset=Custom, kernel_size=3\n2. Use spare parameters to expose the 9 kernel weights\n3. Wire expressions from those spares into the kernel\n\nThe built-in presets (Emboss, Sharpen, Edge Detect, etc.) are\nhard-coded 3x3 kernels embedded into the center of larger sizes.",
+            "position": [
+                50.0,
+                -150.0
+            ],
+            "size": [
+                850.0,
+                140.0
+            ],
+            "color": [
+                0.2,
+                0.6,
+                0.9,
+                0.15
+            ]
+        }
+    ]
+}

@@ -89,6 +89,23 @@ Enable the **VRAM** toggle to see GPU memory usage in the info bar.
 
 ---
 
+## Errors & Warnings
+
+During each cook cycle, the engine clears `node_error` and `node_warning` on
+every node, then re-sets them if a problem occurs. The editor displays these as
+**ERR** (red) and **WRN** (yellow) badges on the node's title bar.
+
+- **Errors** mean the node cannot produce valid output (runtime crash, shader
+  compile failure, missing operator). Downstream nodes receive null.
+- **Warnings** mean the node works but something is degraded (missing native
+  library, CPU fallback active, device open failure, renderer limitation).
+
+Badges disappear automatically when the problem is resolved. Hover over a badge
+to see the full message. See [Troubleshooting](troubleshooting.md#node-errors--warnings)
+for detailed tables of every error and warning trigger.
+
+---
+
 ## Bypass & Lock
 
 ### Bypass (B key)

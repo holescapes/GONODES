@@ -267,18 +267,48 @@ and restored with the patch.
 
 Nodes display status through visual cues on the title bar and body:
 
+### Title Bar Layout
+
+Each node has a two-row colored title bar:
+
+| Row | Contents |
+|-----|----------|
+| **Top row** | Node name + **?** (help button) |
+| **Bottom row** | **B** (bypass) + **L** (lock) + **P** (preview) + **V** (viewer pin) + status badges |
+
+The BLPV buttons have dark pill backgrounds for readability on any family color.
+Inactive buttons are gray; active buttons light up in distinct colors:
+
+| Button | Active Color | Meaning |
+|--------|--------------|---------|
+| **B** | Yellow | Node is bypassed — passes input through without cooking |
+| **L** | Orange-red | Node is locked — output is frozen, not recooking |
+| **P** | Cyan | Preview thumbnail is visible |
+| **V** | Teal | Node is pinned to the docked viewer |
+
+### Status Badges
+
+Status badges appear on the right side of the bottom title row:
+
+| Badge | Color | Meaning |
+|-------|-------|---------|
+| **ERR** | Red | Cook error — hover for details |
+| **WRN** | Yellow | Warning — hover for details |
+| **DEP** | Orange | Operator is deprecated — hover for replacement info |
+
+Errors and warnings are cleared at the start of each cook cycle and re-set if
+the condition persists. See [Node Errors & Warnings](troubleshooting.md#node-errors--warnings)
+for the full list of what triggers each.
+
+### Other Visual Cues
+
 | Indicator          | Meaning                                                      |
 |--------------------|--------------------------------------------------------------|
-| White title text   | Node ID only (family name shown in tooltip on hover)          |
-| Dark outline       | Title text and ? button have a dark outline for readability   |
-| ⏩ prefix          | Node is **bypassed** — passes input through without cooking  |
-| ?? prefix          | Node is **locked** — parameters cannot be edited             |
 | Dimmed appearance  | Node is bypassed (body color reduced to 50% opacity)          |
 | Family color bar   | Title bar is tinted per family (CHOP=green, TOP=purple, etc.) |
 | Preview thumbnail  | Inline output preview (80px tall, live-updating)              |
 | Perf overlay       | Cook time in ms (when Perf toggle is on)                      |
 | **zzz** overlay    | Node is **inactive** — not in any active chain (frozen output)|
-| Error badge        | Cook errors appear in the perf overlay                        |
 
 ### Family Colors
 

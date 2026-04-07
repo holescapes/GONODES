@@ -37,7 +37,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_viewport.size = res
 
 	(_canvas as TextureRect).texture = tex_in.texture
-	_material.set_shader_parameter("source_tex", tex_in.texture)
 	_material.set_shader_parameter("blur_size", get_param_value("blur_size"))
 	_material.set_shader_parameter("quality", get_param_value("quality"))
 	_material.set_shader_parameter("luma_threshold", get_param_value("luma_threshold"))

@@ -15,6 +15,7 @@ var _sim_material: ShaderMaterial = null
 var _render_viewport: SubViewport = null
 var _render_material: ShaderMaterial = null
 var _last_res: Vector2i = Vector2i.ZERO
+var _last_preset: int = 0
 var _needs_reset: bool = true
 
 
@@ -65,10 +66,10 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("reset", false,
 		"Reset", "Re-initialize the simulation"))
 
-	# Presets for common patterns
+	# Quick pattern type selector
 	add_parameter(GNParameter.create_enum("preset",
 		PackedStringArray(["Custom", "Mitosis", "Coral", "Maze", "Spots", "Worms", "Waves"]),
-		0, "Preset", "Quick parameter presets for common patterns"))
+		0, "Pattern Type", "Quick f/k presets for common reaction-diffusion patterns"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -76,10 +77,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var do_reset: bool = get_param_value("reset")
 	var preset: int = get_param_value("preset")
 
-	# Apply preset if changed from Custom
-	if preset > 0:
-		_apply_preset(preset)
-		set_param_value("preset", 0)
+	# Apply preset when selection changes (stays on the selected label)
+	if preset != _last_preset:
+		_last_preset = preset
+		if preset > 0:
+			_apply_preset(preset)
 
 	# Build VPs once on first cook
 	if _sim_viewport == null:
@@ -174,7 +176,7 @@ func _build_pipeline(res: Vector2i) -> void:
 	_sim_viewport.name = "VP_RDSim_%s" % id
 	_sim_viewport.size = res
 	_sim_viewport.transparent_bg = false
-	_sim_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_sim_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_sim_viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_NEVER
 	_sim_viewport.disable_3d = true
 	_sim_viewport.gui_disable_input = true
@@ -195,7 +197,7 @@ func _build_pipeline(res: Vector2i) -> void:
 	_render_viewport.name = "VP_RDRender_%s" % id
 	_render_viewport.size = res
 	_render_viewport.transparent_bg = false
-	_render_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_render_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_render_viewport.disable_3d = true
 	_render_viewport.gui_disable_input = true
 	add_child(_render_viewport)

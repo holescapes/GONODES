@@ -160,8 +160,9 @@ func _ready() -> void:
 	# Replace the scene's TextureRect Viewer with a GNViewerPanel
 	_setup_viewer_panel()
 
-	# Bind inspector to network
+	# Bind inspector to network and undo stack
 	inspector.network = network
+	inspector.undo_redo = graph_editor._undo_redo
 
 	# Track node renames so viewer target stays correct
 	network.node_renamed.connect(_on_node_renamed)

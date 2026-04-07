@@ -479,7 +479,7 @@ Default (no override) = all six platforms.
 #### How the cook engine handles incompatible nodes
 
 When a node fails a renderer or platform check during `cook_frame()`:
-1. `node_warning` is set (yellow badge in editor)
+1. `node_warning` is set (yellow WRN badge in editor)
 2. `cook_valid = false`
 3. `cook_time_ms = 0`
 4. `cached_output` retains its last value (or null if never cooked)
@@ -487,6 +487,9 @@ When a node fails a renderer or platform check during `cook_frame()`:
 6. A warning is logged once (frame 0) and emitted via `cook_error`
 
 The node is **not deleted** — it stays in the graph. If the user later exports to a compatible platform, it will cook normally.
+
+> **For the full list of error vs warning triggers**, see the user-facing
+> [Troubleshooting — Node Errors & Warnings](../addons/gonodes/help/troubleshooting.md#node-errors--warnings).
 
 #### Platform-adaptive operators (preferred over restriction)
 
