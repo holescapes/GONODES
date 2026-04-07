@@ -82,6 +82,11 @@ func chop(id: String, chan: String = "", index: int = -1) -> Variant:
 		return 0.0
 	return _engine.chop(id, chan, index)
 
+func chopp(id: String, port = null, chan: String = "", index: int = -1) -> Variant:
+	if _engine == null:
+		return 0.0
+	return _engine.chopp(id, port, chan, index)
+
 func op_ref(id: String, param_name: String = "") -> Variant:
 	if _engine == null:
 		return 0.0
@@ -91,6 +96,11 @@ func top(id: String, property: String = "") -> Variant:
 	if _engine == null:
 		return 0.0
 	return _engine.top(id, property)
+
+func topp(id: String, port = null, property: String = "") -> Variant:
+	if _engine == null:
+		return 0.0
+	return _engine.topp(id, port, property)
 
 func sop(id: String) -> Variant:
 	if _engine == null:

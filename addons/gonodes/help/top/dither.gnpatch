@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"dither1": {"type": "DitherTOP", "position": [350, 200], "parameters": {"levels": {"value": 2}, "matrix_size": {"value": 1}, "spread": {"value": 0.5}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "dither1", "to_port": 0},
+		{"from": "dither1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Dither TOP -- Ordered Bayer Dithering\n\n2 levels with 4x4 matrix = classic 1-bit retro look.\nEnable Color for per-channel dithering.\nIncrease Levels for subtle banding reduction.", "position": [-50.0, -50.0], "size": [450.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

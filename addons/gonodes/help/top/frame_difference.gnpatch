@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}, "speed": {"value": 0.5}}},
+		"frame_difference1": {"type": "FrameDifferenceTOP", "position": [350, 200], "parameters": {"mode": {"value": 0}, "gain": {"value": 3.0}, "threshold": {"value": 0.02}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "frame_difference1", "to_port": 0},
+		{"from": "frame_difference1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Frame Difference TOP -- Motion Detection\n\nSubtracts previous frame from current to reveal motion.\nGain amplifies small differences. Threshold gates noise.\nAbsolute mode shows magnitude; Signed mode centers at mid-gray.", "position": [-50.0, -50.0], "size": [500.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

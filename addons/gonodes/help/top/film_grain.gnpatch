@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"grain1": {"type": "FilmGrainTOP", "position": [350, 200], "parameters": {"intensity": {"value": 0.2}, "size": {"value": 1.5}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "grain1", "to_port": 0},
+		{"from": "grain1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Film Grain TOP -- Temporal Noise Overlay\n\nAdds animated grain that changes every frame.\nLuminance Dependent = more grain in midtones.\nSize controls grain particle coarseness.", "position": [-50.0, -50.0], "size": [450.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

@@ -2,6 +2,7 @@ class_name AttributeSOP
 extends GNSopBase
 ## Creates or modifies per-vertex attributes (stored in GNGeoData.point_attribs).
 ## Can set from expressions, copy from position/normal channels, or set constant.
+## Expression vars: px, py, pz, i, n, t, dt, frame.
 ## Useful for driving CopySOP pscale, color, age, etc.
 
 
@@ -25,7 +26,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("value", 1.0, null, null, 0.01,
 		"Constant Value", "Value to set (Constant mode)"))
 	add_parameter(GNParameter.create_string("expression", "sin(float(i) / float(n) * 6.28)",
-		"Expression", "Per-vertex expression — vars: px,py,pz,i,n,t"))
+		"Expression", "Per-vertex expression — vars: px,py,pz,i,n,t,dt,frame"))
 	add_parameter(GNParameter.create_int("seed", 42, 0, 99999, "Seed", "Random seed"))
 	add_parameter(GNParameter.create_float("rand_min", 0.0, null, null, 0.01, "Random Min", ""))
 	add_parameter(GNParameter.create_float("rand_max", 1.0, null, null, 0.01, "Random Max", ""))
@@ -57,6 +58,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var rand_min: float = get_param_value("rand_min")
 	var rand_max: float = get_param_value("rand_max")
 	var t: float = elapsed_time
+	var dt_val: float = current_delta
+	var frame_val: float = float(current_frame)
 
 	# Collect all vertex positions for expression evaluation
 	var all_verts := PackedVector3Array()
@@ -75,13 +78,13 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 		1:  # Expression
 			var expr := Expression.new()
-			var var_names := PackedStringArray(["px", "py", "pz", "i", "n", "t"])
+			var var_names := PackedStringArray(["px", "py", "pz", "i", "n", "t", "dt", "frame"])
 			if expr.parse(expr_str, var_names) != OK:
 				GNLogger.warn("AttributeSOP", "'%s' — parse error: %s" % [id, expr.get_error_text()])
 				return _cached_geo
 			for i in range(vert_count):
 				var p: Vector3 = all_verts[i]
-				var vals: Array = [p.x, p.y, p.z, float(i), float(vert_count), t]
+				var vals: Array = [p.x, p.y, p.z, float(i), float(vert_count), t, dt_val, frame_val]
 				var res = expr.execute(vals, self, false)
 				if res is float:
 					result[i] = res

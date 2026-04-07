@@ -1,0 +1,12 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"voronoi1": {"type": "VoronoiTOP", "position": [100, 200], "parameters": {"scale": {"value": 15.0}, "mode": {"value": 2}, "speed": {"value": 0.5}}},
+		"window1": {"type": "WindowOUT", "position": [450, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "voronoi1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Voronoi TOP -- Worley Noise Generator\n\nF2-F1 mode shows cell edges (organic look).\nF1 = distance to nearest, F2 = distance to second.\nAnimate with Speed > 0 for flowing cells.", "position": [50.0, -50.0], "size": [450.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

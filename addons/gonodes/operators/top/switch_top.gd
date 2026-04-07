@@ -35,6 +35,14 @@ func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
 		if int(idx_param.value) > max_idx:
 			idx_param.set_value(max_idx)
 
+func get_active_input_indices() -> PackedInt32Array:
+	var do_blend: bool = get_param_value("blend")
+	if not do_blend:
+		var idx: int = clampi(get_param_value("index"), 0, maxi(input_ports.size() - 1, 0))
+		return PackedInt32Array([idx])
+	# Blend mode uses all inputs
+	return PackedInt32Array()
+
 
 func _cook(inputs: Array[GNData]) -> GNData:
 	var do_blend: bool = get_param_value("blend")

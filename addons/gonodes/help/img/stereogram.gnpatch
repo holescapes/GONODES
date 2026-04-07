@@ -1,0 +1,16 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseIMG", "position": [0, 200], "parameters": {"resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}, "monochrome": {"value": true}, "scale": {"value": 2.0}}},
+		"stereo1": {"type": "StereogramIMG", "position": [350, 200], "parameters": {"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 256}}, "strip_width": {"value": 80}, "depth_scale": {"value": 0.3}}},
+		"img_to_top1": {"type": "ImgToTOP", "position": [700, 200], "parameters": {}},
+		"window1": {"type": "WindowOUT", "position": [1000, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "stereo1", "to_port": 0},
+		{"from": "stereo1", "from_port": 0, "to": "img_to_top1", "to_port": 0},
+		{"from": "img_to_top1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Stereogram IMG -- Magic Eye Generator\n\nGenerates random-dot autostereograms from a depth map.\nCross your eyes or focus behind the screen to see 3D.\nCPU-only: each pixel depends on its left neighbor (sequential).\nUse ImgToTOP to view the result.", "position": [-50.0, -80.0], "size": [520.0, 100.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

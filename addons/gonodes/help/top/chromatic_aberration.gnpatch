@@ -1,0 +1,29 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [0, 200],
+			"parameters": {"monochrome": {"value": false}}
+		},
+		"chroma1": {
+			"type": "ChromaticAberrationTOP",
+			"position": [350, 200],
+			"parameters": {
+				"intensity": {"value": 0.01},
+				"mode": {"value": 0}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": [700, 200],
+			"parameters": {"open": {"value": true}}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "chroma1", "to_port": 0},
+		{"from": "chroma1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Chromatic Aberration TOP\n\nSplits RGB channels radially from center.\nIncrease Intensity for stronger color fringing.\nSwitch Mode to Directional for fixed-angle split.", "position": [-50.0, -50.0], "size": [480.0, 90.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

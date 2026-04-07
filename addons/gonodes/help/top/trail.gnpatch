@@ -1,0 +1,45 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [0, 200],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"monochrome": {"value": false},
+				"seed": {"expression": "floor(time * 2.0)", "mode": "EXPRESSION", "value": 0}
+			}
+		},
+		"trail1": {
+			"type": "TrailTOP",
+			"position": [350, 200],
+			"parameters": {
+				"decay": {"value": 0.92},
+				"brightness": {"value": 1.0}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": [700, 200],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"open": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "trail1", "to_port": 0},
+		{"from": "trail1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Trail TOP -- Motion Persistence\n\nBlends each frame with the previous accumulated output.\nDecay 0.92 gives a smooth fading trail. Lower = shorter.\nAnimate the input to see ghost/echo motion trails.",
+			"position": [-50.0, -50.0],
+			"size": [480.0, 90.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

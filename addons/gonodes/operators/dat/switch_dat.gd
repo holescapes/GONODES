@@ -29,6 +29,11 @@ func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
 			idx_param.set_value(max_idx)
 
 
+func get_active_input_indices() -> PackedInt32Array:
+	var idx: int = clampi(get_param_value("index"), 0, maxi(input_ports.size() - 1, 0))
+	return PackedInt32Array([idx])
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
 	var idx: int = clampi(get_param_value("index"), 0, inputs.size() - 1)
 	if idx < inputs.size() and inputs[idx] is GNTableData:

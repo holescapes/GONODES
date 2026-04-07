@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"pixelate1": {"type": "PixelateTOP", "position": [350, 200], "parameters": {"pixel_size": {"value": 16.0}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "pixelate1", "to_port": 0},
+		{"from": "pixelate1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Pixelate TOP -- Block Mosaic\n\nSnaps pixels to a grid for a blocky retro look.\nPixel Size 1 = no effect, 16+ = chunky blocks.", "position": [-50.0, -50.0], "size": [400.0, 70.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

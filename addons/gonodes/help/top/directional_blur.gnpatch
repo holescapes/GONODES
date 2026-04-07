@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"dir_blur1": {"type": "DirectionalBlurTOP", "position": [350, 200], "parameters": {"strength": {"value": 15.0}, "angle": {"value": 45.0}, "samples": {"value": 24}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "dir_blur1", "to_port": 0},
+		{"from": "dir_blur1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Directional Blur TOP -- Motion Blur\n\nBlurs along a fixed angle (45 degrees here).\nAnimate the Angle for spinning motion blur.\nMore Samples = smoother but slower.", "position": [-50.0, -50.0], "size": [450.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

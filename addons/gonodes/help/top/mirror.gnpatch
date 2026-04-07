@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"mirror1": {"type": "MirrorTOP", "position": [350, 200], "parameters": {"axis": {"value": 0}, "center": {"value": {"_type": "Vector2", "x": 0.5, "y": 0.5}}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "mirror1", "to_port": 0},
+		{"from": "mirror1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Mirror TOP -- Axis Mirror\n\nPlaces a mirror line at any position.\nAxis: Vertical, Horizontal, or Free Angle.\nCenter moves the mirror seam. Free Angle mode uses the Angle parameter.", "position": [-50.0, -50.0], "size": [500.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

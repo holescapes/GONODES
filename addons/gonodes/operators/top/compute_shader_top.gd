@@ -17,6 +17,7 @@ extends GNTopBase
 ## Reserved push constant names (auto-bound, no inspector param created):
 ##   gn_time   — elapsed time in seconds
 ##   gn_frame  — current frame number (as float)
+##   gn_dt     — delta time this frame (seconds)
 ##   gn_res_x  — output width in pixels
 ##   gn_res_y  — output height in pixels
 
@@ -34,11 +35,12 @@ layout(rgba8, set = 0, binding = 0) uniform image2D gn_output;
 // layout(set = 1, binding = 0) uniform sampler2D gn_tex0;
 
 // Push constants — built-in fields are auto-bound by GONODES.
-// Add your own float/int fields AFTER the four gn_* fields
+// Add your own float/int fields AFTER the five gn_* fields
 // to create inspector parameters automatically.
 layout(push_constant, std430) uniform PushConstants {
 	float gn_time;
 	float gn_frame;
+	float gn_dt;
 	float gn_res_x;
 	float gn_res_y;
 	// float speed;  // ← uncomment to add a "speed" parameter
@@ -59,7 +61,7 @@ void main() {
 """
 
 ## Push constant field names that are auto-bound (not exposed as params).
-const _RESERVED_PC_NAMES: Array = ["gn_time", "gn_frame", "gn_res_x", "gn_res_y"]
+const _RESERVED_PC_NAMES: Array = ["gn_time", "gn_frame", "gn_dt", "gn_res_x", "gn_res_y"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -543,6 +545,8 @@ func _build_push_constants(res: Vector2i) -> PackedByteArray:
 				bytes.encode_float(offset, elapsed_time)
 			"gn_frame":
 				bytes.encode_float(offset, float(current_frame))
+			"gn_dt":
+				bytes.encode_float(offset, current_delta)
 			"gn_res_x":
 				bytes.encode_float(offset, float(res.x))
 			"gn_res_y":
@@ -609,8 +613,9 @@ static func _count_shader_tex_inputs(code: String) -> int:
 	var max_idx: int = -1
 	for line in code.split("\n"):
 		var s := line.strip_edges()
+		# Uncomment lines like "// layout(...) uniform sampler2D gn_tex0;"
 		if s.begins_with("//"):
-			continue
+			s = s.substr(2).strip_edges()
 		if s.find("sampler2D") == -1:
 			continue
 		var tex_pos := s.find("gn_tex")
@@ -718,9 +723,13 @@ static func _parse_push_constant_fields(code: String) -> Array:
 		if s.begins_with("}"):
 			break
 
-		# Skip comments / empty lines.
-		if s.begins_with("//") or s.is_empty():
+		# Skip empty lines; treat commented fields as uncommented.
+		if s.is_empty():
 			continue
+		if s.begins_with("//"):
+			s = s.substr(2).strip_edges()
+			if s.is_empty():
+				continue
 
 		# Parse "type name;" or "type name; // = default"
 		var field := _parse_pc_field_line(s)

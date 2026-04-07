@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"halftone1": {"type": "HalftoneTOP", "position": [350, 200], "parameters": {"dot_size": {"value": 6.0}, "mode": {"value": 1}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "halftone1", "to_port": 0},
+		{"from": "halftone1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Halftone TOP -- Dot Screen Pattern\n\nCMYK mode separates into 4 angled dot screens.\nSwitch to BW for classic newspaper halftone.\nSmaller Dot Size = finer pattern.", "position": [-50.0, -50.0], "size": [450.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

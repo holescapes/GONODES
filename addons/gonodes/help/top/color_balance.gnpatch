@@ -1,0 +1,18 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"color_bal1": {"type": "ColorBalanceTOP", "position": [350, 200], "parameters": {
+			"lift": {"value": {"_type": "Color", "r": 0.9, "g": 0.9, "b": 1.0, "a": 1.0}},
+			"gamma": {"value": {"_type": "Color", "r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0}},
+			"gain": {"value": {"_type": "Color", "r": 1.2, "g": 1.0, "b": 0.9, "a": 1.0}}
+		}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "color_bal1", "to_port": 0},
+		{"from": "color_bal1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Color Balance TOP -- Lift/Gamma/Gain\n\nBroadcast-style color correction.\nLift = shadow tint, Gamma = midtones, Gain = highlights.\nBlue lift + warm gain = classic cinematic grade.", "position": [-50.0, -50.0], "size": [480.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

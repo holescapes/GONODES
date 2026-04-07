@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"glitch1": {"type": "GlitchTOP", "position": [350, 200], "parameters": {"intensity": {"value": 0.4}, "block_size": {"value": 24.0}, "channel_shift": {"value": 0.015}, "speed": {"value": 10.0}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "glitch1", "to_port": 0},
+		{"from": "glitch1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Glitch TOP -- Digital Artifacts\n\nBlock displacement + RGB channel shift.\nIntensity = probability of glitch per block.\nSpeed controls how fast glitch pattern changes.", "position": [-50.0, -50.0], "size": [450.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

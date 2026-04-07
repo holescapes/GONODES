@@ -358,10 +358,18 @@ func _compute_active_set() -> Dictionary:
 	# chop("lfo1", "out"), then lfo1 must also be active.
 	while not queue.is_empty():
 		var current_id: String = queue.pop_front()
+		var current_node: GNNode = network.nodes.get(current_id, null)
 
-		# Follow wire connections upstream
+		# Follow wire connections upstream — but respect get_active_input_indices()
+		# for operators like SwitchTOP that only read a subset of their inputs.
 		var in_conns: Array = network.get_input_connections(current_id)
+		var active_ports: PackedInt32Array = PackedInt32Array()
+		if current_node != null:
+			active_ports = current_node.get_active_input_indices()
 		for conn in in_conns:
+			# If the node declared specific active ports, skip non-active ones
+			if active_ports.size() > 0 and conn.to_port not in active_ports:
+				continue
 			var upstream_id: String = conn.from_node
 			if not active.has(upstream_id):
 				active[upstream_id] = true
@@ -1199,6 +1207,36 @@ func mat(node_name: String, port = null) -> Variant:
 	return _resolve_output(node_name, port, "GNMaterialData")
 
 
+## Read a CHOP channel from a specific output port.  For multi-output nodes
+## (e.g. GDScriptSCRIPT with two CHOP outputs) where chop() always picks the
+## first CHOP port it finds.
+## Usage:
+##   chopp("script1", "out2", "tx")          → last sample of "tx" from port "out2"
+##   chopp("script1", "out2", "tx", 5)       → sample 5 of "tx" from port "out2"
+##   chopp("script1", 1, "tx")               → last sample of "tx" from port index 1
+func chopp(node_name: String, port = null, channel: String = "", index: int = -1) -> Variant:
+	return _make_chop_port_proxy(node_name, port, channel, index)
+
+
+## Port-aware CHOP read, guaranteed float.
+func choppf(node_name: String, port = null, channel: String = "", index: int = -1) -> float:
+	var v: Variant = _make_chop_port_proxy(node_name, port, channel, index)
+	if v is float:
+		return v
+	if v is int:
+		return float(v)
+	return 0.0
+
+
+## Read TOP info from a specific output port.  For multi-output nodes
+## (e.g. GLSLMultiTOP, MultiBufferRenderTOP) where top() picks the first TOP port.
+## Usage:
+##   topp("glsl_multi1", "out1", "resolution")  → Vector2i from port "out1"
+##   topp("glsl_multi1", 1, "resolution")        → Vector2i from port index 1
+func topp(node_name: String, port = null, property: String = "") -> Variant:
+	return _make_top_port_proxy(node_name, port, property)
+
+
 # ─── Internal proxy implementations ─────────────────────────────────────────────
 
 
@@ -1348,6 +1386,72 @@ func _make_top_proxy(node_name: String, property: String = "") -> Variant:
 		if not property.is_empty():
 			return 0.0
 		return {"resolution": Vector2i.ZERO, "aspect": 1.0}
+	var tex_data: GNTextureData = data as GNTextureData
+	var info := {
+		"resolution": tex_data.resolution,
+		"aspect": tex_data.get_aspect(),
+	}
+	if not property.is_empty():
+		return info.get(property, 0.0)
+	return info
+
+
+## Port-aware CHOP proxy: resolves a specific output port, then extracts channel.
+func _make_chop_port_proxy(node_name: String, port = null, channel: String = "", index: int = -1) -> Variant:
+	if network == null:
+		if not channel.is_empty():
+			return 0.0
+		return {}
+	var node: GNNode = resolve_node(node_name)
+	if node == null:
+		if not channel.is_empty():
+			return 0.0
+		return {}
+
+	var data: GNData = null
+	if port != null:
+		if port is int:
+			data = node.get_output_data(port)
+		elif port is String and not (port as String).is_empty():
+			data = node.get_output_data_by_name(port as String)
+	if data == null or not data is GNChannelData:
+		if not channel.is_empty():
+			return 0.0
+		return {}
+
+	var ch_data: GNChannelData = data as GNChannelData
+	if not channel.is_empty():
+		return ch_data.get_value(channel, index)
+	return {
+		"channels": ch_data.get_channel_names(),
+		"length": ch_data.length,
+		"sample_rate": ch_data.sample_rate,
+	}
+
+
+## Port-aware TOP proxy: resolves a specific output port, then extracts property.
+func _make_top_port_proxy(node_name: String, port = null, property: String = "") -> Variant:
+	if network == null:
+		if not property.is_empty():
+			return 0.0
+		return {}
+	var node: GNNode = resolve_node(node_name)
+	if node == null:
+		if not property.is_empty():
+			return 0.0
+		return {}
+
+	var data: GNData = null
+	if port != null:
+		if port is int:
+			data = node.get_output_data(port)
+		elif port is String and not (port as String).is_empty():
+			data = node.get_output_data_by_name(port as String)
+	if data == null or not data is GNTextureData:
+		if not property.is_empty():
+			return 0.0
+		return {"resolution": Vector2i.ZERO, "aspect": 1.0}
+
 	var tex_data: GNTextureData = data as GNTextureData
 	var info := {
 		"resolution": tex_data.resolution,
@@ -1781,10 +1885,19 @@ func _cook_single_node(node: GNNode) -> int:
 		result._shared = _consumer_counts.get(node.id, 0) > 1
 
 	if result == null and node.output_ports.size() > 0 and node.family != GNFamily.Type.COMP:
-		if editor_mode:
-			node.node_error = "cook returned null"
-		GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
-		cook_error.emit(node.id, "cook returned null")
+		# Null is expected when a filter node has no connected input — don't flag
+		# it as an error.  Only warn if the node actually received data on at
+		# least one input port (meaning the cook itself failed).
+		var has_any_input := false
+		for inp in inputs:
+			if inp != null:
+				has_any_input = true
+				break
+		if has_any_input:
+			if editor_mode:
+				node.node_error = "cook returned null"
+			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
+			cook_error.emit(node.id, "cook returned null")
 	else:
 		GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
 

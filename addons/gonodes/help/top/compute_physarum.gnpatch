@@ -1,0 +1,45 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"physarum1": {
+			"type": "ComputeShaderTOP",
+			"position": [100, 200],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"time_dependent": {"value": true},
+				"shader_code": {"value": "#version 450\n\nlayout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;\n\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\n\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\tfloat sensor_angle;   // = 0.4\n\tfloat sensor_dist;    // = 9.0\n\tfloat turn_speed;     // = 0.5\n\tfloat move_speed;     // = 1.0\n\tfloat decay_rate;     // = 0.95\n\tfloat deposit;        // = 0.5\n} pc;\n\n// Pseudo-random hash\nfloat hash(float n) { return fract(sin(n) * 43758.5453); }\nvec2 hash2(float n) { return vec2(hash(n), hash(n + 127.1)); }\n\nvoid main() {\n\tivec2 coords = ivec2(gl_GlobalInvocationID.xy);\n\tivec2 size = imageSize(gn_output);\n\tif (coords.x >= size.x || coords.y >= size.y) return;\n\n\t// Read previous trail map\n\tvec4 prev = imageLoad(gn_output, coords);\n\n\t// Diffuse: average 3x3 neighborhood\n\tvec4 sum = vec4(0.0);\n\tfor (int dy = -1; dy <= 1; dy++) {\n\t\tfor (int dx = -1; dx <= 1; dx++) {\n\t\t\tivec2 nc = clamp(coords + ivec2(dx, dy), ivec2(0), size - 1);\n\t\t\tsum += imageLoad(gn_output, nc);\n\t\t}\n\t}\n\tvec4 diffused = sum / 9.0;\n\n\t// Decay the trail\n\tvec4 result = diffused * pc.decay_rate;\n\n\t// Simulate agents: each pixel acts as a potential agent\n\t// (simplified — true physarum uses separate agent buffer)\n\tfloat agent_id = float(coords.y * size.x + coords.x);\n\tfloat agent_seed = agent_id + pc.gn_frame * 0.01;\n\n\t// Only a fraction of pixels are agents\n\tif (hash(agent_seed * 0.1) < 0.1) {\n\t\tvec2 pos = vec2(coords) + 0.5;\n\t\tfloat heading = hash(agent_seed) * 6.28318;\n\n\t\t// Sense forward, left, right\n\t\tvec2 fwd_pos = pos + vec2(cos(heading), sin(heading)) * pc.sensor_dist;\n\t\tvec2 left_pos = pos + vec2(cos(heading + pc.sensor_angle), sin(heading + pc.sensor_angle)) * pc.sensor_dist;\n\t\tvec2 right_pos = pos + vec2(cos(heading - pc.sensor_angle), sin(heading - pc.sensor_angle)) * pc.sensor_dist;\n\n\t\t// Clamp to bounds\n\t\tivec2 fi = clamp(ivec2(fwd_pos), ivec2(0), size - 1);\n\t\tivec2 li = clamp(ivec2(left_pos), ivec2(0), size - 1);\n\t\tivec2 ri = clamp(ivec2(right_pos), ivec2(0), size - 1);\n\n\t\tfloat f_val = imageLoad(gn_output, fi).r;\n\t\tfloat l_val = imageLoad(gn_output, li).r;\n\t\tfloat r_val = imageLoad(gn_output, ri).r;\n\n\t\t// Deposit trail\n\t\tresult.rgb += vec3(pc.deposit * 0.1);\n\t}\n\n\tresult = clamp(result, vec4(0.0), vec4(1.0));\n\timageStore(gn_output, coords, result);\n}"}
+			}
+		},
+		"level1": {
+			"type": "LevelTOP",
+			"position": [450, 200],
+			"parameters": {
+				"brightness": {"value": 2.0},
+				"contrast": {"value": 1.5}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": [750, 200],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"open": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "physarum1", "from_port": 0, "to": "level1", "to_port": 0},
+		{"from": "level1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Physarum Slime Mold — Compute Shader Preset\n\nSimplified physarum simulation using trail diffusion and decay.\nFor a full agent-based simulation, use a separate agent buffer\nwith two compute passes (agent step + trail diffuse/decay).\nAdjust sensor_angle, sensor_dist, decay_rate, and deposit.",
+			"position": [50.0, -80.0],
+			"size": [600.0, 120.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

@@ -2,7 +2,7 @@ class_name PointSOP
 extends GNSopBase
 ## Applies per-vertex position expressions using Godot's Expression class.
 ## Variables: px, py, pz (position), nx, ny, nz (normal), u, v (UV),
-## i (vertex index), n (vertex count), t (time).
+## i (vertex index), n (vertex count), t (time), dt (delta), frame.
 
 
 func _init() -> void:
@@ -41,7 +41,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var recompute: bool = get_param_value("recompute_normals")
 
 	var var_names := PackedStringArray(["px", "py", "pz", "nx", "ny", "nz",
-		"u", "v", "i", "n", "t"])
+		"u", "v", "i", "n", "t", "dt", "frame"])
 
 	var expr_x := Expression.new()
 	var expr_y := Expression.new()
@@ -58,6 +58,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var t: float = elapsed_time
+	var dt_val: float = current_delta
+	var frame_val: float = float(current_frame)
 	var new_mesh := ArrayMesh.new()
 
 	for s in range(in_geo.mesh.get_surface_count()):
@@ -81,7 +83,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			var uv: Vector2 = uvs[vi] if vi < uvs.size() else Vector2.ZERO
 
 			var vals: Array = [p.x, p.y, p.z, nm.x, nm.y, nm.z,
-				uv.x, uv.y, float(vi), float(vcount), t]
+				uv.x, uv.y, float(vi), float(vcount), t, dt_val, frame_val]
 
 			var rx = expr_x.execute(vals, self, false)
 			var ry = expr_y.execute(vals, self, false)

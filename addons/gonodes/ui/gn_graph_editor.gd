@@ -180,6 +180,45 @@ var _wire_insert_pending: Dictionary = {}
 ## Distance threshold (in local/screen pixels) for wire click hit-testing.
 const _WIRE_HIT_DISTANCE := 10.0
 
+## ── Drop-on-wire state ──────────────────────────────────────────────────────
+## When a single node is being dragged over a compatible wire, this dict holds
+## the wire info ({ from_node, from_port, to_node, to_port }).  Empty = no wire
+## under drag.  Reset on drag-end or when the node moves away.
+var _drag_over_wire: Dictionary = {}
+
+## Cached compatible port indices on the dragged node for the current
+## _drag_over_wire.  -1 means no compatible port found.
+var _drag_wire_in_port: int = -1
+var _drag_wire_out_port: int = -1
+
+## Hit-test distance (in local pixels) used during node drag for wire snapping.
+## Slightly wider than click to make the drop target forgiving.
+const _DRAG_WIRE_HIT_DISTANCE := 14.0
+
+## ── Wire-drag edge-scroll state ──────────────────────────────────────────────
+## True while the user is dragging a wire from a port (between
+## connection_drag_started and connection_drag_ended / connection_to_empty /
+## connection_from_empty).
+var _wire_dragging: bool = false
+
+## Edge-scroll tuning constants.
+const _EDGE_SCROLL_MARGIN := 50.0   ## Pixels from edge to trigger scroll.
+const _EDGE_SCROLL_SPEED  := 800.0  ## Pixels per second at full speed.
+
+## ── Toast notification container ─────────────────────────────────────────────
+var _toast_container: VBoxContainer = null
+
+## ── Shake-to-disconnect state ────────────────────────────────────────────────
+## Tracks rapid direction reversals during node drag. When the user "shakes"
+## a mid-chain node, it disconnects and its neighbors are re-wired together.
+var _shake_last_dir: Vector2 = Vector2.ZERO   ## Last movement direction sign
+var _shake_reversals: int = 0                  ## Number of direction reversals
+var _shake_timer: float = 0.0                  ## Time since first reversal
+var _shake_triggered: bool = false             ## Prevent re-triggering per drag
+const _SHAKE_REVERSAL_THRESHOLD := 3           ## Reversals needed to trigger
+const _SHAKE_TIME_WINDOW := 0.5                ## Seconds to accumulate reversals
+const _SHAKE_MIN_SPEED := 150.0                ## Min px/s to count a reversal
+
 ## Origin of the current box-select drag (local/screen coords).  Set on left
 ## mouse-down over empty canvas so we can build the actual selection rect on
 ## mouse-up and use it for wire intersection testing.
@@ -254,6 +293,10 @@ func _ready() -> void:
 	self.connection_to_empty.connect(_on_connection_to_empty)
 	self.connection_from_empty.connect(_on_connection_from_empty)
 
+	# Wire-drag tracking for edge-scroll
+	self.connection_drag_started.connect(_on_connection_drag_started)
+	self.connection_drag_ended.connect(_on_connection_drag_ended)
+
 	# Create palette popup
 	_palette = GNNodePalette.new()
 	_palette.visible = false
@@ -278,6 +321,19 @@ func _ready() -> void:
 	debug_overlay = GNDebugOverlay.new()
 	debug_overlay.graph_editor = self
 	add_child(debug_overlay)
+
+	# Create toast notification container (top-center, above everything)
+	_toast_container = VBoxContainer.new()
+	_toast_container.name = "ToastContainer"
+	_toast_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast_container.set_anchors_preset(Control.PRESET_CENTER)
+	_toast_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_toast_container.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_toast_container.position = Vector2(-200, -30)
+	_toast_container.custom_minimum_size = Vector2(400, 0)
+	_toast_container.add_theme_constant_override("separation", 6)
+	_toast_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	add_child(_toast_container)
 
 	GNLogger.info("GraphEditor", "Graph editor ready")
 
@@ -499,9 +555,9 @@ func _populate_from_network() -> void:
 		var node: GNNode = network.nodes[node_id]
 		_create_node_view(node)
 
-	# Create connections (must happen after all node views exist)
-	for conn in network.connections:
-		_add_visual_connection(conn)
+	# Defer connection creation by one frame so GraphNode's internal
+	# left_port_cache / right_port_cache are populated after _resort().
+	_deferred_restore_connections.call_deferred()
 
 	# Create annotation views (network boxes & sticky notes)
 	_rebuild_annotation_views()
@@ -569,6 +625,15 @@ func _remove_node_view(node_id: String) -> void:
 func _add_visual_connection(conn: GNConnection) -> void:
 	if _node_views.has(conn.from_node) and _node_views.has(conn.to_node):
 		connect_node(conn.from_node, conn.from_port, conn.to_node, conn.to_port)
+
+
+## Called one frame after _populate_from_network() so GraphNode port caches
+## are built (they require a layout pass after set_slot() / add_child()).
+func _deferred_restore_connections() -> void:
+	if network == null:
+		return
+	for conn in network.connections:
+		_add_visual_connection(conn)
 
 
 ## Removes a visual wire for a GNConnection.
@@ -648,10 +713,22 @@ func _on_disconnection_request(from_node: StringName, from_port: int,
 	_undo_redo.commit_action(false)
 
 
+## Wire drag started — enable edge-scroll and zoom behavior.
+func _on_connection_drag_started(_from_node: StringName, _from_port: int,
+		_is_output: bool) -> void:
+	_wire_dragging = true
+
+
+## Wire drag ended (connected to a port or cancelled by pressing Escape / RMB).
+func _on_connection_drag_ended() -> void:
+	_wire_dragging = false
+
+
 ## User drags a wire FROM an output port and drops it on empty canvas.
 ## Opens a filtered palette showing only operators that accept this family as input.
 func _on_connection_to_empty(from_node: StringName, from_port: int,
 		release_position: Vector2) -> void:
+	_wire_dragging = false
 	if network == null:
 		return
 
@@ -698,6 +775,7 @@ func _on_connection_to_empty(from_node: StringName, from_port: int,
 ## Opens a filtered palette showing only operators that produce this family as output.
 func _on_connection_from_empty(to_node: StringName, to_port: int,
 		release_position: Vector2) -> void:
+	_wire_dragging = false
 	if network == null:
 		return
 
@@ -839,7 +917,9 @@ func _on_node_rename_requested(old_id: String, new_id: String) -> void:
 	if network == null:
 		return
 	if not network.rename_node(old_id, new_id):
-		GNLogger.warn("GraphEditor", "Rename '%s' → '%s' failed" % [old_id, new_id])
+		var msg := "Rename '%s' → '%s' failed" % [old_id, new_id]
+		GNLogger.warn("GraphEditor", msg)
+		show_toast(msg, ToastType.WARNING)
 		return
 
 	# Record for undo
@@ -1388,6 +1468,9 @@ func _draw_expr_ref_lines() -> void:
 	# --- Selected wire highlights ---
 	_draw_selected_wires()
 
+	# --- Drop-on-wire highlight (node drag hover) ---
+	_draw_drag_over_wire()
+
 	# --- Ghost wire (pending connection drop) ---
 	_draw_ghost_wire()
 
@@ -1600,6 +1683,26 @@ func paste_clipboard() -> void:
 	var id_remap: Dictionary = {}
 	var new_nodes: Array[GNNode] = []
 
+	# Compute the centroid of the original nodes so we can re-center the
+	# pasted group at the current mouse cursor position.
+	var centroid := Vector2.ZERO
+	var node_count := 0
+	for old_id in nodes_data:
+		var nd: Dictionary = nodes_data[old_id]
+		var raw_pos = nd.get("position", null)
+		if raw_pos is Array and raw_pos.size() >= 2:
+			centroid += Vector2(float(raw_pos[0]), float(raw_pos[1]))
+		elif raw_pos is Vector2:
+			centroid += raw_pos
+		node_count += 1
+	if node_count > 0:
+		centroid /= float(node_count)
+
+	# Target position: mouse cursor in graph space (falls back to small offset
+	# if cursor position can't be determined).
+	var mouse_graph_pos := (get_local_mouse_position() + scroll_offset) / zoom
+	var paste_offset := mouse_graph_pos - centroid
+
 	for old_id in nodes_data:
 		var nd: Dictionary = nodes_data[old_id]
 		var op_type: String = nd.get("type", "")
@@ -1620,8 +1723,8 @@ func paste_clipboard() -> void:
 		node.initialize(new_id)
 		node.from_dict(nd)
 
-		# Offset position so pasted nodes are visually distinct
-		node.graph_position += Vector2(50, 50)
+		# Offset position so pasted group is centered at the mouse cursor
+		node.graph_position += paste_offset
 
 		id_remap[old_id] = new_id
 		new_nodes.append(node)
@@ -2068,6 +2171,272 @@ func _draw_selected_wires() -> void:
 		else:
 			# Fallback for degenerate case
 			_expr_ref_overlay.draw_line(p1, p2, highlight_color, highlight_width, true)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Drop-on-Wire (Houdini-style)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Called every frame during an active single-node drag.  Checks whether the
+## dragged node's center is hovering over a wire that is compatible with the
+## node's I/O.  Updates [member _drag_over_wire] and triggers overlay redraws.
+func _update_drag_over_wire() -> void:
+	if not _node_drag_active or _pre_move_positions.size() != 1 or network == null:
+		if not _drag_over_wire.is_empty():
+			_drag_over_wire = {}
+			_drag_wire_in_port = -1
+			_drag_wire_out_port = -1
+			_expr_ref_overlay.queue_redraw()
+		return
+
+	var dragged_id: String = _pre_move_positions.keys()[0]
+	var view: GNNodeView = _node_views.get(dragged_id, null)
+	if view == null:
+		return
+
+	# Get the center of the dragged node in local (overlay) pixel space
+	var center_graph := view.position_offset + view.size / 2.0
+	var center_local := (center_graph - scroll_offset / zoom) * zoom
+
+	# Hit-test wires
+	var hit := get_closest_connection_at_point(center_local, _DRAG_WIRE_HIT_DISTANCE)
+	if hit.is_empty():
+		if not _drag_over_wire.is_empty():
+			_drag_over_wire = {}
+			_drag_wire_in_port = -1
+			_drag_wire_out_port = -1
+			_expr_ref_overlay.queue_redraw()
+		return
+
+	var wire := _wire_dict_from_graphedit(hit)
+
+	# Skip wires that already connect to/from the dragged node
+	if wire["from_node"] == dragged_id or wire["to_node"] == dragged_id:
+		if not _drag_over_wire.is_empty():
+			_drag_over_wire = {}
+			_drag_wire_in_port = -1
+			_drag_wire_out_port = -1
+			_expr_ref_overlay.queue_redraw()
+		return
+
+	# Check I/O compatibility of the dragged node with this wire
+	var from_node: GNNode = network.get_node_by_id(wire["from_node"])
+	var to_node: GNNode = network.get_node_by_id(wire["to_node"])
+	if from_node == null or to_node == null:
+		return
+
+	var out_port: GNPort = from_node.get_output_port(wire["from_port"])
+	var in_port: GNPort = to_node.get_input_port(wire["to_port"])
+	if out_port == null or in_port == null:
+		return
+
+	var dragged_node: GNNode = network.get_node_by_id(dragged_id)
+	if dragged_node == null:
+		return
+
+	# Find a compatible input port on the dragged node (accepts upstream family)
+	var compat_in: int = -1
+	for port: GNPort in dragged_node.input_ports:
+		if port.family == out_port.family:
+			compat_in = port.index
+			break
+	# Find a compatible output port on the dragged node (produces downstream family)
+	var compat_out: int = -1
+	for port: GNPort in dragged_node.output_ports:
+		if port.family == in_port.family:
+			compat_out = port.index
+			break
+
+	if compat_in < 0 or compat_out < 0:
+		if not _drag_over_wire.is_empty():
+			_drag_over_wire = {}
+			_drag_wire_in_port = -1
+			_drag_wire_out_port = -1
+			_expr_ref_overlay.queue_redraw()
+		return
+
+	# Only redraw if the hovered wire changed
+	if _drag_over_wire != wire:
+		_drag_over_wire = wire
+		_drag_wire_in_port = compat_in
+		_drag_wire_out_port = compat_out
+		_expr_ref_overlay.queue_redraw()
+
+
+## Draws a green glow on the wire the dragged node is hovering over.
+func _draw_drag_over_wire() -> void:
+	if _drag_over_wire.is_empty():
+		return
+
+	var accent := Color(0.2, 1.0, 0.4, 0.9)   # Bright green
+	var glow := Color(0.2, 1.0, 0.4, 0.18)
+
+	var from_graph := _get_port_graph_pos(
+			_drag_over_wire["from_node"], _drag_over_wire["from_port"], true)
+	var to_graph := _get_port_graph_pos(
+			_drag_over_wire["to_node"], _drag_over_wire["to_port"], false)
+
+	var p1 := (from_graph - scroll_offset / zoom) * zoom
+	var p2 := (to_graph - scroll_offset / zoom) * zoom
+
+	var pts: PackedVector2Array = get_connection_line(p1, p2)
+	if pts.size() >= 2:
+		_expr_ref_overlay.draw_polyline(pts, glow, connection_lines_thickness + 6.0, true)
+		_expr_ref_overlay.draw_polyline(pts, accent, connection_lines_thickness + 1.0, true)
+	else:
+		_expr_ref_overlay.draw_line(p1, p2, accent, connection_lines_thickness + 1.0, true)
+
+	# Draw a small "+" indicator at the wire midpoint
+	var mid := (p1 + p2) / 2.0
+	var arm := 6.0
+	_expr_ref_overlay.draw_line(mid - Vector2(arm, 0), mid + Vector2(arm, 0), accent, 2.0, true)
+	_expr_ref_overlay.draw_line(mid - Vector2(0, arm), mid + Vector2(0, arm), accent, 2.0, true)
+
+
+## Splices an already-existing dragged node into a wire.  Handles:
+##   - Disconnecting the old wire
+##   - Snapping the node to the wire midpoint
+##   - Connecting from → dragged → to
+##   - Cascading surrounding nodes apart
+##   - Full undo/redo support (move + splice as one action)
+func _perform_drag_wire_splice(wire: Dictionary, in_port: int, out_port: int) -> void:
+	if network == null:
+		return
+
+	var dragged_id: String = _pre_move_positions.keys()[0]
+	var dragged_view: GNNodeView = _node_views.get(dragged_id, null)
+	if dragged_view == null:
+		return
+
+	var fn: String = wire["from_node"]
+	var fp: int = wire["from_port"]
+	var tn: String = wire["to_node"]
+	var tp: int = wire["to_port"]
+
+	var from_view: GNNodeView = _node_views.get(fn, null)
+	var to_view: GNNodeView = _node_views.get(tn, null)
+
+	# Calculate midpoint to position the dragged node
+	var mid_pos: Vector2
+	if from_view and to_view:
+		mid_pos = (from_view.position_offset + to_view.position_offset) / 2.0
+		# Center the node horizontally at the midpoint
+		mid_pos.x -= dragged_view.size.x / 2.0
+		# Vertically center between the two nodes
+		var from_center_y := from_view.position_offset.y + from_view.size.y / 2.0
+		var to_center_y := to_view.position_offset.y + to_view.size.y / 2.0
+		mid_pos.y = (from_center_y + to_center_y) / 2.0 - dragged_view.size.y / 2.0
+	else:
+		mid_pos = dragged_view.position_offset
+
+	# Snap-record the original position for undo
+	var old_pos: Vector2 = _pre_move_positions.get(dragged_id, dragged_view.position_offset)
+
+	# Move node to midpoint
+	dragged_view.position_offset = mid_pos
+	if dragged_view.gn_node:
+		dragged_view.gn_node.graph_position = mid_pos
+
+	# Remove old wire
+	network.disconnect_nodes(fn, fp, tn, tp)
+	disconnect_node(fn, fp, tn, tp)
+
+	# Connect: from → dragged → to
+	var ok1 := network.connect_nodes(fn, fp, dragged_id, in_port)
+	var ok2 := network.connect_nodes(dragged_id, out_port, tn, tp)
+	connect_node(fn, fp, dragged_id, in_port)
+	connect_node(dragged_id, out_port, tn, tp)
+
+	# Record full undo: move + splice
+	_undo_redo.create_action("Drop %s onto wire" % dragged_id)
+
+	# Undo = restore old connections + move back
+	_undo_redo.add_undo_method(_ur_disconnect.bind(fn, fp, dragged_id, in_port))
+	_undo_redo.add_undo_method(_ur_disconnect.bind(dragged_id, out_port, tn, tp))
+	_undo_redo.add_undo_method(_ur_connect.bind(fn, fp, tn, tp))
+	_undo_redo.add_undo_method(_ur_set_positions.bind({dragged_id: old_pos}))
+
+	# Redo = move + splice
+	_undo_redo.add_do_method(_ur_set_positions.bind({dragged_id: mid_pos}))
+	_undo_redo.add_do_method(_ur_disconnect.bind(fn, fp, tn, tp))
+	_undo_redo.add_do_method(_ur_connect.bind(fn, fp, dragged_id, in_port))
+	_undo_redo.add_do_method(_ur_connect.bind(dragged_id, out_port, tn, tp))
+
+	# Cascade nodes apart if needed
+	var moved := _make_room_for_insert(fn, tn, dragged_id)
+	if not moved.is_empty():
+		_undo_redo.add_undo_method(_ur_animate_positions.bind(moved))
+
+	_undo_redo.commit_action(false)
+
+	_pre_move_positions.clear()
+	_node_drag_ann_info.clear()
+
+	if ok1 and ok2:
+		GNLogger.info("GraphEditor", "Dropped '%s' onto wire %s:%d → %s:%d" % [
+			dragged_id, fn, fp, tn, tp])
+	else:
+		GNLogger.warn("GraphEditor", "Drop-on-wire partially failed: %s → %s → %s" % [
+			fn, dragged_id, tn])
+
+
+## Shake-to-disconnect: remove the dragged node from its chain(s) and
+## re-wire upstream→downstream directly.  Only works for single-node drags
+## where the node has at least one through-connection (in→out on port 0).
+func _perform_shake_disconnect(node_id: String) -> void:
+	if network == null:
+		return
+
+	var in_conns: Array = network.get_input_connections(node_id)
+	var out_conns: Array = network.get_output_connections(node_id)
+
+	if in_conns.is_empty() and out_conns.is_empty():
+		return  # Nothing to disconnect
+
+	_undo_redo.create_action("Shake-disconnect '%s'" % node_id)
+
+	# Build bypass pairs: for each input port, find matching output port wires.
+	# Port 0→0 is the most common "pass-through" case.
+	var bypass_pairs: Array = []  # Array of { from, fp, to, tp }
+	for ic in in_conns:
+		for oc in out_conns:
+			if ic.to_port == oc.from_port:
+				bypass_pairs.append({
+					"from": ic.from_node, "fp": ic.from_port,
+					"to": oc.to_node, "tp": oc.to_port,
+				})
+
+	# Disconnect all wires from/to this node
+	for ic in in_conns:
+		network.disconnect_nodes(ic.from_node, ic.from_port, node_id, ic.to_port)
+		disconnect_node(ic.from_node, ic.from_port, node_id, ic.to_port)
+		_undo_redo.add_undo_method(_ur_connect.bind(
+			ic.from_node, ic.from_port, node_id, ic.to_port))
+		_undo_redo.add_do_method(_ur_disconnect.bind(
+			ic.from_node, ic.from_port, node_id, ic.to_port))
+
+	for oc in out_conns:
+		network.disconnect_nodes(node_id, oc.from_port, oc.to_node, oc.to_port)
+		disconnect_node(node_id, oc.from_port, oc.to_node, oc.to_port)
+		_undo_redo.add_undo_method(_ur_connect.bind(
+			node_id, oc.from_port, oc.to_node, oc.to_port))
+		_undo_redo.add_do_method(_ur_disconnect.bind(
+			node_id, oc.from_port, oc.to_node, oc.to_port))
+
+	# Reconnect bypass pairs (upstream → downstream directly)
+	for bp in bypass_pairs:
+		network.connect_nodes(bp["from"], bp["fp"], bp["to"], bp["tp"])
+		connect_node(bp["from"], bp["fp"], bp["to"], bp["tp"])
+		_undo_redo.add_do_method(_ur_connect.bind(
+			bp["from"], bp["fp"], bp["to"], bp["tp"]))
+		_undo_redo.add_undo_method(_ur_disconnect.bind(
+			bp["from"], bp["fp"], bp["to"], bp["tp"]))
+
+	_undo_redo.commit_action(false)
+
+	show_toast("Disconnected '%s'" % node_id, ToastType.INFO, 1.5)
+	GNLogger.info("GraphEditor", "Shake-disconnect '%s' (%d bypass pairs)" % [
+		node_id, bypass_pairs.size()])
 
 
 ## Initiates a wire drag-to-insert: the user has selected a wire by clicking it,
@@ -3248,6 +3617,13 @@ func _on_begin_node_move() -> void:
 	_pre_move_positions.clear()
 	_node_drag_ann_info.clear()
 	_node_drag_active = false
+	_drag_over_wire = {}
+	_drag_wire_in_port = -1
+	_drag_wire_out_port = -1
+	_shake_last_dir = Vector2.ZERO
+	_shake_reversals = 0
+	_shake_timer = 0.0
+	_shake_triggered = false
 
 	var selected_ids: Array[String] = []
 	for view_name in _node_views:
@@ -3298,12 +3674,17 @@ func _on_begin_node_move() -> void:
 
 
 ## Called every frame — syncs annotation transforms on scroll/zoom changes,
-## and applies group-move deltas during active node drags.
-func _process(_delta: float) -> void:
+## applies group-move deltas during active node drags, and handles edge-scroll
+## when a wire is being dragged near the viewport border.
+func _process(delta: float) -> void:
 	# Redraw overlay when scroll/zoom changes (keeps wire highlights and
 	# expression ref lines aligned with the graph content).
 	if zoom != _last_zoom or scroll_offset != _last_scroll:
 		_expr_ref_overlay.queue_redraw()
+
+	# ── Edge auto-scroll while dragging a wire or node near the border ──
+	if _wire_dragging or _node_drag_active:
+		_handle_edge_scroll(delta)
 
 	# Fast path: nothing to do if no annotations exist and no node drag is active.
 	if _annotation_views.is_empty() and not _node_drag_active:
@@ -3332,6 +3713,27 @@ func _process(_delta: float) -> void:
 	if frame_delta.is_zero_approx():
 		return
 
+	# ── Shake-to-disconnect detection ──
+	if not _shake_triggered and _pre_move_positions.size() == 1:
+		var speed := frame_delta.length() / maxf(delta, 0.001)
+		if speed > _SHAKE_MIN_SPEED:
+			var cur_dir := Vector2(signf(frame_delta.x), signf(frame_delta.y))
+			if _shake_last_dir != Vector2.ZERO:
+				# A reversal = sign flip on either axis
+				if (cur_dir.x != 0.0 and _shake_last_dir.x != 0.0 and cur_dir.x != _shake_last_dir.x) \
+						or (cur_dir.y != 0.0 and _shake_last_dir.y != 0.0 and cur_dir.y != _shake_last_dir.y):
+					if _shake_reversals == 0:
+						_shake_timer = 0.0
+					_shake_reversals += 1
+			_shake_last_dir = cur_dir
+		_shake_timer += delta
+		if _shake_timer > _SHAKE_TIME_WINDOW:
+			_shake_reversals = 0
+			_shake_timer = 0.0
+		if _shake_reversals >= _SHAKE_REVERSAL_THRESHOLD:
+			_shake_triggered = true
+			_perform_shake_disconnect(first_id)
+
 	_group_moving = true
 	_node_drag_last_pos = current_pos
 
@@ -3352,10 +3754,27 @@ func _process(_delta: float) -> void:
 
 	_group_moving = false
 
+	# ── Drop-on-wire detection during drag ──
+	_update_drag_over_wire()
+
 
 ## Compare positions after drag ends and record for undo if changed.
 func _on_end_node_move() -> void:
 	_node_drag_active = false
+
+	# ── Drop-on-wire: splice the dragged node into the hovered wire ──
+	var splice_wire := _drag_over_wire
+	var splice_in := _drag_wire_in_port
+	var splice_out := _drag_wire_out_port
+	_drag_over_wire = {}
+	_drag_wire_in_port = -1
+	_drag_wire_out_port = -1
+	_expr_ref_overlay.queue_redraw()
+
+	if not splice_wire.is_empty() and splice_in >= 0 and splice_out >= 0 \
+			and _pre_move_positions.size() == 1:
+		_perform_drag_wire_splice(splice_wire, splice_in, splice_out)
+		return  # Undo action is recorded inside _perform_drag_wire_splice
 	if _pre_move_positions.is_empty():
 		return
 
@@ -4404,3 +4823,84 @@ func _on_box_drag_ended(ann_id: String) -> void:
 
 	_box_drag_pre_positions.clear()
 	_box_drag_ann_id = ""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Edge auto-scroll while dragging wires or nodes near the viewport border
+# ─────────────────────────────────────────────────────────────────────────────
+func _handle_edge_scroll(delta: float) -> void:
+	var mouse := get_local_mouse_position()
+	var vp_size := size
+	var scroll_delta := Vector2.ZERO
+
+	# Left edge
+	if mouse.x < _EDGE_SCROLL_MARGIN:
+		var t := 1.0 - clampf(mouse.x / _EDGE_SCROLL_MARGIN, 0.0, 1.0)
+		scroll_delta.x -= _EDGE_SCROLL_SPEED * t * delta
+	# Right edge
+	elif mouse.x > vp_size.x - _EDGE_SCROLL_MARGIN:
+		var t := 1.0 - clampf((vp_size.x - mouse.x) / _EDGE_SCROLL_MARGIN, 0.0, 1.0)
+		scroll_delta.x += _EDGE_SCROLL_SPEED * t * delta
+	# Top edge
+	if mouse.y < _EDGE_SCROLL_MARGIN:
+		var t := 1.0 - clampf(mouse.y / _EDGE_SCROLL_MARGIN, 0.0, 1.0)
+		scroll_delta.y -= _EDGE_SCROLL_SPEED * t * delta
+	# Bottom edge
+	elif mouse.y > vp_size.y - _EDGE_SCROLL_MARGIN:
+		var t := 1.0 - clampf((vp_size.y - mouse.y) / _EDGE_SCROLL_MARGIN, 0.0, 1.0)
+		scroll_delta.y += _EDGE_SCROLL_SPEED * t * delta
+
+	if scroll_delta != Vector2.ZERO:
+		scroll_offset += scroll_delta
+		# When dragging nodes, shift them along with the scroll so they
+		# stay under the cursor instead of lagging behind.
+		if _node_drag_active:
+			var graph_delta := scroll_delta / zoom
+			for view_name in _node_views:
+				var view: GNNodeView = _node_views[view_name]
+				if view.selected:
+					view.position_offset += graph_delta
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Toast notifications — temporary overlay messages
+# ─────────────────────────────────────────────────────────────────────────────
+enum ToastType { INFO, WARNING, ERROR }
+
+func show_toast(message: String, type: int = ToastType.INFO, duration: float = 3.0) -> void:
+	if _toast_container == null:
+		return
+
+	var panel := PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var sb := StyleBoxFlat.new()
+	sb.set_corner_radius_all(6)
+	sb.content_margin_left = 14
+	sb.content_margin_right = 14
+	sb.content_margin_top = 8
+	sb.content_margin_bottom = 8
+	match type:
+		ToastType.ERROR:
+			sb.bg_color = Color(0.7, 0.15, 0.15, 0.92)
+		ToastType.WARNING:
+			sb.bg_color = Color(0.72, 0.55, 0.1, 0.92)
+		_:
+			sb.bg_color = Color(0.18, 0.18, 0.22, 0.92)
+	panel.add_theme_stylebox_override("panel", sb)
+
+	var label := Label.new()
+	label.text = message
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_font_size_override("font_size", 14)
+	panel.add_child(label)
+
+	panel.modulate.a = 0.0
+	_toast_container.add_child(panel)
+
+	var tw := create_tween()
+	tw.tween_property(panel, "modulate:a", 1.0, 0.15)
+	tw.tween_interval(duration)
+	tw.tween_property(panel, "modulate:a", 0.0, 0.3)
+	tw.tween_callback(panel.queue_free)

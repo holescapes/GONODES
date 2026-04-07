@@ -2652,9 +2652,19 @@ chop("lfo1", "out")               # Last sample of channel 'out' from CHOP 'lfo1
 chop("noise_chop1", "tx")         # Last sample of channel 'tx'
 chop("math1", "out", 5)           # Sample at index 5
 
+# Port-aware CHOP access (for multi-output nodes)
+chopp("script1", "out2", "tx")    # Channel 'tx' from output port named "out2"
+chopp("script1", 1, "tx")         # Channel 'tx' from output port index 1
+chopp("script1", "out2", "tx", 5) # Sample 5 of 'tx' from port "out2"
+choppf("script1", "out2", "tx")   # Same, guaranteed float return
+
 # Reference TOP properties
 top("noise1", "resolution").x     # Width of TOP output
 top("noise1", "resolution").y     # Height of TOP output
+
+# Port-aware TOP access (for multi-output TOPs like GLSLMultiTOP)
+topp("glsl1", "out1", "resolution")  # Resolution from output port "out1"
+topp("glsl1", 1, "resolution")       # Resolution from output port index 1
 
 # Math with references
 chop("lfo1", "out") * 10.0 + par("offset")
@@ -2724,6 +2734,15 @@ chop("lfo1").sample_rate          # Sample rate (float)
 chop("lfo1")["out"]               # Shorthand for .value("out") — TD syntax compatibility
 ```
 
+#### `chopp(name, port, channel)` — Port-Aware CHOP Access ✅
+```gdscript
+chopp("script1", "out2", "tx")       # Channel 'tx' from output port "out2"
+chopp("script1", 1, "tx")            # Channel 'tx' from port index 1
+chopp("script1", "out2", "tx", 5)    # Sample 5 from port "out2", channel "tx"
+choppf("script1", "out2", "tx")      # Same, guaranteed float return
+```
+**When to use:** For multi-output nodes (e.g. GDScriptSCRIPT with multiple CHOP outputs). `chop()` always finds the first CHOP port; `chopp()` targets a specific port by name or index.
+
 #### `top(name)` — TOP Proxy (MVP)
 ```gdscript
 top("noise1").resolution          # Vector2i (width, height)
@@ -2731,6 +2750,14 @@ top("noise1").resolution.x        # Width
 top("noise1").resolution.y        # Height
 top("noise1").aspect              # float (width / height)
 ```
+
+#### `topp(name, port)` — Port-Aware TOP Access ✅
+```gdscript
+topp("glsl_multi1", "out1", "resolution")   # Resolution from port "out1"
+topp("glsl_multi1", 1, "resolution")         # Resolution from port index 1
+topp("multi_buf1", "normal", "aspect")       # Aspect ratio from "normal" output
+```
+**When to use:** For multi-output TOPs (e.g. GLSLMultiTOP with 8 outputs, MultiBufferRenderTOP). `top()` finds the first TOP port; `topp()` targets a specific port.
 
 #### `sop(name, port)` — SOP Output Access
 ```gdscript

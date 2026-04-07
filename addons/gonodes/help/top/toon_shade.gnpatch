@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"toon1": {"type": "ToonShadeTOP", "position": [350, 200], "parameters": {"shade_levels": {"value": 4}, "edge_strength": {"value": 2.0}, "edge_threshold": {"value": 0.08}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "toon1", "to_port": 0},
+		{"from": "toon1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Toon Shade TOP -- Cel Shading\n\nQuantizes colors into flat shading bands + Sobel edge outlines.\n4 levels = classic anime look. Fewer = more graphic.\nAdjust Edge Threshold to control outline sensitivity.", "position": [-50.0, -50.0], "size": [480.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

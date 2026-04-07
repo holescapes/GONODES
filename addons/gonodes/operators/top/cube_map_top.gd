@@ -51,6 +51,13 @@ func _init_parameters() -> void:
 		"Face Size", "Resolution of each face in pixels"))
 
 
+func get_active_input_indices() -> PackedInt32Array:
+	var mode: int = get_param_value("mode")
+	if mode == 0:
+		return PackedInt32Array()  # Assemble: all 6 inputs
+	return PackedInt32Array([0])  # Extract / Equirect: only input 0
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
 	var mode: int = get_param_value("mode")
 	match mode:

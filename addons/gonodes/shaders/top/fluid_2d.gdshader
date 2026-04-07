@@ -25,8 +25,7 @@ uniform bool reset = false;
 void fragment() {
     if (reset) {
         COLOR = vec4(0.0);
-        return;
-    }
+    } else {
 
     vec2 uv = UV;
     vec2 texel = 1.0 / resolution;
@@ -102,4 +101,5 @@ void fragment() {
     vec2 vel_encoded = clamp(vel * 0.5 + 0.5, 0.0, 1.0);
 
     COLOR = vec4(vel_encoded, density, 1.0);
+    } // end else (not reset)
 }

@@ -1,0 +1,18 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"testcard1": {"type": "TestCardTOP", "position": [0, 200], "parameters": {"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}}, "card_type": {"value": 0}}},
+		"testcard2": {"type": "TestCardTOP", "position": [0, 550], "parameters": {"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}}, "card_type": {"value": 1}, "grid_cells": {"value": 32.0}}},
+		"testcard3": {"type": "TestCardTOP", "position": [0, 900], "parameters": {"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}}, "card_type": {"value": 2}}},
+		"window1": {"type": "WindowOUT", "position": [450, 200], "parameters": {"open": {"value": true}}},
+		"window2": {"type": "WindowOUT", "position": [450, 550], "parameters": {"open": {"value": false}}},
+		"window3": {"type": "WindowOUT", "position": [450, 900], "parameters": {"open": {"value": false}}}
+	},
+	"connections": [
+		{"from": "testcard1", "from_port": 0, "to": "window1", "to_port": 0},
+		{"from": "testcard2", "from_port": 0, "to": "window2", "to_port": 0},
+		{"from": "testcard3", "from_port": 0, "to": "window3", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Test Card TOP -- Projection Mapping Calibration\n\nGenerates broadcast / projection-mapping test cards.\nFull mode: colour bars + grid + safe area + resolution label.\nSet Resolution to your projector's native res.\nToggle individual features with the Show * parameters.", "position": [-50.0, -50.0], "size": [550.0, 90.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

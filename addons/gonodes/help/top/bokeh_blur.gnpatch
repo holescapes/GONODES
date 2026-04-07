@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"bokeh1": {"type": "BokehBlurTOP", "position": [350, 200], "parameters": {"radius": {"value": 12.0}, "shape": {"value": 1}, "quality": {"value": 4}, "brightness": {"value": 2.0}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "bokeh1", "to_port": 0},
+		{"from": "bokeh1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Bokeh Blur TOP -- Shaped DOF Blur\n\nHexagonal iris shape with highlight boost.\nHighlight Boost > 1 makes bright spots bloom into circles.\nDisc shape = smooth, Hexagon = anamorphic look.", "position": [-50.0, -50.0], "size": [480.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

@@ -1,0 +1,16 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"color_space1": {"type": "ColorSpaceTOP", "position": [350, 200], "parameters": {"conversion": {"value": 0}}},
+		"color_space2": {"type": "ColorSpaceTOP", "position": [600, 200], "parameters": {"conversion": {"value": 1}}},
+		"window1": {"type": "WindowOUT", "position": [900, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "color_space1", "to_port": 0},
+		{"from": "color_space1", "from_port": 0, "to": "color_space2", "to_port": 0},
+		{"from": "color_space2", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Color Space TOP -- Space Conversion\n\nConverts between sRGB, Linear, ACEScg, Rec.709, and Rec.2020.\nHere sRGB→Linear then Linear→sRGB roundtrips back to the original.\nUse for correct color pipeline when compositing in linear space.", "position": [-50.0, -50.0], "size": [550.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

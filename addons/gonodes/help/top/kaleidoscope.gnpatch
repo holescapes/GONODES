@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"kaleidoscope1": {"type": "KaleidoscopeTOP", "position": [350, 200], "parameters": {"segments": {"value": 8}, "rotation": {"expression": "time * 10.0", "mode": "EXPRESSION", "value": 0.0}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "kaleidoscope1", "to_port": 0},
+		{"from": "kaleidoscope1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Kaleidoscope TOP -- Mirror Symmetry\n\n8 segments with animated rotation.\nFewer segments = larger mirror wedges.\nAnimate Rotation for psychedelic spinning patterns.", "position": [-50.0, -50.0], "size": [480.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

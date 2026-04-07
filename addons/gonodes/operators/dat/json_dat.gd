@@ -23,6 +23,13 @@ func _init_parameters() -> void:
 		"Pretty Print", "Use indented JSON output (Generate mode only)"))
 
 
+func get_active_input_indices() -> PackedInt32Array:
+	var mode: int = get_param_value("mode")
+	if mode == 0:
+		return PackedInt32Array([-1])  # Parse mode ignores all inputs
+	return PackedInt32Array()  # Generate uses all inputs
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
 	var out := _prepare_table()
 	var mode: int = get_param_value("mode")

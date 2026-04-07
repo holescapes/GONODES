@@ -28,15 +28,22 @@ void fragment() {
 		float r2 = dot(centered, centered);
 		if (r2 > 1.0) {
 			COLOR = vec4(0.0);
-			return;
+		} else {
+			float z = sqrt(1.0 - r2);
+			uv.x = atan(centered.x, z) / 3.14159265 + 0.5;
+			uv.y = asin(centered.y) / 3.14159265 + 0.5;
+			uv = uv * uv_scale + uv_offset;
+			COLOR = texture(source_tex, uv);
 		}
-		float z = sqrt(1.0 - r2);
-		uv.x = atan(centered.x, z) / 3.14159265 + 0.5;
-		uv.y = asin(centered.y) / 3.14159265 + 0.5;
+	} else {
+		// Planar — apply scale and offset
+		uv = uv * uv_scale + uv_offset;
+		COLOR = texture(source_tex, uv);
 	}
 
-	// Apply scale and offset
-	uv = uv * uv_scale + uv_offset;
-
-	COLOR = texture(source_tex, uv);
+	// Cylindrical also needs scale+offset
+	if (projection_mode == 1) {
+		uv = uv * uv_scale + uv_offset;
+		COLOR = texture(source_tex, uv);
+	}
 }

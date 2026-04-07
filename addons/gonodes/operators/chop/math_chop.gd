@@ -29,6 +29,14 @@ func _init_parameters() -> void:
 		"Pick a specific channel from in2 (empty = auto-match)"))
 
 
+func get_active_input_indices() -> PackedInt32Array:
+	var op_idx: int = get_param_value("operation")
+	# Unary ops (4=Abs, 5=Sin, 6=Cos) only use input 0
+	if op_idx >= 4 and op_idx <= 6:
+		return PackedInt32Array([0])
+	return PackedInt32Array()  # Binary ops use both inputs
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
 	var op_idx: int = get_param_value("operation")
 	var operand_val: float = get_param_value("operand")

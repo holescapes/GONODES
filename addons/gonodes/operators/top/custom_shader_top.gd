@@ -17,17 +17,31 @@ extends GNTopBase
 ##   uniform vec4      <name> : source_color = …; → Creates a Color parameter
 ##   uniform vec4      <name> = …;     → Creates a Color parameter named <name>
 ##   uniform vec2      gn_resolution;  → Auto-bound to output resolution (no param)
+##   uniform float     gn_time;       → Auto-bound to elapsed time in seconds (no param)
+##   uniform int       gn_frame;      → Auto-bound to current frame number (no param)
+##   uniform float     gn_dt;         → Auto-bound to delta time this frame (no param)
 ##   TIME                               → Built-in to Godot shaders (no uniform)
+##
+## Fragment-only snippets (no shader_type) are auto-wrapped with a preamble.
+## Commented-out uniforms ("// uniform ...") are uncommented and registered.
 ##
 ## Reserved uniform names (no param created):
 ##   gn_tex0..gn_tex7   — handled as input texture ports
 ##   gn_resolution      — auto-bound to output resolution
+##   gn_time            — auto-bound to elapsed time
+##   gn_frame           — auto-bound to frame count
+##   gn_dt              — auto-bound to delta time
 
 const DEFAULT_SHADER_CODE := """shader_type canvas_item;
 
 // ─── GONODES Uniforms (auto-bound) ───────────────────────
 // Input textures — add more gn_tex<N> uniforms to auto-create input ports.
 uniform sampler2D gn_tex0 : hint_default_white;
+
+// Auto-bound timing uniforms (values injected by the cook engine):
+uniform float gn_time;   // Elapsed time in seconds
+// uniform int gn_frame;  // Current frame number
+// uniform float gn_dt;   // Delta time this frame
 
 // Your own uniforms — each becomes an inspector parameter automatically.
 // Supported types: float, int, bool, vec2, vec4 (color).
@@ -46,7 +60,7 @@ void fragment() {
 
 ## Uniform names that are auto-bound and should NOT create inspector params.
 ## (gn_tex* are already excluded by the sampler2D filter.)
-const _RESERVED_UNIFORMS: Array = ["gn_resolution"]
+const _RESERVED_UNIFORMS: Array = ["gn_resolution", "gn_time", "gn_frame", "gn_dt"]
 
 var _shader: Shader = null
 
@@ -156,8 +170,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	for p_name in _dynamic_param_names:
 		_material.set_shader_parameter(p_name, get_param_value(p_name))
 
-	# ── Resolution uniform ──
+	# ── Auto-bound reserved uniforms ──
 	_material.set_shader_parameter("gn_resolution", Vector2(res))
+	_material.set_shader_parameter("gn_time", elapsed_time)
+	_material.set_shader_parameter("gn_frame", current_frame)
+	_material.set_shader_parameter("gn_dt", current_delta)
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
@@ -173,8 +190,16 @@ func _compile_shader(code: String) -> void:
 		_last_compiled_code = code
 		return
 
-	# Validate basic structure
+	# ── Auto-wrap snippet code ──
+	# If the code doesn't start with 'shader_type', treat it as a fragment
+	# snippet and wrap it with the full preamble.  This supports the preset
+	# convention where files contain only commented uniforms + fragment().
+	var compile_code := code
 	if not code.strip_edges().begins_with("shader_type"):
+		compile_code = _wrap_snippet(code)
+
+	# Validate basic structure
+	if not compile_code.strip_edges().begins_with("shader_type"):
 		GNLogger.error("CustomShaderTOP",
 			"'%s' — shader must begin with 'shader_type canvas_item;'" % id)
 		_shader_ok = false
@@ -183,16 +208,16 @@ func _compile_shader(code: String) -> void:
 
 	# Attempt compilation by setting the code on the Shader resource.
 	var new_shader := Shader.new()
-	new_shader.code = code
+	new_shader.code = compile_code
 
 	_shader = new_shader
 	_material.shader = _shader
 	_shader_ok = true
 	_last_compiled_code = code
-	GNLogger.info("CustomShaderTOP", "'%s' — shader compiled (%d chars)" % [id, code.length()])
+	GNLogger.info("CustomShaderTOP", "'%s' — shader compiled (%d chars)" % [id, compile_code.length()])
 
 	# Rebuild input ports to match the sampler2D gn_tex<N> uniforms found in code
-	var tex_count := _count_shader_tex_inputs(code)
+	var tex_count := _count_shader_tex_inputs(compile_code)
 	if tex_count != input_ports.size():
 		_rebuild_tex_inputs(tex_count)
 
@@ -221,7 +246,73 @@ func _compile_shader(code: String) -> void:
 		parameters.erase("resolution")
 
 	# Rebuild dynamic params from non-reserved uniforms
-	_rebuild_uniform_params(code)
+	_rebuild_uniform_params(compile_code)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Snippet Auto-Wrapping
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Wraps a fragment-only snippet into a full shader_type canvas_item shader.
+## Scans the snippet for:
+##   • gn_tex<N> references → generates sampler2D uniform declarations
+##   • Commented-out uniforms ("// uniform ...") → uncomments them as real uniforms
+##   • gn_time / gn_frame / gn_dt / gn_resolution references → adds uniform decls
+## Returns a complete shader string ready for Shader.code.
+static func _wrap_snippet(snippet: String) -> String:
+	var lines := snippet.split("\n")
+	var preamble_lines: PackedStringArray = PackedStringArray()
+	preamble_lines.append("shader_type canvas_item;")
+	preamble_lines.append("")
+
+	# Collect gn_tex references
+	var max_tex_idx := -1
+	for line in lines:
+		var pos := 0
+		while true:
+			var found := line.find("gn_tex", pos)
+			if found == -1:
+				break
+			var digit_start := found + 6
+			var digit_str := ""
+			while digit_start < line.length() and line[digit_start].is_valid_int():
+				digit_str += line[digit_start]
+				digit_start += 1
+			if not digit_str.is_empty():
+				var idx := digit_str.to_int()
+				if idx > max_tex_idx:
+					max_tex_idx = idx
+			pos = found + 1
+
+	for i in range(max_tex_idx + 1):
+		preamble_lines.append("uniform sampler2D gn_tex%d : hint_default_white;" % i)
+
+	# Auto-bind reserved uniforms if referenced
+	if snippet.find("gn_resolution") != -1:
+		preamble_lines.append("uniform vec2 gn_resolution;")
+	if snippet.find("gn_time") != -1:
+		preamble_lines.append("uniform float gn_time;")
+	if snippet.find("gn_frame") != -1:
+		preamble_lines.append("uniform int gn_frame;")
+	if snippet.find("gn_dt") != -1:
+		preamble_lines.append("uniform float gn_dt;")
+
+	# Extract commented-out uniforms and emit them as real declarations
+	var body_lines: PackedStringArray = PackedStringArray()
+	for line in lines:
+		var stripped := line.strip_edges()
+		if stripped.begins_with("// uniform ") or stripped.begins_with("//uniform "):
+			# Uncomment: strip leading "// " or "//"
+			var real_line := stripped.substr(2).strip_edges()
+			# Ensure it ends with semicolon
+			if not real_line.ends_with(";"):
+				real_line += ";"
+			preamble_lines.append(real_line)
+		else:
+			body_lines.append(line)
+
+	preamble_lines.append("")
+	return "\n".join(preamble_lines) + "\n" + "\n".join(body_lines)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

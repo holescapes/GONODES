@@ -38,13 +38,12 @@ void fragment() {
 
 	if (idx >= num_inputs) {
 		COLOR = bg_color;
-		return;
+	} else {
+		vec2 cell_uv = vec2(
+			(UV.x - float(col) * cell_w) / cell_w,
+			(UV.y - float(row) * cell_h) / cell_h
+		);
+
+		COLOR = sample_input(idx, cell_uv);
 	}
-
-	vec2 cell_uv = vec2(
-		(UV.x - float(col) * cell_w) / cell_w,
-		(UV.y - float(row) * cell_h) / cell_h
-	);
-
-	COLOR = sample_input(idx, cell_uv);
 }

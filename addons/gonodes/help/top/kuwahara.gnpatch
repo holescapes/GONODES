@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"kuwahara1": {"type": "KuwaharaTOP", "position": [350, 200], "parameters": {"radius": {"value": 5}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "kuwahara1", "to_port": 0},
+		{"from": "kuwahara1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Kuwahara TOP -- Oil Painting Filter\n\nSelects lowest-variance quadrant per pixel for a painterly look.\nRadius 3-5 = subtle, 8+ = abstract oil painting.\nExpensive at high radii -- keep under 10 for realtime.", "position": [-50.0, -50.0], "size": [480.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

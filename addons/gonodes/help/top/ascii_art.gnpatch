@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"ascii1": {"type": "ASCIIArtTOP", "position": [350, 200], "parameters": {"cell_size": {"value": 8.0}, "color_mode": {"value": true}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "ascii1", "to_port": 0},
+		{"from": "ascii1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "ASCII Art TOP -- Character Rendering\n\nMaps brightness to ASCII characters (space to @).\nColor Mode tints characters with source image color.\nSmaller Cell Size = more detail, larger = chunkier text.", "position": [-50.0, -50.0], "size": [480.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

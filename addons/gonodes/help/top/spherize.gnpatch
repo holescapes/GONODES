@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"spherize1": {"type": "SpherizeTOP", "position": [350, 200], "parameters": {"strength": {"value": 0.6}, "radius": {"value": 0.5}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "spherize1", "to_port": 0},
+		{"from": "spherize1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Spherize TOP -- Bulge/Pinch Distortion\n\nPositive Strength = bulge (magnify center).\nNegative Strength = pinch (shrink center).\nRadius controls the distortion zone size.", "position": [-50.0, -50.0], "size": [450.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

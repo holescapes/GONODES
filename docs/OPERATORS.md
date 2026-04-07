@@ -334,6 +334,30 @@ Procedural pattern generator: stripes, checkerboard, concentric circles, grids, 
 
 ---
 
+#### TestCardTOP
+
+Broadcast / projection-mapping calibration test card generator. Resolution-aware features scale to match your projector or display.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 1920×1080 | — | Output resolution (match your projector) |
+| card_type | Enum | Full | Full, Grid Only, Color Bars, Grayscale, RGBW | Test card preset |
+| grid_cells | Float | 16.0 | 2.0–64.0 | Grid divisions on the long axis |
+| line_width | Float | 1.5 | 0.5–5.0 | Line thickness (pixels) |
+| grid_color | Color | (0.35, 0.35, 0.35) | — | Grid line colour |
+| bg_color | Color | (0.15, 0.15, 0.15) | — | Background colour |
+| center_color | Color | White | — | Crosshair / label colour |
+| show_grid | Bool | true | — | Draw calibration grid |
+| show_center | Bool | true | — | Draw centre crosshair + resolution label |
+| show_color_bars | Bool | true | — | Draw SMPTE colour bars |
+| show_grayscale | Bool | true | — | Draw grayscale ramp |
+| show_corners | Bool | true | — | Draw corner bracket markers |
+| show_safe_area | Bool | true | — | Draw broadcast safe-area rectangle |
+| show_circle | Bool | true | — | Draw inscribed circle |
+| safe_margin | Float | 0.05 | 0.01–0.15 | Safe-area margin fraction |
+
+---
+
 #### TriangleTOP
 
 SDF 2D primitives: triangle, line, pentagon.
@@ -1344,13 +1368,472 @@ Container that renders connected UI widgets into a SubViewport texture. Outputs 
 
 ---
 
+### Filters & Effects (New — 26 operators)
+
+These 26 new TOPs span stylization, distortion, blurs, colour grading, temporal effects, and generative patterns.
+
+---
+
+#### TrailTOP
+
+Accumulates input frames over time with configurable decay, creating motion-trail / long-exposure effects. Uses feedback ping-pong textures internally.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| decay | Float | 0.9 | 0.0–1.0 | Trail persistence (higher = longer trails) |
+| brightness | Float | 1.0 | 0.0–5.0 | Brightness multiplier on accumulated trail |
+| reset | Bool | false | — | Clear the trail buffer |
+
+**Input:** `in` (TOP). **Time-dependent.** **Shader:** `trail.gdshader`.
+
+**How it works:** Maintains two textures in a ping-pong loop. Each cook blends the current input over the previous frame, scaled by `decay`. A deferred ImageTexture capture feeds the previous frame back as a shader uniform. `reset` reinitialises the buffer.
+
+---
+
+#### ChromaticAberrationTOP
+
+Splits RGB channels with configurable offset — radial (from centre outward) or directional (fixed angle).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| intensity | Float | 0.005 | 0.0–0.1 | Split amount (fraction of image width) |
+| mode | Enum | Radial | Radial, Directional | Split pattern |
+| angle | Float | 0.0 | 0.0–360.0 | Direction angle in degrees (Directional mode) |
+
+**Input:** `in` (TOP). **Shader:** `chromatic_aberration.gdshader`.
+
+---
+
+#### VignetteTOP
+
+Darkens image edges with configurable shape, softness, and tint colour.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| intensity | Float | 0.5 | 0.0–2.0 | Vignette strength |
+| softness | Float | 0.5 | 0.01–2.0 | Edge falloff width |
+| roundness | Float | 1.0 | 0.0–1.0 | Shape (1 = circle, 0 = wide ellipse) |
+| color | Color | Black | — | Vignette tint colour |
+
+**Input:** `in` (TOP). **Shader:** `vignette.gdshader`.
+
+---
+
+#### HalftoneTOP
+
+Converts image to halftone dot pattern — black-and-white or CMYK colour separation with per-screen angle control.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| dot_size | Float | 8.0 | 1.0–50.0 | Dot diameter in pixels |
+| mode | Enum | BW | BW, CMYK | BW = single channel, CMYK = four-colour screens |
+| angle_c | Float | 15.0 | 0.0–90.0 | Cyan screen angle (CMYK) |
+| angle_m | Float | 75.0 | 0.0–90.0 | Magenta screen angle (CMYK) |
+| angle_y | Float | 0.0 | 0.0–90.0 | Yellow screen angle (CMYK) |
+| angle_k | Float | 45.0 | 0.0–90.0 | Black / key screen angle |
+
+**Input:** `in` (TOP). **Shader:** `halftone.gdshader`.
+
+---
+
+#### DitherTOP
+
+Applies Bayer ordered dithering — quantises colours through a threshold matrix, producing retro/lo-fi aesthetics.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| levels | Int | 2 | 2–256 | Output colour levels (2 = pure 1-bit) |
+| matrix_size | Enum | 4×4 | 2×2, 4×4, 8×8 | Bayer matrix size (larger = finer pattern) |
+| spread | Float | 0.5 | 0.0–1.0 | Dither pattern strength |
+| color_dither | Bool | false | — | Dither in colour (true) or greyscale (false) |
+
+**Input:** `in` (TOP). **Shader:** `dither.gdshader`.
+
+---
+
+#### PixelateTOP
+
+Reduces resolution to blocky mosaic by snapping UV to a grid.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| pixel_size | Float | 8.0 | 1.0–256.0 | Block size in pixels |
+
+**Input:** `in` (TOP). **Shader:** `pixelate.gdshader`.
+
+---
+
+#### FilmGrainTOP
+
+Adds animated film-grain noise with optional luminance-dependent intensity (more grain in midtones).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| intensity | Float | 0.15 | 0.0–1.0 | Grain strength |
+| size | Float | 1.0 | 0.5–4.0 | Grain particle size (larger = coarser) |
+| luminance_dependent | Bool | true | — | More grain in midtones, less in highlights/shadows |
+
+**Input:** `in` (TOP). **Time-dependent.** **Shader:** `film_grain.gdshader`.
+
+---
+
+#### MedianTOP
+
+Noise-reducing median filter — replaces each pixel with the median of its neighbourhood. Excellent for salt-and-pepper noise removal while preserving edges.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| radius | Enum | 3×3 | 3×3, 5×5 — filter kernel size |
+
+**Input:** `in` (TOP). **Shader:** `median.gdshader`.
+
+**How it works:** Uses a sorting network on the kernel neighbourhood. The 3×3 kernel uses a 9-element network; 5×5 uses a 25-element network to find the median colour.
+
+---
+
+#### DirectionalBlurTOP
+
+Motion-blur effect along a configurable angle — simulates camera or object movement.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 10.0 | 0.0–100.0 | Blur distance in pixels |
+| angle | Float | 0.0 | 0.0–360.0 | Blur direction in degrees (0 = horizontal right) |
+| samples | Int | 16 | 3–64 | Samples (more = smoother, slower) |
+
+**Input:** `in` (TOP). **Shader:** `directional_blur.gdshader`.
+
+---
+
+#### GradientMapTOP
+
+Remaps source luminance through a gradient texture — the source's brightness looks up the horizontal position in the gradient input.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| intensity | Float | 1.0 | 0.0–1.0 | Blend between original (0) and mapped (1) |
+
+**Inputs:** `in` (TOP — source), `gradient` (TOP — horizontal gradient/ramp). **Shader:** `gradient_map.gdshader`.
+
+**How it works:** Computes Rec.709 luminance of each pixel, then samples the gradient texture at that luminance as the U coordinate. `intensity` crossfades between the original and mapped result.
+
+---
+
+#### KuwaharaTOP
+
+Painterly smoothing via the Kuwahara filter — divides each pixel's neighbourhood into four quadrants and picks the one with the lowest variance, producing an oil-painting effect.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| radius | Int | 4 | 1–12 | Filter radius (larger = more abstract, slower) |
+
+**Input:** `in` (TOP). **Shader:** `kuwahara.gdshader`.
+
+---
+
+#### KaleidoscopeTOP
+
+N-fold radial mirror symmetry — slices the image into angular segments and reflects them.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| segments | Int | 6 | 2–32 | Number of mirror segments |
+| rotation | Float | 0.0 | 0.0–360.0 | Pattern rotation in degrees |
+| center | Vector2 | (0.5, 0.5) | — | Centre point of the kaleidoscope |
+
+**Input:** `in` (TOP). **Shader:** `kaleidoscope.gdshader`.
+
+---
+
+#### PolarTOP
+
+Converts between Cartesian and polar coordinate spaces — useful for wrapping images into circles or unwrapping circular patterns.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| mode | Enum | Cartesian to Polar | Cartesian to Polar, Polar to Cartesian |
+| center | Vector2 | (0.5, 0.5) | Centre point for the transform |
+
+**Input:** `in` (TOP). **Shader:** `polar.gdshader`.
+
+---
+
+#### ScanLineTOP
+
+CRT / VHS scan-line overlay with optional horizontal jitter and screen curvature.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| line_spacing | Float | 4.0 | 1.0–20.0 | Distance between scan lines in pixels |
+| line_brightness | Float | 0.5 | 0.0–1.0 | Dark line brightness (1 = invisible) |
+| jitter | Float | 0.0 | 0.0–10.0 | Horizontal jitter per scan line (pixels) |
+| curvature | Float | 0.0 | 0.0–0.5 | CRT screen curvature |
+
+**Input:** `in` (TOP). **Time-dependent.** **Shader:** `scan_line.gdshader`.
+
+---
+
+#### GlitchTOP
+
+Random block-displacement and RGB channel-shift glitch effect with animated timing.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| intensity | Float | 0.3 | 0.0–1.0 | Probability and strength of glitch blocks |
+| block_size | Float | 32.0 | 4.0–128.0 | Glitch block size in pixels |
+| channel_shift | Float | 0.01 | 0.0–0.05 | RGB channel separation amount |
+| speed | Float | 8.0 | 0.1–30.0 | Glitch animation speed |
+
+**Input:** `in` (TOP). **Time-dependent.** **Shader:** `glitch.gdshader`.
+
+---
+
+#### VoronoiTOP
+
+Generates Worley noise (Voronoi distance fields) — three output modes: F1 (nearest cell distance), F2 (second nearest), and F2−F1 (cell edges).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output resolution |
+| scale | Float | 10.0 | 1.0–100.0 | Cell density |
+| jitter | Float | 1.0 | 0.0–1.0 | Cell point randomness (0 = grid, 1 = fully random) |
+| mode | Enum | F1 (nearest) | F1 (nearest), F2 (second), F2 − F1 (cell edges) | Distance field mode |
+| speed | Float | 0.0 | 0.0–5.0 | Animation speed (0 = static) |
+
+**Generator — no input.** **Time-dependent.** **Shader:** `voronoi.gdshader`.
+
+---
+
+#### HighPassTOP
+
+Extracts high-frequency detail by subtracting an internal Gaussian blur from the original image.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| radius | Float | 5.0 | 1.0–50.0 | Blur radius for the low-pass subtraction |
+| strength | Float | 1.0 | 0.0–5.0 | High-pass intensity multiplier |
+| offset | Float | 0.5 | 0.0–1.0 | Mid-grey offset (0.5 = neutral grey background) |
+
+**Input:** `in` (TOP). **Shader:** `high_pass.gdshader`.
+
+**How it works:** Applies a multi-sample Gaussian blur to produce a low-pass version, subtracts it from the original, multiplies by `strength`, and adds `offset` so neutral detail sits at mid-grey.
+
+---
+
+#### ColorBalanceTOP
+
+Lift / Gamma / Gain colour correction — industry-standard three-way colour grading.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| lift | Color | White | Shadow colour offset (multiply) |
+| gamma | Color | White | Midtone gamma curve (per channel) |
+| gain | Color | White | Highlight gain multiplier |
+
+**Input:** `in` (TOP). **Shader:** `color_balance.gdshader`.
+
+**How it works:** Applies the formula `output = gain × (lift × (1 − source) + source) ^ (1/gamma)` per channel. White for all three = identity (no change).
+
+---
+
+#### ToonShadeTOP
+
+Cel-shading / toon effect — quantises luminance into discrete bands and overlays Sobel edge outlines.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| shade_levels | Int | 4 | 2–16 | Number of shading steps |
+| edge_strength | Float | 1.5 | 0.0–5.0 | Outline detection sensitivity |
+| edge_threshold | Float | 0.1 | 0.0–1.0 | Minimum edge magnitude to draw |
+| edge_color | Color | Black | — | Outline colour |
+
+**Input:** `in` (TOP). **Shader:** `toon_shade.gdshader`.
+
+---
+
+#### CellularAutomataTOP
+
+GPU-accelerated cellular automata simulation with four rule sets. Uses feedback ping-pong textures to evolve state each frame.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 256×256 | — | Simulation grid size |
+| rule_set | Enum | Game of Life | Game of Life, Brian's Brain, Seeds, Day & Night | Automata rule |
+| threshold | Float | 0.5 | 0.0–1.0 | Seed brightness threshold for alive cells |
+| reset | Bool | false | — | Re-seed the simulation from input |
+
+**Input:** `seed` (TOP — optional seed pattern). **Time-dependent.** **Shader:** `cellular_automata.gdshader`.
+
+**How it works:** Reads the previous frame via feedback texture, counts live neighbours, and applies the selected rule set. `reset` re-reads the seed input to reinitialise. Brian's Brain uses three states (alive/dying/dead); Seeds only births; Day & Night uses symmetric survival/birth rules.
+
+---
+
+#### TwirlTOP
+
+Spiral distortion — rotates pixels around a centre point with strength falling off by radius.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 3.0 | −10.0–10.0 | Twist amount in radians (negative = opposite) |
+| radius | Float | 0.5 | 0.01–2.0 | Effect radius as fraction of image |
+| center | Vector2 | (0.5, 0.5) | — | Centre of the twist |
+
+**Input:** `in` (TOP). **Shader:** `twirl.gdshader`.
+
+---
+
+#### SpherizeTOP
+
+Bulge / pinch distortion — warps pixels through a spherical lens around a centre point.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 0.5 | −2.0–2.0 | Bulge (positive) or pinch (negative) |
+| radius | Float | 0.5 | 0.01–2.0 | Effect radius as fraction of image |
+| center | Vector2 | (0.5, 0.5) | — | Centre of the distortion |
+
+**Input:** `in` (TOP). **Shader:** `spherize.gdshader`.
+
+---
+
+#### RippleTOP
+
+Animated sinusoidal wave distortion — radial (concentric rings) or directional (parallel waves).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| amplitude | Float | 0.01 | 0.0–0.1 | Wave displacement amount |
+| frequency | Float | 20.0 | 1.0–100.0 | Number of wave cycles |
+| speed | Float | 5.0 | 0.0–20.0 | Wave animation speed |
+| mode | Enum | Radial | Radial, Directional | Wave pattern type |
+| center | Vector2 | (0.5, 0.5) | — | Radial wave origin |
+
+**Input:** `in` (TOP). **Time-dependent.** **Shader:** `ripple.gdshader`.
+
+---
+
+#### BilateralBlurTOP
+
+Edge-preserving smoothing — blurs flat regions while keeping sharp edges intact. Used for skin smoothing and noise reduction.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| radius | Int | 3 | 1–10 | Blur kernel radius in pixels |
+| sigma_spatial | Float | 3.0 | 0.1–20.0 | Spatial Gaussian spread |
+| sigma_range | Float | 0.1 | 0.01–1.0 | Intensity similarity threshold (lower = sharper edges) |
+
+**Input:** `in` (TOP). **Shader:** `bilateral_blur.gdshader`.
+
+**How it works:** For each pixel, samples its neighbourhood and weights each sample by both spatial distance (Gaussian) and colour-space distance. Pixels that are spatially close but very different in colour are down-weighted, preserving edges.
+
+---
+
+#### BokehBlurTOP
+
+Shaped lens blur — disc or hexagonal iris pattern that emphasises bright highlights, simulating out-of-focus camera bokeh.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| radius | Float | 8.0 | 0.0–64.0 | Blur radius in pixels |
+| shape | Enum | Disc | Disc, Hexagon | Bokeh iris shape |
+| quality | Int | 3 | 1–8 | Sample rings (higher = smoother, slower) |
+| brightness | Float | 1.0 | 0.0–5.0 | Highlight bokeh brightness boost |
+
+**Input:** `in` (TOP). **Shader:** `bokeh_blur.gdshader`.
+
+---
+
+#### ASCIIArtTOP
+
+Renders the input image as ASCII characters — maps cell luminance to a character ramp from dark to bright.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| cell_size | Float | 8.0 | 4.0–32.0 | Character cell size in pixels |
+| text_color | Color | White | — | Character foreground colour |
+| bg_color | Color | Black | — | Background fill colour |
+| color_mode | Bool | false | — | Tint characters with source image colour |
+
+**Input:** `in` (TOP). **Shader:** `ascii_art.gdshader`.
+
+**How it works:** Divides the image into cells, computes average luminance per cell, selects a character from a 10-level ramp (` .:-=+*#%@`), and renders the glyph pattern using procedural bitmap font rendering in the fragment shader.
+
+---
+
+#### MirrorTOP
+
+Axis mirror with a positionable seam — places a mirror line at any point and angle. Unlike FlipTOP (full reflection) or KaleidoscopeTOP (radial), this creates a clean bilateral symmetry with a movable axis.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| axis | Enum | Vertical | Vertical, Horizontal, Free Angle | Mirror axis direction |
+| center | Vector2 | (0.5, 0.5) | — | Mirror line position (UV space) |
+| angle | Float | 0.0 | 0.0–360.0 | Mirror angle in degrees (Free Angle mode) |
+
+**Input:** `in` (TOP). **Shader:** `mirror.gdshader`.
+
+**How it works:** Computes a normal vector for the mirror line, projects each pixel's UV onto that normal, and reflects UVs that fall on the negative side. The reflection is clamped to valid UV range.
+
+---
+
+#### GodRaysTOP
+
+Generates crepuscular rays (volumetric light shafts) by radially sampling bright regions toward a configurable light source position.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| light_pos | Vector2 | (0.5, 0.3) | — | UV position of the light source |
+| samples | Int | 64 | 8–128 | Ray march samples (more = smoother, slower) |
+| density | Float | 1.0 | 0.1–3.0 | How far rays extend |
+| weight | Float | 0.01 | 0.001–0.1 | Per-sample contribution |
+| decay | Float | 0.97 | 0.9–1.0 | Sample falloff (lower = rays fade faster) |
+| exposure | Float | 1.0 | 0.0–5.0 | Final ray brightness multiplier |
+| threshold | Float | 0.5 | 0.0–1.0 | Luminance threshold for ray-emitting pixels |
+
+**Input:** `in` (TOP). **Shader:** `god_rays.gdshader`.
+
+**How it works:** For each pixel, marches along a ray toward the light source, accumulating brightness from pixels above the threshold. Each sample is weighted and decayed geometrically. The accumulated rays are composited additively over the original image.
+
+---
+
+#### ColorSpaceTOP
+
+Mathematically correct color space conversion — uses proper transfer functions (sRGB EOTF, not just gamma 2.2) and exact colorimetry matrices.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| conversion | Enum | sRGB → Linear | sRGB → Linear, Linear → sRGB, sRGB → ACEScg, ACEScg → sRGB, Rec.709 → Rec.2020, Rec.2020 → Rec.709 |
+
+**Input:** `in` (TOP). **Shader:** `color_space.gdshader`.
+
+**How it works:** Applies the IEC 61966-2-1 sRGB EOTF (piecewise linear+power curve, not a simple gamma) for sRGB conversions, then multiplies by the appropriate 3×3 colorimetry matrix for gamut conversion (AP1 for ACEScg, ITU-R BT.2020 for wide-gamut). Chain two ColorSpaceTOPs for sRGB → ACEScg pipeline: first sRGB→Linear, then Linear→ACEScg, and reverse on output.
+
+---
+
+#### FrameDifferenceTOP
+
+Subtracts the previous frame from the current frame — outputs a motion delta image. Core building block for motion detection, VJ reactivity, and edge-of-motion effects.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Absolute | Absolute, Signed | Absolute = |curr−prev|, Signed = offset to mid-gray |
+| gain | Float | 1.0 | 0.0–10.0 | Difference intensity multiplier |
+| threshold | Float | 0.0 | 0.0–1.0 | Suppress differences below this (noise gate) |
+| reset | Bool | false | — | Clear the previous frame buffer |
+
+**Input:** `in` (TOP). **Time-dependent.** **Shader:** `frame_difference.gdshader`.
+
+**How it works:** Stores the previous frame via deferred ImageTexture capture (same pattern as FeedbackTOP). Each cook compares current vs. previous source pixels. Absolute mode takes `abs(diff)`, Signed mode offsets to mid-gray so negative differences are visible. Threshold acts as a noise gate, suppressing jitter. Gain amplifies subtle motion.
+
+---
+
 ## IMG — Image Operators
 
 IMGs process CPU-side `Image` data. Unlike TOPs (GPU textures via SubViewport), IMGs work on raw pixel buffers for operations that need CPU access: file I/O, pixel sorting, procedural generation, and format conversion. All IMG data flows as `GNImageData` — a lightweight RefCounted wrapper around Godot's `Image` class.
 
 Use `ImgToTOP` to bridge IMG output into the GPU TOP pipeline.
 
-**Total: 13 operators** — 2 generators, 5 filters, 2 I/O, 2 bridges, 1 capture, 1 script, 1 utility.
+**Total: 14 operators** — 2 generators, 6 filters, 2 I/O, 2 bridges, 1 capture, 1 script, 1 utility.
 
 ---
 
@@ -1367,6 +1850,24 @@ Reference a remote IMG by name or pass through wired input. When the `img` param
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | img | String | "" | Remote IMG node name (empty = use wired input) |
+
+---
+
+#### StereogramIMG
+
+Generates a random-dot autostereogram (Magic Eye) from a depth map. CPU-based — the row-sequential pixel-linking algorithm requires left-to-right processing that cannot be parallelised on the GPU.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×256 | — | Output image size |
+| strip_width | Int | 80 | 20–200 | Repeating pattern strip width in pixels |
+| depth_scale | Float | 0.3 | 0.0–1.0 | Max depth displacement as fraction of strip width |
+| seed | Int | 42 | 0–99999 | Random seed for the dot pattern |
+| color | Bool | false | — | Use coloured random dots instead of greyscale |
+
+**Input:** `depth` (IMG — depth map). **Output:** `out` (IMG).
+
+**How it works:** For each row, generates a random dot strip, then links pixel columns using a union-find structure based on the depth map's brightness. Brighter depth = closer = wider pixel separation. The linked pixels share the same colour, creating the stereoscopic illusion when the viewer's eyes diverge.
 
 ---
 

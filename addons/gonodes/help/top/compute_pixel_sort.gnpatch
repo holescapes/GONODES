@@ -1,0 +1,45 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [0, 200],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"monochrome": {"value": false}
+			}
+		},
+		"pixel_sort1": {
+			"type": "ComputeShaderTOP",
+			"position": [350, 200],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"time_dependent": {"value": true},
+				"shader_code": {"value": "#version 450\n\nlayout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;\n\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\nlayout(set = 1, binding = 0) uniform sampler2D gn_tex0;\n\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\tfloat threshold_lo;  // = 0.2\n\tfloat threshold_hi;  // = 0.8\n\tfloat direction;     // = 0.0  (0=horizontal, 1=vertical)\n} pc;\n\nfloat luminance(vec4 c) {\n\treturn dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));\n}\n\nvoid main() {\n\tivec2 size = imageSize(gn_output);\n\tint row = int(gl_GlobalInvocationID.y);\n\tif (row >= size.y) return;\n\n\tbool vertical = pc.direction > 0.5;\n\tint line_len = vertical ? size.y : size.x;\n\n\t// Read the row/column into a local array\n\tvec4 pixels[2048];  // max 2048 width\n\tline_len = min(line_len, 2048);\n\n\tint line_idx = int(gl_GlobalInvocationID.x);\n\tif (vertical) {\n\t\tif (line_idx >= size.x) return;\n\t\tfor (int i = 0; i < line_len; i++) {\n\t\t\tpixels[i] = texelFetch(gn_tex0, ivec2(line_idx, i), 0);\n\t\t}\n\t} else {\n\t\tif (line_idx >= size.y) return;\n\t\tfor (int i = 0; i < line_len; i++) {\n\t\t\tpixels[i] = texelFetch(gn_tex0, ivec2(i, line_idx), 0);\n\t\t}\n\t}\n\n\t// Find spans within threshold and sort them by luminance (bubble sort)\n\tint span_start = -1;\n\tfor (int i = 0; i <= line_len; i++) {\n\t\tfloat lum = (i < line_len) ? luminance(pixels[i]) : -1.0;\n\t\tbool in_range = lum >= pc.threshold_lo && lum <= pc.threshold_hi;\n\n\t\tif (in_range && span_start == -1) {\n\t\t\tspan_start = i;\n\t\t} else if (!in_range && span_start != -1) {\n\t\t\t// Sort span [span_start, i) by luminance — simple insertion sort\n\t\t\tfor (int a = span_start + 1; a < i; a++) {\n\t\t\t\tvec4 key = pixels[a];\n\t\t\t\tfloat key_lum = luminance(key);\n\t\t\t\tint b = a - 1;\n\t\t\t\twhile (b >= span_start && luminance(pixels[b]) > key_lum) {\n\t\t\t\t\tpixels[b + 1] = pixels[b];\n\t\t\t\t\tb--;\n\t\t\t\t}\n\t\t\t\tpixels[b + 1] = key;\n\t\t\t}\n\t\t\tspan_start = -1;\n\t\t}\n\t}\n\n\t// Write back\n\tif (vertical) {\n\t\tfor (int i = 0; i < line_len; i++) {\n\t\t\timageStore(gn_output, ivec2(line_idx, i), pixels[i]);\n\t\t}\n\t} else {\n\t\tfor (int i = 0; i < line_len; i++) {\n\t\t\timageStore(gn_output, ivec2(i, line_idx), pixels[i]);\n\t\t}\n\t}\n}"}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": [700, 200],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"open": {"value": true}
+			}
+		}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "pixel_sort1", "to_port": 0},
+		{"from": "pixel_sort1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Pixel Sort — Compute Shader Preset\n\nSorts pixels within brightness threshold spans along rows.\nAdjust threshold_lo/threshold_hi to control which pixels get sorted.\nSet direction to 1 for vertical sorting.",
+			"position": [-50.0, -50.0],
+			"size": [550.0, 100.0],
+			"color": [1.0, 1.0, 1.0, 0.8]
+		}
+	]
+}

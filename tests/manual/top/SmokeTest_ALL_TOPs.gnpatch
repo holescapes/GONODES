@@ -109,46 +109,10 @@
 			"to_port": 0
 		},
 		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "composite1",
-			"to_port": 0
-		},
-		{
-			"from": "circle1",
-			"from_port": 0,
-			"to": "composite1",
-			"to_port": 1
-		},
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "cross1",
-			"to_port": 0
-		},
-		{
 			"from": "constant1",
 			"from_port": 0,
 			"to": "cross1",
 			"to_port": 1
-		},
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "layout1",
-			"to_port": 0
-		},
-		{
-			"from": "circle1",
-			"from_port": 0,
-			"to": "layout1",
-			"to_port": 1
-		},
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "lookup1",
-			"to_port": 0
 		},
 		{
 			"from": "ramp1",
@@ -157,52 +121,10 @@
 			"to_port": 1
 		},
 		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "glue1",
-			"to_port": 0
-		},
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "optical_flow1",
-			"to_port": 0
-		},
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "cache1",
-			"to_port": 0
-		},
-		{
 			"from": "cache1",
 			"from_port": 0,
 			"to": "time_machine1",
 			"to_port": 0
-		},
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "snapshot1",
-			"to_port": 0
-		},
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "feedback1",
-			"to_port": 0
-		},
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "switch1",
-			"to_port": 0
-		},
-		{
-			"from": "circle1",
-			"from_port": 0,
-			"to": "switch1",
-			"to_port": 1
 		},
 		{
 			"from": "render1",
@@ -343,12 +265,6 @@
 			"to_port": 0
 		},
 		{
-			"from": "text1",
-			"from_port": 0,
-			"to": "posterize1",
-			"to_port": 0
-		},
-		{
 			"from": "OUTChain4",
 			"from_port": 0,
 			"to": "switch2",
@@ -415,19 +331,253 @@
 			"to_port": 0
 		},
 		{
-			"from": "rectangle1",
+			"from": "chromatic_aberration1",
 			"from_port": 0,
-			"to": "composite3",
+			"to": "vignette1",
 			"to_port": 0
 		},
 		{
-			"from": "triangle1",
+			"from": "halftone1",
 			"from_port": 0,
-			"to": "composite3",
+			"to": "dither1",
+			"to_port": 0
+		},
+		{
+			"from": "dither1",
+			"from_port": 0,
+			"to": "pixelate1",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 4
+		},
+		{
+			"from": "directional_blur1",
+			"from_port": 0,
+			"to": "gradient_map1",
+			"to_port": 0
+		},
+		{
+			"from": "gradient_map1",
+			"from_port": 0,
+			"to": "kuwahara1",
+			"to_port": 0
+		},
+		{
+			"from": "kuwahara1",
+			"from_port": 0,
+			"to": "kaleidoscope1",
+			"to_port": 0
+		},
+		{
+			"from": "kaleidoscope1",
+			"from_port": 0,
+			"to": "OUTChain6",
+			"to_port": 0
+		},
+		{
+			"from": "glitch1",
+			"from_port": 0,
+			"to": "high_pass1",
+			"to_port": 0
+		},
+		{
+			"from": "high_pass1",
+			"from_port": 0,
+			"to": "color_balance1",
+			"to_port": 0
+		},
+		{
+			"from": "color_balance1",
+			"from_port": 0,
+			"to": "toon_shade1",
+			"to_port": 0
+		},
+		{
+			"from": "toon_shade1",
+			"from_port": 0,
+			"to": "OUTChain7",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain7",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 6
+		},
+		{
+			"from": "twirl1",
+			"from_port": 0,
+			"to": "spherize1",
+			"to_port": 0
+		},
+		{
+			"from": "spherize1",
+			"from_port": 0,
+			"to": "ripple1",
+			"to_port": 0
+		},
+		{
+			"from": "ripple1",
+			"from_port": 0,
+			"to": "bilateral_blur1",
+			"to_port": 0
+		},
+		{
+			"from": "bilateral_blur1",
+			"from_port": 0,
+			"to": "bokeh_blur1",
+			"to_port": 0
+		},
+		{
+			"from": "bokeh_blur1",
+			"from_port": 0,
+			"to": "ascii_art1",
+			"to_port": 0
+		},
+		{
+			"from": "ascii_art1",
+			"from_port": 0,
+			"to": "OUTChain8",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain8",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 7
+		},
+		{
+			"from": "voronoi1",
+			"from_port": 0,
+			"to": "cellular_automata1",
+			"to_port": 0
+		},
+		{
+			"from": "cellular_automata1",
+			"from_port": 0,
+			"to": "OUTChain9",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain9",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 8
+		},
+		{
+			"from": "mirror1",
+			"from_port": 0,
+			"to": "god_rays1",
+			"to_port": 0
+		},
+		{
+			"from": "god_rays1",
+			"from_port": 0,
+			"to": "color_space1",
+			"to_port": 0
+		},
+		{
+			"from": "color_space1",
+			"from_port": 0,
+			"to": "frame_difference1",
+			"to_port": 0
+		},
+		{
+			"from": "frame_difference1",
+			"from_port": 0,
+			"to": "OUTChain10",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain10",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 9
+		},
+		{
+			"from": "pattern1_copy",
+			"from_port": 0,
+			"to": "deform1",
 			"to_port": 1
 		},
 		{
-			"from": "composite3",
+			"from": "deform1",
+			"from_port": 0,
+			"to": "median1",
+			"to_port": 0
+		},
+		{
+			"from": "polar1",
+			"from_port": 0,
+			"to": "glitch1",
+			"to_port": 0
+		},
+		{
+			"from": "custom_shader1",
+			"from_port": 0,
+			"to": "scan_line1",
+			"to_port": 0
+		},
+		{
+			"from": "scan_line1",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "noise3",
+			"from_port": 0,
+			"to": "trail1",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain11",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 5
+		},
+		{
+			"from": "median1",
+			"from_port": 0,
+			"to": "custom_shader1",
+			"to_port": 0
+		},
+		{
+			"from": "trail1",
+			"from_port": 0,
+			"to": "halftone1",
+			"to_port": 0
+		},
+		{
+			"from": "pixelate1",
+			"from_port": 0,
+			"to": "chromatic_aberration1",
+			"to_port": 0
+		},
+		{
+			"from": "vignette1",
+			"from_port": 0,
+			"to": "posterize1",
+			"to_port": 0
+		},
+		{
+			"from": "posterize1",
+			"from_port": 0,
+			"to": "OUTChain11",
+			"to_port": 0
+		},
+		{
+			"from": "noise3_copy",
+			"from_port": 0,
+			"to": "polar1",
+			"to_port": 0
+		},
+		{
+			"from": "rectangle1",
 			"from_port": 0,
 			"to": "composite2",
 			"to_port": 0
@@ -439,6 +589,20 @@
 			"position": [
 				1780.0,
 				-200.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain10": {
+			"position": [
+				1820.0,
+				4100.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain11": {
+			"position": [
+				1780.0,
+				1680.0
 			],
 			"type": "NullTOP"
 		},
@@ -460,6 +624,41 @@
 			"position": [
 				1780.0,
 				860.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain5": {
+			"position": [
+				1780.0,
+				1220.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain6": {
+			"position": [
+				1840.0,
+				2560.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain7": {
+			"position": [
+				1780.0,
+				1960.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain8": {
+			"position": [
+				1820.0,
+				3300.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain9": {
+			"position": [
+				1820.0,
+				3700.0
 			],
 			"type": "NullTOP"
 		},
@@ -488,10 +687,61 @@
 				}
 			},
 			"position": [
-				740.0,
+				780.0,
 				400.0
 			],
 			"type": "AntiAliasTOP"
+		},
+		"ascii_art1": {
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"cell_size": {
+					"value": 8.0
+				},
+				"color_mode": {
+					"value": false
+				},
+				"text_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				}
+			},
+			"position": [
+				1440.0,
+				3300.0
+			],
+			"type": "ASCIIArtTOP"
+		},
+		"bilateral_blur1": {
+			"parameters": {
+				"radius": {
+					"value": 3
+				},
+				"sigma_range": {
+					"value": 0.1
+				},
+				"sigma_spatial": {
+					"value": 3.0
+				}
+			},
+			"position": [
+				910.999450683594,
+				3300.0
+			],
+			"type": "BilateralBlurTOP"
 		},
 		"bloom1": {
 			"parameters": {
@@ -512,7 +762,7 @@
 				}
 			},
 			"position": [
-				580.0,
+				539.999145507813,
 				-200.0
 			],
 			"type": "BloomTOP"
@@ -530,10 +780,31 @@
 				}
 			},
 			"position": [
-				220.0,
+				157.999206542969,
 				-200.0
 			],
 			"type": "BlurTOP"
+		},
+		"bokeh_blur1": {
+			"parameters": {
+				"brightness": {
+					"value": 1.0
+				},
+				"quality": {
+					"value": 3
+				},
+				"radius": {
+					"value": 8.0
+				},
+				"shape": {
+					"value": 0
+				}
+			},
+			"position": [
+				1191.99938964844,
+				3300.0
+			],
+			"type": "BokehBlurTOP"
 		},
 		"cache1": {
 			"parameters": {
@@ -551,10 +822,35 @@
 				}
 			},
 			"position": [
-				210.0,
-				3200.0
+				157.999114990234,
+				4100.0
 			],
 			"type": "CacheTOP"
+		},
+		"cellular_automata1": {
+			"parameters": {
+				"reset": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"rule_set": {
+					"value": 0
+				},
+				"threshold": {
+					"value": 0.5
+				}
+			},
+			"position": [
+				478.9990234375,
+				3700.0
+			],
+			"type": "CellularAutomataTOP"
 		},
 		"channel_mix1": {
 			"parameters": {
@@ -584,7 +880,7 @@
 				}
 			},
 			"position": [
-				560.0,
+				521.999145507813,
 				860.0
 			],
 			"type": "ChannelMixTOP"
@@ -663,10 +959,28 @@
 				}
 			},
 			"position": [
-				166.0,
-				1600.0
+				150.998809814453,
+				2560.0
 			],
 			"type": "ChromaKeyTOP"
+		},
+		"chromatic_aberration1": {
+			"parameters": {
+				"angle": {
+					"value": 133.0
+				},
+				"intensity": {
+					"value": 0.079
+				},
+				"mode": {
+					"value": 1
+				}
+			},
+			"position": [
+				1110.99951171875,
+				1680.0
+			],
+			"type": "ChromaticAberrationTOP"
 		},
 		"circle1": {
 			"parameters": {
@@ -713,10 +1027,46 @@
 				}
 			},
 			"position": [
-				-40.0,
+				40.0,
 				180.0
 			],
 			"type": "CircleTOP"
+		},
+		"color_balance1": {
+			"parameters": {
+				"gain": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"gamma": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"lift": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				}
+			},
+			"position": [
+				1360.0,
+				1960.0
+			],
+			"type": "ColorBalanceTOP"
 		},
 		"color_map1": {
 			"parameters": {
@@ -728,25 +1078,22 @@
 				}
 			},
 			"position": [
-				1180.0,
+				1021.9990234375,
 				860.0
 			],
 			"type": "ColorMapTOP"
 		},
-		"composite1": {
+		"color_space1": {
 			"parameters": {
-				"opacity": {
-					"value": 1.0
-				},
-				"operation": {
+				"conversion": {
 					"value": 0
 				}
 			},
 			"position": [
-				175.0,
-				2000.0
+				692.9990234375,
+				4100.0
 			],
-			"type": "CompositeTOP"
+			"type": "ColorSpaceTOP"
 		},
 		"composite2": {
 			"parameters": {
@@ -758,22 +1105,7 @@
 				}
 			},
 			"position": [
-				380.0,
-				860.0
-			],
-			"type": "CompositeTOP"
-		},
-		"composite3": {
-			"parameters": {
-				"opacity": {
-					"value": 1.0
-				},
-				"operation": {
-					"value": 5
-				}
-			},
-			"position": [
-				220.0,
+				331.999206542969,
 				860.0
 			],
 			"type": "CompositeTOP"
@@ -893,13 +1225,16 @@
 				"shader_code": {
 					"value": "#version 450\n\nlayout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;\n\n// ─── GONODES Auto-bound ──────────────────────────────────\n// Output storage texture (set 0, binding 0 — always present).\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\n\n// Input textures — add gn_tex<N> samplers to auto-create input ports.\n// layout(set = 1, binding = 0) uniform sampler2D gn_tex0;\n\n// Push constants — built-in fields are auto-bound by GONODES.\n// Add your own float/int fields AFTER the four gn_* fields\n// to create inspector parameters automatically.\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\t// float speed;  // ← uncomment to add a \"speed\" parameter\n} pc;\n\nvoid main() {\n\tivec2 coords = ivec2(gl_GlobalInvocationID.xy);\n\tivec2 size = imageSize(gn_output);\n\tif (coords.x >= size.x || coords.y >= size.y) return;\n\n\tvec2 uv = vec2(coords) / vec2(size);\n\tfloat t = pc.gn_time;\n\n\t// Animated rainbow gradient\n\tvec3 col = 0.5 + 0.5 * cos(t + uv.xyx + vec3(0.0, 2.0, 4.0));\n\timageStore(gn_output, coords, vec4(col, 1.0));\n}"
 				},
+				"speed": {
+					"value": 0.0
+				},
 				"time_dependent": {
 					"value": true
 				}
 			},
 			"position": [
-				-94.0,
-				2600.0
+				-82.0008544921875,
+				3500.0
 			],
 			"type": "ComputeShaderTOP"
 		},
@@ -954,9 +1289,9 @@
 				"bg_color": {
 					"value": {
 						"_type": "Color",
-						"a": 0.0,
+						"a": 0.403921574354172,
 						"b": 0.0,
-						"g": 0.0,
+						"g": 0.756862759590149,
 						"r": 0.0
 					}
 				},
@@ -977,21 +1312,21 @@
 				"top_left": {
 					"value": {
 						"_type": "Vector2",
-						"x": 0.0,
-						"y": 0.0
+						"x": 0.199999988079071,
+						"y": 0.170000016689301
 					}
 				},
 				"top_right": {
 					"value": {
 						"_type": "Vector2",
-						"x": 1.0,
+						"x": 0.730000138282776,
 						"y": 0.0
 					}
 				}
 			},
 			"position": [
-				440.0,
-				1180.0
+				341.998901367188,
+				1220.0
 			],
 			"type": "CornerPinTOP"
 		},
@@ -1023,7 +1358,7 @@
 				}
 			},
 			"position": [
-				560.0,
+				620.0,
 				180.0
 			],
 			"type": "CropTOP"
@@ -1035,8 +1370,8 @@
 				}
 			},
 			"position": [
-				210.0,
-				2200.0
+				165.998901367188,
+				3160.0
 			],
 			"type": "CrossTOP"
 		},
@@ -1063,23 +1398,29 @@
 				"cook_once": {
 					"value": false
 				},
+				"rotation": {
+					"value": 0.0
+				},
+				"segments": {
+					"value": 6
+				},
 				"shader_code": {
-					"value": "shader_type canvas_item;\n\n// ─── GONODES Uniforms (auto-bound) ───────────────────────\n// Input textures — add more gn_tex<N> uniforms to auto-create input ports.\nuniform sampler2D gn_tex0 : hint_default_white;\n\n// Your own uniforms — each becomes an inspector parameter automatically.\n// Supported types: float, int, bool, vec2, vec4 (color).\n// uniform float brightness = 1.0;\n// uniform vec4 tint : source_color = vec4(1.0);\n\n// gn_resolution is auto-bound (no param created).\n// uniform vec2 gn_resolution;\n\n// ─── Your fragment shader ────────────────────────────────\nvoid fragment() {\n\tvec4 src = texture(gn_tex0, UV);\n\tCOLOR = src;\n}"
+					"value": "// Kaleidoscope — mirror UV coordinates into symmetric sectors\n// uniform int segments : hint_range(2, 16) = 6;\n// uniform float rotation : hint_range(0.0, 6.2831) = 0.0;\n\nvoid fragment() {\n\tvec2 uv = UV - 0.5;\n\tfloat angle = atan(uv.y, uv.x) + rotation + gn_time * 0.2;\n\tfloat radius = length(uv);\n\n\tfloat seg_angle = TAU / float(segments);\n\tangle = mod(angle, seg_angle);\n\t// Mirror alternating sectors\n\tif (mod(floor(angle / seg_angle + 0.5), 2.0) > 0.5) {\n\t\tangle = seg_angle - angle;\n\t}\n\n\tvec2 mirrored = vec2(cos(angle), sin(angle)) * radius + 0.5;\n\tCOLOR = texture(gn_tex0, mirrored);\n}\n"
 				},
 				"time_dependent": {
 					"value": true
 				}
 			},
 			"position": [
-				-83.0,
-				2400.0
+				1160.99951171875,
+				1220.0
 			],
 			"type": "CustomShaderTOP"
 		},
 		"deform1": {
 			"parameters": {
 				"mode": {
-					"value": 0
+					"value": 1
 				},
 				"resolution": {
 					"value": {
@@ -1089,12 +1430,12 @@
 					}
 				},
 				"strength": {
-					"value": 0.1
+					"value": 0.103
 				}
 			},
 			"position": [
-				840.0,
-				1180.0
+				730.999328613281,
+				1220.0
 			],
 			"type": "DeformTOP"
 		},
@@ -1118,8 +1459,8 @@
 				}
 			},
 			"position": [
-				404.0,
-				1600.0
+				383.9990234375,
+				2560.0
 			],
 			"type": "DepthTOP"
 		},
@@ -1133,10 +1474,28 @@
 				}
 			},
 			"position": [
-				560.0,
+				580.0,
 				400.0
 			],
 			"type": "DilateErodeTOP"
+		},
+		"directional_blur1": {
+			"parameters": {
+				"angle": {
+					"value": 0.0
+				},
+				"samples": {
+					"value": 16
+				},
+				"strength": {
+					"value": 10.0
+				}
+			},
+			"position": [
+				715.999267578125,
+				2560.0
+			],
+			"type": "DirectionalBlurTOP"
 		},
 		"displace1": {
 			"parameters": {
@@ -1157,10 +1516,31 @@
 				}
 			},
 			"position": [
-				1320.0,
+				1360.0,
 				400.0
 			],
 			"type": "DisplaceTOP"
+		},
+		"dither1": {
+			"parameters": {
+				"color_dither": {
+					"value": false
+				},
+				"levels": {
+					"value": 2
+				},
+				"matrix_size": {
+					"value": 1
+				},
+				"spread": {
+					"value": 0.5
+				}
+			},
+			"position": [
+				758.999450683594,
+				1680.0
+			],
+			"type": "DitherTOP"
 		},
 		"edge1": {
 			"parameters": {
@@ -1190,7 +1570,7 @@
 				}
 			},
 			"position": [
-				980.0,
+				934.999084472656,
 				860.0
 			],
 			"type": "EmbossTOP"
@@ -1222,10 +1602,28 @@
 				}
 			},
 			"position": [
-				185.0,
-				3600.0
+				157.999206542969,
+				4500.0
 			],
 			"type": "FeedbackTOP"
+		},
+		"film_grain1": {
+			"parameters": {
+				"intensity": {
+					"value": 0.15
+				},
+				"luminance_dependent": {
+					"value": true
+				},
+				"size": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				165.998901367188,
+				2560.0
+			],
+			"type": "FilmGrainTOP"
 		},
 		"fit1": {
 			"parameters": {
@@ -1253,7 +1651,7 @@
 				}
 			},
 			"position": [
-				740.0,
+				820.0,
 				180.0
 			],
 			"type": "FitTOP"
@@ -1268,7 +1666,7 @@
 				}
 			},
 			"position": [
-				380.0,
+				420.0,
 				180.0
 			],
 			"type": "FlipTOP"
@@ -1349,10 +1747,31 @@
 				}
 			},
 			"position": [
-				-26.0,
-				2200.0
+				-32.0007934570313,
+				3160.0
 			],
 			"type": "Fluid2DTOP"
+		},
+		"frame_difference1": {
+			"parameters": {
+				"gain": {
+					"value": 1.0
+				},
+				"mode": {
+					"value": 0
+				},
+				"reset": {
+					"value": false
+				},
+				"threshold": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				880.999206542969,
+				4100.0
+			],
+			"type": "FrameDifferenceTOP"
 		},
 		"geo_buffer1": {
 			"dynamic_input_count": 2,
@@ -1440,6 +1859,27 @@
 			],
 			"type": "GeometryBufferTOP"
 		},
+		"glitch1": {
+			"parameters": {
+				"block_size": {
+					"value": 32.0
+				},
+				"channel_shift": {
+					"value": 0.01
+				},
+				"intensity": {
+					"value": 0.3
+				},
+				"speed": {
+					"value": 8.0
+				}
+			},
+			"position": [
+				920.0,
+				1960.0
+			],
+			"type": "GlitchTOP"
+		},
 		"glsl_multi1": {
 			"parameters": {
 				"cook_once": {
@@ -1484,10 +1924,101 @@
 				}
 			},
 			"position": [
-				210.0,
-				2800.0
+				157.999114990234,
+				3700.0
 			],
 			"type": "GlueTOP"
+		},
+		"god_rays1": {
+			"parameters": {
+				"decay": {
+					"value": 0.97
+				},
+				"density": {
+					"value": 1.0
+				},
+				"exposure": {
+					"value": 1.0
+				},
+				"light_pos": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.300000011920929
+					}
+				},
+				"samples": {
+					"value": 64
+				},
+				"threshold": {
+					"value": 0.5
+				},
+				"weight": {
+					"value": 0.01
+				}
+			},
+			"position": [
+				405.999328613281,
+				4100.0
+			],
+			"type": "GodRaysTOP"
+		},
+		"gradient_map1": {
+			"parameters": {
+				"intensity": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				906.999328613281,
+				2560.0
+			],
+			"type": "GradientMapTOP"
+		},
+		"halftone1": {
+			"parameters": {
+				"angle_c": {
+					"value": 15.0
+				},
+				"angle_k": {
+					"value": 45.0
+				},
+				"angle_m": {
+					"value": 75.0
+				},
+				"angle_y": {
+					"value": 0.0
+				},
+				"dot_size": {
+					"value": 8.0
+				},
+				"mode": {
+					"value": 0
+				}
+			},
+			"position": [
+				516.998657226563,
+				1680.0
+			],
+			"type": "HalftoneTOP"
+		},
+		"high_pass1": {
+			"parameters": {
+				"offset": {
+					"value": 0.5
+				},
+				"radius": {
+					"value": 5.0
+				},
+				"strength": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				1140.0,
+				1960.0
+			],
+			"type": "HighPassTOP"
 		},
 		"host_in1": {
 			"parameters": {
@@ -1519,6 +2050,40 @@
 			],
 			"type": "HSVAdjustTOP"
 		},
+		"kaleidoscope1": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"rotation": {
+					"value": 0.0
+				},
+				"segments": {
+					"value": 6
+				}
+			},
+			"position": [
+				1460.0,
+				2560.0
+			],
+			"type": "KaleidoscopeTOP"
+		},
+		"kuwahara1": {
+			"parameters": {
+				"radius": {
+					"value": 4
+				}
+			},
+			"position": [
+				1199.99951171875,
+				2560.0
+			],
+			"type": "KuwaharaTOP"
+		},
 		"layout1": {
 			"parameters": {
 				"bg_color": {
@@ -1542,8 +2107,8 @@
 				}
 			},
 			"position": [
-				207.0,
-				2400.0
+				157.999114990234,
+				3300.0
 			],
 			"type": "LayoutTOP"
 		},
@@ -1569,8 +2134,8 @@
 				}
 			},
 			"position": [
-				240.0,
-				1180.0
+				153.998809814453,
+				1220.0
 			],
 			"type": "LensDistortTOP"
 		},
@@ -1593,7 +2158,7 @@
 				}
 			},
 			"position": [
-				760.0,
+				758.999450683594,
 				-200.0
 			],
 			"type": "LevelTOP"
@@ -1620,7 +2185,7 @@
 				}
 			},
 			"position": [
-				1300.0,
+				1360.0,
 				600.0
 			],
 			"type": "LFO_CHOP"
@@ -1674,8 +2239,8 @@
 				}
 			},
 			"position": [
-				202.0,
-				2600.0
+				157.999114990234,
+				3500.0
 			],
 			"type": "LookupTOP"
 		},
@@ -1725,10 +2290,44 @@
 				}
 			},
 			"position": [
-				680.0,
-				1380.0
+				734.999389648438,
+				2340.0
 			],
 			"type": "MatteTOP"
+		},
+		"median1": {
+			"parameters": {
+				"radius": {
+					"value": 1
+				}
+			},
+			"position": [
+				1015.99890136719,
+				1220.0
+			],
+			"type": "MedianTOP"
+		},
+		"mirror1": {
+			"parameters": {
+				"angle": {
+					"value": 0.0
+				},
+				"axis": {
+					"value": 0
+				},
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				}
+			},
+			"position": [
+				157.999114990234,
+				4100.0
+			],
+			"type": "MirrorTOP"
 		},
 		"mono1": {
 			"parameters": {
@@ -1921,7 +2520,7 @@
 				}
 			},
 			"position": [
-				-20.0,
+				-32.0007934570313,
 				-200.0
 			],
 			"type": "NoiseTOP"
@@ -1974,8 +2573,152 @@
 				}
 			},
 			"position": [
-				1120.0,
+				1140.0,
 				600.0
+			],
+			"type": "NoiseTOP"
+		},
+		"noise2": {
+			"parameters": {
+				"channel_names": {
+					"value": "chan1"
+				},
+				"num_channels": {
+					"value": 1
+				},
+				"period": {
+					"value": 1.0
+				},
+				"roughness": {
+					"value": 0.5
+				},
+				"seed": {
+					"value": 0
+				},
+				"speed": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				140.0,
+				1900.0
+			],
+			"type": "NoiseCHOP"
+		},
+		"noise3": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": true
+				},
+				"noise_type": {
+					"value": 2
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"component_expressions": [
+						{
+							"expression": "chop(\"noise2\", \"chan1\")",
+							"mode": "EXPRESSION"
+						},
+						{
+							"expression": "",
+							"mode": "CONSTANT"
+						}
+					],
+					"mode": "EXPRESSION",
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 0
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				120.0,
+				1680.0
+			],
+			"type": "NoiseTOP"
+		},
+		"noise3_copy": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": false
+				},
+				"noise_type": {
+					"value": 2
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 0
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				500.0,
+				1960.0
 			],
 			"type": "NoiseTOP"
 		},
@@ -1989,7 +2732,7 @@
 				}
 			},
 			"position": [
-				900.0,
+				980.0,
 				400.0
 			],
 			"type": "NormalMapTOP"
@@ -2014,8 +2757,8 @@
 				}
 			},
 			"position": [
-				167.0,
-				3000.0
+				143.999206542969,
+				3900.0
 			],
 			"type": "OpticalFlowTOP"
 		},
@@ -2032,8 +2775,8 @@
 				}
 			},
 			"position": [
-				180.0,
-				1380.0
+				157.999114990234,
+				2340.0
 			],
 			"type": "PaletteTOP"
 		},
@@ -2136,10 +2879,71 @@
 				}
 			},
 			"position": [
-				-80.0,
-				1180.0
+				-40.0,
+				1220.0
 			],
 			"type": "PatternTOP"
+		},
+		"pattern1_copy": {
+			"parameters": {
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"duty_cycle": {
+					"value": 0.5
+				},
+				"frequency": {
+					"value": 8.0
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"rotation": {
+					"value": 0.0
+				},
+				"softness": {
+					"value": 0.02
+				},
+				"type": {
+					"value": 4
+				}
+			},
+			"position": [
+				559.999267578125,
+				1460.0
+			],
+			"type": "PatternTOP"
+		},
+		"pixelate1": {
+			"parameters": {
+				"pixel_size": {
+					"value": 8.0
+				}
+			},
+			"position": [
+				934.9990234375,
+				1680.0
+			],
+			"type": "PixelateTOP"
 		},
 		"point_cloud_render1": {
 			"parameters": {
@@ -2204,15 +3008,34 @@
 			],
 			"type": "PointCloudRenderTOP"
 		},
-		"posterize1": {
+		"polar1": {
 			"parameters": {
-				"levels": {
-					"value": 26
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"mode": {
+					"value": 0
 				}
 			},
 			"position": [
-				780.0,
-				640.0
+				700.0,
+				1960.0
+			],
+			"type": "PolarTOP"
+		},
+		"posterize1": {
+			"parameters": {
+				"levels": {
+					"value": 10
+				}
+			},
+			"position": [
+				1580.0,
+				1680.0
 			],
 			"type": "PosterizeTOP"
 		},
@@ -2223,15 +3046,15 @@
 				}
 			},
 			"position": [
-				1080.0,
-				1400.0
+				1012.99890136719,
+				2360.0
 			],
 			"type": "PremultiplyTOP"
 		},
 		"projection1": {
 			"parameters": {
 				"mode": {
-					"value": 0
+					"value": 2
 				},
 				"rotation": {
 					"value": 0.0
@@ -2252,8 +3075,8 @@
 				}
 			},
 			"position": [
-				640.0,
-				1180.0
+				581.999450683594,
+				1220.0
 			],
 			"type": "ProjectionTOP"
 		},
@@ -2273,7 +3096,7 @@
 				}
 			},
 			"position": [
-				1320.0,
+				1360.0,
 				180.0
 			],
 			"type": "RadialBlurTOP"
@@ -2323,8 +3146,8 @@
 				}
 			},
 			"position": [
-				-40.0,
-				1380.0
+				-32.0007934570313,
+				2340.0
 			],
 			"type": "RampTOP"
 		},
@@ -2373,7 +3196,7 @@
 				}
 			},
 			"position": [
-				960.0,
+				934.999450683594,
 				-20.0
 			],
 			"type": "RampTOP"
@@ -2423,7 +3246,7 @@
 				}
 			},
 			"position": [
-				980.0,
+				934.999084472656,
 				1040.0
 			],
 			"type": "RampTOP"
@@ -2565,8 +3388,8 @@
 				}
 			},
 			"position": [
-				-80.0,
-				780.0
+				20.0,
+				800.0
 			],
 			"type": "RectangleTOP"
 		},
@@ -2580,8 +3403,8 @@
 				}
 			},
 			"position": [
-				380.0,
-				1380.0
+				345.998901367188,
+				2340.0
 			],
 			"type": "RemapTOP"
 		},
@@ -2690,7 +3513,7 @@
 				}
 			},
 			"position": [
-				780.0,
+				746.999450683594,
 				860.0
 			],
 			"type": "ReorderTOP"
@@ -2709,10 +3532,59 @@
 				}
 			},
 			"position": [
-				900.0,
+				980.0,
 				180.0
 			],
 			"type": "ResolutionTOP"
+		},
+		"ripple1": {
+			"parameters": {
+				"amplitude": {
+					"value": 0.01
+				},
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"frequency": {
+					"value": 20.0
+				},
+				"mode": {
+					"value": 0
+				},
+				"speed": {
+					"value": 5.0
+				}
+			},
+			"position": [
+				704.999145507813,
+				3300.0
+			],
+			"type": "RippleTOP"
+		},
+		"scan_line1": {
+			"parameters": {
+				"curvature": {
+					"value": 0.0
+				},
+				"jitter": {
+					"value": 3.7
+				},
+				"line_brightness": {
+					"value": 0.179999999999999
+				},
+				"line_spacing": {
+					"value": 13.5
+				}
+			},
+			"position": [
+				1540.0,
+				1220.0
+			],
+			"type": "ScanLineTOP"
 		},
 		"select1": {
 			"parameters": {
@@ -2736,7 +3608,7 @@
 				}
 			},
 			"position": [
-				380.0,
+				333.999206542969,
 				-200.0
 			],
 			"type": "SharpenTOP"
@@ -2751,7 +3623,7 @@
 				}
 			},
 			"position": [
-				1100.0,
+				1180.0,
 				400.0
 			],
 			"type": "SlopeTOP"
@@ -2791,11 +3663,33 @@
 				}
 			},
 			"position": [
-				184.0,
-				3400.0
+				157.999206542969,
+				4300.0
 			],
 			"snapshot_mode": 0,
 			"type": "SnapshotTOP"
+		},
+		"spherize1": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"radius": {
+					"value": 0.5
+				},
+				"strength": {
+					"value": 0.5
+				}
+			},
+			"position": [
+				405.999328613281,
+				3300.0
+			],
+			"type": "SpherizeTOP"
 		},
 		"svg1": {
 			"parameters": {
@@ -2811,32 +3705,13 @@
 				}
 			},
 			"position": [
-				-11.0,
-				1600.0
+				-32.0007934570313,
+				2560.0
 			],
 			"type": "SVGTOP"
 		},
-		"switch1": {
-			"dynamic_input_count": 3,
-			"parameters": {
-				"blend": {
-					"value": false
-				},
-				"blend_pos": {
-					"value": 0.0
-				},
-				"index": {
-					"value": 0
-				}
-			},
-			"position": [
-				206.0,
-				3800.0
-			],
-			"type": "SwitchTOP"
-		},
 		"switch2": {
-			"dynamic_input_count": 5,
+			"dynamic_input_count": 11,
 			"parameters": {
 				"blend": {
 					"value": false
@@ -2901,7 +3776,7 @@
 				}
 			},
 			"position": [
-				-40.0,
+				180.0,
 				400.0
 			],
 			"type": "TextTOP"
@@ -2919,7 +3794,7 @@
 				}
 			},
 			"position": [
-				960.0,
+				934.999450683594,
 				-200.0
 			],
 			"type": "ThresholdTOP"
@@ -2948,7 +3823,7 @@
 				}
 			},
 			"position": [
-				1100.0,
+				1160.0,
 				180.0
 			],
 			"type": "TileTOP"
@@ -2975,8 +3850,8 @@
 				}
 			},
 			"position": [
-				500.0,
-				3200.0
+				509.999206542969,
+				4340.0
 			],
 			"type": "TimeMachineTOP"
 		},
@@ -2996,10 +3871,56 @@
 				}
 			},
 			"position": [
-				1560.0,
-				1100.0
+				1600.0,
+				1040.0
 			],
+			"preview_enabled": false,
 			"type": "TimerCHOP"
+		},
+		"toon_shade1": {
+			"parameters": {
+				"edge_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"edge_strength": {
+					"value": 1.5
+				},
+				"edge_threshold": {
+					"value": 0.1
+				},
+				"shade_levels": {
+					"value": 4
+				}
+			},
+			"position": [
+				1580.0,
+				1960.0
+			],
+			"type": "ToonShadeTOP"
+		},
+		"trail1": {
+			"parameters": {
+				"brightness": {
+					"value": 1.0
+				},
+				"decay": {
+					"value": 0.9
+				},
+				"reset": {
+					"value": false
+				}
+			},
+			"position": [
+				320.0,
+				1680.0
+			],
+			"type": "TrailTOP"
 		},
 		"transform1": {
 			"parameters": {
@@ -3032,7 +3953,7 @@
 				}
 			},
 			"position": [
-				200.0,
+				240.0,
 				180.0
 			],
 			"type": "TransformTOP"
@@ -3090,10 +4011,32 @@
 				}
 			},
 			"position": [
-				-80.0,
-				980.0
+				20.0,
+				1000.0
 			],
 			"type": "TriangleTOP"
+		},
+		"twirl1": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"radius": {
+					"value": 0.5
+				},
+				"strength": {
+					"value": 3.0
+				}
+			},
+			"position": [
+				157.999114990234,
+				3300.0
+			],
+			"type": "TwirlTOP"
 		},
 		"vector_path1": {
 			"parameters": {
@@ -3163,10 +4106,65 @@
 				}
 			},
 			"position": [
-				-57.0,
-				1800.0
+				-45.0007934570313,
+				2760.0
 			],
 			"type": "VectorPathTOP"
+		},
+		"vignette1": {
+			"parameters": {
+				"color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"intensity": {
+					"value": 0.75
+				},
+				"roundness": {
+					"value": 1.0
+				},
+				"softness": {
+					"value": 0.5
+				}
+			},
+			"position": [
+				1375.99975585938,
+				1680.0
+			],
+			"type": "VignetteTOP"
+		},
+		"voronoi1": {
+			"parameters": {
+				"jitter": {
+					"value": 1.0
+				},
+				"mode": {
+					"value": 0
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 10.0
+				},
+				"speed": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				157.999114990234,
+				3700.0
+			],
+			"type": "VoronoiTOP"
 		},
 		"window_out1": {
 			"parameters": {

@@ -20,6 +20,11 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("index", 0, 0, 7, "Input Index", "Which input to pass through"))
 
 
+func get_active_input_indices() -> PackedInt32Array:
+	var idx: int = clampi(get_param_value("index"), 0, maxi(input_ports.size() - 1, 0))
+	return PackedInt32Array([idx])
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
 	var idx: int = clampi(get_param_value("index"), 0, inputs.size() - 1)
 	if idx < inputs.size() and inputs[idx] != null:

@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"monochrome": {"value": false}}},
+		"highpass1": {"type": "HighPassTOP", "position": [350, 200], "parameters": {"radius": {"value": 8.0}, "strength": {"value": 1.5}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "highpass1", "to_port": 0},
+		{"from": "highpass1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "High Pass TOP -- Detail Extraction\n\nSubtracts blurred version, leaving only fine detail.\nGray areas = no detail, bright/dark = edges and texture.\nUseful for texture enhancement and frequency separation.", "position": [-50.0, -50.0], "size": [480.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

@@ -1,0 +1,14 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {"type": "NoiseTOP", "position": [0, 200], "parameters": {"resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}}},
+		"ca1": {"type": "CellularAutomataTOP", "position": [350, 200], "parameters": {"resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}}, "rule_set": {"value": 0}, "threshold": {"value": 0.5}}},
+		"window1": {"type": "WindowOUT", "position": [700, 200], "parameters": {"open": {"value": true}}}
+	},
+	"connections": [
+		{"from": "noise1", "from_port": 0, "to": "ca1", "to_port": 0},
+		{"from": "ca1", "from_port": 0, "to": "window1", "to_port": 0}
+	],
+	"annotations": [{"id": "ann_1", "type": "note", "text": "Cellular Automata TOP -- Game of Life\n\nNoise seeds the initial state, then Life rules evolve.\nToggle Reset to re-seed. Try Brian's Brain for 3-state waves.\nSeeds rule creates explosive growth, Day & Night is reversible.", "position": [-50.0, -50.0], "size": [520.0, 80.0], "color": [1.0, 1.0, 1.0, 0.8]}]
+}

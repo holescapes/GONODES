@@ -268,6 +268,14 @@ func get_remote_dependencies() -> Array[String]:
 	return deps
 
 
+## Returns the input port indices that are actually consumed this frame.
+## Empty array (default) means ALL connected inputs are active.
+## Override in operators like SwitchTOP that only read one (or two) inputs
+## at a time — the cook engine will skip upstream chains for inactive ports.
+func get_active_input_indices() -> PackedInt32Array:
+	return PackedInt32Array()
+
+
 ## Returns a Dictionary mapping parameter names to their expected target
 ## family type (GNFamily.Type enum value, or -1 for any).  Used by the
 ## rename system to propagate ID changes and by the inspector UI to show
