@@ -13,6 +13,9 @@ extends GNTopBase
 ## The texture is created on the CPU via Image (no SubViewport), which
 ## keeps things simple and portable.  Later C++ porting can optimise this.
 
+var _smooth_min: float = INF
+var _smooth_max: float = -INF
+
 
 func _init() -> void:
 	super._init()
@@ -67,18 +70,41 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if ch_count == 0:
 		return null
 
-	# Auto range
+	# Auto range — smooth expansion with 10% headroom padding
 	if auto_range:
-		min_v = INF
-		max_v = -INF
+		var frame_min: float = INF
+		var frame_max: float = -INF
 		for ch_name in ch_names:
 			var data: PackedFloat32Array = channels[ch_name]
 			for val in data:
-				min_v = minf(min_v, val)
-				max_v = maxf(max_v, val)
+				frame_min = minf(frame_min, val)
+				frame_max = maxf(frame_max, val)
+		# Add 10% padding so the waveform doesn't slam against edges
+		var span: float = frame_max - frame_min
+		if span < 0.0001:
+			span = 1.0
+		var pad: float = span * 0.1
+		frame_min -= pad
+		frame_max += pad
+		# Smooth: expand instantly, shrink slowly (decay toward current range)
+		if _smooth_min == INF:
+			_smooth_min = frame_min
+			_smooth_max = frame_max
+		else:
+			_smooth_min = minf(_smooth_min, frame_min)
+			_smooth_max = maxf(_smooth_max, frame_max)
+			# Slowly decay toward the current frame range
+			_smooth_min = lerpf(_smooth_min, frame_min, 0.05)
+			_smooth_max = lerpf(_smooth_max, frame_max, 0.05)
+		min_v = _smooth_min
+		max_v = _smooth_max
 		if absf(max_v - min_v) < 0.0001:
 			min_v -= 0.5
 			max_v += 0.5
+	else:
+		# Reset smooth state when auto_range is off
+		_smooth_min = INF
+		_smooth_max = -INF
 
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	# Fill background

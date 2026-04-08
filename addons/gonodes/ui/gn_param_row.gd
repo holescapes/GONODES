@@ -139,6 +139,7 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 		_expr_edit = LineEdit.new()
 		_expr_edit.placeholder_text = "expression…"
 		_expr_edit.size_flags_horizontal = SIZE_EXPAND_FILL
+		_expr_edit.size_flags_stretch_ratio = 2.0
 		_expr_edit.add_theme_font_size_override("font_size", 11)
 		_expr_edit.text = param.expression
 		_expr_edit.text_submitted.connect(_on_expression_submitted)
@@ -149,11 +150,13 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 
 		# Resolved value preview (shown in expression mode: "→ 0.523")
 		_resolved_label = Label.new()
-		_resolved_label.custom_minimum_size = Vector2(60, 0)
+		_resolved_label.size_flags_horizontal = SIZE_EXPAND_FILL
+		_resolved_label.size_flags_stretch_ratio = 1.0
 		_resolved_label.add_theme_font_size_override("font_size", 10)
 		_resolved_label.add_theme_color_override("font_color", Color(0.55, 0.75, 0.55))
 		_resolved_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		_resolved_label.clip_text = true
+		_resolved_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		_resolved_label.visible = false
 		_resolved_label.mouse_filter = Control.MOUSE_FILTER_PASS
 		_value_container.add_child(_resolved_label)
@@ -481,7 +484,7 @@ func _populate_node_ref_dropdown(ob: OptionButton) -> void:
 		return
 
 	var ref_family: int = param.node_ref_family
-	var own_id: String = owner_node.node_id if owner_node != null else ""
+	var own_id: String = owner_node.id if owner_node != null else ""
 	var sorted_ids: Array = network.nodes.keys()
 	sorted_ids.sort()
 

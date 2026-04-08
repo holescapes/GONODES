@@ -312,11 +312,17 @@ func _get_preset_folder() -> String:
 	# Core: GDScriptSCRIPT (node_type == "script")
 	if _owner_node.node_type == "script":
 		return "script"
-	# Core: CallbackDAT
-	if _owner_node.node_type == "callbackdat":
+	# Core: CallbackDAT (node_type is "callback", preset folder is "callbackdat")
+	if _owner_node.node_type == "callback":
 		return "callbackdat"
-	# Core: CustomShaderTOP / ShaderMAT
+	# Core: CustomShaderTOP / ShaderMAT / GLSLMultiTOP
 	if _param_name == "shader_code":
+		# ComputeShaderTOP uses GLSL 450 compute shaders — separate presets.
+		if _owner_node.node_type == "compute_shader":
+			return "compute"
+		# GLSLMultiTOP uses canvas_item with gn_out — separate presets.
+		if _owner_node.node_type == "glsl_multi":
+			return "glsl_multi"
 		return "glsl"
 	return ""
 

@@ -143,8 +143,23 @@ var _ghost_wire: Dictionary = {}  # { "node_id": String, "port": int, "release":
 ## Cached expression references: { from_node_id: [to_node_id, ...] }
 var _expr_refs: Dictionary = {}
 
+## Per-edge expression detail text: { "consumer_id→source_id": [call_text, ...] }
+## Used by the hover tooltip to show which references a dashed line represents.
+var _expr_ref_details: Dictionary = {}
+
 ## The overlay Control that draws expression reference lines.
 var _expr_ref_overlay: Control = null
+
+## Tooltip popup shown when hovering over an expression reference line.
+var _expr_ref_tooltip: PanelContainer = null
+
+## Hover timer state for expression ref tooltip (3s delay).
+var _expr_ref_hover_edge: String = ""   ## Edge key currently being hovered
+var _expr_ref_hover_time: float = 0.0   ## Accumulated hover time on that edge
+var _expr_ref_hover_mouse: Vector2 = Vector2.ZERO  ## Last mouse pos on the edge
+var _expr_ref_hover_consumer: String = ""  ## Consumer node ID for tooltip text
+var _expr_ref_hover_source: String = ""    ## Source node ID for tooltip text
+const _EXPR_REF_HOVER_DELAY := 2.0      ## Seconds before tooltip appears
 
 ## Annotation views: ann_id → GNNetworkBox or GNStickyNote.
 var _annotation_views: Dictionary = {}
@@ -215,9 +230,9 @@ var _shake_last_dir: Vector2 = Vector2.ZERO   ## Last movement direction sign
 var _shake_reversals: int = 0                  ## Number of direction reversals
 var _shake_timer: float = 0.0                  ## Time since first reversal
 var _shake_triggered: bool = false             ## Prevent re-triggering per drag
-const _SHAKE_REVERSAL_THRESHOLD := 3           ## Reversals needed to trigger
-const _SHAKE_TIME_WINDOW := 0.5                ## Seconds to accumulate reversals
-const _SHAKE_MIN_SPEED := 150.0                ## Min px/s to count a reversal
+const _SHAKE_REVERSAL_THRESHOLD := 5           ## Reversals needed to trigger
+const _SHAKE_TIME_WINDOW := 0.35                ## Seconds to accumulate reversals
+const _SHAKE_MIN_SPEED := 300.0                ## Min px/s to count a reversal
 
 ## Origin of the current box-select drag (local/screen coords).  Set on left
 ## mouse-down over empty canvas so we can build the actual selection rect on
@@ -317,6 +332,30 @@ func _ready() -> void:
 	_expr_ref_overlay.draw.connect(_draw_expr_ref_lines)
 	add_child(_expr_ref_overlay)
 
+	# Create expression reference hover tooltip
+	_expr_ref_tooltip = PanelContainer.new()
+	_expr_ref_tooltip.name = "ExprRefTooltip"
+	_expr_ref_tooltip.visible = false
+	_expr_ref_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tip_label := RichTextLabel.new()
+	tip_label.name = "Label"
+	tip_label.bbcode_enabled = true
+	tip_label.fit_content = true
+	tip_label.scroll_active = false
+	tip_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	tip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tip_label.custom_minimum_size = Vector2(180, 0)
+	_expr_ref_tooltip.add_child(tip_label)
+	var sbx := StyleBoxFlat.new()
+	sbx.bg_color = Color(0.1, 0.12, 0.16, 0.92)
+	sbx.border_color = Color(0.2, 0.85, 0.95, 0.6)
+	sbx.set_border_width_all(1)
+	sbx.set_corner_radius_all(4)
+	sbx.set_content_margin_all(6)
+	_expr_ref_tooltip.add_theme_stylebox_override("panel", sbx)
+	_expr_ref_tooltip.z_index = 100
+	add_child(_expr_ref_tooltip)
+
 	# Create debug overlay (cook order badges, active dimming, ref arrows, sink labels)
 	debug_overlay = GNDebugOverlay.new()
 	debug_overlay.graph_editor = self
@@ -333,7 +372,12 @@ func _ready() -> void:
 	_toast_container.custom_minimum_size = Vector2(400, 0)
 	_toast_container.add_theme_constant_override("separation", 6)
 	_toast_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	_toast_container.z_index = 4096
+	_toast_container.z_as_relative = false
 	add_child(_toast_container)
+
+	# Hook logger warnings/errors to toast notifications
+	GNLogger.toast_sink = Callable(self, "_on_logger_toast")
 
 	GNLogger.info("GraphEditor", "Graph editor ready")
 
@@ -482,6 +526,10 @@ func _gui_input(event: InputEvent) -> void:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			_update_wire_box_selection()
 			_box_select_origin = Vector2(-1, -1)
+
+	# Hover detection for expression reference lines
+	if event is InputEventMouseMotion and expr_refs_visible and not _expr_refs.is_empty():
+		_update_expr_ref_hover(get_local_mouse_position())
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -665,7 +713,7 @@ func _on_connection_request(from_node: StringName, from_port: int,
 	var success := network.connect_nodes(fn, from_port, tn, to_port)
 
 	if not success:
-		GNLogger.warn("GraphEditor", "Connection rejected: %s:%d → %s:%d" % [
+		GNLogger.warn("GraphEditor", "Connection rejected: %s:%d → %s:%d (cycle or type mismatch)" % [
 			fn, from_port, tn, to_port])
 		return
 
@@ -717,6 +765,9 @@ func _on_disconnection_request(from_node: StringName, from_port: int,
 func _on_connection_drag_started(_from_node: StringName, _from_port: int,
 		_is_output: bool) -> void:
 	_wire_dragging = true
+	# Clear stale box-select origin so the upcoming mouse-release doesn't
+	# accidentally box-select wires near the new connection endpoint.
+	_box_select_origin = Vector2(-1, -1)
 
 
 ## Wire drag ended (connected to a port or cancelled by pressing Escape / RMB).
@@ -917,9 +968,7 @@ func _on_node_rename_requested(old_id: String, new_id: String) -> void:
 	if network == null:
 		return
 	if not network.rename_node(old_id, new_id):
-		var msg := "Rename '%s' → '%s' failed" % [old_id, new_id]
-		GNLogger.warn("GraphEditor", msg)
-		show_toast(msg, ToastType.WARNING)
+		GNLogger.warn("GraphEditor", "Rename '%s' → '%s' failed" % [old_id, new_id])
 		return
 
 	# Record for undo
@@ -1408,15 +1457,21 @@ static var _expr_ref_regex: RegEx = null
 
 ## Scans all nodes' parameters for expression references (chop/op/top calls)
 ## and caches them in [member _expr_refs] as `{ from_id: [to_id, ...] }`.
+## Also populates [member _expr_ref_details] with the full call text per edge.
 func _scan_expr_references() -> void:
 	_expr_refs.clear()
+	_expr_ref_details.clear()
 	if network == null:
 		return
 
-	# Lazy-init regex
+	# Lazy-init regex — captures full call and first argument (node ID)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
+		_expr_ref_regex.compile("((?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par)\\s*\\([^)]*\\))")
+
+	# Secondary regex to pull just the first string argument (node ID)
+	var _id_regex := RegEx.new()
+	_id_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for node_id in network.nodes:
 		var node: GNNode = network.nodes[node_id]
@@ -1427,7 +1482,7 @@ func _scan_expr_references() -> void:
 
 			# Check main expression
 			if param.mode == GNParameter.Mode.EXPRESSION and param.expression != "":
-				_extract_refs_from(param.expression, refs)
+				_extract_refs_from_with_details(param.expression, node_id, refs, _id_regex)
 
 			# Check per-component expressions
 			for i in range(param.component_expressions.size()):
@@ -1435,20 +1490,134 @@ func _scan_expr_references() -> void:
 						param.component_modes[i] == GNParameter.Mode.EXPRESSION:
 					var comp_expr: String = param.component_expressions[i]
 					if comp_expr != "":
-						_extract_refs_from(comp_expr, refs)
+						_extract_refs_from_with_details(comp_expr, node_id, refs, _id_regex)
 
 		if refs.size() > 0:
 			_expr_refs[node_id] = refs
 
 
 ## Extracts referenced node IDs from an expression string and appends unique
-## entries to [param out_refs].
-func _extract_refs_from(expr_text: String, out_refs: Array[String]) -> void:
-	var results := _expr_ref_regex.search_all(expr_text)
-	for m in results:
-		var ref_id: String = m.get_string(1)
+## entries to [param out_refs].  Also stores the full call text per edge in
+## [member _expr_ref_details].
+func _extract_refs_from_with_details(expr_text: String, consumer_id: String,
+		out_refs: Array[String], id_regex: RegEx) -> void:
+	# Find full calls
+	var full_matches := _expr_ref_regex.search_all(expr_text)
+	var id_matches := id_regex.search_all(expr_text)
+	for i in range(mini(full_matches.size(), id_matches.size())):
+		var ref_id: String = id_matches[i].get_string(1)
+		var call_text: String = full_matches[i].get_string(1)
 		if not out_refs.has(ref_id):
 			out_refs.append(ref_id)
+		# Store detail per edge
+		var edge_key := "%s→%s" % [consumer_id, ref_id]
+		if not _expr_ref_details.has(edge_key):
+			_expr_ref_details[edge_key] = []
+		var details: Array = _expr_ref_details[edge_key]
+		if not details.has(call_text):
+			details.append(call_text)
+
+
+## Checks if the mouse is near any expression reference line and updates
+## hover state.  The actual tooltip display is handled in [method _process]
+## after the hover delay elapses.
+func _update_expr_ref_hover(local_mouse: Vector2) -> void:
+	var hit_dist_sq := 144.0  # 12px threshold squared
+	var best_dist_sq := hit_dist_sq
+	var best_consumer := ""
+	var best_source := ""
+
+	for from_id in _expr_refs:
+		var from_view: GNNodeView = _node_views.get(from_id, null)
+		if from_view == null:
+			continue
+		var ref_ids: Array = _expr_refs[from_id]
+		for to_id in ref_ids:
+			var to_view: GNNodeView = _node_views.get(to_id, null)
+			if to_view == null:
+				continue
+			# Replicate the screen-space coords from _draw_expr_ref_lines
+			var consumer_center := from_view.position_offset + from_view.size / 2.0
+			var source_center := to_view.position_offset + to_view.size / 2.0
+			var p_src := (source_center - scroll_offset / zoom) * zoom
+			var p_dst := (consumer_center - scroll_offset / zoom) * zoom
+			# Clip to visible segment (exclude portions hidden under nodes)
+			var src_rect := Rect2(
+				(to_view.position_offset - scroll_offset / zoom) * zoom,
+				to_view.size * zoom)
+			var dst_rect := Rect2(
+				(from_view.position_offset - scroll_offset / zoom) * zoom,
+				from_view.size * zoom)
+			var vis_start := _clip_line_to_rect_exit(p_src, p_dst, src_rect)
+			var vis_end := _clip_line_to_rect_exit(p_dst, p_src, dst_rect)
+			var d_sq := _point_to_segment_dist_sq(local_mouse, vis_start, vis_end)
+			if d_sq < best_dist_sq:
+				best_dist_sq = d_sq
+				best_consumer = from_id
+				best_source = to_id
+
+	if best_consumer.is_empty():
+		_expr_ref_hover_edge = ""
+		_expr_ref_hover_time = 0.0
+		_expr_ref_tooltip.visible = false
+		return
+
+	var edge_key := "%s→%s" % [best_consumer, best_source]
+	var calls: Array = _expr_ref_details.get(edge_key, [])
+	if calls.is_empty():
+		_expr_ref_hover_edge = ""
+		_expr_ref_hover_time = 0.0
+		_expr_ref_tooltip.visible = false
+		return
+
+	# Reset timer if the user moved to a different edge
+	if edge_key != _expr_ref_hover_edge:
+		_expr_ref_hover_time = 0.0
+		_expr_ref_tooltip.visible = false
+
+	_expr_ref_hover_edge = edge_key
+	_expr_ref_hover_mouse = local_mouse
+	_expr_ref_hover_consumer = best_consumer
+	_expr_ref_hover_source = best_source
+
+
+## Ticks the expression-ref hover timer and shows the tooltip when the delay
+## has elapsed.  Called from [method _process] so time accumulates even when
+## the mouse is stationary.
+func _tick_expr_ref_hover(delta: float) -> void:
+	if _expr_ref_hover_edge.is_empty():
+		return
+	_expr_ref_hover_time += delta
+	if _expr_ref_hover_time < _EXPR_REF_HOVER_DELAY:
+		return
+	if _expr_ref_tooltip.visible:
+		return  # Already showing — no need to rebuild
+
+	var calls: Array = _expr_ref_details.get(_expr_ref_hover_edge, [])
+	if calls.is_empty():
+		return
+
+	var label: RichTextLabel = _expr_ref_tooltip.get_node("Label")
+	var lines := PackedStringArray()
+	lines.append("[color=#3dd9e6]%s[/color] → [color=#3dd9e6]%s[/color]" % [_expr_ref_hover_source, _expr_ref_hover_consumer])
+	for c in calls:
+		lines.append("  [code]%s[/code]" % str(c))
+	label.text = "\n".join(lines)
+
+	_expr_ref_tooltip.position = _expr_ref_hover_mouse + Vector2(16, -10)
+	_expr_ref_tooltip.reset_size()
+	_expr_ref_tooltip.visible = true
+
+
+## Returns the squared distance from point [param p] to line segment [param a]-[param b].
+static func _point_to_segment_dist_sq(p: Vector2, a: Vector2, b: Vector2) -> float:
+	var ab := b - a
+	var len_sq := ab.length_squared()
+	if len_sq < 0.001:
+		return (p - a).length_squared()
+	var t := clampf((p - a).dot(ab) / len_sq, 0.0, 1.0)
+	var proj := a + ab * t
+	return (p - proj).length_squared()
 
 
 ## Rescans expression references (if dirty) and triggers a redraw of the overlay.
@@ -1494,16 +1663,80 @@ func _draw_expr_ref_lines() -> void:
 			if to_view == null:
 				continue
 
-			# Compute center positions in graph space, then convert to overlay space
-			var from_center := from_view.position_offset + from_view.size / 2.0
-			var to_center := to_view.position_offset + to_view.size / 2.0
+			# from_id = consumer (has the expression), to_id = source (referenced)
+			# Draw line from source → consumer so the arrow shows data flow direction
+			var consumer_center := from_view.position_offset + from_view.size / 2.0
+			var source_center := to_view.position_offset + to_view.size / 2.0
 
 			# Convert from graph-content space to overlay (screen) space
-			var p1 := (from_center - scroll_offset / zoom) * zoom
-			var p2 := (to_center - scroll_offset / zoom) * zoom
+			var p_src := (source_center - scroll_offset / zoom) * zoom
+			var p_dst := (consumer_center - scroll_offset / zoom) * zoom
 
-			_draw_dashed_line_on(_expr_ref_overlay, p1, p2,
+			_draw_dashed_line_on(_expr_ref_overlay, p_src, p_dst,
 					line_color, line_width, dash_length, gap_length)
+
+			# Compute visible segment (where line exits each node's rect)
+			# so the arrow sits on the visible portion, not hidden under a node
+			var src_rect := Rect2(
+				(to_view.position_offset - scroll_offset / zoom) * zoom,
+				to_view.size * zoom)
+			var dst_rect := Rect2(
+				(from_view.position_offset - scroll_offset / zoom) * zoom,
+				from_view.size * zoom)
+			var vis_start := _clip_line_to_rect_exit(p_src, p_dst, src_rect)
+			var vis_end := _clip_line_to_rect_exit(p_dst, p_src, dst_rect)
+			var vis_mid := (vis_start + vis_end) * 0.5
+
+			# Draw arrow at midpoint of visible segment
+			var dir := (p_dst - p_src).normalized()
+			var perp := Vector2(-dir.y, dir.x)
+			var arrow_size := 12.0  # constant screen pixels
+			var arrow_tip := vis_mid + dir * arrow_size * 0.6
+			var arrow_left := vis_mid - dir * arrow_size * 0.4 + perp * arrow_size * 0.5
+			var arrow_right := vis_mid - dir * arrow_size * 0.4 - perp * arrow_size * 0.5
+			_expr_ref_overlay.draw_colored_polygon(
+					PackedVector2Array([arrow_tip, arrow_left, arrow_right]), line_color)
+
+
+## Finds where the line from [param origin] to [param target] exits [param rect].
+## Returns the exit point on the rect edge, or [param origin] if it's outside.
+func _clip_line_to_rect_exit(origin: Vector2, target: Vector2, rect: Rect2) -> Vector2:
+	if not rect.has_point(origin):
+		return origin
+	var dir := target - origin
+	if dir.length_squared() < 0.001:
+		return origin
+	# Test intersection with all 4 edges, keep the nearest positive t
+	var best_t := INF
+	# Left edge
+	if abs(dir.x) > 0.001:
+		var t := (rect.position.x - origin.x) / dir.x
+		if t > 0.0 and t < best_t:
+			var y := origin.y + dir.y * t
+			if y >= rect.position.y and y <= rect.end.y:
+				best_t = t
+		# Right edge
+		t = (rect.end.x - origin.x) / dir.x
+		if t > 0.0 and t < best_t:
+			var y2 := origin.y + dir.y * t
+			if y2 >= rect.position.y and y2 <= rect.end.y:
+				best_t = t
+	# Top edge
+	if abs(dir.y) > 0.001:
+		var t := (rect.position.y - origin.y) / dir.y
+		if t > 0.0 and t < best_t:
+			var x := origin.x + dir.x * t
+			if x >= rect.position.x and x <= rect.end.x:
+				best_t = t
+		# Bottom edge
+		t = (rect.end.y - origin.y) / dir.y
+		if t > 0.0 and t < best_t:
+			var x2 := origin.x + dir.x * t
+			if x2 >= rect.position.x and x2 <= rect.end.x:
+				best_t = t
+	if best_t < INF:
+		return origin + dir * best_t
+	return origin
 
 
 ## Draws a dashed line on the given Control between two points.
@@ -1523,16 +1756,6 @@ func _draw_dashed_line_on(canvas: Control, from: Vector2, to: Vector2,
 		var seg_end := from + dir_norm * seg_end_len
 		canvas.draw_line(seg_start, seg_end, color, width, true)
 		pos += segment
-
-	# Draw a small arrow head at the destination
-	var arrow_size := 6.0
-	var perp := Vector2(-dir_norm.y, dir_norm.x)
-	var arrow_tip := to
-	var arrow_base := to - dir_norm * arrow_size
-	var arrow_left := arrow_base + perp * arrow_size * 0.5
-	var arrow_right := arrow_base - perp * arrow_size * 0.5
-	canvas.draw_colored_polygon(
-			PackedVector2Array([arrow_tip, arrow_left, arrow_right]), color)
 
 
 ## Draws a temporary "ghost" wire from a port to the drop point while the
@@ -3004,6 +3227,8 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 				output_ref_label = 'Copy Output  chop("%s", "out")' % sel_node_name
 			"top":
 				output_ref_label = 'Copy Output  top("%s")' % sel_node_name
+			"ui":
+				output_ref_label = 'Copy Output  chop("%s", "%s:value")' % [sel_node_name, sel_node_name]
 			_:
 				output_ref_label = 'Copy Output  op("%s")' % sel_node_name
 	_context_menu.add_item(output_ref_label, _CtxID.COPY_OUTPUT_REF)
@@ -3273,6 +3498,17 @@ func _copy_output_ref_to_clipboard() -> void:
 			ref = 'chop("%s", "%s")' % [node.id, chan]
 		"top":
 			ref = 'top("%s")' % node.id
+		"ui":
+			# UI nodes output widget_state as a CHOP — use first channel
+			var chan := "%s:value" % node.id
+			var state_port := node.output_ports.size() - 1
+			var state_data: GNData = node.get_output_data(state_port) if state_port >= 0 else null
+			if state_data is GNChannelData:
+				var ch_data: GNChannelData = state_data as GNChannelData
+				var names := ch_data.get_channel_names()
+				if not names.is_empty():
+					chan = names[0]
+			ref = 'chop("%s", "%s")' % [node.id, chan]
 		_:
 			ref = 'op("%s")' % node.id
 	DisplayServer.clipboard_set(ref)
@@ -3686,6 +3922,10 @@ func _process(delta: float) -> void:
 	if _wire_dragging or _node_drag_active:
 		_handle_edge_scroll(delta)
 
+	# ── Expression ref hover tooltip timer ──
+	if expr_refs_visible and not _expr_ref_hover_edge.is_empty():
+		_tick_expr_ref_hover(delta)
+
 	# Fast path: nothing to do if no annotations exist and no node drag is active.
 	if _annotation_views.is_empty() and not _node_drag_active:
 		return
@@ -3717,15 +3957,16 @@ func _process(delta: float) -> void:
 	if not _shake_triggered and _pre_move_positions.size() == 1:
 		var speed := frame_delta.length() / maxf(delta, 0.001)
 		if speed > _SHAKE_MIN_SPEED:
-			var cur_dir := Vector2(signf(frame_delta.x), signf(frame_delta.y))
-			if _shake_last_dir != Vector2.ZERO:
-				# A reversal = sign flip on either axis
-				if (cur_dir.x != 0.0 and _shake_last_dir.x != 0.0 and cur_dir.x != _shake_last_dir.x) \
-						or (cur_dir.y != 0.0 and _shake_last_dir.y != 0.0 and cur_dir.y != _shake_last_dir.y):
-					if _shake_reversals == 0:
-						_shake_timer = 0.0
-					_shake_reversals += 1
-			_shake_last_dir = cur_dir
+			# Only track the dominant axis to avoid false positives from
+			# diagonal or arc-like movement.
+			var dominant_axis: int = 0 if absf(frame_delta.x) >= absf(frame_delta.y) else 1
+			var cur_sign: float = signf(frame_delta.x) if dominant_axis == 0 else signf(frame_delta.y)
+			var last_sign: float = _shake_last_dir.x if dominant_axis == 0 else _shake_last_dir.y
+			if last_sign != 0.0 and cur_sign != 0.0 and cur_sign != last_sign:
+				if _shake_reversals == 0:
+					_shake_timer = 0.0
+				_shake_reversals += 1
+			_shake_last_dir = Vector2(signf(frame_delta.x), signf(frame_delta.y))
 		_shake_timer += delta
 		if _shake_timer > _SHAKE_TIME_WINDOW:
 			_shake_reversals = 0
@@ -4913,3 +5154,12 @@ func show_toast(message: String, type: int = ToastType.INFO, duration: float = 3
 	tw.tween_interval(duration)
 	tw.tween_property(panel, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(panel.queue_free)
+
+
+## Callback for GNLogger.toast_sink — maps logger levels to toast types.
+func _on_logger_toast(log_level: int, message: String) -> void:
+	match log_level:
+		GNLogger.Level.ERROR:
+			show_toast(message, ToastType.ERROR)
+		GNLogger.Level.WARN:
+			show_toast(message, ToastType.WARNING)

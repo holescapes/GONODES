@@ -41,8 +41,5 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if idx < inputs.size() and inputs[idx] is GNChannelData:
 		return inputs[idx]
 
-	# Fallback: return first valid input
-	for inp in inputs:
-		if inp is GNChannelData:
-			return inp
-	return null
+	# Hold previous output while the new chain activates
+	return cached_output

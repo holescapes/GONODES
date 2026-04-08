@@ -573,6 +573,15 @@ via `_on_node_param_changed`. This means switching a Switch node's `index`
 parameter immediately recomputes which upstream chains are active — no manual
 invalidation needed.
 
+When the index is expression-driven, the engine uses the previous frame's
+`resolved_value` for active-set BFS (since expressions are evaluated during
+the cook loop, after active-set computation).  A routing snapshot in
+`_cook_single_node` detects when the expression result changes and sets
+`_active_set_dirty` for the next frame.  This introduces a **1-frame
+latency** for expression-driven routing changes — matching TD/Houdini
+behaviour.  During the transition frame, `_cook()` returns `cached_output`
+(hold last frame) to avoid a flash.
+
 #### Existing operator overrides
 
 | Operator | Active behavior |

@@ -648,9 +648,9 @@ func _rebuild_expr_consumer_map() -> void:
 				consumers.append(node_id)
 			# ref_id → node_id is a dependency edge (node_id reads ref_id)
 			expr_edges.append([ref_id, node_id])
-	# Inject into network so _compute_topological_levels includes them
+	# Inject into network so both topo order and topo levels include them
 	network._expression_edges = expr_edges
-	network._topo_levels_dirty = true
+	network._mark_topo_dirty()
 
 
 ## Returns true if this node's expressions should be re-evaluated this frame.
@@ -761,6 +761,12 @@ func _try_expression_dirty(node: GNNode) -> bool:
 		var param: GNParameter = node.parameters[param_name]
 		if old_values[param_name] != param.resolved_value:
 			node.mark_dirty()
+			# If this node selectively routes inputs (Switch, CubeMap, etc.),
+			# an expression-driven routing param may have changed which
+			# upstream branch is active.  Recompute the active set next frame.
+			# Nodes that use all inputs (empty array) are unaffected.
+			if node.get_active_input_indices().size() > 0:
+				_active_set_dirty = true
 			return true
 	return false
 
@@ -1273,8 +1279,10 @@ func _make_par_proxy(name_or_node: String, param_name: String = "") -> Variant:
 	# ── Circular dependency guard ──
 	var guard_key := "%s:%s" % [target_node.id, target_param_name]
 	if _evaluating_params.has(guard_key):
-		GNLogger.warn("CookEngine",
-			"par() — circular reference detected: '%s' (returning fallback)" % guard_key)
+		var msg := "par() — circular reference detected: '%s'" % guard_key
+		GNLogger.warn("CookEngine", msg + " (returning fallback)")
+		if editor_mode and _current_eval_node != null:
+			_current_eval_node.node_warning = msg
 		return p.fallback_value
 
 	# If the target param is an expression that hasn't been evaluated yet this
@@ -1788,8 +1796,26 @@ func _cook_single_node(node: GNNode) -> int:
 	node.current_frame = frame_count
 	node.project_dir = project_dir
 
-	# Resolve parameters (expressions, binds)
+	# Resolve parameters (expressions, binds).
+	# For nodes that selectively route inputs (Switch, CubeMap, etc.),
+	# snapshot expression values before resolution so we can detect changes
+	# that affect the active chain — _try_expression_dirty is skipped when
+	# the node is already dirty, so this is the only place to catch it.
+	var _routing_snapshot: Dictionary = {}
+	var _check_routing := node.get_active_input_indices().size() > 0
+	if _check_routing:
+		for pn in node.parameters:
+			var p: GNParameter = node.parameters[pn]
+			if p.mode == GNParameter.Mode.EXPRESSION:
+				_routing_snapshot[pn] = p.resolved_value
+
 	_resolve_node_parameters(node)
+
+	if _check_routing and not _routing_snapshot.is_empty():
+		for pn in _routing_snapshot:
+			if _routing_snapshot[pn] != node.parameters[pn].resolved_value:
+				_active_set_dirty = true
+				break
 
 	# Gather input data from upstream cached outputs
 	var inputs: Array[GNData] = _gather_inputs(node)

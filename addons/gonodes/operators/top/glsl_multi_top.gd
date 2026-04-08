@@ -112,6 +112,8 @@ var _input_uniform_set: RID = RID()
 var _output_image_textures: Array[ImageTexture] = []
 var _vertex_buffer_rid: RID = RID()
 var _vertex_array_rid: RID = RID()
+var _cached_clear_colors: PackedColorArray = PackedColorArray()
+var _cached_push_bytes: PackedByteArray = PackedByteArray()
 
 # -- Fallback path (multi-pass SubViewport) state --
 var _fb_shaders: Array[Shader] = []
@@ -194,6 +196,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_compile_all(code)
 
 	if not _shader_ok:
+		GNLogger.warn("GLSLMultiTOP",
+			"'%s' -- cook skipped: shader not compiled (use_mrt=%s)" % [id, _use_mrt])
 		return _cached_tex_data if _cached_tex_data != null else null
 
 	if _use_mrt:
@@ -267,6 +271,7 @@ func _try_init_mrt() -> void:
 
 const _VERT_GLSL := """#version 450
 
+layout(location = 0) in vec2 _vtx_pos;
 layout(location = 0) out vec2 UV;
 
 void main() {
@@ -287,6 +292,15 @@ func _create_fullscreen_triangle() -> void:
 	vf.stride = 8
 	vf.offset = 0
 	_vertex_array_rid = _rd.vertex_array_create(3, _rd.vertex_format_create([vf]), [_vertex_buffer_rid])
+
+
+static func _make_vertex_attr() -> RDVertexAttribute:
+	var vf := RDVertexAttribute.new()
+	vf.format = RenderingDevice.DATA_FORMAT_R32G32_SFLOAT
+	vf.location = 0
+	vf.stride = 8
+	vf.offset = 0
+	return vf
 
 
 ## Transpiles user canvas_item code into GLSL 450 fragment shader.
@@ -392,22 +406,33 @@ func _transpile_to_glsl450(code: String) -> String:
 	preamble.append("} pc;")
 	preamble.append("")
 
-	# Build result
-	var result: PackedStringArray = PackedStringArray()
+	# Build result — identifier replacements must only apply to user body code,
+	# NOT to the push constant struct (which declares the same names as members).
+	var header: PackedStringArray = PackedStringArray()
+	var body: PackedStringArray = PackedStringArray()
 	for i in range(out_lines.size()):
-		if i == insert_pos:
-			result.append_array(preamble)
-		result.append(out_lines[i])
+		if i < insert_pos:
+			header.append(out_lines[i])
+		else:
+			body.append(out_lines[i])
+
+	var body_text := "\n".join(body)
+
+	# Replace standalone TIME with pc.TIME (body only)
+	body_text = _replace_standalone_identifier(body_text, "TIME", "pc.TIME")
+	# Replace user uniform names with pc.name (body only)
+	for uinfo in user_uniforms:
+		body_text = _replace_standalone_identifier(body_text, uinfo[1], "pc." + uinfo[1])
+	# Replace gn_resolution with pc.gn_resolution (body only)
+	body_text = _replace_standalone_identifier(body_text, "gn_resolution", "pc.gn_resolution")
+
+	var result: PackedStringArray = PackedStringArray()
+	result.append_array(header)
+	result.append_array(preamble)
+	for bline in body_text.split("\n"):
+		result.append(bline)
 
 	var final := "\n".join(result)
-
-	# Replace standalone TIME with pc.TIME
-	final = _replace_standalone_identifier(final, "TIME", "pc.TIME")
-	# Replace user uniform names with pc.name
-	for uinfo in user_uniforms:
-		final = _replace_standalone_identifier(final, uinfo[1], "pc." + uinfo[1])
-	# Replace gn_resolution with pc.gn_resolution
-	final = _replace_standalone_identifier(final, "gn_resolution", "pc.gn_resolution")
 
 	# Remove any #define lines we may have emitted
 	var clean_lines: PackedStringArray = PackedStringArray()
@@ -474,6 +499,8 @@ func _compile_mrt(code: String) -> void:
 	_free_mrt_shader()
 
 	var frag_code := _transpile_to_glsl450(code)
+	GNLogger.info("GLSLMultiTOP",
+		"'%s' -- transpiled GLSL 450 (%d chars):\n%s" % [id, frag_code.length(), frag_code])
 
 	var src := RDShaderSource.new()
 	src.source_vertex = _VERT_GLSL
@@ -544,6 +571,10 @@ func _ensure_mrt_framebuffer(size: Vector2i) -> void:
 		_rd.free_rid(_pipeline_rid)
 		_pipeline_rid = RID()
 
+	GNLogger.info("GLSLMultiTOP",
+		"'%s' -- _ensure_mrt_framebuffer: creating pipeline, shader_valid=%s, fb_valid=%s, outputs=%d" % [
+			id, _shader_rid.is_valid(), _framebuffer_rid.is_valid(), _output_count])
+
 	if _shader_rid.is_valid():
 		var blend := RDPipelineColorBlendState.new()
 		for i in range(_output_count):
@@ -554,42 +585,47 @@ func _ensure_mrt_framebuffer(size: Vector2i) -> void:
 		var multisample := RDPipelineMultisampleState.new()
 		var depth := RDPipelineDepthStencilState.new()
 
+		var fb_format := _rd.framebuffer_get_format(_framebuffer_rid)
+		var vf_format := _rd.vertex_format_create([_make_vertex_attr()])
+
 		_pipeline_rid = _rd.render_pipeline_create(
 			_shader_rid,
-			_rd.framebuffer_get_format(_framebuffer_rid),
-			_rd.vertex_format_create([_make_vertex_attr()]),
+			fb_format,
+			vf_format,
 			RenderingDevice.RENDER_PRIMITIVE_TRIANGLES,
 			raster, multisample, depth, blend
 		)
+		if not _pipeline_rid.is_valid():
+			GNLogger.error("GLSLMultiTOP",
+				"'%s' -- render_pipeline_create failed: shader=%s fb_format=%d vf_format=%d outputs=%d" % [
+					id, _shader_rid, fb_format, vf_format, _output_count])
 
 
-static func _make_vertex_attr() -> RDVertexAttribute:
-	var vf := RDVertexAttribute.new()
-	vf.format = RenderingDevice.DATA_FORMAT_R32G32_SFLOAT
-	vf.location = 0
-	vf.stride = 8
-	vf.offset = 0
-	return vf
+
 
 
 func _cook_mrt(inputs: Array[GNData], res: Vector2i) -> GNData:
 	_ensure_mrt_framebuffer(res)
 	if not _framebuffer_rid.is_valid() or not _pipeline_rid.is_valid():
+		GNLogger.error("GLSLMultiTOP",
+			"'%s' -- MRT cook aborted: framebuffer=%s pipeline=%s" % [
+				id, _framebuffer_rid.is_valid(), _pipeline_rid.is_valid()])
 		return null
 
 	_update_mrt_input_textures(inputs)
 
 	var push_bytes := _build_mrt_push_constants(res)
 
-	var clear_colors: PackedColorArray = PackedColorArray()
-	for i in range(_output_count):
-		clear_colors.append(Color(0.0, 0.0, 0.0, 0.0))
+	if _cached_clear_colors.size() != _output_count:
+		_cached_clear_colors.resize(_output_count)
+		for i in range(_output_count):
+			_cached_clear_colors[i] = Color(0.0, 0.0, 0.0, 0.0)
 
 	var draw_flags := RenderingDevice.DRAW_CLEAR_COLOR_ALL
 	var dl := _rd.draw_list_begin(
 		_framebuffer_rid,
 		draw_flags,
-		clear_colors
+		_cached_clear_colors
 	)
 	_rd.draw_list_bind_render_pipeline(dl, _pipeline_rid)
 	_rd.draw_list_bind_vertex_array(dl, _vertex_array_rid)
@@ -608,10 +644,11 @@ func _cook_mrt(inputs: Array[GNData], res: Vector2i) -> GNData:
 	for i in range(_output_count):
 		var bytes := _rd.texture_get_data(_output_tex_rids[i], 0)
 		var img := Image.create_from_data(res.x, res.y, false, Image.FORMAT_RGBA8, bytes)
-		if _output_image_textures[i] == null:
+		var tex := _output_image_textures[i]
+		if tex == null or tex.get_width() != res.x or tex.get_height() != res.y:
 			_output_image_textures[i] = ImageTexture.create_from_image(img)
 		else:
-			_output_image_textures[i].update(img)
+			tex.update(img)
 		_output_textures[i].texture = _output_image_textures[i]
 		_output_textures[i].resolution = res
 
@@ -623,25 +660,25 @@ func _build_mrt_push_constants(res: Vector2i) -> PackedByteArray:
 	var user_count := _dynamic_param_names.size()
 	var raw_fields := 4 + user_count
 	var padded_size := ceili(float(raw_fields * 4) / 16.0) * 16
-	var bytes := PackedByteArray()
-	bytes.resize(padded_size)
+	if _cached_push_bytes.size() != padded_size:
+		_cached_push_bytes.resize(padded_size)
 
-	bytes.encode_float(0, float(res.x))
-	bytes.encode_float(4, float(res.y))
-	bytes.encode_float(8, elapsed_time)
-	bytes.encode_float(12, 0.0)
+	_cached_push_bytes.encode_float(0, float(res.x))
+	_cached_push_bytes.encode_float(4, float(res.y))
+	_cached_push_bytes.encode_float(8, elapsed_time)
+	_cached_push_bytes.encode_float(12, 0.0)
 
 	var offset := 16
 	for p_name in _dynamic_param_names:
 		var val = get_param_value(p_name)
 		var param: GNParameter = parameters.get(p_name, null)
 		if param != null and (param.value_type == GNParameter.ValueType.INT or param.value_type == GNParameter.ValueType.BOOL):
-			bytes.encode_s32(offset, int(val))
+			_cached_push_bytes.encode_s32(offset, int(val))
 		else:
-			bytes.encode_float(offset, float(val))
+			_cached_push_bytes.encode_float(offset, float(val))
 		offset += 4
 
-	return bytes
+	return _cached_push_bytes
 
 
 func _update_mrt_input_textures(inputs: Array[GNData]) -> void:

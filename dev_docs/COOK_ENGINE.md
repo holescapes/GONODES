@@ -130,6 +130,29 @@ Parameter changes automatically trigger `_active_set_dirty = true` via
 `_on_node_param_changed`, so switching a Switch node's index immediately
 recomputes the active set.
 
+#### Expression-Driven Routing
+
+When a routing node's index (or equivalent) is driven by an expression,
+the active set uses `resolved_value` — the **previous frame's** expression
+result — to determine which inputs are active.  This avoids the
+all-inputs-active fallback that would defeat selective activation.
+
+The active set is updated when expression results change via two paths:
+
+1. **`_try_expression_dirty`** — when a clean routing node's expression
+   result changes (upstream cooked), sets `_active_set_dirty = true`.
+2. **Routing snapshot in `_cook_single_node`** — when a dirty routing
+   node's expression values change during `_resolve_node_parameters`,
+   sets `_active_set_dirty = true` for the **next** frame.
+
+Both paths are scoped to routing nodes only
+(`get_active_input_indices().size() > 0`), so normal nodes pay zero cost.
+
+This means expression-driven routing has a **1-frame latency**: the
+Switch reads last frame's expression result for active-set BFS, and the
+new chain becomes active on the next frame.  This matches the behaviour
+of TouchDesigner and Houdini.
+
 ### 3.3 Input Hash Guard (Tier 2)
 
 The core Tier 2 optimisation. Before cooking, the engine hashes:
@@ -154,6 +177,13 @@ Expressions like `chop("lfo1", "out") * 5.0` create **implicit dependencies** no
 1. Scans all expression strings with regex for `chop/op/top/sop/dat/mat/vol/img/output("id")` references
 2. Builds `_expr_consumer_map`: `upstream_id → [consumer_node_ids]`
 3. During the cook loop, a non-dirty node's expressions are only re-evaluated if an upstream source **actually cooked this frame** (`_should_eval_expressions`)
+
+Expression edges are included in the topological sort
+(`_compute_topological_order`), ensuring that an expression source is
+always cooked before its consumers even when there is no wire between
+them.  When the consumer map is rebuilt (`_rebuild_expr_consumer_map`),
+both `_topo_levels_dirty` and the full topo order are invalidated via
+`_mark_topo_dirty()`.
 
 ### 3.5 Incremental Dirty Propagation
 
@@ -180,10 +210,10 @@ This is a key difference from TD, which always cascades the full subtree.
 |---|---|---|---|
 | 1 | Active-only pre-cook | Tier 1 | `_pre_cook()` skips inactive nodes |
 | 2 | Cached topo sort | Tier 1 | Kahn's BFS recomputed only on topology change |
-| 3 | Event-driven active set | Tier 1 | BFS from sinks only when topology/sinks change |
+| 3 | Event-driven active set | Tier 1 | BFS from sinks only when topology/sinks/routing-expression values change |
 | 4 | Selective input activation | Tier 1 | `get_active_input_indices()` prunes upstream chains for Switch-type nodes |
 | 5 | Scene-tree child reorder | Tier 1 | SubViewports render in dependency order |
-| 6 | Expression consumer map | Tier 1 | Skip expression eval if no upstream source cooked |
+| 6 | Expression consumer map | Tier 1 | Skip expression eval if no upstream source cooked; edges included in topo sort |
 | 7 | Inactive dirty cutoff | Tier 1 | `propagate_dirty()` stops at inactive boundaries |
 | 8 | Input hash guard | Tier 2 | Skip cook when params + input timestamps unchanged |
 | 9 | Incremental propagation | Tier 2 | Only direct successors dirtied, cascade stops at hash match |
@@ -358,6 +388,42 @@ If BlurTOP is dirty:
 | | | `_dirty_immediate_downstream()` → LevelTOP marked dirty |
 
 BlurTOP's `_cook()` is never called. The upstream data passes through unchanged.
+
+---
+
+### Example 8 — Expression-Driven Switch (1-Frame Latency)
+
+```
+Network:
+  [LfoCHOP "lfo1"]
+  [ConstantTOP "a"]──┐
+  [NoiseTOP "b"]─────┤──[SwitchTOP]──[Viewer]
+                          index = par("lfo1", "out")  (expression)
+```
+
+**Frame N** — LfoCHOP output changes from 0 to 1:
+
+| Step | Detail |
+|---|---|
+| Active set (start of frame) | Uses `resolved_value` from Frame N−1 (= 0) → input **a** active |
+| Cook lfo1 | COOK (time-dependent) → output now = 1 |
+| Cook SwitchTOP | Dirty → `_resolve_node_parameters` evaluates expression → `resolved_value` = 1 |
+| | Routing snapshot detects value changed (0 → 1) → sets `_active_set_dirty = true` |
+| | `_cook()` requests input 1 (NoiseTOP) — not yet cooked this frame → returns `cached_output` (hold last frame) |
+| Result | SwitchTOP outputs **a**'s last frame (seamless hold), active set queued for rebuild |
+
+**Frame N+1** — active set recomputed:
+
+| Step | Detail |
+|---|---|
+| Active set rebuild | `resolved_value` = 1 → input **b** (NoiseTOP) now active, input **a** pruned |
+| Cook NoiseTOP | Now in active set → **COOK** |
+| Cook SwitchTOP | Input 1 ready → `_cook()` returns NoiseTOP's output |
+| Result | SwitchTOP shows **b** — transition complete, no flash |
+
+The `cached_output` hold in `_cook()` prevents a black frame or wrong-input
+flash during the 1-frame transition window.  Both SwitchTOP and SwitchCHOP
+use this pattern.
 
 ---
 

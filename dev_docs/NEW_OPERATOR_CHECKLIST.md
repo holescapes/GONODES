@@ -31,6 +31,7 @@ python scripts/verify_new_operator.py --counts    # Verify doc counts match
 - [ ] `_cook()` — functional implementation
 - [ ] **Do NOT set `node_description` in the script** — descriptions live in the `.cfg` file
 - [ ] If the operator uses only a subset of its inputs depending on mode/parameter (like Switch), override `get_active_input_indices()` — see [CONTRIBUTING.md](CONTRIBUTING.md#active-input-indices--selective-upstream-cooking)
+- [ ] If the operator is a routing node (Switch-style), `_cook()` should return `cached_output` when the requested input is not yet available — this prevents a flash during the 1-frame expression-driven routing transition
 
 ### 2. Register in Config
 

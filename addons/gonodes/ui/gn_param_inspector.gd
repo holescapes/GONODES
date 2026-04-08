@@ -25,7 +25,7 @@ var _vbox: VBoxContainer = null
 var _header_label: Label = null
 var _family_bar: ColorRect = null
 var _status_label: Label = null
-var _no_selection_label: Label = null
+
 
 ## Preset toolbar elements
 var _preset_bar: HBoxContainer = null
@@ -82,6 +82,7 @@ func _ready() -> void:
 	_status_label = Label.new()
 	_status_label.add_theme_font_size_override("font_size", 11)
 	_status_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	header_box.add_child(_status_label)
 
 	# Preset toolbar (copy / paste / reset / presets dropdown)
@@ -157,20 +158,6 @@ func _ready() -> void:
 	_vbox.add_theme_constant_override("separation", 2)
 	_scroll.add_child(_vbox)
 
-	# "No selection" placeholder
-	_no_selection_label = Label.new()
-	_no_selection_label.text = "Select a node to inspect"
-	_no_selection_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_no_selection_label.add_theme_font_size_override("font_size", 12)
-	_no_selection_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	_no_selection_label.size_flags_vertical = SIZE_EXPAND_FILL
-
-	# Add margin for the placeholder
-	var placeholder_margin := MarginContainer.new()
-	placeholder_margin.add_theme_constant_override("margin_top", 40)
-	placeholder_margin.add_child(_no_selection_label)
-	_vbox.add_child(placeholder_margin)
-
 	_show_empty_state()
 
 
@@ -216,7 +203,6 @@ func inspect(node: GNNode) -> void:
 	_family_bar.color = family_color
 
 	# Hide placeholder
-	_no_selection_label.get_parent().visible = false
 
 	# Show preset toolbar and update paste button
 	_preset_bar.visible = true
@@ -292,6 +278,9 @@ func inspect(node: GNNode) -> void:
 
 	GNLogger.debug("Inspector", "Inspecting '%s' — %d parameters" % [
 		node.id, param_names.size()])
+
+	# Populate full status (cook time, resolution) immediately from cached data
+	_on_node_cooked(node.id)
 
 
 ## Clears the inspector (no node selected).
@@ -461,7 +450,6 @@ func _set_children_mouse_filter(node: Control, filter: Control.MouseFilter) -> v
 			child.mouse_filter = filter
 			_set_children_mouse_filter(child, filter)
 	_family_bar.color = Color(0.3, 0.3, 0.3)
-	_no_selection_label.get_parent().visible = true
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

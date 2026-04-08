@@ -59,5 +59,6 @@ void fragment() {
 	float out_g = clamp(v * sensitivity + 0.5, 0.0, 1.0);
 	float magnitude = clamp(length(vec2(u, v)) * sensitivity * 2.0, 0.0, 1.0);
 
-	COLOR = vec4(out_r, out_g, magnitude, 1.0);
+	vec3 flow_rgb = vec3(out_r, out_g, magnitude);
+	COLOR = vec4(flow_rgb, 1.0);
 }

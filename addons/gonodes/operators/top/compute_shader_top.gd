@@ -48,11 +48,11 @@ layout(push_constant, std430) uniform PushConstants {
 
 void main() {
 	ivec2 coords = ivec2(gl_GlobalInvocationID.xy);
-	ivec2 size = imageSize(gn_output);
+	ivec2 size = ivec2(pc.gn_res_x, pc.gn_res_y);
 	if (coords.x >= size.x || coords.y >= size.y) return;
 
 	vec2 uv = vec2(coords) / vec2(size);
-	float t = pc.gn_time;
+	float t = pc.gn_time + pc.gn_frame * pc.gn_dt;
 
 	// Animated rainbow gradient
 	vec3 col = 0.5 + 0.5 * cos(t + uv.xyx + vec3(0.0, 2.0, 4.0));
@@ -331,6 +331,7 @@ func _compile_shader(code: String) -> void:
 	_free_shader_resources()
 
 	if code.strip_edges().is_empty():
+		node_error = "Empty shader code"
 		GNLogger.warn("ComputeShaderTOP", "'%s' — empty shader code" % id)
 		_shader_ok = false
 		_last_compiled_code = code
@@ -342,6 +343,7 @@ func _compile_shader(code: String) -> void:
 	var spirv := _rd.shader_compile_spirv_from_source(src)
 	var err: String = spirv.get_stage_compile_error(RenderingDevice.SHADER_STAGE_COMPUTE)
 	if not err.is_empty():
+		node_error = err
 		GNLogger.error("ComputeShaderTOP",
 			"'%s' — compile error:\n%s" % [id, err])
 		_shader_ok = false
@@ -350,6 +352,7 @@ func _compile_shader(code: String) -> void:
 
 	_shader_rid = _rd.shader_create_from_spirv(spirv)
 	if not _shader_rid.is_valid():
+		node_error = "Failed to create shader from SPIR-V"
 		GNLogger.error("ComputeShaderTOP",
 			"'%s' — failed to create shader from SPIR-V" % id)
 		_shader_ok = false
@@ -358,6 +361,7 @@ func _compile_shader(code: String) -> void:
 
 	_pipeline_rid = _rd.compute_pipeline_create(_shader_rid)
 	if not _pipeline_rid.is_valid():
+		node_error = "Failed to create compute pipeline"
 		GNLogger.error("ComputeShaderTOP",
 			"'%s' — failed to create compute pipeline" % id)
 		_rd.free_rid(_shader_rid)
@@ -366,6 +370,7 @@ func _compile_shader(code: String) -> void:
 		_last_compiled_code = code
 		return
 
+	node_error = ""
 	_shader_ok = true
 	_last_compiled_code = code
 
@@ -531,11 +536,11 @@ func _build_push_constants(res: Vector2i) -> PackedByteArray:
 	if _pc_fields.is_empty():
 		return PackedByteArray()
 
-	# SPIR-V pads push constant blocks to 16-byte (vec4) alignment.
+	# Vulkan requires push constant data padded to a multiple of 16 bytes.
 	var raw_size := _pc_fields.size() * 4
-	var padded_size := ceili(float(raw_size) / 16.0) * 16
+	var total_size := ceili(raw_size / 16.0) * 16
 	var bytes := PackedByteArray()
-	bytes.resize(padded_size)
+	bytes.resize(total_size)
 
 	var offset := 0
 	for field in _pc_fields:
@@ -608,14 +613,14 @@ static func _extract_layout_int(line: String, key: String) -> int:
 
 
 ## Counts how many sampler2D gn_tex<N> declarations exist in the shader.
-## Same approach as CustomShaderTOP._count_shader_tex_inputs().
+## Only counts uncommented declarations — commented-out lines are ignored
+## because the compiled SPIR-V won't include them.
 static func _count_shader_tex_inputs(code: String) -> int:
 	var max_idx: int = -1
 	for line in code.split("\n"):
 		var s := line.strip_edges()
-		# Uncomment lines like "// layout(...) uniform sampler2D gn_tex0;"
 		if s.begins_with("//"):
-			s = s.substr(2).strip_edges()
+			continue
 		if s.find("sampler2D") == -1:
 			continue
 		var tex_pos := s.find("gn_tex")
@@ -706,6 +711,9 @@ func _rebuild_push_constant_params(code: String) -> void:
 
 ## Parses the push_constant block and returns an array of _PCField in
 ## declaration order.  Only float, int and uint fields are recognised.
+## Important: every uncommented field in the struct MUST be referenced in the
+## shader body (as pc.<name>), otherwise SPIR-V dead-code-elimination strips
+## it and the pipeline will expect fewer bytes than we send.
 static func _parse_push_constant_fields(code: String) -> Array:
 	var fields: Array = []
 	var inside_block := false
@@ -723,13 +731,13 @@ static func _parse_push_constant_fields(code: String) -> Array:
 		if s.begins_with("}"):
 			break
 
-		# Skip empty lines; treat commented fields as uncommented.
+		# Skip empty lines and commented-out field declarations.
+		# Commented fields are NOT parsed — SPIR-V won't include them, so
+		# sending bytes for them causes a push-constant size mismatch.
 		if s.is_empty():
 			continue
 		if s.begins_with("//"):
-			s = s.substr(2).strip_edges()
-			if s.is_empty():
-				continue
+			continue
 
 		# Parse "type name;" or "type name; // = default"
 		var field := _parse_pc_field_line(s)
@@ -771,7 +779,10 @@ static func _parse_pc_field_line(line: String) -> _PCField:
 	if name.is_empty():
 		return null
 
-	# Optional default value from trailing comment: // = <value>
+	# Optional default value from trailing comment.
+	# Supported formats:
+	#   float scale;    // = 8.0
+	#   float scale;    // Noise scale (default: 8.0)
 	var def_val := 0.0
 	var comment_pos := s.find("//")
 	if comment_pos != -1:
@@ -780,5 +791,28 @@ static func _parse_pc_field_line(line: String) -> _PCField:
 			var val_str := comment.substr(1).strip_edges().rstrip(";").strip_edges()
 			if val_str.is_valid_float():
 				def_val = val_str.to_float()
+		else:
+			# Look for (default: <value>) anywhere in the comment
+			var dp := comment.find("default:")
+			if dp == -1:
+				dp = comment.find("default =")
+			if dp != -1:
+				var after := comment.substr(dp)
+				# Skip past "default:" or "default ="
+				var colon_pos := after.find(":")
+				if colon_pos == -1:
+					colon_pos = after.find("=")
+				if colon_pos != -1:
+					var val_part := after.substr(colon_pos + 1).strip_edges()
+					# Strip trailing ) or other non-numeric chars
+					var num_str := ""
+					for ci in range(val_part.length()):
+						var ch := val_part[ci]
+						if ch == "-" or ch == "." or ch.is_valid_int():
+							num_str += ch
+						else:
+							break
+					if num_str.is_valid_float():
+						def_val = num_str.to_float()
 
 	return _PCField.new(name, field_type, def_val)

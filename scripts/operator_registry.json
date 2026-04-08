@@ -12454,6 +12454,11 @@
         "name": "iterations",
         "type": "int",
         "default": 4
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
       }
     ]
   },

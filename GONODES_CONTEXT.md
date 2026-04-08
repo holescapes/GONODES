@@ -558,8 +558,9 @@ GONODES uses a **demand-driven flat-pass** cook model — a hybrid that achieves
 - **Cook order** = topological sort of the dirty subgraph.
 - **Inactive nodes** (not feeding any sink) keep `cached_output` frozen and skip cooking entirely.
 - **Active set** is event-driven — recomputed only when graph topology, sinks, or expressions change.
+- **Expression-driven routing** (e.g., SwitchTOP index set by expression) uses last frame's `resolved_value` for active-set BFS. A routing snapshot in `_cook_single_node` detects value changes and sets `_active_set_dirty` for the next frame (1-frame latency, matching TD/Houdini). During the transition frame, `_cook()` returns `cached_output` (hold last frame) to avoid a flash.
 
-**Expression dependency notification — IMPLEMENTED:** The cook engine now uses an event-driven expression consumer map (`_expr_consumer_map`) built by `_rebuild_expr_consumer_map()`. Instead of polling every frame, `_should_eval_expressions()` checks whether referenced upstream nodes actually cooked this frame or are time-dependent, skipping expression evaluation entirely on quiet frames.
+**Expression dependency notification — IMPLEMENTED:** The cook engine now uses an event-driven expression consumer map (`_expr_consumer_map`) built by `_rebuild_expr_consumer_map()`. Instead of polling every frame, `_should_eval_expressions()` checks whether referenced upstream nodes actually cooked this frame or are time-dependent, skipping expression evaluation entirely on quiet frames. Expression edges are included in the topological sort (`_compute_topological_order`) to guarantee correct evaluation order even without wires.
 
 ### Non-Realtime Mode (NRT)
 
@@ -619,6 +620,7 @@ logging overhead.
 - Collapsible log panel at the bottom of the editor (toggle via Log button)
 - `GNLogger` singleton: `.debug()`, `.info()`, `.warn()`, `.error()`
 - `GNLogger.log_sink` — `Callable` set by `GNLogPanel._ready()` (editor-only)
+- `GNLogger.toast_sink` — `Callable` set by graph editor; auto-forwards WARN/ERROR as transient toasts
 - 500-entry ring buffer, DBG/INF/WRN/ERR filter buttons, color-coded output
 - `GNLogger.enabled` defaults to `false` — player never enables it
 

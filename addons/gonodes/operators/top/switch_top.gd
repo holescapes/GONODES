@@ -38,6 +38,10 @@ func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
 func get_active_input_indices() -> PackedInt32Array:
 	var do_blend: bool = get_param_value("blend")
 	if not do_blend:
+		# get_param_value returns resolved_value for expression-mode params,
+		# which holds the last frame's evaluated result.  The cook engine
+		# marks _active_set_dirty whenever an expression value changes, so
+		# the active chain converges within one frame.
 		var idx: int = clampi(get_param_value("index"), 0, maxi(input_ports.size() - 1, 0))
 		return PackedInt32Array([idx])
 	# Blend mode uses all inputs
@@ -53,11 +57,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		idx = clampi(idx, 0, inputs.size() - 1)
 		if idx < inputs.size() and inputs[idx] is GNTextureData:
 			return inputs[idx]
-		# Fallback: return first valid input
-		for inp in inputs:
-			if inp is GNTextureData:
-				return inp
-		return null
+		# Requested input not available yet (chain activating after index
+		# change).  Hold the previous frame's output so the viewer sees a
+		# seamless freeze-frame instead of a black flash.
+		return cached_output
 
 	# ── Blend between adjacent inputs ──
 	# Collect valid texture inputs

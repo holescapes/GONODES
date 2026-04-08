@@ -91,6 +91,12 @@
 			"to_port": 0
 		},
 		{
+			"from": "ramp1",
+			"from_port": 0,
+			"to": "remap1",
+			"to_port": 1
+		},
+		{
 			"from": "remap1",
 			"from_port": 0,
 			"to": "matte1",
@@ -107,12 +113,6 @@
 			"from_port": 0,
 			"to": "lookup1",
 			"to_port": 1
-		},
-		{
-			"from": "cache1",
-			"from_port": 0,
-			"to": "time_machine1",
-			"to_port": 0
 		},
 		{
 			"from": "render1",
@@ -587,84 +587,334 @@
 			"from_port": 0,
 			"to": "switch2",
 			"to_port": 7
+		},
+		{
+			"from": "noise_ch8",
+			"from_port": 0,
+			"to": "twirl1",
+			"to_port": 0
+		},
+		{
+			"from": "constant1",
+			"from_port": 0,
+			"to": "matte1",
+			"to_port": 1
+		},
+		{
+			"from": "matte1",
+			"from_port": 0,
+			"to": "premultiply1",
+			"to_port": 0
+		},
+		{
+			"from": "premultiply1",
+			"from_port": 0,
+			"to": "lookup1",
+			"to_port": 0
+		},
+		{
+			"from": "lookup1",
+			"from_port": 0,
+			"to": "limit1",
+			"to_port": 0
+		},
+		{
+			"from": "limit1",
+			"from_port": 0,
+			"to": "OUTChain12",
+			"to_port": 0
+		},
+		{
+			"from": "optical_flow1",
+			"from_port": 0,
+			"to": "feedback1",
+			"to_port": 0
+		},
+		{
+			"from": "feedback1",
+			"from_port": 0,
+			"to": "OUTChain13",
+			"to_port": 0
+		},
+		{
+			"from": "test_card1",
+			"from_port": 0,
+			"to": "cross1",
+			"to_port": 1
+		},
+		{
+			"from": "cross1",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 0
+		},
+		{
+			"from": "test_card1",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 1
+		},
+		{
+			"from": "layout1",
+			"from_port": 0,
+			"to": "glue1",
+			"to_port": 0
+		},
+		{
+			"from": "flow_vis1",
+			"from_port": 0,
+			"to": "glue1",
+			"to_port": 2
+		},
+		{
+			"from": "test_card1",
+			"from_port": 0,
+			"to": "glue1",
+			"to_port": 3
+		},
+		{
+			"from": "glue1",
+			"from_port": 0,
+			"to": "OUTChain14",
+			"to_port": 0
+		},
+		{
+			"from": "compute_shader1",
+			"from_port": 0,
+			"to": "fluid_2d1",
+			"to_port": 0
+		},
+		{
+			"from": "fluid_2d1",
+			"from_port": 0,
+			"to": "fluid_2d2",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain8",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 8
+		},
+		{
+			"from": "OUTChain9",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 9
+		},
+		{
+			"from": "OUTChain10",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 10
+		},
+		{
+			"from": "cache1",
+			"from_port": 0,
+			"to": "time_machine1",
+			"to_port": 0
+		},
+		{
+			"from": "time_machine1",
+			"from_port": 0,
+			"to": "optical_flow1",
+			"to_port": 0
+		},
+		{
+			"from": "noise4",
+			"from_port": 0,
+			"to": "mirror1",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain13",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 11
+		},
+		{
+			"from": "OUTChain14",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 12
+		},
+		{
+			"from": "flow_vis1",
+			"from_port": 0,
+			"to": "cross1",
+			"to_port": 0
+		},
+		{
+			"from": "curl_noise1",
+			"from_port": 0,
+			"to": "flow_vis1",
+			"to_port": 0
+		},
+		{
+			"from": "flow_vis1",
+			"from_port": 0,
+			"to": "glue1",
+			"to_port": 1
+		},
+		{
+			"from": "noise2_copy",
+			"from_port": 0,
+			"to": "chop_to_top1",
+			"to_port": 0
+		},
+		{
+			"from": "chop_to_top1",
+			"from_port": 0,
+			"to": "cache1",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain15",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 13
+		},
+		{
+			"from": "OUTChain12",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 14
+		},
+		{
+			"from": "slider1",
+			"from_port": 0,
+			"to": "panel_container1",
+			"to_port": 0
+		},
+		{
+			"from": "label1",
+			"from_port": 0,
+			"to": "panel_container1",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container1",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "fluid_2d2",
+			"from_port": 0,
+			"to": "glsl_multi1",
+			"to_port": 0
+		},
+		{
+			"from": "glsl_multi1",
+			"from_port": 1,
+			"to": "OUTChain15",
+			"to_port": 0
 		}
 	],
 	"generator": "GONODES",
 	"nodes": {
 		"OUTChain1": {
 			"position": [
-				1801.50158691406,
-				-200.0
+				5340.0,
+				-160.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain10": {
 			"position": [
-				1849.50158691406,
-				4100.0
+				5340.0,
+				3420.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain11": {
 			"position": [
-				1801.50158691406,
-				1680.0
+				5340.0,
+				1720.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain12": {
+			"position": [
+				5320.0,
+				3920.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain13": {
+			"position": [
+				5300.0,
+				4840.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain14": {
+			"position": [
+				5300.0,
+				5140.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain15": {
+			"position": [
+				5280.0,
+				5680.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain2": {
 			"position": [
-				1801.50158691406,
-				180.0
+				5340.0,
+				220.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain3": {
 			"position": [
-				1801.50158691406,
-				400.0
+				5340.0,
+				440.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain4": {
 			"position": [
-				1801.50158691406,
-				860.0
+				5340.0,
+				900.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain5": {
 			"position": [
-				1801.50158691406,
-				1220.0
+				5340.0,
+				1260.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain6": {
 			"position": [
-				1800.0,
-				2280.0
+				5340.0,
+				2320.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain7": {
 			"position": [
-				1801.50158691406,
-				1960.0
+				5340.0,
+				2000.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain8": {
 			"position": [
-				1849.50158691406,
-				3300.0
+				5340.0,
+				2720.0
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain9": {
 			"position": [
-				1849.50158691406,
-				3700.0
+				5340.0,
+				3000.0
 			],
 			"type": "NullTOP"
 		},
@@ -678,8 +928,8 @@
 				}
 			},
 			"position": [
-				1612.50158691406,
-				400.0
+				5160.0,
+				440.0
 			],
 			"type": "AnalyzeTOP"
 		},
@@ -693,8 +943,8 @@
 				}
 			},
 			"position": [
-				780.0,
-				400.0
+				4320.0,
+				440.0
 			],
 			"type": "AntiAliasTOP"
 		},
@@ -726,26 +976,26 @@
 				}
 			},
 			"position": [
-				1440.0,
-				3300.0
+				4980.0,
+				2720.0
 			],
 			"type": "ASCIIArtTOP"
 		},
 		"bilateral_blur1": {
 			"parameters": {
 				"radius": {
-					"value": 3
+					"value": 4
 				},
 				"sigma_range": {
-					"value": 0.1
+					"value": 0.29
 				},
 				"sigma_spatial": {
-					"value": 3.0
+					"value": 6.2
 				}
 			},
 			"position": [
-				941.500427246094,
-				3300.0
+				4480.0,
+				2720.0
 			],
 			"type": "BilateralBlurTOP"
 		},
@@ -768,8 +1018,8 @@
 				}
 			},
 			"position": [
-				497.750122070313,
-				-200.0
+				4040.0,
+				-160.0
 			],
 			"type": "BloomTOP"
 		},
@@ -786,8 +1036,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				-200.0
+				3460.0,
+				-160.0
 			],
 			"type": "BlurTOP"
 		},
@@ -807,15 +1057,15 @@
 				}
 			},
 			"position": [
-				1191.99938964844,
-				3300.0
+				4740.0,
+				2720.0
 			],
 			"type": "BokehBlurTOP"
 		},
 		"cache1": {
 			"parameters": {
 				"delay": {
-					"value": 0
+					"value": 22
 				},
 				"freeze": {
 					"value": false
@@ -828,8 +1078,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				4100.0
+				4280.0,
+				4840.0
 			],
 			"type": "CacheTOP"
 		},
@@ -846,15 +1096,15 @@
 					}
 				},
 				"rule_set": {
-					"value": 0
+					"value": 1
 				},
 				"threshold": {
-					"value": 0.5
+					"value": 0.57
 				}
 			},
 			"position": [
-				436.750091552734,
-				3700.0
+				5020.0,
+				3000.0
 			],
 			"type": "CellularAutomataTOP"
 		},
@@ -886,8 +1136,8 @@
 				}
 			},
 			"position": [
-				479.750091552734,
-				860.0
+				4020.0,
+				900.0
 			],
 			"type": "ChannelMixTOP"
 		},
@@ -924,7 +1174,7 @@
 					"value": -1.0
 				},
 				"mode": {
-					"value": 0
+					"value": 2
 				},
 				"resolution": {
 					"value": {
@@ -935,8 +1185,8 @@
 				}
 			},
 			"position": [
-				2177.0,
-				200.0
+				4080.0,
+				4840.0
 			],
 			"type": "CHOPtoTOP"
 		},
@@ -965,8 +1215,8 @@
 				}
 			},
 			"position": [
-				140.0,
-				2280.0
+				3680.0,
+				2320.0
 			],
 			"type": "ChromaKeyTOP"
 		},
@@ -983,8 +1233,8 @@
 				}
 			},
 			"position": [
-				1171.50048828125,
-				1680.0
+				4720.0,
+				1720.0
 			],
 			"type": "ChromaticAberrationTOP"
 		},
@@ -1033,8 +1283,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				180.0
+				3460.0,
+				220.0
 			],
 			"type": "CircleTOP"
 		},
@@ -1069,8 +1319,8 @@
 				}
 			},
 			"position": [
-				1436.50061035156,
-				1960.0
+				4980.0,
+				2000.0
 			],
 			"type": "ColorBalanceTOP"
 		},
@@ -1084,8 +1334,8 @@
 				}
 			},
 			"position": [
-				1220.0,
-				860.0
+				4760.0,
+				900.0
 			],
 			"type": "ColorMapTOP"
 		},
@@ -1096,8 +1346,8 @@
 				}
 			},
 			"position": [
-				661.750122070313,
-				4100.0
+				4800.0,
+				3420.0
 			],
 			"type": "ColorSpaceTOP"
 		},
@@ -1111,8 +1361,8 @@
 				}
 			},
 			"position": [
-				258.750091552734,
-				860.0
+				3800.0,
+				900.0
 			],
 			"type": "CompositeTOP"
 		},
@@ -1211,8 +1461,8 @@
 				}
 			},
 			"position": [
-				2177.0,
-				400.0
+				2800.0,
+				800.0
 			],
 			"type": "CompositorEffectTOP"
 		},
@@ -1229,18 +1479,15 @@
 					}
 				},
 				"shader_code": {
-					"value": "#version 450\n\nlayout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;\n\n// ─── GONODES Auto-bound ──────────────────────────────────\n// Output storage texture (set 0, binding 0 — always present).\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\n\n// Input textures — add gn_tex<N> samplers to auto-create input ports.\n// layout(set = 1, binding = 0) uniform sampler2D gn_tex0;\n\n// Push constants — built-in fields are auto-bound by GONODES.\n// Add your own float/int fields AFTER the four gn_* fields\n// to create inspector parameters automatically.\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\t// float speed;  // ← uncomment to add a \"speed\" parameter\n} pc;\n\nvoid main() {\n\tivec2 coords = ivec2(gl_GlobalInvocationID.xy);\n\tivec2 size = imageSize(gn_output);\n\tif (coords.x >= size.x || coords.y >= size.y) return;\n\n\tvec2 uv = vec2(coords) / vec2(size);\n\tfloat t = pc.gn_time;\n\n\t// Animated rainbow gradient\n\tvec3 col = 0.5 + 0.5 * cos(t + uv.xyx + vec3(0.0, 2.0, 4.0));\n\timageStore(gn_output, coords, vec4(col, 1.0));\n}"
-				},
-				"speed": {
-					"value": 0.0
+					"value": "#version 450\n\nlayout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;\n\n// ─── GONODES Auto-bound ──────────────────────────────────\n// Output storage texture (set 0, binding 0 — always present).\nlayout(rgba8, set = 0, binding = 0) uniform image2D gn_output;\n\n// Input textures — add gn_tex<N> samplers to auto-create input ports.\n// layout(set = 1, binding = 0) uniform sampler2D gn_tex0;\n\n// Push constants — built-in fields are auto-bound by GONODES.\n// Add your own float/int fields AFTER the five gn_* fields\n// to create inspector parameters automatically.\nlayout(push_constant, std430) uniform PushConstants {\n\tfloat gn_time;\n\tfloat gn_frame;\n\tfloat gn_dt;\n\tfloat gn_res_x;\n\tfloat gn_res_y;\n\t// float speed;  // ← uncomment to add a \\\"speed\\\" parameter\n} pc;\n\nvoid main() {\n\tivec2 coords = ivec2(gl_GlobalInvocationID.xy);\n\tivec2 size = ivec2(pc.gn_res_x, pc.gn_res_y);\n\tif (coords.x >= size.x || coords.y >= size.y) return;\n\n\tvec2 uv = vec2(coords) / vec2(size);\n\tfloat t = pc.gn_time + pc.gn_frame * pc.gn_dt;\n\n\t// Animated rainbow gradient\n\tvec3 col = 0.5 + 0.5 * cos(t + uv.xyx + vec3(0.0, 2.0, 4.0));\n\timageStore(gn_output, coords, vec4(col, 1.0));\n}"
 				},
 				"time_dependent": {
 					"value": true
 				}
 			},
 			"position": [
-				-334.249908447266,
-				3500.0
+				4080.0,
+				5680.0
 			],
 			"type": "ComputeShaderTOP"
 		},
@@ -1264,8 +1511,8 @@
 				}
 			},
 			"position": [
-				-300.0,
-				3180.0
+				3920.0,
+				4100.0
 			],
 			"type": "ConstantTOP"
 		},
@@ -1285,8 +1532,8 @@
 				}
 			},
 			"position": [
-				1612.50158691406,
-				180.0
+				5160.0,
+				220.0
 			],
 			"type": "ConvolutionTOP"
 		},
@@ -1331,8 +1578,8 @@
 				}
 			},
 			"position": [
-				287.749938964844,
-				1220.0
+				3840.0,
+				1260.0
 			],
 			"type": "CornerPinTOP"
 		},
@@ -1364,8 +1611,8 @@
 				}
 			},
 			"position": [
-				620.0,
-				180.0
+				4160.0,
+				220.0
 			],
 			"type": "CropTOP"
 		},
@@ -1376,8 +1623,8 @@
 				}
 			},
 			"position": [
-				260.0,
-				2640.0
+				4260.0,
+				5100.0
 			],
 			"type": "CrossTOP"
 		},
@@ -1394,10 +1641,53 @@
 				}
 			},
 			"position": [
-				2177.0,
-				600.0
+				2800.0,
+				2000.0
 			],
 			"type": "CubeMapTOP"
+		},
+		"curl_noise1": {
+			"parameters": {
+				"gain": {
+					"expression": "chop(\"lfo2_copy\", \"out\")",
+					"mode": "EXPRESSION",
+					"value": 0.77
+				},
+				"lacunarity": {
+					"value": 1.5
+				},
+				"octaves": {
+					"value": 3
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 1.21999943256378,
+						"y": 0.480000048875809
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 0
+				},
+				"time_offset": {
+					"value": 0.02
+				}
+			},
+			"position": [
+				3800.0,
+				5140.0
+			],
+			"type": "CurlNoiseTOP"
 		},
 		"custom_shader1": {
 			"parameters": {
@@ -1418,8 +1708,8 @@
 				}
 			},
 			"position": [
-				1171.50048828125,
-				1220.0
+				4720.0,
+				1260.0
 			],
 			"type": "CustomShaderTOP"
 		},
@@ -1440,8 +1730,8 @@
 				}
 			},
 			"position": [
-				800.0,
-				1220.0
+				4340.0,
+				1260.0
 			],
 			"type": "DeformTOP"
 		},
@@ -1465,8 +1755,8 @@
 				}
 			},
 			"position": [
-				700.0,
-				2280.0
+				4240.0,
+				2320.0
 			],
 			"type": "DepthTOP"
 		},
@@ -1480,8 +1770,8 @@
 				}
 			},
 			"position": [
-				580.0,
-				400.0
+				4120.0,
+				440.0
 			],
 			"type": "DilateErodeTOP"
 		},
@@ -1498,8 +1788,8 @@
 				}
 			},
 			"position": [
-				500.0,
-				2280.0
+				4040.0,
+				2320.0
 			],
 			"type": "DirectionalBlurTOP"
 		},
@@ -1522,8 +1812,8 @@
 				}
 			},
 			"position": [
-				1436.50061035156,
-				400.0
+				4980.0,
+				440.0
 			],
 			"type": "DisplaceTOP"
 		},
@@ -1543,8 +1833,8 @@
 				}
 			},
 			"position": [
-				765.500183105469,
-				1680.0
+				4320.0,
+				1720.0
 			],
 			"type": "DitherTOP"
 		},
@@ -1558,8 +1848,8 @@
 				}
 			},
 			"position": [
-				321.750030517578,
-				400.0
+				3860.0,
+				440.0
 			],
 			"type": "EdgeTOP"
 		},
@@ -1576,8 +1866,8 @@
 				}
 			},
 			"position": [
-				980.0,
-				860.0
+				4520.0,
+				900.0
 			],
 			"type": "EmbossTOP"
 		},
@@ -1608,8 +1898,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				4500.0
+				5020.0,
+				4840.0
 			],
 			"type": "FeedbackTOP"
 		},
@@ -1635,8 +1925,8 @@
 				}
 			},
 			"position": [
-				340.0,
-				2280.0
+				3880.0,
+				2320.0
 			],
 			"type": "FilmGrainTOP"
 		},
@@ -1659,8 +1949,8 @@
 				}
 			},
 			"position": [
-				1025.75024414063,
-				1960.0
+				4580.0,
+				2000.0
 			],
 			"type": "FilterTOP"
 		},
@@ -1690,8 +1980,8 @@
 				}
 			},
 			"position": [
-				820.0,
-				180.0
+				4360.0,
+				220.0
 			],
 			"type": "FitTOP"
 		},
@@ -1705,10 +1995,43 @@
 				}
 			},
 			"position": [
-				420.0,
-				180.0
+				3960.0,
+				220.0
 			],
 			"type": "FlipTOP"
+		},
+		"flow_vis1": {
+			"parameters": {
+				"brightness": {
+					"value": 0.95
+				},
+				"color_mode": {
+					"value": 3
+				},
+				"contrast": {
+					"value": 2.1
+				},
+				"noise_scale": {
+					"value": 37.0
+				},
+				"num_steps": {
+					"value": 16
+				},
+				"saturation": {
+					"value": 0.95
+				},
+				"speed_tint": {
+					"value": 1.5
+				},
+				"step_size": {
+					"value": 0.0045
+				}
+			},
+			"position": [
+				4000.0,
+				5140.0
+			],
+			"type": "FlowVisTOP"
 		},
 		"fluid_2d1": {
 			"parameters": {
@@ -1786,8 +2109,8 @@
 				}
 			},
 			"position": [
-				0.0,
-				2640.0
+				4380.0,
+				5680.0
 			],
 			"type": "Fluid2DTOP"
 		},
@@ -1867,8 +2190,8 @@
 				}
 			},
 			"position": [
-				0.0,
-				2820.0
+				4680.0,
+				5680.0
 			],
 			"type": "Fluid2DTOP"
 		},
@@ -1884,12 +2207,12 @@
 					"value": false
 				},
 				"threshold": {
-					"value": 0.0
+					"value": 0.02
 				}
 			},
 			"position": [
-				941.500427246094,
-				4100.0
+				5060.0,
+				3420.0
 			],
 			"type": "FrameDifferenceTOP"
 		},
@@ -1974,8 +2297,8 @@
 				}
 			},
 			"position": [
-				2177.0,
-				1000.0
+				2800.0,
+				600.0
 			],
 			"type": "GeometryBufferTOP"
 		},
@@ -2010,8 +2333,8 @@
 				}
 			},
 			"position": [
-				849.750183105469,
-				1960.0
+				4400.0,
+				2000.0
 			],
 			"type": "GlitchTOP"
 		},
@@ -2021,15 +2344,21 @@
 					"value": false
 				},
 				"shader_code": {
-					"value": "shader_type canvas_item;\r\n\r\n// --- GONODES Multi-Output Shader ---\r\n// Input textures: gn_tex<N> auto-creates input ports (up to 8).\r\nuniform sampler2D gn_tex0 : hint_default_white;\r\n\r\n// Your uniforms become inspector parameters automatically.\r\n// uniform float brightness = 1.0;\r\n\r\nvoid fragment() {\r\nvec4 src = texture(gn_tex0, UV);\r\nfloat luma = dot(src.rgb, vec3(0.299, 0.587, 0.114));\r\n\r\ngn_out0 = src;                             // Output 0: original\r\ngn_out1 = vec4(vec3(luma), src.a);        // Output 1: luminance\r\n}"
+					"value": "shader_type canvas_item;\n\n// --- Threshold Matte (Input Required) ---\n// 3 outputs from a single threshold: masked foreground, alpha matte, inverted matte.\n// Tests uniform parameter binding in GLSLMulti.\n\nuniform sampler2D gn_tex0 : hint_default_white;\nuniform float threshold = 0.5;\nuniform float softness = 0.1;\n\nvoid fragment() {\n\tvec4 src = texture(gn_tex0, UV);\n\tfloat luma = dot(src.rgb, vec3(0.299, 0.587, 0.114));\n\n\tfloat matte = smoothstep(threshold - softness, threshold + softness, luma);\n\n\tgn_out0 = vec4(src.rgb * matte, matte);          // Output 0: masked foreground\n\tgn_out1 = vec4(vec3(matte), 1.0);                // Output 1: matte\n\tgn_out2 = vec4(vec3(1.0 - matte), 1.0);          // Output 2: inverted matte\n}\n"
+				},
+				"softness": {
+					"value": 0.1
+				},
+				"threshold": {
+					"value": 0.5
 				},
 				"time_dependent": {
 					"value": true
 				}
 			},
 			"position": [
-				2177.0,
-				800.0
+				4960.0,
+				5660.0
 			],
 			"type": "GLSLMultiTOP"
 		},
@@ -2059,8 +2388,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				3700.0
+				5000.0,
+				5100.0
 			],
 			"type": "GlueTOP"
 		},
@@ -2093,8 +2422,8 @@
 				}
 			},
 			"position": [
-				405.999328613281,
-				4100.0
+				4580.0,
+				3420.0
 			],
 			"type": "GodRaysTOP"
 		},
@@ -2105,8 +2434,8 @@
 				}
 			},
 			"position": [
-				980.0,
-				2280.0
+				4520.0,
+				2320.0
 			],
 			"type": "GradientMapTOP"
 		},
@@ -2132,8 +2461,8 @@
 				}
 			},
 			"position": [
-				497.750030517578,
-				1680.0
+				4040.0,
+				1720.0
 			],
 			"type": "HalftoneTOP"
 		},
@@ -2150,22 +2479,10 @@
 				}
 			},
 			"position": [
-				1201.75024414063,
-				1960.0
+				4740.0,
+				2000.0
 			],
 			"type": "HighPassTOP"
-		},
-		"host_in1": {
-			"parameters": {
-				"label": {
-					"value": "host_texture"
-				}
-			},
-			"position": [
-				2177.0,
-				1200.0
-			],
-			"type": "HostInTOP"
 		},
 		"hsv1": {
 			"parameters": {
@@ -2180,8 +2497,8 @@
 				}
 			},
 			"position": [
-				1436.50061035156,
-				-200.0
+				4980.0,
+				-160.0
 			],
 			"type": "HSVAdjustTOP"
 		},
@@ -2202,8 +2519,8 @@
 				}
 			},
 			"position": [
-				1500.0,
-				2280.0
+				5040.0,
+				2320.0
 			],
 			"type": "KaleidoscopeTOP"
 		},
@@ -2214,10 +2531,46 @@
 				}
 			},
 			"position": [
-				1240.0,
-				2280.0
+				4780.0,
+				2320.0
 			],
 			"type": "KuwaharaTOP"
+		},
+		"label1": {
+			"parameters": {
+				"font_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"font_size": {
+					"value": 14
+				},
+				"h_align": {
+					"value": 1
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 120,
+						"y": 24
+					}
+				},
+				"text": {
+					"expression": "\"SelectTOP Index=\" + str(int(chop(\"slider1\", \"slider1:value\")))",
+					"mode": "EXPRESSION",
+					"value": "SelectTop Index"
+				}
+			},
+			"position": [
+				5740.0,
+				620.0
+			],
+			"type": "LabelUI"
 		},
 		"layout1": {
 			"parameters": {
@@ -2242,8 +2595,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				3300.0
+				4700.0,
+				5100.0
 			],
 			"type": "LayoutTOP"
 		},
@@ -2269,8 +2622,8 @@
 				}
 			},
 			"position": [
-				60.0,
-				1220.0
+				3600.0,
+				1260.0
 			],
 			"type": "LensDistortTOP"
 		},
@@ -2293,8 +2646,8 @@
 				}
 			},
 			"position": [
-				765.500183105469,
-				-200.0
+				4320.0,
+				-160.0
 			],
 			"type": "LevelTOP"
 		},
@@ -2320,8 +2673,64 @@
 				}
 			},
 			"position": [
-				1436.50061035156,
-				600.0
+				4960.0,
+				680.0
+			],
+			"preview_enabled": false,
+			"type": "LFO_CHOP"
+		},
+		"lfo2": {
+			"parameters": {
+				"amplitude": {
+					"value": 3.512
+				},
+				"duty_cycle": {
+					"value": 0.5
+				},
+				"frequency": {
+					"value": 1.39
+				},
+				"offset": {
+					"value": 0.0
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"waveform": {
+					"value": 1
+				}
+			},
+			"position": [
+				4380.0,
+				3640.0
+			],
+			"preview_enabled": false,
+			"type": "LFO_CHOP"
+		},
+		"lfo2_copy": {
+			"parameters": {
+				"amplitude": {
+					"value": 3.512
+				},
+				"duty_cycle": {
+					"value": 0.5
+				},
+				"frequency": {
+					"value": 0.279999999999999
+				},
+				"offset": {
+					"value": 0.0
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"waveform": {
+					"value": 1
+				}
+			},
+			"position": [
+				3720.0,
+				4880.0
 			],
 			"type": "LFO_CHOP"
 		},
@@ -2331,39 +2740,39 @@
 					"value": 1.0
 				},
 				"max_b": {
-					"value": 1.0
+					"value": 0.9
 				},
 				"max_g": {
-					"value": 1.0
+					"value": 0.8
 				},
 				"max_luma": {
 					"value": 1.0
 				},
 				"max_r": {
-					"value": 1.0
+					"value": 0.85
 				},
 				"min_a": {
 					"value": 0.0
 				},
 				"min_b": {
-					"value": 0.0
+					"value": 0.15
 				},
 				"min_g": {
-					"value": 0.0
+					"value": 0.05
 				},
 				"min_luma": {
 					"value": 0.0
 				},
 				"min_r": {
-					"value": 0.0
+					"value": 0.1
 				},
 				"mode": {
 					"value": 0
 				}
 			},
 			"position": [
-				2177.0,
-				1400.0
+				5120.0,
+				3920.0
 			],
 			"type": "LimitTOP"
 		},
@@ -2374,8 +2783,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				3500.0
+				4700.0,
+				3920.0
 			],
 			"type": "LookupTOP"
 		},
@@ -2386,8 +2795,8 @@
 				}
 			},
 			"position": [
-				1180.0,
-				-200.0
+				4720.0,
+				-160.0
 			],
 			"type": "LookupTOP"
 		},
@@ -2407,8 +2816,8 @@
 				}
 			},
 			"position": [
-				1436.50061035156,
-				860.0
+				4940.0,
+				900.0
 			],
 			"type": "LumaBlurTOP"
 		},
@@ -2421,12 +2830,12 @@
 					"value": 0
 				},
 				"premultiply": {
-					"value": false
+					"value": true
 				}
 			},
 			"position": [
-				1020.0,
-				2960.0
+				4200.0,
+				3920.0
 			],
 			"type": "MatteTOP"
 		},
@@ -2437,30 +2846,32 @@
 				}
 			},
 			"position": [
-				980.0,
-				1220.0
+				4520.0,
+				1260.0
 			],
 			"type": "MedianTOP"
 		},
 		"mirror1": {
 			"parameters": {
 				"angle": {
-					"value": 0.0
+					"expression": "chop(\"lfo2\", \"out\")",
+					"mode": "EXPRESSION",
+					"value": 230.0
 				},
 				"axis": {
-					"value": 0
+					"value": 2
 				},
 				"center": {
 					"value": {
 						"_type": "Vector2",
-						"x": 0.5,
+						"x": 0.560000002384186,
 						"y": 0.5
 					}
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				4100.0
+				4380.0,
+				3420.0
 			],
 			"type": "MirrorTOP"
 		},
@@ -2474,12 +2885,13 @@
 				}
 			},
 			"position": [
-				1612.50158691406,
-				-200.0
+				5160.0,
+				-160.0
 			],
 			"type": "MonoTOP"
 		},
 		"movie_file_in1": {
+			"bypass": true,
 			"parameters": {
 				"bg_color": {
 					"value": {
@@ -2514,8 +2926,8 @@
 				}
 			},
 			"position": [
-				2177.0,
-				1600.0
+				2800.0,
+				0.0
 			],
 			"type": "MovieFileInTOP"
 		},
@@ -2602,8 +3014,8 @@
 				}
 			},
 			"position": [
-				2177.0,
-				1800.0
+				2800.0,
+				1000.0
 			],
 			"type": "MultiBufferRenderTOP"
 		},
@@ -2655,8 +3067,8 @@
 				}
 			},
 			"position": [
-				-284.249908447266,
-				-200.0
+				3260.0,
+				-160.0
 			],
 			"type": "NoiseTOP"
 		},
@@ -2708,8 +3120,8 @@
 				}
 			},
 			"position": [
-				1171.50048828125,
-				600.0
+				4720.0,
+				640.0
 			],
 			"type": "NoiseTOP"
 		},
@@ -2735,8 +3147,35 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				1900.0
+				3360.0,
+				1920.0
+			],
+			"type": "NoiseCHOP"
+		},
+		"noise2_copy": {
+			"parameters": {
+				"channel_names": {
+					"value": "chan1"
+				},
+				"num_channels": {
+					"value": 1
+				},
+				"period": {
+					"value": 1.0
+				},
+				"roughness": {
+					"value": 0.5
+				},
+				"seed": {
+					"value": 0
+				},
+				"speed": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				3900.0,
+				4840.0
 			],
 			"type": "NoiseCHOP"
 		},
@@ -2799,8 +3238,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				1680.0
+				3460.0,
+				1720.0
 			],
 			"type": "NoiseTOP"
 		},
@@ -2852,8 +3291,114 @@
 				}
 			},
 			"position": [
-				479.750091552734,
-				1960.0
+				4020.0,
+				2000.0
+			],
+			"type": "NoiseTOP"
+		},
+		"noise4": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": false
+				},
+				"noise_type": {
+					"value": 5
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 0
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				4160.0,
+				3420.0
+			],
+			"type": "NoiseTOP"
+		},
+		"noise_ch8": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": true
+				},
+				"noise_type": {
+					"value": 0
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"scale": {
+					"value": 6.0
+				},
+				"seed": {
+					"value": 0
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.1
+				}
+			},
+			"position": [
+				3440.0,
+				2720.0
 			],
 			"type": "NoiseTOP"
 		},
@@ -2867,10 +3412,17 @@
 				}
 			},
 			"position": [
-				980.0,
-				400.0
+				4520.0,
+				440.0
 			],
 			"type": "NormalMapTOP"
+		},
+		"null1": {
+			"position": [
+				5120.0,
+				6120.0
+			],
+			"type": "NullTOP"
 		},
 		"optical_flow1": {
 			"parameters": {
@@ -2892,26 +3444,26 @@
 				}
 			},
 			"position": [
-				-107.249908447266,
-				3900.0
+				4720.0,
+				4840.0
 			],
 			"type": "OpticalFlowTOP"
 		},
 		"palette1": {
 			"parameters": {
 				"dither": {
-					"value": false
+					"value": true
 				},
 				"dither_strength": {
-					"value": 0.5
+					"value": 0.7
 				},
 				"palette_size": {
-					"value": 8
+					"value": 5
 				}
 			},
 			"position": [
-				440.0,
-				2960.0
+				3620.0,
+				3920.0
 			],
 			"type": "PaletteTOP"
 		},
@@ -2947,10 +3499,42 @@
 				}
 			},
 			"position": [
-				2177.0,
-				2000.0
+				2800.0,
+				200.0
 			],
 			"type": "PanelTOP"
+		},
+		"panel_container1": {
+			"dynamic_input_count": 3,
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 0.0899999961256981,
+						"b": 0.150000005960464,
+						"g": 0.150000005960464,
+						"r": 0.150000005960464
+					}
+				},
+				"corner_radius": {
+					"value": 4
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 0,
+						"y": 0
+					}
+				},
+				"padding": {
+					"value": 8
+				}
+			},
+			"position": [
+				5920.0,
+				520.0
+			],
+			"type": "PanelContainerUI"
 		},
 		"particle_state1": {
 			"parameters": {
@@ -2965,8 +3549,8 @@
 				}
 			},
 			"position": [
-				2177.0,
-				2200.0
+				2800.0,
+				1200.0
 			],
 			"type": "ParticleStateTOP"
 		},
@@ -3014,8 +3598,8 @@
 				}
 			},
 			"position": [
-				-120.0,
-				1220.0
+				3420.0,
+				1260.0
 			],
 			"type": "PatternTOP"
 		},
@@ -3063,8 +3647,8 @@
 				}
 			},
 			"position": [
-				560.0,
-				1440.0
+				4100.0,
+				1480.0
 			],
 			"type": "PatternTOP"
 		},
@@ -3078,8 +3662,8 @@
 				}
 			},
 			"position": [
-				941.500427246094,
-				1680.0
+				4480.0,
+				1720.0
 			],
 			"type": "PixelateTOP"
 		},
@@ -3141,8 +3725,8 @@
 				}
 			},
 			"position": [
-				2177.0,
-				2400.0
+				2800.0,
+				1400.0
 			],
 			"type": "PointCloudRenderTOP"
 		},
@@ -3163,8 +3747,8 @@
 				}
 			},
 			"position": [
-				673.750122070313,
-				1960.0
+				4220.0,
+				2000.0
 			],
 			"type": "PolarTOP"
 		},
@@ -3175,8 +3759,8 @@
 				}
 			},
 			"position": [
-				1612.50158691406,
-				1680.0
+				5160.0,
+				1720.0
 			],
 			"type": "PosterizeTOP"
 		},
@@ -3187,8 +3771,8 @@
 				}
 			},
 			"position": [
-				1280.0,
-				2940.0
+				4380.0,
+				3920.0
 			],
 			"type": "PremultiplyTOP"
 		},
@@ -3216,8 +3800,8 @@
 				}
 			},
 			"position": [
-				496.750091552734,
-				1220.0
+				4040.0,
+				1260.0
 			],
 			"type": "ProjectionTOP"
 		},
@@ -3237,8 +3821,8 @@
 				}
 			},
 			"position": [
-				1436.50061035156,
-				180.0
+				4980.0,
+				220.0
 			],
 			"type": "RadialBlurTOP"
 		},
@@ -3255,17 +3839,17 @@
 					"value": {
 						"_type": "Color",
 						"a": 1.0,
-						"b": 0.0,
-						"g": 0.0,
-						"r": 0.0
+						"b": 0.300000011920929,
+						"g": 0.0500000007450581,
+						"r": 0.100000001490116
 					}
 				},
 				"color_b": {
 					"value": {
 						"_type": "Color",
 						"a": 1.0,
-						"b": 1.0,
-						"g": 1.0,
+						"b": 0.100000001490116,
+						"g": 0.800000011920929,
 						"r": 1.0
 					}
 				},
@@ -3287,8 +3871,8 @@
 				}
 			},
 			"position": [
-				260.0,
-				2960.0
+				3340.0,
+				3920.0
 			],
 			"type": "RampTOP"
 		},
@@ -3337,8 +3921,8 @@
 				}
 			},
 			"position": [
-				941.500427246094,
-				-20.0
+				4480.0,
+				20.0
 			],
 			"type": "RampTOP"
 		},
@@ -3387,8 +3971,8 @@
 				}
 			},
 			"position": [
-				941.500427246094,
-				1040.0
+				4480.0,
+				1080.0
 			],
 			"type": "RampTOP"
 		},
@@ -3437,8 +4021,8 @@
 				}
 			},
 			"position": [
-				820.0,
-				2480.0
+				4360.0,
+				2520.0
 			],
 			"type": "RampTOP"
 		},
@@ -3522,8 +4106,8 @@
 				}
 			},
 			"position": [
-				1612.50158691406,
-				860.0
+				5120.0,
+				900.0
 			],
 			"type": "ReactionDiffusionTOP"
 		},
@@ -3579,8 +4163,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				800.0
+				3460.0,
+				840.0
 			],
 			"type": "RectangleTOP"
 		},
@@ -3590,12 +4174,12 @@
 					"value": 0
 				},
 				"strength": {
-					"value": 1.0
+					"value": 0.15
 				}
 			},
 			"position": [
-				640.0,
-				2960.0
+				3800.0,
+				3920.0
 			],
 			"type": "RemapTOP"
 		},
@@ -3676,8 +4260,8 @@
 				}
 			},
 			"position": [
-				2177.0,
-				2600.0
+				2800.0,
+				400.0
 			],
 			"type": "RenderTOP"
 		},
@@ -3704,8 +4288,8 @@
 				}
 			},
 			"position": [
-				720.0,
-				860.0
+				4260.0,
+				900.0
 			],
 			"type": "ReorderTOP"
 		},
@@ -3723,8 +4307,8 @@
 				}
 			},
 			"position": [
-				980.0,
-				180.0
+				4520.0,
+				220.0
 			],
 			"type": "ResolutionTOP"
 		},
@@ -3751,8 +4335,8 @@
 				}
 			},
 			"position": [
-				673.750122070313,
-				3300.0
+				4220.0,
+				2720.0
 			],
 			"type": "RippleTOP"
 		},
@@ -3772,22 +4356,10 @@
 				}
 			},
 			"position": [
-				1612.50158691406,
-				1220.0
+				5160.0,
+				1260.0
 			],
 			"type": "ScanLineTOP"
-		},
-		"select1": {
-			"parameters": {
-				"top": {
-					"value": ""
-				}
-			},
-			"position": [
-				2177.0,
-				2800.0
-			],
-			"type": "SelectTOP"
 		},
 		"sharpen1": {
 			"parameters": {
@@ -3799,10 +4371,41 @@
 				}
 			},
 			"position": [
-				260.750061035156,
-				-200.0
+				3800.0,
+				-160.0
 			],
 			"type": "SharpenTOP"
+		},
+		"slider1": {
+			"parameters": {
+				"default_val": {
+					"value": 0.0
+				},
+				"label": {
+					"value": "Slider"
+				},
+				"max_val": {
+					"value": 14.0
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 200,
+						"y": 24
+					}
+				},
+				"min_val": {
+					"value": 0.0
+				},
+				"step": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				5740.0,
+				360.0
+			],
+			"type": "SliderUI"
 		},
 		"slope1": {
 			"parameters": {
@@ -3814,8 +4417,8 @@
 				}
 			},
 			"position": [
-				1180.0,
-				400.0
+				4720.0,
+				440.0
 			],
 			"type": "SlopeTOP"
 		},
@@ -3854,8 +4457,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				4300.0
+				2800.0,
+				1600.0
 			],
 			"snapshot_mode": 0,
 			"type": "SnapshotTOP"
@@ -3873,12 +4476,12 @@
 					"value": 0.5
 				},
 				"strength": {
-					"value": 0.5
+					"value": -1.31
 				}
 			},
 			"position": [
-				405.999328613281,
-				3300.0
+				3940.0,
+				2720.0
 			],
 			"type": "SpherizeTOP"
 		},
@@ -3896,13 +4499,13 @@
 				}
 			},
 			"position": [
-				-40.0,
-				2280.0
+				3500.0,
+				2320.0
 			],
 			"type": "SVGTOP"
 		},
 		"switch2": {
-			"dynamic_input_count": 9,
+			"dynamic_input_count": 16,
 			"parameters": {
 				"blend": {
 					"value": false
@@ -3911,14 +4514,92 @@
 					"value": 0.0
 				},
 				"index": {
+					"expression": "chop(\"slider1\", \"slider1:value\")",
+					"mode": "EXPRESSION",
 					"value": 0
 				}
 			},
 			"position": [
-				2120.0,
-				-200.0
+				5660.0,
+				-160.0
 			],
 			"type": "SwitchTOP"
+		},
+		"test_card1": {
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.150000005960464,
+						"g": 0.150000005960464,
+						"r": 0.150000005960464
+					}
+				},
+				"card_type": {
+					"value": 0
+				},
+				"center_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"grid_cells": {
+					"value": 16.0
+				},
+				"grid_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.349999994039536,
+						"g": 0.349999994039536,
+						"r": 0.349999994039536
+					}
+				},
+				"line_width": {
+					"value": 1.5
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"safe_margin": {
+					"value": 0.05
+				},
+				"show_center": {
+					"value": true
+				},
+				"show_circle": {
+					"value": true
+				},
+				"show_color_bars": {
+					"value": true
+				},
+				"show_corners": {
+					"value": true
+				},
+				"show_grayscale": {
+					"value": true
+				},
+				"show_grid": {
+					"value": true
+				},
+				"show_safe_area": {
+					"value": true
+				}
+			},
+			"position": [
+				4080.0,
+				5380.0
+			],
+			"type": "TestCardTOP"
 		},
 		"text1": {
 			"parameters": {
@@ -3967,8 +4648,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				400.0
+				3460.0,
+				440.0
 			],
 			"type": "TextTOP"
 		},
@@ -3985,8 +4666,8 @@
 				}
 			},
 			"position": [
-				941.500427246094,
-				-200.0
+				4480.0,
+				-160.0
 			],
 			"type": "ThresholdTOP"
 		},
@@ -4014,8 +4695,8 @@
 				}
 			},
 			"position": [
-				1171.50048828125,
-				180.0
+				4720.0,
+				220.0
 			],
 			"type": "TileTOP"
 		},
@@ -4025,7 +4706,7 @@
 					"value": false
 				},
 				"length": {
-					"value": 60
+					"value": 19
 				},
 				"position": {
 					"value": 0.0
@@ -4034,15 +4715,15 @@
 					"value": false
 				},
 				"speed": {
-					"value": 1.0
+					"value": 0.14
 				},
 				"wrap_mode": {
 					"value": 1
 				}
 			},
 			"position": [
-				467.749938964844,
-				4340.0
+				4460.0,
+				4840.0
 			],
 			"type": "TimeMachineTOP"
 		},
@@ -4062,8 +4743,8 @@
 				}
 			},
 			"position": [
-				1612.50158691406,
-				1040.0
+				5140.0,
+				1100.0
 			],
 			"preview_enabled": false,
 			"type": "TimerCHOP"
@@ -4090,8 +4771,8 @@
 				}
 			},
 			"position": [
-				1612.50158691406,
-				1960.0
+				5160.0,
+				2000.0
 			],
 			"type": "ToonShadeTOP"
 		},
@@ -4108,8 +4789,8 @@
 				}
 			},
 			"position": [
-				260.750091552734,
-				1680.0
+				3800.0,
+				1720.0
 			],
 			"type": "TrailTOP"
 		},
@@ -4144,8 +4825,8 @@
 				}
 			},
 			"position": [
-				145.750030517578,
-				180.0
+				3700.0,
+				220.0
 			],
 			"type": "TransformTOP"
 		},
@@ -4202,8 +4883,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				1000.0
+				3460.0,
+				1040.0
 			],
 			"type": "TriangleTOP"
 		},
@@ -4224,8 +4905,8 @@
 				}
 			},
 			"position": [
-				-93.2499084472656,
-				3300.0
+				3740.0,
+				2720.0
 			],
 			"type": "TwirlTOP"
 		},
@@ -4297,8 +4978,8 @@
 				}
 			},
 			"position": [
-				-297.249938964844,
-				2760.0
+				2800.0,
+				1800.0
 			],
 			"type": "VectorPathTOP"
 		},
@@ -4324,8 +5005,8 @@
 				}
 			},
 			"position": [
-				1436.50061035156,
-				1680.0
+				4980.0,
+				1720.0
 			],
 			"type": "VignetteTOP"
 		},
@@ -4352,8 +5033,8 @@
 				}
 			},
 			"position": [
-				80.0,
-				3580.0
+				4820.0,
+				3000.0
 			],
 			"type": "VoronoiTOP"
 		},
@@ -4393,8 +5074,8 @@
 				}
 			},
 			"position": [
-				2320.0,
-				-200.0
+				5860.0,
+				-160.0
 			],
 			"type": "WindowOUT"
 		}

@@ -205,7 +205,6 @@ func _setup_cook_engine() -> void:
 	add_child(cook_engine)
 
 	cook_engine.frame_cooked.connect(_on_frame_cooked)
-	cook_engine.frame_cooked.connect(_check_stress_report)
 	cook_engine.cook_error.connect(_on_cook_error)
 
 	# Initial sink list
@@ -421,9 +420,6 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 			vram_str += " ⚠ >%.0fMB" % _vram_budget_mb
 		parts.append(vram_str)
 
-	if not _viewer_node_id.is_empty():
-		parts.append("Viewing: %s" % _viewer_node_id)
-
 	info_label.text = " | ".join(parts)
 
 	# Update timeline scrubber position (without re-triggering seek)
@@ -546,11 +542,12 @@ func _on_perf_toggled(pressed: bool) -> void:
 
 
 ## Toggles cooking on/off (play/pause).
-func _on_play_pause_toggled(paused: bool) -> void:
+func _on_play_pause_pressed() -> void:
+	var is_playing := cook_engine != null and cook_engine.cooking_enabled
 	if cook_engine != null:
-		cook_engine.cooking_enabled = not paused
-	play_button.text = "Play  ▶" if paused else "Pause  ⏸"
-	GNLogger.info("Editor", "Cooking %s" % ("PAUSED" if paused else "RESUMED"))
+		cook_engine.cooking_enabled = not is_playing
+	play_button.text = "▶️" if is_playing else "⏸"
+	GNLogger.info("Editor", "Cooking %s" % ("PAUSED" if is_playing else "RESUMED"))
 
 
 ## Resets the cook engine: time/frame back to 0, destroys all runtime scene
@@ -583,8 +580,7 @@ func _on_reset_pressed() -> void:
 	cook_engine.cooking_enabled = true
 
 	# 5. Sync play button back to "playing" state
-	play_button.button_pressed = false  # false = playing (not paused)
-	play_button.text = "Pause  ⏸"
+	play_button.text = "⏸"
 
 	GNLogger.info("Editor", "Patch reset — restarting from frame 0")
 
@@ -608,16 +604,14 @@ func _on_nrt_fps_changed(value: float) -> void:
 func _on_step_back_pressed() -> void:
 	if cook_engine != null:
 		cook_engine.step_backward()
-		play_button.button_pressed = true  # show paused state
-		play_button.text = "Play  ▶"
+		play_button.text = "▶️"
 
 
 ## Steps forward one frame.
 func _on_step_fwd_pressed() -> void:
 	if cook_engine != null:
 		cook_engine.step_forward()
-		play_button.button_pressed = true  # show paused state
-		play_button.text = "Play  ▶"
+		play_button.text = "▶️"
 
 
 ## Changes playback speed.
@@ -935,40 +929,96 @@ func _setup_toolbar() -> void:
 
 	row1.add_child(VSeparator.new())
 
+	# ── Graph View ──
+
+	# Preview toggle
+	preview_toggle = CheckButton.new()
+	preview_toggle.text = "Previews"
+	preview_toggle.tooltip_text = "Show / hide inline node previews"
+	preview_toggle.button_pressed = true
+	preview_toggle.toggled.connect(_on_preview_toggled)
+	row1.add_child(preview_toggle)
+
+	# Minimap toggle
+	var minimap_toggle := CheckButton.new()
+	minimap_toggle.text = "Minimap"
+	minimap_toggle.tooltip_text = "Show / hide minimap (M)"
+	minimap_toggle.button_pressed = graph_editor.minimap_enabled
+	minimap_toggle.toggled.connect(func(on: bool):
+		graph_editor.minimap_enabled = on)
+	row1.add_child(minimap_toggle)
+
+	# Wire style OptionButton
+	var wire_opt := OptionButton.new()
+	wire_opt.tooltip_text = "Wire style (W to cycle)"
+	for wn in GNGraphEditor._WIRE_STYLE_NAMES:
+		wire_opt.add_item(wn)
+	wire_opt.selected = 0
+	wire_opt.item_selected.connect(func(wire_idx: int):
+		graph_editor.set_wire_style(wire_idx))
+	row1.add_child(wire_opt)
+
+	# Auto-layout button
+	var btn_layout := Button.new()
+	btn_layout.text = "Layout"
+	btn_layout.tooltip_text = "Auto-layout all nodes (Ctrl+L)"
+	btn_layout.pressed.connect(func(): graph_editor.auto_layout())
+	row1.add_child(btn_layout)
+
+	# Open Viewer button
+	var btn_viewer := Button.new()
+	btn_viewer.text = "+ Viewer"
+	btn_viewer.tooltip_text = "Open a floating viewer window for the selected node"
+	btn_viewer.pressed.connect(func(): open_viewer_window())
+	row1.add_child(btn_viewer)
+
+	# Help button
+	var btn_help := Button.new()
+	btn_help.text = "📖 Help"
+	btn_help.tooltip_text = "Open the help reference hub (F1)"
+	btn_help.pressed.connect(_toggle_main_help_window)
+	row1.add_child(btn_help)
+
+	# ── Timeline & Transport Row ─────────────────────────────────────────
+	var scroll_tl := ScrollContainer.new()
+	scroll_tl.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll_tl.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll_tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_bar.add_child(scroll_tl)
+	var tl_row := HBoxContainer.new()
+	tl_row.add_theme_constant_override("separation", 4)
+	tl_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll_tl.add_child(tl_row)
+
 	# Play / Pause button
 	play_button = Button.new()
-	play_button.text = "Pause  ⏸"
+	play_button.text = "⏸"
 	play_button.tooltip_text = "Pause / Resume cooking (Space)"
-	play_button.toggle_mode = true
-	play_button.button_pressed = false  # false = playing (not paused)
-	play_button.toggled.connect(_on_play_pause_toggled)
-	row1.add_child(play_button)
+	play_button.pressed.connect(_on_play_pause_pressed)
+	tl_row.add_child(play_button)
 
 	# Reset button
 	reset_button = Button.new()
-	reset_button.text = "Reset  ⏮"
+	reset_button.text = "⏮"
 	reset_button.tooltip_text = "Reset the patch back to frame 0 (Escape)"
 	reset_button.pressed.connect(_on_reset_pressed)
-	row1.add_child(reset_button)
+	tl_row.add_child(reset_button)
 
 	# Step backward button
 	step_back_button = Button.new()
 	step_back_button.text = "⏪"
 	step_back_button.tooltip_text = "Step back one frame"
 	step_back_button.pressed.connect(_on_step_back_pressed)
-	row1.add_child(step_back_button)
+	tl_row.add_child(step_back_button)
 
 	# Step forward button
 	step_fwd_button = Button.new()
 	step_fwd_button.text = "⏩"
 	step_fwd_button.tooltip_text = "Step forward one frame"
 	step_fwd_button.pressed.connect(_on_step_fwd_pressed)
-	row1.add_child(step_fwd_button)
+	tl_row.add_child(step_fwd_button)
 
 	# Speed multiplier
-	var speed_label := Label.new()
-	speed_label.text = "Speed:"
-	row1.add_child(speed_label)
 	speed_spin = SpinBox.new()
 	speed_spin.min_value = 0.0
 	speed_spin.max_value = 10.0
@@ -978,16 +1028,14 @@ func _setup_toolbar() -> void:
 	speed_spin.tooltip_text = "Global playback speed multiplier"
 	speed_spin.custom_minimum_size.x = 80
 	speed_spin.value_changed.connect(_on_speed_changed)
-	row1.add_child(speed_spin)
+	tl_row.add_child(speed_spin)
 
 	# Loop mode cycle button
 	loop_button = Button.new()
 	loop_button.text = "Loop: Off"
 	loop_button.tooltip_text = "Cycle loop mode: Off → Loop → Ping-Pong (requires time range)"
 	loop_button.pressed.connect(_on_loop_pressed)
-	row1.add_child(loop_button)
-
-	row1.add_child(VSeparator.new())
+	tl_row.add_child(loop_button)
 
 	# Non-Realtime toggle
 	nrt_toggle = CheckButton.new()
@@ -995,7 +1043,7 @@ func _setup_toolbar() -> void:
 	nrt_toggle.tooltip_text = "Non-Realtime mode — fixed timestep for deterministic, frame-perfect recording"
 	nrt_toggle.button_pressed = false
 	nrt_toggle.toggled.connect(_on_nrt_toggled)
-	row1.add_child(nrt_toggle)
+	tl_row.add_child(nrt_toggle)
 
 	# Non-Realtime FPS SpinBox
 	nrt_fps_spin = SpinBox.new()
@@ -1008,28 +1056,9 @@ func _setup_toolbar() -> void:
 	nrt_fps_spin.editable = true
 	nrt_fps_spin.custom_minimum_size.x = 90
 	nrt_fps_spin.value_changed.connect(_on_nrt_fps_changed)
-	row1.add_child(nrt_fps_spin)
+	tl_row.add_child(nrt_fps_spin)
 
-	# Spacer pushes InfoLabel + LogToggle to the right
-	var spacer1 := Control.new()
-	spacer1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row1.add_child(spacer1)
-
-	# Reparent scene-defined InfoLabel and LogToggle into row 1
-	info_label.reparent(row1, false)
-	info_label.size_flags_horizontal = Control.SIZE_SHRINK_END
-	log_toggle.reparent(row1, false)
-
-	# ── Timeline Scrubber Row ────────────────────────────────────────────
-	var scroll_tl := ScrollContainer.new()
-	scroll_tl.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	scroll_tl.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll_tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_bar.add_child(scroll_tl)
-	var tl_row := HBoxContainer.new()
-	tl_row.add_theme_constant_override("separation", 4)
-	tl_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll_tl.add_child(tl_row)
+	tl_row.add_child(VSeparator.new())
 
 	_timeline_time_label = Label.new()
 	_timeline_time_label.text = "0:00.0 / F0"
@@ -1046,24 +1075,16 @@ func _setup_toolbar() -> void:
 	_timeline_scrubber.value_changed.connect(_on_scrubber_changed)
 	tl_row.add_child(_timeline_scrubber)
 
-	# ── Row 2: View & Graph ──────────────────────────────────────────────
-	var scroll2 := ScrollContainer.new()
-	scroll2.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	scroll2.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_bar.add_child(scroll2)
-	var row2 := HBoxContainer.new()
-	row2.add_theme_constant_override("separation", 4)
-	row2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll2.add_child(row2)
-
-	# Preview toggle
-	preview_toggle = CheckButton.new()
-	preview_toggle.text = "Previews"
-	preview_toggle.tooltip_text = "Show / hide inline node previews"
-	preview_toggle.button_pressed = true
-	preview_toggle.toggled.connect(_on_preview_toggled)
-	row2.add_child(preview_toggle)
+	# ── Row 3: Debug, Monitoring & Panels ────────────────────────────────
+	var scroll3 := ScrollContainer.new()
+	scroll3.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll3.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_bar.add_child(scroll3)
+	var row3 := HBoxContainer.new()
+	row3.add_theme_constant_override("separation", 4)
+	row3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll3.add_child(row3)
 
 	# Performance overlay toggle
 	perf_toggle = CheckButton.new()
@@ -1071,15 +1092,15 @@ func _setup_toolbar() -> void:
 	perf_toggle.tooltip_text = "Show / hide per-node cook time overlay"
 	perf_toggle.button_pressed = false
 	perf_toggle.toggled.connect(_on_perf_toggled)
-	row2.add_child(perf_toggle)
+	row3.add_child(perf_toggle)
 
 	# VRAM monitoring toggle
 	vram_toggle = CheckButton.new()
 	vram_toggle.text = "VRAM"
-	vram_toggle.tooltip_text = "Show GPU memory usage in the info bar"
+	vram_toggle.tooltip_text = "Show GPU memory usage in the status bar"
 	vram_toggle.button_pressed = false
 	vram_toggle.toggled.connect(func(on: bool): _vram_enabled = on)
-	row2.add_child(vram_toggle)
+	row3.add_child(vram_toggle)
 
 	# Debug overlay + panel toggle
 	debug_toggle = CheckButton.new()
@@ -1087,7 +1108,7 @@ func _setup_toolbar() -> void:
 	debug_toggle.tooltip_text = "Show debug overlay (cook order, active chain, dirty flash, data flow) + debug panel (F2)"
 	debug_toggle.button_pressed = false
 	debug_toggle.toggled.connect(_on_debug_toggled)
-	row2.add_child(debug_toggle)
+	row3.add_child(debug_toggle)
 
 	# Debug layer toggles (only visible when debug is on)
 	_debug_layers_container = HBoxContainer.new()
@@ -1110,53 +1131,13 @@ func _setup_toolbar() -> void:
 		cb.add_theme_font_size_override("font_size", 11)
 		cb.toggled.connect(_on_debug_layer_toggled.bind(i))
 		_debug_layers_container.add_child(cb)
-	row2.add_child(_debug_layers_container)
+	row3.add_child(_debug_layers_container)
 
-	row2.add_child(VSeparator.new())
+	row3.add_child(VSeparator.new())
 
-	# Open Viewer button
-	var btn_viewer := Button.new()
-	btn_viewer.text = "+ Viewer"
-	btn_viewer.tooltip_text = "Open a floating viewer window for the selected TOP node"
-	btn_viewer.pressed.connect(func(): open_viewer_window())
-	row2.add_child(btn_viewer)
-
-	# Stress Test button
-	var btn_stress := Button.new()
-	btn_stress.text = "Stress Test"
-	btn_stress.tooltip_text = "Build a 55+ node network for performance testing"
-	btn_stress.pressed.connect(_on_stress_test_pressed)
-	row2.add_child(btn_stress)
-
-	row2.add_child(VSeparator.new())
-
-	# Minimap toggle
-	var minimap_toggle := CheckButton.new()
-	minimap_toggle.text = "Minimap"
-	minimap_toggle.tooltip_text = "Show / hide minimap (M)"
-	minimap_toggle.button_pressed = graph_editor.minimap_enabled
-	minimap_toggle.toggled.connect(func(on: bool):
-		graph_editor.minimap_enabled = on)
-	row2.add_child(minimap_toggle)
-
-	# Wire style OptionButton
-	var wire_opt := OptionButton.new()
-	wire_opt.tooltip_text = "Wire style (W to cycle)"
-	for wn in GNGraphEditor._WIRE_STYLE_NAMES:
-		wire_opt.add_item(wn)
-	wire_opt.selected = 0
-	wire_opt.item_selected.connect(func(wire_idx: int):
-		graph_editor.set_wire_style(wire_idx))
-	row2.add_child(wire_opt)
-
-	# Auto-layout button
-	var btn_layout := Button.new()
-	btn_layout.text = "Layout"
-	btn_layout.tooltip_text = "Auto-layout all nodes (Ctrl+L)"
-	btn_layout.pressed.connect(func(): graph_editor.auto_layout())
-	row2.add_child(btn_layout)
-
-	row2.add_child(VSeparator.new())
+	# Log panel toggle
+	log_toggle.text = "Logs"
+	log_toggle.reparent(row3, false)
 
 	# Compat report toggle
 	compat_toggle = CheckButton.new()
@@ -1164,21 +1145,23 @@ func _setup_toolbar() -> void:
 	compat_toggle.tooltip_text = "Show export compatibility report — scan network against target platform/renderer"
 	compat_toggle.button_pressed = false
 	compat_toggle.toggled.connect(_on_compat_toggled)
-	row2.add_child(compat_toggle)
+	row3.add_child(compat_toggle)
 
 	take_toggle = CheckButton.new()
 	take_toggle.text = "Takes"
 	take_toggle.tooltip_text = "Show take manager — capture, apply and blend named parameter snapshots (Shift+T)"
 	take_toggle.button_pressed = false
 	take_toggle.toggled.connect(_on_take_toggled)
-	row2.add_child(take_toggle)
+	row3.add_child(take_toggle)
 
-	# Help button
-	var btn_help := Button.new()
-	btn_help.text = "📖 Help"
-	btn_help.tooltip_text = "Open the help reference hub (F1)"
-	btn_help.pressed.connect(_toggle_main_help_window)
-	row2.add_child(btn_help)
+	# Spacer pushes status info to the right
+	var spacer3 := Control.new()
+	spacer3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row3.add_child(spacer3)
+
+	# Reparent scene-defined InfoLabel to right end of status row
+	info_label.reparent(row3, false)
+	info_label.size_flags_horizontal = Control.SIZE_SHRINK_END
 
 	# Create the export dialog (hidden until needed)
 	_export_dialog = GNExportDialog.new()
@@ -1208,7 +1191,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			var focus_owner := get_viewport().gui_get_focus_owner()
 			if focus_owner is LineEdit or focus_owner is TextEdit or focus_owner is SpinBox:
 				return
-			play_button.button_pressed = not play_button.button_pressed
+			play_button.pressed.emit()
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_ESCAPE:
 			var focus_owner := get_viewport().gui_get_focus_owner()
@@ -1373,381 +1356,6 @@ func _update_title() -> void:
 	else:
 		var file_name := _current_file_path.get_file()
 		get_window().title = "GONODES Editor — %s" % file_name
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Stress Test — 55+ node network exercising all 6 families
-# ═══════════════════════════════════════════════════════════════════════════════
-
-## Number of warm-up frames before printing the report.
-var _stress_warmup_frames: int = -1
-const STRESS_WARMUP_COUNT: int = 30
-
-func _on_stress_test_pressed() -> void:
-	_on_new_pressed()
-	_build_stress_test_network()
-	# Rebind everything
-	graph_editor.bind_network(network)
-	inspector.network = network
-	cook_engine.network = network
-	cook_engine._nodes_adopted = false
-	network.node_renamed.connect(_on_node_renamed)
-	graph_editor.clear_undo_history()
-	_viewer_node_id = "render_main"
-	_push_active_sinks()
-	_update_title()
-	# Start warm-up countdown — report prints after N frames
-	_stress_warmup_frames = STRESS_WARMUP_COUNT
-	print("[STRESS] Network built — %d nodes, %d connections. Warming up %d frames…" % [
-		network.get_node_count(), network.get_connection_count(), STRESS_WARMUP_COUNT])
-
-
-## Helper to add a node to the stress test network with position.
-func _stress_add(n: GNNode, id: String, x: float, y: float) -> GNNode:
-	n.initialize(id)
-	n.graph_position = Vector2(x, y)
-	network.add_node(n)
-	return n
-
-
-## Builds a large network with 55+ nodes across all 6 families.
-## Layout: multiple parallel TOP chains, CHOP generator/filter chains,
-## DAT table chains, SOP geometry chains feeding COMPs with MATs,
-## merged into a single RenderTOP output.
-func _build_stress_test_network() -> void:
-	network = GNNetwork.new()
-
-	var col_x := 0  # X offset tracker for laying out columns
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# CHOP chain (12 nodes) — generators + filters
-	# ═══════════════════════════════════════════════════════════════════════
-
-	var lfo1 := _stress_add(LFO_CHOP.new(), "lfo1", 0, 0)
-	lfo1.get_parameter("frequency").set_value(0.5)
-	lfo1.get_parameter("amplitude").set_value(1.0)
-
-	var lfo2 := _stress_add(LFO_CHOP.new(), "lfo2", 0, 150)
-	lfo2.get_parameter("frequency").set_value(0.3)
-	lfo2.get_parameter("waveform").set_value(LFO_CHOP.Waveform.SAWTOOTH)
-
-	_stress_add(NoiseCHOP.new(), "noise_c1", 0, 300)
-	var const_c := _stress_add(ConstantCHOP.new(), "const_c1", 0, 450)
-	const_c.get_parameter("value0").set_value(2.0)
-	_stress_add(WaveCHOP.new(), "wave_c1", 0, 600)
-
-	_stress_add(MathCHOP.new(), "math_c1", 300, 0)
-	_stress_add(MathCHOP.new(), "math_c2", 300, 150)
-	_stress_add(LagCHOP.new(), "lag_c1", 300, 300)
-	_stress_add(FilterCHOP.new(), "filter_c1", 300, 450)
-	_stress_add(LimitCHOP.new(), "limit_c1", 300, 600)
-	_stress_add(MergeCHOP.new(), "merge_c1", 600, 150)
-	_stress_add(NullCHOP.new(), "null_c1", 600, 300)
-
-	# Wire CHOP chain
-	network.connect_nodes("lfo1", 0, "math_c1", 0)
-	network.connect_nodes("lfo2", 0, "math_c2", 0)
-	network.connect_nodes("noise_c1", 0, "lag_c1", 0)
-	network.connect_nodes("const_c1", 0, "filter_c1", 0)
-	network.connect_nodes("wave_c1", 0, "limit_c1", 0)
-	network.connect_nodes("math_c1", 0, "merge_c1", 0)
-	network.connect_nodes("math_c2", 0, "merge_c1", 1)
-	network.connect_nodes("lag_c1", 0, "null_c1", 0)
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# DAT chain (8 nodes)
-	# ═══════════════════════════════════════════════════════════════════════
-	col_x = 800
-	_stress_add(ConstantDAT.new(), "const_d1", col_x, 0)
-	_stress_add(ConstantDAT.new(), "const_d2", col_x, 150)
-	_stress_add(TextDAT.new(), "text_d1", col_x, 300)
-	_stress_add(MergeDAT.new(), "merge_d1", col_x + 300, 0)
-	_stress_add(SelectDAT.new(), "select_d1", col_x + 300, 150)
-	_stress_add(SortDAT.new(), "sort_d1", col_x + 300, 300)
-	_stress_add(TransposeDAT.new(), "transpose_d1", col_x + 600, 0)
-	_stress_add(NullDAT.new(), "null_d1", col_x + 600, 150)
-
-	network.connect_nodes("const_d1", 0, "merge_d1", 0)
-	network.connect_nodes("const_d2", 0, "merge_d1", 1)
-	network.connect_nodes("merge_d1", 0, "transpose_d1", 0)
-	network.connect_nodes("text_d1", 0, "select_d1", 0)
-	network.connect_nodes("select_d1", 0, "sort_d1", 0)
-	network.connect_nodes("sort_d1", 0, "null_d1", 0)
-
-	# Bridges: CHOP → DAT → CHOP round-trip
-	_stress_add(CHOPDAT.new(), "chop_to_dat1", col_x + 600, 300)
-	_stress_add(DATtoCHOP.new(), "dat_to_chop1", col_x + 900, 300)
-	network.connect_nodes("merge_c1", 0, "chop_to_dat1", 0)
-	network.connect_nodes("chop_to_dat1", 0, "dat_to_chop1", 0)
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# TOP chain A — Noise → Level → Blur → HSV → Threshold → NullTOP (6)
-	# ═══════════════════════════════════════════════════════════════════════
-	col_x = 0
-	var row_y := 900
-	var noise_t := _stress_add(NoiseTOP.new(), "noise_t1", col_x, row_y)
-	noise_t.get_parameter("resolution").set_value(Vector2i(256, 256))
-	_stress_add(LevelTOP.new(), "level_t1", col_x + 300, row_y)
-	_stress_add(BlurTOP.new(), "blur_t1", col_x + 600, row_y)
-	_stress_add(HSVAdjustTOP.new(), "hsv_t1", col_x + 900, row_y)
-	_stress_add(ThresholdTOP.new(), "thresh_t1", col_x + 1200, row_y)
-	_stress_add(NullTOP.new(), "null_t1", col_x + 1500, row_y)
-
-	network.connect_nodes("noise_t1", 0, "level_t1", 0)
-	network.connect_nodes("level_t1", 0, "blur_t1", 0)
-	network.connect_nodes("blur_t1", 0, "hsv_t1", 0)
-	network.connect_nodes("hsv_t1", 0, "thresh_t1", 0)
-	network.connect_nodes("thresh_t1", 0, "null_t1", 0)
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# TOP chain B — Ramp → Transform → Tile → Edge → Composite (5)
-	# ═══════════════════════════════════════════════════════════════════════
-	row_y = 1100
-	var ramp_t := _stress_add(RampTOP.new(), "ramp_t1", col_x, row_y)
-	ramp_t.get_parameter("resolution").set_value(Vector2i(256, 256))
-	_stress_add(TransformTOP.new(), "xform_t1", col_x + 300, row_y)
-	_stress_add(TileTOP.new(), "tile_t1", col_x + 600, row_y)
-	_stress_add(EdgeTOP.new(), "edge_t1", col_x + 900, row_y)
-	_stress_add(CompositeTOP.new(), "comp_t1", col_x + 1200, row_y)
-
-	network.connect_nodes("ramp_t1", 0, "xform_t1", 0)
-	network.connect_nodes("xform_t1", 0, "tile_t1", 0)
-	network.connect_nodes("tile_t1", 0, "edge_t1", 0)
-	# Composite: chain A + chain B
-	network.connect_nodes("null_t1", 0, "comp_t1", 0)
-	network.connect_nodes("edge_t1", 0, "comp_t1", 1)
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# TOP chain C — Constants, Circle, Rectangle, Cross, Flip (5)
-	# ═══════════════════════════════════════════════════════════════════════
-	row_y = 1300
-	var const_t := _stress_add(ConstantTOP.new(), "const_t1", col_x, row_y)
-	const_t.get_parameter("resolution").set_value(Vector2i(256, 256))
-	var circle_t := _stress_add(CircleTOP.new(), "circle_t1", col_x + 300, row_y)
-	circle_t.get_parameter("resolution").set_value(Vector2i(256, 256))
-	var rect_t := _stress_add(RectangleTOP.new(), "rect_t1", col_x + 600, row_y)
-	rect_t.get_parameter("resolution").set_value(Vector2i(256, 256))
-	_stress_add(CrossTOP.new(), "cross_t1", col_x + 900, row_y)
-	_stress_add(FlipTOP.new(), "flip_t1", col_x + 1200, row_y)
-
-	network.connect_nodes("circle_t1", 0, "cross_t1", 0)
-	network.connect_nodes("rect_t1", 0, "cross_t1", 1)
-	network.connect_nodes("cross_t1", 0, "flip_t1", 0)
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# SOP chains (8 nodes) — Two geometry paths
-	# ═══════════════════════════════════════════════════════════════════════
-	col_x = 2000
-	var box_s := _stress_add(BoxSOP.new(), "box_s1", col_x, 0)
-	box_s.get_parameter("subdivide_w").set_value(6)
-	box_s.get_parameter("subdivide_h").set_value(6)
-	box_s.get_parameter("subdivide_d").set_value(6)
-	var noise_s := _stress_add(NoiseSOP.new(), "noise_s1", col_x + 300, 0)
-	noise_s.get_parameter("amplitude").set_value(0.2)
-	noise_s.get_parameter("frequency").set_value(3.0)
-	noise_s.get_parameter("speed").set_value(0.5)
-	_stress_add(SubdivideSOP.new(), "subdiv_s1", col_x + 600, 0)
-
-	var torus_s := _stress_add(TorusSOP.new(), "torus_s1", col_x, 200)
-	torus_s.get_parameter("rings").set_value(48)
-	torus_s.get_parameter("ring_segments").set_value(24)
-	var xform_s := _stress_add(TransformSOP.new(), "xform_s1", col_x + 300, 200)
-	xform_s.get_parameter("ry").set_expression('chop("lfo1", "out") * 360.0')
-
-	var sphere_s := _stress_add(SphereSOP.new(), "sphere_s1", col_x, 400)
-	sphere_s.get_parameter("radial_segments").set_value(32)
-	sphere_s.get_parameter("rings").set_value(16)
-	var grid_s := _stress_add(GridSOP.new(), "grid_s1", col_x, 600)
-	grid_s.get_parameter("size_x").set_value(10.0)
-	grid_s.get_parameter("size_z").set_value(10.0)
-	grid_s.get_parameter("rows").set_value(20)
-	grid_s.get_parameter("cols").set_value(20)
-
-	# Wire SOP chains
-	network.connect_nodes("box_s1", 0, "noise_s1", 0)
-	network.connect_nodes("noise_s1", 0, "subdiv_s1", 0)
-	network.connect_nodes("torus_s1", 0, "xform_s1", 0)
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# MAT nodes (4)
-	# ═══════════════════════════════════════════════════════════════════════
-	col_x = 2600
-	var mat1 := _stress_add(PbrMAT.new(), "mat_blue", col_x, 0)
-	mat1.get_parameter("albedo_color").set_value(Color(0.1, 0.3, 0.9))
-	mat1.get_parameter("metallic").set_value(0.8)
-	mat1.get_parameter("roughness").set_value(0.15)
-
-	var mat2 := _stress_add(PbrMAT.new(), "mat_red", col_x, 200)
-	mat2.get_parameter("albedo_color").set_value(Color(0.9, 0.15, 0.1))
-	mat2.get_parameter("emission_enabled").set_value(true)
-	mat2.get_parameter("emission_color").set_value(Color(0.9, 0.1, 0.05))
-	mat2.get_parameter("emission_energy").set_value(0.6)
-
-	var mat3 := _stress_add(PbrMAT.new(), "mat_green", col_x, 400)
-	mat3.get_parameter("albedo_color").set_value(Color(0.1, 0.8, 0.2))
-	mat3.get_parameter("roughness").set_value(0.9)
-
-	var mat4 := _stress_add(PbrMAT.new(), "mat_chrome", col_x, 600)
-	mat4.get_parameter("albedo_color").set_value(Color(0.85, 0.85, 0.9))
-	mat4.get_parameter("metallic").set_value(0.8)
-	mat4.get_parameter("roughness").set_value(0.15)
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# COMP nodes — 4 Geometry + Camera + 2 Lights + Merge (8)
-	# ═══════════════════════════════════════════════════════════════════════
-	col_x = 3000
-	var geo1 := _stress_add(GeometryCOMP.new(), "geo1", col_x, 0)
-	geo1.get_parameter("tx").set_value(-2.0)
-	geo1.get_parameter("ty").set_value(0.5)
-
-	var geo2 := _stress_add(GeometryCOMP.new(), "geo2", col_x, 200)
-	geo2.get_parameter("tx").set_value(0.0)
-
-	var geo3 := _stress_add(GeometryCOMP.new(), "geo3", col_x, 400)
-	geo3.get_parameter("tx").set_value(2.0)
-	geo3.get_parameter("ty").set_value(0.5)
-
-	var geo4 := _stress_add(GeometryCOMP.new(), "geo4", col_x, 600)
-	geo4.get_parameter("ty").set_value(-0.5)
-
-	# Wire SOP → Geo + MAT → Geo
-	network.connect_nodes("subdiv_s1", 0, "geo1", 0)   # subdivided box
-	network.connect_nodes("mat_blue", 0, "geo1", 1)
-	network.connect_nodes("xform_s1", 0, "geo2", 0)    # spinning torus
-	network.connect_nodes("mat_red", 0, "geo2", 1)
-	network.connect_nodes("sphere_s1", 0, "geo3", 0)   # sphere
-	network.connect_nodes("mat_green", 0, "geo3", 1)
-	network.connect_nodes("grid_s1", 0, "geo4", 0)     # ground plane
-	network.connect_nodes("mat_chrome", 0, "geo4", 1)
-
-	# Camera
-	var cam := _stress_add(CameraCOMP.new(), "cam_main", col_x, 800)
-	cam.get_parameter("tx").set_value(0.0)
-	cam.get_parameter("ty").set_value(3.0)
-	cam.get_parameter("tz").set_value(5.0)
-	cam.get_parameter("use_look_at").set_value(true)
-	cam.get_parameter("look_at_x").set_value(0.0)
-	cam.get_parameter("look_at_y").set_value(0.0)
-	cam.get_parameter("look_at_z").set_value(0.0)
-	cam.get_parameter("fov").set_value(55.0)
-
-	# Two lights for more interesting shading
-	var light1 := _stress_add(LightCOMP.new(), "light_dir", col_x, 1000)
-	light1.get_parameter("type").set_value(0)  # Directional
-	light1.get_parameter("rx").set_value(-45.0)
-	light1.get_parameter("ry").set_value(30.0)
-	light1.get_parameter("energy").set_value(1.0)
-	light1.get_parameter("shadows").set_value(true)
-
-	var light2 := _stress_add(LightCOMP.new(), "light_point", col_x, 1200)
-	light2.get_parameter("type").set_value(1)  # Omni
-	light2.get_parameter("tx").set_value(2.0)
-	light2.get_parameter("ty").set_value(3.0)
-	light2.get_parameter("tz").set_value(1.0)
-	light2.get_parameter("energy").set_value(0.8)
-	light2.get_parameter("color").set_value(Color(0.6, 0.8, 1.0))
-
-	# MergeCOMP
-	_stress_add(MergeCOMP.new(), "merge_scene", col_x + 400, 300)
-	network.connect_nodes("geo1", 0, "merge_scene", 0)
-	network.connect_nodes("geo2", 0, "merge_scene", 1)
-	network.connect_nodes("geo3", 0, "merge_scene", 2)
-	network.connect_nodes("geo4", 0, "merge_scene", 3)
-
-	# ═══════════════════════════════════════════════════════════════════════
-	# RenderTOP (1 node) — final output
-	# ═══════════════════════════════════════════════════════════════════════
-	var render := _stress_add(RenderTOP.new(), "render_main", col_x + 700, 300)
-	render.get_parameter("resolution").set_value(Vector2i(1280, 720))
-	render.get_parameter("bg_color").set_value(Color(0.06, 0.06, 0.08))
-	render.get_parameter("anti_aliasing").set_value(2)
-	render.get_parameter("ambient_energy").set_value(0.3)
-	network.connect_nodes("merge_scene", 0, "render_main", 0)
-	network.connect_nodes("cam_main", 0, "render_main", 1)
-	network.connect_nodes("light_dir", 0, "render_main", 2)
-	network.connect_nodes("light_point", 0, "render_main", 3)
-
-	# Use composite texture as a material texture on the box (TOP → Geo)
-	network.connect_nodes("comp_t1", 0, "geo1", 2)  # TOP texture input
-
-	print("[STRESS] Built %d nodes, %d connections" % [
-		network.get_node_count(), network.get_connection_count()])
-
-
-## Called each frame after cook — if we're in stress warmup, count down and print report.
-func _check_stress_report(_frame: int, _cook_time_ms: float) -> void:
-	if _stress_warmup_frames < 0:
-		return
-	_stress_warmup_frames -= 1
-	if _stress_warmup_frames > 0:
-		return
-
-	# Warmup complete — print the report
-	_stress_warmup_frames = -1
-	_print_stress_report()
-
-
-## Prints a per-node cook time report sorted by cost (descending).
-func _print_stress_report() -> void:
-	var node_count := network.get_node_count()
-	var conn_count := network.get_connection_count()
-
-	# Gather per-node stats
-	var entries: Array[Dictionary] = []
-	var total_ms := 0.0
-	for node_id in network.nodes:
-		var node: GNNode = network.nodes[node_id]
-		entries.append({
-			"id": node.id,
-			"type": node.node_type,
-			"family": GNFamily.get_family_name(node.family),
-			"cook_ms": node.cook_time_ms,
-			"dirty": node.dirty,
-		})
-		total_ms += node.cook_time_ms
-
-	# Sort descending by cook time
-	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		return a["cook_ms"] > b["cook_ms"])
-
-	# Per-family totals
-	var family_totals: Dictionary = {}
-	for e in entries:
-		var fam: String = e["family"]
-		family_totals[fam] = family_totals.get(fam, 0.0) + e["cook_ms"]
-
-	# Print report
-	print("")
-	print("╔══════════════════════════════════════════════════════════════════╗")
-	print("║         GONODES STRESS TEST REPORT — %d NODES                  ║" % node_count)
-	print("╠══════════════════════════════════════════════════════════════════╣")
-	print("║  Nodes: %d  |  Connections: %d  |  Frame cook: %.2fms" % [
-		node_count, conn_count, cook_engine.frame_cook_time_ms])
-	print("║  FPS:   %d  |  Total node cook: %.2fms" % [
-		Engine.get_frames_per_second(), total_ms])
-	print("╠══════════════════════════════════════════════════════════════════╣")
-	print("║  PER-FAMILY TOTALS:")
-	for fam_name in family_totals:
-		print("║    %-8s  %.3fms" % [fam_name, family_totals[fam_name]])
-	print("╠══════════════════════════════════════════════════════════════════╣")
-	print("║  TOP 15 MOST EXPENSIVE NODES:")
-	print("║  %-20s %-14s %-6s %s" % ["ID", "Type", "Family", "Cook (ms)"])
-	print("║  " + "—".repeat(58))
-	var show_count := mini(entries.size(), 15)
-	for i in range(show_count):
-		var e: Dictionary = entries[i]
-		print("║  %-20s %-14s %-6s %.3f" % [e["id"], e["type"], e["family"], e["cook_ms"]])
-	print("╠══════════════════════════════════════════════════════════════════╣")
-	if total_ms < 5.0:
-		print("║  VERDICT: ✅ EXCELLENT — well under 16ms budget (60 FPS)")
-	elif total_ms < 12.0:
-		print("║  VERDICT: ✅ GOOD — within 16ms budget (60 FPS)")
-	elif total_ms < 16.67:
-		print("║  VERDICT: ⚠️  BORDERLINE — near 16ms budget")
-	else:
-		print("║  VERDICT: ❌ OVER BUDGET — exceeds 16ms (%.1f FPS target)" % (1000.0 / total_ms))
-	print("╚══════════════════════════════════════════════════════════════════╝")
-	print("")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

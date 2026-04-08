@@ -152,6 +152,23 @@ Expression text is preserved across CONSTANT ↔ EXPRESSION mode toggles.
 The `GNParameter` stores `_expression_string` separately from `_value`.
 Only an explicit `reset_to_defaults()` clears the expression.
 
+### Parameter Row Layout
+
+Each parameter row (`gn_param_row.gd`) in Expression mode shows:
+
+- **Expression LineEdit** — stretch ratio 2.0, takes 2/3 of the row width.
+- **Resolved value label** — stretch ratio 1.0, `SIZE_EXPAND_FILL` with
+  `text_overrun_behavior = OVERRUN_TRIM_ELLIPSIS` to prevent long values
+  from blowing out the panel width.
+
+### Inspector Status Label
+
+`_status_label` in `gn_param_inspector.gd` uses `autowrap_mode =
+AUTOWRAP_WORD_SMART` so that long status strings (e.g., cook error
+messages) wrap within the panel instead of clipping or forcing a
+horizontal scrollbar.  The status is refreshed immediately on node
+selection via `_on_node_cooked`.
+
 
 ## Node Preview & Viewer System
 
@@ -525,6 +542,10 @@ and calls `get_connections_intersecting_with_rect(rect)`.  Tiny rectangles
 (< 4px in either dimension) are ignored to avoid accidental selection from
 simple clicks.
 
+`_box_select_origin` is cleared when a connection drag starts
+(`_on_connection_drag_started`) to prevent a stale origin from triggering
+a spurious box-select that would highlight nearby wires.
+
 ### Wire Deletion
 
 The **Delete** key is handled in `_gui_input` (fires before GraphEdit's
@@ -609,16 +630,17 @@ disconnects all its wires.  Implemented in `gn_graph_editor.gd`.
 
 | Constant | Value | Purpose |
 |----------|-------|---------|
-| `_SHAKE_REVERSAL_THRESHOLD` | 3 | Minimum direction reversals to trigger |
-| `_SHAKE_TIME_WINDOW` | 0.5s | Reversals must occur within this window |
-| `_SHAKE_MIN_SPEED` | 150.0 px/s | Minimum horizontal speed to count |
+| `_SHAKE_REVERSAL_THRESHOLD` | 5 | Minimum direction reversals to trigger |
+| `_SHAKE_TIME_WINDOW` | 0.35s | Reversals must occur within this window |
+| `_SHAKE_MIN_SPEED` | 300.0 px/s | Minimum speed on dominant axis to count |
 
 ### Detection
 
 In `_process()`, while `_node_drag_active`:
-1. Track horizontal velocity of the mouse.
-2. If speed ≥ `_SHAKE_MIN_SPEED` and direction reversed, increment
-   `_shake_reversals` and reset `_shake_timer`.
+1. Track velocity on the **dominant movement axis** (whichever of X/Y has
+   the larger cumulative displacement during the drag).
+2. If speed ≥ `_SHAKE_MIN_SPEED` on the dominant axis and direction
+   reversed, increment `_shake_reversals` and reset `_shake_timer`.
 3. When `_shake_reversals` ≥ `_SHAKE_REVERSAL_THRESHOLD` within the time
    window → trigger.
 
@@ -632,6 +654,69 @@ In `_process()`, while `_node_drag_active`:
 5. Emit `_show_toast("Shake disconnect: removed N wires")`.
 6. Full undo/redo: disconnect, reconnect, and toast are recorded in a
    single `UndoRedo` action.
+
+
+## Expression Reference Line Overlay — Implementation
+
+When a node's parameter expression references another node (e.g.,
+`chop("lfo1", "out") * 5.0`), a **dashed line** is drawn from the
+source node to the consumer node.  These lines visualise implicit
+expression dependencies that have no wire representation.
+
+### Scanning and Data Structures
+
+`_scan_expr_references()` runs whenever expression strings change. It
+uses two regexes: one extracts the full call text (e.g., `chop("lfo1",
+"out")`), and one extracts the referenced node ID.  Results are stored
+in:
+
+- `_expression_edges`: `Array` of `[source_id, consumer_id]` pairs used
+  for drawing and topo-sort inclusion.
+- `_expr_ref_details`: `Dictionary` mapping `"source_id→consumer_id"` to
+  an `Array[String]` of full call texts (for tooltip display).
+
+### Line Drawing
+
+Dashed lines are drawn in `_draw()`.  Each line runs from the
+**visible midpoint** of the source node to the visible midpoint of the
+consumer node, clipped to the viewport rect using `_clip_line_to_rect_exit`.
+Lines not intersecting the visible area are culled.
+
+### Directional Arrow
+
+A filled triangle arrow is drawn at the midpoint of the visible segment,
+pointing from source to consumer.  The arrow is **12 px in screen space**
+— its size is divided by the current zoom factor so it appears constant
+regardless of zoom level.
+
+### Hover Tooltip
+
+Hovering over a dashed line for **2 seconds** shows a tooltip displaying
+the expression call details (e.g., `chop("lfo1", "out")`).
+
+| Component | Detail |
+|-----------|--------|
+| `_expr_ref_tooltip` | `PanelContainer` with a `RichTextLabel` child |
+| `z_index` | 100 (renders above all nodes and wires) |
+| `autowrap_mode` | `AUTOWRAP_OFF` — tooltip grows to fit content |
+| `custom_minimum_size` | `Vector2(180, 0)` — minimum width |
+| Hit-test distance | `_EXPR_REF_HIT_DIST_SQ` — squared pixel distance from mouse to nearest point on the **visible** line segment |
+
+Timer logic is split into two methods:
+
+- **`_update_expr_ref_hover()`** — called from `_gui_input` on mouse
+  motion.  Performs hit-test against clipped line segments.  Resets
+  the timer if the hovered edge changes.
+- **`_tick_expr_ref_hover(delta)`** — called from `_process()`.
+  Accumulates time on the current hovered edge.  After
+  `_EXPR_REF_HOVER_DELAY` (2.0 s), shows the tooltip with the call
+  details from `_expr_ref_details`.
+
+### Helper
+
+`_point_to_segment_dist_sq(p, a, b)` — static utility returning the
+squared distance from a point to a line segment.  Used by the hover
+hit-test.
 
 
 ## Edge-Scroll During Node Drag — Implementation
@@ -653,6 +738,14 @@ with `PRESET_CENTER`, `grow_vertical = BOTH`, and `alignment = CENTER`.
 Toasts auto-fade via a `Tween` (opacity 1.0 → 0.0 over ~2s).
 
 Used by: shake-to-disconnect, paste operations, error feedback.
+
+### Centralized Logger Integration
+
+`GNLogger.toast_sink` is a `Callable` set by the graph editor on
+`_ready()`.  When any subsystem calls `GNLogger.warn()` or
+`GNLogger.error()`, the logger automatically forwards the message to
+`toast_sink` (if set), surfacing warnings and errors as transient toasts
+without requiring each callsite to know about the UI.
 
 
 ## Parameter Undo/Redo — Implementation

@@ -49,6 +49,11 @@ static var throttle_interval_frames: int = 0  # 0 = disabled
 ## Signature: func(level: Level, category: String, message: String) -> void
 static var log_sink: Callable = Callable()
 
+## Toast sink — when set, WARN and ERROR messages are forwarded for display
+## as transient toast notifications in the editor UI.
+## Signature: func(level: Level, message: String) -> void
+static var toast_sink: Callable = Callable()
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Public API
@@ -111,6 +116,10 @@ static func _log(msg_level: Level, category: String, message: String) -> void:
 	# Forward to external sink (e.g. editor log panel)
 	if log_sink.is_valid():
 		log_sink.call(msg_level, category, message)
+
+	# Forward WARN/ERROR to toast sink (editor overlay notifications)
+	if toast_sink.is_valid() and msg_level >= Level.WARN:
+		toast_sink.call(msg_level, message)
 
 
 static func _build_prefix(msg_level: Level, category: String) -> String:

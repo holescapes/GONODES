@@ -112,7 +112,10 @@ var is_sink: bool = false
 ## Whether this node is in the active cooking chain (feeds a live sink).
 ## Set each frame by the cook engine. Inactive nodes keep their cached_output
 ## but skip cooking to save GPU/CPU time.
-var is_active: bool = true
+## Defaults to false — the cook engine stamps is_active on the first frame
+## when _active_set_dirty triggers.  This prevents the debug overlay from
+## showing all nodes as active before the first cook cycle.
+var is_active: bool = false
 
 # ─── Node Status (per-cook warnings / errors) ─────────────────────────────────
 
@@ -688,10 +691,15 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 		cached_output = result
 		cook_valid = true
 	else:
-		# Clear stale cached output so downstream nodes don't read old data
 		cached_output = null
-		cook_valid = false
-		GNLogger.debug("GNNode", "'%s' cook produced null output" % id)
+		# Null is valid for sinks and UI nodes — they produce side-effects,
+		# not GNData.  Only flag as invalid if the node has output ports
+		# that downstream nodes expect data from.
+		if is_sink or family == GNFamily.Type.UI or output_ports.is_empty():
+			cook_valid = true
+		else:
+			cook_valid = false
+			GNLogger.debug("GNNode", "'%s' cook produced null output" % id)
 
 	clear_dirty()
 	node_cooked.emit(id)

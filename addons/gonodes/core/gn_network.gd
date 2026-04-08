@@ -570,6 +570,16 @@ func _compute_topological_order() -> Array[GNNode]:
 			adjacency[conn.from_node].append(conn.to_node)
 			in_degree[conn.to_node] += 1
 
+	# Expression reference edges — if node B reads node A via chop()/par()/op(),
+	# A must cook before B so B's expression sees fresh data.
+	for expr_edge in _expression_edges:
+		var from_id: String = expr_edge[0]
+		var to_id: String = expr_edge[1]
+		if nodes.has(from_id) and nodes.has(to_id):
+			if to_id not in adjacency[from_id]:
+				adjacency[from_id].append(to_id)
+				in_degree[to_id] += 1
+
 	# Remote (wireless) dependency edges — operators like SelectTOP and
 	# ParameterCHOP declare dependencies on nodes they reference by name.
 	# The referenced node must cook before the referencing node.
