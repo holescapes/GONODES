@@ -1,8 +1,9 @@
 class_name GNGpuContext
 extends RefCounted
 ## Singleton providing a shared RenderingDevice for all GPU-compute operators
-## (POP and VOL families).  Manages shader compilation, pipeline caching,
-## and a 3D texture pool for ping-pong VOL operations.
+## (POP, VOL, TOP families).  Wraps the main RenderingDevice from
+## RenderingServer.get_rendering_device() so all GPU resources live in a
+## single context — zero-copy texture sharing, no readback overhead.
 ##
 ## Usage:
 ##   var ctx := GNGpuContext.get_context()
@@ -26,7 +27,8 @@ static func get_context() -> GNGpuContext:
 # State
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## The shared local RenderingDevice.  All POP/VOL operators use this.
+## The shared RenderingDevice — the main renderer's device.
+## All POP/VOL/TOP operators use this.
 var rd: RenderingDevice = null
 
 ## Compiled shader cache: shader_source_path → RID
@@ -50,10 +52,9 @@ static var _compute_available: int = -1  # -1 = unchecked, 0 = no, 1 = yes
 
 static func is_compute_available() -> bool:
 	if _compute_available < 0:
-		var rd := RenderingServer.create_local_rendering_device()
+		var rd := RenderingServer.get_rendering_device()
 		if rd != null:
 			_compute_available = 1
-			rd.free()
 		else:
 			_compute_available = 0
 	return _compute_available == 1
@@ -104,9 +105,9 @@ static func are_threads_available() -> bool:
 
 
 func _init_rd() -> void:
-	rd = RenderingServer.create_local_rendering_device()
+	rd = RenderingServer.get_rendering_device()
 	if rd == null:
-		push_error("GNGpuContext: Failed to create local RenderingDevice — GPU compute unavailable")
+		push_error("GNGpuContext: RenderingDevice unavailable — GPU compute disabled (Compatibility renderer?)")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -386,6 +387,6 @@ func shutdown() -> void:
 		for rid in _texture_pool[key]:
 			rd.free_rid(rid)
 	_texture_pool.clear()
-	rd.free()
+	# Do NOT call rd.free() — we don't own the main RenderingDevice.
 	rd = null
 	_instance = null

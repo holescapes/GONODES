@@ -109,7 +109,8 @@ var _sampler_rid: RID = RID()
 var _input_tex_rids: Array[RID] = []
 var _input_tex_sizes: Array[Vector2i] = []
 var _input_uniform_set: RID = RID()
-var _output_image_textures: Array[ImageTexture] = []
+var _placeholder_tex_rid: RID = RID()
+var _output_tex2d_rds: Array[Texture2DRD] = []
 var _vertex_buffer_rid: RID = RID()
 var _vertex_array_rid: RID = RID()
 var _cached_clear_colors: PackedColorArray = PackedColorArray()
@@ -248,8 +249,9 @@ func _try_init_mrt() -> void:
 	if _rd != null:
 		_use_mrt = true
 		return
-	_rd = RenderingServer.create_local_rendering_device()
-	if _rd != null:
+	var ctx := GNGpuContext.get_context()
+	if ctx.rd != null:
+		_rd = ctx.rd
 		_use_mrt = true
 		_cached_tex_data = GNTextureData.new()
 		var ss := RDSamplerState.new()
@@ -259,7 +261,7 @@ func _try_init_mrt() -> void:
 		ss.repeat_v = RenderingDevice.SAMPLER_REPEAT_MODE_CLAMP_TO_EDGE
 		_sampler_rid = _rd.sampler_create(ss)
 		_create_fullscreen_triangle()
-		GNLogger.info("GLSLMultiTOP", "'%s' -- using single-pass MRT (RenderingDevice)" % id)
+		GNLogger.info("GLSLMultiTOP", "'%s' -- using single-pass MRT (shared RenderingDevice)" % id)
 	else:
 		_use_mrt = false
 		GNLogger.info("GLSLMultiTOP", "'%s' -- using multi-pass fallback (Compatibility renderer)" % id)
@@ -548,6 +550,7 @@ func _ensure_mrt_framebuffer(size: Vector2i) -> void:
 		tf.texture_type = RenderingDevice.TEXTURE_TYPE_2D
 		tf.usage_bits = (
 			RenderingDevice.TEXTURE_USAGE_COLOR_ATTACHMENT_BIT |
+			RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
 			RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT
 		)
 		var rid := _rd.texture_create(tf, RDTextureView.new())
@@ -557,10 +560,10 @@ func _ensure_mrt_framebuffer(size: Vector2i) -> void:
 	_framebuffer_rid = _rd.framebuffer_create(tex_rids)
 	_last_mrt_size = size
 
-	while _output_image_textures.size() < _output_count:
-		_output_image_textures.append(null)
-	while _output_image_textures.size() > _output_count:
-		_output_image_textures.pop_back()
+	while _output_tex2d_rds.size() < _output_count:
+		_output_tex2d_rds.append(null)
+	while _output_tex2d_rds.size() > _output_count:
+		_output_tex2d_rds.pop_back()
 
 	while _output_textures.size() < _output_count:
 		_output_textures.append(GNTextureData.new())
@@ -638,18 +641,15 @@ func _cook_mrt(inputs: Array[GNData], res: Vector2i) -> GNData:
 
 	_rd.draw_list_draw(dl, false, 1)
 	_rd.draw_list_end()
-	_rd.submit()
-	_rd.sync()
 
+	# Wrap output RD textures as Texture2DRD — zero-copy, no readback.
 	for i in range(_output_count):
-		var bytes := _rd.texture_get_data(_output_tex_rids[i], 0)
-		var img := Image.create_from_data(res.x, res.y, false, Image.FORMAT_RGBA8, bytes)
-		var tex := _output_image_textures[i]
-		if tex == null or tex.get_width() != res.x or tex.get_height() != res.y:
-			_output_image_textures[i] = ImageTexture.create_from_image(img)
-		else:
-			tex.update(img)
-		_output_textures[i].texture = _output_image_textures[i]
+		var t2d := _output_tex2d_rds[i]
+		if t2d == null:
+			t2d = Texture2DRD.new()
+			_output_tex2d_rds[i] = t2d
+		t2d.texture_rd_rid = _output_tex_rids[i]
+		_output_textures[i].texture = t2d
 		_output_textures[i].resolution = res
 
 	_cached_tex_data = _output_textures[0]
@@ -685,80 +685,72 @@ func _update_mrt_input_textures(inputs: Array[GNData]) -> void:
 	var tex_count := input_ports.size()
 	if tex_count == 0:
 		return
-	var needs_rebuild := _input_tex_rids.size() != tex_count
-	if not needs_rebuild:
-		for i in range(tex_count):
-			var needed := _mrt_input_size(inputs, i)
-			if i >= _input_tex_sizes.size() or _input_tex_sizes[i] != needed:
-				needs_rebuild = true
-				break
-	if needs_rebuild:
-		_free_mrt_input_textures()
-		_create_mrt_input_textures(inputs)
-	else:
-		for i in range(tex_count):
-			if i >= _input_tex_rids.size():
-				break
-			var img := _get_input_image(inputs, i)
-			img.convert(Image.FORMAT_RGBA8)
-			_rd.texture_update(_input_tex_rids[i], 0, img.get_data())
 
+	# Free previous uniform set (references may have changed).
+	# The set may have been auto-invalidated if upstream textures were freed.
+	if _input_uniform_set.is_valid() and _rd.uniform_set_is_valid(_input_uniform_set):
+		_rd.free_rid(_input_uniform_set)
+	_input_uniform_set = RID()
 
-func _mrt_input_size(inputs: Array[GNData], slot: int) -> Vector2i:
-	if slot < inputs.size() and inputs[slot] is GNTextureData:
-		var td: GNTextureData = inputs[slot] as GNTextureData
-		if td.texture != null:
-			var img := td.texture.get_image()
-			if img != null:
-				return Vector2i(img.get_width(), img.get_height())
-	return Vector2i(1, 1)
-
-
-func _create_mrt_input_textures(inputs: Array[GNData]) -> void:
 	var uniforms: Array[RDUniform] = []
-	for i in range(input_ports.size()):
-		var img := _get_input_image(inputs, i)
-		img.convert(Image.FORMAT_RGBA8)
-		var tf := RDTextureFormat.new()
-		tf.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
-		tf.width = img.get_width()
-		tf.height = img.get_height()
-		tf.depth = 1
-		tf.array_layers = 1
-		tf.mipmaps = 1
-		tf.texture_type = RenderingDevice.TEXTURE_TYPE_2D
-		tf.usage_bits = (
-			RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
-			RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
-		)
-		var rid := _rd.texture_create(tf, RDTextureView.new(), [img.get_data()])
-		_input_tex_rids.append(rid)
-		_input_tex_sizes.append(Vector2i(img.get_width(), img.get_height()))
+	for i in range(tex_count):
+		var rd_rid := _get_input_rd_rid(inputs, i)
 		var u := RDUniform.new()
 		u.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
 		u.binding = i
 		u.add_id(_sampler_rid)
-		u.add_id(rid)
+		u.add_id(rd_rid)
 		uniforms.append(u)
 	if uniforms.size() > 0 and _shader_rid.is_valid():
 		_input_uniform_set = _rd.uniform_set_create(uniforms, _shader_rid, 0)
 
 
-func _get_input_image(inputs: Array[GNData], slot: int) -> Image:
+## Returns the RD texture RID for an input slot, zero-copy from the main RD.
+## Falls back to a 1×1 white placeholder for unconnected/null inputs.
+func _get_input_rd_rid(inputs: Array[GNData], slot: int) -> RID:
 	if slot < inputs.size() and inputs[slot] is GNTextureData:
 		var td: GNTextureData = inputs[slot] as GNTextureData
 		if td.texture != null:
-			var img := td.texture.get_image()
-			if img != null:
-				return img
-	var placeholder := Image.create(1, 1, false, Image.FORMAT_RGBA8)
-	placeholder.fill(Color.WHITE)
-	return placeholder
+			var rs_rid := td.texture.get_rid()
+			if rs_rid.is_valid():
+				var rd_rid := RenderingServer.texture_get_rd_texture(rs_rid)
+				if rd_rid.is_valid():
+					return rd_rid
+	return _ensure_placeholder_texture()
+
+
+func _ensure_placeholder_texture() -> RID:
+	if _placeholder_tex_rid.is_valid():
+		return _placeholder_tex_rid
+	var tf := RDTextureFormat.new()
+	tf.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
+	tf.width = 1
+	tf.height = 1
+	tf.depth = 1
+	tf.array_layers = 1
+	tf.mipmaps = 1
+	tf.texture_type = RenderingDevice.TEXTURE_TYPE_2D
+	tf.usage_bits = (
+		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
+		RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
+	)
+	var white := PackedByteArray([255, 255, 255, 255])
+	_placeholder_tex_rid = _rd.texture_create(tf, RDTextureView.new(), [white])
+	return _placeholder_tex_rid
+
+
+func _mrt_input_size(inputs: Array[GNData], slot: int) -> Vector2i:
+	if slot < inputs.size() and inputs[slot] is GNTextureData:
+		var td: GNTextureData = inputs[slot] as GNTextureData
+		if td.resolution != Vector2i.ZERO:
+			return td.resolution
+	return Vector2i(1, 1)
 
 
 func _free_mrt_shader() -> void:
 	if _rd == null:
 		return
+	_free_mrt_input_textures()
 	_free_mrt_framebuffer()
 	if _pipeline_rid.is_valid():
 		_rd.free_rid(_pipeline_rid)
@@ -771,6 +763,11 @@ func _free_mrt_shader() -> void:
 func _free_mrt_framebuffer() -> void:
 	if _rd == null:
 		return
+	# Detach Texture2DRD wrappers before freeing the underlying RD textures,
+	# otherwise Texture2DRD tries to free an already-freed RID internally.
+	for t2d in _output_tex2d_rds:
+		if t2d != null:
+			t2d.texture_rd_rid = RID()
 	if _framebuffer_rid.is_valid():
 		_rd.free_rid(_framebuffer_rid)
 		_framebuffer_rid = RID()
@@ -787,14 +784,15 @@ func _free_mrt_framebuffer() -> void:
 func _free_mrt_input_textures() -> void:
 	if _rd == null:
 		return
-	if _input_uniform_set.is_valid():
+	if _input_uniform_set.is_valid() and _rd.uniform_set_is_valid(_input_uniform_set):
 		_rd.free_rid(_input_uniform_set)
-		_input_uniform_set = RID()
-	for rid in _input_tex_rids:
-		if rid.is_valid():
-			_rd.free_rid(rid)
+	_input_uniform_set = RID()
+	# Input RIDs are borrowed from upstream textures — do NOT free them.
 	_input_tex_rids.clear()
 	_input_tex_sizes.clear()
+	if _placeholder_tex_rid.is_valid():
+		_rd.free_rid(_placeholder_tex_rid)
+		_placeholder_tex_rid = RID()
 
 
 func _cleanup_mrt() -> void:
@@ -809,7 +807,7 @@ func _cleanup_mrt() -> void:
 		_rd.free_rid(_vertex_buffer_rid)
 	if _sampler_rid.is_valid():
 		_rd.free_rid(_sampler_rid)
-	_rd.free()
+	# Do NOT call _rd.free() — we don't own the shared RenderingDevice.
 	_rd = null
 
 
@@ -1040,8 +1038,10 @@ func _rebuild_uniform_params(code: String) -> void:
 				param.value = old["value"]
 				param.resolved_value = old["value"]
 		add_parameter(param)
-		param.value_changed.connect(_on_parameter_changed)
-		param.mode_changed.connect(_on_parameter_mode_changed)
+		if not param.value_changed.is_connected(_on_parameter_changed):
+			param.value_changed.connect(_on_parameter_changed)
+		if not param.mode_changed.is_connected(_on_parameter_mode_changed):
+			param.mode_changed.connect(_on_parameter_mode_changed)
 		_dynamic_param_names.append(ui.uniform_name)
 
 	GNLogger.info("GLSLMultiTOP", "'%s' dynamic params -> %s" % [id, str(_dynamic_param_names)])

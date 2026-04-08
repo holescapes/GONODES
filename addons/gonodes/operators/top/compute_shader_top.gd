@@ -88,26 +88,27 @@ var _rd: RenderingDevice = null
 var _shader_rid: RID = RID()
 var _pipeline_rid: RID = RID()
 
-## Output storage texture on the local RD.
+## Output storage texture on the shared RD.
 var _output_tex_rid: RID = RID()
 var _output_uniform_set: RID = RID()
 
 ## Reusable linear-clamp sampler for all input textures.
 var _sampler_rid: RID = RID()
 
-## Per-input-slot texture RIDs (recreated when input dimensions change).
+## Per-input-slot RD texture RIDs (borrowed from upstream, not owned).
 var _input_tex_rids: Array[RID] = []
 var _input_tex_sizes: Array[Vector2i] = []
 var _input_uniform_set: RID = RID()
+var _placeholder_tex_rid: RID = RID()
 
-## CPU-side ImageTexture used to feed _cached_tex_data after readback.
-var _output_image_texture: ImageTexture = null
+## Texture2DRD wrapper for zero-copy display of the output texture.
+var _output_tex2d_rd: Texture2DRD = null
 
 ## Last successfully compiled code (avoids redundant recompiles).
 var _last_compiled_code: String = ""
 var _shader_ok: bool = false
 
-## Current output texture size on the local RD.
+## Current output texture size on the shared RD.
 var _last_output_size: Vector2i = Vector2i.ZERO
 
 ## All parsed push-constant fields in declaration order (reserved + user).
@@ -237,18 +238,13 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_rd.compute_list_set_push_constant(cl, push_bytes, push_bytes.size())
 	_rd.compute_list_dispatch(cl, groups_x, groups_y, 1)
 	_rd.compute_list_end()
-	_rd.submit()
-	_rd.sync()
 
-	# ── Read back output → ImageTexture ──
-	var output_bytes := _rd.texture_get_data(_output_tex_rid, 0)
-	var img := Image.create_from_data(res.x, res.y, false, Image.FORMAT_RGBA8, output_bytes)
-	if _output_image_texture == null:
-		_output_image_texture = ImageTexture.create_from_image(img)
-	else:
-		_output_image_texture.update(img)
+	# Wrap output RD texture as Texture2DRD — zero-copy, no readback.
+	if _output_tex2d_rd == null:
+		_output_tex2d_rd = Texture2DRD.new()
+	_output_tex2d_rd.texture_rd_rid = _output_tex_rid
 
-	_cached_tex_data.texture = _output_image_texture
+	_cached_tex_data.texture = _output_tex2d_rd
 	_cached_tex_data.resolution = res
 	_cached_tex_data.valid = true
 	_cached_tex_data.timestamp = Time.get_ticks_msec()
@@ -262,11 +258,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 func _ensure_rd() -> void:
 	if _rd != null:
 		return
-	_rd = RenderingServer.create_local_rendering_device()
-	if _rd == null:
+	var ctx := GNGpuContext.get_context()
+	if ctx.rd == null:
 		GNLogger.error("ComputeShaderTOP",
-			"'%s' — failed to create local RenderingDevice" % id)
+			"'%s' — RenderingDevice unavailable (Compatibility renderer?)" % id)
 		return
+	_rd = ctx.rd
 	_cached_tex_data = GNTextureData.new()
 
 	# Create a reusable sampler for input textures.
@@ -282,14 +279,18 @@ func _cleanup_rd() -> void:
 	if _rd == null:
 		return
 	_free_input_textures()
-	if _output_uniform_set.is_valid():
+	if _output_uniform_set.is_valid() and _rd.uniform_set_is_valid(_output_uniform_set):
 		_rd.free_rid(_output_uniform_set)
+	_output_uniform_set = RID()
+	# Detach Texture2DRD before freeing the RD texture.
+	if _output_tex2d_rd != null:
+		_output_tex2d_rd.texture_rd_rid = RID()
 	if _output_tex_rid.is_valid():
 		_rd.free_rid(_output_tex_rid)
 	_free_shader_resources()
 	if _sampler_rid.is_valid():
 		_rd.free_rid(_sampler_rid)
-	_rd.free()
+	# Do NOT call _rd.free() — we don't own the shared RenderingDevice.
 	_rd = null
 
 
@@ -297,9 +298,10 @@ func _free_shader_resources() -> void:
 	if _rd == null:
 		return
 	# Invalidate uniform sets that reference the old shader.
-	if _output_uniform_set.is_valid():
+	# The set may have been auto-invalidated during shutdown.
+	if _output_uniform_set.is_valid() and _rd.uniform_set_is_valid(_output_uniform_set):
 		_rd.free_rid(_output_uniform_set)
-		_output_uniform_set = RID()
+	_output_uniform_set = RID()
 	_free_input_textures()
 	if _pipeline_rid.is_valid():
 		_rd.free_rid(_pipeline_rid)
@@ -313,14 +315,15 @@ func _free_shader_resources() -> void:
 func _free_input_textures() -> void:
 	if _rd == null:
 		return
-	if _input_uniform_set.is_valid():
+	if _input_uniform_set.is_valid() and _rd.uniform_set_is_valid(_input_uniform_set):
 		_rd.free_rid(_input_uniform_set)
-		_input_uniform_set = RID()
-	for rid in _input_tex_rids:
-		if rid.is_valid():
-			_rd.free_rid(rid)
+	_input_uniform_set = RID()
+	# Input RIDs are borrowed from upstream textures — do NOT free them.
 	_input_tex_rids.clear()
 	_input_tex_sizes.clear()
+	if _placeholder_tex_rid.is_valid():
+		_rd.free_rid(_placeholder_tex_rid)
+		_placeholder_tex_rid = RID()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -401,6 +404,9 @@ func _ensure_output_texture(size: Vector2i) -> void:
 	if _output_uniform_set.is_valid():
 		_rd.free_rid(_output_uniform_set)
 		_output_uniform_set = RID()
+	# Detach Texture2DRD before freeing the RD texture it references.
+	if _output_tex2d_rd != null:
+		_output_tex2d_rd.texture_rd_rid = RID()
 	if _output_tex_rid.is_valid():
 		_rd.free_rid(_output_tex_rid)
 		_output_tex_rid = RID()
@@ -415,6 +421,7 @@ func _ensure_output_texture(size: Vector2i) -> void:
 	tf.texture_type = RenderingDevice.TEXTURE_TYPE_2D
 	tf.usage_bits = (
 		RenderingDevice.TEXTURE_USAGE_STORAGE_BIT |
+		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
 		RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT
 	)
 
@@ -438,94 +445,63 @@ func _update_input_textures(inputs: Array[GNData]) -> void:
 	if _tex_input_count == 0:
 		return
 
-	# Check whether any input changed size (requires texture + uniform-set rebuild).
-	var needs_rebuild := _input_tex_rids.size() != _tex_input_count
-	if not needs_rebuild:
-		for i in range(_tex_input_count):
-			var needed_size := _input_size_for(inputs, i)
-			if i >= _input_tex_sizes.size() or _input_tex_sizes[i] != needed_size:
-				needs_rebuild = true
-				break
+	# Free previous uniform set (references may have changed).
+	if _input_uniform_set.is_valid() and _rd.uniform_set_is_valid(_input_uniform_set):
+		_rd.free_rid(_input_uniform_set)
+	_input_uniform_set = RID()
 
-	if needs_rebuild:
-		_free_input_textures()
-		_create_input_textures(inputs)
-	else:
-		# Sizes match — just update the pixel data in-place.
-		_upload_input_data(inputs)
+	var uniforms: Array[RDUniform] = []
+	for i in range(_tex_input_count):
+		var rd_rid := _get_input_rd_rid(inputs, i)
+		var u := RDUniform.new()
+		u.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+		u.binding = i
+		u.add_id(_sampler_rid)
+		u.add_id(rd_rid)
+		uniforms.append(u)
+	if uniforms.size() > 0:
+		_input_uniform_set = _rd.uniform_set_create(uniforms, _shader_rid, 1)
+
+
+## Returns the RD texture RID for an input slot, zero-copy from the main RD.
+func _get_input_rd_rid(inputs: Array[GNData], slot: int) -> RID:
+	if slot < inputs.size() and inputs[slot] is GNTextureData:
+		var td: GNTextureData = inputs[slot] as GNTextureData
+		if td.texture != null:
+			var rs_rid := td.texture.get_rid()
+			if rs_rid.is_valid():
+				var rd_rid := RenderingServer.texture_get_rd_texture(rs_rid)
+				if rd_rid.is_valid():
+					return rd_rid
+	return _ensure_placeholder_texture()
+
+
+func _ensure_placeholder_texture() -> RID:
+	if _placeholder_tex_rid.is_valid():
+		return _placeholder_tex_rid
+	var tf := RDTextureFormat.new()
+	tf.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
+	tf.width = 1
+	tf.height = 1
+	tf.depth = 1
+	tf.array_layers = 1
+	tf.mipmaps = 1
+	tf.texture_type = RenderingDevice.TEXTURE_TYPE_2D
+	tf.usage_bits = (
+		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
+		RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
+	)
+	var white := PackedByteArray([255, 255, 255, 255])
+	_placeholder_tex_rid = _rd.texture_create(tf, RDTextureView.new(), [white])
+	return _placeholder_tex_rid
 
 
 func _input_size_for(inputs: Array[GNData], slot: int) -> Vector2i:
 	if slot < inputs.size() and inputs[slot] is GNTextureData:
 		var td: GNTextureData = inputs[slot] as GNTextureData
-		if td.texture != null:
-			var img := td.texture.get_image()
-			if img != null:
-				return Vector2i(img.get_width(), img.get_height())
-	return Vector2i(1, 1)  # placeholder
-
-
-func _create_input_textures(inputs: Array[GNData]) -> void:
-	var uniforms: Array[RDUniform] = []
-
-	for i in range(_tex_input_count):
-		var img := _get_input_image(inputs, i)
-		img.convert(Image.FORMAT_RGBA8)
-
-		var tf := RDTextureFormat.new()
-		tf.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
-		tf.width = img.get_width()
-		tf.height = img.get_height()
-		tf.depth = 1
-		tf.array_layers = 1
-		tf.mipmaps = 1
-		tf.texture_type = RenderingDevice.TEXTURE_TYPE_2D
-		tf.usage_bits = (
-			RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
-			RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
-		)
-
-		var tex_rid := _rd.texture_create(tf, RDTextureView.new(), [img.get_data()])
-		_input_tex_rids.append(tex_rid)
-		_input_tex_sizes.append(Vector2i(img.get_width(), img.get_height()))
-
-		var u := RDUniform.new()
-		u.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-		u.binding = i
-		u.add_id(_sampler_rid)
-		u.add_id(tex_rid)
-		uniforms.append(u)
-
-	if uniforms.size() > 0:
-		_input_uniform_set = _rd.uniform_set_create(uniforms, _shader_rid, 1)
-
-
-func _upload_input_data(inputs: Array[GNData]) -> void:
-	for i in range(_tex_input_count):
-		if i >= _input_tex_rids.size():
-			break
-		var img := _get_input_image(inputs, i)
-		img.convert(Image.FORMAT_RGBA8)
-		_rd.texture_update(_input_tex_rid_at(i), 0, img.get_data())
-
-
-func _input_tex_rid_at(idx: int) -> RID:
-	if idx < _input_tex_rids.size():
-		return _input_tex_rids[idx]
-	return RID()
-
-
-## Returns an Image for the given input slot, or a 1×1 white placeholder.
-func _get_input_image(inputs: Array[GNData], slot: int) -> Image:
-	if slot < inputs.size() and inputs[slot] is GNTextureData:
-		var td: GNTextureData = inputs[slot] as GNTextureData
-		if td.texture != null:
-			var img := td.texture.get_image()
-			if img != null:
-				return img
-	var placeholder := Image.create(1, 1, false, Image.FORMAT_RGBA8)
-	placeholder.fill(Color.WHITE)
-	return placeholder
+		if td.resolution != Vector2i.ZERO:
+			return td.resolution
+	return Vector2i(1, 1)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

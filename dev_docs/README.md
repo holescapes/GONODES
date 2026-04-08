@@ -25,6 +25,7 @@ This folder contains architecture references, build internals, testing infrastru
 | [TESTING.md](TESTING.md) | Contributors | Test framework architecture, running tests, writing new tests, coverage matrix, bugs found by tests. 1,355 automated tests across 31 files covering all 13 families, the cook engine, expressions, network serialization, and extension operators |
 | [NATIVE_AUDIT.md](NATIVE_AUDIT.md) | Core developers | C++ migration audit — every operator classified by CPU intensity (HOT/WARM/COLD), Phase 1–9 migration tracking, 103 native C++ classes, extension C++ status |
 | [SCRIPTS.md](SCRIPTS.md) | **All contributors** | **Helper scripts reference** — registry generators (`scan_operators.py`, `build_port_registry.py`), help patch generator, operator verifier, patch validator, coverage checker, rename tool, build scripts. Includes the required script sequence for adding a new operator |
+| [GPU_ARCHITECTURE.md](GPU_ARCHITECTURE.md) | **Core developers** | **GPU architecture decision** — single shared RenderingDevice (main RD) for all operators, Texture2DRD zero-copy output, migration checklist from local RDs, rationale, risks |
 
 
 ## Relationship to Help System
