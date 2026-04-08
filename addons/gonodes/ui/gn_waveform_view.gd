@@ -183,6 +183,7 @@ func _draw() -> void:
 	# Grid lines (fixed to current view range)
 	if show_grid:
 		_draw_grid(draw_x, draw_y, draw_w, draw_h, y_min, y_max, y_range)
+		_draw_x_grid(draw_x, draw_y, draw_w, draw_h, x_start, x_end)
 
 	# Draw each channel
 	var ch_index: int = 0
@@ -334,6 +335,32 @@ func _format_value(val: float) -> String:
 	if absf(val) >= 1.0:
 		return "%.1f" % val
 	return "%.3f" % val
+
+
+## Draws vertical grid lines with sample index labels along the X axis.
+func _draw_x_grid(x: float, y: float, w: float, h: float,
+		x_start: float, x_end: float) -> void:
+	var font := ThemeDB.fallback_font
+	var x_span: float = x_end - x_start
+	if x_span < 1.0:
+		return
+
+	var raw_step := x_span / 6.0
+	var step := _snap_to_nice(raw_step)
+	if step < 1.0:
+		step = 1.0
+
+	var first_val := ceilf(x_start / step) * step
+	var val := first_val
+	while val <= x_end:
+		var frac: float = (val - x_start) / x_span
+		var gx: float = x + frac * w
+		draw_line(Vector2(gx, y), Vector2(gx, y + h), grid_color, 1.0)
+		if font != null:
+			var label := "%d" % int(val)
+			draw_string(font, Vector2(gx + 2, y + h - 2),
+				label, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, grid_color.lightened(0.3))
+		val += step
 
 
 ## Updates the channel data and triggers a redraw.

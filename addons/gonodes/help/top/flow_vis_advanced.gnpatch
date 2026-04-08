@@ -1,0 +1,112 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_circle": {
+            "type": "CircleTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "radius": {
+                    "value": 0.3
+                }
+            }
+        },
+        "flow_vis1": {
+            "type": "FlowVisTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "num_steps": {
+                    "value": 26
+                },
+                "step_size": {
+                    "value": 0.008
+                },
+                "noise_scale": {
+                    "value": 160.0
+                },
+                "color_mode": {
+                    "value": 2
+                },
+                "contrast": {
+                    "value": 3.6
+                },
+                "brightness": {
+                    "value": 2.0
+                },
+                "saturation": {
+                    "value": 1.5
+                },
+                "speed_tint": {
+                    "value": 3.0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_circle",
+            "from_port": 0,
+            "to": "flow_vis1",
+            "to_port": 0
+        },
+        {
+            "from": "flow_vis1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "FlowVisTOP \u2014 Advanced\n\nMore complex configuration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

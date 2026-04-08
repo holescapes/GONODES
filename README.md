@@ -19,7 +19,7 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**545 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
+**547 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families

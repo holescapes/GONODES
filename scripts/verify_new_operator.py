@@ -348,6 +348,8 @@ def verify_operator(class_name, verbose=True):
 
     # 2. Extract metadata from .gd
     node_type, family = extract_info(gd_text)
+    if not family:
+        family = extract_family_from_extends(gd_text)
     if node_type:
         if verbose:
             print(f"  {PASS} node_type = \"{node_type}\"")

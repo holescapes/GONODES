@@ -224,15 +224,13 @@ func _build_slots() -> void:
 			left_label.text = gn_node.node_type
 			left_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-		# Port tooltips — build combined tooltip for the row
-		var port_tooltips: PackedStringArray = []
+		# Port tooltips — set per-label so hovering a port only shows that port's info
 		if has_left and not gn_node.input_ports[i].description.is_empty():
-			port_tooltips.append("%s: %s" % [left_name, gn_node.input_ports[i].description])
+			left_label.tooltip_text = "%s: %s" % [left_name, gn_node.input_ports[i].description]
+			left_label.mouse_filter = Control.MOUSE_FILTER_PASS
 		if has_right and not gn_node.output_ports[i].description.is_empty():
-			port_tooltips.append("%s: %s" % [right_name, gn_node.output_ports[i].description])
-		if port_tooltips.size() > 0:
-			row_container.tooltip_text = "\n".join(port_tooltips)
-			row_container.mouse_filter = Control.MOUSE_FILTER_PASS
+			right_label.tooltip_text = "%s: %s" % [right_name, gn_node.output_ports[i].description]
+			right_label.mouse_filter = Control.MOUSE_FILTER_PASS
 
 		add_child(row_container)
 

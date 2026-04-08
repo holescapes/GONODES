@@ -1,0 +1,110 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "curl_noise1": {
+            "type": "CurlNoiseTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 256
+                    }
+                },
+                "scale": {
+                    "value": 2.0
+                },
+                "time_offset": {
+                    "value": 0.5
+                },
+                "seed": {
+                    "value": 0
+                },
+                "octaves": {
+                    "value": 2
+                },
+                "lacunarity": {
+                    "value": 1.0
+                },
+                "gain": {
+                    "value": 0.25
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "curl_noise1",
+            "to_port": 0
+        },
+        {
+            "from": "curl_noise1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CurlNoiseTOP \u2014 Parameters\n\nShowcases: resolution, scale, time_offset.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

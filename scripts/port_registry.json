@@ -5419,6 +5419,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/cube_map_top.gd"
   },
+  "CurlNoiseTOP": {
+    "class_name": "CurlNoiseTOP",
+    "family": "TOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/curl_noise_top.gd"
+  },
   "CustomShaderTOP": {
     "class_name": "CustomShaderTOP",
     "family": "TOP",
@@ -5708,6 +5722,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/flip_top.gd"
+  },
+  "FlowVisTOP": {
+    "class_name": "FlowVisTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "field",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/flow_vis_top.gd"
   },
   "Fluid2DTOP": {
     "class_name": "Fluid2DTOP",

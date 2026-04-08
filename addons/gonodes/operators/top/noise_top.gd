@@ -1,8 +1,13 @@
 class_name NoiseTOP
 extends GNTopBase
 ## Generates a procedural noise texture using a SubViewport and a noise shader.
-## Supports simplex noise with configurable scale, offset, seed, and animation.
-## SubViewport is a child of this Node — freed automatically on removal.
+## Supports multiple noise algorithms with configurable scale, offset, seed, and animation.
+##
+## Parameter relevance by algorithm:
+##   Simplex / Perlin / Value — all params active
+##   Voronoi — octaves/lacunarity/gain/periodic/tile_size ignored (single-pass only)
+##   White — scale/offset/octaves/lacunarity/gain/periodic/tile_size ignored
+##   Ridged — always uses FBM; periodic/tile_size ignored
 
 ## Preloaded noise shader resource.
 var _shader: Shader = null
@@ -19,7 +24,7 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_enum("noise_type",
-		PackedStringArray(["Simplex", "Perlin", "Voronoi", "White"]), 0, "", "Noise algorithm"))
+		PackedStringArray(["Simplex", "Perlin", "Voronoi", "White", "Value", "Ridged"]), 0, "", "Noise algorithm"))
 	add_parameter(GNParameter.create_float("scale", 4.0, 0.1, 100.0, 0.1, "", "Noise frequency / zoom level"))
 	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO, "", "Spatial offset for panning the noise"))
 	add_parameter(GNParameter.create_float("time_offset", 0.0, null, null, 0.01, "", "Z-axis offset for animation (drive with LFO)"))

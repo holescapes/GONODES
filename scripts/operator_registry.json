@@ -10795,6 +10795,50 @@
     ]
   },
   {
+    "class_name": "CurlNoiseTOP",
+    "node_type": "curl_noise",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/curl_noise_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "scale",
+        "type": "float",
+        "default": 4.0
+      },
+      {
+        "name": "time_offset",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "seed",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "octaves",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "lacunarity",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "gain",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
     "class_name": "CustomShaderTOP",
     "node_type": "custom_shader",
     "family": "top",
@@ -11313,6 +11357,55 @@
         "name": "flip_y",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "FlowVisTOP",
+    "node_type": "flow_vis",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/flow_vis_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "num_steps",
+        "type": "int",
+        "default": 24
+      },
+      {
+        "name": "step_size",
+        "type": "float",
+        "default": 0.004
+      },
+      {
+        "name": "noise_scale",
+        "type": "float",
+        "default": 80.0
+      },
+      {
+        "name": "color_mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "contrast",
+        "type": "float",
+        "default": 1.8
+      },
+      {
+        "name": "brightness",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "saturation",
+        "type": "float",
+        "default": 0.75
+      },
+      {
+        "name": "speed_tint",
+        "type": "float",
+        "default": 1.5
       }
     ]
   },

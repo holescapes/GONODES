@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **545 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
+> **547 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
 
 ---
 
@@ -42,7 +42,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 64 operators** — 14 generators, 30 filters, 8 combiners, 3 temporal/buffer, 2 simulation/generative, 3 utility, 3 bridge, 1 host input.
+**Total: 66 operators** — 15 generators, 31 filters, 8 combiners, 3 temporal/buffer, 2 simulation/generative, 3 utility, 3 bridge, 1 host input.
 
 ### Generators
 
@@ -57,7 +57,7 @@ Procedural noise texture generator. GPU-rendered via shader.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | resolution | Vector2i | 512×512 | — | Output resolution |
-| noise_type | Enum | Simplex | Simplex, Perlin, Voronoi, White | Noise algorithm |
+| noise_type | Enum | Simplex | Simplex, Perlin, Voronoi, White, Value, Ridged | Noise algorithm |
 | scale | Float | 4.0 | 0.1–100.0 | Noise frequency/zoom |
 | offset | Vector2 | (0, 0) | — | Spatial offset |
 | time_offset | Float | 0.0 | — | Z-axis offset for animation |
@@ -69,7 +69,9 @@ Procedural noise texture generator. GPU-rendered via shader.
 | periodic | Bool | false | — | Enable seamless tiling via periodic Perlin |
 | tile_size | Float | 4.0 | 1.0–64.0 | Repeat period in noise-space (periodic mode) |
 
-**How it works:** Renders a fullscreen quad with a noise shader. The shader implements 4 noise algorithms selectable via uniform. When `octaves` > 1, fractal Brownian motion (FBM) layers multiple noise samples with increasing frequency and decreasing amplitude. When `periodic` is enabled, a tileable Perlin implementation replaces the base noise so the output tiles seamlessly — useful for seamless textures, looping animations, and tiled backgrounds. Time-dependent — animates automatically when `time_offset` is driven by expressions.
+**How it works:** Renders a fullscreen quad with a noise shader. The shader implements 6 noise algorithms selectable via uniform. When `octaves` > 1, fractal Brownian motion (FBM) layers multiple noise samples with increasing frequency and decreasing amplitude. When `periodic` is enabled, a tileable Perlin implementation replaces the base noise so the output tiles seamlessly — useful for seamless textures, looping animations, and tiled backgrounds. Time-dependent — animates automatically when `time_offset` is driven by expressions.
+
+**Algorithm notes:** Simplex/Perlin/Value — classic noise with FBM layering. Voronoi — Worley F1 (cell distance), ignores octaves/periodic. White — pure random per pixel, ignores octaves/lacunarity/gain/periodic. Ridged — abs() + squaring in FBM loop produces sharp ridgeline features (always uses FBM regardless of octave count).
 
 ---
 
@@ -106,6 +108,25 @@ Circle or ring shape via signed distance field.
 | softness | Float | 0.005 | 0.0–0.1 | Edge antialiasing |
 
 **How it works:** SDF shader computes distance from center, applies smoothstep for edge softness. Border width > 0 creates a ring by subtracting an inner circle.
+
+---
+
+#### CurlNoiseTOP
+
+2D curl noise vector field for fluid advection and flow effects.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output resolution |
+| scale | Float | 4.0 | 0.1–100.0 | Noise frequency / zoom level |
+| offset | Vector2 | (0, 0) | — | Spatial offset for panning |
+| time_offset | Float | 0.0 | — | Z-axis offset for animation |
+| seed | Int | 0 | 0–99999 | Random seed |
+| octaves | Int | 3 | 1–8 | FBM octave count |
+| lacunarity | Float | 2.0 | 1.0–4.0 | Frequency multiplier per octave |
+| gain | Float | 0.5 | 0.0–1.0 | Amplitude multiplier per octave |
+
+**How it works:** Computes two offset simplex FBM noise fields as scalar potentials, then derives the curl (cross-derivative) to produce a divergence-free 2D vector field. Output encodes the field as R=X, G=Y (remapped to 0–1 range), B=0, A=1. Use with DisplaceTOP or particle systems for organic, fluid-like motion. The curl operator guarantees incompressibility — particles advected by this field never converge or diverge.
 
 ---
 
@@ -392,6 +413,25 @@ Render SVG vector graphics to a texture at arbitrary resolution.
 ### Filters
 
 These TOPs take one texture input and modify it.
+
+---
+
+#### FlowVisTOP
+
+Visualizes a 2-channel vector field (e.g. CurlNoiseTOP output) using Line Integral Convolution (LIC).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| num_steps | Int | 24 | 4–64 | LIC integration steps (more = longer streaks) |
+| step_size | Float | 0.004 | 0.0005–0.02 | Distance per integration step in UV space |
+| noise_scale | Float | 80.0 | 1.0–200.0 | Base noise frequency for LIC texture |
+| color_mode | Enum | LIC + Direction | Magnitude, Direction, LIC Only, LIC + Direction | Colorization method |
+| contrast | Float | 1.8 | 0.5–4.0 | LIC streak contrast |
+| brightness | Float | 1.0 | 0.0–2.0 | Overall brightness |
+| saturation | Float | 0.75 | 0.0–1.0 | Color saturation for directional modes |
+| speed_tint | Float | 1.5 | 0.0–4.0 | How much velocity magnitude affects brightness |
+
+**How it works:** Implements Line Integral Convolution (LIC) — for each pixel, traces the streamline forward and backward through the vector field, accumulating hash-based white noise along the path. The averaged noise creates oriented streaks that follow the flow. Color modes map flow angle to HSV hue and magnitude to brightness, producing the iconic flow-field visualizations seen in CFD and generative art. Input must encode velocity as R=X, G=Y in [0,1] range where 0.5 = zero velocity. Pair with CurlNoiseTOP for divergence-free flow fields.
 
 ---
 

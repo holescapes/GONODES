@@ -1,0 +1,220 @@
+stages:
+  - discover
+  - build
+
+variables:
+  SCONS_FLAGS: "target=template_release -j4"
+
+# ── Change rules ───────────────────────────────────────────────────────────────
+
+.ext_rules: &ext_rules
+  rules:
+    - changes:
+        - addons/gn_ext_*/native/**/*
+        - build/**
+        - .gitlab-ci.yml
+      when: always
+    - when: manual
+
+.native_rules: &native_rules
+  rules:
+    - changes:
+        - addons/gn_ext_native/native/**/*
+        - .gitlab-ci.yml
+      when: always
+    - when: manual
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# gn_ext_native — uses godot-cpp SConstruct (built separately)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+build:native-windows-x86_64:
+  stage: build
+  tags: [saas-windows-medium-amd64]
+  <<: *native_rules
+  before_script:
+    - git submodule update --init --recursive
+    - pip install scons
+  script:
+    - cd addons/gn_ext_native/native
+    - scons platform=windows arch=x86_64 $SCONS_FLAGS
+  artifacts:
+    paths: [addons/gn_ext_native/native/bin/win64/]
+    expire_in: 90 days
+
+build:native-windows-arm64:
+  stage: build
+  tags: [saas-windows-medium-amd64]
+  <<: *native_rules
+  before_script:
+    - git submodule update --init --recursive
+    - pip install scons
+  script:
+    - cd addons/gn_ext_native/native
+    - scons platform=windows arch=arm64 $SCONS_FLAGS
+  artifacts:
+    paths: [addons/gn_ext_native/native/bin/win64/]
+    expire_in: 90 days
+
+build:native-linux-x86_64:
+  stage: build
+  tags: [saas-linux-medium-amd64]
+  image: ubuntu:22.04
+  <<: *native_rules
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 python3-pip g++ pkg-config git
+    - git submodule update --init --recursive
+    - pip3 install scons
+  script:
+    - cd addons/gn_ext_native/native
+    - scons platform=linux arch=x86_64 $SCONS_FLAGS
+  artifacts:
+    paths: [addons/gn_ext_native/native/bin/linux64/]
+    expire_in: 90 days
+
+build:native-linux-arm64:
+  stage: build
+  tags: [saas-linux-medium-amd64]
+  image: ubuntu:22.04
+  <<: *native_rules
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 python3-pip g++-aarch64-linux-gnu pkg-config git
+    - git submodule update --init --recursive
+    - pip3 install scons
+  script:
+    - cd addons/gn_ext_native/native
+    - scons platform=linux arch=arm64 $SCONS_FLAGS
+  artifacts:
+    paths: [addons/gn_ext_native/native/bin/linux64/]
+    expire_in: 90 days
+
+build:native-macos:
+  stage: build
+  tags: [saas-macos-medium-m1]
+  <<: *native_rules
+  before_script:
+    - git submodule update --init --recursive
+    - pip3 install scons
+  script:
+    - cd addons/gn_ext_native/native
+    - scons platform=macos arch=arm64 $SCONS_FLAGS
+    - scons platform=macos arch=x86_64 $SCONS_FLAGS
+    - cd bin/macos
+    - |
+      ARM_LIB=$(find . -name "*arm64*" -type f | head -1)
+      X86_LIB=$(find . -name "*x86_64*" -type f | head -1)
+      if [ -n "$ARM_LIB" ] && [ -n "$X86_LIB" ]; then
+        UNIVERSAL=$(echo "$ARM_LIB" | sed 's/\.arm64//')
+        lipo -create "$ARM_LIB" "$X86_LIB" -output "$UNIVERSAL"
+        echo "Created universal: $UNIVERSAL"
+      fi
+  artifacts:
+    paths: [addons/gn_ext_native/native/bin/macos/]
+    expire_in: 90 days
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# All other extensions — unified build via build/SConstruct + build.cfg
+# Uses parallel:matrix to build every discovered extension on every platform.
+# The SConstruct auto-skips extensions that don't support the target platform.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Windows x86_64 (all extensions) ───────────────────────────────────────────
+build:ext-windows-x86_64:
+  stage: build
+  tags: [saas-windows-medium-amd64]
+  <<: *ext_rules
+  before_script:
+    - git submodule update --init --recursive
+    - pip install scons
+  script:
+    - cd build
+    - scons platform=windows arch=x86_64 $SCONS_FLAGS
+  artifacts:
+    paths:
+      - addons/gn_ext_*/native/bin/win64/
+    expire_in: 90 days
+
+# ── Windows ARM64 (all extensions) ────────────────────────────────────────────
+build:ext-windows-arm64:
+  stage: build
+  tags: [saas-windows-medium-amd64]
+  <<: *ext_rules
+  before_script:
+    - git submodule update --init --recursive
+    - pip install scons
+  script:
+    - cd build
+    - scons platform=windows arch=arm64 $SCONS_FLAGS
+  artifacts:
+    paths:
+      - addons/gn_ext_*/native/bin/win64/
+    expire_in: 90 days
+
+# ── Linux x86_64 (all extensions) ─────────────────────────────────────────────
+build:ext-linux-x86_64:
+  stage: build
+  tags: [saas-linux-medium-amd64]
+  image: ubuntu:22.04
+  <<: *ext_rules
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 python3-pip g++ pkg-config libasound2-dev git
+    - git submodule update --init --recursive
+    - pip3 install scons
+  script:
+    - cd build
+    - scons platform=linux arch=x86_64 $SCONS_FLAGS
+  artifacts:
+    paths:
+      - addons/gn_ext_*/native/bin/linux64/
+    expire_in: 90 days
+
+# ── Linux ARM64 (all extensions, cross-compiled) ──────────────────────────────
+build:ext-linux-arm64:
+  stage: build
+  tags: [saas-linux-medium-amd64]
+  image: ubuntu:22.04
+  <<: *ext_rules
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 python3-pip g++-aarch64-linux-gnu pkg-config git
+    - git submodule update --init --recursive
+    - pip3 install scons
+  script:
+    - cd build
+    - scons platform=linux arch=arm64 $SCONS_FLAGS
+  artifacts:
+    paths:
+      - addons/gn_ext_*/native/bin/linux64/
+    expire_in: 90 days
+
+# ── macOS (all extensions, universal via lipo) ────────────────────────────────
+build:ext-macos:
+  stage: build
+  tags: [saas-macos-medium-m1]
+  <<: *ext_rules
+  before_script:
+    - git submodule update --init --recursive
+    - pip3 install scons
+  script:
+    - cd build
+    - scons platform=macos arch=arm64 $SCONS_FLAGS
+    - scons platform=macos arch=x86_64 $SCONS_FLAGS
+    # Create universal binaries for all extensions
+    - |
+      for BIN_DIR in ../addons/gn_ext_*/native/bin/macos; do
+        if [ -d "$BIN_DIR" ]; then
+          cd "$BIN_DIR"
+          for ARM_LIB in $(find . -name "*arm64*" -type f 2>/dev/null); do
+            X86_LIB=$(echo "$ARM_LIB" | sed 's/\.arm64/.x86_64/')
+            UNIVERSAL=$(echo "$ARM_LIB" | sed 's/\.arm64//')
+            if [ -f "$X86_LIB" ]; then
+              lipo -create "$ARM_LIB" "$X86_LIB" -output "$UNIVERSAL"
+              echo "Created universal: $BIN_DIR/$UNIVERSAL"
+            fi
+          done
+          cd -
+        fi
+      done
+  artifacts:
+    paths:
+      - addons/gn_ext_*/native/bin/macos/
+    expire_in: 90 days

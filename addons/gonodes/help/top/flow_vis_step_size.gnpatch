@@ -1,0 +1,109 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "flow_vis1": {
+            "type": "FlowVisTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "num_steps": {
+                    "value": 23
+                },
+                "step_size": {
+                    "value": 0.002
+                },
+                "noise_scale": {
+                    "value": 40.0
+                },
+                "color_mode": {
+                    "value": 1
+                },
+                "contrast": {
+                    "value": 0.9
+                },
+                "brightness": {
+                    "value": 0.5
+                },
+                "saturation": {
+                    "value": 0.375
+                },
+                "speed_tint": {
+                    "value": 0.75
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "flow_vis1",
+            "to_port": 0
+        },
+        {
+            "from": "flow_vis1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "FlowVisTOP \u2014 Parameters\n\nShowcases: num_steps, step_size, noise_scale.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

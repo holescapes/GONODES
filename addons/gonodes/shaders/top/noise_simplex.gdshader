@@ -1,8 +1,8 @@
 shader_type canvas_item;
 // Noise shader for NoiseTOP.
-// Generates 2D noise: Simplex (0), Perlin (1), Voronoi (2), White (3).
+// Generates 2D noise: Simplex (0), Perlin (1), Voronoi (2), White (3), Value (4), Ridged (5).
 
-uniform int noise_type = 0; // 0=Simplex, 1=Perlin, 2=Voronoi, 3=White
+uniform int noise_type = 0; // 0=Simplex, 1=Perlin, 2=Voronoi, 3=White, 4=Value, 5=Ridged
 uniform float scale : hint_range(0.1, 100.0) = 4.0;
 uniform vec2 offset = vec2(0.0, 0.0);
 uniform float time_offset = 0.0;
@@ -104,6 +104,19 @@ float wnoise(vec2 v) {
 	return hash21(v) * 2.0 - 1.0;
 }
 
+// Value noise — blocky grid-interpolated random values
+float vnoise(vec2 v) {
+	vec2 i = floor(v);
+	vec2 f = fract(v);
+	// Quintic interpolation (smoother than cubic smoothstep)
+	vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+	float a = hash21(i + vec2(0.0, 0.0));
+	float b = hash21(i + vec2(1.0, 0.0));
+	float c = hash21(i + vec2(0.0, 1.0));
+	float d = hash21(i + vec2(1.0, 1.0));
+	return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 2.0 - 1.0;
+}
+
 // Single-sample noise dispatch (no FBM) — returns value in [-1, 1]
 float get_noise_raw(vec2 v) {
 	if (noise_type == 1) {
@@ -112,6 +125,11 @@ float get_noise_raw(vec2 v) {
 		return voronoi(v);
 	} else if (noise_type == 3) {
 		return wnoise(v);
+	} else if (noise_type == 4) {
+		return vnoise(v);
+	} else if (noise_type == 5) {
+		// Ridged uses Simplex as base, abs() applied in FBM loop
+		return snoise(v);
 	}
 	return snoise(v); // 0 = Simplex (default)
 }
@@ -146,11 +164,18 @@ float fbm_noise(vec2 v) {
 	float total_amp = 0.0;
 	for (int i = 0; i < octaves; i++) {
 		vec2 p = v * frequency;
+		float n;
 		if (periodic) {
-			value += amplitude * periodic_pnoise(p, tile_size * frequency);
+			n = periodic_pnoise(p, tile_size * frequency);
 		} else {
-			value += amplitude * get_noise_raw(p);
+			n = get_noise_raw(p);
 		}
+		// Ridged: abs() creates sharp ridges, invert so ridges are peaks
+		if (noise_type == 5) {
+			n = 1.0 - abs(n);
+			n = n * n; // sharpen the ridges
+		}
+		value += amplitude * n;
 		total_amp += amplitude;
 		frequency *= lacunarity;
 		amplitude *= gain;
@@ -160,7 +185,7 @@ float fbm_noise(vec2 v) {
 
 // Dispatch noise by type — returns value in [-1, 1]
 float get_noise(vec2 v) {
-	if (octaves > 1 || periodic) {
+	if (octaves > 1 || periodic || noise_type == 5) {
 		return fbm_noise(v);
 	}
 	return get_noise_raw(v);
