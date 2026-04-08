@@ -23,6 +23,12 @@ that don't reach a sink are skipped entirely.
 This means you can have debugging or experimental nodes in your patch that don't
 impact performance unless they're connected to an output.
 
+Some operators are **input-selective** — they only use a subset of their inputs
+depending on their current state. For example, a **SwitchTOP** with `index=1`
+only reads input 1, so the engine won't cook the chains feeding inputs 0, 2,
+and 3. This pruning happens automatically for all Switch-type operators,
+CubeMapTOP, MathCHOP (unary mode), and others.
+
 ### 3. Topological Sort
 
 Active dirty nodes are sorted in **topological order** so that upstream nodes

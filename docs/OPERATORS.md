@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **535 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
+> **545 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
 
 ---
 
@@ -42,7 +42,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 56 operators** — 12 generators, 28 filters, 7 combiners, 3 temporal/buffer, 2 simulation/generative, 2 utility, 2 bridge.
+**Total: 64 operators** — 14 generators, 30 filters, 8 combiners, 3 temporal/buffer, 2 simulation/generative, 3 utility, 3 bridge, 1 host input.
 
 ### Generators
 
@@ -1453,11 +1453,12 @@ Applies Bayer ordered dithering — quantises colours through a threshold matrix
 
 #### PixelateTOP
 
-Reduces resolution to blocky mosaic by snapping UV to a grid.
+Reduces resolution to blocky mosaic by snapping UV to a grid with configurable block shape.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | pixel_size | Float | 8.0 | 1.0–256.0 | Block size in pixels |
+| shape | Enum | Square | Square / Circle / Diamond / Hexagon | Pixel block shape — circle and diamond use smooth edge masking |
 
 **Input:** `in` (TOP). **Shader:** `pixelate.gdshader`.
 
@@ -1465,13 +1466,16 @@ Reduces resolution to blocky mosaic by snapping UV to a grid.
 
 #### FilmGrainTOP
 
-Adds animated film-grain noise with optional luminance-dependent intensity (more grain in midtones).
+Adds animated film-grain noise with optional luminance-dependent intensity (more grain in midtones). Supports colored (independent RGB) grain and manual time control for freeze-frame or externally driven animation.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | intensity | Float | 0.15 | 0.0–1.0 | Grain strength |
 | size | Float | 1.0 | 0.5–4.0 | Grain particle size (larger = coarser) |
 | luminance_dependent | Bool | true | — | More grain in midtones, less in highlights/shadows |
+| colored | Bool | false | — | Independent RGB noise channels instead of monochromatic |
+| manual_time | Bool | false | — | Control animation time manually instead of auto-animating |
+| time | Float | 0.0 | 0.0–10000.0 | Manual time value (only when Manual Time is enabled) |
 
 **Input:** `in` (TOP). **Time-dependent.** **Shader:** `film_grain.gdshader`.
 
@@ -1549,10 +1553,10 @@ N-fold radial mirror symmetry — slices the image into angular segments and ref
 
 Converts between Cartesian and polar coordinate spaces — useful for wrapping images into circles or unwrapping circular patterns.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| mode | Enum | Cartesian to Polar | Cartesian to Polar, Polar to Cartesian |
-| center | Vector2 | (0.5, 0.5) | Centre point for the transform |
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Cartesian to Polar | — | Cartesian to Polar, Polar to Cartesian |
+| center | Vector2 | (0.5, 0.5) | — | Centre point for the transform |
 
 **Input:** `in` (TOP). **Shader:** `polar.gdshader`.
 
@@ -1575,7 +1579,7 @@ CRT / VHS scan-line overlay with optional horizontal jitter and screen curvature
 
 #### GlitchTOP
 
-Random block-displacement and RGB channel-shift glitch effect with animated timing.
+Multi-layer digital glitch effect: block displacement, RGB channel shift, scan-line jitter, horizontal tears, colour crush, static noise, and V002-style stale-frame injection.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -1583,8 +1587,17 @@ Random block-displacement and RGB channel-shift glitch effect with animated timi
 | block_size | Float | 32.0 | 4.0–128.0 | Glitch block size in pixels |
 | channel_shift | Float | 0.01 | 0.0–0.05 | RGB channel separation amount |
 | speed | Float | 8.0 | 0.1–30.0 | Glitch animation speed |
+| scan_jitter | Float | 0.0 | 0.0–0.1 | VHS-style per-scanline horizontal displacement |
+| tear_strength | Float | 0.0 | 0.0–1.0 | Horizontal tear band displacement |
+| color_crush | Float | 0.0 | 0.0–1.0 | Bit-depth reduction in glitch blocks (0 = off, 1 = extreme) |
+| noise | Float | 0.0 | 0.0–1.0 | Analog static / digital snow injection |
+| stale_frame | Float | 0.0 | 0.0–1.0 | V002-style: inject data from old frames into glitch blocks — higher values make the buffer more stale |
 
 **Input:** `in` (TOP). **Time-dependent.** **Shader:** `glitch.gdshader`.
+
+**Stale Frame** keeps an internal history buffer that updates less frequently as the value
+increases. At 1.0, the buffer updates only ~10% of frames, so glitched blocks may show
+imagery from many frames ago — mimicking V002 Glitch's uninitialized FBO reads.
 
 ---
 
@@ -1604,7 +1617,9 @@ Generates Worley noise (Voronoi distance fields) — three output modes: F1 (nea
 
 ---
 
-#### HighPassTOP
+#### HighPassTOP *(deprecated)*
+
+> **Deprecated** — use **FilterTOP** (mode = High Pass) instead. FilterTOP provides Low Pass, High Pass, and Band Pass in a single operator.
 
 Extracts high-frequency detail by subtracting an internal Gaussian blur from the original image.
 
@@ -1616,7 +1631,23 @@ Extracts high-frequency detail by subtracting an internal Gaussian blur from the
 
 **Input:** `in` (TOP). **Shader:** `high_pass.gdshader`.
 
-**How it works:** Applies a multi-sample Gaussian blur to produce a low-pass version, subtracts it from the original, multiplies by `strength`, and adds `offset` so neutral detail sits at mid-grey.
+---
+
+#### FilterTOP
+
+Spatial frequency filter — Low Pass (blur), High Pass (detail), or Band Pass (isolates a frequency band). Mirrors FilterCHOP's design applied to textures.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Low Pass | Low Pass / High Pass / Band Pass | Filter type |
+| radius | Float | 5.0 | 1.0–50.0 | Filter kernel radius (LP/HP size, BP inner radius) |
+| radius_outer | Float | 15.0 | 1.0–80.0 | Band Pass outer blur radius (must be > radius) |
+| strength | Float | 1.0 | 0.0–5.0 | HP/BP intensity multiplier |
+| offset | Float | 0.5 | 0.0–1.0 | HP/BP mid-grey offset (0.5 = neutral) |
+
+**Input:** `in` (TOP). **Shader:** `filter.gdshader`.
+
+**Low Pass** blurs the image. **High Pass** subtracts the blur from the original (detail extraction). **Band Pass** subtracts a large blur from a small blur — isolating spatial frequencies between the two radii. Band pass is useful for texture enhancement, edge-aware glow, and photographic frequency separation.
 
 ---
 
@@ -1827,6 +1858,175 @@ Subtracts the previous frame from the current frame — outputs a motion delta i
 
 ---
 
+### GPU Compute & Advanced
+
+---
+
+#### CubeMapTOP
+
+Assemble cubemap faces, extract individual faces, or convert equirectangular panoramas to cross layout.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Assemble | Assemble, Extract Face, Equirect to Cross | Operation mode |
+| extract_face | Enum | +X | +X, -X, +Y, -Y, +Z, -Z | Which face to extract (Extract Face mode) |
+| face_size | Int | 256 | 1–4096 | Resolution of each face in pixels |
+
+**Inputs:** `in0`–`in5` (TOP — one per cubemap face: +X, -X, +Y, -Y, +Z, -Z). Extract/Equirect modes use only `in0`.
+
+**How it works:** Assemble mode arranges 6 input face textures into a 4×3 cross layout. Extract Face mode takes a cross-layout cubemap and outputs a single face. Equirect to Cross mode converts an equirectangular panorama to the cross layout via a reprojection shader. Useful for environment map workflows and skybox authoring.
+
+> **Active-input aware:** In Extract and Equirect modes, only input 0 is active — unused face inputs don't trigger upstream cooking.
+
+---
+
+#### ComputeShaderTOP
+
+Write custom GLSL 450 compute shaders with live recompilation and dynamic parameter extraction.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| time_dependent | Bool | true | — | Re-cook every frame (enable for shaders using gn_time) |
+| cook_once | Bool | false | — | Pulse: toggle ON to force a single cook, auto-resets to OFF |
+| resolution | Vector2i | 512×512 | — | Output resolution in pixels |
+| shader_code | String | *(template)* | — | GLSL 450 compute shader source (live recompile) |
+
+**Built-in uniforms (push constants):**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `gn_time` | float | Elapsed seconds since engine start |
+| `gn_frame` | int | Current frame number |
+| `gn_dt` | float | Delta time this frame |
+| `gn_res_x` | int | Output resolution width |
+| `gn_res_y` | int | Output resolution height |
+
+**Inputs:** Dynamic — up to 8 texture inputs (`gn_tex0`–`gn_tex7`), auto-created from `gn_tex<N>` samplers declared in your shader code.
+
+**Dynamic parameters:** Float and int fields declared in a `PushConstants` struct in the shader code are automatically extracted and appear as editable parameters in the inspector. Reserved names (`gn_time`, `gn_frame`, `gn_dt`, `gn_res_x`, `gn_res_y`) are excluded.
+
+**How it works:** Compiles GLSL 450 compute source to SPIR-V via `RenderingDevice.shader_compile_spirv_from_source()`. Creates storage image for output, builds push constants from built-in uniforms + user-defined params, dispatches compute workgroups at local size 8×8×1, reads back to ImageTexture. Shader is recompiled only when the code text changes.
+
+> **Requires:** Forward+ or Mobile renderer (compute shaders unavailable on Compatibility/OpenGL).
+
+---
+
+#### CompositorEffectTOP
+
+Full-screen post-processing via Godot's CompositorEffect pipeline — applies depth-based effects (outline, fog, depth view) to 3D rendered scenes.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| effect_mode | Enum | Outline | Outline, Depth Fog, Depth View | Effect type |
+| effect_threshold | Float | 0.08 | 0.001–1.0 | Sobel magnitude threshold (Outline) — lower = more edges |
+| effect_strength | Float | 1.0 | 0.0–4.0 | Overall effect intensity |
+| effect_color | Color | Black | — | Outline/fog tint colour (alpha controls blend weight) |
+
+*(Also inherits all RenderTOP parameters: geometry, camera, light, environment, resolution.)*
+
+**Inputs/Outputs:** Same as RenderTOP (COMP inputs for geometry/camera/light, TOP output).
+
+**How it works:** Extends RenderTOP — first renders the 3D scene normally, then attaches a CompositorEffect to the viewport's Compositor resource. The effect runs a compute shader that processes the depth buffer: Outline mode applies Sobel edge detection, Depth Fog applies distance-based fog, and Depth View outputs raw depth as greyscale.
+
+> **Requires:** Forward+ renderer only (CompositorEffect uses RenderSceneBuffersRD).
+
+---
+
+#### GeometryBufferTOP
+
+Debug visualization of a 3D scene's G-buffer — render as color, unshaded, normal buffer, or wireframe.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| buffer_mode | Enum | Color | Color, Unshaded, Normal Buffer, Wireframe | Which buffer to visualize |
+
+*(Also inherits all RenderTOP parameters.)*
+
+**Inputs/Outputs:** Same as RenderTOP.
+
+**How it works:** Extends RenderTOP — renders the 3D scene, then sets the viewport's debug draw mode: Color (default render), Unshaded (no lighting), Normal Buffer (world-space normals as RGB), or Wireframe (polygon edges). Useful for shader development, performance inspection, and material debugging.
+
+---
+
+#### GlueTOP
+
+Pack up to 4 input textures into a single atlas/grid texture.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 1024×1024 | — | Output atlas resolution |
+| layout | Enum | Auto | Auto, 1×2, 2×1, 2×2, 1×4, 4×1 | Grid arrangement |
+| padding | Int | 0 | 0–32 | Pixels between tiles |
+| background | Color | Transparent | — | Atlas background color |
+
+**Inputs:** `in1`–`in4` (TOP — up to 4 textures).
+
+**How it works:** Collects connected input textures, arranges them in the specified grid layout with configurable padding, and renders into a SubViewport. Auto mode selects the grid based on input count (1=1×1, 2=1×2, 3/4=2×2). Useful for sprite sheets, texture atlases, and multi-face previews.
+
+---
+
+#### OpticalFlowTOP
+
+Compute motion vectors between consecutive frames using the Horn-Schünck algorithm.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output resolution |
+| sensitivity | Float | 20.0 | 1.0–100.0 | Motion amplification factor |
+| smoothing | Float | 0.1 | 0.001–1.0 | Regularization weight |
+| iterations | Int | 4 | 1–16 | Horn-Schünck solver iterations per pixel |
+
+**Input:** `in` (TOP — video or animated source).
+**Output:** `out` (TOP — R=horizontal flow, G=vertical flow, B=magnitude).
+
+**How it works:** GPU shader implementation of Horn-Schünck optical flow. Stores the previous frame internally and computes per-pixel motion vectors between current and previous frames. Output is encoded in RGB: red = horizontal displacement, green = vertical displacement, blue = flow magnitude. Time-dependent — updates every frame.
+
+---
+
+#### VectorPathTOP
+
+Anti-aliased 2D vector graphics rendering — polylines, polygons, circles, arcs, and SVG-style path commands.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Output texture resolution |
+| shape | Enum | Polyline | Polyline, Polygon, Circle, Arc, Path Commands | Drawing primitive type |
+| stroke_color | Color | White | — | Line/stroke color |
+| stroke_width | Float | 2.0 | 0.5–50.0 | Line width in pixels |
+| fill_color | Color | (0.2, 0.4, 0.8, 0.5) | — | Fill color |
+| fill | Bool | false | — | Enable fill for closed shapes |
+| closed | Bool | false | — | Close the polyline into a loop |
+| bg_color | Color | Black | — | Background color |
+| radius | Float | 100.0 | 1.0–10000.0 | Circle/arc radius in pixels |
+| arc_start | Float | 0.0 | -360–360 | Arc start angle (degrees) |
+| arc_end | Float | 360.0 | -360–360 | Arc end angle (degrees) |
+| arc_segments | Int | 64 | 3–512 | Segment count for circles/arcs |
+| line_cap | Enum | Round | Butt, Round, Square | End-cap style for open paths |
+| antialiased | Bool | true | — | Enable anti-aliasing on lines |
+
+**Inputs:**
+- `points` (CHOP — point positions as x0, y0, x1, y1, …)
+- `commands` (DAT — SVG-like path commands: M, L, C, Q, A, Z)
+
+**How it works:** Draws anti-aliased 2D vector graphics using Godot's CanvasItem draw API. In Polyline/Polygon mode, reads point coordinates from the CHOP input. In Path Commands mode, parses an SVG-like command string from the DAT input (Move, Line, Cubic Bézier, Quadratic Bézier, Arc, Close). Renders to a SubViewport for GPU output.
+
+---
+
+#### HostInTOP
+
+Receive textures from a host application via the C API (`libgonodes`). Zero-copy in shared GPU contexts.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| label | String | "" | Optional label for this input in the host's UI |
+
+**No inputs** — receives data from the host C API.
+**Output:** `out` (TOP — texture from host).
+
+**How it works:** Wraps a GPU texture handle received from the host application via `gonodes_set_input_texture()` in the C API. In shared GPU contexts (same Vulkan/D3D12 device), the transfer is zero-copy. The label parameter is exposed to the host for identification when the patch has multiple HostInTOP nodes.
+
+---
+
 ## IMG — Image Operators
 
 IMGs process CPU-side `Image` data. Unlike TOPs (GPU textures via SubViewport), IMGs work on raw pixel buffers for operations that need CPU access: file I/O, pixel sorting, procedural generation, and format conversion. All IMG data flows as `GNImageData` — a lightweight RefCounted wrapper around Godot's `Image` class.
@@ -1877,7 +2077,7 @@ CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Arr
 
 All CHOP data flows as `GNChannelData` — a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 66 operators** — 7 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 4 animation/sequencing, 2 object/skeleton, 1 tablet, 7 signal analysis & audio.
+**Total: 67 operators** — 8 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 4 animation/sequencing, 2 object/skeleton, 1 tablet, 7 signal analysis & audio.
 
 ### Generators
 
@@ -1987,6 +2187,23 @@ Countdown/count-up timer with start/reset triggers.
 **Output channels:** `timer_seconds` (elapsed time), `timer_fraction` (0→1 progress), `running` (0 or 1), `done` (0 or 1).
 
 **How it works:** Counts up using `delta_time * speed`. Start/reset inputs use rising-edge detection. Auto-starts on first cook if enabled and no start input is connected. Time-dependent.
+
+---
+
+#### RampCHOP
+
+User-editable ramp curves output as CHOP channels. Supports 1–16 dynamic ramp slots, each with its own named channel and curve editor.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| samples | Int | 1 | 1–4096 | Number of evaluation points per channel |
+| count | Int | 2 | 1–16 | Number of ramp slots |
+| name*N* | String | "ramp*N*" | — | Channel name for ramp slot N |
+| ramp*N* | Ramp | *(default curve)* | — | Ramp curve for slot N |
+
+**How it works:** Iterates active ramp slots and samples each ramp curve at evenly-spaced evaluation points. With `samples=1`, each channel outputs a single scalar (the ramp evaluated at t=0.5). With `samples>1`, each channel outputs a full curve array — useful for LUT generation, gradient profiles, and envelope shapes. Dynamic slot count — changing `count` at runtime adds/removes parameter slots while preserving existing values.
+
+> **Tip:** Use RampCHOP instead of adding ramp parameters to operators when you need multiple user-editable curves. Read values via `chop("ramp1", "falloff")` (scalar) or `chop("ramp1", "falloff", index)` (specific sample).
 
 ---
 
@@ -2288,7 +2505,7 @@ Per-channel GDScript expression evaluation with time variables.
 
 **Input:** `in` (CHOP, optional).
 
-**How it works:** Uses Godot's `Expression` class. Variables: `v` (input value), `i` (sample index), `n` (sample count), `t` (elapsed time), `dt` (delta), `ch` (channel dictionary). Evaluated per-sample per-channel.
+**How it works:** Uses Godot's `Expression` class. Variables: `v` (input value), `i` (sample index), `n` (sample count), `t` (elapsed time), `dt` (delta), `frame` (frame number), `ch` (channel dictionary). Evaluated per-sample per-channel.
 
 ---
 
@@ -3789,7 +4006,7 @@ Per-vertex position modification via GDScript expressions.
 
 **Input:** `in` (SOP).
 
-**How it works:** Uses Godot's `Expression` class. Variables: `px`, `py`, `pz` (position), `nx`, `ny`, `nz` (normal), `u`, `v` (UV), `i` (vertex index), `n` (count), `t` (time).
+**How it works:** Uses Godot's `Expression` class. Variables: `px`, `py`, `pz` (position), `nx`, `ny`, `nz` (normal), `u`, `v` (UV), `i` (vertex index), `n` (count), `t` (time), `dt` (delta time), `frame` (frame number).
 
 ---
 
@@ -3805,7 +4022,7 @@ Create or modify per-vertex point attributes from expressions or presets.
 
 **Input:** `in` (SOP).
 
-**How it works:** Stores results in `GNGeoData.point_attribs` dictionary — a dictionary of name → `PackedFloat32Array` with `components` values per vertex.
+**How it works:** Stores results in `GNGeoData.point_attribs` dictionary — a dictionary of name → `PackedFloat32Array` with `components` values per vertex. Expression mode variables: `px`, `py`, `pz`, `nx`, `ny`, `nz`, `u`, `v`, `i`, `n`, `t` (time), `dt` (delta time), `frame` (frame number).
 
 ---
 

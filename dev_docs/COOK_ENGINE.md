@@ -105,6 +105,31 @@ topology or sinks change (`_active_set_dirty`), not every frame.
 
 Inactive nodes keep their `cached_output` frozen — zero per-frame cost.
 
+#### Selective Input Activation (`get_active_input_indices`)
+
+By default, BFS follows all wire connections upstream. But some operators only
+read a subset of their inputs — Switch (one input), CubeMapTOP in Extract mode
+(input 0 only), MathCHOP in unary mode (input 0 only).
+
+`GNNode.get_active_input_indices() -> PackedInt32Array` is a virtual method
+operators can override to declare which input ports are consumed this frame:
+
+- Empty array (default) → all connected inputs active
+- `PackedInt32Array([0])` → only input 0 active
+- `PackedInt32Array([-1])` → no inputs active (sentinel)
+
+The BFS in `_compute_active_set()` skips connections to non-active ports:
+```gdscript
+var active_ports: PackedInt32Array = current_node.get_active_input_indices()
+for conn in in_conns:
+    if active_ports.size() > 0 and conn.to_port not in active_ports:
+        continue  # skip this upstream chain
+```
+
+Parameter changes automatically trigger `_active_set_dirty = true` via
+`_on_node_param_changed`, so switching a Switch node's index immediately
+recomputes the active set.
+
 ### 3.3 Input Hash Guard (Tier 2)
 
 The core Tier 2 optimisation. Before cooking, the engine hashes:
@@ -156,14 +181,15 @@ This is a key difference from TD, which always cascades the full subtree.
 | 1 | Active-only pre-cook | Tier 1 | `_pre_cook()` skips inactive nodes |
 | 2 | Cached topo sort | Tier 1 | Kahn's BFS recomputed only on topology change |
 | 3 | Event-driven active set | Tier 1 | BFS from sinks only when topology/sinks change |
-| 4 | Scene-tree child reorder | Tier 1 | SubViewports render in dependency order |
-| 5 | Expression consumer map | Tier 1 | Skip expression eval if no upstream source cooked |
-| 6 | Inactive dirty cutoff | Tier 1 | `propagate_dirty()` stops at inactive boundaries |
-| 7 | Input hash guard | Tier 2 | Skip cook when params + input timestamps unchanged |
-| 8 | Incremental propagation | Tier 2 | Only direct successors dirtied, cascade stops at hash match |
-| 9 | Shared output tagging | — | Fan-out > 1 tags `_shared` for copy-on-write in `_mutable_input()` |
-| 10 | Input array caching | — | `_input_cache` reused per node, avoids per-frame allocation |
-| 11 | Compute shader guard | — | Skip nodes requiring `RenderingDevice` on Compatibility renderer |
+| 4 | Selective input activation | Tier 1 | `get_active_input_indices()` prunes upstream chains for Switch-type nodes |
+| 5 | Scene-tree child reorder | Tier 1 | SubViewports render in dependency order |
+| 6 | Expression consumer map | Tier 1 | Skip expression eval if no upstream source cooked |
+| 7 | Inactive dirty cutoff | Tier 1 | `propagate_dirty()` stops at inactive boundaries |
+| 8 | Input hash guard | Tier 2 | Skip cook when params + input timestamps unchanged |
+| 9 | Incremental propagation | Tier 2 | Only direct successors dirtied, cascade stops at hash match |
+| 10 | Shared output tagging | — | Fan-out > 1 tags `_shared` for copy-on-write in `_mutable_input()` |
+| 11 | Input array caching | — | `_input_cache` reused per node, avoids per-frame allocation |
+| 12 | Compute shader guard | — | Skip nodes requiring `RenderingDevice` on Compatibility renderer |
 
 ---
 
@@ -475,9 +501,9 @@ from different downstream nodes, the issue is a missing `_mutable_input()` call.
 
 | Tier | Feature | Status |
 |---|---|---|
-| 1 | Active-only pre-cook, expression consumer map, inactive cutoff | ✅ Done |
+| 1 | Active-only pre-cook, expression consumer map, inactive cutoff, selective input activation | ✅ Done |
 | 2 | Input hash guard, incremental propagation | ✅ Done |
-| 3 | Multi-threaded cook (level-based parallelism with WorkerThreadPool) | Planned |
+| 3 | Multi-threaded cook (level-based parallelism with WorkerThreadPool) | ✅ Done |
 | 4 | User-facing thread regions (annotation-based parallel groups) | Planned |
 
 See `GONODES_CONTEXT.md` for detailed Tier 3/4 implementation plans.

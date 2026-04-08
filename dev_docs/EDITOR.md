@@ -105,9 +105,17 @@ Export) in GONODES_CONTEXT.md for details.
 
 > Full toolbar reference with controls and descriptions is in `help/editor.md`.
 
-The bottom toolbar is split into **two rows**:
+The bottom toolbar is split into **three rows** (two button rows plus a timeline scrubber):
 - **Row 1** — File & Project (New, Open, Save, Build, NRT, FPS, InfoLabel, Debug Log, **Debug**)
+- **Timeline** — Time label + scrubber slider
 - **Row 2** — View & Graph (Previews, Perf, VRAM, Viewer, Stress Test, Minimap, Wire Style, Layout, Help)
+
+Each row is wrapped in a `ScrollContainer` with `SCROLL_MODE_SHOW_NEVER`
+horizontal scrolling and vertical scrolling disabled.  When the window is
+narrower than the row's content, items remain accessible via
+**Shift + mouse-wheel** scrolling — no buttons are clipped or pushed
+off-screen.  The scrollbar itself is hidden so row height stays fixed and
+the 98 px InfoBar budget is not exceeded.
 
 The **Debug** toggle (CheckButton) activates the debug panel and graph overlay.
 When enabled, four sub-toggles appear beside it: **#Order**, **Dim**,
@@ -581,6 +589,83 @@ the input port.  Disconnects originating from mid-wire clicks are rejected.
 Right-clicking on a wire auto-selects it (if not already selected) and
 shows context menu items including `_CtxID.DELETE_WIRES` and
 `_CtxID.INSERT_NODE_ON_WIRE`.
+
+
+## Shake-to-Disconnect — Implementation
+
+Houdini-style gesture: rapidly shaking a node left-right while dragging
+disconnects all its wires.  Implemented in `gn_graph_editor.gd`.
+
+### State Variables
+
+| Variable | Type | Purpose |
+|----------|------|---------|
+| `_shake_last_dir` | `int` | Last horizontal direction detected (-1 or 1) |
+| `_shake_reversals` | `int` | Count of direction reversals in the current window |
+| `_shake_timer` | `float` | Countdown timer for the detection window |
+| `_shake_triggered` | `bool` | Guard: true once shake fires to prevent re-triggering |
+
+### Constants
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| `_SHAKE_REVERSAL_THRESHOLD` | 3 | Minimum direction reversals to trigger |
+| `_SHAKE_TIME_WINDOW` | 0.5s | Reversals must occur within this window |
+| `_SHAKE_MIN_SPEED` | 150.0 px/s | Minimum horizontal speed to count |
+
+### Detection
+
+In `_process()`, while `_node_drag_active`:
+1. Track horizontal velocity of the mouse.
+2. If speed ≥ `_SHAKE_MIN_SPEED` and direction reversed, increment
+   `_shake_reversals` and reset `_shake_timer`.
+3. When `_shake_reversals` ≥ `_SHAKE_REVERSAL_THRESHOLD` within the time
+   window → trigger.
+
+### Disconnect Logic (`_perform_shake_disconnect`)
+
+1. Collect all input and output connections for all selected nodes.
+2. For each node in the middle of a chain (upstream → node → downstream),
+   create **bypass reconnections** — wire upstream directly to downstream.
+3. Remove all original wires via `disconnect_node()`.
+4. Add bypass wires via `connect_node()`.
+5. Emit `_show_toast("Shake disconnect: removed N wires")`.
+6. Full undo/redo: disconnect, reconnect, and toast are recorded in a
+   single `UndoRedo` action.
+
+
+## Edge-Scroll During Node Drag — Implementation
+
+When dragging a node near any edge of the graph canvas, the canvas
+auto-scrolls in that direction.  Selected nodes' `position_offset`
+is shifted by `scroll_delta / zoom` so they track the scroll — the
+node stays under the cursor, not behind.
+
+Implemented in `_handle_edge_scroll()` in `gn_graph_editor.gd`.
+Only active when `_node_drag_active` is true.
+
+
+## Toast Notifications — Implementation
+
+Toast notifications appear at the **center** of the graph canvas for
+transient feedback.  Implemented as a `Label` child of the graph editor
+with `PRESET_CENTER`, `grow_vertical = BOTH`, and `alignment = CENTER`.
+Toasts auto-fade via a `Tween` (opacity 1.0 → 0.0 over ~2s).
+
+Used by: shake-to-disconnect, paste operations, error feedback.
+
+
+## Parameter Undo/Redo — Implementation
+
+All parameter value changes in the inspector support undo/redo. Each
+parameter widget (GNFloatField, GNIntField, CheckBox, OptionButton,
+ColorPickerButton, etc.) records the old and new value through the
+centralized `UndoRedo` instance. Mode changes (Constant ↔ Expression)
+are also undoable.
+
+Implementation: `gn_param_inspector.gd` wraps each control's value-changed
+callback with `undo_redo.create_action()` / `add_do_method()` /
+`add_undo_method()` / `commit_action()`.
 
 
 ## Clipboard Export (Context Menu)

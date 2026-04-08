@@ -119,6 +119,11 @@
     "extension": null,
     "params": [
       {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
+      {
         "name": "play",
         "type": "bool",
         "default": false
@@ -1421,6 +1426,11 @@
         "name": "seed",
         "type": "int",
         "default": 0
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 1.0
       }
     ]
   },
@@ -1438,13 +1448,7 @@
     "family": "chop",
     "file": "addons/gonodes/operators/chop/object_chop.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "comp_path",
-        "type": "string",
-        "default": ""
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "OscInCHOP",
@@ -1492,11 +1496,6 @@
     "file": "addons/gonodes/operators/chop/parameter_chop.gd",
     "extension": null,
     "params": [
-      {
-        "name": "node_path",
-        "type": "string",
-        "default": ""
-      },
       {
         "name": "parameters",
         "type": "string",
@@ -1807,11 +1806,6 @@
     "extension": null,
     "params": [
       {
-        "name": "chop",
-        "type": "string",
-        "default": ""
-      },
-      {
         "name": "pattern",
         "type": "string",
         "default": "*"
@@ -1873,11 +1867,6 @@
     "file": "addons/gonodes/operators/chop/skeleton_chop.gd",
     "extension": null,
     "params": [
-      {
-        "name": "comp_path",
-        "type": "string",
-        "default": ""
-      },
       {
         "name": "bone_filter",
         "type": "string",
@@ -3041,31 +3030,6 @@
         "default": 1.0
       },
       {
-        "name": "albedo_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "metallic",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "roughness",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "emission_energy",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "emission_color",
-        "type": "color",
-        "default": null
-      },
-      {
         "name": "visible",
         "type": "bool",
         "default": true
@@ -3526,20 +3490,6 @@
     "params": []
   },
   {
-    "class_name": "SelectCOMP",
-    "node_type": "select",
-    "family": "comp",
-    "file": "addons/gonodes/operators/comp/select_comp.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "comp",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
     "class_name": "OutTunnel",
     "node_type": "out_tunnel",
     "family": "comp",
@@ -3720,6 +3670,14 @@
         "default": false
       }
     ]
+  },
+  {
+    "class_name": "SelectCOMP",
+    "node_type": "select",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/select_comp.gd",
+    "extension": null,
+    "params": []
   },
   {
     "class_name": "SoftBodyCOMP",
@@ -4193,8 +4151,8 @@
     "params": [
       {
         "name": "filepath",
-        "type": "string",
-        "default": ""
+        "type": "file",
+        "default": null
       },
       {
         "name": "mode",
@@ -4605,11 +4563,6 @@
     "extension": null,
     "params": [
       {
-        "name": "panel_path",
-        "type": "string",
-        "default": ""
-      },
-      {
         "name": "max_events",
         "type": "int",
         "default": 100
@@ -4638,11 +4591,6 @@
     "file": "addons/gonodes/operators/dat/render_pick_dat.gd",
     "extension": null,
     "params": [
-      {
-        "name": "render_comp",
-        "type": "string",
-        "default": ""
-      },
       {
         "name": "u",
         "type": "float",
@@ -4691,11 +4639,6 @@
     "file": "addons/gonodes/operators/dat/select_dat.gd",
     "extension": null,
     "params": [
-      {
-        "name": "dat",
-        "type": "string",
-        "default": ""
-      },
       {
         "name": "row_start",
         "type": "int",
@@ -5228,6 +5171,11 @@
     "extension": null,
     "params": [
       {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
+      {
         "name": "resolution",
         "type": "vector2i",
         "default": null
@@ -5246,6 +5194,11 @@
     "file": "addons/gonodes/operators/img/image_sequence_img.gd",
     "extension": null,
     "params": [
+      {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
       {
         "name": "resolution",
         "type": "vector2i",
@@ -5349,20 +5302,6 @@
     "params": []
   },
   {
-    "class_name": "SelectIMG",
-    "node_type": "select",
-    "family": "img",
-    "file": "addons/gonodes/operators/img/select_img.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "img",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
     "class_name": "PixelSortIMG",
     "node_type": "pixel_sort",
     "family": "img",
@@ -5422,6 +5361,48 @@
         "name": "active",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "SelectIMG",
+    "node_type": "select",
+    "family": "img",
+    "file": "addons/gonodes/operators/img/select_img.gd",
+    "extension": null,
+    "params": []
+  },
+  {
+    "class_name": "StereogramIMG",
+    "node_type": "stereogram",
+    "family": "img",
+    "file": "addons/gonodes/operators/img/stereogram_img.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "strip_width",
+        "type": "int",
+        "default": 80
+      },
+      {
+        "name": "depth_scale",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "seed",
+        "type": "int",
+        "default": 42
+      },
+      {
+        "name": "color",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -5715,20 +5696,6 @@
     "params": []
   },
   {
-    "class_name": "SelectMAT",
-    "node_type": "select",
-    "family": "mat",
-    "file": "addons/gonodes/operators/mat/select_mat.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "mat",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
     "class_name": "PbrMAT",
     "node_type": "pbr",
     "family": "mat",
@@ -5817,6 +5784,14 @@
     ]
   },
   {
+    "class_name": "SelectMAT",
+    "node_type": "select",
+    "family": "mat",
+    "file": "addons/gonodes/operators/mat/select_mat.gd",
+    "extension": null,
+    "params": []
+  },
+  {
     "class_name": "ShaderMAT",
     "node_type": "shader",
     "family": "mat",
@@ -5826,6 +5801,11 @@
       {
         "name": "shader_code",
         "type": "string",
+        "default": null
+      },
+      {
+        "name": "shader_file",
+        "type": "file",
         "default": null
       },
       {
@@ -6582,20 +6562,6 @@
     "params": []
   },
   {
-    "class_name": "SelectPOP",
-    "node_type": "select",
-    "family": "pop",
-    "file": "addons/gonodes/operators/pop/select_pop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "pop",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
     "class_name": "RenderPOP",
     "node_type": "render",
     "family": "pop",
@@ -6618,6 +6584,14 @@
         "default": true
       }
     ]
+  },
+  {
+    "class_name": "SelectPOP",
+    "node_type": "select",
+    "family": "pop",
+    "file": "addons/gonodes/operators/pop/select_pop.gd",
+    "extension": null,
+    "params": []
   },
   {
     "class_name": "SourcePOP",
@@ -7373,6 +7347,14 @@
         "default": 0.1
       }
     ]
+  },
+  {
+    "class_name": "SelectSDF",
+    "node_type": "select",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/select_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": []
   },
   {
     "class_name": "SmoothSubtractSDF",
@@ -8139,6 +8121,11 @@
     "extension": null,
     "params": [
       {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
+      {
         "name": "reload",
         "type": "bool",
         "default": false
@@ -8152,6 +8139,11 @@
     "file": "addons/gonodes/operators/sop/file_out_sop.gd",
     "extension": null,
     "params": [
+      {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
       {
         "name": "write",
         "type": "bool",
@@ -8948,11 +8940,6 @@
     "extension": null,
     "params": [
       {
-        "name": "sop_path",
-        "type": "string",
-        "default": ""
-      },
-      {
         "name": "apply_transform",
         "type": "bool",
         "default": false
@@ -9401,11 +9388,6 @@
     "file": "addons/gonodes/operators/sop/select_sop.gd",
     "extension": null,
     "params": [
-      {
-        "name": "sop",
-        "type": "string",
-        "default": ""
-      },
       {
         "name": "entity",
         "type": "menu",
@@ -10063,6 +10045,35 @@
     "params": []
   },
   {
+    "class_name": "ASCIIArtTOP",
+    "node_type": "ascii_art",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/ascii_art_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "cell_size",
+        "type": "float",
+        "default": 8.0
+      },
+      {
+        "name": "text_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "color_mode",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "AnalyzeTOP",
     "node_type": "analyze",
     "family": "top",
@@ -10107,6 +10118,30 @@
     "file": "addons/gn_ext_mapper/operators/top/bezier_map_top.gd",
     "extension": "gn_ext_mapper",
     "params": []
+  },
+  {
+    "class_name": "BilateralBlurTOP",
+    "node_type": "bilateral_blur",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/bilateral_blur_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "radius",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "sigma_spatial",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "sigma_range",
+        "type": "float",
+        "default": 0.1
+      }
+    ]
   },
   {
     "class_name": "BlackmagicInTOP",
@@ -10225,6 +10260,35 @@
     ]
   },
   {
+    "class_name": "BokehBlurTOP",
+    "node_type": "bokeh_blur",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/bokeh_blur_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 8.0
+      },
+      {
+        "name": "shape",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "quality",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "brightness",
+        "type": "float",
+        "default": 1.0
+      }
+    ]
+  },
+  {
     "class_name": "CHOPtoTOP",
     "node_type": "chop_to_top",
     "family": "top",
@@ -10294,6 +10358,35 @@
         "name": "freeze",
         "type": "bool",
         "default": false
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "CellularAutomataTOP",
+    "node_type": "cellular_automata",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/cellular_automata_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "rule_set",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.5
       },
       {
         "name": "reset",
@@ -10386,6 +10479,30 @@
     ]
   },
   {
+    "class_name": "ChromaticAberrationTOP",
+    "node_type": "chromatic_aberration",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/chromatic_aberration_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "intensity",
+        "type": "float",
+        "default": 0.005
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "angle",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "CircleTOP",
     "node_type": "circle",
     "family": "top",
@@ -10425,6 +10542,30 @@
     ]
   },
   {
+    "class_name": "ColorBalanceTOP",
+    "node_type": "color_balance",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/color_balance_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "lift",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "gamma",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "gain",
+        "type": "color",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "ColorMapTOP",
     "node_type": "color_map",
     "family": "top",
@@ -10440,6 +10581,20 @@
         "name": "intensity",
         "type": "float",
         "default": 1.0
+      }
+    ]
+  },
+  {
+    "class_name": "ColorSpaceTOP",
+    "node_type": "color_space",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/color_space_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "conversion",
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -10536,11 +10691,6 @@
         "name": "color",
         "type": "color",
         "default": null
-      },
-      {
-        "name": "alpha",
-        "type": "float",
-        "default": 1.0
       }
     ]
   },
@@ -10598,6 +10748,11 @@
         "name": "resolution",
         "type": "vector2i",
         "default": null
+      },
+      {
+        "name": "edge_mode",
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -10616,39 +10771,34 @@
     ]
   },
   {
-    "class_name": "CustomShaderTOP",
-    "node_type": "custom_shader",
+    "class_name": "CubeMapTOP",
+    "node_type": "cube_map",
     "family": "top",
-    "file": "addons/gonodes/operators/top/custom_shader_top.gd",
+    "file": "addons/gonodes/operators/top/cube_map_top.gd",
     "extension": null,
     "params": [
       {
-        "name": "time_dependent",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "cook_once",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "resolution",
-        "type": "vector2i",
+        "name": "mode",
+        "type": "menu",
         "default": null
       },
       {
-        "name": "shader_code",
-        "type": "string",
+        "name": "extract_face",
+        "type": "menu",
         "default": null
+      },
+      {
+        "name": "face_size",
+        "type": "int",
+        "default": 256
       }
     ]
   },
   {
-    "class_name": "GLSLMultiTOP",
-    "node_type": "glsl_multi",
+    "class_name": "CustomShaderTOP",
+    "node_type": "custom_shader",
     "family": "top",
-    "file": "addons/gonodes/operators/top/glsl_multi_top.gd",
+    "file": "addons/gonodes/operators/top/custom_shader_top.gd",
     "extension": null,
     "params": [
       {
@@ -10824,6 +10974,30 @@
     ]
   },
   {
+    "class_name": "DirectionalBlurTOP",
+    "node_type": "directional_blur",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/directional_blur_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "angle",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "samples",
+        "type": "int",
+        "default": 16
+      }
+    ]
+  },
+  {
     "class_name": "DisplaceTOP",
     "node_type": "displace",
     "family": "top",
@@ -10839,6 +11013,35 @@
         "name": "method",
         "type": "menu",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "DitherTOP",
+    "node_type": "dither",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/dither_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "levels",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "matrix_size",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "spread",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "color_dither",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -10927,6 +11130,11 @@
     "extension": "gn_ext_ffmpeg",
     "params": [
       {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
+      {
         "name": "resolution",
         "type": "vector2i",
         "default": null
@@ -10988,6 +11196,79 @@
     ]
   },
   {
+    "class_name": "FilmGrainTOP",
+    "node_type": "film_grain",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/film_grain_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "intensity",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "size",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "luminance_dependent",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "colored",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "manual_time",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "time",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "FilterTOP",
+    "node_type": "filter",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/filter_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "radius_outer",
+        "type": "float",
+        "default": 15.0
+      },
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "offset",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
     "class_name": "FitTOP",
     "node_type": "fit",
     "family": "top",
@@ -11007,6 +11288,11 @@
       {
         "name": "border_color",
         "type": "color",
+        "default": null
+      },
+      {
+        "name": "filter",
+        "type": "menu",
         "default": null
       }
     ]
@@ -11110,6 +11396,64 @@
     ]
   },
   {
+    "class_name": "FrameDifferenceTOP",
+    "node_type": "frame_difference",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/frame_difference_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "gain",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "GLSLMultiTOP",
+    "node_type": "glsl_multi",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/glsl_multi_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "time_dependent",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "cook_once",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "shader_code",
+        "type": "string",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "GeometryBufferTOP",
     "node_type": "geometry_buffer",
     "family": "top",
@@ -11120,6 +11464,60 @@
         "name": "buffer_mode",
         "type": "menu",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "GlitchTOP",
+    "node_type": "glitch",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/glitch_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "intensity",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "block_size",
+        "type": "float",
+        "default": 32.0
+      },
+      {
+        "name": "channel_shift",
+        "type": "float",
+        "default": 0.01
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 8.0
+      },
+      {
+        "name": "scan_jitter",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "tear_strength",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "color_crush",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "noise_amount",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "stale_mix",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -11149,6 +11547,59 @@
         "name": "background",
         "type": "color",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "GodRaysTOP",
+    "node_type": "god_rays",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/god_rays_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "samples",
+        "type": "int",
+        "default": 64
+      },
+      {
+        "name": "density",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "weight",
+        "type": "float",
+        "default": 0.01
+      },
+      {
+        "name": "decay",
+        "type": "float",
+        "default": 0.97
+      },
+      {
+        "name": "exposure",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
+    "class_name": "GradientMapTOP",
+    "node_type": "gradient_map",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/gradient_map_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "intensity",
+        "type": "float",
+        "default": 1.0
       }
     ]
   },
@@ -11196,12 +11647,56 @@
     ]
   },
   {
+    "class_name": "HalftoneTOP",
+    "node_type": "halftone",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/halftone_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "dot_size",
+        "type": "float",
+        "default": 8.0
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "angle_c",
+        "type": "float",
+        "default": 15.0
+      },
+      {
+        "name": "angle_m",
+        "type": "float",
+        "default": 75.0
+      },
+      {
+        "name": "angle_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "angle_k",
+        "type": "float",
+        "default": 45.0
+      }
+    ]
+  },
+  {
     "class_name": "HapInTOP",
     "node_type": "hapintop",
     "family": "top",
     "file": "addons/gn_ext_hap/operators/top/hap_in_top.gd",
     "extension": "gn_ext_hap",
     "params": [
+      {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
       {
         "name": "play",
         "type": "bool",
@@ -11221,6 +11716,30 @@
         "name": "seek",
         "type": "float",
         "default": -1.0
+      }
+    ]
+  },
+  {
+    "class_name": "HighPassTOP",
+    "node_type": "high_pass",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/high_pass_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "offset",
+        "type": "float",
+        "default": 0.5
       }
     ]
   },
@@ -11251,6 +11770,11 @@
         "default": true
       },
       {
+        "name": "isf_file",
+        "type": "file",
+        "default": null
+      },
+      {
         "name": "resolution",
         "type": "vector2i",
         "default": null
@@ -11259,6 +11783,39 @@
         "name": "isf_code",
         "type": "string",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "KaleidoscopeTOP",
+    "node_type": "kaleidoscope",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/kaleidoscope_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "segments",
+        "type": "int",
+        "default": 6
+      },
+      {
+        "name": "rotation",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "KuwaharaTOP",
+    "node_type": "kuwahara",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/kuwahara_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "radius",
+        "type": "int",
+        "default": 4
       }
     ]
   },
@@ -11350,6 +11907,70 @@
     ]
   },
   {
+    "class_name": "LimitTOP",
+    "node_type": "limit",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/limit_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "min_r",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_r",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_g",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_g",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_b",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_b",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_a",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_a",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_luma",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_luma",
+        "type": "float",
+        "default": 1.0
+      }
+    ]
+  },
+  {
     "class_name": "LookupTOP",
     "node_type": "lookup",
     "family": "top",
@@ -11417,6 +12038,39 @@
     ]
   },
   {
+    "class_name": "MedianTOP",
+    "node_type": "median",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/median_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "radius",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "MirrorTOP",
+    "node_type": "mirror",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/mirror_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "axis",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "angle",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "MonoTOP",
     "node_type": "mono",
     "family": "top",
@@ -11442,6 +12096,11 @@
     "file": "addons/gonodes/operators/top/movie_file_in_top.gd",
     "extension": null,
     "params": [
+      {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
       {
         "name": "resolution",
         "type": "vector2i",
@@ -11842,6 +12501,25 @@
     ]
   },
   {
+    "class_name": "PixelateTOP",
+    "node_type": "pixelate",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/pixelate_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "pixel_size",
+        "type": "float",
+        "default": 8.0
+      },
+      {
+        "name": "shape",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "PointCloudRenderTOP",
     "node_type": "point_cloud_render",
     "family": "top",
@@ -11917,6 +12595,25 @@
         "name": "far_clip",
         "type": "float",
         "default": 100.0
+      }
+    ]
+  },
+  {
+    "class_name": "PolarTOP",
+    "node_type": "polar",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/polar_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "rotation",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -12430,6 +13127,11 @@
         "name": "dof_bokeh_shape",
         "type": "menu",
         "default": null
+      },
+      {
+        "name": "cook_every_frame",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -12487,6 +13189,35 @@
     ]
   },
   {
+    "class_name": "RippleTOP",
+    "node_type": "ripple",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/ripple_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "amplitude",
+        "type": "float",
+        "default": 0.01
+      },
+      {
+        "name": "frequency",
+        "type": "float",
+        "default": 20.0
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "SVGTOP",
     "node_type": "svg",
     "family": "top",
@@ -12500,8 +13231,37 @@
       },
       {
         "name": "svg_path",
-        "type": "string",
-        "default": ""
+        "type": "file",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "ScanLineTOP",
+    "node_type": "scan_line",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/scan_line_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "line_spacing",
+        "type": "float",
+        "default": 4.0
+      },
+      {
+        "name": "line_brightness",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "jitter",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "curvature",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -12548,6 +13308,14 @@
         "default": true
       }
     ]
+  },
+  {
+    "class_name": "SelectTOP",
+    "node_type": "select",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/select_top.gd",
+    "extension": null,
+    "params": []
   },
   {
     "class_name": "ShadertoyTOP",
@@ -12675,6 +13443,25 @@
       },
       {
         "name": "slice_pos",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
+    "class_name": "SpherizeTOP",
+    "node_type": "spherize",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/spherize_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "radius",
         "type": "float",
         "default": 0.5
       }
@@ -12862,84 +13649,11 @@
         "name": "blend",
         "type": "bool",
         "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "SelectTOP",
-    "node_type": "select",
-    "family": "top",
-    "file": "addons/gonodes/operators/top/select_top.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "top",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
-    "class_name": "LimitTOP",
-    "node_type": "limit",
-    "family": "top",
-    "file": "addons/gonodes/operators/top/limit_top.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "mode",
-        "type": "enum",
-        "default": 0
       },
       {
-        "name": "min_r",
+        "name": "blend_pos",
         "type": "float",
         "default": 0.0
-      },
-      {
-        "name": "max_r",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "min_g",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "max_g",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "min_b",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "max_b",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "min_a",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "max_a",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "min_luma",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "max_luma",
-        "type": "float",
-        "default": 1.0
       }
     ]
   },
@@ -12987,6 +13701,90 @@
     ]
   },
   {
+    "class_name": "TestCardTOP",
+    "node_type": "testcard",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/test_card_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "card_type",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "grid_cells",
+        "type": "float",
+        "default": 16.0
+      },
+      {
+        "name": "line_width",
+        "type": "float",
+        "default": 1.5
+      },
+      {
+        "name": "grid_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "center_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "show_grid",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "show_center",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "show_color_bars",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "show_grayscale",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "show_corners",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "show_safe_area",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "show_circle",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "safe_margin",
+        "type": "float",
+        "default": 0.05
+      }
+    ]
+  },
+  {
     "class_name": "TextTOP",
     "node_type": "text",
     "family": "top",
@@ -13001,6 +13799,11 @@
       {
         "name": "resolution",
         "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "font_file",
+        "type": "file",
         "default": null
       },
       {
@@ -13118,6 +13921,59 @@
     ]
   },
   {
+    "class_name": "ToonShadeTOP",
+    "node_type": "toon_shade",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/toon_shade_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "shade_levels",
+        "type": "int",
+        "default": 4
+      },
+      {
+        "name": "edge_strength",
+        "type": "float",
+        "default": 1.5
+      },
+      {
+        "name": "edge_threshold",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "edge_color",
+        "type": "color",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "TrailTOP",
+    "node_type": "trail",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/trail_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "decay",
+        "type": "float",
+        "default": 0.9
+      },
+      {
+        "name": "brightness",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "TransformTOP",
     "node_type": "transform",
     "family": "top",
@@ -13187,6 +14043,25 @@
         "name": "softness",
         "type": "float",
         "default": 0.005
+      }
+    ]
+  },
+  {
+    "class_name": "TwirlTOP",
+    "node_type": "twirl",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/twirl_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "radius",
+        "type": "float",
+        "default": 0.5
       }
     ]
   },
@@ -13266,6 +14141,93 @@
         "name": "antialiased",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "VignetteTOP",
+    "node_type": "vignette",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/vignette_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "intensity",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "softness",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "roundness",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "color",
+        "type": "color",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "VoronoiTOP",
+    "node_type": "voronoi",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/voronoi_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "scale",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "jitter",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "WebRenderTOP",
+    "node_type": "webrender",
+    "family": "top",
+    "file": "addons/gn_ext_webrender/operators/top/web_render_top.gd",
+    "extension": "gn_ext_webrender",
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "url",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "html",
+        "type": "string",
+        "default": ""
       }
     ]
   },
@@ -14478,20 +15440,6 @@
     "params": []
   },
   {
-    "class_name": "SelectVOL",
-    "node_type": "select",
-    "family": "vol",
-    "file": "addons/gonodes/operators/vol/select_vol.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "vol",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
     "class_name": "PyroVOL",
     "node_type": "pyro",
     "family": "vol",
@@ -14707,5 +15655,13 @@
         "default": 0.1
       }
     ]
+  },
+  {
+    "class_name": "SelectVOL",
+    "node_type": "select",
+    "family": "vol",
+    "file": "addons/gonodes/operators/vol/select_vol.gd",
+    "extension": null,
+    "params": []
   }
 ]

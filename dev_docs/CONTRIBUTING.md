@@ -524,6 +524,66 @@ This keeps patches portable — the same `.gnpatch` works on every platform with
 
 ---
 
+### Active Input Indices — Selective Upstream Cooking
+
+By default, the cook engine's active-set BFS follows **all** wire connections
+upstream from a node. Some operators only read a subset of their inputs depending
+on their current parameter state — Switch (only selected index), CubeMapTOP
+(only input 0 in Extract/Equirect mode), MathCHOP (only input 0 for unary ops).
+
+If you don't declare which inputs are active, the cook engine will cook **all**
+upstream chains even if your operator ignores some inputs. This wastes CPU/GPU.
+
+#### Override `get_active_input_indices()`
+
+```gdscript
+## Returns port indices that are consumed this cook.
+## Empty array (default) = ALL connected inputs are active.
+## PackedInt32Array([0]) = only input 0 is active.
+## PackedInt32Array([-1]) = NO inputs are active (sentinel).
+func get_active_input_indices() -> PackedInt32Array:
+    var idx: int = get_parameter_value("index")
+    return PackedInt32Array([idx])
+```
+
+The cook engine calls this during `_compute_active_set()` BFS and skips
+connections to non-active ports. The result is that upstream chains only cook
+when the operator actually reads from them.
+
+#### When to override
+
+- **Switch-type operators** — only the selected input feeds through
+- **Mode-dependent operators** — e.g., CubeMapTOP in Extract mode only uses input 0
+- **Unary/binary operators** — e.g., MathCHOP in unary mode only uses input 0
+- **No-input modes** — e.g., JSONDAT in Parse mode ignores all wired inputs
+
+#### Sentinel values
+
+| Return value | Meaning |
+|---|---|
+| `PackedInt32Array()` (empty) | All inputs active (default) |
+| `PackedInt32Array([0])` | Only input 0 active |
+| `PackedInt32Array([0, 1])` | Inputs 0 and 1 active |
+| `PackedInt32Array([-1])` | No inputs active (sentinel — node generates data internally) |
+
+#### Parameter changes trigger recomputation
+
+When any parameter changes, the cook engine marks `_active_set_dirty = true`
+via `_on_node_param_changed`. This means switching a Switch node's `index`
+parameter immediately recomputes which upstream chains are active — no manual
+invalidation needed.
+
+#### Existing operator overrides
+
+| Operator | Active behavior |
+|----------|----------------|
+| SwitchTOP/CHOP/SOP/DAT/COMP | `[selected_index]` (blend mode: all) |
+| CubeMapTOP | Assemble=all, Extract/Equirect=`[0]` |
+| MathCHOP | Unary ops=`[0]`, binary ops=all |
+| JSONDAT | Parse mode=`[-1]` (none), Generate=all |
+
+---
+
 ### Extension Capabilities — What Extensions Can Do
 
 The extension system goes well beyond adding operators to existing families. Extensions can **define entirely new data families** — introducing new port types, wire colors, data classes, and palette sections without modifying any core code.

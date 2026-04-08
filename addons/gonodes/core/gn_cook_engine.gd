@@ -480,10 +480,13 @@ func cook_frame(delta: float) -> void:
 	# Step 3a: Snapshot initially-dirty nodes for debug overlay.
 	# Nodes dirtied by incremental propagation during the cook loop are
 	# added to last_dirty_ids as they trigger.
-	last_dirty_ids.clear()
-	for node in topo_order:
-		if node.dirty:
-			last_dirty_ids[node.id] = true
+	# Gated behind editor_mode — the debug overlay only exists in the editor;
+	# player builds skip this dictionary entirely.
+	if editor_mode:
+		last_dirty_ids.clear()
+		for node in topo_order:
+			if node.dirty:
+				last_dirty_ids[node.id] = true
 
 	# Step 3b: Recompute active chain only when topology or sinks changed.
 	if _active_set_dirty:
@@ -722,7 +725,8 @@ func _dirty_immediate_downstream(node_id: String) -> void:
 		var ds_node: GNNode = network.nodes.get(ds_id, null)
 		if ds_node and not ds_node.dirty:
 			ds_node.mark_dirty()
-			last_dirty_ids[ds_id] = true
+			if editor_mode:
+				last_dirty_ids[ds_id] = true
 
 
 ## Evaluates expression parameters on a non-dirty node and checks whether any

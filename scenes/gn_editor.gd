@@ -883,10 +883,16 @@ func _setup_toolbar() -> void:
 	info_bar.add_theme_constant_override("separation", 2)
 
 	# ── Row 1: File & Project ────────────────────────────────────────────
+	var scroll1 := ScrollContainer.new()
+	scroll1.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll1.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_bar.add_child(scroll1)
+	info_bar.move_child(scroll1, 0)
 	var row1 := HBoxContainer.new()
 	row1.add_theme_constant_override("separation", 4)
-	info_bar.add_child(row1)
-	info_bar.move_child(row1, 0)
+	row1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll1.add_child(row1)
 
 	var btn_new := Button.new()
 	btn_new.text = "New"
@@ -1015,9 +1021,15 @@ func _setup_toolbar() -> void:
 	log_toggle.reparent(row1, false)
 
 	# ── Timeline Scrubber Row ────────────────────────────────────────────
+	var scroll_tl := ScrollContainer.new()
+	scroll_tl.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll_tl.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll_tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_bar.add_child(scroll_tl)
 	var tl_row := HBoxContainer.new()
 	tl_row.add_theme_constant_override("separation", 4)
-	info_bar.add_child(tl_row)
+	tl_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll_tl.add_child(tl_row)
 
 	_timeline_time_label = Label.new()
 	_timeline_time_label.text = "0:00.0 / F0"
@@ -1035,9 +1047,15 @@ func _setup_toolbar() -> void:
 	tl_row.add_child(_timeline_scrubber)
 
 	# ── Row 2: View & Graph ──────────────────────────────────────────────
+	var scroll2 := ScrollContainer.new()
+	scroll2.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll2.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_bar.add_child(scroll2)
 	var row2 := HBoxContainer.new()
 	row2.add_theme_constant_override("separation", 4)
-	info_bar.add_child(row2)
+	row2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll2.add_child(row2)
 
 	# Preview toggle
 	preview_toggle = CheckButton.new()

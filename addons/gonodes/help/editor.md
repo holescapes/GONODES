@@ -69,6 +69,7 @@ available per session. Re-assigning a slot replaces the previous bookmark.
 | **Double-click** wire         | Insert a new node on that wire                  |
 | **Left-drag** on empty space  | Box-select (rubber-band selection for nodes and wires) |
 | **Left-drag** a node          | Move node (snaps to 20px grid)                  |
+| **Shake** a node rapidly      | **Shake-to-disconnect** — detach all wires (see below) |
 | **Left-drag** from port       | Start a wire connection                         |
 | **Right-click** on empty space / node | Open the **context menu**               |
 | **Right-click** wire          | Select wire and open context menu               |
@@ -347,6 +348,7 @@ referenced node.
 | **Zoom range**       | 0.25× to 2.5× (scroll wheel, step 0.1)                  |
 | **Default zoom**     | 0.8×                                                     |
 | **Snap grid**        | 20px grid snapping (enabled by default)                  |
+| **Edge-scroll**      | Drag a node near any edge to auto-scroll the canvas. Selected nodes follow the scroll. |
 | **Fit to view (F)**  | Frames selected nodes or all nodes with padding          |
 | **Bookmarks (1-9)**  | Ctrl+# to set, # to jump — instant node navigation      |
 | **Wire styles (W)**  | Curved (default), Straight, or Right-Angle connections   |
@@ -411,6 +413,21 @@ Wire deletion is fully undoable (Ctrl+Z).
 The entire operation (disconnect old wire, create node, connect new wires,
 reposition nodes) is a single undo action.  Pressing Ctrl+Z undoes the
 insert and smoothly animates nodes back to their original positions.
+
+### Shake-to-Disconnect (Houdini-style)
+
+Rapidly shake a node left-right while dragging to **disconnect all its wires**.
+This is a fast alternative to manually disconnecting wires one by one.
+
+- **How:** While dragging a node, shake it horizontally with enough speed
+  (≥ 150 px/s) and at least 3 direction reversals within 0.5 seconds.
+- **Effect:** All input and output wires are removed. If the node was
+  in the middle of a chain (upstream → node → downstream), the upstream
+  and downstream nodes are automatically **reconnected** to preserve the
+  data flow (bypass reconnection).
+- **Undo:** The entire operation is a single undo action — Ctrl+Z restores
+  all original connections.
+- **Toast:** A brief notification confirms the disconnect.
 
 ### Wire Styles
 
@@ -485,7 +502,10 @@ Full undo/redo support for:
 - Creating / removing wire connections
 - Moving nodes (drag)
 - Renaming nodes
+- **Parameter value changes** (numeric scrub, checkbox toggle, dropdown, color, etc.)
+- **Parameter mode changes** (Constant ↔ Expression)
 - Copy / paste / duplicate / cut operations
+- Shake-to-disconnect
 
 History is cleared on **New** or **Open**.
 
@@ -504,6 +524,15 @@ Patches are saved as `.gonodes` JSON files containing:
 - Node states (bypass, locked, preview enabled)
 
 Bypass and lock states are persisted — reloading a patch restores all node states.
+
+---
+
+## Toast Notifications
+
+Brief, non-intrusive notifications appear in the **center** of the graph
+canvas for transient feedback — e.g., "Shake disconnect: removed 3 wires",
+"Pasted 5 nodes", or error messages from failed operations. Toasts fade
+out automatically after ~2 seconds and do not require dismissal.
 
 ---
 

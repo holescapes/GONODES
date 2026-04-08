@@ -1,10 +1,14 @@
 class_name HighPassTOP
 extends GNTopBase
+## @deprecated Use FilterTOP (mode = High Pass) instead.
 ## Extracts high-frequency detail by subtracting a blurred version from the original.
 
 
 func _init() -> void:
 	node_type = "high_pass"
+	deprecated = true
+	deprecation_message = "Use FilterTOP (mode = High Pass) instead."
+	deprecated_replacement = "FilterTOP"
 
 
 func _init_ports() -> void:

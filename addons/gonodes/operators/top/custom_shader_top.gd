@@ -579,8 +579,6 @@ func _rebuild_uniform_params(code: String) -> void:
 
 		# Register and wire signals
 		add_parameter(param)
-		param.value_changed.connect(_on_parameter_changed)
-		param.mode_changed.connect(_on_parameter_mode_changed)
 		_dynamic_param_names.append(ui.uniform_name)
 
 	GNLogger.info("CustomShaderTOP", "'%s' dynamic params → %s" % [id, str(_dynamic_param_names)])

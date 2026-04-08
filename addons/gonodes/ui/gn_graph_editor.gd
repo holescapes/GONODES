@@ -4852,14 +4852,23 @@ func _handle_edge_scroll(delta: float) -> void:
 
 	if scroll_delta != Vector2.ZERO:
 		scroll_offset += scroll_delta
-		# When dragging nodes, shift them along with the scroll so they
-		# stay under the cursor instead of lagging behind.
+		# When dragging nodes, feed the scroll delta into GraphEdit's
+		# internal drag tracking by synthesizing a mouse motion event.
+		# GraphEdit positions dragged nodes via drag_from + drag_accum/zoom;
+		# adding scroll_delta to drag_accum (via event.relative) keeps its
+		# calculation in sync with the scroll change.  Directly setting
+		# position_offset instead would be overwritten by GraphEdit's next
+		# real mouse event, causing a stutter/snap fight.
 		if _node_drag_active:
-			var graph_delta := scroll_delta / zoom
-			for view_name in _node_views:
-				var view: GNNodeView = _node_views[view_name]
-				if view.selected:
-					view.position_offset += graph_delta
+			var synth := InputEventMouseMotion.new()
+			synth.position = get_local_mouse_position()
+			synth.global_position = get_global_mouse_position()
+			synth.relative = scroll_delta
+			synth.button_mask = MOUSE_BUTTON_MASK_LEFT
+			get_viewport().push_input(synth)
+			# Keep _node_drag_last_pos in sync so the group-move code
+			# in _process() sees only mouse-driven delta, not scroll.
+			_node_drag_last_pos += scroll_delta / zoom
 
 
 # ─────────────────────────────────────────────────────────────────────────────

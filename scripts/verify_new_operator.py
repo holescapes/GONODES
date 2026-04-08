@@ -16,6 +16,7 @@ Usage:
   python scripts/verify_new_operator.py SinkOUT
   python scripts/verify_new_operator.py --all          # Check every registered operator
   python scripts/verify_new_operator.py --recent       # Show operators missing from registries
+  python scripts/verify_new_operator.py SinkOUT --auto-register  # Register in gn_core.cfg
 """
 import argparse
 import json
@@ -201,6 +202,96 @@ def extract_cfg_description(class_name):
         if m:
             return m.group(1)
     return None
+
+
+# ── Base class → family mapping ───────────────────────────────────────────────
+
+BASE_TO_FAMILY = {
+    "GNTopBase": "TOP", "GNChopBase": "CHOP", "GNSopBase": "SOP",
+    "GNDatBase": "DAT", "GNCompBase": "COMP", "GNMatBase": "MAT",
+    "GNImgBase": "IMG", "GNOutBase": "OUT", "GNUiBase": "UI",
+    "GNPopBase": "POP", "GNVolBase": "VOL", "GNNode": None,
+}
+
+
+def extract_docstring(gd_text):
+    """Extract the first ## docstring line from a .gd file."""
+    m = re.search(r"^##\s+(.+)", gd_text, re.MULTILINE)
+    return m.group(1).strip() if m else None
+
+
+def extract_family_from_extends(gd_text):
+    """Derive the family name from the extends base class."""
+    m = re.search(r"^extends\s+(\w+)", gd_text, re.MULTILINE)
+    if not m:
+        return None
+    base = m.group(1)
+    # Direct mapping
+    if base in BASE_TO_FAMILY:
+        return BASE_TO_FAMILY[base]
+    # Fallback: infer from suffix (e.g., RenderTOP → TOP)
+    for suffix in ("TOP", "CHOP", "SOP", "DAT", "COMP", "MAT", "IMG", "OUT", "UI", "POP", "VOL"):
+        if base.upper().endswith(suffix):
+            return suffix
+    return None
+
+
+def auto_register(class_name):
+    """Auto-register an operator in gn_core.cfg using its .gd docstring.
+
+    Returns True on success, False on failure.
+    """
+    # Check if already registered
+    if find_cfg_entry(class_name):
+        print(f"  {WARN} {class_name} is already registered — skipping")
+        return True
+
+    # Find the .gd file
+    gd_path, gd_text = find_gd_file(class_name)
+    if not gd_path:
+        print(f"  {FAIL} Cannot auto-register: .gd file not found for '{class_name}'")
+        return False
+
+    # Extract family
+    family = extract_family_from_extends(gd_text)
+    if not family:
+        # Fallback from extract_info
+        _, family = extract_info(gd_text)
+    if not family:
+        print(f"  {FAIL} Cannot auto-register: unable to determine family for '{class_name}'")
+        return False
+
+    # Extract description from ## docstring
+    description = extract_docstring(gd_text)
+    if not description:
+        print(f"  {FAIL} Cannot auto-register: no ## docstring in {gd_path}")
+        return False
+
+    # Build script path (convert filesystem path to res://)
+    rel_path = os.path.relpath(gd_path, ROOT).replace("\\", "/")
+    script_path = f"res://{rel_path}"
+
+    # Append to gn_core.cfg
+    core_cfg = ROOT / "addons" / "gonodes" / "gn_core.cfg"
+    if not core_cfg.exists():
+        print(f"  {FAIL} gn_core.cfg not found")
+        return False
+
+    entry = (
+        f"\n[operator.{class_name}]\n"
+        f"\n"
+        f'family="{family}"\n'
+        f'script="{script_path}"\n'
+        f'description="{description}"\n'
+    )
+
+    with open(core_cfg, "a", encoding="utf-8") as f:
+        f.write(entry)
+
+    print(f"  {PASS} Auto-registered {class_name} in gn_core.cfg")
+    print(f"        family={family}")
+    print(f"        description=\"{description}\"")
+    return True
 
 
 def count_operators_in_docs():
@@ -482,7 +573,20 @@ def main():
     parser.add_argument("--recent", action="store_true", help="Find unregistered operators")
     parser.add_argument("--counts", action="store_true", help="Check doc count consistency")
     parser.add_argument("--quiet", action="store_true", help="Summary only")
+    parser.add_argument("--auto-register", action="store_true",
+                        help="Auto-register the operator in gn_core.cfg using its ## docstring")
     args = parser.parse_args()
+
+    if args.auto_register:
+        if not args.class_name:
+            print(red("ERROR: --auto-register requires a class_name argument"))
+            return 1
+        ok = auto_register(args.class_name)
+        if not ok:
+            return 1
+        # After registering, run the full verify
+        _, fails, _ = verify_operator(args.class_name)
+        return 1 if fails > 0 else 0
 
     if args.counts or (not args.class_name and not args.all and not args.recent):
         check_doc_counts()

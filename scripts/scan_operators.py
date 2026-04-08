@@ -40,7 +40,7 @@ def scan_ops(base_dir, ext_name=None):
                     if not line.startswith('\t') and not line.startswith('    '):
                         if stripped and not stripped.startswith('pass'):
                             break
-                    cm = re.search(r'create_(float|int|bool|menu|enum|string|color|vector2i|file_path|separator|header|pulse|ramp)\s*\(\s*"([^"]+)"', stripped)
+                    cm = re.search(r'create_(float|int|bool|menu|enum|string|color|vector2i|file_path|file|separator|header|pulse|ramp)\s*\(\s*"([^"]+)"', stripped)
                     if cm:
                         ptype = cm.group(1)
                         pname = cm.group(2)

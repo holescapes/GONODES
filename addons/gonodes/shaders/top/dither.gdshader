@@ -26,15 +26,15 @@ float get_bayer(ivec2 coord) {
 		int idx = (coord.y % 4) * 4 + (coord.x % 4);
 		return bayer4[idx];
 	} else {
-		// 8x8 via recursive 4x4
+		// 8x8 via recursive formula: M8(i,j) = 4*M4(i%4,j%4) + M2(i/4,j/4)
+		// Normalized: bayer4 is /16, bayer2 is /4 → result spans [0, 63/64]
 		int x4 = coord.x % 4;
 		int y4 = coord.y % 4;
 		int idx = y4 * 4 + x4;
-		float base = bayer4[idx];
 		int x2 = (coord.x / 4) % 2;
 		int y2 = (coord.y / 4) % 2;
 		int idx2 = y2 * 2 + x2;
-		return (base + bayer2[idx2]) / 4.0 + 0.125;
+		return bayer4[idx] + bayer2[idx2] / 16.0;
 	}
 }
 

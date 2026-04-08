@@ -18,7 +18,8 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("filepath", "",
+	add_parameter(GNParameter.create_file("filepath", "",
+		PackedStringArray(["*.csv", "*.tsv", "*.json", "*.txt", "*.md", "*.cfg", "*.ini"]),
 		"File Path", "Path to file (res:// or user://)"))
 	add_parameter(GNParameter.create_enum("mode",
 		PackedStringArray(["Auto", "CSV", "TSV", "JSON", "Text"]), 0,

@@ -15,6 +15,9 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("pixel_size", 8.0, 1.0, 256.0, 1.0,
 		"Pixel Size", "Block size in pixels"))
+	add_parameter(GNParameter.create_enum("shape",
+		PackedStringArray(["Square", "Circle", "Diamond", "Hexagon"]), 0,
+		"Shape", "Pixel block shape"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -32,6 +35,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("source_tex", tex_in.texture)
 	_material.set_shader_parameter("pixel_size", get_param_value("pixel_size"))
+	_material.set_shader_parameter("shape", get_param_value("shape"))
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data

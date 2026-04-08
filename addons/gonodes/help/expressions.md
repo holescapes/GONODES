@@ -108,6 +108,52 @@ top("noise1", "aspect")
 top("render1", "resolution").x
 ```
 
+### `chopp(node_id, port, channel, index)` — Port-Aware CHOP Read
+
+Like `chop()` but targets a **specific output port** by name or index.
+Essential for multi-output nodes (e.g., GDScriptSCRIPT with two CHOP outputs)
+where `chop()` always picks the first CHOP port it finds.
+
+| Argument   | Type          | Required | Description                                    |
+|------------|---------------|----------|------------------------------------------------|
+| `node_id`  | String        | yes      | The ID of the CHOP node                         |
+| `port`     | String or int | yes      | Port name (e.g. `"out2"`) or port index (e.g. `1`) |
+| `channel`  | String        | no       | Channel name (e.g. `"tx"`). Omit for info dict. |
+| `index`    | int           | no       | Sample index. `-1` or omitted = latest sample   |
+
+```gdscript
+# Read "tx" from the second output port (by name)
+chopp("script1", "out2", "tx")
+
+# Read "tx" from port index 1
+chopp("script1", 1, "tx")
+
+# Read sample 5 of "tx" from port "out2"
+chopp("script1", "out2", "tx", 5)
+```
+
+**Typed variant:** `choppf()` — guaranteed `float` return (same arguments).
+
+### `topp(node_id, port, property)` — Port-Aware TOP Read
+
+Like `top()` but targets a **specific output port** by name or index.
+For multi-output TOPs (e.g., GLSLMultiTOP, MultiBufferRenderTOP) where
+`top()` picks the first TOP port.
+
+| Argument   | Type          | Required | Description                                    |
+|------------|---------------|----------|------------------------------------------------|
+| `node_id`  | String        | yes      | The ID of the TOP node                          |
+| `port`     | String or int | yes      | Port name (e.g. `"out1"`) or port index (e.g. `1`) |
+| `property` | String        | no       | `"resolution"` or `"aspect"`. Omit for info dict. |
+
+```gdscript
+# Get resolution of GLSLMultiTOP's second output
+topp("glsl_multi1", "out1", "resolution")
+
+# Get resolution of port index 1
+topp("glsl_multi1", 1, "resolution")
+```
+
 ### `par(param_name)` or `par(node_id, param_name)`
 
 Reads a parameter value from own node (self-reference) or another node.

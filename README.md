@@ -19,15 +19,15 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**535 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
+**545 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
 
 | Family | What It Processes | Examples |
 |--------|-------------------|----------|
-| **TOP** (101) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
-| **CHOP** (109) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
+| **TOP** (109) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
+| **CHOP** (110) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
 | **SOP** (117) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
 | **DAT** (44) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
 | **COMP** (19) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
