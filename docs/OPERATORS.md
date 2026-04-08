@@ -1557,6 +1557,7 @@ Converts between Cartesian and polar coordinate spaces — useful for wrapping i
 |-----------|------|---------|-------|-------------|
 | mode | Enum | Cartesian to Polar | — | Cartesian to Polar, Polar to Cartesian |
 | center | Vector2 | (0.5, 0.5) | — | Centre point for the transform |
+| rotation | Float | 0.0 | 0.0–1.0 | Rotates the seam position (0–1 = full turn) |
 
 **Input:** `in` (TOP). **Shader:** `polar.gdshader`.
 

@@ -18,6 +18,8 @@ func _init_parameters() -> void:
 		"", "Conversion direction"))
 	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5),
 		"Center", "Center point for the transform"))
+	add_parameter(GNParameter.create_float("rotation", 0.0, 0.0, 1.0, 0.01,
+		"Rotation", "Rotates the seam position (0–1 = full turn)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -36,6 +38,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("source_tex", tex_in.texture)
 	_material.set_shader_parameter("mode", get_param_value("mode"))
 	_material.set_shader_parameter("center", get_param_value("center"))
+	_material.set_shader_parameter("rotation", get_param_value("rotation"))
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
