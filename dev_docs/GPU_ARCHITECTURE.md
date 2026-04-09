@@ -168,3 +168,69 @@ explicitly. This is fine — it's on-demand, not every frame.
 | Resource leak on main RD | Existing `_cleanup_mrt()` / `_notification(PREDELETE)` logic already frees RIDs. |
 | Thread safety | Cook engine is single-threaded (`_process`). No concurrent RD access. |
 | Compatibility renderer | `get_rendering_device()` returns `null` → fall back to SubViewport path (already implemented). |
+
+
+## RD Resource Lifecycle Rules
+
+Sharing the main RD means resources can be invalidated or freed by the
+engine outside our control. These rules prevent crashes from stale RIDs.
+
+### Borrowed vs Owned RIDs
+
+| RID type | Owned? | Free it? |
+|----------|--------|----------|
+| Output textures (MRT color attachments, compute output) | **Yes** | Yes — operator created them |
+| Placeholder textures (1×1 white fallback) | **Yes** | Yes — operator created them |
+| Uniform sets | **Yes** | Yes — but check validity first (see below) |
+| Shaders, pipelines, samplers, framebuffers | **Yes** | Yes — `RID.is_valid()` guard is sufficient |
+| Input texture RIDs from `texture_get_rd_texture()` | **No** | **Never** — upstream owns them |
+
+### Uniform Set Auto-Invalidation
+
+When a texture referenced by a uniform set is freed (e.g. upstream resizes
+its output), the RD **silently invalidates** the uniform set. Calling
+`free_rid()` on an auto-invalidated uniform set crashes (the RID maps to
+nothing, or worse, a recycled resource).
+
+**Rule: Always check `rd.uniform_set_is_valid(us)` before `free_rid(us)`.**
+
+```gdscript
+# WRONG — crashes if the set was auto-invalidated
+if _input_uniform_set.is_valid():
+    _rd.free_rid(_input_uniform_set)
+
+# RIGHT
+if _input_uniform_set.is_valid() and _rd.uniform_set_is_valid(_input_uniform_set):
+    _rd.free_rid(_input_uniform_set)
+_input_uniform_set = RID()
+```
+
+This applies to every uniform set: input, output, and any created in cleanup paths.
+
+### Texture2DRD: Detach Before Free
+
+`Texture2DRD` internally holds a reference to its `texture_rd_rid`. If you
+free the underlying RD texture while the wrapper still references it,
+assigning a new RID triggers an internal double-free of the old (dead) RID.
+
+**Rule: Set `texture_rd_rid = RID()` before freeing the RD texture.**
+
+```gdscript
+# WRONG — Texture2DRD tries to free the stale RID on next assignment
+_rd.free_rid(_output_tex_rid)
+_output_tex2d_rd.texture_rd_rid = new_rid   # 💥 double-free
+
+# RIGHT
+_output_tex2d_rd.texture_rd_rid = RID()     # detach first
+_rd.free_rid(_output_tex_rid)               # now safe
+```
+
+### Shutdown / PREDELETE Ordering
+
+During engine exit or patch close, the main RD may tear down resources
+before operators get their `NOTIFICATION_PREDELETE`. Cached shaders,
+pipelines, and pooled textures may already be gone.
+
+**Rule: Guard every `free_rid()` in shutdown paths with `RID.is_valid()`
+(and `uniform_set_is_valid()` for uniform sets).** `GNGpuContext.shutdown()`
+follows this pattern for all three caches (shaders, pipelines, texture pool).

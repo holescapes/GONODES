@@ -401,9 +401,9 @@ func _ensure_output_texture(size: Vector2i) -> void:
 		return
 
 	# Free old (uniform set references the old texture, must go first).
-	if _output_uniform_set.is_valid():
+	if _output_uniform_set.is_valid() and _rd.uniform_set_is_valid(_output_uniform_set):
 		_rd.free_rid(_output_uniform_set)
-		_output_uniform_set = RID()
+	_output_uniform_set = RID()
 	# Detach Texture2DRD before freeing the RD texture it references.
 	if _output_tex2d_rd != null:
 		_output_tex2d_rd.texture_rd_rid = RID()

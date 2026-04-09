@@ -281,7 +281,7 @@ func _ready() -> void:
 	minimap_size = Vector2(200, 150)
 
 	# Zoom settings
-	zoom_min = 0.25
+	zoom_min = 0.05
 	zoom_max = 2.5
 	zoom_step = 1.1
 	zoom = 0.8
@@ -1374,7 +1374,7 @@ func _fit_view_to_selection() -> void:
 	var fit_zoom_x: float = view_size.x / (bounds_size.x + padding * 2.0) if bounds_size.x > 0 else 1.0
 	var fit_zoom_y: float = view_size.y / (bounds_size.y + padding * 2.0) if bounds_size.y > 0 else 1.0
 	var fit_zoom: float = minf(fit_zoom_x, fit_zoom_y)
-	fit_zoom = clampf(fit_zoom, 0.2, 2.0)  # Stay within sane zoom limits
+	fit_zoom = clampf(fit_zoom, zoom_min, 2.0)  # Stay within sane zoom limits
 
 	zoom = fit_zoom
 	scroll_offset = bounds_center * zoom - view_size / 2.0

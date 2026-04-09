@@ -378,14 +378,19 @@ func shutdown() -> void:
 	if rd == null:
 		return
 	for key in _shader_cache:
-		rd.free_rid(_shader_cache[key])
+		var rid: RID = _shader_cache[key]
+		if rid.is_valid():
+			rd.free_rid(rid)
 	_shader_cache.clear()
 	for key in _pipeline_cache:
-		rd.free_rid(_pipeline_cache[key])
+		var rid: RID = _pipeline_cache[key]
+		if rid.is_valid():
+			rd.free_rid(rid)
 	_pipeline_cache.clear()
 	for key in _texture_pool:
 		for rid in _texture_pool[key]:
-			rd.free_rid(rid)
+			if rid.is_valid():
+				rd.free_rid(rid)
 	_texture_pool.clear()
 	# Do NOT call rd.free() — we don't own the main RenderingDevice.
 	rd = null

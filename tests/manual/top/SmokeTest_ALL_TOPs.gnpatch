@@ -613,30 +613,6 @@
 			"to_port": 0
 		},
 		{
-			"from": "lookup1",
-			"from_port": 0,
-			"to": "limit1",
-			"to_port": 0
-		},
-		{
-			"from": "limit1",
-			"from_port": 0,
-			"to": "OUTChain12",
-			"to_port": 0
-		},
-		{
-			"from": "optical_flow1",
-			"from_port": 0,
-			"to": "feedback1",
-			"to_port": 0
-		},
-		{
-			"from": "feedback1",
-			"from_port": 0,
-			"to": "OUTChain13",
-			"to_port": 0
-		},
-		{
 			"from": "test_card1",
 			"from_port": 0,
 			"to": "cross1",
@@ -685,12 +661,6 @@
 			"to_port": 0
 		},
 		{
-			"from": "fluid_2d1",
-			"from_port": 0,
-			"to": "fluid_2d2",
-			"to_port": 0
-		},
-		{
 			"from": "OUTChain8",
 			"from_port": 0,
 			"to": "switch2",
@@ -712,12 +682,6 @@
 			"from": "cache1",
 			"from_port": 0,
 			"to": "time_machine1",
-			"to_port": 0
-		},
-		{
-			"from": "time_machine1",
-			"from_port": 0,
-			"to": "optical_flow1",
 			"to_port": 0
 		},
 		{
@@ -757,12 +721,6 @@
 			"to_port": 1
 		},
 		{
-			"from": "noise2_copy",
-			"from_port": 0,
-			"to": "chop_to_top1",
-			"to_port": 0
-		},
-		{
 			"from": "chop_to_top1",
 			"from_port": 0,
 			"to": "cache1",
@@ -799,15 +757,51 @@
 			"to_port": 1
 		},
 		{
-			"from": "fluid_2d2",
+			"from": "wave1",
+			"from_port": 0,
+			"to": "chop_to_top1",
+			"to_port": 0
+		},
+		{
+			"from": "optical_flow1",
+			"from_port": 0,
+			"to": "OUTChain13",
+			"to_port": 0
+		},
+		{
+			"from": "time_machine1",
+			"from_port": 0,
+			"to": "feedback1",
+			"to_port": 0
+		},
+		{
+			"from": "feedback1",
+			"from_port": 0,
+			"to": "optical_flow1",
+			"to_port": 0
+		},
+		{
+			"from": "fluid_2d1",
 			"from_port": 0,
 			"to": "glsl_multi1",
 			"to_port": 0
 		},
 		{
 			"from": "glsl_multi1",
-			"from_port": 1,
+			"from_port": 0,
 			"to": "OUTChain15",
+			"to_port": 0
+		},
+		{
+			"from": "lookup1",
+			"from_port": 0,
+			"to": "limit1",
+			"to_port": 0
+		},
+		{
+			"from": "limit1",
+			"from_port": 0,
+			"to": "OUTChain12",
 			"to_port": 0
 		}
 	],
@@ -836,29 +830,29 @@
 		},
 		"OUTChain12": {
 			"position": [
-				5320.0,
-				3920.0
+				5478.572265625,
+				4964.0078125
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain13": {
 			"position": [
-				5300.0,
-				4840.0
+				5396.9931640625,
+				3831.03198242188
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain14": {
 			"position": [
-				5300.0,
-				5140.0
+				5396.9931640625,
+				4131.03173828125
 			],
 			"type": "NullTOP"
 		},
 		"OUTChain15": {
 			"position": [
-				5280.0,
-				5680.0
+				5376.9931640625,
+				4671.03125
 			],
 			"type": "NullTOP"
 		},
@@ -1018,7 +1012,7 @@
 				}
 			},
 			"position": [
-				4040.0,
+				3964.357421875,
 				-160.0
 			],
 			"type": "BloomTOP"
@@ -1036,7 +1030,7 @@
 				}
 			},
 			"position": [
-				3460.0,
+				3422.357421875,
 				-160.0
 			],
 			"type": "BlurTOP"
@@ -1078,8 +1072,8 @@
 				}
 			},
 			"position": [
-				4280.0,
-				4840.0
+				4366.357421875,
+				3831.03198242188
 			],
 			"type": "CacheTOP"
 		},
@@ -1136,7 +1130,7 @@
 				}
 			},
 			"position": [
-				4020.0,
+				3946.357421875,
 				900.0
 			],
 			"type": "ChannelMixTOP"
@@ -1174,7 +1168,7 @@
 					"value": -1.0
 				},
 				"mode": {
-					"value": 2
+					"value": 0
 				},
 				"resolution": {
 					"value": {
@@ -1185,8 +1179,8 @@
 				}
 			},
 			"position": [
-				4080.0,
-				4840.0
+				4175.357421875,
+				3831.03198242188
 			],
 			"type": "CHOPtoTOP"
 		},
@@ -1215,7 +1209,7 @@
 				}
 			},
 			"position": [
-				3680.0,
+				3593.357421875,
 				2320.0
 			],
 			"type": "ChromaKeyTOP"
@@ -1283,7 +1277,7 @@
 				}
 			},
 			"position": [
-				3460.0,
+				3422.357421875,
 				220.0
 			],
 			"type": "CircleTOP"
@@ -1361,7 +1355,7 @@
 				}
 			},
 			"position": [
-				3800.0,
+				3786.357421875,
 				900.0
 			],
 			"type": "CompositeTOP"
@@ -1486,8 +1480,8 @@
 				}
 			},
 			"position": [
-				4080.0,
-				5680.0
+				4481.03759765625,
+				4665.42333984375
 			],
 			"type": "ComputeShaderTOP"
 		},
@@ -1511,8 +1505,8 @@
 				}
 			},
 			"position": [
-				3920.0,
-				4100.0
+				4014.357421875,
+				5144.0068359375
 			],
 			"type": "ConstantTOP"
 		},
@@ -1578,7 +1572,7 @@
 				}
 			},
 			"position": [
-				3840.0,
+				3784.357421875,
 				1260.0
 			],
 			"type": "CornerPinTOP"
@@ -1623,8 +1617,8 @@
 				}
 			},
 			"position": [
-				4260.0,
-				5100.0
+				4356.9931640625,
+				4091.03173828125
 			],
 			"type": "CrossTOP"
 		},
@@ -1684,8 +1678,8 @@
 				}
 			},
 			"position": [
-				3800.0,
-				5140.0
+				3788.357421875,
+				4131.03173828125
 			],
 			"type": "CurlNoiseTOP"
 		},
@@ -1755,7 +1749,7 @@
 				}
 			},
 			"position": [
-				4240.0,
+				4190.357421875,
 				2320.0
 			],
 			"type": "DepthTOP"
@@ -1788,7 +1782,7 @@
 				}
 			},
 			"position": [
-				4040.0,
+				3971.357421875,
 				2320.0
 			],
 			"type": "DirectionalBlurTOP"
@@ -1848,7 +1842,7 @@
 				}
 			},
 			"position": [
-				3860.0,
+				3788.357421875,
 				440.0
 			],
 			"type": "EdgeTOP"
@@ -1898,8 +1892,8 @@
 				}
 			},
 			"position": [
-				5020.0,
-				4840.0
+				4748.357421875,
+				3833.5810546875
 			],
 			"type": "FeedbackTOP"
 		},
@@ -1925,7 +1919,7 @@
 				}
 			},
 			"position": [
-				3880.0,
+				3782.357421875,
 				2320.0
 			],
 			"type": "FilmGrainTOP"
@@ -1995,7 +1989,7 @@
 				}
 			},
 			"position": [
-				3960.0,
+				3838.357421875,
 				220.0
 			],
 			"type": "FlipTOP"
@@ -2028,8 +2022,8 @@
 				}
 			},
 			"position": [
-				4000.0,
-				5140.0
+				4014.357421875,
+				4131.03173828125
 			],
 			"type": "FlowVisTOP"
 		},
@@ -2039,7 +2033,7 @@
 					"value": 1.5
 				},
 				"density_dissipation": {
-					"value": 0.98
+					"value": 0.902
 				},
 				"dye_color_a": {
 					"value": {
@@ -2067,10 +2061,10 @@
 					}
 				},
 				"emitter_dye": {
-					"value": 1.0
+					"value": 0.600000000000001
 				},
 				"emitter_force": {
-					"value": 1.0
+					"value": 0.5
 				},
 				"emitter_pos": {
 					"value": {
@@ -2080,7 +2074,7 @@
 					}
 				},
 				"emitter_radius": {
-					"value": 0.06
+					"value": 0.11
 				},
 				"enable_emitter": {
 					"value": true
@@ -2102,96 +2096,15 @@
 					"value": false
 				},
 				"velocity_dissipation": {
-					"value": 0.995
+					"value": 0.936
 				},
 				"vorticity": {
 					"value": 0.3
 				}
 			},
 			"position": [
-				4380.0,
-				5680.0
-			],
-			"type": "Fluid2DTOP"
-		},
-		"fluid_2d2": {
-			"parameters": {
-				"brightness": {
-					"value": 1.5
-				},
-				"density_dissipation": {
-					"value": 0.98
-				},
-				"dye_color_a": {
-					"value": {
-						"_type": "Color",
-						"a": 1.0,
-						"b": 0.100000001490116,
-						"g": 0.400000005960464,
-						"r": 1.0
-					}
-				},
-				"dye_color_b": {
-					"value": {
-						"_type": "Color",
-						"a": 1.0,
-						"b": 1.0,
-						"g": 0.400000005960464,
-						"r": 0.100000001490116
-					}
-				},
-				"emitter_dir": {
-					"value": {
-						"_type": "Vector2",
-						"x": 0.0,
-						"y": -1.0
-					}
-				},
-				"emitter_dye": {
-					"value": 2.4
-				},
-				"emitter_force": {
-					"value": 0.399999999999999
-				},
-				"emitter_pos": {
-					"value": {
-						"_type": "Vector2",
-						"x": 0.579999804496765,
-						"y": 0.5
-					}
-				},
-				"emitter_radius": {
-					"value": 0.06
-				},
-				"enable_emitter": {
-					"value": true
-				},
-				"pressure": {
-					"value": 16.0
-				},
-				"reset": {
-					"value": false
-				},
-				"resolution": {
-					"value": {
-						"_type": "Vector2i",
-						"x": 256,
-						"y": 256
-					}
-				},
-				"show_velocity": {
-					"value": true
-				},
-				"velocity_dissipation": {
-					"value": 0.942
-				},
-				"vorticity": {
-					"value": 0.3
-				}
-			},
-			"position": [
-				4680.0,
-				5680.0
+				4817.67333984375,
+				4665.42333984375
 			],
 			"type": "Fluid2DTOP"
 		},
@@ -2333,7 +2246,7 @@
 				}
 			},
 			"position": [
-				4400.0,
+				4366.357421875,
 				2000.0
 			],
 			"type": "GlitchTOP"
@@ -2357,8 +2270,8 @@
 				}
 			},
 			"position": [
-				4960.0,
-				5660.0
+				5056.9931640625,
+				4651.03173828125
 			],
 			"type": "GLSLMultiTOP"
 		},
@@ -2388,8 +2301,8 @@
 				}
 			},
 			"position": [
-				5000.0,
-				5100.0
+				5096.99365234375,
+				4091.03173828125
 			],
 			"type": "GlueTOP"
 		},
@@ -2461,7 +2374,7 @@
 				}
 			},
 			"position": [
-				4040.0,
+				3964.357421875,
 				1720.0
 			],
 			"type": "HalftoneTOP"
@@ -2595,8 +2508,8 @@
 				}
 			},
 			"position": [
-				4700.0,
-				5100.0
+				4796.9931640625,
+				4091.03173828125
 			],
 			"type": "LayoutTOP"
 		},
@@ -2622,7 +2535,7 @@
 				}
 			},
 			"position": [
-				3600.0,
+				3598.357421875,
 				1260.0
 			],
 			"type": "LensDistortTOP"
@@ -2701,7 +2614,7 @@
 				}
 			},
 			"position": [
-				4380.0,
+				4375.357421875,
 				3640.0
 			],
 			"preview_enabled": false,
@@ -2729,8 +2642,8 @@
 				}
 			},
 			"position": [
-				3720.0,
-				4880.0
+				3788.357421875,
+				3871.03149414063
 			],
 			"type": "LFO_CHOP"
 		},
@@ -2771,8 +2684,8 @@
 				}
 			},
 			"position": [
-				5120.0,
-				3920.0
+				5229.328125,
+				4946.365234375
 			],
 			"type": "LimitTOP"
 		},
@@ -2783,8 +2696,8 @@
 				}
 			},
 			"position": [
-				4700.0,
-				3920.0
+				4858.572265625,
+				4956.54345703125
 			],
 			"type": "LookupTOP"
 		},
@@ -2834,8 +2747,8 @@
 				}
 			},
 			"position": [
-				4200.0,
-				3920.0
+				4358.572265625,
+				4964.0078125
 			],
 			"type": "MatteTOP"
 		},
@@ -2870,7 +2783,7 @@
 				}
 			},
 			"position": [
-				4380.0,
+				4366.357421875,
 				3420.0
 			],
 			"type": "MirrorTOP"
@@ -3067,7 +2980,7 @@
 				}
 			},
 			"position": [
-				3260.0,
+				3246.357421875,
 				-160.0
 			],
 			"type": "NoiseTOP"
@@ -3147,35 +3060,8 @@
 				}
 			},
 			"position": [
-				3360.0,
+				3241.357421875,
 				1920.0
-			],
-			"type": "NoiseCHOP"
-		},
-		"noise2_copy": {
-			"parameters": {
-				"channel_names": {
-					"value": "chan1"
-				},
-				"num_channels": {
-					"value": 1
-				},
-				"period": {
-					"value": 1.0
-				},
-				"roughness": {
-					"value": 0.5
-				},
-				"seed": {
-					"value": 0
-				},
-				"speed": {
-					"value": 1.0
-				}
-			},
-			"position": [
-				3900.0,
-				4840.0
 			],
 			"type": "NoiseCHOP"
 		},
@@ -3238,7 +3124,7 @@
 				}
 			},
 			"position": [
-				3460.0,
+				3422.357421875,
 				1720.0
 			],
 			"type": "NoiseTOP"
@@ -3291,7 +3177,7 @@
 				}
 			},
 			"position": [
-				4020.0,
+				3958.357421875,
 				2000.0
 			],
 			"type": "NoiseTOP"
@@ -3397,7 +3283,7 @@
 				}
 			},
 			"position": [
-				3440.0,
+				3422.357421875,
 				2720.0
 			],
 			"type": "NoiseTOP"
@@ -3416,13 +3302,6 @@
 				440.0
 			],
 			"type": "NormalMapTOP"
-		},
-		"null1": {
-			"position": [
-				5120.0,
-				6120.0
-			],
-			"type": "NullTOP"
 		},
 		"optical_flow1": {
 			"parameters": {
@@ -3444,8 +3323,8 @@
 				}
 			},
 			"position": [
-				4720.0,
-				4840.0
+				5052.77978515625,
+				3822.1103515625
 			],
 			"type": "OpticalFlowTOP"
 		},
@@ -3462,8 +3341,8 @@
 				}
 			},
 			"position": [
-				3620.0,
-				3920.0
+				3740.5009765625,
+				5135.68212890625
 			],
 			"type": "PaletteTOP"
 		},
@@ -3598,7 +3477,7 @@
 				}
 			},
 			"position": [
-				3420.0,
+				3417.357421875,
 				1260.0
 			],
 			"type": "PatternTOP"
@@ -3747,7 +3626,7 @@
 				}
 			},
 			"position": [
-				4220.0,
+				4190.357421875,
 				2000.0
 			],
 			"type": "PolarTOP"
@@ -3771,8 +3650,8 @@
 				}
 			},
 			"position": [
-				4380.0,
-				3920.0
+				4538.572265625,
+				4934.1513671875
 			],
 			"type": "PremultiplyTOP"
 		},
@@ -3800,7 +3679,7 @@
 				}
 			},
 			"position": [
-				4040.0,
+				3963.357421875,
 				1260.0
 			],
 			"type": "ProjectionTOP"
@@ -3871,8 +3750,8 @@
 				}
 			},
 			"position": [
-				3340.0,
-				3920.0
+				3417.357421875,
+				4964.0078125
 			],
 			"type": "RampTOP"
 		},
@@ -4163,7 +4042,7 @@
 				}
 			},
 			"position": [
-				3460.0,
+				3422.357421875,
 				840.0
 			],
 			"type": "RectangleTOP"
@@ -4178,8 +4057,8 @@
 				}
 			},
 			"position": [
-				3800.0,
-				3920.0
+				3948.45336914063,
+				4807.26123046875
 			],
 			"type": "RemapTOP"
 		},
@@ -4335,7 +4214,7 @@
 				}
 			},
 			"position": [
-				4220.0,
+				4190.357421875,
 				2720.0
 			],
 			"type": "RippleTOP"
@@ -4371,7 +4250,7 @@
 				}
 			},
 			"position": [
-				3800.0,
+				3788.357421875,
 				-160.0
 			],
 			"type": "SharpenTOP"
@@ -4480,7 +4359,7 @@
 				}
 			},
 			"position": [
-				3940.0,
+				3838.357421875,
 				2720.0
 			],
 			"type": "SpherizeTOP"
@@ -4499,7 +4378,7 @@
 				}
 			},
 			"position": [
-				3500.0,
+				3417.357421875,
 				2320.0
 			],
 			"type": "SVGTOP"
@@ -4596,8 +4475,8 @@
 				}
 			},
 			"position": [
-				4080.0,
-				5380.0
+				4176.9931640625,
+				4371.03173828125
 			],
 			"type": "TestCardTOP"
 		},
@@ -4648,7 +4527,7 @@
 				}
 			},
 			"position": [
-				3460.0,
+				3422.357421875,
 				440.0
 			],
 			"type": "TextTOP"
@@ -4722,8 +4601,8 @@
 				}
 			},
 			"position": [
-				4460.0,
-				4840.0
+				4542.357421875,
+				3831.03198242188
 			],
 			"type": "TimeMachineTOP"
 		},
@@ -4789,7 +4668,7 @@
 				}
 			},
 			"position": [
-				3800.0,
+				3788.357421875,
 				1720.0
 			],
 			"type": "TrailTOP"
@@ -4825,7 +4704,7 @@
 				}
 			},
 			"position": [
-				3700.0,
+				3608.357421875,
 				220.0
 			],
 			"type": "TransformTOP"
@@ -4883,7 +4762,7 @@
 				}
 			},
 			"position": [
-				3460.0,
+				3422.357421875,
 				1040.0
 			],
 			"type": "TriangleTOP"
@@ -4905,7 +4784,7 @@
 				}
 			},
 			"position": [
-				3740.0,
+				3606.357421875,
 				2720.0
 			],
 			"type": "TwirlTOP"
@@ -5037,6 +4916,39 @@
 				3000.0
 			],
 			"type": "VoronoiTOP"
+		},
+		"wave1": {
+			"parameters": {
+				"amplitude": {
+					"value": 1.0
+				},
+				"channels": {
+					"value": 16
+				},
+				"frequency": {
+					"value": 1.0
+				},
+				"length": {
+					"value": 1
+				},
+				"offset": {
+					"value": 0.26
+				},
+				"phase": {
+					"value": 0.089
+				},
+				"phase_step": {
+					"value": 0.01
+				},
+				"waveform": {
+					"value": 0
+				}
+			},
+			"position": [
+				3964.357421875,
+				3805.59594726563
+			],
+			"type": "WaveCHOP"
 		},
 		"window_out1": {
 			"parameters": {
