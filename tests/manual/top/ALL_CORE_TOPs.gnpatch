@@ -821,6 +821,18 @@
 			"from_port": 0,
 			"to": "twirl1",
 			"to_port": 0
+		},
+		{
+			"from": "image_file_in1",
+			"from_port": 0,
+			"to": "img_to_top1",
+			"to_port": 0
+		},
+		{
+			"from": "img_to_top1",
+			"from_port": 0,
+			"to": "cube_map1",
+			"to_port": 0
 		}
 	],
 	"generator": "GONODES",
@@ -1656,7 +1668,7 @@
 					"value": 256
 				},
 				"mode": {
-					"value": 0
+					"value": 2
 				}
 			},
 			"position": [
@@ -2254,6 +2266,9 @@
 				"intensity": {
 					"value": 0.23
 				},
+				"mode": {
+					"value": 0
+				},
 				"noise_amount": {
 					"value": 0.0
 				},
@@ -2455,7 +2470,7 @@
 		"image_file_in1": {
 			"parameters": {
 				"file": {
-					"value": ""
+					"value": "project://kloofendal_48d_partly_cloudy_1k.hdr"
 				},
 				"reload": {
 					"value": false
@@ -2463,8 +2478,8 @@
 				"resolution": {
 					"value": {
 						"_type": "Vector2i",
-						"x": 0,
-						"y": 0
+						"x": 1024,
+						"y": 512
 					}
 				}
 			},
@@ -2473,6 +2488,13 @@
 				-200.0
 			],
 			"type": "ImageFileInIMG"
+		},
+		"img_to_top1": {
+			"position": [
+				-2680.0,
+				-200.0
+			],
+			"type": "ImgToTOP"
 		},
 		"kaleidoscope1": {
 			"parameters": {
@@ -2864,6 +2886,9 @@
 		},
 		"movie_file_in1": {
 			"parameters": {
+				"audio_buffer": {
+					"value": 1024
+				},
 				"bg_color": {
 					"value": {
 						"_type": "Color",
@@ -2878,6 +2903,9 @@
 				},
 				"loop": {
 					"value": true
+				},
+				"mute": {
+					"value": false
 				},
 				"play": {
 					"value": true
@@ -4404,7 +4432,7 @@
 					}
 				},
 				"svg_path": {
-					"value": "res://icon.svg"
+					"value": "project://godot_icon.svg"
 				}
 			},
 			"position": [
@@ -4815,7 +4843,7 @@
 			},
 			"position": [
 				-2300.0,
-				-180.0
+				-220.0
 			],
 			"type": "TwirlTOP"
 		},
@@ -5024,8 +5052,8 @@
 	},
 	"version": "1.0.0",
 	"viewport": {
-		"scroll_x": -1171.26928710938,
-		"scroll_y": 218.465454101563,
-		"zoom": 0.339277923107147
+		"scroll_x": -1184.01745605469,
+		"scroll_y": -570.69189453125,
+		"zoom": 0.661156833171844
 	}
 }

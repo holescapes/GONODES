@@ -345,10 +345,10 @@ func _compute_active_set() -> Dictionary:
 			active[node_id] = true
 			queue.append(node_id)
 
-	# If still no sinks at all, everything is active (safety fallback)
+	# No sinks → nothing to cook → empty active set.
+	# This ensures the debug overlay correctly shows all nodes as inactive
+	# until they feed a live sink (viewer, WindowOUT, etc.).
 	if queue.is_empty():
-		for node_id in network.nodes:
-			active[node_id] = true
 		return active
 
 	# BFS upstream using cached adjacency (get_input_connections)
@@ -485,7 +485,7 @@ func cook_frame(delta: float) -> void:
 	if editor_mode:
 		last_dirty_ids.clear()
 		for node in topo_order:
-			if node.dirty:
+			if node.dirty and _active_set.has(node.id):
 				last_dirty_ids[node.id] = true
 
 	# Step 3b: Recompute active chain only when topology or sinks changed.

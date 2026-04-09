@@ -438,6 +438,10 @@ fades out over ~0.3 seconds.  You see the "dirty wave" ripple downstream
 from whatever triggered it — a parameter change, a time-dependent node
 ticking, or an expression reevaluation.
 
+**Only active nodes flash.**  Inactive nodes stay `dirty = true` internally
+(so they cook immediately when activated), but they are excluded from the
+overlay to avoid a permanent orange border on every disconnected node.
+
 **Use case:** The #1 debugging question in any node graph is "why is this
 node cooking?"  Dirty propagation directly answers that.  When you change a
 parameter on one node and see orange borders ripple through half the graph,
