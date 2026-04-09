@@ -1,0 +1,54 @@
+<!-- Info.plist — GONODES Player document type declarations.
+     Merge these keys into the Player app bundle's Info.plist.
+     Same UTI as the Editor, but with Viewer role so macOS prefers
+     the Editor for double-click and offers Player as an alternative. -->
+
+<key>CFBundleDocumentTypes</key>
+<array>
+  <dict>
+    <key>CFBundleTypeName</key>
+    <string>GONODES Patch</string>
+
+    <key>CFBundleTypeExtensions</key>
+    <array>
+      <string>gnpatch</string>
+    </array>
+
+    <!-- Viewer = read-only playback (Editor gets priority for double-click) -->
+    <key>CFBundleTypeRole</key>
+    <string>Viewer</string>
+
+    <!-- Alternate = secondary handler (won't override Editor as default) -->
+    <key>LSHandlerRank</key>
+    <string>Alternate</string>
+
+    <key>CFBundleTypeIconFile</key>
+    <string>gnpatch</string>
+  </dict>
+</array>
+
+<!-- Import (not export) the UTI — Editor owns it, Player just recognizes it -->
+<key>UTImportedTypeDeclarations</key>
+<array>
+  <dict>
+    <key>UTTypeIdentifier</key>
+    <string>com.gonodes.patch</string>
+
+    <key>UTTypeDescription</key>
+    <string>GONODES Patch File</string>
+
+    <key>UTTypeConformsTo</key>
+    <array>
+      <string>public.json</string>
+      <string>public.data</string>
+    </array>
+
+    <key>UTTypeTagSpecification</key>
+    <dict>
+      <key>public.filename-extension</key>
+      <array>
+        <string>gnpatch</string>
+      </array>
+    </dict>
+  </dict>
+</array>

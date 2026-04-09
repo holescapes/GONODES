@@ -250,6 +250,10 @@ var is_sink: bool = false           # True for output operators (WindowOUT, Spou
                                     # Set by operator in _init(). Engine auto-detects these as sinks.
 var is_active: bool = true          # Set by cook engine per frame. False = skip cooking.
                                     # Inactive nodes keep cached_output frozen.
+                                    # Setter calls virtual _on_active_changed(active: bool) on transitions.
+
+# Virtual hook — override to react to active-chain changes
+func _on_active_changed(_active: bool) -> void: pass  # e.g. MovieFileInTOP pauses playback
 
 # Timing (injected by GNCookEngine before each cook)
 var current_delta: float = 0.0     # Frame delta in seconds
@@ -1266,7 +1270,7 @@ GONODES/
 - [x] **File picker UI** — GNParamRow renders FILE params as a Button (showing filename) + "X" clear button. Opens Godot's native FileDialog scoped to `ACCESS_RESOURCES` (project directory only). Filter extensions from parameter's `file_filters`.
 - [x] **TextTOP font selection** — new `font_file` FILE parameter accepting TTF, OTF, WOFF, WOFF2. Loads via `ResourceLoader`, applies with `add_theme_font_override("font", ...)`. Empty = default theme font.
 - [x] **ImageFileInIMG** — loads image files (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res) as CPU Image. Pure CPU, no SubViewport. Resize param, reload pulse. Chain → ImgToTOP for GPU.
-- [x] **MovieFileInTOP** — plays .ogv Theora video as live GPU texture stream. Uses Godot's native `VideoStreamPlayer`. Play/pause, loop, seek, speed controls. Video decodes internally to GPU — no CPU image access (Godot limitation).
+- [x] **MovieFileInTOP** — plays .ogv Theora video as live GPU texture stream. Uses Godot's native `VideoStreamPlayer`. Play/pause, loop, seek, speed, bg_color, mute, audio_buffer controls. Video decodes internally to GPU — no CPU image access (Godot limitation). **Audio CHOP output** — second output port (`audio`, CHOP family) exposes `left`, `right`, `level`, `pos`, `length`, `playing` channels via AudioEffectCapture on a dedicated AudioServer bus. `get_output_data()` override routes port 0 → TOP texture, port 1 → CHOP audio. Mute param controls bus mute (audio still captured). Pauses on inactive via `_on_active_changed()`; drains capture buffer on deactivate to prevent stale audio burst.
   - **Codec limitations:** Godot's built-in Theora decoder outputs RGB only (no alpha). For alpha video, use image sequences (PNG/WebP).
 
 ### Phase 5.8: Extension Registry Architecture ✅
@@ -1701,8 +1705,9 @@ GONODES/
   - `FFmpegInTOP` → `GNResourceLoader.resolve()` before `_create_ffmpeg_stream()`
 - [x] **File param UI updated** to three-tier dropdown:
   - `_create_file_control()` in `gn_param_row.gd`: OptionButton with Browse "…", Refresh "↻", Clear "X" buttons.
-  - `_populate_file_dropdown()`: Three sections with separators — "── Bundled ──" (res://), "── Project ──" (project folder), "── External ──" (absolute paths with ⚠ warning).
+  - `_populate_file_dropdown()`: Three sections with separators — "── Patch Local ──" (project folder beside the .gnpatch, shown first), "── Bundled ──" (res://, excluding patch-local files), "── External ──" (absolute paths with ⚠ warning).
   - `_open_file_browse_dialog()`: Native FileDialog, auto-converts to project:// if file is inside project folder.
+  - **Lazy refresh fix**: `OptionButton.pressed` signal triggers `_populate_file_dropdown()` on every open, so `project_dir` (set by cook engine after first cook) is always current. Fixes Patch Local not showing for newly placed / uncocked nodes across ALL families.
 - [x] **Editor wired to GNProjectManager**: save/load/new/setup/auto-restore all update `_project` and `cook_engine.project_dir`.
 - [x] File output operators (TextureSaveOUT, TableSaveOUT, RecordOUT, MovieOUT, FFmpegOUT) confirmed write-only, use STRING params — not affected by resource loader migration.
 
@@ -3271,18 +3276,19 @@ The `FILE` parameter type in `gn_param_row.gd` renders as:
 The OptionButton dropdown is populated with three sections:
 
 ```
+── Patch Local ──
+  logo.png
+  custom.ttf
 ── Bundled ──
-  res://addons/gonodes/shaders/top/noise.gdshader
-  res://addons/gonodes/shaders/top/blur.gdshader
-── Project ──
-  project://textures/logo.png
-  project://fonts/custom.ttf
+  addons/gonodes/shaders/top/noise.gdshader
+  addons/gonodes/shaders/top/blur.gdshader
 ── External ──
   ⚠ C:\Users\me\Desktop\photo.jpg
 ```
 
+- **Patch Local** appears first — files in the project folder (sibling to the .gnpatch) are the most likely targets. These files are excluded from the Bundled section to prevent duplicates. Stored as `project://` paths internally.
 - **Browse "…"** opens a native `FileDialog`. If the selected file is inside the project folder, it's auto-converted to `project://` relative path.
-- **Refresh "↻"** re-scans both bundled and project directories.
+- **Refresh "↻"** re-scans patch-local, bundled, and project directories.
 - **Clear "X"** resets the parameter to empty string.
 - External files show a ⚠ warning icon — they are not portable across machines.
 
@@ -4776,7 +4782,7 @@ Deep comparison of GONODES vs TouchDesigner operator inventory:
 | RaySOP | SOP | Möller-Trumbore CPU raycast projecting source vertices onto target surface |
 | BeatCHOP | CHOP | RMS energy-based onset detection with adaptive threshold + de-bounce; synthetic BPM fallback |
 | ReplicatorCOMP | COMP | Table-driven replicator via GNNetwork API with hash-based change detection |
-| OpticalFlowTOP | TOP | Horn-Schunck GLSL fragment shader for motion vector estimation |
+| OpticalFlowTOP | TOP | Horn-Schunck GLSL fragment shader for motion vector estimation. `bg_color` (Color) + `colorize` (bool) params — zero-motion areas blend with bg_color instead of raw (0.5, 0.5, 0) green tint |
 
 ### 31.3 Tier 2 Operators (10 complementary)
 
@@ -5519,4 +5525,43 @@ Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VO
 | ML Segmentation | ✅ Implemented | SegmentationTOP — person/background mask |
 | ML Object Detection | ✅ Implemented | ObjectDetectDAT — YOLOv8 bounding boxes + COCO labels |
 | Depth Sensors (Kinect/RealSense/Ultraleap) | ✅ Implemented | gn_ext_depth_sensor — unified API with capability flags (depth/color/IR/skeleton/hand tracking/point cloud/player index) |
+
+## 35. Session Changelog — GPU Blit Refactoring, UX & Operator Updates
+
+### 35.1 GPU-Side Frame Buffering (Blit SubViewport Pattern)
+
+Eliminated CPU `get_image()` readback from **7 TOP operators** by introducing a GPU-only blit SubViewport pattern.
+
+- **`GNTopBase._create_blit_viewport(size: Vector2i) → Dictionary`** — static helper creating a lightweight `SubViewport` (UPDATE_DISABLED, no own world, transparent BG) + child `TextureRect`. Returns `{ viewport, canvas }`. Caller assigns a source texture to `canvas.texture`, then triggers `UPDATE_ONCE` on the viewport to GPU-blit one frame.
+- **Ring buffer TOPs** (CacheTOP, TimeMachineTOP): Rewritten from `Array[ImageTexture]` + `get_image()` to `Array[Dictionary]` of blit SubViewports. Each ring slot holds its own SubViewport. Critical `execute_cook` override: only renders the `_pending_write_vp` slot, reverts all others to UPDATE_DISABLED. Without this, `GNTopBase.execute_cook` would trigger UPDATE_ONCE on ALL N ring SubViewports per frame.
+- **Single-frame feedback TOPs** (FeedbackTOP, TrailTOP, CellularAutomataTOP, FrameDifferenceTOP, GlitchTOP): Each uses one blit SubViewport to snapshot either the operator's own viewport output (feedback) or the input texture (frame difference). `_ensure_blit()`/`_destroy_blit()` lifecycle. No `execute_cook` override needed (single additional VP is harmless).
+- **Performance impact**: Eliminates GPU→CPU→GPU roundtrip per frame per operator. Most significant for CacheTOP/TimeMachineTOP where N readbacks per frame became zero.
+
+### 35.2 GlitchTOP Mode Enum
+
+- **`mode` enum** with 4 values: Blocks, VHS, Data Moshing, Snow. No "All" mode — each GlitchTOP focuses on one style; chain multiple GlitchTOPs for combined effects.
+- Mode gates shader layers: GDScript zeros out inactive float params before passing to shader. Shader also gates block displacement via `uniform int mode` so blocks only fire in Blocks (0) + Data Moshing (2).
+- **Blocks**: displacement + channel shift + color crush. **VHS**: scan jitter + tears + noise + block displacement (off) + channel shift. **Data Moshing**: stale frames + block displacement (channel shift off). **Snow**: noise only.
+
+### 35.3 OpticalFlowTOP Background Color Fix
+
+- Added `bg_color` (Color, default black) and `colorize` (bool) params.
+- Zero-motion areas now blend with `bg_color` instead of raw (0.5, 0.5, 0.0) green tint from the Horn-Schunck motion vector encoding.
+
+### 35.4 Node Search (Ctrl+F)
+
+- **Activation**: Ctrl+F or right-click context menu → "Search Nodes…"
+- **UI**: PanelContainer overlay at top-center of graph editor (z_index 4096), contains 🔍 icon, LineEdit, match counter label, ▲/▼ navigation buttons, ✕ close button.
+- **Matching**: Filters nodes by `id` and `node_type` substring match (case-insensitive). Non-matching nodes dimmed to 25% modulate alpha.
+- **Navigation**: Enter = next match, Shift+Enter = previous match. ▲/▼ buttons do the same. Counter shows "3 of 12" format. Auto-scrolls to match and selects it.
+- **Close**: Escape key or ✕ button. Restores all node modulation.
+
+### 35.5 GNNode `_on_active_changed()` Hook
+
+- `is_active` setter on GNNode now calls virtual `_on_active_changed(active: bool)` on transitions (false→true or true→false).
+- **MovieFileInTOP** overrides this to pause `VideoStreamPlayer` when inactive and resume on reactivation. Also drains `AudioEffectCapture` buffer on deactivate to prevent stale audio burst.
+
+### 35.6 Shake-to-Disconnect Sensitivity Tuning
+
+- Thresholds loosened for easier triggering: reversals 5 → **3**, time window 0.35s → **0.5s**, min speed 300 → **200** px/s.
 

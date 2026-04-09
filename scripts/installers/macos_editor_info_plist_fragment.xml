@@ -1,0 +1,68 @@
+<!-- Info.plist — GONODES Editor document type declarations.
+     Merge these keys into the app bundle's Info.plist.
+     Godot's export process generates the base Info.plist; add this
+     section under the top-level <dict>. -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     Document Types — tells macOS this app can open .gnpatch files
+     ════════════════════════════════════════════════════════════════ -->
+<key>CFBundleDocumentTypes</key>
+<array>
+  <dict>
+    <key>CFBundleTypeName</key>
+    <string>GONODES Patch</string>
+
+    <key>CFBundleTypeExtensions</key>
+    <array>
+      <string>gnpatch</string>
+    </array>
+
+    <!-- Editor = can read + write; use Viewer for Player app -->
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+
+    <!-- Owner = this app "owns" the type (highest priority) -->
+    <key>LSHandlerRank</key>
+    <string>Owner</string>
+
+    <!-- Icon file (must be in Resources/ inside the .app bundle) -->
+    <key>CFBundleTypeIconFile</key>
+    <string>gnpatch</string>
+  </dict>
+</array>
+
+<!-- ════════════════════════════════════════════════════════════════
+     Exported UTI — declares a system-wide Uniform Type Identifier
+     so other apps and Finder know about the .gnpatch format.
+     ════════════════════════════════════════════════════════════════ -->
+<key>UTExportedTypeDeclarations</key>
+<array>
+  <dict>
+    <key>UTTypeIdentifier</key>
+    <string>com.gonodes.patch</string>
+
+    <key>UTTypeDescription</key>
+    <string>GONODES Patch File</string>
+
+    <key>UTTypeConformsTo</key>
+    <array>
+      <string>public.json</string>
+      <string>public.data</string>
+    </array>
+
+    <key>UTTypeTagSpecification</key>
+    <dict>
+      <key>public.filename-extension</key>
+      <array>
+        <string>gnpatch</string>
+      </array>
+      <key>public.mime-type</key>
+      <string>application/x-gnpatch</string>
+    </dict>
+
+    <key>UTTypeIconFiles</key>
+    <array>
+      <string>gnpatch.icns</string>
+    </array>
+  </dict>
+</array>

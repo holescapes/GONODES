@@ -138,6 +138,56 @@ These operators call `rd.texture_get_data()` / `rd.buffer_get_data()`
 explicitly. This is fine — it's on-demand, not every frame.
 
 
+## GPU-Side Frame Buffering (Blit SubViewport Pattern)
+
+Several temporal operators previously used a GPU→CPU→GPU readback
+anti-pattern: `viewport.get_texture().get_image()` → `ImageTexture.update()`.
+This has been replaced with a **blit SubViewport ring buffer** approach
+that keeps all textures on the GPU.
+
+### `GNTopBase._create_blit_viewport(parent, name, size, transparent)`
+
+Static helper that creates a lightweight SubViewport + TextureRect child.
+To capture a texture: set `blit.canvas.texture = source_texture`, then
+`execute_cook` triggers `UPDATE_ONCE` on the viewport.  Read back via
+`blit.viewport.get_texture()` — a `ViewportTexture` that stays GPU-resident.
+
+### Ring Buffer TOPs (N-frame history)
+
+**CacheTOP** and **TimeMachineTOP** use a ring of N blit viewports:
+
+| Aspect | Implementation |
+|--------|---------------|
+| Storage | `Array[Dictionary]` of `{ viewport: SubViewport, canvas: TextureRect }` |
+| Write | Each frame, set canvas texture on write slot → UPDATE_ONCE |
+| Read | Read from ring at delay offset via `viewport.get_texture()` |
+| execute_cook override | Reverts all ring slots to UPDATE_DISABLED except `_pending_write_vp` — prevents `GNTopBase.execute_cook` from re-blitting all N slots |
+
+### Single-Frame Feedback TOPs
+
+**FeedbackTOP**, **TrailTOP**, **CellularAutomataTOP** — blit VP captures
+the main shader viewport's output each frame for next-frame feedback input.
+Both viewports (shader + blit) render via `execute_cook` — no override needed.
+
+**FrameDifferenceTOP** — blit VP captures the *input texture* (not the
+diff output) for next-frame comparison.
+
+**GlitchTOP** — blit VP captures viewport output probabilistically.
+`execute_cook` override suppresses the blit VP on frames where the stale
+buffer should remain unchanged.
+
+### Future: Texture2DArray for bulk GPU reads
+
+Operators that need to sample many frames simultaneously in a single shader
+pass (e.g. temporal accumulation, motion blur with N-tap) would benefit
+from a `Texture2DArray` ring on the RenderingDevice.  The current SubViewport
+blit approach outputs one `ViewportTexture` per slot — fine for operators
+that select/output a single frame, but requires N texture binds for
+multi-frame shaders.  A `Texture2DArray` with layered writes via compute
+would allow a single bind for all N frames.  This is a future optimization
+and not yet implemented.
+
+
 ## Migration Checklist
 
 - [x] **GNGpuContext**: Changed `_init_rd()` to use `RenderingServer.get_rendering_device()`. Removed `rd.free()` from `shutdown()`.

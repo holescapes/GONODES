@@ -32,12 +32,18 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		node_warning = "No target TOP specified"
 		return null
 
-	# Resolve the owning GNNetwork (cached for performance)
+	# Resolve the owning GNNetwork via the CookEngine parent
 	if _network_cache == null or not is_instance_valid(_network_cache):
 		var p = get_parent()
-		while p != null and not (p is GNNetwork):
-			p = p.get_parent()
-		_network_cache = p as GNNetwork
+		if p is GNCookEngine:
+			_network_cache = p.network
+		else:
+			# Fallback: walk parents for a CookEngine
+			while p != null:
+				if p is GNCookEngine:
+					_network_cache = p.network
+					break
+				p = p.get_parent()
 
 	if _network_cache == null:
 		GNLogger.warn("SelectTOP", "'%s' — could not find parent GNNetwork" % id)

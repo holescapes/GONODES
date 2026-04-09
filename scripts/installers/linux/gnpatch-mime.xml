@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- gnpatch-mime.xml — Freedesktop MIME type definition for .gnpatch files.
+     Install to: /usr/share/mime/packages/  (system-wide)
+            or:  ~/.local/share/mime/packages/  (per-user)
+     Then run:   update-mime-database /usr/share/mime  (or ~/.local/share/mime) -->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-gnpatch">
+    <comment>GONODES Patch File</comment>
+    <comment xml:lang="en">GONODES node graph patch</comment>
+    <glob pattern="*.gnpatch"/>
+    <!-- .gnpatch files are JSON at the top level -->
+    <sub-class-of type="application/json"/>
+    <icon name="application-x-gnpatch"/>
+  </mime-type>
+</mime-info>

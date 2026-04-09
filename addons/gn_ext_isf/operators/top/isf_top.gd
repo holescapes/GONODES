@@ -130,16 +130,18 @@ func from_dict(d: Dictionary) -> void:
 # ===============================================================================
 
 func _load_file_to_code(path: String) -> void:
-	if not FileAccess.file_exists(path):
+	# Resolve project:// and other path tiers to absolute
+	var resolved := GNResourceLoader.resolve(path, project_dir)
+	if resolved.is_empty() or not FileAccess.file_exists(resolved):
 		GNLogger.error("ISFTOP", "'%s' — file not found: %s" % [id, path])
 		return
-	var file := FileAccess.open(path, FileAccess.READ)
+	var file := FileAccess.open(resolved, FileAccess.READ)
 	if file == null:
 		GNLogger.error("ISFTOP", "'%s' — cannot open: %s" % [id, path])
 		return
 	set_param_value("isf_code", file.get_as_text())
 	file.close()
-	GNLogger.info("ISFTOP", "'%s' — loaded %s" % [id, path.get_file()])
+	GNLogger.info("ISFTOP", "'%s' — loaded %s" % [id, resolved.get_file()])
 
 
 # ===============================================================================

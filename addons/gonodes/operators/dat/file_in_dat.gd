@@ -33,10 +33,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var path: String = get_param_value("filepath")
 	if path.is_empty():
 		return out
-	if not FileAccess.file_exists(path):
+	# Resolve project:// and other path tiers
+	var resolved := GNResourceLoader.resolve(path, project_dir)
+	if resolved.is_empty() or not FileAccess.file_exists(resolved):
 		push_warning("FileInDAT: File not found: %s" % path)
 		return out
-	var file := FileAccess.open(path, FileAccess.READ)
+	var file := FileAccess.open(resolved, FileAccess.READ)
 	if file == null:
 		push_warning("FileInDAT: Cannot open file: %s" % path)
 		return out
@@ -44,13 +46,13 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	file.close()
 
 	var mode: int = get_param_value("mode")
-	# Auto-detect based on extension
+	# Auto-detect based on extension (use resolved path for extension check)
 	if mode == 0:
-		if path.ends_with(".csv"):
+		if resolved.ends_with(".csv"):
 			mode = 1
-		elif path.ends_with(".tsv"):
+		elif resolved.ends_with(".tsv"):
 			mode = 2
-		elif path.ends_with(".json"):
+		elif resolved.ends_with(".json"):
 			mode = 3
 		else:
 			mode = 4  # Text

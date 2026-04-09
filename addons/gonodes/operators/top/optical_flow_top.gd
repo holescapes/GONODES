@@ -38,6 +38,10 @@ func _init_parameters() -> void:
 		"Smoothing", "Regularization weight (higher = smoother flow field)"))
 	add_parameter(GNParameter.create_int("iterations", 4, 1, 16,
 		"Iterations", "Horn-Schunck solver iterations per pixel"))
+	add_parameter(GNParameter.create_color("bg_color", Color(0.5, 0.5, 0.0, 1.0),
+		"Background", "Color for areas with no motion"))
+	add_parameter(GNParameter.create_bool("colorize", true,
+		"Colorize Background", "Blend bg_color into still areas (off = raw flow vectors)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -65,6 +69,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("sensitivity", sensitivity)
 	_material.set_shader_parameter("smoothing", smoothing)
 	_material.set_shader_parameter("iterations", iterations)
+	var bg_col: Color = get_param_value("bg_color")
+	_material.set_shader_parameter("bg_color", bg_col)
+	_material.set_shader_parameter("use_flow_color", get_param_value("colorize"))
 
 	# Previous frame — use the capture viewport's texture
 	if _has_prev_frame and _prev_viewport != null:

@@ -60,7 +60,13 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			_decoder.close()
 			_texture = null
 			return null
-		if not _decoder.open(file_path):
+		# Resolve project:// and other path tiers to absolute
+		var resolved := GNResourceLoader.resolve(file_path, project_dir)
+		if resolved.is_empty():
+			node_warning = "Cannot resolve path: " + file_path
+			_texture = null
+			return null
+		if not _decoder.open(resolved):
 			node_warning = "Failed to open HAP file: " + file_path
 			_texture = null
 			return null

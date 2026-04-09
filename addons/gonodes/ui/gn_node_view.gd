@@ -483,7 +483,12 @@ func set_viewer_active(active: bool) -> void:
 ## Updates the preview from the GNNode's current state.
 func update_preview() -> void:
 	if _preview != null and _preview.visible and gn_node != null:
+		var old_height := _preview.get_combined_minimum_size().y
 		gn_node.update_preview_control(_preview)
+		# GraphNode only grows automatically — if content shrank we must
+		# explicitly reset so it recomputes the minimum size.
+		if _preview.get_combined_minimum_size().y < old_height:
+			reset_size()
 
 
 ## Shows the preview control (if one exists).

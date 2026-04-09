@@ -32,15 +32,20 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	if _viewport.size != res:
 		_viewport.size = res
 
-	if svg_path.is_empty() or not FileAccess.file_exists(svg_path):
+	if svg_path.is_empty():
+		_cached_tex_data.resolution = res
+		return _cached_tex_data
+
+	# Resolve project:// and other path tiers
+	var resolved := GNResourceLoader.resolve(svg_path, project_dir)
+	if resolved.is_empty() or not GNResourceLoader.exists(svg_path, project_dir):
 		_cached_tex_data.resolution = res
 		return _cached_tex_data
 
 	# Only reload when path or resolution changes
 	if svg_path != _last_path or res != _last_res:
-		var img := Image.new()
-		var err: int = img.load(svg_path)
-		if err != OK:
+		var img := GNResourceLoader.load_image(svg_path, project_dir)
+		if img == null:
 			GNLogger.warn("SVGTOP", "'%s' — failed to load SVG: %s" % [id, svg_path])
 			_cached_tex_data.resolution = res
 			return _cached_tex_data

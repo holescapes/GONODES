@@ -11,6 +11,7 @@ uniform float time_val : hint_range(0.0, 100000.0) = 0.0;
 uniform float speed : hint_range(0.1, 30.0) = 8.0;
 
 // --- additional layers (0 = disabled) ---
+uniform int mode = 0;   // 0=Blocks, 1=VHS, 2=DataMoshing, 3=Snow
 uniform float scan_jitter : hint_range(0.0, 0.1) = 0.0;
 uniform float tear_strength : hint_range(0.0, 1.0) = 0.0;
 uniform float color_crush : hint_range(0.0, 1.0) = 0.0;
@@ -59,11 +60,11 @@ void fragment() {
 		}
 	}
 
-	// --- 3. Block displacement (original behaviour) ---
+	// --- 3. Block displacement (Blocks + Data Moshing only) ---
 	vec2 block = floor(uv * tex_size / block_size);
 	float rand_block = hash2(block + vec2(time_q));
 
-	if (rand_block < intensity) {
+	if ((mode == 0 || mode == 2) && rand_block < intensity) {
 		float offset_x = (hash2(block + vec2(time_q + 1.0)) * 2.0 - 1.0) * intensity * 0.1;
 		uv.x += offset_x;
 	}

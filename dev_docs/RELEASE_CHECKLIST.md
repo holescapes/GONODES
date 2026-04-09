@@ -314,6 +314,15 @@ nodes cook without errors, and visual output looks correct.
 
 ## Phase 6: Package
 
+### File association icons
+
+- [ ] Create `.gnpatch` file icon artwork (node graph motif)
+  - `gnpatch.ico` — Windows (256×256, 48×48, 32×32, 16×16 multi-res)
+  - `gnpatch.icns` — macOS (1024×1024 down to 16×16)
+  - `gnpatch.png` — Linux (128×128 minimum)
+- [ ] Place icons in `scripts/installers/` and inside app bundles
+- [ ] Run per-platform registration scripts (see `scripts/installers/`)
+
 ### Editor distribution (for creators)
 
 ```

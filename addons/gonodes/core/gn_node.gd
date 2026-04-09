@@ -115,7 +115,11 @@ var is_sink: bool = false
 ## Defaults to false — the cook engine stamps is_active on the first frame
 ## when _active_set_dirty triggers.  This prevents the debug overlay from
 ## showing all nodes as active before the first cook cycle.
-var is_active: bool = false
+var is_active: bool = false:
+	set(value):
+		if is_active != value:
+			is_active = value
+			_on_active_changed(value)
 
 # ─── Node Status (per-cook warnings / errors) ─────────────────────────────────
 
@@ -721,6 +725,13 @@ func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
 func _on_parameter_mode_changed(param_name: String, _new_mode: int) -> void:
 	mark_dirty()
 	parameter_changed.emit(id, param_name)
+
+
+## Called when this node transitions between active and inactive states.
+## Override in subclasses that own scene-tree children which process
+## independently (e.g. VideoStreamPlayer, AudioStreamPlayer).
+func _on_active_changed(_active: bool) -> void:
+	pass
 
 
 func _to_string() -> String:

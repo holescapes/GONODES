@@ -4,8 +4,9 @@ extends GNTopBase
 ## horizontal tears, colour crush, static noise, and V002-style stale-frame
 ## injection.
 
-var _stale_texture: ImageTexture = null
+var _blit: Dictionary = {}
 var _frame_count: int = 0
+var _update_stale: bool = false
 
 
 func _init() -> void:
@@ -19,6 +20,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
+	add_parameter(GNParameter.create_enum("mode",
+		PackedStringArray(["Blocks", "VHS", "Data Moshing", "Snow"]), 0,
+		"Mode", "Glitch style — chain multiple GlitchTOPs for combined effects"))
 	add_parameter(GNParameter.create_float("intensity", 0.3, 0.0, 1.0, 0.01,
 		"Intensity", "Probability and strength of glitch blocks"))
 	add_parameter(GNParameter.create_float("block_size", 32.0, 4.0, 128.0, 1.0,
@@ -50,50 +54,95 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	if _viewport.size != res:
 		_viewport.size = res
-		_stale_texture = null
+		_destroy_blit()
+		_frame_count = 0
 
 	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("source_tex", tex_in.texture)
 	_material.set_shader_parameter("intensity", get_param_value("intensity"))
-	_material.set_shader_parameter("block_size", get_param_value("block_size"))
-	_material.set_shader_parameter("channel_shift", get_param_value("channel_shift"))
 	_material.set_shader_parameter("speed", get_param_value("speed"))
 	_material.set_shader_parameter("time_val", elapsed_time)
-	_material.set_shader_parameter("scan_jitter", get_param_value("scan_jitter"))
-	_material.set_shader_parameter("tear_strength", get_param_value("tear_strength"))
-	_material.set_shader_parameter("color_crush", get_param_value("color_crush"))
-	_material.set_shader_parameter("noise_amount", get_param_value("noise_amount"))
+	_material.set_shader_parameter("mode", get_param_value("mode"))
 
+	# Gate layers by mode:
+	# 0=Blocks, 1=VHS, 2=Data Moshing, 3=Snow
+	var mode: int = get_param_value("mode")
+	var block_size: float = get_param_value("block_size")
+	var channel_shift: float = get_param_value("channel_shift")
+	var scan_jitter: float = get_param_value("scan_jitter")
+	var tear_strength: float = get_param_value("tear_strength")
+	var color_crush: float = get_param_value("color_crush")
+	var noise_amount: float = get_param_value("noise_amount")
 	var stale_val: float = get_param_value("stale_mix")
+
+	match mode:
+		0:  # Blocks — displacement + channel shift + color crush
+			scan_jitter = 0.0
+			tear_strength = 0.0
+			noise_amount = 0.0
+			stale_val = 0.0
+		1:  # VHS — scan jitter + tears + noise
+			color_crush = 0.0
+			stale_val = 0.0
+		2:  # Data Moshing — stale frames + block displacement
+			scan_jitter = 0.0
+			tear_strength = 0.0
+			noise_amount = 0.0
+			color_crush = 0.0
+			channel_shift = 0.0
+			stale_val = maxf(stale_val, 0.3)
+		3:  # Snow — noise only
+			channel_shift = 0.0
+			scan_jitter = 0.0
+			tear_strength = 0.0
+			color_crush = 0.0
+			stale_val = 0.0
+			noise_amount = maxf(noise_amount, 0.1)
+
+	_material.set_shader_parameter("block_size", block_size)
+	_material.set_shader_parameter("channel_shift", channel_shift)
+	_material.set_shader_parameter("scan_jitter", scan_jitter)
+	_material.set_shader_parameter("tear_strength", tear_strength)
+	_material.set_shader_parameter("color_crush", color_crush)
+	_material.set_shader_parameter("noise_amount", noise_amount)
+
 	_material.set_shader_parameter("stale_mix", stale_val)
+	_update_stale = false
 
 	if stale_val > 0.0:
-		if _stale_texture != null:
-			_material.set_shader_parameter("stale_tex", _stale_texture)
+		_ensure_blit(res)
+		if _frame_count > 0:
+			_material.set_shader_parameter("stale_tex", (_blit.viewport as SubViewport).get_texture())
 		else:
 			_material.set_shader_parameter("stale_tex", tex_in.texture)
+
+		var update_prob: float = clamp(1.0 - stale_val * 0.9, 0.1, 1.0)
+		if _frame_count < 2 or randf() <= update_prob:
+			(_blit.canvas as TextureRect).texture = _viewport.get_texture()
+			_update_stale = true
 		_frame_count += 1
-		if _frame_count > 1:
-			_maybe_capture_stale.call_deferred(stale_val)
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
 
-## Capture the viewport output for the stale buffer.  Higher stale_mix values
-## reduce the update frequency so the buffer becomes genuinely stale — blocks
-## may show data from many frames ago, mimicking V002's uninitialised FBO reads.
-func _maybe_capture_stale(stale_val: float) -> void:
-	if _viewport == null:
+## Only render the stale blit viewport on frames where we want to update it.
+func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
+	var result := super.execute_cook(inputs, frame)
+	if result != null and not _blit.is_empty() and not _update_stale:
+		(_blit.viewport as SubViewport).render_target_update_mode = SubViewport.UPDATE_DISABLED
+	return result
+
+
+func _ensure_blit(res: Vector2i) -> void:
+	if not _blit.is_empty() and (_blit.viewport as SubViewport).size == res:
 		return
-	# Update probability decreases with staleness: at 1.0 → ~10%, at 0.1 → ~90%
-	var update_prob: float = clamp(1.0 - stale_val * 0.9, 0.1, 1.0)
-	if _stale_texture != null and randf() > update_prob:
-		return  # Skip this frame — keep the buffer stale
-	var img: Image = _viewport.get_texture().get_image()
-	if img == null:
-		return
-	if _stale_texture == null:
-		_stale_texture = ImageTexture.create_from_image(img)
-	else:
-		_stale_texture.update(img)
+	_destroy_blit()
+	_blit = GNTopBase._create_blit_viewport(self, "StaleBlit", res, true)
+
+
+func _destroy_blit() -> void:
+	if _blit.has("viewport") and is_instance_valid(_blit.viewport):
+		(_blit.viewport as SubViewport).queue_free()
+	_blit = {}
+	_frame_count = 0

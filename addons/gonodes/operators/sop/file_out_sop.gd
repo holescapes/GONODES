@@ -34,7 +34,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if do_write:
 		var path: String = get_param_value("file").strip_edges()
 		if not path.is_empty():
-			_export_obj(in_geo, path)
+			# Resolve project:// paths to absolute for writing
+			var resolved := GNResourceLoader.resolve(path, project_dir)
+			if not resolved.is_empty():
+				_export_obj(in_geo, resolved)
 
 	# Pass-through
 	return in_geo

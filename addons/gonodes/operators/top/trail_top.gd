@@ -4,7 +4,7 @@ extends GNTopBase
 ## Blends the current input with the accumulated previous output at a
 ## configurable decay rate, creating ghost / echo / trail effects.
 
-var _feedback_texture: ImageTexture = null
+var _blit: Dictionary = {}
 var _frame_count: int = 0
 
 
@@ -38,37 +38,40 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	if _viewport.size != res:
 		_viewport.size = res
-		_feedback_texture = null
+		_destroy_blit()
 
 	if get_param_value("reset"):
-		_feedback_texture = null
+		_destroy_blit()
 		_frame_count = 0
+
+	_ensure_blit(res)
 
 	_material.set_shader_parameter("source_tex", tex_in.texture)
 
-	if _feedback_texture != null:
-		_material.set_shader_parameter("prev_tex", _feedback_texture)
+	if _frame_count > 0:
+		_material.set_shader_parameter("prev_tex", (_blit.viewport as SubViewport).get_texture())
 	else:
 		_material.set_shader_parameter("prev_tex", tex_in.texture)
 
 	_material.set_shader_parameter("decay", get_param_value("decay"))
 	_material.set_shader_parameter("brightness", get_param_value("brightness"))
 
+	# Point blit viewport at main viewport output for GPU-side capture
+	(_blit.canvas as TextureRect).texture = _viewport.get_texture()
 	_frame_count += 1
-	if _frame_count > 1:
-		_capture_feedback.call_deferred()
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
 
-func _capture_feedback() -> void:
-	if _viewport == null:
+func _ensure_blit(res: Vector2i) -> void:
+	if not _blit.is_empty() and (_blit.viewport as SubViewport).size == res:
 		return
-	var img: Image = _viewport.get_texture().get_image()
-	if img == null:
-		return
-	if _feedback_texture == null:
-		_feedback_texture = ImageTexture.create_from_image(img)
-	else:
-		_feedback_texture.update(img)
+	_destroy_blit()
+	_blit = GNTopBase._create_blit_viewport(self, "TrailBlit", res, true)
+
+
+func _destroy_blit() -> void:
+	if _blit.has("viewport") and is_instance_valid(_blit.viewport):
+		(_blit.viewport as SubViewport).queue_free()
+	_blit = {}

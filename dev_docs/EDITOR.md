@@ -630,9 +630,9 @@ disconnects all its wires.  Implemented in `gn_graph_editor.gd`.
 
 | Constant | Value | Purpose |
 |----------|-------|---------|
-| `_SHAKE_REVERSAL_THRESHOLD` | 5 | Minimum direction reversals to trigger |
-| `_SHAKE_TIME_WINDOW` | 0.35s | Reversals must occur within this window |
-| `_SHAKE_MIN_SPEED` | 300.0 px/s | Minimum speed on dominant axis to count |
+| `_SHAKE_REVERSAL_THRESHOLD` | 3 | Minimum direction reversals to trigger |
+| `_SHAKE_TIME_WINDOW` | 0.5s | Reversals must occur within this window |
+| `_SHAKE_MIN_SPEED` | 200.0 px/s | Minimum speed on dominant axis to count |
 
 ### Detection
 
@@ -887,3 +887,56 @@ Upstream tracking:
 - [godotengine/godot#111271](https://github.com/godotengine/godot/issues/111271) — Stretch mode + different DPI
 
 User-facing docs: `help/troubleshooting.md` → "Multi-Monitor DPI / Scaling Issues".
+
+
+## Node Search (Ctrl+F) — Implementation
+
+Find-in-graph search overlay for locating nodes by ID or type in large
+patches.  Implemented in `gn_graph_editor.gd`.
+
+### UI
+
+Floating `PanelContainer` at top-center of the graph canvas (`z_index 4096`).
+Contains: 🔍 icon, `LineEdit` (placeholder "Search nodes…"), match count
+`Label` ("3 of 12"), ✕ close button.
+
+### Activation
+
+- **Ctrl+F** (keyboard shortcut in `_unhandled_key_input`)
+- **Right-click → "Search Nodes…"** (context menu `_CtxID.SEARCH_NODES`)
+
+### Behaviour
+
+1. As the user types, `_on_search_text_changed()` filters `_node_views`
+   by substring match (case-insensitive) against `node.id` and
+   `node.node_type`.
+2. Non-matching nodes are dimmed to 25% opacity via `view.modulate`.
+3. Matching node IDs are sorted alphabetically for stable navigation.
+4. **Enter** → next match, **Shift+Enter** → previous match.
+   Each navigation step selects the match node and centers the graph
+   on it via `scroll_to_node()`.
+5. **Escape** or ✕ button → close search bar, restore all node modulation.
+
+### State Variables
+
+| Variable | Type | Purpose |
+|----------|------|--------|
+| `_search_bar` | `PanelContainer` | The overlay panel |
+| `_search_edit` | `LineEdit` | Text input |
+| `_search_label` | `Label` | "N of M" counter |
+| `_search_matches` | `Array[String]` | Node IDs matching query |
+| `_search_index` | `int` | Current cursor into matches |
+| `_search_dimmed` | `bool` | Whether modulation is active |
+
+
+## File Parameter Dropdown — Lazy Refresh
+
+The file dropdown (`_populate_file_dropdown` in `gn_param_row.gd`) shows
+three tiers: Patch Local, Bundled, External.  The **Patch Local** section
+requires `owner_node.project_dir` which is set by the cook engine during
+the first cook cycle — after the inspector UI is built.
+
+Fix: the `OptionButton.pressed` signal triggers `_populate_file_dropdown()`
+on every open, ensuring `project_dir` is current.  This is a universal fix
+for all families (TOP, IMG, CHOP, DAT, SOP, etc.) since the dropdown code
+is in the shared `gn_param_row.gd`.

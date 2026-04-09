@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=GONODES Editor
+GenericName=Node Graph Editor
+Comment=Visual programming environment for real-time graphics
+Exec=gonodes-editor %f
+Icon=gonodes-editor
+Terminal=false
+Categories=Graphics;AudioVideo;Development;
+MimeType=application/x-gnpatch;
+StartupNotify=true
+Keywords=nodes;graphics;shader;vfx;

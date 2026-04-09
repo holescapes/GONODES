@@ -656,6 +656,12 @@ func _create_file_control() -> Control:
 	# Populate with matching files from all tiers
 	_populate_file_dropdown(option)
 
+	# Re-populate every time the user opens the dropdown so that project_dir
+	# (set by the cook engine after the first cook) is always current.
+	option.pressed.connect(func() -> void:
+		_populate_file_dropdown(option)
+	)
+
 	# Connect selection
 	option.item_selected.connect(_on_file_option_selected)
 
@@ -704,7 +710,9 @@ func _create_ramp_control() -> Control:
 
 
 ## Populates the OptionButton dropdown with files from all tiers:
-## Tier 1 (bundled res://), Tier 2 (project folder), and any Tier 3 current value.
+## Patch Local (project folder beside the .gnpatch), Bundled (res://), and any
+## Tier 3 current value.  Patch Local appears first so patch-adjacent files are
+## easy to find, and those files are excluded from the Bundled section.
 func _populate_file_dropdown(option: OptionButton) -> void:
 	option.clear()
 	option.add_item("(none)", 0)
@@ -721,28 +729,25 @@ func _populate_file_dropdown(option: OptionButton) -> void:
 	var current_path: String = str(param.value)
 	var selected_idx := 0
 
-	# ── Tier 1: Bundled (res://) ──
-	var bundled_files := GNResourceLoader.scan_directory("res://", extensions)
-	bundled_files.sort()
-	if not bundled_files.is_empty():
-		option.add_separator("── Bundled ──")
-		item_idx += 1
-		for file_path in bundled_files:
-			var display := file_path.trim_prefix("res://")
-			option.add_item(display, item_idx)
-			option.set_item_metadata(item_idx, file_path)
-			option.set_item_tooltip(item_idx, file_path)
-			if file_path == current_path:
-				selected_idx = item_idx
-			item_idx += 1
-
-	# ── Tier 2: Project folder ──
+	# ── Patch Local: project folder beside the .gnpatch ──
 	var proj_dir: String = owner_node.project_dir if owner_node != null else ""
+	# Compute the res:// prefix that maps to project_dir so we can filter
+	# those files out of the Bundled section below.
+	var project_res_prefix := ""
 	if not proj_dir.is_empty():
+		var res_root := ProjectSettings.globalize_path("res://").replace("\\", "/")
+		if not res_root.ends_with("/"):
+			res_root += "/"
+		var norm_proj := proj_dir.replace("\\", "/")
+		if not norm_proj.ends_with("/"):
+			norm_proj += "/"
+		if norm_proj.begins_with(res_root):
+			project_res_prefix = "res://" + norm_proj.substr(res_root.length())
+
 		var project_files := GNResourceLoader.scan_directory(proj_dir, extensions)
 		project_files.sort()
 		if not project_files.is_empty():
-			option.add_separator("── Project ──")
+			option.add_separator("── Patch Local ──")
 			item_idx += 1
 			for abs_path in project_files:
 				var proj_path := GNResourceLoader.to_project_relative(abs_path, proj_dir)
@@ -754,7 +759,27 @@ func _populate_file_dropdown(option: OptionButton) -> void:
 					selected_idx = item_idx
 				item_idx += 1
 
-	# ── Tier 3: If current value is an absolute path not in lists above, add it ──
+	# ── Bundled (res://) — excluding files already shown in Patch Local ──
+	var bundled_files := GNResourceLoader.scan_directory("res://", extensions)
+	bundled_files.sort()
+	if not bundled_files.is_empty():
+		var added_bundled := false
+		for file_path in bundled_files:
+			if not project_res_prefix.is_empty() and file_path.begins_with(project_res_prefix):
+				continue  # already listed under Patch Local
+			if not added_bundled:
+				option.add_separator("── Bundled ──")
+				item_idx += 1
+				added_bundled = true
+			var display := file_path.trim_prefix("res://")
+			option.add_item(display, item_idx)
+			option.set_item_metadata(item_idx, file_path)
+			option.set_item_tooltip(item_idx, file_path)
+			if file_path == current_path:
+				selected_idx = item_idx
+			item_idx += 1
+
+	# ── External: absolute path not in either list above ──
 	if selected_idx == 0 and not current_path.is_empty():
 		var tier := GNResourceLoader.classify(current_path)
 		if tier == GNResourceLoader.PathTier.ABSOLUTE:

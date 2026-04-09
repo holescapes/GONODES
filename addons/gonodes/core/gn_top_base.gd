@@ -192,3 +192,37 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 			if child is SubViewport:
 				child.render_target_update_mode = SubViewport.UPDATE_ONCE
 	return result
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GPU-Side Texture Snapshot (Blit Viewport)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Creates a lightweight SubViewport that copies a source texture via a
+## fullscreen TextureRect blit — stays entirely on the GPU, no CPU readback.
+## Returns a Dictionary: { "viewport": SubViewport, "canvas": TextureRect }
+##
+## Call [code]blit.canvas.texture = src[/code] to set the source,
+## then [method execute_cook] will trigger UPDATE_ONCE automatically since
+## the viewport is a child of this node.
+##
+## Read back via [code]blit.viewport.get_texture()[/code].
+static func _create_blit_viewport(parent: Node, vp_name: String,
+		size: Vector2i, transparent: bool = true) -> Dictionary:
+	var vp := SubViewport.new()
+	vp.name = vp_name
+	vp.size = size
+	vp.transparent_bg = transparent
+	vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	vp.disable_3d = true
+	vp.gui_disable_input = true
+	parent.add_child(vp)
+
+	var canvas := TextureRect.new()
+	canvas.name = "BlitCanvas"
+	canvas.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	canvas.stretch_mode = TextureRect.STRETCH_SCALE
+	vp.add_child(canvas)
+	canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	return { "viewport": vp, "canvas": canvas }

@@ -4,7 +4,7 @@ extends GNTopBase
 ## delta image.  Core building block for motion detection, VJ reactivity,
 ## and edge-of-motion effects.  Uses feedback ping-pong internally.
 
-var _prev_texture: ImageTexture = null
+var _blit: Dictionary = {}
 var _frame_count: int = 0
 
 
@@ -41,17 +41,19 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	if _viewport.size != res:
 		_viewport.size = res
-		_prev_texture = null
+		_destroy_blit()
 
 	var do_reset: bool = get_param_value("reset")
 	if do_reset:
-		_prev_texture = null
+		_destroy_blit()
 		_frame_count = 0
+
+	_ensure_blit(res)
 
 	_material.set_shader_parameter("source_tex", tex_in.texture)
 
-	if _prev_texture != null:
-		_material.set_shader_parameter("prev_tex", _prev_texture)
+	if _frame_count > 0:
+		_material.set_shader_parameter("prev_tex", (_blit.viewport as SubViewport).get_texture())
 	else:
 		_material.set_shader_parameter("prev_tex", tex_in.texture)
 
@@ -59,26 +61,22 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("gain", get_param_value("gain"))
 	_material.set_shader_parameter("threshold", get_param_value("threshold"))
 
+	# Point blit viewport at current input for next frame's prev_tex
+	(_blit.canvas as TextureRect).texture = tex_in.texture
 	_frame_count += 1
-	if _frame_count > 1:
-		_capture_prev.call_deferred()
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
 
-func _capture_prev() -> void:
-	if _viewport == null:
+func _ensure_blit(res: Vector2i) -> void:
+	if not _blit.is_empty() and (_blit.viewport as SubViewport).size == res:
 		return
-	# Capture the *source input* (not the diff output) for next frame comparison.
-	# We read the source_tex that was set on the material.
-	var src_tex: Texture2D = _material.get_shader_parameter("source_tex")
-	if src_tex == null:
-		return
-	var img: Image = src_tex.get_image()
-	if img == null:
-		return
-	if _prev_texture == null:
-		_prev_texture = ImageTexture.create_from_image(img)
-	else:
-		_prev_texture.update(img)
+	_destroy_blit()
+	_blit = GNTopBase._create_blit_viewport(self, "PrevFrameBlit", res, true)
+
+
+func _destroy_blit() -> void:
+	if _blit.has("viewport") and is_instance_valid(_blit.viewport):
+		(_blit.viewport as SubViewport).queue_free()
+	_blit = {}

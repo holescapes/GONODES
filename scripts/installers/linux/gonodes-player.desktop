@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=GONODES Player
+GenericName=Patch Player
+Comment=Play GONODES patches in real-time
+Exec=gonodes-player %f
+Icon=gonodes-player
+Terminal=false
+Categories=Graphics;AudioVideo;Player;
+MimeType=application/x-gnpatch;
+StartupNotify=true
+Keywords=nodes;graphics;player;

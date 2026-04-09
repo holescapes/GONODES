@@ -8,6 +8,8 @@ uniform sampler2D previous_frame : hint_default_white;
 uniform float sensitivity : hint_range(1.0, 100.0, 0.1) = 20.0;
 uniform float smoothing : hint_range(0.001, 1.0, 0.001) = 0.1;
 uniform int iterations : hint_range(1, 16, 1) = 4;
+uniform vec4 bg_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+uniform bool use_flow_color = true;
 
 float luminance(vec3 c) {
 	return dot(c, vec3(0.2126, 0.7152, 0.0722));
@@ -60,5 +62,7 @@ void fragment() {
 	float magnitude = clamp(length(vec2(u, v)) * sensitivity * 2.0, 0.0, 1.0);
 
 	vec3 flow_rgb = vec3(out_r, out_g, magnitude);
-	COLOR = vec4(flow_rgb, 1.0);
+	// Blend between bg_color (at zero motion) and flow visualization
+	vec3 result = mix(bg_color.rgb, flow_rgb, use_flow_color ? magnitude : 1.0);
+	COLOR = vec4(result, 1.0);
 }

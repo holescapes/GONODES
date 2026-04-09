@@ -871,6 +871,11 @@ func get_connection_count() -> int:
 ## Off by default (experimental).  User can opt in per patch.
 var multithreading_enabled: bool = false
 
+## Graph viewport state — scroll offset and zoom level.
+## Serialized as the top-level "viewport" key in .gnpatch files.
+## Written by the editor before save, read after load.
+var viewport_state: Dictionary = {}
+
 ## Host I/O manifest — declares the patch's interface for embedded host apps.
 ## Serialized as the top-level "host_io" key in .gnpatch files.
 ## Structure: { "inputs": [...], "outputs": [...], "parameters": [...] }
@@ -932,6 +937,10 @@ func to_dict() -> Dictionary:
 	# Patch-level settings
 	if multithreading_enabled:
 		d["multithreading_enabled"] = true
+
+	# Graph viewport state
+	if not viewport_state.is_empty():
+		d["viewport"] = viewport_state
 
 	# Host I/O manifest
 	if not host_io.is_empty():
@@ -1082,6 +1091,9 @@ func from_dict(d: Dictionary) -> bool:
 
 	# Patch-level settings
 	multithreading_enabled = d.get("multithreading_enabled", false)
+
+	# Graph viewport state
+	viewport_state = d.get("viewport", {})
 
 	# Host I/O manifest
 	host_io = d.get("host_io", {})

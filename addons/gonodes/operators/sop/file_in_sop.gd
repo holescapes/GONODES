@@ -50,6 +50,11 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			"error":
 				GNLogger.warn("FileInSOP", "'%s' — URL fetch error: %s" % [id, result.error])
 				return geo
+	else:
+		# Resolve project:// and other path tiers to absolute
+		path = GNResourceLoader.resolve(path, project_dir)
+		if path.is_empty():
+			return geo
 
 	var ext: String = path.get_extension().to_lower()
 

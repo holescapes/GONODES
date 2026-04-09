@@ -13,6 +13,14 @@ var _loaded_file_path: String = ""
 var _stream: VideoStream = null
 var _awaiting_video_size: bool = false
 
+# Audio capture infrastructure
+var _audio_bus_name: String = ""
+var _audio_bus_idx: int = -1
+var _capture_effect: AudioEffectCapture = null
+var _cached_audio_data: GNChannelData = null
+var _left_buf: PackedFloat32Array = PackedFloat32Array()
+var _right_buf: PackedFloat32Array = PackedFloat32Array()
+
 
 func _init() -> void:
 	node_type = "movie_file_in"
@@ -21,6 +29,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.TOP, "Video frame texture")
+	add_output("audio", GNFamily.Type.CHOP, "Audio waveform (left, right, level, pos, length, playing)")
 
 
 func _init_parameters() -> void:
@@ -37,6 +46,10 @@ func _init_parameters() -> void:
 		"Seek to time in seconds. Set -1 to disable manual seek."))
 	add_parameter(GNParameter.create_color("bg_color", Color.BLACK, "",
 		"Background color shown when no video is loaded or during gaps"))
+	add_parameter(GNParameter.create_bool("mute", false, "Mute",
+		"Mute direct audio output (audio still available on CHOP port)"))
+	add_parameter(GNParameter.create_int("audio_buffer", 1024, 64, 8192, "Audio Buffer",
+		"Number of audio samples to output per cook"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
@@ -85,6 +98,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		elif do_play and _video_player.paused:
 			_video_player.paused = false
 
+	# Audio capture
+	_pull_audio()
+
+	if _audio_bus_idx >= 0:
+		AudioServer.set_bus_mute(_audio_bus_idx, get_param_value("mute"))
+
 	_cached_tex_data.resolution = _viewport.size
 	return _cached_tex_data
 
@@ -106,6 +125,9 @@ func _setup_viewport() -> void:
 	_viewport.add_child(_bg)
 	_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
+	# Dedicated audio bus with capture effect
+	_setup_audio_bus()
+
 	# VideoStreamPlayer fills the viewport
 	_video_player = VideoStreamPlayer.new()
 	_video_player.name = "VideoPlayer"
@@ -113,6 +135,7 @@ func _setup_viewport() -> void:
 	_video_player.autoplay = false
 	_video_player.loop = true
 	_video_player.process_mode = Node.PROCESS_MODE_ALWAYS
+	_video_player.bus = _audio_bus_name
 	_viewport.add_child(_video_player)
 	_video_player.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_video_player.finished.connect(_on_video_finished)
@@ -150,3 +173,105 @@ func _apply_video_file(file_path: String) -> void:
 
 func _on_video_finished() -> void:
 	GNLogger.debug("MovieFileInTOP", "'%s' video playback finished" % id)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Audio Capture
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _setup_audio_bus() -> void:
+	if _audio_bus_idx >= 0:
+		return
+	_audio_bus_name = "GN_MovieAudio_%s" % id
+	_audio_bus_idx = AudioServer.bus_count
+	AudioServer.add_bus(_audio_bus_idx)
+	AudioServer.set_bus_name(_audio_bus_idx, _audio_bus_name)
+
+	_capture_effect = AudioEffectCapture.new()
+	_capture_effect.buffer_length = 0.5
+	AudioServer.add_bus_effect(_audio_bus_idx, _capture_effect)
+
+
+func _pull_audio() -> void:
+	var sample_rate: float = float(AudioServer.get_mix_rate())
+	if _cached_audio_data == null:
+		_cached_audio_data = GNChannelData.new()
+	_cached_audio_data.sample_rate = sample_rate
+	_cached_audio_data.channels.clear()
+
+	var buf_size: int = get_param_value("audio_buffer")
+	var is_playing: bool = _video_player != null and _video_player.is_playing()
+
+	if _capture_effect != null and is_playing:
+		var available: int = _capture_effect.get_frames_available()
+		var pull_count: int = mini(available, buf_size)
+
+		if pull_count > 0:
+			var frames: PackedVector2Array = _capture_effect.get_buffer(pull_count)
+			_left_buf.resize(frames.size())
+			_right_buf.resize(frames.size())
+
+			var rms_sum: float = 0.0
+			for i in range(frames.size()):
+				_left_buf[i] = frames[i].x
+				_right_buf[i] = frames[i].y
+				rms_sum += frames[i].x * frames[i].x
+
+			_cached_audio_data.set_channel("left", _left_buf.duplicate())
+			_cached_audio_data.set_channel("right", _right_buf.duplicate())
+			_cached_audio_data.length = frames.size()
+			var rms: float = sqrt(rms_sum / maxf(float(frames.size()), 1.0))
+			_cached_audio_data.set_single_value("level", clampf(rms, 0.0, 1.0))
+		else:
+			_cached_audio_data.set_single_value("level", 0.0)
+	else:
+		_cached_audio_data.set_single_value("level", 0.0)
+
+	# Transport info
+	_cached_audio_data.set_single_value("playing", 1.0 if is_playing else 0.0)
+	_cached_audio_data.set_single_value("pos",
+		_video_player.stream_position if is_playing and _video_player != null else 0.0)
+	var duration: float = 0.0
+	if _stream != null and _stream.has_method("get_length"):
+		duration = _stream.get_length()
+	_cached_audio_data.set_single_value("length", duration)
+
+
+## Route multi-output: port 0 = TOP texture, port 1 = CHOP audio.
+func get_output_data(port_index: int) -> GNData:
+	if port_index == 1:
+		return _cached_audio_data
+	return cached_output
+
+
+func _cleanup_audio_bus() -> void:
+	if _audio_bus_idx >= 0:
+		for i in range(AudioServer.bus_count):
+			if AudioServer.get_bus_name(i) == _audio_bus_name:
+				AudioServer.remove_bus(i)
+				break
+	_capture_effect = null
+	_audio_bus_idx = -1
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_cleanup_audio_bus()
+
+
+## Pause / resume the VideoStreamPlayer when the node enters or leaves the
+## active cooking chain.  Without this, Godot's _process() keeps decoding
+## and rendering video frames (and playing audio) even when the cook engine
+## is not cooking this node.
+func _on_active_changed(active: bool) -> void:
+	if _video_player == null:
+		return
+	if active:
+		if get_param_value("play") and _video_player.stream != null:
+			_video_player.paused = false
+	else:
+		if _video_player.is_playing():
+			_video_player.paused = true
+		# Drain capture buffer so stale audio doesn't burst on resume
+		if _capture_effect != null:
+			_capture_effect.clear_buffer()

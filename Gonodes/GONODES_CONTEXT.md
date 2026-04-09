@@ -250,6 +250,10 @@ var is_sink: bool = false           # True for output operators (WindowOUT, Spou
                                     # Set by operator in _init(). Engine auto-detects these as sinks.
 var is_active: bool = true          # Set by cook engine per frame. False = skip cooking.
                                     # Inactive nodes keep cached_output frozen.
+                                    # Setter calls virtual _on_active_changed(active: bool) on transitions.
+
+# Virtual hook — override to react to active-chain changes
+func _on_active_changed(_active: bool) -> void: pass  # e.g. MovieFileInTOP pauses playback
 
 # Timing (injected by GNCookEngine before each cook)
 var current_delta: float = 0.0     # Frame delta in seconds
@@ -4776,7 +4780,7 @@ Deep comparison of GONODES vs TouchDesigner operator inventory:
 | RaySOP | SOP | Möller-Trumbore CPU raycast projecting source vertices onto target surface |
 | BeatCHOP | CHOP | RMS energy-based onset detection with adaptive threshold + de-bounce; synthetic BPM fallback |
 | ReplicatorCOMP | COMP | Table-driven replicator via GNNetwork API with hash-based change detection |
-| OpticalFlowTOP | TOP | Horn-Schunck GLSL fragment shader for motion vector estimation |
+| OpticalFlowTOP | TOP | Horn-Schunck GLSL fragment shader for motion vector estimation. `bg_color` (Color) + `colorize` (bool) params — zero-motion areas blend with bg_color instead of raw (0.5, 0.5, 0) green tint |
 
 ### 31.3 Tier 2 Operators (10 complementary)
 
@@ -5519,4 +5523,43 @@ Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VO
 | ML Segmentation | ✅ Implemented | SegmentationTOP — person/background mask |
 | ML Object Detection | ✅ Implemented | ObjectDetectDAT — YOLOv8 bounding boxes + COCO labels |
 | Depth Sensors (Kinect/RealSense/Ultraleap) | ✅ Implemented | gn_ext_depth_sensor — unified API with capability flags (depth/color/IR/skeleton/hand tracking/point cloud/player index) |
+
+## 35. Session Changelog — GPU Blit Refactoring, UX & Operator Updates
+
+### 35.1 GPU-Side Frame Buffering (Blit SubViewport Pattern)
+
+Eliminated CPU `get_image()` readback from **7 TOP operators** by introducing a GPU-only blit SubViewport pattern.
+
+- **`GNTopBase._create_blit_viewport(size: Vector2i) → Dictionary`** — static helper creating a lightweight `SubViewport` (UPDATE_DISABLED, no own world, transparent BG) + child `TextureRect`. Returns `{ viewport, canvas }`. Caller assigns a source texture to `canvas.texture`, then triggers `UPDATE_ONCE` on the viewport to GPU-blit one frame.
+- **Ring buffer TOPs** (CacheTOP, TimeMachineTOP): Rewritten from `Array[ImageTexture]` + `get_image()` to `Array[Dictionary]` of blit SubViewports. Each ring slot holds its own SubViewport. Critical `execute_cook` override: only renders the `_pending_write_vp` slot, reverts all others to UPDATE_DISABLED. Without this, `GNTopBase.execute_cook` would trigger UPDATE_ONCE on ALL N ring SubViewports per frame.
+- **Single-frame feedback TOPs** (FeedbackTOP, TrailTOP, CellularAutomataTOP, FrameDifferenceTOP, GlitchTOP): Each uses one blit SubViewport to snapshot either the operator's own viewport output (feedback) or the input texture (frame difference). `_ensure_blit()`/`_destroy_blit()` lifecycle. No `execute_cook` override needed (single additional VP is harmless).
+- **Performance impact**: Eliminates GPU→CPU→GPU roundtrip per frame per operator. Most significant for CacheTOP/TimeMachineTOP where N readbacks per frame became zero.
+
+### 35.2 GlitchTOP Mode Enum
+
+- **`mode` enum** with 4 values: Blocks, VHS, Data Moshing, Snow. No "All" mode — each GlitchTOP focuses on one style; chain multiple GlitchTOPs for combined effects.
+- Mode gates shader layers: GDScript zeros out inactive float params before passing to shader. Shader also gates block displacement via `uniform int mode` so blocks only fire in Blocks (0) + Data Moshing (2).
+- **Blocks**: displacement + channel shift + color crush. **VHS**: scan jitter + tears + noise + block displacement (off) + channel shift. **Data Moshing**: stale frames + block displacement (channel shift off). **Snow**: noise only.
+
+### 35.3 OpticalFlowTOP Background Color Fix
+
+- Added `bg_color` (Color, default black) and `colorize` (bool) params.
+- Zero-motion areas now blend with `bg_color` instead of raw (0.5, 0.5, 0.0) green tint from the Horn-Schunck motion vector encoding.
+
+### 35.4 Node Search (Ctrl+F)
+
+- **Activation**: Ctrl+F or right-click context menu → "Search Nodes…"
+- **UI**: PanelContainer overlay at top-center of graph editor (z_index 4096), contains 🔍 icon, LineEdit, match counter label, ▲/▼ navigation buttons, ✕ close button.
+- **Matching**: Filters nodes by `id` and `node_type` substring match (case-insensitive). Non-matching nodes dimmed to 25% modulate alpha.
+- **Navigation**: Enter = next match, Shift+Enter = previous match. ▲/▼ buttons do the same. Counter shows "3 of 12" format. Auto-scrolls to match and selects it.
+- **Close**: Escape key or ✕ button. Restores all node modulation.
+
+### 35.5 GNNode `_on_active_changed()` Hook
+
+- `is_active` setter on GNNode now calls virtual `_on_active_changed(active: bool)` on transitions (false→true or true→false).
+- **MovieFileInTOP** overrides this to pause `VideoStreamPlayer` when inactive and resume on reactivation. Also drains `AudioEffectCapture` buffer on deactivate to prevent stale audio burst.
+
+### 35.6 Shake-to-Disconnect Sensitivity Tuning
+
+- Thresholds loosened for easier triggering: reversals 5 → **3**, time window 0.35s → **0.5s**, min speed 300 → **200** px/s.
 

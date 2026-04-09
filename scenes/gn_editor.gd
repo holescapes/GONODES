@@ -147,6 +147,15 @@ func _ready() -> void:
 
 	# Bind graph editor to network
 	graph_editor.bind_network(network)
+
+	# Restore graph viewport state from patch file (scroll position + zoom)
+	var vp: Dictionary = network.viewport_state
+	if not vp.is_empty():
+		graph_editor.zoom = vp.get("zoom", 0.8)
+		graph_editor.scroll_offset = Vector2(
+			vp.get("scroll_x", 0.0),
+			vp.get("scroll_y", 0.0))
+
 	graph_editor.operator_selected.connect(_on_graph_node_selected)
 	graph_editor.operator_deselected.connect(_on_graph_selection_cleared)
 	graph_editor.open_viewer_requested.connect(_on_open_viewer_requested)
@@ -1284,6 +1293,13 @@ func _save_to_path(path: String) -> void:
 	_project.ensure_ready()
 	cook_engine.project_dir = _project.project_dir
 
+	# Store current graph viewport state so it restores on next load
+	network.viewport_state = {
+		"scroll_x": graph_editor.scroll_offset.x,
+		"scroll_y": graph_editor.scroll_offset.y,
+		"zoom": graph_editor.zoom,
+	}
+
 	var err := network.save_to_file(path)
 	if err == OK:
 		_current_file_path = path
@@ -1332,6 +1348,14 @@ func _load_from_path(path: String) -> void:
 	network.node_renamed.connect(_on_node_renamed)
 	graph_editor.clear_undo_history()
 	graph_editor.update_viewer_pin_highlights("")
+
+	# Restore graph viewport state (scroll position and zoom)
+	var vp: Dictionary = network.viewport_state
+	if not vp.is_empty():
+		graph_editor.zoom = vp.get("zoom", 0.8)
+		graph_editor.scroll_offset = Vector2(
+			vp.get("scroll_x", 0.0),
+			vp.get("scroll_y", 0.0))
 
 	_push_active_sinks()
 	_update_title()
