@@ -26,8 +26,6 @@ func _init_parameters() -> void:
 		"Strength", "Displacement strength"))
 	add_parameter(GNParameter.create_enum("mode", ["Displace", "Refract", "Warp"],
 		0, "Mode", "Deformation algorithm"))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1024, 1024),
-		"Resolution", "Output resolution"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -36,7 +34,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if tex_in == null or tex_in.texture == null:
 		return null
 
-	var res: Vector2i = get_param_value("resolution")
+	var res: Vector2i = tex_in.resolution
 	_init_shader_viewport(SHADER_PATH, true, true, res)
 
 	if _viewport.size != res:

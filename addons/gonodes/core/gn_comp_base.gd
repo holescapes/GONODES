@@ -82,20 +82,26 @@ func update_preview_control(control: Control) -> void:
 			label.text = "no node"
 
 
-func display_in_viewer(viewer) -> void:
-	# COMPs pass through their input data (e.g. GNGeoData from SOP input).
-	# Route by output data type so the viewer shows the right visualization.
+func render_for_viewer(viewer) -> void:
+	# COMPs pass through their input data — route by output type.
 	if cached_output is GNGeoData:
-		viewer.show_3d_mesh(cached_output as GNGeoData)
-		return
+		var geo: GNGeoData = cached_output as GNGeoData
+		if geo.mesh != null:
+			GNSopBase._ensure_viewer_scene()
+			var vp: SubViewport = viewer.get_3d_viewport()
+			GNSopBase._reparent_viewer_nodes(vp)
+			GNViewerRenderHelpers.apply_orbit_camera(
+				GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+			GNViewerRenderHelpers.render_sop(vp, GNSopBase._viewer_mesh_instance, geo.mesh)
+			viewer.set_info_bar("%d verts" % geo.vertex_count)
+			return
 	if cached_output is GNTextureData:
 		var td: GNTextureData = cached_output as GNTextureData
 		if td.texture:
-			viewer.show_texture(td.texture,
+			viewer.set_texture(td.texture,
 				"%dx%d" % [td.resolution.x, td.resolution.y])
-			viewer.update_zoom_label()
 			return
 	if cached_output != null:
-		viewer.show_info(cached_output.get_preview_text(), "")
+		viewer.set_info(cached_output.get_preview_text(), "")
 		return
-	viewer.show_info("COMP: %s" % node_type, "Component operator")
+	viewer.set_info("COMP: %s" % node_type, "Component operator")

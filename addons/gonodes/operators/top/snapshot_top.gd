@@ -3,7 +3,7 @@ extends GNTopBase
 ## Renders any non-TOP data as a TOP texture — the same visualization the
 ## viewer panel shows, but available as a node output for downstream processing.
 ##
-## Shares rendering code with GNViewerPanel via GNViewerRenderer, so
+## Shares rendering code with GNViewerPanel via GNViewerRenderHelpers, so
 ## improvements to the viewer automatically benefit this node too.
 ##
 ## The "mode" parameter selects the input data family. Changing mode rebuilds
@@ -57,8 +57,16 @@ var _pop_gizmo: Node3D = null
 var _mat_vp: SubViewport = null
 var _mat_sphere: MeshInstance3D = null
 
-## Reusable ImageTexture for CPU-side renders (CHOP, DAT, VOL, IMG).
+## Reusable ImageTexture for CPU-side renders (CHOP, VOL, IMG).
 var _img_texture: ImageTexture = null
+
+## Previous ImageTexture size+format — for detecting when we need to recreate.
+var _prev_img_size: Vector2i = Vector2i.ZERO
+var _prev_img_format: int = -1
+
+## DAT SubViewport + drawing control for text table rendering.
+var _dat_vp: SubViewport = null
+var _dat_draw: _DATTableDraw = null
 
 ## Current mode — cached to detect mode changes.
 var _current_mode: int = -1
@@ -192,9 +200,9 @@ func _cook_sop(data: GNData, res: Vector2i) -> GNData:
 	var dist: float = get_param_value("orbit_distance")
 	var wire: bool = get_param_value("wireframe")
 
-	GNViewerRenderer.apply_orbit_camera(_sop_camera, yaw, pitch, dist)
-	GNViewerRenderer.update_gizmo_scale(_sop_gizmo, dist)
-	GNViewerRenderer.render_sop(_sop_vp, _sop_mesh_instance, geo.mesh, wire)
+	GNViewerRenderHelpers.apply_orbit_camera(_sop_camera, yaw, pitch, dist)
+	GNViewerRenderHelpers.update_gizmo_scale(_sop_gizmo, dist)
+	GNViewerRenderHelpers.render_sop(_sop_vp, _sop_mesh_instance, geo.mesh, wire)
 
 	return _output_from_viewport(_sop_vp, res)
 
@@ -204,7 +212,8 @@ func _cook_chop(data: GNData, res: Vector2i) -> GNData:
 	if ch == null or ch.channels.is_empty():
 		return null
 
-	var img := GNViewerRenderer.render_chop_waveform(ch, res)
+	# Use a rolling window: show last 'res.x' samples so the waveform scrolls.
+	var img := GNViewerRenderHelpers.render_chop_waveform_rolling(ch, res)
 	return _output_from_image(img, res)
 
 
@@ -213,8 +222,12 @@ func _cook_dat(data: GNData, res: Vector2i) -> GNData:
 	if tbl == null or tbl.table.is_empty():
 		return null
 
-	var img := GNViewerRenderer.render_dat_table(tbl, res)
-	return _output_from_image(img, res)
+	_ensure_dat_viewport(res)
+	_dat_vp.size = res
+	_dat_draw.table_data = tbl
+	_dat_draw.queue_redraw()
+
+	return _output_from_viewport(_dat_vp, res)
 
 
 func _cook_pop(data: GNData, res: Vector2i) -> GNData:
@@ -230,10 +243,10 @@ func _cook_pop(data: GNData, res: Vector2i) -> GNData:
 	var dist: float = get_param_value("orbit_distance")
 	var pt_size: float = get_param_value("point_size")
 
-	GNViewerRenderer.apply_orbit_camera(_pop_camera, yaw, pitch, dist)
-	GNViewerRenderer.update_gizmo_scale(_pop_gizmo, dist)
+	GNViewerRenderHelpers.apply_orbit_camera(_pop_camera, yaw, pitch, dist)
+	GNViewerRenderHelpers.update_gizmo_scale(_pop_gizmo, dist)
 
-	if not GNViewerRenderer.render_pop(_pop_vp, _pop_multimesh, pd, pt_size):
+	if not GNViewerRenderHelpers.render_pop(_pop_vp, _pop_multimesh, pd, pt_size):
 		return null
 
 	return _output_from_viewport(_pop_vp, res)
@@ -248,7 +261,7 @@ func _cook_vol(data: GNData, res: Vector2i) -> GNData:
 	var slice_pos: float = get_param_value("slice_pos")
 	var show_mip: bool = (vol_view == 1)
 
-	var img := GNViewerRenderer.render_vol_composite(vd, res, slice_pos, show_mip)
+	var img := GNViewerRenderHelpers.render_vol_composite(vd, res, slice_pos, show_mip)
 	return _output_from_image(img, res)
 
 
@@ -260,21 +273,42 @@ func _cook_mat(data: GNData, res: Vector2i) -> GNData:
 	_ensure_mat_viewport(res)
 	_mat_vp.size = res
 
-	GNViewerRenderer.render_mat(_mat_vp, _mat_sphere, mat_data.material)
+	GNViewerRenderHelpers.render_mat(_mat_vp, _mat_sphere, mat_data.material)
 
 	return _output_from_viewport(_mat_vp, res)
 
 
 func _cook_img(data: GNData, res: Vector2i) -> GNData:
 	var img_data := data as GNImageData
-	if img_data == null:
+	if img_data == null or img_data.image == null:
 		return null
 
-	var img := GNViewerRenderer.render_img(img_data)
-	if img == null:
-		return null
+	var src: Image = img_data.image
+	# Resize to target resolution if needed.
+	var img: Image
+	if src.get_size() == Vector2i(res.x, res.y) and src.get_format() == Image.FORMAT_RGBA8:
+		img = src
+	else:
+		img = src.duplicate()
+		if img.get_format() != Image.FORMAT_RGBA8:
+			img.convert(Image.FORMAT_RGBA8)
+		if img.get_size() != Vector2i(res.x, res.y):
+			img.resize(res.x, res.y)
 
-	return _output_from_image(img, res)
+	# Recreate ImageTexture if size or format changed.
+	var img_size := img.get_size()
+	if _img_texture == null or _prev_img_size != img_size or _prev_img_format != img.get_format():
+		_img_texture = ImageTexture.create_from_image(img)
+		_prev_img_size = img_size
+		_prev_img_format = img.get_format()
+	else:
+		_img_texture.update(img)
+
+	if _cached_tex_data == null:
+		_cached_tex_data = GNTextureData.new()
+	_cached_tex_data.texture = _img_texture
+	_cached_tex_data.resolution = res
+	return _cached_tex_data
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -284,7 +318,7 @@ func _cook_img(data: GNData, res: Vector2i) -> GNData:
 func _ensure_sop_viewport(size: Vector2i) -> void:
 	if _sop_vp != null:
 		return
-	var scene := GNViewerRenderer.create_sop_viewport(size)
+	var scene := GNViewerRenderHelpers.create_sop_viewport(size)
 	_sop_vp = scene["viewport"]
 	_sop_camera = scene["camera"]
 	_sop_mesh_instance = scene["mesh_instance"]
@@ -295,7 +329,7 @@ func _ensure_sop_viewport(size: Vector2i) -> void:
 func _ensure_pop_viewport(size: Vector2i) -> void:
 	if _pop_vp != null:
 		return
-	var scene := GNViewerRenderer.create_pop_viewport(size)
+	var scene := GNViewerRenderHelpers.create_pop_viewport(size)
 	_pop_vp = scene["viewport"]
 	_pop_camera = scene["camera"]
 	_pop_multimesh = scene["multimesh_instance"]
@@ -306,10 +340,23 @@ func _ensure_pop_viewport(size: Vector2i) -> void:
 func _ensure_mat_viewport(size: Vector2i) -> void:
 	if _mat_vp != null:
 		return
-	var scene := GNViewerRenderer.create_mat_viewport(size)
+	var scene := GNViewerRenderHelpers.create_mat_viewport(size)
 	_mat_vp = scene["viewport"]
 	_mat_sphere = scene["sphere"]
 	add_child(_mat_vp)
+
+
+func _ensure_dat_viewport(size: Vector2i) -> void:
+	if _dat_vp != null:
+		return
+	_dat_vp = SubViewport.new()
+	_dat_vp.size = size
+	_dat_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	_dat_vp.transparent_bg = false
+	_dat_draw = _DATTableDraw.new()
+	_dat_draw.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_dat_vp.add_child(_dat_draw)
+	add_child(_dat_vp)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -328,8 +375,12 @@ func _output_from_viewport(vp: SubViewport, res: Vector2i) -> GNData:
 
 ## Uploads a CPU-side Image as an ImageTexture TOP output.
 func _output_from_image(img: Image, res: Vector2i) -> GNData:
-	if _img_texture == null:
+	var img_size := img.get_size()
+	var img_fmt := img.get_format()
+	if _img_texture == null or _prev_img_size != img_size or _prev_img_format != img_fmt:
 		_img_texture = ImageTexture.create_from_image(img)
+		_prev_img_size = img_size
+		_prev_img_format = img_fmt
 	else:
 		_img_texture.update(img)
 	if _cached_tex_data == null:
@@ -356,3 +407,63 @@ func from_dict(d: Dictionary) -> void:
 		_rebuild_input_for_mode(mode)
 		_update_param_visibility(mode)
 	super.from_dict(d)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Inner class: DAT table drawing control (renders text via _draw)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class _DATTableDraw extends Control:
+	var table_data: GNTableData = null
+
+	var bg_color: Color = Color(0.06, 0.06, 0.08)
+	var cell_color: Color = Color(0.12, 0.12, 0.16)
+	var header_color: Color = Color(0.18, 0.18, 0.25)
+	var border_color: Color = Color(0.06, 0.06, 0.08)
+	var text_color: Color = Color(0.85, 0.85, 0.9)
+	var header_text_color: Color = Color(0.95, 0.95, 1.0)
+
+	func _draw() -> void:
+		draw_rect(Rect2(Vector2.ZERO, size), bg_color)
+		if table_data == null or table_data.table.is_empty():
+			return
+
+		var rows: Array = table_data.table
+		var row_count: int = rows.size()
+		var col_count: int = 0
+		for row in rows:
+			if row.size() > col_count:
+				col_count = row.size()
+		if col_count == 0:
+			return
+
+		var font: Font = ThemeDB.fallback_font
+		var font_size: int = clampi(int(size.y / row_count * 0.55), 8, 18)
+
+		var cell_w: float = size.x / float(col_count)
+		var cell_h: float = size.y / float(row_count)
+
+		for r in range(row_count):
+			for c in range(col_count):
+				var x0: float = c * cell_w
+				var y0: float = r * cell_h
+				var rect := Rect2(x0, y0, cell_w, cell_h)
+
+				# Cell background
+				var is_header: bool = (r == 0 and table_data.has_header)
+				var fill: Color = header_color if is_header else cell_color
+				draw_rect(rect.grow(-0.5), fill)
+
+				# Cell text
+				var cell_val: String = ""
+				if c < rows[r].size():
+					cell_val = str(rows[r][c])
+				if cell_val.length() > 0:
+					var tc: Color = header_text_color if is_header else text_color
+					# Truncate text to fit cell width
+					var max_chars: int = maxi(int(cell_w / (font_size * 0.55)), 1)
+					if cell_val.length() > max_chars:
+						cell_val = cell_val.left(max_chars - 1) + "\u2026"
+					var text_y: float = y0 + cell_h * 0.5 + font_size * 0.35
+					draw_string(font, Vector2(x0 + 4.0, text_y), cell_val,
+						HORIZONTAL_ALIGNMENT_LEFT, cell_w - 8.0, font_size, tc)

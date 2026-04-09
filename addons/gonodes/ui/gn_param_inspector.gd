@@ -381,7 +381,8 @@ func _clear_rows() -> void:
 	for p_name in _param_rows:
 		var row: GNParamRow = _param_rows[p_name]
 		row.cleanup()
-		_vbox.remove_child(row)
+		if row.get_parent() == _vbox:
+			_vbox.remove_child(row)
 		row.queue_free()
 	_param_rows.clear()
 	_row_order.clear()

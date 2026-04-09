@@ -9,6 +9,31 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-04-02 — Viewer Architecture v2: Nodes Own Rendering
+
+### Architecture
+- **Viewer panel stripped to minimal host:** `GNViewerPanel` reduced from ~1530
+  to ~440 lines.  The viewer now provides four display modes — `set_texture()`
+  (pan/zoom), `set_control()`, `set_info()`, and `get_3d_viewport()` (lazy 3D
+  SubViewport) — and forwards all input to the node via `handle_viewer_input()`.
+  Family-specific viewports, orbit cameras, waveform widgets, volume slice logic,
+  and extension display handlers all removed from the viewer.
+- **Renamed:** `display_in_viewer()` → `render_for_viewer()` across all 11 family
+  bases and 10 COMP operators.  `GNViewerRenderer` → `GNViewerRenderHelpers`.
+- **Static shared viewer objects:** 3D families (SOP, POP, MAT) own static scene
+  nodes (`_viewer_camera`, `_viewer_light`, `_viewer_mesh_instance`, etc.) with
+  `_viewer_` prefix.  These are reparented into the viewer's shared 3D SubViewport
+  on each render, eliminating per-family viewport overhead.
+- **Node-owned interaction:** SOP/POP handle orbit via `handle_viewer_input()` →
+  `GNViewerRenderHelpers.handle_orbit_input()`.  VOL handles slice scroll via
+  `handle_scroll_input()`.  Viewer re-renders by calling `render_for_viewer()`
+  after input is consumed.
+- **Extension display handlers deprecated:** Extensions now override
+  `render_for_viewer()` directly instead of registering via
+  `GNViewerPanel.register_display_handler()`.  SDF extension updated as reference.
+
+---
+
 ## 2026-04-01 — Houdini-Style Parameter Controls & Rangeless Transforms
 
 ### UI
@@ -144,7 +169,7 @@ For the full development journal with implementation details, see
 
 ### Architecture
 - **Preview system refactor** — Consolidated node preview rendering into
-  `GNViewerRenderer` with cached texture reuse for IMG stability.
+  `GNViewerRenderHelpers` with cached texture reuse for IMG stability.
 - **GNExtensionRegistry** — Dynamic operator loading from `gn_ext_*` addon
   folders via `gn_extension.cfg` manifests with platform/architecture/renderer
   guards.

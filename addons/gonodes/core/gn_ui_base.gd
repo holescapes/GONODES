@@ -141,11 +141,24 @@ func update_preview_control(control: Control) -> void:
 			label.text = "no widget"
 
 
-func display_in_viewer(viewer) -> void:
+## Shared SubViewport for UI widget preview rendering.
+var _viewer_ui_preview: Control = null
+
+
+func render_for_viewer(viewer) -> void:
 	if _control_node != null:
-		viewer.show_ui_preview(self)
+		# Re-duplicate only if the source control changed (new cook).
+		if _viewer_ui_preview == null or not is_instance_valid(_viewer_ui_preview):
+			_viewer_ui_preview = _control_node.duplicate()
+
+		# Build info from widget_state
+		var state_parts: PackedStringArray = []
+		for key in widget_state:
+			state_parts.append("%s: %s" % [key, widget_state[key]])
+		var info := ", ".join(state_parts) if state_parts.size() > 0 else "(no state)"
+		viewer.set_control(_viewer_ui_preview, info)
 		return
-	viewer.show_info("No UI output", "")
+	viewer.set_info("No UI output", "")
 
 
 ## Called by WindowOUT to deliver input events to overlay content.

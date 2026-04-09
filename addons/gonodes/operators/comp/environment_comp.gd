@@ -301,13 +301,12 @@ func update_preview_control(control: Control) -> void:
 		label.text = ", ".join(parts)
 
 
-func display_in_viewer(viewer) -> void:
+func render_for_viewer(viewer) -> void:
 	var bg_modes := ["Color", "Sky", "Canvas", "Keep"]
 	var tonemap_modes := ["Linear", "Reinhard", "Filmic", "ACES"]
 	var bg_mode: String = bg_modes[get_param_value("bg_mode")]
 	var tm_mode: String = tonemap_modes[get_param_value("tonemap_mode")]
 	var exposure: float = get_param_value("tonemap_exposure")
-	# Collect enabled post-effects
 	var effects: PackedStringArray = []
 	if get_param_value("glow_enabled"): effects.append("Glow (%.2f)" % get_param_value("glow_intensity"))
 	if get_param_value("ssao_enabled"): effects.append("SSAO")
@@ -324,4 +323,4 @@ func display_in_viewer(viewer) -> void:
 		ambient_str = "Ambient: Off"
 	var text := "Background: %s\nTonemap: %s  Exposure: %.2f\n%s\nEffects: %s" % [
 		bg_mode, tm_mode, exposure, ambient_str, effects_str]
-	viewer.show_info(text, "EnvironmentCOMP")
+	viewer.set_info(text, "EnvironmentCOMP")

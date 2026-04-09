@@ -303,22 +303,24 @@ func get_multi_mesh_instance() -> MultiMeshInstance3D:
 	return _multi_mesh_instance
 
 
-func display_in_viewer(viewer) -> void:
-	# Show the template mesh with the active material in the 3D orbit viewer.
+func render_for_viewer(viewer) -> void:
 	if _multi_mesh != null and _multi_mesh.mesh != null:
-		var geo := GNGeoData.new()
-		geo.mesh = _multi_mesh.mesh as ArrayMesh if _multi_mesh.mesh is ArrayMesh else null
-		if geo.mesh != null:
-			geo.vertex_count = geo.mesh.get_surface_count()
-			var mat: Material = _multi_mesh_instance.material_override if _multi_mesh_instance else null
-			if mat != null:
-				viewer.show_3d_mesh_with_material(geo, mat)
-			else:
-				viewer.show_3d_mesh(geo)
+		var mesh: Mesh = _multi_mesh.mesh
+		if mesh is ArrayMesh:
+			GNSopBase._ensure_viewer_scene()
+			var vp: SubViewport = viewer.get_3d_viewport()
+			GNSopBase._reparent_viewer_nodes(vp)
+			GNSopBase._viewer_mesh_instance.mesh = mesh
+			GNSopBase._viewer_mesh_instance.material_override = \
+				_multi_mesh_instance.material_override if _multi_mesh_instance else null
+			GNViewerRenderHelpers.apply_orbit_camera(
+				GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+			viewer.set_info_bar("InstanceCOMP")
 			viewer.set_info_overlay("%d instances" % _multi_mesh.instance_count)
 			return
 	var count: int = _multi_mesh.instance_count if _multi_mesh else 0
-	viewer.show_info("%d instances" % count, "InstanceCOMP")
+	viewer.set_info("%d instances" % count, "InstanceCOMP")
 
 
 ## Preview override showing instance count.

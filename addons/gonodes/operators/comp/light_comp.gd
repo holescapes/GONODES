@@ -120,12 +120,11 @@ func get_light() -> Light3D:
 	return _light
 
 
-func display_in_viewer(viewer) -> void:
+func render_for_viewer(viewer) -> void:
 	if _light == null:
-		viewer.show_info("No light", "LightCOMP")
+		viewer.set_info("No light", "LightCOMP")
 		return
 
-	# Build a gizmo mesh representing the light type
 	var gizmo_mesh: ArrayMesh = _build_light_gizmo()
 	var gizmo_mat := StandardMaterial3D.new()
 	gizmo_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -133,12 +132,15 @@ func display_in_viewer(viewer) -> void:
 	gizmo_mat.albedo_color.a = 0.9
 	gizmo_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 
-	var entries: Array = [
-		{"mesh": gizmo_mesh, "material": gizmo_mat, "transform": Transform3D.IDENTITY},
-	]
-	viewer.show_3d_scene(entries, "LightCOMP")
+	GNSopBase._ensure_viewer_scene()
+	var vp: SubViewport = viewer.get_3d_viewport()
+	GNSopBase._reparent_viewer_nodes(vp)
+	GNSopBase._viewer_mesh_instance.mesh = gizmo_mesh
+	GNSopBase._viewer_mesh_instance.material_override = gizmo_mat
+	GNViewerRenderHelpers.apply_orbit_camera(GNSopBase._viewer_camera, 45.0, -20.0, 5.0)
+	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	viewer.set_info_bar("LightCOMP")
 
-	# Info overlay
 	var type_names := ["Directional", "Omni", "Spot"]
 	var type_name: String = type_names[_current_type] if _current_type >= 0 and _current_type < 3 else "Unknown"
 	var energy: float = _light.light_energy

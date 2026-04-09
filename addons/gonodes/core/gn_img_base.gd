@@ -50,14 +50,24 @@ func _prepare_image() -> GNImageData:
 	return _cached_image_data
 
 
-func display_in_viewer(viewer) -> void:
+## Shared ImageTexture for uploading CPU Images to the viewer.
+static var _viewer_texture: ImageTexture = null
+
+func render_for_viewer(viewer) -> void:
 	if cached_output is GNImageData:
 		var img_data: GNImageData = cached_output as GNImageData
 		if img_data.image != null and not img_data.image.is_empty():
-			viewer.show_image(img_data.image,
+			var img: Image = img_data.image
+			if _viewer_texture == null \
+					or _viewer_texture.get_width() != img.get_width() \
+					or _viewer_texture.get_height() != img.get_height():
+				_viewer_texture = ImageTexture.create_from_image(img)
+			else:
+				_viewer_texture.update(img)
+			viewer.set_texture(_viewer_texture,
 				"%dx%d" % [img_data.resolution.x, img_data.resolution.y])
 			return
-	viewer.show_info("No IMG output", "")
+	viewer.set_info("No IMG output", "")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

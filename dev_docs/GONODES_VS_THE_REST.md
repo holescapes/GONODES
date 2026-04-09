@@ -1,6 +1,6 @@
 # GONODES vs the Rest of the Bunch
 
-> **Date:** 2026-03-20 (consolidated 2026-03-25 — merged TD_HOUDINI_COMPARISON.md)
+> **Date:** 2026-03-20 (consolidated 2026-03-25 — merged TD_HOUDINI_COMPARISON.md; updated 2026-04-09 — operator counts, missing TOP gap analysis)
 > **Audience:** Core developers, architecture reviewers, prospective contributors
 > **Purpose:** Comprehensive cook-flow and real-time efficiency comparison between GONODES, TouchDesigner, VVVV, and Houdini — with an actionable optimisation roadmap, operator coverage audit, and feature parity tracker.
 >
@@ -55,12 +55,12 @@
 |---|---|---|---|---|
 | **Primary domain** | Real-time AV, interactive media | Real-time patching, installations | Offline VFX, simulation, procedural modelling | Real-time AV, VJing, generative art |
 | **Cook paradigm** | Pull-based, demand-driven per frame | Push-based (beta: everything runs; gamma: hybrid with .NET JIT) | Pull-based, demand-driven on dependency change | Push-based, topo-sorted per frame with 3-tier guards |
-| **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | GDScript (operators) + 103 C++ GDExtension native ops |
+| **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | GDScript (operators) + 92 C++ GDExtension native ops |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan — multi-stream | DirectX 11 (beta); Stride/Vulkan (gamma) | Karma GPU (offline), OpenCL | Godot Vulkan/GLES3 SubViewport + RenderingDevice compute |
 | **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | 545 operators across 13 families (TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT) |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **489 operators** across 13 families — 137 TOP, 85 CHOP, 75 SOP, 45 DAT, 31 UI, 27 SDF, 20 COMP, 15 IMG, 14 VOL, 14 OUT, 12 POP, 11 MAT, 3 SCRIPT |
 
 ---
 
@@ -170,7 +170,7 @@ No explicit GPU fences, barriers, or synchronisation code — Godot's renderer h
 
 | | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **Houdini** | **GONODES** |
 |---|---|---|---|---|---|
-| Operator core | C++ | C++ | .NET (RyuJIT) | C++ + VEX (LLVM JIT) | GDScript + 103 C++ GDExtension |
+| Operator core | C++ | C++ | .NET (RyuJIT) | C++ + VEX (LLVM JIT) | GDScript + 92 C++ GDExtension |
 | Expression eval | Python (interpreted) | N/A (pin-based) | .NET IL (JIT) | **VEX (LLVM JIT — near native C++)** | GDScript Expression (interpreted) |
 | Per-op parallelism | Thread CHOP only | Some (beta) | .NET Task parallelism | Many SOPs internally threaded | WorkerThreadPool batch per topo level |
 | Data throughput | ~1M pts @ 60fps (C++ SOPs) | Comparable (C++) | ~500K pts @ 60fps (.NET) | 10M+ pts (VEX wrangles) | ~100K–500K pts (native), ~10K–50K (GDScript) |
@@ -180,7 +180,7 @@ No explicit GPU fences, barriers, or synchronisation code — Godot's renderer h
 Pure GDScript operators are ~10–50× slower than equivalent C++ for data-heavy operations (per-vertex SOP processing, per-sample CHOP math). This is the single largest performance gap vs TD and VVVV.
 
 **Mitigations already in place:**
-- 103 C++ GDExtension native operators (42 SOP, 23 CHOP, 9 VOL, 9 POP, 5 IMG, 4 TOP) cover the built-in hot paths
+- 92 C++ GDExtension native operators (42 SOP, 23 CHOP, 9 VOL, 9 POP, 5 IMG, 4 TOP) cover the built-in hot paths
 - GDScript auto-delegates to C++ when native binaries are available, falls back gracefully when not
 
 **Where the GDScript tax matters:**
@@ -292,7 +292,7 @@ GONODES doesn't have this, and it's not obviously needed for real-time workflows
 |---|---|---|---|---|
 | User scripting | Python | VL (visual .NET), C# | VEX + Python | GDScript (Script ops) + **Python** (`gn_ext_user_python` — NumPy, hot-reload) + **C++** (`gn_ext_user_native` — hot-reload, 2–8s compile) |
 | Shader authoring | GLSL (frag/vert/compute) | HLSL/Stride shaders | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item + compute) + ISF + Shadertoy |
-| C++ plugin SDK | **No** | Yes (vvvv SDK) | Yes (HDK) | GDExtension (103 native ops) + **UserNative** hot-reload C++ (in-editor compile) |
+| C++ plugin SDK | **No** | Yes (vvvv SDK) | Yes (HDK) | GDExtension (92 native ops) + **UserNative** hot-reload C++ (in-editor compile) |
 | Asset packaging | `.tox` (COMP export) | Nuget packages (gamma) | **HDA** (gold standard) | `.gnasset` (JSON, self-contained) |
 | Event-driven scripting | Parameter Execute DAT | Reactive (VL) | Spare param callbacks | CallbackDAT (on_cook, on_value_change, etc.) |
 | Runtime compilation | Python (always available) | .NET JIT | VEX JIT | GDScript runtime + **Python** hot-reload + **C++** hot-reload (GDExtension, 2–8s) |
@@ -347,7 +347,7 @@ Per-expression microsecond profiling lets users identify which cross-reference i
 
 ### 12.4 Volumetric Compute Pipeline
 
-11 VOL operators with GPU compute (Navier-Stokes fluid sim, raymarching, marching cubes, pyro emitter). Neither TD nor VVVV has a comparable built-in 3D volume pipeline. This is a genuine differentiator.
+14 VOL operators with GPU compute (Navier-Stokes fluid sim, raymarching, marching cubes, pyro emitter). Neither TD nor VVVV has a comparable built-in 3D volume pipeline. This is a genuine differentiator.
 
 ### 12.5 Open Source + Godot Ecosystem
 
@@ -377,7 +377,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 
 **Gap:** Pure GDScript is ~10–50× slower than C++ for per-element data processing. User-written GDScriptSCRIPT (SOP template) with per-vertex logic is the weakest link.
 
-**Mitigation:** 103 C++ native operators cover built-in hot paths. GPU work (TOP/POP/VOL) is unaffected.
+**Mitigation:** 92 C++ native operators cover built-in hot paths. GPU work (TOP/POP/VOL) is unaffected.
 
 ### 13.3 No Adaptive Quality Degradation (vs TD)
 
@@ -410,7 +410,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 | Concern | Verdict |
 |---|---|
 | **Can GONODES hit 60fps for VJ patches?** | **Yes.** Stress-tested at 59 nodes, 60fps. Hash guard keeps per-frame cost proportional to *actually-changing* nodes. |
-| **Is the GDScript tax a problem?** | **For shader-driven work: no.** TOP/POP/VOL are GPU-bound. For heavy CPU geometry: 103 native ops cover built-in paths. User Script SOPs are the weak spot. |
+| **Is the GDScript tax a problem?** | **For shader-driven work: no.** TOP/POP/VOL are GPU-bound. For heavy CPU geometry: 92 native ops cover built-in paths. User Script SOPs are the weak spot. |
 | **Is the serial GPU cook a problem?** | **For typical VJ workflows: rarely.** Most patches are linear chains. Multi-chain compositions lose ~10–20% vs TD's parallel streams. |
 | **Is the push model wasteful?** | **No.** The 3-tier guard system makes push functionally equivalent to pull for real-world graphs. The per-frame topo scan is microseconds. |
 | **How does it compare to VVVV?** | **Better dirty/skip optimisation** than vvvv beta (which has none). Comparable to vvvv gamma, with the trade-off of GDScript vs .NET JIT for user scripts. |
@@ -694,7 +694,7 @@ This is acceptable: platforms that can't run Python (web/mobile) are unlikely to
 
 GONODES is **architecturally competitive** with TouchDesigner for real-time visual art workloads. The cook engine's 3-tier guard system (active set → expression map → input hash) achieves equivalent work-skipping to TD's pull model. The incremental dirty propagation is actually smarter than TD's blanket subtree cascade. Features like non-realtime mode, expression profiling, and the VOL compute pipeline are genuine differentiators.
 
-The honest gaps are: serial GPU cook (Godot limitation), ~~GDScript interpretation overhead for user scripts~~ (now mitigated by 103 native ops + `gn_ext_user_native` C++ hot-reload + `gn_ext_user_python` NumPy vectorisation), and lack of adaptive quality degradation. The GDScript bottleneck is **effectively closed** — users now have three scripting tiers (GDScript → Python+NumPy → C++) with integrated editors and help for each.
+The honest gaps are: serial GPU cook (Godot limitation), ~~GDScript interpretation overhead for user scripts~~ (now mitigated by 92 native ops + `gn_ext_user_native` C++ hot-reload + `gn_ext_user_python` NumPy vectorisation), and lack of adaptive quality degradation. The GDScript bottleneck is **effectively closed** — users now have three scripting tiers (GDScript → Python+NumPy → C++) with integrated editors and help for each.
 
 For the target domain (VJ, generative art, interactive installations at 30–200 nodes), GONODES delivers real-time performance today. The remaining roadmap items (expression compilation, adaptive frame budget, GPU batch parallelism) would push it toward handling larger, more complex networks and professional production reliability.
 
@@ -724,20 +724,20 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 18. Feature Parity Audit & Roadmap
 
-> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (545 operators across 13 families).
+> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (489 operators across 13 families).
 
 ### 18.1 Feature Coverage Matrix
 
 | TD Feature Area | TD Implementation | GONODES Status |
 |---|---|---|
-| **Texture processing** | 90+ TOPs | **70 TOPs** — ~80% parity, strong |
-| **Channel/signal** | 70+ CHOPs | **74 CHOPs** — near parity |
-| **Geometry** | 50+ SOPs | **71 SOPs** — exceeds TD in some areas |
-| **Data tables** | 30+ DATs | **37 DATs** — near parity |
-| **Materials** | ~10 MATs | **9 MATs** — solid |
+| **Texture processing** | 90+ TOPs | **137 TOPs** (112 core + 4 native + 21 extension) — exceeds TD in coverage |
+| **Channel/signal** | 70+ CHOPs | **85 CHOPs** — exceeds TD |
+| **Geometry** | 50+ SOPs | **75 SOPs** — exceeds TD |
+| **Data tables** | 30+ DATs | **45 DATs** — exceeds TD |
+| **Materials** | ~10 MATs | **11 MATs** — parity |
 | **Components** | COMPs (containers, 3D scenes, panels) | **20 COMPs** — good, physics included |
-| **GPU Particles** | Particle SOP/POP network | **10 POP operators** — SSBO compute pipeline |
-| **3D Volumes** | Not native (3D texture workarounds) | **11 VOL operators** — **GONODES leads here** |
+| **GPU Particles** | Particle SOP/POP network | **12 POP operators** — SSBO compute pipeline |
+| **3D Volumes** | Not native (3D texture workarounds) | **14 VOL operators** — **GONODES leads here** |
 | **UI Widgets** | Panel COMP widgets | **31 UI operators** — comparable |
 | **Shader authoring** | GLSL TOP, Compute Shader TOP | CustomShaderTOP + ComputeShaderTOP + ISF + Shadertoy — strong |
 | **Video I/O** | Theora, HAP, FFMPEG, NDI, Blackmagic | HAP, FFmpeg, GPU Encode, Theora, NDI, **Blackmagic** (scaffold) |
@@ -748,7 +748,7 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 | **OSC** | OSC In/Out | OscOutOUT + OscInDAT/OscInCHOP |
 | **Serial** | Serial DAT | **gn_ext_serial** |
 | **Physics** | Bullet (legacy) | **Jolt physics COMPs** — modern, better |
-| **SDF rendering** | Not built-in | **SDF (core)** — GONODES leads |
+| **SDF rendering** | Not built-in | **27 SDF operators** (gn_ext_sdf) — GONODES leads |
 | **Embed in host apps** | TouchEngine SDK | **LibGodot + libgonodes C API** — comparable |
 | **Custom operators** | C++ or Python .tox | **.gnasset + Script operators** |
 | **Fluid simulation** | NVIDIA Flex (plugin), GLSL workarounds | **FluidVOL (3D NS) + Fluid2DTOP (2D NS)** |
@@ -820,6 +820,48 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 | 27 | 2D Vector Path Rendering | ✅ VectorPathTOP |
 
 **Overall: 26 of 27 items implemented (96%).** Only FLIP Fluid remains.
+
+### 18.6 Missing TOP Operators — Gap Analysis (April 2026)
+
+Despite having 137 TOP operators (exceeding TD's ~90), the following operators found in TD, vvvv, and/or Nuke are not yet present in GONODES:
+
+#### High Priority (common in real-time visual workflows)
+
+| Operator | Found In | What It Does | Why Useful |
+|----------|----------|-------------|------------|
+| **HistogramTOP** | TD + Nuke | Visual RGB/Luma histogram rendering | Essential color grading feedback — AnalyzeTOP gives stats but no visual histogram |
+| **LUTTOP** | Nuke + TD | Load & apply 3D .cube/.3dl LUT files | Industry-standard color grading; GradientMapTOP/LookupTOP are 1D only |
+| **MorphIMG** | vvvv + TD | Morphological open/close/skeleton/dilate-erode combos | Blob tracking, mask cleanup — DilateErodeTOP is basic single-op only. CPU-bound (IMG family). |
+| **BlobTrackIMG** | TD | Detect + track connected regions (centroid, area, bounding box) | Interactive installations, camera-based interactivity. CPU-bound (IMG family). |
+| **BackgroundSubtractIMG** | TD + vvvv | Adaptive background model subtraction | Camera-based motion detection for installations. CPU-bound (IMG family). |
+
+#### Medium Priority (useful for professional workflows)
+
+| Operator | Found In | What It Does | Why Useful |
+|----------|----------|-------------|------------|
+| **ZCompositeTOP** | Nuke | Merge two renders by depth buffer | Multi-pass 3D compositing — CompositeTOP is 2D alpha-based only |
+| **MotionBlurTOP** | TD + Nuke | Temporal motion blur using optical flow vectors | DirectionalBlurTOP is spatial only, not temporal |
+| **LensFlareTOP** | Nuke + vvvv | Procedural lens flare, anamorphic streaks, ghosts | Cinematic look — GodRaysTOP covers volumetric but not optical flares |
+| **DepthOfFieldTOP** | TD + Nuke | Standalone DoF (circle of confusion from depth map) | Currently tied to RenderTOP; a standalone composable DoF is more flexible |
+| **KeyMixTOP** | Nuke | Blend two inputs using a matte/mask input | Essential compositing utility — CompositeTOP doesn't have dedicated matte input |
+| **InvertTOP** | TD | Per-channel inversion | Trivial but commonly expected as a named node |
+| **MathTOP** | TD | Per-pixel math (add/sub/mul/pow/abs/min/max between inputs) | TD's workhorse for combining textures arithmetically |
+| **ContourIMG** | vvvv + Nuke | Isoline/contour extraction from value maps | Topographic visualization, isoline rendering. CPU-bound (IMG family). |
+| **AudioSpectrumTOP** | TD | Dedicated FFT spectrogram with mel scale, waterfall modes | CHOPtoTOP exists but lacks spectrogram-specific features |
+| **ColorTrackIMG** | TD | Track a color region → centroid/area output | Simple interactivity for installations. CPU-bound (IMG family). |
+| **TimeWarpTOP** | TD + Nuke | Retime input with speed curve / time remap | Motion graphics, slow-mo effects |
+| **GradeTOP** | Nuke | Lift/gain/multiply/offset with black/white point | More precise than LevelTOP for film-style grading |
+
+#### Low Priority (niche or partially covered)
+
+| Operator | Found In | What It Does | Notes |
+|----------|----------|-------------|-------|
+| **RenderPickTOP** | TD | Mouse pick → object ID from rendered scene | Interactive 3D selection |
+| **HoughIMG** | vvvv | Line/circle detection (Hough transform) | Niche CV — ML extensions cover most detection. CPU-bound (IMG family). |
+| **FiducialIMG** | vvvv | ARTag/fiducial marker detection | Extension territory. CPU-bound (IMG family). |
+| **DATtoTOP** | TD | Render table/text data as texture | PanelTOP partially covers |
+
+**Summary:** 5 high-priority, 12 medium-priority, 4 low-priority gaps identified. The high-priority items (HistogramTOP, LUTTOP, MorphIMG, BlobTrackIMG, BackgroundSubtractIMG) would close the most impactful remaining gaps vs TD for installation/interactive workflows. CV operators use the IMG family (CPU-bound) rather than TOP (GPU) — a natural fit for a future `gn_ext_cv` extension wrapping OpenCV.
 
 ---
 

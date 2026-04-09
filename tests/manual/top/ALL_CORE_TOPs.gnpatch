@@ -833,6 +833,30 @@
 			"from_port": 0,
 			"to": "cube_map1",
 			"to_port": 0
+		},
+		{
+			"from": "wave_vp",
+			"from_port": 0,
+			"to": "vector_path1",
+			"to_port": 0
+		},
+		{
+			"from": "checkerboard1",
+			"from_port": 0,
+			"to": "snapshot1",
+			"to_port": 0
+		},
+		{
+			"from": "table_vp",
+			"from_port": 0,
+			"to": "vector_path1",
+			"to_port": 1
+		},
+		{
+			"from": "wave_vp",
+			"from_port": 0,
+			"to": "rename1",
+			"to_port": 0
 		}
 	],
 	"generator": "GONODES",
@@ -946,6 +970,13 @@
 			"position": [
 				-560.0,
 				100.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChainVP": {
+			"position": [
+				-280.0,
+				2700.0
 			],
 			"type": "NullTOP"
 		},
@@ -1171,6 +1202,49 @@
 				-2000.0
 			],
 			"type": "ChannelMixTOP"
+		},
+		"checkerboard1": {
+			"parameters": {
+				"cells_x": {
+					"value": 8
+				},
+				"cells_y": {
+					"value": 8
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"softness": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				-3040.62353515625,
+				-937.05615234375
+			],
+			"type": "CheckerboardIMG"
 		},
 		"chop_to_top1": {
 			"parameters": {
@@ -1546,6 +1620,75 @@
 				2240.0
 			],
 			"type": "ConstantTOP"
+		},
+		"constant2": {
+			"parameters": {
+				"col0": {
+					"value": "name\nsdadad"
+				},
+				"col1": {
+					"value": "value\nasdads"
+				},
+				"col2": {
+					"value": ""
+				},
+				"col3": {
+					"value": ""
+				},
+				"r0c0": {
+					"value": ""
+				},
+				"r0c1": {
+					"value": ""
+				},
+				"r0c2": {
+					"value": ""
+				},
+				"r0c3": {
+					"value": ""
+				},
+				"r1c0": {
+					"value": ""
+				},
+				"r1c1": {
+					"value": ""
+				},
+				"r1c2": {
+					"value": ""
+				},
+				"r1c3": {
+					"value": ""
+				},
+				"r2c0": {
+					"value": ""
+				},
+				"r2c1": {
+					"value": ""
+				},
+				"r2c2": {
+					"value": ""
+				},
+				"r2c3": {
+					"value": ""
+				},
+				"r3c0": {
+					"value": ""
+				},
+				"r3c1": {
+					"value": ""
+				},
+				"r3c2": {
+					"value": ""
+				},
+				"r3c3": {
+					"value": ""
+				}
+			},
+			"position": [
+				-3360.0,
+				-1040.0
+			],
+			"type": "ConstantDAT"
 		},
 		"convolution1": {
 			"parameters": {
@@ -4108,6 +4251,24 @@
 			],
 			"type": "RemapTOP"
 		},
+		"rename1": {
+			"parameters": {
+				"from0": {
+					"value": "chan"
+				},
+				"renames": {
+					"value": 1
+				},
+				"to0": {
+					"value": "x"
+				}
+			},
+			"position": [
+				-1462.56884765625,
+				2674.50048828125
+			],
+			"type": "RenameCHOP"
+		},
 		"render1": {
 			"parameters": {
 				"ambient_color": {
@@ -4362,7 +4523,7 @@
 		"snapshot1": {
 			"parameters": {
 				"mode": {
-					"value": 0
+					"value": 6
 				},
 				"orbit_distance": {
 					"value": 3.0
@@ -4397,7 +4558,7 @@
 				-3100.0,
 				-1300.0
 			],
-			"snapshot_mode": 0,
+			"snapshot_mode": 6,
 			"type": "SnapshotTOP"
 		},
 		"spherize1": {
@@ -4461,6 +4622,30 @@
 				-3060.0
 			],
 			"type": "SwitchTOP"
+		},
+		"table_vp": {
+			"parameters": {
+				"cols": {
+					"value": 2
+				},
+				"data": {
+					"value": "cmd,val\nM,1\nC,0\nC,0\nZ,0"
+				},
+				"headers": {
+					"value": "name,value,weight"
+				},
+				"merge_input": {
+					"value": false
+				},
+				"rows": {
+					"value": 5
+				}
+			},
+			"position": [
+				-1400.0,
+				2960.0
+			],
+			"type": "TableDAT"
 		},
 		"test_card1": {
 			"parameters": {
@@ -4589,6 +4774,18 @@
 				-2460.0
 			],
 			"type": "TextTOP"
+		},
+		"text2": {
+			"parameters": {
+				"text": {
+					"value": "DSADDASdsd\nsss"
+				}
+			},
+			"position": [
+				-3320.0,
+				-1220.0
+			],
+			"type": "TextDAT"
 		},
 		"threshold1": {
 			"parameters": {
@@ -4856,15 +5053,15 @@
 					"value": 360.0
 				},
 				"arc_segments": {
-					"value": 64
+					"value": 104
 				},
 				"arc_start": {
-					"value": 0.0
+					"value": -37.0
 				},
 				"bg_color": {
 					"value": {
 						"_type": "Color",
-						"a": 1.0,
+						"a": 0.0,
 						"b": 0.0,
 						"g": 0.0,
 						"r": 0.0
@@ -4874,22 +5071,22 @@
 					"value": false
 				},
 				"fill": {
-					"value": false
+					"value": true
 				},
 				"fill_color": {
 					"value": {
 						"_type": "Color",
-						"a": 0.5,
-						"b": 0.800000011920929,
-						"g": 0.400000005960464,
-						"r": 0.200000002980232
+						"a": 0.400000005960464,
+						"b": 0.600000023841858,
+						"g": 0.300000011920929,
+						"r": 0.100000001490116
 					}
 				},
 				"line_cap": {
 					"value": 1
 				},
 				"radius": {
-					"value": 100.0
+					"value": 272.0
 				},
 				"resolution": {
 					"value": {
@@ -4906,17 +5103,17 @@
 						"_type": "Color",
 						"a": 1.0,
 						"b": 1.0,
-						"g": 1.0,
-						"r": 1.0
+						"g": 0.800000011920929,
+						"r": 0.200000002980232
 					}
 				},
 				"stroke_width": {
-					"value": 2.0
+					"value": 3.0
 				}
 			},
 			"position": [
-				-3100.0,
-				-1100.0
+				-1000.0,
+				2740.0
 			],
 			"type": "VectorPathTOP"
 		},
@@ -5008,6 +5205,39 @@
 			],
 			"type": "WaveCHOP"
 		},
+		"wave_vp": {
+			"parameters": {
+				"amplitude": {
+					"value": 200.0
+				},
+				"channels": {
+					"value": 16
+				},
+				"frequency": {
+					"value": 0.5
+				},
+				"length": {
+					"value": 1
+				},
+				"offset": {
+					"value": 256.0
+				},
+				"phase": {
+					"value": 0.005
+				},
+				"phase_step": {
+					"value": 0.05
+				},
+				"waveform": {
+					"value": 0
+				}
+			},
+			"position": [
+				-1740.0,
+				2700.0
+			],
+			"type": "WaveCHOP"
+		},
 		"window_out1": {
 			"parameters": {
 				"always_on_top": {
@@ -5052,8 +5282,8 @@
 	},
 	"version": "1.0.0",
 	"viewport": {
-		"scroll_x": -1184.01745605469,
-		"scroll_y": -570.69189453125,
-		"zoom": 0.661156833171844
+		"scroll_x": -1749.06018066406,
+		"scroll_y": 2072.55981445313,
+		"zoom": 0.879999756813049
 	}
 }

@@ -1,11 +1,11 @@
-class_name GNViewerRenderer
+class_name GNViewerRenderHelpers
 extends RefCounted
-## Shared rendering utilities for visualizing any GNData type as a 2D image.
+## Optional helper library for common data-to-image rendering.
 ##
-## Used by both the docked/floating GNViewerPanel (interactive) and SnapshotTOP
-## (headless rendering into a TOP texture).  This keeps all "data → image"
-## conversion in one place: when new visualizations are added or improved here,
-## both the viewer and SnapshotTOP benefit automatically.
+## Nodes use these utilities from their render_for_viewer() overrides when the
+## default visualization is sufficient.  Custom operators can bypass this
+## entirely and implement their own rendering.  The viewer and SnapshotTOP
+## never call these directly — they go through the node's virtual method.
 ##
 ## All public methods are static — no instance state needed.
 
@@ -277,17 +277,19 @@ static func render_mat(vp: SubViewport, sphere: MeshInstance3D,
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CHOP — Render GNChannelData to CPU Image (waveform)
+# CHOP — Waveform rendering
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Renders CHOP channel data as a waveform image (CPU-side).
-## Returns a completed Image (RGBA8) suitable for ImageTexture upload.
-##
-## [param ch_data]    — source channel data.
-## [param size]       — output image dimensions.
-## [param bg_color]   — background fill.
-## [param line_color] — base waveform line color (channels get hue offsets).
-static func render_chop_waveform(ch_data: GNChannelData, size: Vector2i,
+## Creates an interactive waveform Control (grid, zoom, pan, legends).
+## Use this for viewer display; use render_chop_waveform_rolling() for
+## baking CHOP data to a static Image (e.g. SnapshotTOP).
+static func create_waveform_view() -> GNWaveformView:
+	return GNWaveformView.new()
+
+
+## Renders a rolling-window waveform: only the last [code]size.x[/code] samples
+## are drawn so the waveform scrolls left as new data arrives.
+static func render_chop_waveform_rolling(ch_data: GNChannelData, size: Vector2i,
 		bg_color: Color = Color(0.06, 0.06, 0.08),
 		line_color: Color = Color(0.3, 1.0, 0.4)) -> Image:
 	var w: int = maxi(size.x, 1)
@@ -301,7 +303,7 @@ static func render_chop_waveform(ch_data: GNChannelData, size: Vector2i,
 	var ch_names: Array = ch_data.channels.keys()
 	var ch_count: int = ch_names.size()
 
-	# Compute global range with headroom
+	# Compute global range across all channels for consistent Y scaling.
 	var min_v: float = INF
 	var max_v: float = -INF
 	for ch_name in ch_names:
@@ -316,7 +318,7 @@ static func render_chop_waveform(ch_data: GNChannelData, size: Vector2i,
 	min_v -= headroom
 	max_v += headroom
 
-	# Draw each channel
+	# Draw each channel — only the last W samples (rolling window).
 	for ci in range(ch_count):
 		var samples: PackedFloat32Array = ch_data.channels[ch_names[ci]]
 		if samples.is_empty():
@@ -328,92 +330,52 @@ static func render_chop_waveform(ch_data: GNChannelData, size: Vector2i,
 				line_color.s, line_color.v, line_color.a)
 
 		var sample_count: int = samples.size()
-		for px in range(w):
-			var t: float = float(px) / float(w - 1) if w > 1 else 0.0
-			var si: float = t * float(sample_count - 1)
-			var si0: int = clampi(int(si), 0, sample_count - 1)
-			var si1: int = clampi(si0 + 1, 0, sample_count - 1)
-			var frac: float = si - float(si0)
-			var val: float = samples[si0] * (1.0 - frac) + samples[si1] * frac
 
-			var norm: float = (val - min_v) / (max_v - min_v)
-			norm = clampf(norm, 0.0, 1.0)
-			var py: int = clampi(h - 1 - int(norm * float(h - 1)), 0, h - 1)
-			img.set_pixel(px, py, col)
-
-			# Connect to previous pixel vertically
-			if px > 0:
-				var prev_t: float = float(px - 1) / float(w - 1) if w > 1 else 0.0
-				var prev_si: float = prev_t * float(sample_count - 1)
-				var prev_si0: int = clampi(int(prev_si), 0, sample_count - 1)
-				var prev_si1: int = clampi(prev_si0 + 1, 0, sample_count - 1)
-				var prev_frac: float = prev_si - float(prev_si0)
-				var prev_val: float = samples[prev_si0] * (1.0 - prev_frac) + samples[prev_si1] * prev_frac
-				var prev_norm: float = clampf((prev_val - min_v) / (max_v - min_v), 0.0, 1.0)
-				var prev_py: int = clampi(h - 1 - int(prev_norm * float(h - 1)), 0, h - 1)
-				var y_min: int = mini(prev_py, py)
-				var y_max: int = maxi(prev_py, py)
-				for y in range(y_min, y_max + 1):
-					img.set_pixel(px, clampi(y, 0, h - 1), col)
-
-	return img
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# DAT — Render GNTableData to CPU Image (simple text table)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-## Renders table data as a simple text-on-image representation.
-## Since Godot doesn't expose font rendering to Image easily, this draws a
-## color-coded grid with cell values baked in via set_pixel patterns.
-## For SnapshotTOP this provides a basic visual representation of the table.
-static func render_dat_table(tbl: GNTableData, size: Vector2i,
-		bg_color: Color = Color(0.06, 0.06, 0.08),
-		cell_color: Color = Color(0.15, 0.15, 0.2),
-		header_color: Color = Color(0.2, 0.2, 0.3)) -> Image:
-	var w: int = maxi(size.x, 1)
-	var h: int = maxi(size.y, 1)
-	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	img.fill(bg_color)
-
-	if tbl == null or tbl.table.is_empty():
-		return img
-
-	var row_count: int = tbl.table.size()
-	var col_count: int = 0
-	for row in tbl.table:
-		if row.size() > col_count:
-			col_count = row.size()
-	if col_count == 0:
-		return img
-
-	# Draw grid cells
-	var cell_w: int = maxi(w / col_count, 1)
-	var cell_h: int = maxi(h / row_count, 1)
-
-	for r in range(row_count):
-		for c in range(col_count):
-			var x0: int = c * cell_w
-			var y0: int = r * cell_h
-			var x1: int = mini(x0 + cell_w - 1, w - 1)
-			var y1: int = mini(y0 + cell_h - 1, h - 1)
-
-			var fill: Color = header_color if (r == 0 and tbl.has_header) else cell_color
-
-			# Fill cell
-			for y in range(y0, y1 + 1):
-				for x in range(x0, x1 + 1):
-					img.set_pixel(x, y, fill)
-
-			# Draw border (1px dark line on right and bottom edges)
-			for y in range(y0, y1 + 1):
-				if x1 < w:
-					img.set_pixel(mini(x1, w - 1), y, bg_color)
-			for x in range(x0, x1 + 1):
-				if y1 < h:
-					img.set_pixel(x, mini(y1, h - 1), bg_color)
+		if sample_count <= w:
+			# Fewer samples than pixels — stretch across full width.
+			for px in range(w):
+				var t: float = float(px) / float(w - 1) if w > 1 else 0.0
+				var si_f: float = t * float(sample_count - 1)
+				var si0: int = clampi(int(si_f), 0, sample_count - 1)
+				var si1: int = clampi(si0 + 1, 0, sample_count - 1)
+				var frac: float = si_f - float(si0)
+				var val: float = samples[si0] * (1.0 - frac) + samples[si1] * frac
+				var norm: float = clampf((val - min_v) / (max_v - min_v), 0.0, 1.0)
+				var py: int = clampi(h - 1 - int(norm * float(h - 1)), 0, h - 1)
+				img.set_pixel(px, py, col)
+				if px > 0:
+					var prev_t: float = float(px - 1) / float(w - 1) if w > 1 else 0.0
+					var prev_si_f: float = prev_t * float(sample_count - 1)
+					var prev_si0: int = clampi(int(prev_si_f), 0, sample_count - 1)
+					var prev_si1: int = clampi(prev_si0 + 1, 0, sample_count - 1)
+					var prev_frac: float = prev_si_f - float(prev_si0)
+					var prev_val: float = samples[prev_si0] * (1.0 - prev_frac) + samples[prev_si1] * prev_frac
+					var prev_norm: float = clampf((prev_val - min_v) / (max_v - min_v), 0.0, 1.0)
+					var prev_py: int = clampi(h - 1 - int(prev_norm * float(h - 1)), 0, h - 1)
+					var y_min: int = mini(prev_py, py)
+					var y_max: int = maxi(prev_py, py)
+					for y in range(y_min, y_max + 1):
+						img.set_pixel(px, clampi(y, 0, h - 1), col)
+		else:
+			# More samples than pixels — rolling window, last W samples.
+			var start_idx: int = sample_count - w
+			for px in range(w):
+				var si: int = start_idx + px
+				var val: float = samples[si]
+				var norm: float = clampf((val - min_v) / (max_v - min_v), 0.0, 1.0)
+				var py: int = clampi(h - 1 - int(norm * float(h - 1)), 0, h - 1)
+				img.set_pixel(px, py, col)
+				if px > 0:
+					var prev_val: float = samples[si - 1]
+					var prev_norm: float = clampf((prev_val - min_v) / (max_v - min_v), 0.0, 1.0)
+					var prev_py: int = clampi(h - 1 - int(prev_norm * float(h - 1)), 0, h - 1)
+					var y_min: int = mini(prev_py, py)
+					var y_max: int = maxi(prev_py, py)
+					for y in range(y_min, y_max + 1):
+						img.set_pixel(px, clampi(y, 0, h - 1), col)
 
 	return img
+
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -510,18 +472,6 @@ static func render_vol_composite(vd: GNVolumeData, size: Vector2i,
 		_blit_scaled(img, mip_img, half_w, half_h, w - half_w, h - half_h)
 
 	return img
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# IMG — Upload Image to texture (trivial, but here for completeness)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-## Returns a copy of the Image suitable for ImageTexture upload.
-## This is essentially a pass-through — the Image is already CPU-side.
-static func render_img(img_data: GNImageData) -> Image:
-	if img_data == null or img_data.image == null:
-		return null
-	return img_data.image
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

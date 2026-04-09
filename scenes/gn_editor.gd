@@ -176,6 +176,9 @@ func _ready() -> void:
 	# Track node renames so viewer target stays correct
 	network.node_renamed.connect(_on_node_renamed)
 
+	# Track graph modifications for unsaved-changes warning
+	network.graph_changed.connect(_mark_modified)
+
 	# Initialize sub-network navigation with root level
 	_setup_breadcrumb_bar()
 	_init_nav_stack()
@@ -1222,8 +1225,59 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
+## Shows a Save/Don't Save/Cancel dialog if the patch has unsaved changes.
+## Runs [param action] immediately if clean, or after user chooses Save/Don't Save.
+func _guard_unsaved(action: Callable) -> void:
+	if not _modified:
+		action.call()
+		return
+
+	var dlg := ConfirmationDialog.new()
+	dlg.title = "Unsaved Changes"
+	dlg.dialog_text = "This patch has unsaved changes.\nDo you want to save before continuing?"
+	dlg.ok_button_text = "Save"
+	dlg.cancel_button_text = "Cancel"
+
+	# Add a "Don't Save" button
+	var dont_save_btn := dlg.add_button("Don't Save", true)
+
+	dlg.confirmed.connect(func():
+		# Save first, then run the action
+		if _current_file_path.is_empty():
+			# Need Save-As — connect one-shot to file_selected
+			var conn: Callable
+			conn = func(path: String):
+				_save_dialog.file_selected.disconnect(conn)
+				action.call()
+			_save_dialog.file_selected.connect(conn)
+			_save_dialog.popup_centered()
+		else:
+			_save_to_path(_current_file_path)
+			action.call()
+		dlg.queue_free()
+	)
+
+	dont_save_btn.pressed.connect(func():
+		# Skip saving, just run the action
+		_modified = false
+		action.call()
+		dlg.queue_free()
+	)
+
+	dlg.canceled.connect(func():
+		dlg.queue_free()
+	)
+
+	add_child(dlg)
+	dlg.popup_centered()
+
+
 ## New patch — clears everything and starts fresh.
 func _on_new_pressed() -> void:
+	_guard_unsaved(_on_new_confirmed)
+
+
+func _on_new_confirmed() -> void:
 	_viewer_node_id = ""
 	_viewer_pinned = false
 	if viewer_panel:
@@ -1250,17 +1304,19 @@ func _on_new_pressed() -> void:
 	cook_engine._nodes_adopted = false
 
 	network.node_renamed.connect(_on_node_renamed)
+	network.graph_changed.connect(_mark_modified)
 	graph_editor.clear_undo_history()
 	graph_editor.update_viewer_pin_highlights("")
 
 	_push_active_sinks()
+	_modified = false
 	_update_title()
 	GNLogger.info("Editor", "New patch created")
 
 
 ## Open — show file dialog.
 func _on_open_pressed() -> void:
-	_load_dialog.popup_centered()
+	_guard_unsaved(func(): _load_dialog.popup_centered())
 
 
 ## Save — save to current path or show Save As dialog.
@@ -1304,7 +1360,7 @@ func _save_to_path(path: String) -> void:
 	if err == OK:
 		_current_file_path = path
 		_save_setting("last_patch_path", path)
-		_update_title()
+		_clear_modified()
 		print("[GONODES] Saved patch: %s" % path)
 	else:
 		push_error("[GONODES] Failed to save patch to '%s' (error %d)" % [path, err])
@@ -1346,6 +1402,7 @@ func _load_from_path(path: String) -> void:
 	cook_engine._nodes_adopted = false  # Force re-adoption of loaded nodes
 
 	network.node_renamed.connect(_on_node_renamed)
+	network.graph_changed.connect(_mark_modified)
 	graph_editor.clear_undo_history()
 	graph_editor.update_viewer_pin_highlights("")
 
@@ -1358,6 +1415,7 @@ func _load_from_path(path: String) -> void:
 			vp.get("scroll_y", 0.0))
 
 	_push_active_sinks()
+	_modified = false
 	_update_title()
 	print("[GONODES] Loaded patch: %s (%d nodes, %d connections)" % [
 		path, network.get_node_count(), network.get_connection_count()])
@@ -1375,11 +1433,30 @@ func _remove_network_nodes_from_tree() -> void:
 
 ## Updates the window title to show the current file name.
 func _update_title() -> void:
+	var mod := "*" if _modified else ""
 	if _current_file_path.is_empty():
-		get_window().title = "GONODES Editor — Untitled"
+		get_window().title = "GONODES Editor — Untitled%s" % mod
 	else:
 		var file_name := _current_file_path.get_file()
-		get_window().title = "GONODES Editor — %s" % file_name
+		get_window().title = "GONODES Editor — %s%s" % [file_name, mod]
+
+
+func _mark_modified() -> void:
+	if not _modified:
+		_modified = true
+		_update_title()
+
+
+func _clear_modified() -> void:
+	if _modified:
+		_modified = false
+		_update_title()
+
+
+## Intercept window close and quit requests.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_guard_unsaved(func(): get_tree().quit())
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

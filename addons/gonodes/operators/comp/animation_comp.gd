@@ -232,26 +232,26 @@ func destroy_scene_node() -> void:
 	_scene_node = null
 
 
-func display_in_viewer(viewer) -> void:
-	# Show the upstream mesh with material (the animated scene node).
+func render_for_viewer(viewer) -> void:
 	if _scene_node != null and _scene_node is MeshInstance3D:
 		var mi: MeshInstance3D = _scene_node as MeshInstance3D
 		if mi.mesh != null and mi.mesh is ArrayMesh:
-			var geo := GNGeoData.new()
-			geo.mesh = mi.mesh as ArrayMesh
-			geo.vertex_count = geo.mesh.get_surface_count()
-			var mat: Material = mi.material_override
-			if mat != null:
-				viewer.show_3d_mesh_with_material(geo, mat)
-			else:
-				viewer.show_3d_mesh(geo)
+			GNSopBase._ensure_viewer_scene()
+			var vp: SubViewport = viewer.get_3d_viewport()
+			GNSopBase._reparent_viewer_nodes(vp)
+			GNSopBase._viewer_mesh_instance.mesh = mi.mesh
+			GNSopBase._viewer_mesh_instance.material_override = mi.material_override
+			GNViewerRenderHelpers.apply_orbit_camera(
+				GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 			var active: String = "Playing" if get_param_value("active") else "Paused"
+			viewer.set_info_bar("AnimationCOMP")
 			viewer.set_info_overlay("%s  %.1fs  x%.1f" % [active, get_param_value("duration"), get_param_value("speed")])
 			return
 	var active: String = "Playing" if get_param_value("active") else "Paused"
 	var dur: float = get_param_value("duration")
 	var speed: float = get_param_value("speed")
-	viewer.show_info("Animation — %s\nDuration: %.2fs  Speed: %.2fx" % [active, dur, speed], "AnimationCOMP")
+	viewer.set_info("Animation — %s\nDuration: %.2fs  Speed: %.2fx" % [active, dur, speed], "AnimationCOMP")
 
 
 

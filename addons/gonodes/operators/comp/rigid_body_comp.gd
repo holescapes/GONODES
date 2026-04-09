@@ -260,16 +260,17 @@ func get_rigid_body() -> RigidBody3D:
 	return _rigid_body
 
 
-func display_in_viewer(viewer) -> void:
+func render_for_viewer(viewer) -> void:
 	if _mesh_instance != null and _mesh_instance.mesh != null and _mesh_instance.mesh is ArrayMesh:
-		var geo := GNGeoData.new()
-		geo.mesh = _mesh_instance.mesh as ArrayMesh
-		geo.vertex_count = geo.mesh.get_surface_count()
-		var mat: Material = _mesh_instance.material_override
-		if mat != null:
-			viewer.show_3d_mesh_with_material(geo, mat)
-		else:
-			viewer.show_3d_mesh(geo)
+		GNSopBase._ensure_viewer_scene()
+		var vp: SubViewport = viewer.get_3d_viewport()
+		GNSopBase._reparent_viewer_nodes(vp)
+		GNSopBase._viewer_mesh_instance.mesh = _mesh_instance.mesh
+		GNSopBase._viewer_mesh_instance.material_override = _mesh_instance.material_override
+		GNViewerRenderHelpers.apply_orbit_camera(
+			GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		viewer.set_info_bar("RigidBodyCOMP")
 		var mode_names := ["Dynamic", "Kinematic", "Static"]
 		var mode: int = get_param_value("mode")
 		var mode_name: String = mode_names[mode] if mode >= 0 and mode < 3 else "?"
@@ -278,7 +279,7 @@ func display_in_viewer(viewer) -> void:
 	var mode_names := ["Dynamic", "Kinematic", "Static"]
 	var mode: int = get_param_value("mode")
 	var mode_name: String = mode_names[mode] if mode >= 0 and mode < 3 else "Unknown"
-	viewer.show_info("RigidBody (%s)\nMass: %.2f" % [mode_name, get_param_value("mass")], "RigidBodyCOMP")
+	viewer.set_info("RigidBody (%s)\nMass: %.2f" % [mode_name, get_param_value("mass")], "RigidBodyCOMP")
 
 
 

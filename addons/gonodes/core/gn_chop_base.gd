@@ -67,11 +67,18 @@ func update_preview_control(control: Control) -> void:
 		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
 
 
-func display_in_viewer(viewer) -> void:
+## Shared waveform control — uses GNWaveformView (grid, zoom, pan, legends).
+static var _viewer_waveform: GNWaveformView = null
+
+
+func render_for_viewer(viewer) -> void:
 	if cached_output is GNChannelData:
-		viewer.show_waveform(cached_output as GNChannelData)
-		return
-	viewer.show_info("No CHOP output", "")
-
-
-
+		var ch: GNChannelData = cached_output as GNChannelData
+		if not ch.channels.is_empty():
+			if _viewer_waveform == null:
+				_viewer_waveform = GNViewerRenderHelpers.create_waveform_view()
+			_viewer_waveform.set_channel_data(ch)
+			var info := "%d ch × %d samples" % [ch.channels.size(), ch.length]
+			viewer.set_control(_viewer_waveform, info)
+			return
+	viewer.set_info("No CHOP output", "")

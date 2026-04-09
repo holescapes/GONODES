@@ -30,8 +30,6 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512),
-		"", "Output resolution"))
 	add_parameter(GNParameter.create_float("sensitivity", 20.0, 1.0, 100.0, 0.1,
 		"Sensitivity", "Motion amplification factor"))
 	add_parameter(GNParameter.create_float("smoothing", 0.1, 0.001, 1.0, 0.001,
@@ -49,7 +47,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if tex_in == null or tex_in.texture == null:
 		return null
 
-	var res: Vector2i = get_param_value("resolution")
+	var res: Vector2i = tex_in.resolution
 	var sensitivity: float = get_param_value("sensitivity")
 	var smoothing: float = get_param_value("smoothing")
 	var iterations: int = get_param_value("iterations")

@@ -79,8 +79,7 @@ func get_group_node() -> Node3D:
 	return _group_node
 
 
-func display_in_viewer(viewer) -> void:
-	# Collect all child meshes for 3D scene display
+func render_for_viewer(viewer) -> void:
 	var entries: Array = []
 	for child in _managed_children:
 		if not is_instance_valid(child):
@@ -88,34 +87,43 @@ func display_in_viewer(viewer) -> void:
 		if child is MeshInstance3D:
 			var mi: MeshInstance3D = child as MeshInstance3D
 			if mi.mesh != null and mi.mesh is ArrayMesh:
-				entries.append({
-					"mesh": mi.mesh,
-					"material": mi.material_override,
-					"transform": mi.transform,
-				})
+				entries.append({"mesh": mi.mesh, "material": mi.material_override, "transform": mi.transform})
 		elif child is MultiMeshInstance3D:
-			# Show just the template mesh from MultiMesh
 			var mmi: MultiMeshInstance3D = child as MultiMeshInstance3D
 			if mmi.multimesh != null and mmi.multimesh.mesh != null and mmi.multimesh.mesh is ArrayMesh:
-				entries.append({
-					"mesh": mmi.multimesh.mesh,
-					"material": mmi.material_override,
-					"transform": Transform3D.IDENTITY,
-				})
+				entries.append({"mesh": mmi.multimesh.mesh, "material": mmi.material_override, "transform": Transform3D.IDENTITY})
 
 	if entries.size() > 0:
-		viewer.show_3d_scene(entries, "MergeCOMP")
-		# Info overlay
+		GNSopBase._ensure_viewer_scene()
+		var vp: SubViewport = viewer.get_3d_viewport()
+		GNSopBase._reparent_viewer_nodes(vp)
+		# Primary mesh
+		GNSopBase._viewer_mesh_instance.mesh = entries[0]["mesh"]
+		GNSopBase._viewer_mesh_instance.material_override = entries[0]["material"]
+		# Extra meshes
+		var extra_mis: Array[MeshInstance3D] = []
+		for i in range(1, entries.size()):
+			var mi := MeshInstance3D.new()
+			mi.mesh = entries[i]["mesh"]
+			mi.material_override = entries[i]["material"]
+			mi.transform = entries[i]["transform"]
+			vp.add_child(mi)
+			extra_mis.append(mi)
+		GNViewerRenderHelpers.apply_orbit_camera(GNSopBase._viewer_camera, 45.0, -30.0, 5.0)
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		viewer.set_info_bar("MergeCOMP")
+		# Clean up extra meshes
+		for mi in extra_mis:
+			mi.queue_free()
 		var child_count: int = _managed_children.size()
 		var mesh_count: int = entries.size()
 		var vis: String = "visible" if _group_node != null and _group_node.visible else "hidden"
 		viewer.set_info_overlay("%d children, %d meshes\n%s" % [child_count, mesh_count, vis])
 		return
 
-	# Fallback: info text
 	var child_count: int = _managed_children.size()
 	var vis: String = "visible" if _group_node != null and _group_node.visible else "hidden"
-	viewer.show_info("Merge Group — %d children\n%s" % [child_count, vis], "MergeCOMP")
+	viewer.set_info("Merge Group — %d children\n%s" % [child_count, vis], "MergeCOMP")
 
 
 

@@ -93,15 +93,21 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return geo_in
 
 
-func display_in_viewer(viewer) -> void:
+func render_for_viewer(viewer) -> void:
 	if cached_output is GNGeoData and _mesh_instance != null:
-		var mat: Material = _mesh_instance.material_override
-		if mat != null:
-			viewer.show_3d_mesh_with_material(cached_output as GNGeoData, mat)
-		else:
-			viewer.show_3d_mesh(cached_output as GNGeoData)
-		return
-	super.display_in_viewer(viewer)
+		var geo: GNGeoData = cached_output as GNGeoData
+		if geo.mesh != null:
+			GNSopBase._ensure_viewer_scene()
+			var vp: SubViewport = viewer.get_3d_viewport()
+			GNSopBase._reparent_viewer_nodes(vp)
+			GNSopBase._viewer_mesh_instance.mesh = geo.mesh
+			GNSopBase._viewer_mesh_instance.material_override = _mesh_instance.material_override
+			GNViewerRenderHelpers.apply_orbit_camera(
+				GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+			viewer.set_info_bar("%d verts" % geo.vertex_count)
+			return
+	super.render_for_viewer(viewer)
 
 
 ## Destroys the scene node and resets geometry state so the

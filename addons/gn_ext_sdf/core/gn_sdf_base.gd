@@ -50,3 +50,15 @@ static func _make_node(op: String, params: Dictionary, children: Array = [],
 func update_preview_control(control: Control) -> void:
 	if control is Label:
 		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
+
+
+func render_for_viewer(viewer) -> void:
+	if cached_output != null and cached_output is GNSDFData:
+		var sd: GNSDFData = cached_output as GNSDFData
+		var tree = sd.sdf_tree
+		if tree == null or tree.is_empty():
+			viewer.set_info("Empty SDF tree", "")
+		else:
+			viewer.set_info(sd.get_preview_text(), "hash: %d" % sd.tree_hash)
+		return
+	viewer.set_info("No SDF output", "")

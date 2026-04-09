@@ -56,7 +56,7 @@ gn_extension.cfg (declarative manifest)
        ├─→ GNFamily.register_family()                 ← new families
        └─→ boot.gd::boot()                           ← runtime hooks
               │
-              ├─→ GNViewerPanel.register_display_handler()   ← viewer display
+              ├─→ Override render_for_viewer() on base class  ← viewer display
               ├─→ GNCodeEditor.register_code_language()      ← code editor
               ├─→ GNParamRow.register_code_param()           ← param inspector
               └─→ GNNode.handle_viewer_input()               ← input forwarding (virtual override)
@@ -261,7 +261,7 @@ static func boot() -> void:
 
 | Hook | What It Registers | Example |
 |------|-------------------|---------|
-| `GNViewerPanel.register_display_handler()` | Custom viewer for new data types | SDF extension shows SDF tree text |
+| Override `render_for_viewer()` | Custom viewer rendering for new data types | SDF extension shows SDF tree text |
 | `GNNode.handle_viewer_input()` | Viewer input forwarding (virtual override) | WebRender forwards mouse/keyboard to CEF |
 | `GNCodeEditor.register_code_language()` | Syntax highlighting + presets | ISF extension registers `.fs` highlighting |
 | `GNParamRow.register_code_param()` | "Edit ↗" button on specific params | Shadertoy registers `shader_code` param |
@@ -307,26 +307,30 @@ static func boot() -> void:
 Three static registries allow extensions to hook into core UI without
 core code importing any extension module.
 
-### 6.1 Viewer Display Handler
+### 6.1 Viewer Display (render_for_viewer)
 
-**File:** `addons/gonodes/ui/gn_viewer_panel.gd`
+Extensions provide viewer rendering by overriding `render_for_viewer(viewer)`
+on their family base class or individual operator.  The viewer parameter
+provides these display modes:
 
 ```gdscript
-static var _ext_display_handlers: Dictionary = {}
-
-static func register_display_handler(data_class_name: String, handler: Callable) -> void
-    # handler signature: func(output: GNData, viewer: GNViewerPanel) -> void
+## In your extension's base class or operator:
+func render_for_viewer(viewer) -> void:
+    viewer.set_info("My custom info", "info bar text")
+    # or: viewer.set_texture(my_texture, "info bar text")
+    # or: viewer.set_control(my_control, "info bar text")
+    # or: var vp = viewer.get_3d_viewport()  # activates 3D mode
 ```
 
-When the viewer panel encounters an output whose class name matches a
-registered handler, it calls that handler instead of the default display
-logic. The handler receives the data object and the viewer panel instance.
-
-**Viewer methods available to handlers:**
-- `show_info(text: String, info_bar_text: String = "")` — display text in viewer
-- `show_texture(tex: Texture2D, info: String)` — display a texture
-- `hide_all_displays()` — clear the viewer
-- `get_content_rect() -> Rect2` — available drawing area
+**Viewer API available to nodes:**
+- `set_texture(tex: Texture2D, info_bar: String)` — display a texture with pan/zoom
+- `set_control(control: Control, info_bar: String)` — display any Control widget
+- `set_info(text: String, info_bar: String)` — display centered text
+- `get_3d_viewport() -> SubViewport` — get/activate lazy 3D SubViewport
+- `set_info_bar(text: String)` — set the bottom info bar
+- `set_info_overlay(text: String)` — semi-transparent overlay text
+- `get_content_size() -> Vector2i` — snapped content area size
+- `hide_all_displays()` — clear all display modes
 
 ### 6.2 Code Editor Language
 
@@ -511,15 +515,16 @@ data_script = "res://addons/gn_ext_myext/core/my_data.gd"
 extends RefCounted
 
 static func boot() -> void:
-    if DisplayServer.get_name() == "headless":
-        return
-    # Register viewer display handler
-    var vp := load("res://addons/gonodes/ui/gn_viewer_panel.gd")
-    if vp and vp.has_method("register_display_handler"):
-        vp.register_display_handler("MyExtData", _display_myext)
+    # Boot scripts run at startup. Register runtime hooks here.
+    # Viewer display is now handled by overriding render_for_viewer()
+    # on your operator or family base class — no boot registration needed.
+    pass
+```
 
-static func _display_myext(output, viewer) -> void:
-    viewer.show_info(output.get_preview_text(), "")
+Viewer rendering example (in your operator):
+```gdscript
+func render_for_viewer(viewer) -> void:
+    viewer.set_info(cached_output.get_preview_text(), "")
 ```
 
 ### Step 4: Write Operators

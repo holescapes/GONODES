@@ -268,13 +268,17 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 ## Lazily creates the Compositor resource and attaches the effect.
 ## Called after super._cook() so _viewport is guaranteed to exist.
+## In Godot 4.6 Compositor is a Camera3D property, not SubViewport.
 func _setup_compositor_effect() -> void:
 	if _compositor != null or _viewport == null:
 		return
+	var cam: Camera3D = _viewport.get_camera_3d()
+	if cam == null:
+		return
 	_effect     = _GNCompositorEffect.new()
 	_compositor = Compositor.new()
-	_compositor.effects.append(_effect)
-	_viewport.compositor = _compositor
+	_compositor.compositor_effects.append(_effect)
+	cam.compositor = _compositor
 
 
 func _notification(what: int) -> void:

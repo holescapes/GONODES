@@ -1368,7 +1368,7 @@ Render CHOP channels as a texture — waveform oscilloscope, heatmap, or graph.
 
 #### SnapshotTOP
 
-Renders any non-TOP data type as a TOP texture — the same visualization the viewer panel shows, but as a node output for downstream processing. Shares rendering code with `GNViewerPanel` via `GNViewerRenderer`, so viewer improvements automatically update this node too.
+Renders any non-TOP data type as a TOP texture — the same visualization the viewer panel shows, but as a node output for downstream processing. Uses `GNViewerRenderHelpers` for default rendering, which individual operators can override via `render_for_viewer()`.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -1384,7 +1384,7 @@ Renders any non-TOP data type as a TOP texture — the same visualization the vi
 
 **Input:** `in` — dynamic port, family changes with mode (SOP/CHOP/DAT/POP/VOL/MAT/IMG).
 
-**How it works:** Delegates all rendering to `GNViewerRenderer` — the same static utility class that `GNViewerPanel` uses. SOP and POP modes create lazily-initialized SubViewports with orbit cameras. CHOP mode renders a waveform to a CPU Image. DAT mode renders a grid-cell table. VOL mode composites 3 orthogonal slices (or MIP) into a single image. MAT mode renders a lit sphere with the material applied. IMG mode is a direct pass-through upload. Parameters that don't apply to the current mode are automatically hidden.
+**How it works:** Calls the upstream node's `render_for_viewer()` method, which by default delegates to `GNViewerRenderHelpers` — the same helper library that family base classes use for viewer display. SOP and POP modes create lazily-initialized SubViewports with orbit cameras. CHOP mode renders a waveform to a CPU Image. DAT mode renders a grid-cell table. VOL mode composites 3 orthogonal slices (or MIP) into a single image. MAT mode renders a lit sphere with the material applied. IMG mode is a direct pass-through upload. Parameters that don't apply to the current mode are automatically hidden.
 
 ---
 

@@ -21,7 +21,6 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("near", 0.05, 0.001, 100.0, 0.01, "Near", "Near plane for depth normalization"))
 	add_parameter(GNParameter.create_float("far", 100.0, 1.0, 10000.0, 1.0, "Far", "Far plane for depth normalization"))
 	add_parameter(GNParameter.create_bool("invert", false, "Invert", "Invert depth (white=near, black=far)"))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output resolution"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -30,7 +29,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		GNLogger.warn("DepthTOP", "'%s' — no valid input" % id)
 		return null
 
-	var res: Vector2i = get_param_value("resolution")
+	var res: Vector2i = tex_in.resolution
 	_ensure_viewport(res, true, true)
 	if _viewport.size != res:
 		_viewport.size = res

@@ -378,21 +378,22 @@ func destroy_scene_node() -> void:
 	super.destroy_scene_node()
 
 
-func display_in_viewer(viewer) -> void:
+func render_for_viewer(viewer) -> void:
 	if _mesh_inst != null and _mesh_inst.mesh != null and _mesh_inst.mesh is ArrayMesh:
-		var geo := GNGeoData.new()
-		geo.mesh = _mesh_inst.mesh as ArrayMesh
-		geo.vertex_count = geo.mesh.get_surface_count()
-		var mat: Material = _mesh_inst.material_override
-		if mat != null:
-			viewer.show_3d_mesh_with_material(geo, mat)
-		else:
-			viewer.show_3d_mesh(geo)
+		GNSopBase._ensure_viewer_scene()
+		var vp: SubViewport = viewer.get_3d_viewport()
+		GNSopBase._reparent_viewer_nodes(vp)
+		GNSopBase._viewer_mesh_instance.mesh = _mesh_inst.mesh
+		GNSopBase._viewer_mesh_instance.material_override = _mesh_inst.material_override
+		GNViewerRenderHelpers.apply_orbit_camera(
+			GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		viewer.set_info_bar("SoftBodyCOMP")
 		var verts: int = _positions.size() if _positions != null else 0
 		viewer.set_info_overlay("SoftBody — %d verts  Iter: %d" % [verts, get_param_value("iterations")])
 		return
 	var verts: int = _positions.size() if _positions != null else 0
-	viewer.show_info("SoftBody — %d vertices\nIterations: %d" % [
+	viewer.set_info("SoftBody — %d vertices\nIterations: %d" % [
 		verts, get_param_value("iterations")], "SoftBodyCOMP")
 
 

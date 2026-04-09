@@ -111,7 +111,7 @@ Extensions customize the editor through **registration hooks** provided by core:
 
 - **Operators** — declared in `gn_extension.cfg`, auto-discovered by the registry
 - **Code editors** — `boot.gd` calls `GNCodeEditor.register_code_language()` and `GNParamRow.register_code_param()` to add syntax highlighting, presets, and "Edit ↗" buttons for extension-specific params (e.g. HTML, JavaScript, ISF, GLSL)
-- **Viewer display** — `GNViewerPanel.register_display_handler()` for custom data visualization; `GNNode.handle_viewer_input()` virtual for input forwarding (e.g. mouse → CEF browser)
+- **Viewer display** — Override `render_for_viewer()` on operators for custom visualization; `handle_viewer_input()` virtual for input forwarding (e.g. mouse → CEF browser)
 - **New families** — `GNFamily.register_family()` creates entirely new data types with custom wire colors, palette sections, and data classes
 - **Native binaries** — `.gdextension` files ship as `.disabled` by default; `sync_native_extensions()` auto-activates them when the platform binary exists on disk, silencing Godot's startup warnings on machines where the binary hasn't been compiled
 

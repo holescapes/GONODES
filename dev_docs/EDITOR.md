@@ -230,12 +230,13 @@ selection via `_on_node_cooked`.
 
 ## Node Preview & Viewer System
 
-### Shared Rendering via GNViewerRenderer
+### Shared Rendering via GNViewerRenderHelpers
 
-All data-to-image rendering logic is consolidated in `GNViewerRenderer`
-(`addons/gonodes/core/gn_viewer_renderer.gd`) — a static utility class.
-Both the **docked viewer panel** (`GNViewerPanel`) and **SnapshotTOP**
-(node-graph operator) delegate to `GNViewerRenderer` for:
+Common data-to-image rendering logic is available in `GNViewerRenderHelpers`
+(`addons/gonodes/core/gn_viewer_render_helpers.gd`) — a static utility class.
+Family base classes use these helpers in their `render_for_viewer()` overrides
+for default visualization.  Custom operators can bypass the helpers entirely.
+Available helpers:
 - SOP/POP/MAT SubViewport creation (camera, light, gizmo, environment)
 - Orbit camera positioning
 - Volume slice extraction (XY/XZ/YZ) and MIP projection
@@ -262,34 +263,40 @@ The logic lives in `GNNode.create_preview_control()` and
 these unless they have non-data state to display (COMP: `_scene_node`,
 UI: `_control_node`, OUT: sink status).
 
-### Node-Driven Viewer Display (display_in_viewer)
+### Node-Driven Viewer Display (render_for_viewer)
 
-The docked viewer panel uses a **node-driven dispatch** pattern rather than
-a centralized type-switch.  Each node controls its own viewer presentation:
+The docked viewer panel is a **minimal host** — a dumb surface that provides
+a TextureRect (with pan/zoom), a Control container, an info label, and a
+lazy 3D SubViewport.  Each node controls its own viewer presentation:
 
-1. `GNNode.display_in_viewer(viewer)` — virtual method on the base class.
+1. `GNNode.render_for_viewer(viewer)` — virtual method on the base class.
    The `viewer` parameter is untyped (`Variant`) to avoid a core→UI
    circular dependency.
-2. All 10 family base classes override this method to call the appropriate
-   typed API method on `GNViewerPanel`:
-   - `GNTopBase` / `GNImgBase` → `viewer.show_image()`
-   - `GNChopBase` → `viewer.show_waveform()`
-   - `GNDatBase` → `viewer.show_spreadsheet()`
-   - `GNSopBase` → `viewer.show_3d_mesh()`
-   - `GNMatBase` → `viewer.show_material()`
+2. All 11 family base classes override this method, choosing one of the
+   viewer's display modes:
+   - `GNTopBase` / `GNImgBase` → `viewer.set_texture()`
+   - `GNChopBase` → renders waveform to ImageTexture → `viewer.set_texture()`
+   - `GNDatBase` → `viewer.set_control(tree)` (shared static Tree)
+   - `GNSopBase` → `viewer.get_3d_viewport()` + static shared scene nodes
+   - `GNMatBase` → `viewer.get_3d_viewport()` + static shared sphere/camera
    - `GNCompBase` → routes by output data type (texture/geo/default)
-   - `GNPopBase` → `viewer.show_pop_particles()`
-   - `GNVolBase` → `viewer.show_vol_slices()`
-   - `GNUiBase` → `viewer.show_ui_preview(self)`
-3. `GNViewerPanel.update_from_node()` is a single line:
-   `node.display_in_viewer(self)` (plus toolbar label update).
-4. **Legacy extension handlers** are preserved: the GNNode base fallback
-   checks `viewer.has_ext_display_handler()` for registered extension
-   display handlers (e.g., SDF extension) before falling back to a
-   generic text preview.
+   - `GNPopBase` → `viewer.get_3d_viewport()` + static shared MultiMesh
+   - `GNVolBase` → renders slice composite to ImageTexture → `viewer.set_texture()`
+   - `GNUiBase` → renders to its own SubViewport → `viewer.set_texture()`
+   - `GNSdfBase` → `viewer.set_info()` with SDF tree text
+3. `GNViewerPanel.update_from_node()` calls `node.render_for_viewer(self)`.
+4. Input forwarding: the viewer forwards `gui_input` to
+   `node.handle_viewer_input(event, local_pos)`.  If the node consumes the
+   event (returns `true`), the viewer re-renders by calling
+   `render_for_viewer()` again.  SOP/POP use this for orbit interaction,
+   VOL uses it for slice scrolling.
+5. 3D families share **static scene nodes** (`_viewer_camera`, `_viewer_light`,
+   `_viewer_mesh_instance`, etc.) owned by the family base class with a
+   `_viewer_` prefix.  These are reparented into the viewer's 3D SubViewport
+   on each render.
 
 This pattern makes adding viewer support for new families or custom nodes
-trivial — just override `display_in_viewer()` on the base class.
+trivial — just override `render_for_viewer()` on the base class.
 
 ### Multi-Output Nodes
 

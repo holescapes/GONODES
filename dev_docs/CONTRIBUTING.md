@@ -38,7 +38,7 @@
 
 ```
 addons/gonodes/
-├── core/           # Engine: cook engine, network, data types, base classes, GNViewerRenderer
+├── core/           # Engine: cook engine, network, data types, base classes, GNViewerRenderHelpers
 ├── operators/      # All operator scripts, organized by family
 │   ├── top/        # Texture operators (GPU)
 │   ├── chop/       # Channel operators
@@ -358,8 +358,8 @@ registration API (`GNCodeEditor.register_code_language()`,
 `GNParamRow.register_code_param()`); extensions call it. Remove the extension
 and the customization disappears.
 
-**Viewer behavior** follows the same rule. Custom data display goes through
-`GNViewerPanel.register_display_handler()` in the boot script. Input
+**Viewer behavior** follows the same rule. Custom data display is achieved by
+overriding `render_for_viewer()` on the operator or family base class. Input
 forwarding uses the `handle_viewer_input()` virtual on `GNNode` — the
 operator overrides it, not the viewer. The viewer has zero knowledge of
 extension-specific types.
@@ -648,10 +648,10 @@ in `gn_extension.cfg`, which the extension registry calls after loading operator
 
 **1. Viewer Panel** (`gn_viewer_panel.gd`)
 
-`GNViewerPanel.register_display_handler(data_class_name, handler_callable)` — extensions
-register a `Callable(output: GNData, viewer: GNViewerPanel)` that the viewer calls
-when the pinned node's output matches the registered class name. Handlers use
-`viewer.show_info()` or `viewer.show_texture()` to display content.
+Extensions customize viewer rendering by overriding `render_for_viewer(viewer)` on
+their operator or family base class. The viewer provides `set_texture()`, `set_control()`,
+`set_info()`, `get_3d_viewport()`, `set_info_bar()`, and `set_info_overlay()` as
+display methods. No boot registration is needed for viewer display.
 
 **2. Code Editor** (`gn_code_editor.gd`)
 

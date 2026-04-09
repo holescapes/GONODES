@@ -92,32 +92,41 @@ func get_camera() -> Camera3D:
 	return _camera
 
 
-func display_in_viewer(viewer) -> void:
+func render_for_viewer(viewer) -> void:
 	if _camera == null:
-		viewer.show_info("No camera", "CameraCOMP")
+		viewer.set_info("No camera", "CameraCOMP")
 		return
 
-	# Build frustum wireframe mesh
 	var mesh := _build_frustum_mesh()
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.albedo_color = Color(0.9, 0.85, 0.3)
+	mat.albedo_color = Color(0.9, 0.85, 0.3, 0.8)
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color.a = 0.8
 
-	# Camera body (small box at origin)
 	var body_mesh := _build_camera_body_mesh()
 	var body_mat := StandardMaterial3D.new()
 	body_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	body_mat.albedo_color = Color(0.6, 0.6, 0.7)
 
-	var entries: Array = [
-		{"mesh": body_mesh, "material": body_mat, "transform": Transform3D.IDENTITY},
-		{"mesh": mesh, "material": mat, "transform": Transform3D.IDENTITY},
-	]
-	viewer.show_3d_scene(entries, "CameraCOMP")
+	GNSopBase._ensure_viewer_scene()
+	var vp: SubViewport = viewer.get_3d_viewport()
+	GNSopBase._reparent_viewer_nodes(vp)
+	GNSopBase._viewer_mesh_instance.mesh = body_mesh
+	GNSopBase._viewer_mesh_instance.material_override = body_mat
 
-	# Info overlay
+	# Add frustum as extra mesh
+	var frustum_mi := MeshInstance3D.new()
+	frustum_mi.mesh = mesh
+	frustum_mi.material_override = mat
+	vp.add_child(frustum_mi)
+
+	GNViewerRenderHelpers.apply_orbit_camera(GNSopBase._viewer_camera, 45.0, -20.0, 5.0)
+	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	viewer.set_info_bar("CameraCOMP")
+
+	# Clean up extra mesh after render
+	frustum_mi.queue_free()
+
 	var proj_name: String = "Perspective" if _camera.projection == Camera3D.PROJECTION_PERSPECTIVE else "Orthogonal"
 	var fov_or_size: String = "FOV: %.1f°" % _camera.fov if _camera.projection == Camera3D.PROJECTION_PERSPECTIVE else "Size: %.1f" % _camera.size
 	var pos: Vector3 = _camera.position
