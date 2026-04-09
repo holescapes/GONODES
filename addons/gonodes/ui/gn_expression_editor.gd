@@ -56,6 +56,7 @@ func _setup_code_edit(edit: CodeEdit) -> void:
 	edit.code_completion_prefixes = PackedStringArray([".", "(", "\""])
 	edit.code_completion_requested.connect(_on_code_completion_requested)
 	edit.text_changed.connect(_on_text_changed)
+	edit.caret_changed.connect(_on_caret_changed)
 	_setup_syntax_highlighter()
 
 
@@ -785,6 +786,24 @@ static func _persist_user_snippets() -> void:
 func _on_text_changed() -> void:
 	var text := _code_edit.text.strip_edges()
 	_validate_expression(text)
+	_maybe_request_completion()
+
+
+## Called when the caret moves (click, arrow keys) without text changing.
+func _on_caret_changed() -> void:
+	_maybe_request_completion()
+
+
+## Force-triggers code completion when the caret is inside a recognised
+## autocomplete context (node IDs, channels, params).  CodeEdit normally
+## suppresses completion inside string color regions, so we bypass that.
+func _maybe_request_completion() -> void:
+	var line := _code_edit.get_line(_code_edit.get_caret_line())
+	var col := _code_edit.get_caret_column()
+	var before := line.substr(0, col)
+	var ctx := _detect_function_context(before)
+	if not ctx.is_empty():
+		_code_edit.request_code_completion(true)
 
 
 ## Attempts to parse the expression and shows any error.

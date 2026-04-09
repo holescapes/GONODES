@@ -1506,7 +1506,7 @@ GONODES/
   - [x] Node lock toggle (L key — prevents parameter changes, ?? indicator, inspector dims and disables inputs).
   - [x] Wire style options (W key to cycle, toolbar dropdown — curved/straight/right-angle via `connection_lines_curvature`).
 - [x] **Expression & scripting system refinement**:
-  - [x] Autocomplete / intellisense for expression fields — via GNExpressionEditor CodeEdit autocomplete. Family-aware node filtering (chop(" shows CHOPs only, top(" shows TOPs only, op("/par("/set_par(" show all). Hierarchical path completion (type "subnet1/" to browse subnetwork nodes, "../" for parent). par()/set_par() context detection with second-arg param name suggestions. Node IDs color-coded by family.
+  - [x] Autocomplete / intellisense for expression fields — works in **both** the inline LineEdit and the popup CodeEdit editor. Family-aware node filtering (chop(" shows CHOPs only, top(" shows TOPs only, op("/par("/set_par(" show all). Hierarchical path completion (type "subnet1/" to browse subnetwork nodes, "../" for parent). par()/set_par() context detection with second-arg param name suggestions. Node IDs color-coded by family. **Inline LineEdit** uses a manual PopupMenu triggered on text changes, arrow-key/mouse caret movement (via `gui_input` + `call_deferred`), and gathers node IDs or CHOP channel names from the network. **Popup CodeEdit** force-triggers `request_code_completion(true)` inside string regions where Godot normally suppresses the signal.
   - [x] Expression syntax highlighting (CodeHighlighter in GNExpressionEditor — GONODES keywords green/purple, context vars cyan, math funcs blue, built-in utilities teal, GDScript keywords pink).
   - [x] Custom user-defined expression functions — `GNExpressionFunctions` registry + `fn()` dispatch on CookEngine. Register via `GNExpressionFunctions.register()`, call via `fn("name", args...)`.
   - [x] Multi-line expression editor popup — `GNExpressionEditor` (Window) with CodeEdit, syntax highlighting, live validation, autocomplete, Ctrl+Enter confirm, Escape cancel. Opened via ↗ button next to expression fields.
@@ -2944,11 +2944,12 @@ Expression dependencies (implicit, via param references):
 
 **Mode switching:** Click the C/E toggle button on any parameter row, or right-click → "Insert Parameter Reference…" / "Insert CHOP Reference…" to auto-generate an expression.
 
-**Autocomplete (planned for MVP):**
-- When typing `op("` in an expression field, show dropdown of available node names
-- After `op("noise1").par.`, show dropdown of parameter names for that node
-- After `chop("lfo1").value("`, show dropdown of channel names
-- Provides discoverability without memorizing node/param names
+**Autocomplete (implemented):**
+- Typing `chop("`, `top("`, `sop("`, etc. in either the inline LineEdit or popup CodeEdit shows a dropdown of matching node IDs, filtered to the relevant family.
+- Inside the second string arg (e.g., `chop("lfo1", "`), CHOP channel names are suggested from the referenced node's `output_ports`.
+- Inline LineEdit: `PopupMenu` driven by `_check_inline_autocomplete()` — triggers on text changes and caret movement (arrow keys, mouse clicks via `gui_input` + `call_deferred`).
+- Popup CodeEdit: built-in completion API; `_maybe_request_completion()` force-calls `request_code_completion(true)` inside string regions where Godot suppresses the signal.
+- Provides discoverability without memorizing node/param/channel names.
 
 **Drag-and-drop parameter linking (planned):**
 - Drag a parameter label from one node's inspector to another node's parameter field

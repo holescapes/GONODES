@@ -609,6 +609,30 @@ me.cook_valid
 
 ---
 
+## Inline Autocomplete
+
+Autocomplete works directly in the **inline expression field** (the
+LineEdit in the parameter row) — no need to open the popup editor for
+quick references.
+
+**How it triggers:**
+
+- **Typing** — type `chop("`, `top("`, `sop("`, etc. and a dropdown
+  appears with matching node IDs, filtered to the relevant family.
+- **Caret movement** — use arrow keys, Home/End, or click inside the
+  quotes to re-trigger the dropdown at the new caret position.
+- **Channel names** — inside the second argument (e.g., `chop("lfo1", "`)
+  the dropdown switches to channel name suggestions from the referenced
+  node's outputs.
+
+Select an item with mouse click or Enter. The text is inserted at the
+caret position. Press Escape to dismiss.
+
+> The inline dropdown uses the same family filtering and color-coding as
+> the popup editor's autocomplete.
+
+---
+
 ## Multi-line Expression Editor
 
 For complex expressions, click the **↗** button next to any expression field to

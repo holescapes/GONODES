@@ -161,6 +161,64 @@ Each parameter row (`gn_param_row.gd`) in Expression mode shows:
   `text_overrun_behavior = OVERRUN_TRIM_ELLIPSIS` to prevent long values
   from blowing out the panel width.
 
+### Expression Autocomplete — Implementation
+
+Autocomplete suggestions appear while typing expression functions
+(`chop(`, `top(`, `sop(`, etc.) in both the **inline LineEdit** and
+the **popup CodeEdit** editor.
+
+#### Inline LineEdit (`gn_param_row.gd`)
+
+The inline field uses a manually managed `PopupMenu`.
+
+| Component | Detail |
+|-----------|--------|
+| `_autocomplete_popup` | `PopupMenu` created lazily on first trigger |
+| `_autocomplete_target` | The `LineEdit` that opened the popup |
+| `_ac_trigger_re` | Static `RegEx` matching `chop("`, `top("`, etc. before the caret |
+| `_ac_second_arg_re` | Static `RegEx` matching `chop("id", "` to detect the channel-name context |
+
+**Trigger detection** — `_check_inline_autocomplete(edit)` runs on:
+
+- `text_changed` signal — fires as the user types.
+- Arrow keys / Home / End — detected via `_on_expr_gui_input()`, then
+  `_check_inline_autocomplete.call_deferred(edit)` so the caret position
+  updates first.
+- Mouse click in the LineEdit — same deferred path via `gui_input`.
+
+> **Note:** Godot's `LineEdit` does **not** emit `caret_changed`.  All
+> caret-movement detection goes through `gui_input` with `call_deferred`.
+
+**Suggestion gathering:**
+
+- **Node ID suggestions** — `_gather_node_ids(filter_family)` walks the
+  network and collects node IDs, optionally filtered to a single family
+  via `_fn_to_family(fn)` (e.g., `chop(` → `GNFamily.Type.CHOP`).
+- **Channel name suggestions** — `_gather_chop_channels(node_id)` reads
+  `node.output_ports` on the referenced CHOP node and collects port
+  names.  Triggers when the caret is inside the second string argument
+  (e.g., `chop("lfo1", "|"`).
+
+**Popup display** — `_show_inline_autocomplete(edit, items, partial)`
+positions the `PopupMenu` below the caret, applies a family-colored icon
+to each item, and filters items by the partial string already typed.
+Selecting an item inserts the text at the caret position.
+
+#### Popup CodeEdit (`gn_expression_editor.gd`)
+
+The popup editor uses Godot's built-in `CodeEdit` completion API.
+
+**Problem:** `CodeEdit` suppresses `code_completion_requested` inside
+string color regions added via `add_color_region("\"", "\"")`.  This
+means typing `chop("` in the popup editor triggers no completion by
+default.
+
+**Fix:** `_maybe_request_completion()` is called from both
+`text_changed` and `caret_changed`.  It checks `_detect_function_context()`
+and, when inside a recognized expression function call, calls
+`_code_edit.request_code_completion(true)` to force the completion
+panel open.
+
 ### Inspector Status Label
 
 `_status_label` in `gn_param_inspector.gd` uses `autowrap_mode =

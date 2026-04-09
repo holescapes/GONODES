@@ -66,6 +66,12 @@ var _comp_resolved_labels: Array[Label] = []
 ## Resolved-value label shown next to the expression LineEdit (scalar params).
 var _resolved_label: Label = null
 
+## Inline autocomplete popup for expression fields.
+var _autocomplete_popup: PopupMenu = null
+
+## The LineEdit that triggered the current autocomplete popup.
+var _autocomplete_target: LineEdit = null
+
 ## Direct reference to the code TextEdit when inside a code-editor wrapper VBox.
 var _code_edit: TextEdit = null
 
@@ -145,6 +151,7 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 		_expr_edit.text_submitted.connect(_on_expression_submitted)
 		_expr_edit.focus_exited.connect(_on_expression_focus_lost)
 		_expr_edit.gui_input.connect(_on_expr_gui_input)
+		_expr_edit.text_changed.connect(func(t: String) -> void: _on_expr_text_changed(_expr_edit))
 		_expr_edit.visible = false
 		_value_container.add_child(_expr_edit)
 
@@ -207,6 +214,7 @@ func _build_multi_component_ui() -> void:
 	_expr_edit.text_submitted.connect(_on_expression_submitted)
 	_expr_edit.focus_exited.connect(_on_expression_focus_lost)
 	_expr_edit.gui_input.connect(_on_expr_gui_input)
+	_expr_edit.text_changed.connect(func(t: String) -> void: _on_expr_text_changed(_expr_edit))
 	_expr_edit.visible = false
 	_value_container.add_child(_expr_edit)
 
@@ -297,6 +305,7 @@ func _build_multi_component_ui() -> void:
 		expr_edit.focus_exited.connect(func() -> void: _on_comp_expr_focus_lost(expr_idx))
 		var gui_idx := i
 		expr_edit.gui_input.connect(func(ev: InputEvent) -> void: _on_comp_expr_gui_input(gui_idx, ev))
+		expr_edit.text_changed.connect(func(t: String) -> void: _on_expr_text_changed(expr_edit))
 		row.add_child(expr_edit)
 		_comp_expr_edits.append(expr_edit)
 
@@ -1042,6 +1051,7 @@ func _on_comp_field_tab(comp_idx: int, forward: bool) -> void:
 
 
 ## Handles Tab/Shift+Tab in expression LineEdits to navigate between rows.
+## Also triggers inline autocomplete on caret-moving input (arrows, mouse click).
 func _on_expr_gui_input(event: InputEvent) -> void:
 	if event is InputEventKey and (event as InputEventKey).pressed:
 		var key := event as InputEventKey
@@ -1054,6 +1064,13 @@ func _on_expr_gui_input(event: InputEvent) -> void:
 			else:
 				tab_next_requested.emit()
 			accept_event()
+			return
+		# Arrow keys / Home / End move the caret — recheck autocomplete
+		if key.keycode in [KEY_LEFT, KEY_RIGHT, KEY_HOME, KEY_END]:
+			_check_inline_autocomplete.call_deferred(_expr_edit)
+	elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
+		# Mouse click repositions caret — recheck after Godot processes it
+		_check_inline_autocomplete.call_deferred(_expr_edit)
 
 
 ## Handles Tab/Shift+Tab in per-component expression LineEdits, cycling siblings first.
@@ -1946,3 +1963,197 @@ func _show_chop_reference_picker() -> void:
 		dialog.popup_centered()
 	else:
 		dialog.queue_free()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Inline Expression Autocomplete
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Regex matching function call patterns that should trigger node-ID autocomplete.
+## Matches: chop(" chopf(" chopi(" chops(" top(" sop(" dat(" mat(" op(" par(" set_par("
+static var _ac_trigger_re: RegEx = null
+
+## Returns the shared trigger regex, compiling it on first use.
+static func _get_ac_trigger_re() -> RegEx:
+	if _ac_trigger_re == null:
+		_ac_trigger_re = RegEx.new()
+		_ac_trigger_re.compile("(chop[sfi]?|top|sop|dat|mat|op|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]*)$")
+	return _ac_trigger_re
+
+## Regex for detecting second-argument context (channel names after first arg).
+static var _ac_second_arg_re: RegEx = null
+
+static func _get_ac_second_arg_re() -> RegEx:
+	if _ac_second_arg_re == null:
+		_ac_second_arg_re = RegEx.new()
+		_ac_second_arg_re.compile("(chop[sfi]?)\\s*\\(\\s*\"([^\"]*)\"\\s*,\\s*\"([^\"]*)$")
+	return _ac_second_arg_re
+
+## Called on every text change in an expression LineEdit.
+func _on_expr_text_changed(edit: LineEdit) -> void:
+	_check_inline_autocomplete(edit)
+
+
+## Called when the caret moves (arrow keys, mouse click) without text changing.
+func _on_expr_caret_moved(edit: LineEdit) -> void:
+	_check_inline_autocomplete(edit)
+
+
+## Shared logic: detect autocomplete context from text before caret and show popup.
+func _check_inline_autocomplete(edit: LineEdit) -> void:
+	if network == null:
+		return
+
+	var text := edit.text
+	var col := edit.caret_column
+	var before := text.substr(0, col)
+
+	# Check for second-arg context first (channel suggestions)
+	var m2 := _get_ac_second_arg_re().search(before)
+	if m2:
+		var node_id := m2.get_string(2)
+		var partial := m2.get_string(3)
+		_show_inline_autocomplete(edit, _gather_chop_channels(node_id), partial)
+		return
+
+	# Check for first-arg context (node ID suggestions)
+	var m := _get_ac_trigger_re().search(before)
+	if m:
+		var fn := m.get_string(1)
+		var partial := m.get_string(2)
+		var filter_family: int = _fn_to_family(fn)
+		_show_inline_autocomplete(edit, _gather_node_ids(filter_family), partial)
+		return
+
+	# No match — close popup if open
+	_close_autocomplete()
+
+
+## Maps a function name to the expected family filter (-1 = all).
+func _fn_to_family(fn: String) -> int:
+	if fn.begins_with("chop"):
+		return GNFamily.Type.CHOP
+	match fn:
+		"top": return GNFamily.Type.TOP
+		"sop": return GNFamily.Type.SOP
+		"dat": return GNFamily.Type.DAT
+		"mat": return GNFamily.Type.MAT
+	return -1  # op, par, set_par → all families
+
+
+## Gathers node IDs from the network, optionally filtered by output family.
+## Returns Array of { id: String, family: int }.
+func _gather_node_ids(filter_family: int) -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	if network == null:
+		return results
+	for node_id in network.nodes:
+		var node: GNNode = network.nodes[node_id]
+		if filter_family >= 0 and node.family != filter_family:
+			# Also check output ports for cross-family operators
+			var match_found := false
+			for port in node.output_ports:
+				if port.family == filter_family:
+					match_found = true
+					break
+			if not match_found:
+				continue
+		results.append({ "id": node_id, "family": node.family })
+	results.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.id).naturalnocasecmp_to(str(b.id)) < 0)
+	return results
+
+
+## Gathers channel names from a specific CHOP node's cached output.
+func _gather_chop_channels(node_id: String) -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	if network == null:
+		return results
+	var node: GNNode = network.get_node_by_id(node_id)
+	if node == null or node.cached_output == null:
+		return results
+	if node.cached_output is GNChannelData:
+		var chop_data: GNChannelData = node.cached_output as GNChannelData
+		for ch_name in chop_data.channels:
+			results.append({ "id": ch_name, "family": GNFamily.Type.CHOP })
+	return results
+
+
+## Shows or updates the inline autocomplete popup below the given LineEdit.
+func _show_inline_autocomplete(edit: LineEdit, items: Array[Dictionary], partial: String) -> void:
+	if items.is_empty():
+		_close_autocomplete()
+		return
+
+	# Filter by partial text
+	var q := partial.to_lower()
+	var filtered: Array[Dictionary] = []
+	for item in items:
+		if q.is_empty() or str(item.id).to_lower().contains(q):
+			filtered.append(item)
+
+	if filtered.is_empty():
+		_close_autocomplete()
+		return
+
+	# Create popup lazily
+	if _autocomplete_popup == null:
+		_autocomplete_popup = PopupMenu.new()
+		_autocomplete_popup.name = "ExprAutocomplete"
+		_autocomplete_popup.max_size = Vector2(320, 240)
+		_autocomplete_popup.id_pressed.connect(_on_autocomplete_selected)
+		add_child(_autocomplete_popup)
+
+	_autocomplete_target = edit
+	_autocomplete_popup.clear()
+
+	for i in range(filtered.size()):
+		var entry: Dictionary = filtered[i]
+		var label: String = str(entry.id)
+		var family_color: Color = GNFamily.FAMILY_COLORS.get(entry.family, Color.WHITE)
+		_autocomplete_popup.add_item(label, i)
+		_autocomplete_popup.set_item_metadata(i, entry.id)
+		var img := Image.create(12, 12, false, Image.FORMAT_RGBA8)
+		img.fill(family_color)
+		var tex := ImageTexture.create_from_image(img)
+		_autocomplete_popup.set_item_icon(_autocomplete_popup.get_item_index(i), tex)
+
+	# Position below the LineEdit
+	var edit_rect := edit.get_global_rect()
+	var popup_pos := Vector2(edit_rect.position.x, edit_rect.position.y + edit_rect.size.y)
+	_autocomplete_popup.position = Vector2i(int(popup_pos.x), int(popup_pos.y))
+	_autocomplete_popup.reset_size()
+	if not _autocomplete_popup.visible:
+		_autocomplete_popup.popup()
+
+
+## Called when the user selects an item from the autocomplete popup.
+func _on_autocomplete_selected(id: int) -> void:
+	if _autocomplete_target == null or _autocomplete_popup == null:
+		return
+	var idx := _autocomplete_popup.get_item_index(id)
+	var selected_id: String = str(_autocomplete_popup.get_item_metadata(idx))
+	var edit := _autocomplete_target
+
+	# Find the partial text that needs replacing (everything after the last ")
+	var text := edit.text
+	var col := edit.caret_column
+	var before := text.substr(0, col)
+	var after := text.substr(col)
+
+	# Find the last unclosed quote to determine where partial starts
+	var quote_pos := before.rfind("\"")
+	if quote_pos < 0:
+		return
+	var new_before := before.substr(0, quote_pos + 1) + selected_id
+	edit.text = new_before + after
+	edit.caret_column = new_before.length()
+	edit.grab_focus()
+	_close_autocomplete()
+
+
+## Closes the autocomplete popup if open.
+func _close_autocomplete() -> void:
+	if _autocomplete_popup != null and _autocomplete_popup.visible:
+		_autocomplete_popup.hide()
+	_autocomplete_target = null
