@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -110,7 +106,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Record CHOP \u2014 Buffer\n\nRecords LFO output into a rolling buffer\nof up to 500 samples. Toggle 'active'\nto start/stop recording.",
+            "text": "Record CHOP — Buffer\n\nRecords LFO output into a rolling buffer\nof up to 500 samples. Toggle 'active'\nto start/stop recording.",
             "position": [
                 -100.0,
                 -150.0

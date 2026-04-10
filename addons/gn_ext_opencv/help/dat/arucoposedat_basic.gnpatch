@@ -1,0 +1,108 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "pose1": {
+            "type": "ArucoPoseDAT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "dictionary": {
+                    "value": 0
+                },
+                "marker_size": {
+                    "value": 0.05
+                }
+            }
+        },
+        "display1": {
+            "type": "TextTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "font_size": {
+                    "value": 16
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "pose1",
+            "to_port": 0
+        },
+        {
+            "from": "pose1",
+            "from_port": 0,
+            "to": "display1",
+            "to_port": 0
+        },
+        {
+            "from": "display1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Aruco Pose DAT — Basic\n\n3D pose estimation from detected ArUco markers + camera calibration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

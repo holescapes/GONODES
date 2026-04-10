@@ -113,7 +113,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RenderTOP \u2014 Parameters\n\nShowcases: resolution, bg_color, transparent_bg.",
+            "text": "render_transparent_bg — Bg\n\nDemonstrates resolution, bg_color, transparent_bg parameters.",
             "position": [
                 -100.0,
                 -100.0

@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "sizex": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 },
                 "sizey": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "sizez": {
                     "value": 2.0
@@ -140,14 +136,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Remesh SOP \u2014 Basic\n\nMidpoint subdivision creates a uniform triangle mesh\nfrom a coarse box. target_edge=0.15 controls density.\nSmooth = on applies Laplacian post-smoothing for even triangles.",
+            "text": "Remesh SOP — Basic\n\nRetopologize mesh to uniform triangle density via midpoint subdivision.\nUsing: target_edge=0.15, iterations=3, smooth=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
                 500.0,
-                100.0
+                140.0
             ],
             "color": [
                 1.0,

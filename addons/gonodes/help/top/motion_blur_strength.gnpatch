@@ -71,7 +71,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MotionBlurTOP \u2014 Parameters\n\nShowcases: strength, quality.",
+            "text": "Motion Blur TOP — Strength\n\nTemporal motion blur driven by a flow/velocity texture.\nShowcasing: strength=0.5, quality=1.",
             "position": [
                 -100.0,
                 -100.0

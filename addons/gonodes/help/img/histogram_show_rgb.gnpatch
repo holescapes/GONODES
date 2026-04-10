@@ -90,7 +90,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "HistogramIMG \u2014 Parameters\n\nShowcases: num_bins, show_rgb, show_luma.",
+            "text": "Noise IMG — Rgb\n\nCPU procedural noise image (value noise, white noise).",
             "position": [
                 -100.0,
                 -100.0

@@ -17,14 +17,10 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
-                    "value": 4.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "time_offset": {
                     "value": 0.0
@@ -69,14 +65,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Noise TOP — Basic\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.\nUsing: noise_type=0, scale=4.0, time_offset=0.0, seed=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

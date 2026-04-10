@@ -96,7 +96,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DATtoCHOP \u2014 Parameters\n\nShowcases: layout, first_is_name.",
+            "text": "DA Tto CHOP — Layout\n\nConvert DAT table to CHOP channels.\nShowcasing: layout=1, first_is_name=True.",
             "position": [
                 -100.0,
                 -100.0

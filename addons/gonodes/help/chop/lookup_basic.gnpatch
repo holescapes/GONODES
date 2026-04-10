@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 }
             }
         },
@@ -103,7 +99,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Lookup CHOP \u2014 Basic\n\nUses ramp as index into wave table.\nRemaps input through transfer function.",
+            "text": "Lookup CHOP — Basic\n\nIndex into a sample array using another channel as lookup position.",
             "position": [
                 -100.0,
                 -100.0

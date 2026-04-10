@@ -92,14 +92,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FlowVisTOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Flow Vis TOP — Advanced\n\nVisualizes a 2-channel vector field via Line Integral Convolution (LIC). GPU shader.\nCombined configuration: num_steps=26, step_size=0.008, noise_scale=160.0, color_mode=2.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

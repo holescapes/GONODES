@@ -81,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RampTOP \u2014 Parameters\n\nShowcases: resolution, type, color_a.",
+            "text": "Ramp TOP — Type\n\nGradient ramp generator (horizontal, vertical, radial, circular).\nShowcasing: type=1, phase=0.5, repeat=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

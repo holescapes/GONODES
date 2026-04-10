@@ -13,9 +13,7 @@
                     "value": 0
                 },
                 "has_header": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -76,7 +74,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FileInDAT \u2014 Basic\n\nDefault settings.",
+            "text": "File In DAT — Basic\n\nRead a file (CSV, TSV, JSON, text) from disk into a table.\nUsing: mode=0, has_header=True.",
             "position": [
                 -100.0,
                 -100.0

@@ -89,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SwitchDAT \u2014 Parameters\n\nShowcases: index.",
+            "text": "Switch DAT — Variation\n\nSelect one of 2 table inputs by index.\nShowcasing: index=0.",
             "position": [
                 -100.0,
                 -100.0

@@ -81,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CallbackDAT \u2014 Parameters\n\nShowcases: time_dependent, active, log_events.",
+            "text": "Callback DAT — Dependent\n\nEvent-driven callback DAT. Named scripts fire on target node events (onCook, onValueChange, onStart).\nShowcasing: time_dependent=True, active=True, log_events=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

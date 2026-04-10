@@ -135,7 +135,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AdvectPOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Advect POP — Advanced\n\nAdvect particles by a VOL velocity field.\nCombined configuration: strength=2.0, add_mode=False.",
             "position": [
                 -100.0,
                 -100.0

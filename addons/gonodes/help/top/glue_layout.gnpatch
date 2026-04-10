@@ -91,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GlueTOP \u2014 Parameters\n\nShowcases: resolution, layout, padding.",
+            "text": "Glue TOP — Layout\n\nPack multiple textures into a grid atlas layout.\nShowcasing: layout=1, padding=0.",
             "position": [
                 -100.0,
                 -100.0

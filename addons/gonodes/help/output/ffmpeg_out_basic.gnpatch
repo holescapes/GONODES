@@ -39,14 +39,10 @@
                     "value": "user://output/video"
                 },
                 "codec": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "framerate": {
-                    "value": 30,
-                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
-                    "mode": "EXPRESSION"
+                    "value": 30
                 },
                 "crf": {
                     "value": 23
@@ -68,5 +64,26 @@
             "to_port": 0
         }
     ],
-    "description": "FFmpegOUT \u2014 Encode image sequence to video via FFmpeg CLI. Toggle 'active' ON to capture, OFF to encode."
+    "description": "FFmpegOUT — Encode image sequence to video via FFmpeg CLI. Toggle 'active' ON to capture, OFF to encode.",
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Noise TOP — Basic\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

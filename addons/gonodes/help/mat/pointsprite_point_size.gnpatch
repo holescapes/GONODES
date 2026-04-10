@@ -131,7 +131,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PointSpriteMAT \u2014 Parameters\n\nShowcases: color, point_size.",
+            "text": "Point Sprite MAT — Size\n\nPoint sprite material — renders vertices as sized point sprites.\nShowcasing: point_size=2.0.",
             "position": [
                 -100.0,
                 -100.0

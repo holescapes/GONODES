@@ -68,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LookupTOP \u2014 Parameters\n\nShowcases: index_by.",
+            "text": "Lookup TOP — By\n\nRemap colors via a lookup table / ramp texture.\nShowcasing: index_by=1.",
             "position": [
                 -100.0,
                 -100.0

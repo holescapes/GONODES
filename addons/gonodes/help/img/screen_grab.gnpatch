@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "source": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "res_x": {
                     "value": 512
@@ -85,7 +83,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ScreenGrabIMG\n\nCaptures the main viewport (or editor viewport) as a CPU Image.\nViewport-only \u2014 no OS-level desktop grab.\n\nChain \u2192 ImgToTOP to convert to GPU texture for the TOP pipeline.\nSet Source to 'Main Viewport' or 'Editor Viewport'.\nResolution controls the output size (resized from viewport).",
+            "text": "ScreenGrabIMG\n\nCaptures the main viewport (or editor viewport) as a CPU Image.\nViewport-only — no OS-level desktop grab.\n\nChain → ImgToTOP to convert to GPU texture for the TOP pipeline.\nSet Source to 'Main Viewport' or 'Editor Viewport'.\nResolution controls the output size (resized from viewport).",
             "position": [
                 -50.0,
                 -150.0

@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
                     "value": 2.0,
@@ -78,7 +76,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Wave CHOP \u2014 Sine\n\n2 Hz sine wave.\nSmooth periodic oscillation.",
+            "text": "Wave CHOP — Sine\n\n2 Hz sine wave.\nSmooth periodic oscillation.",
             "position": [
                 -100.0,
                 -100.0

@@ -87,14 +87,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "EdgeBlendTOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_mapper extension.",
+            "text": "Edge Blend TOP — Advanced\n\nSoft-edge gradient blending for overlapping projector regions.\nCombined configuration: blend_left=0.3, blend_right=0.3, blend_top=0.0, blend_bottom=0.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

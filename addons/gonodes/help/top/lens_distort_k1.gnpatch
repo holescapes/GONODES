@@ -87,14 +87,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LensDistortTOP \u2014 Parameters\n\nShowcases: k1, k2, chromatic_aberration.",
+            "text": "Lens Distort TOP — K1\n\nBarrel / pincushion lens distortion with chromatic aberration.\nShowcasing: k1=0.1, k2=0.5, chromatic_aberration=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

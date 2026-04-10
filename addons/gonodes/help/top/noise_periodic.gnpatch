@@ -17,9 +17,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
                     "value": 4.0,
@@ -78,7 +76,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseTOP \u2014 Periodic/Tiling Noise\n\nEnable 'periodic' to generate seamlessly tiling noise.\nThe output tiles perfectly when repeated in a grid.\n\ntile_size controls the repeat period.\nCombine with octaves for FBM detail.\nPerfect for looping VJ backgrounds.",
+            "text": "NoiseTOP — Periodic/Tiling Noise\n\nEnable 'periodic' to generate seamlessly tiling noise.\nThe output tiles perfectly when repeated in a grid.\n\ntile_size controls the repeat period.\nCombine with octaves for FBM detail.\nPerfect for looping VJ backgrounds.",
             "position": [
                 -120.0,
                 -130.0

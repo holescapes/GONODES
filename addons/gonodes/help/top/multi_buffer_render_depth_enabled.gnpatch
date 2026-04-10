@@ -60,14 +60,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MultiBufferRenderTOP \u2014 Parameters\n\nShowcases: depth_enabled, normal_enabled.",
+            "text": "Multi Buffer Render TOP — Enabled\n\nMulti-buffer 3D render: outputs color, depth, and normal buffer textures.\nShowcasing: depth_enabled=True, normal_enabled=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

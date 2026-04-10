@@ -160,14 +160,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GroupSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Group SOP — Advanced\n\nCreate and manage point/primitive groups via bounding box, normal, or range.\nCombined configuration: entity=2, method=2, bb_min_x=-1.0, bb_min_y=-1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

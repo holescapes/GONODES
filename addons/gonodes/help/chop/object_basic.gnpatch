@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "radius": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -112,7 +110,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Object CHOP \u2014 Basic\n\nReads the transform of geo1 as 9 CHOP channels:\ntx, ty, tz, rx, ry, rz, sx, sy, sz.\nChange geo1's position/rotation to see values update.",
+            "text": "Object CHOP — Basic\n\nRead COMP transform (tx/ty/tz/rx/ry/rz/sx/sy/sz) as CHOP channels.\nUsing: comp_path=geo1.",
             "position": [
                 -100.0,
                 -100.0

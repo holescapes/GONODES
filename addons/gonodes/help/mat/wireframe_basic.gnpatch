@@ -19,9 +19,7 @@
                     }
                 },
                 "alpha": {
-                    "value": 1.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -131,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WireframeMAT \u2014 Basic\n\nDefault settings.",
+            "text": "Wireframe MAT — Basic\n\nWireframe rendering material using spatial wireframe render mode.\nUsing: alpha=1.0.",
             "position": [
                 -100.0,
                 -100.0

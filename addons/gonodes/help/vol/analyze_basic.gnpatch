@@ -10,99 +10,33 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 10
+                    "value": 20
                 },
                 "cols": {
-                    "value": 10
+                    "value": 20
                 }
             }
         },
-        "noise1": {
-            "type": "NoiseSOP",
+        "focus1": {
+            "type": "AnalyzeVOL",
             "position": [
                 450,
                 100
             ],
-            "parameters": {
-                "amplitude": {
-                    "value": 0.2,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
-                },
-                "frequency": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "offset_x": {
-                    "value": 0.0
-                },
-                "offset_y": {
-                    "value": 0.0
-                },
-                "offset_z": {
-                    "value": 0.0
-                },
-                "speed": {
-                    "value": 1.0
-                },
-                "noise_type": {
-                    "value": 0
-                },
-                "displace_axis": {
-                    "value": 0
-                },
-                "seed": {
-                    "value": 0
-                }
-            }
+            "parameters": {}
         },
-        "geo_view": {
-            "type": "GeometryCOMP",
+        "raymarch1": {
+            "type": "RaymarchVOL",
             "position": [
-                700,
+                800,
                 100
             ],
             "parameters": {}
         },
-        "cam_view": {
-            "type": "CameraCOMP",
-            "position": [
-                700,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 0.5
-                },
-                "tz": {
-                    "value": 3
-                }
-            }
-        },
-        "render_view": {
-            "type": "RenderTOP",
-            "position": [
-                1000,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
+                1150,
                 100
             ],
             "parameters": {
@@ -123,29 +57,17 @@
         {
             "from": "src_grid",
             "from_port": 0,
-            "to": "noise1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "noise1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "geo_view",
+            "to": "raymarch1",
             "to_port": 0
         },
         {
-            "from": "geo_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 0
-        },
-        {
-            "from": "cam_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 1
-        },
-        {
-            "from": "render_view",
+            "from": "raymarch1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -155,14 +77,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Analyze VOL — Basic\n\nCompute min, max, mean, and sum statistics of a volume.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

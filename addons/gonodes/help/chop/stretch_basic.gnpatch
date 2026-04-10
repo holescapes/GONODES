@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Stretch CHOP \u2014 Basic\n\nTime-stretches wave signal.\nChanges duration without pitch.",
+            "text": "Stretch CHOP — Basic\n\nTime-stretch samples with Catmull-Rom cubic interpolation.",
             "position": [
                 -100.0,
                 -100.0

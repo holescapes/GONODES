@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "points": {
-                    "value": 10,
-                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 10
                 },
                 "direction": {
                     "value": {
@@ -23,9 +21,7 @@
                     }
                 },
                 "length": {
-                    "value": 3.0,
-                    "expression": "(3.0 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 3.0
                 }
             }
         },
@@ -121,7 +117,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Line SOP \u2014 Vertical Line\n\n10-point line extending 3 units along Y.\nUseful as a path or deformation target.",
+            "text": "Line SOP — Vertical Line\n\n10-point line extending 3 units along Y.\nUseful as a path or deformation target.",
             "position": [
                 -100.0,
                 -150.0

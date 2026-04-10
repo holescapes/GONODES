@@ -61,9 +61,7 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "DAT Output",
-                    "expression": "str(op(\"renderpick1\"))",
-                    "mode": "EXPRESSION"
+                    "value": "DAT Output"
                 },
                 "resolution": {
                     "value": {
@@ -93,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RenderPick DAT \u2014 Basic\n\nMouse position drives a physics raycast from the camera.\nOutputs hit info: object name, position, normal, distance.\nSet render_comp to a COMP with Camera3D for actual picking.\nuse_input=true reads UV from the connected CHOP.",
+            "text": "Mouse In CHOP — Basic\n\nMouse position, delta, buttons, and scroll as CHOP channels.",
             "position": [
                 -100.0,
                 -120.0

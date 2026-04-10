@@ -136,7 +136,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ToggleUI \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Toggle UI — Advanced\n\nOn/off toggle (CheckButton). Outputs 0 or 1 as CHOP channel.\nCombined configuration: label=Enable.",
             "position": [
                 -100.0,
                 -100.0

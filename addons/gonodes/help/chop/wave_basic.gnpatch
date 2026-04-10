@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "channels": {
-                    "value": 3,
-                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 3
                 },
                 "length": {
                     "value": 100
@@ -101,14 +97,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Wave CHOP \u2014 Basic\n\n3-channel sine wave, 100 samples each.\nPhase step of 0.33 offsets each channel by ~120\u00b0\nto create evenly distributed wave patterns.",
+            "text": "Wave CHOP — Basic\n\nMulti-channel, multi-sample waveform generator.\nUsing: waveform=0, channels=3, length=100, frequency=2.0.",
             "position": [
                 -100.0,
                 -150.0
             ],
             "size": [
-                400.0,
-                110.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

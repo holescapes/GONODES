@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
                     "value": 0.25,
@@ -117,7 +115,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Feedback CHOP \u2014 Reset Control\n\nDemonstrates the reset parameter on FeedbackCHOP.\nA slow wave accumulates through feedback; toggle reset to clear the buffer.\nMath reduces gain to prevent runaway accumulation.",
+            "text": "Feedback CHOP — Reset Control\n\nDemonstrates the reset parameter on FeedbackCHOP.\nA slow wave accumulates through feedback; toggle reset to clear the buffer.\nMath reduces gain to prevent runaway accumulation.",
             "position": [
                 50.0,
                 -60.0

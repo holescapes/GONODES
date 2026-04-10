@@ -125,7 +125,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DATtoSOP \u2014 Parameters\n\nShowcases: mode, max_rows.",
+            "text": "Table DAT — Mode\n\nManual editable data table (CSV-style).",
             "position": [
                 -100.0,
                 -100.0

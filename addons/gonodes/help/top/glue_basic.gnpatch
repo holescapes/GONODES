@@ -39,14 +39,10 @@
                     }
                 },
                 "layout": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "padding": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "background": {
                     "value": {
@@ -97,7 +93,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GlueTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Glue TOP — Basic\n\nPack multiple textures into a grid atlas layout.\nUsing: layout=0, padding=0.",
             "position": [
                 -100.0,
                 -100.0

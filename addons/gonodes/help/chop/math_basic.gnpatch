@@ -25,9 +25,7 @@
                     "value": 2
                 },
                 "operand": {
-                    "value": 2.0,
-                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 }
             }
         },
@@ -91,14 +89,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Math CHOP \u2014 Basic\n\nMultiplies LFO output by 2x.\nDemonstrates single-operation math processing.",
+            "text": "Math CHOP — Basic\n\nArithmetic operations (Add, Subtract, Multiply, Divide, Abs, Sin, Cos, Pow).\nUsing: operation=2, operand=2.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

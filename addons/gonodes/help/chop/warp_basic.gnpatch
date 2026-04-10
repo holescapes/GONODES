@@ -78,7 +78,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Warp CHOP \u2014 Basic\n\nTime-warps ramp signal.\nNon-linear time remapping.",
+            "text": "Warp CHOP — Basic\n\nTime-warp / retime channel data with speed, offset, or warp curve.",
             "position": [
                 -100.0,
                 -100.0

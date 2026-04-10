@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -88,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Trail CHOP \u2014 Basic\n\nShows LFO history over 3 seconds.\nScrolling waveform display.",
+            "text": "Trail CHOP — Basic\n\nScrolling buffer recording input values over time (oscilloscope).\nUsing: length=3.0.",
             "position": [
                 -100.0,
                 -100.0

@@ -116,14 +116,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FontSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Font SOP — Advanced\n\nGenerate 3D text mesh using Godot TextMesh.\nCombined configuration: font_size=2.0, depth=0.2, horizontal_align=2.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

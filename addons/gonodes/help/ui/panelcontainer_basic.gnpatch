@@ -58,14 +58,10 @@
                     }
                 },
                 "corner_radius": {
-                    "value": 4,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 },
                 "padding": {
-                    "value": 8,
-                    "expression": "(8 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 8
                 },
                 "min_size": {
                     "value": {
@@ -148,7 +144,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PanelContainerUI \u2014 Basic\n\nDefault settings.",
+            "text": "Button UI — Basic\n\nPush button widget. Outputs press/release state as CHOP channel.\nUsing: label=Button A.",
             "position": [
                 -100.0,
                 -100.0

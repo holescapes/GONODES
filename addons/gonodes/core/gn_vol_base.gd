@@ -71,9 +71,10 @@ var _viewer_slice_pos: float = 0.5
 var _viewer_show_mip: bool = false
 
 
-func render_for_viewer(viewer) -> void:
-	if cached_output is GNVolumeData:
-		var vd: GNVolumeData = cached_output as GNVolumeData
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	var data: GNData = get_output_data(port_index)
+	if data is GNVolumeData:
+		var vd: GNVolumeData = data as GNVolumeData
 		if vd.has_volume():
 			var size: Vector2i = viewer.get_content_size()
 			var img := GNViewerRenderHelpers.render_vol_composite(

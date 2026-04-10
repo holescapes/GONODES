@@ -13,9 +13,7 @@
                     "value": "[b]Bold Title[/b]\n[i]Italic[/i] and [color=red]colored[/color] text.\n[url]Clickable link[/url]"
                 },
                 "bbcode": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "font_size": {
                     "value": 18
@@ -61,7 +59,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RichTextLabel UI \u00e2\u20ac\u201d Basic\n\nBBCode rich text label. Supports bold, italic, color, links.\nOptional DAT input overrides parameter text.\nRead-only display widget (no interactive state).",
+            "text": "RichTextLabel UI â€” Basic\n\nBBCode rich text label. Supports bold, italic, color, links.\nOptional DAT input overrides parameter text.\nRead-only display widget (no interactive state).",
             "position": [
                 -100.0,
                 -100.0

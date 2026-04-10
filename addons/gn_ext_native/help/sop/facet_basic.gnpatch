@@ -2,41 +2,30 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "sphere1": {
-            "type": "SphereSOP",
+        "src_grid": {
+            "type": "GridSOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
                 "rows": {
-                    "value": 12,
-                    "expression": "(12 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 10
                 },
-                "columns": {
-                    "value": 12,
-                    "expression": "(12 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                "cols": {
+                    "value": 10
                 }
             }
         },
-        "facet1": {
-            "type": "FacetSOPNative",
+        "focus1": {
+            "type": "FacetSOP",
             "position": [
                 450,
                 100
             ],
-            "parameters": {
-                "mode": {
-                    "value": 0
-                },
-                "recompute_normals": {
-                    "value": true
-                }
-            }
+            "parameters": {}
         },
-        "geo1": {
+        "geo_view": {
             "type": "GeometryCOMP",
             "position": [
                 800,
@@ -44,7 +33,7 @@
             ],
             "parameters": {}
         },
-        "cam1": {
+        "cam_view": {
             "type": "CameraCOMP",
             "position": [
                 800,
@@ -55,17 +44,17 @@
                     "value": 0
                 },
                 "ty": {
-                    "value": 0
+                    "value": 0.5
                 },
                 "tz": {
-                    "value": 4
+                    "value": 3
                 }
             }
         },
-        "render1": {
+        "render_view": {
             "type": "RenderTOP",
             "position": [
-                1150,
+                1100,
                 100
             ],
             "parameters": {
@@ -81,7 +70,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1500,
+                1450,
                 100
             ],
             "parameters": {
@@ -100,31 +89,31 @@
     },
     "connections": [
         {
-            "from": "sphere1",
+            "from": "src_grid",
             "from_port": 0,
-            "to": "facet1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "facet1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "geo1",
+            "to": "geo_view",
             "to_port": 0
         },
         {
-            "from": "geo1",
+            "from": "geo_view",
             "from_port": 0,
-            "to": "render1",
+            "to": "render_view",
             "to_port": 0
         },
         {
-            "from": "cam1",
+            "from": "cam_view",
             "from_port": 0,
-            "to": "render1",
+            "to": "render_view",
             "to_port": 1
         },
         {
-            "from": "render1",
+            "from": "render_view",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -134,14 +123,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Facet SOP (Native) \u00e2\u20ac\u201d Unique Points (Flat Shading)\n\nExpands shared vertices so every face gets its own\npoints and flat normals, giving a faceted look.\nSwitch mode to 'Consolidate' to merge nearby points.",
+            "text": "Facet SOP — Basic\n\nUnique points (flat shading) or consolidate close vertices.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

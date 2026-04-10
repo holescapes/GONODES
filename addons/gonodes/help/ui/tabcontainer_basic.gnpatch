@@ -25,9 +25,7 @@
                     "value": "Param"
                 },
                 "default_val": {
-                    "value": 0.5,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 }
             }
         },
@@ -148,7 +146,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TabContainerUI \u2014 Basic\n\nDefault settings.",
+            "text": "Button UI — Basic\n\nPush button widget. Outputs press/release state as CHOP channel.\nUsing: label=Button A.",
             "position": [
                 -100.0,
                 -100.0

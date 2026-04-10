@@ -19,9 +19,7 @@
                     }
                 },
                 "point_size": {
-                    "value": 8.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 8.0
                 }
             }
         },
@@ -131,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Point Sprite MAT \u2014 Vertex Points\n\nRenders each vertex as a point sprite.\nOptional texture applied via POINT_COORD.",
+            "text": "Point Sprite MAT — Vertex Points\n\nRenders each vertex as a point sprite.\nOptional texture applied via POINT_COORD.",
             "position": [
                 -100.0,
                 -150.0

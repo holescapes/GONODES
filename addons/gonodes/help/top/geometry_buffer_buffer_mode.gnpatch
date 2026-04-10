@@ -55,14 +55,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GeometryBufferTOP \u2014 Parameters\n\nShowcases: buffer_mode.",
+            "text": "Geometry Buffer TOP — Mode\n\nRender 3D scene with debug buffer output: Color, Unshaded, Normal Buffer, or Wireframe.\nShowcasing: buffer_mode=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

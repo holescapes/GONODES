@@ -122,7 +122,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FileOutSOP \u2014 Parameters\n\nShowcases: write.",
+            "text": "File Out SOP — Write\n\nExport SOP geometry to Wavefront OBJ file.\nShowcasing: write=True.",
             "position": [
                 -100.0,
                 -100.0

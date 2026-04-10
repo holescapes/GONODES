@@ -122,7 +122,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SubdivideSOP \u2014 Parameters\n\nShowcases: iterations.",
+            "text": "Subdivide SOP — Variation\n\nMidpoint triangle subdivision (1-4 iterations).\nShowcasing: iterations=0.",
             "position": [
                 -100.0,
                 -100.0

@@ -94,7 +94,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CHOPDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "CHOP DAT — Advanced\n\nConvert CHOP channels to a DAT table.\nCombined configuration: layout=2.",
             "position": [
                 -100.0,
                 -100.0

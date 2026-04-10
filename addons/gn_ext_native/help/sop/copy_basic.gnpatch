@@ -2,65 +2,30 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "box1": {
-            "type": "BoxSOP",
+        "src_grid": {
+            "type": "GridSOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "sizex": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "sizey": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "sizez": {
-                    "value": 0.5
-                }
-            }
-        },
-        "sphere1": {
-            "type": "SphereSOP",
-            "position": [
-                100,
-                300
-            ],
-            "parameters": {
                 "rows": {
-                    "value": 8
+                    "value": 10
                 },
-                "columns": {
-                    "value": 8
-                },
-                "radius": {
-                    "value": 2.0
+                "cols": {
+                    "value": 10
                 }
             }
         },
-        "copy1": {
-            "type": "CopySOPNative",
+        "focus1": {
+            "type": "CopySOP",
             "position": [
                 450,
                 100
             ],
-            "parameters": {
-                "align_to_normal": {
-                    "value": true
-                },
-                "scale": {
-                    "value": 1.0
-                },
-                "use_point_scale": {
-                    "value": false
-                }
-            }
+            "parameters": {}
         },
-        "geo1": {
+        "geo_view": {
             "type": "GeometryCOMP",
             "position": [
                 800,
@@ -68,7 +33,7 @@
             ],
             "parameters": {}
         },
-        "cam1": {
+        "cam_view": {
             "type": "CameraCOMP",
             "position": [
                 800,
@@ -79,17 +44,17 @@
                     "value": 0
                 },
                 "ty": {
-                    "value": 1
+                    "value": 0.5
                 },
                 "tz": {
-                    "value": 6
+                    "value": 3
                 }
             }
         },
-        "render1": {
+        "render_view": {
             "type": "RenderTOP",
             "position": [
-                1150,
+                1100,
                 100
             ],
             "parameters": {
@@ -105,7 +70,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1500,
+                1450,
                 100
             ],
             "parameters": {
@@ -124,37 +89,31 @@
     },
     "connections": [
         {
-            "from": "box1",
+            "from": "src_grid",
             "from_port": 0,
-            "to": "copy1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "sphere1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "copy1",
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
             "to_port": 1
         },
         {
-            "from": "copy1",
-            "from_port": 0,
-            "to": "geo1",
-            "to_port": 0
-        },
-        {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
+            "from": "render_view",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -164,14 +123,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Copy SOP (Native) \u00e2\u20ac\u201d Boxes on Sphere Vertices\n\nSmall boxes instanced onto each vertex of a sphere,\naligned to sphere normals. Toggle 'align_to_normal'\noff for axis-aligned copies.",
+            "text": "Copy SOP — Basic\n\nInstance template geometry onto each point of the target mesh.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

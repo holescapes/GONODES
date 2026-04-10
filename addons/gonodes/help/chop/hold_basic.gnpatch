@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Hold CHOP \u2014 Basic\n\nSamples and holds LFO value on trigger.",
+            "text": "Hold CHOP — Basic\n\nSample-and-hold — captures values on trigger.",
             "position": [
                 -100.0,
                 -100.0

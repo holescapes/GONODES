@@ -29,9 +29,7 @@
                     "value": 0
                 },
                 "max_pixels": {
-                    "value": 100,
-                    "expression": "(100 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 100
                 }
             }
         },
@@ -98,7 +96,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TOPtoDAT \u2014 Basic\n\nDefault settings.",
+            "text": "TO Pto DAT — Basic\n\nConvert TOP texture info or pixel data to a DAT table.\nUsing: mode=0, max_pixels=100.",
             "position": [
                 -100.0,
                 -100.0

@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "HSVAdjustTOP \u2014 Parameters\n\nShowcases: hue_offset, saturation, value.",
+            "text": "HSV Adjust TOP — Offset\n\nHue offset, saturation, and value (brightness) adjustment.\nShowcasing: hue_offset=0.5, saturation=0.5, value=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

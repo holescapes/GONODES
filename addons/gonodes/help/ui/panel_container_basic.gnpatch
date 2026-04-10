@@ -43,14 +43,10 @@
                     }
                 },
                 "corner_radius": {
-                    "value": 8,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 8
                 },
                 "padding": {
-                    "value": 12,
-                    "expression": "(12 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 12
                 }
             }
         },
@@ -98,7 +94,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PanelContainer UI \u00e2\u20ac\u201d Basic\n\nStyled panel wrapper with background color,\nrounded corners, and internal padding.\nNests child UI widgets inside a visual frame.",
+            "text": "PanelContainer UI â€” Basic\n\nStyled panel wrapper with background color,\nrounded corners, and internal padding.\nNests child UI widgets inside a visual frame.",
             "position": [
                 -100.0,
                 -100.0

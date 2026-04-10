@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 2,
-                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "frequency": {
                     "value": 1.0,
@@ -114,7 +112,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Logic CHOP \u2014 OR\n\nLogical OR of two square waves.\nOutput is 1 when either input > 0.",
+            "text": "Logic CHOP — OR\n\nLogical OR of two square waves.\nOutput is 1 when either input > 0.",
             "position": [
                 -100.0,
                 -100.0

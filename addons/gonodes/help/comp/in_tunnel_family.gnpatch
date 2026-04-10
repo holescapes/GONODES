@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "InTunnel \u2014 Parameters\n\nShowcases: index, family, label.",
+            "text": "In Tunnel — Family\n\nInput tunnel — bridges data from parent sub-network into inner graph.\nShowcasing: index=0, family=1.",
             "position": [
                 -100.0,
                 -100.0

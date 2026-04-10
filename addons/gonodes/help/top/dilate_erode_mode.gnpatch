@@ -73,14 +73,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DilateErodeTOP \u2014 Parameters\n\nShowcases: mode, radius.",
+            "text": "Dilate Erode TOP — Mode\n\nMorphological dilate (expand) or erode (shrink) with circular footprint.\nShowcasing: mode=1, radius=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

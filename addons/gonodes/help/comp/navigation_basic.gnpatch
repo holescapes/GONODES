@@ -1,0 +1,265 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "NavigationCOMP — Basic. Sphere agent navigates to a target position on a default flat floor.",
+    "nodes": {
+        "sphere_agent": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.4
+                },
+                "segments": {
+                    "value": 12
+                }
+            }
+        },
+        "geo_agent": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "nav1": {
+            "type": "NavigationCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "ty": {
+                    "value": 0.4
+                },
+                "target_x": {
+                    "value": 8.0
+                },
+                "target_y": {
+                    "value": 0.0
+                },
+                "target_z": {
+                    "value": -6.0
+                },
+                "speed": {
+                    "value": 3.0
+                },
+                "path_tolerance": {
+                    "value": 0.5
+                }
+            }
+        },
+        "floor_grid": {
+            "type": "GridSOP",
+            "position": [
+                0,
+                300
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 30.0
+                },
+                "size_z": {
+                    "value": 30.0
+                },
+                "cols": {
+                    "value": 2
+                },
+                "rows": {
+                    "value": 2
+                }
+            }
+        },
+        "geo_floor": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                300
+            ],
+            "parameters": {}
+        },
+        "static_floor": {
+            "type": "StaticBodyCOMP",
+            "position": [
+                600,
+                300
+            ],
+            "parameters": {}
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                500
+            ],
+            "parameters": {
+                "text": {
+                    "value": "NavigationCOMP — Basic\n\nSphere agent navigates toward (8, 0, -6).\nUses a default flat nav mesh (no floor_in).\nSpeed = 3 units/sec, tolerance = 0.5.\n\nCharacterBody3D + NavigationAgent3D\nhandles pathfinding and movement."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 15.0
+                },
+                "tz": {
+                    "value": 15.0
+                },
+                "use_look_at": {
+                    "value": true
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere_agent",
+            "from_port": 0,
+            "to": "geo_agent",
+            "to_port": 0
+        },
+        {
+            "from": "geo_agent",
+            "from_port": 0,
+            "to": "nav1",
+            "to_port": 0
+        },
+        {
+            "from": "floor_grid",
+            "from_port": 0,
+            "to": "geo_floor",
+            "to_port": 0
+        },
+        {
+            "from": "geo_floor",
+            "from_port": 0,
+            "to": "static_floor",
+            "to_port": 0
+        },
+        {
+            "from": "nav1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "static_floor",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 3
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Navigation COMP — Basic\n\nAI pathfinding — navigate a COMP toward a target using NavigationServer3D.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

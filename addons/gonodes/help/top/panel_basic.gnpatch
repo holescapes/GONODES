@@ -13,14 +13,10 @@
                     "value": "Brightness"
                 },
                 "min_value": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "max_value": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "default_value": {
                     "value": 0.5
@@ -105,7 +101,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Panel TOP \u2014 Render to Texture\n\nPanelTOP collects UI widgets into a SubViewport\nand renders them as a non-interactive TOP texture.\nUseful for recording, screenshots, or feeding UI\ninto shader effects. For interactive panels, wire\nwidgets to WindowOUT panel port via ContainerUI.",
+            "text": "Panel TOP — Render to Texture\n\nPanelTOP collects UI widgets into a SubViewport\nand renders them as a non-interactive TOP texture.\nUseful for recording, screenshots, or feeding UI\ninto shader effects. For interactive panels, wire\nwidgets to WindowOUT panel port via ContainerUI.",
             "position": [
                 -100.0,
                 -150.0

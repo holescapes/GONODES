@@ -19,9 +19,7 @@
                     }
                 },
                 "alpha": {
-                    "value": 1.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -131,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Wireframe MAT \u2014 Edge Rendering\n\nRenders geometry as wireframe lines.\nUses Godot's spatial wireframe render mode.",
+            "text": "Wireframe MAT — Edge Rendering\n\nRenders geometry as wireframe lines.\nUses Godot's spatial wireframe render mode.",
             "position": [
                 -100.0,
                 -150.0

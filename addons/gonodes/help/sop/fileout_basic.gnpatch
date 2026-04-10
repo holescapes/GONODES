@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 10,
-                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 10
                 },
                 "cols": {
-                    "value": 10,
-                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 10
                 }
             }
         },
@@ -131,7 +127,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FileOutSOP \u2014 Basic\n\nDefault settings.",
+            "text": "File Out SOP — Basic\n\nExport SOP geometry to Wavefront OBJ file.\nUsing: write=False.",
             "position": [
                 -100.0,
                 -100.0

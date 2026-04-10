@@ -32,6 +32,43 @@ python scripts/verify_new_operator.py --counts    # Verify doc counts match
 - [ ] **Do NOT set `node_description` in the script** — descriptions live in the `.cfg` file
 - [ ] If the operator uses only a subset of its inputs depending on mode/parameter (like Switch), override `get_active_input_indices()` — see [CONTRIBUTING.md](CONTRIBUTING.md#active-input-indices--selective-upstream-cooking)
 - [ ] If the operator is a routing node (Switch-style), `_cook()` should return `cached_output` when the requested input is not yet available — this prevents a flash during the 1-frame expression-driven routing transition
+- [ ] **Multi-output operators:** If the node has 2+ output ports, structure `_cook()` as **shared core** (unconditional) plus **per-port guards** using `is_output_demanded(N)`. Split expensive per-port logic into separate helper methods and call them conditionally.
+
+  **Demand is detected from three sources** (not just wires):
+  1. Wire connections to active downstream nodes
+  2. Wireless Select operators (SelectCHOP, SelectTOP, etc.) referencing this node by name
+  3. Expression references (`chop()`, `top()`, `dat()`, etc.) in other nodes' parameters
+
+  No port is auto-demanded — each port is independently stamped by the cook
+  engine based on actual consumers.  The `_cook()` method decides which work
+  is shared (unconditional) and which is per-port (guarded).
+
+  **Pattern A — Independent post-processing** (e.g., OpenCV operators):
+  The shared detection always runs.  Overlay conversion and data extraction
+  are independent post-processing steps, each guarded:
+  ```gdscript
+  func _cook(inputs: Array[GNData]) -> GNData:
+      var out := _prepare_output()
+      _run_shared_detection(inputs)            # Shared core — always
+      if is_output_demanded(0):
+          _build_overlay(out)                  # Port 0 — only if demanded
+      if is_output_demanded(1):
+          _extract_tracking_data()             # Port 1 — only if demanded
+      return out
+  ```
+
+  **Pattern B — Directional dependency** (e.g., MovieFileInTOP):
+  Audio (port 1) depends on video decode, but video (port 0) doesn’t need
+  audio.  Video decode is the shared core; only audio capture is guarded:
+  ```gdscript
+  func _cook(inputs: Array[GNData]) -> GNData:
+      var result := _decode_video(inputs)      # Shared core (audio needs this)
+      if is_output_demanded(1):
+          _pull_audio()                        # Port 1 — only if demanded
+      return result
+  ```
+
+  Override `get_output_data(port_index)` to route each port to its cached data. See `MovieFileInTOP` (directional dependency) or any OpenCV IMG operator (independent post-processing) for canonical patterns.
 
 ### 2. Register in Config
 

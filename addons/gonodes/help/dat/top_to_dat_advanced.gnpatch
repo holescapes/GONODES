@@ -98,14 +98,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TOPtoDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "TO Pto DAT — Advanced\n\nConvert TOP texture info or pixel data to a DAT table.\nCombined configuration: mode=2, max_pixels=102.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -78,7 +78,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Delete CHOP \u2014 Basic\n\nDeletes selected channels from pattern.",
+            "text": "Delete CHOP — Basic\n\nDelete channels by name pattern, index, or keep-only mode.",
             "position": [
                 -100.0,
                 -100.0

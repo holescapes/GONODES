@@ -80,14 +80,10 @@
                     ]
                 },
                 "ambient_energy": {
-                    "value": 0.2,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.2
                 },
                 "tonemap_mode": {
-                    "value": 3,
-                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 3
                 },
                 "tonemap_exposure": {
                     "value": 1.2
@@ -203,7 +199,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Environment COMP \u2014 Post-Processing Control\n\nSeparates environment/post-processing from the RenderTOP.\nControls background, ambient, tonemap, glow, SSAO, SSIL, SSR,\nadjustments, and volumetric fog.\n\nConnect to any RenderTOP COMP input.",
+            "text": "Environment COMP — Post-Processing Control\n\nSeparates environment/post-processing from the RenderTOP.\nControls background, ambient, tonemap, glow, SSAO, SSIL, SSR,\nadjustments, and volumetric fog.\n\nConnect to any RenderTOP COMP input.",
             "position": [
                 -400.0,
                 -150.0

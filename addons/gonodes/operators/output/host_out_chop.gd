@@ -43,6 +43,13 @@ func _get_host_channels() -> Dictionary:
 	return _output_channels
 
 
+## Called by GNEmbeddedHost._collect_outputs() for direct zero-copy path.
+## Returns channel arrays without any JSON serialization or env-var encoding.
+## Each value is the raw PackedFloat32Array — frame-scoped lifetime.
+func _get_host_channels_direct() -> Dictionary:
+	return _output_channels
+
+
 func update_preview_control(control: Control) -> void:
 	if control is Label:
 		if _output_channels.is_empty():

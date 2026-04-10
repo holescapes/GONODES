@@ -92,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Join CHOP \u2014 Basic\n\nJoins two ramp segments end-to-end.",
+            "text": "Join CHOP — Basic\n\nConcatenate samples from multiple inputs with optional crossfade.",
             "position": [
                 -100.0,
                 -100.0

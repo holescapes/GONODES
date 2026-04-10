@@ -10,17 +10,13 @@
             ],
             "parameters": {
                 "count": {
-                    "value": 4,
-                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 },
                 "name0": {
                     "value": "red"
                 },
                 "value0": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "name1": {
                     "value": "green"
@@ -96,14 +92,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Channel CHOP \u2014 Basic\n\nFour named constant channels (red, green, blue, alpha).\nUse expression mode on the value parameters to create\ncomputed channels, e.g. value0 = sin(time).",
+            "text": "Channel CHOP — Basic\n\nNamed channels from parameter values (expression-friendly).\nUsing: count=4, name0=red, value0=1.0, name1=green.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                480.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -232,7 +232,7 @@ func destroy_scene_node() -> void:
 	_scene_node = null
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _scene_node != null and _scene_node is MeshInstance3D:
 		var mi: MeshInstance3D = _scene_node as MeshInstance3D
 		if mi.mesh != null and mi.mesh is ArrayMesh:

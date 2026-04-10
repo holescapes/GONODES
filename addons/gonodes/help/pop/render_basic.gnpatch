@@ -110,7 +110,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RenderPOP \u2014 Basic\n\nDefault settings.",
+            "text": "Render POP — Basic\n\nRender particle point cloud into a COMP for 3D viewport.",
             "position": [
                 -100.0,
                 -100.0

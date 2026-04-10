@@ -86,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TOP to CHOP \u2014 Basic\n\nConverts noise texture to channel data.\nPixel values become samples.",
+            "text": "Noise TOP — Basic\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.",
             "position": [
                 -100.0,
                 -100.0

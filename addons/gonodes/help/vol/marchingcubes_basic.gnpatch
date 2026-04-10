@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "threshold": {
-                    "value": 0.5,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "smooth_normals": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -121,7 +117,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MarchingCubesVOL \u2014 Basic\n\nDefault settings.",
+            "text": "Noise VOL — Basic\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).",
             "position": [
                 -100.0,
                 -100.0

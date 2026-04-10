@@ -87,14 +87,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MidiInDAT \u2014 Parameters\n\nShowcases: active, device, channel_filter.",
+            "text": "Midi In DAT — Active\n\nLog raw MIDI messages (note, CC, pitch bend) into a DAT table.\nShowcasing: active=True, device=0, channel_filter=0, max_rows=99.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

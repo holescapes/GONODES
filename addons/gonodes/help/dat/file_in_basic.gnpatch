@@ -16,9 +16,7 @@
                     "value": 0
                 },
                 "has_header": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -82,7 +80,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "File In DAT \u2014 Read from Disk\n\nLoads CSV/TSV/JSON/text files.\nAuto-detects format from extension.",
+            "text": "File In DAT — Read from Disk\n\nLoads CSV/TSV/JSON/text files.\nAuto-detects format from extension.",
             "position": [
                 -100.0,
                 -150.0

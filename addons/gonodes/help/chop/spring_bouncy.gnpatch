@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 2,
-                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "frequency": {
                     "value": 0.5,
@@ -96,7 +94,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Spring CHOP \u2014 Bouncy\n\nLow damping + high stiffness = bouncy.\nSquare wave triggers oscillations.",
+            "text": "Spring CHOP — Bouncy\n\nLow damping + high stiffness = bouncy.\nSquare wave triggers oscillations.",
             "position": [
                 -100.0,
                 -100.0

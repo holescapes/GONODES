@@ -20,14 +20,10 @@
                     "value": 0
                 },
                 "scale": {
-                    "value": 4.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "offset_x": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.2",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "offset_y": {
                     "value": 0.0
@@ -92,14 +88,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseIMG \u2014 Basic\n\nDefault settings.",
+            "text": "Noise IMG — Basic\n\nCPU procedural noise image (value noise, white noise).\nUsing: type=0, scale=4.0, offset_x=0.0, offset_y=0.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

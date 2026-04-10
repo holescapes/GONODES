@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextTOP — Advanced\n\nMore complex configuration.",
+            "text": "Text TOP — Advanced\n\nRenders text to a texture via a Label in a SubViewport.\nCombined configuration: font_size=50, align_h=2, align_v=2, word_wrap=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

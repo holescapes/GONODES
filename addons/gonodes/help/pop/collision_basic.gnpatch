@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "ground_y": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "bounce": {
-                    "value": 0.3,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.3
                 },
                 "friction": {
                     "value": 0.1
@@ -141,14 +137,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CollisionPOP \u2014 Basic\n\nDefault settings.",
+            "text": "Collision POP — Basic\n\nGround plane and bounding box collision for particles.\nUsing: ground_y=0.0, bounce=0.3, friction=0.1, kill_below=-1000.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

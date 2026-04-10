@@ -47,7 +47,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OscOUT \u2014 Parameters\n\nShowcases: host, port, active.",
+            "text": "Noise CHOP — Active\n\nSmooth procedural noise channels with roughness control.\nShowcasing: amplitude=1.0.",
             "position": [
                 -100.0,
                 -100.0

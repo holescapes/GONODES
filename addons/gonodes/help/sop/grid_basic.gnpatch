@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "size_x": {
-                    "value": 4.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "size_z": {
-                    "value": 4.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "rows": {
                     "value": 16
@@ -122,7 +118,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Grid SOP \u2014 Plane\n\n4\u00d74 unit grid with 16\u00d716 subdivisions.\nHigh subdivision makes it ideal for noise deformation.\nOrientation Y-up (XZ plane).",
+            "text": "Grid SOP — Plane\n\n4×4 unit grid with 16×16 subdivisions.\nHigh subdivision makes it ideal for noise deformation.\nOrientation Y-up (XZ plane).",
             "position": [
                 -100.0,
                 -150.0

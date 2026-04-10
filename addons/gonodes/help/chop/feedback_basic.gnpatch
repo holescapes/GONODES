@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Feedback CHOP \u2014 Basic\n\nAccesses previous frame's CHOP values.\nCreates temporal recursion.",
+            "text": "Feedback CHOP — Basic\n\nPrevious-frame channel data for feedback loops.",
             "position": [
                 -100.0,
                 -100.0

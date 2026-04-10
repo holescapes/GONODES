@@ -91,14 +91,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RaymarchVOL \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Raymarch VOL — Advanced\n\nRender volume as density cloud via GPU raymarching into a TOP texture.\nCombined configuration: width=514, height=514, max_steps=130, step_size=0.02.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

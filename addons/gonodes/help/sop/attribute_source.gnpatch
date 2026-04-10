@@ -18,9 +18,7 @@
             ],
             "parameters": {
                 "source": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "value": {
                     "value": 0.5,
@@ -136,14 +134,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AttributeSOP \u2014 Parameters\n\nShowcases: name, source, value.",
+            "text": "Attribute SOP — Source\n\nCreate or modify per-vertex point attributes from expressions or presets.\nShowcasing: source=1, value=0.5, seed=41, rand_min=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -58,9 +58,7 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "DAT Output",
-                    "expression": "str(op(\"panelexec1\"))",
-                    "mode": "EXPRESSION"
+                    "value": "DAT Output"
                 },
                 "resolution": {
                     "value": {
@@ -90,7 +88,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PanelExecute DAT \u2014 Basic\n\nLogs UI events as DAT table rows. Mouse input provides\nposition/button state. Events include press, release,\nmove (if log_hover=true). Set panel_path to a UI COMP\nfor panel-specific events. Use 'clear' pulse to reset.",
+            "text": "Mouse In CHOP — Basic\n\nMouse position, delta, buttons, and scroll as CHOP channels.",
             "position": [
                 -100.0,
                 -120.0

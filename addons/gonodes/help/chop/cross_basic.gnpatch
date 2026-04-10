@@ -22,14 +22,10 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 2,
-                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "frequency": {
-                    "value": 3.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 3.0
                 }
             }
         },
@@ -111,7 +107,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Cross CHOP \u2014 Basic\n\n50% crossfade between sine and square wave.",
+            "text": "Cross CHOP — Basic\n\nLinear crossfade between two channel sets.\nUsing: cross=0.5.",
             "position": [
                 -100.0,
                 -100.0

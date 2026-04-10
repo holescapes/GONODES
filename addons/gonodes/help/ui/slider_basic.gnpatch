@@ -13,14 +13,10 @@
                     "value": "Mix"
                 },
                 "min_value": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "max_value": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "default_value": {
                     "value": 0.5
@@ -62,7 +58,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Slider UI \u00e2\u20ac\u201d Basic\n\nHorizontal/Vertical slider widget.\nInteractive slider. Wire to WindowOUT panel port\nfor native input. Use PanelTOP for CHOP state readout.",
+            "text": "Slider UI â€” Basic\n\nHorizontal/Vertical slider widget.\nInteractive slider. Wire to WindowOUT panel port\nfor native input. Use PanelTOP for CHOP state readout.",
             "position": [
                 -100.0,
                 -100.0

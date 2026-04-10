@@ -13,14 +13,10 @@
                     "value": false
                 },
                 "buffer_size": {
-                    "value": 1024,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1024
                 },
                 "stereo": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "gain": {
                     "value": 1.0
@@ -95,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Audio In CHOP \u2014 Microphone\n\nCaptures microphone input.\nSet 'active' to true to start recording.\nOutputs audio waveform samples as channels.",
+            "text": "Audio In CHOP — Microphone\n\nCaptures microphone input.\nSet 'active' to true to start recording.\nOutputs audio waveform samples as channels.",
             "position": [
                 -100.0,
                 -150.0

@@ -145,7 +145,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MergeCOMP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Sphere SOP — Advanced\n\nSphere or hemisphere mesh.",
             "position": [
                 -100.0,
                 -100.0

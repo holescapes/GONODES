@@ -145,14 +145,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ContainerUI \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Container UI — Advanced\n\nLayout container for nesting and arranging child UI widgets.\nCombined configuration: layout=2, spacing=6, padding=6, columns=4.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

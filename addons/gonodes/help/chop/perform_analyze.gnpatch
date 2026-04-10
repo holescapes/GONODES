@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "function": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Perform CHOP \u2014 Average FPS\n\nRunning average of performance metrics.\nSmooths out per-frame noise.",
+            "text": "Perform CHOP — Average FPS\n\nRunning average of performance metrics.\nSmooths out per-frame noise.",
             "position": [
                 -100.0,
                 -100.0

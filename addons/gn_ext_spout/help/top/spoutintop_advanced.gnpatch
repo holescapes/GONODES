@@ -50,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SpoutInTOP — Advanced\n\nMore complex configuration.\nRequires gn_ext_spout extension.",
+            "text": "Spout In TOP — Advanced\n\nReceive a shared GPU texture from another Spout sender application.",
             "position": [
                 -100.0,
                 -100.0

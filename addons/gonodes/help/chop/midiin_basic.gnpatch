@@ -16,14 +16,10 @@
                     "value": -1
                 },
                 "channel_filter": {
-                    "value": -1,
-                    "expression": "sin(time * 2.0) * 0.2",
-                    "mode": "EXPRESSION"
+                    "value": -1
                 },
                 "normalize_velocity": {
-                    "value": true,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -95,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MIDI In CHOP \u2014 Input\n\nReceives MIDI data from all devices.\nVelocities are normalized to 0..1.\nEach note/CC becomes a named channel.",
+            "text": "MIDI In CHOP — Input\n\nReceives MIDI data from all devices.\nVelocities are normalized to 0..1.\nEach note/CC becomes a named channel.",
             "position": [
                 -100.0,
                 -150.0

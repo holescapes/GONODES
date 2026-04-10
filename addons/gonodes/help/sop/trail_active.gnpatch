@@ -125,7 +125,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TrailSOP \u2014 Parameters\n\nShowcases: length, active.",
+            "text": "Trail SOP — Active\n\nRecord centroid over time as a line strip trail.\nShowcasing: length=59, active=True.",
             "position": [
                 -100.0,
                 -100.0

@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Slope CHOP \u2014 Basic\n\nComputes rate of change of LFO.\nSine derivative = cosine.",
+            "text": "Slope CHOP — Basic\n\n1st/2nd derivative (rate-of-change) of input channels — velocity, acceleration.",
             "position": [
                 -100.0,
                 -100.0

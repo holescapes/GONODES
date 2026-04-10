@@ -90,14 +90,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "HistogramIMG \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Histogram IMG — Advanced\n\nCPU histogram analyser — bins R/G/B/Luma intensities and draws a chart image.\nCombined configuration: num_bins=258, show_rgb=False, show_luma=False, smoothing=1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

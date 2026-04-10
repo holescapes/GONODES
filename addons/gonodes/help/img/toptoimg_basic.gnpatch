@@ -78,7 +78,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TOPtoIMG \u2014 Basic\n\nDefault settings.",
+            "text": "Noise TOP — Basic\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.",
             "position": [
                 -100.0,
                 -100.0

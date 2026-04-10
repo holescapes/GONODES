@@ -13,17 +13,13 @@
                     "value": "[b]Hello[/b] World"
                 },
                 "bbcode": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "font_size": {
                     "value": 16
                 },
                 "fit_content": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "scroll_active": {
                     "value": false
@@ -108,14 +104,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RichTextLabelUI \u2014 Basic\n\nDefault settings.",
+            "text": "Rich Text Label UI — Basic\n\nBBCode rich text label. Optional DAT input for content.\nUsing: text=[b]Hello[/b] World, bbcode=True, font_size=16, fit_content=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

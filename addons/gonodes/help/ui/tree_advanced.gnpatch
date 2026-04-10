@@ -160,14 +160,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TreeUI \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Tree UI — Advanced\n\nTree view built from DAT table data with parent/child relationships.\nCombined configuration: hide_root=False, hide_folding=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

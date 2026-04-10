@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "stretch_mode": {
-                    "value": 4,
-                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 },
                 "min_size": {
                     "value": {
@@ -55,7 +53,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextureRect UI \u00e2\u20ac\u201d Basic\n\nDisplays a TOP texture inside a UI panel.\nConnect a TOP operator to the 'top' input.\nOptional MAT input applies a shader overlay.",
+            "text": "TextureRect UI â€” Basic\n\nDisplays a TOP texture inside a UI panel.\nConnect a TOP operator to the 'top' input.\nOptional MAT input applies a shader overlay.",
             "position": [
                 -100.0,
                 -100.0

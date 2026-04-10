@@ -151,14 +151,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TransformSOP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "text": "Transform SOP — Tx\n\nTranslate, rotate, and scale geometry with 6 transform orders.\nShowcasing: tx=0.5, ty=0.5, tz=0.5, rx=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -60,14 +60,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MultiBufferRenderTOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Multi Buffer Render TOP — Advanced\n\nMulti-buffer 3D render: outputs color, depth, and normal buffer textures.\nCombined configuration: depth_enabled=False, normal_enabled=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

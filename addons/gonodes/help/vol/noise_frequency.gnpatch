@@ -105,14 +105,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseVOL \u2014 Parameters\n\nShowcases: res_x, res_y, res_z.",
+            "text": "Noise VOL — Frequency\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).\nShowcasing: res_x=63, res_y=63, res_z=63, frequency=2.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

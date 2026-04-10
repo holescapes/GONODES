@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "max_columns": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "min_size": {
                     "value": {
@@ -55,7 +53,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ItemList UI \u00e2\u20ac\u201d Basic\n\nSelectable item list from DAT (first column = text).\nOptional TOP input provides icon for all items.\nState channel: selected (index, -1 for none).",
+            "text": "ItemList UI â€” Basic\n\nSelectable item list from DAT (first column = text).\nOptional TOP input provides icon for all items.\nState channel: selected (index, -1 for none).",
             "position": [
                 -100.0,
                 -100.0

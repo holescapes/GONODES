@@ -1445,6 +1445,31 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/area_comp.gd"
   },
+  "BoneCOMP": {
+    "class_name": "BoneCOMP",
+    "family": "COMP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "skeleton_in",
+        "type": "COMP"
+      },
+      {
+        "port": 1,
+        "name": "attach_in",
+        "type": "COMP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/bone_comp.gd"
+  },
   "CameraCOMP": {
     "class_name": "CameraCOMP",
     "family": "COMP",
@@ -1458,6 +1483,31 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/camera_comp.gd"
+  },
+  "ConstraintCOMP": {
+    "class_name": "ConstraintCOMP",
+    "family": "COMP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "comp_in",
+        "type": "COMP"
+      },
+      {
+        "port": 1,
+        "name": "target_in",
+        "type": "COMP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/constraint_comp.gd"
   },
   "EnginesCOMP": {
     "class_name": "EnginesCOMP",
@@ -1600,6 +1650,41 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/light_comp.gd"
   },
+  "LODCOMP": {
+    "class_name": "LODCOMP",
+    "family": "COMP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "lod0",
+        "type": "COMP"
+      },
+      {
+        "port": 1,
+        "name": "lod1",
+        "type": "COMP"
+      },
+      {
+        "port": 2,
+        "name": "lod2",
+        "type": "COMP"
+      },
+      {
+        "port": 3,
+        "name": "lod3",
+        "type": "COMP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/lod_comp.gd"
+  },
   "MergeCOMP": {
     "class_name": "MergeCOMP",
     "family": "COMP",
@@ -1613,6 +1698,31 @@
     ],
     "dynamic_inputs": "COMP",
     "file": "addons/gonodes/operators/comp/merge_comp.gd"
+  },
+  "NavigationCOMP": {
+    "class_name": "NavigationCOMP",
+    "family": "COMP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "agent_in",
+        "type": "COMP"
+      },
+      {
+        "port": 1,
+        "name": "floor_in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/navigation_comp.gd"
   },
   "NullCOMP": {
     "class_name": "NullCOMP",
@@ -1641,6 +1751,31 @@
     "outputs": [],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/out_tunnel.gd"
+  },
+  "PathCOMP": {
+    "class_name": "PathCOMP",
+    "family": "COMP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "comp_in",
+        "type": "COMP"
+      },
+      {
+        "port": 1,
+        "name": "path_in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/path_comp.gd"
   },
   "ReplicatorCOMP": {
     "class_name": "ReplicatorCOMP",
@@ -1695,13 +1830,7 @@
   "SelectCOMP": {
     "class_name": "SelectCOMP",
     "family": "COMP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "COMP"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
@@ -1771,8 +1900,33 @@
         "type": "COMP"
       }
     ],
-    "dynamic_inputs": null,
+    "dynamic_inputs": "COMP",
     "file": "addons/gonodes/operators/comp/switch_comp.gd"
+  },
+  "VehicleCOMP": {
+    "class_name": "VehicleCOMP",
+    "family": "COMP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "comp_in",
+        "type": "COMP"
+      },
+      {
+        "port": 1,
+        "name": "control_in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/vehicle_comp.gd"
   },
   "CallbackDAT": {
     "class_name": "CallbackDAT",
@@ -3057,6 +3211,34 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/output/host_out_dat.gd"
   },
+  "HostOutPOP": {
+    "class_name": "HostOutPOP",
+    "family": "OUT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "POP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/output/host_out_pop.gd"
+  },
+  "HostOutSOP": {
+    "class_name": "HostOutSOP",
+    "family": "OUT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/output/host_out_sop.gd"
+  },
   "HostOutTOP": {
     "class_name": "HostOutTOP",
     "family": "OUT",
@@ -3070,6 +3252,20 @@
     "outputs": [],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/output/host_out_top.gd"
+  },
+  "HostOutVOL": {
+    "class_name": "HostOutVOL",
+    "family": "OUT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "VOL"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/output/host_out_vol.gd"
   },
   "ImageSaveOUT": {
     "class_name": "ImageSaveOUT",
@@ -3292,6 +3488,20 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/pop/force_pop.gd"
+  },
+  "HostInPOP": {
+    "class_name": "HostInPOP",
+    "family": "POP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "POP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/pop/host_in_pop.gd"
   },
   "InstancePOP": {
     "class_name": "InstancePOP",
@@ -3935,6 +4145,20 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/heightfield_sop.gd"
+  },
+  "HostInSOP": {
+    "class_name": "HostInSOP",
+    "family": "SOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/host_in_sop.gd"
   },
   "IsoSurfaceSOP": {
     "class_name": "IsoSurfaceSOP",
@@ -8172,6 +8396,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/vol/gpu_marching_cubes_vol.gd"
   },
+  "HostInVOL": {
+    "class_name": "HostInVOL",
+    "family": "VOL",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "VOL"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/vol/host_in_vol.gd"
+  },
   "MarchingCubesVOL": {
     "class_name": "MarchingCubesVOL",
     "family": "VOL",
@@ -10776,6 +11014,451 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_ndi/operators/top/ndi_out_top.gd"
+  },
+  "ArucoPoseDAT": {
+    "class_name": "ArucoPoseDAT",
+    "family": "DAT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/dat/aruco_pose_dat.gd"
+  },
+  "CameraCalibDAT": {
+    "class_name": "CameraCalibDAT",
+    "family": "DAT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/dat/camera_calib_dat.gd"
+  },
+  "QRCodeDAT": {
+    "class_name": "QRCodeDAT",
+    "family": "DAT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/dat/qrcode_dat.gd"
+  },
+  "ArucoDetectIMG": {
+    "class_name": "ArucoDetectIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "data",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/aruco_detect_img.gd"
+  },
+  "BackgroundSubtractIMG": {
+    "class_name": "BackgroundSubtractIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/bg_subtract_img.gd"
+  },
+  "BlobTrackIMG": {
+    "class_name": "BlobTrackIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "data",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/blob_track_img.gd"
+  },
+  "CameraUndistortIMG": {
+    "class_name": "CameraUndistortIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/camera_undistort_img.gd"
+  },
+  "ColorTrackIMG": {
+    "class_name": "ColorTrackIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "data",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/color_track_img.gd"
+  },
+  "ContourIMG": {
+    "class_name": "ContourIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "data",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/contour_img.gd"
+  },
+  "ConvolveIMG": {
+    "class_name": "ConvolveIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/convolve_img.gd"
+  },
+  "DrawOverlayIMG": {
+    "class_name": "DrawOverlayIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/draw_overlay_img.gd"
+  },
+  "FeatureMatchIMG": {
+    "class_name": "FeatureMatchIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in_a",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "in_b",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/feature_match_img.gd"
+  },
+  "HoughCirclesIMG": {
+    "class_name": "HoughCirclesIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "data",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/hough_circles_img.gd"
+  },
+  "HoughLinesIMG": {
+    "class_name": "HoughLinesIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "data",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/hough_lines_img.gd"
+  },
+  "MorphIMG": {
+    "class_name": "MorphIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/morph_img.gd"
+  },
+  "ObjectTrackIMG": {
+    "class_name": "ObjectTrackIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "data",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/object_track_img.gd"
+  },
+  "OpticalFlowIMG": {
+    "class_name": "OpticalFlowIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/optical_flow_img.gd"
+  },
+  "PerspectiveWarpIMG": {
+    "class_name": "PerspectiveWarpIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/perspective_warp_img.gd"
+  },
+  "StereoDepthIMG": {
+    "class_name": "StereoDepthIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "left",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "right",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/stereo_depth_img.gd"
+  },
+  "ThresholdIMG": {
+    "class_name": "ThresholdIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_opencv/operators/img/threshold_img.gd"
   },
   "BendSDF": {
     "class_name": "BendSDF",

@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "normal_scale": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "albedo_color": {
                     "value": {
@@ -24,9 +22,7 @@
                     }
                 },
                 "roughness": {
-                    "value": 0.5,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "unlit": {
                     "value": false
@@ -142,14 +138,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NormalMapMAT \u2014 Basic\n\nDefault settings.",
+            "text": "Normal Map MAT — Basic\n\nNormal map visualization material with tangent-space normal mapping.\nUsing: normal_scale=1.0, roughness=0.5, unlit=False, cull_mode=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

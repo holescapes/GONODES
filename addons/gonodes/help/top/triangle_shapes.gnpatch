@@ -17,9 +17,7 @@
                     }
                 },
                 "shape": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "size": {
                     "value": 0.35,
@@ -93,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Triangle TOP \u2014 SDF 2D Primitives\n\nShapes: 0=Triangle, 1=Line, 2=Pentagon.\nOrange triangle + rotated green pentagon.\nBorder, fill, rotation, and softness controls.",
+            "text": "Triangle TOP — SDF 2D Primitives\n\nShapes: 0=Triangle, 1=Line, 2=Pentagon.\nOrange triangle + rotated green pentagon.\nBorder, fill, rotation, and softness controls.",
             "position": [
                 -100.0,
                 -150.0

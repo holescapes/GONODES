@@ -30,9 +30,7 @@
             ],
             "parameters": {
                 "axis": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "merge": {
                     "value": true,
@@ -159,7 +157,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Mirror SOP \u2014 Reflect and Merge\n\nTranslates box off-center, mirrors across X=0\nplane, and merges both halves.\nGreat for symmetric modeling workflows.",
+            "text": "Mirror SOP — Reflect and Merge\n\nTranslates box off-center, mirrors across X=0\nplane, and merges both halves.\nGreat for symmetric modeling workflows.",
             "position": [
                 -100.0,
                 -150.0

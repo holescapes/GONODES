@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "time_dependent": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "cook_once": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "force_active": {
                     "value": false
@@ -81,14 +77,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GDScriptSCRIPT (DAT template) \u2014 Basic\n\nDefault settings.",
+            "text": "GDScript SCRIPT — Basic\n\nUser-scripted node. Write GDScript with @output annotations for any data type. Template dropdown provides CHOP/SOP/DAT/IMG starting code.\nUsing: time_dependent=False, cook_once=False, force_active=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

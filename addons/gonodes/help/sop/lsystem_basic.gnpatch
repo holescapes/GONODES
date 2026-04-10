@@ -16,14 +16,10 @@
                     "value": "F=F[+F]F[-F]F"
                 },
                 "iterations": {
-                    "value": 4,
-                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 },
                 "step_size": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "angle": {
                     "value": 25.7
@@ -148,7 +144,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "L-System SOP \u2014 Fractal Tree\n\nGenerates branching tree geometry from grammar rules.\nTube radius > 0 gives solid branch tubes with taper.\nGravity adds downward tropism for organic droop.",
+            "text": "L-System SOP — Fractal Tree\n\nGenerates branching tree geometry from grammar rules.\nTube radius > 0 gives solid branch tubes with taper.\nGravity adds downward tropism for organic droop.",
             "position": [
                 -100.0,
                 -150.0

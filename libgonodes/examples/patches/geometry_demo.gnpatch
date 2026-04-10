@@ -1,0 +1,132 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "Geometry exchange demo — push/read vertex data via the C API.",
+    "nodes": {
+        "host_geo_in": {
+            "type": "HostInSOP",
+            "position": [100, 200],
+            "parameters": {
+                "label": {
+                    "value": "Geometry from host"
+                }
+            }
+        },
+        "transform1": {
+            "type": "TransformSOP",
+            "position": [400, 200],
+            "parameters": {
+                "scale": {
+                    "value": {
+                        "_type": "Vector3",
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 2.0
+                    }
+                }
+            }
+        },
+        "normal1": {
+            "type": "NormalSOP",
+            "position": [700, 200],
+            "parameters": {}
+        },
+        "sop_out": {
+            "type": "HostOutSOP",
+            "position": [1000, 200],
+            "parameters": {
+                "label": {
+                    "value": "Processed geometry"
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [400, 500],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 3.0
+                }
+            }
+        },
+        "vis_out": {
+            "type": "HostOutTOP",
+            "position": [700, 500],
+            "parameters": {
+                "label": {
+                    "value": "Visualization"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "host_geo_in",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "transform1",
+            "from_port": 0,
+            "to": "normal1",
+            "to_port": 0
+        },
+        {
+            "from": "normal1",
+            "from_port": 0,
+            "to": "sop_out",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "vis_out",
+            "to_port": 0
+        }
+    ],
+    "host_io": {
+        "inputs": [
+            {
+                "label": "Geometry from host",
+                "family": "SOP",
+                "node": "host_geo_in",
+                "required": true
+            }
+        ],
+        "outputs": [
+            {
+                "label": "Processed geometry",
+                "family": "SOP",
+                "node": "sop_out"
+            },
+            {
+                "label": "Visualization",
+                "family": "TOP",
+                "node": "vis_out"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Transform Scale",
+                "node": "transform1",
+                "param": "scale",
+                "type": "vector3"
+            },
+            {
+                "label": "Noise Scale",
+                "node": "noise1",
+                "param": "scale",
+                "type": "float",
+                "range": [0.1, 50.0]
+            }
+        ]
+    }
+}

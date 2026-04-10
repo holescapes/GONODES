@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "size_x": {
-                    "value": 10.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 10.0
                 },
                 "size_z": {
-                    "value": 10.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 10.0
                 },
                 "subdivisions": {
                     "value": 128
@@ -134,7 +130,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "HeightfieldSOP \u2014 Basic Terrain\n\n128\u00d7128 grid displaced by 6-octave FBM noise.\nAdjust frequency, persistence, and height for different looks.\nChange seed for variation. Add erosion for natural detail.",
+            "text": "HeightfieldSOP — Basic Terrain\n\n128×128 grid displaced by 6-octave FBM noise.\nAdjust frequency, persistence, and height for different looks.\nChange seed for variation. Add erosion for natural detail.",
             "position": [
                 -120.0,
                 -130.0

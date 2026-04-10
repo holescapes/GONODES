@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SlopeTOP \u2014 Parameters\n\nShowcases: output, strength.",
+            "text": "Slope TOP — Output\n\nImage gradient / derivative: horizontal, vertical, or magnitude.\nShowcasing: output=1, strength=0.5.",
             "position": [
                 -100.0,
                 -100.0

@@ -15,9 +15,7 @@
                     "mode": "EXPRESSION"
                 },
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 }
             }
         },
@@ -128,7 +126,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Composite CHOP \u2014 Multi-Input Blend\n\nAverages a sine and square wave together.\nMethods: average, add, max, min.\nDynamic inputs for combining many sources.",
+            "text": "Composite CHOP — Multi-Input Blend\n\nAverages a sine and square wave together.\nMethods: average, add, max, min.\nDynamic inputs for combining many sources.",
             "position": [
                 -100.0,
                 -150.0

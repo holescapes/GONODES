@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 3,
-                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 3
                 },
                 "frequency": {
                     "value": 0.5,
@@ -116,7 +114,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Limit CHOP \u2014 Clamp\n\nSawtooth LFO (range \u00b12) clamped to -0.5..0.8.\nUse Loop or Zig-Zag modes for wrapping behavior.",
+            "text": "Limit CHOP — Clamp\n\nSawtooth LFO (range ±2) clamped to -0.5..0.8.\nUse Loop or Zig-Zag modes for wrapping behavior.",
             "position": [
                 -100.0,
                 -150.0

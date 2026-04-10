@@ -9,6 +9,7 @@
  *   • Introspection: listing nodes, parameters, connections
  *   • Host I/O manifest: querying the patch interface contract
  *   • Registering a parameter change callback
+ *   • v1.1.0: Transport control, event triggers, texture info, resolution override
  *
  * Build:
  *   cd libgonodes/build && cmake .. && cmake --build . --target params_demo
@@ -246,6 +247,112 @@ static void demo_animated_loop(gonodes_instance_t gn) {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
+/*  v1.1.0 Demo: Transport Control                                          */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+static void demo_transport(gonodes_instance_t gn) {
+    printf("\n═══ Transport Control (v1.1.0) ═══\n");
+
+    double t = gonodes_get_transport_time(gn);
+    printf("  Current time: %.3f s\n", t);
+
+    gonodes_set_transport(gn, GONODES_TRANSPORT_PLAY);
+    gonodes_set_transport_speed(gn, 1.0);
+    printf("  Set PLAY, speed=1.0x\n");
+
+    for (int i = 0; i < 10; ++i)
+        gonodes_cook_frame(gn, 1.0 / 60.0);
+    printf("  After 10 frames: %.3f s\n", gonodes_get_transport_time(gn));
+
+    gonodes_set_transport(gn, GONODES_TRANSPORT_PAUSE);
+    printf("  Set PAUSE\n");
+    gonodes_cook_frame(gn, 1.0 / 60.0);
+    printf("  After 1 paused frame: %.3f s (should be unchanged)\n",
+           gonodes_get_transport_time(gn));
+
+    gonodes_transport_seek(gn, 5.0);
+    printf("  Seek to 5.0 s: %.3f s\n", gonodes_get_transport_time(gn));
+
+    gonodes_set_transport(gn, GONODES_TRANSPORT_STOP);
+    printf("  Set STOP: %.3f s\n", gonodes_get_transport_time(gn));
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  v1.1.0 Demo: Event/Trigger System                                       */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+static void on_event_demo(
+    gonodes_instance_t /*inst*/, const char* name,
+    const char* payload, void* /*user_data*/
+) {
+    printf("  [EVENT] %s", name);
+    if (payload) printf(" — %s", payload);
+    printf("\n");
+}
+
+static void demo_events(gonodes_instance_t gn) {
+    printf("\n═══ Event/Trigger System (v1.1.0) ═══\n");
+
+    gonodes_set_on_event(gn, on_event_demo, nullptr);
+    printf("  Event callback registered.\n");
+
+    int err = gonodes_fire_event(gn, "test_bang", "{\"data\": 42}");
+    printf("  Fire 'test_bang': %s\n", err == GONODES_OK ? "OK" : "failed");
+    gonodes_cook_frame(gn, 1.0 / 60.0);
+
+    err = gonodes_fire_event(gn, "pulse", nullptr);
+    printf("  Fire 'pulse' (bare): %s\n", err == GONODES_OK ? "OK" : "failed");
+    gonodes_cook_frame(gn, 1.0 / 60.0);
+
+    gonodes_set_on_event(gn, nullptr, nullptr);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  v1.1.0 Demo: Texture Info Query                                         */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+static void demo_texture_info(gonodes_instance_t gn) {
+    printf("\n═══ Texture Info Query (v1.1.0) ═══\n");
+
+    gonodes_texture_info_t info;
+    memset(&info, 0, sizeof(info));
+
+    int err = gonodes_get_texture_info(gn, "host_out_tex", &info);
+    if (err == GONODES_OK) {
+        printf("  host_out_tex: %dx%d, format=%d, channels=%d\n",
+               info.width, info.height, info.format, info.channels);
+    } else {
+        printf("  host_out_tex: not available (%d)\n", err);
+    }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  v1.1.0 Demo: Output Resolution Override                                 */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+static void demo_resolution(gonodes_instance_t gn) {
+    printf("\n═══ Resolution Override (v1.1.0) ═══\n");
+
+    int w = 0, h = 0;
+    gonodes_get_output_texture(gn, "host_out_tex", &w, &h);
+    printf("  Default: %dx%d\n", w, h);
+
+    gonodes_set_output_resolution(gn, "host_out_tex", 1920, 1080);
+    gonodes_cook_frame(gn, 1.0 / 60.0);
+    gonodes_get_output_texture(gn, "host_out_tex", &w, &h);
+    printf("  After 1080p override: %dx%d\n", w, h);
+
+    gonodes_set_output_resolution(gn, "host_out_tex", 0, 0);
+    gonodes_cook_frame(gn, 1.0 / 60.0);
+    gonodes_get_output_texture(gn, "host_out_tex", &w, &h);
+    printf("  After revert: %dx%d\n", w, h);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
 /*  Main                                                                     */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -304,6 +411,13 @@ int main(int argc, char* argv[]) {
     demo_dat_reading(gn);
     demo_texture_output(gn);
     demo_animated_loop(gn);
+
+    /* ── v1.1.0 Feature Demos ───────────────────────────────────────── */
+
+    demo_transport(gn);
+    demo_events(gn);
+    demo_texture_info(gn);
+    demo_resolution(gn);
 
     /* ── Reload Test ────────────────────────────────────────────────── */
 

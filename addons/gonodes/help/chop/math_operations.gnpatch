@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
                     "value": 0.5,
@@ -145,7 +143,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Math CHOP \u2014 Operations\n\nLFO split into two Math CHOPs:\n\u2022 Abs:  converts -1..1 to 0..1\n\u2022 Multiply by 2.0: doubles the amplitude",
+            "text": "Math CHOP — Operations\n\nLFO split into two Math CHOPs:\n• Abs:  converts -1..1 to 0..1\n• Multiply by 2.0: doubles the amplitude",
             "position": [
                 -100.0,
                 -150.0

@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "depth_enabled": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "normal_enabled": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "resolution": {
                     "value": {
@@ -60,14 +56,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MultiBufferRenderTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Multi Buffer Render TOP — Basic\n\nMulti-buffer 3D render: outputs color, depth, and normal buffer textures.\nUsing: depth_enabled=True, normal_enabled=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

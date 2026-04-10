@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "scale_start": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "scale_end": {
-                    "value": 0.2,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.2
                 },
                 "axis": {
                     "value": 1
@@ -133,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Taper SOP \u2014 Scale Along Axis\n\nSmooth taper from full size to 20%.\nLinear or smoothstep profile.",
+            "text": "Taper SOP — Scale Along Axis\n\nSmooth taper from full size to 20%.\nLinear or smoothstep profile.",
             "position": [
                 -100.0,
                 -150.0

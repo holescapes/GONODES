@@ -1,0 +1,93 @@
+{
+	"generator": "GONODES",
+	"description": "FFmpeg video playback demo. Chain 1: video file looped at half speed with HSV color shift. Chain 2: same source blurred and composited over a color background. Set 'file' parameter to a local .mp4/.mkv/.webm path to test.",
+	"connections": [
+		{
+			"from": "video_src",
+			"from_port": 0,
+			"to": "hsv_shift",
+			"to_port": 0
+		},
+		{
+			"from": "hsv_shift",
+			"from_port": 0,
+			"to": "out_shifted",
+			"to_port": 0
+		},
+		{
+			"from": "video_src",
+			"from_port": 0,
+			"to": "blur1",
+			"to_port": 0
+		},
+		{
+			"from": "bg_color",
+			"from_port": 0,
+			"to": "comp1",
+			"to_port": 0
+		},
+		{
+			"from": "blur1",
+			"from_port": 0,
+			"to": "comp1",
+			"to_port": 1
+		},
+		{
+			"from": "comp1",
+			"from_port": 0,
+			"to": "out_composited",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"video_src": {
+			"type": "FFmpegInTOP",
+			"position": [0.0, 100.0],
+			"parameters": {
+				"file": {"value": ""},
+				"play": {"value": true},
+				"loop": {"value": true},
+				"speed": {"value": 0.5}
+			}
+		},
+		"hsv_shift": {
+			"type": "HSVAdjustTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"hue_offset": {"value": 0.15},
+				"saturation_mult": {"value": 1.3}
+			}
+		},
+		"out_shifted": {
+			"type": "NullTOP",
+			"position": [800.0, 0.0],
+			"parameters": {}
+		},
+		"blur1": {
+			"type": "BlurTOP",
+			"position": [400.0, 200.0],
+			"parameters": {
+				"size": {"value": 12.0}
+			}
+		},
+		"bg_color": {
+			"type": "ConstantTOP",
+			"position": [400.0, 400.0],
+			"parameters": {
+				"color": {"value": {"_type": "Color", "r": 0.05, "g": 0.02, "b": 0.12, "a": 1.0}}
+			}
+		},
+		"comp1": {
+			"type": "CompositeTOP",
+			"position": [800.0, 200.0],
+			"parameters": {
+				"operation": {"value": 1}
+			}
+		},
+		"out_composited": {
+			"type": "NullTOP",
+			"position": [1200.0, 200.0],
+			"parameters": {}
+		}
+	}
+}

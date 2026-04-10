@@ -133,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PrimitiveSOP \u2014 Parameters\n\nShowcases: face_normals, face_area, face_centroid.",
+            "text": "Primitive SOP — Normals\n\nCompute per-primitive attributes: face normal, area, centroid, prim ID.\nShowcasing: face_normals=True, face_area=True, face_centroid=True, face_id=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

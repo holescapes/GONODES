@@ -99,7 +99,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DeleteDAT \u2014 Parameters\n\nShowcases: mode, start_index, end_index.",
+            "text": "Delete DAT — Mode\n\nDelete rows or columns from a table by index range.\nShowcasing: mode=1, start_index=0, end_index=0.",
             "position": [
                 -100.0,
                 -100.0

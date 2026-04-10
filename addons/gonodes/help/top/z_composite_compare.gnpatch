@@ -71,14 +71,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ZCompositeTOP \u2014 Parameters\n\nShowcases: compare, bias.",
+            "text": "Z Composite TOP — Compare\n\nDepth-aware compositing — combine two layers using their depth buffers.\nShowcasing: compare=1, bias=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -87,14 +87,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ProjectionMaskTOP \u2014 Parameters\n\nShowcases: left, right, mask_top.\nRequires gn_ext_mapper extension.",
+            "text": "Projection Mask TOP — Left\n\nProjection mask with adjustable polygon or rectangle cutout regions.\nShowcasing: left=0.0, right=0.5, mask_top=0.0, bottom=1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

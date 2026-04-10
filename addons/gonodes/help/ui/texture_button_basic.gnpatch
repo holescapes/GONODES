@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "toggle_mode": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "stretch": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "min_size": {
                     "value": {
@@ -60,7 +56,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextureButton UI \u00e2\u20ac\u201d Basic\n\nClickable texture button with 3 TOP inputs:\nnormal, pressed, and hover textures.\nState channels: press (impulse), toggle (0/1).",
+            "text": "TextureButton UI â€” Basic\n\nClickable texture button with 3 TOP inputs:\nnormal, pressed, and hover textures.\nState channels: press (impulse), toggle (0/1).",
             "position": [
                 -100.0,
                 -100.0

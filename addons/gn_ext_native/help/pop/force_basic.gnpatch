@@ -9,32 +9,20 @@
                 100
             ],
             "parameters": {
-                "max_particles": {
-                    "value": 50000
-                },
-                "rate": {
-                    "value": 2000.0,
-                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
-                    "mode": "EXPRESSION"
+                "emit_rate": {
+                    "value": 100
                 }
             }
         },
-        "force1": {
-            "type": "ForcePOPNative",
+        "focus1": {
+            "type": "ForcePOP",
             "position": [
                 450,
                 100
             ],
-            "parameters": {
-                "gravity_y": {
-                    "value": -9.81
-                },
-                "drag": {
-                    "value": 0.01
-                }
-            }
+            "parameters": {}
         },
-        "renderpop1": {
+        "pop_render": {
             "type": "RenderPOP",
             "position": [
                 800,
@@ -53,7 +41,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1375,
+                1150,
                 100
             ],
             "parameters": {
@@ -68,69 +56,23 @@
                     "value": true
                 }
             }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                975,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "camera1": {
-            "type": "CameraCOMP",
-            "position": [
-                975,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0.0
-                },
-                "ty": {
-                    "value": 0.0
-                },
-                "tz": {
-                    "value": 5.0
-                }
-            }
         }
     },
     "connections": [
         {
             "from": "source1",
             "from_port": 0,
-            "to": "force1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "force1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "renderpop1",
+            "to": "pop_render",
             "to_port": 0
         },
         {
-            "from": "renderpop1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "camera1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
+            "from": "pop_render",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -140,14 +82,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Force POP (Native) \u2014 Gravity + Drag\n\nParticles falling under gravity (-9.81) with light drag.\nCombines gravity, wind, and drag in one Euler step.\nNative C++ processes all particles in a tight loop.",
+            "text": "Force POP — Basic\n\nApply gravity, wind, and directional forces to particles.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

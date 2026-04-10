@@ -19,9 +19,7 @@
                     }
                 },
                 "point_size": {
-                    "value": 4.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 }
             }
         },
@@ -131,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PointSpriteMAT \u2014 Basic\n\nDefault settings.",
+            "text": "Point Sprite MAT — Basic\n\nPoint sprite material — renders vertices as sized point sprites.\nUsing: point_size=4.0.",
             "position": [
                 -100.0,
                 -100.0

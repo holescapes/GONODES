@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TileTOP \u2014 Parameters\n\nShowcases: mirror_x, mirror_y.",
+            "text": "Tile TOP — X\n\nTile/repeat a texture with optional mirroring.\nShowcasing: mirror_x=True, mirror_y=True.",
             "position": [
                 -100.0,
                 -100.0

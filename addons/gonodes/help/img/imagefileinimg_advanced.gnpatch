@@ -72,14 +72,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ImageFileInIMG — Advanced\n\nMore complex configuration.",
+            "text": "Image File In IMG — Advanced\n\nLoads an image file (PNG, JPG, WebP, HDR, EXR, etc.) as CPU Image.\nCombined configuration: reload=True, file=res://addons/gonodes/help/media/sample_image.jpg.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

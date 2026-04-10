@@ -94,7 +94,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LinkButtonUI \u2014 Parameters\n\nShowcases: text, underline, min_size.",
+            "text": "Link Button UI — Underline\n\nClickable text link button with underline options.\nShowcasing: underline=1.",
             "position": [
                 -100.0,
                 -100.0

@@ -93,7 +93,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return geo_in
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if cached_output is GNGeoData and _mesh_instance != null:
 		var geo: GNGeoData = cached_output as GNGeoData
 		if geo.mesh != null:
@@ -107,7 +107,7 @@ func render_for_viewer(viewer) -> void:
 			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 			viewer.set_info_bar("%d verts" % geo.vertex_count)
 			return
-	super.render_for_viewer(viewer)
+	super.render_for_viewer(viewer, port_index)
 
 
 ## Destroys the scene node and resets geometry state so the

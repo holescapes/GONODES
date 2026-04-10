@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "angle": {
-                    "value": 90.0,
-                    "expression": "time * 45.0",
-                    "mode": "EXPRESSION"
+                    "value": 90.0
                 },
                 "axis": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "origin": {
                     "value": 0.0
@@ -130,7 +126,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Bend SOP \u2014 Arc Deformation\n\n90\u00b0 bend along Y axis.\nWorks best on subdivided geometry.",
+            "text": "Bend SOP — Arc Deformation\n\n90° bend along Y axis.\nWorks best on subdivided geometry.",
             "position": [
                 -100.0,
                 -150.0

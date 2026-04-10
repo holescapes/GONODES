@@ -101,14 +101,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Select DAT — Advanced\n\nSelect rows/columns by wire or wireless name reference, with range filtering.\nCombined configuration: row_start=2, row_end=1, col_start=2, col_end=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

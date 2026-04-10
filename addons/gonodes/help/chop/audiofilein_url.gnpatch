@@ -40,5 +40,26 @@
             "to": "null_chop",
             "to_port": 0
         }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Audio File In CHOP — Url\n\nPlay audio file (WAV/OGG) and output waveform as CHOP channels.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
     ]
 }

@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "strength": {
-                    "value": 1.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "add_mode": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -135,7 +131,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AdvectPOP \u2014 Basic\n\nDefault settings.",
+            "text": "Advect POP — Basic\n\nAdvect particles by a VOL velocity field.\nUsing: strength=1.0, add_mode=True.",
             "position": [
                 -100.0,
                 -100.0

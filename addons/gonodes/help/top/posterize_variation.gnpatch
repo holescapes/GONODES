@@ -68,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PosterizeTOP \u2014 Parameters\n\nShowcases: levels.",
+            "text": "Posterize TOP — Variation\n\nReduce color depth to N discrete levels (2-256).\nShowcasing: levels=3.",
             "position": [
                 -100.0,
                 -100.0

@@ -260,7 +260,7 @@ func get_rigid_body() -> RigidBody3D:
 	return _rigid_body
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _mesh_instance != null and _mesh_instance.mesh != null and _mesh_instance.mesh is ArrayMesh:
 		GNSopBase._ensure_viewer_scene()
 		var vp: SubViewport = viewer.get_3d_viewport()

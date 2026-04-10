@@ -17,9 +17,7 @@
                     }
                 },
                 "scale": {
-                    "value": 6.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 6.0
                 }
             }
         },
@@ -90,7 +88,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonIMG \u2014 Python Pixel Processing\n\nWrite IMG operators in Python using NumPy arrays.\nThe default example adjusts brightness.\nLoad the Edge Detect example for Sobel filtering.\n\nImage pixels arrive as (H, W, 4) uint8 numpy arrays.\nReturn via make_img_result(pixels, width, height).",
+            "text": "UserPythonIMG — Python Pixel Processing\n\nWrite IMG operators in Python using NumPy arrays.\nThe default example adjusts brightness.\nLoad the Edge Detect example for Sobel filtering.\n\nImage pixels arrive as (H, W, 4) uint8 numpy arrays.\nReturn via make_img_result(pixels, width, height).",
             "position": [
                 -100.0,
                 -100.0

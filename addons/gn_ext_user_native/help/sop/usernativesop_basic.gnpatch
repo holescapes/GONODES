@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 50,
-                    "expression": "(50 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 50
                 },
                 "columns": {
-                    "value": 50,
-                    "expression": "(50 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 50
                 },
                 "sizex": {
                     "value": 4.0
@@ -143,7 +139,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserNativeSOP \u2014 Basic C++ Geometry\n\nWrite custom SOP operators in C++ with hot-reload.\nThe default example generates a sine-wave deformed grid.\n\nClick the node, then 'Edit C++ \u2197' in the inspector.\nPress Ctrl+B to build. The node reloads automatically.\n\n10-50\u00d7 faster than equivalent GDScript.",
+            "text": "UserNativeSOP — Basic C++ Geometry\n\nWrite custom SOP operators in C++ with hot-reload.\nThe default example generates a sine-wave deformed grid.\n\nClick the node, then 'Edit C++ ↗' in the inspector.\nPress Ctrl+B to build. The node reloads automatically.\n\n10-50× faster than equivalent GDScript.",
             "position": [
                 -100.0,
                 -100.0

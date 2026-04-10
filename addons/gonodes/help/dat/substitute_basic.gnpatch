@@ -24,14 +24,10 @@
                     "value": "world"
                 },
                 "use_regex": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "case_sensitive": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "scope": {
                     "value": 0
@@ -104,7 +100,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Substitute DAT \u2014 Find & Replace\n\nReplace text in all cells (case-insensitive).\nSupports regex patterns.",
+            "text": "Substitute DAT — Find & Replace\n\nReplace text in all cells (case-insensitive).\nSupports regex patterns.",
             "position": [
                 -100.0,
                 -150.0

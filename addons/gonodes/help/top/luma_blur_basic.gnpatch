@@ -32,14 +32,10 @@
             ],
             "parameters": {
                 "blur_size": {
-                    "value": 4.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "quality": {
-                    "value": 4,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 },
                 "luma_threshold": {
                     "value": 0.5
@@ -87,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LumaBlurTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Luma Blur TOP — Basic\n\nLuminance-weighted selective blur (bright or dark areas blurred more).\nUsing: blur_size=4.0, quality=4, luma_threshold=0.5, blur_bright=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Copy CHOP \u2014 Basic\n\nDuplicates LFO channels.",
+            "text": "Copy CHOP — Basic\n\nCopy channels from B onto A (overwrite, add, subtract, multiply).",
             "position": [
                 -100.0,
                 -100.0

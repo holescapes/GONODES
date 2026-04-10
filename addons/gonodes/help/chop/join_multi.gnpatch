@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
                     "value": 1.0,
@@ -131,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Join CHOP \u2014 Three Segments\n\nSine, triangle, and square waves joined sequentially.",
+            "text": "Join CHOP — Three Segments\n\nSine, triangle, and square waves joined sequentially.",
             "position": [
                 -100.0,
                 -100.0

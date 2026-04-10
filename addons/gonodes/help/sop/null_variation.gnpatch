@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullSOP \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Null SOP — Variation\n\nPass-through.",
             "position": [
                 -100.0,
                 -100.0

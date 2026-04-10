@@ -87,14 +87,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MidiInDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Midi In DAT — Advanced\n\nLog raw MIDI messages (note, CC, pitch bend) into a DAT table.\nCombined configuration: active=False, device=1, channel_filter=1, max_rows=102.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

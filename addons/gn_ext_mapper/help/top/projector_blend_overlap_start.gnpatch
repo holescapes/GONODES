@@ -136,14 +136,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ProjectorBlendTOP \u2014 Parameters\n\nShowcases: overlap_start, overlap_end, blend_axis.\nRequires gn_ext_mapper extension.",
+            "text": "Projector Blend TOP — Start\n\nMulti-projector luminance blending with overlap correction and color matching.\nShowcasing: overlap_start=0.2, overlap_end=0.3, blend_axis=1, blend_gamma=1.1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

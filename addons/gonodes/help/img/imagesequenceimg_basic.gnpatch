@@ -17,14 +17,10 @@
                     }
                 },
                 "play": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "speed": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "index": {
                     "value": -1
@@ -83,14 +79,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ImageSequenceIMG \u2014 Basic\n\nDefault settings.",
+            "text": "Image Sequence IMG — Basic\n\nPlays a numbered image sequence as animated CPU Image frames.\nUsing: play=True, speed=1.0, index=-1, loop_mode=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

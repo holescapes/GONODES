@@ -70,7 +70,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GDScriptSCRIPT (IMG template) \u2014 Parameters\n\nShowcases: time_dependent, cook_once, force_active.",
+            "text": "GDScript SCRIPT (IMG template) — Dependent\n\nDemonstrates time_dependent, cook_once, force_active parameters.",
             "position": [
                 -100.0,
                 -100.0

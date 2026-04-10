@@ -94,7 +94,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SeparatorUI \u2014 Parameters\n\nShowcases: vertical, min_size.",
+            "text": "Separator UI — Vertical\n\nHorizontal or vertical separator line for layout.\nShowcasing: vertical=True.",
             "position": [
                 -100.0,
                 -100.0

@@ -133,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ExtrudeSOP \u2014 Parameters\n\nShowcases: distance, output_sides, output_front.",
+            "text": "Extrude SOP — Distance\n\nPer-triangle face extrusion with front, back, and side walls.\nShowcasing: distance=0.1, output_sides=True, output_front=True, output_back=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

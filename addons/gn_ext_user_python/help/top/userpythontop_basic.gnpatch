@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "auto_reload": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "time_dep": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -53,7 +49,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonTOP \u2014 Python Texture Generation\n\nWrite TOP operators in Python using NumPy.\nThe default example generates an animated gradient.\nLoad the Gradient example for radial/angular patterns.\n\nPixels are generated CPU-side as (H, W, 4) uint8 arrays\nand uploaded to a texture each frame.",
+            "text": "UserPythonTOP — Python Texture Generation\n\nWrite TOP operators in Python using NumPy.\nThe default example generates an animated gradient.\nLoad the Gradient example for radial/angular patterns.\n\nPixels are generated CPU-side as (H, W, 4) uint8 arrays\nand uploaded to a texture each frame.",
             "position": [
                 -100.0,
                 -100.0

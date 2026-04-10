@@ -10,17 +10,13 @@
             ],
             "parameters": {
                 "value0": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "name0": {
                     "value": "tx"
                 },
                 "value1": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "name1": {
                     "value": "ty"

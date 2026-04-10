@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(libgonodes VERSION 1.0.0 LANGUAGES CXX)
+project(libgonodes VERSION 1.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -80,4 +80,13 @@ if(GONODES_BUILD_EXAMPLES)
 
     # Params Demo Example
     add_subdirectory(examples/params_demo EXCLUDE_FROM_ALL)
+
+    # v1.1.0: Geometry Host Example
+    add_subdirectory(examples/geometry_host EXCLUDE_FROM_ALL)
+
+    # v1.1.0: Graph Edit Demo Example
+    add_subdirectory(examples/graph_edit_demo EXCLUDE_FROM_ALL)
+
+    # v1.1.0: MIDI/OSC Host Example
+    add_subdirectory(examples/midi_osc_host EXCLUDE_FROM_ALL)
 endif()

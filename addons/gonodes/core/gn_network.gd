@@ -29,8 +29,10 @@ var _topo_dirty: bool = true
 ## Cached adjacency maps — rebuilt when graph structure changes.
 ## _downstream_map: node_id → Array of downstream node_ids (for dirty propagation)
 ## _input_conn_map: node_id → Array[GNConnection] (for input gathering)
+## _output_conn_map: node_id → Array[GNConnection] (for demand-based output cooking)
 var _downstream_map: Dictionary = {}
 var _input_conn_map: Dictionary = {}
+var _output_conn_map: Dictionary = {}
 var _adjacency_dirty: bool = true
 
 # ─── Signals ───────────────────────────────────────────────────────────────────
@@ -740,15 +742,18 @@ func _rebuild_adjacency() -> void:
 		return
 	_downstream_map.clear()
 	_input_conn_map.clear()
+	_output_conn_map.clear()
 	for node_id in nodes:
 		_downstream_map[node_id] = []
 		_input_conn_map[node_id] = []
+		_output_conn_map[node_id] = []
 	for conn in connections:
 		if nodes.has(conn.from_node) and nodes.has(conn.to_node):
 			var ds_list: Array = _downstream_map[conn.from_node]
 			if conn.to_node not in ds_list:
 				ds_list.append(conn.to_node)
 			_input_conn_map[conn.to_node].append(conn)
+			_output_conn_map[conn.from_node].append(conn)
 	_adjacency_dirty = false
 
 

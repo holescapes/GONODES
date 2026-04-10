@@ -122,14 +122,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GridSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Grid SOP — Advanced\n\nSubdivided plane with configurable orientation.\nCombined configuration: size_x=4.0, size_z=4.0, rows=12, cols=12.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

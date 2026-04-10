@@ -135,7 +135,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AdvectPOP \u2014 Parameters\n\nShowcases: strength, add_mode.",
+            "text": "Advect POP — Strength\n\nAdvect particles by a VOL velocity field.\nShowcasing: strength=0.5, add_mode=True.",
             "position": [
                 -100.0,
                 -100.0

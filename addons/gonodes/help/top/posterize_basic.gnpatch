@@ -18,9 +18,7 @@
             ],
             "parameters": {
                 "levels": {
-                    "value": 6,
-                    "expression": "(6 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 6
                 }
             }
         },
@@ -62,7 +60,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Posterize TOP \u2014 Color Quantization\n\nReduce to 6 color levels per channel.\nAdjust 'Levels' from 2 (harsh) to 256 (subtle).",
+            "text": "Posterize TOP — Color Quantization\n\nReduce to 6 color levels per channel.\nAdjust 'Levels' from 2 (harsh) to 256 (subtle).",
             "position": [
                 -100.0,
                 -150.0

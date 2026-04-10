@@ -1,0 +1,97 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "bgsub1": {
+            "type": "BackgroundSubtractIMG",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "method": {
+                    "value": 0
+                },
+                "history": {
+                    "value": 500
+                }
+            }
+        },
+        "bridge1": {
+            "type": "ImgToTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "bgsub1",
+            "to_port": 0
+        },
+        {
+            "from": "bgsub1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "BackgroundSubtractIMG \u2014 Basic MOG2\n\nWebcam background subtraction.\nForeground mask shows moving objects in white.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

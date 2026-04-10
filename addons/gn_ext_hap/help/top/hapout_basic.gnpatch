@@ -1,6 +1,6 @@
 {
     "version": "1.0",
-    "description": "HapOutTOP \u2014 Record a texture to HAP .mov video. Toggle 'record' on to capture, off to finalize.",
+    "description": "HapOutTOP — Record a texture to HAP .mov video. Toggle 'record' on to capture, off to finalize.",
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
@@ -29,14 +29,10 @@
                     "value": "user://output/test_hap.mov"
                 },
                 "variant": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "fps": {
-                    "value": 30,
-                    "expression": "(30 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 30
                 },
                 "record": {
                     "value": false
@@ -51,7 +47,7 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "HapOutTOP records input textures to a HAP .mov file.\n\n1. Set file_path and variant (HAP / HAP Alpha / HAP Q)\n2. Toggle 'record' ON \u2014 frames are captured each cook\n3. Toggle 'record' OFF \u2014 .mov file is finalized\n\nThe output .mov can be played by HapInTOP with\nzero CPU decode overhead."
+                    "value": "HapOutTOP records input textures to a HAP .mov file.\n\n1. Set file_path and variant (HAP / HAP Alpha / HAP Q)\n2. Toggle 'record' ON — frames are captured each cook\n3. Toggle 'record' OFF — .mov file is finalized\n\nThe output .mov can be played by HapInTOP with\nzero CPU decode overhead."
                 }
             }
         }
@@ -62,6 +58,27 @@
             "from_port": 0,
             "to": "hapout1",
             "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Hap OUT — Basic\n\nEncode input texture to HAP video file for GPU-direct playback.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

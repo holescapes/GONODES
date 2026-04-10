@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "plane": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "origin": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "keep_above": {
                     "value": true
@@ -137,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ClipSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Clip SOP — Basic\n\nClip geometry by an axis-aligned plane with triangle splitting.\nUsing: plane=0, origin=0.0, keep_above=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

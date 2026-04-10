@@ -1,0 +1,274 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "VehicleCOMP — Basic. Box car body on a flat floor with keyboard controls.",
+    "nodes": {
+        "box_body": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 2.0
+                },
+                "size_y": {
+                    "value": 0.8
+                },
+                "size_z": {
+                    "value": 4.0
+                }
+            }
+        },
+        "geo_body": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "vehicle1": {
+            "type": "VehicleCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "ty": {
+                    "value": 2.0
+                },
+                "mass": {
+                    "value": 1000.0
+                },
+                "wheel_base": {
+                    "value": 3.0
+                },
+                "track_width": {
+                    "value": 1.8
+                },
+                "engine_force": {
+                    "value": 400.0
+                },
+                "throttle": {
+                    "value": 0.3
+                },
+                "steer": {
+                    "value": 0.0
+                }
+            }
+        },
+        "floor_grid": {
+            "type": "GridSOP",
+            "position": [
+                0,
+                300
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 50.0
+                },
+                "size_z": {
+                    "value": 50.0
+                },
+                "cols": {
+                    "value": 2
+                },
+                "rows": {
+                    "value": 2
+                }
+            }
+        },
+        "geo_floor": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                300
+            ],
+            "parameters": {}
+        },
+        "static_floor": {
+            "type": "StaticBodyCOMP",
+            "position": [
+                600,
+                300
+            ],
+            "parameters": {}
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                500
+            ],
+            "parameters": {
+                "text": {
+                    "value": "VehicleCOMP — Basic\n\nBox body with 4-wheel vehicle physics.\nThrottle = 0.3 (slow forward).\nChange steer param to turn.\nUses VehicleBody3D + VehicleWheel3D.\n\nConnect a GamepadCHOP or KeyboardInCHOP\nfor interactive control."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 8.0
+                },
+                "tz": {
+                    "value": 15.0
+                },
+                "use_look_at": {
+                    "value": true
+                },
+                "look_at_y": {
+                    "value": 1.0
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box_body",
+            "from_port": 0,
+            "to": "geo_body",
+            "to_port": 0
+        },
+        {
+            "from": "geo_body",
+            "from_port": 0,
+            "to": "vehicle1",
+            "to_port": 0
+        },
+        {
+            "from": "floor_grid",
+            "from_port": 0,
+            "to": "geo_floor",
+            "to_port": 0
+        },
+        {
+            "from": "geo_floor",
+            "from_port": 0,
+            "to": "static_floor",
+            "to_port": 0
+        },
+        {
+            "from": "vehicle1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "static_floor",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 3
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Vehicle COMP — Basic\n\nVehicle physics body with 4 wheels, suspension, steering via VehicleBody3D.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

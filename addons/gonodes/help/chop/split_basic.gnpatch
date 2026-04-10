@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "channels": {
-                    "value": 4,
-                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Split CHOP \u2014 Basic\n\nSplits multi-channel noise into individual channels.",
+            "text": "Split CHOP — Basic\n\nSelect one channel or group of N channels from input.",
             "position": [
                 -100.0,
                 -100.0

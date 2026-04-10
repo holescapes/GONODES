@@ -141,14 +141,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CollisionPOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Collision POP — Advanced\n\nGround plane and bounding box collision for particles.\nCombined configuration: ground_y=1.0, bounce=0.6, friction=0.2, kill_below=-2000.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlurTOP \u2014 Parameters\n\nShowcases: size, quality, method.",
+            "text": "Blur TOP — Size\n\nTwo-pass separable blur with 7 filter types (Gaussian, Box, Triangle, Sinc, Hanning, Blackman, Bump).\nShowcasing: size=2.5, quality=3, method=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

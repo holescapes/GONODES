@@ -50,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SpoutInTOP — Parameters\n\nShowcases: sender_name, resolution.\nRequires gn_ext_spout extension.",
+            "text": "Spout In TOP — Variation\n\nReceive a shared GPU texture from another Spout sender application.",
             "position": [
                 -100.0,
                 -100.0

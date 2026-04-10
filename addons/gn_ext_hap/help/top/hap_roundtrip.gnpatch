@@ -1,6 +1,6 @@
 {
     "version": "1.0",
-    "description": "HAP round-trip \u2014 Record with HapOutTOP, then play back with HapInTOP for GPU-direct video loop.",
+    "description": "HAP round-trip — Record with HapOutTOP, then play back with HapInTOP for GPU-direct video loop.",
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
@@ -80,7 +80,26 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "HAP Round-Trip Demo\n\nTop chain: NoiseTOP \u2192 HapOutTOP (toggle record to capture)\nBottom chain: HapInTOP \u2192 NullTOP (plays back the recorded file)\n\n1. Toggle hapout1 'record' ON for a few seconds\n2. Toggle 'record' OFF to finalize\n3. hapin1 automatically plays back the GPU-direct HAP file"
+                    "value": "HAP Round-Trip Demo\n\nTop chain: NoiseTOP → HapOutTOP (toggle record to capture)\nBottom chain: HapInTOP → NullTOP (plays back the recorded file)\n\n1. Toggle hapout1 'record' ON for a few seconds\n2. Toggle 'record' OFF to finalize\n3. hapin1 automatically plays back the GPU-direct HAP file"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1000,
+                400
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
                 }
             }
         }
@@ -97,6 +116,33 @@
             "from_port": 0,
             "to": "null1",
             "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HAP Roundtrip\n\nDemonstrates HAP encode + decode pipeline.\nGPU-direct HAP video playback — DXT frames upload directly to GPU without CPU decode.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

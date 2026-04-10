@@ -17,9 +17,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
                     "value": 4.0,
@@ -91,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Shadertoy URL TOP \u2014 Effect Example\n\nCRT post-process applied to a NoiseTOP input.\niChannel0 is wired automatically when the node has one input connected.\nThe effect adds chromatic aberration, scanlines and a vignette using texture().\nAny number of input TOPs can be added: each becomes iChannel0, iChannel1, etc.\nEdit shadertoy_code inline or load a preset from the Presets menu.",
+            "text": "Shadertoy URL TOP — Effect Example\n\nCRT post-process applied to a NoiseTOP input.\niChannel0 is wired automatically when the node has one input connected.\nThe effect adds chromatic aberration, scanlines and a vignette using texture().\nAny number of input TOPs can be added: each becomes iChannel0, iChannel1, etc.\nEdit shadertoy_code inline or load a preset from the Presets menu.",
             "position": [
                 -250.0,
                 -200.0

@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "align_to_normal": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "scale": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "use_point_scale": {
                     "value": false
@@ -137,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CopySOP \u2014 Basic\n\nDefault settings.",
+            "text": "Copy SOP — Basic\n\nInstance template geometry onto each point of the target mesh.\nUsing: align_to_normal=True, scale=1.0, use_point_scale=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

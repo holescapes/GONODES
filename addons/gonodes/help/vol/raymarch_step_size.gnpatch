@@ -91,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RaymarchVOL \u2014 Parameters\n\nShowcases: width, height, max_steps.",
+            "text": "Noise VOL — Size\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).",
             "position": [
                 -100.0,
                 -100.0

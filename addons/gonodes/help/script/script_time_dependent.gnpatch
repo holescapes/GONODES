@@ -88,7 +88,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GDScriptSCRIPT \u2014 Parameters\n\nShowcases: time_dependent, cook_once, force_active.",
+            "text": "Noise CHOP — Dependent\n\nSmooth procedural noise channels with roughness control.\nShowcasing: length=100.",
             "position": [
                 -100.0,
                 -100.0

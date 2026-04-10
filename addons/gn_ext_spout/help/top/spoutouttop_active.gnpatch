@@ -68,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SpoutOutTOP \u2014 Parameters\n\nShowcases: sender_name, active.\nRequires gn_ext_spout extension.",
+            "text": "Spout Out TOP — Active\n\nShare the input texture via Spout to other applications.\nShowcasing: active=True.",
             "position": [
                 -100.0,
                 -100.0

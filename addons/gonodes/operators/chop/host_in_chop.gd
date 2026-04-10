@@ -12,6 +12,11 @@ extends GNChopBase
 var _host_channels: Dictionary = {}
 var _host_dirty: bool = false
 
+## Direct zero-copy path: channel data injected as raw typed arrays.
+## No JSON serialization, no env-var round-trip.
+var _host_direct_channels: Dictionary = {}
+var _host_direct_dirty: bool = false
+
 
 func _init() -> void:
 	node_type = "host_in"
@@ -36,10 +41,30 @@ func _set_host_channels(channels: Dictionary) -> void:
 	mark_dirty()
 
 
+## Called by GNEmbeddedHost._flush_inputs() with direct channel data.
+## Zero-copy: arrays are used directly from the host's staged pointers;
+## no JSON parsing, no env-var serialization.
+func _set_host_channels_direct(channels: Dictionary) -> void:
+	_host_direct_channels = channels
+	_host_direct_dirty = true
+	_host_dirty = false  # Direct path supersedes env-var path
+	mark_dirty()
+
+
 func _cook(_inputs: Array[GNData]) -> GNData:
 	var sr: float = get_param_value("sample_rate")
 	var out := _prepare_output(sr)
 
+	# Direct zero-copy path: channels injected as raw typed arrays.
+	if _host_direct_dirty and not _host_direct_channels.is_empty():
+		for ch_name in _host_direct_channels:
+			var samples: PackedFloat32Array = _host_direct_channels[ch_name]
+			out.set_channel(ch_name, samples)
+		out.valid = true
+		_host_direct_dirty = false
+		return out
+
+	# Env-var path (legacy).
 	for ch_name in _host_channels:
 		var samples: PackedFloat32Array = _host_channels[ch_name]
 		out.set_channel(ch_name, samples)

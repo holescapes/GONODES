@@ -75,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OutTunnel \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Out Tunnel — Advanced\n\nOutput tunnel — bridges data from inner graph to parent sub-network.\nCombined configuration: index=3, family=2.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

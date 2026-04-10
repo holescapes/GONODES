@@ -77,7 +77,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MotionBlurTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Motion Blur TOP — Basic\n\nTemporal motion blur driven by a flow/velocity texture.\nUsing: strength=1.0, quality=0.",
             "position": [
                 -100.0,
                 -100.0

@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SwitchCOMP \u2014 Parameters\n\nShowcases: index.",
+            "text": "Switch COMP — Variation\n\nSelect one of up to 8 component inputs by index.\nShowcasing: index=0.",
             "position": [
                 -100.0,
                 -100.0

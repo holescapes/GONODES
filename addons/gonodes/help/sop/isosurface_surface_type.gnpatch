@@ -128,14 +128,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "IsoSurfaceSOP \u2014 Parameters\n\nShowcases: surface_type, resolution, bounds_size.",
+            "text": "Iso Surface SOP — Type\n\nAnalytic implicit surface via marching cubes (Gyroid, Schwarz-P, Torus, custom).\nShowcasing: surface_type=1, bounds_size=3.14, threshold=0.5, frequency=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

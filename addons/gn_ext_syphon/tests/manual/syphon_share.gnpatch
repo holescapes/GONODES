@@ -1,0 +1,62 @@
+{
+	"generator": "GONODES",
+	"description": "Syphon texture sharing demo (macOS). Chain 1: NoiseTOP → ChromaticAberrationTOP → SyphonOutTOP sharing as 'GONODES_Test'. Chain 2: SyphonInTOP receiving from any Syphon server → NullTOP for monitoring. Demonstrates macOS GPU texture sharing with external apps (VDMX, MadMapper, etc.).",
+	"connections": [
+		{
+			"from": "gen_src",
+			"from_port": 0,
+			"to": "chroma_fx",
+			"to_port": 0
+		},
+		{
+			"from": "chroma_fx",
+			"from_port": 0,
+			"to": "syphon_send",
+			"to_port": 0
+		},
+		{
+			"from": "syphon_recv",
+			"from_port": 0,
+			"to": "recv_view",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"gen_src": {
+			"type": "NoiseTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}},
+				"seed": {"value": 21}
+			}
+		},
+		"chroma_fx": {
+			"type": "ChromaticAberrationTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"strength": {"value": 4.0}
+			}
+		},
+		"syphon_send": {
+			"type": "SyphonOutTOP",
+			"position": [800.0, 0.0],
+			"parameters": {
+				"server_name": {"value": "GONODES_Test"},
+				"active": {"value": true}
+			}
+		},
+		"syphon_recv": {
+			"type": "SyphonInTOP",
+			"position": [0.0, 300.0],
+			"parameters": {
+				"app_name": {"value": ""},
+				"server_name": {"value": ""}
+			}
+		},
+		"recv_view": {
+			"type": "NullTOP",
+			"position": [400.0, 300.0],
+			"parameters": {}
+		}
+	}
+}

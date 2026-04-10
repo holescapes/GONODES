@@ -81,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Null DAT — Advanced\n\nPass-through.",
             "position": [
                 -100.0,
                 -100.0

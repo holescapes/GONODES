@@ -2,34 +2,30 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "sphere1": {
-            "type": "SphereSOP",
+        "src_grid": {
+            "type": "GridSOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "radial_segments": {
-                    "value": 16,
-                    "expression": "(16 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                "rows": {
+                    "value": 10
                 },
-                "rings": {
-                    "value": 8,
-                    "expression": "(8 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                "cols": {
+                    "value": 10
                 }
             }
         },
-        "wireframe1": {
-            "type": "WireframeSOPNative",
+        "focus1": {
+            "type": "WireframeSOP",
             "position": [
                 450,
                 100
             ],
             "parameters": {}
         },
-        "geo1": {
+        "geo_view": {
             "type": "GeometryCOMP",
             "position": [
                 800,
@@ -37,7 +33,7 @@
             ],
             "parameters": {}
         },
-        "cam1": {
+        "cam_view": {
             "type": "CameraCOMP",
             "position": [
                 800,
@@ -55,10 +51,10 @@
                 }
             }
         },
-        "render1": {
+        "render_view": {
             "type": "RenderTOP",
             "position": [
-                1150,
+                1100,
                 100
             ],
             "parameters": {
@@ -74,7 +70,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1500,
+                1450,
                 100
             ],
             "parameters": {
@@ -93,31 +89,31 @@
     },
     "connections": [
         {
-            "from": "sphere1",
+            "from": "src_grid",
             "from_port": 0,
-            "to": "wireframe1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "wireframe1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "geo1",
+            "to": "geo_view",
             "to_port": 0
         },
         {
-            "from": "geo1",
+            "from": "geo_view",
             "from_port": 0,
-            "to": "render1",
+            "to": "render_view",
             "to_port": 0
         },
         {
-            "from": "cam1",
+            "from": "cam_view",
             "from_port": 0,
-            "to": "render1",
+            "to": "render_view",
             "to_port": 1
         },
         {
-            "from": "render1",
+            "from": "render_view",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -127,14 +123,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Wireframe SOP (Native) \u2014 Edge Line Extraction\n\nSphere triangles converted to wireframe lines.\nDuplicate edges are automatically removed.\nNative C++ processes edge deduplication via hashing.",
+            "text": "Wireframe SOP — Basic\n\nConvert triangles to deduplicated wireframe lines.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

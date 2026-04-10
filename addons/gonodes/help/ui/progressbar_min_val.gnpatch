@@ -105,14 +105,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ProgressBarUI \u2014 Parameters\n\nShowcases: min_val, max_val, default_val.",
+            "text": "Progress Bar UI — Val\n\nProgress bar driven by CHOP input. Outputs value and ratio.\nShowcasing: min_val=0.5, max_val=50.0, default_val=25.0, show_percentage=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

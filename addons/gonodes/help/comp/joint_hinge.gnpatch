@@ -2,61 +2,34 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "window1": {
+        "src_sphere": {
+            "type": "SphereSOP",
             "position": [
-                1450,
+                100,
                 100
             ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "y": 512,
-                        "_type": "Vector2i",
-                        "x": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            },
-            "type": "WindowOUT"
+            "parameters": {}
         },
-        "box_view": {
-            "type": "BoxSOP",
+        "focus1": {
+            "type": "JointCOMP",
             "position": [
-                500,
-                100
+                100,
+                250
             ],
             "parameters": {}
         },
         "geo_view": {
             "type": "GeometryCOMP",
             "position": [
-                800,
+                450,
                 100
             ],
             "parameters": {}
         },
-        "render_view": {
-            "type": "RenderTOP",
-            "position": [
-                1100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
         "cam_view": {
             "type": "CameraCOMP",
             "position": [
-                800,
+                450,
                 300
             ],
             "parameters": {
@@ -70,14 +43,55 @@
                     "value": 3
                 }
             }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                750,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
         {
-            "from": "box_view",
+            "from": "src_sphere",
             "from_port": 0,
             "to": "geo_view",
             "to_port": 0
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 2
         },
         {
             "from": "geo_view",
@@ -102,13 +116,13 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Joint COMP — Hinge Constraint\n\nHinge joint at (0, 3, 0).\njoint_type: 0=Pin, 1=Hinge, 2=Slider,\n3=ConeTwist, 4=6DOF.\nConnect to RigidBody COMPs as inputs.",
+            "text": "Joint COMP — Hinge\n\nJoint3D constraint between two physics bodies (Pin, Hinge, Slider, ConeTwist, 6DOF).",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                380.0,
+                500.0,
                 120.0
             ],
             "color": [

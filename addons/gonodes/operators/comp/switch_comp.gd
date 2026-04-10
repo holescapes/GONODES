@@ -2,8 +2,8 @@ class_name SwitchCOMP
 extends GNCompBase
 ## Switches between multiple component inputs.
 ##
-## Routes one of up to 8 component inputs to the output based on the
-## selected index parameter. Out-of-range indices are clamped.
+## Uses dynamic auto-grow input ports — connect to add more slots,
+## disconnect to shrink.  Starts with 2 inputs.
 
 
 func _init() -> void:
@@ -11,13 +11,22 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	for i in range(8):
-		add_input("in%d" % i, GNFamily.Type.COMP, false, "Component input %d" % i)
+	_enable_dynamic_inputs(GNFamily.Type.COMP, "in", "Component Input", 2)
 	add_output("out", GNFamily.Type.COMP, "Selected component")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("index", 0, 0, 7, "Input Index", "Which input to pass through"))
+	add_parameter(GNParameter.create_int("index", 0, 0, 0, "Input Index", "Which input to pass through"))
+
+
+func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
+	super(connected_ports)
+	var idx_param := get_parameter("index")
+	if idx_param:
+		var max_idx: int = maxi(input_ports.size() - 2, 0)
+		idx_param.max_value = max_idx
+		if int(idx_param.value) > max_idx:
+			idx_param.set_value(max_idx)
 
 
 func get_active_input_indices() -> PackedInt32Array:

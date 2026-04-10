@@ -133,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MirrorSOP \u2014 Parameters\n\nShowcases: plane, origin, merge.",
+            "text": "Mirror SOP — Plane\n\nReflect geometry across a plane with optional merge.\nShowcasing: plane=1, origin=0.5, merge=True, reverse_winding=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

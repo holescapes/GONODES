@@ -4,32 +4,70 @@
     "nodes": {
         "ndiin1": {
             "type": "NDIInTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "source": { "value": "" },
-                "resolution": { "value": { "_type": "Vector2i", "x": 1920, "y": 1080 } }
+                "source": {
+                    "value": ""
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1920,
+                        "y": 1080
+                    }
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [600, 100],
+            "position": [
+                600,
+                100
+            ],
             "parameters": {
-                "resolution": { "value": { "_type": "Vector2i", "x": 960, "y": 540 } },
-                "open": { "value": true }
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 960,
+                        "y": 540
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        { "from": "ndiin1", "from_port": 0, "to": "window1", "to_port": 0 }
+        {
+            "from": "ndiin1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NDI In — Basic\n\nReceive NDI video from any source on the local network.\nSet the 'source' parameter to the NDI source name\n(e.g. 'OBS (DESKTOP-ABC)').\n\nRequires gn_ext_ndi GDExtension — see README.md.",
-            "position": [-100.0, -100.0],
-            "size": [450.0, 120.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "NDI In TOP — Basic\n\nReceive NDI video stream as a texture. Auto-discovers sources on the local network.\nUsing: source=.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                450.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

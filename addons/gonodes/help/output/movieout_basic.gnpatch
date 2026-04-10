@@ -44,14 +44,10 @@
                     "value": 0
                 },
                 "quality": {
-                    "value": 0.9,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.9
                 },
                 "start_frame": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frame_padding": {
                     "value": 4
@@ -85,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MovieOUT \u2014 Basic\n\nDefault settings.",
+            "text": "Movie OUT — Basic\n\nSave image sequence to disk (numbered PNG/WebP frames).\nUsing: active=False, output_folder=user://output/sequence, file_prefix=frame, format=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

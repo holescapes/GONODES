@@ -94,7 +94,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FIFODAT \u2014 Parameters\n\nShowcases: max_rows, active.",
+            "text": "FIFO DAT — Active\n\nFirst-in-first-out rolling row buffer with max row limit.\nShowcasing: max_rows=99, active=True.",
             "position": [
                 -100.0,
                 -100.0

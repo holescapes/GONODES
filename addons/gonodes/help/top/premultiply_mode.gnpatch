@@ -68,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PremultiplyTOP \u2014 Parameters\n\nShowcases: mode.",
+            "text": "Premultiply TOP — Mode\n\nPremultiply or unpremultiply RGB by alpha.\nShowcasing: mode=1.",
             "position": [
                 -100.0,
                 -100.0

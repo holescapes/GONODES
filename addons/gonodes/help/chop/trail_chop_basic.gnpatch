@@ -18,9 +18,7 @@
             ],
             "parameters": {
                 "length": {
-                    "value": 120,
-                    "expression": "(120 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 120
                 },
                 "active": {
                     "value": true
@@ -87,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Trail CHOP \u2014 Scrolling Buffer\n\nRecords input over 120 frames as a scrolling history.\nLike an oscilloscope trace of CHOP values.",
+            "text": "Trail CHOP — Scrolling Buffer\n\nRecords input over 120 frames as a scrolling history.\nLike an oscilloscope trace of CHOP values.",
             "position": [
                 -100.0,
                 -150.0

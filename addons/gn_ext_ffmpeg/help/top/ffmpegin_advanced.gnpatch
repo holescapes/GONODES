@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FFmpegInTOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_ffmpeg extension.",
+            "text": "FFmpeg In TOP — Advanced\n\nFFmpeg video decoder. Supports H.264, H.265, VP9, AV1 and many more codecs via EIRTeam.FFmpeg GDExtension.\nCombined configuration: play=False, loop=False, speed=2.0, seek=-1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

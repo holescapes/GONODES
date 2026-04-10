@@ -73,7 +73,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MonoTOP \u2014 Parameters\n\nShowcases: method, mix.",
+            "text": "Mono TOP — Method\n\nConvert to grayscale (Rec.709, Rec.601, Average, Desaturate).\nShowcasing: method=1, mix=0.5.",
             "position": [
                 -100.0,
                 -100.0

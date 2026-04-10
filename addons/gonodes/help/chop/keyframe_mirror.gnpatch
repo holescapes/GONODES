@@ -2,11 +2,34 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "noise1": {
-            "type": "NoiseTOP",
+        "src_wave": {
+            "type": "WaveCHOP",
             "position": [
                 100,
-                400
+                100
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 2.0
+                },
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
+        },
+        "focus1": {
+            "type": "KeyframeCHOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
             ],
             "parameters": {
                 "resolution": {
@@ -18,35 +41,11 @@
                 }
             }
         },
-        "transform1": {
-            "type": "TransformTOP",
-            "position": [
-                500,
-                200
-            ],
-            "parameters": {
-                "sx": {
-                    "mode": "EXPRESSION",
-                    "value": 1.0,
-                    "expression": "chop(\"keyframe1\",\"out\",0)"
-                },
-                "sy": {
-                    "mode": "EXPRESSION",
-                    "value": 1.0,
-                    "expression": "chop(\"keyframe1\",\"out\",1)"
-                },
-                "rotate": {
-                    "mode": "EXPRESSION",
-                    "value": 0.0,
-                    "expression": "chop(\"keyframe1\",\"out\",2)"
-                }
-            }
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                900,
-                200
+                1150,
+                100
             ],
             "parameters": {
                 "resolution": {
@@ -64,13 +63,19 @@
     },
     "connections": [
         {
-            "from": "noise1",
+            "from": "src_wave",
             "from_port": 0,
-            "to": "transform1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "transform1",
+            "from": "focus1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -80,14 +85,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Keyframe CHOP — Mirror Extend\n\n3 keyframe channels drive a TOP transform: scale_x,\nscale_y (opposing), and rotation (0→360). Extend = MIRROR\nso the animation bounces back and forth forever.\nExpressions on TransformTOP read the keyframe channels.",
+            "text": "Keyframe CHOP — Mirror\n\nKeyframe curve animation → CHOP channels (ramp curves sampled over time).",
             "position": [
                 -100.0,
-                -120.0
+                -100.0
             ],
             "size": [
-                520.0,
-                110.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

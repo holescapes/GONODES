@@ -133,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ScatterSOP \u2014 Parameters\n\nShowcases: count, seed, emit_normals.",
+            "text": "Scatter SOP — Normals\n\nScatter random points on mesh surface (area-weighted sampling).\nShowcasing: count=99, seed=41, emit_normals=True, emit_uvs=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

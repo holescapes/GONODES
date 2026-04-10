@@ -82,14 +82,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CustomShaderTOP \u2014 Parameters\n\nShowcases: time_dependent, cook_once, resolution.",
+            "text": "Custom Shader TOP — Dependent\n\nUser-editable GLSL shader with 4 texture inputs and uniforms.\nShowcasing: time_dependent=True, cook_once=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ButtonUI \u2014 Parameters\n\nShowcases: label, toggle_mode, min_size.",
+            "text": "Button UI — Mode\n\nPush button widget. Outputs press/release state as CHOP channel.\nShowcasing: toggle_mode=True.",
             "position": [
                 -100.0,
                 -100.0

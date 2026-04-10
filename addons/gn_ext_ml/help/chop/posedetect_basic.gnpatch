@@ -26,9 +26,7 @@
             ],
             "parameters": {
                 "min_confidence": {
-                    "value": 0.5,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 }
             }
         },
@@ -94,14 +92,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Pose Detect \u2014 Basic\n\nWebcam -> BlazePose body detection -> 33 keypoints.\nOutputs x/y/z/visibility per joint as CHOP channels.\nVisualized as waveform via CHOPtoTOP.\n\nRequires gn_ext_ml + BlazePose ONNX model.",
+            "text": "Pose Detect CHOP — Basic\n\nBody pose estimation via BlazePose — 33 keypoints as CHOP channels (x/y/z/visibility per joint).\nUsing: min_confidence=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                450.0,
-                120.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

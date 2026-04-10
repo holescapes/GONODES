@@ -92,14 +92,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseIMG \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Noise IMG — Advanced\n\nCPU procedural noise image (value noise, white noise).\nCombined configuration: type=2, scale=8.0, offset_x=1.0, offset_y=1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

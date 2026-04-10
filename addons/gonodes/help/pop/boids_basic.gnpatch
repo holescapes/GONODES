@@ -37,14 +37,10 @@
             ],
             "parameters": {
                 "perception_radius": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 },
                 "avoid_radius": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "separation": {
                     "value": 1.5
@@ -175,7 +171,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Boids Flocking Simulation\n\nSourcePOP emits particles \u2192 BoidsPOP applies Reynolds flocking rules:\n\u2022 Separation: steer away from close neighbors\n\u2022 Alignment: match average velocity of nearby flock\n\u2022 Cohesion: steer toward flock center\n\nSpherical boundary keeps the flock contained.\nAll three weights are adjustable. Try:\n\u2022 High separation + low cohesion = scattered\n\u2022 High cohesion + low separation = tight swarm\n\u2022 High alignment = schooling fish behavior",
+            "text": "Boids Flocking Simulation\n\nSourcePOP emits particles → BoidsPOP applies Reynolds flocking rules:\n• Separation: steer away from close neighbors\n• Alignment: match average velocity of nearby flock\n• Cohesion: steer toward flock center\n\nSpherical boundary keeps the flock contained.\nAll three weights are adjustable. Try:\n• High separation + low cohesion = scattered\n• High cohesion + low separation = tight swarm\n• High alignment = schooling fish behavior",
             "position": [
                 -100.0,
                 -170.0

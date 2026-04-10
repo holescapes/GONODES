@@ -79,7 +79,7 @@ func get_group_node() -> Node3D:
 	return _group_node
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	var entries: Array = []
 	for child in _managed_children:
 		if not is_instance_valid(child):

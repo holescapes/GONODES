@@ -133,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SkinSOP \u2014 Parameters\n\nShowcases: close_u, close_v, end_caps.",
+            "text": "Skin SOP — U\n\nSkin (loft) multiple cross-sections into a surface mesh.\nShowcasing: close_u=True, close_v=True, end_caps=True, recompute_normals=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

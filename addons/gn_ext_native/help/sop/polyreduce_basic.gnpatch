@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "radius": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "rings": {
-                    "value": 32,
-                    "expression": "(32 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 32
                 },
                 "radial_segments": {
                     "value": 32
@@ -140,7 +136,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Poly Reduce SOP (Native) \u00e2\u20ac\u201d Sphere Decimation\n\nReduces a 32-ring sphere to 25% of its triangles\nusing QEM edge-collapse. Boundary edges are preserved\nwith weight 10. Shows low-poly faceted result.",
+            "text": "Poly Reduce SOP (Native) â€” Sphere Decimation\n\nReduces a 32-ring sphere to 25% of its triangles\nusing QEM edge-collapse. Boundary edges are preserved\nwith weight 10. Shows low-poly faceted result.",
             "position": [
                 -100.0,
                 -150.0

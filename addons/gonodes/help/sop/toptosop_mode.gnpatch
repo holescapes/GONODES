@@ -147,14 +147,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TOPtoSOP \u2014 Parameters\n\nShowcases: mode, resolution, height_scale.",
+            "text": "TO Pto SOP — Mode\n\nConvert TOP texture to SOP heightfield, point cloud, or normal map mesh.\nShowcasing: mode=1, height_scale=1.0, grid_size=5.0, threshold=0.05.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

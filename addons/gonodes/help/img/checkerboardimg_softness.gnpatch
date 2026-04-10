@@ -95,7 +95,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CheckerboardIMG \u2014 Parameters\n\nShowcases: resolution, cells_x, cells_y.",
+            "text": "Checkerboard IMG — Softness\n\nCPU checkerboard pattern generator.\nShowcasing: cells_x=7, cells_y=7, softness=0.5.",
             "position": [
                 -100.0,
                 -100.0

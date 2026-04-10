@@ -81,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ConvolutionTOP \u2014 Parameters\n\nShowcases: preset, kernel_size, divisor.",
+            "text": "Convolution TOP — Preset\n\nCustom NxN kernel convolution with Emboss/Sharpen/Edge presets.\nShowcasing: preset=1, kernel_size=2, divisor=0.5, bias=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

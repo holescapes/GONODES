@@ -41,14 +41,10 @@
                     "value": 0
                 },
                 "quality": {
-                    "value": 0.75,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.75
                 },
                 "auto_number": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "start_frame": {
                     "value": 0
@@ -68,14 +64,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextureSaveOUT \u2014 Basic\n\nDefault settings.",
+            "text": "Texture Save OUT — Basic\n\nSave GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write.\nUsing: active=False, file_path=user://output/frame, format=0, quality=0.75.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

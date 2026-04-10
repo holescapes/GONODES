@@ -67,7 +67,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextDAT \u2014 Parameters\n\nShowcases: text.",
+            "text": "Text DAT — Variation\n\nPlain text storage.",
             "position": [
                 -100.0,
                 -100.0

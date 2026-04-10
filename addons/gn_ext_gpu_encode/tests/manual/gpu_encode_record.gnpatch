@@ -1,0 +1,71 @@
+{
+	"generator": "GONODES",
+	"description": "GPU hardware recording pipeline. Generates a NoiseTOP source, applies chromatic aberration and transform animation, then feeds into MovieFileOutTOP to record an MP4 at 8 Mbps / 30 fps. Toggle 'record' on the output node to start/stop capture.",
+	"connections": [
+		{
+			"from": "noise_gen",
+			"from_port": 0,
+			"to": "chroma_fx",
+			"to_port": 0
+		},
+		{
+			"from": "chroma_fx",
+			"from_port": 0,
+			"to": "transform1",
+			"to_port": 0
+		},
+		{
+			"from": "transform1",
+			"from_port": 0,
+			"to": "recorder",
+			"to_port": 0
+		},
+		{
+			"from": "transform1",
+			"from_port": 0,
+			"to": "preview_null",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"noise_gen": {
+			"type": "NoiseTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}},
+				"seed": {"value": 7}
+			}
+		},
+		"chroma_fx": {
+			"type": "ChromaticAberrationTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"strength": {"value": 3.5}
+			}
+		},
+		"transform1": {
+			"type": "TransformTOP",
+			"position": [800.0, 0.0],
+			"parameters": {
+				"rotate": {"value": 15.0},
+				"scale_x": {"value": 1.1},
+				"scale_y": {"value": 1.1}
+			}
+		},
+		"recorder": {
+			"type": "MovieFileOutTOP",
+			"position": [1200.0, 0.0],
+			"parameters": {
+				"file_path": {"value": "output.mp4"},
+				"bitrate": {"value": 8000},
+				"fps": {"value": 30},
+				"record": {"value": false}
+			}
+		},
+		"preview_null": {
+			"type": "NullTOP",
+			"position": [1200.0, 200.0],
+			"parameters": {}
+		}
+	}
+}

@@ -106,7 +106,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LabelUI \u2014 Parameters\n\nShowcases: text, font_size, font_color.",
+            "text": "Label UI — Align\n\nDisplay-only text label driven by DAT input or expression.\nShowcasing: font_size=15, h_align=1.",
             "position": [
                 -100.0,
                 -100.0

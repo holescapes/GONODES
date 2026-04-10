@@ -15,9 +15,7 @@
                     "mode": "EXPRESSION"
                 },
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 }
             }
         },
@@ -107,7 +105,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Expression CHOP \u2014 Formula Eval\n\nApplies sin(v*PI)*0.5 + i*0.01 per sample.\nVariables: v (value), i (index), n (count),\nt (time), dt (delta), ch (channel map).",
+            "text": "Expression CHOP — Formula Eval\n\nApplies sin(v*PI)*0.5 + i*0.01 per sample.\nVariables: v (value), i (index), n (count),\nt (time), dt (delta), ch (channel map).",
             "position": [
                 -100.0,
                 -150.0

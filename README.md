@@ -293,7 +293,8 @@ Both formats work today. A dedicated asset browser and community sharing portal 
 ├─────────────────────────────────────────────┤
 │  Cook Engine                                │
 │  Topological DAG walk, dirty propagation,   │
-│  active-chain pruning, expression eval      │
+│  active-chain pruning, expression eval,     │
+│  output demand culling                      │
 ├─────────────────────────────────────────────┤
 │  Data Types & Parameters                    │
 │  Textures, Channels, Geometry, Tables,      │

@@ -42,9 +42,7 @@
             ],
             "parameters": {
                 "index": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 }
             }
         },
@@ -150,7 +148,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Switch COMP \u2014 Select Input\n\nSelects one of up to 8 component inputs.\nChange 'index' to switch between scenes.",
+            "text": "Switch COMP — Select Input\n\nSelects one of up to 8 component inputs.\nChange 'index' to switch between scenes.",
             "position": [
                 -100.0,
                 -150.0

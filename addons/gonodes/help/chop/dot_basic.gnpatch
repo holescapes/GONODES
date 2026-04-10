@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -167,7 +165,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Dot Node \u2014 Branch Routing\n\nDot node acts as a pass-through routing point.\nSame LFO signal split into two branches:\n\u2022 Math (x2 gain) \u2192 top output\n\u2022 Filter (smoothed) \u2192 bottom output\nDot adapts to any family \u2014 works with TOP, SOP, DAT too.",
+            "text": "Dot Node — Branch Routing\n\nDot node acts as a pass-through routing point.\nSame LFO signal split into two branches:\n• Math (x2 gain) → top output\n• Filter (smoothed) → bottom output\nDot adapts to any family — works with TOP, SOP, DAT too.",
             "position": [
                 -100.0,
                 -120.0

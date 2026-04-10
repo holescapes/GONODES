@@ -160,14 +160,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectSOP \u2014 Parameters\n\nShowcases: entity, method, start.",
+            "text": "Select SOP — Entity\n\nSelect geometry by wire or wireless name reference, with element filtering.\nShowcasing: entity=1, method=1, start=0, end=49.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

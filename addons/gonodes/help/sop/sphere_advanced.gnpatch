@@ -122,14 +122,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SphereSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Sphere SOP — Advanced\n\nSphere or hemisphere mesh.\nCombined configuration: radius=1.0, height=2.0, radial_segments=34, rings=18.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

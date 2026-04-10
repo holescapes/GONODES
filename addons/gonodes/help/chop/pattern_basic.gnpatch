@@ -64,7 +64,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Pattern CHOP \u2014 Basic\n\nGenerates a repeating pattern.\nUseful for lookup tables.",
+            "text": "Pattern CHOP — Basic\n\nMulti-sample pattern (ramp, sine, step, random, constant).",
             "position": [
                 -100.0,
                 -100.0

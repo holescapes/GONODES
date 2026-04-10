@@ -145,7 +145,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MergeCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "text": "Sphere SOP — Tx\n\nSphere or hemisphere mesh.",
             "position": [
                 -100.0,
                 -100.0

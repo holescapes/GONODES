@@ -136,14 +136,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SweepSOP \u2014 Parameters\n\nShowcases: scale, profile_segs, close_profile.",
+            "text": "Sweep SOP — Scale\n\nSweep a cross-section along a backbone curve (parallel transport frames).\nShowcasing: scale=0.05, profile_segs=11, close_profile=True, close_backbone=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

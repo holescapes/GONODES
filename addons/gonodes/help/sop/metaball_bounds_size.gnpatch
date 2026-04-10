@@ -170,14 +170,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MetaballSOP \u2014 Parameters\n\nShowcases: resolution, bounds_size, threshold.",
+            "text": "Metaball SOP — Size\n\nMetaball implicit surface via marching cubes from point cloud blobs.\nShowcasing: bounds_size=3.0, threshold=0.5, default_radius=0.5, ball_count=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "value0": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Spring CHOP \u2014 Basic\n\nSpring dynamics on constant target.\nOscillates and settles.",
+            "text": "Spring CHOP — Basic\n\nDamped harmonic oscillator — channels spring toward input values.",
             "position": [
                 -100.0,
                 -100.0

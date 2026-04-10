@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "distance": {
-                    "value": 0.2,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.2
                 },
                 "output_sides": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "output_front": {
                     "value": true
@@ -140,14 +136,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ExtrudeSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Extrude SOP — Basic\n\nPer-triangle face extrusion with front, back, and side walls.\nUsing: distance=0.2, output_sides=True, output_front=True, output_back=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

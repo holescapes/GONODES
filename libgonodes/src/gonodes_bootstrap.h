@@ -50,11 +50,96 @@ struct gonodes_instance_s {
     void* on_param_changed_userdata;
     gonodes_log_fn log_callback;
     void* log_callback_userdata;
+    gonodes_event_fn on_event;
+    void* on_event_userdata;
 
     /* Stats. */
     double last_cook_time_ms;
     int    last_cooked_count;
     int    frame_number;
+
+    /* Transport state (Gap 6). */
+    int    transport_state;     /* gonodes_transport_state enum value. */
+    double transport_speed;     /* 1.0 = normal. */
+    double transport_time;      /* Accumulated time in seconds. */
+
+    /* Geometry cache (Gap 4). */
+    gonodes_geometry_data_t cached_geometry;
+    float* geo_positions_buf;   /* Owned buffer for positions. */
+    float* geo_normals_buf;     /* Owned buffer for normals. */
+    float* geo_uvs_buf;         /* Owned buffer for UVs. */
+    float* geo_colors_buf;      /* Owned buffer for colors. */
+    uint32_t* geo_indices_buf;  /* Owned buffer for indices. */
+
+    /* Pixel readback buffer (Gap 9). */
+    void*  pixel_readback_buf;
+    int    pixel_readback_size;
+
+    /* Texture info cache (Gap 2). */
+    char* cached_texture_info_json;
+
+    /* ── v1.2.0: Zero-copy staging ─────────────────────────────────────── */
+
+    /* CHOP direct input: staged pointers valid for one cook frame. */
+    struct {
+        char node_id[256];
+        const char** channel_names;
+        const float** channel_data;
+        const int*    sample_counts;
+        int           num_channels;
+    } staged_chop_inputs[16];    /* Max 16 concurrent HostInCHOP nodes. */
+    int staged_chop_count;
+
+    /* DAT direct input: staged pointer valid for one cook frame. */
+    struct {
+        char node_id[256];
+        const char* json_data;
+        int length;
+    } staged_dat_inputs[16];
+    int staged_dat_count;
+
+    /* SOP direct input: staged pointers valid for one cook frame. */
+    struct {
+        char node_id[256];
+        const float* positions;
+        const float* normals;
+        const float* uvs;
+        const float* colors;
+        int vertex_count;
+        const uint32_t* indices;
+        int index_count;
+    } staged_sop_inputs[16];
+    int staged_sop_count;
+
+    /* VOL GPU input: staged handle valid for one cook frame. */
+    struct {
+        char node_id[256];
+        uint64_t texture_handle;
+        int width, height, depth, channels;
+        char field_name[64];
+    } staged_vol_gpu_inputs[16];
+    int staged_vol_gpu_count;
+
+    /* POP GPU input: staged handle valid for one cook frame. */
+    struct {
+        char node_id[256];
+        uint64_t buffer_handle;
+        int particle_count;
+        int stride;
+        int buffer_size;
+    } staged_pop_gpu_inputs[16];
+    int staged_pop_gpu_count;
+
+    /* VOL GPU output cache. */
+    gonodes_volume_gpu_handle_t cached_vol_gpu;
+
+    /* POP GPU output cache. */
+    gonodes_particle_gpu_handle_t cached_pop_gpu;
+
+    /* CHOP direct output cache. */
+    gonodes_chop_data_t cached_chop_direct;
+    gonodes_channel_info_t* cached_chop_channels;   /* Heap-allocated array. */
+    int cached_chop_channels_capacity;
 };
 
 /* ── Internal helpers (not part of public API) ────────────────────────────── */

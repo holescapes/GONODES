@@ -87,7 +87,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SwitchDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Switch DAT — Advanced\n\nSelect one of 2 table inputs by index.\nCombined configuration: index=2.",
             "position": [
                 -100.0,
                 -100.0

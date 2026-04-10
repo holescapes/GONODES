@@ -99,14 +99,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextureRectUI \u2014 Parameters\n\nShowcases: stretch_mode, min_size, expand_mode.",
+            "text": "Texture Rect UI — Mode\n\nDisplays a TOP texture in panel. Optional MAT shader overlay.\nShowcasing: stretch_mode=1, expand_mode=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

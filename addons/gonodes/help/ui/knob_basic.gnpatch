@@ -13,14 +13,10 @@
                     "value": "Knob"
                 },
                 "min_val": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "max_val": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "default_val": {
                     "value": 0.5
@@ -96,14 +92,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "KnobUI \u2014 Basic\n\nDefault settings.",
+            "text": "Knob UI — Basic\n\nRotary knob widget. Outputs float value as CHOP channel.\nUsing: label=Knob, min_val=0.0, max_val=1.0, default_val=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

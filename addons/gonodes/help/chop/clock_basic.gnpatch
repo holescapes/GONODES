@@ -64,7 +64,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Clock CHOP \u2014 Basic\n\nOutputs current time as channel values.",
+            "text": "Clock CHOP — Basic\n\nSystem time, frame count, elapsed time, and BPM beat channels.",
             "position": [
                 -100.0,
                 -100.0

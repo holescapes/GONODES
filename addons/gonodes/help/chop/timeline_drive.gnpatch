@@ -2,11 +2,34 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "noise1": {
-            "type": "NoiseTOP",
+        "src_wave": {
+            "type": "WaveCHOP",
             "position": [
                 100,
-                350
+                100
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 2.0
+                },
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
+        },
+        "focus1": {
+            "type": "TimelineCHOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
             ],
             "parameters": {
                 "resolution": {
@@ -18,35 +41,11 @@
                 }
             }
         },
-        "transform1": {
-            "type": "TransformTOP",
-            "position": [
-                500,
-                250
-            ],
-            "parameters": {
-                "rotate": {
-                    "mode": "EXPRESSION",
-                    "value": 0.0,
-                    "expression": "chop(\"timeline1\",\"fraction\") * 360.0"
-                },
-                "sx": {
-                    "mode": "EXPRESSION",
-                    "value": 1.0,
-                    "expression": "0.5 + chop(\"timeline1\",\"fraction\") * 1.5"
-                },
-                "sy": {
-                    "mode": "EXPRESSION",
-                    "value": 1.0,
-                    "expression": "0.5 + chop(\"timeline1\",\"fraction\") * 1.5"
-                }
-            }
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                900,
-                250
+                1150,
+                100
             ],
             "parameters": {
                 "resolution": {
@@ -64,13 +63,19 @@
     },
     "connections": [
         {
-            "from": "noise1",
+            "from": "src_wave",
             "from_port": 0,
-            "to": "transform1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "transform1",
+            "from": "focus1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -80,14 +85,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Timeline CHOP — Drive Transform\n\nA Ping-Pong timeline (0–6 s) drives a Transform TOP via expressions.\n• Rotation: fraction × 360° (full spin per cycle)\n• Scale: 0.5–2.0 (grows with progress)\nDemonstrates referencing timeline channels from expressions.",
+            "text": "Timeline CHOP — Drive\n\nIndependent local timeline — generates time/frame/fraction channels.",
             "position": [
                 -100.0,
-                -120.0
+                -100.0
             ],
             "size": [
-                530.0,
-                110.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

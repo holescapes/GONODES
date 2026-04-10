@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "scale": {
-                    "value": 0.1,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.1
                 },
                 "profile_segs": {
-                    "value": 12,
-                    "expression": "(12 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 12
                 },
                 "close_profile": {
                     "value": true
@@ -143,14 +139,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SweepSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Sweep SOP — Basic\n\nSweep a cross-section along a backbone curve (parallel transport frames).\nUsing: scale=0.1, profile_segs=12, close_profile=True, close_backbone=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

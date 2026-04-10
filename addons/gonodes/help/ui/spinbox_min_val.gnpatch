@@ -130,14 +130,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SpinBoxUI \u2014 Parameters\n\nShowcases: min_val, max_val, step.",
+            "text": "Spin Box UI — Val\n\nNumeric spin box with increment/decrement buttons.\nShowcasing: min_val=0.5, max_val=50.0, step=0.5, default_val=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

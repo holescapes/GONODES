@@ -48,8 +48,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return result
 
 	var res: Vector2i = get_param_value("resolution")
-	var depth_on: bool = get_param_value("depth_enabled")
-	var normal_on: bool = get_param_value("normal_enabled")
+	var depth_on: bool = get_param_value("depth_enabled") and is_output_demanded(1)
+	var normal_on: bool = get_param_value("normal_enabled") and is_output_demanded(2)
 
 	# ── Depth buffer ─────────────────────────────────────────────────────
 	if depth_on:

@@ -45,14 +45,10 @@
                     "value": 0
                 },
                 "start_frame": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frame_padding": {
-                    "value": 4,
-                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 }
             }
         }
@@ -71,5 +67,26 @@
             "to_port": 0
         }
     ],
-    "description": "MovieOUT \u2014 Save image sequence to disk as numbered PNG/WebP frames. Toggle 'active' to record."
+    "description": "MovieOUT — Save image sequence to disk as numbered PNG/WebP frames. Toggle 'active' to record.",
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Movie OUT — Basic\n\nSave image sequence to disk (numbered PNG/WebP frames).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

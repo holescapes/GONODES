@@ -99,14 +99,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SOPtoDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "SO Pto DAT — Advanced\n\nConvert SOP vertex data or mesh summary to a DAT table.\nCombined configuration: attribute=2, max_points=1002.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

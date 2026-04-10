@@ -105,14 +105,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RichTextLabelUI \u2014 Parameters\n\nShowcases: text, bbcode, font_size.",
+            "text": "Rich Text Label UI — Bbcode\n\nBBCode rich text label. Optional DAT input for content.\nShowcasing: bbcode=True, font_size=15, fit_content=True, scroll_active=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

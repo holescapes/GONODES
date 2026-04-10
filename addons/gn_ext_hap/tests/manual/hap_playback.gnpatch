@@ -1,0 +1,68 @@
+{
+	"generator": "GONODES",
+	"description": "HAP GPU-direct video playback demo. Chain 1: HAP file looped at normal speed through TransformTOP (scale + rotate). Chain 2: same source with FeedbackTOP for trail effect. Set 'file' parameter to a .mov HAP file to test.",
+	"connections": [
+		{
+			"from": "hap_src",
+			"from_port": 0,
+			"to": "transform1",
+			"to_port": 0
+		},
+		{
+			"from": "transform1",
+			"from_port": 0,
+			"to": "out_transformed",
+			"to_port": 0
+		},
+		{
+			"from": "hap_src",
+			"from_port": 0,
+			"to": "feedback1",
+			"to_port": 0
+		},
+		{
+			"from": "feedback1",
+			"from_port": 0,
+			"to": "out_trails",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"hap_src": {
+			"type": "HapInTOP",
+			"position": [0.0, 100.0],
+			"parameters": {
+				"file": {"value": ""},
+				"play": {"value": true},
+				"loop": {"value": true},
+				"speed": {"value": 1.0}
+			}
+		},
+		"transform1": {
+			"type": "TransformTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"scale_x": {"value": 0.8},
+				"scale_y": {"value": 0.8},
+				"rotate": {"value": 5.0}
+			}
+		},
+		"out_transformed": {
+			"type": "NullTOP",
+			"position": [800.0, 0.0],
+			"parameters": {}
+		},
+		"feedback1": {
+			"type": "FeedbackTOP",
+			"position": [400.0, 200.0],
+			"parameters": {
+				"decay": {"value": 0.92}
+			}
+		},
+		"out_trails": {
+			"type": "NullTOP",
+			"position": [800.0, 200.0],
+			"parameters": {}
+		}
+	}
+}

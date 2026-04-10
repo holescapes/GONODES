@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "top_radius": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "bottom_radius": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "height": {
                     "value": 1.0
@@ -128,14 +124,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CylinderSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Cylinder SOP — Basic\n\nCylinder or cone mesh with top/bottom radius and caps.\nUsing: top_radius=0.5, bottom_radius=0.5, height=1.0, radial_segments=32.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

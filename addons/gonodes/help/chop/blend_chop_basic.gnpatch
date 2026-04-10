@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "value0": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "name0": {
                     "value": "val"
@@ -121,7 +119,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Blend CHOP \u2014 Weighted Mix\n\nBlends between two (or more) CHOP inputs.\nblend=0 \u2192 100% input A, blend=1 \u2192 100% input B.\nMethods: Linear, Ease In, Ease Out, Smooth Step.",
+            "text": "Blend CHOP — Weighted Mix\n\nBlends between two (or more) CHOP inputs.\nblend=0 → 100% input A, blend=1 → 100% input B.\nMethods: Linear, Ease In, Ease Out, Smooth Step.",
             "position": [
                 50.0,
                 -50.0

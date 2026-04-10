@@ -73,7 +73,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ProjectionTOP \u2014 Parameters\n\nShowcases: mode, rotation.",
+            "text": "Projection TOP — Mode\n\nUV projection mapping: planar, cylindrical, or spherical.\nShowcasing: mode=1, rotation=0.5.",
             "position": [
                 -100.0,
                 -100.0

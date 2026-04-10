@@ -85,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MergeDAT \u2014 Basic\n\nDefault settings.",
+            "text": "Merge DAT — Basic\n\nStack rows or append columns from two inputs.\nUsing: mode=0.",
             "position": [
                 -100.0,
                 -100.0

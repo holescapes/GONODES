@@ -95,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "InsertDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Insert DAT — Advanced\n\nInsert rows or columns into a table at a given position.\nCombined configuration: mode=2, index=2, count=3.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

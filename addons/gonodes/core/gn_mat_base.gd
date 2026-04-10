@@ -86,9 +86,10 @@ static func _ensure_viewer_scene() -> void:
 	_viewer_environment.environment = env
 
 
-func render_for_viewer(viewer) -> void:
-	if cached_output is GNMaterialData:
-		var mat_data: GNMaterialData = cached_output as GNMaterialData
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	var data: GNData = get_output_data(port_index)
+	if data is GNMaterialData:
+		var mat_data: GNMaterialData = data as GNMaterialData
 		if mat_data.material != null:
 			_ensure_viewer_scene()
 			var vp: SubViewport = viewer.get_3d_viewport()

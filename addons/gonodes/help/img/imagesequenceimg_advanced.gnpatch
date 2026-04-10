@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ImageSequenceIMG \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Image Sequence IMG — Advanced\n\nPlays a numbered image sequence as animated CPU Image frames.\nCombined configuration: play=False, speed=2.0, index=1, loop_mode=2.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

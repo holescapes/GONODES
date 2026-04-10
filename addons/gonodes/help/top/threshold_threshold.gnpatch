@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ThresholdTOP \u2014 Parameters\n\nShowcases: threshold, softness, use_alpha.",
+            "text": "Threshold TOP — Threshold\n\nBinary black/white threshold with optional softness.\nShowcasing: threshold=0.25, softness=0.5, use_alpha=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

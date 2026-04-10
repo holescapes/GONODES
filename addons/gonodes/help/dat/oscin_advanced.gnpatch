@@ -84,14 +84,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OscInDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Osc In DAT — Advanced\n\nReceive OSC messages into a DAT table via UDP.\nCombined configuration: port=9002, max_rows=102, active=False, clear=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

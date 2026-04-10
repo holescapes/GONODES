@@ -94,7 +94,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SeparatorUI \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Separator UI — Advanced\n\nHorizontal or vertical separator line for layout.\nCombined configuration: vertical=True.",
             "position": [
                 -100.0,
                 -100.0

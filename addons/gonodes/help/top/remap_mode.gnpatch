@@ -73,7 +73,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RemapTOP \u2014 Parameters\n\nShowcases: mode, strength.",
+            "text": "Remap TOP — Mode\n\nUV displacement remap or 1D LUT value remap via map texture.\nShowcasing: mode=1, strength=0.5.",
             "position": [
                 -100.0,
                 -100.0

@@ -18,9 +18,7 @@
             ],
             "parameters": {
                 "operation": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 }
             }
         },
@@ -122,7 +120,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BooleanSOP \u2014 Parameters\n\nShowcases: operation.",
+            "text": "Boolean SOP — Operation\n\nBoolean operations (union, intersect, subtract) via CSG.\nShowcasing: operation=1.",
             "position": [
                 -100.0,
                 -100.0

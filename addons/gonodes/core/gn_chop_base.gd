@@ -71,9 +71,10 @@ func update_preview_control(control: Control) -> void:
 static var _viewer_waveform: GNWaveformView = null
 
 
-func render_for_viewer(viewer) -> void:
-	if cached_output is GNChannelData:
-		var ch: GNChannelData = cached_output as GNChannelData
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	var data: GNData = get_output_data(port_index)
+	if data is GNChannelData:
+		var ch: GNChannelData = data as GNChannelData
 		if not ch.channels.is_empty():
 			if _viewer_waveform == null:
 				_viewer_waveform = GNViewerRenderHelpers.create_waveform_view()

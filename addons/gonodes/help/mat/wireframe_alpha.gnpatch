@@ -131,7 +131,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WireframeMAT \u2014 Parameters\n\nShowcases: color, alpha.",
+            "text": "Wireframe MAT — Alpha\n\nWireframe rendering material using spatial wireframe render mode.\nShowcasing: alpha=0.5.",
             "position": [
                 -100.0,
                 -100.0

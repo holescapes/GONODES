@@ -49,6 +49,14 @@ var time_dependent: bool = false
 ## Cached output data from the last successful cook.
 var cached_output: GNData = null
 
+## Per-output-port demand flags, stamped by the cook engine each frame
+## before cooking.  For multi-output nodes, ports that feed no active
+## downstream node (via wires, wireless Select operators, or expression
+## references) are marked false — the operator can skip expensive work
+## for those ports via [method is_output_demanded].
+## Single-output nodes ignore this (always demanded when active).
+var _demanded_outputs: Array[bool] = []
+
 ## Duration of the last cook in milliseconds (for profiling overlay).
 var cook_time_ms: float = 0.0
 
@@ -381,9 +389,16 @@ static func _preview_format_name(fmt: Image.Format) -> String:
 ##   viewer.get_3d_viewport() -> SubViewport — shared 3D SubViewport
 ##   viewer.get_content_size() -> Vector2i  — available display area
 ##   viewer.hide_all_displays()             — clear all displays
-func render_for_viewer(viewer) -> void:
-	if cached_output != null:
-		viewer.set_info(cached_output.get_preview_text(), "")
+##
+## [param port_index] selects which output port to render.  The viewer panel
+## passes the user-selected port from its port dropdown.  Defaults to 0.
+## Family base classes use [method get_output_data](port_index) automatically.
+## Override only when cross-family rendering is needed (e.g. IMG port 0 +
+## CHOP port 1).
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	var data: GNData = get_output_data(port_index)
+	if data != null:
+		viewer.set_info(data.get_preview_text(), "")
 	else:
 		viewer.set_info("No output", "")
 
@@ -627,6 +642,44 @@ func mark_dirty() -> void:
 ## Clears the dirty flag after a successful cook.
 func clear_dirty() -> void:
 	dirty = false
+
+
+## Returns true if the given output port has demand from an active consumer
+## this frame.  Demand is detected from three sources:
+##   1. Wire connections to active downstream nodes
+##   2. Wireless Select operators referencing this node by name
+##   3. Expression references (chop(), top(), dat(), etc.) in other nodes
+##
+## Each port is evaluated independently — no port is auto-demanded.
+## The operator's [method _cook] unconditional code IS the shared core.
+## Per-port post-processing should be guarded with this method:
+##
+## [codeblock]
+## func _cook(inputs) -> GNData:
+##     _run_detection(inputs)               # shared core — always
+##     if is_output_demanded(0):
+##         _build_overlay()                 # port 0 — only if demanded
+##     if is_output_demanded(1):
+##         _extract_tracking_data()         # port 1 — only if demanded
+##     return cached_output
+## [/codeblock]
+##
+## For operators where a secondary port depends on the primary cook path
+## (e.g., MovieFileInTOP: video decode is always needed), keep the shared
+## work unconditional and guard only the secondary post-processing:
+##
+## [codeblock]
+## func _cook(inputs) -> GNData:
+##     var result := _decode_video(inputs)  # shared — always (audio needs this)
+##     if is_output_demanded(1):
+##         _pull_audio()                    # port 1 — only if demanded
+##     return result
+## [/codeblock]
+func is_output_demanded(port_index: int) -> bool:
+	if port_index < _demanded_outputs.size():
+		return _demanded_outputs[port_index]
+	# Fallback: single-output or not yet stamped → always demanded
+	return true
 
 
 ## Returns the cooked output data for a specific output port index.

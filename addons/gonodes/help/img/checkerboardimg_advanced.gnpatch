@@ -95,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CheckerboardIMG \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Checkerboard IMG — Advanced\n\nCPU checkerboard pattern generator.\nCombined configuration: cells_x=10, cells_y=10, softness=1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

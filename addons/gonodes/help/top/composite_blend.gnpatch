@@ -17,9 +17,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
                     "value": 4.0,
@@ -127,7 +125,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Composite TOP \u2014 Over Blend\n\nRadial ramp + noise composited with Over mode.\nOpacity 0.7 blends the foreground partially.\nTry Add, Multiply, Screen modes too.",
+            "text": "Composite TOP — Over Blend\n\nRadial ramp + noise composited with Over mode.\nOpacity 0.7 blends the foreground partially.\nTry Add, Multiply, Screen modes too.",
             "position": [
                 -100.0,
                 -150.0

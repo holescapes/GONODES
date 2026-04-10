@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "subdivide_w": {
-                    "value": 4,
-                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 },
                 "subdivide_h": {
-                    "value": 8,
-                    "expression": "(8 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 8
                 },
                 "subdivide_d": {
                     "value": 4
@@ -137,7 +133,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Twist SOP \u2014 Rotational Deform\n\n180\u00b0 twist around Y axis.\nMore subdivisions = smoother twist.",
+            "text": "Twist SOP — Rotational Deform\n\n180° twist around Y axis.\nMore subdivisions = smoother twist.",
             "position": [
                 -100.0,
                 -150.0

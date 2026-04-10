@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FFmpegInTOP \u2014 Parameters\n\nShowcases: resolution, play, loop.\nRequires gn_ext_ffmpeg extension.",
+            "text": "FFmpeg In TOP — Play\n\nFFmpeg video decoder. Supports H.264, H.265, VP9, AV1 and many more codecs via EIRTeam.FFmpeg GDExtension.\nShowcasing: play=True, loop=True, speed=0.5, seek=-0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

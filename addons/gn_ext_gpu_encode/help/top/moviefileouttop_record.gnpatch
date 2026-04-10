@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MovieFileOutTOP \u2014 Parameters\n\nShowcases: file_path, bitrate, fps.\nRequires gn_ext_gpu_encode extension.",
+            "text": "Movie File Out TOP — Record\n\nRecord input texture to a video file using hardware GPU encoding.\nShowcasing: bitrate=7999, fps=29, record=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

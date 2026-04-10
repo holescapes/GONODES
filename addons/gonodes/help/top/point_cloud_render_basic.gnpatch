@@ -4,33 +4,92 @@
     "nodes": {
         "pcr1": {
             "type": "PointCloudRenderTOP",
-            "position": [200, 100],
+            "position": [
+                200,
+                100
+            ],
             "parameters": {
-                "width": {"value": 512},
-                "height": {"value": 512},
-                "point_size": {"value": 6.0},
-                "cam_dist": {"value": 5.0},
-                "cam_yaw": {"value": 30.0},
-                "cam_pitch": {"value": 25.0}
+                "width": {
+                    "value": 512
+                },
+                "height": {
+                    "value": 512
+                },
+                "point_size": {
+                    "value": 6.0
+                },
+                "cam_dist": {
+                    "value": 5.0
+                },
+                "cam_yaw": {
+                    "value": 30.0
+                },
+                "cam_pitch": {
+                    "value": 25.0
+                }
             }
         },
         "null1": {
             "type": "NullTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                850,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        {"from": "pcr1", "from_port": 0, "to": "null1", "to_port": 0}
+        {
+            "from": "pcr1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "null1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "PointCloudRenderTOP — Particle Viewer\n\nRenders POP particles as a 2D point cloud texture.\nWire a POP source into the input. Adjust camera angle and point size.",
-            "position": [-100.0, -100.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

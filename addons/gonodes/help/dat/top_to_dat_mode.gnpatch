@@ -98,7 +98,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TOPtoDAT \u2014 Parameters\n\nShowcases: mode, max_pixels.",
+            "text": "TO Pto DAT — Mode\n\nConvert TOP texture info or pixel data to a DAT table.\nShowcasing: mode=1, max_pixels=99.",
             "position": [
                 -100.0,
                 -100.0

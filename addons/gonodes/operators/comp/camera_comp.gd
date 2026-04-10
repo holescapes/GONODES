@@ -92,7 +92,7 @@ func get_camera() -> Camera3D:
 	return _camera
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _camera == null:
 		viewer.set_info("No camera", "CameraCOMP")
 		return

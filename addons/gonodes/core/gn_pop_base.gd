@@ -137,9 +137,10 @@ static func _reparent_viewer_nodes(vp: SubViewport) -> void:
 			vp.add_child(node)
 
 
-func render_for_viewer(viewer) -> void:
-	if cached_output is GNParticleData:
-		var pd: GNParticleData = cached_output as GNParticleData
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	var data: GNData = get_output_data(port_index)
+	if data is GNParticleData:
+		var pd: GNParticleData = data as GNParticleData
 		if pd.particle_count > 0:
 			_ensure_viewer_scene()
 			var vp: SubViewport = viewer.get_3d_viewport()

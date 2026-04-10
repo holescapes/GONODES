@@ -1,0 +1,60 @@
+{
+	"generator": "GONODES",
+	"description": "Blackmagic SDI/HDMI capture → monitoring → output. Chain 1: device 0 capture at 1080p30 passed through LevelTOP for exposure correction, then to device 1 output. Chain 2: capture routed through a NullTOP for monitoring without output. Requires DeckLink hardware.",
+	"connections": [
+		{
+			"from": "bm_capture",
+			"from_port": 0,
+			"to": "level_correct",
+			"to_port": 0
+		},
+		{
+			"from": "level_correct",
+			"from_port": 0,
+			"to": "bm_output",
+			"to_port": 0
+		},
+		{
+			"from": "bm_capture",
+			"from_port": 0,
+			"to": "monitor_null",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"bm_capture": {
+			"type": "BlackmagicInTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"device": {"value": 0},
+				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}},
+				"fps": {"value": 4},
+				"active": {"value": true}
+			}
+		},
+		"level_correct": {
+			"type": "LevelTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"brightness": {"value": 1.05},
+				"contrast": {"value": 1.1},
+				"gamma": {"value": 1.0}
+			}
+		},
+		"bm_output": {
+			"type": "BlackmagicOutTOP",
+			"position": [800.0, 0.0],
+			"parameters": {
+				"device": {"value": 1},
+				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}},
+				"fps": {"value": 4},
+				"active": {"value": true}
+			}
+		},
+		"monitor_null": {
+			"type": "NullTOP",
+			"position": [400.0, 200.0],
+			"parameters": {}
+		}
+	}
+}

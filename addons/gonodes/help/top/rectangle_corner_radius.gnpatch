@@ -81,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RectangleTOP \u2014 Parameters\n\nShowcases: resolution, fill_color, bg_color.",
+            "text": "Rectangle TOP — Radius\n\nSDF rounded rectangle with fill/border/softness.\nShowcasing: corner_radius=0.5, border_width=0.5, softness=0.0025.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

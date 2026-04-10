@@ -139,7 +139,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ScrollContainerUI \u2014 Parameters\n\nShowcases: h_scroll, v_scroll, min_size.",
+            "text": "Button UI — Scroll\n\nPush button widget. Outputs press/release state as CHOP channel.\nShowcasing: label=Button A.",
             "position": [
                 -100.0,
                 -100.0

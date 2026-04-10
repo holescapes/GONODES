@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OutTunnel \u2014 Parameters\n\nShowcases: index, family, label.",
+            "text": "Out Tunnel — Family\n\nOutput tunnel — bridges data from inner graph to parent sub-network.\nShowcasing: index=0, family=1.",
             "position": [
                 -100.0,
                 -100.0

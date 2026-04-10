@@ -121,14 +121,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextureButtonUI \u2014 Parameters\n\nShowcases: toggle_mode, stretch, min_size.",
+            "text": "Texture Button UI — Mode\n\nClickable texture button with normal/pressed/hover TOP inputs.\nShowcasing: toggle_mode=True, stretch=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -18,9 +18,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -116,7 +114,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Fan CHOP \u2014 Basic\n\nFans merged channels into separate outputs.",
+            "text": "Fan CHOP — Basic\n\nFan a single channel into multiple copies with offset spread.",
             "position": [
                 -100.0,
                 -100.0

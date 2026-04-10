@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "source": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "res_x": {
                     "value": 511
@@ -71,14 +69,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ScreenGrabIMG \u2014 Parameters\n\nShowcases: source, res_x, res_y.",
+            "text": "Screen Grab IMG — Source\n\nCapture viewport contents as CPU Image. Chain → ImgToTOP for GPU.\nShowcasing: source=1, res_x=511, res_y=511, active=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

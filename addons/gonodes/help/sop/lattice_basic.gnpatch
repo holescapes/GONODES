@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "div_x": {
-                    "value": 2,
-                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "div_y": {
-                    "value": 2,
-                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "div_z": {
                     "value": 2
@@ -146,7 +142,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LatticeSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Lattice SOP — Basic\n\nFree-form deformation via control-point lattice.\nUsing: div_x=2, div_y=2, div_z=2, amplitude=0.0.",
             "position": [
                 -100.0,
                 -100.0

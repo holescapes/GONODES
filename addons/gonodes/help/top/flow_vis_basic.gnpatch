@@ -95,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FlowVisTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Flow Vis TOP — Basic\n\nVisualizes a 2-channel vector field via Line Integral Convolution (LIC). GPU shader.\nUsing: num_steps=24, step_size=0.004, noise_scale=80.0, color_mode=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

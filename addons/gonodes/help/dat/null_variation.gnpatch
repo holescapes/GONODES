@@ -85,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullDAT \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Null DAT — Variation\n\nPass-through.",
             "position": [
                 -100.0,
                 -100.0

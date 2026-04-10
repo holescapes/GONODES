@@ -133,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolyLoftSOP \u2014 Parameters\n\nShowcases: loft_distance, loft_axis, subdivisions.",
+            "text": "Poly Loft SOP — Distance\n\nLoft polygon surface between cross-section rings.\nShowcasing: loft_distance=0.5, loft_axis=1, subdivisions=0, close_caps=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

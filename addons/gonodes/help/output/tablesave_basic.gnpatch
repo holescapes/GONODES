@@ -27,9 +27,7 @@
                     "value": 0
                 },
                 "include_header": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         }
@@ -46,7 +44,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TableSaveOUT \u2014 Basic\n\nDefault settings.",
+            "text": "Constant DAT — Basic\n\nManually editable 4x4 table with column headers.",
             "position": [
                 -100.0,
                 -100.0

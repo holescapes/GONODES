@@ -76,14 +76,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GridWarpTOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_mapper extension.",
+            "text": "Grid Warp TOP — Advanced\n\nGrid-based mesh warp with adjustable control points.\nCombined configuration: grid_cols=6, grid_rows=6.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

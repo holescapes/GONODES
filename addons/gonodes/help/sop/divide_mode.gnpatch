@@ -125,7 +125,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DivideSOP \u2014 Parameters\n\nShowcases: mode, remove_degenerate.",
+            "text": "Divide SOP — Mode\n\nTriangulate mesh and remove degenerate triangles.\nShowcasing: mode=1, remove_degenerate=True.",
             "position": [
                 -100.0,
                 -100.0

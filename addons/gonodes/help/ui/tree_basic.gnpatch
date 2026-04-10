@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "hide_root": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "min_size": {
                     "value": {
@@ -55,7 +53,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Tree UI \u00e2\u20ac\u201d Basic\n\nTree view built from DAT table data.\nDAT columns: name, parent (row index or empty).\nState channel: selected (row index, -1 for none).",
+            "text": "Tree UI â€” Basic\n\nTree view built from DAT table data.\nDAT columns: name, parent (row index or empty).\nState channel: selected (row index, -1 for none).",
             "position": [
                 -100.0,
                 -100.0

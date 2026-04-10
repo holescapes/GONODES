@@ -220,6 +220,123 @@ This is a key difference from TD, which always cascades the full subtree.
 | 10 | Shared output tagging | — | Fan-out > 1 tags `_shared` for copy-on-write in `_mutable_input()` |
 | 11 | Input array caching | — | `_input_cache` reused per node, avoids per-frame allocation |
 | 12 | Compute shader guard | — | Skip nodes requiring `RenderingDevice` on Compatibility renderer |
+| 13 | **Output demand culling** | **Tier 1** | **Multi-output nodes skip secondary-port work when the port has no active downstream consumer** |
+
+### 4.1 Output Demand Culling (Multi-Output Nodes)
+
+Nodes with 2+ output ports (15 operators currently) often carry a primary
+output plus expensive secondary data — audio waveforms, analysis tables,
+depth buffers.  Without demand detection, the secondary work runs every
+frame even when nobody reads it.
+
+**TouchDesigner has this exact problem.** TD's Movie File In TOP always
+decodes audio even if only the video texture is connected.  TD has no
+mechanism to distinguish demanded vs idle output ports.
+
+GONODES solves this with `is_output_demanded(port_index)`:
+
+#### Three Sources of Demand
+
+The cook engine detects demand from **three sources**, not just wires:
+
+1. **Wire connections** — a physical wire from port N to an active downstream
+   node.  Detected via `_output_conn_map` (cached adjacency).
+
+2. **Wireless Select operators** — a SelectCHOP, SelectTOP, SelectDAT (etc.)
+   referencing this node by name.  These operators declare `node_ref_family`
+   on their parameter, telling the engine *which family* of output port they
+   demand.  Detected via `_wireless_demand_map` (built from
+   `get_remote_dependencies()` and node_ref parameters).
+
+3. **Expression references** — another node's parameter expression calls
+   `chop("this_node")`, `top("this_node")`, `dat("this_node")`, etc.
+   The function name implies which output-port family is demanded.
+   Detected via the `_expr_demand_regex` scan during
+   `_build_wireless_demand_map()`.
+
+```gdscript
+# GNCookEngine._stamp_demanded_outputs(node)
+# For each output port, demand = wire ∪ wireless ∪ expression
+# Port family is matched: chop("blob1") demands the CHOP port,
+# not the IMG port, on a multi-output operator.
+```
+
+#### Shared Core + Per-Port Guards
+
+Multi-output operators structure their `_cook()` method as:
+
+1. **Shared core** — unconditional work that must run regardless of which
+   ports are demanded (image conversion, detection calls, video decode).
+2. **Per-port post-processing** — guarded with `is_output_demanded(N)`,
+   skipped when that port has zero demand.
+
+The operator author decides what’s shared and what’s per-port.  There is
+no engine-level coupling flag — the `_cook()` method IS the authority.
+
+**Pattern A — Independent post-processing** (OpenCV operators):
+The shared detection call produces raw results.  Converting those results
+into the overlay image (port 0) and extracting tracking data (port 1) are
+independent steps.  A SelectCHOP reading only the CHOP data skips the
+image conversion entirely:
+
+```gdscript
+func _cook(inputs: Array[GNData]) -> GNData:
+    var out := _prepare_image()
+    # Shared core: image conversion + detection (always runs)
+    var conv := GNOpenCVHelper.image_to_rgba(src.image)
+    var result: PackedByteArray = _cv.detect_blobs(...)
+
+    # Port 1: CHOP extraction — only if demanded
+    if is_output_demanded(1):
+        _pull_blob_chop()
+
+    # Port 0: overlay image conversion — only if demanded
+    if is_output_demanded(0) and not result.is_empty():
+        out.set_image(GNOpenCVHelper.rgba_to_image(result, w, h))
+    return out
+```
+
+**Pattern B — Directional dependency** (MovieFileInTOP):
+The audio waveform (port 1) requires the video decode (shared core) to have
+run.  But the video texture (port 0) does NOT require audio capture.
+The video decode is unconditional shared core; only the audio capture is
+guarded:
+
+```gdscript
+func _cook(inputs: Array[GNData]) -> GNData:
+    _setup_viewport()
+    # Shared core: video decode (always runs — audio needs it too)
+    # ... load + play video ...
+
+    # Port 1: audio capture — only if demanded
+    if is_output_demanded(1):
+        _pull_audio()
+    return _cached_tex_data
+```
+
+If only a SelectCHOP demands the audio, the video decode still runs (it’s
+the shared prerequisite) but the texture result goes unused — minimal waste.
+If only the video is demanded, audio capture is skipped entirely.
+
+**Pattern C — Shared render + independent buffers** (MultiBufferRenderTOP):
+The 3D scene render (port 0) is the shared core via the parent class.
+Depth (port 1) and normal (port 2) secondary viewports are independently
+guarded — each can be disabled without affecting the others.
+
+#### Demand Lookup Cost
+
+- **Wire demand:** O(fan-out) per node via `_output_conn_map`
+- **Wireless demand:** O(1) dictionary lookup per node via `_wireless_demand_map`
+  (built once per frame in O(active nodes × params))
+
+**Operators using per-port guards:** BlobTrackIMG, ContourIMG, ColorTrackIMG,
+ObjectTrackIMG, HoughLinesIMG, HoughCirclesIMG, ArucoDetectIMG (port 0+1),
+MovieFileInTOP (port 1), MultiBufferRenderTOP (port 1+2).
+
+Operators where secondary outputs are integral to the primary compute
+(FluidVOL velocity, PyroVOL temperature, GLSLMultiTOP MRT passes,
+SubNetworkNode tunnel routing, GdScriptScript user outputs) do NOT
+use demand guards — the work is inseparable.
 
 ---
 

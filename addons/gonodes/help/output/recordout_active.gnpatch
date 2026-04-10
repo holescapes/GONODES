@@ -55,14 +55,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RecordOUT \u2014 Parameters\n\nShowcases: active, max_samples, save.",
+            "text": "Record OUT — Active\n\nRecord CHOP channels over time to buffer. Save to CSV/JSON.\nShowcasing: active=True, max_samples=9999, save=True, reset=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

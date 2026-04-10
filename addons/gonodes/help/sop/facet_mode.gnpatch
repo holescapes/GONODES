@@ -130,14 +130,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FacetSOP \u2014 Parameters\n\nShowcases: mode, distance, recompute_normals.",
+            "text": "Facet SOP — Mode\n\nUnique points (flat shading) or consolidate close vertices.\nShowcasing: mode=1, distance=0.0005, recompute_normals=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

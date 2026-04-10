@@ -116,14 +116,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DropdownUI \u2014 Parameters\n\nShowcases: label, items, default_index.",
+            "text": "Dropdown UI — Variation\n\nDropdown menu (OptionButton). Outputs selected index as CHOP channel.\nShowcasing: default_index=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

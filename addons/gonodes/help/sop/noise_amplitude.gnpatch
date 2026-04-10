@@ -148,14 +148,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseSOP \u2014 Parameters\n\nShowcases: amplitude, frequency, offset_x.",
+            "text": "Noise SOP — Amplitude\n\nDisplace vertices with animated procedural noise.\nShowcasing: amplitude=0.1, frequency=1.0, offset_x=0.5, offset_y=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

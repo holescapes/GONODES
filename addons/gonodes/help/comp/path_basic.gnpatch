@@ -1,0 +1,243 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "PathCOMP — Basic. A sphere moves along a 3-point curve driven by LFO progress.",
+    "nodes": {
+        "sphere_sop": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.3
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "lfo1": {
+            "type": "LFOCHOP",
+            "position": [
+                0,
+                200
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 0.2
+                },
+                "type": {
+                    "value": 2
+                }
+            }
+        },
+        "path1": {
+            "type": "PathCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "progress": {
+                    "expression": "chop('lfo1', 'out') * 0.5 + 0.5"
+                },
+                "loop": {
+                    "value": true
+                },
+                "rotation_mode": {
+                    "value": 3
+                },
+                "p0x": {
+                    "value": -4.0
+                },
+                "p0y": {
+                    "value": 0.5
+                },
+                "p0z": {
+                    "value": 0.0
+                },
+                "p1x": {
+                    "value": 0.0
+                },
+                "p1y": {
+                    "value": 3.0
+                },
+                "p1z": {
+                    "value": -3.0
+                },
+                "p2x": {
+                    "value": 4.0
+                },
+                "p2y": {
+                    "value": 0.5
+                },
+                "p2z": {
+                    "value": 0.0
+                }
+            }
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                300
+            ],
+            "parameters": {
+                "text": {
+                    "value": "PathCOMP — Basic\n\nSphere travels along a 3-point curve.\nProgress driven by LFO (0..1).\nRotation mode = XYZ (follows curve tangent)."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 4.0
+                },
+                "tz": {
+                    "value": 10.0
+                },
+                "use_look_at": {
+                    "value": true
+                },
+                "look_at_y": {
+                    "value": 1.5
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere_sop",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "path1",
+            "to_port": 0
+        },
+        {
+            "from": "path1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Path COMP — Basic\n\nMove a COMP along a Path3D curve with configurable progress and rotation.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -13,9 +13,7 @@
                     "value": "Toggle"
                 },
                 "default_on": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "min_size": {
                     "value": {
@@ -83,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ToggleUI \u2014 Basic\n\nDefault settings.",
+            "text": "Toggle UI — Basic\n\nOn/off toggle (CheckButton). Outputs 0 or 1 as CHOP channel.\nUsing: label=Toggle, default_on=False.",
             "position": [
                 -100.0,
                 -100.0

@@ -1,0 +1,65 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "Minimal base patch for graph editing demo — noise → output. The host modifies this at runtime.",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [400, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1280,
+                        "y": 720
+                    }
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "scale": {
+                    "value": 5.0
+                },
+                "monochrome": {
+                    "value": false
+                }
+            }
+        },
+        "host_out": {
+            "type": "HostOutTOP",
+            "position": [800, 200],
+            "parameters": {
+                "label": {
+                    "value": "Main output"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "host_out",
+            "to_port": 0
+        }
+    ],
+    "host_io": {
+        "inputs": [],
+        "outputs": [
+            {
+                "label": "Main output",
+                "family": "TOP",
+                "node": "host_out"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Noise Scale",
+                "node": "noise1",
+                "param": "scale",
+                "type": "float",
+                "range": [0.1, 50.0]
+            }
+        ]
+    }
+}

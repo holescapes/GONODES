@@ -75,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WebcamIMG \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Webcam IMG — Advanced\n\nLive webcam/camera feed as CPU Image. Chain → ImgToTOP for GPU.\nCombined configuration: device=2, active=False, mirror_h=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

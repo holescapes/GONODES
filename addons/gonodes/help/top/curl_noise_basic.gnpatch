@@ -96,14 +96,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CurlNoiseTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Curl Noise TOP — Basic\n\n2D curl noise vector field for fluid advection and flow effects. GPU shader.\nUsing: scale=4.0, time_offset=0.0, seed=0, octaves=3.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -193,14 +193,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "JointCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "text": "Joint COMP — Tx\n\nJoint3D constraint between two physics bodies (Pin, Hinge, Slider, ConeTwist, 6DOF).\nShowcasing: tx=0.5, ty=0.5, tz=0.5, rx=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

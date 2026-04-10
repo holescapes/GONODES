@@ -84,14 +84,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WebServerDAT \u2014 Parameters\n\nShowcases: port, active, content_type.",
+            "text": "Web Server DAT — Active\n\nHTTP server via TCPServer — serve content and log requests.\nShowcasing: port=8079, active=True, max_requests=49, clear=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

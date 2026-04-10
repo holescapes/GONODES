@@ -130,14 +130,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlendSOP \u2014 Parameters\n\nShowcases: blend, blend_normals, blend_uvs.",
+            "text": "Blend SOP — Blend\n\nMorph between two geometries by blending vertex positions.\nShowcasing: blend=0.25, blend_normals=True, blend_uvs=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

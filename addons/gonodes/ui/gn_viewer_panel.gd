@@ -8,7 +8,7 @@ extends Control
 ##   • Info      — Centered text label (set_info)
 ##   • 3D        — Bare SubViewport, populated by the node (get_3d_viewport)
 ##
-## The node's render_for_viewer(viewer) virtual method chooses which mode
+## The node's render_for_viewer(viewer, port_index) virtual method chooses which mode
 ## to activate.  Input is forwarded to node.handle_viewer_input() first;
 ## only unhandled events are processed for built-in pan/zoom.
 
@@ -34,6 +34,8 @@ var _node_label: Label = null
 var _zoom_label: Label = null
 var _fit_btn: Button = null
 var _wireframe_btn: Button = null
+var _port_selector: OptionButton = null
+var _selected_port_index: int = 0
 
 # ─ Background ───────────────────────────────────────────────────────────────
 var _bg: ColorRect = null
@@ -121,6 +123,13 @@ func _ready() -> void:
 	_wireframe_btn.visible = false
 	_toolbar.add_child(_wireframe_btn)
 
+	_port_selector = OptionButton.new()
+	_port_selector.flat = true
+	_port_selector.add_theme_font_size_override("font_size", 10)
+	_port_selector.visible = false
+	_port_selector.item_selected.connect(_on_port_selected)
+	_toolbar.add_child(_port_selector)
+
 	_zoom_label = Label.new()
 	_zoom_label.add_theme_font_size_override("font_size", 10)
 	_zoom_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
@@ -205,7 +214,7 @@ func _on_tex_gui_input(event: InputEvent) -> void:
 			local_pos = (event as InputEventMouse).position
 		if node.handle_viewer_input(event, local_pos):
 			# Node consumed the event — re-render (e.g. VOL scroll updates slice)
-			node.render_for_viewer(self)
+			node.render_for_viewer(self, _selected_port_index)
 			return
 
 	# Built-in pan/zoom
@@ -333,7 +342,7 @@ func _on_3d_gui_input(event: InputEvent) -> void:
 			local_pos = (event as InputEventMouse).position
 		if node.handle_viewer_input(event, local_pos):
 			# Node handled input (orbit, etc.) — re-render
-			node.render_for_viewer(self)
+			node.render_for_viewer(self, _selected_port_index)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -419,6 +428,12 @@ func set_info(text: String, info_bar_text: String = "") -> void:
 ## Calling this activates 3D display mode.
 func get_3d_viewport() -> SubViewport:
 	_ensure_3d_viewport()
+
+	# Always clear previous scene children — different nodes (even within the
+	# same family) may use entirely different visualization methods
+	# (e.g. CameraCOMP vs GeometryCOMP, or MAT sphere vs SOP wireframe).
+	for child in _3d_viewport.get_children():
+		_3d_viewport.remove_child(child)
 
 	if not _3d_display.visible:
 		_hide_all_displays()
@@ -520,7 +535,7 @@ func _on_resize_settled() -> void:
 			# Re-render by asking the node
 			var node: GNNode = _displayed_node.get_ref() as GNNode
 			if node != null:
-				node.render_for_viewer(self)
+				node.render_for_viewer(self, _selected_port_index)
 
 	if _info_label and _info_label.visible:
 		_info_label.position = content.position
@@ -539,6 +554,7 @@ func set_target(p_node_id: String) -> void:
 	if node_id == p_node_id:
 		return
 	node_id = p_node_id
+	_selected_port_index = 0
 	_zoom = 1.0
 	_pan = Vector2.ZERO
 	_panning = false
@@ -568,7 +584,10 @@ func update_from_node(node: GNNode) -> void:
 	if _wireframe_btn:
 		_wireframe_btn.visible = show_wire
 
-	node.render_for_viewer(self)
+	# Port selector — show only for multi-output nodes.
+	_update_port_selector(node)
+
+	node.render_for_viewer(self, _selected_port_index)
 
 
 func clear() -> void:
@@ -586,6 +605,45 @@ func _update_toolbar(family_name: String, p_node_id: String,
 		_node_label.text = p_node_id
 
 
+func _update_port_selector(node: GNNode) -> void:
+	if _port_selector == null:
+		return
+	var port_count: int = node.output_ports.size()
+	if port_count <= 1:
+		_port_selector.visible = false
+		_selected_port_index = 0
+		return
+	# Rebuild items only when the node changed (avoid flicker).
+	var needs_rebuild: bool = _port_selector.item_count != port_count
+	if not needs_rebuild:
+		for i in range(port_count):
+			var expected: String = "%d: %s" % [i, node.output_ports[i].label \
+				if not node.output_ports[i].label.is_empty() \
+				else node.output_ports[i].port_name]
+			if _port_selector.get_item_text(i) != expected:
+				needs_rebuild = true
+				break
+	if needs_rebuild:
+		_port_selector.clear()
+		for i in range(port_count):
+			var port: GNPort = node.output_ports[i]
+			var label: String = port.label if not port.label.is_empty() else port.port_name
+			var family_tag: String = GNFamily.get_family_name(port.family)
+			_port_selector.add_item("%d: %s" % [i, label], i)
+		# Clamp selection in case the node shrank its port count.
+		if _selected_port_index >= port_count:
+			_selected_port_index = 0
+		_port_selector.selected = _selected_port_index
+	_port_selector.visible = true
+
+
+func _on_port_selected(index: int) -> void:
+	_selected_port_index = index
+	var node: GNNode = _displayed_node.get_ref() as GNNode
+	if node != null:
+		node.render_for_viewer(self, _selected_port_index)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Keyboard Shortcuts
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -594,7 +652,7 @@ func _on_wireframe_toggled(_pressed: bool) -> void:
 	var node: GNNode = _displayed_node.get_ref() as GNNode
 	if node != null and node.has_method("toggle_viewer_wireframe"):
 		node.toggle_viewer_wireframe()
-		node.render_for_viewer(self)
+		node.render_for_viewer(self, _selected_port_index)
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -623,5 +681,5 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			var node: GNNode = _displayed_node.get_ref() as GNNode
 			if node != null and node.has_method("toggle_viewer_mip"):
 				node.toggle_viewer_mip()
-				node.render_for_viewer(self)
+				node.render_for_viewer(self, _selected_port_index)
 				get_viewport().set_input_as_handled()

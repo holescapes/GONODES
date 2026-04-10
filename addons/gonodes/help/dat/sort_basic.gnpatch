@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "sort_col": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "order": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "sort_type": {
                     "value": 0
@@ -95,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SortDAT \u2014 Basic\n\nDefault settings.",
+            "text": "Sort DAT — Basic\n\nSort rows by a column (alphabetic or numeric).\nUsing: sort_col=0, order=0, sort_type=0.",
             "position": [
                 -100.0,
                 -100.0

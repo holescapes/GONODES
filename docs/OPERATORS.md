@@ -4944,6 +4944,21 @@ Fractures input geometry via 3D Voronoi decomposition. Seeds are scattered insid
 
 ---
 
+#### HostInSOP
+
+Receive geometry data from a host application via the C API (`libgonodes`). Supports both CPU upload and v1.2.0 direct zero-copy pointer lending.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| label | String | "" | Optional label for this input in the host's UI |
+
+**No inputs** — receives data from the host C API.
+**Output:** `out` (SOP — geometry from host).
+
+**How it works:** The host pushes vertex attribute arrays (positions, normals, UVs, colors, indices) via `gonodes_set_input_geometry()` or the v1.2.0 `gonodes_set_input_geometry_direct()` for zero-copy pointer lending. GNEmbeddedHost calls `_set_host_geometry_direct()` to inject the data. The cook method builds an ArrayMesh from the raw attribute arrays.
+
+---
+
 ## COMP — Component Operators
 
 COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output — instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
@@ -5469,6 +5484,20 @@ Keep-alive sink — holds its upstream chain active without producing output. Ac
 **Input 0:** `in` (any family — adapts to whatever is connected).
 
 **How it works:** Extends `GNOutBase` with `is_sink` toggled by the `active` parameter. Overrides `can_accept_connection()` to accept any data family (like DotNode). The `_cook()` method is a no-op — data flows in and is consumed without processing. Toggle Active OFF to suspend the chain without deleting the node.
+
+---
+
+#### HostOutSOP
+
+Export geometry data to a host application via the C API (`libgonodes`). Flattens mesh arrays (positions, normals, UVs, colors, indices) for the host to read via `gonodes_get_output_geometry()`.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| label | String | "" | Optional label for this output in the host's UI |
+
+**Input:** `in` (SOP — geometry to export to host).
+
+**How it works:** On cook, extracts the first surface's arrays from the input GNGeoData and flattens them into interleaved float arrays (xyz for positions/normals, uv for UVs, rgba for colors). GNEmbeddedHost calls `_get_host_geometry()` to read the flattened data and publish it to the C API.
 
 ---
 

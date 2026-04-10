@@ -4,37 +4,107 @@
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "type": {"value": 0}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "type": {
+                    "value": 0
+                }
             }
         },
         "limit1": {
             "type": "LimitTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "mode": {"value": 0},
-                "min_r": {"value": 0.2},
-                "max_r": {"value": 0.8},
-                "min_g": {"value": 0.2},
-                "max_g": {"value": 0.8},
-                "min_b": {"value": 0.2},
-                "max_b": {"value": 0.8}
+                "mode": {
+                    "value": 0
+                },
+                "min_r": {
+                    "value": 0.2
+                },
+                "max_r": {
+                    "value": 0.8
+                },
+                "min_g": {
+                    "value": 0.2
+                },
+                "max_g": {
+                    "value": 0.8
+                },
+                "min_b": {
+                    "value": 0.2
+                },
+                "max_b": {
+                    "value": 0.8
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [900, 100],
+            "position": [
+                900,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1", "from_port": 0, "to": "limit1", "to_port": 0},
-        {"from": "limit1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "limit1",
+            "to_port": 0
+        },
+        {
+            "from": "limit1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
-    "description": "LimitTOP clamps noise to [0.2, 0.8] per channel — no pure black or white."
+    "description": "LimitTOP clamps noise to [0.2, 0.8] per channel — no pure black or white.",
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Noise TOP — Basic\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

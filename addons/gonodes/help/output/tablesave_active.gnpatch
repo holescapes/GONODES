@@ -43,7 +43,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TableSaveOUT \u2014 Parameters\n\nShowcases: active, file_path, format.",
+            "text": "Constant DAT — Active\n\nManually editable 4x4 table with column headers.",
             "position": [
                 -100.0,
                 -100.0

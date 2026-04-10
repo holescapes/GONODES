@@ -81,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlurIMG \u2014 Parameters\n\nShowcases: radius, passes.",
+            "text": "Noise IMG — Variation\n\nCPU procedural noise image (value noise, white noise).",
             "position": [
                 -100.0,
                 -100.0

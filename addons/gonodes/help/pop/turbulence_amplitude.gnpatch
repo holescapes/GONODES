@@ -144,14 +144,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TurbulencePOP \u2014 Parameters\n\nShowcases: amplitude, frequency, roughness.",
+            "text": "Turbulence POP — Amplitude\n\nCurl noise turbulence force field on particles.\nShowcasing: amplitude=1.0, frequency=0.5, roughness=0.25, octaves=2.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

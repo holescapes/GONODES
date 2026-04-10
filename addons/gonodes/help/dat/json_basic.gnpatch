@@ -13,9 +13,7 @@
                     "value": 0
                 },
                 "pretty": {
-                    "value": true,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -76,7 +74,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "JSONDAT \u2014 Basic\n\nDefault settings.",
+            "text": "JSON DAT — Basic\n\nParse JSON string to table or generate JSON from table.\nUsing: mode=0, pretty=True.",
             "position": [
                 -100.0,
                 -100.0

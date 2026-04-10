@@ -2,26 +2,10 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "webcam1": {
-            "type": "WebcamIMG",
+        "src_noise": {
+            "type": "NoiseTOP",
             "position": [
                 100,
-                100
-            ],
-            "parameters": {}
-        },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
-        "depth1": {
-            "type": "DepthEstimateTOP",
-            "position": [
-                600,
                 100
             ],
             "parameters": {
@@ -32,53 +16,26 @@
                         "y": 512
                     }
                 },
-                "normalize": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
                 }
             }
         },
-        "displace1": {
-            "type": "DisplaceTOP",
+        "focus1": {
+            "type": "DepthTOP",
             "position": [
-                850,
+                450,
                 100
             ],
-            "parameters": {
-                "amount": {
-                    "value": 0.08
-                }
-            }
-        },
-        "blur1": {
-            "type": "BlurTOP",
-            "position": [
-                850,
-                300
-            ],
-            "parameters": {
-                "radius": {
-                    "value": 3.0
-                }
-            }
-        },
-        "comp1": {
-            "type": "CompositeTOP",
-            "position": [
-                1100,
-                100
-            ],
-            "parameters": {
-                "operation": {
-                    "value": 0
-                }
-            }
+            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1350,
+                800,
                 100
             ],
             "parameters": {
@@ -97,49 +54,13 @@
     },
     "connections": [
         {
-            "from": "webcam1",
+            "from": "src_noise",
             "from_port": 0,
-            "to": "bridge1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "bridge1",
-            "from_port": 0,
-            "to": "depth1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
-            "from_port": 0,
-            "to": "displace1",
-            "to_port": 0
-        },
-        {
-            "from": "depth1",
-            "from_port": 0,
-            "to": "displace1",
-            "to_port": 1
-        },
-        {
-            "from": "depth1",
-            "from_port": 0,
-            "to": "blur1",
-            "to_port": 0
-        },
-        {
-            "from": "displace1",
-            "from_port": 0,
-            "to": "comp1",
-            "to_port": 0
-        },
-        {
-            "from": "blur1",
-            "from_port": 0,
-            "to": "comp1",
-            "to_port": 1
-        },
-        {
-            "from": "comp1",
+            "from": "focus1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -149,14 +70,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Estimate \u2014 Displacement Effect\n\nDepth map used to displace the original video.\nCreates a parallax/3D-pop effect from 2D footage.\nBlurred depth composited for atmospheric haze.",
+            "text": "Depth TOP — Displace\n\nPseudo-depth extraction via luminance (near/far/invert controls).",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                450.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

@@ -17,9 +17,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
                     "value": 6.0,
@@ -72,7 +70,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseTOP \u2014 FBM (Fractal Brownian Motion)\n\n6 octaves of layered noise for rich detail.\nlacunarity (2.0) doubles frequency per layer.\ngain (0.5) halves amplitude per layer.\n\nColor mode (monochrome off) generates independent R/G/B channels.\nUseful for cloud textures, terrain height, etc.",
+            "text": "NoiseTOP — FBM (Fractal Brownian Motion)\n\n6 octaves of layered noise for rich detail.\nlacunarity (2.0) doubles frequency per layer.\ngain (0.5) halves amplitude per layer.\n\nColor mode (monochrome off) generates independent R/G/B channels.\nUseful for cloud textures, terrain height, etc.",
             "position": [
                 -120.0,
                 -130.0

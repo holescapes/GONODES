@@ -2,26 +2,10 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "webcam1": {
-            "type": "WebcamIMG",
+        "src_noise": {
+            "type": "NoiseTOP",
             "position": [
                 100,
-                100
-            ],
-            "parameters": {}
-        },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
-        "depth1": {
-            "type": "DepthEstimateTOP",
-            "position": [
-                600,
                 100
             ],
             "parameters": {
@@ -32,33 +16,18 @@
                         "y": 512
                     }
                 },
-                "normalize": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
                 }
             }
         },
-        "ramp1": {
-            "type": "RampTOP",
+        "focus1": {
+            "type": "DepthTOP",
             "position": [
-                600,
-                300
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "lookup1": {
-            "type": "LookupTOP",
-            "position": [
-                850,
+                450,
                 100
             ],
             "parameters": {}
@@ -66,7 +35,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1100,
+                800,
                 100
             ],
             "parameters": {
@@ -85,31 +54,13 @@
     },
     "connections": [
         {
-            "from": "webcam1",
+            "from": "src_noise",
             "from_port": 0,
-            "to": "bridge1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "bridge1",
-            "from_port": 0,
-            "to": "depth1",
-            "to_port": 0
-        },
-        {
-            "from": "depth1",
-            "from_port": 0,
-            "to": "lookup1",
-            "to_port": 0
-        },
-        {
-            "from": "ramp1",
-            "from_port": 0,
-            "to": "lookup1",
-            "to_port": 1
-        },
-        {
-            "from": "lookup1",
+            "from": "focus1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -119,14 +70,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Estimate \u2014 Color Mapped\n\nDepth map fed through LookupTOP with a color ramp.\nCreates a false-color depth visualization.\nCustomize the ramp gradient for different palettes.",
+            "text": "Depth TOP — Colormap\n\nPseudo-depth extraction via luminance (near/far/invert controls).",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                450.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

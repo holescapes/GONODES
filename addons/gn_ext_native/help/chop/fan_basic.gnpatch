@@ -2,59 +2,47 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "wave1": {
+        "src_wave": {
             "type": "WaveCHOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "waveform": {
-                    "value": 0
-                },
                 "frequency": {
-                    "value": 1.0
+                    "value": 2.0
                 },
                 "amplitude": {
                     "value": 1.0
                 }
             }
         },
-        "fan1": {
-            "type": "FanCHOPNative",
+        "focus1": {
+            "type": "FanCHOP",
             "position": [
                 450,
-                100
-            ],
-            "parameters": {
-                "count": {
-                    "value": 6,
-                    "expression": "(6 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
-                },
-                "offset": {
-                    "value": 0.15,
-                    "expression": "sin(time * 2.0) * 0.2",
-                    "mode": "EXPRESSION"
-                },
-                "operation": {
-                    "value": 2
-                },
-                "prefix": {
-                    "value": "ch"
-                }
-            }
-        },
-        "null1": {
-            "type": "NullCHOP",
-            "position": [
-                800,
                 100
             ],
             "parameters": {}
         },
         "choptop1": {
             "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
             "position": [
                 1150,
                 100
@@ -64,23 +52,7 @@
                     "value": {
                         "_type": "Vector2i",
                         "x": 512,
-                        "y": 256
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1500,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 256
+                        "y": 512
                     }
                 },
                 "open": {
@@ -91,19 +63,13 @@
     },
     "connections": [
         {
-            "from": "wave1",
+            "from": "src_wave",
             "from_port": 0,
-            "to": "fan1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "fan1",
-            "from_port": 0,
-            "to": "null1",
-            "to_port": 0
-        },
-        {
-            "from": "null1",
+            "from": "focus1",
             "from_port": 0,
             "to": "choptop1",
             "to_port": 0
@@ -119,14 +85,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Fan CHOP (Native) \u2014 Phase-Shifted Copies\n\nSine wave fanned into 6 channels with 0.15 phase shift each.\nCreates a cascading wave pattern.\nNative C++ generates all fan copies in one pass.",
+            "text": "Fan CHOP — Basic\n\nFan a single channel into multiple copies with offset spread.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

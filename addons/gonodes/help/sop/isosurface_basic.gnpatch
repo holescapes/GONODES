@@ -10,17 +10,13 @@
             ],
             "parameters": {
                 "surface_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "resolution": {
                     "value": 40
                 },
                 "bounds_size": {
-                    "value": 6.28,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 6.28
                 },
                 "threshold": {
                     "value": 0.0
@@ -128,14 +124,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "IsoSurfaceSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Iso Surface SOP — Basic\n\nAnalytic implicit surface via marching cubes (Gyroid, Schwarz-P, Torus, custom).\nUsing: surface_type=0, bounds_size=6.28, threshold=0.0, frequency=1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

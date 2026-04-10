@@ -122,7 +122,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SphereSOP \u2014 Parameters\n\nShowcases: radius, height, radial_segments.",
+            "text": "Sphere SOP — Radius\n\nSphere or hemisphere mesh.\nShowcasing: radius=0.25, height=0.5, radial_segments=31, rings=15.",
             "position": [
                 -100.0,
                 -100.0

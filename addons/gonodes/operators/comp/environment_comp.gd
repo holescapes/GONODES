@@ -301,7 +301,7 @@ func update_preview_control(control: Control) -> void:
 		label.text = ", ".join(parts)
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	var bg_modes := ["Color", "Sky", "Canvas", "Keep"]
 	var tonemap_modes := ["Linear", "Reinhard", "Filmic", "ACES"]
 	var bg_mode: String = bg_modes[get_param_value("bg_mode")]

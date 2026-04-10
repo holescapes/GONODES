@@ -81,14 +81,10 @@
             ],
             "parameters": {
                 "width": {
-                    "value": 512,
-                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 512
                 },
                 "height": {
-                    "value": 512,
-                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 512
                 },
                 "max_steps": {
                     "value": 100
@@ -163,7 +159,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CHOP to VOL \u2014 Channel Data as Voxels\n\nCHOPtoVOL maps channel sample data into a 3D volume.\nLFO + NoiseCHOP merged provide multi-channel input.\n\nUse mapping modes to control how CHOP samples are\ndistributed across voxel slices. The result is raymarched\nfor visual feedback \u2014 useful for audio-reactive volumes\nor data-driven volumetric effects.",
+            "text": "CHOP to VOL — Channel Data as Voxels\n\nCHOPtoVOL maps channel sample data into a 3D volume.\nLFO + NoiseCHOP merged provide multi-channel input.\n\nUse mapping modes to control how CHOP samples are\ndistributed across voxel slices. The result is raymarched\nfor visual feedback — useful for audio-reactive volumes\nor data-driven volumetric effects.",
             "position": [
                 -100.0,
                 -100.0

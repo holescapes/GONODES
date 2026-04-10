@@ -10,17 +10,13 @@
             ],
             "parameters": {
                 "family_filter": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "name_pattern": {
                     "value": "*"
                 },
                 "include_type": {
-                    "value": true,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -84,7 +80,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OP Find DAT \u2014 Search Network\n\nLists all operators in the current network.\nFilter by family or name glob pattern.",
+            "text": "OP Find DAT — Search Network\n\nLists all operators in the current network.\nFilter by family or name glob pattern.",
             "position": [
                 -100.0,
                 -150.0

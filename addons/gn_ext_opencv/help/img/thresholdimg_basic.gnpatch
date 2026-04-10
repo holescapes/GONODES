@@ -1,0 +1,97 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "thresh1": {
+            "type": "ThresholdIMG",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "method": {
+                    "value": 0
+                },
+                "threshold": {
+                    "value": 128.0
+                }
+            }
+        },
+        "bridge1": {
+            "type": "ImgToTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "thresh1",
+            "to_port": 0
+        },
+        {
+            "from": "thresh1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Noise IMG — Basic\n\nCPU procedural noise image (value noise, white noise).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

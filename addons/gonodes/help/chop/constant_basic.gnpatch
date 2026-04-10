@@ -10,17 +10,13 @@
             ],
             "parameters": {
                 "count": {
-                    "value": 3,
-                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 3
                 },
                 "name0": {
                     "value": "x"
                 },
                 "value0": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "name1": {
                     "value": "y"
@@ -104,7 +100,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Constant CHOP \u2014 Basic\n\nDefines 3 named channels with fixed values.\nUseful for setting up static data or expressions.",
+            "text": "Constant CHOP — Basic\n\nUp to 3 named static float values.\nUsing: count=3, name0=x, value0=1.0, name1=y.",
             "position": [
                 -100.0,
                 -150.0

@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 }
             }
         },
@@ -128,7 +124,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Switch CHOP \u2014 Select Input\n\nSwitches between two LFO inputs.\nindex=0 selects input A, index=1 selects input B.\nIndex can be driven by an expression.",
+            "text": "Switch CHOP — Select Input\n\nSwitches between two LFO inputs.\nindex=0 selects input A, index=1 selects input B.\nIndex can be driven by an expression.",
             "position": [
                 -100.0,
                 -150.0

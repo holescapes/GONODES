@@ -2,7 +2,7 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "grid1": {
+        "src_grid": {
             "type": "GridSOP",
             "position": [
                 100,
@@ -10,62 +10,33 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 20
+                    "value": 10
                 },
-                "columns": {
-                    "value": 20
+                "cols": {
+                    "value": 10
                 }
             }
         },
-        "noise1": {
-            "type": "NoiseSOP",
+        "focus1": {
+            "type": "SmoothSOP",
             "position": [
                 450,
                 100
             ],
-            "parameters": {
-                "amplitude": {
-                    "value": 0.3
-                },
-                "frequency": {
-                    "value": 3.0
-                }
-            }
+            "parameters": {}
         },
-        "smooth1": {
-            "type": "SmoothSOPNative",
+        "geo_view": {
+            "type": "GeometryCOMP",
             "position": [
                 800,
                 100
             ],
-            "parameters": {
-                "iterations": {
-                    "value": 5,
-                    "expression": "(5 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
-                },
-                "strength": {
-                    "value": 0.5,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
-                },
-                "pin_borders": {
-                    "value": true
-                }
-            }
-        },
-        "geo1": {
-            "type": "GeometryCOMP",
-            "position": [
-                1150,
-                100
-            ],
             "parameters": {}
         },
-        "cam1": {
+        "cam_view": {
             "type": "CameraCOMP",
             "position": [
-                1150,
+                800,
                 300
             ],
             "parameters": {
@@ -73,17 +44,17 @@
                     "value": 0
                 },
                 "ty": {
-                    "value": 2
+                    "value": 0.5
                 },
                 "tz": {
-                    "value": 5
+                    "value": 3
                 }
             }
         },
-        "render1": {
+        "render_view": {
             "type": "RenderTOP",
             "position": [
-                1500,
+                1100,
                 100
             ],
             "parameters": {
@@ -99,7 +70,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1850,
+                1450,
                 100
             ],
             "parameters": {
@@ -118,37 +89,31 @@
     },
     "connections": [
         {
-            "from": "grid1",
+            "from": "src_grid",
             "from_port": 0,
-            "to": "noise1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "noise1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "smooth1",
+            "to": "geo_view",
             "to_port": 0
         },
         {
-            "from": "smooth1",
+            "from": "geo_view",
             "from_port": 0,
-            "to": "geo1",
+            "to": "render_view",
             "to_port": 0
         },
         {
-            "from": "geo1",
+            "from": "cam_view",
             "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
+            "to": "render_view",
             "to_port": 1
         },
         {
-            "from": "render1",
+            "from": "render_view",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -158,14 +123,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Smooth SOP (Native) \u2014 Laplacian Smoothing\n\nNoisy grid smoothed with 5 iterations at 0.5 strength.\nBorder vertices are pinned to prevent shrinkage.\nNative C++ processes adjacency & smoothing loops.",
+            "text": "Smooth SOP — Basic\n\nLaplacian vertex smoothing (relaxation) with border pinning.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

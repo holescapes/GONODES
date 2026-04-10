@@ -34,14 +34,10 @@
             ],
             "parameters": {
                 "index": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "blend": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 }
             }
         },
@@ -149,7 +145,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Switch SOP \u2014 Select Input\n\nindex=0 outputs sphere, index=1 outputs torus.\nEnable blend for mesh interpolation between inputs.",
+            "text": "Switch SOP — Select Input\n\nindex=0 outputs sphere, index=1 outputs torus.\nEnable blend for mesh interpolation between inputs.",
             "position": [
                 -100.0,
                 -150.0

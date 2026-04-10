@@ -2,61 +2,10 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "circle1": {
-            "type": "CircleSOP",
+        "src_noise": {
+            "type": "NoiseTOP",
             "position": [
                 100,
-                100
-            ],
-            "parameters": {
-                "radius": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "segments": {
-                    "value": 32,
-                    "expression": "(32 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
-                },
-                "type": {
-                    "value": 0
-                },
-                "orientation": {
-                    "value": 0
-                }
-            }
-        },
-        "geo_view": {
-            "type": "GeometryCOMP",
-            "position": [
-                700,
-                100
-            ],
-            "parameters": {}
-        },
-        "cam_view": {
-            "type": "CameraCOMP",
-            "position": [
-                700,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 0.5
-                },
-                "tz": {
-                    "value": 3
-                }
-            }
-        },
-        "render_view": {
-            "type": "RenderTOP",
-            "position": [
-                1000,
                 100
             ],
             "parameters": {
@@ -66,13 +15,27 @@
                         "x": 512,
                         "y": 512
                     }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
                 }
             }
+        },
+        "focus1": {
+            "type": "AntiAliasTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
+                800,
                 100
             ],
             "parameters": {
@@ -91,25 +54,13 @@
     },
     "connections": [
         {
-            "from": "circle1",
+            "from": "src_noise",
             "from_port": 0,
-            "to": "geo_view",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "geo_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 0
-        },
-        {
-            "from": "cam_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 1
-        },
-        {
-            "from": "render_view",
+            "from": "focus1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -119,14 +70,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CircleSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Anti Alias TOP — Advanced\n\nSimplified FXAA-style anti-aliasing with luma edge detection.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

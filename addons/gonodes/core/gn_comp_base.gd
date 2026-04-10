@@ -82,10 +82,11 @@ func update_preview_control(control: Control) -> void:
 			label.text = "no node"
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	# COMPs pass through their input data — route by output type.
-	if cached_output is GNGeoData:
-		var geo: GNGeoData = cached_output as GNGeoData
+	var data: GNData = get_output_data(port_index)
+	if data is GNGeoData:
+		var geo: GNGeoData = data as GNGeoData
 		if geo.mesh != null:
 			GNSopBase._ensure_viewer_scene()
 			var vp: SubViewport = viewer.get_3d_viewport()
@@ -95,13 +96,13 @@ func render_for_viewer(viewer) -> void:
 			GNViewerRenderHelpers.render_sop(vp, GNSopBase._viewer_mesh_instance, geo.mesh)
 			viewer.set_info_bar("%d verts" % geo.vertex_count)
 			return
-	if cached_output is GNTextureData:
-		var td: GNTextureData = cached_output as GNTextureData
+	if data is GNTextureData:
+		var td: GNTextureData = data as GNTextureData
 		if td.texture:
 			viewer.set_texture(td.texture,
 				"%dx%d" % [td.resolution.x, td.resolution.y])
 			return
-	if cached_output != null:
-		viewer.set_info(cached_output.get_preview_text(), "")
+	if data != null:
+		viewer.set_info(data.get_preview_text(), "")
 		return
 	viewer.set_info("COMP: %s" % node_type, "Component operator")

@@ -90,14 +90,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FIFODAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "FIFO DAT — Advanced\n\nFirst-in-first-out rolling row buffer with max row limit.\nCombined configuration: max_rows=102, active=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

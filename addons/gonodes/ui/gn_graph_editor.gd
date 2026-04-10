@@ -21,6 +21,9 @@ var _spawn_position: Vector2 = Vector2.ZERO
 ## Clipboard dictionary for copy/paste: {"nodes": {id: dict}, "connections": [dict]}.
 var _clipboard: Dictionary = {}
 
+## Graph-space position captured at right-click time for context-menu paste.
+var _context_graph_pos := Vector2.ZERO
+
 ## Whether live previews are shown on node views.
 var previews_visible: bool = true
 
@@ -503,6 +506,7 @@ func _gui_input(event: InputEvent) -> void:
 						_selected_wires = [w]
 						_expr_ref_overlay.queue_redraw()
 
+			_context_graph_pos = (get_local_mouse_position() + scroll_offset) / zoom
 			_show_context_menu(get_screen_position() + get_local_mouse_position())
 			accept_event()
 		elif event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
@@ -1918,7 +1922,9 @@ func copy_selected() -> void:
 
 
 ## Pastes clipboard contents with new IDs and offset positions.
-func paste_clipboard() -> void:
+## If [param target_graph_pos] is provided, nodes are centered there instead of
+## the current mouse position.
+func paste_clipboard(target_graph_pos := Vector2(INF, INF)) -> void:
 	if _clipboard.is_empty() or not _clipboard.has("nodes"):
 		return
 	if network == null:
@@ -1946,9 +1952,13 @@ func paste_clipboard() -> void:
 	if node_count > 0:
 		centroid /= float(node_count)
 
-	# Target position: mouse cursor in graph space (falls back to small offset
-	# if cursor position can't be determined).
-	var mouse_graph_pos := (get_local_mouse_position() + scroll_offset) / zoom
+	# Target position: use explicit target if provided, otherwise fall back to
+	# the current mouse cursor in graph space.
+	var mouse_graph_pos: Vector2
+	if target_graph_pos.x != INF:
+		mouse_graph_pos = target_graph_pos
+	else:
+		mouse_graph_pos = (get_local_mouse_position() + scroll_offset) / zoom
 	var paste_offset := mouse_graph_pos - centroid
 
 	for old_id in nodes_data:
@@ -1988,6 +1998,13 @@ func paste_clipboard() -> void:
 		if not from_id.is_empty() and not to_id.is_empty():
 			network.connect_nodes(from_id, int(cd["from_port"]),
 					to_id, int(cd["to_port"]))
+
+	# Sync dynamic port counts — trim ports that had connections in the
+	# source patch but not in the paste (e.g. pasting a single SwitchTOP
+	# that originally had 20 inputs).
+	for node in new_nodes:
+		if node._dynamic_input:
+			network._update_dynamic_node_inputs(node.id)
 
 	# Select only the newly pasted nodes
 	_deselect_all()
@@ -3293,7 +3310,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 		_CtxID.CUT:
 			cut_selected()
 		_CtxID.PASTE:
-			paste_clipboard()
+			paste_clipboard(_context_graph_pos)
 		_CtxID.DUPLICATE:
 			duplicate_selected()
 		_CtxID.DELETE:
@@ -3454,7 +3471,7 @@ func _paste_from_json() -> void:
 		})
 
 	_clipboard = {"nodes": payload["nodes"], "connections": normalized_conns}
-	paste_clipboard()
+	paste_clipboard(_context_graph_pos)
 	GNLogger.info("GraphEditor", "Pasted %d node(s) from JSON" % payload["nodes"].size())
 
 

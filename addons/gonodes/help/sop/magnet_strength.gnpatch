@@ -145,14 +145,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MagnetSOP \u2014 Parameters\n\nShowcases: strength, radius, falloff.",
+            "text": "Magnet SOP — Strength\n\nDeform geometry by attracting/repelling vertices toward attractor points.\nShowcasing: strength=0.5, radius=1.0, falloff=1, exponent=1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

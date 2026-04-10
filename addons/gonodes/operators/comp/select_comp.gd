@@ -3,8 +3,8 @@ extends GNCompBase
 ## References a remote COMP node by name — outputs that node's data
 ## without requiring a wire connection.
 ##
-## When the 'comp' parameter names a remote COMP, its output is used.
-## When 'comp' is empty, the wired input is used instead (pass-through).
+## Wireless reference — no input port.  Names a remote COMP by its node id
+## and outputs that node's data.
 
 var _network_cache: GNNetwork = null
 
@@ -14,7 +14,6 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.COMP, false, "Input component (used when 'comp' is empty)")
 	add_output("out", GNFamily.Type.COMP, "Selected component")
 
 
@@ -23,20 +22,18 @@ func _init_parameters() -> void:
 		"COMP", "Name (id) of a remote COMP to reference (empty = use wired input)"))
 
 
-func _cook(inputs: Array[GNData]) -> GNData:
+func _cook(_inputs: Array[GNData]) -> GNData:
 	var remote_id: String = get_param_value("comp")
 
-	if not remote_id.is_empty():
-		var data: GNData = _resolve_remote(remote_id, GNFamily.Type.COMP)
-		if data != null:
-			node_warning = ""
-			return data
-		node_warning = "Remote COMP '%s' not found or has no output" % remote_id
+	if remote_id.is_empty():
+		node_warning = "No COMP referenced — set the 'comp' parameter"
 		return null
 
-	node_warning = ""
-	if inputs.size() > 0 and inputs[0] != null:
-		return inputs[0]
+	var data: GNData = _resolve_remote(remote_id, GNFamily.Type.COMP)
+	if data != null:
+		node_warning = ""
+		return data
+	node_warning = "Remote COMP '%s' not found or has no output" % remote_id
 	return null
 
 

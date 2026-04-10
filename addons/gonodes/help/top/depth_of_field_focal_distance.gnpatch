@@ -80,14 +80,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DepthOfFieldTOP \u2014 Parameters\n\nShowcases: focal_distance, focal_range, max_blur.",
+            "text": "Depth Of Field TOP — Distance\n\nPost-process depth-of-field blur with bokeh disc sampling.\nShowcasing: focal_distance=0.25, focal_range=0.05, max_blur=4.0, bokeh_brightness=0.6.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

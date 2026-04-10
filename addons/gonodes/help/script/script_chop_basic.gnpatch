@@ -64,14 +64,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Script CHOP \u2014 Basic\n\nCustom GDScript-driven CHOP.\nEdit script to define output channels.",
+            "text": "GDScript SCRIPT — Basic\n\nUser-scripted node. Write GDScript with @output annotations for any data type. Template dropdown provides CHOP/SOP/DAT/IMG starting code.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

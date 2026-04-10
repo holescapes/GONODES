@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "bpm": {
-                    "value": 120.0,
-                    "expression": "(120.0 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 120.0
                 }
             }
         },
@@ -70,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Beat CHOP \u2014 Basic\n\nGenerates beat pulses at 120 BPM.",
+            "text": "Beat CHOP — Basic\n\nEnergy-based beat/onset detection for music-reactive visuals.\nUsing: bpm=120.0.",
             "position": [
                 -100.0,
                 -100.0

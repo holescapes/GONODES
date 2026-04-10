@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
                     "value": 0.5,
@@ -128,7 +126,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Merge CHOP \u2014 Combine\n\nTwo LFOs merged with Rename mode.\nDuplicate channels get unique names.\nCombines data from multiple sources.",
+            "text": "Merge CHOP — Combine\n\nTwo LFOs merged with Rename mode.\nDuplicate channels get unique names.\nCombines data from multiple sources.",
             "position": [
                 -100.0,
                 -150.0

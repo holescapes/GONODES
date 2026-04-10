@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "stretch_mode": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "min_size": {
                     "value": {
@@ -22,9 +20,7 @@
                     }
                 },
                 "expand_mode": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -99,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextureRectUI \u2014 Basic\n\nDefault settings.",
+            "text": "Texture Rect UI — Basic\n\nDisplays a TOP texture in panel. Optional MAT shader overlay.\nUsing: stretch_mode=0, expand_mode=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

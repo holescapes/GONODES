@@ -17,9 +17,7 @@
                     }
                 },
                 "scale": {
-                    "value": 3.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 3.0
                 }
             }
         },
@@ -63,5 +61,26 @@
             "to_port": 0
         }
     ],
-    "description": "WindowOUT \u2014 Display a texture in a standalone OS window. Toggle 'open' to show."
+    "description": "WindowOUT — Display a texture in a standalone OS window. Toggle 'open' to show.",
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Window OUT — Basic\n\nDisplay a texture in a standalone OS window (VJ output).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

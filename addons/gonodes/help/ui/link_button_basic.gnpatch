@@ -13,9 +13,7 @@
                     "value": "Click this link"
                 },
                 "underline": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 }
             }
         },
@@ -87,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LinkButton UI \u00e2\u20ac\u201d Basic\n\nClickable text link with underline options.\nUnderline modes: Always, On Hover, Never.\nState channel: press (impulse 0/1).",
+            "text": "LinkButton UI â€” Basic\n\nClickable text link with underline options.\nUnderline modes: Always, On Hover, Never.\nState channel: press (impulse 0/1).",
             "position": [
                 -100.0,
                 -100.0

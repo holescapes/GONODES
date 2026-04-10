@@ -64,7 +64,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RtMidi In \u2014 Basic\n\nReceives MIDI via native RtMidi library.\nRequires gn_ext_midi DLL.\nShows notes, CC, pitch bend.",
+            "text": "Rt Midi In CHOP — Basic\n\nReceive MIDI via RtMidi native library (lower latency than built-in).",
             "position": [
                 -100.0,
                 -100.0

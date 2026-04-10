@@ -1,6 +1,6 @@
 {
     "version": "1.0",
-    "description": "HapInTOP \u2014 Looping with speed control. Demonstrates playback speed and looping.",
+    "description": "HapInTOP — Looping with speed control. Demonstrates playback speed and looping.",
     "nodes": {
         "hapin1": {
             "type": "HapInTOP",
@@ -103,6 +103,27 @@
             "from_port": 0,
             "to": "window1",
             "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Hap In TOP — Playback\n\nGPU-direct HAP video playback — DXT frames upload directly to GPU without CPU decode.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

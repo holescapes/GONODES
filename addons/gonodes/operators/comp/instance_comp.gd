@@ -303,7 +303,7 @@ func get_multi_mesh_instance() -> MultiMeshInstance3D:
 	return _multi_mesh_instance
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _multi_mesh != null and _multi_mesh.mesh != null:
 		var mesh: Mesh = _multi_mesh.mesh
 		if mesh is ArrayMesh:

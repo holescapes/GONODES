@@ -133,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TaperSOP \u2014 Parameters\n\nShowcases: scale_start, scale_end, axis.",
+            "text": "Taper SOP — Start\n\nTaper geometry by scaling perpendicular axes along a profile.\nShowcasing: scale_start=0.5, scale_end=0.25, axis=1, profile=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

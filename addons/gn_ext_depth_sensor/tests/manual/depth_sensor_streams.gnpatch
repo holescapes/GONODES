@@ -1,0 +1,99 @@
+{
+	"generator": "GONODES",
+	"description": "Depth sensor stream demo — four DepthSensorTOP nodes reading Color, Depth, IR, and Player Index streams from the same device. Depth stream feeds into LevelTOP to remap range for visualization. Requires Azure Kinect, RealSense, or Ultraleap hardware.",
+	"connections": [
+		{
+			"from": "sensor_depth",
+			"from_port": 0,
+			"to": "depth_remap",
+			"to_port": 0
+		},
+		{
+			"from": "depth_remap",
+			"from_port": 0,
+			"to": "depth_view",
+			"to_port": 0
+		},
+		{
+			"from": "sensor_color",
+			"from_port": 0,
+			"to": "color_view",
+			"to_port": 0
+		},
+		{
+			"from": "sensor_ir",
+			"from_port": 0,
+			"to": "ir_view",
+			"to_port": 0
+		},
+		{
+			"from": "sensor_player",
+			"from_port": 0,
+			"to": "player_view",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"sensor_color": {
+			"type": "DepthSensorTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"stream": {"value": 1},
+				"active": {"value": true}
+			}
+		},
+		"color_view": {
+			"type": "NullTOP",
+			"position": [400.0, 0.0],
+			"parameters": {}
+		},
+		"sensor_depth": {
+			"type": "DepthSensorTOP",
+			"position": [0.0, 200.0],
+			"parameters": {
+				"stream": {"value": 0},
+				"max_depth_mm": {"value": 5000},
+				"active": {"value": true}
+			}
+		},
+		"depth_remap": {
+			"type": "LevelTOP",
+			"position": [400.0, 200.0],
+			"parameters": {
+				"brightness": {"value": 2.0},
+				"gamma": {"value": 0.5}
+			}
+		},
+		"depth_view": {
+			"type": "NullTOP",
+			"position": [800.0, 200.0],
+			"parameters": {}
+		},
+		"sensor_ir": {
+			"type": "DepthSensorTOP",
+			"position": [0.0, 400.0],
+			"parameters": {
+				"stream": {"value": 2},
+				"active": {"value": true}
+			}
+		},
+		"ir_view": {
+			"type": "NullTOP",
+			"position": [400.0, 400.0],
+			"parameters": {}
+		},
+		"sensor_player": {
+			"type": "DepthSensorTOP",
+			"position": [0.0, 600.0],
+			"parameters": {
+				"stream": {"value": 3},
+				"active": {"value": true}
+			}
+		},
+		"player_view": {
+			"type": "NullTOP",
+			"position": [400.0, 600.0],
+			"parameters": {}
+		}
+	}
+}

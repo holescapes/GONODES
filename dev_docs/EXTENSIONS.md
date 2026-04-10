@@ -315,7 +315,8 @@ provides these display modes:
 
 ```gdscript
 ## In your extension's base class or operator:
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+    var data: GNData = get_output_data(port_index)
     viewer.set_info("My custom info", "info bar text")
     # or: viewer.set_texture(my_texture, "info bar text")
     # or: viewer.set_control(my_control, "info bar text")
@@ -523,8 +524,10 @@ static func boot() -> void:
 
 Viewer rendering example (in your operator):
 ```gdscript
-func render_for_viewer(viewer) -> void:
-    viewer.set_info(cached_output.get_preview_text(), "")
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+    var data: GNData = get_output_data(port_index)
+    if data != null:
+        viewer.set_info(data.get_preview_text(), "")
 ```
 
 ### Step 4: Write Operators

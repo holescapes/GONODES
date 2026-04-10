@@ -81,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlurIMG \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Noise IMG — Advanced\n\nCPU procedural noise image (value noise, white noise).",
             "position": [
                 -100.0,
                 -100.0

@@ -65,14 +65,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextureSaveOUT \u2014 Parameters\n\nShowcases: active, file_path, format.",
+            "text": "Texture Save OUT — Active\n\nSave GPU texture to disk (PNG, WebP, EXR). GPU→CPU readback + file write.\nShowcasing: active=True, format=1, quality=0.375, auto_number=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

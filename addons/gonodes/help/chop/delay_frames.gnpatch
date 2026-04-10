@@ -15,9 +15,7 @@
                     "mode": "EXPRESSION"
                 },
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "amplitude": {
                     "value": 1.0
@@ -110,7 +108,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Delay CHOP \u2014 Frame Delay\n\nDelays a sine LFO by 30 frames.\nUseful for staggered animation chains.\nRing buffer stores past frame values.",
+            "text": "Delay CHOP — Frame Delay\n\nDelays a sine LFO by 30 frames.\nUseful for staggered animation chains.\nRing buffer stores past frame values.",
             "position": [
                 -100.0,
                 -150.0

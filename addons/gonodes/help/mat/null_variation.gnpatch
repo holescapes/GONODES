@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullMAT \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Null MAT — Variation\n\nPass-through for organization and references.",
             "position": [
                 -100.0,
                 -100.0

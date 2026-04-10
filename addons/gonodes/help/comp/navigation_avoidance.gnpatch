@@ -1,0 +1,373 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "NavigationCOMP — Avoidance. Agent navigates with obstacle avoidance enabled around box obstacles.",
+    "nodes": {
+        "sphere_agent": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.35
+                },
+                "segments": {
+                    "value": 12
+                }
+            }
+        },
+        "geo_agent": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "nav1": {
+            "type": "NavigationCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "ty": {
+                    "value": 0.35
+                },
+                "tx": {
+                    "value": -6.0
+                },
+                "tz": {
+                    "value": -6.0
+                },
+                "target_x": {
+                    "value": 6.0
+                },
+                "target_y": {
+                    "value": 0.0
+                },
+                "target_z": {
+                    "value": 6.0
+                },
+                "speed": {
+                    "value": 3.5
+                },
+                "avoidance": {
+                    "value": true
+                },
+                "path_tolerance": {
+                    "value": 0.3
+                },
+                "cell_size": {
+                    "value": 0.25
+                }
+            }
+        },
+        "box_obs1": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                300
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 2.0
+                },
+                "size_y": {
+                    "value": 2.0
+                },
+                "size_z": {
+                    "value": 2.0
+                }
+            }
+        },
+        "geo_obs1": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 1.0
+                },
+                "tz": {
+                    "value": 0.0
+                }
+            }
+        },
+        "box_obs2": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                500
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 3.0
+                },
+                "size_y": {
+                    "value": 1.5
+                },
+                "size_z": {
+                    "value": 1.0
+                }
+            }
+        },
+        "geo_obs2": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                500
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 3.0
+                },
+                "ty": {
+                    "value": 0.75
+                },
+                "tz": {
+                    "value": -3.0
+                }
+            }
+        },
+        "floor_grid": {
+            "type": "GridSOP",
+            "position": [
+                0,
+                700
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 30.0
+                },
+                "size_z": {
+                    "value": 30.0
+                },
+                "cols": {
+                    "value": 2
+                },
+                "rows": {
+                    "value": 2
+                }
+            }
+        },
+        "geo_floor": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                700
+            ],
+            "parameters": {}
+        },
+        "static_floor": {
+            "type": "StaticBodyCOMP",
+            "position": [
+                600,
+                700
+            ],
+            "parameters": {}
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                900
+            ],
+            "parameters": {
+                "text": {
+                    "value": "NavigationCOMP — Avoidance\n\nAgent starts at (-6, 0, -6) and navigates\nto (6, 0, 6) with avoidance=true.\n\nTwo box obstacles are placed in the path.\nThe NavigationAgent3D avoidance system\nsteers around them in real time.\n\nFor baked obstacles, connect floor_in\nwith obstacle geometry merged in."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                200
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 20.0
+                },
+                "tz": {
+                    "value": 15.0
+                },
+                "use_look_at": {
+                    "value": true
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                700
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere_agent",
+            "from_port": 0,
+            "to": "geo_agent",
+            "to_port": 0
+        },
+        {
+            "from": "geo_agent",
+            "from_port": 0,
+            "to": "nav1",
+            "to_port": 0
+        },
+        {
+            "from": "box_obs1",
+            "from_port": 0,
+            "to": "geo_obs1",
+            "to_port": 0
+        },
+        {
+            "from": "box_obs2",
+            "from_port": 0,
+            "to": "geo_obs2",
+            "to_port": 0
+        },
+        {
+            "from": "floor_grid",
+            "from_port": 0,
+            "to": "geo_floor",
+            "to_port": 0
+        },
+        {
+            "from": "geo_floor",
+            "from_port": 0,
+            "to": "static_floor",
+            "to_port": 0
+        },
+        {
+            "from": "nav1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "geo_obs1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "geo_obs2",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "static_floor",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 3
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 4
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 5
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Navigation COMP — Avoidance\n\nAI pathfinding — navigate a COMP toward a target using NavigationServer3D.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

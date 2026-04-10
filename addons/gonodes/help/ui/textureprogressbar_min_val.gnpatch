@@ -105,14 +105,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextureProgressBarUI \u2014 Parameters\n\nShowcases: min_val, max_val, default_val.",
+            "text": "Texture Progress Bar UI — Val\n\nTextured progress bar with TOP layers and CHOP driver.\nShowcasing: min_val=0.5, max_val=50.0, default_val=0.5, fill_mode=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

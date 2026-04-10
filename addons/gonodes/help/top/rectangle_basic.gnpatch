@@ -42,14 +42,10 @@
                     }
                 },
                 "corner_radius": {
-                    "value": 0.05,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.05
                 },
                 "softness": {
-                    "value": 0.01,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.01
                 }
             }
         },
@@ -85,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Rectangle TOP \u2014 Rounded\n\nAn orange rounded rectangle on a dark bg.\nCorner radius and softness control the shape.\nCenter and size can be expression-driven.",
+            "text": "Rectangle TOP — Rounded\n\nAn orange rounded rectangle on a dark bg.\nCorner radius and softness control the shape.\nCenter and size can be expression-driven.",
             "position": [
                 -100.0,
                 -150.0

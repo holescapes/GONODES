@@ -181,14 +181,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AnimationCOMP \u2014 Parameters\n\nShowcases: active, speed, duration.",
+            "text": "Animation COMP — Active\n\nAnimationPlayer wrapper for keyframe animation on COMP transform properties.\nShowcasing: active=True, speed=0.5, duration=1.0, loop_mode=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

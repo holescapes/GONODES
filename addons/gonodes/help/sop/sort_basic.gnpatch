@@ -2,38 +2,33 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "grid1": {
+        "src_grid": {
             "type": "GridSOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "size_x": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "size_z": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
                 "rows": {
                     "value": 10
                 },
                 "cols": {
                     "value": 10
-                },
-                "orientation": {
-                    "value": 0
                 }
             }
+        },
+        "focus1": {
+            "type": "SortSOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
         },
         "geo_view": {
             "type": "GeometryCOMP",
             "position": [
-                700,
+                800,
                 100
             ],
             "parameters": {}
@@ -41,7 +36,7 @@
         "cam_view": {
             "type": "CameraCOMP",
             "position": [
-                700,
+                800,
                 300
             ],
             "parameters": {
@@ -59,7 +54,7 @@
         "render_view": {
             "type": "RenderTOP",
             "position": [
-                1000,
+                1100,
                 100
             ],
             "parameters": {
@@ -75,7 +70,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
+                1450,
                 100
             ],
             "parameters": {
@@ -94,7 +89,13 @@
     },
     "connections": [
         {
-            "from": "grid1",
+            "from": "src_grid",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "focus1",
             "from_port": 0,
             "to": "geo_view",
             "to_port": 0
@@ -122,14 +123,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GridSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Sort SOP — Basic\n\nSort vertices by axis, distance from origin, or randomly.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

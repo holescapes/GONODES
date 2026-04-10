@@ -121,7 +121,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MarchingCubesVOL \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Noise VOL — Advanced\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).",
             "position": [
                 -100.0,
                 -100.0

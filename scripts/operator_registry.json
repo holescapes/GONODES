@@ -562,6 +562,11 @@
         "name": "end_index",
         "type": "int",
         "default": 0
+      },
+      {
+        "name": "index_range",
+        "type": "string",
+        "default": "0-10:2"
       }
     ]
   },
@@ -1681,6 +1686,21 @@
     "extension": null,
     "params": [
       {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "from_pattern",
+        "type": "string",
+        "default": "*"
+      },
+      {
+        "name": "to_pattern",
+        "type": "string",
+        "default": "*"
+      },
+      {
         "name": "renames",
         "type": "int",
         "default": 1
@@ -2661,6 +2681,60 @@
     ]
   },
   {
+    "class_name": "BoneCOMP",
+    "node_type": "bone",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/bone_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "bone_name",
+        "type": "string",
+        "default": "Head"
+      },
+      {
+        "name": "ox",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "oy",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "oz",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "rx",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ry",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "rz",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "override_pose",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "use_external_skeleton",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "CameraCOMP",
     "node_type": "camera",
     "family": "comp",
@@ -2746,6 +2820,60 @@
         "name": "clear_color",
         "type": "color",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "ConstraintCOMP",
+    "node_type": "constraint",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/constraint_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "blend",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "ox",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "oy",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "oz",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "up_axis",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "constrain_position",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "constrain_rotation",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "constrain_scale",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -3324,6 +3452,60 @@
     ]
   },
   {
+    "class_name": "LODCOMP",
+    "node_type": "lod",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/lod_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "tx",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ty",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "tz",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "dist1",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "dist2",
+        "type": "float",
+        "default": 25.0
+      },
+      {
+        "name": "dist3",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "fade_range",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "auto_lod",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "forced_lod",
+        "type": "int",
+        "default": 0
+      }
+    ]
+  },
+  {
     "class_name": "LightCOMP",
     "node_type": "light",
     "family": "comp",
@@ -3482,6 +3664,95 @@
     ]
   },
   {
+    "class_name": "NavigationCOMP",
+    "node_type": "navigation",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/navigation_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "agent_radius",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "agent_height",
+        "type": "float",
+        "default": 1.8
+      },
+      {
+        "name": "target_x",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "target_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "target_z",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "tx",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ty",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "tz",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "cell_size",
+        "type": "float",
+        "default": 0.25
+      },
+      {
+        "name": "cell_height",
+        "type": "float",
+        "default": 0.25
+      },
+      {
+        "name": "max_slope",
+        "type": "float",
+        "default": 45.0
+      },
+      {
+        "name": "max_climb",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "avoidance",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "path_tolerance",
+        "type": "float",
+        "default": 0.5
+      }
+    ]
+  },
+  {
     "class_name": "NullCOMP",
     "node_type": "null",
     "family": "comp",
@@ -3510,6 +3781,100 @@
         "name": "label",
         "type": "string",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "PathCOMP",
+    "node_type": "path",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/path_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "progress",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "loop",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "cubic_interp",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "rotation_mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "tilt",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "p0x",
+        "type": "float",
+        "default": -3.0
+      },
+      {
+        "name": "p0y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "p0z",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "p1x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "p1y",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "p1z",
+        "type": "float",
+        "default": -2.0
+      },
+      {
+        "name": "p2x",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "p2y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "p2z",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ox",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "oy",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "oz",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -3871,6 +4236,144 @@
     ]
   },
   {
+    "class_name": "VehicleCOMP",
+    "node_type": "vehicle",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/vehicle_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "tx",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ty",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "tz",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ry",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "mass",
+        "type": "float",
+        "default": 1200.0
+      },
+      {
+        "name": "wheel_base",
+        "type": "float",
+        "default": 2.4
+      },
+      {
+        "name": "track_width",
+        "type": "float",
+        "default": 1.6
+      },
+      {
+        "name": "wheel_radius",
+        "type": "float",
+        "default": 0.35
+      },
+      {
+        "name": "suspension_rest",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "suspension_travel",
+        "type": "float",
+        "default": 0.2
+      },
+      {
+        "name": "suspension_stiffness",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "damping",
+        "type": "float",
+        "default": 4.0
+      },
+      {
+        "name": "steer",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "throttle",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "brake",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_steer_angle",
+        "type": "float",
+        "default": 30.0
+      },
+      {
+        "name": "engine_force",
+        "type": "float",
+        "default": 300.0
+      },
+      {
+        "name": "brake_force",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "drive_type",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "ArucoPoseDAT",
+    "node_type": "aruco_pose",
+    "family": "dat",
+    "file": "addons/gn_ext_opencv/operators/dat/aruco_pose_dat.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "dictionary",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "marker_size",
+        "type": "float",
+        "default": 0.05
+      },
+      {
+        "name": "camera_matrix",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "dist_coeffs",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "BlackmagicDAT",
     "node_type": "blackmagic",
     "family": "dat",
@@ -3938,6 +4441,40 @@
       {
         "name": "on_create",
         "type": "string",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "CameraCalibDAT",
+    "node_type": "camera_calib",
+    "family": "dat",
+    "file": "addons/gn_ext_opencv/operators/dat/camera_calib_dat.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "cols",
+        "type": "int",
+        "default": 9
+      },
+      {
+        "name": "rows",
+        "type": "int",
+        "default": 6
+      },
+      {
+        "name": "capture",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "calibrate",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "reset",
+        "type": "pulse",
         "default": null
       }
     ]
@@ -4585,6 +5122,20 @@
     ]
   },
   {
+    "class_name": "QRCodeDAT",
+    "node_type": "qrcode",
+    "family": "dat",
+    "file": "addons/gn_ext_opencv/operators/dat/qrcode_dat.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "RenderPickDAT",
     "node_type": "render_pick",
     "family": "dat",
@@ -5077,6 +5628,158 @@
     ]
   },
   {
+    "class_name": "ArucoDetectIMG",
+    "node_type": "aruco_detect",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/aruco_detect_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "dictionary",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "draw_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "thickness",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "draw_ids",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "BackgroundSubtractIMG",
+    "node_type": "bg_subtract",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/bg_subtract_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "method",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "history",
+        "type": "int",
+        "default": 500
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 16.0
+      },
+      {
+        "name": "learning_rate",
+        "type": "float",
+        "default": -1.0
+      },
+      {
+        "name": "detect_shadows",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "reset",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "BlobTrackIMG",
+    "node_type": "blob_track",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/blob_track_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "min_area",
+        "type": "float",
+        "default": 25.0
+      },
+      {
+        "name": "max_area",
+        "type": "float",
+        "default": 50000.0
+      },
+      {
+        "name": "circ_min",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "circ_max",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "conv_min",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "conv_max",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "iner_min",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "iner_max",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "max_track_dist",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "max_lost_frames",
+        "type": "int",
+        "default": 5
+      },
+      {
+        "name": "draw_ids",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "draw_bbox",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "BlurIMG",
     "node_type": "blur",
     "family": "img",
@@ -5092,6 +5795,30 @@
         "name": "passes",
         "type": "int",
         "default": 1
+      }
+    ]
+  },
+  {
+    "class_name": "CameraUndistortIMG",
+    "node_type": "camera_undistort",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/camera_undistort_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "camera_matrix",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "dist_coeffs",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -5135,6 +5862,197 @@
     ]
   },
   {
+    "class_name": "ColorTrackIMG",
+    "node_type": "color_track",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/color_track_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "target_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "hue_range",
+        "type": "float",
+        "default": 15.0
+      },
+      {
+        "name": "sat_min",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "sat_max",
+        "type": "float",
+        "default": 255.0
+      },
+      {
+        "name": "val_min",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "val_max",
+        "type": "float",
+        "default": 255.0
+      },
+      {
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "ContourIMG",
+    "node_type": "contour",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/contour_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "method",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "min_area",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "thickness",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "draw_all",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "ConvolveIMG",
+    "node_type": "convolve",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/convolve_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "preset",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "custom_kernel",
+        "type": "string",
+        "default": "0,-1,0,-1,5,-1,0,-1,0"
+      },
+      {
+        "name": "custom_w",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "custom_h",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "normalize",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "DrawOverlayIMG",
+    "node_type": "draw_overlay",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/draw_overlay_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "draw_mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "x1",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "y1",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "x2",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "y2",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "thickness",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "default": "hello"
+      },
+      {
+        "name": "font_scale",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "EdgeDetectIMG",
     "node_type": "edge_detect",
     "family": "img",
@@ -5160,6 +6078,45 @@
         "name": "color_edges",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "FeatureMatchIMG",
+    "node_type": "feature_match",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/feature_match_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "method",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "max_features",
+        "type": "int",
+        "default": 500
+      },
+      {
+        "name": "max_dist",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "thickness",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -5194,6 +6151,109 @@
         "name": "smoothing",
         "type": "float",
         "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "HoughCirclesIMG",
+    "node_type": "hough_circles",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/hough_circles_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "dp",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "min_dist",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "high_thresh",
+        "type": "float",
+        "default": 100.0
+      },
+      {
+        "name": "center_thresh",
+        "type": "float",
+        "default": 100.0
+      },
+      {
+        "name": "min_radius",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "max_radius",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "thickness",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "HoughLinesIMG",
+    "node_type": "hough_lines",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/hough_lines_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "rho",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "theta",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "threshold",
+        "type": "int",
+        "default": 50
+      },
+      {
+        "name": "min_length",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "max_gap",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "thickness",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -5274,6 +6334,40 @@
     "params": []
   },
   {
+    "class_name": "MorphIMG",
+    "node_type": "morph",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/morph_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "operation",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "kernel_shape",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "kernel_size",
+        "type": "int",
+        "default": 5
+      },
+      {
+        "name": "iterations",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "NoiseIMG",
     "node_type": "noise",
     "family": "img",
@@ -5334,6 +6428,208 @@
     "file": "addons/gonodes/operators/img/null_img.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "ObjectTrackIMG",
+    "node_type": "object_track",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/object_track_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "method",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "roi_x",
+        "type": "float",
+        "default": 0.25
+      },
+      {
+        "name": "roi_y",
+        "type": "float",
+        "default": 0.25
+      },
+      {
+        "name": "roi_w",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "roi_h",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "draw_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "draw_thickness",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "reinit",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "OpticalFlowIMG",
+    "node_type": "optical_flow",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/optical_flow_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "pyr_scale",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "levels",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "winsize",
+        "type": "int",
+        "default": 15
+      },
+      {
+        "name": "iterations",
+        "type": "int",
+        "default": 3
+      },
+      {
+        "name": "poly_n",
+        "type": "int",
+        "default": 5
+      },
+      {
+        "name": "poly_sigma",
+        "type": "float",
+        "default": 1.2
+      },
+      {
+        "name": "mag_scale",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "PerspectiveWarpIMG",
+    "node_type": "perspective_warp",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/perspective_warp_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "src_x0",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "src_y0",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "src_x1",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "src_y1",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "src_x2",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "src_y2",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "src_x3",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "src_y3",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "dst_x0",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "dst_y0",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "dst_x1",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "dst_y1",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "dst_x2",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "dst_y2",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "dst_x3",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "dst_y3",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "interpolation",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
   },
   {
     "class_name": "PixelSortIMG",
@@ -5407,6 +6703,50 @@
     "params": []
   },
   {
+    "class_name": "StereoDepthIMG",
+    "node_type": "stereo_depth",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/stereo_depth_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "num_disparities",
+        "type": "int",
+        "default": 64
+      },
+      {
+        "name": "block_size",
+        "type": "int",
+        "default": 5
+      },
+      {
+        "name": "min_disparity",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "uniqueness",
+        "type": "int",
+        "default": 10
+      },
+      {
+        "name": "speckle_window",
+        "type": "int",
+        "default": 100
+      },
+      {
+        "name": "speckle_range",
+        "type": "int",
+        "default": 32
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "StereogramIMG",
     "node_type": "stereogram",
     "family": "img",
@@ -5447,6 +6787,45 @@
     "file": "addons/gonodes/operators/img/top_to_img.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "ThresholdIMG",
+    "node_type": "threshold",
+    "family": "img",
+    "file": "addons/gn_ext_opencv/operators/img/threshold_img.gd",
+    "extension": "gn_ext_opencv",
+    "params": [
+      {
+        "name": "method",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 128.0
+      },
+      {
+        "name": "max_value",
+        "type": "float",
+        "default": 255.0
+      },
+      {
+        "name": "block_size",
+        "type": "int",
+        "default": 11
+      },
+      {
+        "name": "c_offset",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
   },
   {
     "class_name": "VideoDeviceInIMG",
@@ -6034,10 +7413,52 @@
     ]
   },
   {
+    "class_name": "HostOutPOP",
+    "node_type": "host_out_pop",
+    "family": "output",
+    "file": "addons/gonodes/operators/output/host_out_pop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutSOP",
+    "node_type": "host_out_sop",
+    "family": "output",
+    "file": "addons/gonodes/operators/output/host_out_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
     "class_name": "HostOutTOP",
     "node_type": "host_out",
     "family": "output",
     "file": "addons/gonodes/operators/output/host_out_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutVOL",
+    "node_type": "host_out_vol",
+    "family": "output",
+    "file": "addons/gonodes/operators/output/host_out_vol.gd",
     "extension": null,
     "params": [
       {
@@ -6511,6 +7932,25 @@
         "name": "drag",
         "type": "float",
         "default": 0.01
+      }
+    ]
+  },
+  {
+    "class_name": "HostInPOP",
+    "node_type": "host_in_pop",
+    "family": "pop",
+    "file": "addons/gonodes/operators/pop/host_in_pop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "max_particles",
+        "type": "int",
+        "default": 100000
       }
     ]
   },
@@ -8432,6 +9872,20 @@
         "name": "talus_angle",
         "type": "float",
         "default": 0.6
+      }
+    ]
+  },
+  {
+    "class_name": "HostInSOP",
+    "node_type": "host_in_sop",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/host_in_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
       }
     ]
   },
@@ -15671,6 +17125,25 @@
         "name": "max_triangles",
         "type": "int",
         "default": 500000
+      }
+    ]
+  },
+  {
+    "class_name": "HostInVOL",
+    "node_type": "host_in_vol",
+    "family": "vol",
+    "file": "addons/gonodes/operators/vol/host_in_vol.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "field_name",
+        "type": "string",
+        "default": "density"
       }
     ]
   },

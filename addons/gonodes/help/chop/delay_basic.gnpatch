@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -88,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Delay CHOP \u2014 Basic\n\nDelays LFO signal by 0.5 seconds.",
+            "text": "Delay CHOP — Basic\n\nDelay channels by N frames using a ring buffer.\nUsing: delay=0.5.",
             "position": [
                 -100.0,
                 -100.0

@@ -128,14 +128,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CylinderSOP \u2014 Parameters\n\nShowcases: top_radius, bottom_radius, height.",
+            "text": "Cylinder SOP — Radius\n\nCylinder or cone mesh with top/bottom radius and caps.\nShowcasing: top_radius=0.25, bottom_radius=0.25, height=0.5, radial_segments=31.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

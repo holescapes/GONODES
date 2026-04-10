@@ -17,9 +17,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
                     "value": 5.0,
@@ -63,7 +61,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Noise TOP \u2014 Color\n\nSimplex noise at 512\u00d7512 in color mode.\nAdjust scale for finer or coarser detail.",
+            "text": "Noise TOP — Color\n\nSimplex noise at 512×512 in color mode.\nAdjust scale for finer or coarser detail.",
             "position": [
                 -100.0,
                 -150.0

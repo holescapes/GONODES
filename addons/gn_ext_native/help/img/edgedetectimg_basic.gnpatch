@@ -20,17 +20,13 @@
                     "value": 0
                 },
                 "scale": {
-                    "value": 4.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "octaves": {
                     "value": 3
                 },
                 "monochrome": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 }
             }
         },
@@ -107,7 +103,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Edge Detect IMG (Native) \u00e2\u20ac\u201d Sobel on Noise\n\nSobel edge detection at 1.5\u00c3\u2014 strength applied to\ncolour noise. Toggle 'color_edges' to see gradient\ndirection, or switch kernel to Prewitt.",
+            "text": "Edge Detect IMG (Native) â€” Sobel on Noise\n\nSobel edge detection at 1.5Ã— strength applied to\ncolour noise. Toggle 'color_edges' to see gradient\ndirection, or switch kernel to Prewitt.",
             "position": [
                 -100.0,
                 -150.0

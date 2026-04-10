@@ -1,0 +1,126 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "Transport and CPU pixel readback demo — time-driven noise with host transport control and pixel extraction.",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [400, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": false
+                },
+                "time_scale": {
+                    "value": 1.0
+                }
+            }
+        },
+        "blur1": {
+            "type": "BlurTOP",
+            "position": [700, 200],
+            "parameters": {
+                "blur_size": {
+                    "value": 4.0
+                }
+            }
+        },
+        "host_out": {
+            "type": "HostOutTOP",
+            "position": [1000, 200],
+            "parameters": {
+                "label": {
+                    "value": "Readback target"
+                }
+            }
+        },
+        "timer1": {
+            "type": "TimerCHOP",
+            "position": [400, 400],
+            "parameters": {
+                "length": {
+                    "value": 10.0
+                },
+                "loop": {
+                    "value": true
+                }
+            }
+        },
+        "time_out": {
+            "type": "HostOutCHOP",
+            "position": [700, 400],
+            "parameters": {
+                "label": {
+                    "value": "Timer data"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "blur1",
+            "to_port": 0
+        },
+        {
+            "from": "blur1",
+            "from_port": 0,
+            "to": "host_out",
+            "to_port": 0
+        },
+        {
+            "from": "timer1",
+            "from_port": 0,
+            "to": "time_out",
+            "to_port": 0
+        }
+    ],
+    "host_io": {
+        "inputs": [],
+        "outputs": [
+            {
+                "label": "Readback target",
+                "family": "TOP",
+                "node": "host_out"
+            },
+            {
+                "label": "Timer data",
+                "family": "CHOP",
+                "node": "time_out"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Noise Scale",
+                "node": "noise1",
+                "param": "scale",
+                "type": "float",
+                "range": [0.1, 50.0]
+            },
+            {
+                "label": "Blur Size",
+                "node": "blur1",
+                "param": "blur_size",
+                "type": "float",
+                "range": [0.0, 32.0]
+            },
+            {
+                "label": "Timer Length",
+                "node": "timer1",
+                "param": "length",
+                "type": "float",
+                "range": [0.1, 120.0]
+            }
+        ]
+    }
+}

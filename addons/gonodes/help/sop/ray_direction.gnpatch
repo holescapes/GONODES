@@ -18,9 +18,7 @@
             ],
             "parameters": {
                 "direction": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "max_dist": {
                     "value": 50.0,
@@ -133,14 +131,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RaySOP \u2014 Parameters\n\nShowcases: direction, max_dist, offset.",
+            "text": "Ray SOP — Direction\n\nProject vertices onto a target surface via raycasting.\nShowcasing: direction=1, max_dist=50.0, offset=0.5, use_hit_normal=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

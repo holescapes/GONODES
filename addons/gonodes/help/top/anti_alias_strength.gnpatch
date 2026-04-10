@@ -75,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AntiAliasTOP \u2014 Parameters\n\nShowcases: strength, edge_threshold.",
+            "text": "Anti Alias TOP — Strength\n\nSimplified FXAA-style anti-aliasing with luma edge detection.\nShowcasing: strength=0.5, edge_threshold=0.0625.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

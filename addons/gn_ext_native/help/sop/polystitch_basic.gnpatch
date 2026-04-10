@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "radius": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "divisions": {
-                    "value": 12,
-                    "expression": "(12 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 12
                 }
             }
         },
@@ -155,7 +151,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolyStitch SOP (Native) \u2014 Bridge Two Curves\n\nTwo circles stitched by nearest-pair quad strips.\nMax distance controls which pairs form connections.\nNative C++ handles brute-force distance search.",
+            "text": "PolyStitch SOP (Native) — Bridge Two Curves\n\nTwo circles stitched by nearest-pair quad strips.\nMax distance controls which pairs form connections.\nNative C++ handles brute-force distance search.",
             "position": [
                 -100.0,
                 -150.0

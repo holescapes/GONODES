@@ -45,9 +45,7 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "DAT Output",
-                    "expression": "str(op(\"null1\"))",
-                    "mode": "EXPRESSION"
+                    "value": "DAT Output"
                 },
                 "resolution": {
                     "value": {
@@ -77,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Sensor DAT \u2014 Device List\n\nLists all connected depth sensors across all\nbackends (Azure Kinect + RealSense).\nShows name, serial, backend, and capability\nflags (depth, color, ir, skeleton, etc.).\n\nUse the serial number in other depth sensor\noperators to select a specific device.",
+            "text": "Depth Sensor DAT — Device List\n\nLists all connected depth sensors across all\nbackends (Azure Kinect + RealSense).\nShows name, serial, backend, and capability\nflags (depth, color, ir, skeleton, etc.).\n\nUse the serial number in other depth sensor\noperators to select a specific device.",
             "position": [
                 -100.0,
                 -100.0

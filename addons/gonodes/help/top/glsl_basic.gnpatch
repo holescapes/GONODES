@@ -17,14 +17,10 @@
                     }
                 },
                 "scale": {
-                    "value": 4.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "monochrome": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -88,14 +84,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CustomShaderTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Custom Shader TOP — Basic\n\nUser-editable GLSL shader with 4 texture inputs and uniforms.\nUsing: time_dependent=True, cook_once=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

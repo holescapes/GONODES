@@ -13,14 +13,10 @@
                     "value": "Type here..."
                 },
                 "max_length": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "editable": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "min_size": {
                     "value": {
@@ -88,14 +84,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LineEditUI \u2014 Basic\n\nDefault settings.",
+            "text": "Line Edit UI — Basic\n\nSingle-line text input. Outputs text length and submit state.\nUsing: placeholder=Type here..., max_length=0, editable=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

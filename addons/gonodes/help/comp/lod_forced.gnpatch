@@ -1,0 +1,245 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "LODCOMP — Forced. Manually switch between LOD levels with a parameter.",
+    "nodes": {
+        "torus_hi": {
+            "type": "TorusSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "inner_radius": {
+                    "value": 0.3
+                },
+                "outer_radius": {
+                    "value": 1.0
+                },
+                "ring_segments": {
+                    "value": 32
+                },
+                "rings": {
+                    "value": 16
+                }
+            }
+        },
+        "geo_hi": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "torus_lo": {
+            "type": "TorusSOP",
+            "position": [
+                0,
+                200
+            ],
+            "parameters": {
+                "inner_radius": {
+                    "value": 0.3
+                },
+                "outer_radius": {
+                    "value": 1.0
+                },
+                "ring_segments": {
+                    "value": 8
+                },
+                "rings": {
+                    "value": 4
+                }
+            }
+        },
+        "geo_lo": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                200
+            ],
+            "parameters": {}
+        },
+        "lod1": {
+            "type": "LODCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "auto_lod": {
+                    "value": false
+                },
+                "forced_lod": {
+                    "value": 0
+                }
+            }
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                300
+            ],
+            "parameters": {
+                "text": {
+                    "value": "LODCOMP — Forced\n\nAuto LOD disabled. Change 'Forced LOD' param\n(0 or 1) to manually switch between high and\nlow poly torus. Useful for debugging or\nexplicit quality control."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 2.0
+                },
+                "tz": {
+                    "value": 5.0
+                },
+                "use_look_at": {
+                    "value": true
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "torus_hi",
+            "from_port": 0,
+            "to": "geo_hi",
+            "to_port": 0
+        },
+        {
+            "from": "torus_lo",
+            "from_port": 0,
+            "to": "geo_lo",
+            "to_port": 0
+        },
+        {
+            "from": "geo_hi",
+            "from_port": 0,
+            "to": "lod1",
+            "to_port": 0
+        },
+        {
+            "from": "geo_lo",
+            "from_port": 0,
+            "to": "lod1",
+            "to_port": 1
+        },
+        {
+            "from": "lod1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LOD COMP — Forced\n\nLevel-of-detail switcher — swap geometry based on camera distance.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

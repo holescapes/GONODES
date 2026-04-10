@@ -75,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PanelTOP \u2014 Parameters\n\nShowcases: resolution, bg_color, transparent_bg.",
+            "text": "Panel TOP — Bg\n\nRenders UI widgets into a SubViewport texture with interactive input forwarding.\nShowcasing: transparent_bg=True, layout=1, padding=7, spacing=3.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

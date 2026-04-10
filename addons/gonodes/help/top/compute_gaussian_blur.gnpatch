@@ -17,9 +17,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
                     "value": 4.0,
@@ -95,7 +93,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Compute Shader TOP \u2014 Gaussian Blur\n\nReads an input texture (gn_tex0) via sampler2D and applies\na 2D Gaussian blur kernel. The 'radius' push constant\nbecomes an inspector parameter (default 4.0).\n\nFor separable two-pass blur (faster at large radii),\nsee the BlurTOP operator instead.",
+            "text": "Compute Shader TOP — Gaussian Blur\n\nReads an input texture (gn_tex0) via sampler2D and applies\na 2D Gaussian blur kernel. The 'radius' push constant\nbecomes an inspector parameter (default 4.0).\n\nFor separable two-pass blur (faster at large radii),\nsee the BlurTOP operator instead.",
             "position": [
                 -250.0,
                 -170.0

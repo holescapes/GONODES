@@ -17,9 +17,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
                     "value": 4.0,
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ISF File TOP \u2014 Effect Example\n\nEdge detection glow applied to a NoiseTOP input.\nThe JSON INPUTS block defines one image input (src) plus colour, threshold,\nglow_width and show_src parameters \u2014 all auto-generated in the inspector.\nIMG_NORM_PIXEL() samples the image at normalised coordinates.\nRENDERSIZE gives the canvas resolution in pixels.",
+            "text": "ISF File TOP — Effect Example\n\nEdge detection glow applied to a NoiseTOP input.\nThe JSON INPUTS block defines one image input (src) plus colour, threshold,\nglow_width and show_src parameters — all auto-generated in the inspector.\nIMG_NORM_PIXEL() samples the image at normalised coordinates.\nRENDERSIZE gives the canvas resolution in pixels.",
             "position": [
                 -250.0,
                 -200.0

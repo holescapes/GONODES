@@ -50,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SVGTOP \u2014 Parameters\n\nShowcases: resolution, svg_path.",
+            "text": "SVG TOP — Variation\n\nRender SVG vector graphics to a texture at arbitrary resolution.",
             "position": [
                 -100.0,
                 -100.0

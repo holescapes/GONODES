@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SwitchCOMP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Switch COMP — Advanced\n\nSelect one of up to 8 component inputs by index.\nCombined configuration: index=2.",
             "position": [
                 -100.0,
                 -100.0

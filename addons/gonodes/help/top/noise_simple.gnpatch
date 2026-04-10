@@ -78,5 +78,26 @@
             "type": "WindowOUT"
         }
     },
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Noise TOP — Simple\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

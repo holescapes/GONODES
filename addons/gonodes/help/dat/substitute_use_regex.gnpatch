@@ -102,14 +102,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SubstituteDAT \u2014 Parameters\n\nShowcases: find, replace_with, use_regex.",
+            "text": "Substitute DAT — Regex\n\nFind and replace text in table cells or text (regex supported).\nShowcasing: use_regex=True, case_sensitive=True, scope=1, scope_index=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

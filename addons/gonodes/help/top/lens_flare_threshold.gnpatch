@@ -101,14 +101,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LensFlareTOP \u2014 Parameters\n\nShowcases: threshold, ghost_intensity, ghost_count.",
+            "text": "Lens Flare TOP — Threshold\n\nProcedural lens flare — ghosts, anamorphic streaks, and halo ring from bright areas.\nShowcasing: threshold=0.4, ghost_intensity=0.3, ghost_count=3, ghost_spacing=0.15.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "first_u": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "second_u": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "extract": {
                     "value": false
@@ -146,14 +142,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CarveSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Carve SOP — Basic\n\nTrim mesh by parametric U range (reveal, slice, carve animations).\nUsing: first_u=0.0, second_u=1.0, extract=False, use_uvs=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

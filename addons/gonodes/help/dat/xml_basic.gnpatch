@@ -2,10 +2,30 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "text1": {
+        "src_text": {
+            "type": "TextDAT",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "Hello\\nworld\\n1,2,3"
+                }
+            }
+        },
+        "focus1": {
+            "type": "XMLDAT",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "display1": {
             "type": "TextTOP",
             "position": [
-                500,
+                800,
                 100
             ],
             "parameters": {
@@ -16,18 +36,15 @@
                         "y": 512
                     }
                 },
-                "text": {
-                    "value": "XMLDAT\nParses XML into a\npath / attribute / value\ntable.\n\nEach row = one attribute\nor text node found\nin the document."
-                },
                 "font_size": {
-                    "value": 28
+                    "value": 24
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                900,
+                1150,
                 100
             ],
             "parameters": {
@@ -46,11 +63,43 @@
     },
     "connections": [
         {
-            "from": "text1",
+            "from": "src_text",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "display1",
+            "to_port": 0
+        },
+        {
+            "from": "display1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
         }
     ],
-    "annotations": []
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "XML DAT — Basic\n\nParse XML document into a flat path/attribute/value table.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

@@ -130,14 +130,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PolyReduceSOP \u2014 Parameters\n\nShowcases: target_percent, preserve_boundary, boundary_weight.",
+            "text": "Poly Reduce SOP — Percent\n\nMesh decimation via quadric error metric edge collapse.\nShowcasing: target_percent=25.0, preserve_boundary=True, boundary_weight=5.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -81,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "EvaluateDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Evaluate DAT — Advanced\n\nEvaluate cells starting with '=' as GDScript expressions.",
             "position": [
                 -100.0,
                 -100.0

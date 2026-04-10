@@ -4,42 +4,118 @@
     "nodes": {
         "src_noise": {
             "type": "NoiseTOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "scale": {"value": 3.0},
-                "monochrome": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 3.0
+                },
+                "monochrome": {
+                    "value": true
+                }
             }
         },
         "level1": {
             "type": "LevelTOP",
-            "position": [450, 100],
+            "position": [
+                450,
+                100
+            ],
             "parameters": {
-                "brightness": {"value": 1.5},
-                "contrast": {"value": 1.2}
+                "brightness": {
+                    "value": 1.5
+                },
+                "contrast": {
+                    "value": 1.2
+                }
             }
         },
         "bloom1": {
             "type": "BloomTOP",
-            "position": [800, 100],
+            "position": [
+                800,
+                100
+            ],
             "parameters": {
-                "threshold": {"value": 0.8},
-                "intensity": {"value": 1.0},
-                "levels": {"value": 4}
+                "threshold": {
+                    "value": 0.8
+                },
+                "intensity": {
+                    "value": 1.0
+                },
+                "levels": {
+                    "value": 4
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1150, 100],
+            "position": [
+                1150,
+                100
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "src_noise", "from_port": 0, "to": "level1", "to_port": 0},
-        {"from": "level1", "from_port": 0, "to": "bloom1", "to_port": 0},
-        {"from": "bloom1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "level1",
+            "to_port": 0
+        },
+        {
+            "from": "level1",
+            "from_port": 0,
+            "to": "bloom1",
+            "to_port": 0
+        },
+        {
+            "from": "bloom1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Bloom TOP — Basic\n\nBloom / glow via Dual Kawase blur (threshold, downsample, upsample, composite).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
     ]
 }

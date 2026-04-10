@@ -74,7 +74,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LUTTOP \u2014 Basic\n\nDefault settings.",
+            "text": "LUT TOP — Basic\n\nApply a 3D LUT (.cube / .3dl) colour transform to the input texture.\nUsing: intensity=1.0.",
             "position": [
                 -100.0,
                 -100.0

@@ -73,14 +73,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MovieOUT \u2014 Parameters\n\nShowcases: active, output_folder, file_prefix.",
+            "text": "Movie OUT — Active\n\nSave image sequence to disk (numbered PNG/WebP frames).\nShowcasing: active=True, format=1, quality=0.45, start_frame=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

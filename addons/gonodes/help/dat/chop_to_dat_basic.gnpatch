@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 },
                 "amplitude": {
-                    "value": 1.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -99,7 +95,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CHOP to DAT \u2014 Channel Data as Table\n\nConverts CHOP channel data to a DAT table.\nEach channel becomes a column or row.\nlayout controls the orientation.",
+            "text": "CHOP to DAT — Channel Data as Table\n\nConverts CHOP channel data to a DAT table.\nEach channel becomes a column or row.\nlayout controls the orientation.",
             "position": [
                 -100.0,
                 -150.0

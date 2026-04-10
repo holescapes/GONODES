@@ -150,7 +150,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ForcePOP \u2014 Parameters\n\nShowcases: gravity_x, gravity_y, gravity_z.",
+            "text": "Source POP — X\n\nEmit particles from SOP geometry surface or origin point.",
             "position": [
                 -100.0,
                 -100.0

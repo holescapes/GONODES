@@ -26,9 +26,7 @@
             ],
             "parameters": {
                 "key_mode": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "key_color": {
                     "value": {
@@ -90,14 +88,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ChromaKeyTOP \u2014 Parameters\n\nShowcases: key_mode, key_color, threshold.",
+            "text": "Chroma Key TOP — Mode\n\nChroma / luma key (green-screen) with spill suppression.\nShowcasing: key_mode=1, threshold=0.2, smoothness=0.04, spill_reduction=0.25.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

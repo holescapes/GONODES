@@ -56,7 +56,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ImgToTOP \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Noise IMG — Variation\n\nCPU procedural noise image (value noise, white noise).",
             "position": [
                 -100.0,
                 -100.0

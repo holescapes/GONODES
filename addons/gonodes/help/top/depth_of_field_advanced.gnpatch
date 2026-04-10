@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DepthOfFieldTOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Depth Of Field TOP — Advanced\n\nPost-process depth-of-field blur with bokeh disc sampling.\nCombined configuration: focal_distance=1.0, focal_range=0.2, max_blur=16.0, bokeh_brightness=2.4.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

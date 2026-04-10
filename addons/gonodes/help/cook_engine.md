@@ -92,6 +92,7 @@ Enable the **VRAM** toggle to see GPU memory usage in the info bar.
 - Use the **Active Chain** visualization to verify only necessary nodes are cooking
 - NoiseTOP and shader-based TOPs run on the GPU — they're generally fast
 - ScriptCHOP/DAT/SOP/IMG run on the CPU — heavy computation here affects framerate
+- **Multi-output nodes** (BlobTrackIMG, MovieFileInTOP, etc.) automatically skip secondary-port work when that port has no demand. Demand is detected from wires, wireless Select operators, and expression references (`chop()`, `top()`, `dat()`, etc.). Only connect or reference ports you actually need
 
 ---
 

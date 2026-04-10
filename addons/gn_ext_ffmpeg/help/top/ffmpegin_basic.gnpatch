@@ -17,14 +17,10 @@
                     }
                 },
                 "play": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "loop": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "speed": {
                     "value": 1.0
@@ -78,14 +74,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FFmpegInTOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_ffmpeg extension.",
+            "text": "FFmpeg In TOP — Basic\n\nFFmpeg video decoder. Supports H.264, H.265, VP9, AV1 and many more codecs via EIRTeam.FFmpeg GDExtension.\nUsing: play=True, loop=True, speed=1.0, seek=-1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

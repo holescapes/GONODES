@@ -125,7 +125,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ColorPickerUI \u2014 Parameters\n\nShowcases: default_color, edit_alpha, min_size.",
+            "text": "Color Picker UI — Alpha\n\nColor picker button. Outputs RGBA channels as CHOP state.\nShowcasing: edit_alpha=True.",
             "position": [
                 -100.0,
                 -100.0

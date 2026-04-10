@@ -139,14 +139,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LatticeSOP \u2014 Parameters\n\nShowcases: div_x, div_y, div_z.",
+            "text": "Lattice SOP — Amplitude\n\nFree-form deformation via control-point lattice.\nShowcasing: div_x=1, div_y=1, div_z=1, amplitude=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

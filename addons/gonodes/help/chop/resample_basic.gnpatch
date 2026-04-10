@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Resample CHOP \u2014 Basic\n\nResamples wave to different rate.\nChanges temporal resolution.",
+            "text": "Resample CHOP — Basic\n\nResample channels to a new sample count or sample rate.",
             "position": [
                 -100.0,
                 -100.0

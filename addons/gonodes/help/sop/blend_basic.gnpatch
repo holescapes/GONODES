@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "blend": {
-                    "value": 0.5,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "blend_normals": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "blend_uvs": {
                     "value": false
@@ -137,14 +133,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlendSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Blend SOP — Basic\n\nMorph between two geometries by blending vertex positions.\nUsing: blend=0.5, blend_normals=True, blend_uvs=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

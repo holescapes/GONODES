@@ -80,14 +80,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "KeyMixTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Key Mix TOP — Basic\n\nMix two textures using a matte/key channel (luma, R, G, B, or A).\nUsing: matte_channel=0, opacity=1.0, invert=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

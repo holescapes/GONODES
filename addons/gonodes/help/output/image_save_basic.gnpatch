@@ -42,9 +42,7 @@
                     "value": 0
                 },
                 "auto_number": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         }
@@ -63,5 +61,26 @@
             "to_port": 0
         }
     ],
-    "description": "ImageSaveOUT \u2014 Save a CPU Image to disk (PNG, WebP, EXR). Toggle 'active' to write."
+    "description": "ImageSaveOUT — Save a CPU Image to disk (PNG, WebP, EXR). Toggle 'active' to write.",
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Image Save OUT — Basic\n\nSave CPU Image to disk (PNG, WebP, EXR). Activate toggle to write.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

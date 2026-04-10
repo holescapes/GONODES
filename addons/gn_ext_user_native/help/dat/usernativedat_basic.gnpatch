@@ -55,9 +55,7 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "DAT Output",
-                    "expression": "str(op(\"null1\"))",
-                    "mode": "EXPRESSION"
+                    "value": "DAT Output"
                 },
                 "resolution": {
                     "value": {
@@ -87,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserNativeDAT \u2014 Basic C++ Table Generator\n\nWrite custom DAT operators in C++ for table/text processing.\nThe default example generates a table with sine values.\nTry loading the CSV Parser example for high-performance\nCSV parsing.\n\nC++ string operations run much faster than GDScript\nfor large datasets (10k+ rows).",
+            "text": "UserNativeDAT — Basic C++ Table Generator\n\nWrite custom DAT operators in C++ for table/text processing.\nThe default example generates a table with sine values.\nTry loading the CSV Parser example for high-performance\nCSV parsing.\n\nC++ string operations run much faster than GDScript\nfor large datasets (10k+ rows).",
             "position": [
                 -100.0,
                 -100.0

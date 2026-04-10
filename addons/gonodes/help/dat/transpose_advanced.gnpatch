@@ -81,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TransposeDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Transpose DAT — Advanced\n\nSwap rows and columns.",
             "position": [
                 -100.0,
                 -100.0

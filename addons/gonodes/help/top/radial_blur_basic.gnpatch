@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "strength": {
-                    "value": 0.3,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 0.3
                 },
                 "samples": {
-                    "value": 16,
-                    "expression": "(16 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 16
                 }
             }
         },
@@ -67,7 +63,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Radial Blur TOP \u2014 Zoom Blur\n\nBlur radiating from a center point.\nIncrease strength and samples for heavier effect.",
+            "text": "Radial Blur TOP — Zoom Blur\n\nBlur radiating from a center point.\nIncrease strength and samples for heavier effect.",
             "position": [
                 -100.0,
                 -150.0

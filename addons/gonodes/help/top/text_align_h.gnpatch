@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextTOP — Parameters\n\nShowcases: text, resolution, font_size.",
+            "text": "Text TOP — H\n\nRenders text to a texture via a Label in a SubViewport.\nShowcasing: font_size=47, align_h=1, align_v=1, word_wrap=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

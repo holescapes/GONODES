@@ -136,14 +136,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ProjectorBlendTOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_mapper extension.",
+            "text": "Projector Blend TOP — Advanced\n\nMulti-projector luminance blending with overlap correction and color matching.\nCombined configuration: overlap_start=0.8, overlap_end=1.2, blend_axis=0, blend_gamma=4.4.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "close_u": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "close_v": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "end_caps": {
                     "value": false
@@ -140,14 +136,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SkinSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Skin SOP — Basic\n\nSkin (loft) multiple cross-sections into a surface mesh.\nUsing: close_u=True, close_v=False, end_caps=False, recompute_normals=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

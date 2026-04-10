@@ -73,7 +73,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SpoutOutTOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_spout extension.",
+            "text": "Spout Out TOP — Advanced\n\nShare the input texture via Spout to other applications.\nCombined configuration: active=False.",
             "position": [
                 -100.0,
                 -100.0

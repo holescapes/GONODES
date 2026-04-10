@@ -101,6 +101,56 @@ Every frame, `cook_frame(delta)` walks the topo-sorted DAG. Three guard layers p
 
 **For typical real-time networks (30–200 nodes), the per-frame topo scan overhead is negligible.** GONODES's push model with guards achieves functionally equivalent work-skipping to TD's pull model. The theoretical gap only appears at 500+ nodes where TD's pull model wins by never visiting unrequested branches.
 
+### Multi-Output Demand Culling — Beating TD's Double-Compute
+
+In TouchDesigner, when a node has cross-family outputs (e.g., a Movie File In TOP that also carries audio), both the texture and audio data are **always computed** — TD has no mechanism to detect whether a specific output port is connected. If you connect only the texture output and ignore the audio, TD still decodes and buffers the audio waveform every frame. This is a known inefficiency in TD's architecture.
+
+GONODES solves this with **output demand culling**. Before cooking a multi-output node, the cook engine stamps `_demanded_outputs` — a per-port boolean array computed from three demand sources:
+
+1. **Wire connections** to active downstream nodes
+2. **Wireless Select operators** (SelectCHOP, SelectTOP, etc.) referencing the node by name
+3. **Expression references** (`chop("node")`, `top("node")`, `dat("node")`) in other nodes' parameters
+
+The demand is **family-aware**: `chop("blob1")` demands only the CHOP output port on BlobTrackIMG, not the IMG overlay port. This prevents false-positive demand from dragging in unnecessary work.
+
+Operators structure their `_cook()` as **shared core** (unconditional) plus **per-port guards**:
+
+```gdscript
+# Shared core + per-port guards (BlobTrackIMG pattern)
+func _cook(inputs: Array[GNData]) -> GNData:
+    var out := _prepare_image()
+    var result := _cv.detect_blobs(...)       # Shared core — always runs
+    if is_output_demanded(0):
+        out.set_image(_to_overlay(result))    # Port 0 — only if demanded
+    if is_output_demanded(1):
+        _pull_analysis_data()                 # Port 1 — only if demanded
+    return out
+
+# Directional dependency (MovieFileInTOP pattern)
+func _cook(inputs: Array[GNData]) -> GNData:
+    var result := _decode_video()             # Shared core (audio needs this)
+    if is_output_demanded(1):
+        _pull_audio()                         # Port 1 — gated, port 0 free
+    return result
+```
+
+There is no engine-level coupling flag — the operator's `_cook()` method
+decides what's shared vs. per-port.  This handles all real-world dependency
+patterns: fully independent post-processing (OpenCV), directional dependency
+(MovieFileInTOP), and shared render + independent buffers (MultiBufferRenderTOP).
+
+This applies to all 15 multi-output operators in GONODES. Concrete savings:
+- **7 OpenCV IMG operators** (BlobTrack, Contour, ColorTrack, ObjectTrack, HoughLines, HoughCircles, ArucoDetect): Skip CHOP/DAT extraction when only the overlay is used; skip overlay conversion when only the data is used.
+- **MovieFileInTOP**: Audio capture gated; video decode is shared core that always runs.
+- **MultiBufferRenderTOP**: Depth/normal viewports disabled independently.
+
+| Behaviour | TouchDesigner | GONODES |
+|-----------|---------------|---------|
+| Multi-output compute | All ports always computed | Only demanded ports computed |
+| Cross-family overhead | Full (audio decoded even if unused) | Zero (skipped via `is_output_demanded`) |
+| Per-port granularity | None | Per-output-port demand flags |
+| Demand sources | N/A (no demand detection) | Wires + wireless Selects + expressions |
+
 ---
 
 ## 3. Dirty Propagation — The Critical Path
@@ -860,6 +910,75 @@ Despite having 143 TOP operators (exceeding TD's ~90), the following operators f
 | **FiducialIMG** | vvvv | ARTag/fiducial marker detection | Extension territory. CPU-bound (IMG family). |
 
 **Summary:** Of the original 18 gap items, **11 are now resolved** (7 new operators built, 4 covered by existing operators). **7 gaps remain open** — 3 high-priority CV operators (MorphIMG, BlobTrackIMG, BackgroundSubtractIMG), 2 medium-priority CV operators (ContourIMG, ColorTrackIMG), and 3 low-priority niche items. The 5 remaining CV operators are natural candidates for a future `gn_ext_cv` extension wrapping OpenCV. DATtoTOP excluded — SnapshotTOP (mode=DAT) already covers it. TimeWarpTOP excluded — TimeMachineTOP Ramp mode provides curve-based time remapping.
+
+### 18.7 Missing COMP Operators — Gap Analysis (April 2026)
+
+GONODES has **26 COMPs** (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP, RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP, SubNetworkNode, InTunnel, OutTunnel, NullCOMP, SelectCOMP, SwitchCOMP, EnvironmentCOMP, InstanceCOMP, AnimationCOMP, ReplicatorCOMP, EnginesCOMP, ConstraintCOMP, BoneCOMP, LODCOMP, PathCOMP, VehicleCOMP, NavigationCOMP). TD has ~25+ COMPs including container/panel types. The following TD/vvvv COMPs have no GONODES equivalent:
+
+#### High Priority (needed for common 3D/performance workflows)
+
+| Operator | Found In | What It Does | Godot Path | Status |
+|----------|----------|-------------|------------|--------|
+| **ConstraintCOMP** | TD | Constrain COMP transform to another (Look At, Parent, Path, Blend) | `Node3D.look_at()`, `RemoteTransform3D`, `PathFollow3D` | ✅ Implemented |
+| **BoneCOMP** | TD | Skeleton bone reference for character rigging/animation | `Skeleton3D` + `BoneAttachment3D` | ✅ Implemented |
+| **LODCOMP** | TD + vvvv | Level-of-detail switcher based on camera distance | `VisibilityRange` on MeshInstance3D or manual LOD switching | ✅ Implemented |
+
+#### Medium Priority (useful for advanced scene composition)
+
+| Operator | Found In | What It Does | Godot Path | Status |
+|----------|----------|-------------|------------|--------|
+| **FeedbackCOMP** | TD | Feed previous frame's rendered scene back as input | SubViewport readback → texture; similar to FeedbackTOP for 3D | ⬜ Open |
+| **TimeCOMP** | TD | Local time base — independent play/pause/speed per sub-network | Custom time offset on SubNetworkNode, `_pre_cook` override | ⬜ Open |
+| **PathCOMP** | TD + vvvv | Move COMP along a Curve3D/Path3D at parameterized speed | `PathFollow3D` wrapper with CHOP input for position/offset | ✅ Implemented |
+| **VehicleCOMP** | vvvv | Vehicle physics (wheels, suspension, steering) | `VehicleBody3D` + `VehicleWheel3D` (Jolt) | ✅ Implemented |
+
+#### Low Priority (niche or partially covered)
+
+| Operator | Found In | What It Does | Notes |
+|----------|----------|-------------|-------|
+| **NavigationCOMP** | vvvv | AI pathfinding on navigation mesh | `NavigationAgent3D` + `NavigationRegion3D` — useful for installations | ✅ Implemented |
+| **AudioListenerCOMP** | TD | 3D positional audio listener in scene | `AudioListener3D` wrapper — only matters with spatial audio |
+| **AudioSourceCOMP** | TD + vvvv | 3D positional audio emitter attached to a COMP | `AudioStreamPlayer3D` + CHOP → PCM bridge |
+
+**Summary:** 10 COMP operators identified in gap analysis. **6 now implemented** (ConstraintCOMP, BoneCOMP, LODCOMP, PathCOMP, VehicleCOMP, NavigationCOMP). 4 remaining: 2 medium-priority (FeedbackCOMP, TimeCOMP), 2 low-priority (AudioListenerCOMP, AudioSourceCOMP). AudioListenerCOMP + AudioSourceCOMP enable 3D spatial audio when combined with the audio CHOP pipeline.
+
+### 18.8 Missing Audio Operators — Gap Analysis (April 2026)
+
+GONODES has **8 audio operators**: AudioInCHOP (mic capture), AudioSpectrumCHOP (FFT analysis), AudioSpectrumCHOPNative (C++ FFT), AudioFileInCHOP (file playback), AudioBandCHOP (multi-band frequency analysis), AudioDynamicsCHOP (compressor/limiter/gate), BeatCHOP (onset detection), AudioDeviceOUT (PCM output to speakers). This covers analysis and I/O well, but TD has **12 audio CHOPs** plus synthesis/effects operators. The following TD/vvvv audio operators have no GONODES equivalent:
+
+#### Tier 1 — Audio Synthesis & Generation (High Priority)
+
+| Operator | Found In | What It Does | Godot Path | Status |
+|----------|----------|-------------|------------|--------|
+| **AudioOscillatorCHOP** | TD | Audio-rate waveform generator (sine, saw, square, triangle, noise, pulse) with FM/AM modulation | `AudioStreamGenerator` + manual PCM synthesis at 44100/48000 Hz | ⬜ Open |
+| **AudioFilterCHOP** | TD + vvvv | Biquad audio filter (lowpass, highpass, bandpass, notch, allpass, peak, shelf) with resonance/Q | Per-sample biquad IIR on CHOP channels; Godot has `AudioEffectFilter` but bus-only | ⬜ Open |
+| **AudioParaEQCHOP** | TD | Multi-band parametric equalizer (4–8 bands, each with freq/gain/Q) | Chain of biquad sections or FFT-based EQ | ⬜ Open |
+| **AudioMixCHOP** | TD | Multi-input audio mixer with per-input gain, pan, mute, solo | Weighted channel merge with stereo panning law (equal-power) | ⬜ Open |
+
+#### Tier 2 — Audio Playback & Streaming (Medium Priority)
+
+| Operator | Found In | What It Does | Godot Path | Status |
+|----------|----------|-------------|------------|--------|
+| **AudioMovieCHOP** | TD | Extract audio track from video file (synced to MovieFileInTOP) | `AudioStreamPlayer` attached to `VideoStreamPlayer`, capture via `AudioEffectCapture` | ⬜ Open |
+| **AudioRenderCHOP** | TD | Offline render of CHOP chain to audio buffer (non-realtime bounce) | Iterate cook engine at audio rate, accumulate PCM → WAV/OGG export | ⬜ Open |
+| **AudioStreamInCHOP** | TD + vvvv | Receive audio over network (RTP, Dante-like, custom UDP) | `PacketPeerUDP` with jitter buffer, or SRT/RTP via GDExtension | ⬜ Open |
+| **AudioStreamOutCHOP** | TD + vvvv | Send audio over network | `PacketPeerUDP` with RTP framing | ⬜ Open |
+
+#### Tier 3 — Audio Effects & Processing (Lower Priority)
+
+| Operator | Found In | What It Does | Godot Path | Status |
+|----------|----------|-------------|------------|--------|
+| **AudioReverbCHOP** | TD + vvvv | Convolution or algorithmic reverb on CHOP audio data | Schroeder/FDN reverb on PCM samples; Godot `AudioEffectReverb` is bus-only | ⬜ Open |
+| **AudioDelayCHOP** | TD + vvvv | Sample-accurate delay line with feedback, ping-pong, tempo sync | Circular buffer delay with interpolated read head | ⬜ Open |
+| **AudioPitchCHOP** | TD | Pitch shift without tempo change (phase vocoder or granular) | FFT phase vocoder on CHOP channels | ⬜ Open |
+| **AudioEnvelopeCHOP** | TD | Amplitude envelope follower (attack/release) for sidechain/ducking | Per-sample RMS/peak with configurable attack/release time constants | ⬜ Open |
+| **AudioGateCHOP** | vvvv | Noise gate with threshold, attack, hold, release | Gain attenuation below threshold with hysteresis | ⬜ Open — partially covered by AudioDynamicsCHOP gate mode |
+
+**Summary:** 13 missing audio operators identified across 3 tiers. **Tier 1 (4 operators)** fills the synthesis/effects gap — AudioOscillatorCHOP and AudioFilterCHOP alone would enable basic audio-reactive synthesis chains without leaving GONODES. **Tier 2 (4 operators)** adds video-sync audio, offline bounce, and network audio streaming. **Tier 3 (5 operators)** rounds out the effects chain with reverb, delay, pitch shift, and envelope following.
+
+**Combined with existing 8 audio operators, implementing all 13 would bring GONODES to 21 audio operators — exceeding TD's 12 audio CHOPs** and making GONODES a credible audio-visual creation environment without external DAW dependencies.
+
+**Roadmap priority:** Tier 1 first (AudioOscillatorCHOP → AudioFilterCHOP → AudioMixCHOP → AudioParaEQCHOP), then AudioMovieCHOP (video-sync is expected), then effects.
 
 ---
 

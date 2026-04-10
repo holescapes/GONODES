@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "width": {
-                    "value": 512,
-                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 512
                 },
                 "height": {
-                    "value": 512,
-                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 512
                 },
                 "point_size": {
                     "value": 6.0
@@ -89,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Point Cloud Render \u2014 Basic\n\nRenders POP particles as circular splats\nwith perspective projection, depth testing,\nand per-particle color. GPU-accelerated\nwith CPU fallback.",
+            "text": "Source POP — Basic\n\nEmit particles from SOP geometry surface or origin point.\nUsing: emit_rate=500, life=3.0.",
             "position": [
                 -100.0,
                 -100.0

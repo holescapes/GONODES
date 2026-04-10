@@ -121,7 +121,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MarchingCubesVOL \u2014 Parameters\n\nShowcases: threshold, smooth_normals.",
+            "text": "Noise VOL — Threshold\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).",
             "position": [
                 -100.0,
                 -100.0

@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FilterTOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Filter TOP — Advanced\n\nSpatial frequency filter — Low Pass, High Pass, or Band Pass.\nCombined configuration: mode=2, radius=10.0, radius_outer=30.0, strength=2.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -10,17 +10,13 @@
             ],
             "parameters": {
                 "family_filter": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "name_pattern": {
                     "value": "*"
                 },
                 "include_type": {
-                    "value": true,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -81,14 +77,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OPFindDAT \u2014 Basic\n\nDefault settings.",
+            "text": "OP Find DAT — Basic\n\nSearch the network for operators by family and name pattern.\nUsing: family_filter=0, name_pattern=*, include_type=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

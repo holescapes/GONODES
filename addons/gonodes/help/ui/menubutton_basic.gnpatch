@@ -78,7 +78,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MenuButtonUI \u2014 Basic\n\nDefault settings.",
+            "text": "Menu Button UI — Basic\n\nButton with popup menu items from DAT data.\nUsing: label=Menu.",
             "position": [
                 -100.0,
                 -100.0

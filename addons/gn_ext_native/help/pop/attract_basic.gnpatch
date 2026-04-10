@@ -9,43 +9,20 @@
                 100
             ],
             "parameters": {
-                "max_particles": {
-                    "value": 30000
-                },
-                "rate": {
-                    "value": 1000.0
+                "emit_rate": {
+                    "value": 100
                 }
             }
         },
-        "attract1": {
-            "type": "AttractPOPNative",
+        "focus1": {
+            "type": "AttractPOP",
             "position": [
                 450,
                 100
             ],
-            "parameters": {
-                "target_x": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
-                },
-                "target_y": {
-                    "value": 2.0,
-                    "expression": "(2.0 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
-                },
-                "target_z": {
-                    "value": 0.0
-                },
-                "strength": {
-                    "value": 15.0
-                },
-                "radius": {
-                    "value": 0.0
-                }
-            }
+            "parameters": {}
         },
-        "renderpop1": {
+        "pop_render": {
             "type": "RenderPOP",
             "position": [
                 800,
@@ -64,7 +41,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1375,
+                1150,
                 100
             ],
             "parameters": {
@@ -79,69 +56,23 @@
                     "value": true
                 }
             }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                975,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "camera1": {
-            "type": "CameraCOMP",
-            "position": [
-                975,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0.0
-                },
-                "ty": {
-                    "value": 0.0
-                },
-                "tz": {
-                    "value": 5.0
-                }
-            }
         }
     },
     "connections": [
         {
             "from": "source1",
             "from_port": 0,
-            "to": "attract1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "attract1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "renderpop1",
+            "to": "pop_render",
             "to_port": 0
         },
         {
-            "from": "renderpop1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "camera1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
+            "from": "pop_render",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -151,14 +82,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Attract POP (Native) \u2014 Point Attractor\n\nParticles attracted toward (0, 2, 0) with strength 15.\nInverse-square falloff creates natural orbital motion.\nNative C++ processes all particle distances in one pass.",
+            "text": "Attract POP — Basic\n\nPoint, line, or geometry attractor/repulsor for particles.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

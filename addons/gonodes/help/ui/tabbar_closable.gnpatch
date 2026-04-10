@@ -124,14 +124,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TabBarUI \u2014 Parameters\n\nShowcases: default_tab, closable, drag_reorder.",
+            "text": "Tab Bar UI — Closable\n\nTab bar from DAT data. Outputs selected tab index.\nShowcasing: default_tab=0, closable=True, drag_reorder=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

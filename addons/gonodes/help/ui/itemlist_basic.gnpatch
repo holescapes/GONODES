@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "allow_reselect": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "max_columns": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "icon_size": {
                     "value": 32
@@ -88,14 +84,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ItemListUI \u2014 Basic\n\nDefault settings.",
+            "text": "Item List UI — Basic\n\nSelectable item list from DAT data. Optional TOP icon texture.\nUsing: allow_reselect=False, max_columns=1, icon_size=32.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FontSOP \u2014 Parameters\n\nShowcases: text, font_size, depth.",
+            "text": "Font SOP — Size\n\nGenerate 3D text mesh using Godot TextMesh.\nShowcasing: font_size=0.5, depth=0.05, horizontal_align=1.",
             "position": [
                 -100.0,
                 -100.0

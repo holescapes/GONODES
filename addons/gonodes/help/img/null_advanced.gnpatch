@@ -70,7 +70,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullIMG \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Null IMG — Advanced\n\nPass-through for organization and references.",
             "position": [
                 -100.0,
                 -100.0

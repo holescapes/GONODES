@@ -32,9 +32,7 @@
             ],
             "parameters": {
                 "key_mode": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "key_color": {
                     "value": {
@@ -46,9 +44,7 @@
                     }
                 },
                 "threshold": {
-                    "value": 0.4,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.4
                 },
                 "smoothness": {
                     "value": 0.08
@@ -96,14 +92,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ChromaKeyTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Chroma Key TOP — Basic\n\nChroma / luma key (green-screen) with spill suppression.\nUsing: key_mode=0, threshold=0.4, smoothness=0.08, spill_reduction=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

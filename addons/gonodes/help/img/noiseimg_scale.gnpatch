@@ -92,14 +92,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NoiseIMG \u2014 Parameters\n\nShowcases: resolution, type, scale.",
+            "text": "Noise IMG — Scale\n\nCPU procedural noise image (value noise, white noise).\nShowcasing: type=0, scale=2.0, offset_x=0.5, offset_y=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

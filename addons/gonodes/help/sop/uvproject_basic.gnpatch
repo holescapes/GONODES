@@ -28,14 +28,10 @@
                     "value": 0
                 },
                 "axis": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale_u": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "scale_v": {
                     "value": 1.0
@@ -140,14 +136,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UVProjectSOP \u2014 Basic\n\nDefault settings.",
+            "text": "UV Project SOP — Basic\n\nAssign UVs via planar, cylindrical, or spherical projection.\nUsing: mode=0, axis=0, scale_u=1.0, scale_v=1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

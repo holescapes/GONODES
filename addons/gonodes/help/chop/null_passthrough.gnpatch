@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
                     "value": 1.0,
@@ -89,7 +87,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Null CHOP \u2014 Passthrough\n\nPasses input data through without changes.\nUseful as a reference point for expressions\nlike chop(\"null1\", \"out\").",
+            "text": "Null CHOP — Passthrough\n\nPasses input data through without changes.\nUseful as a reference point for expressions\nlike chop(\"null1\", \"out\").",
             "position": [
                 -100.0,
                 -150.0

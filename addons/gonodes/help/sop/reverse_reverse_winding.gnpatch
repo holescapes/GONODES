@@ -127,7 +127,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ReverseSOP \u2014 Parameters\n\nShowcases: reverse_winding, flip_normals.",
+            "text": "Reverse SOP — Winding\n\nReverse face winding order and flip normals.\nShowcasing: reverse_winding=True, flip_normals=True.",
             "position": [
                 -100.0,
                 -100.0

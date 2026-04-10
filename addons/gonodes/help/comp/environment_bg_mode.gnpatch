@@ -96,7 +96,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "EnvironmentCOMP — Parameters\n\nShowcases: bg_mode, bg_color, bg_energy.",
+            "text": "Sphere SOP — Mode\n\nSphere or hemisphere mesh.",
             "position": [
                 -100.0,
                 -100.0

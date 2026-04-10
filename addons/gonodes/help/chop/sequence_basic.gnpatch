@@ -25,14 +25,10 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 2,
-                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "amplitude": {
                     "value": 0.5
@@ -142,14 +138,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Sequence CHOP \u2014 Basic\n\nThree CHOP sources (sine, square, noise) played end-to-end.\n3s duration per clip with 0.5s crossfade between transitions.\nLoop = on so the sequence repeats.",
+            "text": "Sequence CHOP — Basic\n\nSequence CHOP inputs end-to-end in time with optional crossfade.\nUsing: duration=3.0, crossfade=0.5, loop=True.",
             "position": [
                 -100.0,
                 -120.0
             ],
             "size": [
                 500.0,
-                100.0
+                140.0
             ],
             "color": [
                 1.0,

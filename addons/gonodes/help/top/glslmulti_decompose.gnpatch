@@ -2,51 +2,133 @@
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "resolution": {"_type": "Vector2i", "x": 512, "y": 512},
+                "resolution": {
+                    "_type": "Vector2i",
+                    "x": 512,
+                    "y": 512
+                },
                 "monochrome": false
             }
         },
         "glsl_multi1": {
             "type": "GLSLMultiTOP",
-            "position": [400, 200],
+            "position": [
+                400,
+                200
+            ],
             "parameters": {
                 "shader_code": "shader_type canvas_item;\nuniform sampler2D gn_tex0 : hint_default_white;\nuniform float edge_strength = 5.0;\n\nvoid fragment() {\n\tvec4 src = texture(gn_tex0, UV);\n\tfloat luma = dot(src.rgb, vec3(0.299, 0.587, 0.114));\n\tvec3 chroma = src.rgb - vec3(luma);\n\tvec3 edge = fwidth(src.rgb) * edge_strength;\n\n\tgn_out0 = src;\n\tgn_out1 = vec4(vec3(luma), 1.0);\n\tgn_out2 = vec4(chroma + 0.5, 1.0);\n\tgn_out3 = vec4(edge, 1.0);\n}"
             }
         },
         "layout1": {
             "type": "LayoutTOP",
-            "position": [700, 200],
+            "position": [
+                700,
+                200
+            ],
             "parameters": {
                 "columns": 2,
-                "resolution": {"_type": "Vector2i", "x": 1024, "y": 1024}
+                "resolution": {
+                    "_type": "Vector2i",
+                    "x": 1024,
+                    "y": 1024
+                }
             }
         },
         "text1": {
             "type": "TextTOP",
-            "position": [400, 50],
+            "position": [
+                400,
+                50
+            ],
             "parameters": {
                 "text": "GLSLMultiTOP — 4-Output Decomposition\n\nOne shader pass generates 4 outputs:\n  out0: Original\n  out1: Luminance\n  out2: Chrominance\n  out3: Edges\n\nCustom uniform 'edge_strength' auto-creates\nan inspector parameter.",
                 "font_size": 18,
-                "resolution": {"_type": "Vector2i", "x": 512, "y": 512}
+                "resolution": {
+                    "_type": "Vector2i",
+                    "x": 512,
+                    "y": 512
+                }
             }
         },
         "window1": {
             "type": "WindowOUT",
-            "position": [1000, 200],
+            "position": [
+                1000,
+                200
+            ],
             "parameters": {
-                "resolution": {"_type": "Vector2i", "x": 512, "y": 512},
+                "resolution": {
+                    "_type": "Vector2i",
+                    "x": 512,
+                    "y": 512
+                },
                 "open": true
             }
         }
     },
     "connections": [
-        {"from": "noise1", "from_port": 0, "to": "glsl_multi1", "to_port": 0},
-        {"from": "glsl_multi1", "from_port": 0, "to": "layout1", "to_port": 0},
-        {"from": "glsl_multi1", "from_port": 1, "to": "layout1", "to_port": 1},
-        {"from": "glsl_multi1", "from_port": 2, "to": "layout1", "to_port": 2},
-        {"from": "glsl_multi1", "from_port": 3, "to": "layout1", "to_port": 3},
-        {"from": "layout1", "from_port": 0, "to": "window1", "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "glsl_multi1",
+            "to_port": 0
+        },
+        {
+            "from": "glsl_multi1",
+            "from_port": 0,
+            "to": "layout1",
+            "to_port": 0
+        },
+        {
+            "from": "glsl_multi1",
+            "from_port": 1,
+            "to": "layout1",
+            "to_port": 1
+        },
+        {
+            "from": "glsl_multi1",
+            "from_port": 2,
+            "to": "layout1",
+            "to_port": 2
+        },
+        {
+            "from": "glsl_multi1",
+            "from_port": 3,
+            "to": "layout1",
+            "to_port": 3
+        },
+        {
+            "from": "layout1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Noise TOP — Decompose\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
     ]
 }

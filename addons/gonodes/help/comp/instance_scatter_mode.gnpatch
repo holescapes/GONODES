@@ -191,7 +191,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "InstanceCOMP \u2014 Parameters\n\nShowcases: count, scatter_mode, spacing.",
+            "text": "Sphere SOP — Mode\n\nSphere or hemisphere mesh.",
             "position": [
                 -100.0,
                 -100.0

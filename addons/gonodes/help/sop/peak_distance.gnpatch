@@ -127,7 +127,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PeakSOP \u2014 Parameters\n\nShowcases: distance, recompute_normals.",
+            "text": "Peak SOP — Distance\n\nPush vertices along their normals by a distance.\nShowcasing: distance=0.05, recompute_normals=True.",
             "position": [
                 -100.0,
                 -100.0

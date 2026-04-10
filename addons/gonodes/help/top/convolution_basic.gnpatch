@@ -32,14 +32,10 @@
             ],
             "parameters": {
                 "preset": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "kernel_size": {
-                    "value": 3,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 3
                 },
                 "divisor": {
                     "value": 1.0
@@ -87,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ConvolutionTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Convolution TOP — Basic\n\nCustom NxN kernel convolution with Emboss/Sharpen/Edge presets.\nUsing: preset=0, kernel_size=3, divisor=1.0, bias=0.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

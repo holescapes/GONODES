@@ -55,6 +55,10 @@ var _project: GNProjectManager = GNProjectManager.new()
 var _save_dialog: FileDialog = null
 var _load_dialog: FileDialog = null
 
+## Open Recent menu button.
+var _recent_menu: MenuButton = null
+const _MAX_RECENT := 10
+
 ## Floating viewer windows — each pinned to a specific node's output.
 var _viewer_windows: Array[GNViewerWindow] = []
 
@@ -915,6 +919,14 @@ func _setup_toolbar() -> void:
 	btn_open.pressed.connect(_on_open_pressed)
 	row1.add_child(btn_open)
 
+	_recent_menu = MenuButton.new()
+	_recent_menu.text = "Recent"
+	_recent_menu.tooltip_text = "Open a recently loaded patch"
+	_recent_menu.flat = false
+	_recent_menu.get_popup().id_pressed.connect(_on_recent_selected)
+	row1.add_child(_recent_menu)
+	_rebuild_recent_menu()
+
 	var btn_save := Button.new()
 	btn_save.text = "Save"
 	btn_save.tooltip_text = "Save patch (Ctrl+S)"
@@ -1370,6 +1382,7 @@ func _save_to_path(path: String) -> void:
 	if err == OK:
 		_current_file_path = path
 		_save_setting("last_patch_path", path)
+		_push_recent(path)
 		_clear_modified()
 		print("[GONODES] Saved patch: %s" % path)
 	else:
@@ -1400,6 +1413,7 @@ func _load_from_path(path: String) -> void:
 
 	_current_file_path = path
 	_save_setting("last_patch_path", path)
+	_push_recent(path)
 
 	# Set up project folder for this patch
 	_project.set_from_patch_path(path)
@@ -1481,6 +1495,55 @@ func _save_setting(key: String, value: Variant) -> void:
 		cfg.load(_SETTINGS_PATH)
 	cfg.set_value("editor", key, value)
 	cfg.save(_SETTINGS_PATH)
+
+
+## Pushes a path to the front of the recent patches list (max _MAX_RECENT).
+func _push_recent(path: String) -> void:
+	var recents: Array = _load_setting("recent_patches", []) as Array
+	# Remove if already present so it moves to front
+	var idx := -1
+	for i in range(recents.size()):
+		if str(recents[i]) == path:
+			idx = i
+			break
+	if idx != -1:
+		recents.remove_at(idx)
+	recents.insert(0, path)
+	if recents.size() > _MAX_RECENT:
+		recents.resize(_MAX_RECENT)
+	_save_setting("recent_patches", recents)
+	_rebuild_recent_menu()
+
+
+## Rebuilds the Open Recent popup menu from saved settings.
+func _rebuild_recent_menu() -> void:
+	if _recent_menu == null:
+		return
+	var popup: PopupMenu = _recent_menu.get_popup()
+	popup.clear()
+	var recents: Array = _load_setting("recent_patches", []) as Array
+	if recents.is_empty():
+		popup.add_item("(no recent patches)", -1)
+		popup.set_item_disabled(0, true)
+		return
+	for i in range(recents.size()):
+		var p: String = str(recents[i])
+		var label: String = p.get_file()
+		popup.add_item(label, i)
+		popup.set_item_tooltip(i, p)
+		if not FileAccess.file_exists(p):
+			popup.set_item_disabled(i, true)
+
+
+## Called when the user selects an item from the Open Recent menu.
+func _on_recent_selected(idx: int) -> void:
+	var recents: Array = _load_setting("recent_patches", []) as Array
+	if idx < 0 or idx >= recents.size():
+		return
+	var path: String = str(recents[idx])
+	if not FileAccess.file_exists(path):
+		return
+	_guard_unsaved(func(): _load_from_path(path))
 
 
 ## Loads a setting value, returning [param default] if the key doesn't exist.

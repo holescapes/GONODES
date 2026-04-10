@@ -2,56 +2,47 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "lfo1": {
-            "type": "LFO_CHOP",
+        "src_wave": {
+            "type": "WaveCHOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
                 "frequency": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "waveform": {
-                    "value": 3,
-                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 },
                 "amplitude": {
                     "value": 1.0
                 }
             }
         },
-        "smooth1": {
-            "type": "SmoothCHOPNative",
+        "focus1": {
+            "type": "SmoothCHOP",
             "position": [
                 450,
-                100
-            ],
-            "parameters": {
-                "type": {
-                    "value": 0
-                },
-                "cutoff": {
-                    "value": 0.15
-                },
-                "q": {
-                    "value": 0.707
-                }
-            }
-        },
-        "null1": {
-            "type": "NullCHOP",
-            "position": [
-                800,
                 100
             ],
             "parameters": {}
         },
         "choptop1": {
             "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
             "position": [
                 1150,
                 100
@@ -61,23 +52,7 @@
                     "value": {
                         "_type": "Vector2i",
                         "x": 512,
-                        "y": 256
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1500,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 256
+                        "y": 512
                     }
                 },
                 "open": {
@@ -88,19 +63,13 @@
     },
     "connections": [
         {
-            "from": "lfo1",
+            "from": "src_wave",
             "from_port": 0,
-            "to": "smooth1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "smooth1",
-            "from_port": 0,
-            "to": "null1",
-            "to_port": 0
-        },
-        {
-            "from": "null1",
+            "from": "focus1",
             "from_port": 0,
             "to": "choptop1",
             "to_port": 0
@@ -116,14 +85,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Smooth CHOP (Native) \u00e2\u20ac\u201d Low-Pass on Random LFO\n\nBiquad Butterworth low-pass at cutoff 0.15 smooths\na random LFO waveform. Try switching to High Pass\nor Band Pass and varying Q.",
+            "text": "Smooth CHOP — Basic\n\nBiquad Butterworth IIR filter (low-pass, high-pass, band-pass).",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

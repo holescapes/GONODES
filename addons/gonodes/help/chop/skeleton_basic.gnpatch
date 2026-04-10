@@ -16,9 +16,7 @@
                     "value": "*"
                 },
                 "local": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -76,14 +74,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Skeleton CHOP \u2014 Basic\n\nReads bone transforms from a Skeleton3D inside a COMP.\nOutputs tx/ty/tz/rx/ry/rz per bone as named channels.\nSet comp_path to a GeometryCOMP that has a Skeleton3D child.\nbone_filter='*' reads all bones; use 'Arm*' to filter.",
+            "text": "Skeleton CHOP — Basic\n\nRead skeleton bone transforms as CHOP channels with bone filter.\nUsing: comp_path=geo1, bone_filter=*, local=True.",
             "position": [
                 -100.0,
                 -120.0
             ],
             "size": [
-                520.0,
-                110.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -1,0 +1,100 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "morph1": {
+            "type": "MorphIMG",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "operation": {
+                    "value": 1
+                },
+                "kernel_size": {
+                    "value": 7
+                },
+                "iterations": {
+                    "value": 2
+                }
+            }
+        },
+        "bridge1": {
+            "type": "ImgToTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "morph1",
+            "to_port": 0
+        },
+        {
+            "from": "morph1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MorphIMG \u2014 Dilate\n\nDilate 2x with a 7x7 kernel.\nExpands bright regions.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

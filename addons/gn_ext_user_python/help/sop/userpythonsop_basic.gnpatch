@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 50,
-                    "expression": "(50 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 50
                 },
                 "columns": {
-                    "value": 50,
-                    "expression": "(50 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 50
                 },
                 "sizex": {
                     "value": 4.0
@@ -140,7 +136,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonSOP \u2014 Python Geometry with NumPy\n\nWrite SOP operators in Python using NumPy arrays.\nThe default example applies a sine-wave vertex deformation.\n\nClick the node, then 'Edit Python \u2197' in the inspector.\nPress Ctrl+R to reload. No compilation needed.\n\nUse vectorized NumPy ops for best performance.",
+            "text": "UserPythonSOP — Python Geometry with NumPy\n\nWrite SOP operators in Python using NumPy arrays.\nThe default example applies a sine-wave vertex deformation.\n\nClick the node, then 'Edit Python ↗' in the inspector.\nPress Ctrl+R to reload. No compilation needed.\n\nUse vectorized NumPy ops for best performance.",
             "position": [
                 -100.0,
                 -100.0

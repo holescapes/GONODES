@@ -130,14 +130,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CopySOP \u2014 Parameters\n\nShowcases: align_to_normal, scale, use_point_scale.",
+            "text": "Copy SOP — Normal\n\nInstance template geometry onto each point of the target mesh.\nShowcasing: align_to_normal=True, scale=0.5, use_point_scale=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -104,14 +104,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LensFlareTOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Lens Flare TOP — Advanced\n\nProcedural lens flare — ghosts, anamorphic streaks, and halo ring from bright areas.\nCombined configuration: threshold=1.6, ghost_intensity=1.2, ghost_count=6, ghost_spacing=0.6.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

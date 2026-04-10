@@ -15,6 +15,11 @@ extends GNDatBase
 var _host_json: String = ""
 var _host_dirty: bool = false
 
+## Direct zero-copy path: raw JSON string injected via pointer lending.
+var _host_direct_json: String = ""
+var _host_direct_length: int = 0
+var _host_direct_dirty: bool = false
+
 
 func _init() -> void:
 	node_type = "host_in"
@@ -39,16 +44,34 @@ func _set_host_table(json_data: String) -> void:
 	mark_dirty()
 
 
+## Called by GNEmbeddedHost._flush_inputs() with direct string data.
+## Zero-copy: the string is used directly from the host's staged pointer;
+## no additional serialization or env-var round-trip.
+func _set_host_table_direct(json_data: String, length: int) -> void:
+	_host_direct_json = json_data
+	_host_direct_length = length
+	_host_direct_dirty = true
+	_host_dirty = false  # Direct path supersedes env-var path
+	mark_dirty()
+
+
 func _cook(_inputs: Array[GNData]) -> GNData:
 	var out := _prepare_table()
 	var mode_idx: int = get_param_value("mode")
 
-	if _host_json.is_empty():
+	# Direct zero-copy path: use the raw JSON from pointer lending.
+	var json_src: String = ""
+	if _host_direct_dirty and not _host_direct_json.is_empty():
+		json_src = _host_direct_json
+		_host_direct_dirty = false
+	elif not _host_json.is_empty():
+		json_src = _host_json
+	else:
 		out.valid = false
 		return out
 
 	var json := JSON.new()
-	if json.parse(_host_json) != OK:
+	if json.parse(json_src) != OK:
 		node_warning = "Invalid JSON from host: %s" % json.get_error_message()
 		out.valid = false
 		return out

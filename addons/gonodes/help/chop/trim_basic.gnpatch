@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Trim CHOP \u2014 Basic\n\nTrims signal to shorter time range.",
+            "text": "Trim CHOP — Basic\n\nExtract a sub-range of samples from channels.",
             "position": [
                 -100.0,
                 -100.0

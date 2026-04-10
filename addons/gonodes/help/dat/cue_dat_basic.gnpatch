@@ -10,17 +10,13 @@
             ],
             "parameters": {
                 "num_cues": {
-                    "value": 3,
-                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 3
                 },
                 "cue0_name": {
                     "value": "intro"
                 },
                 "cue0_time": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "cue0_duration": {
                     "value": 5.0
@@ -120,14 +116,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Cue DAT \u2014 Basic\n\nThree cues: intro (0 s), main (5 s), outro (15 s).\n\u2022 intro: instant cut, 5 s duration\n\u2022 main: 1 s fade-in, 10 s duration\n\u2022 outro: 2 s fade-in, 5 s duration\nView the table output as text to inspect columns.",
+            "text": "Cue DAT — Basic\n\nCue list manager — named cues with timing, transitions, and parameter overrides.\nUsing: num_cues=3, cue0_name=intro, cue0_time=0.0, cue0_duration=5.0.",
             "position": [
                 -100.0,
                 -120.0
             ],
             "size": [
-                490.0,
-                110.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SharpenTOP \u2014 Parameters\n\nShowcases: strength, radius.",
+            "text": "Sharpen TOP — Strength\n\nUnsharp-mask sharpening with strength and radius.\nShowcasing: strength=0.5, radius=0.5.",
             "position": [
                 -100.0,
                 -100.0

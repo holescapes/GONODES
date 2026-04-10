@@ -91,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CHOPDAT \u2014 Parameters\n\nShowcases: layout.",
+            "text": "CHOP DAT — Layout\n\nConvert CHOP channels to a DAT table.\nShowcasing: layout=1.",
             "position": [
                 -100.0,
                 -100.0

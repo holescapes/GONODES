@@ -2,72 +2,28 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "noise_a": {
-            "type": "NoiseVOLNative",
+        "src_grid": {
+            "type": "GridSOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "res_x": {
-                    "value": 64
+                "rows": {
+                    "value": 20
                 },
-                "res_y": {
-                    "value": 64
-                },
-                "res_z": {
-                    "value": 64
-                },
-                "frequency": {
-                    "value": 3.0
+                "cols": {
+                    "value": 20
                 }
             }
         },
-        "noise_b": {
-            "type": "NoiseVOLNative",
-            "position": [
-                100,
-                300
-            ],
-            "parameters": {
-                "res_x": {
-                    "value": 64
-                },
-                "res_y": {
-                    "value": 64
-                },
-                "res_z": {
-                    "value": 64
-                },
-                "frequency": {
-                    "value": 6.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "amplitude": {
-                    "value": 0.5,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
-                }
-            }
-        },
-        "blend1": {
-            "type": "BlendVOLNative",
+        "focus1": {
+            "type": "BlendVOL",
             "position": [
                 450,
                 100
             ],
-            "parameters": {
-                "operation": {
-                    "value": "add"
-                },
-                "scale_a": {
-                    "value": 1.0
-                },
-                "scale_b": {
-                    "value": 0.5
-                }
-            }
+            "parameters": {}
         },
         "raymarch1": {
             "type": "RaymarchVOL",
@@ -75,15 +31,7 @@
                 800,
                 100
             ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
+            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
@@ -107,19 +55,13 @@
     },
     "connections": [
         {
-            "from": "noise_a",
+            "from": "src_grid",
             "from_port": 0,
-            "to": "blend1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "noise_b",
-            "from_port": 0,
-            "to": "blend1",
-            "to_port": 1
-        },
-        {
-            "from": "blend1",
+            "from": "focus1",
             "from_port": 0,
             "to": "raymarch1",
             "to_port": 0
@@ -135,14 +77,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Blend VOL (Native) \u2014 Add Two Noise Fields\n\nTwo noise volumes added together with different scales.\nSupports add/subtract/multiply/max/min/mix operations.\nNative C++ processes all voxels in a tight loop.",
+            "text": "Blend VOL — Basic\n\nBlend/combine two volumes (add, multiply, max, lerp).",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

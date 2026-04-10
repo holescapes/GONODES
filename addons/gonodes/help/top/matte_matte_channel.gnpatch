@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MatteTOP \u2014 Parameters\n\nShowcases: matte_channel, invert, premultiply.",
+            "text": "Matte TOP — Channel\n\nApply alpha from a second texture (luma/R/G/B/A source, invert, premultiply).\nShowcasing: matte_channel=1, invert=True, premultiply=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

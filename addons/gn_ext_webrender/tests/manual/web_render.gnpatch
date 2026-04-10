@@ -1,0 +1,65 @@
+{
+	"generator": "GONODES",
+	"description": "Web rendering demo. Chain 1: WebRenderTOP in URL mode loading a page at 1280x720 30fps — output through FitTOP to rescale for compositing. Chain 2: WebRenderTOP in HTML mode rendering inline animated HTML/CSS/JS — the embedded canvas draws a rotating gradient. Demonstrates CEF-based headless browser rendering to texture.",
+	"connections": [
+		{
+			"from": "web_url",
+			"from_port": 0,
+			"to": "fit_url",
+			"to_port": 0
+		},
+		{
+			"from": "fit_url",
+			"from_port": 0,
+			"to": "url_view",
+			"to_port": 0
+		},
+		{
+			"from": "web_html",
+			"from_port": 0,
+			"to": "html_view",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"web_url": {
+			"type": "WebRenderTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"mode": {"value": 0},
+				"url": {"value": "https://example.com"},
+				"resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+				"fps": {"value": 30},
+				"active": {"value": true}
+			}
+		},
+		"fit_url": {
+			"type": "FitTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 640, "y": 360}}
+			}
+		},
+		"url_view": {
+			"type": "NullTOP",
+			"position": [800.0, 0.0],
+			"parameters": {}
+		},
+		"web_html": {
+			"type": "WebRenderTOP",
+			"position": [0.0, 300.0],
+			"parameters": {
+				"mode": {"value": 1},
+				"html": {"value": "<!DOCTYPE html><html><head><style>body{margin:0;overflow:hidden;background:#111}canvas{display:block}</style></head><body><canvas id=\"c\"></canvas><script>const c=document.getElementById('c'),x=c.getContext('2d');c.width=640;c.height=360;let t=0;function draw(){t+=0.02;x.fillStyle='rgba(17,17,17,0.1)';x.fillRect(0,0,640,360);for(let i=0;i<6;i++){let a=t+i*Math.PI/3;let cx=320+Math.cos(a)*100;let cy=180+Math.sin(a)*100;let g=x.createRadialGradient(cx,cy,0,cx,cy,80);g.addColorStop(0,`hsl(${(i*60+t*50)%360},100%,60%)`);g.addColorStop(1,'transparent');x.fillStyle=g;x.fillRect(0,0,640,360)}requestAnimationFrame(draw)}draw()</script></body></html>"},
+				"resolution": {"value": {"_type": "Vector2i", "x": 640, "y": 360}},
+				"fps": {"value": 30},
+				"active": {"value": true}
+			}
+		},
+		"html_view": {
+			"type": "NullTOP",
+			"position": [400.0, 300.0],
+			"parameters": {}
+		}
+	}
+}

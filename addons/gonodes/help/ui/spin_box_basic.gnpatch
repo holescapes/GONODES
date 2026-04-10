@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "min_val": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "max_val": {
-                    "value": 100.0,
-                    "expression": "(100.0 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 100.0
                 },
                 "step": {
                     "value": 1.0
@@ -62,7 +58,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SpinBox UI \u00e2\u20ac\u201d Basic\n\nNumeric spin box with +/- buttons.\nConfigurable range, step, prefix/suffix.\nState channel: value.",
+            "text": "SpinBox UI â€” Basic\n\nNumeric spin box with +/- buttons.\nConfigurable range, step, prefix/suffix.\nState channel: value.",
             "position": [
                 -100.0,
                 -100.0

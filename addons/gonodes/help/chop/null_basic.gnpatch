@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Null CHOP \u2014 Basic\n\nPass-through node. No processing.\nUseful as reference/anchor point.",
+            "text": "Null CHOP — Basic\n\nPass-through.",
             "position": [
                 -100.0,
                 -100.0

@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 16,
-                    "expression": "(16 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 16
                 },
                 "columns": {
-                    "value": 16,
-                    "expression": "(16 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 16
                 },
                 "radius": {
                     "value": 1.0
@@ -152,14 +148,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Smooth SOP \u2014 Basic\n\nSphere deformed by Noise SOP, then smoothed with 5 Laplacian\niterations at 0.7 strength. Pin borders prevents boundary\nvertices from drifting. Compare with smooth bypassed.",
+            "text": "Smooth SOP — Basic\n\nLaplacian vertex smoothing (relaxation) with border pinning.\nUsing: iterations=5, strength=0.7, pin_borders=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
                 500.0,
-                100.0
+                140.0
             ],
             "color": [
                 1.0,

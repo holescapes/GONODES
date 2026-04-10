@@ -16,9 +16,7 @@
                     "value": 0
                 },
                 "auto_parse": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -82,7 +80,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Web DAT \u2014 HTTP GET\n\nFetches data from a URL via HTTP.\nAuto-parses JSON responses into tables.",
+            "text": "Web DAT — HTTP GET\n\nFetches data from a URL via HTTP.\nAuto-parses JSON responses into tables.",
             "position": [
                 -100.0,
                 -150.0

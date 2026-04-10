@@ -1,0 +1,143 @@
+{
+	"generator": "GONODES",
+	"description": "Machine learning inference demo. Chain 1: NoiseTOP source → DepthEstimateTOP for monocular depth. Chain 2: TestCardTOP → StyleTransferTOP for neural art style. Chain 3: RampTOP → SegmentationTOP for foreground masking → CompositeTOP to composite over a color background. Set model_path parameters to .onnx model files. Requires GNOnnxInference native library.",
+	"connections": [
+		{
+			"from": "photo_src",
+			"from_port": 0,
+			"to": "depth_est",
+			"to_port": 0
+		},
+		{
+			"from": "depth_est",
+			"from_port": 0,
+			"to": "depth_view",
+			"to_port": 0
+		},
+		{
+			"from": "style_src",
+			"from_port": 0,
+			"to": "style_xfer",
+			"to_port": 0
+		},
+		{
+			"from": "style_xfer",
+			"from_port": 0,
+			"to": "style_view",
+			"to_port": 0
+		},
+		{
+			"from": "seg_src",
+			"from_port": 0,
+			"to": "segment",
+			"to_port": 0
+		},
+		{
+			"from": "segment",
+			"from_port": 0,
+			"to": "comp_mask",
+			"to_port": 1
+		},
+		{
+			"from": "bg_fill",
+			"from_port": 0,
+			"to": "comp_mask",
+			"to_port": 0
+		},
+		{
+			"from": "comp_mask",
+			"from_port": 0,
+			"to": "seg_view",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"photo_src": {
+			"type": "NoiseTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"seed": {"value": 11}
+			}
+		},
+		"depth_est": {
+			"type": "DepthEstimateTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"model_path": {"value": ""},
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"invert": {"value": false},
+				"normalize": {"value": true},
+				"provider": {"value": 0},
+				"active": {"value": true}
+			}
+		},
+		"depth_view": {
+			"type": "NullTOP",
+			"position": [800.0, 0.0],
+			"parameters": {}
+		},
+		"style_src": {
+			"type": "TestCardTOP",
+			"position": [0.0, 300.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+			}
+		},
+		"style_xfer": {
+			"type": "StyleTransferTOP",
+			"position": [400.0, 300.0],
+			"parameters": {
+				"model_path": {"value": ""},
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"strength": {"value": 0.8},
+				"provider": {"value": 0},
+				"active": {"value": true}
+			}
+		},
+		"style_view": {
+			"type": "NullTOP",
+			"position": [800.0, 300.0],
+			"parameters": {}
+		},
+		"seg_src": {
+			"type": "RampTOP",
+			"position": [0.0, 600.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+			}
+		},
+		"segment": {
+			"type": "SegmentationTOP",
+			"position": [400.0, 600.0],
+			"parameters": {
+				"model_path": {"value": ""},
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"threshold": {"value": 0.5},
+				"soft_mask": {"value": true},
+				"invert": {"value": false},
+				"provider": {"value": 0},
+				"active": {"value": true}
+			}
+		},
+		"bg_fill": {
+			"type": "ConstantTOP",
+			"position": [400.0, 800.0],
+			"parameters": {
+				"color": {"value": {"_type": "Color", "r": 0.0, "g": 0.4, "b": 0.15, "a": 1.0}}
+			}
+		},
+		"comp_mask": {
+			"type": "CompositeTOP",
+			"position": [800.0, 600.0],
+			"parameters": {
+				"operation": {"value": 1}
+			}
+		},
+		"seg_view": {
+			"type": "NullTOP",
+			"position": [1200.0, 600.0],
+			"parameters": {}
+		}
+	}
+}

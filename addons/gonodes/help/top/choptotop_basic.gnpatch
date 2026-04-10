@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CHOPtoTOP \u2014 Basic\n\nDefault settings.",
+            "text": "CHOP to TOP — Basic\n\nConverts CHOP channel data into a 2D texture.\nEach channel becomes a row; sample values map to pixel intensity.\nUseful for visualizing audio, LFO, or any channel data as an image.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

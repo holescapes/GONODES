@@ -19,9 +19,7 @@
                     }
                 },
                 "edit_alpha": {
-                    "value": true,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "min_size": {
                     "value": {
@@ -89,7 +87,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ColorPickerUI \u2014 Basic\n\nDefault settings.",
+            "text": "Color Picker UI — Basic\n\nColor picker button. Outputs RGBA channels as CHOP state.\nUsing: edit_alpha=True.",
             "position": [
                 -100.0,
                 -100.0

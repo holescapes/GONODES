@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "amplitude": {
                     "value": 1.0
@@ -95,14 +91,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LFO CHOP \u2014 Basic\n\nA single LFO generating a 1 Hz sine wave.\nOutput oscillates between -1 and 1.",
+            "text": "LFO_ CHOP — Basic\n\nLow-frequency oscillator (sine, triangle, square, saw, pulse).\nUsing: waveform=0, frequency=1.0, amplitude=1.0, offset=0.0.",
             "position": [
                 -100.0,
                 -150.0
             ],
             "size": [
-                350.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -2,7 +2,7 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "sphere1": {
+        "src_sphere": {
             "type": "SphereSOP",
             "position": [
                 100,
@@ -10,30 +10,44 @@
             ],
             "parameters": {}
         },
-        "geo1": {
+        "focus1": {
+            "type": "EnvironmentCOMP",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {}
+        },
+        "geo_view": {
             "type": "GeometryCOMP",
             "position": [
-                400,
+                450,
                 100
             ],
             "parameters": {}
         },
-        "cam1": {
+        "cam_view": {
             "type": "CameraCOMP",
             "position": [
-                700,
+                450,
                 300
             ],
             "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
                 "tz": {
                     "value": 3
                 }
             }
         },
-        "render1": {
+        "render_view": {
             "type": "RenderTOP",
             "position": [
-                1000,
+                750,
                 100
             ],
             "parameters": {
@@ -49,7 +63,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1400,
+                1100,
                 100
             ],
             "parameters": {
@@ -68,25 +82,31 @@
     },
     "connections": [
         {
-            "from": "sphere1",
+            "from": "src_sphere",
             "from_port": 0,
-            "to": "geo1",
+            "to": "geo_view",
             "to_port": 0
         },
         {
-            "from": "geo1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "render1",
+            "to": "render_view",
+            "to_port": 2
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
             "to_port": 0
         },
         {
-            "from": "cam1",
+            "from": "cam_view",
             "from_port": 0,
-            "to": "render1",
+            "to": "render_view",
             "to_port": 1
         },
         {
-            "from": "render1",
+            "from": "render_view",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -96,14 +116,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "EnvironmentCOMP — Basic\n\nDefault settings.",
+            "text": "Environment COMP — Basic\n\nEnvironment settings for 3D rendering — background, lighting, post-processing.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

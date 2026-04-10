@@ -33,9 +33,7 @@
                     }
                 },
                 "strength": {
-                    "value": 1.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -83,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Style Transfer \u2014 Basic\n\nWebcam -> neural style transfer in real-time.\nDefault: Mosaic style. Change model_path to\nswitch styles (candy, udnie, etc.).",
+            "text": "Webcam IMG — Basic\n\nLive webcam/camera feed as CPU Image. Chain → ImgToTOP for GPU.",
             "position": [
                 -100.0,
                 -100.0

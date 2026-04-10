@@ -61,14 +61,10 @@
                     }
                 },
                 "effect_mode": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "threshold": {
-                    "value": 0.05,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.05
                 },
                 "strength": {
                     "value": 1.0
@@ -130,5 +126,25 @@
             "to_port": 0
         }
     ],
-    "annotations": []
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Compositor Effect TOP — Basic\n\nRender 3D scene with a pipeline-level CompositorEffect: Outline, Depth Fog, or Depth View.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

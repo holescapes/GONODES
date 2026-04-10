@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "target_x": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "target_y": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "target_z": {
                     "value": 0.0
@@ -144,14 +140,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AttractPOP \u2014 Basic\n\nDefault settings.",
+            "text": "Attract POP — Basic\n\nPoint, line, or geometry attractor/repulsor for particles.\nUsing: target_x=0.0, target_y=1.0, target_z=0.0, strength=10.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

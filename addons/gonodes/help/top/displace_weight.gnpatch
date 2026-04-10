@@ -73,7 +73,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DisplaceTOP \u2014 Parameters\n\nShowcases: weight, method.",
+            "text": "Displace TOP — Weight\n\nDistort one texture using another as a displacement map.\nShowcasing: weight=0.05, method=1.",
             "position": [
                 -100.0,
                 -100.0

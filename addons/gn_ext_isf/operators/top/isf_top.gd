@@ -63,6 +63,9 @@ var _compiled: bool = false
 var _last_compiled_code: String = ""
 var _last_file_path: String = ""
 var _isf_param_names: PackedStringArray = PackedStringArray()
+var _vertex_source: String = ""
+var _imported_base_dir: String = ""
+var _imported_textures: Dictionary = {}  # name → ImageTexture
 
 
 # ===============================================================================
@@ -130,18 +133,62 @@ func from_dict(d: Dictionary) -> void:
 # ===============================================================================
 
 func _load_file_to_code(path: String) -> void:
-	# Resolve project:// and other path tiers to absolute
 	var resolved := GNResourceLoader.resolve(path, project_dir)
-	if resolved.is_empty() or not FileAccess.file_exists(resolved):
+	if resolved.is_empty():
 		GNLogger.error("ISFTOP", "'%s' — file not found: %s" % [id, path])
 		return
+
+	# ── If path points to a directory, find the .fs inside it ──
+	if DirAccess.dir_exists_absolute(resolved):
+		var fs_path := _find_fs_in_dir(resolved)
+		if fs_path.is_empty():
+			GNLogger.error("ISFTOP", "'%s' — no .fs file found in folder: %s" % [id, resolved])
+			return
+		resolved = fs_path
+
+	if not FileAccess.file_exists(resolved):
+		GNLogger.error("ISFTOP", "'%s' — file not found: %s" % [id, path])
+		return
+
+	# ── Read fragment shader ──
 	var file := FileAccess.open(resolved, FileAccess.READ)
 	if file == null:
 		GNLogger.error("ISFTOP", "'%s' — cannot open: %s" % [id, path])
 		return
 	set_param_value("isf_code", file.get_as_text())
 	file.close()
+
+	# ── Remember base directory for IMPORTED image resolution ──
+	_imported_base_dir = resolved.get_base_dir()
+
+	# ── Look for companion .vs vertex shader ──
+	_vertex_source = ""
+	var base_name := resolved.get_file().get_basename()
+	var vs_path := _imported_base_dir.path_join(base_name + ".vs")
+	if FileAccess.file_exists(vs_path):
+		var vs_file := FileAccess.open(vs_path, FileAccess.READ)
+		if vs_file != null:
+			_vertex_source = vs_file.get_as_text()
+			vs_file.close()
+			GNLogger.info("ISFTOP", "'%s' — loaded companion VS: %s" % [id, vs_path.get_file()])
+
 	GNLogger.info("ISFTOP", "'%s' — loaded %s" % [id, resolved.get_file()])
+
+
+## Find the first .fs file inside a directory.
+static func _find_fs_in_dir(dir_path: String) -> String:
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return ""
+	dir.list_dir_begin()
+	var fname := dir.get_next()
+	while not fname.is_empty():
+		if not dir.current_is_dir() and fname.get_extension().to_lower() == "fs":
+			dir.list_dir_end()
+			return dir_path.path_join(fname)
+		fname = dir.get_next()
+	dir.list_dir_end()
+	return ""
 
 
 # ===============================================================================
@@ -153,7 +200,7 @@ func _compile(source: String) -> void:
 	if source.strip_edges().is_empty():
 		return
 
-	var result := ISFTranslator.translate(source)
+	var result := ISFTranslator.translate(source, _vertex_source)
 	if not result.success:
 		GNLogger.error("ISFTOP",
 			"'%s' — ISF translation failed: %s" % [id, result.error])
@@ -203,6 +250,7 @@ func _compile(source: String) -> void:
 			_pass_shaders.append(s)
 
 	_compiled = true
+	_load_imported_images()
 	GNLogger.info("ISFTOP",
 		"'%s' — compiled (%d passes, %d ISF params, %d image ports)" % [
 			id, maxi(result.passes.size(), 1),
@@ -305,6 +353,37 @@ func _build_isf_params() -> void:
 
 
 # ===============================================================================
+# IMPORTED Image Loading
+# ===============================================================================
+
+func _load_imported_images() -> void:
+	_imported_textures.clear()
+	if _isf_result == null or _isf_result.imported_images.is_empty():
+		return
+	if _imported_base_dir.is_empty():
+		return
+
+	for img_name in _isf_result.imported_images:
+		var entry: Dictionary = _isf_result.imported_images[img_name]
+		var rel_path: String = entry.get("PATH", "")
+		if rel_path.is_empty():
+			continue
+		var abs_path := _imported_base_dir.path_join(rel_path)
+		if not FileAccess.file_exists(abs_path):
+			GNLogger.warn("ISFTOP", "'%s' — IMPORTED image not found: %s" % [id, abs_path])
+			continue
+		var img := Image.new()
+		var err := img.load(abs_path)
+		if err != OK:
+			GNLogger.warn("ISFTOP", "'%s' — failed to load IMPORTED image: %s" % [id, abs_path])
+			continue
+		var tex := ImageTexture.create_from_image(img)
+		_imported_textures[img_name] = tex
+		GNLogger.info("ISFTOP", "'%s' — loaded IMPORTED '%s' (%dx%d)" % [
+			id, img_name, img.get_width(), img.get_height()])
+
+
+# ===============================================================================
 # Cook
 # ===============================================================================
 
@@ -397,6 +476,10 @@ func _ensure_pass_viewports(base_res: Vector2i) -> void:
 		vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		vp.disable_3d = true
 		vp.gui_disable_input = true
+		if p.persistent:
+			vp.render_target_clear_mode = SubViewport.CLEAR_MODE_NEVER
+		if p.is_float:
+			vp.use_hdr_2d = true
 		add_child(vp)
 
 		var mat := ShaderMaterial.new()
@@ -499,3 +582,9 @@ func _bind_uniforms(mat: ShaderMaterial, inputs: Array[GNData], res: Vector2i) -
 					mat.set_shader_parameter("isf_%s_size" % inp.input_name,
 						Vector2(td.resolution))
 
+	# ── IMPORTED image textures ──
+	for img_name in _imported_textures:
+		var tex: ImageTexture = _imported_textures[img_name]
+		mat.set_shader_parameter(img_name, tex)
+		mat.set_shader_parameter("isf_%s_size" % img_name,
+			Vector2(tex.get_width(), tex.get_height()))

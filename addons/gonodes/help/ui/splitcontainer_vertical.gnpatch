@@ -142,7 +142,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SplitContainerUI \u2014 Parameters\n\nShowcases: vertical, offset, collapsed.",
+            "text": "Button UI — Vertical\n\nPush button widget. Outputs press/release state as CHOP channel.\nShowcasing: label=Button A.",
             "position": [
                 -100.0,
                 -100.0

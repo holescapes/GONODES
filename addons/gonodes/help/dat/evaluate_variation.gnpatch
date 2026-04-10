@@ -85,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "EvaluateDAT \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Evaluate DAT — Variation\n\nEvaluate cells starting with '=' as GDScript expressions.",
             "position": [
                 -100.0,
                 -100.0

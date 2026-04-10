@@ -1,0 +1,271 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "ConstraintCOMP — Blend mode. Sphere blends between its own position and the target.",
+    "nodes": {
+        "sphere_sop": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.4
+                }
+            }
+        },
+        "geo_sphere": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {
+                "tx": {
+                    "value": -3.0
+                },
+                "ty": {
+                    "value": 1.0
+                }
+            }
+        },
+        "box_sop": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                200
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 0.5
+                },
+                "size_y": {
+                    "value": 0.5
+                },
+                "size_z": {
+                    "value": 0.5
+                }
+            }
+        },
+        "geo_target": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                200
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 3.0
+                },
+                "ty": {
+                    "value": 2.0
+                }
+            }
+        },
+        "lfo1": {
+            "type": "LFOCHOP",
+            "position": [
+                300,
+                400
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 0.3
+                },
+                "type": {
+                    "value": 1
+                }
+            }
+        },
+        "constraint1": {
+            "type": "ConstraintCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "mode": {
+                    "value": 2
+                },
+                "blend": {
+                    "expression": "chop('lfo1', 'out') * 0.5 + 0.5"
+                }
+            }
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                400
+            ],
+            "parameters": {
+                "text": {
+                    "value": "ConstraintCOMP — Blend\n\nSphere smoothly interpolates between its own\ntransform and the target's. Blend driven by LFO.\nMode = Blend, Blend = LFO 0..1"
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 3.0
+                },
+                "tz": {
+                    "value": 8.0
+                },
+                "use_look_at": {
+                    "value": true
+                },
+                "look_at_y": {
+                    "value": 1.5
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere_sop",
+            "from_port": 0,
+            "to": "geo_sphere",
+            "to_port": 0
+        },
+        {
+            "from": "box_sop",
+            "from_port": 0,
+            "to": "geo_target",
+            "to_port": 0
+        },
+        {
+            "from": "geo_sphere",
+            "from_port": 0,
+            "to": "constraint1",
+            "to_port": 0
+        },
+        {
+            "from": "geo_target",
+            "from_port": 0,
+            "to": "constraint1",
+            "to_port": 1
+        },
+        {
+            "from": "constraint1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "geo_target",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 3
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Constraint COMP — Blend\n\nConstrain a COMP transform to follow another (Look At, Parent, Blend).",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

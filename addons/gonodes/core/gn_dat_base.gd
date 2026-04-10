@@ -81,9 +81,10 @@ static func _ensure_viewer_spreadsheet() -> Tree:
 	return _viewer_spreadsheet
 
 
-func render_for_viewer(viewer) -> void:
-	if cached_output is GNTableData:
-		var tbl: GNTableData = cached_output as GNTableData
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	var data: GNData = get_output_data(port_index)
+	if data is GNTableData:
+		var tbl: GNTableData = data as GNTableData
 		if not tbl.table.is_empty():
 			var tree := _ensure_viewer_spreadsheet()
 			_populate_viewer_tree(tree, tbl)

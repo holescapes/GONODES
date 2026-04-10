@@ -109,9 +109,7 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "DAT Output",
-                    "expression": "str(op(\"dmx1\"))",
-                    "mode": "EXPRESSION"
+                    "value": "DAT Output"
                 },
                 "resolution": {
                     "value": {
@@ -153,14 +151,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DMX DAT \u2014 Basic\n\nArt-Net UDP output. CHOP values mapped to DMX channels.\nLFO animates channel 1, static values on channels 2-3.\nSet 'active' = true to start broadcasting on universe 0.\nDefault IP = broadcast (255.255.255.255), port 6454.",
+            "text": "DMX DAT — Basic\n\nDMX lighting protocol (Art-Net / sACN) controller with channel table.\nUsing: universe=0, ip=255.255.255.255, port=6454, active=False.",
             "position": [
                 -100.0,
                 -120.0
             ],
             "size": [
-                520.0,
-                110.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

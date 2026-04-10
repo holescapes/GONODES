@@ -1,0 +1,342 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "LODCOMP — Distance Thresholds. Shows LOD switching with labelled distance rings.",
+    "nodes": {
+        "sphere_hi": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.8
+                },
+                "radial_segments": {
+                    "value": 48
+                },
+                "rings": {
+                    "value": 24
+                }
+            }
+        },
+        "pbr_red": {
+            "type": "PbrMAT",
+            "position": [
+                0,
+                150
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.9,
+                        "g": 0.2,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "geo_hi": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "sphere_med": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                300
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.8
+                },
+                "radial_segments": {
+                    "value": 16
+                },
+                "rings": {
+                    "value": 8
+                }
+            }
+        },
+        "pbr_yellow": {
+            "type": "PbrMAT",
+            "position": [
+                0,
+                450
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.9,
+                        "g": 0.8,
+                        "b": 0.1,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "geo_med": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                300
+            ],
+            "parameters": {}
+        },
+        "box_lo": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                600
+            ],
+            "parameters": {}
+        },
+        "pbr_blue": {
+            "type": "PbrMAT",
+            "position": [
+                0,
+                750
+            ],
+            "parameters": {
+                "albedo_color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.2,
+                        "g": 0.3,
+                        "b": 0.9,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "geo_lo": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                600
+            ],
+            "parameters": {}
+        },
+        "lod1": {
+            "type": "LODCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "dist1": {
+                    "value": 5.0
+                },
+                "dist2": {
+                    "value": 12.0
+                },
+                "auto_lod": {
+                    "value": true
+                }
+            }
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                700
+            ],
+            "parameters": {
+                "text": {
+                    "value": "LODCOMP — Distance Thresholds\n\nColor-coded LOD levels:\n  Red = LOD 0 (< 5m)\n  Yellow = LOD 1 (5–12m)\n  Blue = LOD 2 (> 12m)\n\nChange camera tz to see switching."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 1.0
+                },
+                "tz": {
+                    "value": 4.0
+                },
+                "use_look_at": {
+                    "value": true
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere_hi",
+            "from_port": 0,
+            "to": "geo_hi",
+            "to_port": 0
+        },
+        {
+            "from": "pbr_red",
+            "from_port": 0,
+            "to": "geo_hi",
+            "to_port": 1
+        },
+        {
+            "from": "sphere_med",
+            "from_port": 0,
+            "to": "geo_med",
+            "to_port": 0
+        },
+        {
+            "from": "pbr_yellow",
+            "from_port": 0,
+            "to": "geo_med",
+            "to_port": 1
+        },
+        {
+            "from": "box_lo",
+            "from_port": 0,
+            "to": "geo_lo",
+            "to_port": 0
+        },
+        {
+            "from": "pbr_blue",
+            "from_port": 0,
+            "to": "geo_lo",
+            "to_port": 1
+        },
+        {
+            "from": "geo_hi",
+            "from_port": 0,
+            "to": "lod1",
+            "to_port": 0
+        },
+        {
+            "from": "geo_med",
+            "from_port": 0,
+            "to": "lod1",
+            "to_port": 1
+        },
+        {
+            "from": "geo_lo",
+            "from_port": 0,
+            "to": "lod1",
+            "to_port": 2
+        },
+        {
+            "from": "lod1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LOD COMP — Distances\n\nLevel-of-detail switcher — swap geometry based on camera distance.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

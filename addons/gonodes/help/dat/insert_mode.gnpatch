@@ -99,7 +99,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "InsertDAT \u2014 Parameters\n\nShowcases: mode, index, count.",
+            "text": "Insert DAT — Mode\n\nInsert rows or columns into a table at a given position.\nShowcasing: mode=1, index=0, count=0.",
             "position": [
                 -100.0,
                 -100.0

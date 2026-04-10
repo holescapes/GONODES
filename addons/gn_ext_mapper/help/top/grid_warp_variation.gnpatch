@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GridWarpTOP \u2014 Parameters\n\nShowcases: grid_cols, grid_rows.\nRequires gn_ext_mapper extension.",
+            "text": "Grid Warp TOP — Variation\n\nGrid-based mesh warp with adjustable control points.\nShowcasing: grid_cols=3, grid_rows=3.",
             "position": [
                 -100.0,
                 -100.0

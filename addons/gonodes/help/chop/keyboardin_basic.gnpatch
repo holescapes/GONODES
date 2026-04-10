@@ -64,7 +64,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Keyboard In \u2014 Basic\n\nOutputs key press states as channels.\nPress keys to see values change.",
+            "text": "Keyboard In CHOP — Basic\n\nKeyboard key states as CHOP channels (toggle or momentary mode).",
             "position": [
                 -100.0,
                 -100.0

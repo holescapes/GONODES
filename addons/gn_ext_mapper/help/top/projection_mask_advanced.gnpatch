@@ -90,14 +90,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ProjectionMaskTOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_mapper extension.",
+            "text": "Projection Mask TOP — Advanced\n\nProjection mask with adjustable polygon or rectangle cutout regions.\nCombined configuration: left=0.1, right=0.9, mask_top=0.1, bottom=0.9.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

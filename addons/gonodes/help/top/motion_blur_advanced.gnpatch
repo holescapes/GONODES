@@ -74,14 +74,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MotionBlurTOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Motion Blur TOP — Advanced\n\nTemporal motion blur driven by a flow/velocity texture.\nCombined configuration: strength=2.0, quality=2.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

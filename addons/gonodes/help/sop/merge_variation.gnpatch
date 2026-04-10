@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MergeSOP \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Merge SOP — Variation\n\nMerge multiple geometries into one ArrayMesh.",
             "position": [
                 -100.0,
                 -100.0

@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "auto_reload": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "time_dep": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -75,7 +71,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonCHOP \u2014 Python Signal Processing\n\nWrite CHOP operators in Python using NumPy.\nThe default example generates phase-offset sine channels.\n\nUse gonodes.chop helpers: make_chop_result(channels_dict)\nfor multi-channel output with sample rate.\n\nLoad the Signal Generator example for waveform selection.",
+            "text": "UserPythonCHOP — Python Signal Processing\n\nWrite CHOP operators in Python using NumPy.\nThe default example generates phase-offset sine channels.\n\nUse gonodes.chop helpers: make_chop_result(channels_dict)\nfor multi-channel output with sample rate.\n\nLoad the Signal Generator example for waveform selection.",
             "position": [
                 -100.0,
                 -100.0

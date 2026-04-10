@@ -1,0 +1,82 @@
+{
+	"generator": "GONODES",
+	"description": "NDI video-over-IP demo. Chain 1: NoiseTOP → TransformTOP with animated rotation → NDIOutTOP broadcasting as 'GoNodes_Test' at 30fps. Chain 2: NDIInTOP receiving from any discovered source → LevelTOP for brightness adjustment → NullTOP output. Chains form a local loopback when NDI is available on the machine.",
+	"connections": [
+		{
+			"from": "gen_src",
+			"from_port": 0,
+			"to": "transform_anim",
+			"to_port": 0
+		},
+		{
+			"from": "transform_anim",
+			"from_port": 0,
+			"to": "ndi_send",
+			"to_port": 0
+		},
+		{
+			"from": "ndi_recv",
+			"from_port": 0,
+			"to": "level_adj",
+			"to_port": 0
+		},
+		{
+			"from": "level_adj",
+			"from_port": 0,
+			"to": "recv_view",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"gen_src": {
+			"type": "NoiseTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 1280, "y": 720}},
+				"seed": {"value": 55}
+			}
+		},
+		"transform_anim": {
+			"type": "TransformTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"rotate": {"value": 30.0},
+				"scale_x": {"value": 0.9},
+				"scale_y": {"value": 0.9}
+			}
+		},
+		"ndi_send": {
+			"type": "NDIOutTOP",
+			"position": [800.0, 0.0],
+			"parameters": {
+				"name": {"value": "GoNodes_Test"},
+				"fps_n": {"value": 30},
+				"fps_d": {"value": 1},
+				"active": {"value": true}
+			}
+		},
+		"ndi_recv": {
+			"type": "NDIInTOP",
+			"position": [0.0, 300.0],
+			"parameters": {
+				"source": {"value": ""},
+				"bandwidth": {"value": 0},
+				"timeout_ms": {"value": 500},
+				"active": {"value": true}
+			}
+		},
+		"level_adj": {
+			"type": "LevelTOP",
+			"position": [400.0, 300.0],
+			"parameters": {
+				"brightness": {"value": 1.1},
+				"contrast": {"value": 1.05}
+			}
+		},
+		"recv_view": {
+			"type": "NullTOP",
+			"position": [800.0, 300.0],
+			"parameters": {}
+		}
+	}
+}

@@ -81,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CacheTOP \u2014 Parameters\n\nShowcases: length, delay, freeze.",
+            "text": "Cache TOP — Freeze\n\nRing buffer that stores N frames with delay and freeze controls.\nShowcasing: length=29, delay=0, freeze=True, reset=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

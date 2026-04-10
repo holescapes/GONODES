@@ -64,7 +64,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BezierMapTOP \u2014 Parameters\n\nAlternate parameter values.\nRequires gn_ext_mapper extension.",
+            "text": "Bezier Map TOP — Variation\n\nBezier mesh warp for mapping textures onto curved surfaces.",
             "position": [
                 -100.0,
                 -100.0

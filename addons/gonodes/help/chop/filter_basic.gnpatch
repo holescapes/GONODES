@@ -89,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Filter CHOP \u2014 Basic\n\nLow-pass filters a noisy signal.\nWidth controls smoothing amount.",
+            "text": "Filter CHOP — Basic\n\nSingle-pole IIR low-pass or high-pass filter.\nUsing: filter_width=4.0.",
             "position": [
                 -100.0,
                 -100.0

@@ -51,7 +51,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RecordOUT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Math CHOP — Advanced\n\nArithmetic operations (Add, Subtract, Multiply, Divide, Abs, Sin, Cos, Pow).",
             "position": [
                 -100.0,
                 -100.0

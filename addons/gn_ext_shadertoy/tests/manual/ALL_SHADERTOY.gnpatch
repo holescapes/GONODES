@@ -1,0 +1,379 @@
+{
+	"connections": [
+		{
+			"from": "shadertoy",
+			"from_port": 0,
+			"to": "hsv_correct",
+			"to_port": 0
+		},
+		{
+			"from": "hsv_correct",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "switch2_copy_copy",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "slider1",
+			"from_port": 0,
+			"to": "panel_container1",
+			"to_port": 0
+		},
+		{
+			"from": "label1",
+			"from_port": 0,
+			"to": "panel_container1",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container1",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch2_copy_copy",
+			"to_port": 0
+		},
+		{
+			"from": "noise_tex",
+			"from_port": 0,
+			"to": "shadertoy1",
+			"to_port": 0
+		},
+		{
+			"from": "shadertoy1",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch2_copy_copy",
+			"to_port": 1
+		}
+	],
+	"generator": "GONODES",
+	"nodes": {
+		"OUTChain1": {
+			"position": [
+				1100.0,
+				-320.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain2": {
+			"position": [
+				1084.42761230469,
+				47.03515625
+			],
+			"type": "NullTOP"
+		},
+		"hsv_correct": {
+			"parameters": {
+				"hue_offset": {
+					"value": -0.36
+				},
+				"saturation": {
+					"value": 2.38
+				},
+				"value": {
+					"value": 1.31
+				}
+			},
+			"position": [
+				740.0,
+				-300.0
+			],
+			"type": "HSVAdjustTOP"
+		},
+		"label1": {
+			"parameters": {
+				"font_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"font_size": {
+					"value": 14
+				},
+				"h_align": {
+					"value": 1
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 120,
+						"y": 24
+					}
+				},
+				"text": {
+					"expression": "\"SelectTOP Index=\" + str(int(chop(\"slider1\", \"slider1:value\")))",
+					"mode": "EXPRESSION",
+					"value": "SelectTop Index"
+				}
+			},
+			"position": [
+				1440.0,
+				480.0
+			],
+			"type": "LabelUI"
+		},
+		"noise_tex": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": true
+				},
+				"noise_type": {
+					"value": 0
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 42
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				400.0,
+				40.0
+			],
+			"type": "NoiseTOP"
+		},
+		"panel_container1": {
+			"dynamic_input_count": 3,
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 0.0899999961256981,
+						"b": 0.150000005960464,
+						"g": 0.150000005960464,
+						"r": 0.150000005960464
+					}
+				},
+				"corner_radius": {
+					"value": 4
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 0,
+						"y": 0
+					}
+				},
+				"padding": {
+					"value": 8
+				}
+			},
+			"position": [
+				1640.0,
+				340.0
+			],
+			"type": "PanelContainerUI"
+		},
+		"shadertoy": {
+			"parameters": {
+				"fetch": {
+					"is_pulse": true,
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 640,
+						"y": 360
+					}
+				},
+				"shadertoy_api_key": {
+					"value": ""
+				},
+				"shadertoy_code": {
+					"value": "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord / iResolution.xy;\n    float t = iTime * 0.3;\n    vec3 col = vec3(0.0);\n    for (int i = 0; i < 4; i++) {\n        float fi = float(i);\n        vec2 p = uv * (2.0 + fi * 0.5) + vec2(t * (0.3 + fi * 0.1), t * 0.2);\n        float n = sin(p.x * 3.0 + sin(p.y * 4.0 + t)) * cos(p.y * 2.5 + cos(p.x * 3.5 - t));\n        n = n * 0.5 + 0.5;\n        col += vec3(n * 0.3, n * 0.25, n * 0.4) / (1.0 + fi * 0.3);\n    }\n    col = pow(col, vec3(0.8));\n    fragColor = vec4(col, 1.0);\n}\n"
+				},
+				"shadertoy_url": {
+					"value": ""
+				},
+				"time_dependent": {
+					"value": true
+				}
+			},
+			"position": [
+				340.0,
+				-300.0
+			],
+			"type": "ShadertoyTOP"
+		},
+		"shadertoy1": {
+			"parameters": {
+				"block_size": {
+					"value": 14.49
+				},
+				"fetch": {
+					"is_pulse": true,
+					"value": false
+				},
+				"shadertoy_api_key": {
+					"value": ""
+				},
+				"shadertoy_code": {
+					"value": "// Pixelate — mosaic / blocky pixelation\n// Original GONODES shader — requires iChannel0 input image\n// Uniform: float block_size = 8.0  (pixels per block)\n\nuniform float block_size; // = 8.0\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    float bs = max(block_size, 1.0);\n    vec2 pixelated = floor(fragCoord.xy / bs) * bs + bs * 0.5;\n    vec2 uv = pixelated / iResolution.xy;\n    fragColor = texture(iChannel0, uv);\n}\n"
+				},
+				"shadertoy_url": {
+					"value": ""
+				},
+				"time_dependent": {
+					"value": true
+				}
+			},
+			"position": [
+				740.0,
+				40.0
+			],
+			"type": "ShadertoyTOP"
+		},
+		"slider1": {
+			"parameters": {
+				"default_val": {
+					"value": 0.0
+				},
+				"label": {
+					"value": "Slider"
+				},
+				"max_val": {
+					"value": 7.0
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 200,
+						"y": 24
+					}
+				},
+				"min_val": {
+					"value": 0.0
+				},
+				"step": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				1440.0,
+				220.0
+			],
+			"type": "SliderUI"
+		},
+		"switch2_copy_copy": {
+			"dynamic_input_count": 3,
+			"parameters": {
+				"blend": {
+					"value": false
+				},
+				"blend_pos": {
+					"value": 0.0
+				},
+				"index": {
+					"expression": "chop(\"slider1\", \"slider1:value\")",
+					"mode": "EXPRESSION",
+					"value": 0
+				}
+			},
+			"position": [
+				1360.0,
+				-300.0
+			],
+			"type": "SwitchTOP"
+		},
+		"window_out1": {
+			"parameters": {
+				"always_on_top": {
+					"value": false
+				},
+				"monitor": {
+					"value": 0
+				},
+				"open": {
+					"value": false
+				},
+				"position": {
+					"value": {
+						"_type": "Vector2i",
+						"x": -1,
+						"y": -1
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"title": {
+					"value": "GONODES Output"
+				},
+				"vsync": {
+					"value": true
+				},
+				"window_mode": {
+					"value": 0
+				}
+			},
+			"position": [
+				1700.0,
+				-300.0
+			],
+			"type": "WindowOUT"
+		}
+	},
+	"version": "1.0.0",
+	"viewport": {
+		"scroll_x": 147.608062744141,
+		"scroll_y": -213.85041809082,
+		"zoom": 0.598479688167572
+	}
+}

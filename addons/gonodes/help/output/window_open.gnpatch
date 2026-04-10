@@ -50,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WindowOUT \u2014 Parameters\n\nShowcases: open, title, monitor.",
+            "text": "Window OUT — Open\n\nDisplay a texture in a standalone OS window (VJ output).",
             "position": [
                 -100.0,
                 -100.0

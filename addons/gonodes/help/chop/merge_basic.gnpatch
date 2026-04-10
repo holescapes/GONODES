@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -102,7 +100,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Merge CHOP \u2014 Basic\n\nCombines LFO and wave into multi-channel output.",
+            "text": "Merge CHOP — Basic\n\nMerge channels from up to 4 inputs.",
             "position": [
                 -100.0,
                 -100.0

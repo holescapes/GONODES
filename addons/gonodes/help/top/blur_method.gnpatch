@@ -4,88 +4,225 @@
     "nodes": {
         "src_noise": {
             "type": "NoiseTOP",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "scale": {"value": 4.0},
-                "monochrome": {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
+                }
             }
         },
         "blur_gaussian": {
             "type": "BlurTOP",
-            "position": [500, 100],
+            "position": [
+                500,
+                100
+            ],
             "parameters": {
-                "size": {"value": 10.0},
-                "quality": {"value": 8},
-                "method": {"value": 0}
+                "size": {
+                    "value": 10.0
+                },
+                "quality": {
+                    "value": 8
+                },
+                "method": {
+                    "value": 0
+                }
             }
         },
         "blur_box": {
             "type": "BlurTOP",
-            "position": [500, 250],
+            "position": [
+                500,
+                250
+            ],
             "parameters": {
-                "size": {"value": 10.0},
-                "quality": {"value": 8},
-                "method": {"value": 1}
+                "size": {
+                    "value": 10.0
+                },
+                "quality": {
+                    "value": 8
+                },
+                "method": {
+                    "value": 1
+                }
             }
         },
         "blur_triangle": {
             "type": "BlurTOP",
-            "position": [500, 400],
+            "position": [
+                500,
+                400
+            ],
             "parameters": {
-                "size": {"value": 10.0},
-                "quality": {"value": 8},
-                "method": {"value": 2}
+                "size": {
+                    "value": 10.0
+                },
+                "quality": {
+                    "value": 8
+                },
+                "method": {
+                    "value": 2
+                }
             }
         },
         "blur_sinc": {
             "type": "BlurTOP",
-            "position": [500, 550],
+            "position": [
+                500,
+                550
+            ],
             "parameters": {
-                "size": {"value": 10.0},
-                "quality": {"value": 8},
-                "method": {"value": 3}
+                "size": {
+                    "value": 10.0
+                },
+                "quality": {
+                    "value": 8
+                },
+                "method": {
+                    "value": 3
+                }
             }
         },
         "null_gaussian": {
             "type": "NullTOP",
-            "position": [850, 100],
+            "position": [
+                850,
+                100
+            ],
             "parameters": {}
         },
         "null_box": {
             "type": "NullTOP",
-            "position": [850, 250],
+            "position": [
+                850,
+                250
+            ],
             "parameters": {}
         },
         "null_triangle": {
             "type": "NullTOP",
-            "position": [850, 400],
+            "position": [
+                850,
+                400
+            ],
             "parameters": {}
         },
         "null_sinc": {
             "type": "NullTOP",
-            "position": [850, 550],
+            "position": [
+                850,
+                550
+            ],
             "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        {"from": "src_noise", "from_port": 0, "to": "blur_gaussian", "to_port": 0},
-        {"from": "src_noise", "from_port": 0, "to": "blur_box", "to_port": 0},
-        {"from": "src_noise", "from_port": 0, "to": "blur_triangle", "to_port": 0},
-        {"from": "src_noise", "from_port": 0, "to": "blur_sinc", "to_port": 0},
-        {"from": "blur_gaussian", "from_port": 0, "to": "null_gaussian", "to_port": 0},
-        {"from": "blur_box", "from_port": 0, "to": "null_box", "to_port": 0},
-        {"from": "blur_triangle", "from_port": 0, "to": "null_triangle", "to_port": 0},
-        {"from": "blur_sinc", "from_port": 0, "to": "null_sinc", "to_port": 0}
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "blur_gaussian",
+            "to_port": 0
+        },
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "blur_box",
+            "to_port": 0
+        },
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "blur_triangle",
+            "to_port": 0
+        },
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "blur_sinc",
+            "to_port": 0
+        },
+        {
+            "from": "blur_gaussian",
+            "from_port": 0,
+            "to": "null_gaussian",
+            "to_port": 0
+        },
+        {
+            "from": "blur_box",
+            "from_port": 0,
+            "to": "null_box",
+            "to_port": 0
+        },
+        {
+            "from": "blur_triangle",
+            "from_port": 0,
+            "to": "null_triangle",
+            "to_port": 0
+        },
+        {
+            "from": "blur_sinc",
+            "from_port": 0,
+            "to": "null_sinc",
+            "to_port": 0
+        },
+        {
+            "from": "null_sinc",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlurTOP \u2014 Filter Methods\n\nCompare Gaussian, Box, Triangle, and Sinc.\nAlso available: Hanning, Blackman, Bump.",
-            "position": [-100.0, -50.0],
-            "size": [500.0, 80.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "text": "BlurTOP — Filter Methods\n\nCompare Gaussian, Box, Triangle, and Sinc.\nAlso available: Hanning, Blackman, Bump.",
+            "position": [
+                -100.0,
+                -50.0
+            ],
+            "size": [
+                500.0,
+                80.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

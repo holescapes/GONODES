@@ -14,13 +14,18 @@ extends RefCounted
 ##   DATE                               →  isf_date        (uniform vec4)
 ##   FRAMEINDEX                         →  isf_frame_index (uniform int)
 ##   PASSINDEX                          →  isf_pass_index  (uniform int)
-##   isf_FragNormCoord                  →  UV              (Godot built-in)
+##   isf_FragNormCoord                  →  varying vec2 (set from UV in vertex)
 ##   gl_FragColor = ...                 →  COLOR = ...
+##   gl_FragCoord                       →  FRAGCOORD
+##   gl_Position                        →  VERTEX (in vertex shaders)
 ##   IMG_PIXEL(img, coord)              →  texture(img, coord / isf_rendersize)
 ##   IMG_NORM_PIXEL(img, coord)         →  texture(img, coord)
-##   IMG_THIS_PIXEL(img)                →  texture(img, UV)
-##   IMG_THIS_NORM_PIXEL(img)           →  texture(img, UV)
+##   IMG_THIS_PIXEL(img)                →  texture(img, isf_FragNormCoord)
+##   IMG_THIS_NORM_PIXEL(img)           →  texture(img, isf_FragNormCoord)
+##   IMG_NORM_THIS_PIXEL(img)           →  texture(img, isf_FragNormCoord)
 ##   IMG_SIZE(img)                      →  isf_<img>_size  (uniform vec2)
+##   texture2D / texture2DRect          →  texture
+##   varying <type> <name>              →  file-scope varying (both VS + FS)
 ##   inputImage                         →  isf_inputImage  (uniform sampler2D)
 ##   INPUTS[float/bool/long/point2D/color] → uniform params (auto-generated)
 ##   INPUTS[image]                      →  uniform sampler2D
@@ -78,6 +83,7 @@ class TranslationResult:
 	var credit: String = ""
 	var categories: Array = []
 	var imported_images: Dictionary = {}  # name → { "PATH": relative_path }
+	var vertex_code: String = ""        # Translated Godot vertex() block (empty = none)
 	var uses_time: bool = false
 	var uses_time_delta: bool = false
 	var uses_date: bool = false
@@ -89,8 +95,9 @@ class TranslationResult:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Translates a complete ISF file (JSON header + GLSL body) into Godot shader(s).
+## [param vertex_source] — optional ISF .vs vertex shader source code.
 ## Returns a [TranslationResult] with the converted code or an error message.
-static func translate(isf_source: String) -> TranslationResult:
+static func translate(isf_source: String, vertex_source: String = "") -> TranslationResult:
 	var result := TranslationResult.new()
 
 	if isf_source.strip_edges().is_empty():
@@ -168,14 +175,18 @@ static func translate(isf_source: String) -> TranslationResult:
 		result.error = "No GLSL body found after JSON header"
 		return result
 
-	# ── Detect built-in usage ──
-	result.uses_time = glsl_body.find("TIME") != -1
-	result.uses_time_delta = glsl_body.find("TIMEDELTA") != -1
-	result.uses_date = glsl_body.find("DATE") != -1
-	result.uses_frame_index = glsl_body.find("FRAMEINDEX") != -1
+	# ── Detect built-in usage (word-boundary aware) ──
+	result.uses_time_delta = _has_word(glsl_body, "TIMEDELTA")
+	result.uses_time = _has_word(glsl_body, "TIME")  # after TIMEDELTA check, but independent
+	result.uses_date = _has_word(glsl_body, "DATE")
+	result.uses_frame_index = _has_word(glsl_body, "FRAMEINDEX")
 
 	# ── Translate GLSL ──
 	var translated_body := _translate_glsl(glsl_body, result)
+
+	# ── Translate vertex shader (if provided) ──
+	if not vertex_source.strip_edges().is_empty():
+		result.vertex_code = _translate_vertex(vertex_source)
 
 	# ── Build complete shader(s) ──
 	if result.passes.size() <= 1:
@@ -248,43 +259,28 @@ static func _translate_glsl(code: String, result: TranslationResult) -> String:
 
 	# ── Replace ISF image functions ──
 	# Must be done before variable name replacements to avoid partial matches.
-	# IMG_THIS_NORM_PIXEL(img) → texture(img, UV)
+	# Handle both orderings: IMG_THIS_NORM_PIXEL and IMG_NORM_THIS_PIXEL
 	code = _replace_img_func(code, "IMG_THIS_NORM_PIXEL", true, true)
-	# IMG_THIS_PIXEL(img) → texture(img, UV)
+	code = _replace_img_func(code, "IMG_NORM_THIS_PIXEL", true, true)
 	code = _replace_img_func(code, "IMG_THIS_PIXEL", true, false)
-	# IMG_NORM_PIXEL(img, coord) → texture(img, coord)
 	code = _replace_img_func(code, "IMG_NORM_PIXEL", false, true)
-	# IMG_PIXEL(img, coord) → texture(img, coord / isf_rendersize)
 	code = _replace_img_func(code, "IMG_PIXEL", false, false)
-	# IMG_SIZE(img) → isf_<img>_size
 	code = _replace_img_size(code)
 
-	# ── Replace ISF built-in variables ──
-	# RENDERSIZE → isf_rendersize (must be before other replacements)
-	code = code.replace("RENDERSIZE", "isf_rendersize")
+	# ── Replace ISF built-in variables (word-boundary safe) ──
+	code = _replace_word(code, "RENDERSIZE", "isf_rendersize")
+	code = _replace_word(code, "TIMEDELTA", "isf_time_delta")  # before TIME
+	# TIME stays as TIME (Godot built-in matches ISF semantics)
+	code = _replace_word(code, "DATE", "isf_date")
+	code = _replace_word(code, "FRAMEINDEX", "isf_frame_index")
+	code = _replace_word(code, "PASSINDEX", "isf_pass_index")
 
-	# TIMEDELTA → isf_time_delta (must be before TIME replacement)
-	code = code.replace("TIMEDELTA", "isf_time_delta")
+	# isf_FragNormCoord is kept as-is — it's declared as a varying and
+	# assigned from UV in the vertex function so helper functions at file
+	# scope can access it (Godot's UV built-in is only valid inside
+	# vertex()/fragment()).
 
-	# TIME stays as TIME (Godot built-in)
-	# No replacement needed — Godot's TIME is the same concept.
-
-	# DATE → isf_date
-	code = code.replace("DATE", "isf_date")
-
-	# FRAMEINDEX → isf_frame_index
-	code = code.replace("FRAMEINDEX", "isf_frame_index")
-
-	# PASSINDEX → isf_pass_index
-	code = code.replace("PASSINDEX", "isf_pass_index")
-
-	# isf_FragNormCoord → UV
-	code = code.replace("isf_FragNormCoord", "UV")
-
-	# gl_FragColor → COLOR
 	code = code.replace("gl_FragColor", "COLOR")
-
-	# gl_FragCoord → FRAGCOORD
 	code = code.replace("gl_FragCoord", "FRAGCOORD")
 
 	# ── Replace texture2D/texture2DRect with texture ──
@@ -297,7 +293,108 @@ static func _translate_glsl(code: String, result: TranslationResult) -> String:
 	return code
 
 
-## Replaces ISF image sampling functions with Godot texture() calls.
+## Translates an ISF vertex shader (.vs) into Godot-compatible code.
+## Returns the full block to inject: varying declarations + void vertex() { ... }.
+## Trivial vertex shaders (only isf_vertShaderInit) produce an empty string.
+static func _translate_vertex(vs_source: String) -> String:
+	var vs := vs_source.strip_edges()
+	if vs.is_empty():
+		return ""
+
+	# Strip version/precision
+	vs = _strip_line_starting_with(vs, "#version")
+	vs = _strip_line_starting_with(vs, "precision ")
+
+	# Remove isf_vertShaderInit() call — Godot's default vertex does this
+	vs = vs.replace("isf_vertShaderInit();", "")
+
+	# ISF v1 backcompat
+	vs = vs.replace("vv_FragNormCoord", "isf_FragNormCoord")
+
+	# Apply the same variable name translations as the fragment shader
+	vs = _replace_word(vs, "RENDERSIZE", "isf_rendersize")
+	vs = _replace_word(vs, "TIMEDELTA", "isf_time_delta")
+	vs = _replace_word(vs, "DATE", "isf_date")
+	vs = _replace_word(vs, "FRAMEINDEX", "isf_frame_index")
+	vs = _replace_word(vs, "PASSINDEX", "isf_pass_index")
+	vs = vs.replace("gl_Position", "VERTEX")
+	vs = vs.replace("gl_FragCoord", "FRAGCOORD")
+	vs = vs.replace("texture2DRect", "texture")
+	vs = vs.replace("texture2D", "texture")
+
+	# Extract varying declarations (they go at file scope, outside functions)
+	var varyings := PackedStringArray()
+	var body_lines := PackedStringArray()
+	for line in vs.split("\n"):
+		var stripped := line.strip_edges()
+		if stripped.begins_with("varying "):
+			varyings.append(stripped)
+		elif not stripped.is_empty():
+			body_lines.append(line)
+
+	# Rebuild the body — if it's only an empty main(), skip vertex entirely
+	var body := "\n".join(body_lines).strip_edges()
+
+	# Check if main() body is empty after removing isf_vertShaderInit
+	var inner := _extract_main_body(body)
+	if inner.strip_edges().is_empty() and varyings.is_empty():
+		return ""  # Trivial VS, no custom vertex code needed
+
+	# Build result: varying declarations + vertex function
+	var out := ""
+	for v in varyings:
+		out += v + "\n"
+	if not inner.strip_edges().is_empty():
+		if not out.is_empty():
+			out += "\n"
+		out += "void vertex() {\n"
+		for ln in inner.split("\n"):
+			out += "\t" + ln + "\n"
+		out += "}\n"
+
+	return out
+
+
+## Extracts the body inside void main() { ... }, returning only the inner code.
+static func _extract_main_body(vs_code: String) -> String:
+	var regex := RegEx.new()
+	regex.compile("void\\s+main\\s*\\(\\s*\\)\\s*\\{")
+	var m := regex.search(vs_code)
+	if m == null:
+		return ""
+	var start := m.get_end()
+	var depth := 1
+	var pos := start
+	while pos < vs_code.length() and depth > 0:
+		if vs_code[pos] == "{":
+			depth += 1
+		elif vs_code[pos] == "}":
+			depth -= 1
+		pos += 1
+	if depth != 0:
+		return ""
+	return vs_code.substr(start, pos - start - 1)
+
+
+## Extracts the body inside void vertex() { ... }, returning only the inner code.
+static func _extract_vertex_body(vs_code: String) -> String:
+	var regex := RegEx.new()
+	regex.compile("void\\s+vertex\\s*\\(\\s*\\)\\s*\\{")
+	var m := regex.search(vs_code)
+	if m == null:
+		return ""
+	var start := m.get_end()
+	var depth := 1
+	var pos := start
+	while pos < vs_code.length() and depth > 0:
+		if vs_code[pos] == "{":
+			depth += 1
+		elif vs_code[pos] == "}":
+			depth -= 1
+		pos += 1
+	if depth != 0:
+		return ""
+	return vs_code.substr(start, pos - start - 1)
 ## [param func_name] — the ISF function name to replace.
 ## [param is_this] — true if the function uses the current fragment's coords (no coord arg).
 ## [param is_normalized] — true if coordinates are normalized (0-1 range).
@@ -339,23 +436,25 @@ static func _replace_img_func(code: String, func_name: String,
 		var args_str := code.substr(paren_start + 1, paren_end - paren_start - 1).strip_edges()
 
 		if is_this:
-			# IMG_THIS_PIXEL(imageName) → texture(imageName, UV)
+			# IMG_THIS_PIXEL(imageName) → texture(imageName, isf_FragNormCoord)
+			# Use isf_FragNormCoord (not UV) so it works in helper functions
 			var img_name := args_str.strip_edges()
-			result += "texture(%s, UV)" % img_name
+			if is_normalized:
+				result += "texture(%s, isf_FragNormCoord)" % img_name
+			else:
+				result += "texture(%s, isf_FragNormCoord)" % img_name
 		elif is_normalized:
-			# IMG_NORM_PIXEL(imageName, coord) → texture(imageName, coord)
 			var comma_pos := _find_top_level_comma(args_str)
 			if comma_pos == -1:
-				result += "texture(%s, UV)" % args_str.strip_edges()
+				result += "texture(%s, isf_FragNormCoord)" % args_str.strip_edges()
 			else:
 				var img_name := args_str.substr(0, comma_pos).strip_edges()
 				var coord := args_str.substr(comma_pos + 1).strip_edges()
 				result += "texture(%s, %s)" % [img_name, coord]
 		else:
-			# IMG_PIXEL(imageName, coord) → texture(imageName, coord / isf_rendersize)
 			var comma_pos := _find_top_level_comma(args_str)
 			if comma_pos == -1:
-				result += "texture(%s, UV)" % args_str.strip_edges()
+				result += "texture(%s, isf_FragNormCoord)" % args_str.strip_edges()
 			else:
 				var img_name := args_str.substr(0, comma_pos).strip_edges()
 				var coord := args_str.substr(comma_pos + 1).strip_edges()
@@ -501,8 +600,45 @@ static func _build_shader_code(body: String, result: TranslationResult,
 		code += "uniform sampler2D %s;\n" % img_name
 		code += "uniform vec2 isf_%s_size;\n" % img_name
 
+	# ── Varyings & vertex shader ──
+	# ISF declares varyings in both .vs and .fs — extract from the fragment
+	# body so they live at file scope exactly once.
+	var frag_varyings := PackedStringArray()
+	var clean_body := _strip_varyings(body, frag_varyings)
+
+	# Collect unique varying declarations (vertex varyings + fragment varyings)
+	var seen_varyings := PackedStringArray()
+	if not result.vertex_code.is_empty():
+		for line in result.vertex_code.split("\n"):
+			var s := line.strip_edges()
+			if s.begins_with("varying ") and s not in seen_varyings:
+				seen_varyings.append(s)
+	for v in frag_varyings:
+		if v not in seen_varyings:
+			seen_varyings.append(v)
+
+	# Always declare isf_FragNormCoord varying so helpers can access it
+	var fnc_decl := "varying vec2 isf_FragNormCoord;"
+	if fnc_decl not in seen_varyings:
+		seen_varyings.insert(0, fnc_decl)
+
 	code += "\n"
-	code += body
+	for v in seen_varyings:
+		code += v + "\n"
+
+	# Build vertex function — always needed to set isf_FragNormCoord = UV.
+	# If the ISF has custom vertex code, its body is appended after.
+	var vertex_inner := "\tisf_FragNormCoord = UV;\n"
+	if not result.vertex_code.is_empty():
+		# Extract just the inner body of void vertex() { ... }
+		var vx_body := _extract_vertex_body(result.vertex_code)
+		if not vx_body.strip_edges().is_empty():
+			for ln in vx_body.split("\n"):
+				vertex_inner += "\t" + ln.strip_edges() + "\n"
+	code += "\nvoid vertex() {\n" + vertex_inner + "}\n"
+
+	code += "\n"
+	code += clean_body
 
 	return code
 
@@ -510,6 +646,20 @@ static func _build_shader_code(body: String, result: TranslationResult,
 # ═══════════════════════════════════════════════════════════════════════════════
 # String Utilities
 # ═══════════════════════════════════════════════════════════════════════════════
+
+## Strips `varying` declarations from shader code, appending them to [param out_varyings].
+## Returns the code with those lines removed.
+static func _strip_varyings(code: String, out_varyings: PackedStringArray) -> String:
+	var result_lines := PackedStringArray()
+	for line in code.split("\n"):
+		var s := line.strip_edges()
+		if s.begins_with("varying "):
+			if s not in out_varyings:
+				out_varyings.append(s)
+		else:
+			result_lines.append(line)
+	return "\n".join(result_lines)
+
 
 ## Strips any line that starts with the given prefix (after whitespace).
 static func _strip_line_starting_with(code: String, prefix: String) -> String:
@@ -519,6 +669,58 @@ static func _strip_line_starting_with(code: String, prefix: String) -> String:
 		if not line.strip_edges().begins_with(prefix):
 			result_lines.append(line)
 	return "\n".join(result_lines)
+
+
+## Replaces [param word] with [param replacement] only at word boundaries.
+## A word boundary is any non-identifier character (not alphanumeric or underscore).
+static func _replace_word(code: String, word: String, replacement: String) -> String:
+	var result := ""
+	var search_pos := 0
+	while search_pos < code.length():
+		var pos := code.find(word, search_pos)
+		if pos == -1:
+			result += code.substr(search_pos)
+			break
+		# Check left boundary
+		if pos > 0:
+			var before := code.unicode_at(pos - 1)
+			if _is_ident_char(before):
+				result += code.substr(search_pos, pos - search_pos + word.length())
+				search_pos = pos + word.length()
+				continue
+		# Check right boundary
+		var after_pos := pos + word.length()
+		if after_pos < code.length():
+			var after := code.unicode_at(after_pos)
+			if _is_ident_char(after):
+				result += code.substr(search_pos, pos - search_pos + word.length())
+				search_pos = pos + word.length()
+				continue
+		result += code.substr(search_pos, pos - search_pos) + replacement
+		search_pos = pos + word.length()
+	return result
+
+
+## Returns true if the Unicode codepoint is an identifier character (a-z, A-Z, 0-9, _).
+static func _is_ident_char(c: int) -> bool:
+	return (c >= 65 and c <= 90) or (c >= 97 and c <= 122) or (c >= 48 and c <= 57) or c == 95
+
+
+## Returns true if [param word] appears in [param code] as a standalone word
+## (not part of a larger identifier).
+static func _has_word(code: String, word: String) -> bool:
+	var pos := 0
+	while pos < code.length():
+		var found := code.find(word, pos)
+		if found == -1:
+			return false
+		var left_ok := found == 0 or not _is_ident_char(code.unicode_at(found - 1))
+		var right_pos := found + word.length()
+		var right_ok := right_pos >= code.length() or not _is_ident_char(code.unicode_at(right_pos))
+		if left_ok and right_ok:
+			return true
+		pos = found + word.length()
+	return false
 
 
 ## Finds the matching closing parenthesis for an opening paren at [param start_pos].

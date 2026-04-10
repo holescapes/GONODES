@@ -1,0 +1,125 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "edge1": {
+            "type": "EdgeDetectIMG",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "hough1": {
+            "type": "HoughLinesIMG",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "threshold": {
+                    "value": 50
+                },
+                "min_length": {
+                    "value": 30.0
+                }
+            }
+        },
+        "bridge1": {
+            "type": "ImgToTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "null_dat1": {
+            "type": "NullDAT",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "edge1",
+            "to_port": 0
+        },
+        {
+            "from": "edge1",
+            "from_port": 0,
+            "to": "hough1",
+            "to_port": 0
+        },
+        {
+            "from": "hough1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "hough1",
+            "from_port": 1,
+            "to": "null_dat1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Noise IMG — Basic\n\nCPU procedural noise image (value noise, white noise).",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1,
+                1,
+                1,
+                0.8
+            ]
+        }
+    ]
+}

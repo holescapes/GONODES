@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FolderDAT \u2014 Parameters\n\nShowcases: path, recursive, filter.",
+            "text": "Folder DAT — Recursive\n\nList directory contents with optional recursive traversal.\nShowcasing: recursive=True, include_dirs=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

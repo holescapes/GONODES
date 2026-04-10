@@ -39,14 +39,10 @@
                     }
                 },
                 "sensitivity": {
-                    "value": 20.0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 20.0
                 },
                 "smoothing": {
-                    "value": 0.1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.1
                 },
                 "iterations": {
                     "value": 4
@@ -91,14 +87,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OpticalFlowTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Optical Flow TOP — Basic\n\nHorn-Schunck optical flow motion vector estimation.\nUsing: sensitivity=20.0, smoothing=0.1, iterations=4.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

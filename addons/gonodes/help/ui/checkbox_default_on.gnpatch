@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CheckBoxUI \u2014 Parameters\n\nShowcases: label, default_on, min_size.",
+            "text": "Check Box UI — On\n\nStandard checkbox with label. Outputs 0/1 toggle state.\nShowcasing: default_on=True.",
             "position": [
                 -100.0,
                 -100.0

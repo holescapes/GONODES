@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "amplitude": {
-                    "value": 2.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Limit CHOP \u2014 Basic\n\nClamps LFO to default range.\nPrevents values from exceeding bounds.",
+            "text": "LFO_ CHOP — Basic\n\nLow-frequency oscillator (sine, triangle, square, saw, pulse).\nUsing: amplitude=2.0.",
             "position": [
                 -100.0,
                 -100.0

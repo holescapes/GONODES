@@ -1,0 +1,280 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "NavigationCOMP — SOP Floor. Bakes a navigation mesh from an input SOP floor geometry.",
+    "nodes": {
+        "sphere_agent": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 0.3
+                },
+                "segments": {
+                    "value": 10
+                }
+            }
+        },
+        "geo_agent": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "floor_sop": {
+            "type": "GridSOP",
+            "position": [
+                0,
+                300
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 20.0
+                },
+                "size_z": {
+                    "value": 20.0
+                },
+                "cols": {
+                    "value": 8
+                },
+                "rows": {
+                    "value": 8
+                }
+            }
+        },
+        "nav1": {
+            "type": "NavigationCOMP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "ty": {
+                    "value": 0.3
+                },
+                "target_x": {
+                    "value": 7.0
+                },
+                "target_y": {
+                    "value": 0.0
+                },
+                "target_z": {
+                    "value": 7.0
+                },
+                "speed": {
+                    "value": 4.0
+                },
+                "cell_size": {
+                    "value": 0.2
+                },
+                "cell_height": {
+                    "value": 0.15
+                },
+                "max_slope": {
+                    "value": 45.0
+                },
+                "max_climb": {
+                    "value": 0.3
+                }
+            }
+        },
+        "geo_floor_vis": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                300
+            ],
+            "parameters": {}
+        },
+        "static_floor": {
+            "type": "StaticBodyCOMP",
+            "position": [
+                600,
+                300
+            ],
+            "parameters": {}
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                500
+            ],
+            "parameters": {
+                "text": {
+                    "value": "NavigationCOMP — SOP Floor\n\nThe floor_in port (port 1) receives SOP\ngeometry for baking a NavigationMesh.\n\nCell size 0.2, cell height 0.15,\nmax slope 45 deg, max climb 0.3.\n\nThe navigation mesh is baked from the\nSOP vertices at load time."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 18.0
+                },
+                "tz": {
+                    "value": 18.0
+                },
+                "use_look_at": {
+                    "value": true
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere_agent",
+            "from_port": 0,
+            "to": "geo_agent",
+            "to_port": 0
+        },
+        {
+            "from": "geo_agent",
+            "from_port": 0,
+            "to": "nav1",
+            "to_port": 0
+        },
+        {
+            "from": "floor_sop",
+            "from_port": 0,
+            "to": "nav1",
+            "to_port": 1
+        },
+        {
+            "from": "floor_sop",
+            "from_port": 0,
+            "to": "geo_floor_vis",
+            "to_port": 0
+        },
+        {
+            "from": "geo_floor_vis",
+            "from_port": 0,
+            "to": "static_floor",
+            "to_port": 0
+        },
+        {
+            "from": "nav1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "static_floor",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 3
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Navigation COMP — Floor\n\nAI pathfinding — navigate a COMP toward a target using NavigationServer3D.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

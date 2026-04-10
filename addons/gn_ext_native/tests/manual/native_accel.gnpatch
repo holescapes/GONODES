@@ -1,0 +1,120 @@
+{
+	"generator": "GONODES",
+	"description": "Native acceleration demo. Chain 1: NoiseTOP → OpticalFlowTOPNative to compute motion vectors between frames. Chain 2: NoiseTOP → AnalyzeTOPNative in Average mode to produce per-pixel statistics. Chain 3: ConstantCHOP waveform → CHOPtoTOPNative rendered as heatmap. Chain 4: Placeholder ParticleStateTOPNative (requires POP input).",
+	"connections": [
+		{
+			"from": "noise_flow",
+			"from_port": 0,
+			"to": "optical_flow",
+			"to_port": 0
+		},
+		{
+			"from": "optical_flow",
+			"from_port": 0,
+			"to": "flow_view",
+			"to_port": 0
+		},
+		{
+			"from": "noise_analyze",
+			"from_port": 0,
+			"to": "analyze",
+			"to_port": 0
+		},
+		{
+			"from": "analyze",
+			"from_port": 0,
+			"to": "analyze_view",
+			"to_port": 0
+		},
+		{
+			"from": "wave_chop",
+			"from_port": 0,
+			"to": "chop_to_top",
+			"to_port": 0
+		},
+		{
+			"from": "chop_to_top",
+			"from_port": 0,
+			"to": "chop_top_view",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"noise_flow": {
+			"type": "NoiseTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"seed": {"value": 33}
+			}
+		},
+		"optical_flow": {
+			"type": "OpticalFlowTOPNative",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+				"sensitivity": {"value": 20.0},
+				"smoothing": {"value": 0.1},
+				"iterations": {"value": 8}
+			}
+		},
+		"flow_view": {
+			"type": "NullTOP",
+			"position": [800.0, 0.0],
+			"parameters": {}
+		},
+		"noise_analyze": {
+			"type": "NoiseTOP",
+			"position": [0.0, 300.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 256, "y": 256}},
+				"seed": {"value": 77}
+			}
+		},
+		"analyze": {
+			"type": "AnalyzeTOPNative",
+			"position": [400.0, 300.0],
+			"parameters": {
+				"mode": {"value": 2},
+				"kernel_size": {"value": 8}
+			}
+		},
+		"analyze_view": {
+			"type": "NullTOP",
+			"position": [800.0, 300.0],
+			"parameters": {}
+		},
+		"wave_chop": {
+			"type": "WaveCHOP",
+			"position": [0.0, 600.0],
+			"parameters": {
+				"type": {"value": 0},
+				"frequency": {"value": 2.0},
+				"amplitude": {"value": 1.0}
+			}
+		},
+		"chop_to_top": {
+			"type": "CHOPtoTOPNative",
+			"position": [400.0, 600.0],
+			"parameters": {
+				"mode": {"value": 1},
+				"resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 256}},
+				"auto_range": {"value": true}
+			}
+		},
+		"chop_top_view": {
+			"type": "NullTOP",
+			"position": [800.0, 600.0],
+			"parameters": {}
+		},
+		"particle_state": {
+			"type": "ParticleStateTOPNative",
+			"position": [0.0, 900.0],
+			"parameters": {
+				"width": {"value": 256},
+				"attribute": {"value": "pos"},
+				"scale": {"value": 1.0}
+			}
+		}
+	}
+}

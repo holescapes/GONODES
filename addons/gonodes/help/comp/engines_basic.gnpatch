@@ -29,9 +29,7 @@
                     "value": 2
                 },
                 "interval": {
-                    "value": 10,
-                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 10
                 }
             }
         },
@@ -121,5 +119,25 @@
             "to_port": 0
         }
     ],
-    "annotations": []
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Engines COMP — Basic\n\nCook throttle — Live, Snapshot, or Interval update modes for performance isolation.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

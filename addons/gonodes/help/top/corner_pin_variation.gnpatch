@@ -74,7 +74,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CornerPinTOP \u2014 Parameters\n\nShowcases: bg_color.",
+            "text": "Corner Pin TOP — Variation\n\n4-point perspective warp for projection mapping and keystone correction.",
             "position": [
                 -100.0,
                 -100.0

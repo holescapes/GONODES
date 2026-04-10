@@ -83,7 +83,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CHOPtoTOP \u2014 Parameters\n\nShowcases: mode, resolution, background.",
+            "text": "choptotop_mode — Mode\n\nDemonstrates mode, resolution, background parameters.",
             "position": [
                 -100.0,
                 -100.0

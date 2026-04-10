@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "source": {
-                    "value": 2,
-                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "include_text": {
                     "value": false,
@@ -78,14 +76,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "XMLDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "XML DAT — Advanced\n\nParse XML document into a flat path/attribute/value table.\nCombined configuration: source=2, include_text=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

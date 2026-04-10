@@ -10,71 +10,33 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 10,
-                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 20
                 },
                 "cols": {
-                    "value": 10,
-                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 20
                 }
             }
         },
-        "null1": {
-            "type": "NullSOP",
+        "focus1": {
+            "type": "NullVOL",
             "position": [
                 450,
                 100
             ],
             "parameters": {}
         },
-        "geo_view": {
-            "type": "GeometryCOMP",
+        "raymarch1": {
+            "type": "RaymarchVOL",
             "position": [
-                700,
+                800,
                 100
             ],
             "parameters": {}
         },
-        "cam_view": {
-            "type": "CameraCOMP",
-            "position": [
-                700,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 0.5
-                },
-                "tz": {
-                    "value": 3
-                }
-            }
-        },
-        "render_view": {
-            "type": "RenderTOP",
-            "position": [
-                1000,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
+                1150,
                 100
             ],
             "parameters": {
@@ -95,29 +57,17 @@
         {
             "from": "src_grid",
             "from_port": 0,
-            "to": "null1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "null1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "geo_view",
+            "to": "raymarch1",
             "to_port": 0
         },
         {
-            "from": "geo_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 0
-        },
-        {
-            "from": "cam_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 1
-        },
-        {
-            "from": "render_view",
+            "from": "raymarch1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -127,14 +77,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Null VOL — Basic\n\nPass-through for organization and references.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

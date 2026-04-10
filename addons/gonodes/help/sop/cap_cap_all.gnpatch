@@ -127,7 +127,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CapSOP \u2014 Parameters\n\nShowcases: cap_all, flip_cap_normals.",
+            "text": "Cap SOP — All\n\nClose open boundary holes with triangle fan caps.\nShowcasing: cap_all=True, flip_cap_normals=True.",
             "position": [
                 -100.0,
                 -100.0

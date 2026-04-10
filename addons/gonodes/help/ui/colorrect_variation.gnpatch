@@ -98,7 +98,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ColorRectUI \u2014 Parameters\n\nShowcases: color, min_size.",
+            "text": "Color Rect UI — Variation\n\nColored rectangle. Clickable with optional MAT shader.",
             "position": [
                 -100.0,
                 -100.0

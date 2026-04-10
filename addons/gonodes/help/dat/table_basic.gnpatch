@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 4,
-                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 4
                 },
                 "cols": {
-                    "value": 3,
-                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 3
                 },
                 "headers": {
                     "value": "name,value,weight"
@@ -84,14 +80,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TableDAT \u2014 Basic\n\nDefault settings.",
+            "text": "Table DAT — Basic\n\nManual editable data table (CSV-style).\nUsing: rows=4, cols=3, headers=name,value,weight, merge_input=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

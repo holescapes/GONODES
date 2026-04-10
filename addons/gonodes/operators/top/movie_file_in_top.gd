@@ -98,8 +98,9 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		elif do_play and _video_player.paused:
 			_video_player.paused = false
 
-	# Audio capture
-	_pull_audio()
+	# Audio capture (skip if port 1 unconnected)
+	if is_output_demanded(1):
+		_pull_audio()
 
 	if _audio_bus_idx >= 0:
 		AudioServer.set_bus_mute(_audio_bus_idx, get_param_value("mute"))

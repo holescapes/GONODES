@@ -38,14 +38,10 @@
                     "value": "user://output/video"
                 },
                 "codec": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "framerate": {
-                    "value": 30,
-                    "expression": "0.5 + 0.5 * sin(time * 4.0)",
-                    "mode": "EXPRESSION"
+                    "value": 30
                 },
                 "crf": {
                     "value": 23
@@ -79,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FFmpegOUT \u2014 Basic\n\nDefault settings.",
+            "text": "F Fmpeg OUT — Basic\n\nEncode IMG sequence to video via FFmpeg CLI (H.264, H.265, VP9, ProRes).\nUsing: active=False, output_file=user://output/video, codec=0, framerate=30.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

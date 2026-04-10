@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "EdgeTOP \u2014 Parameters\n\nShowcases: strength, grayscale.",
+            "text": "Edge TOP — Strength\n\nSobel edge detection with configurable strength.\nShowcasing: strength=0.5, grayscale=True.",
             "position": [
                 -100.0,
                 -100.0

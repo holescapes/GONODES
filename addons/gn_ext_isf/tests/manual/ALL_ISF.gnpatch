@@ -1,0 +1,848 @@
+{
+	"connections": [
+		{
+			"from": "isf_shader",
+			"from_port": 0,
+			"to": "level_out",
+			"to_port": 0
+		},
+		{
+			"from": "level_out",
+			"from_port": 0,
+			"to": "OutChain1",
+			"to_port": 0
+		},
+		{
+			"from": "noise_input",
+			"from_port": 0,
+			"to": "isf_shader2",
+			"to_port": 0
+		},
+		{
+			"from": "isf_shader2",
+			"from_port": 0,
+			"to": "OutChain2",
+			"to_port": 0
+		},
+		{
+			"from": "switch2_copy",
+			"from_port": 0,
+			"to": "window_out1_copy",
+			"to_port": 0
+		},
+		{
+			"from": "slider1",
+			"from_port": 0,
+			"to": "panel_container1",
+			"to_port": 0
+		},
+		{
+			"from": "label1",
+			"from_port": 0,
+			"to": "panel_container1",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container1",
+			"from_port": 0,
+			"to": "window_out1_copy",
+			"to_port": 1
+		},
+		{
+			"from": "OutChain1",
+			"from_port": 0,
+			"to": "switch2_copy",
+			"to_port": 0
+		},
+		{
+			"from": "OutChain2",
+			"from_port": 0,
+			"to": "switch2_copy",
+			"to_port": 1
+		},
+		{
+			"from": "OutChain3",
+			"from_port": 0,
+			"to": "switch2_copy",
+			"to_port": 2
+		},
+		{
+			"from": "OutChain4",
+			"from_port": 0,
+			"to": "switch2_copy",
+			"to_port": 3
+		},
+		{
+			"from": "isf1",
+			"from_port": 0,
+			"to": "OutChain3",
+			"to_port": 0
+		},
+		{
+			"from": "isf2",
+			"from_port": 0,
+			"to": "OutChain4",
+			"to_port": 0
+		},
+		{
+			"from": "isf3",
+			"from_port": 0,
+			"to": "OutChain5",
+			"to_port": 0
+		},
+		{
+			"from": "OutChain5",
+			"from_port": 0,
+			"to": "switch2_copy",
+			"to_port": 4
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "isf3",
+			"to_port": 0
+		},
+		{
+			"from": "noise_helper",
+			"from_port": 0,
+			"to": "isf_helper_test",
+			"to_port": 0
+		},
+		{
+			"from": "isf_helper_test",
+			"from_port": 0,
+			"to": "OutChain6",
+			"to_port": 0
+		},
+		{
+			"from": "OutChain6",
+			"from_port": 0,
+			"to": "switch2_copy",
+			"to_port": 5
+		},
+		{
+			"from": "isf_word_boundary",
+			"from_port": 0,
+			"to": "OutChain7",
+			"to_port": 0
+		},
+		{
+			"from": "OutChain7",
+			"from_port": 0,
+			"to": "switch2_copy",
+			"to_port": 6
+		},
+		{
+			"from": "isf_multipass",
+			"from_port": 0,
+			"to": "OutChain8",
+			"to_port": 0
+		},
+		{
+			"from": "OutChain8",
+			"from_port": 0,
+			"to": "switch2_copy",
+			"to_port": 7
+		}
+	],
+	"generator": "GONODES",
+	"nodes": {
+		"OutChain1": {
+			"position": [
+				1200.0,
+				0.0
+			],
+			"type": "NullTOP"
+		},
+		"OutChain2": {
+			"position": [
+				1200.0,
+				220.0
+			],
+			"type": "NullTOP"
+		},
+		"OutChain3": {
+			"position": [
+				1200.0,
+				460.0
+			],
+			"type": "NullTOP"
+		},
+		"OutChain4": {
+			"position": [
+				1200.0,
+				680.0
+			],
+			"type": "NullTOP"
+		},
+		"OutChain5": {
+			"position": [
+				1200.0,
+				920.0
+			],
+			"type": "NullTOP"
+		},
+		"OutChain6": {
+			"position": [
+				1200.0,
+				1160.0
+			],
+			"type": "NullTOP"
+		},
+		"OutChain7": {
+			"position": [
+				1200.0,
+				1400.0
+			],
+			"type": "NullTOP"
+		},
+		"OutChain8": {
+			"position": [
+				1200.0,
+				1640.0
+			],
+			"type": "NullTOP"
+		},
+		"isf1": {
+			"parameters": {
+				"color1": {
+					"value": 0.45
+				},
+				"color2": {
+					"value": 1.0
+				},
+				"cycle1": {
+					"value": 1.33
+				},
+				"cycle2": {
+					"value": 0.22
+				},
+				"depthX": {
+					"value": 0.85
+				},
+				"depthY": {
+					"value": 0.25
+				},
+				"isf_code": {
+					"value": "/*{\n  \"CREDIT\": \"by mojovideotech\",\n  \"DESCRIPTION\": \"from http://glslsandbox.com/e#35553.0\",\n  \"CATEGORIES\": [\n    \"fluid\",\n    \"liquid\"\n  ],\n  \"INPUTS\": [\n  \t{\n\t\t\t\"NAME\" :\t\"rate1\",\n\t\t\t\"TYPE\" :\t\"float\",\n\t\t\t\"DEFAULT\" :\t1.9,\n\t\t\t\"MIN\" :\t-3.0,\n\t\t\t\"MAX\" :\t3.0\n\t},\n\t {\n\t\t\t\"NAME\" :\t\"rate2\",\n\t\t\t\"TYPE\" :\t\"float\",\n\t\t\t\"DEFAULT\" :\t0.6,\n\t\t\t\"MIN\" :\t-3.0,\n\t\t\t\"MAX\" :\t3.0\n\t},\n\t{\n\t\t\t\"NAME\" :\t\"loopcycle\",\n\t\t\t\"TYPE\" :\t\"float\",\n\t\t\t\"DEFAULT\" :\t85.0,\n\t\t\t\"MIN\" :\t20.0,\n\t\t\t\"MAX\" :\t100.0\n\t},\n\t{\n\t\t\t\"NAME\" :\t\"color1\",\n\t\t\t\"TYPE\" :\t\"float\",\n\t\t\t\"DEFAULT\" :\t0.45,\n\t\t\t\"MIN\" :\t-2.5,\n\t\t\t\"MAX\" :\t2.5\n\t},\n\t{\n\t\t\t\"NAME\" :\t\"color2\",\n\t\t\t\"TYPE\" :\t\"float\",\n\t\t\t\"DEFAULT\" :\t1.0,\n\t\t\t\"MIN\" :\t-1.25,\n\t\t\t\"MAX\" :\t1.125\n\t},\n\t{\n\t\t\t\"NAME\" :\t\"cycle1\",\n\t\t\t\"TYPE\" :\t\"float\",\n\t\t\t\"DEFAULT\" :\t1.33,\n\t\t\t\"MIN\" :\t0.01,\n\t\t\t\"MAX\" :\t3.1459\n\t},\n\t{\n\t\t\t\"NAME\" :\t\"cycle2\",\n\t\t\t\"TYPE\" :\t\"float\",\n\t\t\t\"DEFAULT\" :\t0.22,\n\t\t\t\"MIN\" :\t-0.497,\n\t\t\t\"MAX\" :\t0.497\n\t},\n\t{\n\t\t\t\"NAME\" :\t\"nudge\",\n\t\t\t\"TYPE\" :\t\"float\",\n\t\t\t\"DEFAULT\" :\t0.095,\n\t\t\t\"MIN\" :\t0.001,\n\t\t\t\"MAX\" :\t0.01\n\t},\n\t{\n      \t\t\t\"NAME\" :\t\"depthX\",\n      \t\t\t\"TYPE\" : \t\"float\",\n      \t\t\t\"DEFAULT\" :\t0.85,\n      \t\t\t\"MIN\" : \t0.001,\n      \t\t\t\"MAX\" :\t\t0.9\n    \t},\n    \t{\n      \t\t\t\"NAME\" :\t\"depthY\",\n      \t\t\t\"TYPE\" :\t\"float\",\n      \t\t\t\"DEFAULT\" :\t0.25,\n      \t\t\t\"MIN\" : \t0.001,\n      \t\t\t\"MAX\" :\t\t0.9\n    \t}\n  ]\n}*/\n\n///////////////////////////////////////////\n// ColorDiffusionFlow  by mojovideotech\n//\n// based on :\n// glslsandbox.com/\\e#35553.0\n//\n// Creative Commons Attribution-NonCommercial-ShareAlike 3.0\n///////////////////////////////////////////\n\n\n#ifdef GL_ES\nprecision mediump float;\n#endif\n \n#define \tpi   \t3.141592653589793 \t// pi\n\nvoid main() {\n\tfloat T = TIME * rate1;\n\tfloat TT = TIME * rate2;\n\tvec2 p=(2.*isf_FragNormCoord);\n\tfor(int i=1;i<11;i++) {\n    \tvec2 newp=p;\n\t\tfloat ii = float(i);  \n    \tnewp.x+=depthX/ii*sin(ii*pi*p.y+T*nudge+cos((TT/(5.0*ii))*ii));\n    \tnewp.y+=depthY/ii*cos(ii*pi*p.x+TT+nudge+sin((T/(5.0*ii))*ii));\n    \tp=newp+log(DATE.w)/loopcycle;\n  }\n  vec3 col=vec3(cos(p.x+p.y+3.0*color1)*0.5+0.5,sin(p.x+p.y+6.0*cycle1)*0.5+0.5,(sin(p.x+p.y+9.0*color2)+cos(p.x+p.y+12.0*cycle2))*0.25+.5);\n  gl_FragColor=vec4(col*col, 1.0);\n}"
+				},
+				"isf_file": {
+					"value": "project://ColorDiffusionFlow/ColorDiffusionFlow.fs"
+				},
+				"loopcycle": {
+					"value": 85.0
+				},
+				"nudge": {
+					"value": 0.01
+				},
+				"rate1": {
+					"value": 1.9
+				},
+				"rate2": {
+					"value": 0.6
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"time_dependent": {
+					"value": true
+				}
+			},
+			"position": [
+				800.0,
+				460.0
+			],
+			"type": "ISFTOP"
+		},
+		"isf2": {
+			"parameters": {
+				"color": {
+					"value": true
+				},
+				"cycle": {
+					"value": 1.0
+				},
+				"flash": {
+					"value": 7.5
+				},
+				"isf_code": {
+					"value": "/*{\n\t\"CREDIT\": \"by mojovideotech\",\n\t\"CATEGORIES\" : [ \"generator\"\n  ],\n  \"DESCRIPTION\" : \"\",\n  \"INPUTS\" : [\n\t{\n     \t\"NAME\" :\t\t\"seed1\",\n     \t\"TYPE\" : \t\t\"float\",\n    \t\"DEFAULT\" :\t\t155,\n     \t\"MIN\" : \t\t34,\n      \t\"MAX\" :\t\t\t233\n\t},\n    {\n      \t\"NAME\" :\t\t\"seed2\",\n      \t\"TYPE\" :\t\t\"float\",\n      \t\"DEFAULT\" :\t\t649,\n      \t\"MIN\" : \t\t89,\n      \t\"MAX\" :\t\t\t987\t\n\t},\n\t{\n\t\t\"NAME\" : \t\t\"scale\",\n\t\t\"TYPE\" : \t\t\"float\",\n\t\t\"DEFAULT\" : \t1.0,\n\t\t\"MIN\" : \t\t0.25,\n\t\t\"MAX\" : \t\t2.0\n\t},\n\t{\n\t\t\"NAME\" : \t\t\"rate\",\n\t\t\"TYPE\" : \t\t\"float\",\n\t\t\"DEFAULT\" : \t1.0,\n\t\t\"MIN\" : \t\t0.1,\n\t\t\"MAX\" : \t\t3.0\n\t},\n\t{\n\t\t\"NAME\" : \t\t\"zoom\",\n\t\t\"TYPE\" : \t\t\"float\",\n\t\t\"DEFAULT\" : \t0.175,\n\t\t\"MIN\" : \t\t-1.0,\n\t\t\"MAX\" : \t\t1.0\n\t},\n\t{\n\t\t\"NAME\" : \t\t\"line\",\n\t\t\"TYPE\" : \t\t\"float\",\n\t\t\"DEFAULT\" : \t0.367,\n\t\t\"MIN\" : \t\t0.0,\n\t\t\"MAX\" : \t\t0.5\n\t},\n\t{\n\t\t\"NAME\" : \t\t\"flash\",\n\t\t\"TYPE\" : \t\t\"float\",\n\t\t\"DEFAULT\" : \t7.5,\n\t\t\"MIN\" : \t\t0.5,\n\t\t\"MAX\" : \t\t10.0\n\t},\n\t{\n   \t\t\"NAME\" : \t\t\"mirror\",\n     \t\"TYPE\" : \t\t\"bool\",\n     \t\"DEFAULT\" : \tfalse\n   \t},\n   \t{\n   \t\t\"NAME\" : \t\t\"color\",\n     \t\"TYPE\" : \t\t\"bool\",\n     \t\"DEFAULT\" : \ttrue\n   \t},\n   \t{\n\t\t\"NAME\" : \t\t\"cycle\",\n\t\t\"TYPE\" : \t\t\"float\",\n\t\t\"DEFAULT\" : \t1.0,\n\t\t\"MIN\" : \t\t0.05,\n\t\t\"MAX\" : \t\t20.0\n\t}\n  ]\n}\n*/\n\n\n////////////////////////////////////////////////////////////////////\n// InnerDimensionalMatrix  by mojovideotech\n//\n// based on :\n// The Universe Within - by Martijn Steinrucken aka BigWings 2018\n// shadertoy.com/\\lscczl\n// glslsandbox.com\\/e#47584.1\n//\n// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0\n////////////////////////////////////////////////////////////////////\n\n#ifdef GL_ES\nprecision highp float;\n#endif\n\n#define S(a, b, t) smoothstep(a, b, t)\n\nfloat N1(float n) {\n\treturn fract(sin(n) * 43758.5453123);\n}\n\nfloat N11(float p) {\n\tfloat fl = floor(p);\n\tfloat fc = fract(p);\n\treturn mix(N1(fl), N1(fl + 1.0), fc);\n} \n\nfloat N21(vec2 p) { return fract(sin(p.x * floor(seed1) + p.y * floor(seed2)) * floor(seed2+seed1)); }\n\nvec2 N22(vec2 p) { return vec2(N21(p), N21(p + floor(seed2))); }\n\nfloat L(vec2 p, vec2 a, vec2 b) {\n\tvec2 pa = p-a, ba = b-a;\n\tfloat t = clamp(dot(pa, ba)/dot(ba, ba), 0.0, 1.0);\n\tfloat d = length(pa - ba * t);\n\tfloat m = S(0.02, 0.0, d);\n\td = length(a-b);\n\tfloat f = S(1.0, 0.8, d);\n\tm *= f;\n\tm += m*S(0.05, 0.06, abs(d - 0.5)) * 2.0;\n\treturn m;\n}\n\nvec2 GetPos(vec2 p, vec2 o) {\n\tp += o;\n\tvec2 n = N22(p)*TIME*rate;\n\tp = sin(n) * line;\n\treturn o+p;\n}\n\nfloat G(vec2 uv) {\n\tvec2 id = floor(uv);\n\tuv = fract(uv) - 0.5;\n\tvec2 g = GetPos(id, vec2(0));\n\tfloat m = 0.0;\n\tfor(float y=-1.0; y<=1.0; y++) {\n\t\tfor(float x=-1.0; x<=1.0; x++) {\n\t\t\tvec2 offs = vec2(x, y);\n\t\t\tvec2 p = GetPos(id, offs);\n\t\t\tm+=L(uv, g, p);\n\t\t\tvec2 a = p-uv;\n\t\t\tfloat f = 0.003/dot(a, a);\n\t\t\tf *= pow( sin(N21(id+offs) * 6.2831 + (flash*TIME)) * 0.4 + 0.6, flash);\n\t\t\tm += f;\n\t\t}\n\t}\n\tm += L(uv, GetPos(id, vec2(-1, 0)), GetPos(id, vec2(0, -1)));\n\tm += L(uv, GetPos(id, vec2(0, -1)), GetPos(id, vec2(1, 0)));\n\tm += L(uv, GetPos(id, vec2(1, 0)), GetPos(id, vec2(0, 1)));\n\tm += L(uv, GetPos(id, vec2(0, 1)), GetPos(id, vec2(-1, 0)));\n\treturn m;\n}\n\nvoid main() \n{\n\tvec2 uv = (2.25 - scale) * ( gl_FragCoord.xy - 0.5 * RENDERSIZE.xy) / RENDERSIZE.y;\n\tif (mirror) { if(uv.x<0.0) uv.x = abs(uv.x); }\n\tfloat m = 0.0;\n\tvec3 col;\n\tfor(float i=0.0; i<1.0; i+=0.2) {\n\t\tfloat z = fract(i+TIME*zoom);\n\t\tfloat s = mix(10.0, 0.5, z);\n\t\tfloat f = S(0.0, 0.4, z) * S(1.0, 0.8, z);\n\t\tm += G(uv * s + (N11(i)*100.0) * i) * f;\n\t}\n\tif (color) { col = 0.5 + sin(vec3(1.0, 0.5, 0.75)*TIME*cycle) * 0.5; }\n\telse col = vec3(1.0);\n\tcol *= m; \n\tgl_FragColor = vec4( col, 1.0 );\n}"
+				},
+				"isf_file": {
+					"value": "project://InnerDimensionalMatrix/InnerDimensionalMatrix.fs"
+				},
+				"line": {
+					"value": 0.367
+				},
+				"mirror": {
+					"value": false
+				},
+				"rate": {
+					"value": 1.0
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 1.0
+				},
+				"seed1": {
+					"value": 155.0
+				},
+				"seed2": {
+					"value": 649.0
+				},
+				"time_dependent": {
+					"value": true
+				},
+				"zoom": {
+					"value": 0.175
+				}
+			},
+			"position": [
+				820.0,
+				680.0
+			],
+			"type": "ISFTOP"
+		},
+		"isf3": {
+			"parameters": {
+				"angle": {
+					"value": 0.0
+				},
+				"colorize": {
+					"value": 0.0
+				},
+				"divs": {
+					"value": 4.0
+				},
+				"isf_code": {
+					"value": "/*\n{\n  \"CATEGORIES\" : [\n    \"Halftone Effect\"\n  ],\n  \"ISFVSN\" : \"2\",\n  \"INPUTS\" : [\n    {\n      \"NAME\" : \"inputImage\",\n      \"TYPE\" : \"image\"\n    },\n    {\n      \"NAME\" : \"sharpness\",\n      \"TYPE\" : \"float\",\n      \"MAX\" : 10,\n      \"DEFAULT\" : 1,\n      \"MIN\" : 0\n    },\n    {\n      \"NAME\" : \"angle\",\n      \"TYPE\" : \"float\",\n      \"MAX\" : 1,\n      \"DEFAULT\" : 0,\n      \"MIN\" : 0\n    },\n    {\n      \"NAME\" : \"scale\",\n      \"TYPE\" : \"float\",\n      \"MAX\" : 2,\n      \"DEFAULT\" : 1,\n      \"MIN\" : 0\n    },\n    {\n      \"NAME\" : \"colorize\",\n      \"TYPE\" : \"float\",\n      \"MAX\" : 1,\n      \"DEFAULT\" : 0,\n      \"MIN\" : -1\n    },\n    {\n      \"NAME\" : \"divs\",\n      \"TYPE\" : \"float\",\n      \"MAX\" : 16,\n      \"DEFAULT\" : 4,\n      \"MIN\" : 1\n    },\n    {\n      \"LABELS\" : [\n        \"Random\",\n        \"Dot\",\n        \"Circular\",\n        \"Line\"\n      ],\n      \"NAME\" : \"patternType\",\n      \"TYPE\" : \"long\",\n      \"DEFAULT\" : 0,\n      \"VALUES\" : [\n        0,\n        1,\n        2,\n        3\n      ]\n    }\n  ],\n  \"CREDIT\" : \"by VIDVOX\"\n}\n*/\n\nvarying vec2 left_coord;\nvarying vec2 right_coord;\nvarying vec2 above_coord;\nvarying vec2 below_coord;\n\nvarying vec2 lefta_coord;\nvarying vec2 righta_coord;\nvarying vec2 leftb_coord;\nvarying vec2 rightb_coord;\n\nconst float tau = 6.28318530718;\n\nvec3 rgb2hsv(vec3 c)\t{\n\tvec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);\n\t//vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));\n\t//vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));\n\tvec4 p = c.g < c.b ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);\n\tvec4 q = c.r < p.x ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);\n\t\n\tfloat d = q.x - min(q.w, q.y);\n\tfloat e = 1.0e-10;\n\treturn vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);\n}\n\nvec3 hsv2rgb(vec3 c)\t{\n\tvec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);\n\tvec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);\n\treturn c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);\n}\n\nfloat dotScreenPattern(float ang, float sca, vec2 cent) {\n\tfloat s = sin( ang * tau ), c = cos( ang * tau );\n\tvec2 tex = isf_FragNormCoord * RENDERSIZE - cent * RENDERSIZE;\n\tvec2 point = vec2( c * tex.x - s * tex.y, s * tex.x + c * tex.y ) * max(sca,0.001);\n\treturn ( sin( point.x ) * sin( point.y ) ) * 4.0;\n}\n\nfloat circleScreenPattern(float ang, float sca, vec2 cent) {\n\tfloat s = 0.0;\n\tfloat c = 1.0;\n\tvec2 tex = isf_FragNormCoord * RENDERSIZE;\n\tvec2 point = vec2( c * tex.x - s * tex.y, s * tex.x + c * tex.y );\n\tfloat d = distance(point, cent * RENDERSIZE) * max(sca,0.001);\n\treturn ( sin(d + ang * tau) ) * 4.0;\n}\n\nfloat lineScreenPattern(float ang, float sca, vec2 cent) {\n\tfloat s = sin(tau * ang * 0.5);\n\tfloat c = cos(tau * ang * 0.5);\n\tvec2 tex = isf_FragNormCoord * RENDERSIZE;\n\tvec2 point = vec2( c * tex.x - s * tex.y, s * tex.x + c * tex.y ) * max(sca,0.001);\n\tfloat d = point.y;\n\n\treturn ( cent.x + sin(d + cent.y * tau) ) * 4.0;\n}\n\nfloat rand(vec2 co){\n    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);\n}\n\nvoid main() {\n\tvec4 color = IMG_THIS_PIXEL(inputImage);\n\tvec4 colorL = IMG_NORM_PIXEL(inputImage, left_coord);\n\tvec4 colorR = IMG_NORM_PIXEL(inputImage, right_coord);\n\tvec4 colorA = IMG_NORM_PIXEL(inputImage, above_coord);\n\tvec4 colorB = IMG_NORM_PIXEL(inputImage, below_coord);\n\n\tvec4 colorLA = IMG_NORM_PIXEL(inputImage, lefta_coord);\n\tvec4 colorRA = IMG_NORM_PIXEL(inputImage, righta_coord);\n\tvec4 colorLB = IMG_NORM_PIXEL(inputImage, leftb_coord);\n\tvec4 colorRB = IMG_NORM_PIXEL(inputImage, rightb_coord);\n\n\tvec4 final = color + sharpness * (8.0*color - colorL - colorR - colorA - colorB - colorLA - colorRA - colorLB - colorRB);\n\tvec3 hsv = rgb2hsv(final.rgb);\n\tfloat ang = floor(hsv.r * divs + 0.5) / divs;\n\tfloat sca = floor(hsv.b * divs + 0.5) / divs;\n\tfloat col = max(min(colorize + floor(hsv.g * divs + 0.5) / divs,1.0),0.0);;\n\t\n\tfloat average = ( final.r + final.g + final.b ) / 3.0;\n\tint pType = patternType;\n\tif (pType == 0)\t{\n\t\tpType = int(2.9999 * rand(vec2(ang,sca)));\n\t}\n\telse\t{\n\t\tpType = pType - 1;\t\n\t}\n\tif (pType == 0)\t{\n\t\tfinal = vec4( vec3( average * 10.0 - 5.0 + dotScreenPattern(angle + ang, scale * sca, vec2(0.5)) ), color.a );\n\t}\n\telse if (pType == 1)\t{\n\t\tfinal = vec4( vec3( average * 10.0 - 5.0 + circleScreenPattern(angle + ang, scale * sca, vec2(0.5)) ), color.a );\n\t}\n\telse if (pType == 2)\t{\n\t\tfinal = vec4( vec3( average * 10.0 - 5.0 + lineScreenPattern(angle + ang, scale * sca, vec2(0.5)) ), color.a );\n\t}\n\t\n\tfinal = mix (color * final, final, 1.0-col);\n\tgl_FragColor = final;\n}"
+				},
+				"isf_file": {
+					"value": "project://Halftone Multi/Halftone Multi.fs"
+				},
+				"patternType": {
+					"value": 0
+				},
+				"scale": {
+					"value": 1.0
+				},
+				"sharpness": {
+					"value": 1.0
+				},
+				"time_dependent": {
+					"value": true
+				}
+			},
+			"position": [
+				820.0,
+				920.0
+			],
+			"type": "ISFTOP"
+		},
+		"isf_helper_test": {
+			"parameters": {
+				"isf_code": {
+					"value": "/*{\n  \"DESCRIPTION\": \"Tests IMG_THIS_PIXEL and isf_FragNormCoord in helper functions\",\n  \"CREDIT\": \"GONODES audit\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"TEST\"],\n  \"INPUTS\": [\n    {\"NAME\": \"inputImage\", \"TYPE\": \"image\"},\n    {\"NAME\": \"strength\", \"TYPE\": \"float\", \"DEFAULT\": 0.5, \"MIN\": 0.0, \"MAX\": 1.0}\n  ]\n}*/\n\n// Helper function at file scope uses isf_FragNormCoord\n// This tests that isf_FragNormCoord is a valid varying (not UV)\nvec4 sampleCenter(sampler2D img) {\n    return IMG_THIS_PIXEL(img);\n}\n\nvec2 getCoords() {\n    return isf_FragNormCoord;\n}\n\nvoid main() {\n    vec4 center = sampleCenter(inputImage);\n    vec2 uv = getCoords();\n    vec2 offset = (uv - 0.5) * strength;\n    vec4 shifted = IMG_NORM_PIXEL(inputImage, uv + offset);\n    gl_FragColor = mix(center, shifted, strength);\n}\n"
+				},
+				"isf_file": {
+					"value": ""
+				},
+				"strength": {
+					"value": 0.5
+				},
+				"time_dependent": {
+					"value": false
+				}
+			},
+			"position": [
+				820.0,
+				1160.0
+			],
+			"type": "ISFTOP"
+		},
+		"isf_multipass": {
+			"parameters": {
+				"isf_code": {
+					"value": "/*{\n  \"DESCRIPTION\": \"Tests multi-pass with persistent buffer (motion trail)\",\n  \"CREDIT\": \"GONODES audit\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"TEST\"],\n  \"INPUTS\": [\n    {\"NAME\": \"trailDecay\", \"TYPE\": \"float\", \"DEFAULT\": 0.95, \"MIN\": 0.5, \"MAX\": 0.99}\n  ],\n  \"PASSES\": [\n    {\"TARGET\": \"trailBuffer\", \"PERSISTENT\": true, \"FLOAT\": true},\n    {}\n  ]\n}*/\n\nvoid main() {\n    if (PASSINDEX == 0) {\n        // Pass 0: accumulate into persistent buffer\n        vec4 prev = IMG_NORM_PIXEL(trailBuffer, isf_FragNormCoord);\n        // Animated dot position\n        float cx = 0.5 + 0.3 * cos(TIME * 1.5);\n        float cy = 0.5 + 0.3 * sin(TIME * 2.0);\n        float d = distance(isf_FragNormCoord, vec2(cx, cy));\n        float dot = smoothstep(0.05, 0.0, d);\n        vec4 fresh = vec4(dot, dot * 0.6, dot * 0.2, 1.0);\n        gl_FragColor = max(prev * trailDecay, fresh);\n    } else {\n        // Pass 1: output from trail buffer with gamma\n        vec4 trail = IMG_NORM_PIXEL(trailBuffer, isf_FragNormCoord);\n        gl_FragColor = vec4(pow(trail.rgb, vec3(0.8)), 1.0);\n    }\n}\n"
+				},
+				"isf_file": {
+					"value": ""
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"time_dependent": {
+					"value": true
+				},
+				"trailDecay": {
+					"value": 0.95
+				}
+			},
+			"position": [
+				820.0,
+				1640.0
+			],
+			"type": "ISFTOP"
+		},
+		"isf_shader": {
+			"parameters": {
+				"color_shift": {
+					"value": 0.5
+				},
+				"isf_code": {
+					"value": "/*{\n  \"DESCRIPTION\": \"Plasma globe pattern\",\n  \"CREDIT\": \"GoNodes demo\",\n  \"ISFVSN\": \"2\",\n  \"CATEGORIES\": [\"Generator\"],\n  \"INPUTS\": [\n    {\"NAME\": \"speed\", \"TYPE\": \"float\", \"DEFAULT\": 1.0, \"MIN\": 0.0, \"MAX\": 5.0},\n    {\"NAME\": \"scale\", \"TYPE\": \"float\", \"DEFAULT\": 3.0, \"MIN\": 0.5, \"MAX\": 10.0},\n    {\"NAME\": \"color_shift\", \"TYPE\": \"float\", \"DEFAULT\": 0.5, \"MIN\": 0.0, \"MAX\": 1.0}\n  ]\n}*/\n\nvoid main() {\n  vec2 uv = isf_FragNormCoord * scale;\n  float t = TIME * speed;\n  float v = sin(uv.x * 3.0 + t) + sin(uv.y * 2.0 + t * 1.3) + sin((uv.x + uv.y) * 1.5 + t * 0.7);\n  v = v / 3.0 * 0.5 + 0.5;\n  vec3 col = vec3(\n    sin(v * 6.28 + color_shift * 6.28) * 0.5 + 0.5,\n    sin(v * 6.28 + 2.09 + color_shift * 6.28) * 0.5 + 0.5,\n    sin(v * 6.28 + 4.19 + color_shift * 6.28) * 0.5 + 0.5\n  );\n  gl_FragColor = vec4(col, 1.0);\n}\n"
+				},
+				"isf_file": {
+					"value": ""
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 3.0
+				},
+				"speed": {
+					"value": 1.0
+				},
+				"time_dependent": {
+					"value": true
+				}
+			},
+			"position": [
+				520.0,
+				0.0
+			],
+			"type": "ISFTOP"
+		},
+		"isf_shader2": {
+			"parameters": {
+				"isf_code": {
+					"value": "/*{\n\t\"DESCRIPTION\": \"Mirror the input image along a configurable axis\",\n\t\"CREDIT\": \"GONODES\",\n\t\"ISFVSN\": \"2.0\",\n\t\"CATEGORIES\": [\"Distort\"],\n\t\"INPUTS\": [\n\t\t{ \"NAME\": \"src\",  \"TYPE\": \"image\" },\n\t\t{ \"NAME\": \"mode\", \"TYPE\": \"long\",\n\t\t  \"VALUES\": [0, 1, 2, 3],\n\t\t  \"LABELS\": [\"Horizontal\", \"Vertical\", \"Both\", \"Diagonal\"],\n\t\t  \"DEFAULT\": 0 }\n\t]\n}*/\n\nvoid main() {\n\tvec2 uv = isf_FragNormCoord;\n\tif (mode == 0) uv.x = 1.0 - abs(uv.x * 2.0 - 1.0);\n\telse if (mode == 1) uv.y = 1.0 - abs(uv.y * 2.0 - 1.0);\n\telse if (mode == 2) {\n\t\tuv.x = 1.0 - abs(uv.x * 2.0 - 1.0);\n\t\tuv.y = 1.0 - abs(uv.y * 2.0 - 1.0);\n\t} else {\n\t\tfloat tmp = uv.x;\n\t\tuv.x = uv.y;\n\t\tuv.y = tmp;\n\t}\n\tgl_FragColor = IMG_NORM_PIXEL(src, uv);\n}\n"
+				},
+				"isf_file": {
+					"value": ""
+				},
+				"mode": {
+					"value": 2
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"time_dependent": {
+					"value": true
+				}
+			},
+			"position": [
+				800.0,
+				220.0
+			],
+			"type": "ISFTOP"
+		},
+		"isf_word_boundary": {
+			"parameters": {
+				"isf_code": {
+					"value": "/*{\n  \"DESCRIPTION\": \"Tests word-boundary-safe replacement of DATE FRAMEINDEX TIMEDELTA\",\n  \"CREDIT\": \"GONODES audit\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"TEST\"],\n  \"INPUTS\": [\n    {\"NAME\": \"updateRate\", \"TYPE\": \"float\", \"DEFAULT\": 1.0, \"MIN\": 0.1, \"MAX\": 5.0},\n    {\"NAME\": \"validateDATE\", \"TYPE\": \"float\", \"DEFAULT\": 0.5, \"MIN\": 0.0, \"MAX\": 1.0},\n    {\"NAME\": \"myFRAMEINDEXscale\", \"TYPE\": \"float\", \"DEFAULT\": 0.01, \"MIN\": 0.001, \"MAX\": 0.1}\n  ]\n}*/\n\n// User vars contain ISF keywords as substrings:\n//   updateRate        (contains no keyword)\n//   validateDATE      (contains DATE as suffix)\n//   myFRAMEINDEXscale (contains FRAMEINDEX infix)\n// Word-boundary replacement must NOT corrupt these.\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    float t = TIME * updateRate;\n    float fi = float(FRAMEINDEX) * myFRAMEINDEXscale;\n    float dt = TIMEDELTA;\n    float yr = DATE.x;\n    float brightness = validateDATE;\n    vec3 col = vec3(\n        sin(uv.x * 6.28 + t) * 0.5 + 0.5,\n        cos(uv.y * 6.28 + fi) * 0.5 + 0.5,\n        sin((uv.x + uv.y) * 3.14 + dt * 100.0 + yr * 0.001) * 0.5 + 0.5\n    );\n    col *= brightness;\n    gl_FragColor = vec4(col, 1.0);\n}\n"
+				},
+				"isf_file": {
+					"value": ""
+				},
+				"myFRAMEINDEXscale": {
+					"value": 0.01
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"time_dependent": {
+					"value": true
+				},
+				"updateRate": {
+					"value": 1.0
+				},
+				"validateDATE": {
+					"value": 0.5
+				}
+			},
+			"position": [
+				820.0,
+				1400.0
+			],
+			"type": "ISFTOP"
+		},
+		"label1": {
+			"parameters": {
+				"font_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"font_size": {
+					"value": 14
+				},
+				"h_align": {
+					"value": 1
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 120,
+						"y": 24
+					}
+				},
+				"text": {
+					"expression": "\"SelectTOP Index=\" + str(int(chop(\"slider1\", \"slider1:value\")))",
+					"mode": "EXPRESSION",
+					"value": "SelectTop Index"
+				}
+			},
+			"position": [
+				1637.87329101563,
+				491.629150390625
+			],
+			"type": "LabelUI"
+		},
+		"level_out": {
+			"parameters": {
+				"brightness": {
+					"value": 0.78
+				},
+				"contrast": {
+					"value": 2.58
+				},
+				"gamma": {
+					"value": 0.24
+				},
+				"invert": {
+					"value": false
+				},
+				"opacity": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				800.0,
+				0.0
+			],
+			"type": "LevelTOP"
+		},
+		"noise1": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": false
+				},
+				"noise_type": {
+					"value": 2
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 0
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				500.0,
+				920.0
+			],
+			"type": "NoiseTOP"
+		},
+		"noise_helper": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": true
+				},
+				"noise_type": {
+					"value": 0
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 3.0
+				},
+				"seed": {
+					"value": 42
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				500.0,
+				1160.0
+			],
+			"type": "NoiseTOP"
+		},
+		"noise_input": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": false
+				},
+				"noise_type": {
+					"value": 2
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 99
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				520.0,
+				220.0
+			],
+			"type": "NoiseTOP"
+		},
+		"panel_container1": {
+			"dynamic_input_count": 3,
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 0.0899999961256981,
+						"b": 0.150000005960464,
+						"g": 0.150000005960464,
+						"r": 0.150000005960464
+					}
+				},
+				"corner_radius": {
+					"value": 4
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 0,
+						"y": 0
+					}
+				},
+				"padding": {
+					"value": 8
+				}
+			},
+			"position": [
+				1840.0,
+				360.0
+			],
+			"type": "PanelContainerUI"
+		},
+		"slider1": {
+			"parameters": {
+				"default_val": {
+					"value": 0.0
+				},
+				"label": {
+					"value": "Slider"
+				},
+				"max_val": {
+					"value": 7.0
+				},
+				"min_size": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 200,
+						"y": 24
+					}
+				},
+				"min_val": {
+					"value": 0.0
+				},
+				"step": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				1637.87329101563,
+				231.629150390625
+			],
+			"type": "SliderUI"
+		},
+		"switch2_copy": {
+			"dynamic_input_count": 9,
+			"parameters": {
+				"blend": {
+					"value": false
+				},
+				"blend_pos": {
+					"value": 0.0
+				},
+				"index": {
+					"expression": "chop(\"slider1\", \"slider1:value\")",
+					"mode": "EXPRESSION",
+					"value": 0
+				}
+			},
+			"position": [
+				1560.0,
+				-280.0
+			],
+			"type": "SwitchTOP"
+		},
+		"window_out1_copy": {
+			"parameters": {
+				"always_on_top": {
+					"value": false
+				},
+				"monitor": {
+					"value": 0
+				},
+				"open": {
+					"value": false
+				},
+				"position": {
+					"value": {
+						"_type": "Vector2i",
+						"x": -1,
+						"y": -1
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"title": {
+					"value": "GONODES Output"
+				},
+				"vsync": {
+					"value": true
+				},
+				"window_mode": {
+					"value": 0
+				}
+			},
+			"position": [
+				1757.87329101563,
+				-288.370849609375
+			],
+			"type": "WindowOUT"
+		}
+	},
+	"version": "1.0.0",
+	"viewport": {
+		"scroll_x": 155.635437011719,
+		"scroll_y": 438.589538574219,
+		"zoom": 0.60105162858963
+	}
+}

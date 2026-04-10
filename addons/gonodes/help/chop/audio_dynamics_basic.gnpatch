@@ -34,14 +34,10 @@
                     "value": 0
                 },
                 "threshold": {
-                    "value": -12.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": -12.0
                 },
                 "ratio": {
-                    "value": 4.0,
-                    "expression": "(4.0 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "attack": {
                     "value": 10.0
@@ -113,5 +109,25 @@
             "to_port": 0
         }
     ],
-    "annotations": []
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Audio Dynamics CHOP — Basic\n\nCompressor / Limiter / Expander / Gate dynamics processor for audio-rate CHOPs.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

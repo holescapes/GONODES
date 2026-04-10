@@ -75,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "VideoDeviceInIMG \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_video_capture extension.",
+            "text": "Video Device In IMG — Advanced\n\nCapture live video from a webcam or capture device (CPU Image).\nCombined configuration: device_index=2, fps=32, active=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

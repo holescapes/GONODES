@@ -49,14 +49,10 @@
             ],
             "parameters": {
                 "vertical": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "offset": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.2",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "collapsed": {
                     "value": false
@@ -142,7 +138,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SplitContainerUI \u2014 Basic\n\nDefault settings.",
+            "text": "Button UI — Basic\n\nPush button widget. Outputs press/release state as CHOP channel.\nUsing: label=Button A.",
             "position": [
                 -100.0,
                 -100.0

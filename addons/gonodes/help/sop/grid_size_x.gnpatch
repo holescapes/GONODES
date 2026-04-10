@@ -122,7 +122,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GridSOP \u2014 Parameters\n\nShowcases: size_x, size_z, rows.",
+            "text": "Grid SOP — X\n\nSubdivided plane with configurable orientation.\nShowcasing: size_x=1.0, size_z=1.0, rows=9, cols=9.",
             "position": [
                 -100.0,
                 -100.0

@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 }
             }
         },
@@ -88,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Analyze CHOP \u2014 Basic\n\nComputes running average of an LFO signal.",
+            "text": "Analyze CHOP — Basic\n\nPer-channel statistics: min, max, average, RMS, sum, range, count.\nUsing: function=0.",
             "position": [
                 -100.0,
                 -100.0

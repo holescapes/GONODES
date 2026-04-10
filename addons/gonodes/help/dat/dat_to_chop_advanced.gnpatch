@@ -92,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DATtoCHOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "DA Tto CHOP — Advanced\n\nConvert DAT table to CHOP channels.\nCombined configuration: layout=2, first_is_name=False.",
             "position": [
                 -100.0,
                 -100.0

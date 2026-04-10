@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FlipTOP \u2014 Parameters\n\nShowcases: flip_x, flip_y.",
+            "text": "Flip TOP — X\n\nMirror texture horizontally and/or vertically.\nShowcasing: flip_x=True, flip_y=True.",
             "position": [
                 -100.0,
                 -100.0

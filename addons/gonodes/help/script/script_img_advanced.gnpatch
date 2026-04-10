@@ -70,14 +70,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GDScriptSCRIPT (IMG template) \u2014 Advanced\n\nMore complex configuration.",
+            "text": "GDScript IMG Template — Advanced\n\nUser-authored GDScript for advanced image processing.\nDemonstrates combining multiple inputs, parameter access, and custom pixel operations.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

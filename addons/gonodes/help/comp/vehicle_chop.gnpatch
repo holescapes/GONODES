@@ -1,0 +1,351 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "VehicleCOMP — CHOP Input. Drives vehicle steering/throttle/brake from a CHOP.",
+    "nodes": {
+        "const_steer": {
+            "type": "ConstantCHOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "name0": {
+                    "value": "steer"
+                },
+                "value0": {
+                    "value": 0.2
+                }
+            }
+        },
+        "const_throttle": {
+            "type": "ConstantCHOP",
+            "position": [
+                0,
+                200
+            ],
+            "parameters": {
+                "name0": {
+                    "value": "throttle"
+                },
+                "value0": {
+                    "value": 0.6
+                }
+            }
+        },
+        "const_brake": {
+            "type": "ConstantCHOP",
+            "position": [
+                0,
+                400
+            ],
+            "parameters": {
+                "name0": {
+                    "value": "brake"
+                },
+                "value0": {
+                    "value": 0.0
+                }
+            }
+        },
+        "merge_chop": {
+            "type": "MergeCHOP",
+            "position": [
+                300,
+                200
+            ],
+            "parameters": {}
+        },
+        "box_body": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                700
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 2.0
+                },
+                "size_y": {
+                    "value": 0.6
+                },
+                "size_z": {
+                    "value": 4.0
+                }
+            }
+        },
+        "geo_body": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                700
+            ],
+            "parameters": {}
+        },
+        "vehicle1": {
+            "type": "VehicleCOMP",
+            "position": [
+                600,
+                400
+            ],
+            "parameters": {
+                "ty": {
+                    "value": 2.0
+                },
+                "mass": {
+                    "value": 1200.0
+                },
+                "drive_type": {
+                    "value": 2
+                },
+                "wheel_base": {
+                    "value": 3.2
+                },
+                "track_width": {
+                    "value": 1.8
+                },
+                "engine_force": {
+                    "value": 600.0
+                },
+                "brake_force": {
+                    "value": 80.0
+                }
+            }
+        },
+        "floor_grid": {
+            "type": "GridSOP",
+            "position": [
+                0,
+                1000
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 100.0
+                },
+                "size_z": {
+                    "value": 100.0
+                },
+                "cols": {
+                    "value": 2
+                },
+                "rows": {
+                    "value": 2
+                }
+            }
+        },
+        "geo_floor": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                1000
+            ],
+            "parameters": {}
+        },
+        "static_floor": {
+            "type": "StaticBodyCOMP",
+            "position": [
+                600,
+                1000
+            ],
+            "parameters": {}
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                1200
+            ],
+            "parameters": {
+                "text": {
+                    "value": "VehicleCOMP — CHOP Input\n\nThe control_in port reads channels:\n  steer  — steering (-1 to 1)\n  throttle — forward power (0 to 1)\n  brake — braking force (0 to 1)\n\nAWD drive type. Merge 3 ConstantCHOPs\ninto one CHOP for the control_in port.\n\nReplace with GamepadCHOP or\nKeyboardInCHOP for live control."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                400
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                700
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 10.0
+                },
+                "tz": {
+                    "value": 18.0
+                },
+                "use_look_at": {
+                    "value": true
+                },
+                "look_at_y": {
+                    "value": 1.0
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                900
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                400
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                400
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "const_steer",
+            "from_port": 0,
+            "to": "merge_chop",
+            "to_port": 0
+        },
+        {
+            "from": "const_throttle",
+            "from_port": 0,
+            "to": "merge_chop",
+            "to_port": 1
+        },
+        {
+            "from": "const_brake",
+            "from_port": 0,
+            "to": "merge_chop",
+            "to_port": 2
+        },
+        {
+            "from": "box_body",
+            "from_port": 0,
+            "to": "geo_body",
+            "to_port": 0
+        },
+        {
+            "from": "geo_body",
+            "from_port": 0,
+            "to": "vehicle1",
+            "to_port": 0
+        },
+        {
+            "from": "merge_chop",
+            "from_port": 0,
+            "to": "vehicle1",
+            "to_port": 1
+        },
+        {
+            "from": "floor_grid",
+            "from_port": 0,
+            "to": "geo_floor",
+            "to_port": 0
+        },
+        {
+            "from": "geo_floor",
+            "from_port": 0,
+            "to": "static_floor",
+            "to_port": 0
+        },
+        {
+            "from": "vehicle1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "static_floor",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 3
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Vehicle COMP — Chop\n\nVehicle physics body with 4 wheels, suspension, steering via VehicleBody3D.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

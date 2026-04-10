@@ -79,14 +79,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ImageSaveOUT \u2014 Parameters\n\nShowcases: active, file_path, format.",
+            "text": "Image Save OUT — Active\n\nSave CPU Image to disk (PNG, WebP, EXR). Activate toggle to write.\nShowcasing: active=True, format=1, quality=0.375, auto_number=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "default_tab": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "closable": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 },
                 "min_size": {
                     "value": {
@@ -96,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TabBar UI \u00e2\u20ac\u201d Basic\n\nStandalone tab bar (no child content).\nTab names from DAT first column.\nState channel: tab (selected index).",
+            "text": "TabBar UI â€” Basic\n\nStandalone tab bar (no child content).\nTab names from DAT first column.\nState channel: tab (selected index).",
             "position": [
                 -100.0,
                 -100.0

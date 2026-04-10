@@ -84,14 +84,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WebServerDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Web Server DAT — Advanced\n\nHTTP server via TCPServer — serve content and log requests.\nCombined configuration: port=8082, active=False, max_requests=52, clear=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

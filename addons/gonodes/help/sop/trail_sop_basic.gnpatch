@@ -18,9 +18,7 @@
             ],
             "parameters": {
                 "length": {
-                    "value": 60,
-                    "expression": "(60 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 60
                 },
                 "active": {
                     "value": true
@@ -125,7 +123,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Trail SOP \u2014 Motion Trail\n\nRecords centroid position as a 60-frame line strip.\nConnect animated geometry for visible trails.",
+            "text": "Trail SOP — Motion Trail\n\nRecords centroid position as a 60-frame line strip.\nConnect animated geometry for visible trails.",
             "position": [
                 -100.0,
                 -150.0

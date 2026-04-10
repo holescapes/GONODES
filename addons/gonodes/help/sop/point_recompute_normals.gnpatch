@@ -122,7 +122,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PointSOP \u2014 Parameters\n\nShowcases: expr_x, expr_y, expr_z.",
+            "text": "Point SOP — Normals\n\nPer-vertex position modification via GDScript expressions.\nShowcasing: recompute_normals=True.",
             "position": [
                 -100.0,
                 -100.0

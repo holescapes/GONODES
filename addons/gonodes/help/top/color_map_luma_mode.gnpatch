@@ -75,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ColorMapTOP \u2014 Parameters\n\nShowcases: luma_mode, intensity.",
+            "text": "Color Map TOP — Mode\n\nRemap luminance to a gradient texture (source + gradient inputs).\nShowcasing: luma_mode=1, intensity=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

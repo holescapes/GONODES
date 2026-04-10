@@ -145,7 +145,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MarginContainerUI \u2014 Parameters\n\nShowcases: left, top, right.",
+            "text": "Button UI — Variation\n\nPush button widget. Outputs press/release state as CHOP channel.\nShowcasing: label=Button A.",
             "position": [
                 -100.0,
                 -100.0

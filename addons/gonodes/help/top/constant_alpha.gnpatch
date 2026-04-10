@@ -2,25 +2,10 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "constant1": {
-            "type": "ConstantDAT",
+        "src_noise": {
+            "type": "NoiseTOP",
             "position": [
                 100,
-                100
-            ],
-            "parameters": {
-                "col0": {
-                    "value": "name"
-                },
-                "col1": {
-                    "value": "value"
-                }
-            }
-        },
-        "texttop1": {
-            "type": "TextTOP",
-            "position": [
-                1150,
                 100
             ],
             "parameters": {
@@ -31,15 +16,26 @@
                         "y": 512
                     }
                 },
-                "font_size": {
-                    "value": 14
+                "scale": {
+                    "value": 4.0
+                },
+                "monochrome": {
+                    "value": true
                 }
             }
+        },
+        "focus1": {
+            "type": "ConstantTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
+                800,
                 100
             ],
             "parameters": {
@@ -58,13 +54,13 @@
     },
     "connections": [
         {
-            "from": "constant1",
+            "from": "src_noise",
             "from_port": 0,
-            "to": "texttop1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "texttop1",
+            "from": "focus1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -74,14 +70,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ConstantDAT \u2014 Basic\n\nDefault settings.",
+            "text": "Constant TOP — Alpha\n\nSolid color texture.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

@@ -67,7 +67,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ConstantDAT \u2014 Parameters\n\nShowcases: col0, col1, col2.",
+            "text": "Constant DAT — Variation\n\nManually editable 4x4 table with column headers.",
             "position": [
                 -100.0,
                 -100.0

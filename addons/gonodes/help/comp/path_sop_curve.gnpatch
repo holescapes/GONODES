@@ -1,0 +1,261 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "PathCOMP — SOP Curve. A box follows a path defined by SOP point positions.",
+    "nodes": {
+        "line_sop": {
+            "type": "LineSOP",
+            "position": [
+                0,
+                200
+            ],
+            "parameters": {
+                "points": {
+                    "value": 8
+                },
+                "length": {
+                    "value": 8.0
+                }
+            }
+        },
+        "transform1": {
+            "type": "TransformSOP",
+            "position": [
+                300,
+                200
+            ],
+            "parameters": {
+                "ty": {
+                    "expression": "sin(me.point_index * 0.8) * 1.5"
+                }
+            }
+        },
+        "box_sop": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "size_x": {
+                    "value": 0.4
+                },
+                "size_y": {
+                    "value": 0.4
+                },
+                "size_z": {
+                    "value": 0.4
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "lfo1": {
+            "type": "LFOCHOP",
+            "position": [
+                0,
+                400
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 0.1
+                },
+                "type": {
+                    "value": 2
+                }
+            }
+        },
+        "path1": {
+            "type": "PathCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "progress": {
+                    "expression": "chop('lfo1', 'out') * 0.5 + 0.5"
+                },
+                "loop": {
+                    "value": false
+                },
+                "rotation_mode": {
+                    "value": 3
+                }
+            }
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                400
+            ],
+            "parameters": {
+                "text": {
+                    "value": "PathCOMP — SOP Curve Input\n\nThe path is defined by a LineSOP → TransformSOP\nthat creates a wavy line. The box follows it.\nSOP input overrides the built-in 3-point curve."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 4.0
+                },
+                "ty": {
+                    "value": 4.0
+                },
+                "tz": {
+                    "value": 8.0
+                },
+                "use_look_at": {
+                    "value": true
+                },
+                "look_at_y": {
+                    "value": 1.0
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "line_sop",
+            "from_port": 0,
+            "to": "transform1",
+            "to_port": 0
+        },
+        {
+            "from": "box_sop",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "path1",
+            "to_port": 0
+        },
+        {
+            "from": "transform1",
+            "from_port": 0,
+            "to": "path1",
+            "to_port": 1
+        },
+        {
+            "from": "path1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Line SOP — Curve\n\nLine strip along an axis.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -17,9 +17,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "scale": {
                     "value": 4.0,
@@ -95,7 +93,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Compute Shader TOP \u2014 Sobel Edge Filter\n\nReads an input texture (gn_tex0) via sampler2D and writes\nSobel edge-detected output to the storage image.\n\nThe 'strength' push constant becomes an inspector parameter.\nResolution is inherited from the input NoiseTOP automatically.",
+            "text": "Compute Shader TOP — Sobel Edge Filter\n\nReads an input texture (gn_tex0) via sampler2D and writes\nSobel edge-detected output to the storage image.\n\nThe 'strength' push constant becomes an inspector parameter.\nResolution is inherited from the input NoiseTOP automatically.",
             "position": [
                 -250.0,
                 -170.0

@@ -32,14 +32,10 @@
             ],
             "parameters": {
                 "r_source": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "g_source": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "b_source": {
                     "value": 0
@@ -99,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ChannelMixTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Channel Mix TOP — Basic\n\nSwap and remap RGBA channels with per-channel gain.\nUsing: r_source=0, g_source=0, b_source=0, a_source=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

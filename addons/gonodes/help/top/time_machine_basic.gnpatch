@@ -32,14 +32,10 @@
             ],
             "parameters": {
                 "length": {
-                    "value": 60,
-                    "expression": "(60 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 60
                 },
                 "speed": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "position": {
                     "value": 0.0
@@ -93,14 +89,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TimeMachineTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Time Machine TOP — Basic\n\nPlayback controller over a frame buffer with speed, scrub, and wrap modes.\nUsing: length=60, speed=1.0, position=0.0, wrap_mode=0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

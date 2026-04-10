@@ -124,7 +124,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullPOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Null POP — Advanced\n\nPass-through for feedback loops, organization, and references.",
             "position": [
                 -100.0,
                 -100.0

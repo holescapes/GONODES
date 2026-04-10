@@ -96,7 +96,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SOPtoDAT \u2014 Parameters\n\nShowcases: attribute, max_points.",
+            "text": "SO Pto DAT — Attribute\n\nConvert SOP vertex data or mesh summary to a DAT table.\nShowcasing: attribute=1, max_points=999.",
             "position": [
                 -100.0,
                 -100.0

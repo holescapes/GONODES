@@ -84,7 +84,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Limit CHOP \u2014 Basic\n\nClamps LFO to default range.\nPrevents values from exceeding bounds.",
+            "text": "LFO_ CHOP — X\n\nLow-frequency oscillator (sine, triangle, square, saw, pulse).\nShowcasing: amplitude=2.0.",
             "position": [
                 -100.0,
                 -100.0

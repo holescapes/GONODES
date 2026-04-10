@@ -68,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LUTTOP \u2014 Parameters\n\nShowcases: lut_file, intensity.",
+            "text": "LUT TOP — Intensity\n\nApply a 3D LUT (.cube / .3dl) colour transform to the input texture.\nShowcasing: intensity=0.5.",
             "position": [
                 -100.0,
                 -100.0

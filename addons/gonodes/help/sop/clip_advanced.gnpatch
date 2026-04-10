@@ -130,14 +130,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ClipSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Clip SOP — Advanced\n\nClip geometry by an axis-aligned plane with triangle splitting.\nCombined configuration: plane=2, origin=1.0, keep_above=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

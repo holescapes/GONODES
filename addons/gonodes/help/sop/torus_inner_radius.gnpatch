@@ -119,14 +119,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TorusSOP \u2014 Parameters\n\nShowcases: inner_radius, outer_radius, rings.",
+            "text": "Torus SOP — Radius\n\nTorus (donut) mesh with inner/outer radius.\nShowcasing: inner_radius=0.1, outer_radius=0.25, rings=31, ring_segments=15.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

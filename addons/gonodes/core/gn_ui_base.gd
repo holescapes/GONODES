@@ -145,7 +145,7 @@ func update_preview_control(control: Control) -> void:
 var _viewer_ui_preview: Control = null
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _control_node != null:
 		# Re-duplicate only if the source control changed (new cook).
 		if _viewer_ui_preview == null or not is_instance_valid(_viewer_ui_preview):

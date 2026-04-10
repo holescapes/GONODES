@@ -39,9 +39,7 @@
                     }
                 },
                 "noise_type": {
-                    "value": 2,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "scale": {
                     "value": 5.0,
@@ -109,7 +107,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Cross TOP \u2014 Dissolve\n\nBlends between two noise textures.\ncross=0 shows input A, cross=1 shows B.\nAnimate cross for a dissolve transition.",
+            "text": "Cross TOP — Dissolve\n\nBlends between two noise textures.\ncross=0 shows input A, cross=1 shows B.\nAnimate cross for a dissolve transition.",
             "position": [
                 -100.0,
                 -150.0

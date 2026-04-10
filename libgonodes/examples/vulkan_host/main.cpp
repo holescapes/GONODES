@@ -223,6 +223,61 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    /* ── v1.2.0: Zero-Copy VOL GPU Exchange ─────────────────────────── */
+    /* On a shared Vulkan device, push a 3D texture handle to a HostInVOL
+     * node.  The handle is used directly by the GONODES compute pipeline
+     * — no CPU readback or upload.  After cooking, read the output 3D
+     * texture handle back from a HostOutVOL node. */
+
+    printf("[Vulkan Host] VOL GPU zero-copy demo...\n");
+    {
+        /* In a real app, create a VkImage3D and fill it with voxel data.
+         * Here we simulate by passing a dummy handle for demonstration. */
+        uint64_t dummy_vol_handle = 0x12345678ULL;  /* real: vkGetImage... */
+        int vol_err = gonodes_set_input_volume_gpu(gn, "host_vol_in",
+            dummy_vol_handle, 64, 64, 64, 1, "density");
+        if (vol_err == GONODES_OK)
+            printf("  Pushed 64^3 volume handle to host_vol_in\n");
+
+        gonodes_cook_frame(gn, 1.0 / 60.0);
+
+        gonodes_volume_gpu_handle_t vol_out = {};
+        if (gonodes_get_output_volume_gpu(gn, "host_vol_out", &vol_out) == GONODES_OK
+            && vol_out.native_handle != 0) {
+            printf("  VOL output: handle=0x%llx %dx%dx%d ch=%d\n",
+                   (unsigned long long)vol_out.native_handle,
+                   vol_out.width, vol_out.height, vol_out.depth, vol_out.channels);
+        } else {
+            printf("  VOL output: not available (no host_vol_out node?)\n");
+        }
+    }
+
+    /* ── v1.2.0: Zero-Copy POP GPU Exchange ─────────────────────────── */
+    /* Push a particle SSBO handle to a HostInPOP node.  The buffer is a
+     * VkBuffer on the shared device, used directly by POP compute shaders.
+     * After cooking, read the output SSBO handle from a HostOutPOP node. */
+
+    printf("[Vulkan Host] POP GPU zero-copy demo...\n");
+    {
+        uint64_t dummy_ssbo = 0xABCDEF00ULL;  /* real: vkCreateBuffer... */
+        int pop_err = gonodes_set_input_particles_gpu(gn, "host_pop_in",
+            dummy_ssbo, 10000, 64, 10000 * 64);
+        if (pop_err == GONODES_OK)
+            printf("  Pushed 10000-particle SSBO to host_pop_in\n");
+
+        gonodes_cook_frame(gn, 1.0 / 60.0);
+
+        gonodes_particle_gpu_handle_t pop_out = {};
+        if (gonodes_get_output_particles_gpu(gn, "host_pop_out", &pop_out) == GONODES_OK
+            && pop_out.native_handle != 0) {
+            printf("  POP output: handle=0x%llx count=%d stride=%d\n",
+                   (unsigned long long)pop_out.native_handle,
+                   pop_out.particle_count, pop_out.stride);
+        } else {
+            printf("  POP output: not available (no host_pop_out node?)\n");
+        }
+    }
+
     /* ── Cleanup ────────────────────────────────────────────────────── */
 
     gonodes_destroy(gn);

@@ -119,14 +119,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CircleSOP \u2014 Parameters\n\nShowcases: radius, segments, type.",
+            "text": "Circle SOP — Radius\n\nFilled disc or wire circle with configurable orientation.\nShowcasing: radius=0.25, segments=31, type=1, orientation=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

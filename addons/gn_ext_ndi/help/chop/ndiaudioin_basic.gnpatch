@@ -13,9 +13,7 @@
                     "value": ""
                 },
                 "bandwidth": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 }
             }
         },
@@ -73,14 +71,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NDI Audio In \u2014 Basic\n\nReceive NDI audio as CHOP channels.\nDefault bandwidth is 'Audio Only' for efficiency.\nEach audio channel becomes ch0, ch1, etc.\n\nRequires gn_ext_ndi GDExtension \u2014 see README.md.",
+            "text": "NDI Audio In CHOP — Basic\n\nReceive NDI audio channels as CHOP data. Supports multi-channel float audio.\nUsing: source=, bandwidth=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                450.0,
-                120.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

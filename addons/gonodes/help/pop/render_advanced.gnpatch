@@ -110,7 +110,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RenderPOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Render POP — Advanced\n\nRender particle point cloud into a COMP for 3D viewport.",
             "position": [
                 -100.0,
                 -100.0

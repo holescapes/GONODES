@@ -147,7 +147,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CameraCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "text": "Camera COMP — Tx\n\nCamera3D wrapper — defines the viewpoint for RenderTOP.\nShowcasing: tx=0.5, ty=0.5, tz=1.5, rx=-7.5.",
             "position": [
                 -100.0,
                 -100.0

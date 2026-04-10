@@ -31,14 +31,10 @@
             ],
             "parameters": {
                 "gravity": {
-                    "value": -9.8,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                    "value": -9.8
                 },
                 "damping": {
-                    "value": 0.99,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.99
                 },
                 "iterations": {
                     "value": 8
@@ -138,7 +134,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Cloth SOP \u2014 Basic Drape\n\nA 20\u00d720 grid falls under gravity with the top row\npinned. Verlet integration with 8 constraint\niterations and 2 substeps per frame.\nAdjust stiffness (0\u20131) to control fabric rigidity.",
+            "text": "Cloth SOP — Basic Drape\n\nA 20×20 grid falls under gravity with the top row\npinned. Verlet integration with 8 constraint\niterations and 2 substeps per frame.\nAdjust stiffness (0–1) to control fabric rigidity.",
             "position": [
                 -100.0,
                 -100.0

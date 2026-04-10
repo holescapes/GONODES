@@ -25,9 +25,7 @@
                     }
                 },
                 "h_align": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "min_size": {
                     "value": {
@@ -109,7 +107,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LabelUI \u2014 Basic\n\nDefault settings.",
+            "text": "Label UI — Basic\n\nDisplay-only text label driven by DAT input or expression.\nUsing: text=Label, font_size=16, h_align=0.",
             "position": [
                 -100.0,
                 -100.0

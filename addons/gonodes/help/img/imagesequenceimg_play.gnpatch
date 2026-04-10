@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ImageSequenceIMG \u2014 Parameters\n\nShowcases: resolution, play, speed.",
+            "text": "Image Sequence IMG — Play\n\nPlays a numbered image sequence as animated CPU Image frames.\nShowcasing: play=True, speed=0.5, index=0, loop_mode=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

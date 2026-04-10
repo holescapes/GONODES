@@ -127,14 +127,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FuseSOP \u2014 Parameters\n\nShowcases: threshold, recompute_normals.",
+            "text": "Fuse SOP — Threshold\n\nMerge coincident vertices within a distance threshold.\nShowcasing: threshold=0.0005, recompute_normals=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

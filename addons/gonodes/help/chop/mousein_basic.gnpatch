@@ -64,7 +64,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Mouse In \u2014 Basic\n\nOutputs mouse X, Y position and button states.",
+            "text": "Mouse In CHOP — Basic\n\nMouse position, delta, buttons, and scroll as CHOP channels.",
             "position": [
                 -100.0,
                 -100.0

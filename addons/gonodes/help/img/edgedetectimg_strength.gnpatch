@@ -87,7 +87,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "EdgeDetectIMG \u2014 Parameters\n\nShowcases: kernel, strength, invert.",
+            "text": "Noise IMG — Strength\n\nCPU procedural noise image (value noise, white noise).",
             "position": [
                 -100.0,
                 -100.0

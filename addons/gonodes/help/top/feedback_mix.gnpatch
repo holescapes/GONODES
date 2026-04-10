@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FeedbackTOP \u2014 Parameters\n\nShowcases: mix, rotate, reset.",
+            "text": "Feedback TOP — Mix\n\nBlends current frame with previous frame for trails/echoes.\nShowcasing: mix=0.45, rotate=0.5, reset=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

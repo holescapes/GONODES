@@ -81,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CallbackDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Callback DAT — Advanced\n\nEvent-driven callback DAT. Named scripts fire on target node events (onCook, onValueChange, onStart).\nCombined configuration: time_dependent=False, active=False, log_events=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

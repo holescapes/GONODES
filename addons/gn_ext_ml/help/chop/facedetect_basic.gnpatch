@@ -26,14 +26,10 @@
             ],
             "parameters": {
                 "detail": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "min_confidence": {
-                    "value": 0.5,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 }
             }
         },
@@ -99,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Face Detect \u2014 Basic\n\nWebcam -> face mesh landmarks as CHOP channels.\nKey points mode: eyes, nose, mouth, eyebrows, jawline.\nChannels: nose_tip:x, left_eye_outer:y, chin:z, etc.",
+            "text": "Face Detect CHOP — Basic\n\nFace mesh landmarks — 468 points as CHOP channels for face tracking and expression.\nUsing: detail=0, min_confidence=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                450.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

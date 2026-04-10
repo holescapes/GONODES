@@ -68,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SyphonOutTOP \u2014 Parameters\n\nShowcases: server_name, active.\nRequires gn_ext_syphon extension.",
+            "text": "Syphon Out TOP — Active\n\nShare the input texture via Syphon to other applications.\nShowcasing: active=True.",
             "position": [
                 -100.0,
                 -100.0

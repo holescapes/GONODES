@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "frequency": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "amplitude": {
-                    "value": 64.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 64.0
                 },
                 "offset": {
                     "value": 64.0
@@ -92,7 +88,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RtMidi Out \u2014 Basic\n\nSends LFO as MIDI CC.\nRequires gn_ext_midi DLL.",
+            "text": "Rt Midi Out CHOP — Basic\n\nSend MIDI via RtMidi native library.",
             "position": [
                 -100.0,
                 -100.0

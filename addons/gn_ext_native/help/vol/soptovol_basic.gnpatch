@@ -34,14 +34,10 @@
                     "value": 64
                 },
                 "radius": {
-                    "value": 0.08,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.08
                 },
                 "strength": {
-                    "value": 2.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 }
             }
         },
@@ -105,7 +101,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SOP to VOL (Native) \u2014 Point Splatting\n\nSphere vertices splatted into a 64\u00b3 density volume.\nEach point contributes a sphere falloff at radius 0.08.\nNative C++ computes AABB and rasterizes in one pass.",
+            "text": "SOP to VOL (Native) — Point Splatting\n\nSphere vertices splatted into a 64³ density volume.\nEach point contributes a sphere falloff at radius 0.08.\nNative C++ computes AABB and rasterizes in one pass.",
             "position": [
                 -100.0,
                 -150.0

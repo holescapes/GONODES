@@ -110,7 +110,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullCOMP \u2014 Basic\n\nDefault settings.",
+            "text": "Null COMP — Basic\n\nPass-through component for wire organization.",
             "position": [
                 -100.0,
                 -100.0

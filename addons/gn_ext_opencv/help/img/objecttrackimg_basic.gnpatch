@@ -1,0 +1,120 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "otrack1": {
+            "type": "ObjectTrackIMG",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "method": {
+                    "value": 1
+                },
+                "roi_x": {
+                    "value": 0.25
+                },
+                "roi_y": {
+                    "value": 0.25
+                },
+                "roi_w": {
+                    "value": 0.5
+                },
+                "roi_h": {
+                    "value": 0.5
+                }
+            }
+        },
+        "bridge1": {
+            "type": "ImgToTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "null_chop1": {
+            "type": "NullCHOP",
+            "position": [
+                500,
+                300
+            ],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "otrack1",
+            "to_port": 0
+        },
+        {
+            "from": "otrack1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "otrack1",
+            "from_port": 1,
+            "to": "null_chop1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Webcam IMG — Basic\n\nLive webcam/camera feed as CPU Image. Chain → ImgToTOP for GPU.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

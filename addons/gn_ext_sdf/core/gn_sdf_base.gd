@@ -52,9 +52,10 @@ func update_preview_control(control: Control) -> void:
 		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
 
 
-func render_for_viewer(viewer) -> void:
-	if cached_output != null and cached_output is GNSDFData:
-		var sd: GNSDFData = cached_output as GNSDFData
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	var data: GNData = get_output_data(port_index)
+	if data != null and data is GNSDFData:
+		var sd: GNSDFData = data as GNSDFData
 		var tree = sd.sdf_tree
 		if tree == null or tree.is_empty():
 			viewer.set_info("Empty SDF tree", "")

@@ -151,14 +151,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MountainSOP \u2014 Parameters\n\nShowcases: height, frequency, octaves.",
+            "text": "Mountain SOP — Height\n\nNoise-based vertex displacement along normals.\nShowcasing: height=0.25, frequency=1.0, octaves=3, lacunarity=1.0.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

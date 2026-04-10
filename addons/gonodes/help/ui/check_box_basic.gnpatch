@@ -13,9 +13,7 @@
                     "value": "Enable Effect"
                 },
                 "default_on": {
-                    "value": false,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": false
                 }
             }
         },
@@ -90,7 +88,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CheckBox UI \u00e2\u20ac\u201d Basic\n\nStandard checkbox with text label.\nUnlike ToggleUI (switch style), this is classic checkbox.\nState channel: value (0 or 1).",
+            "text": "CheckBox UI â€” Basic\n\nStandard checkbox with text label.\nUnlike ToggleUI (switch style), this is classic checkbox.\nState channel: value (0 or 1).",
             "position": [
                 -100.0,
                 -100.0

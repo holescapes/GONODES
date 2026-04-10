@@ -93,14 +93,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ChannelMixTOP \u2014 Parameters\n\nShowcases: r_source, g_source, b_source.",
+            "text": "Channel Mix TOP — Source\n\nSwap and remap RGBA channels with per-channel gain.\nShowcasing: r_source=1, g_source=1, b_source=1, a_source=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

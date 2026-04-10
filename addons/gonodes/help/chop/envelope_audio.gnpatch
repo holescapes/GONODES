@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
                     "value": 440.0,
@@ -92,7 +90,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Envelope CHOP \u2014 Audio Rate\n\nEnvelope follower on a 440 Hz tone.\nExtracts amplitude contour.",
+            "text": "Envelope CHOP — Audio Rate\n\nEnvelope follower on a 440 Hz tone.\nExtracts amplitude contour.",
             "position": [
                 -100.0,
                 -100.0

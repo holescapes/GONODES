@@ -2,39 +2,23 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "ik1": {
-            "type": "IkCHOPNative",
+        "src_wave": {
+            "type": "WaveCHOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "num_joints": {
-                    "value": 4,
-                    "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                "frequency": {
+                    "value": 2.0
                 },
-                "bone_length": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
-                },
-                "target_x": {
-                    "value": 2.5
-                },
-                "target_y": {
-                    "value": 1.5
-                },
-                "target_z": {
-                    "value": 0.0
-                },
-                "iterations": {
-                    "value": 10
+                "amplitude": {
+                    "value": 1.0
                 }
             }
         },
-        "null1": {
-            "type": "NullCHOP",
+        "focus1": {
+            "type": "IKCHOP",
             "position": [
                 450,
                 100
@@ -52,7 +36,7 @@
                     "value": {
                         "_type": "Vector2i",
                         "x": 512,
-                        "y": 256
+                        "y": 512
                     }
                 }
             }
@@ -68,7 +52,7 @@
                     "value": {
                         "_type": "Vector2i",
                         "x": 512,
-                        "y": 256
+                        "y": 512
                     }
                 },
                 "open": {
@@ -79,13 +63,13 @@
     },
     "connections": [
         {
-            "from": "ik1",
+            "from": "src_wave",
             "from_port": 0,
-            "to": "null1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "null1",
+            "from": "focus1",
             "from_port": 0,
             "to": "choptop1",
             "to_port": 0
@@ -101,14 +85,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "IK CHOP (Native) \u2014 FABRIK Solver\n\n4-joint chain reaching toward target (2.5, 1.5, 0).\nOutputs joint positions and rotations as channels.\nNative C++ FABRIK with forward/backward passes.",
+            "text": "IK CHOP — Basic\n\nFABRIK inverse kinematics chain solver with joint position output.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

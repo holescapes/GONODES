@@ -69,7 +69,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BezierMapTOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_mapper extension.",
+            "text": "Bezier Map TOP — Advanced\n\nBezier mesh warp for mapping textures onto curved surfaces.",
             "position": [
                 -100.0,
                 -100.0

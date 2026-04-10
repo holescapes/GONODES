@@ -89,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlurVOL \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Blur VOL — Advanced\n\n3D Gaussian or box blur on a volume.\nCombined configuration: radius=3, passes=3.",
             "position": [
                 -100.0,
                 -100.0

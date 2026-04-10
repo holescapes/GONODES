@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "value0": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 }
             }
         },
@@ -106,7 +104,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Interpolate CHOP \u2014 Basic\n\nLinear interpolation between 0 and 1 at 50%.",
+            "text": "Interpolate CHOP — Basic\n\nBlend between two channel sets with easing curves.\nUsing: interpolate=0.5.",
             "position": [
                 -100.0,
                 -100.0

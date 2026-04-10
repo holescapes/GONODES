@@ -73,7 +73,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AnalyzeTOP \u2014 Parameters\n\nShowcases: mode, kernel_size.",
+            "text": "Analyze TOP — Mode\n\nPer-pixel statistics: min, max, average, or sum over a kernel.\nShowcasing: mode=1, kernel_size=7.",
             "position": [
                 -100.0,
                 -100.0

@@ -17,9 +17,7 @@
                     }
                 },
                 "shape": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "stroke_color": {
                     "value": {
@@ -93,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "VectorPath TOP \u2014 Default Star\n\nPolygon mode with no CHOP input renders\na default 5-pointed star. Anti-aliased fill\nwith gold stroke on dark background.\nConnect a CHOP with x0,y0,x1,y1,... channels\nto drive custom point positions.",
+            "text": "VectorPath TOP — Default Star\n\nPolygon mode with no CHOP input renders\na default 5-pointed star. Anti-aliased fill\nwith gold stroke on dark background.\nConnect a CHOP with x0,y0,x1,y1,... channels\nto drive custom point positions.",
             "position": [
                 -50.0,
                 -70.0

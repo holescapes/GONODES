@@ -17,14 +17,10 @@
                     }
                 },
                 "scale": {
-                    "value": 4.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 4.0
                 },
                 "monochrome": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -84,14 +80,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ThresholdTOP \u2014 Basic\n\nDefault settings.",
+            "text": "Threshold TOP — Basic\n\nBinary black/white threshold with optional softness.\nUsing: threshold=0.5, softness=0.0, use_alpha=False.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

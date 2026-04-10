@@ -18,17 +18,13 @@
             ],
             "parameters": {
                 "num_points": {
-                    "value": 12,
-                    "expression": "(12 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 12
                 },
                 "seed": {
                     "value": 42
                 },
                 "offset": {
-                    "value": 0.01,
-                    "expression": "sin(time * 2.0) * 0.2",
-                    "mode": "EXPRESSION"
+                    "value": 0.01
                 },
                 "interior_faces": {
                     "value": true
@@ -109,7 +105,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Voronoi Shatter \u2014 Basic\n\nFractures a box into 12 Voronoi pieces.\nEach piece is a separate surface with\na 'piece' point attribute for identification.\nOffset adds a small gap between fragments.",
+            "text": "Box SOP — Basic\n\nBox mesh with per-axis size and subdivisions.",
             "position": [
                 -100.0,
                 -100.0

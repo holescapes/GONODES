@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "roughness": {
-                    "value": 0.8,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.8
                 },
                 "amplitude": {
-                    "value": 1.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 }
             }
         },
@@ -93,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Smooth CHOP \u2014 Basic\n\nGaussian smoothing on noisy signal.\nWidth controls kernel size.",
+            "text": "Smooth CHOP — Basic\n\nBiquad Butterworth IIR filter (low-pass, high-pass, band-pass).\nUsing: width=0.2.",
             "position": [
                 -100.0,
                 -100.0

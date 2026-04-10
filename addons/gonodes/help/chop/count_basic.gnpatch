@@ -28,14 +28,10 @@
             ],
             "parameters": {
                 "threshold": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "step": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "limit_max": {
                     "value": 100.0
@@ -119,7 +115,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Count CHOP \u2014 Edge Counter\n\nCounts rising edges of a 2 Hz LFO.\nLoops at 100, step of 1 per trigger.\nUseful for event counting.",
+            "text": "Count CHOP — Edge Counter\n\nCounts rising edges of a 2 Hz LFO.\nLoops at 100, step of 1 per trigger.\nUseful for event counting.",
             "position": [
                 -100.0,
                 -150.0

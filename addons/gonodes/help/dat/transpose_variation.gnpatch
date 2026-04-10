@@ -85,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TransposeDAT \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Transpose DAT — Variation\n\nSwap rows and columns.",
             "position": [
                 -100.0,
                 -100.0

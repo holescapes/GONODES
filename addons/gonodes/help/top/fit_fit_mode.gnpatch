@@ -86,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FitTOP \u2014 Parameters\n\nShowcases: fit_mode, resolution, border_color.",
+            "text": "Fit TOP — Mode\n\nAspect-aware resize: fit, fill, stretch, or letterbox with border colour.\nShowcasing: fit_mode=1.",
             "position": [
                 -100.0,
                 -100.0

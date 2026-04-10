@@ -1,0 +1,61 @@
+{
+	"generator": "GONODES",
+	"description": "Spout texture sharing demo (Windows DirectX 11). Chain 1: NoiseTOP → BlurTOP for soft glow → SpoutOutTOP broadcasting as 'GONODES_Test' to external apps (Resolume, OBS, etc.). Chain 2: SpoutInTOP receiving from any active sender → NullTOP for monitoring. Demonstrates GPU-direct zero-copy texture interop.",
+	"connections": [
+		{
+			"from": "gen_src",
+			"from_port": 0,
+			"to": "blur_glow",
+			"to_port": 0
+		},
+		{
+			"from": "blur_glow",
+			"from_port": 0,
+			"to": "spout_send",
+			"to_port": 0
+		},
+		{
+			"from": "spout_recv",
+			"from_port": 0,
+			"to": "recv_view",
+			"to_port": 0
+		}
+	],
+	"nodes": {
+		"gen_src": {
+			"type": "NoiseTOP",
+			"position": [0.0, 0.0],
+			"parameters": {
+				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}},
+				"seed": {"value": 13}
+			}
+		},
+		"blur_glow": {
+			"type": "BlurTOP",
+			"position": [400.0, 0.0],
+			"parameters": {
+				"size": {"value": 6.0}
+			}
+		},
+		"spout_send": {
+			"type": "SpoutOutTOP",
+			"position": [800.0, 0.0],
+			"parameters": {
+				"sender_name": {"value": "GONODES_Test"},
+				"active": {"value": true}
+			}
+		},
+		"spout_recv": {
+			"type": "SpoutInTOP",
+			"position": [0.0, 300.0],
+			"parameters": {
+				"sender_name": {"value": ""}
+			}
+		},
+		"recv_view": {
+			"type": "NullTOP",
+			"position": [400.0, 300.0],
+			"parameters": {}
+		}
+	}
+}

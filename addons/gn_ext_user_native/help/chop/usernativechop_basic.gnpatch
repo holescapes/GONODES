@@ -13,14 +13,10 @@
                     "value": "MyUserCHOP"
                 },
                 "auto_build": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "time_dep": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 }
             }
         },
@@ -78,7 +74,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserNativeCHOP \u2014 Basic C++ Signal\n\nWrite custom CHOP operators in C++ with hot-reload.\nThe default example generates phase-offset sine channels.\n\nClick the node, then 'Edit C++ \u2197' in the inspector.\nUse the Templates menu for CHOP-specific starters,\nor load a full example like Signal Generator.",
+            "text": "UserNativeCHOP — Basic C++ Signal\n\nWrite custom CHOP operators in C++ with hot-reload.\nThe default example generates phase-offset sine channels.\n\nClick the node, then 'Edit C++ ↗' in the inspector.\nUse the Templates menu for CHOP-specific starters,\nor load a full example like Signal Generator.",
             "position": [
                 -100.0,
                 -100.0

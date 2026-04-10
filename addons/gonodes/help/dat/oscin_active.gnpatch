@@ -84,14 +84,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OscInDAT \u2014 Parameters\n\nShowcases: port, max_rows, active.",
+            "text": "Osc In DAT — Active\n\nReceive OSC messages into a DAT table via UDP.\nShowcasing: port=8999, max_rows=99, active=True, clear=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

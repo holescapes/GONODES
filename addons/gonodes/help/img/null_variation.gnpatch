@@ -70,7 +70,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NullIMG \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Null IMG — Variation\n\nPass-through for organization and references.",
             "position": [
                 -100.0,
                 -100.0

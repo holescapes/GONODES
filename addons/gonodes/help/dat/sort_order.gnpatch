@@ -27,9 +27,7 @@
                     "mode": "EXPRESSION"
                 },
                 "order": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "sort_type": {
                     "value": 1
@@ -99,7 +97,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SortDAT \u2014 Parameters\n\nShowcases: sort_col, order, sort_type.",
+            "text": "Sort DAT — Order\n\nSort rows by a column (alphabetic or numeric).\nShowcasing: sort_col=0, order=1, sort_type=1.",
             "position": [
                 -100.0,
                 -100.0

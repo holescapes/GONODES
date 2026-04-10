@@ -75,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NormalMapTOP \u2014 Parameters\n\nShowcases: strength, invert_y.",
+            "text": "Normal Map TOP — Strength\n\nGenerate a tangent-space normal map from a height/bump texture.\nShowcasing: strength=0.5, invert_y=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

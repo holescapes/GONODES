@@ -130,14 +130,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GDScriptSCRIPT (SOP template) \u2014 Parameters\n\nShowcases: time_dependent, cook_once, force_active.",
+            "text": "GDScript SCRIPT — Dependent\n\nUser-scripted node. Write GDScript with @output annotations for any data type. Template dropdown provides CHOP/SOP/DAT/IMG starting code.\nShowcasing: time_dependent=True, cook_once=True, force_active=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

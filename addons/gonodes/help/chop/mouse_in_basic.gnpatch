@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "normalized": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "buttons": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "scroll": {
                     "value": true
@@ -78,7 +74,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Mouse In CHOP \u2014 Position & Buttons\n\nOutputs tx, ty (normalized), dx, dy (delta),\nlmb, rmb, mmb, scroll channels.",
+            "text": "Mouse In CHOP — Position & Buttons\n\nOutputs tx, ty (normalized), dx, dy (delta),\nlmb, rmb, mmb, scroll channels.",
             "position": [
                 -100.0,
                 -150.0

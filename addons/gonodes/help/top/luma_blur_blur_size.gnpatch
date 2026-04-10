@@ -81,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LumaBlurTOP \u2014 Parameters\n\nShowcases: blur_size, quality, luma_threshold.",
+            "text": "Luma Blur TOP — Size\n\nLuminance-weighted selective blur (bright or dark areas blurred more).\nShowcasing: blur_size=2.0, quality=3, luma_threshold=0.25, blur_bright=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -37,9 +37,7 @@
                     "value": "/gonodes"
                 },
                 "send_mode": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 }
             }
         }
@@ -56,14 +54,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "OscOUT \u2014 Basic\n\nDefault settings.",
+            "text": "Osc OUT — Basic\n\nSend CHOP channels as OSC messages over UDP.\nUsing: host=127.0.0.1, port=9001, active=False, prefix=/gonodes.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

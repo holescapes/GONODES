@@ -68,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CrossTOP \u2014 Parameters\n\nShowcases: cross.",
+            "text": "Cross TOP — Cross\n\nLinear crossfade between two textures.\nShowcasing: cross=0.25.",
             "position": [
                 -100.0,
                 -100.0

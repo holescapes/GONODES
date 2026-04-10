@@ -21,14 +21,10 @@
                     "value": 2
                 },
                 "axis": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "scale_u": {
-                    "value": 1.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "scale_v": {
                     "value": 1.0
@@ -133,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UV Project SOP \u2014 Spherical Mapping\n\nAssigns spherical UV projection.\nAlso supports planar and cylindrical modes.",
+            "text": "UV Project SOP — Spherical Mapping\n\nAssigns spherical UV projection.\nAlso supports planar and cylindrical modes.",
             "position": [
                 -100.0,
                 -150.0

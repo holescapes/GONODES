@@ -70,9 +70,7 @@
                     }
                 },
                 "shape": {
-                    "value": 2,
-                    "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 2
                 },
                 "stroke_color": {
                     "value": {
@@ -158,7 +156,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "VectorPath TOP \u2014 Animated Circle\n\nTwo LFOs (sine + cosine via phase offset)\ndrive the center of a circle via x0/y0 channels.\n128-segment anti-aliased outline with translucent\nfill. Great for animated data viz markers.",
+            "text": "VectorPath TOP — Animated Circle\n\nTwo LFOs (sine + cosine via phase offset)\ndrive the center of a circle via x0/y0 channels.\n128-segment anti-aliased outline with translucent\nfill. Great for animated data viz markers.",
             "position": [
                 -100.0,
                 -80.0

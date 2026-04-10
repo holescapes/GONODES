@@ -10,17 +10,13 @@
             ],
             "parameters": {
                 "num_cues": {
-                    "value": 3,
-                    "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 3
                 },
                 "cue0_name": {
                     "value": "start"
                 },
                 "cue0_time": {
-                    "value": 0.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.0
                 },
                 "cue0_duration": {
                     "value": 4.0
@@ -141,14 +137,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Cue CHOP \u2014 Basic\n\nCueDAT \u2192 CueCHOP in Timeline mode (auto-advance by engine time).\n3 cues at 0 s, 4 s, and 10 s.\nOutput channels: active_cue, cue_progress, transition,\nnext_cue, cue_elapsed, cue_remaining.",
+            "text": "Cue DAT — Basic\n\nCue list manager — named cues with timing, transitions, and parameter overrides.\nUsing: num_cues=3, cue0_name=start, cue0_time=0.0, cue0_duration=4.0.",
             "position": [
                 -100.0,
                 -120.0
             ],
             "size": [
-                530.0,
-                110.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

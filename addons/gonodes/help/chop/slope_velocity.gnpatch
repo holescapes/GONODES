@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
                     "value": 0.5,
@@ -102,7 +100,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Slope CHOP \u2014 Velocity Detection\n\nComputes the first derivative (velocity) of a sine wave.\nNormalize is on; multiply=2.0 amplifies the result.\nUseful for detecting rate of change in any animated signal.",
+            "text": "Slope CHOP — Velocity Detection\n\nComputes the first derivative (velocity) of a sine wave.\nNormalize is on; multiply=2.0 amplifies the result.\nUseful for detecting rate of change in any animated signal.",
             "position": [
                 50.0,
                 -60.0

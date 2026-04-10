@@ -2,46 +2,41 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "isosurface1": {
-            "type": "IsoSurfaceSOPNative",
+        "src_grid": {
+            "type": "GridSOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "surface_type": {
-                    "value": 0,
-                    "expression": "cos(time * 0.6) * 1.5",
-                    "mode": "EXPRESSION"
+                "rows": {
+                    "value": 10
                 },
-                "resolution": {
-                    "value": 40
-                },
-                "bounds_size": {
-                    "value": 6.28,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
-                },
-                "threshold": {
-                    "value": 0.0
-                },
-                "frequency": {
-                    "value": 1.0
+                "cols": {
+                    "value": 10
                 }
             }
         },
-        "geo1": {
-            "type": "GeometryCOMP",
+        "focus1": {
+            "type": "IsoSurfaceSOP",
             "position": [
                 450,
                 100
             ],
             "parameters": {}
         },
-        "cam1": {
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
             "type": "CameraCOMP",
             "position": [
-                450,
+                800,
                 300
             ],
             "parameters": {
@@ -49,17 +44,17 @@
                     "value": 0
                 },
                 "ty": {
-                    "value": 0
+                    "value": 0.5
                 },
                 "tz": {
-                    "value": 8
+                    "value": 3
                 }
             }
         },
-        "render1": {
+        "render_view": {
             "type": "RenderTOP",
             "position": [
-                800,
+                1100,
                 100
             ],
             "parameters": {
@@ -75,7 +70,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1150,
+                1450,
                 100
             ],
             "parameters": {
@@ -94,25 +89,31 @@
     },
     "connections": [
         {
-            "from": "isosurface1",
+            "from": "src_grid",
             "from_port": 0,
-            "to": "geo1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "geo1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "render1",
+            "to": "geo_view",
             "to_port": 0
         },
         {
-            "from": "cam1",
+            "from": "geo_view",
             "from_port": 0,
-            "to": "render1",
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
             "to_port": 1
         },
         {
-            "from": "render1",
+            "from": "render_view",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -122,14 +123,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "IsoSurface SOP (Native) \u00e2\u20ac\u201d Gyroid Surface\n\nMarching-cubes extraction of a Gyroid implicit surface.\nTry switching surface_type to Schwarz-P, Schwarz-D,\nSphere, or Torus. Increase resolution for finer detail.",
+            "text": "Iso Surface SOP — Basic\n\nAnalytic implicit surface via marching cubes (Gyroid, Schwarz-P, Torus, custom).",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

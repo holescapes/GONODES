@@ -81,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TableDAT \u2014 Parameters\n\nShowcases: rows, cols, headers.",
+            "text": "Table DAT — Input\n\nManual editable data table (CSV-style).\nShowcasing: rows=3, cols=2, merge_input=True.",
             "position": [
                 -100.0,
                 -100.0

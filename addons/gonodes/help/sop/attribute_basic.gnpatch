@@ -28,14 +28,10 @@
                     "value": "pscale"
                 },
                 "source": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "value": {
-                    "value": 1.0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1.0
                 },
                 "expression": {
                     "value": "sin(float(i) / float(n) * 6.28)"
@@ -149,14 +145,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AttributeSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Attribute SOP — Basic\n\nCreate or modify per-vertex point attributes from expressions or presets.\nUsing: name=pscale, source=0, value=1.0, expression=sin(float(i) / float(n) * 6.28).",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

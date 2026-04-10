@@ -119,9 +119,10 @@ static func _reparent_viewer_nodes(vp: SubViewport) -> void:
 			vp.add_child(node)
 
 
-func render_for_viewer(viewer) -> void:
-	if cached_output is GNGeoData:
-		var geo: GNGeoData = cached_output as GNGeoData
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	var data: GNData = get_output_data(port_index)
+	if data is GNGeoData:
+		var geo: GNGeoData = data as GNGeoData
 		if geo.mesh != null:
 			_ensure_viewer_scene()
 			var vp: SubViewport = viewer.get_3d_viewport()

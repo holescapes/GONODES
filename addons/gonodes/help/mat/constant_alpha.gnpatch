@@ -24,9 +24,7 @@
                     "mode": "EXPRESSION"
                 },
                 "cull_mode": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 }
             }
         },
@@ -136,7 +134,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ConstantMAT \u2014 Parameters\n\nShowcases: color, alpha, cull_mode.",
+            "text": "Constant MAT — Alpha\n\nFlat unlit (constant) material — no lighting applied.\nShowcasing: alpha=0.5, cull_mode=1.",
             "position": [
                 -100.0,
                 -100.0

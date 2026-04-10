@@ -76,7 +76,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FileInDAT \u2014 Parameters\n\nShowcases: filepath, mode, has_header.",
+            "text": "File In DAT — Mode\n\nRead a file (CSV, TSV, JSON, text) from disk into a table.\nShowcasing: mode=1, has_header=True.",
             "position": [
                 -100.0,
                 -100.0

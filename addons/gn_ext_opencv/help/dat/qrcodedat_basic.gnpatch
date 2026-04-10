@@ -1,0 +1,101 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "qr1": {
+            "type": "QRCodeDAT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        },
+        "display1": {
+            "type": "TextTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "font_size": {
+                    "value": 16
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "qr1",
+            "to_port": 0
+        },
+        {
+            "from": "qr1",
+            "from_port": 0,
+            "to": "display1",
+            "to_port": 0
+        },
+        {
+            "from": "display1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "QR Code DAT — Basic\n\nQR / barcode detection and decoding. Outputs decoded text and bounding corners.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

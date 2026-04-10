@@ -1,0 +1,111 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                50
+            ],
+            "parameters": {}
+        },
+        "noise2": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                250
+            ],
+            "parameters": {}
+        },
+        "fmatch1": {
+            "type": "FeatureMatchIMG",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "method": {
+                    "value": 0
+                },
+                "max_features": {
+                    "value": 500
+                }
+            }
+        },
+        "bridge1": {
+            "type": "ImgToTOP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "fmatch1",
+            "to_port": 0
+        },
+        {
+            "from": "noise2",
+            "from_port": 0,
+            "to": "fmatch1",
+            "to_port": 1
+        },
+        {
+            "from": "fmatch1",
+            "from_port": 0,
+            "to": "bridge1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "FeatureMatchIMG \u2014 Basic ORB\n\nORB feature matching between two noise images.\nMatch lines drawn on a side-by-side composite.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

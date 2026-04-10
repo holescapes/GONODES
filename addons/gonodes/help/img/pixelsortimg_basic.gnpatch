@@ -18,14 +18,10 @@
             ],
             "parameters": {
                 "direction": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "sort_mode": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "threshold_low": {
                     "value": 0.1
@@ -90,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PixelSortIMG \u2014 Basic\n\nDefault settings.",
+            "text": "Noise IMG — Basic\n\nCPU procedural noise image (value noise, white noise).",
             "position": [
                 -100.0,
                 -100.0

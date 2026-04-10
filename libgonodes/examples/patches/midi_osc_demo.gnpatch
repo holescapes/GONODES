@@ -1,0 +1,149 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "MIDI/OSC demo — protocol inputs, event triggers, transport-driven noise, resolution override.",
+    "nodes": {
+        "midi_in": {
+            "type": "MidiInCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "label": {
+                    "value": "MIDI from host"
+                }
+            }
+        },
+        "osc_in": {
+            "type": "OscInCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "label": {
+                    "value": "OSC from host"
+                },
+                "address": {
+                    "value": "/control/*"
+                }
+            }
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [400, 200],
+            "parameters": {
+                "operation": {
+                    "value": 0
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [700, 200],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1280,
+                        "y": 720
+                    }
+                },
+                "scale": {
+                    "value": 5.0
+                },
+                "monochrome": {
+                    "value": false
+                }
+            }
+        },
+        "level1": {
+            "type": "LevelTOP",
+            "position": [1000, 200],
+            "parameters": {
+                "brightness": {
+                    "value": 1.0
+                },
+                "gamma": {
+                    "value": 1.0
+                }
+            }
+        },
+        "host_out": {
+            "type": "HostOutTOP",
+            "position": [1300, 200],
+            "parameters": {
+                "label": {
+                    "value": "Main output"
+                }
+            }
+        },
+        "data_out": {
+            "type": "HostOutCHOP",
+            "position": [700, 400],
+            "parameters": {
+                "label": {
+                    "value": "Protocol data"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "midi_in",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 0
+        },
+        {
+            "from": "osc_in",
+            "from_port": 0,
+            "to": "math1",
+            "to_port": 1
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "level1",
+            "to_port": 0
+        },
+        {
+            "from": "level1",
+            "from_port": 0,
+            "to": "host_out",
+            "to_port": 0
+        },
+        {
+            "from": "math1",
+            "from_port": 0,
+            "to": "data_out",
+            "to_port": 0
+        }
+    ],
+    "host_io": {
+        "inputs": [],
+        "outputs": [
+            {
+                "label": "Main output",
+                "family": "TOP",
+                "node": "host_out"
+            },
+            {
+                "label": "Protocol data",
+                "family": "CHOP",
+                "node": "data_out"
+            }
+        ],
+        "parameters": [
+            {
+                "label": "Noise Scale",
+                "node": "noise1",
+                "param": "scale",
+                "type": "float",
+                "range": [0.1, 50.0]
+            },
+            {
+                "label": "Brightness",
+                "node": "level1",
+                "param": "brightness",
+                "type": "float",
+                "range": [0.0, 2.0]
+            }
+        ]
+    }
+}

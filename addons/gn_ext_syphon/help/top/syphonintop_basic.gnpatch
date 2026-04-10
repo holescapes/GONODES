@@ -50,7 +50,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SyphonInTOP — Basic\n\nDefault settings.\nRequires gn_ext_syphon extension.",
+            "text": "Syphon In TOP — Basic\n\nReceive a shared GPU texture from another Syphon server application.",
             "position": [
                 -100.0,
                 -100.0

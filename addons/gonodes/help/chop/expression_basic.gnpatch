@@ -68,14 +68,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Expression CHOP \u2014 Basic\n\nGenerates sine wave using expression.\nme.time provides elapsed seconds.",
+            "text": "Expression CHOP — Basic\n\nPer-channel GDScript expression evaluation with time variables.\nUsing: expr0=sin(me.time * 3.14).",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

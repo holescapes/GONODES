@@ -128,7 +128,7 @@ func get_light() -> Light3D:
 	return _light
 
 
-func render_for_viewer(viewer) -> void:
+func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _light == null:
 		viewer.set_info("No light", "LightCOMP")
 		return

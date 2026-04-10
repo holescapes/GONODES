@@ -72,7 +72,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CropTOP \u2014 Parameters\n\nShowcases: resolution.",
+            "text": "Crop TOP — Variation\n\nCrop a UV sub-region from the input texture.",
             "position": [
                 -100.0,
                 -100.0

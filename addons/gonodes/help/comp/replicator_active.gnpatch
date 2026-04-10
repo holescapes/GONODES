@@ -119,14 +119,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ReplicatorCOMP \u2014 Parameters\n\nShowcases: count, template_type, prefix.",
+            "text": "Replicator COMP — Active\n\nTable-driven replicator — create N copies of a template with per-instance overrides.\nShowcasing: count=2, active=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -1,0 +1,273 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "description": "LODCOMP — Basic. Three detail levels switching based on camera distance.",
+    "nodes": {
+        "sphere_hi": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 1.0
+                },
+                "radial_segments": {
+                    "value": 32
+                },
+                "rings": {
+                    "value": 16
+                }
+            }
+        },
+        "geo_hi": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                0
+            ],
+            "parameters": {}
+        },
+        "sphere_med": {
+            "type": "SphereSOP",
+            "position": [
+                0,
+                200
+            ],
+            "parameters": {
+                "radius": {
+                    "value": 1.0
+                },
+                "radial_segments": {
+                    "value": 12
+                },
+                "rings": {
+                    "value": 6
+                }
+            }
+        },
+        "geo_med": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                200
+            ],
+            "parameters": {}
+        },
+        "box_lo": {
+            "type": "BoxSOP",
+            "position": [
+                0,
+                400
+            ],
+            "parameters": {}
+        },
+        "geo_lo": {
+            "type": "GeometryCOMP",
+            "position": [
+                300,
+                400
+            ],
+            "parameters": {}
+        },
+        "lod1": {
+            "type": "LODCOMP",
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "dist1": {
+                    "value": 8.0
+                },
+                "dist2": {
+                    "value": 20.0
+                },
+                "auto_lod": {
+                    "value": true
+                }
+            }
+        },
+        "note1": {
+            "type": "NoteDAT",
+            "position": [
+                600,
+                500
+            ],
+            "parameters": {
+                "text": {
+                    "value": "LODCOMP — Basic\n\nThree LOD levels:\n  LOD 0: high-poly sphere (32 segments)\n  LOD 1: low-poly sphere (12 segments)\n  LOD 2: box (lowest detail)\n\nAuto LOD switches based on camera distance.\nMove the camera to see levels change."
+                }
+            }
+        },
+        "merge1": {
+            "type": "MergeCOMP",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 2.0
+                },
+                "tz": {
+                    "value": 5.0
+                },
+                "use_look_at": {
+                    "value": true
+                },
+                "look_at_y": {
+                    "value": 0.0
+                }
+            }
+        },
+        "light1": {
+            "type": "LightCOMP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {
+                "light_type": {
+                    "value": 0
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1500,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere_hi",
+            "from_port": 0,
+            "to": "geo_hi",
+            "to_port": 0
+        },
+        {
+            "from": "sphere_med",
+            "from_port": 0,
+            "to": "geo_med",
+            "to_port": 0
+        },
+        {
+            "from": "box_lo",
+            "from_port": 0,
+            "to": "geo_lo",
+            "to_port": 0
+        },
+        {
+            "from": "geo_hi",
+            "from_port": 0,
+            "to": "lod1",
+            "to_port": 0
+        },
+        {
+            "from": "geo_med",
+            "from_port": 0,
+            "to": "lod1",
+            "to_port": 1
+        },
+        {
+            "from": "geo_lo",
+            "from_port": 0,
+            "to": "lod1",
+            "to_port": 2
+        },
+        {
+            "from": "lod1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 1
+        },
+        {
+            "from": "light1",
+            "from_port": 0,
+            "to": "merge1",
+            "to_port": 2
+        },
+        {
+            "from": "merge1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LOD COMP — Basic\n\nLevel-of-detail switcher — swap geometry based on camera distance.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

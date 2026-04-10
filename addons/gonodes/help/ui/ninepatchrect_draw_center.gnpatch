@@ -108,14 +108,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "NinePatchRectUI \u2014 Parameters\n\nShowcases: patch_left, patch_top, patch_right.",
+            "text": "Nine Patch Rect UI — Center\n\nStretchable nine-patch texture display from TOP input.\nShowcasing: patch_left=7, patch_top=7, patch_right=7, patch_bottom=7.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

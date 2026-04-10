@@ -65,9 +65,7 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "DAT Output",
-                    "expression": "str(op(\"serial_tx1\"))",
-                    "mode": "EXPRESSION"
+                    "value": "DAT Output"
                 },
                 "resolution": {
                     "value": {
@@ -97,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Serial Send DAT \u2014 Basic\n\nSends a constant text message on pulse.\nConstantDAT feeds a single row to SerialSendDAT.\nLine ending = LF appended to each message.\nUse Send Now pulse or set Continuous for auto-send.",
+            "text": "Serial Send DAT — Basic\n\nSends text or binary data out a serial port. Accepts a DAT input (rows are sent as messages). Uses native C++ serial I/O via GNNativeSerialPort.\nUsing: port=COM3, baud_rate=9600, line_ending=1, active=False.",
             "position": [
                 -50.0,
                 -50.0
             ],
             "size": [
-                520.0,
-                110.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

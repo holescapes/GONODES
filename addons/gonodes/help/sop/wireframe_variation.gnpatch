@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WireframeSOP \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "Wireframe SOP — Variation\n\nConvert triangles to deduplicated wireframe lines.",
             "position": [
                 -100.0,
                 -100.0

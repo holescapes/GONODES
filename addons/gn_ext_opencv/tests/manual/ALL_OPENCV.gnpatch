@@ -1,0 +1,865 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "webcam1": {
+            "type": "WebcamIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "noise1": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                1700
+            ],
+            "parameters": {}
+        },
+        "thresh1": {
+            "type": "ThresholdIMG",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "method": {
+                    "value": 0
+                },
+                "threshold": {
+                    "value": 128.0
+                }
+            }
+        },
+        "morph1": {
+            "type": "MorphIMG",
+            "position": [
+                500,
+                300
+            ],
+            "parameters": {
+                "operation": {
+                    "value": 2
+                },
+                "kernel_size": {
+                    "value": 5
+                }
+            }
+        },
+        "contour1": {
+            "type": "ContourIMG",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "mode": {
+                    "value": 0
+                },
+                "thickness": {
+                    "value": 2
+                }
+            }
+        },
+        "blob1": {
+            "type": "BlobTrackIMG",
+            "position": [
+                900,
+                300
+            ],
+            "parameters": {
+                "min_area": {
+                    "value": 100.0
+                },
+                "draw_ids": {
+                    "value": true
+                }
+            }
+        },
+        "bgsub1": {
+            "type": "BackgroundSubtractIMG",
+            "position": [
+                500,
+                700
+            ],
+            "parameters": {
+                "method": {
+                    "value": 0
+                },
+                "history": {
+                    "value": 300
+                }
+            }
+        },
+        "flow1": {
+            "type": "OpticalFlowIMG",
+            "position": [
+                500,
+                900
+            ],
+            "parameters": {
+                "mag_scale": {
+                    "value": 15.0
+                }
+            }
+        },
+        "ctrack1": {
+            "type": "ColorTrackIMG",
+            "position": [
+                500,
+                1100
+            ],
+            "parameters": {
+                "hue_range": {
+                    "value": 20.0
+                },
+                "sat_min": {
+                    "value": 80.0
+                }
+            }
+        },
+        "otrack1": {
+            "type": "ObjectTrackIMG",
+            "position": [
+                500,
+                1300
+            ],
+            "parameters": {
+                "method": {
+                    "value": 1
+                }
+            }
+        },
+        "edge1": {
+            "type": "EdgeDetectIMG",
+            "position": [
+                500,
+                1500
+            ],
+            "parameters": {}
+        },
+        "hlines1": {
+            "type": "HoughLinesIMG",
+            "position": [
+                900,
+                1500
+            ],
+            "parameters": {
+                "threshold": {
+                    "value": 40
+                },
+                "min_length": {
+                    "value": 30.0
+                }
+            }
+        },
+        "hcirc1": {
+            "type": "HoughCirclesIMG",
+            "position": [
+                500,
+                1700
+            ],
+            "parameters": {
+                "dp": {
+                    "value": 1.5
+                },
+                "min_dist": {
+                    "value": 40.0
+                }
+            }
+        },
+        "conv1": {
+            "type": "ConvolveIMG",
+            "position": [
+                500,
+                1900
+            ],
+            "parameters": {
+                "preset": {
+                    "value": 1
+                }
+            }
+        },
+        "undist1": {
+            "type": "CameraUndistortIMG",
+            "position": [
+                500,
+                2100
+            ],
+            "parameters": {}
+        },
+        "warp1": {
+            "type": "PerspectiveWarpIMG",
+            "position": [
+                500,
+                2300
+            ],
+            "parameters": {
+                "src_x0": {
+                    "value": 0.1
+                },
+                "src_y0": {
+                    "value": 0.1
+                },
+                "src_x1": {
+                    "value": 0.9
+                },
+                "src_y1": {
+                    "value": 0.05
+                }
+            }
+        },
+        "aruco1": {
+            "type": "ArucoDetectIMG",
+            "position": [
+                500,
+                2500
+            ],
+            "parameters": {
+                "dictionary": {
+                    "value": 0
+                }
+            }
+        },
+        "arucopose1": {
+            "type": "ArucoPoseDAT",
+            "position": [
+                900,
+                2500
+            ],
+            "parameters": {
+                "dictionary": {
+                    "value": 0
+                }
+            }
+        },
+        "qr1": {
+            "type": "QRCodeDAT",
+            "position": [
+                500,
+                2700
+            ],
+            "parameters": {}
+        },
+        "fmatch1": {
+            "type": "FeatureMatchIMG",
+            "position": [
+                500,
+                2900
+            ],
+            "parameters": {
+                "method": {
+                    "value": 0
+                },
+                "max_features": {
+                    "value": 300
+                }
+            }
+        },
+        "stereodepth1": {
+            "type": "StereoDepthIMG",
+            "position": [
+                500,
+                3100
+            ],
+            "parameters": {}
+        },
+        "draw1": {
+            "type": "DrawOverlayIMG",
+            "position": [
+                500,
+                3300
+            ],
+            "parameters": {
+                "draw_mode": {
+                    "value": 4
+                },
+                "label": {
+                    "value": "OpenCV Extension"
+                },
+                "font_scale": {
+                    "value": 2.0
+                },
+                "x1": {
+                    "value": 0.05
+                },
+                "y1": {
+                    "value": 0.5
+                }
+            }
+        },
+        "calib1": {
+            "type": "CameraCalibDAT",
+            "position": [
+                500,
+                3500
+            ],
+            "parameters": {
+                "cols": {
+                    "value": 9
+                },
+                "rows": {
+                    "value": 6
+                }
+            }
+        },
+        "bridge_thresh": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                100
+            ],
+            "parameters": {}
+        },
+        "bridge_blob": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                300
+            ],
+            "parameters": {}
+        },
+        "bridge_bgsub": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                700
+            ],
+            "parameters": {}
+        },
+        "bridge_flow": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                900
+            ],
+            "parameters": {}
+        },
+        "bridge_ctrack": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                1100
+            ],
+            "parameters": {}
+        },
+        "bridge_otrack": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                1300
+            ],
+            "parameters": {}
+        },
+        "bridge_hlines": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                1500
+            ],
+            "parameters": {}
+        },
+        "bridge_aruco": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                2500
+            ],
+            "parameters": {}
+        },
+        "bridge_draw": {
+            "type": "ImgToTOP",
+            "position": [
+                1300,
+                3300
+            ],
+            "parameters": {}
+        },
+        "layout1": {
+            "type": "LayoutTOP",
+            "position": [
+                1700,
+                700
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                2000,
+                700
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1280,
+                        "y": 960
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        },
+        "null_blob": {
+            "type": "NullCHOP",
+            "position": [
+                900,
+                500
+            ],
+            "parameters": {}
+        },
+        "null_contour": {
+            "type": "NullDAT",
+            "position": [
+                900,
+                -100
+            ],
+            "parameters": {}
+        },
+        "null_ctrack": {
+            "type": "NullCHOP",
+            "position": [
+                500,
+                1200
+            ],
+            "parameters": {}
+        },
+        "null_otrack": {
+            "type": "NullCHOP",
+            "position": [
+                500,
+                1400
+            ],
+            "parameters": {}
+        },
+        "null_hlines": {
+            "type": "NullDAT",
+            "position": [
+                900,
+                1600
+            ],
+            "parameters": {}
+        },
+        "null_hcirc": {
+            "type": "NullDAT",
+            "position": [
+                500,
+                1800
+            ],
+            "parameters": {}
+        },
+        "null_aruco": {
+            "type": "NullDAT",
+            "position": [
+                500,
+                2600
+            ],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "thresh1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "bgsub1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "flow1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "ctrack1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "otrack1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "edge1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "undist1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "warp1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "aruco1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "arucopose1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "qr1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "draw1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "calib1",
+            "to_port": 0
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "fmatch1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "fmatch1",
+            "to_port": 1
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "stereodepth1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "stereodepth1",
+            "to_port": 1
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "hcirc1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "conv1",
+            "to_port": 0
+        },
+        {
+            "from": "thresh1",
+            "from_port": 0,
+            "to": "morph1",
+            "to_port": 0
+        },
+        {
+            "from": "thresh1",
+            "from_port": 0,
+            "to": "contour1",
+            "to_port": 0
+        },
+        {
+            "from": "morph1",
+            "from_port": 0,
+            "to": "blob1",
+            "to_port": 0
+        },
+        {
+            "from": "edge1",
+            "from_port": 0,
+            "to": "hlines1",
+            "to_port": 0
+        },
+        {
+            "from": "contour1",
+            "from_port": 0,
+            "to": "bridge_thresh",
+            "to_port": 0
+        },
+        {
+            "from": "blob1",
+            "from_port": 0,
+            "to": "bridge_blob",
+            "to_port": 0
+        },
+        {
+            "from": "bgsub1",
+            "from_port": 0,
+            "to": "bridge_bgsub",
+            "to_port": 0
+        },
+        {
+            "from": "flow1",
+            "from_port": 0,
+            "to": "bridge_flow",
+            "to_port": 0
+        },
+        {
+            "from": "ctrack1",
+            "from_port": 0,
+            "to": "bridge_ctrack",
+            "to_port": 0
+        },
+        {
+            "from": "otrack1",
+            "from_port": 0,
+            "to": "bridge_otrack",
+            "to_port": 0
+        },
+        {
+            "from": "hlines1",
+            "from_port": 0,
+            "to": "bridge_hlines",
+            "to_port": 0
+        },
+        {
+            "from": "aruco1",
+            "from_port": 0,
+            "to": "bridge_aruco",
+            "to_port": 0
+        },
+        {
+            "from": "draw1",
+            "from_port": 0,
+            "to": "bridge_draw",
+            "to_port": 0
+        },
+        {
+            "from": "bridge_thresh",
+            "from_port": 0,
+            "to": "layout1",
+            "to_port": 0
+        },
+        {
+            "from": "bridge_blob",
+            "from_port": 0,
+            "to": "layout1",
+            "to_port": 1
+        },
+        {
+            "from": "bridge_bgsub",
+            "from_port": 0,
+            "to": "layout1",
+            "to_port": 2
+        },
+        {
+            "from": "bridge_flow",
+            "from_port": 0,
+            "to": "layout1",
+            "to_port": 3
+        },
+        {
+            "from": "layout1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "blob1",
+            "from_port": 1,
+            "to": "null_blob",
+            "to_port": 0
+        },
+        {
+            "from": "contour1",
+            "from_port": 1,
+            "to": "null_contour",
+            "to_port": 0
+        },
+        {
+            "from": "ctrack1",
+            "from_port": 1,
+            "to": "null_ctrack",
+            "to_port": 0
+        },
+        {
+            "from": "otrack1",
+            "from_port": 1,
+            "to": "null_otrack",
+            "to_port": 0
+        },
+        {
+            "from": "hlines1",
+            "from_port": 1,
+            "to": "null_hlines",
+            "to_port": 0
+        },
+        {
+            "from": "hcirc1",
+            "from_port": 1,
+            "to": "null_hcirc",
+            "to_port": 0
+        },
+        {
+            "from": "aruco1",
+            "from_port": 1,
+            "to": "null_aruco",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_title",
+            "type": "note",
+            "text": "ALL_OPENCV — Full Extension Demo\n\nDemonstrates all 20 gn_ext_opencv operators.\n7 operators have dual outputs (IMG + DAT/CHOP).\nRequires GNOpenCV GDExtension + webcam.\n\nTop: Threshold → Morph → Contour / Blob\nMiddle: BG Subtract, Optical Flow, Color Track, Object Track\nBottom: Hough, Convolve, Calibration, ArUco, QR, Feature Match",
+            "position": [
+                -200.0,
+                -200.0
+            ],
+            "size": [
+                650.0,
+                220.0
+            ],
+            "color": [
+                0.2,
+                0.6,
+                1.0,
+                0.9
+            ]
+        },
+        {
+            "id": "ann_tier1",
+            "type": "note",
+            "text": "Tier 1 — Essentials\nThreshold → Morph → Contour + Blob (dual outputs: IMG + DAT/CHOP)",
+            "position": [
+                400.0,
+                -50.0
+            ],
+            "size": [
+                500.0,
+                60.0
+            ],
+            "color": [
+                1.0,
+                0.9,
+                0.7,
+                0.8
+            ]
+        },
+        {
+            "id": "ann_tier2",
+            "type": "note",
+            "text": "Tier 2 — Motion & Tracking\nBG Subtract, Optical Flow, Color Track, Object Track",
+            "position": [
+                400.0,
+                600.0
+            ],
+            "size": [
+                500.0,
+                60.0
+            ],
+            "color": [
+                0.7,
+                1.0,
+                0.7,
+                0.8
+            ]
+        },
+        {
+            "id": "ann_tier3",
+            "type": "note",
+            "text": "Tier 3 — Geometry Detection\nHough Lines, Hough Circles, Convolve",
+            "position": [
+                400.0,
+                1400.0
+            ],
+            "size": [
+                500.0,
+                60.0
+            ],
+            "color": [
+                1.0,
+                0.7,
+                0.7,
+                0.8
+            ]
+        },
+        {
+            "id": "ann_tier4",
+            "type": "note",
+            "text": "Tier 4 — Calibration & Warp\nCamera Undistort, Perspective Warp, Camera Calib",
+            "position": [
+                400.0,
+                2000.0
+            ],
+            "size": [
+                500.0,
+                60.0
+            ],
+            "color": [
+                0.7,
+                0.7,
+                1.0,
+                0.8
+            ]
+        },
+        {
+            "id": "ann_tier5",
+            "type": "note",
+            "text": "Tier 5 — Markers & Recognition\nArUco, ArUco Pose, QR Code, Feature Match",
+            "position": [
+                400.0,
+                2400.0
+            ],
+            "size": [
+                500.0,
+                60.0
+            ],
+            "color": [
+                1.0,
+                0.7,
+                1.0,
+                0.8
+            ]
+        },
+        {
+            "id": "ann_tier6",
+            "type": "note",
+            "text": "Tier 6 — Utility\nStereo Depth, Draw Overlay",
+            "position": [
+                400.0,
+                3000.0
+            ],
+            "size": [
+                500.0,
+                60.0
+            ],
+            "color": [
+                0.9,
+                0.9,
+                0.9,
+                0.8
+            ]
+        }
+    ]
+}

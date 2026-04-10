@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "waveform": {
-                    "value": 0,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0
                 },
                 "frequency": {
-                    "value": 0.5,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 0.5
                 },
                 "amplitude": {
                     "value": 1.0
@@ -137,7 +133,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Logic CHOP \u2014 AND Gate\n\nTwo LFOs at different frequencies \u2192 Logic AND.\nOutput is 1 when both inputs are above threshold.\nChange operation for OR, XOR, NAND, etc.",
+            "text": "Logic CHOP — AND Gate\n\nTwo LFOs at different frequencies → Logic AND.\nOutput is 1 when both inputs are above threshold.\nChange operation for OR, XOR, NAND, etc.",
             "position": [
                 -100.0,
                 -150.0

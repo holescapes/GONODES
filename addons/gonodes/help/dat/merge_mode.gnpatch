@@ -89,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MergeDAT \u2014 Parameters\n\nShowcases: mode.",
+            "text": "Merge DAT — Mode\n\nStack rows or append columns from two inputs.\nShowcasing: mode=1.",
             "position": [
                 -100.0,
                 -100.0

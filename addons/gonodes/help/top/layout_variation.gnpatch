@@ -86,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LayoutTOP \u2014 Parameters\n\nShowcases: resolution, columns, bg_color.",
+            "text": "Layout TOP — Variation\n\nTile up to 8 input textures into a grid mosaic (dynamic ports).\nShowcasing: columns=1.",
             "position": [
                 -100.0,
                 -100.0

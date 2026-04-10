@@ -124,14 +124,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ItemListUI \u2014 Parameters\n\nShowcases: allow_reselect, max_columns, icon_size.",
+            "text": "Item List UI — Reselect\n\nSelectable item list from DAT data. Optional TOP icon texture.\nShowcasing: allow_reselect=True, max_columns=0, icon_size=31.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

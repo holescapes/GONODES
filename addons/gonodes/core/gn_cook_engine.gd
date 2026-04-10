@@ -163,6 +163,34 @@ var _expr_resolved_this_frame: Dictionary = {}
 ## Matches chop("id"), op("id"), top("id"), sop("id"), dat("id"), mat("id").
 static var _expr_ref_regex: RegEx = null
 
+## Regex for extracting node references WITH their function name (family hint).
+## Group 1 = function name (chop, top, dat, etc.), Group 2 = node ID.
+## Used by _build_wireless_demand_map() to determine which output port family
+## is demanded by each expression reference.
+static var _expr_demand_regex: RegEx = null
+
+## Maps expression function names to the GNFamily.Type they demand.
+## "op" and "output" are resolved at stamp time from the target node's ports.
+static var _EXPR_FUNC_TO_FAMILY: Dictionary = {
+	"chop": GNFamily.Type.CHOP, "chops": GNFamily.Type.CHOP,
+	"chopf": GNFamily.Type.CHOP, "chopi": GNFamily.Type.CHOP,
+	"top": GNFamily.Type.TOP,
+	"img": GNFamily.Type.IMG,
+	"sop": GNFamily.Type.SOP,
+	"dat": GNFamily.Type.DAT,
+	"mat": GNFamily.Type.MAT,
+	"vol": GNFamily.Type.VOL,
+	"pop": GNFamily.Type.POP,
+	# "op" and "output" → -1 (all ports) — handled in _build_wireless_demand_map
+}
+
+## Per-frame reverse map: target_node_id → Array[int] of demanded family types.
+## Built by _build_wireless_demand_map() from:
+##   1. Wireless node_ref parameters (Select operators, etc.)
+##   2. Expression function calls (chop(), top(), dat(), etc.)
+## -1 in the array means "all ports demanded" (from op()/output() or untyped refs).
+var _wireless_demand_map: Dictionary = {}
+
 ## Reverse map: upstream_node_id → Array of downstream node IDs that read it
 ## via expressions (chop/op/top/par).  Built alongside the active set so that
 ## the cook loop can skip _try_expression_dirty() on nodes whose expression
@@ -405,7 +433,7 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 	# Lazy-init regex (same pattern as GNGraphEditor's overlay scanner)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
+		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|pop|output|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for param_name in node.parameters:
 		var param: GNParameter = node.parameters[param_name]
@@ -431,6 +459,85 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 							refs.append(ref_id)
 
 	return refs
+
+
+## Builds _wireless_demand_map: target_node_id → Array[int] of demanded
+## family types.  Called once per frame after the active set is computed.
+## Scans all active nodes for:
+##   1. Wireless node_ref parameters (Select operators, etc.) — the param's
+##      node_ref_family tells us which output family is demanded on the target.
+##   2. Expression function calls (chop(), top(), dat(), etc.) — the function
+##      name implies which family is demanded on the referenced node.
+func _build_wireless_demand_map() -> void:
+	_wireless_demand_map.clear()
+
+	# Lazy-init the family-aware expression regex
+	if _expr_demand_regex == null:
+		_expr_demand_regex = RegEx.new()
+		_expr_demand_regex.compile("(chop[sfi]?|top|sop|dat|mat|vol|img|pop|op|output)\\s*\\(\\s*\"([^\"]+)\"")
+
+	for node_id in _active_set:
+		var node: GNNode = network.nodes.get(node_id, null)
+		if node == null:
+			continue
+
+		# ── 1. Wireless node_ref parameters (Select operators, etc.) ──────
+		for p_name in node.parameters:
+			var p: GNParameter = node.parameters[p_name]
+			if p.node_ref_family < -1:
+				continue  # not a node reference parameter
+			var target_id: String = str(p.value)
+			if target_id.is_empty() or target_id == node_id:
+				continue
+			if p.node_ref_family >= 0:
+				_add_wireless_demand(target_id, p.node_ref_family)
+			else:
+				# node_ref_family == -1 → any-family ref → demand all ports
+				_add_wireless_demand(target_id, -1)
+
+		# ── 2. Expression function calls with family hints ────────────────
+		for p_name in node.parameters:
+			var param: GNParameter = node.parameters[p_name]
+			_scan_expr_demand(param, node_id)
+
+
+## Adds a demanded family to the wireless demand map for a target node.
+func _add_wireless_demand(target_id: String, family: int) -> void:
+	if not _wireless_demand_map.has(target_id):
+		_wireless_demand_map[target_id] = []
+	var arr: Array = _wireless_demand_map[target_id]
+	if family not in arr:
+		arr.append(family)
+
+
+## Scans a parameter's expressions for family-typed node references and
+## adds them to the wireless demand map.
+func _scan_expr_demand(param: GNParameter, owner_id: String) -> void:
+	if param.mode == GNParameter.Mode.EXPRESSION and param.expression != "":
+		_extract_expr_demand(param.expression, owner_id)
+	# Per-component expressions (Vector2/3/4, Color)
+	for i in range(param.component_expressions.size()):
+		if param.component_modes.size() > i and \
+				param.component_modes[i] == GNParameter.Mode.EXPRESSION:
+			var comp_expr: String = param.component_expressions[i]
+			if comp_expr != "":
+				_extract_expr_demand(comp_expr, owner_id)
+
+
+## Parses an expression string for function calls like chop("id"), top("id"),
+## and adds the implied family demand to _wireless_demand_map.
+func _extract_expr_demand(expr: String, owner_id: String) -> void:
+	var results := _expr_demand_regex.search_all(expr)
+	for m in results:
+		var func_name: String = m.get_string(1)
+		var target_id: String = m.get_string(2)
+		if target_id == owner_id:
+			continue
+		if _EXPR_FUNC_TO_FAMILY.has(func_name):
+			_add_wireless_demand(target_id, _EXPR_FUNC_TO_FAMILY[func_name])
+		else:
+			# op() / output() → demand all ports on the target
+			_add_wireless_demand(target_id, -1)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -491,6 +598,7 @@ func cook_frame(delta: float) -> void:
 	# Step 3b: Recompute active chain only when topology or sinks changed.
 	if _active_set_dirty:
 		_active_set = _compute_active_set()
+		_build_wireless_demand_map()
 		for node in topo_order:
 			node.is_active = _active_set.has(node.id)
 		# Reorder scene-tree children to match topological order so that
@@ -794,6 +902,40 @@ func _rebuild_consumer_counts() -> void:
 			var from_id: String = conn.from_node
 			_consumer_counts[from_id] = _consumer_counts.get(from_id, 0) + 1
 	_consumer_counts_dirty = false
+
+
+## Stamps the [member GNNode._demanded_outputs] array on a multi-output node.
+## Demand is detected from three sources:
+##   1. Wire connections — outgoing wires to active downstream nodes
+##   2. Wireless Select operators — node_ref parameters targeting this node
+##   3. Expression references — chop(), top(), dat(), etc. calls in other nodes
+##
+## Each port is evaluated independently — no port is auto-demanded.
+## The operator's _cook() unconditional code handles shared prerequisites;
+## per-port post-processing is guarded with is_output_demanded().
+## Uses [member GNNetwork._output_conn_map] and [member _wireless_demand_map].
+func _stamp_demanded_outputs(node: GNNode) -> void:
+	var pcount := node.output_ports.size()
+	node._demanded_outputs.resize(pcount)
+	for i in range(pcount):
+		node._demanded_outputs[i] = false
+
+	# Source 1: Wire connections — check ALL ports (including port 0)
+	var out_conns: Array = network._output_conn_map.get(node.id, [])
+	for conn in out_conns:
+		if conn.from_port >= 0 and conn.from_port < pcount:
+			if _active_set.has(conn.to_node):
+				node._demanded_outputs[conn.from_port] = true
+
+	# Source 2+3: Wireless demand (Select operators + expression references)
+	var wireless_families: Array = _wireless_demand_map.get(node.id, [])
+	if not wireless_families.is_empty():
+		for i in range(pcount):
+			if node._demanded_outputs[i]:
+				continue  # already demanded by wire
+			var port_family: int = node.output_ports[i].family
+			if -1 in wireless_families or port_family in wireless_families:
+				node._demanded_outputs[i] = true
 
 
 ## Gathers input data for a node from upstream nodes' cached outputs.
@@ -1905,6 +2047,11 @@ func _cook_single_node(node: GNNode) -> int:
 		node.clear_dirty()
 		node.node_cooked.emit(node.id)
 		return 0
+
+	# Stamp per-port demand flags for multi-output nodes so they can
+	# skip expensive secondary-port work via is_output_demanded().
+	if node.output_ports.size() > 1:
+		_stamp_demanded_outputs(node)
 
 	# Cook the node
 	var result := node.execute_cook(inputs, frame_count)

@@ -10,9 +10,7 @@
             ],
             "parameters": {
                 "value0": {
-                    "value": 0.1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 0.1
                 }
             }
         },
@@ -84,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Speed CHOP \u2014 Basic\n\nIntegrates constant velocity.\nPosition increases linearly.",
+            "text": "Speed CHOP — Basic\n\nVelocity integrator — accumulates input over time.",
             "position": [
                 -100.0,
                 -100.0

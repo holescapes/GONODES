@@ -15,9 +15,7 @@
                     "mode": "EXPRESSION"
                 },
                 "wrap_mode": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": true
                 },
                 "min_size": {
                     "value": {
@@ -121,14 +119,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TextEditUI \u2014 Parameters\n\nShowcases: placeholder, editable, wrap_mode.",
+            "text": "Text Edit UI — Editable\n\nMulti-line text editor. Optional DAT input for initial content.\nShowcasing: editable=True, wrap_mode=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

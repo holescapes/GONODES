@@ -148,7 +148,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TabContainerUI \u2014 Parameters\n\nShowcases: default_tab, min_size.",
+            "text": "Button UI — Variation\n\nPush button widget. Outputs press/release state as CHOP channel.\nShowcasing: label=Button A.",
             "position": [
                 -100.0,
                 -100.0

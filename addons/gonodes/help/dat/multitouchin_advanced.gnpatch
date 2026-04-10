@@ -76,14 +76,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MultiTouchInDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "Multi Touch In DAT — Advanced\n\nMulti-touch input events as table rows with position and pressure.\nCombined configuration: active=False, normalize=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

@@ -10,14 +10,10 @@
             ],
             "parameters": {
                 "rows": {
-                    "value": 10,
-                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 10
                 },
                 "cols": {
-                    "value": 10,
-                    "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
-                    "mode": "EXPRESSION"
+                    "value": 10
                 }
             }
         },
@@ -127,7 +123,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WireframeSOP \u2014 Basic\n\nDefault settings.",
+            "text": "Wireframe SOP — Basic\n\nConvert triangles to deduplicated wireframe lines.",
             "position": [
                 -100.0,
                 -100.0

@@ -75,14 +75,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "WebcamIMG \u2014 Parameters\n\nShowcases: device, resolution, active.",
+            "text": "Webcam IMG — Active\n\nLive webcam/camera feed as CPU Image. Chain → ImgToTOP for GPU.\nShowcasing: device=0, active=True, mirror_h=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

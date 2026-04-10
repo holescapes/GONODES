@@ -115,7 +115,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MenuButtonUI \u2014 Parameters\n\nShowcases: label, min_size.",
+            "text": "Menu Button UI — Variation\n\nButton with popup menu items from DAT data.",
             "position": [
                 -100.0,
                 -100.0

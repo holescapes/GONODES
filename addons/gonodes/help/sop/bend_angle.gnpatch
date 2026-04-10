@@ -23,9 +23,7 @@
                     "mode": "EXPRESSION"
                 },
                 "axis": {
-                    "value": 1,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
+                    "value": 1
                 },
                 "origin": {
                     "value": 0.5
@@ -133,14 +131,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BendSOP \u2014 Parameters\n\nShowcases: angle, axis, origin.",
+            "text": "Bend SOP — Angle\n\nBend geometry along an axis using circular arc deformation.\nShowcasing: angle=0.5, axis=1, origin=0.5, length_val=0.5.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

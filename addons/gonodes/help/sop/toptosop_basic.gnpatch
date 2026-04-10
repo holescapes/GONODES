@@ -32,14 +32,10 @@
                     "value": 64
                 },
                 "height_scale": {
-                    "value": 2.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 2.0
                 },
                 "grid_size": {
-                    "value": 10.0,
-                    "expression": "0.7 + 0.3 * sin(time * 1.5)",
-                    "mode": "EXPRESSION"
+                    "value": 10.0
                 },
                 "threshold": {
                     "value": 0.1
@@ -147,14 +143,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TOPtoSOP \u2014 Basic\n\nDefault settings.",
+            "text": "TO Pto SOP — Basic\n\nConvert TOP texture to SOP heightfield, point cloud, or normal map mesh.\nUsing: mode=0, height_scale=2.0, grid_size=10.0, threshold=0.1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

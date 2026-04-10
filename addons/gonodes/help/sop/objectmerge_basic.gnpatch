@@ -38,14 +38,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ObjectMergeSOP — Basic\n\nFetches geometry from another SOP by node path.\nSet sop_path to the ID of any SOP in the network.",
+            "text": "Object Merge SOP — Basic\n\nFetch geometry from another SOP by path reference.\nUsing: sop_path=grid1, apply_transform=True.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,

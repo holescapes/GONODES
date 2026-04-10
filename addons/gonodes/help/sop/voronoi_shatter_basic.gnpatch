@@ -4,37 +4,160 @@
     "nodes": {
         "box1": {
             "type": "BoxSOP",
-            "position": [100, 100],
+            "position": [
+                100,
+                100
+            ],
             "parameters": {}
         },
         "voronoi1": {
             "type": "VoronoiShatterSOP",
-            "position": [400, 100],
+            "position": [
+                400,
+                100
+            ],
             "parameters": {
-                "num_points": {"value": 12},
-                "seed": {"value": 42},
-                "offset": {"value": 0.01},
-                "interior_faces": {"value": true}
+                "num_points": {
+                    "value": 12
+                },
+                "seed": {
+                    "value": 42
+                },
+                "offset": {
+                    "value": 0.01
+                },
+                "interior_faces": {
+                    "value": true
+                }
             }
         },
         "null1": {
             "type": "NullSOP",
-            "position": [700, 100],
+            "position": [
+                700,
+                100
+            ],
             "parameters": {}
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                1050,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                1050,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1350,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1650,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
     },
     "connections": [
-        {"from": "box1", "from_port": 0, "to": "voronoi1", "to_port": 0},
-        {"from": "voronoi1", "from_port": 0, "to": "null1", "to_port": 0}
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "voronoi1",
+            "to_port": 0
+        },
+        {
+            "from": "voronoi1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "voronoi1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
             "text": "VoronoiShatterSOP — Fracture\n\n12-piece Voronoi shatter with small gap offset.\nChange seed for different break patterns.",
-            "position": [-100.0, -100.0],
-            "size": [400.0, 100.0],
-            "color": [1.0, 1.0, 1.0, 0.8]
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
     ]
 }

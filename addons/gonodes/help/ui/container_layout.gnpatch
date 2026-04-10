@@ -145,14 +145,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ContainerUI \u2014 Parameters\n\nShowcases: layout, spacing, padding.",
+            "text": "Container UI — Layout\n\nLayout container for nesting and arranging child UI widgets.\nShowcasing: layout=1, spacing=3, padding=3, columns=1.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                140.0
             ],
             "color": [
                 1.0,
