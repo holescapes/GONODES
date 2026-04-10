@@ -9,6 +9,46 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-04-10 — Pattern Matching, Paste from JSON, Bug Fixes
+
+### New Features
+- **Global pattern matching system (GNPattern):** New static utility class
+  (`addons/gonodes/core/gn_pattern.gd`) providing glob matching, multi-pattern
+  CSV with `!` exclusion, index ranges with stride/take-skip, pattern expansion
+  (`[1-4]`, `[rgb]`, cartesian product), and wildcard capture rename (`*(0)`,
+  `?(0)`). Inspired by TouchDesigner and Houdini pattern systems. Full docs in
+  `dev_docs/PATTERNS.md`.
+- **Operators retrofitted to use GNPattern:** SelectCHOP, DeleteCHOP (+ new
+  "By Index Range" mode), RenameCHOP (+ new Pattern mode with capture),
+  OPFindDAT, FolderDAT — all now delegate to GNPattern instead of inline
+  pattern matching.
+- **Paste from JSON:** New right-click menu item "Paste from JSON" in the graph
+  editor. Reads JSON from the OS clipboard, normalizes connection key formats
+  (`"from"/"to"` and `"from_node"/"to_node"`), and pastes with full ID
+  deduplication, mouse-position centering, and undo support. Accepts both
+  "Copy as JSON" output and raw `.gnpatch` snippets.
+- **Unsaved changes guard:** Editor now tracks `_modified` flag, shows `*` in
+  title bar for dirty patches, and prompts Save/Don't Save/Cancel on New, Open,
+  and window close (WM_CLOSE_REQUEST).
+
+### Bug Fixes
+- **depth_of_field.gdshader:** Removed illegal `return` in `fragment()` and
+  replaced `switch` with `if/else if/else` (not supported in Godot shading
+  language).
+- **motion_blur.gdshader:** Fixed invisible blur — velocity was divided by
+  texture pixel size, reducing flow-map-driven offset to sub-pixel values.
+- **lut_top.gd:** Fixed `project://` paths not being resolved before
+  `FileAccess.open()`. Now uses `GNResourceLoader.resolve()`. Added
+  `node_error` messages for path resolution failures, missing files, and
+  unsupported formats.
+- **lut_top.gd:** Fixed `split_floats()` type mismatch in `.3dl` parser
+  (`PackedFloat64Array` assigned to `PackedStringArray`).
+- **gn_editor.gd:** Added missing `var _modified: bool` declaration. Fixed
+  dangling one-shot connection when user cancels Save-As after choosing "Save"
+  in the unsaved-changes dialog. Fixed "Don't Save" not updating title bar.
+
+---
+
 ## 2026-04-02 — Viewer Architecture v2: Nodes Own Rendering
 
 ### Architecture

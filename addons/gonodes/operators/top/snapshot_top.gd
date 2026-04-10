@@ -89,37 +89,48 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512),
 		"Resolution", "Output image size"))
 
-	# ── SOP parameters ──────────────────────────────────────────────────
-	add_parameter(GNParameter.create_float("orbit_yaw", 45.0, -360.0, 360.0, 0.5,
-		"Orbit Yaw", "Horizontal camera rotation in degrees"))
-	add_parameter(GNParameter.create_float("orbit_pitch", -30.0, -89.0, 89.0, 0.5,
-		"Orbit Pitch", "Vertical camera rotation in degrees"))
-	add_parameter(GNParameter.create_float("orbit_distance", 3.0, 0.5, 50.0, 0.1,
-		"Orbit Distance", "Camera distance from origin"))
-	add_parameter(GNParameter.create_bool("wireframe", false,
-		"Wireframe", "Render mesh as wireframe"))
+	# ── SOP parameters (visible for SOP + POP) ─────────────────────────
+	var sop_pop_rule := {"param": "mode", "values": [MODE_SOP, MODE_POP]}
+	var p_yaw := GNParameter.create_float("orbit_yaw", 45.0, -360.0, 360.0, 0.5,
+		"Orbit Yaw", "Horizontal camera rotation in degrees")
+	p_yaw.visibility_rule = sop_pop_rule
+	add_parameter(p_yaw)
+	var p_pitch := GNParameter.create_float("orbit_pitch", -30.0, -89.0, 89.0, 0.5,
+		"Orbit Pitch", "Vertical camera rotation in degrees")
+	p_pitch.visibility_rule = sop_pop_rule
+	add_parameter(p_pitch)
+	var p_dist := GNParameter.create_float("orbit_distance", 3.0, 0.5, 50.0, 0.1,
+		"Orbit Distance", "Camera distance from origin")
+	p_dist.visibility_rule = sop_pop_rule
+	add_parameter(p_dist)
+	var p_wire := GNParameter.create_bool("wireframe", false,
+		"Wireframe", "Render mesh as wireframe")
+	p_wire.visibility_rule = {"param": "mode", "values": [MODE_SOP]}
+	add_parameter(p_wire)
 
 	# ── POP parameters ──────────────────────────────────────────────────
-	add_parameter(GNParameter.create_float("point_size", 0.02, 0.001, 1.0, 0.001,
-		"Point Size", "Billboard size for each particle"))
+	var p_ps := GNParameter.create_float("point_size", 0.02, 0.001, 1.0, 0.001,
+		"Point Size", "Billboard size for each particle")
+	p_ps.visibility_rule = {"param": "mode", "values": [MODE_POP]}
+	add_parameter(p_ps)
 
 	# ── VOL parameters ──────────────────────────────────────────────────
-	add_parameter(GNParameter.create_enum("vol_view",
+	var vol_rule := {"param": "mode", "values": [MODE_VOL]}
+	var p_vv := GNParameter.create_enum("vol_view",
 		PackedStringArray(["Slices", "MIP"]),
-		0, "Volume View", "Slices = 3 orthogonal planes, MIP = max intensity projection"))
-	add_parameter(GNParameter.create_float("slice_pos", 0.5, 0.0, 1.0, 0.01,
-		"Slice Position", "Normalized position along each axis (0..1)"))
-
-	# Set initial visibility
-	_update_param_visibility(MODE_SOP)
+		0, "Volume View", "Slices = 3 orthogonal planes, MIP = max intensity projection")
+	p_vv.visibility_rule = vol_rule
+	add_parameter(p_vv)
+	var p_sp := GNParameter.create_float("slice_pos", 0.5, 0.0, 1.0, 0.01,
+		"Slice Position", "Normalized position along each axis (0..1)")
+	p_sp.visibility_rule = vol_rule
+	add_parameter(p_sp)
 
 
 func _on_parameter_changed(param_name: String, new_value: Variant) -> void:
 	super._on_parameter_changed(param_name, new_value)
 	if param_name == "mode":
-		var new_mode: int = int(new_value)
-		_rebuild_input_for_mode(new_mode)
-		_update_param_visibility(new_mode)
+		_rebuild_input_for_mode(int(new_value))
 
 
 ## Rebuilds the input port to match the selected mode's family type.
@@ -132,27 +143,6 @@ func _rebuild_input_for_mode(mode: int) -> void:
 	add_input("in", fam as GNFamily.Type, false,
 		"Source data to render (%s)" % GNFamily.get_family_name(fam as GNFamily.Type))
 	ports_changed.emit(id)
-
-
-## Shows/hides parameters based on the active mode.
-func _update_param_visibility(mode: int) -> void:
-	# SOP-only params
-	var sop_params := ["orbit_yaw", "orbit_pitch", "orbit_distance", "wireframe"]
-	for p in sop_params:
-		if parameters.has(p):
-			parameters[p].visible = (mode == MODE_SOP or mode == MODE_POP)
-
-	# POP-only params
-	if parameters.has("point_size"):
-		parameters["point_size"].visible = (mode == MODE_POP)
-
-	# VOL-only params
-	var vol_params := ["vol_view", "slice_pos"]
-	for p in vol_params:
-		if parameters.has(p):
-			parameters[p].visible = (mode == MODE_VOL)
-
-	parameters_changed.emit(id)
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -403,9 +393,7 @@ func to_dict() -> Dictionary:
 func from_dict(d: Dictionary) -> void:
 	# Rebuild input port before super restores connections
 	if d.has("snapshot_mode"):
-		var mode: int = int(d["snapshot_mode"])
-		_rebuild_input_for_mode(mode)
-		_update_param_visibility(mode)
+		_rebuild_input_for_mode(int(d["snapshot_mode"]))
 	super.from_dict(d)
 
 

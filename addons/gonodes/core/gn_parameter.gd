@@ -91,8 +91,16 @@ var is_pulse: bool = false
 @export var display_group: String = ""
 
 ## When false, the parameter is hidden in the inspector UI.
-## Used by operators that show/hide params based on mode (e.g. SnapshotTOP).
+## Managed automatically when [member visibility_rule] is set.
 var visible: bool = true
+
+## Declarative visibility rule — hides/shows this parameter based on another
+## parameter's current value.  Format:
+##   {"param": "mode", "values": [0, 2]}
+## Meaning: "visible when the sibling parameter named 'mode' has value 0 or 2."
+## Empty dictionary (default) = always visible.  Evaluated by GNNode's
+## [method _apply_visibility_rules] whenever the controlling parameter changes.
+var visibility_rule: Dictionary = {}
 
 ## When >= -1, this string parameter stores a node-reference ID.
 ## The value is a GNFamily.Type enum value indicating the expected target

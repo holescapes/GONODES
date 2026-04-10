@@ -25,22 +25,36 @@ func _init_parameters() -> void:
 		"Mode", "Glitch style — chain multiple GlitchTOPs for combined effects"))
 	add_parameter(GNParameter.create_float("intensity", 0.3, 0.0, 1.0, 0.01,
 		"Intensity", "Probability and strength of glitch blocks"))
-	add_parameter(GNParameter.create_float("block_size", 32.0, 4.0, 128.0, 1.0,
-		"Block Size", "Glitch block size in pixels"))
-	add_parameter(GNParameter.create_float("channel_shift", 0.01, 0.0, 0.05, 0.001,
-		"Channel Shift", "RGB channel separation amount"))
+	var p_bs := GNParameter.create_float("block_size", 32.0, 4.0, 128.0, 1.0,
+		"Block Size", "Glitch block size in pixels")
+	p_bs.visibility_rule = {"param": "mode", "values": [0, 1, 2]}
+	add_parameter(p_bs)
+	var p_cs := GNParameter.create_float("channel_shift", 0.01, 0.0, 0.05, 0.001,
+		"Channel Shift", "RGB channel separation amount")
+	p_cs.visibility_rule = {"param": "mode", "values": [0, 1]}
+	add_parameter(p_cs)
 	add_parameter(GNParameter.create_float("speed", 8.0, 0.1, 30.0, 0.1,
 		"Speed", "Glitch animation speed"))
-	add_parameter(GNParameter.create_float("scan_jitter", 0.0, 0.0, 0.1, 0.001,
-		"Scan Jitter", "VHS-style per-scanline horizontal displacement"))
-	add_parameter(GNParameter.create_float("tear_strength", 0.0, 0.0, 1.0, 0.01,
-		"Tear Strength", "Horizontal tear band displacement"))
-	add_parameter(GNParameter.create_float("color_crush", 0.0, 0.0, 1.0, 0.01,
-		"Color Crush", "Bit-depth reduction in glitch blocks (0 = off, 1 = extreme)"))
-	add_parameter(GNParameter.create_float("noise_amount", 0.0, 0.0, 1.0, 0.01,
-		"Noise", "Analog static / digital snow injection"))
-	add_parameter(GNParameter.create_float("stale_mix", 0.0, 0.0, 1.0, 0.01,
-		"Stale Frame", "V002-style: inject data from old frames into glitch blocks"))
+	var p_sj := GNParameter.create_float("scan_jitter", 0.0, 0.0, 0.1, 0.001,
+		"Scan Jitter", "VHS-style per-scanline horizontal displacement")
+	p_sj.visibility_rule = {"param": "mode", "values": [1]}
+	add_parameter(p_sj)
+	var p_ts := GNParameter.create_float("tear_strength", 0.0, 0.0, 1.0, 0.01,
+		"Tear Strength", "Horizontal tear band displacement")
+	p_ts.visibility_rule = {"param": "mode", "values": [1]}
+	add_parameter(p_ts)
+	var p_cc := GNParameter.create_float("color_crush", 0.0, 0.0, 1.0, 0.01,
+		"Color Crush", "Bit-depth reduction in glitch blocks (0 = off, 1 = extreme)")
+	p_cc.visibility_rule = {"param": "mode", "values": [0]}
+	add_parameter(p_cc)
+	var p_na := GNParameter.create_float("noise_amount", 0.0, 0.0, 1.0, 0.01,
+		"Noise", "Analog static / digital snow injection")
+	p_na.visibility_rule = {"param": "mode", "values": [1, 3]}
+	add_parameter(p_na)
+	var p_sm := GNParameter.create_float("stale_mix", 0.0, 0.0, 1.0, 0.01,
+		"Stale Frame", "V002-style: inject data from old frames into glitch blocks")
+	p_sm.visibility_rule = {"param": "mode", "values": [2]}
+	add_parameter(p_sm)
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

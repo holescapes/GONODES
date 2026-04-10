@@ -4,7 +4,7 @@ shader_type canvas_item;
 
 uniform sampler2D texture_a : hint_default_white;
 uniform sampler2D texture_b : hint_default_black;
-uniform int operation = 0; // 0=Add, 1=Multiply, 2=Over, 3=Screen, 4=Subtract, 5=Difference
+uniform int operation = 0; // 0=Add, 1=Multiply, 2=Over, 3=Screen, 4=Subtract, 5=Difference, 6=Power, 7=Abs, 8=Min, 9=Max
 uniform float opacity : hint_range(0.0, 1.0) = 1.0;
 
 void fragment() {
@@ -32,6 +32,18 @@ void fragment() {
 			break;
 		case 5: // Difference
 			result = vec4(mix(a.rgb, abs(a.rgb - b.rgb), opacity), max(a.a, b.a));
+			break;
+		case 6: // Power
+			result = vec4(mix(a.rgb, pow(a.rgb, b.rgb * 4.0), opacity), max(a.a, b.a));
+			break;
+		case 7: // Abs
+			result = vec4(abs(a.rgb - b.rgb * opacity), max(a.a, b.a));
+			break;
+		case 8: // Min
+			result = vec4(mix(a.rgb, min(a.rgb, b.rgb), opacity), max(a.a, b.a));
+			break;
+		case 9: // Max
+			result = vec4(mix(a.rgb, max(a.rgb, b.rgb), opacity), max(a.a, b.a));
 			break;
 		default:
 			result = a;

@@ -1,0 +1,124 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_circle": {
+            "type": "CircleTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "radius": {
+                    "value": 0.3
+                }
+            }
+        },
+        "lens_flare1": {
+            "type": "LensFlareTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "threshold": {
+                    "value": 1.6
+                },
+                "ghost_intensity": {
+                    "value": 1.2
+                },
+                "ghost_count": {
+                    "value": 6
+                },
+                "ghost_spacing": {
+                    "value": 0.6
+                },
+                "halo_intensity": {
+                    "value": 0.8
+                },
+                "halo_radius": {
+                    "value": 1.0
+                },
+                "halo_width": {
+                    "value": 0.12
+                },
+                "streak_intensity": {
+                    "value": 0.6
+                },
+                "streak_length": {
+                    "value": 0.3
+                },
+                "tint": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.2,
+                        "g": 0.6,
+                        "b": 1.0,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_circle",
+            "from_port": 0,
+            "to": "lens_flare1",
+            "to_port": 0
+        },
+        {
+            "from": "lens_flare1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LensFlareTOP \u2014 Advanced\n\nMore complex configuration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

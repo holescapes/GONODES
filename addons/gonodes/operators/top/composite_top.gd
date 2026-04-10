@@ -4,7 +4,7 @@ extends GNTopBase
 ## Uses a SubViewport with a composite shader.
 ## SubViewport is a child of this Node — freed automatically on removal.
 
-enum BlendOp { ADD, MULTIPLY, OVER, SCREEN, SUBTRACT, DIFFERENCE }
+enum BlendOp { ADD, MULTIPLY, OVER, SCREEN, SUBTRACT, DIFFERENCE, POWER, ABS, MIN, MAX }
 
 var _shader: Shader = null
 
@@ -21,7 +21,7 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("operation",
-		PackedStringArray(["Add", "Multiply", "Over", "Screen", "Subtract", "Difference"]), 0, "", "Blend mode"))
+		PackedStringArray(["Add", "Multiply", "Over", "Screen", "Subtract", "Difference", "Power", "Abs", "Min", "Max"]), 0, "", "Blend mode"))
 	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01, "", "Blend opacity"))
 
 

@@ -19,7 +19,7 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**547 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
+**554 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
@@ -34,7 +34,9 @@ Parallel level-based cook engine, named output ports, dot routing nodes, and key
 | **POP** (20) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
 | **VOL** (22) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
 | **MAT** (10) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
-| **IMG** (18) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab |
+| **IMG** (18) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab, Histogram |
+
+> **GPU/CPU boundary rule:** Operators that require GPU→CPU texture readback (histogram, blob detection, pixel sorting) are always IMG family — never TOP. This makes the performance cost visible in your graph. Use `TOPtoIMG` / `ImgToTOP` bridges to cross the boundary explicitly.
 | **OUT** (14) | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
 | **UI** (31) | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer |
 | **SDF** (26) | Signed distance fields | Box, Sphere, Torus, Boolean ops, Bend, Twist, Raymarch |

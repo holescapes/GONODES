@@ -1,8 +1,17 @@
 class_name TimeMachineTOP
 extends GNTopBase
 ## Time-scrubbing over a GPU-side frame buffer — delay, reverse, speed ramp,
-## ping-pong.  Uses blit SubViewports as a ring-buffer so textures never
-## leave the GPU.
+## ping-pong, and curve-based time warp.  Uses blit SubViewports as a
+## ring-buffer so textures never leave the GPU.
+##
+## Mode 0 (Speed): Linear playback at a fixed speed multiplier.
+## Mode 1 (Position): Manual normalised scrub (0..1) over the buffer.
+## Mode 2 (Ramp): A time-ramp curve maps normalised playback progress to
+##   buffer position — non-linear retiming (ease-in/out, freeze, speed ramps).
+
+const MODE_SPEED    := 0
+const MODE_POSITION := 1
+const MODE_RAMP     := 2
 
 var _ring: Array[Dictionary] = []
 var _write_index: int = 0
@@ -25,8 +34,23 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("length", 60, 1, 600, "Buffer Length", "Number of frames to store"))
-	add_parameter(GNParameter.create_float("speed", 1.0, -4.0, 4.0, 0.01, "Speed", "Playback speed (negative = reverse)"))
-	add_parameter(GNParameter.create_float("position", 0.0, 0.0, 1.0, 0.001, "Position", "Manual scrub position (0..1) — overrides speed when > 0"))
+	add_parameter(GNParameter.create_enum("mode",
+		PackedStringArray(["Speed", "Position", "Ramp"]), MODE_SPEED,
+		"Mode", "Speed = fixed rate, Position = manual scrub, Ramp = curve-based time warp"))
+	# Speed mode params
+	var p_speed := GNParameter.create_float("speed", 1.0, -4.0, 4.0, 0.01, "Speed", "Playback speed (negative = reverse)")
+	p_speed.visibility_rule = {"param": "mode", "values": [MODE_SPEED]}
+	add_parameter(p_speed)
+	# Position mode params
+	var p_pos := GNParameter.create_float("position", 0.0, 0.0, 1.0, 0.001, "Position", "Manual scrub position (0..1)")
+	p_pos.visibility_rule = {"param": "mode", "values": [MODE_POSITION]}
+	add_parameter(p_pos)
+	# Ramp mode params
+	var p_ramp := GNParameter.create_ramp("time_ramp", [],
+		"Time Ramp", "Curve mapping normalised playback progress (X) to buffer position (Y)")
+	p_ramp.visibility_rule = {"param": "mode", "values": [MODE_RAMP]}
+	add_parameter(p_ramp)
+	# Shared params
 	add_parameter(GNParameter.create_enum("wrap_mode",
 		PackedStringArray(["Clamp", "Loop", "Ping-Pong"]), 1, "Wrap Mode", "Behaviour at buffer boundaries"))
 	add_parameter(GNParameter.create_bool("freeze", false, "Freeze", "Stop recording new frames"))
@@ -41,8 +65,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var res: Vector2i = tex_in.resolution
 	var buf_len: int = clampi(get_param_value("length"), 1, 600)
-	var speed_val: float = get_param_value("speed")
-	var pos_val: float = get_param_value("position")
+	var mode: int = get_param_value("mode")
 	var wrap: int = get_param_value("wrap_mode")
 	var freeze: bool = get_param_value("freeze")
 	var do_reset: bool = get_param_value("reset")
@@ -71,10 +94,17 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_cached_tex_data.resolution = res
 		return _cached_tex_data
 
-	if pos_val > 0.001:
-		_playback_pos = pos_val * float(available - 1)
-	else:
-		_playback_pos += speed_val
+	match mode:
+		MODE_SPEED:
+			_playback_pos += get_param_value("speed")
+		MODE_POSITION:
+			_playback_pos = get_param_value("position") * float(available - 1)
+		MODE_RAMP:
+			# Normalised playback progress (0..1) mapped through the ramp curve
+			var progress: float = fmod(elapsed_time * 0.01, 1.0)
+			var ramp_keys: Array = get_param_value("time_ramp")
+			var mapped: float = GNParameter.sample_ramp(ramp_keys, progress)
+			_playback_pos = mapped * float(available - 1)
 
 	# Wrap
 	var max_pos: float = float(available - 1)

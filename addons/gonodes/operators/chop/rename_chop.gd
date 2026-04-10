@@ -1,8 +1,16 @@
 class_name RenameCHOP
 extends GNChopBase
 ## Renames channels from input to new names in the output.
-## The **renames** parameter controls how many from→to rename rows exist (1–32).
-## Each row has a **fromN** (source channel name) and **toN** (target name).
+##
+## Two modes:
+##   **Pattern** — uses GNPattern wildcard matching and capture-based renaming.
+##     From: *_old      To: *(0)_new        (foo_old → foo_new)
+##     From: chan*       To: tx[1-4]         (sequential rename via expansion)
+##     From: ?x          To: ?(0)y            (tx → ty)
+##
+##   **Manual Rows** — explicit from→to pairs (1–32 rows).
+##     Each row has a **fromN** (source channel name) and **toN** (target name).
+## Channels not matched by any rule pass through with their original name.
 ## Channels not matched by any row pass through with their original name.
 ## Empty **from** or **to** fields are skipped.
 
@@ -20,8 +28,22 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
+	add_parameter(GNParameter.create_enum("mode",
+		PackedStringArray(["Pattern", "Manual Rows"]),
+		0, "Mode", "Pattern uses wildcards and capture; Manual Rows uses explicit from/to pairs"))
+
+	# ── Pattern mode params ──
+	add_parameter(GNParameter.create_string("from_pattern", "*",
+		"From Pattern", "Wildcard pattern to match channels (see PATTERNS.md)"))
+	add_parameter(GNParameter.create_string("to_pattern", "*",
+		"To Pattern", "Replacement pattern with *(0), ?(0) captures or [1-N] expansion"))
+	parameters["from_pattern"].visibility_rule = {"param": "mode", "values": [0]}
+	parameters["to_pattern"].visibility_rule = {"param": "mode", "values": [0]}
+
+	# ── Manual Rows mode params ──
 	add_parameter(GNParameter.create_int("renames", 1, 1, 32,
 		"Renames", "Number of rename rows"))
+	parameters["renames"].visibility_rule = {"param": "mode", "values": [1]}
 	_rebuild_rename_slots(1)
 
 
@@ -87,6 +109,42 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		GNLogger.warn("RenameCHOP", "'%s' — no valid input" % id)
 		return null
 
+	var mode: int = get_param_value("mode")
+
+	if mode == 0:
+		return _cook_pattern(in_data)
+	else:
+		return _cook_manual(in_data)
+
+
+## Pattern mode: wildcard match + capture-based replace via GNPattern.
+func _cook_pattern(in_data: GNChannelData) -> GNData:
+	var from_pat: String = get_param_value("from_pattern").strip_edges()
+	var to_pat: String = get_param_value("to_pattern").strip_edges()
+
+	var out := _prepare_output(in_data.sample_rate)
+
+	if from_pat.is_empty() or to_pat.is_empty():
+		# Pass-through
+		for ch_name in in_data.channels:
+			out.set_channel(ch_name, in_data.channels[ch_name])
+		return out
+
+	var all_names := PackedStringArray()
+	for ch_name in in_data.channels:
+		all_names.append(ch_name)
+
+	var rename_map := GNPattern.rename_batch(all_names, from_pat, to_pat)
+
+	for ch_name in in_data.channels:
+		var out_name: String = rename_map.get(ch_name, ch_name)
+		out.set_channel(out_name, in_data.channels[ch_name])
+
+	return out
+
+
+## Manual Rows mode: explicit from→to pairs (legacy behaviour).
+func _cook_manual(in_data: GNChannelData) -> GNData:
 	var row_count: int = get_param_value("renames")
 
 	# Dynamic slot rebuild when user changes count

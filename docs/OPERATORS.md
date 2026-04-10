@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **547 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
+> **554 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
 
 ---
 
@@ -42,7 +42,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 66 operators** — 15 generators, 31 filters, 8 combiners, 3 temporal/buffer, 2 simulation/generative, 3 utility, 3 bridge, 1 host input.
+**Total: 72 operators** — 15 generators, 37 filters, 8 combiners, 3 temporal/buffer, 2 simulation/generative, 3 utility, 3 bridge, 1 host input.
 
 ### Generators
 
@@ -943,12 +943,12 @@ Blend two textures with various blend modes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| operation | Enum | Add | Add, Multiply, Over, Screen, Subtract, Difference | Blend mode |
+| operation | Enum | Add | Add, Multiply, Over, Screen, Subtract, Difference, Power, Abs, Min, Max | Blend mode |
 | opacity | Float | 1.0 | 0.0–1.0 | Blend opacity |
 
 **Inputs:** `A` (TOP), `B` (TOP).
 
-**How it works:** Shader samples both textures and applies the selected blend operation per pixel. Resolution follows input A.
+**How it works:** Shader samples both textures and applies the selected blend operation per pixel. Power raises A to the power of B, Abs takes the absolute value of A, Min/Max select the per-channel minimum/maximum. Resolution follows input A.
 
 ---
 
@@ -1104,21 +1104,23 @@ Ring buffer — stores N frames with delay and freeze controls.
 
 #### TimeMachineTOP
 
-Playback controller over a frame buffer with speed, scrub, and wrap modes.
+Playback controller over a frame buffer with speed, manual scrub, and curve-based time warp modes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| speed | Float | 1.0 | →10.0–10.0 | Playback speed |
-| position | Float | 0.0 | 0.0–1.0 | Normalised scrub position |
-| use_position | Bool | false | — | Override speed with position scrub |
-| wrap_mode | Enum | Clamp | Clamp, Loop, Ping-Pong | End-of-buffer behaviour |
-| freeze | Bool | false | — | Pause playback |
-| reset | Bool (pulse) | false | — | Reset playback head |
+| length | Int | 60 | 1–600 | Number of frames to store |
+| mode | Enum | Speed | Speed, Position, Ramp | Speed = fixed rate, Position = manual scrub, Ramp = curve-based time warp |
+| speed | Float | 1.0 | -4.0–4.0 | Playback speed — negative = reverse (Speed mode only) |
+| position | Float | 0.0 | 0.0–1.0 | Normalised scrub position (Position mode only) |
+| time_ramp | Ramp | linear | — | Curve mapping normalised playback progress (X) to buffer position (Y) (Ramp mode only) |
+| wrap_mode | Enum | Loop | Clamp, Loop, Ping-Pong | End-of-buffer behaviour |
+| freeze | Bool | false | — | Pause recording |
+| reset | Bool (pulse) | false | — | Clear the buffer and reset playback head |
 
-**Inputs:** `in` (TOP — typically from CacheTOP). **How it works:** Reads from input CacheTOP's buffer. Speed/position controls which stored frame to output.
+**Inputs:** `in` (TOP — typically from CacheTOP). **How it works:** Records input frames into a GPU ring-buffer. The active mode determines how the read position advances: Speed mode uses a fixed rate multiplier, Position mode maps a 0–1 slider directly, and Ramp mode evaluates a user-drawn curve to map playback progress to buffer position (non-linear retiming — ease-in/out, freeze frames, speed ramps). Parameters irrelevant to the current mode are automatically hidden.
 
-> **Workflow: Cache + SelectTOP for multi-tap delay**
-> Wire your source → CacheTOP (length=120) → TimeMachineTOP for scrubbing / speed control.  For accessing specific past frames without speed ramp, wire CacheTOP → multiple SelectTOPs each pointing at the same CacheTOP but with different `delay` values on CacheTOP copies — or use a single CacheTOP and tap it from multiple TimeMachineTOPs with different `position` values for multi-head playback (echo effects, motion trails, compare frames).
+> **Workflow: Cache + TimeMachineTOP for time warp**
+> Wire your source → CacheTOP (length=120) → TimeMachineTOP. Use Speed mode for linear delay/reverse, Position mode for manual scrubbing, or Ramp mode to draw a time-remapping curve (replaces the need for a separate TimeWarpTOP). For multi-head playback (echo effects, motion trails), wire a single CacheTOP to multiple TimeMachineTOPs with different settings.
 
 ---
 
@@ -2068,13 +2070,119 @@ Receive textures from a host application via the C API (`libgonodes`). Zero-copy
 
 ---
 
+### Compositing & Grading (New — 6 operators)
+
+---
+
+#### LUTTOP
+
+Apply a 3D LUT (.cube / .3dl) colour transform to the input texture.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| lut_file | File | "" | *.cube, *.3dl | Path to the 3D LUT file |
+| intensity | Float | 1.0 | 0.0–1.0 | Blend between original and LUT-graded colour |
+
+**Inputs:** `in` (TOP).
+
+**How it works:** Parses a .cube or .3dl LUT file on CPU, builds an `ImageTexture3D`, and applies the 3D lookup in a fragment shader via `sampler3D`. The LUT is cached and only rebuilt when the file path changes.
+
+---
+
+#### ZCompositeTOP
+
+Depth-aware compositing — merge two layers using their depth buffers.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| compare | Enum | Nearer | Nearer, Farther | Which depth wins |
+| depth_bias | Float | 0.0 | -1.0–1.0 | Signed bias added to layer A depth before comparison |
+
+**Inputs:** `colorA` (TOP), `depthA` (TOP), `colorB` (TOP), `depthB` (TOP).
+
+**How it works:** Shader samples both colour/depth pairs and picks the pixel whose depth passes the comparison test. Useful for multi-pass 3D compositing where alpha-based blending is insufficient.
+
+---
+
+#### DepthOfFieldTOP
+
+Post-process depth-of-field blur with bokeh disc sampling.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| focal_distance | Float | 0.5 | 0.0–1.0 | Focal plane distance in normalised depth space |
+| focal_range | Float | 0.1 | 0.0–1.0 | Range around focal distance that stays sharp |
+| max_blur | Float | 8.0 | 0.0–32.0 | Maximum blur radius in pixels |
+| bokeh_brightness | Float | 0.5 | 0.0–2.0 | Highlight boost on bright out-of-focus areas |
+| quality | Enum | Medium | Low, Medium, High | Disc sample count (16/32/64) |
+
+**Inputs:** `color` (TOP), `depth` (TOP).
+
+**How it works:** Computes circle-of-confusion from depth, then samples a golden-angle disc pattern at the CoC radius. Quality setting controls sample count. Bokeh brightness boosts highlights in the blur to simulate optical bokeh.
+
+---
+
+#### KeyMixTOP
+
+Mix two textures using a matte/mask input (essential compositing utility).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| matte_channel | Enum | Luma | Luma, R, G, B, A | Which channel of the matte to use as mix factor |
+| invert | Bool | false | — | Invert the matte |
+| opacity | Float | 1.0 | 0.0–1.0 | Overall mix opacity |
+
+**Inputs:** `A` (TOP), `B` (TOP), `matte` (TOP).
+
+**How it works:** Extracts a single-channel mix factor from the matte using the selected channel (or luminance), optionally inverts it, and blends A↔B per pixel. More flexible than CompositeTOP when you have an explicit matte/key input.
+
+---
+
+#### MotionBlurTOP
+
+Temporal motion blur driven by a flow/velocity texture.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 1.0 | 0.0–5.0 | Blur strength multiplier |
+| quality | Enum | Medium | Low, Medium, High | Number of samples along the flow vector (8/16/32) |
+
+**Inputs:** `color` (TOP), `flow` (TOP — RG velocity field).
+
+**How it works:** Reads the per-pixel velocity from the flow texture (Red=X, Green=Y) and samples the colour texture at evenly-spaced offsets along the velocity direction. Quality setting controls sample count.
+
+---
+
+#### LensFlareTOP
+
+Procedural lens flare — ghosts, anamorphic streaks, and halo ring from bright areas.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| threshold | Float | 0.8 | 0.0–2.0 | Brightness threshold for flare extraction |
+| ghost_intensity | Float | 0.6 | 0.0–2.0 | Ghost copy brightness |
+| ghost_count | Int | 4 | 1–8 | Number of ghost reflections |
+| ghost_spacing | Float | 0.3 | 0.1–1.0 | Distance between ghost copies |
+| halo_intensity | Float | 0.4 | 0.0–2.0 | Halo ring brightness |
+| halo_radius | Float | 0.5 | 0.0–1.0 | Halo ring distance from centre |
+| halo_width | Float | 0.06 | 0.01–0.3 | Halo ring thickness |
+| streak_intensity | Float | 0.3 | 0.0–2.0 | Anamorphic streak brightness |
+| streak_length | Float | 0.15 | 0.0–0.5 | Horizontal streak spread |
+| tint | Color | (1.0, 0.9, 0.7) | — | Colour tint for all flare elements |
+
+**Inputs:** `in` (TOP).
+
+**How it works:** Extracts bright pixels above threshold, generates ghost copies with chromatic aberration by flipping UV around the centre, adds a halo ring using smoothstep distance, and draws anamorphic horizontal streaks. All elements are tinted and added to the original image.
+
+---
+
 ## IMG — Image Operators
 
 IMGs process CPU-side `Image` data. Unlike TOPs (GPU textures via SubViewport), IMGs work on raw pixel buffers for operations that need CPU access: file I/O, pixel sorting, procedural generation, and format conversion. All IMG data flows as `GNImageData` — a lightweight RefCounted wrapper around Godot's `Image` class.
 
 Use `ImgToTOP` to bridge IMG output into the GPU TOP pipeline.
 
-**Total: 14 operators** — 2 generators, 6 filters, 2 I/O, 2 bridges, 1 capture, 1 script, 1 utility.
+**Total: 15 operators** — 2 generators, 6 filters, 2 I/O, 2 bridges, 1 capture, 1 script, 1 utility, 1 analysis.
 
 ---
 
@@ -2109,6 +2217,24 @@ Generates a random-dot autostereogram (Magic Eye) from a depth map. CPU-based �
 **Input:** `depth` (IMG — depth map). **Output:** `out` (IMG).
 
 **How it works:** For each row, generates a random dot strip, then links pixel columns using a union-find structure based on the depth map's brightness. Brighter depth = closer = wider pixel separation. The linked pixels share the same colour, creating the stereoscopic illusion when the viewer's eyes diverge.
+
+---
+
+#### HistogramIMG
+
+CPU-side histogram analyser — bins R/G/B/Luma intensities and draws a chart image.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| num_bins | Int | 256 | 16–512 | Number of histogram bins |
+| show_rgb | Bool | true | — | Draw separate R, G, B curves |
+| show_luma | Bool | true | — | Draw the luminance curve |
+| resolution | Vector2i | 512×256 | — | Output chart size in pixels |
+| smoothing | Float | 0.0 | 0.0–4.0 | Gaussian smoothing radius for the histogram curves |
+
+**Input:** `in` (IMG — source image). **Output:** `out` (IMG — histogram chart).
+
+**How it works:** Iterates all source pixels, bins each channel into R/G/B/Luma arrays, optionally smooths with a 1D Gaussian, normalises to peak, and renders curves with additive blending onto a dark background. Grid lines mark 25%/50%/75% intensity.
 
 ---
 

@@ -2569,6 +2569,26 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/img/edge_detect_img.gd"
   },
+  "HistogramIMG": {
+    "class_name": "HistogramIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/img/histogram_img.gd"
+  },
   "ImageFileInIMG": {
     "class_name": "ImageFileInIMG",
     "family": "IMG",
@@ -5478,6 +5498,31 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/deform_top.gd"
   },
+  "DepthOfFieldTOP": {
+    "class_name": "DepthOfFieldTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "color",
+        "type": "TOP"
+      },
+      {
+        "port": 1,
+        "name": "depth",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/depth_of_field_top.gd"
+  },
   "DepthTOP": {
     "class_name": "DepthTOP",
     "family": "TOP",
@@ -6012,6 +6057,36 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/kaleidoscope_top.gd"
   },
+  "KeyMixTOP": {
+    "class_name": "KeyMixTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "A",
+        "type": "TOP"
+      },
+      {
+        "port": 1,
+        "name": "B",
+        "type": "TOP"
+      },
+      {
+        "port": 2,
+        "name": "matte",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/key_mix_top.gd"
+  },
   "KuwaharaTOP": {
     "class_name": "KuwaharaTOP",
     "family": "TOP",
@@ -6076,6 +6151,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/lens_distort_top.gd"
+  },
+  "LensFlareTOP": {
+    "class_name": "LensFlareTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/lens_flare_top.gd"
   },
   "LevelTOP": {
     "class_name": "LevelTOP",
@@ -6162,6 +6257,26 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/luma_blur_top.gd"
   },
+  "LUTTOP": {
+    "class_name": "LUTTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/lut_top.gd"
+  },
   "MatteTOP": {
     "class_name": "MatteTOP",
     "family": "TOP",
@@ -6247,6 +6362,31 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/mono_top.gd"
   },
+  "MotionBlurTOP": {
+    "class_name": "MotionBlurTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "color",
+        "type": "TOP"
+      },
+      {
+        "port": 1,
+        "name": "flow",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/motion_blur_top.gd"
+  },
   "MovieFileInTOP": {
     "class_name": "MovieFileInTOP",
     "family": "TOP",
@@ -6256,6 +6396,11 @@
         "port": 0,
         "name": "out",
         "type": "TOP"
+      },
+      {
+        "port": 1,
+        "name": "audio",
+        "type": "CHOP"
       }
     ],
     "dynamic_inputs": null,
@@ -7101,6 +7246,41 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/voronoi_top.gd"
+  },
+  "ZCompositeTOP": {
+    "class_name": "ZCompositeTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "color_a",
+        "type": "TOP"
+      },
+      {
+        "port": 1,
+        "name": "depth_a",
+        "type": "TOP"
+      },
+      {
+        "port": 2,
+        "name": "color_b",
+        "type": "TOP"
+      },
+      {
+        "port": 3,
+        "name": "depth_b",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/z_composite_top.gd"
   },
   "ButtonUI": {
     "class_name": "ButtonUI",

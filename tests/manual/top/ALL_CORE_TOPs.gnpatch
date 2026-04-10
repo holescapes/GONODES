@@ -835,27 +835,213 @@
 			"to_port": 0
 		},
 		{
-			"from": "wave_vp",
+			"from": "lut1",
 			"from_port": 0,
-			"to": "vector_path1",
+			"to": "OUTChain17",
 			"to_port": 0
 		},
 		{
-			"from": "checkerboard1",
+			"from": "OUTChain17",
 			"from_port": 0,
-			"to": "snapshot1",
-			"to_port": 0
+			"to": "switch2",
+			"to_port": 16
 		},
 		{
-			"from": "table_vp",
+			"from": "zc_depA",
 			"from_port": 0,
-			"to": "vector_path1",
+			"to": "z_composite1",
 			"to_port": 1
 		},
 		{
-			"from": "wave_vp",
+			"from": "zc_colB",
 			"from_port": 0,
-			"to": "rename1",
+			"to": "z_composite1",
+			"to_port": 2
+		},
+		{
+			"from": "zc_depB",
+			"from_port": 0,
+			"to": "z_composite1",
+			"to_port": 3
+		},
+		{
+			"from": "z_composite1",
+			"from_port": 0,
+			"to": "OUTChain18",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain18",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 17
+		},
+		{
+			"from": "dof_col",
+			"from_port": 0,
+			"to": "depth_of_field1",
+			"to_port": 0
+		},
+		{
+			"from": "dof_depth",
+			"from_port": 0,
+			"to": "depth_of_field1",
+			"to_port": 1
+		},
+		{
+			"from": "depth_of_field1",
+			"from_port": 0,
+			"to": "OUTChain19",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain19",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 18
+		},
+		{
+			"from": "km_a",
+			"from_port": 0,
+			"to": "key_mix1",
+			"to_port": 0
+		},
+		{
+			"from": "km_b",
+			"from_port": 0,
+			"to": "key_mix1",
+			"to_port": 1
+		},
+		{
+			"from": "km_matte",
+			"from_port": 0,
+			"to": "key_mix1",
+			"to_port": 2
+		},
+		{
+			"from": "key_mix1",
+			"from_port": 0,
+			"to": "OUTChain20",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain20",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 19
+		},
+		{
+			"from": "mb_flow",
+			"from_port": 0,
+			"to": "motion_blur1",
+			"to_port": 1
+		},
+		{
+			"from": "motion_blur1",
+			"from_port": 0,
+			"to": "OUTChain21",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain21",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 20
+		},
+		{
+			"from": "lf_src",
+			"from_port": 0,
+			"to": "lens_flare1",
+			"to_port": 0
+		},
+		{
+			"from": "lens_flare1",
+			"from_port": 0,
+			"to": "OUTChain22",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain22",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 21
+		},
+		{
+			"from": "zc_colA",
+			"from_port": 0,
+			"to": "img_to_top2",
+			"to_port": 0
+		},
+		{
+			"from": "img_to_top2",
+			"from_port": 0,
+			"to": "z_composite1",
+			"to_port": 0
+		},
+		{
+			"from": "mb_col",
+			"from_port": 0,
+			"to": "img_to_top3",
+			"to_port": 0
+		},
+		{
+			"from": "img_to_top3",
+			"from_port": 0,
+			"to": "motion_blur1",
+			"to_port": 0
+		},
+		{
+			"from": "wave1_copy",
+			"from_port": 0,
+			"to": "rename1_copy",
+			"to_port": 0
+		},
+		{
+			"from": "rename1_copy",
+			"from_port": 0,
+			"to": "vpath_chop_copy",
+			"to_port": 0
+		},
+		{
+			"from": "table_cmds_copy",
+			"from_port": 0,
+			"to": "vpath_dat_copy",
+			"to_port": 1
+		},
+		{
+			"from": "vpath_chop_copy",
+			"from_port": 0,
+			"to": "OUTChain23",
+			"to_port": 0
+		},
+		{
+			"from": "vpath_dat_copy",
+			"from_port": 0,
+			"to": "OUTChain24",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain23",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 22
+		},
+		{
+			"from": "OUTChain24",
+			"from_port": 0,
+			"to": "switch2",
+			"to_port": 23
+		},
+		{
+			"from": "image_file_in2",
+			"from_port": 0,
+			"to": "img_to_top4",
+			"to_port": 0
+		},
+		{
+			"from": "img_to_top4",
+			"from_port": 0,
+			"to": "lut1",
 			"to_port": 0
 		}
 	],
@@ -917,10 +1103,66 @@
 			],
 			"type": "NullTOP"
 		},
+		"OUTChain17": {
+			"position": [
+				-520.0,
+				2720.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain18": {
+			"position": [
+				-520.0,
+				3120.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain19": {
+			"position": [
+				-520.0,
+				3520.0
+			],
+			"type": "NullTOP"
+		},
 		"OUTChain2": {
 			"position": [
 				-560.0,
 				-2680.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain20": {
+			"position": [
+				-520.0,
+				3920.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain21": {
+			"position": [
+				-520.0,
+				4320.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain22": {
+			"position": [
+				-520.0,
+				4720.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain23": {
+			"position": [
+				-580.0,
+				5120.0
+			],
+			"type": "NullTOP"
+		},
+		"OUTChain24": {
+			"position": [
+				-580.0,
+				5400.0
 			],
 			"type": "NullTOP"
 		},
@@ -970,13 +1212,6 @@
 			"position": [
 				-560.0,
 				100.0
-			],
-			"type": "NullTOP"
-		},
-		"OUTChainVP": {
-			"position": [
-				-280.0,
-				2700.0
 			],
 			"type": "NullTOP"
 		},
@@ -1203,49 +1438,6 @@
 			],
 			"type": "ChannelMixTOP"
 		},
-		"checkerboard1": {
-			"parameters": {
-				"cells_x": {
-					"value": 8
-				},
-				"cells_y": {
-					"value": 8
-				},
-				"color_a": {
-					"value": {
-						"_type": "Color",
-						"a": 1.0,
-						"b": 1.0,
-						"g": 1.0,
-						"r": 1.0
-					}
-				},
-				"color_b": {
-					"value": {
-						"_type": "Color",
-						"a": 1.0,
-						"b": 0.0,
-						"g": 0.0,
-						"r": 0.0
-					}
-				},
-				"resolution": {
-					"value": {
-						"_type": "Vector2i",
-						"x": 256,
-						"y": 256
-					}
-				},
-				"softness": {
-					"value": 0.0
-				}
-			},
-			"position": [
-				-3040.62353515625,
-				-937.05615234375
-			],
-			"type": "CheckerboardIMG"
-		},
 		"chop_to_top1": {
 			"parameters": {
 				"auto_range": {
@@ -1259,6 +1451,9 @@
 						"g": 0.0500000007450581,
 						"r": 0.0500000007450581
 					}
+				},
+				"color_scheme": {
+					"value": 1
 				},
 				"line_color": {
 					"value": {
@@ -1275,11 +1470,17 @@
 				"max_val": {
 					"value": 1.0
 				},
+				"mel_scale": {
+					"value": true
+				},
 				"min_val": {
 					"value": -1.0
 				},
 				"mode": {
 					"value": 0
+				},
+				"num_bands": {
+					"value": 64
 				},
 				"resolution": {
 					"value": {
@@ -1621,75 +1822,6 @@
 			],
 			"type": "ConstantTOP"
 		},
-		"constant2": {
-			"parameters": {
-				"col0": {
-					"value": "name\nsdadad"
-				},
-				"col1": {
-					"value": "value\nasdads"
-				},
-				"col2": {
-					"value": ""
-				},
-				"col3": {
-					"value": ""
-				},
-				"r0c0": {
-					"value": ""
-				},
-				"r0c1": {
-					"value": ""
-				},
-				"r0c2": {
-					"value": ""
-				},
-				"r0c3": {
-					"value": ""
-				},
-				"r1c0": {
-					"value": ""
-				},
-				"r1c1": {
-					"value": ""
-				},
-				"r1c2": {
-					"value": ""
-				},
-				"r1c3": {
-					"value": ""
-				},
-				"r2c0": {
-					"value": ""
-				},
-				"r2c1": {
-					"value": ""
-				},
-				"r2c2": {
-					"value": ""
-				},
-				"r2c3": {
-					"value": ""
-				},
-				"r3c0": {
-					"value": ""
-				},
-				"r3c1": {
-					"value": ""
-				},
-				"r3c2": {
-					"value": ""
-				},
-				"r3c3": {
-					"value": ""
-				}
-			},
-			"position": [
-				-3360.0,
-				-1040.0
-			],
-			"type": "ConstantDAT"
-		},
 		"convolution1": {
 			"parameters": {
 				"bias": {
@@ -1892,13 +2024,6 @@
 				"mode": {
 					"value": 1
 				},
-				"resolution": {
-					"value": {
-						"_type": "Vector2i",
-						"x": 1024,
-						"y": 1024
-					}
-				},
 				"strength": {
 					"value": 0.103
 				}
@@ -1919,13 +2044,6 @@
 				},
 				"near": {
 					"value": 8.90999999999999
-				},
-				"resolution": {
-					"value": {
-						"_type": "Vector2i",
-						"x": 512,
-						"y": 512
-					}
 				}
 			},
 			"position": [
@@ -1933,6 +2051,30 @@
 				-580.0
 			],
 			"type": "DepthTOP"
+		},
+		"depth_of_field1": {
+			"parameters": {
+				"bokeh_brightness": {
+					"value": 1.2
+				},
+				"focal_distance": {
+					"value": 0.5
+				},
+				"focal_range": {
+					"value": 0.1
+				},
+				"max_blur": {
+					"value": 8.0
+				},
+				"quality": {
+					"value": 1
+				}
+			},
+			"position": [
+				-1140.0,
+				3520.0
+			],
+			"type": "DepthOfFieldTOP"
 		},
 		"dilate_erode1": {
 			"parameters": {
@@ -2011,6 +2153,132 @@
 				-1180.0
 			],
 			"type": "DitherTOP"
+		},
+		"dof_col": {
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.150000005960464,
+						"g": 0.150000005960464,
+						"r": 0.150000005960464
+					}
+				},
+				"card_type": {
+					"value": 0
+				},
+				"center_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"grid_cells": {
+					"value": 16.0
+				},
+				"grid_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.349999994039536,
+						"g": 0.349999994039536,
+						"r": 0.349999994039536
+					}
+				},
+				"line_width": {
+					"value": 1.5
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"safe_margin": {
+					"value": 0.05
+				},
+				"show_center": {
+					"value": true
+				},
+				"show_circle": {
+					"value": true
+				},
+				"show_color_bars": {
+					"value": true
+				},
+				"show_corners": {
+					"value": true
+				},
+				"show_grayscale": {
+					"value": true
+				},
+				"show_grid": {
+					"value": true
+				},
+				"show_safe_area": {
+					"value": true
+				}
+			},
+			"position": [
+				-1940.0,
+				3520.0
+			],
+			"type": "TestCardTOP"
+		},
+		"dof_depth": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"repeat": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"type": {
+					"value": 0
+				}
+			},
+			"position": [
+				-1940.0,
+				3640.0
+			],
+			"type": "RampTOP"
 		},
 		"edge1": {
 			"parameters": {
@@ -2632,10 +2900,53 @@
 			],
 			"type": "ImageFileInIMG"
 		},
+		"image_file_in2": {
+			"parameters": {
+				"file": {
+					"value": "project://20815840526_04a04d4cee_k.jpg"
+				},
+				"reload": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 2047,
+						"y": 1332
+					}
+				}
+			},
+			"position": [
+				-1660.0,
+				2720.0
+			],
+			"type": "ImageFileInIMG"
+		},
 		"img_to_top1": {
 			"position": [
 				-2680.0,
 				-200.0
+			],
+			"type": "ImgToTOP"
+		},
+		"img_to_top2": {
+			"position": [
+				-2060.0,
+				3120.0
+			],
+			"type": "ImgToTOP"
+		},
+		"img_to_top3": {
+			"position": [
+				-1680.0,
+				4340.0
+			],
+			"type": "ImgToTOP"
+		},
+		"img_to_top4": {
+			"position": [
+				-1400.0,
+				2720.0
 			],
 			"type": "ImgToTOP"
 		},
@@ -2660,6 +2971,151 @@
 				-580.0
 			],
 			"type": "KaleidoscopeTOP"
+		},
+		"key_mix1": {
+			"parameters": {
+				"invert": {
+					"value": false
+				},
+				"matte_channel": {
+					"value": 0
+				},
+				"opacity": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				-1140.0,
+				3920.0
+			],
+			"type": "KeyMixTOP"
+		},
+		"km_a": {
+			"parameters": {
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.400000005960464,
+						"r": 1.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.300000011920929,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"duty_cycle": {
+					"value": 0.5
+				},
+				"frequency": {
+					"value": 6.0
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"rotation": {
+					"value": 0.0
+				},
+				"softness": {
+					"value": 0.02
+				},
+				"type": {
+					"value": 0
+				}
+			},
+			"position": [
+				-1940.0,
+				3920.0
+			],
+			"type": "PatternTOP"
+		},
+		"km_b": {
+			"parameters": {
+				"jitter": {
+					"value": 1.0
+				},
+				"mode": {
+					"value": 0
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"scale": {
+					"value": 10.0
+				},
+				"speed": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				-1940.0,
+				4040.0
+			],
+			"type": "VoronoiTOP"
+		},
+		"km_matte": {
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"border_width": {
+					"value": 0.0
+				},
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"fill_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"radius": {
+					"value": 0.4
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"softness": {
+					"value": 0.1
+				}
+			},
+			"position": [
+				-1940.0,
+				4160.0
+			],
+			"type": "CircleTOP"
 		},
 		"kuwahara1": {
 			"parameters": {
@@ -2764,6 +3220,51 @@
 			],
 			"type": "LensDistortTOP"
 		},
+		"lens_flare1": {
+			"parameters": {
+				"ghost_count": {
+					"value": 4
+				},
+				"ghost_intensity": {
+					"value": 0.6
+				},
+				"ghost_spacing": {
+					"value": 0.3
+				},
+				"halo_intensity": {
+					"value": 0.4
+				},
+				"halo_radius": {
+					"value": 0.5
+				},
+				"halo_width": {
+					"value": 0.06
+				},
+				"streak_intensity": {
+					"value": 0.3
+				},
+				"streak_length": {
+					"value": 0.15
+				},
+				"threshold": {
+					"value": 0.6
+				},
+				"tint": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.699999988079071,
+						"g": 0.899999976158142,
+						"r": 1.0
+					}
+				}
+			},
+			"position": [
+				-1140.0,
+				4720.0
+			],
+			"type": "LensFlareTOP"
+		},
 		"level2": {
 			"parameters": {
 				"brightness": {
@@ -2787,6 +3288,63 @@
 				-3060.0
 			],
 			"type": "LevelTOP"
+		},
+		"lf_src": {
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0500000007450581,
+						"g": 0.0199999995529652,
+						"r": 0.0199999995529652
+					}
+				},
+				"border_width": {
+					"value": 0.0
+				},
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.300000011920929,
+						"y": 0.300000011920929
+					}
+				},
+				"corner_radius": {
+					"value": 0.0
+				},
+				"fill_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.800000011920929,
+						"g": 0.949999988079071,
+						"r": 1.0
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"size": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0500000007450581,
+						"y": 0.0500000007450581
+					}
+				},
+				"softness": {
+					"value": 0.005
+				}
+			},
+			"position": [
+				-1940.0,
+				4720.0
+			],
+			"type": "RectangleTOP"
 		},
 		"lfo1": {
 			"parameters": {
@@ -2958,6 +3516,21 @@
 			],
 			"type": "LumaBlurTOP"
 		},
+		"lut1": {
+			"parameters": {
+				"intensity": {
+					"value": 1.0
+				},
+				"lut_file": {
+					"value": "project://warm_cinematic_8.cube"
+				}
+			},
+			"position": [
+				-1140.0,
+				2720.0
+			],
+			"type": "LUTTOP"
+		},
 		"matte1": {
 			"parameters": {
 				"invert": {
@@ -2975,6 +3548,99 @@
 				2060.0
 			],
 			"type": "MatteTOP"
+		},
+		"mb_col": {
+			"parameters": {
+				"cells_x": {
+					"value": 8
+				},
+				"cells_y": {
+					"value": 8
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"softness": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				-1940.0,
+				4340.0
+			],
+			"type": "CheckerboardIMG"
+		},
+		"mb_flow": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.5,
+						"r": 0.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.5,
+						"r": 1.0
+					}
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"repeat": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"type": {
+					"value": 0
+				}
+			},
+			"position": [
+				-1940.0,
+				4460.0
+			],
+			"type": "RampTOP"
 		},
 		"median1": {
 			"parameters": {
@@ -3026,6 +3692,21 @@
 				-3060.0
 			],
 			"type": "MonoTOP"
+		},
+		"motion_blur1": {
+			"parameters": {
+				"quality": {
+					"value": 1
+				},
+				"strength": {
+					"value": 2.0
+				}
+			},
+			"position": [
+				-1140.0,
+				4320.0
+			],
+			"type": "MotionBlurTOP"
 		},
 		"movie_file_in1": {
 			"parameters": {
@@ -3495,13 +4176,6 @@
 				},
 				"iterations": {
 					"value": 4
-				},
-				"resolution": {
-					"value": {
-						"_type": "Vector2i",
-						"x": 512,
-						"y": 512
-					}
 				},
 				"sensitivity": {
 					"value": 20.0
@@ -4251,21 +4925,120 @@
 			],
 			"type": "RemapTOP"
 		},
-		"rename1": {
+		"rename1_copy": {
 			"parameters": {
 				"from0": {
-					"value": "chan"
+					"value": "chan1"
 				},
-				"renames": {
+				"from1": {
+					"value": "chan2"
+				},
+				"from10": {
+					"value": "chan11"
+				},
+				"from11": {
+					"value": "chan12"
+				},
+				"from12": {
+					"value": "chan13"
+				},
+				"from13": {
+					"value": "chan14"
+				},
+				"from14": {
+					"value": "chan15"
+				},
+				"from15": {
+					"value": "chan16"
+				},
+				"from2": {
+					"value": "chan3"
+				},
+				"from3": {
+					"value": "chan4"
+				},
+				"from4": {
+					"value": "chan5"
+				},
+				"from5": {
+					"value": "chan6"
+				},
+				"from6": {
+					"value": "chan7"
+				},
+				"from7": {
+					"value": "chan8"
+				},
+				"from8": {
+					"value": "chan9"
+				},
+				"from9": {
+					"value": "chan10"
+				},
+				"from_pattern": {
+					"value": "*"
+				},
+				"mode": {
 					"value": 1
 				},
+				"renames": {
+					"value": 16
+				},
 				"to0": {
-					"value": "x"
+					"value": "x0"
+				},
+				"to1": {
+					"value": "y0"
+				},
+				"to10": {
+					"value": "x5"
+				},
+				"to11": {
+					"value": "y5"
+				},
+				"to12": {
+					"value": "x6"
+				},
+				"to13": {
+					"value": "y6"
+				},
+				"to14": {
+					"value": "x7"
+				},
+				"to15": {
+					"value": "y7"
+				},
+				"to2": {
+					"value": "x1"
+				},
+				"to3": {
+					"value": "y1"
+				},
+				"to4": {
+					"value": "x2"
+				},
+				"to5": {
+					"value": "y2"
+				},
+				"to6": {
+					"value": "x3"
+				},
+				"to7": {
+					"value": "y3"
+				},
+				"to8": {
+					"value": "x4"
+				},
+				"to9": {
+					"value": "y4"
+				},
+				"to_pattern": {
+					"value": "*"
 				}
 			},
 			"position": [
-				-1462.56884765625,
-				2674.50048828125
+				-1300.0,
+				5120.0
 			],
 			"type": "RenameCHOP"
 		},
@@ -4483,7 +5256,7 @@
 					"value": "Slider"
 				},
 				"max_val": {
-					"value": 15.0
+					"value": 23.0
 				},
 				"min_size": {
 					"value": {
@@ -4603,7 +5376,7 @@
 			"type": "SVGTOP"
 		},
 		"switch2": {
-			"dynamic_input_count": 17,
+			"dynamic_input_count": 25,
 			"parameters": {
 				"blend": {
 					"value": false
@@ -4623,13 +5396,13 @@
 			],
 			"type": "SwitchTOP"
 		},
-		"table_vp": {
+		"table_cmds_copy": {
 			"parameters": {
 				"cols": {
-					"value": 2
+					"value": 3
 				},
 				"data": {
-					"value": "cmd,val\nM,1\nC,0\nC,0\nZ,0"
+					"value": "cmd,x,y\nM,50,400\nC,100,100,250,100,256,256\nC,262,412,412,412,462,112\nL,462,400\nL,50,400\nZ,,"
 				},
 				"headers": {
 					"value": "name,value,weight"
@@ -4638,12 +5411,12 @@
 					"value": false
 				},
 				"rows": {
-					"value": 5
+					"value": 7
 				}
 			},
 			"position": [
-				-1400.0,
-				2960.0
+				-1320.0,
+				5540.0
 			],
 			"type": "TableDAT"
 		},
@@ -4775,18 +5548,6 @@
 			],
 			"type": "TextTOP"
 		},
-		"text2": {
-			"parameters": {
-				"text": {
-					"value": "DSADDASdsd\nsss"
-				}
-			},
-			"position": [
-				-3320.0,
-				-1220.0
-			],
-			"type": "TextDAT"
-		},
 		"threshold1": {
 			"parameters": {
 				"softness": {
@@ -4842,6 +5603,9 @@
 				"length": {
 					"value": 37
 				},
+				"mode": {
+					"value": 0
+				},
 				"position": {
 					"value": 0.0
 				},
@@ -4850,6 +5614,25 @@
 				},
 				"speed": {
 					"value": 0.14
+				},
+				"time_ramp": {
+					"value": {
+						"_type": "Ramp",
+						"keys": [
+							{
+								"left_tangent": 0.0,
+								"pos": 0.0,
+								"right_tangent": 0.0,
+								"value": 0.0
+							},
+							{
+								"left_tangent": 0.0,
+								"pos": 1.0,
+								"right_tangent": 0.0,
+								"value": 1.0
+							}
+						]
+					}
 				},
 				"wrap_mode": {
 					"value": 1
@@ -5044,79 +5827,6 @@
 			],
 			"type": "TwirlTOP"
 		},
-		"vector_path1": {
-			"parameters": {
-				"antialiased": {
-					"value": true
-				},
-				"arc_end": {
-					"value": 360.0
-				},
-				"arc_segments": {
-					"value": 104
-				},
-				"arc_start": {
-					"value": -37.0
-				},
-				"bg_color": {
-					"value": {
-						"_type": "Color",
-						"a": 0.0,
-						"b": 0.0,
-						"g": 0.0,
-						"r": 0.0
-					}
-				},
-				"closed": {
-					"value": false
-				},
-				"fill": {
-					"value": true
-				},
-				"fill_color": {
-					"value": {
-						"_type": "Color",
-						"a": 0.400000005960464,
-						"b": 0.600000023841858,
-						"g": 0.300000011920929,
-						"r": 0.100000001490116
-					}
-				},
-				"line_cap": {
-					"value": 1
-				},
-				"radius": {
-					"value": 272.0
-				},
-				"resolution": {
-					"value": {
-						"_type": "Vector2i",
-						"x": 512,
-						"y": 512
-					}
-				},
-				"shape": {
-					"value": 0
-				},
-				"stroke_color": {
-					"value": {
-						"_type": "Color",
-						"a": 1.0,
-						"b": 1.0,
-						"g": 0.800000011920929,
-						"r": 0.200000002980232
-					}
-				},
-				"stroke_width": {
-					"value": 3.0
-				}
-			},
-			"position": [
-				-1000.0,
-				2740.0
-			],
-			"type": "VectorPathTOP"
-		},
 		"vignette1": {
 			"parameters": {
 				"color": {
@@ -5172,6 +5882,152 @@
 			],
 			"type": "VoronoiTOP"
 		},
+		"vpath_chop_copy": {
+			"parameters": {
+				"antialiased": {
+					"value": true
+				},
+				"arc_end": {
+					"value": 360.0
+				},
+				"arc_segments": {
+					"value": 64
+				},
+				"arc_start": {
+					"value": 0.0
+				},
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 0.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"closed": {
+					"value": true
+				},
+				"fill": {
+					"value": true
+				},
+				"fill_color": {
+					"value": {
+						"_type": "Color",
+						"a": 0.400000005960464,
+						"b": 0.600000023841858,
+						"g": 0.300000011920929,
+						"r": 0.100000001490116
+					}
+				},
+				"line_cap": {
+					"value": 1
+				},
+				"radius": {
+					"value": 100.0
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"shape": {
+					"value": 0
+				},
+				"stroke_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 0.800000011920929,
+						"r": 0.200000002980232
+					}
+				},
+				"stroke_width": {
+					"value": 3.0
+				}
+			},
+			"position": [
+				-900.0,
+				5120.0
+			],
+			"type": "VectorPathTOP"
+		},
+		"vpath_dat_copy": {
+			"parameters": {
+				"antialiased": {
+					"value": true
+				},
+				"arc_end": {
+					"value": 360.0
+				},
+				"arc_segments": {
+					"value": 64
+				},
+				"arc_start": {
+					"value": 0.0
+				},
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 0.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"closed": {
+					"value": false
+				},
+				"fill": {
+					"value": true
+				},
+				"fill_color": {
+					"value": {
+						"_type": "Color",
+						"a": 0.5,
+						"b": 0.100000001490116,
+						"g": 0.150000005960464,
+						"r": 0.600000023841858
+					}
+				},
+				"line_cap": {
+					"value": 1
+				},
+				"radius": {
+					"value": 100.0
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"shape": {
+					"value": 4
+				},
+				"stroke_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.200000002980232,
+						"g": 0.600000023841858,
+						"r": 1.0
+					}
+				},
+				"stroke_width": {
+					"value": 2.5
+				}
+			},
+			"position": [
+				-900.0,
+				5420.0
+			],
+			"type": "VectorPathTOP"
+		},
 		"wave1": {
 			"parameters": {
 				"amplitude": {
@@ -5205,7 +6061,7 @@
 			],
 			"type": "WaveCHOP"
 		},
-		"wave_vp": {
+		"wave1_copy": {
 			"parameters": {
 				"amplitude": {
 					"value": 200.0
@@ -5233,8 +6089,8 @@
 				}
 			},
 			"position": [
-				-1740.0,
-				2700.0
+				-1700.0,
+				5120.0
 			],
 			"type": "WaveCHOP"
 		},
@@ -5278,12 +6134,220 @@
 				-3060.0
 			],
 			"type": "WindowOUT"
+		},
+		"z_composite1": {
+			"parameters": {
+				"bias": {
+					"value": 0.0
+				},
+				"compare": {
+					"value": 0
+				}
+			},
+			"position": [
+				-1140.0,
+				3120.0
+			],
+			"type": "ZCompositeTOP"
+		},
+		"zc_colA": {
+			"parameters": {
+				"cells_x": {
+					"value": 4
+				},
+				"cells_y": {
+					"value": 4
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.100000001490116,
+						"g": 0.200000002980232,
+						"r": 0.899999976158142
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.800000011920929,
+						"g": 0.100000001490116,
+						"r": 0.100000001490116
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"softness": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				-2340.0,
+				3120.0
+			],
+			"type": "CheckerboardIMG"
+		},
+		"zc_colB": {
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"border_width": {
+					"value": 0.0
+				},
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"fill_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.300000011920929,
+						"g": 0.899999976158142,
+						"r": 0.100000001490116
+					}
+				},
+				"radius": {
+					"value": 0.35
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"softness": {
+					"value": 0.005
+				}
+			},
+			"position": [
+				-2340.0,
+				3360.0
+			],
+			"type": "CircleTOP"
+		},
+		"zc_depA": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"repeat": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"type": {
+					"value": 0
+				}
+			},
+			"position": [
+				-2340.0,
+				3240.0
+			],
+			"type": "RampTOP"
+		},
+		"zc_depB": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"repeat": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"type": {
+					"value": 0
+				}
+			},
+			"position": [
+				-2340.0,
+				3480.0
+			],
+			"type": "RampTOP"
 		}
 	},
 	"version": "1.0.0",
 	"viewport": {
-		"scroll_x": -1749.06018066406,
-		"scroll_y": 2072.55981445313,
-		"zoom": 0.879999756813049
+		"scroll_x": -1014.32989501953,
+		"scroll_y": -1580.04528808594,
+		"zoom": 0.410526305437088
 	}
 }

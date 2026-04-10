@@ -410,6 +410,7 @@ func initialize(p_id: String) -> void:
 	process_mode = PROCESS_MODE_DISABLED
 	_init_ports()
 	_init_parameters()
+	_apply_visibility_rules()  # Set initial visibility from declarative rules
 	GNLogger.debug("GNNode", "Initialized '%s' (%s/%s) — %d in, %d out, %d params" % [
 		id, GNFamily.get_family_name(family), node_type,
 		input_ports.size(), output_ports.size(), parameters.size()])
@@ -703,9 +704,12 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Called when any parameter's value changes — marks this node dirty.
+## Also evaluates declarative visibility rules if any sibling parameter
+## references the changed parameter.
 func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
 	mark_dirty()
 	parameter_changed.emit(id, param_name)
+	_apply_visibility_rules(param_name)
 
 
 ## Called when any parameter's mode changes (constant ↔ expression ↔ bind).
@@ -713,6 +717,38 @@ func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
 func _on_parameter_mode_changed(param_name: String, _new_mode: int) -> void:
 	mark_dirty()
 	parameter_changed.emit(id, param_name)
+
+
+## Evaluates declarative [member GNParameter.visibility_rule] entries.
+## Called when [param changed_param] updates — checks if any sibling parameter
+## has a visibility_rule referencing it, then sets [member GNParameter.visible].
+## Emits [signal parameters_changed] once if any visibility state changed.
+##
+## Pass "" to evaluate ALL rules (used on load / init).
+func _apply_visibility_rules(changed_param: String = "") -> void:
+	var any_changed := false
+	for key in parameters:
+		var param: GNParameter = parameters[key]
+		var rule: Dictionary = param.visibility_rule
+		if rule.is_empty():
+			continue
+		var ctrl_name: String = rule.get("param", "")
+		if ctrl_name.is_empty():
+			continue
+		# Skip rules that don't reference the changed parameter (unless full eval)
+		if not changed_param.is_empty() and ctrl_name != changed_param:
+			continue
+		var ctrl_param: GNParameter = parameters.get(ctrl_name, null)
+		if ctrl_param == null:
+			continue
+		var allowed_values: Array = rule.get("values", [])
+		var current_value = ctrl_param.value if ctrl_param.resolved_value == null else ctrl_param.resolved_value
+		var new_visible: bool = allowed_values.has(int(current_value))
+		if param.visible != new_visible:
+			param.visible = new_visible
+			any_changed = true
+	if any_changed:
+		parameters_changed.emit(id)
 
 
 ## Called when this node transitions between active and inactive states.
@@ -838,6 +874,9 @@ func from_dict(d: Dictionary) -> void:
 				if not data.is_empty():
 					sp.from_dict(data)
 				add_spare_parameter(sp)
+
+	# Evaluate declarative visibility rules after all params are restored
+	_apply_visibility_rules()
 
 
 ## Creates a GNParameter from a spare parameter definition dictionary.

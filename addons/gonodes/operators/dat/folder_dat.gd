@@ -82,4 +82,4 @@ func _scan_dir(path: String, recursive: bool, filter_pat: String,
 func _matches_filter(file_name: String, pattern: String) -> bool:
 	if pattern == "*" or pattern.is_empty():
 		return true
-	return file_name.matchn(pattern)
+	return GNPattern.matches_any(file_name, pattern)

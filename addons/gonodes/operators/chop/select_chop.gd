@@ -60,23 +60,21 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_cached_channel_data.length = 0
 	_cached_channel_data.sample_rate = in_data.sample_rate
 
-	var patterns: PackedStringArray = pattern.split(",")
-	for i in range(patterns.size()):
-		patterns[i] = patterns[i].strip_edges()
-
-	var rename_list: PackedStringArray = rename_pat.split(",") if not rename_pat.is_empty() else PackedStringArray()
-	for i in range(rename_list.size()):
-		rename_list[i] = rename_list[i].strip_edges()
-
-	var match_idx: int = 0
+	# Build rename map if rename pattern is set
+	var all_names := PackedStringArray()
 	for ch_name in in_data.channels:
-		if _matches_pattern(ch_name, patterns):
-			var out_name: String = ch_name
-			if match_idx < rename_list.size() and not rename_list[match_idx].is_empty():
-				out_name = rename_list[match_idx]
+		all_names.append(ch_name)
 
+	var rename_map: Dictionary = {}
+	if not rename_pat.is_empty():
+		# If rename_pat contains *(N) or ?(N), treat as pattern capture rename.
+		# Otherwise fall back to expansion/sequential rename.
+		rename_map = GNPattern.rename_batch(all_names, pattern, rename_pat)
+
+	for ch_name in in_data.channels:
+		if GNPattern.matches_any(ch_name, pattern):
+			var out_name: String = rename_map.get(ch_name, ch_name)
 			_cached_channel_data.set_channel(out_name, in_data.channels[ch_name])
-			match_idx += 1
 
 	return _cached_channel_data
 
@@ -95,20 +93,4 @@ func _resolve_remote_chop(target_id: String) -> GNChannelData:
 	return target.cached_output as GNChannelData if target.cached_output is GNChannelData else null
 
 
-func _matches_pattern(ch_name: String, patterns: PackedStringArray) -> bool:
-	for pat in patterns:
-		if pat == "*":
-			return true
-		if pat == ch_name:
-			return true
-		# Simple wildcard matching (prefix*)
-		if pat.ends_with("*"):
-			var prefix: String = pat.left(pat.length() - 1)
-			if ch_name.begins_with(prefix):
-				return true
-		# (*suffix)
-		if pat.begins_with("*"):
-			var suffix: String = pat.right(pat.length() - 1)
-			if ch_name.ends_with(suffix):
-				return true
-	return false
+# Pattern matching now delegated to GNPattern (see addons/gonodes/core/gn_pattern.gd)

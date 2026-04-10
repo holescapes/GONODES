@@ -67,6 +67,7 @@ enum _CtxID {
 	REPROMOTE_ASSET,
 	ADD_SPARE_PARAM,
 	COPY_AS_JSON,
+	PASTE_FROM_JSON,
 	COPY_DEBUG_INFO,
 	COPY_NETWORK_JSON,
 	DELETE_WIRES,
@@ -3263,6 +3264,11 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.add_item("Copy as JSON", _CtxID.COPY_AS_JSON)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_AS_JSON), not has_selection)
 
+	_context_menu.add_item("Paste from JSON", _CtxID.PASTE_FROM_JSON)
+	var _clip_text := DisplayServer.clipboard_get().strip_edges()
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.PASTE_FROM_JSON),
+		_clip_text.is_empty() or not _clip_text.begins_with("{"))
+
 	_context_menu.add_item("Copy Debug Info", _CtxID.COPY_DEBUG_INFO)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.COPY_DEBUG_INFO), not single_selected)
 
@@ -3372,6 +3378,8 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			_show_add_spare_param_dialog()
 		_CtxID.COPY_AS_JSON:
 			_copy_selected_as_json()
+		_CtxID.PASTE_FROM_JSON:
+			_paste_from_json()
 		_CtxID.COPY_DEBUG_INFO:
 			_copy_debug_info_to_clipboard()
 		_CtxID.COPY_NETWORK_JSON:
@@ -3414,6 +3422,40 @@ func _copy_selected_as_json() -> void:
 	DisplayServer.clipboard_set(json_text)
 	GNLogger.info("GraphEditor", "Copied %d node(s) as JSON (%d bytes)" % [
 		nodes_data.size(), json_text.length()])
+
+
+## Pastes nodes from JSON text on the OS clipboard.
+func _paste_from_json() -> void:
+	var clip_text := DisplayServer.clipboard_get().strip_edges()
+	if clip_text.is_empty():
+		GNLogger.warn("GraphEditor", "Clipboard is empty")
+		return
+
+	var json := JSON.new()
+	var err := json.parse(clip_text)
+	if err != OK:
+		GNLogger.warn("GraphEditor", "Paste JSON: parse error — %s" % json.get_error_message())
+		return
+
+	var payload: Dictionary = json.data
+	if not payload.has("nodes"):
+		GNLogger.warn("GraphEditor", "Paste JSON: missing 'nodes' key")
+		return
+
+	# Normalize connection keys: "from"/"to" → "from_node"/"to_node"
+	var conns: Array = payload.get("connections", [])
+	var normalized_conns: Array = []
+	for cd in conns:
+		normalized_conns.append({
+			"from_node": cd.get("from_node", cd.get("from", "")),
+			"from_port": int(cd.get("from_port", 0)),
+			"to_node": cd.get("to_node", cd.get("to", "")),
+			"to_port": int(cd.get("to_port", 0)),
+		})
+
+	_clipboard = {"nodes": payload["nodes"], "connections": normalized_conns}
+	paste_clipboard()
+	GNLogger.info("GraphEditor", "Pasted %d node(s) from JSON" % payload["nodes"].size())
 
 
 ## Copies a single node's debug state to the OS clipboard.

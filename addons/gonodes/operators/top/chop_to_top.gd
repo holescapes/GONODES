@@ -29,7 +29,7 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("mode",
-		PackedStringArray(["Waveform", "Heatmap", "Graph"]),
+		PackedStringArray(["Waveform", "Heatmap", "Graph", "Spectrogram"]),
 		0, "Mode", "Visualisation style"))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 256),
 		"Resolution", "Output image size"))
@@ -37,14 +37,30 @@ func _init_parameters() -> void:
 		"Background", "Background colour"))
 	add_parameter(GNParameter.create_color("line_color", Color(0.2, 0.8, 0.2, 1.0),
 		"Line Color", "Waveform / graph line colour"))
-	add_parameter(GNParameter.create_float("line_width", 2.0, 1.0, 8.0, 1.0,
-		"Line Width", "Stroke width in pixels (approximate)"))
+	var p_lw := GNParameter.create_float("line_width", 2.0, 1.0, 8.0, 1.0,
+		"Line Width", "Stroke width in pixels (approximate)")
+	p_lw.visibility_rule = {"param": "mode", "values": [0, 2]}
+	add_parameter(p_lw)
 	add_parameter(GNParameter.create_float("min_val", -1.0, -1000.0, 1000.0, 0.1,
 		"Min Value", "Value mapped to bottom of image"))
 	add_parameter(GNParameter.create_float("max_val", 1.0, -1000.0, 1000.0, 0.1,
 		"Max Value", "Value mapped to top of image"))
 	add_parameter(GNParameter.create_bool("auto_range", true,
 		"Auto Range", "Automatically fit min/max to channel data"))
+	# Spectrogram-specific params
+	var p_nb := GNParameter.create_int("num_bands", 64, 8, 512, "Bands",
+		"Number of frequency bands (width of output)")
+	p_nb.visibility_rule = {"param": "mode", "values": [3]}
+	add_parameter(p_nb)
+	var p_mel := GNParameter.create_bool("mel_scale", true, "Mel Scale",
+		"Logarithmic (mel) frequency mapping — perceptual pitch spacing")
+	p_mel.visibility_rule = {"param": "mode", "values": [3]}
+	add_parameter(p_mel)
+	var p_cs := GNParameter.create_enum("color_scheme",
+		PackedStringArray(["Grayscale", "Heat", "Plasma"]),
+		1, "Colors", "Spectrogram colour palette")
+	p_cs.visibility_rule = {"param": "mode", "values": [3]}
+	add_parameter(p_cs)
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -117,6 +133,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			_draw_heatmap(img, channels, ch_names, w, h, min_v, max_v, line_col)
 		2:
 			_draw_graph(img, channels, ch_names, w, h, min_v, max_v, line_col)
+		3:
+			_draw_spectrogram(img, channels, ch_names, w, h, min_v, max_v)
 
 	# Create texture from image
 	var tex := ImageTexture.create_from_image(img)
@@ -244,3 +262,66 @@ func _draw_graph(img: Image, channels: Dictionary, ch_names: Array,
 					# Blend fill
 					var existing: Color = img.get_pixel(px, yc)
 					img.set_pixel(px, yc, existing.blend(fill_col))
+
+
+func _draw_spectrogram(img: Image, channels: Dictionary, ch_names: Array,
+		w: int, h: int, min_v: float, max_v: float) -> void:
+	## Renders CHOP channels as a single-frame spectrogram row.
+	## Each channel = one frequency band. X = band index, Y = single row (full height).
+	## Chain → CacheTOP + LayoutTOP (vertical) for a scrolling waterfall.
+	var num_bands: int = get_param_value("num_bands")
+	var mel: bool = get_param_value("mel_scale")
+	var scheme: int = get_param_value("color_scheme")
+	var ch_count: int = ch_names.size()
+	if ch_count == 0:
+		return
+
+	# Use the first channel's samples as frequency bins, or average all channels
+	var bins := PackedFloat32Array()
+	var first_data: PackedFloat32Array = channels[ch_names[0]]
+	var src_len: int = first_data.size()
+	if src_len == 0:
+		return
+
+	# Resample/remap to num_bands
+	bins.resize(num_bands)
+	for b in range(num_bands):
+		var t: float = float(b) / float(num_bands - 1) if num_bands > 1 else 0.0
+		# Mel scale: logarithmic frequency mapping
+		if mel:
+			t = (pow(10.0, t) - 1.0) / 9.0
+		var si: float = t * float(src_len - 1)
+		var si0: int = clampi(int(si), 0, src_len - 1)
+		var si1: int = clampi(si0 + 1, 0, src_len - 1)
+		var frac: float = si - float(si0)
+		bins[b] = first_data[si0] * (1.0 - frac) + first_data[si1] * frac
+
+	# Draw — each band = one vertical column, full height
+	var range_span: float = max_v - min_v
+	if absf(range_span) < 0.0001:
+		range_span = 1.0
+
+	for px in range(w):
+		var band_idx: int = clampi(int(float(px) / float(w) * float(num_bands)), 0, num_bands - 1)
+		var val: float = clampf((bins[band_idx] - min_v) / range_span, 0.0, 1.0)
+		var col: Color = _spectrogram_color(val, scheme)
+		for y in range(h):
+			img.set_pixel(px, y, col)
+
+
+static func _spectrogram_color(t: float, scheme: int) -> Color:
+	match scheme:
+		0:  # Grayscale
+			return Color(t, t, t, 1.0)
+		1:  # Heat (black → red → yellow → white)
+			return Color(
+				clampf(t * 3.0, 0.0, 1.0),
+				clampf(t * 3.0 - 1.0, 0.0, 1.0),
+				clampf(t * 3.0 - 2.0, 0.0, 1.0), 1.0)
+		2:  # Plasma (dark purple → magenta → orange → yellow)
+			var r: float = clampf(0.5 + 0.5 * sin(3.14159 * (t * 0.95 + 0.1)), 0.0, 1.0)
+			var g: float = clampf(0.5 + 0.5 * sin(3.14159 * (t * 0.95 - 0.35)), 0.0, 1.0)
+			var b_val: float = clampf(0.5 + 0.5 * sin(3.14159 * (t * 0.95 + 0.7)), 0.0, 1.0)
+			return Color(r, g, b_val, 1.0)
+		_:
+			return Color(t, t, t, 1.0)

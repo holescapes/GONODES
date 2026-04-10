@@ -284,6 +284,20 @@ GNChannelData with the results) don't need `_mutable_input()`.
 | UI | No | Control node references, not mutable data |
 | OUT | N/A | Sinks — consume but don't produce data |
 
+### The GPU/CPU Family Rule
+
+**Any operator that performs a GPU→CPU readback (texture download) must be in the IMG family, not TOP.**
+
+This is a deliberate design rule. TOP operators are GPU-resident: they produce `GNTextureData` via SubViewport shaders and never stall the GPU pipeline. When an operator needs to read pixels back to the CPU (histogram analysis, blob detection, pixel sorting, etc.), the GPU→CPU transfer is expensive (1–5ms+). By placing these in the IMG family, users see the orange IMG color in their graph and immediately know "this node has a CPU cost". If an IMG result needs to go back to GPU, wire it through `ImgToTOP`.
+
+Examples:
+- `HistogramIMG` — reads TOP texture, computes histogram bins on CPU, outputs chart Image
+- `TOPtoIMG` — explicit bridge operator (GPU readback)
+- `PixelSortIMG` — CPU-bound pixel manipulation
+- `ScreenGrabIMG` — viewport capture to CPU
+
+The bridge pair `TOPtoIMG` / `ImgToTOP` makes the cost boundary visible in the graph.
+
 ---
 
 ## 8. Extension Data Types

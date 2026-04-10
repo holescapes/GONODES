@@ -60,7 +60,7 @@
 | **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **489 operators** across 13 families — 137 TOP, 85 CHOP, 75 SOP, 45 DAT, 31 UI, 27 SDF, 20 COMP, 15 IMG, 14 VOL, 14 OUT, 12 POP, 11 MAT, 3 SCRIPT |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **496 operators** across 13 families — 143 TOP, 85 CHOP, 75 SOP, 45 DAT, 31 UI, 27 SDF, 20 COMP, 16 IMG, 14 VOL, 14 OUT, 12 POP, 11 MAT, 3 SCRIPT |
 
 ---
 
@@ -724,13 +724,13 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 18. Feature Parity Audit & Roadmap
 
-> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (489 operators across 13 families).
+> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (496 operators across 13 families).
 
 ### 18.1 Feature Coverage Matrix
 
 | TD Feature Area | TD Implementation | GONODES Status |
 |---|---|---|
-| **Texture processing** | 90+ TOPs | **137 TOPs** (112 core + 4 native + 21 extension) — exceeds TD in coverage |
+| **Texture processing** | 90+ TOPs | **143 TOPs** (118 core + 4 native + 21 extension) — exceeds TD in coverage |
 | **Channel/signal** | 70+ CHOPs | **85 CHOPs** — exceeds TD |
 | **Geometry** | 50+ SOPs | **75 SOPs** — exceeds TD |
 | **Data tables** | 30+ DATs | **45 DATs** — exceeds TD |
@@ -823,34 +823,33 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ### 18.6 Missing TOP Operators — Gap Analysis (April 2026)
 
-Despite having 137 TOP operators (exceeding TD's ~90), the following operators found in TD, vvvv, and/or Nuke are not yet present in GONODES:
+Despite having 143 TOP operators (exceeding TD's ~90), the following operators found in TD, vvvv, and/or Nuke are not yet present in GONODES:
 
 #### High Priority (common in real-time visual workflows)
 
-| Operator | Found In | What It Does | Why Useful |
-|----------|----------|-------------|------------|
-| **HistogramTOP** | TD + Nuke | Visual RGB/Luma histogram rendering | Essential color grading feedback — AnalyzeTOP gives stats but no visual histogram |
-| **LUTTOP** | Nuke + TD | Load & apply 3D .cube/.3dl LUT files | Industry-standard color grading; GradientMapTOP/LookupTOP are 1D only |
-| **MorphIMG** | vvvv + TD | Morphological open/close/skeleton/dilate-erode combos | Blob tracking, mask cleanup — DilateErodeTOP is basic single-op only. CPU-bound (IMG family). |
-| **BlobTrackIMG** | TD | Detect + track connected regions (centroid, area, bounding box) | Interactive installations, camera-based interactivity. CPU-bound (IMG family). |
-| **BackgroundSubtractIMG** | TD + vvvv | Adaptive background model subtraction | Camera-based motion detection for installations. CPU-bound (IMG family). |
+| Operator | Found In | What It Does | Status |
+|----------|----------|-------------|--------|
+| ~~HistogramTOP~~ → **HistogramIMG** | TD + Nuke | Visual RGB/Luma histogram rendering | ✅ Implemented as IMG family (CPU readback) |
+| **LUTTOP** | Nuke + TD | Load & apply 3D .cube/.3dl LUT files | ✅ Implemented — parses .cube/.3dl, applies via sampler3D |
+| **MorphIMG** | vvvv + TD | Morphological open/close/skeleton/dilate-erode combos | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
+| **BlobTrackIMG** | TD | Detect + track connected regions (centroid, area, bounding box) | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
+| **BackgroundSubtractIMG** | TD + vvvv | Adaptive background model subtraction | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
 
 #### Medium Priority (useful for professional workflows)
 
-| Operator | Found In | What It Does | Why Useful |
-|----------|----------|-------------|------------|
-| **ZCompositeTOP** | Nuke | Merge two renders by depth buffer | Multi-pass 3D compositing — CompositeTOP is 2D alpha-based only |
-| **MotionBlurTOP** | TD + Nuke | Temporal motion blur using optical flow vectors | DirectionalBlurTOP is spatial only, not temporal |
-| **LensFlareTOP** | Nuke + vvvv | Procedural lens flare, anamorphic streaks, ghosts | Cinematic look — GodRaysTOP covers volumetric but not optical flares |
-| **DepthOfFieldTOP** | TD + Nuke | Standalone DoF (circle of confusion from depth map) | Currently tied to RenderTOP; a standalone composable DoF is more flexible |
-| **KeyMixTOP** | Nuke | Blend two inputs using a matte/mask input | Essential compositing utility — CompositeTOP doesn't have dedicated matte input |
-| **InvertTOP** | TD | Per-channel inversion | Trivial but commonly expected as a named node |
-| **MathTOP** | TD | Per-pixel math (add/sub/mul/pow/abs/min/max between inputs) | TD's workhorse for combining textures arithmetically |
-| **ContourIMG** | vvvv + Nuke | Isoline/contour extraction from value maps | Topographic visualization, isoline rendering. CPU-bound (IMG family). |
-| **AudioSpectrumTOP** | TD | Dedicated FFT spectrogram with mel scale, waterfall modes | CHOPtoTOP exists but lacks spectrogram-specific features |
-| **ColorTrackIMG** | TD | Track a color region → centroid/area output | Simple interactivity for installations. CPU-bound (IMG family). |
-| **TimeWarpTOP** | TD + Nuke | Retime input with speed curve / time remap | Motion graphics, slow-mo effects |
-| **GradeTOP** | Nuke | Lift/gain/multiply/offset with black/white point | More precise than LevelTOP for film-style grading |
+| Operator | Found In | What It Does | Status |
+|----------|----------|-------------|--------|
+| **ZCompositeTOP** | Nuke | Merge two renders by depth buffer | ✅ Implemented — 4-input (colorA, depthA, colorB, depthB) with Nearer/Farther compare |
+| **MotionBlurTOP** | TD + Nuke | Temporal motion blur using optical flow vectors | ✅ Implemented — flow/velocity-driven blur with strength + quality |
+| **LensFlareTOP** | Nuke + vvvv | Procedural lens flare, anamorphic streaks, ghosts | ✅ Implemented — threshold-based ghosts, halo ring, anamorphic streaks |
+| **DepthOfFieldTOP** | TD + Nuke | Standalone DoF (circle of confusion from depth map) | ✅ Implemented — golden-angle disc blur with CoC from depth map |
+| **KeyMixTOP** | Nuke | Blend two inputs using a matte/mask input | ✅ Implemented — 3 inputs (A, B, matte) with channel select + invert |
+| ~~InvertTOP~~ | TD | Per-channel inversion | ✅ Covered — LevelTOP `invert` bool param |
+| ~~MathTOP~~ | TD | Per-pixel math (add/sub/mul/pow/abs/min/max between inputs) | ✅ Partially covered — CompositeTOP upgraded with Power/Abs/Min/Max blend modes |
+| **ContourIMG** | vvvv + Nuke | Isoline/contour extraction from value maps | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
+| ~~AudioSpectrumTOP~~ | TD | Dedicated FFT spectrogram with mel scale, waterfall modes | ✅ Covered — CHOPtoTOP Spectrogram mode (mel scale, color schemes, waterfall via CacheTOP) |
+| **ColorTrackIMG** | TD | Track a color region → centroid/area output | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
+| ~~GradeTOP~~ | Nuke | Lift/gain/multiply/offset with black/white point | ✅ Covered — ColorBalanceTOP (Lift/Gamma/Gain) + LimitTOP (black/white point) |
 
 #### Low Priority (niche or partially covered)
 
@@ -859,9 +858,8 @@ Despite having 137 TOP operators (exceeding TD's ~90), the following operators f
 | **RenderPickTOP** | TD | Mouse pick → object ID from rendered scene | Interactive 3D selection |
 | **HoughIMG** | vvvv | Line/circle detection (Hough transform) | Niche CV — ML extensions cover most detection. CPU-bound (IMG family). |
 | **FiducialIMG** | vvvv | ARTag/fiducial marker detection | Extension territory. CPU-bound (IMG family). |
-| **DATtoTOP** | TD | Render table/text data as texture | PanelTOP partially covers |
 
-**Summary:** 5 high-priority, 12 medium-priority, 4 low-priority gaps identified. The high-priority items (HistogramTOP, LUTTOP, MorphIMG, BlobTrackIMG, BackgroundSubtractIMG) would close the most impactful remaining gaps vs TD for installation/interactive workflows. CV operators use the IMG family (CPU-bound) rather than TOP (GPU) — a natural fit for a future `gn_ext_cv` extension wrapping OpenCV.
+**Summary:** Of the original 18 gap items, **11 are now resolved** (7 new operators built, 4 covered by existing operators). **7 gaps remain open** — 3 high-priority CV operators (MorphIMG, BlobTrackIMG, BackgroundSubtractIMG), 2 medium-priority CV operators (ContourIMG, ColorTrackIMG), and 3 low-priority niche items. The 5 remaining CV operators are natural candidates for a future `gn_ext_cv` extension wrapping OpenCV. DATtoTOP excluded — SnapshotTOP (mode=DAT) already covers it. TimeWarpTOP excluded — TimeMachineTOP Ramp mode provides curve-based time remapping.
 
 ---
 

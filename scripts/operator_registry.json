@@ -5164,6 +5164,40 @@
     ]
   },
   {
+    "class_name": "HistogramIMG",
+    "node_type": "histogram",
+    "family": "img",
+    "file": "addons/gonodes/operators/img/histogram_img.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "num_bins",
+        "type": "int",
+        "default": 256
+      },
+      {
+        "name": "show_rgb",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "show_luma",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "smoothing",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
     "class_name": "ImageFileInIMG",
     "node_type": "image_file_in",
     "family": "img",
@@ -10334,6 +10368,21 @@
         "name": "auto_range",
         "type": "bool",
         "default": true
+      },
+      {
+        "name": "num_bands",
+        "type": "int",
+        "default": 64
+      },
+      {
+        "name": "mel_scale",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "color_scheme",
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -10883,11 +10932,6 @@
         "name": "mode",
         "type": "menu",
         "default": null
-      },
-      {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
       }
     ]
   },
@@ -10927,6 +10971,40 @@
         "name": "active",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "DepthOfFieldTOP",
+    "node_type": "depth_of_field",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/depth_of_field_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "focal_distance",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "focal_range",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "max_blur",
+        "type": "float",
+        "default": 8.0
+      },
+      {
+        "name": "bokeh_brightness",
+        "type": "float",
+        "default": 1.2
+      },
+      {
+        "name": "quality",
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -10990,11 +11068,6 @@
         "name": "invert",
         "type": "bool",
         "default": false
-      },
-      {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
       }
     ]
   },
@@ -11568,6 +11641,11 @@
     "extension": null,
     "params": [
       {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
         "name": "intensity",
         "type": "float",
         "default": 0.3
@@ -11899,6 +11977,30 @@
     ]
   },
   {
+    "class_name": "KeyMixTOP",
+    "node_type": "key_mix",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/key_mix_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "matte_channel",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "opacity",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "KuwaharaTOP",
     "node_type": "kuwahara",
     "family": "top",
@@ -11909,6 +12011,25 @@
         "name": "radius",
         "type": "int",
         "default": 4
+      }
+    ]
+  },
+  {
+    "class_name": "LUTTOP",
+    "node_type": "lut",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/lut_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "lut_file",
+        "type": "file",
+        "default": null
+      },
+      {
+        "name": "intensity",
+        "type": "float",
+        "default": 1.0
       }
     ]
   },
@@ -11960,6 +12081,65 @@
       },
       {
         "name": "bg_color",
+        "type": "color",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "LensFlareTOP",
+    "node_type": "lens_flare",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/lens_flare_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.8
+      },
+      {
+        "name": "ghost_intensity",
+        "type": "float",
+        "default": 0.6
+      },
+      {
+        "name": "ghost_count",
+        "type": "int",
+        "default": 4
+      },
+      {
+        "name": "ghost_spacing",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "halo_intensity",
+        "type": "float",
+        "default": 0.4
+      },
+      {
+        "name": "halo_radius",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "halo_width",
+        "type": "float",
+        "default": 0.06
+      },
+      {
+        "name": "streak_intensity",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "streak_length",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "tint",
         "type": "color",
         "default": null
       }
@@ -12183,6 +12363,25 @@
     ]
   },
   {
+    "class_name": "MotionBlurTOP",
+    "node_type": "motion_blur",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/motion_blur_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "quality",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "MovieFileInTOP",
     "node_type": "movie_file_in",
     "family": "top",
@@ -12223,6 +12422,16 @@
         "name": "bg_color",
         "type": "color",
         "default": null
+      },
+      {
+        "name": "mute",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "audio_buffer",
+        "type": "int",
+        "default": 1024
       }
     ]
   },
@@ -12436,11 +12645,6 @@
     "extension": null,
     "params": [
       {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
-      },
-      {
         "name": "sensitivity",
         "type": "float",
         "default": 20.0
@@ -12459,6 +12663,11 @@
         "name": "bg_color",
         "type": "color",
         "default": null
+      },
+      {
+        "name": "colorize",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -13992,6 +14201,11 @@
         "default": 60
       },
       {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
         "name": "speed",
         "type": "float",
         "default": 1.0
@@ -14000,6 +14214,11 @@
         "name": "position",
         "type": "float",
         "default": 0.0
+      },
+      {
+        "name": "time_ramp",
+        "type": "ramp",
+        "default": null
       },
       {
         "name": "wrap_mode",
@@ -14326,6 +14545,25 @@
         "name": "html",
         "type": "string",
         "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "ZCompositeTOP",
+    "node_type": "z_composite",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/z_composite_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "compare",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "bias",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },

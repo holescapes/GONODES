@@ -1,0 +1,100 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "depth_of_field1": {
+            "type": "DepthOfFieldTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "focal_distance": {
+                    "value": 0.25
+                },
+                "focal_range": {
+                    "value": 0.05
+                },
+                "max_blur": {
+                    "value": 4.0
+                },
+                "bokeh_brightness": {
+                    "value": 0.6
+                },
+                "quality": {
+                    "value": 1
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "depth_of_field1",
+            "to_port": 0
+        },
+        {
+            "from": "depth_of_field1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DepthOfFieldTOP \u2014 Parameters\n\nShowcases: focal_distance, focal_range, max_blur.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

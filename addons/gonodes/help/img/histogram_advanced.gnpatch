@@ -1,0 +1,110 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noiseimg1": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "histogram1": {
+            "type": "HistogramIMG",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "num_bins": {
+                    "value": 258
+                },
+                "show_rgb": {
+                    "value": false
+                },
+                "show_luma": {
+                    "value": false
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1024,
+                        "y": 1024
+                    }
+                },
+                "smoothing": {
+                    "value": 1.0
+                }
+            }
+        },
+        "imgtotop1": {
+            "type": "ImgToTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noiseimg1",
+            "from_port": 0,
+            "to": "histogram1",
+            "to_port": 0
+        },
+        {
+            "from": "histogram1",
+            "from_port": 0,
+            "to": "imgtotop1",
+            "to_port": 0
+        },
+        {
+            "from": "imgtotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HistogramIMG \u2014 Advanced\n\nMore complex configuration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

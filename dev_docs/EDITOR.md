@@ -830,15 +830,26 @@ callback with `undo_redo.create_action()` / `add_do_method()` /
 `add_undo_method()` / `commit_action()`.
 
 
-## Clipboard Export (Context Menu)
+## Clipboard Export & Import (Context Menu)
 
-Three context menu items in the graph editor for sharing and debugging:
+Four context menu items in the graph editor for sharing, importing, and debugging:
 
 ### Copy as JSON
 
 Serializes selected nodes + their internal connections as pretty-printed JSON
 to the system clipboard.  Uses `GNNode.to_dict()` for each selected node and
 filters `GNNetwork.connections` to only include wires between selected nodes.
+
+### Paste from JSON
+
+Imports nodes from JSON text on the OS clipboard into the current network.
+Accepts JSON produced by "Copy as JSON" or snippets from `.gnpatch` files.
+Handles both connection key formats (`"from"/"to"` from Copy-as-JSON and
+`"from_node"/"to_node"` from internal clipboard) by normalizing on paste.
+
+Pasted nodes are centered at the mouse cursor, given deduplicated IDs
+(appends `_copy` / counter), and fully undoable via Ctrl+Z.  The menu item
+is grayed out when the clipboard is empty or does not start with `{`.
 
 ### Copy Debug Info
 
@@ -857,12 +868,13 @@ metadata, annotations) as pretty-printed JSON to clipboard.
 
 ### Implementation
 
-All three are defined in `gn_graph_editor.gd`:
-- `_CtxID.COPY_AS_JSON`, `_CtxID.COPY_DEBUG_INFO`, `_CtxID.COPY_NETWORK_JSON`
-  enum values in `_show_context_menu()`
-- `_copy_selected_as_json()`, `_copy_debug_info_to_clipboard()`,
-  `_copy_network_json_to_clipboard()` methods
-- Uses `DisplayServer.clipboard_set()` for OS clipboard access
+All four are defined in `gn_graph_editor.gd`:
+- `_CtxID.COPY_AS_JSON`, `_CtxID.PASTE_FROM_JSON`, `_CtxID.COPY_DEBUG_INFO`,
+  `_CtxID.COPY_NETWORK_JSON` enum values in `_show_context_menu()`
+- `_copy_selected_as_json()`, `_paste_from_json()`,
+  `_copy_debug_info_to_clipboard()`, `_copy_network_json_to_clipboard()` methods
+- Uses `DisplayServer.clipboard_set()` / `DisplayServer.clipboard_get()` for
+  OS clipboard access
 
 
 ## Settings Persistence

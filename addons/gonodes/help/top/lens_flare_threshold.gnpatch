@@ -1,0 +1,121 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_ramp": {
+            "type": "RampTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "lens_flare1": {
+            "type": "LensFlareTOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "threshold": {
+                    "value": 0.4
+                },
+                "ghost_intensity": {
+                    "value": 0.3
+                },
+                "ghost_count": {
+                    "value": 3
+                },
+                "ghost_spacing": {
+                    "value": 0.15
+                },
+                "halo_intensity": {
+                    "value": 0.2
+                },
+                "halo_radius": {
+                    "value": 0.25
+                },
+                "halo_width": {
+                    "value": 0.03
+                },
+                "streak_intensity": {
+                    "value": 0.15
+                },
+                "streak_length": {
+                    "value": 0.075
+                },
+                "tint": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.4,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_ramp",
+            "from_port": 0,
+            "to": "lens_flare1",
+            "to_port": 0
+        },
+        {
+            "from": "lens_flare1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "LensFlareTOP \u2014 Parameters\n\nShowcases: threshold, ghost_intensity, ghost_count.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

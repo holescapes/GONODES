@@ -156,7 +156,13 @@ func _ready() -> void:
 	_vbox = VBoxContainer.new()
 	_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
 	_vbox.add_theme_constant_override("separation", 2)
-	_scroll.add_child(_vbox)
+
+	var param_margin := MarginContainer.new()
+	param_margin.size_flags_horizontal = SIZE_EXPAND_FILL
+	param_margin.size_flags_vertical = SIZE_EXPAND_FILL
+	param_margin.add_theme_constant_override("margin_top", 6)
+	param_margin.add_child(_vbox)
+	_scroll.add_child(param_margin)
 
 	_show_empty_state()
 
@@ -381,11 +387,13 @@ func _clear_rows() -> void:
 	for p_name in _param_rows:
 		var row: GNParamRow = _param_rows[p_name]
 		row.cleanup()
-		if row.get_parent() == _vbox:
-			_vbox.remove_child(row)
-		row.queue_free()
 	_param_rows.clear()
 	_row_order.clear()
+
+	# Remove all children from the vbox (rows, group HBoxes, spare headers)
+	for child in _vbox.get_children():
+		_vbox.remove_child(child)
+		child.queue_free()
 
 
 ## Navigates Tab forward: finds the next visible row after `from_row` and focuses it.

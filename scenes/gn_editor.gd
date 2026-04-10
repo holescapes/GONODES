@@ -45,6 +45,9 @@ var _viewer_pinned: bool = false
 ## Path to the currently loaded/saved patch file (empty = unsaved).
 var _current_file_path: String = ""
 
+## Tracks whether the network has unsaved changes since last save/load.
+var _modified: bool = false
+
 ## Project manager — manages project folder, path resolution, scanning.
 var _project: GNProjectManager = GNProjectManager.new()
 
@@ -1244,12 +1247,19 @@ func _guard_unsaved(action: Callable) -> void:
 	dlg.confirmed.connect(func():
 		# Save first, then run the action
 		if _current_file_path.is_empty():
-			# Need Save-As — connect one-shot to file_selected
+			# Need Save-As — connect one-shot to file_selected.
+			# Also handle cancel so the one-shot doesn't dangle.
 			var conn: Callable
-			conn = func(path: String):
+			var cancel_conn: Callable
+			conn = func(_path: String):
 				_save_dialog.file_selected.disconnect(conn)
+				_save_dialog.canceled.disconnect(cancel_conn)
 				action.call()
+			cancel_conn = func():
+				_save_dialog.file_selected.disconnect(conn)
+				_save_dialog.canceled.disconnect(cancel_conn)
 			_save_dialog.file_selected.connect(conn)
+			_save_dialog.canceled.connect(cancel_conn)
 			_save_dialog.popup_centered()
 		else:
 			_save_to_path(_current_file_path)
@@ -1259,7 +1269,7 @@ func _guard_unsaved(action: Callable) -> void:
 
 	dont_save_btn.pressed.connect(func():
 		# Skip saving, just run the action
-		_modified = false
+		_clear_modified()
 		action.call()
 		dlg.queue_free()
 	)

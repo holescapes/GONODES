@@ -36,15 +36,23 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("shadow_normal_bias", 1.0, 0.0, 16.0, 0.1, "Shadow Normal Bias", "Normal-based offset to reduce acne on curved surfaces"))
 	add_parameter(GNParameter.create_float("shadow_blur", 1.0, 0.0, 10.0, 0.1, "Shadow Blur", "Soft shadow blur radius"))
 	add_parameter(GNParameter.create_float("shadow_opacity", 1.0, 0.0, 1.0, 0.05, "Shadow Opacity", "Shadow darkness (0 = invisible, 1 = fully dark)"))
-	# Directional shadow mode
-	add_parameter(GNParameter.create_enum("dir_shadow_mode",
+	# Directional shadow mode (type 0 only)
+	var p_dsm := GNParameter.create_enum("dir_shadow_mode",
 		PackedStringArray(["Orthogonal", "PSSM 2 Splits", "PSSM 4 Splits"]), 2,
-		"Dir Shadow Mode", "Directional light shadow split mode (ignored for Omni/Spot)"))
-	# Omni-specific
-	add_parameter(GNParameter.create_float("omni_range", 10.0, 0.1, 1000.0, 0.5, "Omni Range", "Point light range"))
-	# Spot-specific
-	add_parameter(GNParameter.create_float("spot_range", 10.0, 0.1, 1000.0, 0.5, "Spot Range", "Spotlight range"))
-	add_parameter(GNParameter.create_float("spot_angle", 45.0, 0.1, 90.0, 0.5, "Spot Angle", "Spotlight cone angle (degrees)"))
+		"Dir Shadow Mode", "Directional light shadow split mode")
+	p_dsm.visibility_rule = {"param": "type", "values": [0]}
+	add_parameter(p_dsm)
+	# Omni-specific (type 1 only)
+	var p_or := GNParameter.create_float("omni_range", 10.0, 0.1, 1000.0, 0.5, "Omni Range", "Point light range")
+	p_or.visibility_rule = {"param": "type", "values": [1]}
+	add_parameter(p_or)
+	# Spot-specific (type 2 only)
+	var p_sr := GNParameter.create_float("spot_range", 10.0, 0.1, 1000.0, 0.5, "Spot Range", "Spotlight range")
+	p_sr.visibility_rule = {"param": "type", "values": [2]}
+	add_parameter(p_sr)
+	var p_sa := GNParameter.create_float("spot_angle", 45.0, 0.1, 90.0, 0.5, "Spot Angle", "Spotlight cone angle (degrees)")
+	p_sa.visibility_rule = {"param": "type", "values": [2]}
+	add_parameter(p_sa)
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

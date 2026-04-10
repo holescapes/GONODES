@@ -65,9 +65,9 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		if target_family >= 0 and node.family != target_family:
 			continue
 
-		# Name pattern filter (glob)
+		# Name pattern filter
 		if not pattern.is_empty() and pattern != "*":
-			if not _glob_match(node.id, pattern):
+			if not GNPattern.matches_any(node.id, pattern):
 				continue
 
 		# Build row
@@ -95,21 +95,4 @@ func _find_network() -> GNNetwork:
 	return null
 
 
-## Simple glob pattern matching supporting * and ? wildcards.
-func _glob_match(text: String, pattern_str: String) -> bool:
-	# Convert glob to regex
-	var regex_str := "^"
-	for ch in pattern_str:
-		match ch:
-			"*":
-				regex_str += ".*"
-			"?":
-				regex_str += "."
-			".":
-				regex_str += "\\."
-			_:
-				regex_str += ch
-	regex_str += "$"
-	var regex := RegEx.new()
-	regex.compile("(?i)" + regex_str)
-	return regex.search(text) != null
+# Pattern matching now delegated to GNPattern (see addons/gonodes/core/gn_pattern.gd)
