@@ -527,21 +527,7 @@ func _update_panel_layer(inputs: Array[GNData]) -> void:
 		return
 
 	# Find the upstream UI node on port 1
-	var engine: GNCookEngine = get_parent() as GNCookEngine \
-		if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		_panel_ui_root.visible = false
-		return
-
-	var network: GNNetwork = engine.network
-	var conns: Array = network.get_input_connections(id)
-	var ui_node: GNUiBase = null
-	for conn in conns:
-		if conn.to_port == 1:
-			var upstream: GNNode = network.nodes.get(conn.from_node, null)
-			if upstream is GNUiBase:
-				ui_node = upstream as GNUiBase
-			break
+	var ui_node: GNUiBase = get_input_node(1) as GNUiBase
 
 	if ui_node == null:
 		# No UI connected — hide panel layer and remove stale controls

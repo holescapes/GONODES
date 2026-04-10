@@ -65,7 +65,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if not GNOpenCVHelper.is_available() or not get_param_value("active"):
 		return _cached_table
 
-	var src := _get_input_img(inputs, 0)
+	var src: GNImageData = inputs[0] as GNImageData if inputs.size() > 0 and inputs[0] is GNImageData else null
 	if src == null or src.image == null:
 		return _cached_table
 

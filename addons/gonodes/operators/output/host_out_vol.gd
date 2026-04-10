@@ -54,7 +54,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# GPU zero-copy: extract native handle directly (no CPU readback).
 	if not vol_in.is_cpu and vol_in.rd_texture.is_valid():
-		var ctx := GNGpuContext.get_singleton()
+		var ctx := GNGpuContext.get_context()
 		if ctx != null and ctx.rd != null:
 			_output_gpu_handle = ctx.rd.texture_get_native_handle(vol_in.rd_texture)
 			_output_gpu_format = vol_in.data_format
@@ -64,7 +64,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if vol_in.is_cpu:
 		_output_data = vol_in.cpu_data.duplicate()
 	elif vol_in.rd_texture.is_valid():
-		var ctx := GNGpuContext.get_singleton()
+		var ctx := GNGpuContext.get_context()
 		if ctx != null and ctx.rd != null:
 			var byte_data: PackedByteArray = ctx.rd.texture_get_data(vol_in.rd_texture, 0)
 			_output_data = byte_data.to_float32_array()

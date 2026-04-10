@@ -134,25 +134,12 @@ func _sync_children_from_network() -> void:
 	if _group_node == null:
 		return
 
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		return
-
-	var network: GNNetwork = engine.network
-
-	# Get connections sorted by input port index (determines hierarchy order)
-	var conns: Array = network.get_input_connections(id).duplicate()
-	conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
-		return a.to_port < b.to_port)
-
-	# Build the expected child list from current connections
+	# Build the expected child list from current connections (sorted by port)
 	var expected: Array[Node3D] = []
-	for conn in conns:
-		var upstream: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream == null or not (upstream is GNCompBase):
+	for upstream in get_input_nodes_sorted():
+		if not (upstream is GNCompBase):
 			continue
-		var comp: GNCompBase = upstream as GNCompBase
-		var scene_nd: Node3D = comp.get_scene_node()
+		var scene_nd: Node3D = (upstream as GNCompBase).get_scene_node()
 		if scene_nd != null:
 			expected.append(scene_nd)
 

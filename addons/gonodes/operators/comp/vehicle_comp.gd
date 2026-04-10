@@ -79,7 +79,7 @@ func _init_parameters() -> void:
 
 func _cook(inputs: Array[GNData]) -> GNData:
 	var comp_data = inputs[0] if inputs.size() > 0 else null
-	var chop_data: GNChopData = inputs[1] as GNChopData if inputs.size() > 1 and inputs[1] is GNChopData else null
+	var chop_data: GNChannelData = inputs[1] as GNChannelData if inputs.size() > 1 and inputs[1] is GNChannelData else null
 
 	_ensure_vehicle()
 

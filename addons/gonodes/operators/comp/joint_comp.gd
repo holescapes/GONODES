@@ -147,30 +147,10 @@ func _connect_bodies() -> void:
 	if _joint == null:
 		return
 
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		return
-
-	var network: GNNetwork = engine.network
-	var conns: Array = network.get_input_connections(id).duplicate()
-	conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
-		return a.to_port < b.to_port)
-
-	var body_a_node: Node3D = null
-	var body_b_node: Node3D = null
-
-	for conn in conns:
-		var upstream: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream == null or not (upstream is GNCompBase):
-			continue
-		var scene_nd: Node3D = (upstream as GNCompBase).get_scene_node()
-		if scene_nd == null:
-			continue
-
-		if conn.to_port == 0:
-			body_a_node = scene_nd
-		elif conn.to_port == 1:
-			body_b_node = scene_nd
+	var body_a_comp: GNCompBase = get_input_node(0) as GNCompBase
+	var body_b_comp: GNCompBase = get_input_node(1) as GNCompBase
+	var body_a_node: Node3D = body_a_comp.get_scene_node() if body_a_comp else null
+	var body_b_node: Node3D = body_b_comp.get_scene_node() if body_b_comp else null
 
 	# Set node paths relative to the joint
 	if body_a_node != null and _joint.is_inside_tree() and body_a_node.is_inside_tree():

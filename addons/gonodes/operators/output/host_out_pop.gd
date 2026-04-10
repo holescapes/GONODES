@@ -56,7 +56,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# GPU zero-copy: extract native SSBO handle (no CPU readback).
 	if not pop_in.is_cpu and pop_in.rd_buffer.is_valid():
-		var ctx := GNGpuContext.get_singleton()
+		var ctx := GNGpuContext.get_context()
 		if ctx != null and ctx.rd != null:
 			_output_gpu_handle = ctx.rd.buffer_get_native_handle(pop_in.rd_buffer)
 			_output_gpu_stride = pop_in.stride
@@ -100,7 +100,7 @@ func _extract_cpu(pop: GNParticleData) -> void:
 
 ## Extract from GPU SSBO — readback + unpack standard layout.
 func _extract_gpu(pop: GNParticleData) -> void:
-	var ctx := GNGpuContext.get_singleton()
+	var ctx := GNGpuContext.get_context()
 	if ctx == null or ctx.rd == null:
 		return
 	var byte_data: PackedByteArray = ctx.rd.buffer_get_data(pop.rd_buffer)

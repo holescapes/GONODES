@@ -467,6 +467,66 @@ func get_output_port(index: int) -> GNPort:
 	return output_ports[index]
 
 
+## Returns the upstream GNNode connected to input [param port], or null.
+## Walks the parent cook-engine's network graph to find the connection.
+func get_input_node(port: int) -> GNNode:
+	var eng: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	if eng == null or eng.network == null:
+		return null
+	for conn in eng.network.get_input_connections(id):
+		if conn.to_port == port:
+			return eng.network.nodes.get(conn.from_node, null)
+	return null
+
+
+## Returns all upstream GNNodes sorted by input port index.
+## Optionally skips ports below [param min_port] (useful when port 0 carries
+## a different family, e.g. a DAT config input on TabContainerUI).
+func get_input_nodes_sorted(min_port: int = 0) -> Array[GNNode]:
+	var eng: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	if eng == null or eng.network == null:
+		return []
+	var conns: Array = eng.network.get_input_connections(id).duplicate()
+	conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
+		return a.to_port < b.to_port)
+	var result: Array[GNNode] = []
+	for conn in conns:
+		if conn.to_port < min_port:
+			continue
+		var node: GNNode = eng.network.nodes.get(conn.from_node, null)
+		if node != null:
+			result.append(node)
+	return result
+
+
+## Resolves the scene Node3D for a [param comp], walking upstream through
+## pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP, etc.) that don't
+## own a scene node themselves.  Returns null if no scene node can be found.
+func resolve_comp_scene_node(comp: GNCompBase) -> Node3D:
+	var eng: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	if eng == null or eng.network == null:
+		return null
+	return _resolve_comp_scene_node_r(comp, eng.network, {})
+
+
+func _resolve_comp_scene_node_r(comp: GNCompBase, net: GNNetwork,
+		visited: Dictionary) -> Node3D:
+	var scene_nd: Node3D = comp.get_scene_node()
+	if scene_nd != null:
+		return scene_nd
+	if visited.has(comp.id):
+		return null
+	visited[comp.id] = true
+	for conn in net.get_input_connections(comp.id):
+		var upstream: GNNode = net.nodes.get(conn.from_node, null)
+		if upstream is GNCompBase:
+			var resolved: Node3D = _resolve_comp_scene_node_r(
+				upstream as GNCompBase, net, visited)
+			if resolved != null:
+				return resolved
+	return null
+
+
 ## Replaces all input ports with [param count] sequentially-named ports of the
 ## given [param port_family].  Emits [signal ports_changed] so the graph editor
 ## can prune stale connections and rebuild slots.  Use from subclass overrides of

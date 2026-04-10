@@ -147,7 +147,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	# Vertices are already in world space (transform baked at _init_simulation),
 	# so leave _mesh_inst at identity.  Sync material/visibility only.
-	var upstream_comp: GNCompBase = _resolve_upstream_comp()
+	var upstream_comp: GNCompBase = get_input_node(0) as GNCompBase
 	if upstream_comp != null:
 		var src_node: Node3D = upstream_comp.get_scene_node()
 		if src_node is MeshInstance3D:
@@ -398,27 +398,12 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Upstream Resolution (shared with old implementation)
+# Upstream Resolution
 # ═══════════════════════════════════════════════════════════════════════════════
-
-## Walks the network to find the upstream COMP connected to the comp_in port.
-func _resolve_upstream_comp() -> GNCompBase:
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		return null
-	var network: GNNetwork = engine.network
-	for conn in network.get_input_connections(id):
-		if conn.to_port != 0:
-			continue
-		var upstream: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream is GNCompBase:
-			return upstream as GNCompBase
-	return null
-
 
 ## Resolves the MeshInstance3D from the upstream COMP.
 func _resolve_upstream_mesh() -> MeshInstance3D:
-	var comp: GNCompBase = _resolve_upstream_comp()
+	var comp: GNCompBase = get_input_node(0) as GNCompBase
 	if comp == null:
 		return null
 	if comp is GeometryCOMP:

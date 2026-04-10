@@ -319,10 +319,13 @@ For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT
 - ~~JSON serialization (.gnpatch)~~ — **Done.** `.gnpatch` JSON format used for all patch files, including cross-app portability via libgonodes C API.
 - ~~FFmpeg GDExtension~~ — **Done.** FFmpegInTOP (decode: H.264, H.265, VP9, AV1, ProRes + all FFmpeg codecs), FFmpegOUT (encode: H.264, H.265, VP9, AV1, ProRes via CLI), MovieFileOutTOP (GPU hardware H.264/H.265 encode via MF/VideoToolbox).
 - ~~HAP codec~~ — **Done.** `gn_ext_hap` GDExtension with HapInTOP (GPU-direct DXT playback, zero CPU decode) and HapOutTOP (DXT compress + Snappy + MOV mux). Supports HAP, HAP Alpha, HAP Q variants.
-- NDI video streaming (NDIOutTOP)
+- ~~NDI video streaming (NDIOutTOP)~~ — **Done.** `ndi_out_top.gd` ships in `gn_ext_ndi`.
 - FxPlug / FFGL plugin export
 - Laser DAC drivers — EtherDream, Helios, ShowNET (GDExtension; data model via LaserCHOP ready)
 - Network collaboration (shared editing)
+- Modular extension distribution (per-extension `.pck` install/remove)
+
+For the full roadmap including optimisation tiers, see [dev_docs/ROADMAP.md](dev_docs/ROADMAP.md).
 
 ### LibGONODES — Embeddable Engine
 

@@ -64,22 +64,8 @@ func _on_tab_changed(tab: int) -> void:
 
 
 func _populate_children(tab_names: PackedStringArray) -> void:
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		return
-	var network: GNNetwork = engine.network
-	var conns: Array = network.get_input_connections(id).duplicate()
-	# Filter out port 0 (DAT)
-	var ui_conns: Array = []
-	for conn in conns:
-		if conn.to_port > 0:
-			ui_conns.append(conn)
-	ui_conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
-		return a.to_port < b.to_port)
-
 	var idx := 0
-	for conn in ui_conns:
-		var upstream: GNNode = network.nodes.get(conn.from_node, null)
+	for upstream in get_input_nodes_sorted(1):
 		if upstream is GNUiBase:
 			var ctrl: Control = (upstream as GNUiBase).get_control_node()
 			if ctrl != null:

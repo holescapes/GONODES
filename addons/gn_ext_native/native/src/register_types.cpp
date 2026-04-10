@@ -161,6 +161,9 @@
 #include "chop/gn_native_lag_chop.h"
 #include "chop/gn_native_blend_chop.h"
 
+// SOP processors — Phase 9 (boolean migration)
+#include "sop/gn_native_boolean_sop.h"
+
 using namespace godot;
 
 void initialize_gn_native_module(ModuleInitializationLevel p_level) {
@@ -324,6 +327,9 @@ void initialize_gn_native_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<GNNativeTransformChop>();
     ClassDB::register_class<GNNativeLagChop>();
     ClassDB::register_class<GNNativeBlendChop>();
+
+    // SOP processors — Phase 9 (boolean migration)
+    ClassDB::register_class<GNNativeBooleanSop>();
 }
 
 void uninitialize_gn_native_module(ModuleInitializationLevel p_level) {

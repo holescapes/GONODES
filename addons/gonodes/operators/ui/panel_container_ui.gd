@@ -72,15 +72,7 @@ func _ensure_panel() -> void:
 
 
 func _populate_children() -> void:
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		return
-	var network: GNNetwork = engine.network
-	var conns: Array = network.get_input_connections(id).duplicate()
-	conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
-		return a.to_port < b.to_port)
-	for conn in conns:
-		var upstream: GNNode = network.nodes.get(conn.from_node, null)
+	for upstream in get_input_nodes_sorted():
 		if upstream is GNUiBase:
 			var ctrl: Control = (upstream as GNUiBase).get_control_node()
 			if ctrl != null:

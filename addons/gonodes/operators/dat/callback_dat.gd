@@ -155,20 +155,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 ## Resolves the target node from the upstream connection and wires signals.
 func _resolve_target() -> void:
-	# Find the actual upstream node connected to input 0
-	var engine: Node = get_parent()
-	if engine == null or not engine is GNCookEngine:
-		return
-	var cook_engine: GNCookEngine = engine as GNCookEngine
-	if cook_engine.network == null:
-		return
-
-	var new_target: GNNode = null
-	var input_conns: Array = cook_engine.network.get_input_connections(id)
-	for conn in input_conns:
-		if conn.to_port == 0:
-			new_target = cook_engine.network.nodes.get(conn.from_node, null)
-			break
+	var new_target: GNNode = get_input_node(0)
 
 	var new_target_id: String = new_target.id if new_target != null else ""
 

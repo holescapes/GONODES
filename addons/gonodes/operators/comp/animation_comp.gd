@@ -82,11 +82,11 @@ func _init_parameters() -> void:
 
 func _cook(inputs: Array[GNData]) -> GNData:
 	# Get input COMP's scene node
-	var comp_in: GNNode = _get_input_comp_node(inputs, 0)
-	if comp_in == null or not (comp_in is GNCompBase):
+	var comp_in: GNCompBase = get_input_node(0) as GNCompBase
+	if comp_in == null:
 		return null
 
-	var target_node: Node3D = (comp_in as GNCompBase).get_scene_node()
+	var target_node: Node3D = comp_in.get_scene_node()
 	if target_node == null:
 		return null
 
@@ -122,21 +122,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_anim_player.seek(anim_time, true)
 
 	return inputs[0] if inputs.size() > 0 else null
-
-
-func _get_input_comp_node(inputs: Array[GNData], port: int) -> GNNode:
-	# Walk upstream via the cook engine's network graph
-	var eng: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if eng == null or eng.network == null:
-		return null
-	var net: GNNetwork = eng.network
-	for conn in net.get_input_connections(id):
-		if conn.to_port != port:
-			continue
-		var upstream: GNNode = net.nodes.get(conn.from_node, null)
-		if upstream is GNCompBase:
-			return upstream
-	return null
 
 
 func _ensure_anim_player(target: Node3D) -> void:

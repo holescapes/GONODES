@@ -67,7 +67,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_build_status_table("Failed to instantiate GNOpenCV", 0)
 		return _cached_table
 
-	var src := _get_input_img(inputs, 0)
+	var src: GNImageData = inputs[0] as GNImageData if inputs.size() > 0 and inputs[0] is GNImageData else null
 	var do_capture: bool = get_param_value("capture")
 	var do_calibrate: bool = get_param_value("calibrate")
 	if do_capture:

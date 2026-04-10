@@ -9870,6 +9870,31 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/blend_sop_native.gd"
   },
+  "BooleanSOPNative": {
+    "class_name": "BooleanSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "a",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "b",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/boolean_sop_native.gd"
+  },
   "CapSOPNative": {
     "class_name": "CapSOPNative",
     "family": "SOP",

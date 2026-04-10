@@ -53,14 +53,9 @@ func _ensure_margin() -> void:
 
 
 func _populate_child() -> void:
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		return
-	var network: GNNetwork = engine.network
-	var conns: Array = network.get_input_connections(id).duplicate()
 	var new_child: Control = null
-	for conn in conns:
-		var upstream: GNNode = network.nodes.get(conn.from_node, null)
+	var nodes := get_input_nodes_sorted()
+	for upstream in nodes:
 		if upstream is GNUiBase:
 			new_child = (upstream as GNUiBase).get_control_node()
 			break

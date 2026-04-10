@@ -13,9 +13,6 @@ extends GNChopBase
 ## its scene node's current physics state.  No data flows through the input
 ## port — only the node reference matters.
 
-## Tracks the resolved upstream COMP to avoid repeated network walks.
-var _cached_comp: GNCompBase = null
-
 
 func _init() -> void:
 	node_type = "physics"
@@ -44,7 +41,7 @@ func _init_parameters() -> void:
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
-	var comp: GNCompBase = _resolve_upstream_comp()
+	var comp: GNCompBase = get_input_node(0) as GNCompBase
 	if comp == null:
 		return _prepare_output()  # Empty channel data
 
@@ -107,26 +104,3 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		out.set_single_value("sleeping", asleep)
 
 	return out
-
-
-## Walks the network to find the upstream COMP connected to the comp_in port.
-## Caches the result for subsequent cooks until connections change.
-func _resolve_upstream_comp() -> GNCompBase:
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		_cached_comp = null
-		return null
-
-	var network: GNNetwork = engine.network
-	var conns: Array = network.get_input_connections(id)
-
-	for conn in conns:
-		if conn.to_port != 0:
-			continue  # Only care about port 0 (comp_in)
-		var upstream: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream is GNCompBase:
-			_cached_comp = upstream as GNCompBase
-			return _cached_comp
-
-	_cached_comp = null
-	return null

@@ -4276,7 +4276,7 @@ Scatter random points on mesh surface (area-weighted sampling).
 
 #### BooleanSOP
 
-Boolean operations (union, intersect, subtract) via Godot's CSG system.
+Boolean operations (union, intersect, subtract) on two meshes.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -4284,7 +4284,7 @@ Boolean operations (union, intersect, subtract) via Godot's CSG system.
 
 **Inputs:** `a` (SOP), `b` (SOP).
 
-**How it works:** Creates temporary `CSGCombiner3D` and `CSGMesh3D` nodes in the scene tree. Assigns input meshes, performs the boolean operation, extracts the result via `get_meshes()`, then removes the temporary nodes.
+**How it works:** The native C++ variant (`gn_ext_native`) uses a BSP-tree CSG algorithm — no scene tree access required, no frame-delay, fully deterministic. The core GDScript fallback delegates to Godot's `CSGMesh3D` nodes.
 
 ---
 

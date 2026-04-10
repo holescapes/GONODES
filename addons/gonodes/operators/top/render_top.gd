@@ -237,110 +237,35 @@ func _setup_viewport() -> void:
 	_cached_tex_data.resolution = _viewport.size
 
 
-## Resolves a COMP's scene node, walking upstream through pass-through COMPs
-## (NullCOMP, SwitchCOMP, AnimationCOMP, etc.) that don't own a scene node.
-func _resolve_comp_scene_node(comp: GNCompBase, net: GNNetwork,
-		visited: Dictionary = {}) -> Node3D:
-	var scene_nd: Node3D = comp.get_scene_node()
-	if scene_nd != null:
-		return scene_nd
-	# Cycle guard
-	if visited.has(comp.id):
-		return null
-	visited[comp.id] = true
-	# Walk upstream through this COMP's inputs
-	for conn in net.get_input_connections(comp.id):
-		var upstream: GNNode = net.nodes.get(conn.from_node, null)
-		if upstream is GeometryCOMP:
-			var mi: MeshInstance3D = (upstream as GeometryCOMP).get_mesh_instance()
-			if mi != null:
-				return mi
-		elif upstream is CameraCOMP:
-			var cam: Camera3D = (upstream as CameraCOMP).get_camera()
-			if cam != null:
-				return cam
-		elif upstream is LightCOMP:
-			var lt: Light3D = (upstream as LightCOMP).get_light()
-			if lt != null:
-				return lt
-		elif upstream is MergeCOMP:
-			var grp: Node3D = (upstream as MergeCOMP).get_group_node()
-			if grp != null:
-				return grp
-		elif upstream is GNCompBase:
-			var resolved: Node3D = _resolve_comp_scene_node(
-				upstream as GNCompBase, net, visited)
-			if resolved != null:
-				return resolved
-	return null
-
-
 ## Populates the 3D viewport with scene nodes from connected COMPs.
 ## Iterates connections sorted by input port index for deterministic ordering.
 func _populate_scene_from_network() -> void:
 	if _viewport == null:
 		return
 
-	# Find the cook engine to get network reference
-	var engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if engine == null or engine.network == null:
-		return
-
-	var network: GNNetwork = engine.network
 	var has_camera: bool = false
 
-	# Sort connections by input port index for deterministic scene order
-	var conns: Array = network.get_input_connections(id).duplicate()
-	conns.sort_custom(func(a: GNConnection, b: GNConnection) -> bool:
-		return a.to_port < b.to_port)
-
-	# Find all COMP nodes connected to this RenderTOP's inputs
-	for conn in conns:
-		var upstream_node: GNNode = network.nodes.get(conn.from_node, null)
-		if upstream_node == null:
+	for upstream_node in get_input_nodes_sorted():
+		if upstream_node is EnvironmentCOMP:
+			_env_comp = upstream_node as EnvironmentCOMP
 			continue
 
-		if upstream_node is MergeCOMP:
-			var group_node: Node3D = (upstream_node as MergeCOMP).get_group_node()
-			if group_node != null:
-				_adopt_scene_node(group_node)
-				# Scan the merge group for cameras so we don't create a default
-				if not has_camera:
-					has_camera = _activate_camera_in_subtree(group_node)
+		if not (upstream_node is GNCompBase):
+			continue
 
-		elif upstream_node is GeometryCOMP:
-			var mesh_inst: MeshInstance3D = (upstream_node as GeometryCOMP).get_mesh_instance()
-			if mesh_inst != null:
-				_adopt_scene_node(mesh_inst)
+		# Resolve the scene node — walks through pass-through COMPs automatically
+		var scene_nd: Node3D = resolve_comp_scene_node(upstream_node as GNCompBase)
+		if scene_nd == null:
+			continue
 
-		elif upstream_node is CameraCOMP:
-			var camera: Camera3D = (upstream_node as CameraCOMP).get_camera()
-			if camera != null:
-				_adopt_scene_node(camera)
-				camera.current = true
-				has_camera = true
+		_adopt_scene_node(scene_nd)
 
-		elif upstream_node is LightCOMP:
-			var light: Light3D = (upstream_node as LightCOMP).get_light()
-			if light != null:
-				_adopt_scene_node(light)
-
-		elif upstream_node is EnvironmentCOMP:
-			# Capture the EnvironmentCOMP reference — _apply_environment() will
-			# swap its Environment into the viewport's WorldEnvironment.
-			_env_comp = upstream_node as EnvironmentCOMP
-
-		elif upstream_node is GNCompBase:
-			# Generic fallback — handles physics COMPs, pass-through COMPs
-			# (NullCOMP, SwitchCOMP, AnimationCOMP), and any future types.
-			# Walk upstream if this COMP has no scene node (pass-through).
-			var scene_nd: Node3D = _resolve_comp_scene_node(
-				upstream_node as GNCompBase, network)
-			if scene_nd != null:
-				_adopt_scene_node(scene_nd)
-				if scene_nd is Camera3D:
-					(scene_nd as Camera3D).current = true
-					has_camera = true
+		# Camera bookkeeping — activate any camera found
+		if scene_nd is Camera3D:
+			(scene_nd as Camera3D).current = true
+			has_camera = true
+		elif upstream_node is MergeCOMP and not has_camera:
+			has_camera = _activate_camera_in_subtree(scene_nd)
 
 	# If no camera COMP is connected, create a default camera
 	if not has_camera:
