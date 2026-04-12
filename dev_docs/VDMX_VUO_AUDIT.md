@@ -1,6 +1,6 @@
 # LibGONODES vs VDMX Integration of TouchDesigner & VUO — Gap Audit
 
-> **Version:** 1.1.0 (API bump from 1.0.0)
+> **Version:** 1.2.0 (API bump from 1.1.0 — added zero-copy texture handles, direct geometry API, unified CHOP readback)
 > **Date:** 2026-04
 > **Audience:** LibGONODES contributors, host-app integrators, anyone evaluating GONODES as a VDMX/VJ-tool plugin backend.
 

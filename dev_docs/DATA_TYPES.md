@@ -32,7 +32,7 @@ GNData (RefCounted)
 ├── GNTableData       (DAT)  — 2D string table + text buffer
 ├── GNMaterialData    (MAT)  — Godot Material wrapper
 ├── GNPopData         (POP)  — GPU particle state (SSBO RIDs)
-├── GNVol3DData       (VOL)  — Texture3D compute volumes
+├── GNVolumeData      (VOL)  — Texture3D compute volumes
 ├── GNCompData        (COMP) — 3D scene node reference
 ├── GNUiData          (UI)   — Control node reference
 └── [Extension types]        — e.g. GNSDFData (SDF family)

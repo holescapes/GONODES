@@ -18,10 +18,10 @@ The main scene is `scenes/gn_editor.tscn`.
 
 The editor always launches with **Forward+** (Vulkan / D3D12) for the best
 preview quality.  If the GPU or driver doesn't support Vulkan, Godot
-automatically falls back to **Compatibility** (OpenGL 3.3).  Note:
-`fallback_to_opengl3` is NOT a valid Godot 4.x project setting (it was
-Godot 3.x). Renderer selection is handled per-platform via export presets
-or the `--rendering-method` CLI flag.
+automatically falls back to **Compatibility** (OpenGL 3.3) via the
+`rendering/rendering_device/fallback_to_opengl3 = true` project setting
+(enforced in `gonodes_plugin.gd`). Per-platform renderer can also be
+overridden via export presets or the `--rendering-method` CLI flag.
 
 | Platform | Primary      | Fallback          |
 |----------|-------------|-------------------|

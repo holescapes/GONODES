@@ -291,6 +291,7 @@ static func create_vector2i(p_name: String, p_default: Vector2i,
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
 	param.description = p_description
 	param.value_type = ValueType.VECTOR2I
+	param.step = 1.0
 	param.default_value = p_default
 	param.value = p_default
 	param.fallback_value = p_default

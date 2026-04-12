@@ -333,6 +333,30 @@ func create_preview_control() -> Control:
 	return label
 
 
+## Renders into the on-node preview host.  Mirrors the viewer panel paradigm:
+## the host provides set_texture(), set_text(), set_control() and the node
+## pushes data into it.  Family base classes provide default implementations;
+## individual operators can override for custom rendering without touching
+## base classes.
+##
+## The [param host] exposes a minimal API (GNPreviewHost):
+##   host.set_texture(tex)   — display a Texture2D thumbnail
+##   host.set_text(text)     — display short text (channel list, table summary)
+##   host.set_control(ctrl)  — embed a custom Control
+##
+## Default implementation delegates to the legacy update_preview_control() path.
+func render_for_preview(host) -> void:
+	if cached_output is GNTextureData and host.has_method("set_texture"):
+		var td: GNTextureData = cached_output as GNTextureData
+		if td.texture != null:
+			host.set_texture(td.texture)
+			return
+	if cached_output != null and host.has_method("set_text"):
+		host.set_text(cached_output.get_preview_text())
+	elif host.has_method("set_text"):
+		host.set_text("")
+
+
 ## Updates the preview control from cached_output.  Family base classes override
 ## this with type-specific logic (GNTopBase → TextureRect, GNChopBase → channel
 ## labels, etc.).  This fallback handles nodes that don't extend a family base

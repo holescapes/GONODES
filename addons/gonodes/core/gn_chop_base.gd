@@ -67,6 +67,13 @@ func update_preview_control(control: Control) -> void:
 		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
 
 
+func render_for_preview(host) -> void:
+	if cached_output != null:
+		host.set_text(cached_output.get_preview_text())
+	else:
+		host.set_text("")
+
+
 ## Shared waveform control — uses GNWaveformView (grid, zoom, pan, legends).
 static var _viewer_waveform: GNWaveformView = null
 

@@ -128,7 +128,7 @@ func _init_ports() -> void:
     add_input("geo", GNFamily.Type.SOP, true, "Input geometry to process")
     add_output("out", GNFamily.Type.SOP, "Processed geometry output")
 
-func _setup_parameters() -> void:
+func _init_parameters() -> void:
     # Every parameter MUST have a description (last argument)
     var p := GNParameter
     add_parameter(p.create_float("strength", 1.0, 0.0, 10.0, 0.1, "Strength", "How much effect to apply"))
@@ -141,7 +141,7 @@ func _cook(inputs: Array) -> GNGeoData:
     if geo == null:
         return null
 
-    var strength: float = get_parameter_value("strength")
+    var strength: float = get_param_value("strength")
     # ... processing logic ...
 
     return geo
@@ -156,7 +156,7 @@ func _cook(inputs: Array) -> GNGeoData:
 **Mandatory elements in `_init_ports()`:**
 - Every `add_input()` and `add_output()` call must include a description string as the last argument.
 
-**Mandatory elements in `_setup_parameters()`:**
+**Mandatory elements in `_init_parameters()`:**
 - Every `GNParameter.create_*()` call must include a description string as the last argument.
 - Use sensible defaults and ranges.
 
@@ -542,7 +542,7 @@ upstream chains even if your operator ignores some inputs. This wastes CPU/GPU.
 ## PackedInt32Array([0]) = only input 0 is active.
 ## PackedInt32Array([-1]) = NO inputs are active (sentinel).
 func get_active_input_indices() -> PackedInt32Array:
-    var idx: int = get_parameter_value("index")
+    var idx: int = get_param_value("index")
     return PackedInt32Array([idx])
 ```
 
@@ -784,11 +784,11 @@ Any changes to the SDK headers, build system, or wrapper operators affect the re
 ```gdscript
 # Good — explains the non-obvious
 # Clamp resolution to prevent GPU memory explosion on high-iteration L-systems
-var res := clampi(get_parameter_value("resolution"), 4, 128)
+var res := clampi(get_param_value("resolution"), 4, 128)
 
 # Bad — restates the code
 # Set res to the resolution parameter value
-var res := get_parameter_value("resolution")
+var res := get_param_value("resolution")
 ```
 
 - Keep `_cook()` methods focused. Extract helper methods for complex algorithms.
@@ -1075,7 +1075,7 @@ Any node can have user-added "spare" parameters via right-click → "Add Spare P
 
 - Are stored in `gn_node.gd` → `spare_parameters: Dictionary`, separate from `_init_parameters()`.
 - Support types: Float, Int, Bool, String, Color, Vector2, Vector2i.
-- Are accessible via the same `get_parameter_value()` / `set_parameter_value()` API as regular params.
+- Are accessible via the same `get_param_value()` / `set_param_value()` API as regular params.
 - Serialize in `.gnpatch` files under a `"spare_parameters"` key per node.
 - Render in the inspector under a collapsible "Spare Parameters" section.
 

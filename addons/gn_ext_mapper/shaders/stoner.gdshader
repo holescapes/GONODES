@@ -37,10 +37,11 @@ mat3 mat3_inv(mat3 m) {
 	float det = a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g);
 	if (abs(det) < 1e-10) return mat3(1.0);
 	float inv_det = 1.0 / det;
+	// Adjugate = transpose of cofactor matrix
 	return mat3(
-		vec3((e*i - f*h) * inv_det, (c*h - b*i) * inv_det, (b*f - c*e) * inv_det),
-		vec3((f*g - d*i) * inv_det, (a*i - c*g) * inv_det, (c*d - a*f) * inv_det),
-		vec3((d*h - e*g) * inv_det, (b*g - a*h) * inv_det, (a*e - b*d) * inv_det)
+		vec3((e*i - f*h) * inv_det, (f*g - d*i) * inv_det, (d*h - e*g) * inv_det),
+		vec3((c*h - b*i) * inv_det, (a*i - c*g) * inv_det, (b*g - a*h) * inv_det),
+		vec3((b*f - c*e) * inv_det, (c*d - a*f) * inv_det, (a*e - b*d) * inv_det)
 	);
 }
 
@@ -93,53 +94,46 @@ vec4 test_gradient(vec2 uv) {
 }
 
 void fragment() {
-	// Compute inverse homography: output pixel → source UV
 	mat3 H = compute_homography(tl, tr, bl, br);
 	mat3 H_inv = mat3_inv(H);
 
 	vec3 p = H_inv * vec3(UV, 1.0);
-	if (abs(p.z) < 1e-10) {
-		COLOR = vec4(0.0);
-		return;
+	vec2 src_uv;
+	bool outside = abs(p.z) < 1e-10;
+
+	if (!outside) {
+		src_uv = p.xy / p.z;
+		outside = src_uv.x < -0.01 || src_uv.x > 1.01 || src_uv.y < -0.01 || src_uv.y > 1.01;
 	}
-	vec2 src_uv = p.xy / p.z;
 
-	// Bounds check
-	if (src_uv.x < -0.01 || src_uv.x > 1.01 || src_uv.y < -0.01 || src_uv.y > 1.01) {
+	if (outside) {
 		COLOR = vec4(0.0);
-		return;
-	}
-	src_uv = clamp(src_uv, vec2(0.0), vec2(1.0));
-
-	// Grid subdivision refinement (bilinear sub-cell warping)
-	// When grid > 1, we apply per-cell bilinear correction on top of the homography
-	// This allows fine-tuning for curved surfaces
-	// (Control point offsets would come from a grid texture in advanced usage)
-
-	// Sample source
-	vec4 color;
-	if (show_test_pattern == 1) {
-		color = test_grid(src_uv, test_grid_lines);
-	} else if (show_test_pattern == 2) {
-		color = test_gradient(src_uv);
 	} else {
-		color = texture(input_tex, src_uv);
-	}
+		src_uv = clamp(src_uv, vec2(0.0), vec2(1.0));
 
-	// Apply softedge blending
-	float mask = 1.0;
-	if (softedge_left > 0.0) {
-		mask *= pow(smoothstep(0.0, softedge_left, src_uv.x), softedge_gamma);
-	}
-	if (softedge_right > 0.0) {
-		mask *= pow(smoothstep(0.0, softedge_right, 1.0 - src_uv.x), softedge_gamma);
-	}
-	if (softedge_top > 0.0) {
-		mask *= pow(smoothstep(0.0, softedge_top, src_uv.y), softedge_gamma);
-	}
-	if (softedge_bottom > 0.0) {
-		mask *= pow(smoothstep(0.0, softedge_bottom, 1.0 - src_uv.y), softedge_gamma);
-	}
+		vec4 color;
+		if (show_test_pattern == 1) {
+			color = test_grid(src_uv, test_grid_lines);
+		} else if (show_test_pattern == 2) {
+			color = test_gradient(src_uv);
+		} else {
+			color = texture(input_tex, src_uv);
+		}
 
-	COLOR = vec4(color.rgb * mask, color.a * mask);
+		float mask = 1.0;
+		if (softedge_left > 0.0) {
+			mask *= pow(smoothstep(0.0, softedge_left, src_uv.x), softedge_gamma);
+		}
+		if (softedge_right > 0.0) {
+			mask *= pow(smoothstep(0.0, softedge_right, 1.0 - src_uv.x), softedge_gamma);
+		}
+		if (softedge_top > 0.0) {
+			mask *= pow(smoothstep(0.0, softedge_top, src_uv.y), softedge_gamma);
+		}
+		if (softedge_bottom > 0.0) {
+			mask *= pow(smoothstep(0.0, softedge_bottom, 1.0 - src_uv.y), softedge_gamma);
+		}
+
+		COLOR = vec4(color.rgb * mask, color.a * mask);
+	}
 }

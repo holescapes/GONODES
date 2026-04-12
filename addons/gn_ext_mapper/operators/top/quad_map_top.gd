@@ -32,12 +32,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_in.resolution
-	_init_shader_viewport("res://addons/gn_ext_mapper/shaders/quad_warp.gdshader", true, true, res)
+	_init_shader_viewport("res://addons/gn_ext_mapper/shaders/quad_warp.gdshader", true, false, res)
 
 	if _viewport.size != res:
 		_viewport.size = res
+		(_canvas as ColorRect).set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("input_tex", tex_in.texture)
 	_material.set_shader_parameter("tl", Vector2(get_param_value("tl_x"), get_param_value("tl_y")))
 	_material.set_shader_parameter("tr", Vector2(get_param_value("tr_x"), get_param_value("tr_y")))

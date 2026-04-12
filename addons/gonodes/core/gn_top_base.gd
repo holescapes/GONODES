@@ -69,6 +69,15 @@ func update_preview_control(control: Control) -> void:
 			(control as TextureRect).texture = null
 
 
+func render_for_preview(host) -> void:
+	if cached_output is GNTextureData:
+		var td: GNTextureData = cached_output as GNTextureData
+		if td.texture != null:
+			host.set_texture(td.texture)
+			return
+	host.set_text("")
+
+
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	var data: GNData = get_output_data(port_index)
 	if data is GNTextureData:

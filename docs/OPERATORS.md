@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **554 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus native C++ acceleration variants and 18 extension addons.
+> **528 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 21 extension addons.
 
 ---
 
@@ -6025,7 +6025,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **372** | |
+| **Total** | **372** | *Core operators only. With extensions (91), SDF (27), SCRIPT (3), and native variants, total reaches 528.* |
 
 ### Extension Operators (not included in count above)
 

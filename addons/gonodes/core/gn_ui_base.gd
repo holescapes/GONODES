@@ -141,6 +141,16 @@ func update_preview_control(control: Control) -> void:
 			label.text = "no widget"
 
 
+func render_for_preview(host) -> void:
+	if _control_node != null:
+		var state_str := ""
+		for key in widget_state:
+			state_str += "%s: %s\n" % [key, str(widget_state[key])]
+		host.set_text("%s\n%s" % [_control_node.get_class(), state_str.strip_edges()])
+	else:
+		host.set_text("no widget")
+
+
 ## Shared SubViewport for UI widget preview rendering.
 var _viewer_ui_preview: Control = null
 

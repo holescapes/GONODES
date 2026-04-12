@@ -36,8 +36,8 @@ signal dive_into_requested(node_id: String)
 ## The inline LineEdit used during rename (null when not renaming).
 var _rename_edit: LineEdit = null
 
-## Live preview control created by the GNNode.
-var _preview: Control = null
+## Live preview host (GNPreviewHost) — delegates rendering to GNNode.render_for_preview().
+var _preview: GNPreviewHost = null
 
 ## Performance overlay label (cook time + status badge).
 var _perf_label: Label = null
@@ -297,15 +297,14 @@ func update_status() -> void:
 	update_status_badge()
 
 
-## Sets up the preview area for this node.
-## Delegates to the GNNode's create_preview_control() virtual method.
+## Sets up the preview area for this node using GNPreviewHost.
+## The host provides set_texture/set_text/set_control — the node's
+## render_for_preview() pushes content into it (viewer panel paradigm).
 func _setup_preview() -> void:
-	_preview = gn_node.create_preview_control()
-	if _preview != null:
-		_preview.custom_minimum_size = Vector2(120, THUMBNAIL_HEIGHT)
-		_preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(_preview)
+	_preview = GNPreviewHost.new()
+	_preview.max_preview_height = GNSettings.get_value("preview_max_height", 80.0)
+	_preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	add_child(_preview)
 
 
 ## Adds a small "?" button to the GraphNode title bar.
@@ -481,10 +480,12 @@ func set_viewer_active(active: bool) -> void:
 
 
 ## Updates the preview from the GNNode's current state.
+## Delegates to the node's render_for_preview() which pushes content
+## into the GNPreviewHost (viewer panel paradigm).
 func update_preview() -> void:
 	if _preview != null and _preview.visible and gn_node != null:
 		var old_height := _preview.get_combined_minimum_size().y
-		gn_node.update_preview_control(_preview)
+		gn_node.render_for_preview(_preview)
 		# GraphNode only grows automatically — if content shrank we must
 		# explicitly reset so it recomputes the minimum size.
 		if _preview.get_combined_minimum_size().y < old_height:

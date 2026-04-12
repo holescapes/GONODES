@@ -82,6 +82,14 @@ func update_preview_control(control: Control) -> void:
 			label.text = "no node"
 
 
+func render_for_preview(host) -> void:
+	if _scene_node != null:
+		var vis: String = "visible" if _scene_node.visible else "hidden"
+		host.set_text("%s\n%s" % [_scene_node.get_class(), vis])
+	else:
+		host.set_text("no node")
+
+
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	# COMPs pass through their input data — route by output type.
 	var data: GNData = get_output_data(port_index)

@@ -45,12 +45,16 @@ void fragment() {
 
 	vec2 target = UV;
 	vec2 uv_guess = UV; // Start with identity as initial guess
+	bool converged = false;
 
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 12; i++) {
 		vec2 pos = bezier_surface(uv_guess.x, uv_guess.y);
 		vec2 err = pos - target;
 
-		if (length(err) < 0.0001) break;
+		if (length(err) < 0.0001) {
+			converged = true;
+			break;
+		}
 
 		// Compute Jacobian via finite differences
 		float eps = 0.001;
@@ -66,11 +70,19 @@ void fragment() {
 		delta.y = (-du.y * err.x + du.x * err.y) / det;
 
 		uv_guess -= delta;
+		// Clamp during iteration to prevent wild divergence at boundaries
+		uv_guess = clamp(uv_guess, vec2(-0.5), vec2(1.5));
 	}
 
-	if (uv_guess.x < -0.01 || uv_guess.x > 1.01 || uv_guess.y < -0.01 || uv_guess.y > 1.01) {
-		COLOR = vec4(0.0);
+	// Final convergence check: verify the solved point actually maps near the target
+	if (!converged) {
+		vec2 final_pos = bezier_surface(uv_guess.x, uv_guess.y);
+		converged = length(final_pos - target) < 0.005;
+	}
+
+	if (!converged || uv_guess.x < 0.0 || uv_guess.x > 1.0 || uv_guess.y < 0.0 || uv_guess.y > 1.0) {
+		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
 	} else {
-		COLOR = texture(input_tex, clamp(uv_guess, vec2(0.0), vec2(1.0)));
+		COLOR = texture(input_tex, uv_guess);
 	}
 }

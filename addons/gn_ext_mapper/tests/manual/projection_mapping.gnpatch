@@ -1,6 +1,4 @@
 {
-	"generator": "GONODES",
-	"description": "Projection mapping toolkit demo. Chain 1: TestCardTOP → QuadMapTOP for 4-corner pin correction → EdgeBlendTOP for soft-edge blending → NullTOP output. Chain 2: same source → BezierMapTOP for curved surface warping. Chain 3: CheckerboardIMG → GridWarpTOP for mesh-based warp. Chain 4: RampTOP → ProjectionMaskTOP with feathered rectangular mask. Chain 5: StonerTOP in test-pattern mode for projector calibration. Chain 6: ProjectorBlendTOP merging two projector feeds with overlap correction.",
 	"connections": [
 		{
 			"from": "testcard",
@@ -30,12 +28,6 @@
 			"from": "bezier_map",
 			"from_port": 0,
 			"to": "out_bezier",
-			"to_port": 0
-		},
-		{
-			"from": "checker_src",
-			"from_port": 0,
-			"to": "grid_warp",
 			"to_port": 0
 		},
 		{
@@ -85,165 +77,861 @@
 			"from_port": 0,
 			"to": "out_blend",
 			"to_port": 0
+		},
+		{
+			"from": "checker_src",
+			"from_port": 0,
+			"to": "img_to_top1",
+			"to_port": 0
+		},
+		{
+			"from": "img_to_top1",
+			"from_port": 0,
+			"to": "grid_warp",
+			"to_port": 0
+		},
+		{
+			"from": "ramp_src",
+			"from_port": 0,
+			"to": "grid_warp",
+			"to_port": 1
 		}
 	],
+	"generator": "GONODES",
 	"nodes": {
-		"testcard": {
-			"type": "TestCardTOP",
-			"position": [0.0, 0.0],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}}
-			}
-		},
-		"quad_map": {
-			"type": "QuadMapTOP",
-			"position": [400.0, 0.0],
-			"parameters": {
-				"tl_x": {"value": 0.05},
-				"tl_y": {"value": 0.03},
-				"tr_x": {"value": 0.97},
-				"tr_y": {"value": 0.0},
-				"bl_x": {"value": 0.02},
-				"bl_y": {"value": 0.98},
-				"br_x": {"value": 0.95},
-				"br_y": {"value": 1.0}
-			}
-		},
-		"edge_blend": {
-			"type": "EdgeBlendTOP",
-			"position": [800.0, 0.0],
-			"parameters": {
-				"blend_left": {"value": 0.08},
-				"blend_right": {"value": 0.08},
-				"blend_top": {"value": 0.0},
-				"blend_bottom": {"value": 0.0},
-				"gamma": {"value": 2.2}
-			}
-		},
-		"out_quad": {
-			"type": "NullTOP",
-			"position": [1200.0, 0.0],
-			"parameters": {}
-		},
 		"bezier_map": {
-			"type": "BezierMapTOP",
-			"position": [400.0, 250.0],
 			"parameters": {
-				"cp00_x": {"value": 0.0},
-				"cp00_y": {"value": 0.0},
-				"cp10_x": {"value": 0.35},
-				"cp10_y": {"value": -0.05},
-				"cp20_x": {"value": 0.65},
-				"cp20_y": {"value": -0.05},
-				"cp30_x": {"value": 1.0},
-				"cp30_y": {"value": 0.0},
-				"cp03_x": {"value": 0.0},
-				"cp03_y": {"value": 1.0},
-				"cp13_x": {"value": 0.35},
-				"cp13_y": {"value": 1.05},
-				"cp23_x": {"value": 0.65},
-				"cp23_y": {"value": 1.05},
-				"cp33_x": {"value": 1.0},
-				"cp33_y": {"value": 1.0}
-			}
-		},
-		"out_bezier": {
-			"type": "NullTOP",
-			"position": [800.0, 250.0],
-			"parameters": {}
+				"cp00_x": {
+					"value": 0.178
+				},
+				"cp00_y": {
+					"value": 0.0989999999999999
+				},
+				"cp01_x": {
+					"value": 0.0
+				},
+				"cp01_y": {
+					"value": 0.333
+				},
+				"cp02_x": {
+					"value": 0.0
+				},
+				"cp02_y": {
+					"value": 0.667
+				},
+				"cp03_x": {
+					"value": 0.0
+				},
+				"cp03_y": {
+					"value": 1.0
+				},
+				"cp10_x": {
+					"value": 0.445
+				},
+				"cp10_y": {
+					"value": 0.056
+				},
+				"cp11_x": {
+					"value": 0.202
+				},
+				"cp11_y": {
+					"value": 0.333
+				},
+				"cp12_x": {
+					"value": 0.333
+				},
+				"cp12_y": {
+					"value": 0.667
+				},
+				"cp13_x": {
+					"value": 0.35
+				},
+				"cp13_y": {
+					"value": 0.492
+				},
+				"cp20_x": {
+					"value": 0.491
+				},
+				"cp20_y": {
+					"value": -0.05
+				},
+				"cp21_x": {
+					"value": 0.667
+				},
+				"cp21_y": {
+					"value": 0.333
+				},
+				"cp22_x": {
+					"value": 0.667
+				},
+				"cp22_y": {
+					"value": 0.667
+				},
+				"cp23_x": {
+					"value": 0.65
+				},
+				"cp23_y": {
+					"value": 1.05
+				},
+				"cp30_x": {
+					"value": 1.0
+				},
+				"cp30_y": {
+					"value": 0.0
+				},
+				"cp31_x": {
+					"value": 1.0
+				},
+				"cp31_y": {
+					"value": 0.333
+				},
+				"cp32_x": {
+					"value": 1.0
+				},
+				"cp32_y": {
+					"value": 0.667
+				},
+				"cp33_x": {
+					"value": 1.0
+				},
+				"cp33_y": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				400.0,
+				250.0
+			],
+			"type": "BezierMapTOP"
 		},
 		"checker_src": {
-			"type": "CheckerboardIMG",
-			"position": [0.0, 500.0],
 			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 1024, "y": 1024}}
-			}
+				"cells_x": {
+					"value": 8
+				},
+				"cells_y": {
+					"value": 8
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 1024,
+						"y": 1024
+					}
+				},
+				"softness": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				-80.0,
+				500.0
+			],
+			"type": "CheckerboardIMG"
+		},
+		"edge_blend": {
+			"parameters": {
+				"blend_bottom": {
+					"value": 0.0
+				},
+				"blend_left": {
+					"value": 0.08
+				},
+				"blend_right": {
+					"value": 0.08
+				},
+				"blend_top": {
+					"value": 0.0
+				},
+				"gamma": {
+					"value": 2.2
+				}
+			},
+			"position": [
+				800.0,
+				0.0
+			],
+			"type": "EdgeBlendTOP"
 		},
 		"grid_warp": {
-			"type": "GridWarpTOP",
-			"position": [400.0, 500.0],
 			"parameters": {
-				"grid_cols": {"value": 8},
-				"grid_rows": {"value": 6}
-			}
+				"amplitude": {
+					"value": 0.292
+				},
+				"grid_cols": {
+					"value": 4
+				},
+				"grid_rows": {
+					"value": 8
+				},
+				"pt_0_0_x": {
+					"value": 0.0
+				},
+				"pt_0_0_y": {
+					"value": 0.0
+				},
+				"pt_0_1_x": {
+					"value": 0.0
+				},
+				"pt_0_1_y": {
+					"value": 0.0
+				},
+				"pt_0_2_x": {
+					"value": 0.0
+				},
+				"pt_0_2_y": {
+					"value": 0.0
+				},
+				"pt_0_3_x": {
+					"value": 0.0
+				},
+				"pt_0_3_y": {
+					"value": 0.0
+				},
+				"pt_0_4_x": {
+					"value": 0.0
+				},
+				"pt_0_4_y": {
+					"value": 0.0
+				},
+				"pt_0_5_x": {
+					"value": 0.0
+				},
+				"pt_0_5_y": {
+					"value": 0.0
+				},
+				"pt_0_6_x": {
+					"value": 0.0
+				},
+				"pt_0_6_y": {
+					"value": 0.0
+				},
+				"pt_0_7_x": {
+					"value": 0.0
+				},
+				"pt_0_7_y": {
+					"value": 0.0
+				},
+				"pt_1_0_x": {
+					"value": 0.0
+				},
+				"pt_1_0_y": {
+					"value": 0.0
+				},
+				"pt_1_1_x": {
+					"value": 0.0
+				},
+				"pt_1_1_y": {
+					"value": 0.0
+				},
+				"pt_1_2_x": {
+					"value": 0.0
+				},
+				"pt_1_2_y": {
+					"value": 0.0
+				},
+				"pt_1_3_x": {
+					"value": 0.0
+				},
+				"pt_1_3_y": {
+					"value": 0.0
+				},
+				"pt_1_4_x": {
+					"value": 0.0
+				},
+				"pt_1_4_y": {
+					"value": 0.0
+				},
+				"pt_1_5_x": {
+					"value": 0.0
+				},
+				"pt_1_5_y": {
+					"value": 0.0
+				},
+				"pt_1_6_x": {
+					"value": 0.0
+				},
+				"pt_1_6_y": {
+					"value": 0.0
+				},
+				"pt_1_7_x": {
+					"value": 0.0
+				},
+				"pt_1_7_y": {
+					"value": 0.0
+				},
+				"pt_2_0_x": {
+					"value": 0.0
+				},
+				"pt_2_0_y": {
+					"value": 0.0
+				},
+				"pt_2_1_x": {
+					"value": 0.0
+				},
+				"pt_2_1_y": {
+					"value": 0.0
+				},
+				"pt_2_2_x": {
+					"value": 0.0
+				},
+				"pt_2_2_y": {
+					"value": 0.0
+				},
+				"pt_2_3_x": {
+					"value": 0.0
+				},
+				"pt_2_3_y": {
+					"value": 0.0
+				},
+				"pt_2_4_x": {
+					"value": 0.0
+				},
+				"pt_2_4_y": {
+					"value": 0.0
+				},
+				"pt_2_5_x": {
+					"value": 0.0
+				},
+				"pt_2_5_y": {
+					"value": 0.0
+				},
+				"pt_2_6_x": {
+					"value": 0.0
+				},
+				"pt_2_6_y": {
+					"value": 0.0
+				},
+				"pt_2_7_x": {
+					"value": 0.0
+				},
+				"pt_2_7_y": {
+					"value": 0.0
+				},
+				"pt_3_0_x": {
+					"value": 0.0
+				},
+				"pt_3_0_y": {
+					"value": 0.0
+				},
+				"pt_3_1_x": {
+					"value": 0.0
+				},
+				"pt_3_1_y": {
+					"value": 0.0
+				},
+				"pt_3_2_x": {
+					"value": 0.0
+				},
+				"pt_3_2_y": {
+					"value": 0.0
+				},
+				"pt_3_3_x": {
+					"value": 0.0
+				},
+				"pt_3_3_y": {
+					"value": 0.0
+				},
+				"pt_3_4_x": {
+					"value": 0.0
+				},
+				"pt_3_4_y": {
+					"value": 0.0
+				},
+				"pt_3_5_x": {
+					"value": 0.0
+				},
+				"pt_3_5_y": {
+					"value": 0.0
+				},
+				"pt_3_6_x": {
+					"value": 0.0
+				},
+				"pt_3_6_y": {
+					"value": 0.0
+				},
+				"pt_3_7_x": {
+					"value": 0.0
+				},
+				"pt_3_7_y": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				400.0,
+				500.0
+			],
+			"type": "GridWarpTOP"
 		},
-		"out_grid": {
-			"type": "NullTOP",
-			"position": [800.0, 500.0],
-			"parameters": {}
+		"img_to_top1": {
+			"position": [
+				180.0,
+				500.0
+			],
+			"type": "ImgToTOP"
 		},
-		"ramp_src": {
-			"type": "RampTOP",
-			"position": [0.0, 700.0],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}}
-			}
-		},
-		"proj_mask": {
-			"type": "ProjectionMaskTOP",
-			"position": [400.0, 700.0],
-			"parameters": {
-				"left": {"value": 0.1},
-				"right": {"value": 0.9},
-				"mask_top": {"value": 0.05},
-				"bottom": {"value": 0.95},
-				"feather": {"value": 0.06},
-				"invert": {"value": false}
-			}
-		},
-		"out_mask": {
-			"type": "NullTOP",
-			"position": [800.0, 700.0],
-			"parameters": {}
-		},
-		"stoner": {
-			"type": "StonerTOP",
-			"position": [400.0, 900.0],
-			"parameters": {
-				"test_pattern": {"value": 1},
-				"test_grid_lines": {"value": 16},
-				"softedge_left": {"value": 0.1},
-				"softedge_right": {"value": 0.1},
-				"softedge_gamma": {"value": 2.2}
-			}
-		},
-		"out_stoner": {
-			"type": "NullTOP",
-			"position": [800.0, 900.0],
-			"parameters": {}
-		},
-		"proj_left": {
-			"type": "RampTOP",
-			"position": [0.0, 1100.0],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}}
-			}
-		},
-		"proj_right": {
-			"type": "RampTOP",
-			"position": [0.0, 1300.0],
-			"parameters": {
-				"resolution": {"value": {"_type": "Vector2i", "x": 1920, "y": 1080}}
-			}
-		},
-		"proj_blend": {
-			"type": "ProjectorBlendTOP",
-			"position": [400.0, 1100.0],
-			"parameters": {
-				"overlap_start": {"value": 0.4},
-				"overlap_end": {"value": 0.6},
-				"blend_axis": {"value": 0},
-				"blend_gamma": {"value": 2.2},
-				"blend_exponent": {"value": 1.0},
-				"brightness_a": {"value": 1.0},
-				"brightness_b": {"value": 1.0},
-				"black_level": {"value": 0.01}
-			}
+		"out_bezier": {
+			"position": [
+				800.0,
+				250.0
+			],
+			"type": "NullTOP"
 		},
 		"out_blend": {
-			"type": "NullTOP",
-			"position": [800.0, 1100.0],
-			"parameters": {}
+			"position": [
+				800.0,
+				1100.0
+			],
+			"type": "NullTOP"
+		},
+		"out_grid": {
+			"position": [
+				800.0,
+				500.0
+			],
+			"type": "NullTOP"
+		},
+		"out_mask": {
+			"position": [
+				800.0,
+				700.0
+			],
+			"type": "NullTOP"
+		},
+		"out_quad": {
+			"position": [
+				1200.0,
+				0.0
+			],
+			"type": "NullTOP"
+		},
+		"out_stoner": {
+			"position": [
+				800.0,
+				900.0
+			],
+			"type": "NullTOP"
+		},
+		"proj_blend": {
+			"parameters": {
+				"black_level": {
+					"value": 0.01
+				},
+				"blend_axis": {
+					"value": 0
+				},
+				"blend_exponent": {
+					"value": 1.0
+				},
+				"blend_gamma": {
+					"value": 2.2
+				},
+				"brightness_a": {
+					"value": 1.0
+				},
+				"brightness_b": {
+					"value": 1.0
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"overlap_end": {
+					"value": 0.6
+				},
+				"overlap_start": {
+					"value": 0.4
+				}
+			},
+			"position": [
+				400.0,
+				1100.0
+			],
+			"type": "ProjectorBlendTOP"
+		},
+		"proj_left": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"repeat": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 1920,
+						"y": 1080
+					}
+				},
+				"type": {
+					"value": 0
+				}
+			},
+			"position": [
+				0.0,
+				1100.0
+			],
+			"type": "RampTOP"
+		},
+		"proj_mask": {
+			"parameters": {
+				"bottom": {
+					"value": 0.95
+				},
+				"feather": {
+					"value": 0.06
+				},
+				"invert": {
+					"value": false
+				},
+				"left": {
+					"value": 0.131
+				},
+				"mask_top": {
+					"value": 0.05
+				},
+				"right": {
+					"value": 0.9
+				}
+			},
+			"position": [
+				400.0,
+				700.0
+			],
+			"type": "ProjectionMaskTOP"
+		},
+		"proj_right": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"repeat": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 1920,
+						"y": 1080
+					}
+				},
+				"type": {
+					"value": 0
+				}
+			},
+			"position": [
+				0.0,
+				1300.0
+			],
+			"type": "RampTOP"
+		},
+		"quad_map": {
+			"parameters": {
+				"bl_x": {
+					"value": 0.101
+				},
+				"bl_y": {
+					"value": 0.779
+				},
+				"br_x": {
+					"value": 0.828
+				},
+				"br_y": {
+					"value": 1.0
+				},
+				"tl_x": {
+					"value": 0.0539999999999996
+				},
+				"tl_y": {
+					"value": 0.0539999999999998
+				},
+				"tr_x": {
+					"value": 0.631
+				},
+				"tr_y": {
+					"value": 0.137
+				}
+			},
+			"position": [
+				400.0,
+				0.0
+			],
+			"type": "QuadMapTOP"
+		},
+		"ramp_src": {
+			"parameters": {
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"color_a": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"color_b": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"phase": {
+					"value": 0.0
+				},
+				"repeat": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 1920,
+						"y": 1080
+					}
+				},
+				"type": {
+					"value": 2
+				}
+			},
+			"position": [
+				0.0,
+				700.0
+			],
+			"type": "RampTOP"
+		},
+		"stoner": {
+			"parameters": {
+				"bl_x": {
+					"value": 0.325
+				},
+				"bl_y": {
+					"value": 0.873
+				},
+				"br_x": {
+					"value": 0.592
+				},
+				"br_y": {
+					"value": 0.853999999999999
+				},
+				"grid_u": {
+					"value": 12
+				},
+				"grid_v": {
+					"value": 6
+				},
+				"softedge_bottom": {
+					"value": 0.0
+				},
+				"softedge_gamma": {
+					"value": 2.02
+				},
+				"softedge_left": {
+					"value": 0.0
+				},
+				"softedge_right": {
+					"value": 0.0
+				},
+				"softedge_top": {
+					"value": 0.0
+				},
+				"test_grid_lines": {
+					"value": 7
+				},
+				"test_pattern": {
+					"value": 1
+				},
+				"tl_x": {
+					"value": 0.0899999999999999
+				},
+				"tl_y": {
+					"value": 0.0609999999999999
+				},
+				"tr_x": {
+					"value": 0.66
+				},
+				"tr_y": {
+					"value": 0.185
+				}
+			},
+			"position": [
+				400.0,
+				900.0
+			],
+			"type": "StonerTOP"
+		},
+		"testcard": {
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.150000005960464,
+						"g": 0.150000005960464,
+						"r": 0.150000005960464
+					}
+				},
+				"card_type": {
+					"value": 0
+				},
+				"center_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"grid_cells": {
+					"value": 16.0
+				},
+				"grid_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.349999994039536,
+						"g": 0.349999994039536,
+						"r": 0.349999994039536
+					}
+				},
+				"line_width": {
+					"value": 1.5
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 1920,
+						"y": 1080
+					}
+				},
+				"safe_margin": {
+					"value": 0.05
+				},
+				"show_center": {
+					"value": true
+				},
+				"show_circle": {
+					"value": true
+				},
+				"show_color_bars": {
+					"value": true
+				},
+				"show_corners": {
+					"value": true
+				},
+				"show_grayscale": {
+					"value": true
+				},
+				"show_grid": {
+					"value": true
+				},
+				"show_safe_area": {
+					"value": true
+				}
+			},
+			"position": [
+				0.0,
+				0.0
+			],
+			"type": "TestCardTOP"
 		}
+	},
+	"version": "1.0.0",
+	"viewport": {
+		"scroll_x": 15.9158592224121,
+		"scroll_y": 269.0,
+		"zoom": 0.60105174779892
 	}
 }

@@ -50,15 +50,15 @@ already read `elapsed_time`, `current_frame`, and `current_delta`.
 
 ### Expression Functions
 
-These are callable directly inside expressions (on any parameter):
-
 | Function | Returns | Description |
 |----------|---------|-------------|
-| `fps()` | `float` | Current transport FPS |
+| `fps()` | `float` | Effective FPS (NRT target or real-time 1/dt) |
 | `speed()` | `float` | Current playback speed multiplier |
-| `tstart()` | `float` | Start of time_range in seconds (0 if unbounded) |
-| `tend()` | `float` | End of time_range in seconds (0 if unbounded) |
-| `frames()` | `int` | Total frames in time_range (0 if unbounded) |
+| `tstart()` | `float` | Timeline start time in seconds |
+| `tend()` | `float` | Timeline end time in seconds |
+| `frames()` | `int` | Total frames in timeline range at current FPS |
+
+> These functions are methods on `GNCookEngine` — available in any parameter expression via the `base_instance` mechanism.  The timeline range is synced from the editor's scrubber (`timeline_start`, `timeline_end`).
 
 ---
 

@@ -52,6 +52,12 @@ var non_realtime_fps: float = 30.0
 ## Global playback speed multiplier.  1.0 = normal, 0.5 = half speed, etc.
 var playback_speed: float = 1.0
 
+## Timeline range start time (seconds). Set by the editor's timeline scrubber.
+var timeline_start: float = 0.0
+
+## Timeline range end time (seconds). Set by the editor's timeline scrubber.
+var timeline_end: float = 600.0
+
 ## Maximum nodes to cook per frame (0 = unlimited).
 ## Can be used to throttle heavy patches on low-end hardware.
 var max_cooks_per_frame: int = 0
@@ -1387,6 +1393,47 @@ func choppf(node_name: String, port = null, channel: String = "", index: int = -
 ##   topp("glsl_multi1", 1, "resolution")        → Vector2i from port index 1
 func topp(node_name: String, port = null, property: String = "") -> Variant:
 	return _make_top_port_proxy(node_name, port, property)
+
+
+# ─── Timeline Expression Functions ───────────────────────────────────────────────
+
+
+## Returns the effective FPS. In NRT mode, returns non_realtime_fps.
+## In real-time mode, returns the engine's actual frame rate.
+## Usage in expressions: fps()
+func fps() -> float:
+	if non_realtime:
+		return non_realtime_fps
+	if current_delta > 0.0:
+		return 1.0 / current_delta
+	return 60.0
+
+
+## Returns the current global playback speed multiplier.
+## Usage in expressions: speed()
+func speed() -> float:
+	return playback_speed
+
+
+## Returns the timeline start time in seconds.
+## Usage in expressions: tstart()
+func tstart() -> float:
+	return timeline_start
+
+
+## Returns the timeline end time in seconds.
+## Usage in expressions: tend() -> float
+func tend() -> float:
+	return timeline_end
+
+
+## Returns the total number of frames in the timeline range at current FPS.
+## Usage in expressions: frames()
+func frames() -> int:
+	var f := fps()
+	if f <= 0.0:
+		return 0
+	return roundi((timeline_end - timeline_start) * f)
 
 
 # ─── Internal proxy implementations ─────────────────────────────────────────────

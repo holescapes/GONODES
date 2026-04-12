@@ -108,7 +108,7 @@ The cook engine itself has moderate per-node overhead each frame:
 | **objectmerge** | `objectmerge_sop.gd` | Reference fetch + optional transform |
 | **dat_to_sop** | `dat_to_sop.gd` | Table → points converter (small data) |
 | **chop_to_sop** | `chop_to_sop.gd` | Channel → points converter (small data) |
-| **boolean** | `boolean_sop.gd` | Delegates to Godot CSGMesh3D (engine-native) |
+| **boolean** | `boolean_sop.gd` | Native C++ BSP-tree CSG via `gn_ext_native` (`boolean_sop_native.gd`) |
 | **script** | `script_sop.gd` | User-written GDScript |
 | **primitive** | `primitive_sop.gd` | Primitive attribute layer |
 | **reverse** | `reverse_sop.gd` | Index reversal |
@@ -494,7 +494,7 @@ These GDScript operators have the worst CPU bottlenecks and do NOT yet have `gn_
 | **polybevel_sop** | SOP | vertices×rings — complex topology |
 | **polystitch_sop** | SOP | O(A×B) brute-force matching |
 | **wireframe_sop** | SOP | Per-triangle edge extraction |
-| **boolean_sop** | SOP | CSG fallback could be native |
+| **boolean_sop** | SOP | ✅ Migrated to native C++ BSP-tree CSG |
 | **fluid_vol** CPU | VOL | Navier-Stokes triple loop × pressure iters |
 | **blur_vol** CPU | VOL | 6-deep nested loop — worst in project |
 | **noise_vol** CPU | VOL | res³ noise eval |

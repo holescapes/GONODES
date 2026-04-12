@@ -2,7 +2,7 @@
 
 > **Audience:** Contributors writing or running tests.  
 > **Last updated:** 2026-03-27  
-> **Total automated tests:** 1,355 across 31+ test files — all passing
+> **Total automated tests:** 1,376 across 52 test files — all passing
 
 ---
 
@@ -31,7 +31,7 @@ GONODES uses a **four-layer testing strategy** designed around the constraints o
 | Layer | Runs | Verifies | Requires GPU? |
 |-------|------|----------|--------------|
 | **Unit tests** | Headless CLI | Individual classes (GNParameter, GNNetwork, GNCookEngine, GNChannelData, GNParamPresetManager) in isolation | No |
-| **Operator tests** | Headless CLI | All 554 operators — instantiation, parameter defaults, cook-without-crash, output type correctness | No |
+| **Operator tests** | Headless CLI | All 528 operators — instantiation, parameter defaults, cook-without-crash, output type correctness | No |
 | **Functional tests** | Headless CLI | Output **correctness** — vertex positions, channel values, table contents, bounding boxes, topology changes | No |
 | **Integration tests** | Headless CLI | Full `cook_frame()` pipeline through multi-node networks with real operator instances | No |
 | **Manual test patches** | Editor (visual) | GPU rendering, shader compilation, visual output, particle systems, volumetrics, materials | Yes |
@@ -642,7 +642,7 @@ func test_my_chain() -> void:
 - **GNNetwork** — node add/remove, connection management, topological sort, cycle detection, dirty propagation, rename with connection update, unique ID generation, serialization structure
 - **GNChannelData** — channel I/O, index bounds behavior, missing data handling, metadata tracking, deep copy, family identity
 - **GNParamPresetManager** — clipboard lifecycle, type-safe paste, reset to defaults, null safety
-- **All 554 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
+- **All 528 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
 - **SOP behavioral verification** — vertex counts, geometry presence, subdivision effects, deformation correctness (transform shifts, noise deforms, bend/twist/taper), merge/switch/blend output, position data comparison
 - **SOP functional verification** — vertex positions within bounds, AABB size changes after scale/peak/extrude, normal directions after flip/recompute, scatter point counts, copy multiplication, clip plane enforcement, sort ordering, fuse deduplication
 - **DAT behavioral verification** — cell content, row/column counts, sort correctness (ascending/descending, numeric/alphabetic), merge row stacking, transpose dimension swap, switch selection

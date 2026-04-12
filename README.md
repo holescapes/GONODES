@@ -19,27 +19,27 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**554 operators** across **13 families**, plus **92 native C++ accelerated operators** and **18 extensions**.  
+**528 operators** across **13 families**, plus **93 native C++ accelerated variants** and **21 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
 
 | Family | What It Processes | Examples |
 |--------|-------------------|----------|
-| **TOP** (109) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
-| **CHOP** (110) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
-| **SOP** (117) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
-| **DAT** (44) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
-| **COMP** (19) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
-| **POP** (20) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
-| **VOL** (22) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
-| **MAT** (10) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
-| **IMG** (18) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab, Histogram |
+| **TOP** (143) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
+| **CHOP** (85) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
+| **SOP** (76) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
+| **DAT** (48) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
+| **COMP** (26) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
+| **POP** (13) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
+| **VOL** (15) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
+| **MAT** (11) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
+| **IMG** (33) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab, Histogram |
 
 > **GPU/CPU boundary rule:** Operators that require GPU→CPU texture readback (histogram, blob detection, pixel sorting) are always IMG family — never TOP. This makes the performance cost visible in your graph. Use `TOPtoIMG` / `ImgToTOP` bridges to cross the boundary explicitly.
-| **OUT** (14) | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
+| **OUT** (17) | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
 | **UI** (31) | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer |
-| **SDF** (26) | Signed distance fields | Box, Sphere, Torus, Boolean ops, Bend, Twist, Raymarch |
+| **SDF** (27) | Signed distance fields | Box, Sphere, Torus, Boolean ops, Bend, Twist, Raymarch |
 | **SCRIPT** (3) | User scripting | GDScript, Python, C++ — template-based multi-family output |
 
 ### Live Expression System
@@ -155,11 +155,11 @@ Press **F2** to open the debug system:
 
 ### Help System
 
-Every operator has a **?** button that opens auto-generated documentation (inputs, outputs, parameters, description) plus hand-written guides where available. **1,413 example patches** — 3+ per operator — open in floating editor windows so your work stays untouched.
+Every operator has a **?** button that opens auto-generated documentation (inputs, outputs, parameters, description) plus hand-written guides where available. **1,547 example patches** — 3+ per operator — open in floating editor windows so your work stays untouched.
 
 ### Testing
 
-**1,355 automated tests** across 31+ test files covering all 13 families, the cook engine, parameter system, data types, serialization, and operator behavior.
+**1,376 automated tests** across 52 test files covering all 13 families, the cook engine, parameter system, data types, serialization, and operator behavior.
 
 ### GONODES Player — Standalone Export
 

@@ -50,13 +50,13 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var res: Vector2i = tex_in.resolution if tex_in != null else Vector2i(1920, 1080)
-	_init_shader_viewport("res://addons/gn_ext_mapper/shaders/stoner.gdshader", true, true, res)
+	_init_shader_viewport("res://addons/gn_ext_mapper/shaders/stoner.gdshader", true, false, res)
 
 	if _viewport.size != res:
 		_viewport.size = res
+		(_canvas as ColorRect).set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	if tex_in != null:
-		(_canvas as TextureRect).texture = tex_in.texture
 		_material.set_shader_parameter("input_tex", tex_in.texture)
 
 	# Corner pins

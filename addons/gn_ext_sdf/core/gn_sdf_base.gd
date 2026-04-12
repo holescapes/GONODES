@@ -52,6 +52,13 @@ func update_preview_control(control: Control) -> void:
 		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
 
 
+func render_for_preview(host) -> void:
+	if cached_output != null:
+		host.set_text(cached_output.get_preview_text())
+	else:
+		host.set_text("")
+
+
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	var data: GNData = get_output_data(port_index)
 	if data != null and data is GNSDFData:

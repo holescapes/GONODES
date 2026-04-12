@@ -91,6 +91,33 @@ class TranslationResult:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Cached RegEx patterns (compiled once, reused forever)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+static var _re_main: RegEx
+static var _re_main_decl: RegEx
+static var _re_vertex: RegEx
+
+static func _ensure_regex() -> void:
+	if _re_main != null:
+		return
+	_re_main = RegEx.new()
+	_re_main.compile("void\\s+main\\s*\\(\\s*\\)\\s*\\{")
+	_re_main_decl = RegEx.new()
+	_re_main_decl.compile("void\\s+main\\s*\\(")
+	_re_vertex = RegEx.new()
+	_re_vertex.compile("void\\s+vertex\\s*\\(\\s*\\)\\s*\\{")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Translation cache — avoid re-translating the same ISF source
+# ═══════════════════════════════════════════════════════════════════════════════
+
+static var _cache: Dictionary = {}  # hash → TranslationResult
+const _CACHE_MAX := 32
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Public API
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -98,11 +125,19 @@ class TranslationResult:
 ## [param vertex_source] — optional ISF .vs vertex shader source code.
 ## Returns a [TranslationResult] with the converted code or an error message.
 static func translate(isf_source: String, vertex_source: String = "") -> TranslationResult:
-	var result := TranslationResult.new()
+	_ensure_regex()
 
 	if isf_source.strip_edges().is_empty():
-		result.error = "Empty ISF source"
-		return result
+		var err_result := TranslationResult.new()
+		err_result.error = "Empty ISF source"
+		return err_result
+
+	# Check translation cache
+	var cache_key := isf_source.hash() ^ vertex_source.hash()
+	if _cache.has(cache_key):
+		return _cache[cache_key]
+
+	var result := TranslationResult.new()
 
 	# ── Extract JSON header ──
 	var json_dict := _extract_json_header(isf_source)
@@ -136,13 +171,11 @@ static func translate(isf_source: String, vertex_source: String = "") -> Transla
 			result.image_inputs.append(inp.input_name)
 
 	# Detect generator/FX/transition
-	var has_input_image := false
+	var has_any_image_input := result.image_inputs.size() > 0
 	var has_start_image := false
 	var has_end_image := false
 	var has_progress := false
 	for inp in result.inputs:
-		if inp.input_name == "inputImage":
-			has_input_image = true
 		if inp.input_name == "startImage":
 			has_start_image = true
 		if inp.input_name == "endImage":
@@ -150,7 +183,7 @@ static func translate(isf_source: String, vertex_source: String = "") -> Transla
 		if inp.input_name == "progress":
 			has_progress = true
 
-	result.is_generator = not has_input_image and not has_start_image
+	result.is_generator = not has_any_image_input
 	result.is_transition = has_start_image and has_end_image and has_progress
 
 	# ── Parse PASSES ──
@@ -202,6 +235,13 @@ static func translate(isf_source: String, vertex_source: String = "") -> Transla
 		result.godot_code = result.pass_codes[result.pass_codes.size() - 1]
 
 	result.success = true
+
+	# Store in cache (evict oldest if full)
+	if _cache.size() >= _CACHE_MAX:
+		var first_key = _cache.keys()[0]
+		_cache.erase(first_key)
+	_cache[cache_key] = result
+
 	return result
 
 
@@ -357,9 +397,8 @@ static func _translate_vertex(vs_source: String) -> String:
 
 ## Extracts the body inside void main() { ... }, returning only the inner code.
 static func _extract_main_body(vs_code: String) -> String:
-	var regex := RegEx.new()
-	regex.compile("void\\s+main\\s*\\(\\s*\\)\\s*\\{")
-	var m := regex.search(vs_code)
+	_ensure_regex()
+	var m := _re_main.search(vs_code)
 	if m == null:
 		return ""
 	var start := m.get_end()
@@ -378,9 +417,8 @@ static func _extract_main_body(vs_code: String) -> String:
 
 ## Extracts the body inside void vertex() { ... }, returning only the inner code.
 static func _extract_vertex_body(vs_code: String) -> String:
-	var regex := RegEx.new()
-	regex.compile("void\\s+vertex\\s*\\(\\s*\\)\\s*\\{")
-	var m := regex.search(vs_code)
+	_ensure_regex()
+	var m := _re_vertex.search(vs_code)
 	if m == null:
 		return ""
 	var start := m.get_end()
@@ -509,10 +547,8 @@ static func _replace_img_size(code: String) -> String:
 ## Replaces void main() { ... } with void fragment() { ... }.
 static func _replace_main_func(code: String) -> String:
 	# ISF uses void main() { }, not mainImage like Shadertoy
-	var regex_pattern := "void\\s+main\\s*\\("
-	var regex := RegEx.new()
-	regex.compile(regex_pattern)
-	var match := regex.search(code)
+	_ensure_regex()
+	var match := _re_main_decl.search(code)
 	if match == null:
 		return code
 	# Replace just the function name

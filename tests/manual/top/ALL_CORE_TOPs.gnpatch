@@ -259,12 +259,6 @@
 			"to_port": 3
 		},
 		{
-			"from": "color_map1",
-			"from_port": 0,
-			"to": "luma_blur1",
-			"to_port": 0
-		},
-		{
 			"from": "triangle1",
 			"from_port": 0,
 			"to": "composite2",
@@ -299,12 +293,6 @@
 			"from_port": 0,
 			"to": "color_map1",
 			"to_port": 1
-		},
-		{
-			"from": "luma_blur1",
-			"from_port": 0,
-			"to": "reaction_diffusion1",
-			"to_port": 0
 		},
 		{
 			"from": "reaction_diffusion1",
@@ -1043,6 +1031,18 @@
 			"from_port": 0,
 			"to": "lut1",
 			"to_port": 0
+		},
+		{
+			"from": "color_map1",
+			"from_port": 0,
+			"to": "luma_blur1",
+			"to_port": 0
+		},
+		{
+			"from": "luma_blur1",
+			"from_port": 0,
+			"to": "reaction_diffusion1",
+			"to_port": 0
 		}
 	],
 	"generator": "GONODES",
@@ -1098,7 +1098,7 @@
 		},
 		"OUTChain16": {
 			"position": [
-				-460.0,
+				-580.0,
 				2400.0
 			],
 			"type": "NullTOP"
@@ -3160,7 +3160,7 @@
 				}
 			},
 			"position": [
-				-160.0,
+				-100.0,
 				-2280.0
 			],
 			"type": "LabelUI"
@@ -3512,7 +3512,7 @@
 			},
 			"position": [
 				-960.0,
-				-2000.0
+				-2120.0
 			],
 			"type": "LumaBlurTOP"
 		},
@@ -3729,7 +3729,7 @@
 					"value": true
 				},
 				"mute": {
-					"value": false
+					"value": true
 				},
 				"play": {
 					"value": true
@@ -3749,7 +3749,7 @@
 				}
 			},
 			"position": [
-				-1020.0,
+				-1140.0,
 				2400.0
 			],
 			"type": "MovieFileInTOP"
@@ -4172,20 +4172,20 @@
 					}
 				},
 				"colorize": {
-					"value": true
+					"value": false
 				},
 				"iterations": {
-					"value": 4
+					"value": 11
 				},
 				"sensitivity": {
-					"value": 20.0
+					"value": 28.6
 				},
 				"smoothing": {
-					"value": 0.1
+					"value": 0.574
 				}
 			},
 			"position": [
-				-740.0,
+				-860.0,
 				2400.0
 			],
 			"type": "OpticalFlowTOP"
@@ -4273,7 +4273,7 @@
 				}
 			},
 			"position": [
-				20.0,
+				80.0,
 				-2380.0
 			],
 			"type": "PanelContainerUI"
@@ -5273,7 +5273,7 @@
 				}
 			},
 			"position": [
-				-160.0,
+				-100.0,
 				-2540.0
 			],
 			"type": "SliderUI"
@@ -6103,7 +6103,7 @@
 					"value": 0
 				},
 				"open": {
-					"value": false
+					"value": true
 				},
 				"position": {
 					"value": {
@@ -6346,8 +6346,8 @@
 	},
 	"version": "1.0.0",
 	"viewport": {
-		"scroll_x": -1014.32989501953,
-		"scroll_y": -1580.04528808594,
-		"zoom": 0.410526305437088
+		"scroll_x": -733.026123046875,
+		"scroll_y": 926.8984375,
+		"zoom": 0.410525530576706
 	}
 }

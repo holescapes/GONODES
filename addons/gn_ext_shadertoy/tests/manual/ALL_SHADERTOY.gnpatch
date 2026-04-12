@@ -285,7 +285,7 @@
 					"value": "Slider"
 				},
 				"max_val": {
-					"value": 7.0
+					"value": 2.0
 				},
 				"min_size": {
 					"value": {
@@ -337,7 +337,7 @@
 					"value": 0
 				},
 				"open": {
-					"value": false
+					"value": true
 				},
 				"position": {
 					"value": {
@@ -372,8 +372,8 @@
 	},
 	"version": "1.0.0",
 	"viewport": {
-		"scroll_x": 147.608062744141,
-		"scroll_y": -213.85041809082,
+		"scroll_x": -673.214111328125,
+		"scroll_y": -697.513488769531,
 		"zoom": 0.598479688167572
 	}
 }

@@ -26,6 +26,8 @@ This folder contains architecture references, build internals, testing infrastru
 | [NATIVE_AUDIT.md](NATIVE_AUDIT.md) | Core developers | C++ migration audit — every operator classified by CPU intensity (HOT/WARM/COLD), Phase 1–9 migration tracking, 103 native C++ classes, extension C++ status |
 | [SCRIPTS.md](SCRIPTS.md) | **All contributors** | **Helper scripts reference** — registry generators (`scan_operators.py`, `build_port_registry.py`), help patch generator, operator verifier, patch validator, coverage checker, rename tool, build scripts. Includes the required script sequence for adding a new operator |
 | [GPU_ARCHITECTURE.md](GPU_ARCHITECTURE.md) | **Core developers** | **GPU architecture decision** — single shared RenderingDevice (main RD) for all operators, Texture2DRD zero-copy output, migration checklist from local RDs, rationale, risks |
+| [API_REFERENCE.md](API_REFERENCE.md) | **All contributors** | **Operator API cheat sheet** — every public method, property, and signal on GNNode and family base classes, parameter/port definition, cook helpers, expression functions |
+| [DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md) | **All contributors** | **Documentation map and update rules** — what each doc covers, which files to update when adding operators/changing API/making releases |
 
 
 ## Relationship to Help System

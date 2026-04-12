@@ -101,6 +101,9 @@ var _export_dialog: Window = null
 ## Main help reference window (singleton — toggled on/off).
 var _main_help_window: GNMainHelpWindow = null
 
+## Preferences dialog (lazy-created).
+var _preferences_dialog: GNPreferencesDialog = null
+
 ## Settings file path for persisting editor state (last opened patch, etc.).
 const _SETTINGS_PATH := "user://gonodes_settings.cfg"
 
@@ -221,6 +224,8 @@ func _setup_cook_engine() -> void:
 	cook_engine.network = network
 	cook_engine.project_dir = _project.project_dir
 	cook_engine.editor_mode = true
+	cook_engine.timeline_start = 0.0
+	cook_engine.timeline_end = 600.0
 	add_child(cook_engine)
 
 	cook_engine.frame_cooked.connect(_on_frame_cooked)
@@ -1006,6 +1011,13 @@ func _setup_toolbar() -> void:
 	btn_help.pressed.connect(_toggle_main_help_window)
 	row1.add_child(btn_help)
 
+	# Preferences button
+	var btn_prefs := Button.new()
+	btn_prefs.text = "⚙ Prefs"
+	btn_prefs.tooltip_text = "Open preferences dialog"
+	btn_prefs.pressed.connect(_open_preferences)
+	row1.add_child(btn_prefs)
+
 	# ── Timeline & Transport Row ─────────────────────────────────────────
 	var scroll_tl := ScrollContainer.new()
 	scroll_tl.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
@@ -1481,6 +1493,17 @@ func _clear_modified() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		_guard_unsaved(func(): get_tree().quit())
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Preferences
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _open_preferences() -> void:
+	if _preferences_dialog == null:
+		_preferences_dialog = GNPreferencesDialog.new()
+		add_child(_preferences_dialog)
+	_preferences_dialog.popup_centered()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

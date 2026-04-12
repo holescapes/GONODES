@@ -475,9 +475,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _gui_input(event: InputEvent) -> void:
 	# Skip mouse events that land on the search bar overlay.
+	# Must accept_event() to prevent GraphEdit's base class from consuming it.
 	if event is InputEventMouse and _search_bar != null and _search_bar.visible:
 		var local: Vector2 = (event as InputEventMouse).position
-		if _search_bar.get_rect().has_point(local):
+		if _search_bar.get_global_rect().has_point(get_global_transform() * local):
+			accept_event()
 			return
 
 	# Delete key — delete selected wires (runs before GraphEdit consumes the

@@ -52,12 +52,15 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var smoothing: float = get_param_value("smoothing")
 	var iterations: int = get_param_value("iterations")
 
-	# Ensure the "previous frame" capture viewport exists
-	_ensure_prev_viewport(res)
-
-	# Init the main shader viewport
+	# Init the main shader viewport FIRST so it gets a lower child index
+	# and renders before _prev_viewport (Godot renders SubViewports in
+	# child-index order — the main VP must read _prev_viewport's stale
+	# texture before _prev_viewport captures the current frame).
 	_init_shader_viewport("res://addons/gonodes/shaders/top/optical_flow.gdshader",
 		true, false, res)
+
+	# Ensure the "previous frame" capture viewport exists (child index > main VP)
+	_ensure_prev_viewport(res)
 
 	if _viewport.size != res:
 		_viewport.size = res

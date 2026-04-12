@@ -141,7 +141,7 @@ requires_renderers = ["forward_plus"]
 
 ### Startup Sequence
 
-1. **Plugin loads** — `addons/gonodes/plugin.gd` `_enter_tree()` calls
+1. **Plugin loads** — `addons/gonodes/gonodes_plugin.gd` `_enter_tree()` calls
    `GNExtensionRegistry.instance()`.
 2. **Core operators registered** — `_register_core_operators()` registers all
    built-in operators from `addons/gonodes/operators/`.

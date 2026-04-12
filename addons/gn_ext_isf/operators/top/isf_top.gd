@@ -230,24 +230,40 @@ func _compile(source: String) -> void:
 	_build_isf_params()
 
 	# ── Compile Godot shader(s) ──
-	_cleanup_pass_viewports()
-	if _viewport != null:
-		_viewport.queue_free()
-		_viewport = null
-		_material = null
-		_canvas = null
+	var pass_count := result.passes.size()
+	var was_multipass := _pass_shaders.size() > 1
+	var is_multipass := pass_count > 1
 
-	if result.passes.size() <= 1:
-		_shader = Shader.new()
+	# Only destroy viewport when switching between single↔multi-pass.
+	# Reusing Shader objects avoids expensive GPU re-allocation.
+	if was_multipass != is_multipass:
+		_cleanup_pass_viewports()
+		if _viewport != null:
+			_viewport.queue_free()
+			_viewport = null
+			_material = null
+			_canvas = null
+
+	if not is_multipass:
+		if _shader == null:
+			_shader = Shader.new()
 		_shader.code = result.godot_code
 		_pass_shaders.clear()
+		# Update the existing material if the viewport survived
+		if _material != null:
+			_material.shader = _shader
 	else:
 		_shader = null
-		_pass_shaders.clear()
-		for pass_code in result.pass_codes:
-			var s := Shader.new()
-			s.code = pass_code
-			_pass_shaders.append(s)
+		# Reuse existing pass shaders where possible
+		while _pass_shaders.size() > pass_count:
+			_pass_shaders.pop_back()
+		for i in range(pass_count):
+			if i < _pass_shaders.size():
+				_pass_shaders[i].code = result.pass_codes[i]
+			else:
+				var s := Shader.new()
+				s.code = result.pass_codes[i]
+				_pass_shaders.append(s)
 
 	_compiled = true
 	_load_imported_images()

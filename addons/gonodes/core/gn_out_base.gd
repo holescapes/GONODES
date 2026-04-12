@@ -75,3 +75,7 @@ func _get_input_dat(inputs: Array[GNData], port: int = 0) -> GNTableData:
 func update_preview_control(control: Control) -> void:
 	if control is Label:
 		(control as Label).text = "sink"
+
+
+func render_for_preview(host) -> void:
+	host.set_text("sink")

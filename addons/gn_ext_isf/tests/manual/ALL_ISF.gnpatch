@@ -340,7 +340,7 @@
 					"value": 1.0
 				},
 				"time_dependent": {
-					"value": true
+					"value": false
 				}
 			},
 			"position": [
@@ -358,7 +358,7 @@
 					"value": ""
 				},
 				"strength": {
-					"value": 0.5
+					"value": 0.62
 				},
 				"time_dependent": {
 					"value": false
@@ -443,15 +443,8 @@
 				"mode": {
 					"value": 2
 				},
-				"resolution": {
-					"value": {
-						"_type": "Vector2i",
-						"x": 512,
-						"y": 512
-					}
-				},
 				"time_dependent": {
-					"value": true
+					"value": false
 				}
 			},
 			"position": [
@@ -589,7 +582,7 @@
 					}
 				},
 				"scale": {
-					"value": 4.0
+					"value": 4.39999999999999
 				},
 				"seed": {
 					"value": 0
@@ -841,8 +834,8 @@
 	},
 	"version": "1.0.0",
 	"viewport": {
-		"scroll_x": 155.635437011719,
-		"scroll_y": 438.589538574219,
-		"zoom": 0.60105162858963
+		"scroll_x": 29.4867553710938,
+		"scroll_y": -99.7367553710938,
+		"zoom": 0.54641056060791
 	}
 }

@@ -60,7 +60,7 @@
 | **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **496 operators** across 13 families — 143 TOP, 85 CHOP, 75 SOP, 45 DAT, 31 UI, 27 SDF, 20 COMP, 16 IMG, 14 VOL, 14 OUT, 12 POP, 11 MAT, 3 SCRIPT |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **528 operators** across 13 families — 143 TOP, 85 CHOP, 76 SOP, 48 DAT, 33 IMG, 31 UI, 27 SDF, 26 COMP, 17 OUT, 15 VOL, 13 POP, 11 MAT, 3 SCRIPT |
 
 ---
 
@@ -774,7 +774,7 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 18. Feature Parity Audit & Roadmap
 
-> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (496 operators across 13 families).
+> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (528 operators across 13 families).
 
 ### 18.1 Feature Coverage Matrix
 

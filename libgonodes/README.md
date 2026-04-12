@@ -56,7 +56,7 @@ cmake --build .
 
 Produces:
 - `libgonodes.dll` / `.so` / `.dylib`
-- Example executables (sdl_host, vulkan_host, opengl_host, metal_host, params_demo)
+- Example executables (sdl_host, vulkan_host, opengl_host, metal_host, params_demo, geometry_host, graph_edit_demo, midi_osc_host)
 
 ### 2. Get LibGodot
 

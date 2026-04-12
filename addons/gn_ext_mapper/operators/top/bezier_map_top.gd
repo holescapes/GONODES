@@ -16,23 +16,35 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	# 16 control points (4x4 grid). Default positions form a uniform grid.
+	# Named by grid position: Row 0-3 (top to bottom), Col 0-3 (left to right)
 	var defaults := [
 		[0.0, 0.0], [0.333, 0.0], [0.667, 0.0], [1.0, 0.0],
 		[0.0, 0.333], [0.333, 0.333], [0.667, 0.333], [1.0, 0.333],
 		[0.0, 0.667], [0.333, 0.667], [0.667, 0.667], [1.0, 0.667],
 		[0.0, 1.0], [0.333, 1.0], [0.667, 1.0], [1.0, 1.0],
 	]
+	# Internal names must stay as cpXY for the shader uniforms
 	var names := [
 		"cp00", "cp10", "cp20", "cp30",
 		"cp01", "cp11", "cp21", "cp31",
 		"cp02", "cp12", "cp22", "cp32",
 		"cp03", "cp13", "cp23", "cp33",
 	]
+	# Human-readable labels: Row/Col grid positions
+	var row_labels := ["Top", "Upper Mid", "Lower Mid", "Bottom"]
+	var col_labels := ["Left", "Center-Left", "Center-Right", "Right"]
+	# Map internal index → (col, row) for labeling
+	# Grid layout: index = row * 4 + col, names are cpCR where C=col, R=row
 	for i in range(16):
 		var n: String = names[i]
 		var d: Array = defaults[i]
-		add_parameter(GNParameter.create_float(n + "_x", d[0], -1.0, 2.0, 0.001, n + " X", "Control point %s X" % n))
-		add_parameter(GNParameter.create_float(n + "_y", d[1], -1.0, 2.0, 0.001, n + " Y", "Control point %s Y" % n))
+		var col_idx: int = int(n.substr(2, 1))  # cp[C]R → C
+		var row_idx: int = int(n.substr(3, 1))  # cpC[R] → R
+		var label := "%s %s" % [row_labels[row_idx], col_labels[col_idx]]
+		add_parameter(GNParameter.create_float(n + "_x", d[0], -1.0, 2.0, 0.001,
+			"%s X" % label, "Horizontal position for control point row %d, col %d" % [row_idx, col_idx]))
+		add_parameter(GNParameter.create_float(n + "_y", d[1], -1.0, 2.0, 0.001,
+			"%s Y" % label, "Vertical position for control point row %d, col %d" % [row_idx, col_idx]))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

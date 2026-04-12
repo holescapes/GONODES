@@ -39,7 +39,7 @@ var _updating: bool = false
 var _comp_mode_btns: Array[Button] = []
 
 ## Per-component numeric fields (constant mode widgets).
-var _comp_fields: Array[GNFloatField] = []
+var _comp_fields: Array[GNNumericField] = []
 
 ## Per-component expression LineEdits (expression mode widgets).
 var _comp_expr_edits: Array[LineEdit] = []
@@ -274,23 +274,47 @@ func _build_multi_component_ui() -> void:
 		comp_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 		row.add_child(comp_label)
 
-		# GNFloatField (visible in constant mode)
-		var field := GNFloatField.new()
-		if is_color:
-			field.min_value = 0.0
-			field.max_value = 1.0
-			field.step = 0.01
+		# Numeric field (visible in constant mode) — use GNIntField for VECTOR2I
+		var is_int_vec := param.value_type == GNParameter.ValueType.VECTOR2I
+		var field: GNNumericField
+		if is_int_vec:
+			var ifield := GNIntField.new()
+			ifield.min_value = null
+			ifield.max_value = null
+			ifield.value = int(param.get_component_value(i))
+			ifield.default_value = int(_get_default_component(i))
+			ifield.size_flags_horizontal = SIZE_EXPAND_FILL
+			var field_idx_i := i
+			ifield.value_changed.connect(func(val: int) -> void: _on_comp_field_changed(field_idx_i, float(val)))
+			var tab_idx_i := i
+			ifield.tab_requested.connect(func(fwd: bool) -> void: _on_comp_field_tab(tab_idx_i, fwd))
+			field = ifield
+		elif is_color:
+			var ffield := GNFloatField.new()
+			ffield.min_value = 0.0
+			ffield.max_value = 1.0
+			ffield.step = 0.01
+			ffield.value = param.get_component_value(i)
+			ffield.default_value = _get_default_component(i)
+			ffield.size_flags_horizontal = SIZE_EXPAND_FILL
+			var field_idx_c := i
+			ffield.value_changed.connect(func(val: float) -> void: _on_comp_field_changed(field_idx_c, val))
+			var tab_idx_c := i
+			ffield.tab_requested.connect(func(fwd: bool) -> void: _on_comp_field_tab(tab_idx_c, fwd))
+			field = ffield
 		else:
-			field.min_value = null
-			field.max_value = null
-			field.step = param.step
-		field.value = param.get_component_value(i)
-		field.default_value = _get_default_component(i)
-		field.size_flags_horizontal = SIZE_EXPAND_FILL
-		var field_idx := i
-		field.value_changed.connect(func(val: float) -> void: _on_comp_field_changed(field_idx, val))
-		var tab_idx := i
-		field.tab_requested.connect(func(fwd: bool) -> void: _on_comp_field_tab(tab_idx, fwd))
+			var ffield := GNFloatField.new()
+			ffield.min_value = null
+			ffield.max_value = null
+			ffield.step = param.step
+			ffield.value = param.get_component_value(i)
+			ffield.default_value = _get_default_component(i)
+			ffield.size_flags_horizontal = SIZE_EXPAND_FILL
+			var field_idx_f := i
+			ffield.value_changed.connect(func(val: float) -> void: _on_comp_field_changed(field_idx_f, val))
+			var tab_idx_f := i
+			ffield.tab_requested.connect(func(fwd: bool) -> void: _on_comp_field_tab(tab_idx_f, fwd))
+			field = ffield
 		row.add_child(field)
 		_comp_fields.append(field)
 
@@ -360,8 +384,10 @@ func _create_value_control() -> Control:
 			return _create_enum_control()
 		GNParameter.ValueType.COLOR:
 			return _create_color_control()
-		GNParameter.ValueType.VECTOR2, GNParameter.ValueType.VECTOR2I:
+		GNParameter.ValueType.VECTOR2:
 			return _create_vector2_control()
+		GNParameter.ValueType.VECTOR2I:
+			return _create_vector2i_control()
 		GNParameter.ValueType.FILE:
 			return _create_file_control()
 		GNParameter.ValueType.RAMP:
@@ -433,6 +459,19 @@ func _create_string_control() -> Control:
 	# If this is a code param (Script operators or CustomShaderTOP), add Edit ↗ button
 	if _is_code_editor_param():
 		_code_edit = edit
+		# Show only a short preview — the full source is in the windowed editor.
+		# This avoids Godot's TextEdit doing expensive word-wrap/glyph shaping
+		# on potentially thousands of lines that aren't visible anyway.
+		var full_text: String = str(param.value)
+		var preview_lines := full_text.split("\n", true, 6)
+		if preview_lines.size() > 5:
+			preview_lines.resize(5)
+			preview_lines.append("…")
+		edit.text = "\n".join(preview_lines)
+		edit.editable = false
+		edit.custom_minimum_size = Vector2(0, 60)
+		edit.add_theme_color_override("font_readonly_color", Color(0.6, 0.6, 0.6, 0.7))
+
 		var vbox := VBoxContainer.new()
 		vbox.size_flags_horizontal = SIZE_EXPAND_FILL
 		vbox.add_theme_constant_override("separation", 2)
@@ -591,7 +630,12 @@ func _open_code_editor() -> void:
 func _on_code_editor_committed(text: String, _param_name: String) -> void:
 	_set_value_with_undo(text)
 	if _code_edit != null:
-		_code_edit.text = text
+		# Keep only a short preview in the inline TextEdit
+		var preview_lines := text.split("\n", true, 6)
+		if preview_lines.size() > 5:
+			preview_lines.resize(5)
+			preview_lines.append("…")
+		_code_edit.text = "\n".join(preview_lines)
 	if owner_node:
 		owner_node.mark_dirty()
 
@@ -645,6 +689,38 @@ func _create_vector2_control() -> Control:
 	y_field.suffix = "  Y"
 	y_field.size_flags_horizontal = SIZE_EXPAND_FILL
 	y_field.value_changed.connect(_on_vector2_y_changed)
+	hbox.add_child(y_field)
+
+	return hbox
+
+
+func _create_vector2i_control() -> Control:
+	var hbox := HBoxContainer.new()
+	hbox.size_flags_horizontal = SIZE_EXPAND_FILL
+	hbox.add_theme_constant_override("separation", 4)
+
+	var vec_val = param.value
+	var x_val: int = int(vec_val.x) if vec_val else 0
+	var y_val: int = int(vec_val.y) if vec_val else 0
+
+	var x_field := GNIntField.new()
+	x_field.min_value = null
+	x_field.max_value = null
+	x_field.value = x_val
+	x_field.default_value = x_val
+	x_field.suffix = "  X"
+	x_field.size_flags_horizontal = SIZE_EXPAND_FILL
+	x_field.value_changed.connect(_on_vector2i_x_changed)
+	hbox.add_child(x_field)
+
+	var y_field := GNIntField.new()
+	y_field.min_value = null
+	y_field.max_value = null
+	y_field.value = y_val
+	y_field.default_value = y_val
+	y_field.suffix = "  Y"
+	y_field.size_flags_horizontal = SIZE_EXPAND_FILL
+	y_field.value_changed.connect(_on_vector2i_y_changed)
 	hbox.add_child(y_field)
 
 	return hbox
@@ -926,20 +1002,28 @@ func _on_vector2_x_changed(val: float) -> void:
 	if _updating:
 		return
 	var current = param.value
-	if param.value_type == GNParameter.ValueType.VECTOR2I:
-		_set_value_with_undo(Vector2i(int(val), current.y), true)
-	else:
-		_set_value_with_undo(Vector2(val, current.y), true)
+	_set_value_with_undo(Vector2(val, current.y), true)
 
 
 func _on_vector2_y_changed(val: float) -> void:
 	if _updating:
 		return
 	var current = param.value
-	if param.value_type == GNParameter.ValueType.VECTOR2I:
-		_set_value_with_undo(Vector2i(current.x, int(val)), true)
-	else:
-		_set_value_with_undo(Vector2(current.x, val), true)
+	_set_value_with_undo(Vector2(current.x, val), true)
+
+
+func _on_vector2i_x_changed(val: int) -> void:
+	if _updating:
+		return
+	var current = param.value
+	_set_value_with_undo(Vector2i(val, current.y), true)
+
+
+func _on_vector2i_y_changed(val: int) -> void:
+	if _updating:
+		return
+	var current = param.value
+	_set_value_with_undo(Vector2i(current.x, val), true)
 
 
 func _on_file_option_selected(idx: int) -> void:
@@ -1593,7 +1677,7 @@ func _update_value_display() -> void:
 			if picker:
 				var val = param.get_resolved_value()
 				picker.color = val if val is Color else Color.WHITE
-		GNParameter.ValueType.VECTOR2, GNParameter.ValueType.VECTOR2I:
+		GNParameter.ValueType.VECTOR2:
 			var hbox := _control as HBoxContainer
 			if hbox and hbox.get_child_count() >= 2:
 				var vec_val = param.get_resolved_value()
@@ -1603,6 +1687,16 @@ func _update_value_display() -> void:
 					x_field.set_value_no_signal(vec_val.x)
 				if y_field:
 					y_field.set_value_no_signal(vec_val.y)
+		GNParameter.ValueType.VECTOR2I:
+			var hbox_i := _control as HBoxContainer
+			if hbox_i and hbox_i.get_child_count() >= 2:
+				var vec_val_i = param.get_resolved_value()
+				var x_int: GNIntField = hbox_i.get_child(0) as GNIntField
+				var y_int: GNIntField = hbox_i.get_child(1) as GNIntField
+				if x_int:
+					x_int.set_value_no_signal(int(vec_val_i.x))
+				if y_int:
+					y_int.set_value_no_signal(int(vec_val_i.y))
 		GNParameter.ValueType.FILE:
 			var hbox := _control as HBoxContainer
 			if hbox and hbox.get_child_count() >= 1:

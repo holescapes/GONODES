@@ -1,0 +1,89 @@
+class_name GNSettings
+extends RefCounted
+## Centralized key-value store for user preferences.
+##
+## All settings are persisted to user://gonodes_settings.cfg under the
+## [preferences] section.  Editor-internal layout state (split offsets,
+## recent patches) keeps the existing [editor] section untouched.
+##
+## Usage:
+##   GNSettings.set_value("preview_max_height", 120.0)
+##   var h: float = GNSettings.get_value("preview_max_height", 120.0)
+##
+## The first call to get_value/set_value lazily loads the ConfigFile.
+
+const _PATH := "user://gonodes_settings.cfg"
+const _SECTION := "preferences"
+
+static var _cfg: ConfigFile = null
+static var _loaded: bool = false
+
+## Emitted when any setting changes (key, new_value).
+## Connect from UI controls that need live updates.
+static var changed: Signal  # Can't use static signals in 4.x — use a callable approach instead.
+
+## Registered listeners: Array of Callable(key, value).
+static var _listeners: Array[Callable] = []
+
+
+static func _ensure_loaded() -> void:
+	if _loaded:
+		return
+	_cfg = ConfigFile.new()
+	if FileAccess.file_exists(_PATH):
+		_cfg.load(_PATH)
+	_loaded = true
+
+
+## Returns the value for a key, or the default if not set.
+static func get_value(key: String, default: Variant = null) -> Variant:
+	_ensure_loaded()
+	return _cfg.get_value(_SECTION, key, default)
+
+
+## Sets a value and persists to disk.
+static func set_value(key: String, value: Variant) -> void:
+	_ensure_loaded()
+	_cfg.set_value(_SECTION, key, value)
+	_cfg.save(_PATH)
+	_notify_listeners(key, value)
+
+
+## Returns true if a key has been explicitly set.
+static func has_key(key: String) -> bool:
+	_ensure_loaded()
+	return _cfg.has_section_key(_SECTION, key)
+
+
+## Registers a callable to be notified when any setting changes.
+## The callable receives (key: String, value: Variant).
+static func add_listener(cb: Callable) -> void:
+	if cb not in _listeners:
+		_listeners.append(cb)
+
+
+## Removes a previously registered listener.
+static func remove_listener(cb: Callable) -> void:
+	var idx := _listeners.find(cb)
+	if idx >= 0:
+		_listeners.remove_at(idx)
+
+
+static func _notify_listeners(key: String, value: Variant) -> void:
+	for cb in _listeners:
+		cb.call(key, value)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Well-Known Defaults
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Default settings and their values.  Used by the preferences dialog
+## to populate controls and by callers to provide defaults.
+const DEFAULTS: Dictionary = {
+	"preview_max_height": 80.0,
+	"preview_enabled_on_create": true,
+	"graph_snap_distance": 20,
+	"perf_overlay_enabled": false,
+	"log_level": 1,  # 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
+}
