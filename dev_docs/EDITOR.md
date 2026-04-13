@@ -290,7 +290,15 @@ lazy 3D SubViewport.  Each node controls its own viewer presentation:
    event (returns `true`), the viewer re-renders by calling
    `render_for_viewer()` again.  SOP/POP use this for orbit interaction,
    VOL uses it for slice scrolling.
-5. 3D families share **static scene nodes** (`_viewer_camera`, `_viewer_light`,
+5. **Texture overlay:** `viewer.set_texture_overlay(control)` attaches a
+   transparent Control that draws in texture pixel space.  The overlay
+   tracks pan/zoom automatically (positioned/sized to match `_tex_display`).
+   Pass `null` to remove.  All input still routes through
+   `handle_viewer_input()` — the overlay has `MOUSE_FILTER_IGNORE`.
+   Helper: `viewer.local_pos_to_uv(local_pos)` converts mouse position
+   to 0–1 texture UV coordinates; `viewer.uv_to_local_pos(uv)` does
+   the reverse.  Used by projection mapping TOPs for interactive handles.
+6. 3D families share **static scene nodes** (`_viewer_camera`, `_viewer_light`,
    `_viewer_mesh_instance`, etc.) owned by the family base class with a
    `_viewer_` prefix.  These are reparented into the viewer's 3D SubViewport
    on each render.
@@ -875,6 +883,136 @@ All four are defined in `gn_graph_editor.gd`:
   `_copy_debug_info_to_clipboard()`, `_copy_network_json_to_clipboard()` methods
 - Uses `DisplayServer.clipboard_set()` / `DisplayServer.clipboard_get()` for
   OS clipboard access
+
+
+## Custom Assets — Editor Workflow
+
+The custom asset system extends the graph editor with asset creation,
+locked editing, export/import, and drag-and-drop.
+
+### Promotion Dialog
+
+Right-click a SubNetwork → "Promote to Custom Asset…" opens
+`GNAssetPromotionDialog`. The dialog shows identity fields (name, family,
+description, author, version) and a read-only summary of the SubNetwork's
+spare parameters — these become the asset's public interface. No parameter
+selection is needed; all spare params are promoted automatically. Zero spare
+params is valid (parameterless asset).
+
+**Implementation:** `gn_asset_promotion_dialog.gd`
+
+### Read-Only Asset Viewing
+
+When diving into a `GNCustomOperator` (double-click), the inner network
+opens in **read-only mode**. The `GNGraphEditor.read_only` property gates
+all edit operations:
+
+| Guarded Operation | Method |
+|---|---|
+| Connect wires | `_on_connection_request()` |
+| Disconnect wires | `_on_disconnection_request()` |
+| Delete nodes | `_on_delete_nodes_request()` |
+| Paste clipboard | `paste_clipboard()` |
+| Add node from palette | `_on_palette_node_selected()` |
+| Group into subnet | `group_selected_into_subnet()` |
+
+A breadcrumb banner with 🔒 icon indicates locked state. The "Edit Asset
+Definition" button unlocks editing after confirmation.
+
+**Implementation:** `gn_graph_editor.gd` (`read_only` property),
+`gn_editor.gd` (`_on_dive_into_requested()`, `_update_breadcrumb()`)
+
+### Edit Asset Definition
+
+Clicking "Edit Asset Definition" in the read-only banner calls
+`begin_asset_edit()` on the GNCustomOperator and clears `read_only`.
+On save, a confirmation dialog shows the instance count:
+
+- **"Save to All N instances"** — writes changes back to the `.gnasset`
+  file; all instances update on next cook.
+- **"Save As New Asset…"** — saves as a new `.gnasset` with a different
+  name, preserving the original.
+- **"Cancel"** — discards changes.
+
+**Implementation:** `gn_editor.gd` (`_on_edit_asset_requested()`,
+`_on_asset_edit_save()`, `_do_asset_save()`)
+
+### Make Editable (One-Way Escape Hatch)
+
+Right-click a GNCustomOperator → "Make Editable" converts it into a plain
+SubNetworkNode. The asset link is severed — the inner network becomes a
+standalone copy. This is irreversible.
+
+**Implementation:** `gn_graph_editor.gd` (`_CtxID.MAKE_EDITABLE`),
+`gn_editor.gd` (`_on_make_editable_requested()`)
+
+### Dirty Asset Interception on Graph Save
+
+If any GNCustomOperator instance has unsaved edits when saving the graph,
+a dialog intercepts the save:
+
+- **"Save Assets & Graph"** — saves all dirty assets first, then the graph.
+- **"Discard Changes & Save Graph"** — reverts dirty assets, saves graph.
+- **"Cancel"** — aborts save.
+
+**Implementation:** `gn_editor.gd` (`_find_dirty_assets()`,
+`_save_to_path()`, `_do_save_to_path()`)
+
+### Promote to Parent (Spare Param)
+
+Right-click a parameter on a node inside a SubNetwork → "Promote to Parent
+(Spare Param)" creates a spare parameter on the parent SubNetworkNode that
+mirrors the current param. The inner param is auto-wired via an expression
+`par("../", "spare_name")` to read from the parent spare.
+
+This is the primary mechanism for building a custom asset's public interface.
+
+**Implementation:** `gn_param_row.gd` (`_promote_to_parent()`,
+`_is_inside_subnet()`, `_find_parent_subnet()`)
+
+### SubNetwork Export/Import
+
+Two new context menu items:
+
+- **Export Sub-Network…** — saves the inner network + metadata as a
+  `.gnpatch` file via FileDialog. Metadata includes `source_type`,
+  `source_label`, `family`.
+- **Import .gnpatch…** — loads a `.gnpatch` file and creates a
+  SubNetworkNode with the loaded inner network.
+
+**Implementation:** `gn_graph_editor.gd` (`_CtxID.EXPORT_SUBNET_PATCH`,
+`_CtxID.IMPORT_SUBNET_PATCH`), `gn_editor.gd`
+(`_on_export_subnet_requested()`, `_on_import_patch_requested()`)
+
+### Drag-and-Drop from OS
+
+`.gnpatch` and `.gnasset` files can be dragged from the OS file manager
+directly onto the graph canvas:
+
+| File Type | Action |
+|-----------|--------|
+| `.gnpatch` | Creates SubNetworkNode, loads inner network from file |
+| `.gnasset` | Registers asset if unknown, creates GNCustomOperator instance |
+
+**Implementation:** `gn_graph_editor.gd` (`_can_drop_data()`,
+`_drop_data()`, `_drop_gnpatch()`, `_drop_gnasset()`)
+
+### Palette Reorganization
+
+Custom assets are organized in a dedicated "Custom" top-level palette section:
+
+```
+Custom → Family → Extension Display Name / "User" → Asset Name
+```
+
+- Extension read-only assets show a tooltip and have "Edit Asset" / "Re-promote"
+  disabled in the context menu.
+- Empty groups are automatically hidden.
+- Custom asset items are colored gold (0.9, 0.85, 0.6).
+
+**Implementation:** `gn_node_palette.gd` (`_populate_tree()`,
+`_add_operator_item()`), `gn_extension_registry.gd`
+(`get_custom_asset_registry()`, `_scan_extension_assets()`)
 
 
 ## Settings Persistence

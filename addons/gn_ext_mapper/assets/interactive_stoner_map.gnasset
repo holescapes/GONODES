@@ -1,0 +1,156 @@
+{
+	"identity": {
+		"op_name": "InteractiveStonerMap",
+		"family": "TOP",
+		"description": "Stoner keystone correction with interactive corner drag panel — connect both outputs to WindowOUT for live projection surface adjustment."
+	},
+	"inner_network": {
+		"nodes": {
+			"in1": {
+				"type": "InTunnel",
+				"position": [0, 100],
+				"parameters": {
+					"index": {"value": 0},
+					"family": {"value": 0},
+					"label": {"value": "texture"}
+				}
+			},
+			"drag1": {
+				"type": "CornerDragUI",
+				"position": [200, 300],
+				"parameters": {
+					"label": {"value": "Stoner Corners"},
+					"size": {"value": 250}
+				}
+			},
+			"map1": {
+				"type": "StonerTOP",
+				"position": [500, 100],
+				"parameters": {
+					"tl_x": {
+						"mode": "EXPRESSION",
+						"expression": "chop(\"drag1\", \"drag1:tl_x\")"
+					},
+					"tl_y": {
+						"mode": "EXPRESSION",
+						"expression": "chop(\"drag1\", \"drag1:tl_y\")"
+					},
+					"tr_x": {
+						"mode": "EXPRESSION",
+						"expression": "chop(\"drag1\", \"drag1:tr_x\")"
+					},
+					"tr_y": {
+						"mode": "EXPRESSION",
+						"expression": "chop(\"drag1\", \"drag1:tr_y\")"
+					},
+					"bl_x": {
+						"mode": "EXPRESSION",
+						"expression": "chop(\"drag1\", \"drag1:bl_x\")"
+					},
+					"bl_y": {
+						"mode": "EXPRESSION",
+						"expression": "chop(\"drag1\", \"drag1:bl_y\")"
+					},
+					"br_x": {
+						"mode": "EXPRESSION",
+						"expression": "chop(\"drag1\", \"drag1:br_x\")"
+					},
+					"br_y": {
+						"mode": "EXPRESSION",
+						"expression": "chop(\"drag1\", \"drag1:br_y\")"
+					}
+				}
+			},
+			"out_tex": {
+				"type": "OutTunnel",
+				"position": [850, 100],
+				"parameters": {
+					"index": {"value": 0},
+					"family": {"value": 0},
+					"label": {"value": "warped"}
+				}
+			},
+			"out_panel": {
+				"type": "OutTunnel",
+				"position": [850, 300],
+				"parameters": {
+					"index": {"value": 1},
+					"family": {"value": 9},
+					"label": {"value": "panel"}
+				}
+			}
+		},
+		"connections": [
+			{"from": "in1", "from_port": 0, "to": "map1", "to_port": 0},
+			{"from": "map1", "from_port": 0, "to": "out_tex", "to_port": 0},
+			{"from": "drag1", "from_port": 0, "to": "out_panel", "to_port": 0}
+		]
+	},
+	"promoted_parameters": [],
+	"custom_parameters": [
+		{
+			"name": "show_panel",
+			"value_type": 2,
+			"label": "Show Panel",
+			"default_value": true,
+			"min_value": 0,
+			"max_value": 1,
+			"step": 1
+		},
+		{
+			"name": "pad_size",
+			"value_type": 1,
+			"label": "Pad Size",
+			"default_value": 250,
+			"min_value": 64,
+			"max_value": 512,
+			"step": 1
+		},
+		{
+			"name": "softedge_left",
+			"value_type": 0,
+			"label": "Soft Edge Left",
+			"default_value": 0.0,
+			"min_value": 0.0,
+			"max_value": 0.5,
+			"step": 0.01
+		},
+		{
+			"name": "softedge_right",
+			"value_type": 0,
+			"label": "Soft Edge Right",
+			"default_value": 0.0,
+			"min_value": 0.0,
+			"max_value": 0.5,
+			"step": 0.01
+		},
+		{
+			"name": "softedge_top",
+			"value_type": 0,
+			"label": "Soft Edge Top",
+			"default_value": 0.0,
+			"min_value": 0.0,
+			"max_value": 0.5,
+			"step": 0.01
+		},
+		{
+			"name": "softedge_bottom",
+			"value_type": 0,
+			"label": "Soft Edge Bottom",
+			"default_value": 0.0,
+			"min_value": 0.0,
+			"max_value": 0.5,
+			"step": 0.01
+		},
+		{
+			"name": "test_pattern",
+			"value_type": 9,
+			"label": "Test Pattern",
+			"default_value": 0,
+			"min_value": 0,
+			"max_value": 2,
+			"step": 1,
+			"enum_options": ["Off", "Grid", "Gradient"]
+		}
+	]
+}

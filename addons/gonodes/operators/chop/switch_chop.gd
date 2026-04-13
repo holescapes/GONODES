@@ -16,6 +16,8 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("index", 0, 0, 0, "Input Index",
 		"Which input to output (0-based)"))
+	add_parameter(GNParameter.create_bool("null_on_missing", false, "Null on Missing",
+		"When true, output null instead of holding the previous frame when the selected input is empty. Useful as a programmatic gate."))
 
 
 ## Auto-adjust index param max_value when ports grow/shrink.
@@ -42,4 +44,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return inputs[idx]
 
 	# Hold previous output while the new chain activates
+	if get_param_value("null_on_missing"):
+		return null
 	return cached_output

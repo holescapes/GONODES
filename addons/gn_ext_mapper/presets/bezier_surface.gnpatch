@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"description": "Bezier mesh warp surface — SubNetwork with texture I/O and 4x4 Bezier control grid.",
+	"nodes": {
+		"bezier_surface": {
+			"type": "SubNetworkNode",
+			"position": [200, 100],
+			"parameters": {
+				"label": {"value": "Bezier Surface"}
+			},
+			"inner_network": {
+				"nodes": {
+					"in1": {
+						"type": "InTunnel",
+						"position": [0, 0],
+						"parameters": {
+							"index": {"value": 0},
+							"family": {"value": 0},
+							"label": {"value": "tex_in"}
+						}
+					},
+					"bezier1": {
+						"type": "BezierMapTOP",
+						"position": [400, 0],
+						"parameters": {}
+					},
+					"out1": {
+						"type": "OutTunnel",
+						"position": [800, 0],
+						"parameters": {
+							"index": {"value": 0},
+							"family": {"value": 0},
+							"label": {"value": "tex_out"}
+						}
+					}
+				},
+				"connections": [
+					{"from": "in1", "from_port": 0, "to": "bezier1", "to_port": 0},
+					{"from": "bezier1", "from_port": 0, "to": "out1", "to_port": 0}
+				]
+			}
+		}
+	},
+	"connections": [],
+	"annotations": []
+}

@@ -30,6 +30,10 @@ var previews_visible: bool = true
 ## Whether the performance profiling overlay is shown on node views.
 var perf_overlay_visible: bool = false
 
+## When true, the graph is in read-only mode (viewing a locked custom asset).
+## No edits allowed — drag, delete, connect, etc. are suppressed.
+var read_only: bool = false
+
 ## Right-click context menu.
 var _context_menu: PopupMenu = null
 
@@ -66,8 +70,10 @@ enum _CtxID {
 	ADD_STICKY_NOTE,
 	PROMOTE_TO_ASSET,
 	EDIT_ASSET,
-	MAKE_UNIQUE,
+	MAKE_EDITABLE,
 	REPROMOTE_ASSET,
+	EXPORT_SUBNET_PATCH,
+	IMPORT_SUBNET_PATCH,
 	ADD_SPARE_PARAM,
 	COPY_AS_JSON,
 	PASTE_FROM_JSON,
@@ -272,10 +278,16 @@ signal dive_into_requested(node_id: String)
 signal edit_asset_requested(node_id: String)
 
 ## Signal emitted when the user wants to detach an asset instance (Make Unique).
-signal make_unique_requested(node_id: String)
+signal make_editable_requested(node_id: String)
 
 ## Signal emitted when the user wants to re-promote parameters on a custom asset.
 signal repromote_asset_requested(node_id: String)
+
+## Signal emitted when the user wants to export a SubNetwork as a .gnpatch file.
+signal export_subnet_requested(node_id: String)
+
+## Signal emitted when the user wants to import a .gnpatch from disk.
+signal import_patch_requested(graph_pos: Vector2)
 
 ## Signal emitted when the user clicks the eye (viewer pin) button on a node.
 signal viewer_pin_requested(node_id: String)
@@ -727,7 +739,7 @@ func _remove_visual_connection(conn: GNConnection) -> void:
 ## User drags a wire from one port to another.
 func _on_connection_request(from_node: StringName, from_port: int,
 		to_node: StringName, to_port: int) -> void:
-	if network == null:
+	if network == null or read_only:
 		return
 
 	var fn := String(from_node)
@@ -769,7 +781,7 @@ const _DISCONNECT_PORT_THRESHOLD := 6.0  # pixels in local space
 
 func _on_disconnection_request(from_node: StringName, from_port: int,
 		to_node: StringName, to_port: int) -> void:
-	if network == null:
+	if network == null or read_only:
 		return
 
 	# Check that the click was near the input port, not mid-wire.
@@ -902,7 +914,7 @@ func _on_connection_from_empty(to_node: StringName, to_port: int,
 
 ## User presses Delete with nodes selected.
 func _on_delete_nodes_request(node_names: Array[StringName]) -> void:
-	if network == null:
+	if network == null or read_only:
 		return
 	if node_names.is_empty():
 		return
@@ -1050,7 +1062,7 @@ func _on_network_node_renamed(old_id: String, new_id: String) -> void:
 
 ## Called when the user selects a node type from the palette popup.
 func _on_palette_node_selected(operator_type: String) -> void:
-	if network == null:
+	if network == null or read_only:
 		return
 
 	var node: GNNode = _create_operator_instance(operator_type)
@@ -1929,7 +1941,7 @@ func copy_selected() -> void:
 func paste_clipboard(target_graph_pos := Vector2(INF, INF)) -> void:
 	if _clipboard.is_empty() or not _clipboard.has("nodes"):
 		return
-	if network == null:
+	if network == null or read_only:
 		return
 
 	var nodes_data: Dictionary = _clipboard["nodes"]
@@ -3163,12 +3175,26 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.PROMOTE_TO_ASSET), not is_single_subnet)
 
 	# Custom asset actions — enabled only when exactly one GNCustomOperator is selected
+	# "Edit Asset" is disabled for extension read-only assets
+	var is_editable_asset := is_single_custom_asset
+	if is_single_custom_asset and selected_ids.size() == 1:
+		var co_node := network.get_node_by_id(selected_ids[0])
+		if co_node is GNCustomOperator:
+			var reg := GNExtensionRegistry.instance()
+			var entry := reg.get_entry(co_node.node_type)
+			if entry != null and entry.asset_read_only:
+				is_editable_asset = false
 	_context_menu.add_item("Edit Asset…", _CtxID.EDIT_ASSET)
-	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.EDIT_ASSET), not is_single_custom_asset)
-	_context_menu.add_item("Make Unique", _CtxID.MAKE_UNIQUE)
-	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.MAKE_UNIQUE), not is_single_custom_asset)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.EDIT_ASSET), not is_editable_asset)
+	_context_menu.add_item("Make Editable", _CtxID.MAKE_EDITABLE)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.MAKE_EDITABLE), not is_single_custom_asset)
 	_context_menu.add_item("Re-promote Parameters…", _CtxID.REPROMOTE_ASSET)
-	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.REPROMOTE_ASSET), not is_single_custom_asset)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.REPROMOTE_ASSET), not is_editable_asset)
+
+	# Export / Import sub-network patches
+	_context_menu.add_item("Export Sub-Network…", _CtxID.EXPORT_SUBNET_PATCH)
+	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.EXPORT_SUBNET_PATCH), not is_single_subnet)
+	_context_menu.add_item("Import .gnpatch…", _CtxID.IMPORT_SUBNET_PATCH)
 
 	# Add Spare Parameter — enabled when exactly one node is selected
 	_context_menu.add_item("Add Spare Parameter…", _CtxID.ADD_SPARE_PARAM)
@@ -3385,16 +3411,22 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			var sel := _get_selected_node_ids()
 			if sel.size() == 1:
 				edit_asset_requested.emit(sel[0])
-		_CtxID.MAKE_UNIQUE:
+		_CtxID.MAKE_EDITABLE:
 			var sel2 := _get_selected_node_ids()
 			if sel2.size() == 1:
-				make_unique_requested.emit(sel2[0])
+				make_editable_requested.emit(sel2[0])
 		_CtxID.REPROMOTE_ASSET:
 			var sel3 := _get_selected_node_ids()
 			if sel3.size() == 1:
 				repromote_asset_requested.emit(sel3[0])
 		_CtxID.ADD_SPARE_PARAM:
 			_show_add_spare_param_dialog()
+		_CtxID.EXPORT_SUBNET_PATCH:
+			var sel_exp := _get_selected_node_ids()
+			if sel_exp.size() == 1:
+				export_subnet_requested.emit(sel_exp[0])
+		_CtxID.IMPORT_SUBNET_PATCH:
+			import_patch_requested.emit(_context_graph_pos)
 		_CtxID.COPY_AS_JSON:
 			_copy_selected_as_json()
 		_CtxID.PASTE_FROM_JSON:
@@ -4299,7 +4331,7 @@ func _ur_undo_group_subnet(subnet_id: String, nodes_snapshot: Array,
 ## 7. Remove old nodes and wires from the parent network.
 ## 8. Reconnect external wires to the SubNetworkNode's ports.
 func group_selected_into_subnet() -> void:
-	if network == null:
+	if network == null or read_only:
 		return
 	var selected := _get_selected_node_ids()
 	if selected.is_empty():
@@ -5437,3 +5469,118 @@ func _restore_search_modulation() -> void:
 		var view: GNNodeView = _node_views[node_id]
 		view.modulate = Color.WHITE
 	_search_dimmed = false
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Drag-and-Drop — .gnpatch and .gnasset files from OS file browser
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Accepts .gnpatch and .gnasset file drops from the OS file browser.
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	if data is Dictionary and data.has("files"):
+		var files: PackedStringArray = data["files"]
+		for f in files:
+			if f.ends_with(".gnpatch") or f.ends_with(".gnasset"):
+				return true
+	return false
+
+
+## Handles dropped .gnpatch / .gnasset files.
+func _drop_data(at_position: Vector2, data: Variant) -> void:
+	if network == null or read_only:
+		return
+	if not (data is Dictionary and data.has("files")):
+		return
+
+	var files: PackedStringArray = data["files"]
+	var graph_pos := (at_position + scroll_offset) / zoom
+	var offset_step := Vector2(40, 40)
+	var idx := 0
+
+	for file_path in files:
+		var drop_pos := graph_pos + offset_step * idx
+		if file_path.ends_with(".gnpatch"):
+			_drop_gnpatch(file_path, drop_pos)
+			idx += 1
+		elif file_path.ends_with(".gnasset"):
+			_drop_gnasset(file_path, drop_pos)
+			idx += 1
+
+
+## Creates a SubNetworkNode from a dropped .gnpatch file.
+func _drop_gnpatch(file_path: String, graph_pos: Vector2) -> void:
+	var file := FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		GNLogger.error("GraphEditor", "Cannot read dropped .gnpatch: %s" % file_path)
+		return
+	var json_text := file.get_as_text()
+	file.close()
+
+	var json := JSON.new()
+	if json.parse(json_text) != OK:
+		GNLogger.error("GraphEditor", "JSON parse error in %s" % file_path)
+		return
+
+	var data: Dictionary = json.data if json.data is Dictionary else {}
+	if data.is_empty() or not data.has("nodes"):
+		GNLogger.error("GraphEditor", "Invalid .gnpatch: %s" % file_path)
+		return
+
+	var label := file_path.get_file().get_basename().to_pascal_case()
+	var meta: Dictionary = data.get("_metadata", {})
+	var family_str: String = meta.get("family", "COMP")
+
+	var subnet := SubNetworkNode.new()
+	var unique_id := network.generate_unique_id("sub_network")
+	subnet.initialize(unique_id)
+	subnet.graph_position = graph_pos
+	subnet.family = GNFamily.string_to_type(family_str)
+	subnet._ensure_inner_network()
+
+	var clean_data := data.duplicate()
+	clean_data.erase("_metadata")
+	subnet.inner_network.from_dict(clean_data)
+	subnet.sync_ports_from_tunnels()
+
+	if subnet.parameters.has("label"):
+		subnet.parameters["label"].value = meta.get("source_label", label)
+
+	network.add_node(subnet)
+	_create_node_view(subnet)
+	GNLogger.info("GraphEditor", "Dropped .gnpatch '%s' as sub-network '%s'" % [
+		file_path.get_file(), unique_id])
+
+
+## Creates a GNCustomOperator instance from a dropped .gnasset file.
+func _drop_gnasset(file_path: String, graph_pos: Vector2) -> void:
+	# Ensure asset is registered
+	var reg := GNExtensionRegistry.instance()
+	var data := GNCustomOperator._read_asset_json(file_path)
+	if data.is_empty():
+		GNLogger.error("GraphEditor", "Invalid .gnasset: %s" % file_path)
+		return
+	var identity: Dictionary = data.get("identity", {})
+	var op_name: String = identity.get("op_name", "")
+	if op_name.is_empty():
+		GNLogger.error("GraphEditor", "Asset missing op_name: %s" % file_path)
+		return
+
+	# Register if not already known (e.g., file from outside scanned dirs)
+	if not reg.has_operator(op_name):
+		reg._register_custom_asset(file_path)
+
+	# Create the instance
+	var node := GNCustomOperator.new()
+	if not node.load_from_asset(file_path):
+		GNLogger.error("GraphEditor", "Failed to load .gnasset: %s" % file_path)
+		node.free()
+		return
+
+	var unique_id := network.generate_unique_id(node.node_type)
+	node.initialize(unique_id)
+	node.graph_position = graph_pos
+
+	network.add_node(node)
+	_create_node_view(node)
+	GNLogger.info("GraphEditor", "Dropped .gnasset '%s' as '%s'" % [
+		file_path.get_file(), unique_id])

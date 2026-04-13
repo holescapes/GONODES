@@ -43,6 +43,8 @@ var _bg: ColorRect = null
 # ─ Texture display (pan + zoom) ─────────────────────────────────────────────
 var _tex_clip: Control = null
 var _tex_display: TextureRect = null
+var _tex_overlay: Control = null  # Node-supplied overlay drawing in texture pixel space
+var _current_overlay: Control = null  # Ref to the overlay currently parented
 var _zoom: float = 1.0
 var _pan: Vector2 = Vector2.ZERO
 var _panning: bool = false
@@ -196,6 +198,13 @@ func _create_texture_display() -> void:
 	_tex_display.mouse_filter = MOUSE_FILTER_IGNORE
 	_tex_clip.add_child(_tex_display)
 
+	# Transparent overlay container — positioned/sized to match _tex_display.
+	# Node-owned Controls are reparented here via set_texture_overlay().
+	_tex_overlay = Control.new()
+	_tex_overlay.mouse_filter = MOUSE_FILTER_IGNORE
+	_tex_overlay.visible = false
+	_tex_clip.add_child(_tex_overlay)
+
 	_tex_clip.gui_input.connect(_on_tex_gui_input)
 	_tex_clip.resized.connect(_on_tex_clip_resized)
 	_tex_clip.mouse_exited.connect(func() -> void: _panning = false)
@@ -257,6 +266,10 @@ func _apply_tex_transform() -> void:
 	var pos := clip_center + _pan - display_size * 0.5
 	_tex_display.position = pos
 	_tex_display.size = display_size
+	# Keep overlay in sync with the texture rect
+	if _tex_overlay != null:
+		_tex_overlay.position = pos
+		_tex_overlay.size = display_size
 
 
 func _fit_to_panel() -> void:
@@ -355,9 +368,11 @@ func set_texture(tex: Texture2D, info_bar_text: String = "") -> void:
 		set_info("No texture", info_bar_text)
 		return
 
-	# Fast path: same texture, already visible — just update info
+	# Fast path: same texture, already visible — just update info + redraw overlay
 	if _tex_clip.visible and _tex_display.texture == tex:
 		_info_bar.text = info_bar_text
+		if _current_overlay != null:
+			_current_overlay.queue_redraw()
 		return
 
 	_hide_all_displays()
@@ -454,6 +469,55 @@ func set_info_bar(text: String) -> void:
 	_info_bar.text = text
 
 
+## Attaches a node-supplied overlay Control that draws in texture pixel space.
+## The overlay is positioned/sized to match the texture rect and participates
+## in pan/zoom automatically.  Pass [code]null[/code] to remove the overlay.
+## The overlay's [code]mouse_filter[/code] is forced to IGNORE — all input
+## routes through [method GNNode.handle_viewer_input] as before.
+func set_texture_overlay(overlay: Control) -> void:
+	_clear_texture_overlay()
+	if overlay == null:
+		return
+	_current_overlay = overlay
+	overlay.mouse_filter = MOUSE_FILTER_IGNORE
+	if overlay.get_parent() != null:
+		overlay.get_parent().remove_child(overlay)
+	_tex_overlay.add_child(overlay)
+	overlay.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_tex_overlay.visible = true
+
+
+func _clear_texture_overlay() -> void:
+	if _tex_overlay == null:
+		return
+	if _current_overlay != null:
+		if _current_overlay.get_parent() == _tex_overlay:
+			_tex_overlay.remove_child(_current_overlay)
+		_current_overlay = null
+	_tex_overlay.visible = false
+
+
+## Converts a mouse position relative to the texture clip container into
+## normalized 0-1 UV coordinates (0,0 = top-left of texture, 1,1 = bottom-right).
+## Returns [code]Vector2(-1,-1)[/code] if no texture is displayed.
+func local_pos_to_uv(local_pos: Vector2) -> Vector2:
+	if _tex_display == null or _tex_display.texture == null:
+		return Vector2(-1.0, -1.0)
+	var tex_pos := local_pos - _tex_display.position
+	var display_size := _tex_display.size
+	if display_size.x <= 0.0 or display_size.y <= 0.0:
+		return Vector2(-1.0, -1.0)
+	return Vector2(tex_pos.x / display_size.x, tex_pos.y / display_size.y)
+
+
+## Converts normalized 0-1 UV coordinates to a position in the texture clip
+## container's local space (inverse of [method local_pos_to_uv]).
+func uv_to_local_pos(uv: Vector2) -> Vector2:
+	if _tex_display == null:
+		return Vector2.ZERO
+	return _tex_display.position + Vector2(uv.x * _tex_display.size.x, uv.y * _tex_display.size.y)
+
+
 ## Shows or hides a semi-transparent text overlay on top of the current display.
 func set_info_overlay(text: String) -> void:
 	if _info_overlay == null:
@@ -485,6 +549,7 @@ func hide_all_displays() -> void:
 func _hide_all_displays() -> void:
 	if _tex_clip:
 		_tex_clip.visible = false
+	_clear_texture_overlay()
 	if _control_container:
 		_control_container.visible = false
 	if _3d_display:

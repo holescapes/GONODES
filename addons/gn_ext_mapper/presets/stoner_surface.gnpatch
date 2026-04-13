@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"description": "Stoner keystone correction surface — SubNetwork with texture I/O, softedge blending, and test patterns.",
+	"nodes": {
+		"stoner_surface": {
+			"type": "SubNetworkNode",
+			"position": [200, 100],
+			"parameters": {
+				"label": {"value": "Stoner Surface"}
+			},
+			"inner_network": {
+				"nodes": {
+					"in1": {
+						"type": "InTunnel",
+						"position": [0, 0],
+						"parameters": {
+							"index": {"value": 0},
+							"family": {"value": 0},
+							"label": {"value": "tex_in"}
+						}
+					},
+					"stoner1": {
+						"type": "StonerTOP",
+						"position": [400, 0],
+						"parameters": {}
+					},
+					"out1": {
+						"type": "OutTunnel",
+						"position": [800, 0],
+						"parameters": {
+							"index": {"value": 0},
+							"family": {"value": 0},
+							"label": {"value": "tex_out"}
+						}
+					}
+				},
+				"connections": [
+					{"from": "in1", "from_port": 0, "to": "stoner1", "to_port": 0},
+					{"from": "stoner1", "from_port": 0, "to": "out1", "to_port": 0}
+				]
+			}
+		}
+	},
+	"connections": [],
+	"annotations": []
+}

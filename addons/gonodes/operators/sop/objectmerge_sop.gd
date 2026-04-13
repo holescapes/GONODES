@@ -1,5 +1,8 @@
 class_name ObjectMergeSOP
 extends GNSopBase
+## @deprecated Use SelectSOP instead (has the same remote reference + apply_transform,
+## plus geometry filtering).
+##
 ## Fetch geometry from another SOP node by reference path.
 ##
 ## Equivalent to duplicating a wire without connecting — useful for

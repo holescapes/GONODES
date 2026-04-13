@@ -13,7 +13,7 @@ authors in `GNNode` and family base classes.
 | `_init_parameters()` | `void` | Define parameters — called once after construction |
 | `_cook(inputs: Array[GNData])` | `GNData` | Produce output from inputs; return `null` on failure |
 | `_pre_cook(delta: float)` | `void` | Called each frame before cook; default calls `mark_dirty()` when `time_dependent = true` |
-| `render_for_viewer(viewer, port_index: int = 0)` | `void` | Render into viewer panel (use `viewer.set_texture()`, `.set_control()`, `.set_info()`, `.get_3d_viewport()`) |
+| `render_for_viewer(viewer, port_index: int = 0)` | `void` | Render into viewer panel (use `viewer.set_texture()`, `.set_control()`, `.set_info()`, `.get_3d_viewport()`, `.set_texture_overlay()`) |
 | `render_for_preview(host)` | `void` | Render into on-node preview (use `host.set_texture()`, `.set_text()`, `.set_control()`) |
 | `handle_viewer_input(event, local_pos)` | `bool` | Handle viewer input; return `true` to consume |
 | `requires_compute()` | `bool` | Override to return `true` if node needs GPU compute |

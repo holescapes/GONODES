@@ -17,6 +17,8 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("index", 0, 0, 0, "Input Index", "Which input to pass through"))
+	add_parameter(GNParameter.create_bool("null_on_missing", false, "Null on Missing",
+		"When true, output null instead of holding the previous frame when the selected input is empty. Useful as a programmatic gate."))
 
 
 func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
@@ -38,4 +40,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var idx: int = clampi(get_param_value("index"), 0, inputs.size() - 1)
 	if idx < inputs.size() and inputs[idx] != null:
 		return inputs[idx]
-	return null
+	if get_param_value("null_on_missing"):
+		return null
+	return cached_output

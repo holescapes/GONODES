@@ -6,6 +6,10 @@ extends Resource
 
 # ─── Data ──────────────────────────────────────────────────────────────────────
 
+## The GNNode that owns this network as its inner network (e.g. SubNetworkNode).
+## null for the root-level network.
+var host_node: GNNode = null
+
 ## All nodes in this network, keyed by their unique ID.
 var nodes: Dictionary = {}
 

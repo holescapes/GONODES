@@ -2,9 +2,10 @@ class_name GNAssetPromotionDialog
 extends AcceptDialog
 ## Dialog for promoting a SubNetworkNode into a reusable .gnasset custom operator.
 ##
-## Shows identity fields (name, family, description) and a checkbox list of
-## inner parameters to promote to the asset's public interface.  On confirm,
-## writes the .gnasset file and registers it in the extension registry.
+## Spare parameters on the SubNetwork become the asset's public interface —
+## no checkbox selection required.  The dialog shows identity fields
+## (name, family, description) and a read-only summary of the spare params
+## that will become the asset interface.
 
 signal asset_created(asset_path: String, op_name: String)
 
@@ -15,10 +16,10 @@ var _name_edit: LineEdit = null
 var _family_edit: LineEdit = null
 var _desc_edit: TextEdit = null
 
-# ── Parameter promotion ──────────────────────────────────────────────────────
+# ── Spare params summary (read-only) ────────────────────────────────────────
 var _param_scroll: ScrollContainer = null
 var _param_vbox: VBoxContainer = null
-var _param_checks: Array[Dictionary] = []  # { "check": CheckBox, "inner_node_id", "param_name" }
+var _spare_hint_label: Label = null
 
 # ── Save location ───────────────────────────────────────────────────────────
 var _location_edit: LineEdit = null
@@ -27,7 +28,7 @@ var _location_edit: LineEdit = null
 func _init() -> void:
 	title = "Promote to Custom Asset"
 	ok_button_text = "Create Asset"
-	size = Vector2i(500, 520)
+	size = Vector2i(500, 480)
 
 
 func _ready() -> void:
@@ -73,24 +74,24 @@ func _ready() -> void:
 	_desc_edit.placeholder_text = "What does this asset do?"
 	root_vbox.add_child(_desc_edit)
 
-	# ── Promoted Parameters ──────────────────────────────────────────────
+	# ── Asset Interface (spare params summary) ───────────────────────────
 	var sep := HSeparator.new()
 	root_vbox.add_child(sep)
 
 	var params_label := Label.new()
-	params_label.text = "Promoted Parameters"
+	params_label.text = "Asset Interface (Spare Parameters)"
 	params_label.add_theme_font_size_override("font_size", 14)
 	root_vbox.add_child(params_label)
 
-	var hint_label := Label.new()
-	hint_label.text = "Check parameters to expose on the asset's public interface."
-	hint_label.add_theme_font_size_override("font_size", 11)
-	hint_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	root_vbox.add_child(hint_label)
+	_spare_hint_label = Label.new()
+	_spare_hint_label.add_theme_font_size_override("font_size", 11)
+	_spare_hint_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	_spare_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	root_vbox.add_child(_spare_hint_label)
 
 	_param_scroll = ScrollContainer.new()
 	_param_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_param_scroll.custom_minimum_size = Vector2(0, 160)
+	_param_scroll.custom_minimum_size = Vector2(0, 120)
 	_param_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	root_vbox.add_child(_param_scroll)
 
@@ -126,40 +127,41 @@ func setup(subnet: SubNetworkNode) -> void:
 	_name_edit.text = subnet.id.capitalize().replace(" ", "")
 	_family_edit.text = GNFamily.get_family_name(subnet.family)
 	_desc_edit.text = ""
-	_populate_param_list()
+	_populate_spare_summary()
 
 
-func _populate_param_list() -> void:
-	# Clear existing
+## Builds a read-only list of spare parameters that will become the asset interface.
+func _populate_spare_summary() -> void:
 	for child in _param_vbox.get_children():
 		child.queue_free()
-	_param_checks.clear()
 
-	if _source_node == null or _source_node.inner_network == null:
+	if _source_node == null:
 		return
 
-	# Enumerate parameters from all inner nodes
+	var spare_count: int = _source_node.spare_parameters.size()
+	if spare_count == 0:
+		_spare_hint_label.text = (
+			"This sub-network has no spare parameters.\n"
+			+ "The asset will be created with no public interface (valid but parameterless).\n"
+			+ "Add spare parameters to the sub-network first to expose controls on the asset."
+		)
+		_param_scroll.visible = false
+		return
+
+	_spare_hint_label.text = (
+		"All spare parameters on this sub-network become the asset's public interface."
+	)
+	_param_scroll.visible = true
+
 	var order := 0
-	for node_id in _source_node.inner_network.nodes:
-		var inner_node: GNNode = _source_node.inner_network.nodes[node_id]
-		if inner_node is InTunnel or inner_node is OutTunnel:
-			continue
-		for param_name in inner_node.parameters:
-			var param: GNParameter = inner_node.parameters[param_name]
-			if param.param_name == "label":
-				continue  # Skip internal label param
-			var check := CheckBox.new()
-			check.text = "%s → %s  (%s)" % [node_id, param.label, _type_name(param.value_type)]
-			check.add_theme_font_size_override("font_size", 12)
-			_param_vbox.add_child(check)
-			_param_checks.append({
-				"check": check,
-				"inner_node_id": node_id,
-				"param_name": param_name,
-				"promoted_name": "%s_%s" % [node_id, param_name],
-				"order": order,
-			})
-			order += 1
+	for sp_name in _source_node.spare_parameters:
+		var sp: GNParameter = _source_node.spare_parameters[sp_name]
+		var row := Label.new()
+		row.text = "  %s  (%s)  =  %s" % [sp.label, _type_name(sp.value_type), str(sp.value)]
+		row.add_theme_font_size_override("font_size", 12)
+		row.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+		_param_vbox.add_child(row)
+		order += 1
 
 
 func _type_name(vt: GNParameter.ValueType) -> String:
@@ -194,17 +196,22 @@ func _on_confirmed() -> void:
 	if save_dir.is_empty():
 		save_dir = "res://custom_operators/"
 
-	# Collect promoted parameters
-	var promoted: Array[Dictionary] = []
-	for entry in _param_checks:
-		var check: CheckBox = entry["check"]
-		if check.button_pressed:
-			promoted.append({
-				"inner_node_id": entry["inner_node_id"],
-				"inner_param_name": entry["param_name"],
-				"promoted_name": entry["promoted_name"],
-				"promoted_order": entry["order"],
-			})
+	# Spare parameters become the asset's custom_parameters (the public interface).
+	# No promoted params (legacy checkbox model removed) — spare params are the interface.
+	var custom_params: Array[Dictionary] = []
+	var order := 0
+	for sp_name in _source_node.spare_parameters:
+		var sp: GNParameter = _source_node.spare_parameters[sp_name]
+		custom_params.append({
+			"name": sp_name,
+			"value_type": sp.value_type,
+			"label": sp.label,
+			"default_value": GNCustomOperator._variant_to_saveable(sp.value),
+			"min_value": sp.min_value,
+			"max_value": sp.max_value,
+			"step": sp.step,
+		})
+		order += 1
 
 	# Build .gnasset data
 	var asset_data: Dictionary = {
@@ -214,7 +221,8 @@ func _on_confirmed() -> void:
 			"description": desc,
 		},
 		"inner_network": _source_node.inner_network.to_dict(),
-		"promoted_parameters": promoted,
+		"promoted_parameters": [],
+		"custom_parameters": custom_params,
 	}
 
 	# Write file
@@ -228,5 +236,6 @@ func _on_confirmed() -> void:
 	# Register in the extension registry
 	var reg := GNExtensionRegistry.instance()
 	reg._register_custom_asset(full_path)
-	GNLogger.info("PromotionDialog", "Created custom asset '%s' at %s" % [op_name, full_path])
+	GNLogger.info("PromotionDialog", "Created custom asset '%s' at %s (%d interface params)" % [
+		op_name, full_path, custom_params.size()])
 	asset_created.emit(full_path, op_name)

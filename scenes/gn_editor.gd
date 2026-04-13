@@ -173,8 +173,10 @@ func _ready() -> void:
 	graph_editor.dive_into_requested.connect(_on_dive_into_requested)
 	graph_editor.viewer_pin_requested.connect(_on_viewer_pin_requested)
 	graph_editor.edit_asset_requested.connect(_on_edit_asset_requested)
-	graph_editor.make_unique_requested.connect(_on_make_unique_requested)
+	graph_editor.make_editable_requested.connect(_on_make_editable_requested)
 	graph_editor.repromote_asset_requested.connect(_on_repromote_asset_requested)
+	graph_editor.export_subnet_requested.connect(_on_export_subnet_requested)
+	graph_editor.import_patch_requested.connect(_on_import_patch_requested)
 
 	# Replace the scene's TextureRect Viewer with a GNViewerPanel
 	_setup_viewer_panel()
@@ -1377,7 +1379,74 @@ func _on_load_file_selected(path: String) -> void:
 
 
 ## Saves the current network to the given path.
+## If any assets have unsaved edits, prompts the user first.
 func _save_to_path(path: String) -> void:
+	# Check for dirty custom assets
+	var dirty := _find_dirty_assets(network)
+	if not dirty.is_empty():
+		_show_dirty_assets_dialog(path, dirty)
+		return
+	_do_save_to_path(path)
+
+
+## Shows a dialog when saving a graph that contains unsaved asset edits.
+func _show_dirty_assets_dialog(path: String, dirty: Array[Dictionary]) -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = "Unsaved Asset Changes"
+	dlg.size = Vector2i(460, 220)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 8)
+
+	var msg := Label.new()
+	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var names: PackedStringArray = []
+	for d in dirty:
+		names.append(d["asset_path"].get_file())
+	msg.text = (
+		"The following assets have been modified but not saved:\n  • %s\n\n"
+		% "\n  • ".join(names)
+		+ "These changes only exist in memory. Choose how to proceed:"
+	)
+	vbox.add_child(msg)
+	dlg.add_child(vbox)
+
+	dlg.ok_button_text = "Save Assets & Graph"
+	var discard_btn := dlg.add_button("Discard Changes & Save Graph", true)
+	dlg.add_cancel_button("Cancel")
+
+	dlg.confirmed.connect(func():
+		# Save all dirty assets first
+		for d in dirty:
+			var co := network.get_node_by_id(d["node_id"]) as GNCustomOperator
+			if co != null:
+				co.save_asset_from_inner()
+		_editing_asset_node_id = ""
+		_do_save_to_path(path)
+		dlg.queue_free()
+	)
+
+	discard_btn.pressed.connect(func():
+		# Discard all dirty asset edits
+		for d in dirty:
+			var co := network.get_node_by_id(d["node_id"]) as GNCustomOperator
+			if co != null:
+				co.discard_asset_edits()
+		_editing_asset_node_id = ""
+		_do_save_to_path(path)
+		dlg.queue_free()
+	)
+
+	dlg.canceled.connect(func():
+		dlg.queue_free()
+	)
+
+	add_child(dlg)
+	dlg.popup_centered()
+
+
+## Performs the actual network save to disk.
+func _do_save_to_path(path: String) -> void:
 	# Ensure project folder exists for this patch
 	_project.set_from_patch_path(path)
 	_project.ensure_ready()
@@ -1705,6 +1774,13 @@ func _on_dive_into_requested(node_id: String) -> void:
 	# Switch the graph editor to the inner network
 	_switch_to_network(subnet.inner_network)
 
+	# If diving into a GNCustomOperator that is NOT in edit mode, set read-only.
+	# The user must use "Edit Asset Definition" to unlock editing.
+	if node is GNCustomOperator and not (node as GNCustomOperator).asset_editing:
+		graph_editor.read_only = true
+	else:
+		graph_editor.read_only = false
+
 	# Reset viewer
 	_viewer_node_id = ""
 	_viewer_pinned = false
@@ -1714,8 +1790,9 @@ func _on_dive_into_requested(node_id: String) -> void:
 	# Update breadcrumb
 	_update_breadcrumb()
 
-	GNLogger.info("Editor", "Dived into sub-network '%s' (depth %d)" % [
-		node_id, _nav_stack.size() - 1])
+	GNLogger.info("Editor", "Dived into sub-network '%s' (depth %d%s)" % [
+		node_id, _nav_stack.size() - 1,
+		", read-only" if graph_editor.read_only else ""])
 
 
 ## Navigates back to a specific depth in the navigation stack.
@@ -1751,6 +1828,9 @@ func _navigate_to_depth(target_depth: int) -> void:
 	# Restore target level
 	var target := _nav_stack.back() as _NavEntry
 	_switch_to_network(target.network)
+
+	# Clear read-only when navigating back (root is never read-only)
+	graph_editor.read_only = false
 
 	# Restore view state
 	graph_editor.scroll_offset = target.scroll_offset
@@ -1856,6 +1936,37 @@ func _update_breadcrumb() -> void:
 		repromote_btn.pressed.connect(func() -> void: _on_repromote_asset_requested(_editing_asset_node_id))
 		_breadcrumb_bar.add_child(repromote_btn)
 
+	elif graph_editor.read_only and _nav_stack.size() > 1:
+		# Read-only banner for viewing a locked custom asset
+		var spacer := Control.new()
+		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_breadcrumb_bar.add_child(spacer)
+
+		var ro_label := Label.new()
+		ro_label.text = "\U0001F512 Read-Only (Custom Asset)"
+		ro_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.3))
+		ro_label.add_theme_font_size_override("font_size", 13)
+		_breadcrumb_bar.add_child(ro_label)
+
+		# Offer a button to start editing
+		var edit_btn := Button.new()
+		edit_btn.text = "Edit Asset Definition"
+		edit_btn.add_theme_color_override("font_color", Color(0.3, 0.8, 1.0))
+		var current_entry := _nav_stack.back() as _NavEntry
+		edit_btn.pressed.connect(func():
+			# Find the parent custom operator node and begin editing
+			var parent_entry := _nav_stack[_nav_stack.size() - 2] as _NavEntry
+			var subnet_id := current_entry.subnet_node_id
+			var parent_node: GNNode = parent_entry.network.get_node_by_id(subnet_id)
+			if parent_node is GNCustomOperator:
+				var co := parent_node as GNCustomOperator
+				co.begin_asset_edit()
+				_editing_asset_node_id = subnet_id
+				graph_editor.read_only = false
+				_update_breadcrumb()
+		)
+		_breadcrumb_bar.add_child(edit_btn)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Asset Edit-in-Place
@@ -1873,8 +1984,12 @@ func _on_edit_asset_requested(node_id: String) -> void:
 	# Dive into the inner network (reuse existing mechanism)
 	_on_dive_into_requested(node_id)
 
+	# Unlock graph — asset editing explicitly requested
+	graph_editor.read_only = false
+
 
 ## Saves the edited asset back to disk and reloads sibling instances.
+## Shows a confirmation dialog with instance count before saving.
 func _on_asset_edit_save() -> void:
 	if _editing_asset_node_id.is_empty():
 		return
@@ -1882,6 +1997,53 @@ func _on_asset_edit_save() -> void:
 	if co == null:
 		return
 
+	# Count instances of this asset across all networks
+	var asset_path: String = co.asset_path
+	var instance_count := _count_asset_instances_recursive(network, asset_path)
+
+	# Show confirmation dialog
+	var dlg := AcceptDialog.new()
+	dlg.title = "Save Asset Definition"
+	dlg.size = Vector2i(420, 180)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 8)
+
+	var msg := Label.new()
+	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if instance_count > 1:
+		msg.text = "\"%s\" has %d instances in this project.\nSaving will update ALL instances to match." % [
+			asset_path.get_file(), instance_count]
+	else:
+		msg.text = "Save changes to \"%s\"?" % asset_path.get_file()
+	vbox.add_child(msg)
+	dlg.add_child(vbox)
+
+	dlg.ok_button_text = "Save to All"
+	var save_as_btn := dlg.add_button("Save As New Asset…", true)
+	dlg.add_cancel_button("Cancel")
+
+	dlg.confirmed.connect(func():
+		_do_asset_save(co)
+		dlg.queue_free()
+	)
+
+	save_as_btn.pressed.connect(func():
+		dlg.queue_free()
+		# Open the promotion dialog to save as a new asset
+		graph_editor._show_promote_to_asset_dialog_for(co as SubNetworkNode)
+	)
+
+	dlg.canceled.connect(func():
+		dlg.queue_free()
+	)
+
+	add_child(dlg)
+	dlg.popup_centered()
+
+
+## Actually performs the asset save after user confirms.
+func _do_asset_save(co: GNCustomOperator) -> void:
 	if not co.save_asset_from_inner():
 		GNLogger.error("Editor", "Failed to save asset: %s" % co.asset_path)
 		return
@@ -1937,8 +2099,44 @@ func _reload_asset_instances_recursive(net: GNNetwork, target_path: String, skip
 	return count
 
 
+## Counts all GNCustomOperator instances whose asset_path matches [param target_path].
+func _count_asset_instances_recursive(net: GNNetwork, target_path: String) -> int:
+	var count: int = 0
+	for nid in net.nodes:
+		var node: GNNode = net.nodes[nid]
+		if node is GNCustomOperator:
+			var co := node as GNCustomOperator
+			if co.asset_path == target_path:
+				count += 1
+			if co.inner_network != null:
+				count += _count_asset_instances_recursive(co.inner_network, target_path)
+		elif node is SubNetworkNode:
+			var sn := node as SubNetworkNode
+			if sn.inner_network != null:
+				count += _count_asset_instances_recursive(sn.inner_network, target_path)
+	return count
+
+
+## Returns an array of { "node_id", "asset_path", "instance_count" } for all
+## GNCustomOperator nodes that have unsaved edits (asset_editing == true).
+func _find_dirty_assets(net: GNNetwork) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for nid in net.nodes:
+		var node: GNNode = net.nodes[nid]
+		if node is GNCustomOperator:
+			var co := node as GNCustomOperator
+			if co.asset_editing:
+				result.append({
+					"node_id": nid,
+					"asset_path": co.asset_path,
+					"instance_count": _count_asset_instances_recursive(net, co.asset_path),
+				})
+	return result
+
+
 ## Converts a GNCustomOperator into a plain SubNetworkNode (detaches from asset).
-func _on_make_unique_requested(node_id: String) -> void:
+## Preserves spare parameters with their current values on the new subnet.
+func _on_make_editable_requested(node_id: String) -> void:
 	var node: GNNode = _current_network().get_node_by_id(node_id)
 	if not node is GNCustomOperator:
 		return
@@ -1977,7 +2175,7 @@ func _on_make_unique_requested(node_id: String) -> void:
 
 	# Refresh UI
 	graph_editor.bind_network(_current_network())
-	GNLogger.info("Editor", "Made '%s' unique — detached from asset" % node_id)
+	GNLogger.info("Editor", "Made '%s' editable — detached from asset" % node_id)
 
 
 ## Re-opens the promotion dialog on the custom asset's inner network.
@@ -1992,3 +2190,135 @@ func _on_repromote_asset_requested(node_id: String) -> void:
 
 	# Reuse the graph editor's promotion dialog
 	graph_editor._show_promote_to_asset_dialog_for(node as SubNetworkNode)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Export / Import Sub-Network Patches
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## FileDialogs for .gnpatch sub-network export/import.
+var _export_subnet_dialog: FileDialog = null
+var _import_subnet_dialog: FileDialog = null
+var _export_subnet_node_id: String = ""
+var _import_patch_graph_pos: Vector2 = Vector2.ZERO
+
+
+## Called when the user right-clicks a SubNetwork → "Export Sub-Network…".
+func _on_export_subnet_requested(node_id: String) -> void:
+	var node: GNNode = _current_network().get_node_by_id(node_id)
+	if not node is SubNetworkNode:
+		return
+
+	_export_subnet_node_id = node_id
+
+	if _export_subnet_dialog == null:
+		_export_subnet_dialog = FileDialog.new()
+		_export_subnet_dialog.title = "Export Sub-Network as .gnpatch"
+		_export_subnet_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+		_export_subnet_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		_export_subnet_dialog.filters = PackedStringArray(["*.gnpatch ; GONODES Patch"])
+		_export_subnet_dialog.min_size = Vector2i(700, 500)
+		_export_subnet_dialog.file_selected.connect(_on_export_subnet_file_selected)
+		add_child(_export_subnet_dialog)
+
+	# Suggest filename based on subnet label or node ID
+	var suggested := node_id.to_snake_case() + ".gnpatch"
+	_export_subnet_dialog.current_file = suggested
+	_export_subnet_dialog.popup_centered()
+
+
+## Writes the SubNetwork's inner network to a .gnpatch file.
+func _on_export_subnet_file_selected(path: String) -> void:
+	var node: GNNode = _current_network().get_node_by_id(_export_subnet_node_id)
+	if not node is SubNetworkNode:
+		GNLogger.error("Editor", "Export target '%s' not found" % _export_subnet_node_id)
+		return
+
+	var subnet := node as SubNetworkNode
+	if subnet.inner_network == null:
+		GNLogger.error("Editor", "SubNetwork has no inner network")
+		return
+
+	# Build the patch data — same format as a full graph save but just the inner network
+	var patch_data: Dictionary = subnet.inner_network.to_dict()
+	patch_data["_metadata"] = {
+		"source_type": "sub_network_export",
+		"source_label": subnet.get_param_value("label"),
+		"family": GNFamily.get_family_name(subnet.family),
+	}
+
+	var json_text := JSON.stringify(patch_data, "\t")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		GNLogger.error("Editor", "Cannot write .gnpatch: %s" % path)
+		return
+	file.store_string(json_text)
+	file.close()
+	GNLogger.info("Editor", "Exported sub-network '%s' to %s" % [_export_subnet_node_id, path])
+
+
+## Called when the user right-clicks canvas → "Import .gnpatch…".
+func _on_import_patch_requested(graph_pos: Vector2) -> void:
+	_import_patch_graph_pos = graph_pos
+
+	if _import_subnet_dialog == null:
+		_import_subnet_dialog = FileDialog.new()
+		_import_subnet_dialog.title = "Import .gnpatch as Sub-Network"
+		_import_subnet_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+		_import_subnet_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		_import_subnet_dialog.filters = PackedStringArray(["*.gnpatch ; GONODES Patch"])
+		_import_subnet_dialog.min_size = Vector2i(700, 500)
+		_import_subnet_dialog.file_selected.connect(_on_import_subnet_file_selected)
+		add_child(_import_subnet_dialog)
+
+	_import_subnet_dialog.popup_centered()
+
+
+## Reads a .gnpatch file and creates a SubNetworkNode from it.
+func _on_import_subnet_file_selected(path: String) -> void:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		GNLogger.error("Editor", "Cannot read .gnpatch: %s" % path)
+		return
+	var json_text := file.get_as_text()
+	file.close()
+
+	var json := JSON.new()
+	if json.parse(json_text) != OK:
+		GNLogger.error("Editor", "JSON parse error in %s: %s" % [path, json.get_error_message()])
+		return
+
+	var data: Dictionary = json.data if json.data is Dictionary else {}
+	if data.is_empty() or not data.has("nodes"):
+		GNLogger.error("Editor", "Invalid .gnpatch — no 'nodes' key: %s" % path)
+		return
+
+	var net := _current_network()
+	if net == null:
+		return
+
+	# Create a SubNetworkNode and load the patch as its inner network
+	var label: String = path.get_file().get_basename().to_pascal_case()
+	var meta: Dictionary = data.get("_metadata", {})
+	var family_str: String = meta.get("family", "COMP")
+
+	var subnet := SubNetworkNode.new()
+	var unique_id := net.generate_unique_id("sub_network")
+	subnet.initialize(unique_id)
+	subnet.graph_position = _import_patch_graph_pos
+	subnet.family = GNFamily.string_to_type(family_str)
+	subnet._ensure_inner_network()
+
+	# Remove _metadata before loading (it's not part of the network dict)
+	var clean_data := data.duplicate()
+	clean_data.erase("_metadata")
+	subnet.inner_network.from_dict(clean_data)
+	subnet.sync_ports_from_tunnels()
+
+	# Set label
+	if subnet.parameters.has("label"):
+		subnet.parameters["label"].value = meta.get("source_label", label)
+
+	net.add_node(subnet)
+	graph_editor.bind_network(net)  # Refresh view
+	GNLogger.info("Editor", "Imported .gnpatch '%s' as sub-network '%s'" % [path, unique_id])

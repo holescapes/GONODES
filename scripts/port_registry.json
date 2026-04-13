@@ -2899,6 +2899,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/img/stereogram_img.gd"
   },
+  "SwitchIMG": {
+    "class_name": "SwitchIMG",
+    "family": "IMG",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": "IMG",
+    "file": "addons/gonodes/operators/img/switch_img.gd"
+  },
   "TOPtoIMG": {
     "class_name": "TOPtoIMG",
     "family": "IMG",
@@ -3140,6 +3154,20 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/mat/shader_mat.gd"
+  },
+  "SwitchMAT": {
+    "class_name": "SwitchMAT",
+    "family": "MAT",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "MAT"
+      }
+    ],
+    "dynamic_inputs": "MAT",
+    "file": "addons/gonodes/operators/mat/switch_mat.gd"
   },
   "WireframeMAT": {
     "class_name": "WireframeMAT",
@@ -3627,6 +3655,20 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/pop/source_pop.gd"
+  },
+  "SwitchPOP": {
+    "class_name": "SwitchPOP",
+    "family": "POP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "POP"
+      }
+    ],
+    "dynamic_inputs": "POP",
+    "file": "addons/gonodes/operators/pop/switch_pop.gd"
   },
   "TurbulencePOP": {
     "class_name": "TurbulencePOP",
@@ -7813,6 +7855,31 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/ui/nine_patch_rect_ui.gd"
   },
+  "NullUI": {
+    "class_name": "NullUI",
+    "family": "UI",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "UI"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "UI"
+      },
+      {
+        "port": 1,
+        "name": "state",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/ui/null_ui.gd"
+  },
   "PanelContainerUI": {
     "class_name": "PanelContainerUI",
     "family": "UI",
@@ -7987,6 +8054,25 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/ui/split_container_ui.gd"
+  },
+  "SwitchUI": {
+    "class_name": "SwitchUI",
+    "family": "UI",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "UI"
+      },
+      {
+        "port": 1,
+        "name": "state",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": "UI",
+    "file": "addons/gonodes/operators/ui/switch_ui.gd"
   },
   "TabBarUI": {
     "class_name": "TabBarUI",
@@ -8564,6 +8650,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/vol/sop_to_vol.gd"
   },
+  "SwitchVOL": {
+    "class_name": "SwitchVOL",
+    "family": "VOL",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "VOL"
+      }
+    ],
+    "dynamic_inputs": "VOL",
+    "file": "addons/gonodes/operators/vol/switch_vol.gd"
+  },
   "BlackmagicDAT": {
     "class_name": "BlackmagicDAT",
     "family": "DAT",
@@ -8806,6 +8906,11 @@
         "port": 0,
         "name": "in",
         "type": "TOP"
+      },
+      {
+        "port": 1,
+        "name": "disp",
+        "type": "TOP"
       }
     ],
     "outputs": [
@@ -8902,6 +9007,63 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_mapper/operators/top/stoner_top.gd"
+  },
+  "BezierDragUI": {
+    "class_name": "BezierDragUI",
+    "family": "UI",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "UI"
+      },
+      {
+        "port": 1,
+        "name": "state",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_mapper/operators/ui/bezier_drag_ui.gd"
+  },
+  "CornerDragUI": {
+    "class_name": "CornerDragUI",
+    "family": "UI",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "UI"
+      },
+      {
+        "port": 1,
+        "name": "state",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_mapper/operators/ui/corner_drag_ui.gd"
+  },
+  "GridDragUI": {
+    "class_name": "GridDragUI",
+    "family": "UI",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "UI"
+      },
+      {
+        "port": 1,
+        "name": "state",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_mapper/operators/ui/grid_drag_ui.gd"
   },
   "RtMidiInCHOP": {
     "class_name": "RtMidiInCHOP",
@@ -11581,6 +11743,14 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_sdf/operators/sdf/mirror_sdf.gd"
   },
+  "NullSDF": {
+    "class_name": "NullSDF",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_sdf/operators/sdf/null_sdf.gd"
+  },
   "OctahedronSDF": {
     "class_name": "OctahedronSDF",
     "family": null,
@@ -11682,6 +11852,14 @@
     "outputs": [],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_sdf/operators/sdf/subtract_sdf.gd"
+  },
+  "SwitchSDF": {
+    "class_name": "SwitchSDF",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_sdf/operators/sdf/switch_sdf.gd"
   },
   "TorusSDF": {
     "class_name": "TorusSDF",

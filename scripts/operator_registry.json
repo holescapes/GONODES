@@ -2089,6 +2089,11 @@
         "name": "index",
         "type": "int",
         "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -4232,6 +4237,11 @@
         "name": "index",
         "type": "int",
         "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -5413,6 +5423,11 @@
         "name": "index",
         "type": "int",
         "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -6781,6 +6796,25 @@
     ]
   },
   {
+    "class_name": "SwitchIMG",
+    "node_type": "switch",
+    "family": "img",
+    "file": "addons/gonodes/operators/img/switch_img.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "index",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "TOPtoIMG",
     "node_type": "top_to_img",
     "family": "img",
@@ -7270,6 +7304,25 @@
         "name": "color1",
         "type": "color",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "SwitchMAT",
+    "node_type": "switch",
+    "family": "mat",
+    "file": "addons/gonodes/operators/mat/switch_mat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "index",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -8112,6 +8165,25 @@
     ]
   },
   {
+    "class_name": "SwitchPOP",
+    "node_type": "switch",
+    "family": "pop",
+    "file": "addons/gonodes/operators/pop/switch_pop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "index",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "TurbulencePOP",
     "node_type": "turbulence",
     "family": "pop",
@@ -8575,6 +8647,14 @@
     ]
   },
   {
+    "class_name": "NullSDF",
+    "node_type": "null_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/null_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": []
+  },
+  {
     "class_name": "OctahedronSDF",
     "node_type": "octahedron_sdf",
     "family": "sdf",
@@ -8894,6 +8974,25 @@
     "file": "addons/gn_ext_sdf/operators/sdf/subtract_sdf.gd",
     "extension": "gn_ext_sdf",
     "params": []
+  },
+  {
+    "class_name": "SwitchSDF",
+    "node_type": "switch_sdf",
+    "family": "sdf",
+    "file": "addons/gn_ext_sdf/operators/sdf/switch_sdf.gd",
+    "extension": "gn_ext_sdf",
+    "params": [
+      {
+        "name": "index",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
+      }
+    ]
   },
   {
     "class_name": "TorusSDF",
@@ -10945,6 +11044,11 @@
         "name": "invert",
         "type": "bool",
         "default": false
+      },
+      {
+        "name": "apply_transform",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -11162,6 +11266,11 @@
         "name": "index",
         "type": "int",
         "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -13244,6 +13353,11 @@
         "name": "grid_rows",
         "type": "int",
         "default": 4
+      },
+      {
+        "name": "amplitude",
+        "type": "float",
+        "default": 1.0
       }
     ]
   },
@@ -15415,6 +15529,11 @@
         "name": "blend_pos",
         "type": "float",
         "default": 0.0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -16022,6 +16141,40 @@
     ]
   },
   {
+    "class_name": "BezierDragUI",
+    "node_type": "bezier_drag",
+    "family": "ui",
+    "file": "addons/gn_ext_mapper/operators/ui/bezier_drag_ui.gd",
+    "extension": "gn_ext_mapper",
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": "Bezier Drag"
+      },
+      {
+        "name": "size",
+        "type": "int",
+        "default": 200
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "handle_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "wire_color",
+        "type": "color",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "ButtonUI",
     "node_type": "button",
     "family": "ui",
@@ -16147,6 +16300,40 @@
     ]
   },
   {
+    "class_name": "CornerDragUI",
+    "node_type": "corner_drag",
+    "family": "ui",
+    "file": "addons/gn_ext_mapper/operators/ui/corner_drag_ui.gd",
+    "extension": "gn_ext_mapper",
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": "Corner Drag"
+      },
+      {
+        "name": "size",
+        "type": "int",
+        "default": 200
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "handle_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "wire_color",
+        "type": "color",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "DropdownUI",
     "node_type": "dropdown",
     "family": "ui",
@@ -16171,6 +16358,50 @@
       {
         "name": "min_size",
         "type": "vector2i",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "GridDragUI",
+    "node_type": "grid_drag",
+    "family": "ui",
+    "file": "addons/gn_ext_mapper/operators/ui/grid_drag_ui.gd",
+    "extension": "gn_ext_mapper",
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": "Grid Drag"
+      },
+      {
+        "name": "size",
+        "type": "int",
+        "default": 200
+      },
+      {
+        "name": "grid_cols",
+        "type": "int",
+        "default": 4
+      },
+      {
+        "name": "grid_rows",
+        "type": "int",
+        "default": 4
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "handle_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "wire_color",
+        "type": "color",
         "default": null
       }
     ]
@@ -16426,6 +16657,14 @@
         "default": null
       }
     ]
+  },
+  {
+    "class_name": "NullUI",
+    "node_type": "null",
+    "family": "ui",
+    "file": "addons/gonodes/operators/ui/null_ui.gd",
+    "extension": null,
+    "params": []
   },
   {
     "class_name": "PanelContainerUI",
@@ -16691,6 +16930,25 @@
         "name": "min_size",
         "type": "vector2i",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "SwitchUI",
+    "node_type": "switch",
+    "family": "ui",
+    "file": "addons/gonodes/operators/ui/switch_ui.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "index",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -17472,5 +17730,24 @@
     "file": "addons/gonodes/operators/vol/select_vol.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "SwitchVOL",
+    "node_type": "switch",
+    "family": "vol",
+    "file": "addons/gonodes/operators/vol/switch_vol.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "index",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "null_on_missing",
+        "type": "bool",
+        "default": false
+      }
+    ]
   }
 ]

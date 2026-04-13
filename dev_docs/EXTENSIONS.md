@@ -23,6 +23,7 @@ platform/architecture/renderer guards, and the dependency system.
 9. [Extension Directory Layout](#9-extension-directory-layout)
 10. [Writing a New Family Extension](#10-writing-a-new-family-extension)
 11. [Shipped Extensions](#11-shipped-extensions)
+12. [Extension-Shipped Assets (.gnasset)](#12-extension-shipped-assets-gnasset)
 
 ---
 
@@ -286,6 +287,23 @@ event. If it returns `false`, the viewer's default pan/zoom handling runs.
 
 Example: WebRenderTOP overrides this to forward mouse clicks and
 keyboard events to the Chromium browser.
+
+### Texture Overlay
+
+TOPs that need interactive handles drawn on top of their output texture
+use `viewer.set_texture_overlay(control)` inside `render_for_viewer()`.
+The overlay Control draws in texture pixel space (0,0 = top-left,
+size = texture dimensions) and automatically tracks pan/zoom.
+
+```gdscript
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+    viewer.set_texture(my_texture, "1920x1080")
+    viewer.set_texture_overlay(my_overlay_control)  # or null to remove
+```
+
+Use `viewer.local_pos_to_uv(local_pos)` inside `handle_viewer_input()`
+to convert mouse coordinates to 0–1 UV space. The mapper extension's
+QuadMapTOP, StonerTOP, BezierMapTOP and GridWarpTOP all use this pattern.
 
 ### Headless Guard
 
@@ -567,3 +585,61 @@ family name string.
 | `gn_ext_blackmagic` | No | — | Blackmagic capture |
 | `gn_ext_serial` | No | — | Serial port I/O |
 | `gn_ext_webrender` | Yes | Code params (`html`, `javascript`), code languages (HTML, JS), input handler | 1 TOP — Web page to texture via CEF |
+
+---
+
+## 12. Extension-Shipped Assets (.gnasset)
+
+Extensions can ship reusable custom operator assets (`.gnasset` files) that
+appear in the palette under the extension's display name. These are
+**read-only** — users cannot edit them in-place, but can "Make Editable" to
+copy and break the link.
+
+### Directory Layout
+
+Place `.gnasset` files in an `assets/` directory inside the extension:
+
+```
+addons/gn_ext_myext/
+    gn_extension.cfg
+    assets/
+        MyCustomBlur.gnasset
+        MySpecialFilter.gnasset
+    operators/
+    ...
+```
+
+### Scanning
+
+`GNExtensionRegistry._scan_extension_assets()` runs during
+`scan_custom_assets()` and iterates every `gn_ext_*/assets/` directory.
+For each `.gnasset` file found:
+
+1. Reads the extension's `gn_extension.cfg` to extract the `display_name`.
+2. Parses the `.gnasset` JSON.
+3. Registers the operator via `_register_custom_asset()` with
+   `p_read_only = true` and `p_section` set to the extension display name.
+
+### Palette Appearance
+
+Extension assets appear in the palette under:
+
+```
+Custom → <Family> → <Extension Display Name> → <Asset Name>
+```
+
+They are colored gold like user assets but show a tooltip:
+*"(read-only — from extension)"*. The "Edit Asset" and "Re-promote" context
+menu items are disabled for these entries.
+
+### Priority
+
+Extension assets are scanned **first** (priority 1). If a user asset has the
+same `op_name` + `family` as an extension asset, the **user asset wins** — this
+lets users override extension-shipped assets with their own versions.
+
+### Design Rule
+
+Extension assets follow the same self-containment rule as all extension
+resources: **deleting the extension folder removes the assets from the
+palette**. No orphaned entries, no registration debris.

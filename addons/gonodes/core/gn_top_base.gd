@@ -85,6 +85,7 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 		if tex_data.texture:
 			viewer.set_texture(tex_data.texture,
 				"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
+			viewer.set_texture_overlay(null)  # Default: no overlay
 			return
 	viewer.set_info("No texture output", "")
 

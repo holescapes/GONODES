@@ -69,6 +69,7 @@ func initialize(p_id: String) -> void:
 func _ensure_inner_network() -> void:
 	if inner_network == null:
 		inner_network = GNNetwork.new()
+		inner_network.host_node = self
 	if _inner_cook_engine == null:
 		_inner_cook_engine = GNCookEngine.new()
 		_inner_cook_engine.name = "InnerCookEngine"

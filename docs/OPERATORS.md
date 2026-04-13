@@ -5708,6 +5708,21 @@ Textured progress bar with TOP layers and CHOP driver.
 - **Parameters:** `min_val` (FLOAT), `max_val` (FLOAT), `default_val` (FLOAT), `chop_channel` (STRING), `fill_mode` (INT: 0-5), `min_size` (VECTOR2I)
 - **State channels:** `value`, `ratio`
 
+### CornerDragUI *(ext: mapper)*
+Interactive 4-corner drag pad for projection mapping. Drag handles to position quad corners.
+- **Parameters:** `label` (STRING), `size` (INT, 200), `bg_color` (COLOR), `handle_color` (COLOR), `wire_color` (COLOR)
+- **State channels:** `tl_x`, `tl_y`, `tr_x`, `tr_y`, `bl_x`, `bl_y`, `br_x`, `br_y`
+
+### BezierDragUI *(ext: mapper)*
+Interactive 4×4 Bezier control point grid for curved surface mapping.
+- **Parameters:** `label` (STRING), `size` (INT, 200), `bg_color` (COLOR), `handle_color` (COLOR), `wire_color` (COLOR)
+- **State channels:** `cp00_x`, `cp00_y` ... `cp33_x`, `cp33_y` (32 channels)
+
+### GridDragUI *(ext: mapper)*
+Interactive NxM grid drag pad for grid warp control.
+- **Parameters:** `label` (STRING), `size` (INT, 200), `grid_cols` (INT, 4), `grid_rows` (INT, 4), `bg_color` (COLOR), `handle_color` (COLOR), `wire_color` (COLOR)
+- **State channels:** `pt_X_Y_x`, `pt_X_Y_y` per grid point (offsets from base grid position)
+
 ---
 
 ## POP — Point Operators
@@ -6125,3 +6140,70 @@ The `gn_ext_isf` extension provides a single **ISFTOP** node that runs [ISF v2](
 **Presets:** 10 factory presets (5 generators: color bars, sine warp, kaleidoscope, gradient map, Lissajous; 5 effects: kaleidoscope FX, glitch, mirror, edge glow, cross-hatch).
 
 **Help patches:** 2 examples — generator, FX chain.
+
+---
+
+## Custom Assets (.gnasset)
+
+Custom assets are user-defined or extension-shipped reusable operators built from SubNetwork internals. A `.gnasset` is a stateless snapshot: a JSON file containing an inner network definition, identity metadata, and a parameter interface defined by the SubNetwork's **spare parameters**.
+
+### Concept
+
+Any SubNetwork can be promoted to a `.gnasset` via right-click → "Promote to Custom Asset…". The SubNetwork's spare parameters become the asset's public interface — parameters that appear on the custom operator node when placed in a graph. Unlike `.gnpatch` files (fire-and-forget stateless snapshots), `.gnasset` files are **linked shared definitions**: all instances reference the same asset file, and edits to the asset propagate to every instance.
+
+### Creating a Custom Asset
+
+1. Build a SubNetwork with the desired inner nodes and connections.
+2. Add spare parameters to the SubNetwork for each value you want exposed (right-click a param → "Promote to Parent (Spare Param)" or add manually via "Add Spare Parameter…").
+3. Right-click the SubNetwork → "Promote to Custom Asset…".
+4. Fill in the identity dialog (name, family, description, author, version).
+5. Click "Create" — the `.gnasset` is saved and immediately available in the palette.
+
+### Asset Editing
+
+- **Locked by default:** Double-clicking a custom asset to "dive in" shows the inner network in **read-only mode** (no edits allowed). A breadcrumb banner with 🔒 indicates locked state.
+- **Edit Asset Definition:** Click the "Edit Asset Definition" button in the breadcrumb banner to unlock editing. A confirmation dialog shows how many instances will be affected ("Save to All N instances" / "Save As New Asset…" / "Cancel").
+- **Make Editable:** Right-click → "Make Editable" converts a custom asset instance into a plain SubNetwork (one-way, severs the asset link). Useful for one-off modifications.
+
+### Palette Organization
+
+Custom assets appear in a dedicated **"Custom"** top-level section in the palette, organized hierarchically:
+
+```
+Custom
+  ├── TOP
+  │   ├── MyExtension
+  │   │   └── ExtensionBlur (read-only — from extension)
+  │   └── User
+  │       └── MyCustomBlur
+  ├── CHOP
+  │   └── User
+  │       └── MyAudioProcessor
+  └── SOP
+      └── User
+          └── MyMeshDeformer
+```
+
+- **Extension assets** appear under the extension's display name and are read-only.
+- **User assets** appear under "User" and are fully editable.
+- Assets are colored gold in the palette to distinguish them from built-in operators.
+
+### Scan Directories
+
+Assets are scanned from three locations (in priority order):
+
+| Priority | Directory | Source | Read-Only |
+|----------|-----------|--------|-----------|
+| 1 | `addons/gn_ext_*/assets/*.gnasset` | Extension-shipped | Yes |
+| 2 | `res://custom_operators/` | Project-local | No |
+| 3 | `user://gonodes_assets/` | User-global | No |
+
+### .gnpatch Export/Import
+
+SubNetworks can also be exported as standalone `.gnpatch` files (right-click → "Export Sub-Network…"). These are stateless snapshots with no link back to the source — useful for sharing individual patches. Import via right-click → "Import .gnpatch…" or drag-and-drop onto the graph canvas.
+
+### Drag-and-Drop
+
+Both `.gnpatch` and `.gnasset` files can be dragged from the OS file manager directly onto the graph canvas:
+- **.gnpatch** → creates a new SubNetworkNode with the patch's inner network.
+- **.gnasset** → registers the asset (if not already known) and creates a GNCustomOperator instance.

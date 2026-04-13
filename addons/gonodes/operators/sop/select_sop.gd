@@ -63,6 +63,9 @@ func _init_parameters() -> void:
 	# Invert
 	add_parameter(GNParameter.create_bool("invert", false, "",
 		"Invert selection (discard matching, keep non-matching)"))
+	# Transform (remote reference only)
+	add_parameter(GNParameter.create_bool("apply_transform", false,
+		"Apply Transform", "Apply the source node's transform to output geometry (remote reference only)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -105,6 +108,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			_select_points(arrays, new_mesh, method, invert)
 
 	_cached_geo.set_mesh(new_mesh)
+
+	# Apply source transform if enabled and using remote reference
+	if not remote_id.is_empty() and get_param_value("apply_transform"):
+		_apply_source_transform(in_geo)
+
 	return _cached_geo
 
 
@@ -244,6 +252,34 @@ func _select_points(arrays: Array, out_mesh: ArrayMesh, method: int, invert: boo
 	out_arrays[Mesh.ARRAY_TEX_UV]  = out_uvs     if not out_uvs.is_empty()     else null
 	out_arrays[Mesh.ARRAY_INDEX]   = out_indices
 	out_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out_arrays)
+
+
+func _apply_source_transform(source_geo: GNGeoData) -> void:
+	var xform := source_geo.transform
+	if xform == Transform3D.IDENTITY:
+		return
+	var mesh := _cached_geo.mesh
+	var new_mesh := ArrayMesh.new()
+	var normal_basis := xform.basis.inverse().transposed()
+	for surf_idx in range(mesh.get_surface_count()):
+		var arrays := mesh.surface_get_arrays(surf_idx)
+		var prim := mesh.surface_get_primitive_type(surf_idx)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		if verts.size() > 0:
+			var transformed := PackedVector3Array()
+			transformed.resize(verts.size())
+			for i in range(verts.size()):
+				transformed[i] = xform * verts[i]
+			arrays[Mesh.ARRAY_VERTEX] = transformed
+		if arrays[Mesh.ARRAY_NORMAL] != null:
+			var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+			var transformed_n := PackedVector3Array()
+			transformed_n.resize(normals.size())
+			for i in range(normals.size()):
+				transformed_n[i] = (normal_basis * normals[i]).normalized()
+			arrays[Mesh.ARRAY_NORMAL] = transformed_n
+		new_mesh.add_surface_from_arrays(prim, arrays)
+	_cached_geo.set_mesh(new_mesh)
 
 
 func _resolve_remote_sop(target_id: String) -> GNGeoData:

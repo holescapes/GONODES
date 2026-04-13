@@ -140,3 +140,5 @@ including nested sub-networks (sub-networks inside sub-networks).
   the labels appear on the outer node's ports.
 - You can have multiple InTunnels and OutTunnels of different families
   in the same sub-network (e.g., a CHOP input + SOP input → TOP output).
+- To make a sub-network reusable across patches, promote it to a
+  **custom asset** — see the Custom Assets guide.

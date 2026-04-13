@@ -74,6 +74,8 @@ class OperatorEntry:
 	var deprecated: bool                       ## True if the operator is deprecated
 	var deprecation_message: String            ## Reason / migration guidance
 	var deprecated_replacement: String         ## Class name of the replacement operator
+	var is_custom_asset: bool   ## True if this is a .gnasset custom operator
+	var asset_read_only: bool   ## True if this asset came from an extension (not user-editable)
 
 	func _init(p_family: String, p_script: GDScript, p_desc: String,
 			p_source: String = "core", p_section: String = "",
@@ -89,6 +91,8 @@ class OperatorEntry:
 		deprecated = false
 		deprecation_message = ""
 		deprecated_replacement = ""
+		is_custom_asset = false
+		asset_read_only = false
 
 
 ## class_name → OperatorEntry
@@ -202,6 +206,27 @@ func get_description(class_name_key: String) -> String:
 ## Returns true if the operator is registered.
 func has_operator(class_name_key: String) -> bool:
 	return _operators.has(class_name_key)
+
+
+## Returns the custom asset registry grouped for the palette:
+## { family_name: { section_name: [op_names] } }
+## Section names are extension display names or "User" for user-created assets.
+## Only includes operators where is_custom_asset == true.
+func get_custom_asset_registry() -> Dictionary:
+	var result: Dictionary = {}
+	for op_name in _operators:
+		var entry: OperatorEntry = _operators[op_name]
+		if not entry.is_custom_asset:
+			continue
+		if not result.has(entry.family):
+			result[entry.family] = {}
+		var sections: Dictionary = result[entry.family]
+		# Use section from registration (extension name or "Custom" → rename to "User")
+		var sec: String = entry.section if entry.section != "Custom" else "User"
+		if not sections.has(sec):
+			sections[sec] = []
+		sections[sec].append(op_name)
+	return result
 
 
 ## Returns true if the named operator is deprecated.
@@ -670,8 +695,18 @@ var _loaded_assets: PackedStringArray = []
 ## Scans known directories for .gnasset files and registers each as a custom
 ## operator in the registry.  Assets whose identity block is missing or
 ## malformed are skipped with a warning.
+##
+## Scan order (later overrides earlier on name conflict):
+##   1. Extension assets: res://addons/gn_ext_*/assets/*.gnasset (read-only)
+##   2. Project assets: res://custom_operators/*.gnasset (editable)
+##   3. User-global assets: user://gonodes_assets/*.gnasset (editable)
 func scan_custom_assets() -> void:
 	var found_count := 0
+
+	# Phase 1: Extension-shipped .gnasset files (read-only)
+	found_count += _scan_extension_assets()
+
+	# Phase 2+3: User/project assets (editable)
 	for scan_dir in _ASSET_SCAN_DIRS:
 		if not DirAccess.dir_exists_absolute(scan_dir):
 			continue
@@ -684,7 +719,7 @@ func scan_custom_assets() -> void:
 			if not dir.current_is_dir() and file_name.ends_with(".gnasset"):
 				var full_path := scan_dir.path_join(file_name)
 				if not _loaded_assets.has(full_path):
-					if _register_custom_asset(full_path):
+					if _register_custom_asset(full_path, false, "Custom", ""):
 						found_count += 1
 			file_name = dir.get_next()
 		dir.list_dir_end()
@@ -693,9 +728,58 @@ func scan_custom_assets() -> void:
 		GNLogger.info("ExtRegistry", "Loaded %d custom asset(s)" % found_count)
 
 
+## Scans all registered extension directories for assets/*.gnasset files.
+## Extension-shipped assets are read-only (can be instantiated but not edited).
+## Returns the number of assets found.
+func _scan_extension_assets() -> int:
+	var count := 0
+	var addons_path := "res://addons"
+	var dir := DirAccess.open(addons_path)
+	if dir == null:
+		return 0
+
+	dir.list_dir_begin()
+	var folder_name := dir.get_next()
+	while folder_name != "":
+		if dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
+			var ext_path := addons_path + "/" + folder_name
+			var assets_dir := ext_path + "/assets"
+			if DirAccess.dir_exists_absolute(assets_dir):
+				# Determine extension display name from cfg
+				var cfg_path := ext_path + "/gn_extension.cfg"
+				var ext_display_name := folder_name.trim_prefix("gn_ext_").capitalize()
+				if FileAccess.file_exists(cfg_path):
+					var cfg := ConfigFile.new()
+					if cfg.load(cfg_path) == OK:
+						ext_display_name = cfg.get_value("extension", "name", ext_display_name)
+
+				var ad := DirAccess.open(assets_dir)
+				if ad != null:
+					ad.list_dir_begin()
+					var f := ad.get_next()
+					while f != "":
+						if not ad.current_is_dir() and f.ends_with(".gnasset"):
+							var full_path := assets_dir + "/" + f
+							if not _loaded_assets.has(full_path):
+								if _register_custom_asset(full_path, true, ext_display_name, folder_name):
+									count += 1
+						f = ad.get_next()
+					ad.list_dir_end()
+		folder_name = dir.get_next()
+	dir.list_dir_end()
+
+	if count > 0:
+		GNLogger.info("ExtRegistry", "Found %d extension-shipped asset(s)" % count)
+	return count
+
+
 ## Registers a single .gnasset file as a custom operator.
+## [param p_read_only]: if true, asset came from extension (no edit definition).
+## [param p_section]: palette section name (extension display name or "Custom").
+## [param p_extension_source]: extension folder name or "" for user assets.
 ## Returns true on success.
-func _register_custom_asset(asset_path: String) -> bool:
+func _register_custom_asset(asset_path: String, p_read_only: bool = false,
+		p_section: String = "Custom", p_extension_source: String = "") -> bool:
 	var data := GNCustomOperator._read_asset_json(asset_path)
 	if data.is_empty():
 		GNLogger.warn("ExtRegistry", "Skipping invalid asset: %s" % asset_path)
@@ -713,10 +797,14 @@ func _register_custom_asset(asset_path: String) -> bool:
 	# Register with the GNCustomOperator script — create_instance will
 	# produce a GNCustomOperator, and the caller must call load_from_asset()
 	# with the path stored in the entry's extension_dir field.
-	register_operator(op_name, family_str, GNCustomOperator,
-		desc, "custom_asset", "Custom", asset_path)
+	var source_name: String = "custom_asset" if p_extension_source.is_empty() else p_extension_source
+	var entry := register_operator(op_name, family_str, GNCustomOperator,
+		desc, "custom_asset", p_section, asset_path)
+	entry.is_custom_asset = true
+	entry.asset_read_only = p_read_only
 	_loaded_assets.append(asset_path)
-	GNLogger.info("ExtRegistry", "Registered custom asset '%s' from %s" % [op_name, asset_path])
+	GNLogger.info("ExtRegistry", "Registered custom asset '%s' from %s%s" % [
+		op_name, asset_path, " (read-only)" if p_read_only else ""])
 	return true
 
 

@@ -23,6 +23,8 @@ func _init_parameters() -> void:
 		"Crossfade between adjacent inputs using Blend Position"))
 	add_parameter(GNParameter.create_float("blend_pos", 0.0, 0.0, 1.0, 0.01, "Blend Position",
 		"Fractional position through the input list (0.0 = first, 1.0 = last)"))
+	add_parameter(GNParameter.create_bool("null_on_missing", false, "Null on Missing",
+		"When true, output null instead of holding the previous frame when the selected input is empty. Useful as a programmatic gate."))
 
 
 ## Auto-adjust index param max_value when ports grow/shrink.
@@ -60,6 +62,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		# Requested input not available yet (chain activating after index
 		# change).  Hold the previous frame's output so the viewer sees a
 		# seamless freeze-frame instead of a black flash.
+		if get_param_value("null_on_missing"):
+			return null
 		return cached_output
 
 	# ── Blend between adjacent inputs ──

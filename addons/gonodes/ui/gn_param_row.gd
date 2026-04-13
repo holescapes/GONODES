@@ -1831,6 +1831,11 @@ func _show_param_context_menu(screen_pos: Vector2) -> void:
 	_param_context_menu.add_item("Insert Parameter Reference…", 10)
 	_param_context_menu.add_item("Insert CHOP Reference…", 11)
 
+	# Promote to Parent — only shown when the node lives inside a SubNetwork
+	if _is_inside_subnet():
+		_param_context_menu.add_separator()
+		_param_context_menu.add_item("Promote to Parent (Spare Param)", 20)
+
 	_param_context_menu.position = Vector2i(screen_pos)
 	_param_context_menu.reset_size()
 	_param_context_menu.popup()
@@ -1854,8 +1859,70 @@ func _on_param_context_id(id: int) -> void:
 		11:
 			_show_chop_reference_picker()
 			return
+		20:
+			_promote_to_parent()
+			return
 	if not ref.is_empty():
 		DisplayServer.clipboard_set(ref)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Promote to Parent (Spare Param)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns true if the owner_node's network is an inner_network of a SubNetwork.
+func _is_inside_subnet() -> bool:
+	if network == null:
+		return false
+	return network.host_node is SubNetworkNode
+
+
+## Returns the SubNetworkNode that owns the current network, or null.
+func _find_parent_subnet() -> SubNetworkNode:
+	if network == null or not (network.host_node is SubNetworkNode):
+		return null
+	return network.host_node as SubNetworkNode
+
+
+## Creates a spare parameter on the parent SubNetwork that mirrors this param,
+## and wires the inner node's param to read from the parent via an expression.
+func _promote_to_parent() -> void:
+	var parent_subnet := _find_parent_subnet()
+	if parent_subnet == null or param == null or owner_node == null:
+		GNLogger.warn("ParamRow", "Cannot promote — not inside a sub-network")
+		return
+
+	# Build a unique spare param name: inner_node_id + "_" + param_name
+	var sp_name := "%s_%s" % [owner_node.id, param.param_name]
+	# Avoid collision with existing spare params
+	var base_name := sp_name
+	var counter := 1
+	while parent_subnet.spare_parameters.has(sp_name):
+		counter += 1
+		sp_name = "%s_%d" % [base_name, counter]
+
+	# Clone the parameter as a spare param on the parent
+	var spare := param.duplicate()
+	spare.param_name = sp_name
+	spare.label = "%s: %s" % [owner_node.id, param.label]
+	# Copy current value as default
+	spare.default_value = param.value
+	spare.value = param.value
+
+	parent_subnet.add_spare_parameter(spare)
+
+	# Wire the inner node's param to read from parent via expression
+	param.mode = GNParameter.Mode.EXPRESSION
+	param.expression = 'par("../", "%s")' % sp_name
+	param.mode_changed.emit(param.param_name, param.mode)
+	owner_node.mark_dirty()
+
+	GNLogger.info("ParamRow", "Promoted '%s.%s' to parent spare param '%s'" % [
+		owner_node.id, param.param_name, sp_name])
+
+	# Refresh the row UI to show expression mode
+	_update_mode_display()
+	_update_value_display()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

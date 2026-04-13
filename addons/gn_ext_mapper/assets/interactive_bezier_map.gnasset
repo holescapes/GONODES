@@ -1,0 +1,110 @@
+{
+	"identity": {
+		"op_name": "InteractiveBezierMap",
+		"family": "TOP",
+		"description": "Bezier warp with interactive 4x4 control point drag panel — connect both outputs to WindowOUT for live curved surface adjustment."
+	},
+	"inner_network": {
+		"nodes": {
+			"in1": {
+				"type": "InTunnel",
+				"position": [0, 100],
+				"parameters": {
+					"index": {"value": 0},
+					"family": {"value": 0},
+					"label": {"value": "texture"}
+				}
+			},
+			"drag1": {
+				"type": "BezierDragUI",
+				"position": [200, 300],
+				"parameters": {
+					"label": {"value": "Bezier Grid"},
+					"size": {"value": 250}
+				}
+			},
+			"map1": {
+				"type": "BezierMapTOP",
+				"position": [500, 100],
+				"parameters": {
+					"cp00_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp00_x\")"},
+					"cp00_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp00_y\")"},
+					"cp10_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp10_x\")"},
+					"cp10_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp10_y\")"},
+					"cp20_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp20_x\")"},
+					"cp20_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp20_y\")"},
+					"cp30_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp30_x\")"},
+					"cp30_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp30_y\")"},
+					"cp01_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp01_x\")"},
+					"cp01_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp01_y\")"},
+					"cp11_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp11_x\")"},
+					"cp11_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp11_y\")"},
+					"cp21_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp21_x\")"},
+					"cp21_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp21_y\")"},
+					"cp31_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp31_x\")"},
+					"cp31_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp31_y\")"},
+					"cp02_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp02_x\")"},
+					"cp02_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp02_y\")"},
+					"cp12_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp12_x\")"},
+					"cp12_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp12_y\")"},
+					"cp22_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp22_x\")"},
+					"cp22_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp22_y\")"},
+					"cp32_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp32_x\")"},
+					"cp32_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp32_y\")"},
+					"cp03_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp03_x\")"},
+					"cp03_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp03_y\")"},
+					"cp13_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp13_x\")"},
+					"cp13_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp13_y\")"},
+					"cp23_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp23_x\")"},
+					"cp23_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp23_y\")"},
+					"cp33_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp33_x\")"},
+					"cp33_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:cp33_y\")"}
+				}
+			},
+			"out_tex": {
+				"type": "OutTunnel",
+				"position": [850, 100],
+				"parameters": {
+					"index": {"value": 0},
+					"family": {"value": 0},
+					"label": {"value": "warped"}
+				}
+			},
+			"out_panel": {
+				"type": "OutTunnel",
+				"position": [850, 300],
+				"parameters": {
+					"index": {"value": 1},
+					"family": {"value": 9},
+					"label": {"value": "panel"}
+				}
+			}
+		},
+		"connections": [
+			{"from": "in1", "from_port": 0, "to": "map1", "to_port": 0},
+			{"from": "map1", "from_port": 0, "to": "out_tex", "to_port": 0},
+			{"from": "drag1", "from_port": 0, "to": "out_panel", "to_port": 0}
+		]
+	},
+	"promoted_parameters": [],
+	"custom_parameters": [
+		{
+			"name": "show_panel",
+			"value_type": 2,
+			"label": "Show Panel",
+			"default_value": true,
+			"min_value": 0,
+			"max_value": 1,
+			"step": 1
+		},
+		{
+			"name": "pad_size",
+			"value_type": 1,
+			"label": "Pad Size",
+			"default_value": 250,
+			"min_value": 64,
+			"max_value": 512,
+			"step": 1
+		}
+	]
+}

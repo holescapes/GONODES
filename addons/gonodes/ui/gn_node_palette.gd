@@ -82,15 +82,17 @@ func popup_at_filtered(global_pos: Vector2, allowed: PackedStringArray) -> void:
 ## Builds or rebuilds the tree, optionally filtering by search text.
 ## Operators with a non-empty section get grouped under a sub-heading within
 ## their family (e.g. TOP → Shadertoy → ShadertoyTOP).
+## Custom assets get a dedicated "Custom" top-level section with
+## Custom → Family → Extension/User → Asset hierarchy.
 func _populate_tree(filter: String) -> void:
 	_tree.clear()
 	var root := _tree.create_item()
 	var reg := GNExtensionRegistry.instance()
 	var registry_sectioned := reg.get_operator_registry_sectioned()
+	var custom_registry := reg.get_custom_asset_registry()
 	var filter_lower := filter.to_lower()
 
-	# Iterate families in enum order (driven by GNFamily.FAMILY_NAMES).
-	# No hardcoded list — new families are picked up automatically.
+	# ── Built-in operators (excludes custom assets) ────────────────────
 	for family_enum: int in GNFamily.FAMILY_NAMES:
 		var family_name: String = GNFamily.FAMILY_NAMES[family_enum]
 		if not registry_sectioned.has(family_name):
@@ -99,11 +101,13 @@ func _populate_tree(filter: String) -> void:
 		var sections: Dictionary = registry_sectioned[family_name]
 		var family_color: Color = GNFamily.get_color(family_enum)
 
-		# Pre-filter all ops across all sections to decide if the family header
-		# should appear at all.
+		# Pre-filter: skip custom_asset ops (they go in the Custom section)
 		var any_visible := false
 		for sec_name in sections:
 			for op_name in sections[sec_name]:
+				var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
+				if entry != null and entry.is_custom_asset:
+					continue
 				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
 					continue
 				if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
@@ -132,6 +136,9 @@ func _populate_tree(filter: String) -> void:
 			var filtered_ops: Array[String] = []
 
 			for op_name in ops:
+				var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
+				if entry != null and entry.is_custom_asset:
+					continue  # Skip custom assets — they go in Custom section
 				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
 					continue
 				if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
@@ -153,23 +160,111 @@ func _populate_tree(filter: String) -> void:
 
 			# Add operators under the parent (family or section)
 			for op_name in filtered_ops:
-				var op_item := _tree.create_item(parent_item)
-				var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
-				if entry != null and entry.deprecated:
-					op_item.set_text(0, "\u29b8 " + op_name + "  (deprecated)")
-					op_item.set_custom_color(0, Color(0.5, 0.5, 0.5))
-				else:
-					op_item.set_text(0, op_name)
-				op_item.set_metadata(0, op_name)
-				var desc := _get_operator_description(op_name)
-				if entry != null and entry.deprecated and not entry.deprecation_message.is_empty():
-					desc = "\u26a0 DEPRECATED: " + entry.deprecation_message + ("\n" + desc if not desc.is_empty() else "")
-				if not desc.is_empty():
-					op_item.set_tooltip_text(0, desc)
+				_add_operator_item(parent_item, op_name, reg)
+
+	# ── Custom Assets — dedicated top-level section ────────────────────
+	var custom_any_visible := false
+	for fam_name in custom_registry:
+		for sec_name in custom_registry[fam_name]:
+			for op_name in custom_registry[fam_name][sec_name]:
+				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
+					continue
+				if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+					custom_any_visible = true
+					break
+			if custom_any_visible:
+				break
+		if custom_any_visible:
+			break
+
+	if custom_any_visible:
+		var custom_root := _tree.create_item(root)
+		custom_root.set_text(0, "Custom")
+		custom_root.set_selectable(0, false)
+		custom_root.set_custom_color(0, Color(0.9, 0.75, 0.3))
+
+		# Sort families alphabetically within custom
+		var custom_fam_keys: Array = custom_registry.keys()
+		custom_fam_keys.sort()
+
+		for fam_name in custom_fam_keys:
+			var fam_sections: Dictionary = custom_registry[fam_name]
+			var fam_color: Color = GNFamily.get_color(GNFamily.string_to_type(fam_name))
+
+			# Check if any ops in this family pass filter
+			var fam_visible := false
+			for sec_name in fam_sections:
+				for op_name in fam_sections[sec_name]:
+					if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
+						continue
+					if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+						fam_visible = true
+						break
+				if fam_visible:
+					break
+			if not fam_visible:
+				continue
+
+			# Custom → Family
+			var fam_item := _tree.create_item(custom_root)
+			fam_item.set_text(0, fam_name)
+			fam_item.set_selectable(0, false)
+			fam_item.set_custom_color(0, fam_color)
+
+			# Sort sections: alphabetical
+			var sec_keys: Array = fam_sections.keys()
+			sec_keys.sort()
+
+			for sec_name in sec_keys:
+				var ops: Array = fam_sections[sec_name]
+				var filtered_ops: Array[String] = []
+				for op_name in ops:
+					if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
+						continue
+					if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+						filtered_ops.append(op_name)
+
+				if filtered_ops.is_empty():
+					continue
+
+				# Custom → Family → Extension/User
+				var parent_item: TreeItem = fam_item
+				if sec_keys.size() > 1 or sec_name != "User":
+					var sec_item := _tree.create_item(fam_item)
+					sec_item.set_text(0, sec_name)
+					sec_item.set_selectable(0, false)
+					sec_item.set_custom_color(0, fam_color.lerp(Color.WHITE, 0.35))
+					parent_item = sec_item
+
+				for op_name in filtered_ops:
+					_add_operator_item(parent_item, op_name, reg)
 
 	# Auto-select first selectable item if filtering
 	if not filter_lower.is_empty():
 		_select_first_leaf(root)
+
+
+## Adds a single operator item to the tree under [param parent_item].
+func _add_operator_item(parent_item: TreeItem, op_name: String,
+		reg: GNExtensionRegistry) -> void:
+	var op_item := _tree.create_item(parent_item)
+	var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
+	if entry != null and entry.deprecated:
+		op_item.set_text(0, "\u29b8 " + op_name + "  (deprecated)")
+		op_item.set_custom_color(0, Color(0.5, 0.5, 0.5))
+	elif entry != null and entry.is_custom_asset:
+		op_item.set_text(0, op_name)
+		op_item.set_custom_color(0, Color(0.9, 0.85, 0.6))
+	else:
+		op_item.set_text(0, op_name)
+	op_item.set_metadata(0, op_name)
+	var desc := _get_operator_description(op_name)
+	if entry != null and entry.deprecated and not entry.deprecation_message.is_empty():
+		desc = "\u26a0 DEPRECATED: " + entry.deprecation_message + ("\n" + desc if not desc.is_empty() else "")
+	if entry != null and entry.is_custom_asset and entry.asset_read_only:
+		desc = ("[extension asset] " if desc.is_empty() else desc + "\n") + "(read-only — from extension)"
+	if not desc.is_empty():
+		op_item.set_tooltip_text(0, desc)
 
 
 ## Selects the first selectable leaf item in the tree (for keyboard navigation).
