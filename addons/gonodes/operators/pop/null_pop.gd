@@ -1,8 +1,7 @@
 class_name NullPOP
 extends GNPopBase
 ## Pass-through POP — forwards particle data unchanged.
-## Essential for feedback loops (simulation reads previous frame from NullPOP)
-## and for organizing particle networks.
+## Essential for feedback loops (simulation reads previous frame from NullPOP).
 
 
 func _init() -> void:
@@ -20,12 +19,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	if inputs.size() > 0 and inputs[0] is GNParticleData:
-		return inputs[0]
-	return null
+	return _null_cook(inputs)
 
 
 func _cook_cpu(inputs: Array[GNData]) -> GNData:
-	if inputs.size() > 0 and inputs[0] is GNParticleData:
-		return inputs[0]
-	return null
+	return _null_cook(inputs)

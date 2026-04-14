@@ -230,12 +230,47 @@ selection via `_on_node_cooked`.
 
 ## Node Preview & Viewer System
 
+### GNDataRenderer Architecture
+
+Viewer/preview rendering is separated from data classes via `GNDataRenderer`
+(`addons/gonodes/ui/renderers/gn_data_renderer.gd`) — an abstract base with
+three virtuals:
+- `render_for_viewer(data: GNData, viewer) -> void`
+- `render_for_preview(data: GNData, host: Control) -> void`
+- `handle_viewer_input(data: GNData, event: InputEvent, viewer) -> bool`
+
+One renderer instance per data-carrying family, registered via
+`renderer_script` key in `[family.*]` config sections. `GNFamily._renderer_registry`
+maps family IDs to instances, populated during config loading by
+`GNExtensionRegistry`.
+
+**Design principle:** `GNData` subclasses stay editor-agnostic (zero UI
+imports). Renderers live in the UI layer (`addons/gonodes/ui/renderers/`)
+and know about SubViewport, controls, GNViewerRenderHelpers, etc. This
+means the cook engine can run headless without pulling in viewer code.
+
+Concrete renderers (10 total):
+- `GNTextureRenderer` — TOP: `viewer.set_texture()`
+- `GNImageRenderer` — IMG: `Image` → `ImageTexture` upload → `viewer.set_texture()`
+- `GNChannelRenderer` — CHOP: `GNWaveformView` → `viewer.set_control()`
+- `GNTableRenderer` — DAT: `Tree` spreadsheet → `viewer.set_control()`
+- `GNGeoRenderer` — SOP: 3D viewport + orbit camera + mesh
+- `GNParticleRenderer` — POP: 3D viewport + orbit camera + MultiMesh
+- `GNVolumeRenderer` — VOL: 2×2 slice composite, scroll-to-slice
+- `GNMaterialRenderer` — MAT: 3D viewport + preview sphere
+- `GNCompRenderer` — COMP: text fallback (scene node info)
+- `GNUIRenderer` — UI: Control duplicated into SubViewport
+
+3D renderers (GNGeoRenderer, GNParticleRenderer, GNMaterialRenderer) own
+static scene nodes (`_viewer_camera`, `_viewer_light`, `_viewer_mesh_instance`)
+that are reparented into the viewer's shared 3D SubViewport on each render.
+
 ### Shared Rendering via GNViewerRenderHelpers
 
 Common data-to-image rendering logic is available in `GNViewerRenderHelpers`
 (`addons/gonodes/core/gn_viewer_render_helpers.gd`) — a static utility class.
-Family base classes use these helpers in their `render_for_viewer()` overrides
-for default visualization.  Custom operators can bypass the helpers entirely.
+Renderers use these helpers for default visualization. Custom operators can
+bypass the helpers entirely.
 Available helpers:
 - SOP/POP/MAT SubViewport creation (camera, light, gizmo, environment)
 - Orbit camera positioning
@@ -257,54 +292,57 @@ This means cross-family nodes automatically get the correct preview:
   texture thumbnail, not volume stats.
 - A POP operator that outputs `GNGeoData` (e.g. InstancePOP) shows vertex
   counts, not particle counts.
+- An IMG operator with a CHOP on port 1 gets `GNChannelRenderer` for that
+  port automatically.
 
 The logic lives in `GNNode.create_preview_control()` and
 `GNNode.update_preview_control()` — family base classes do **not** override
 these unless they have non-data state to display (COMP: `_scene_node`,
 UI: `_control_node`, OUT: sink status).
 
-### Node-Driven Viewer Display (render_for_viewer)
+### Two-Tier Viewer Dispatch
 
 The docked viewer panel is a **minimal host** — a dumb surface that provides
 a TextureRect (with pan/zoom), a Control container, an info label, and a
-lazy 3D SubViewport.  Each node controls its own viewer presentation:
+lazy 3D SubViewport.
 
-1. `GNNode.render_for_viewer(viewer)` — virtual method on the base class.
-   The `viewer` parameter is untyped (`Variant`) to avoid a core→UI
-   circular dependency.
-2. All 11 family base classes override this method, choosing one of the
-   viewer's display modes:
-   - `GNTopBase` / `GNImgBase` → `viewer.set_texture()`
-   - `GNChopBase` → renders waveform to ImageTexture → `viewer.set_texture()`
-   - `GNDatBase` → `viewer.set_control(tree)` (shared static Tree)
-   - `GNSopBase` → `viewer.get_3d_viewport()` + static shared scene nodes
-   - `GNMatBase` → `viewer.get_3d_viewport()` + static shared sphere/camera
-   - `GNCompBase` → routes by output data type (texture/geo/default)
-   - `GNPopBase` → `viewer.get_3d_viewport()` + static shared MultiMesh
-   - `GNVolBase` → renders slice composite to ImageTexture → `viewer.set_texture()`
-   - `GNUiBase` → renders to its own SubViewport → `viewer.set_texture()`
-   - `GNSdfBase` → `viewer.set_info()` with SDF tree text
-3. `GNViewerPanel.update_from_node()` calls `node.render_for_viewer(self)`.
-4. Input forwarding: the viewer forwards `gui_input` to
-   `node.handle_viewer_input(event, local_pos)`.  If the node consumes the
-   event (returns `true`), the viewer re-renders by calling
-   `render_for_viewer()` again.  SOP/POP use this for orbit interaction,
-   VOL uses it for slice scrolling.
-5. **Texture overlay:** `viewer.set_texture_overlay(control)` attaches a
-   transparent Control that draws in texture pixel space.  The overlay
-   tracks pan/zoom automatically (positioned/sized to match `_tex_display`).
-   Pass `null` to remove.  All input still routes through
-   `handle_viewer_input()` — the overlay has `MOUSE_FILTER_IGNORE`.
-   Helper: `viewer.local_pos_to_uv(local_pos)` converts mouse position
-   to 0–1 texture UV coordinates; `viewer.uv_to_local_pos(uv)` does
-   the reverse.  Used by projection mapping TOPs for interactive handles.
-6. 3D families share **static scene nodes** (`_viewer_camera`, `_viewer_light`,
-   `_viewer_mesh_instance`, etc.) owned by the family base class with a
-   `_viewer_` prefix.  These are reparented into the viewer's 3D SubViewport
-   on each render.
+**Rendering dispatch:**
+1. `GNNode.render_for_viewer(viewer, port_index)` — reads `get_output_data(port_index)`,
+   looks up `GNFamily.get_renderer(data.get_family())`, and calls
+   `renderer.render_for_viewer(data, viewer)`.
+2. Individual operators (e.g. GNSDFBase, CameraComp) can override
+   `render_for_viewer` directly for custom display — the override
+   takes precedence over the renderer dispatch.
+3. `GNViewerPanel.update_from_node()` calls `node.render_for_viewer(self, port)`.
 
-This pattern makes adding viewer support for new families or custom nodes
-trivial — just override `render_for_viewer()` on the base class.
+**Input dispatch:**
+1. Viewer calls `node.handle_viewer_input(event, local_pos, self, port)`.
+2. If the operator override consumes it (returns `true`) — done, re-render.
+3. If it returns `false`, the base implementation dispatches to
+   `renderer.handle_viewer_input(data, event, viewer)` for default
+   data-type interaction (orbit drag/zoom on 3D, scroll-to-slice on VOL).
+4. If the renderer also returns `false`, the viewer's built-in pan/zoom runs.
+
+Operator overrides get `viewer` and `port_index` as parameters — no need
+to cache a `WeakRef` from `render_for_viewer`.
+
+### Per-Viewer Mutable State
+
+Orbit camera state (`orbit_yaw`, `orbit_pitch`, `orbit_distance`,
+`orbit_dragging`), wireframe toggle, and volume slice state (`vol_slice_pos`,
+`vol_show_mip`) are **instance variables on `GNViewerPanel`** — not static
+on family bases. Each viewer panel instance is independent. `set_target()`
+resets all state when switching nodes.
+
+### Texture Overlay
+
+`viewer.set_texture_overlay(control)` attaches a transparent Control that
+draws in texture pixel space.  The overlay tracks pan/zoom automatically.
+Pass `null` to remove. All input still routes through
+`handle_viewer_input()` — the overlay has `MOUSE_FILTER_IGNORE`.
+Helper: `viewer.local_pos_to_uv(local_pos)` converts mouse position
+to 0–1 texture UV coordinates; `viewer.uv_to_local_pos(uv)` does
+the reverse.  Used by projection mapping TOPs for interactive handles.
 
 ### Multi-Output Nodes
 

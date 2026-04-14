@@ -1,9 +1,6 @@
 class_name NullCOMP
 extends GNCompBase
-## Pass-through component that does nothing.
-##
-## Wire-cleanup / organizational node. Passes input data through unchanged.
-## Useful for tidying networks or as a placeholder during prototyping.
+## Pass-through COMP — forwards its input unchanged.
 
 
 func _init() -> void:
@@ -20,6 +17,4 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	if inputs.size() > 0 and inputs[0] != null:
-		return inputs[0]
-	return null
+	return _null_cook(inputs)

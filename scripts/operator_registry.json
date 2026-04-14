@@ -2084,18 +2084,7 @@
     "family": "chop",
     "file": "addons/gonodes/operators/chop/switch_chop.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "TOPtoCHOP",
@@ -4232,18 +4221,7 @@
     "family": "comp",
     "file": "addons/gonodes/operators/comp/switch_comp.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "VehicleCOMP",
@@ -5418,18 +5396,7 @@
     "family": "dat",
     "file": "addons/gonodes/operators/dat/switch_dat.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "TOPtoDAT",
@@ -6801,18 +6768,7 @@
     "family": "img",
     "file": "addons/gonodes/operators/img/switch_img.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "TOPtoIMG",
@@ -7313,18 +7269,7 @@
     "family": "mat",
     "file": "addons/gonodes/operators/mat/switch_mat.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "WireframeMAT",
@@ -8170,18 +8115,7 @@
     "family": "pop",
     "file": "addons/gonodes/operators/pop/switch_pop.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "TurbulencePOP",
@@ -8981,18 +8915,7 @@
     "family": "sdf",
     "file": "addons/gn_ext_sdf/operators/sdf/switch_sdf.gd",
     "extension": "gn_ext_sdf",
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "TorusSDF",
@@ -11261,18 +11184,7 @@
     "family": "sop",
     "file": "addons/gonodes/operators/sop/switch_sop.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "TOPtoSOP",
@@ -15514,28 +15426,7 @@
     "family": "top",
     "file": "addons/gonodes/operators/top/switch_top.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "blend",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "blend_pos",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "SyphonInTOP",
@@ -16939,18 +16830,7 @@
     "family": "ui",
     "file": "addons/gonodes/operators/ui/switch_ui.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "TabBarUI",
@@ -17737,17 +17617,6 @@
     "family": "vol",
     "file": "addons/gonodes/operators/vol/switch_vol.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "null_on_missing",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   }
 ]

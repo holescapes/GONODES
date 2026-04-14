@@ -823,11 +823,15 @@ This is resolved during cook: the cook engine evaluates parameter expressions be
 - Window stretch: `canvas_items` mode, `expand` aspect (set in `project.godot`)
 
 ### GNViewerPanel (`addons/gonodes/ui/gn_viewer_panel.gd`)
-Family-aware viewer panel that displays any node family's output. Only one visualization mode is active at a time. Rendering helper utilities live in `GNViewerRenderHelpers` (`addons/gonodes/core/gn_viewer_render_helpers.gd`) — a static utility class providing viewport creation (SOP/POP/MAT SubViewports with cameras, lights, gizmos), orbit camera positioning, volume slice extraction, CHOP waveform rendering, and DAT table rendering. Nodes call these helpers from their `render_for_viewer()` overrides.
+Family-aware viewer panel that displays any node family's output. Only one visualization mode is active at a time. Rendering helper utilities live in `GNViewerRenderHelpers` (`addons/gonodes/core/gn_viewer_render_helpers.gd`) — a static utility class providing viewport creation (SOP/POP/MAT SubViewports with cameras, lights, gizmos), orbit camera positioning, volume slice extraction, CHOP waveform rendering, and DAT table rendering.
 
-**Node-driven display dispatch:** Each node controls its own viewer presentation via `render_for_viewer(viewer)` (virtual method on GNNode). Family base classes override this to call the viewer's display mode API. `update_from_node()` dispatches via `node.render_for_viewer(self)`. Input is forwarded to `node.handle_viewer_input(event, local_pos)` — if the node consumes it, the viewer re-renders by calling `render_for_viewer()` again.
+**Data-type renderer dispatch (GNDataRenderer):** Viewer rendering is separated from data classes via `GNDataRenderer` (`addons/gonodes/ui/renderers/gn_data_renderer.gd`) — an abstract base class with `render_for_viewer(data, viewer)`, `render_for_preview(data, host)`, and `handle_viewer_input(data, event, viewer)` virtuals. One renderer instance per data-carrying family, registered in config via `renderer_script` key under `[family.*]` sections. GNData stays editor-agnostic (no UI imports); renderers live in the UI layer and know about SubViewport, controls, etc. `GNFamily._renderer_registry` maps family IDs to renderer instances, populated by `GNExtensionRegistry` during config loading.
 
-**Public API methods** (called by family base `render_for_viewer()` overrides):
+**Dispatch chain:** `GNNode.render_for_viewer(viewer, port_index)` reads `get_output_data(port_index)`, then calls `GNFamily.get_renderer(data.get_family()).render_for_viewer(data, viewer)`. Individual operators (e.g. GNSDFBase, CameraComp) can override `render_for_viewer` directly for custom display. Input dispatch: the viewer panel calls `node.handle_viewer_input(event, local_pos, self, port)`. If the operator override consumes it (returns `true`), done. Otherwise the base implementation dispatches to `renderer.handle_viewer_input(data, event, viewer)` for default data-type interaction (orbit, scroll slicing). Operator overrides receive the `viewer` and `port_index` as parameters — no `WeakRef` caching needed.
+
+**Per-viewer mutable state:** Orbit camera state (`orbit_yaw`, `orbit_pitch`, `orbit_distance`, `orbit_dragging`), wireframe toggle, and volume slice state (`vol_slice_pos`, `vol_show_mip`) are instance variables on `GNViewerPanel` — not static on family bases. Multiple viewer panels display independently.
+
+**Public API methods** (called by `GNDataRenderer` subclasses and operator overrides):
 - `set_texture(tex, info_bar)` — texture display with built-in pan/zoom
 - `set_control(control, info_bar)` — arbitrary Control widget display
 - `set_info(text, info_bar)` — centered text display
@@ -837,29 +841,30 @@ Family-aware viewer panel that displays any node family's output. Only one visua
 - `get_content_size() -> Vector2i` — snapped content area size
 - `hide_all_displays()` — clear all display modes
 
-**Visualization modes:**
+**Visualization modes** (handled by `GNDataRenderer` subclasses in `addons/gonodes/ui/renderers/`):
 
-| Family | Display Mode | Description |
-|--------|-------------|-------------|
-| **TOP** | `set_texture()` | Full-resolution display. Left-click/middle-click drag to pan, scroll to zoom. Shift+F to fit, Home for 1:1. |
-| **IMG** | `set_texture()` | Same as TOP — uploads `Image` → shared static `ImageTexture` |
-| **CHOP** | `set_texture()` | Waveform rendered to `ImageTexture` via `GNViewerRenderHelpers.render_chop_waveform_rolling()` |
-| **DAT** | `set_control(tree)` | Shared static `Tree` widget with column headers, scrollable rows |
-| **SOP** | `get_3d_viewport()` | Static shared camera/light/mesh/gizmo, orbit via `handle_viewer_input()` |
-| **MAT** | `get_3d_viewport()` | Static shared camera/light/sphere, material applied to sphere |
-| **POP** | `get_3d_viewport()` | Static shared camera/light/multimesh, orbit via `handle_viewer_input()` |
-| **VOL** | `set_texture()` | Slice composite rendered to `ImageTexture`, scroll to change slice via `handle_viewer_input()` |
-| **UI** | `set_texture()` | Control duplicated into own `SubViewport`, rendered one frame |
-| **SDF** | `set_info()` | SDF tree text preview with hash |
-| **COMP** | Polymorphic | Routes by output data type: GNGeoData → SOP path, GNTextureData → set_texture, fallback → set_info |
+| Family | Renderer | Display Mode | Description |
+|--------|----------|-------------|-------------|
+| **TOP** | `GNTextureRenderer` | `set_texture()` | Full-resolution display. Left-click/middle-click drag to pan, scroll to zoom. Shift+F to fit, Home for 1:1. |
+| **IMG** | `GNImageRenderer` | `set_texture()` | Same as TOP — uploads `Image` → shared static `ImageTexture` |
+| **CHOP** | `GNChannelRenderer` | `set_texture()` | Waveform rendered to `ImageTexture` via `GNViewerRenderHelpers.render_chop_waveform_rolling()` |
+| **DAT** | `GNTableRenderer` | `set_control(tree)` | Shared static `Tree` widget with column headers, scrollable rows |
+| **SOP** | `GNGeoRenderer` | `get_3d_viewport()` | Static shared camera/light/mesh/gizmo, orbit via renderer `handle_viewer_input()` |
+| **MAT** | `GNMaterialRenderer` | `get_3d_viewport()` | Static shared camera/light/sphere, material applied to sphere |
+| **POP** | `GNParticleRenderer` | `get_3d_viewport()` | Static shared camera/light/multimesh, orbit via renderer `handle_viewer_input()` |
+| **VOL** | `GNVolumeRenderer` | `set_texture()` | Slice composite rendered to `ImageTexture`, scroll to change slice via renderer `handle_viewer_input()` |
+| **UI** | `GNUIRenderer` | `set_texture()` | Control duplicated into own `SubViewport`, rendered one frame |
+| **SDF** | *(operator override)* | `set_info()` | SDF tree text preview with hash (GNSDFBase overrides `render_for_viewer` directly) |
+| **COMP** | `GNCompRenderer` | Polymorphic | Routes by output data type: GNGeoData → GNGeoRenderer, GNTextureData → GNTextureRenderer, fallback → set_info |
 
-**Static shared viewer objects:** 3D families own static scene nodes (`_viewer_camera`, `_viewer_light`, `_viewer_mesh_instance`, etc.) with `_viewer_` prefix on the family base class. These are reparented into the viewer's shared 3D SubViewport on each render. Only one set of nodes per family exists regardless of how many operators are viewed.
+**Static shared viewer objects:** 3D renderers own static scene nodes (`_viewer_camera`, `_viewer_light`, `_viewer_mesh_instance`, etc.) with `_viewer_` prefix on the renderer class. These are reparented into the viewer's shared 3D SubViewport on each render. Only one set of nodes per renderer exists regardless of how many operators are viewed.
 
 **Key design decisions:**
 - Viewer is a minimal host with four display modes — no family-specific logic.
 - One shared lazy 3D SubViewport for all 3D families (SOP, POP, MAT, COMP).
 - SubViewport sizes snapped to 64px boundaries to avoid resize churn.
-- Pan/zoom state resets when switching nodes. Orbit state is per-node (stored on the node).
+- Pan/zoom state resets when switching nodes. Orbit/slice state is per-viewer (instance vars on `GNViewerPanel`), not per-node — multiple viewer panels display independently.
+- `GNData` stays editor-agnostic (zero UI imports). `GNDataRenderer` subclasses live in `addons/gonodes/ui/renderers/` and own all viewer/preview UI logic.
 - `SnapshotTOP` uses `GNViewerRenderHelpers` directly with its own viewports (not the viewer panel).
 
 **Cook-frame update strategy:**

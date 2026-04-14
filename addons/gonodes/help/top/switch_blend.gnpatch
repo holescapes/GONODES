@@ -70,7 +70,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Switch TOP — Blend\n\nSelect one of up to 4 texture inputs by index.",
+            "text": "Switch TOP — Basics\n\nSelect one of multiple texture inputs by index.\nFor crossfading, use CrossTOP.",
             "position": [
                 -100.0,
                 -100.0

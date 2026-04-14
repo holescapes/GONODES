@@ -41,15 +41,20 @@ const _TYPE_MAP: Dictionary = {
 }
 
 ## Maps family annotation strings to family IDs.
-## Extensions can append to this via GNScriptHelper.register_script_family().
+## Seeded with core families; extensions append via register_script_family().
+## All core families are re-registered at startup by the extension registry,
+## so this initial seed is just for robustness if scripts parse before registry runs.
 static var _FAMILY_MAP: Dictionary = {
 	"top":  GNFamily.Type.TOP,
 	"img":  GNFamily.Type.IMG,
 	"chop": GNFamily.Type.CHOP,
 	"dat":  GNFamily.Type.DAT,
 	"sop":  GNFamily.Type.SOP,
-	"comp": GNFamily.Type.COMP,
+	"pop":  GNFamily.Type.POP,
+	"vol":  GNFamily.Type.VOL,
 	"mat":  GNFamily.Type.MAT,
+	"comp": GNFamily.Type.COMP,
+	"ui":   GNFamily.Type.UI,
 }
 
 
@@ -475,24 +480,11 @@ static func parse_output_annotations(code: String) -> Array:
 
 ## Creates a fresh GNData subclass instance for the given family type.
 ## Used by GDScriptSCRIPT to pre-populate multi-output data objects.
+## Delegates to GNFamily._data_factories which covers both core and extension families.
 static func create_data_for_family(family: int) -> GNData:
-	match family:
-		GNFamily.Type.CHOP:
-			return GNChannelData.new()
-		GNFamily.Type.TOP:
-			return GNTextureData.new()
-		GNFamily.Type.SOP:
-			return GNGeoData.new()
-		GNFamily.Type.DAT:
-			return GNTableData.new()
-		GNFamily.Type.IMG:
-			return GNImageData.new()
-		GNFamily.Type.MAT:
-			return GNMaterialData.new()
-	# Extension families — delegate to the registry
-	var ext_data := GNFamily.create_data_for_family(family)
-	if ext_data != null:
-		return ext_data as GNData
+	var data := GNFamily.create_data_for_family(family)
+	if data != null:
+		return data as GNData
 	return GNData.new()
 
 

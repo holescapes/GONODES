@@ -29,6 +29,10 @@ func initialize(p_id: String) -> void:
 	super.initialize(p_id)
 
 
+func _is_family_data(data: GNData) -> bool:
+	return data is GNTableData
+
+
 ## Default output port.  Override in subclass to add inputs or extra outputs.
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.DAT, "Table output")
@@ -71,33 +75,6 @@ func render_for_preview(host) -> void:
 		host.set_text(cached_output.get_preview_text())
 	else:
 		host.set_text("")
-
-
-## Shared Tree control for spreadsheet display in the viewer.
-static var _viewer_spreadsheet: Tree = null
-
-
-static func _ensure_viewer_spreadsheet() -> Tree:
-	if _viewer_spreadsheet == null:
-		_viewer_spreadsheet = Tree.new()
-		_viewer_spreadsheet.columns = 1
-		_viewer_spreadsheet.hide_root = true
-		_viewer_spreadsheet.allow_reselect = false
-		_viewer_spreadsheet.scroll_horizontal_enabled = true
-		_viewer_spreadsheet.scroll_vertical_enabled = true
-	return _viewer_spreadsheet
-
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	var data: GNData = get_output_data(port_index)
-	if data is GNTableData:
-		var tbl: GNTableData = data as GNTableData
-		if not tbl.table.is_empty():
-			var tree := _ensure_viewer_spreadsheet()
-			_populate_viewer_tree(tree, tbl)
-			viewer.set_control(tree)
-			return
-	viewer.set_info("No DAT output", "")
 
 
 static func _populate_viewer_tree(tree: Tree, tbl: GNTableData) -> void:

@@ -1,10 +1,31 @@
 class_name GNFamily
 ## Enum constants and runtime registry for operator families in GONODES.
 ##
-## Core families are defined in the Type enum (values 0–10).
+## Core families are defined in the Type enum (values 0–11).
 ## Extensions can register additional families at runtime via register_family(),
 ## which assigns IDs starting at 1000.  All family APIs accept int, so core
 ## enum values and extension IDs are interchangeable.
+##
+## NOTE — Families vs Data/Port Types (Apr 2026 design discussion):
+## A "family" is an operator classification (what an operator IS), while a
+## "data type" (= port type) is what flows on wires (GNTextureData, etc.).
+## Most families map 1:1 to a data type (TOP → GNTextureData, SDF → GNSDFData).
+## COMP → GNCompData (wraps Node3D scene node), UI → GNUIData (wraps Control).
+## Classification-only families have no wire data type:
+##   OUT    — terminal sinks that consume other families' data
+##   SCRIPT — user-authored nodes that produce other families' data
+##
+## The single source of truth is _data_factories: a family is data-carrying if
+## and only if it has a registered factory.  Both core and extension families
+## register through gn_core.cfg / gn_extension.cfg [family.*] sections,
+## processed by GNExtensionRegistry._load_extension().  GNFamily is the sole
+## authority on ID assignment: core names resolve to enum values via
+## _CORE_FAMILY_IDS; unknown names get auto-assigned IDs >= 1000.
+## No config file may specify an ID — it's always resolved by GNFamily.
+##
+## Two query methods reflect this:
+##   get_all_families()  — every registered family (for filters like OPFindDAT)
+##   get_data_families() — families with a _data_factories entry (for tunnel/port dropdowns)
 
 ## Core operator family enum.
 enum Type {
@@ -25,55 +46,65 @@ enum Type {
 ## Next ID for extension-registered families.
 static var _next_ext_id: int = 1000
 
-## Family display names for UI.  Extensions append to this at runtime.
-static var FAMILY_NAMES: Dictionary = {
-	Type.TOP:  "TOP",
-	Type.IMG:  "IMG",
-	Type.CHOP: "CHOP",
-	Type.SOP:  "SOP",
-	Type.POP:  "POP",
-	Type.DAT:  "DAT",
-	Type.MAT:  "MAT",
-	Type.COMP: "COMP",
-	Type.VOL:  "VOL",
-	Type.UI:   "UI",
-	Type.OUT:  "OUT",
-	Type.SCRIPT: "SCRIPT",
+## Authoritative mapping of core family names to their enum IDs.
+## GNFamily is the sole authority on ID assignment — no config file may
+## specify an ID.  Core names resolve here; everything else gets auto-assigned.
+static var _CORE_FAMILY_IDS: Dictionary = {
+	"TOP":    Type.TOP,
+	"IMG":    Type.IMG,
+	"CHOP":   Type.CHOP,
+	"SOP":    Type.SOP,
+	"POP":    Type.POP,
+	"DAT":    Type.DAT,
+	"MAT":    Type.MAT,
+	"COMP":   Type.COMP,
+	"VOL":    Type.VOL,
+	"UI":     Type.UI,
+	"OUT":    Type.OUT,
+	"SCRIPT": Type.SCRIPT,
 }
+
+## Family display names for UI.  Populated at startup from gn_core.cfg
+## (core families) and gn_extension.cfg (extension families) via the same
+## _load_extension() path.  Empty until GNExtensionRegistry runs.
+static var FAMILY_NAMES: Dictionary = {}
 
 ## Family colors for port/wire rendering in the graph editor.
-static var FAMILY_COLORS: Dictionary = {
-	Type.TOP:  Color(0.6, 0.2, 0.8),    # Purple
-	Type.IMG:  Color(0.3, 0.7, 0.7),    # Teal
-	Type.CHOP: Color(0.2, 0.8, 0.2),    # Green
-	Type.SOP:  Color(0.2, 0.4, 0.9),    # Blue
-	Type.POP:  Color(0.2, 0.8, 0.8),    # Cyan
-	Type.DAT:  Color(0.9, 0.8, 0.2),    # Yellow
-	Type.MAT:  Color(0.9, 0.4, 0.2),    # Red/Orange
-	Type.COMP: Color(0.5, 0.5, 0.5),    # Gray
-	Type.VOL:  Color(0.85, 0.35, 0.55),  # Rose — GPU 3D volumetric textures
-	Type.UI:   Color(0.2, 0.7, 0.9),    # Sky Blue — interactive 2D widgets
-	Type.OUT:  Color(0.9, 0.3, 0.3),    # Red — terminal sink
-	Type.SCRIPT: Color(0.5, 0.9, 0.3),  # Lime — user-authored code nodes
-}
+## Populated at startup alongside FAMILY_NAMES.
+static var FAMILY_COLORS: Dictionary = {}
 
 ## Data factory callbacks: family ID → Callable that returns a fresh GNData subclass.
-## Extensions register via register_data_factory() so that GDScriptSCRIPT and
-## GNScriptHelper can create the correct output data for extension families.
+## Populated at startup from the "data_script" key in [family.*] config sections.
+## This dictionary is the single source of truth for "which families carry data"
+## — get_data_families() and create_data_for_family() both derive from it.
 static var _data_factories: Dictionary = {}
 
+## Data renderer instances: family ID → GNDataRenderer subclass instance.
+## Populated at startup from the "renderer_script" key in [family.*] config sections.
+## Used by the viewer panel to dispatch rendering by data type rather than node type.
+## Lives in the editor UI layer — never loaded by the cook engine or headless player.
+static var _renderer_registry: Dictionary = {}
 
-## Registers a new extension family at runtime.
-## Returns the assigned family ID (>= 1000).
-## Call this from your extension's loader / _init.gd.
+
+## Registers a family (core or extension) at runtime.
+## GNFamily is the sole authority on ID assignment.  Core family names
+## (TOP, CHOP, SOP, etc.) resolve to their enum values via _CORE_FAMILY_IDS.
+## Unknown names are auto-assigned IDs >= 1000 in the extension range.
+## Returns the assigned family ID.
 static func register_family(family_name: String, color: Color) -> int:
-	# Check for duplicate — return existing ID if already registered
+	var upper := family_name.to_upper()
+	# Already registered? Return existing ID.
 	for key in FAMILY_NAMES:
-		if FAMILY_NAMES[key] == family_name.to_upper():
+		if FAMILY_NAMES[key] == upper:
 			return key
-	var id := _next_ext_id
-	_next_ext_id += 1
-	FAMILY_NAMES[id] = family_name.to_upper()
+	# Resolve ID: core families get their enum value, extensions get auto-assigned.
+	var id: int
+	if _CORE_FAMILY_IDS.has(upper):
+		id = _CORE_FAMILY_IDS[upper]
+	else:
+		id = _next_ext_id
+		_next_ext_id += 1
+	FAMILY_NAMES[id] = upper
 	FAMILY_COLORS[id] = color
 	return id
 
@@ -91,6 +122,17 @@ static func create_data_for_family(family_id: int) -> RefCounted:
 	if _data_factories.has(family_id):
 		return _data_factories[family_id].call()
 	return null
+
+
+## Registers a data renderer instance for a family.
+## Called by GNExtensionRegistry when loading [family.*] sections with renderer_script.
+static func register_renderer(family_id: int, renderer: RefCounted) -> void:
+	_renderer_registry[family_id] = renderer
+
+
+## Returns the GNDataRenderer for the given family, or null if none registered.
+static func get_renderer(family_id: int) -> RefCounted:
+	return _renderer_registry.get(family_id, null)
 
 
 ## Returns the display name for a family enum value.
@@ -112,3 +154,37 @@ static func string_to_type(family_str: String, fallback: int = Type.COMP) -> int
 		if FAMILY_NAMES[key] == upper:
 			return key
 	return fallback
+
+
+## Returns all registered families as two parallel arrays:
+## [param ids] sorted (core 0–11 first, then extensions 1000+) and
+## [param names] with matching display strings.
+## Optionally pass [param exclude] to skip specific family IDs.
+## Use for dropdowns that need every family (e.g. OPFindDAT filter).
+static func get_all_families(exclude: Array[int] = []) -> Array:
+	var ids: Array[int] = []
+	for key in FAMILY_NAMES:
+		if key in exclude:
+			continue
+		ids.append(key)
+	ids.sort()
+	var names := PackedStringArray()
+	for fid in ids:
+		names.append(FAMILY_NAMES[fid])
+	return [ids, names]
+
+
+## Returns only families that carry data on wires — suitable for port/tunnel
+## type dropdowns.  Derived from _data_factories: a family is a "data family"
+## if and only if it has a registered factory (has data_script in config).
+## Currently excludes only OUT and SCRIPT (classification-only, no data_script).
+static func get_data_families() -> Array:
+	var ids: Array[int] = []
+	for fid in _data_factories:
+		if FAMILY_NAMES.has(fid):
+			ids.append(fid)
+	ids.sort()
+	var names := PackedStringArray()
+	for fid in ids:
+		names.append(FAMILY_NAMES[fid])
+	return [ids, names]

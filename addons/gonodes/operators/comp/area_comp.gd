@@ -148,7 +148,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# ── Visual debug shape ───────────────────────────────────────────────
 	_update_debug_visual()
 
-	return null
+	return _build_comp_data()
 
 
 func _ensure_area() -> void:

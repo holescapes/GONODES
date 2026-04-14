@@ -154,7 +154,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			_mesh_inst.material_override = (src_node as MeshInstance3D).material_override
 			_mesh_inst.visible = src_node.visible
 
-	return null
+	return _build_comp_data()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -380,13 +380,13 @@ func destroy_scene_node() -> void:
 
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _mesh_inst != null and _mesh_inst.mesh != null and _mesh_inst.mesh is ArrayMesh:
-		GNSopBase._ensure_viewer_scene()
+		GNGeoRenderer._ensure_viewer_scene()
 		var vp: SubViewport = viewer.get_3d_viewport()
-		GNSopBase._reparent_viewer_nodes(vp)
-		GNSopBase._viewer_mesh_instance.mesh = _mesh_inst.mesh
-		GNSopBase._viewer_mesh_instance.material_override = _mesh_inst.material_override
+		GNGeoRenderer._reparent_viewer_nodes(vp)
+		GNGeoRenderer._viewer_mesh_instance.mesh = _mesh_inst.mesh
+		GNGeoRenderer._viewer_mesh_instance.material_override = _mesh_inst.material_override
 		GNViewerRenderHelpers.apply_orbit_camera(
-			GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+			GNGeoRenderer._viewer_camera, 45.0, -30.0, 3.0)
 		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 		viewer.set_info_bar("SoftBodyCOMP")
 		var verts: int = _positions.size() if _positions != null else 0

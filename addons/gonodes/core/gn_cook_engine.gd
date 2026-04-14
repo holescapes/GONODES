@@ -1962,9 +1962,9 @@ func _hash2(x: float, y: float) -> float:
 # Parallel Cook Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Returns true for families that require main-thread execution (GPU / renderer).
+## Returns true for nodes that require main-thread execution (GPU / renderer).
 func _is_gpu_family(node: GNNode) -> bool:
-	return node.family in [GNFamily.Type.TOP, GNFamily.Type.POP, GNFamily.Type.VOL]
+	return node.requires_main_thread()
 
 
 ## Cooks a single node through the full guard pipeline (hash guard, bypass,

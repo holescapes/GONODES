@@ -98,7 +98,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	node_warning = ""
 	_scene_node = _path
-	return comp_data if comp_data != null else GNData.new()
+	return comp_data if comp_data != null else _build_comp_data()
 
 
 func _ensure_path() -> void:

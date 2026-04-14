@@ -149,7 +149,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if force_in != null and mode_idx == 0 and _rigid_body.is_inside_tree():
 		_apply_forces(force_in)
 
-	return null
+	return _build_comp_data()
 
 
 ## Lazily creates the RigidBody3D hierarchy: body → collision_shape + mesh_instance.
@@ -262,13 +262,13 @@ func get_rigid_body() -> RigidBody3D:
 
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _mesh_instance != null and _mesh_instance.mesh != null and _mesh_instance.mesh is ArrayMesh:
-		GNSopBase._ensure_viewer_scene()
+		GNGeoRenderer._ensure_viewer_scene()
 		var vp: SubViewport = viewer.get_3d_viewport()
-		GNSopBase._reparent_viewer_nodes(vp)
-		GNSopBase._viewer_mesh_instance.mesh = _mesh_instance.mesh
-		GNSopBase._viewer_mesh_instance.material_override = _mesh_instance.material_override
+		GNGeoRenderer._reparent_viewer_nodes(vp)
+		GNGeoRenderer._viewer_mesh_instance.mesh = _mesh_instance.mesh
+		GNGeoRenderer._viewer_mesh_instance.material_override = _mesh_instance.material_override
 		GNViewerRenderHelpers.apply_orbit_camera(
-			GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+			GNGeoRenderer._viewer_camera, 45.0, -30.0, 3.0)
 		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 		viewer.set_info_bar("RigidBodyCOMP")
 		var mode_names := ["Dynamic", "Kinematic", "Static"]

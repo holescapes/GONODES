@@ -111,7 +111,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		3: _apply_cone_twist_params()
 		4: _apply_6dof_params()
 
-	return null
+	return _build_comp_data()
 
 
 func _create_joint(joint_type: int) -> void:

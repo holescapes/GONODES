@@ -1,8 +1,6 @@
 class_name NullTOP
 extends GNTopBase
 ## Pass-through TOP — forwards its input unchanged.
-## Useful for organizing networks, creating reference points,
-## and as merge targets.
 
 
 func _init() -> void:
@@ -15,11 +13,8 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	pass  # No parameters — pure pass-through
+	pass
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	if tex_in == null:
-		return null
-	return tex_in
+	return _null_cook(inputs)

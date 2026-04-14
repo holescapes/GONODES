@@ -19,10 +19,13 @@ var tunnel_index: int = 0
 
 ## The data family this tunnel carries (TOP, CHOP, SOP, DAT, MAT, COMP, etc.).
 ## Used to configure the output port and the parent node's matching input port.
-var tunnel_family: GNFamily.Type = GNFamily.Type.TOP
+var tunnel_family: int = GNFamily.Type.TOP
 
 ## Label shown on the parent node's input port.
 var tunnel_label: String = "in"
+
+## Maps dropdown indices to family IDs (populated in _init_parameters).
+var _family_ids: Array[int] = []
 
 
 func _init() -> void:
@@ -40,9 +43,14 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("index", tunnel_index, 0, 32,
 		"Index", "Input port index on the parent sub-network node"))
-	add_parameter(GNParameter.create_enum("family",
-		PackedStringArray(["TOP", "IMG", "CHOP", "SOP", "POP", "DAT", "MAT", "COMP"]),
-		int(tunnel_family),
+	# Build family dropdown dynamically — only data-carrying families (port types)
+	var fam_data: Array = GNFamily.get_data_families()
+	_family_ids = fam_data[0]
+	var fam_names: PackedStringArray = fam_data[1]
+	var default_idx: int = _family_ids.find(tunnel_family)
+	if default_idx < 0:
+		default_idx = 0
+	add_parameter(GNParameter.create_enum("family", fam_names, default_idx,
 		"Family", "Data type this tunnel carries"))
 	add_parameter(GNParameter.create_string("label", tunnel_label,
 		"Label", "Port label shown on the parent sub-network node"))
@@ -71,7 +79,8 @@ func _on_parameter_changed(param_name: String, new_value: Variant) -> void:
 		"index":
 			tunnel_index = int(new_value)
 		"family":
-			var new_family := int(new_value) as GNFamily.Type
+			var idx := int(new_value)
+			var new_family: int = _family_ids[idx] if idx >= 0 and idx < _family_ids.size() else GNFamily.Type.TOP
 			if new_family != tunnel_family:
 				tunnel_family = new_family
 				_rebuild_output_port()

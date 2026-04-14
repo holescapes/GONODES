@@ -2327,7 +2327,7 @@
   },
   "OPFindDAT": {
     "class_name": "OPFindDAT",
-    "family": "CHOP",
+    "family": "DAT",
     "inputs": [],
     "outputs": [
       {

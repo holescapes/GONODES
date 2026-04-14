@@ -229,8 +229,8 @@ def extract_family_from_extends(gd_text):
     # Direct mapping
     if base in BASE_TO_FAMILY:
         return BASE_TO_FAMILY[base]
-    # Fallback: infer from suffix (e.g., RenderTOP → TOP)
-    for suffix in ("TOP", "CHOP", "SOP", "DAT", "COMP", "MAT", "IMG", "OUT", "UI", "POP", "VOL"):
+    # Fallback: infer from suffix (e.g., RenderTOP → TOP, SphereSDF → SDF)
+    for suffix in ("TOP", "CHOP", "SOP", "DAT", "COMP", "MAT", "IMG", "OUT", "UI", "POP", "VOL", "SDF"):
         if base.upper().endswith(suffix):
             return suffix
     return None

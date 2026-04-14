@@ -51,6 +51,10 @@ func requires_compute() -> bool:
 	return true
 
 
+func requires_main_thread() -> bool:
+	return true
+
+
 func has_cpu_fallback() -> bool:
 	return true
 
@@ -62,6 +66,10 @@ func supported_renderers() -> PackedStringArray:
 func initialize(p_id: String) -> void:
 	family = GNFamily.Type.POP
 	super.initialize(p_id)
+
+
+func _is_family_data(data: GNData) -> bool:
+	return data is GNParticleData
 
 
 func _init_ports() -> void:
@@ -97,88 +105,6 @@ func render_for_preview(host) -> void:
 		host.set_text(cached_output.get_preview_text())
 	else:
 		host.set_text("")
-
-
-## Shared 3D scene nodes for particle point cloud display.
-static var _viewer_camera: Camera3D = null
-static var _viewer_light: DirectionalLight3D = null
-static var _viewer_gizmo: Node3D = null
-static var _viewer_multimesh: MultiMeshInstance3D = null
-static var _viewer_env_node: WorldEnvironment = null
-
-## Per-node viewer orbit state.
-var _viewer_orbit_yaw: float = 45.0
-var _viewer_orbit_pitch: float = -30.0
-var _viewer_orbit_distance: float = 5.0
-var _viewer_orbit_state: Dictionary = {}
-
-
-static func _ensure_viewer_scene() -> void:
-	if _viewer_camera != null:
-		return
-	_viewer_camera = Camera3D.new()
-	_viewer_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
-	_viewer_camera.fov = 45.0
-
-	_viewer_light = DirectionalLight3D.new()
-	_viewer_light.rotation_degrees = Vector3(-45, 30, 0)
-
-	_viewer_multimesh = MultiMeshInstance3D.new()
-
-	_viewer_gizmo = GNViewerRenderHelpers._create_axis_gizmo()
-
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.08, 0.08, 0.1)
-	env.ambient_light_color = Color(0.3, 0.3, 0.35)
-	env.ambient_light_energy = 0.5
-	_viewer_env_node = WorldEnvironment.new()
-	_viewer_env_node.environment = env
-
-
-static func _reparent_viewer_nodes(vp: SubViewport) -> void:
-	for node in [_viewer_camera, _viewer_light, _viewer_multimesh, _viewer_gizmo, _viewer_env_node]:
-		if node.get_parent() != vp:
-			if node.get_parent() != null:
-				node.get_parent().remove_child(node)
-			vp.add_child(node)
-
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	var data: GNData = get_output_data(port_index)
-	if data is GNParticleData:
-		var pd: GNParticleData = data as GNParticleData
-		if pd.particle_count > 0:
-			_ensure_viewer_scene()
-			var vp: SubViewport = viewer.get_3d_viewport()
-			_reparent_viewer_nodes(vp)
-			GNViewerRenderHelpers.apply_orbit_camera(
-				_viewer_camera, _viewer_orbit_yaw, _viewer_orbit_pitch, _viewer_orbit_distance)
-			GNViewerRenderHelpers.update_gizmo_scale(_viewer_gizmo, _viewer_orbit_distance)
-			if GNViewerRenderHelpers.render_pop(vp, _viewer_multimesh, pd):
-				viewer.set_info_bar("%d particles" % pd.particle_count)
-				return
-	viewer.set_info("No POP output", "")
-
-
-func handle_viewer_input(event: InputEvent, _local_pos: Vector2) -> bool:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_LEFT:
-			_viewer_orbit_state["dragging"] = mb.pressed
-			return true
-		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_viewer_orbit_distance = maxf(_viewer_orbit_distance * 0.9, 0.5)
-			return true
-		if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_viewer_orbit_distance = minf(_viewer_orbit_distance * 1.1, 50.0)
-			return true
-	if event is InputEventMouseMotion and _viewer_orbit_state.get("dragging", false):
-		var mm: InputEventMouseMotion = event
-		_viewer_orbit_yaw = fmod(_viewer_orbit_yaw + mm.relative.x * 0.5, 360.0)
-		_viewer_orbit_pitch = clampf(_viewer_orbit_pitch - mm.relative.y * 0.5, -89.0, 89.0)
-		return true
-	return false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

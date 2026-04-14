@@ -22,6 +22,10 @@ func requires_compute() -> bool:
 	return true
 
 
+func requires_main_thread() -> bool:
+	return true
+
+
 func has_cpu_fallback() -> bool:
 	return true
 
@@ -33,6 +37,10 @@ func supported_renderers() -> PackedStringArray:
 func initialize(p_id: String) -> void:
 	family = GNFamily.Type.VOL
 	super.initialize(p_id)
+
+
+func _is_family_data(data: GNData) -> bool:
+	return data is GNVolumeData
 
 
 func _init_ports() -> void:
@@ -68,52 +76,6 @@ func render_for_preview(host) -> void:
 		host.set_text(cached_output.get_preview_text())
 	else:
 		host.set_text("")
-
-
-## Shared ImageTexture for uploading volume slice composites to the viewer.
-static var _viewer_texture: ImageTexture = null
-
-## Per-node viewer state.
-var _viewer_slice_pos: float = 0.5
-var _viewer_show_mip: bool = false
-
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	var data: GNData = get_output_data(port_index)
-	if data is GNVolumeData:
-		var vd: GNVolumeData = data as GNVolumeData
-		if vd.has_volume():
-			var size: Vector2i = viewer.get_content_size()
-			var img := GNViewerRenderHelpers.render_vol_composite(
-				vd, size, _viewer_slice_pos, _viewer_show_mip)
-			if _viewer_texture == null \
-					or _viewer_texture.get_width() != img.get_width() \
-					or _viewer_texture.get_height() != img.get_height():
-				_viewer_texture = ImageTexture.create_from_image(img)
-			else:
-				_viewer_texture.update(img)
-			var info := "%dx%dx%d %s (slice %.0f%%)" % [
-				vd.resolution.x, vd.resolution.y, vd.resolution.z,
-				vd.field_name, _viewer_slice_pos * 100.0]
-			viewer.set_texture(_viewer_texture, info)
-			return
-	viewer.set_info("No VOL output", "")
-
-
-func toggle_viewer_mip() -> void:
-	_viewer_show_mip = not _viewer_show_mip
-
-
-func handle_viewer_input(event: InputEvent, _local_pos: Vector2) -> bool:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_viewer_slice_pos = clampf(_viewer_slice_pos + 0.02, 0.0, 1.0)
-			return true
-		if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_viewer_slice_pos = clampf(_viewer_slice_pos - 0.02, 0.0, 1.0)
-			return true
-	return false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

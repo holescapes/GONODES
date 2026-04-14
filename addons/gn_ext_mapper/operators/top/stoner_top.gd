@@ -111,8 +111,9 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	viewer.set_info("No texture output", "")
 
 
-func handle_viewer_input(event: InputEvent, local_pos: Vector2) -> bool:
-	var viewer = _viewer_ref.get_ref()
+func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, port_index: int = 0) -> bool:
+	if viewer == null:
+		viewer = _viewer_ref.get_ref()
 	if viewer == null:
 		return false
 

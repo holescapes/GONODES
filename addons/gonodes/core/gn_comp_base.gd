@@ -5,6 +5,7 @@ extends GNNode
 ## Provides:
 ##   • family = GNFamily.Type.COMP set automatically
 ##   • Default output port "out" of type COMP
+##   • GNCompData output via _build_comp_data() wrapping _scene_node
 ##   • Automatic cleanup of reparented scene nodes via _notification(PREDELETE)
 ##   • Typed scene node accessor pattern via _scene_node
 ##   • Inline label preview (create_preview_control / update_preview_control)
@@ -15,6 +16,9 @@ extends GNNode
 ## Subclasses create and assign their concrete node type to this variable.
 ## Automatically freed on node removal via _notification(PREDELETE).
 var _scene_node: Node3D = null
+
+## Cached GNCompData wrapping _scene_node.  Built via _build_comp_data().
+var _cached_comp_data: GNCompData = null
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -29,6 +33,13 @@ func _init() -> void:
 func initialize(p_id: String) -> void:
 	family = GNFamily.Type.COMP
 	super.initialize(p_id)
+
+
+func _is_family_data(data: GNData) -> bool:
+	# COMP wires carry GNCompData but also pass through upstream data
+	# (GNGeoData from GeometryCOMP, GNTextureData from tunnels, etc.).
+	# Accept any non-null data so Switch/Null routing works for all cases.
+	return data != null
 
 
 ## Default output port.  Override in subclass to add inputs or extra outputs.
@@ -54,6 +65,19 @@ func _notification(what: int) -> void:
 ## accessor (get_mesh_instance, get_camera, get_light) that casts this.
 func get_scene_node() -> Node3D:
 	return _scene_node
+
+
+## Builds GNCompData wrapping the current _scene_node.  Call from _cook() in
+## subclasses that own a scene node: `return _build_comp_data()`.
+## Returns a valid GNCompData even when _scene_node is null (valid=false).
+func _build_comp_data() -> GNCompData:
+	if _cached_comp_data == null:
+		_cached_comp_data = GNCompData.new()
+	_cached_comp_data.scene_node = _scene_node
+	_cached_comp_data.scene_label = _scene_node.get_class() if _scene_node != null else ""
+	_cached_comp_data.valid = _scene_node != null
+	_cached_comp_data.timestamp = Engine.get_process_frames()
+	return _cached_comp_data
 
 
 ## Destroys the runtime scene node and resets this COMP to its pre-first-cook
@@ -88,29 +112,3 @@ func render_for_preview(host) -> void:
 		host.set_text("%s\n%s" % [_scene_node.get_class(), vis])
 	else:
 		host.set_text("no node")
-
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	# COMPs pass through their input data — route by output type.
-	var data: GNData = get_output_data(port_index)
-	if data is GNGeoData:
-		var geo: GNGeoData = data as GNGeoData
-		if geo.mesh != null:
-			GNSopBase._ensure_viewer_scene()
-			var vp: SubViewport = viewer.get_3d_viewport()
-			GNSopBase._reparent_viewer_nodes(vp)
-			GNViewerRenderHelpers.apply_orbit_camera(
-				GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
-			GNViewerRenderHelpers.render_sop(vp, GNSopBase._viewer_mesh_instance, geo.mesh)
-			viewer.set_info_bar("%d verts" % geo.vertex_count)
-			return
-	if data is GNTextureData:
-		var td: GNTextureData = data as GNTextureData
-		if td.texture:
-			viewer.set_texture(td.texture,
-				"%dx%d" % [td.resolution.x, td.resolution.y])
-			return
-	if data != null:
-		viewer.set_info(data.get_preview_text(), "")
-		return
-	viewer.set_info("COMP: %s" % node_type, "Component operator")

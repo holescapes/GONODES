@@ -29,6 +29,10 @@ func initialize(p_id: String) -> void:
 	super.initialize(p_id)
 
 
+func _is_family_data(data: GNData) -> bool:
+	return data is GNChannelData
+
+
 ## Default output port.  Override in subclass to add inputs or extra outputs.
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.CHOP, "Channel data output")
@@ -72,21 +76,3 @@ func render_for_preview(host) -> void:
 		host.set_text(cached_output.get_preview_text())
 	else:
 		host.set_text("")
-
-
-## Shared waveform control — uses GNWaveformView (grid, zoom, pan, legends).
-static var _viewer_waveform: GNWaveformView = null
-
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	var data: GNData = get_output_data(port_index)
-	if data is GNChannelData:
-		var ch: GNChannelData = data as GNChannelData
-		if not ch.channels.is_empty():
-			if _viewer_waveform == null:
-				_viewer_waveform = GNViewerRenderHelpers.create_waveform_view()
-			_viewer_waveform.set_channel_data(ch)
-			var info := "%d ch × %d samples" % [ch.channels.size(), ch.length]
-			viewer.set_control(_viewer_waveform, info)
-			return
-	viewer.set_info("No CHOP output", "")

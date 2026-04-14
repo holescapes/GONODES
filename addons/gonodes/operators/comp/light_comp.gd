@@ -112,7 +112,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		spot.spot_range = get_param_value("spot_range")
 		spot.spot_angle = get_param_value("spot_angle")
 
-	return null
+	return _build_comp_data()
 
 
 ## Destroys the scene node and resets light state so the
@@ -140,12 +140,12 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	gizmo_mat.albedo_color.a = 0.9
 	gizmo_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 
-	GNSopBase._ensure_viewer_scene()
+	GNGeoRenderer._ensure_viewer_scene()
 	var vp: SubViewport = viewer.get_3d_viewport()
-	GNSopBase._reparent_viewer_nodes(vp)
-	GNSopBase._viewer_mesh_instance.mesh = gizmo_mesh
-	GNSopBase._viewer_mesh_instance.material_override = gizmo_mat
-	GNViewerRenderHelpers.apply_orbit_camera(GNSopBase._viewer_camera, 45.0, -20.0, 5.0)
+	GNGeoRenderer._reparent_viewer_nodes(vp)
+	GNGeoRenderer._viewer_mesh_instance.mesh = gizmo_mesh
+	GNGeoRenderer._viewer_mesh_instance.material_override = gizmo_mat
+	GNViewerRenderHelpers.apply_orbit_camera(GNGeoRenderer._viewer_camera, 45.0, -20.0, 5.0)
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	viewer.set_info_bar("LightCOMP")
 

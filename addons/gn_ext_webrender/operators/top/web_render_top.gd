@@ -226,7 +226,7 @@ func _on_node_removed() -> void:
 
 ## Forwards mouse and keyboard events from the viewer to the CEF browser.
 ## Returns true if the event was consumed (viewer skips pan/zoom).
-func handle_viewer_input(event: InputEvent, local_pos: Vector2) -> bool:
+func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, port_index: int = 0) -> bool:
 	if _browser == null or not is_instance_valid(_browser):
 		return false
 

@@ -61,7 +61,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# engine preserves velocity, contacts, and accumulated state.
 	_sync_children_from_network()
 
-	return null  # RenderTOP reads scene nodes via get_scene_node() / get_children()
+	return _build_comp_data()
 
 
 ## Detaches children first (they belong to their own COMPs), then
@@ -94,12 +94,12 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 				entries.append({"mesh": mmi.multimesh.mesh, "material": mmi.material_override, "transform": Transform3D.IDENTITY})
 
 	if entries.size() > 0:
-		GNSopBase._ensure_viewer_scene()
+		GNGeoRenderer._ensure_viewer_scene()
 		var vp: SubViewport = viewer.get_3d_viewport()
-		GNSopBase._reparent_viewer_nodes(vp)
+		GNGeoRenderer._reparent_viewer_nodes(vp)
 		# Primary mesh
-		GNSopBase._viewer_mesh_instance.mesh = entries[0]["mesh"]
-		GNSopBase._viewer_mesh_instance.material_override = entries[0]["material"]
+		GNGeoRenderer._viewer_mesh_instance.mesh = entries[0]["mesh"]
+		GNGeoRenderer._viewer_mesh_instance.material_override = entries[0]["material"]
 		# Extra meshes
 		var extra_mis: Array[MeshInstance3D] = []
 		for i in range(1, entries.size()):
@@ -109,7 +109,7 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 			mi.transform = entries[i]["transform"]
 			vp.add_child(mi)
 			extra_mis.append(mi)
-		GNViewerRenderHelpers.apply_orbit_camera(GNSopBase._viewer_camera, 45.0, -30.0, 5.0)
+		GNViewerRenderHelpers.apply_orbit_camera(GNGeoRenderer._viewer_camera, 45.0, -30.0, 5.0)
 		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 		viewer.set_info_bar("MergeCOMP")
 		# Clean up extra meshes

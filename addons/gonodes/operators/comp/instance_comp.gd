@@ -307,14 +307,14 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _multi_mesh != null and _multi_mesh.mesh != null:
 		var mesh: Mesh = _multi_mesh.mesh
 		if mesh is ArrayMesh:
-			GNSopBase._ensure_viewer_scene()
+			GNGeoRenderer._ensure_viewer_scene()
 			var vp: SubViewport = viewer.get_3d_viewport()
-			GNSopBase._reparent_viewer_nodes(vp)
-			GNSopBase._viewer_mesh_instance.mesh = mesh
-			GNSopBase._viewer_mesh_instance.material_override = \
+			GNGeoRenderer._reparent_viewer_nodes(vp)
+			GNGeoRenderer._viewer_mesh_instance.mesh = mesh
+			GNGeoRenderer._viewer_mesh_instance.material_override = \
 				_multi_mesh_instance.material_override if _multi_mesh_instance else null
 			GNViewerRenderHelpers.apply_orbit_camera(
-				GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+				GNGeoRenderer._viewer_camera, 45.0, -30.0, 3.0)
 			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 			viewer.set_info_bar("InstanceCOMP")
 			viewer.set_info_overlay("%d instances" % _multi_mesh.instance_count)

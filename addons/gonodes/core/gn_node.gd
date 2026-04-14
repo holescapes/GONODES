@@ -175,6 +175,15 @@ func requires_compute() -> bool:
 	return false
 
 
+## Whether this node must cook on the main thread (GPU / renderer access).
+## Override to return true in base classes that use SubViewport rendering (TOP),
+## compute shaders (POP, VOL), or any other renderer API.  The cook engine
+## batches main-thread nodes separately from parallelisable CPU nodes.
+## Extension families that need GPU access should override this in their base.
+func requires_main_thread() -> bool:
+	return false
+
+
 ## Whether this node provides a CPU fallback when compute shaders are unavailable.
 ## Override to return true in families that implement [method _cook_cpu] (POP, VOL).
 ## When true, the cook engine calls [method _cook_cpu] instead of skipping the node
@@ -265,6 +274,65 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return null
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Switch / Null Shared Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+# These exist in GNNode (not in a mixin) because GDScript lacks multiple
+# inheritance.  Family bases override _is_family_data(); Switch and Null
+# subclasses delegate to these one-liners instead of copy-pasting logic.
+
+## Returns true if [param data] matches the expected data type for this
+## operator's family.  Override in each family base (e.g. GNTopBase checks
+## [code]data is GNTextureData[/code]).  Default accepts any non-null data.
+func _is_family_data(data: GNData) -> bool:
+	return data != null
+
+
+## Standard Switch parameter setup: index + null_on_missing.
+func _switch_init_parameters() -> void:
+	add_parameter(GNParameter.create_int("index", 0, 0, 0, "Input Index",
+		"Which input to output (0-based)"))
+	add_parameter(GNParameter.create_bool("null_on_missing", false, "Null on Missing",
+		"When true, output null instead of holding the previous frame when the "
+		+ "selected input is empty. Useful as a programmatic gate."))
+
+
+## Clamps the "index" parameter max to match the current dynamic input count.
+## Call from [method update_dynamic_inputs] after [code]super()[/code].
+func _switch_clamp_index() -> void:
+	var idx_param := get_parameter("index")
+	if idx_param:
+		var max_idx: int = maxi(input_ports.size() - 2, 0)
+		idx_param.max_value = max_idx
+		if int(idx_param.value) > max_idx:
+			idx_param.set_value(max_idx)
+
+
+## Returns [code]PackedInt32Array([selected_index])[/code] for active-chain
+## pruning — only the selected input's upstream chain is cooked.
+func _switch_active_indices() -> PackedInt32Array:
+	var idx: int = clampi(get_param_value("index"), 0, maxi(input_ports.size() - 1, 0))
+	return PackedInt32Array([idx])
+
+
+## Standard discrete Switch cook: select input by index, hold cached_output
+## on miss (or null if null_on_missing is true).
+func _switch_cook(inputs: Array[GNData]) -> GNData:
+	var idx: int = clampi(get_param_value("index"), 0, inputs.size() - 1)
+	if idx < inputs.size() and _is_family_data(inputs[idx]):
+		return inputs[idx]
+	if get_param_value("null_on_missing"):
+		return null
+	return cached_output
+
+
+## Standard Null cook: pass the first input through unchanged.
+func _null_cook(inputs: Array[GNData]) -> GNData:
+	if inputs.size() > 0 and _is_family_data(inputs[0]):
+		return inputs[0]
+	return null
+
+
 ## Override to declare wireless (non-wire) dependencies on other nodes.
 ## Returns an array of node IDs that this node reads from without a wire
 ## connection (e.g. SelectTOP referencing a remote TOP by name).
@@ -344,8 +412,15 @@ func create_preview_control() -> Control:
 ##   host.set_text(text)     — display short text (channel list, table summary)
 ##   host.set_control(ctrl)  — embed a custom Control
 ##
-## Default implementation delegates to the legacy update_preview_control() path.
+## Default implementation dispatches to the GNDataRenderer for the output's
+## data family.  Individual nodes can override for custom previews.
 func render_for_preview(host) -> void:
+	if cached_output != null:
+		var renderer = GNFamily.get_renderer(cached_output.get_family())
+		if renderer != null:
+			renderer.render_for_preview(cached_output, host)
+			return
+	# Fallback: texture shortcut or plain text
 	if cached_output is GNTextureData and host.has_method("set_texture"):
 		var td: GNTextureData = cached_output as GNTextureData
 		if td.texture != null:
@@ -399,10 +474,9 @@ static func _preview_format_name(fmt: Image.Format) -> String:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Renders this node's output into the viewer panel (or SnapshotTOP adapter).
-## Family base classes override this to provide type-specific visualization
-## (texture, waveform, 3D mesh, spreadsheet, etc.).  Individual operators can
-## further override for custom display (e.g. a COMP showing its composed scene
-## rather than raw pass-through geometry).
+## Dispatches rendering to the GNDataRenderer registered for the data type.
+## Individual operators can override this for custom visualization (e.g.
+## CameraCOMP frustum, LightCOMP cone, mapper TOP control points).
 ##
 ## The [param viewer] parameter is untyped to avoid a core → UI dependency.
 ## It exposes a minimal host API:
@@ -416,23 +490,34 @@ static func _preview_format_name(fmt: Image.Format) -> String:
 ##
 ## [param port_index] selects which output port to render.  The viewer panel
 ## passes the user-selected port from its port dropdown.  Defaults to 0.
-## Family base classes use [method get_output_data](port_index) automatically.
-## Override only when cross-family rendering is needed (e.g. IMG port 0 +
-## CHOP port 1).
+## The renderer is chosen by the data instance's family, so multi-type nodes
+## (e.g. a TOP with a CHOP on port 1) get correct rendering per port.
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	var data: GNData = get_output_data(port_index)
 	if data != null:
+		var renderer = GNFamily.get_renderer(data.get_family())
+		if renderer != null:
+			renderer.render_for_viewer(data, viewer)
+			return
 		viewer.set_info(data.get_preview_text(), "")
 	else:
 		viewer.set_info("No output", "")
 
 
 ## Called by the viewer panel when the user interacts with this node's display.
-## Override to handle mouse/keyboard input forwarded from the viewer.
-## [param event]: The Godot InputEvent (mouse button, motion, key, etc.).
-## [param local_pos]: Mouse position relative to the display area (0,0 = top-left).
-## Return [code]true[/code] to consume the event (viewer skips its own handling).
-func handle_viewer_input(_event: InputEvent, _local_pos: Vector2) -> bool:
+## Individual operators can override for custom interaction (e.g. mapper TOP
+## control point dragging, WebRender mouse forwarding).
+## Return [code]true[/code] to consume the event.  If the operator does not
+## consume it, the base dispatches to the family's [GNDataRenderer] for
+## default data-type interaction (orbit drag, scroll-to-slice, etc.).
+func handle_viewer_input(_event: InputEvent, _local_pos: Vector2, viewer = null, port_index: int = 0) -> bool:
+	if viewer == null:
+		return false
+	var data: GNData = get_output_data(port_index)
+	if data != null:
+		var renderer = GNFamily.get_renderer(data.get_family())
+		if renderer != null:
+			return renderer.handle_viewer_input(data, _event, viewer)
 	return false
 
 

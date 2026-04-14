@@ -95,6 +95,42 @@
 			"from_port": 0,
 			"to": "grid_warp",
 			"to_port": 1
+		},
+		{
+			"from": "out_quad",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 0
+		},
+		{
+			"from": "out_bezier",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 1
+		},
+		{
+			"from": "out_grid",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 2
+		},
+		{
+			"from": "out_mask",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 3
+		},
+		{
+			"from": "out_stoner",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 4
+		},
+		{
+			"from": "out_blend",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 5
 		}
 	],
 	"generator": "GONODES",
@@ -306,30 +342,6 @@
 				"pt_0_3_y": {
 					"value": 0.0
 				},
-				"pt_0_4_x": {
-					"value": 0.0
-				},
-				"pt_0_4_y": {
-					"value": 0.0
-				},
-				"pt_0_5_x": {
-					"value": 0.0
-				},
-				"pt_0_5_y": {
-					"value": 0.0
-				},
-				"pt_0_6_x": {
-					"value": 0.0
-				},
-				"pt_0_6_y": {
-					"value": 0.0
-				},
-				"pt_0_7_x": {
-					"value": 0.0
-				},
-				"pt_0_7_y": {
-					"value": 0.0
-				},
 				"pt_1_0_x": {
 					"value": 0.0
 				},
@@ -352,30 +364,6 @@
 					"value": 0.0
 				},
 				"pt_1_3_y": {
-					"value": 0.0
-				},
-				"pt_1_4_x": {
-					"value": 0.0
-				},
-				"pt_1_4_y": {
-					"value": 0.0
-				},
-				"pt_1_5_x": {
-					"value": 0.0
-				},
-				"pt_1_5_y": {
-					"value": 0.0
-				},
-				"pt_1_6_x": {
-					"value": 0.0
-				},
-				"pt_1_6_y": {
-					"value": 0.0
-				},
-				"pt_1_7_x": {
-					"value": 0.0
-				},
-				"pt_1_7_y": {
 					"value": 0.0
 				},
 				"pt_2_0_x": {
@@ -402,30 +390,6 @@
 				"pt_2_3_y": {
 					"value": 0.0
 				},
-				"pt_2_4_x": {
-					"value": 0.0
-				},
-				"pt_2_4_y": {
-					"value": 0.0
-				},
-				"pt_2_5_x": {
-					"value": 0.0
-				},
-				"pt_2_5_y": {
-					"value": 0.0
-				},
-				"pt_2_6_x": {
-					"value": 0.0
-				},
-				"pt_2_6_y": {
-					"value": 0.0
-				},
-				"pt_2_7_x": {
-					"value": 0.0
-				},
-				"pt_2_7_y": {
-					"value": 0.0
-				},
 				"pt_3_0_x": {
 					"value": 0.0
 				},
@@ -448,30 +412,6 @@
 					"value": 0.0
 				},
 				"pt_3_3_y": {
-					"value": 0.0
-				},
-				"pt_3_4_x": {
-					"value": 0.0
-				},
-				"pt_3_4_y": {
-					"value": 0.0
-				},
-				"pt_3_5_x": {
-					"value": 0.0
-				},
-				"pt_3_5_y": {
-					"value": 0.0
-				},
-				"pt_3_6_x": {
-					"value": 0.0
-				},
-				"pt_3_6_y": {
-					"value": 0.0
-				},
-				"pt_3_7_x": {
-					"value": 0.0
-				},
-				"pt_3_7_y": {
 					"value": 0.0
 				}
 			},
@@ -518,7 +458,7 @@
 		},
 		"out_quad": {
 			"position": [
-				1200.0,
+				1140.0,
 				0.0
 			],
 			"type": "NullTOP"
@@ -851,6 +791,28 @@
 			],
 			"type": "StonerTOP"
 		},
+		"switch1": {
+			"dynamic_input_count": 7,
+			"parameters": {
+				"blend": {
+					"value": false
+				},
+				"blend_pos": {
+					"value": 0.0
+				},
+				"index": {
+					"value": 0
+				},
+				"null_on_missing": {
+					"value": false
+				}
+			},
+			"position": [
+				1566.03100585938,
+				140.073516845703
+			],
+			"type": "SwitchTOP"
+		},
 		"testcard": {
 			"parameters": {
 				"bg_color": {
@@ -930,8 +892,8 @@
 	},
 	"version": "1.0.0",
 	"viewport": {
-		"scroll_x": 15.9158592224121,
-		"scroll_y": 269.0,
-		"zoom": 0.60105174779892
+		"scroll_x": -156.008056640625,
+		"scroll_y": -101.672653198242,
+		"zoom": 0.231731384992599
 	}
 }

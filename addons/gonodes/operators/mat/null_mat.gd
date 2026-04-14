@@ -1,7 +1,6 @@
 class_name NullMAT
 extends GNMatBase
 ## Pass-through MAT — forwards material data unchanged.
-## Useful for organizing networks and creating reference points.
 
 
 func _init() -> void:
@@ -18,6 +17,4 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	if inputs.size() > 0 and inputs[0] is GNMaterialData:
-		return inputs[0]
-	return null
+	return _null_cook(inputs)

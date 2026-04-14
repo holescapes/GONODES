@@ -577,6 +577,8 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 
 	# ── Register extension families ──
 	# Sections named "family.<NAME>" declare custom port types.
+	# GNFamily resolves core names to their enum IDs automatically;
+	# unknown names get auto-assigned IDs >= 1000.
 	for section in cfg.get_sections():
 		if not section.begins_with("family."):
 			continue
@@ -591,6 +593,12 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 			var fac_scr: GDScript = load(factory_script) as GDScript
 			if fac_scr != null:
 				GNFamily.register_data_factory(fam_id, func(): return fac_scr.new())
+		# Register data renderer if the extension provides one
+		var renderer_path: String = cfg.get_value(section, "renderer_script", "")
+		if not renderer_path.is_empty() and ResourceLoader.exists(renderer_path):
+			var rend_scr: GDScript = load(renderer_path) as GDScript
+			if rend_scr != null:
+				GNFamily.register_renderer(fam_id, rend_scr.new())
 		# Register for @input/@output annotation parsing in script nodes
 		GNScriptHelper.register_script_family(fam_name.to_lower(), fam_id)
 		print("[ExtRegistry] Registered family '%s' (id=%d)" % [fam_name, fam_id])

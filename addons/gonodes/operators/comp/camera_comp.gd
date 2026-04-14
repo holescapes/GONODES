@@ -75,9 +75,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_camera.near = get_param_value("near")
 	_camera.far = get_param_value("far")
 
-	# Return null data — camera provides no downstream data.
-	# The actual output is the Camera3D node itself, accessed via get_camera().
-	return null
+	return _build_comp_data()
 
 
 ## Destroys the scene node and resets camera state so the
@@ -108,11 +106,11 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	body_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	body_mat.albedo_color = Color(0.6, 0.6, 0.7)
 
-	GNSopBase._ensure_viewer_scene()
+	GNGeoRenderer._ensure_viewer_scene()
 	var vp: SubViewport = viewer.get_3d_viewport()
-	GNSopBase._reparent_viewer_nodes(vp)
-	GNSopBase._viewer_mesh_instance.mesh = body_mesh
-	GNSopBase._viewer_mesh_instance.material_override = body_mat
+	GNGeoRenderer._reparent_viewer_nodes(vp)
+	GNGeoRenderer._viewer_mesh_instance.mesh = body_mesh
+	GNGeoRenderer._viewer_mesh_instance.material_override = body_mat
 
 	# Add frustum as extra mesh
 	var frustum_mi := MeshInstance3D.new()
@@ -120,7 +118,7 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	frustum_mi.material_override = mat
 	vp.add_child(frustum_mi)
 
-	GNViewerRenderHelpers.apply_orbit_camera(GNSopBase._viewer_camera, 45.0, -20.0, 5.0)
+	GNViewerRenderHelpers.apply_orbit_camera(GNGeoRenderer._viewer_camera, 45.0, -20.0, 5.0)
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	viewer.set_info_bar("CameraCOMP")
 

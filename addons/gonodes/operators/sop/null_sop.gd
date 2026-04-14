@@ -16,6 +16,4 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	if inputs.size() > 0 and inputs[0] is GNGeoData:
-		return inputs[0]
-	return null
+	return _null_cook(inputs)

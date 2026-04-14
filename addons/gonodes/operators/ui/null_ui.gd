@@ -1,8 +1,6 @@
 class_name NullUI
 extends GNUiBase
 ## Pass-through UI — forwards its input widget unchanged.
-## Useful for organizing networks, creating reference points,
-## and as a null source for Switch-based gating.
 
 
 func _init() -> void:

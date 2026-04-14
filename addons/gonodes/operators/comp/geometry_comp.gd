@@ -97,13 +97,13 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if cached_output is GNGeoData and _mesh_instance != null:
 		var geo: GNGeoData = cached_output as GNGeoData
 		if geo.mesh != null:
-			GNSopBase._ensure_viewer_scene()
+			GNGeoRenderer._ensure_viewer_scene()
 			var vp: SubViewport = viewer.get_3d_viewport()
-			GNSopBase._reparent_viewer_nodes(vp)
-			GNSopBase._viewer_mesh_instance.mesh = geo.mesh
-			GNSopBase._viewer_mesh_instance.material_override = _mesh_instance.material_override
+			GNGeoRenderer._reparent_viewer_nodes(vp)
+			GNGeoRenderer._viewer_mesh_instance.mesh = geo.mesh
+			GNGeoRenderer._viewer_mesh_instance.material_override = _mesh_instance.material_override
 			GNViewerRenderHelpers.apply_orbit_camera(
-				GNSopBase._viewer_camera, 45.0, -30.0, 3.0)
+				GNGeoRenderer._viewer_camera, 45.0, -30.0, 3.0)
 			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 			viewer.set_info_bar("%d verts" % geo.vertex_count)
 			return

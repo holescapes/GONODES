@@ -10,6 +10,12 @@ signal node_type_selected(operator_type: String)
 ## Search/filter input.
 var _search_edit: LineEdit = null
 
+## Scrollable row of family filter pills.
+var _pill_container: HBoxContainer = null
+
+## Currently selected family filter — -1 means "All".
+var _active_family_filter: int = -1
+
 ## Tree that displays operators grouped by family.
 var _tree: Tree = null
 
@@ -41,6 +47,18 @@ func _ready() -> void:
 	_search_edit.gui_input.connect(_on_search_gui_input)
 	vbox.add_child(_search_edit)
 
+	# Family filter pill row
+	var scroll := ScrollContainer.new()
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll.custom_minimum_size.y = 26
+	vbox.add_child(scroll)
+
+	_pill_container = HBoxContainer.new()
+	_pill_container.add_theme_constant_override("separation", 3)
+	scroll.add_child(_pill_container)
+	_build_family_pills()
+
 	# Tree
 	_tree = Tree.new()
 	_tree.hide_root = true
@@ -57,6 +75,7 @@ func _ready() -> void:
 ## Opens the palette popup at the given global position.
 func popup_at(global_pos: Vector2) -> void:
 	_allowed_operators = []
+	_reset_pills()
 	position = Vector2i(global_pos)
 	popup()
 	_search_edit.text = ""
@@ -68,11 +87,130 @@ func popup_at(global_pos: Vector2) -> void:
 ## Used when the user drops a connection on empty space — only compatible nodes shown.
 func popup_at_filtered(global_pos: Vector2, allowed: PackedStringArray) -> void:
 	_allowed_operators = allowed
+	_reset_pills()
 	position = Vector2i(global_pos)
 	popup()
 	_search_edit.text = ""
 	_search_edit.grab_focus()
 	_populate_tree("")
+
+
+## Resets the pill filter back to "All" without triggering a tree rebuild.
+func _reset_pills() -> void:
+	_active_family_filter = -1
+	for child in _pill_container.get_children():
+		var fid: int = child.get_meta("family_id")
+		var is_all := (fid == -1)
+		child.set_pressed_no_signal(is_all)
+		var color: Color
+		if fid == -1:
+			color = Color(0.7, 0.7, 0.7)
+		else:
+			color = GNFamily.get_color(fid)
+		_style_pill(child, color, is_all)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Family Pills
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Builds the family filter pill/chip row from the dynamic family registry.
+func _build_family_pills() -> void:
+	for child in _pill_container.get_children():
+		child.queue_free()
+
+	# "All" pill
+	var all_btn := Button.new()
+	all_btn.text = "All"
+	all_btn.toggle_mode = true
+	all_btn.button_pressed = true
+	all_btn.flat = true
+	all_btn.custom_minimum_size = Vector2(32, 22)
+	all_btn.add_theme_font_size_override("font_size", 11)
+	all_btn.set_meta("family_id", -1)
+	all_btn.toggled.connect(_on_pill_toggled.bind(-1))
+	_pill_container.add_child(all_btn)
+	_style_pill(all_btn, Color(0.7, 0.7, 0.7), true)
+
+	# One pill per registered family (sorted: core 0-11, then extensions 1000+)
+	var result: Array = GNFamily.get_all_families()
+	var ids: Array = result[0]
+	var names: PackedStringArray = result[1]
+	for i in ids.size():
+		var fam_id: int = ids[i]
+		var fam_name: String = names[i]
+		var fam_color: Color = GNFamily.get_color(fam_id)
+		var btn := Button.new()
+		btn.text = fam_name
+		btn.toggle_mode = true
+		btn.button_pressed = false
+		btn.flat = true
+		btn.custom_minimum_size = Vector2(32, 22)
+		btn.add_theme_font_size_override("font_size", 11)
+		btn.set_meta("family_id", fam_id)
+		btn.toggled.connect(_on_pill_toggled.bind(fam_id))
+		_pill_container.add_child(btn)
+		_style_pill(btn, fam_color, false)
+
+
+## Applies colored StyleBoxFlat to a pill button.
+func _style_pill(btn: Button, color: Color, active: bool) -> void:
+	var bg := StyleBoxFlat.new()
+	bg.corner_radius_top_left = 10
+	bg.corner_radius_top_right = 10
+	bg.corner_radius_bottom_left = 10
+	bg.corner_radius_bottom_right = 10
+	bg.content_margin_left = 6
+	bg.content_margin_right = 6
+	bg.content_margin_top = 2
+	bg.content_margin_bottom = 2
+
+	if active:
+		bg.bg_color = color.lerp(Color.WHITE, 0.15)
+		btn.add_theme_color_override("font_color", Color.WHITE)
+		btn.add_theme_color_override("font_pressed_color", Color.WHITE)
+	else:
+		bg.bg_color = color.darkened(0.5)
+		bg.bg_color.a = 0.45
+		btn.add_theme_color_override("font_color", color.lerp(Color.WHITE, 0.3))
+		btn.add_theme_color_override("font_pressed_color", color.lerp(Color.WHITE, 0.3))
+
+	# Hover gets a subtle brighten on top of the current state.
+	var hover := bg.duplicate()
+	hover.bg_color = hover.bg_color.lightened(0.15)
+
+	btn.add_theme_stylebox_override("normal", bg)
+	btn.add_theme_stylebox_override("pressed", bg)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("hover_pressed", hover)
+	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+
+
+## Handles a pill toggle — single-select radio behavior.
+func _on_pill_toggled(pressed: bool, family_id: int) -> void:
+	if not pressed:
+		# Don't allow deselecting the already-active pill (radio behavior)
+		for child in _pill_container.get_children():
+			if child.get_meta("family_id") == family_id:
+				child.set_pressed_no_signal(true)
+				return
+		return
+
+	_active_family_filter = family_id
+
+	# Update visuals: activate the pressed pill, deactivate the rest
+	for child in _pill_container.get_children():
+		var fid: int = child.get_meta("family_id")
+		var is_active := (fid == family_id)
+		child.set_pressed_no_signal(is_active)
+		var color: Color
+		if fid == -1:
+			color = Color(0.7, 0.7, 0.7)
+		else:
+			color = GNFamily.get_color(fid)
+		_style_pill(child, color, is_active)
+
+	_populate_tree(_search_edit.text)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -96,6 +234,9 @@ func _populate_tree(filter: String) -> void:
 	for family_enum: int in GNFamily.FAMILY_NAMES:
 		var family_name: String = GNFamily.FAMILY_NAMES[family_enum]
 		if not registry_sectioned.has(family_name):
+			continue
+		# Family pill filter: skip families that don't match the active pill
+		if _active_family_filter >= 0 and family_enum != _active_family_filter:
 			continue
 
 		var sections: Dictionary = registry_sectioned[family_name]
@@ -165,6 +306,11 @@ func _populate_tree(filter: String) -> void:
 	# ── Custom Assets — dedicated top-level section ────────────────────
 	var custom_any_visible := false
 	for fam_name in custom_registry:
+		# Family pill filter applies to custom assets too
+		if _active_family_filter >= 0:
+			var fam_id_pre: int = GNFamily.string_to_type(fam_name)
+			if fam_id_pre != _active_family_filter:
+				continue
 		for sec_name in custom_registry[fam_name]:
 			for op_name in custom_registry[fam_name][sec_name]:
 				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
@@ -188,6 +334,11 @@ func _populate_tree(filter: String) -> void:
 		custom_fam_keys.sort()
 
 		for fam_name in custom_fam_keys:
+			# Family pill filter: skip non-matching families in custom section too
+			if _active_family_filter >= 0:
+				var fam_id_check: int = GNFamily.string_to_type(fam_name)
+				if fam_id_check != _active_family_filter:
+					continue
 			var fam_sections: Dictionary = custom_registry[fam_name]
 			var fam_color: Color = GNFamily.get_color(GNFamily.string_to_type(fam_name))
 

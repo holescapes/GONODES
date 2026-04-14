@@ -586,7 +586,7 @@ behaviour.  During the transition frame, `_cook()` returns `cached_output`
 
 | Operator | Active behavior |
 |----------|----------------|
-| SwitchTOP/CHOP/SOP/DAT/COMP | `[selected_index]` (blend mode: all) |
+| SwitchTOP/CHOP/SOP/DAT/COMP + IMG/POP/VOL/MAT/UI/SDF | `[selected_index]` |
 | CubeMapTOP | Assemble=all, Extract/Equirect=`[0]` |
 | MathCHOP | Unary ops=`[0]`, binary ops=all |
 | JSONDAT | Parse mode=`[-1]` (none), Generate=all |

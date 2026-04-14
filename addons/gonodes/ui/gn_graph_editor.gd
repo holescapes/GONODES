@@ -773,6 +773,11 @@ func _on_connection_request(from_node: StringName, from_port: int,
 		_undo_redo.add_undo_method(_ur_disconnect.bind(fn, from_port, tn, to_port))
 	_undo_redo.commit_action(false)
 
+	# Clear wire selection — making a connection is an atomic action.
+	if not _selected_wires.is_empty():
+		_selected_wires.clear()
+		_expr_ref_overlay.queue_redraw()
+
 
 ## User disconnects a wire (right-click drag or right_disconnects).
 ## We guard with a proximity check — only allow if the mouse is close to the
@@ -811,6 +816,11 @@ func _on_connection_drag_started(_from_node: StringName, _from_port: int,
 	# Clear stale box-select origin so the upcoming mouse-release doesn't
 	# accidentally box-select wires near the new connection endpoint.
 	_box_select_origin = Vector2(-1, -1)
+	# Clear wire selection — the click that starts a drag can sporadically
+	# hit-test as a wire click when the port extends beyond the node rect.
+	if not _selected_wires.is_empty():
+		_selected_wires.clear()
+		_expr_ref_overlay.queue_redraw()
 
 
 ## Wire drag ended (connected to a port or cancelled by pressing Escape / RMB).

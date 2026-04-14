@@ -124,6 +124,7 @@ requires_renderers = ["forward_plus"]
 |-------|----------|-------------|
 | `color` | Yes | Wire/node color as `"R,G,B"` floats (0.0–1.0) |
 | `data_script` | No | Resource path to data class (must extend `GNData`) |
+| `renderer_script` | No | Resource path to viewer renderer (must extend `GNDataRenderer`) |
 
 ### Operator Fields (`[operator.ClassName]`)
 
@@ -275,15 +276,21 @@ Operators that need to receive mouse/keyboard events from the viewer
 virtual method:
 
 ```gdscript
-func handle_viewer_input(event: InputEvent, local_pos: Vector2) -> bool:
-    # Process the event, return true to consume it (skips viewer pan/zoom)
+func handle_viewer_input(event: InputEvent, local_pos: Vector2,
+                         viewer = null, port_index: int = 0) -> bool:
+    # Process the event, return true to consume it (skips renderer + pan/zoom)
     return false
 ```
 
 This is a **generic virtual** on the base node class — the viewer panel
-calls it without any knowledge of the specific operator. No viewer
-branching or type checks. The operator decides whether to consume the
-event. If it returns `false`, the viewer's default pan/zoom handling runs.
+calls it with `(event, local_pos, self, selected_port)`.  The operator
+decides whether to consume the event.  If it returns `false`, the base
+implementation dispatches to the family's `GNDataRenderer` for default
+interaction (orbit drag, scroll-to-slice).  If that also returns `false`,
+the viewer's built-in pan/zoom handling runs.
+
+The `viewer` parameter gives direct access to the viewer panel (UV helpers,
+orbit state, etc.) — no need to cache a `WeakRef` from `render_for_viewer`.
 
 Example: WebRenderTOP overrides this to forward mouse clicks and
 keyboard events to the Chromium browser.
@@ -325,21 +332,36 @@ static func boot() -> void:
 Three static registries allow extensions to hook into core UI without
 core code importing any extension module.
 
-### 6.1 Viewer Display (render_for_viewer)
+### 6.1 Viewer Display (GNDataRenderer & render_for_viewer)
 
-Extensions provide viewer rendering by overriding `render_for_viewer(viewer)`
-on their family base class or individual operator.  The viewer parameter
-provides these display modes:
+The default viewer rendering for each data type is handled by `GNDataRenderer`
+subclasses registered in config via `renderer_script` under `[family.*]`.
+Extensions that define custom families should provide a renderer:
+
+```ini
+[family.MyFamily]
+color="0.8,0.4,0.2"
+data_script="res://addons/my_ext/my_data.gd"
+renderer_script="res://addons/my_ext/my_renderer.gd"
+```
 
 ```gdscript
-## In your extension's base class or operator:
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-    var data: GNData = get_output_data(port_index)
-    viewer.set_info("My custom info", "info bar text")
+## my_renderer.gd
+class_name MyRenderer extends GNDataRenderer
+
+func render_for_viewer(data: GNData, viewer) -> void:
+    viewer.set_info(data.get_preview_text(), "info bar text")
     # or: viewer.set_texture(my_texture, "info bar text")
     # or: viewer.set_control(my_control, "info bar text")
     # or: var vp = viewer.get_3d_viewport()  # activates 3D mode
+
+func handle_viewer_input(data: GNData, event: InputEvent, viewer) -> bool:
+    return false  # return true to consume
 ```
+
+Individual operators can still override `render_for_viewer(viewer, port_index)`
+on `GNNode` directly — the operator override takes precedence over the
+renderer dispatch.
 
 **Viewer API available to nodes:**
 - `set_texture(tex: Texture2D, info_bar: String)` — display a texture with pan/zoom
@@ -390,15 +412,19 @@ register their own parameter names (e.g. `isf_code`, `shader_code`).
 **File:** `addons/gonodes/core/gn_node.gd`
 
 ```gdscript
-func handle_viewer_input(_event: InputEvent, _local_pos: Vector2) -> bool:
-    return false  # Override in operator to consume events
+func handle_viewer_input(_event: InputEvent, _local_pos: Vector2,
+                         viewer = null, port_index: int = 0) -> bool:
+    # Base: dispatches to GNDataRenderer for the output data's family.
+    # Override in operator to consume events before the renderer sees them.
+    return false
 ```
 
 Unlike the other hooks which use static registries, input forwarding uses
 a **virtual method override** on the operator itself. The viewer panel calls
-`handle_viewer_input()` on whichever node is currently displayed — without
-knowing its type. If the method returns `true`, the event is consumed and
-the viewer's default pan/zoom is skipped.
+`handle_viewer_input(event, local_pos, self, port)` on whichever node is
+currently displayed. If the operator override returns `true`, the event is
+consumed. Otherwise, the base dispatches to the family renderer, and if
+that also returns `false`, the viewer's default pan/zoom runs.
 
 This pattern is used by WebRenderTOP to forward mouse/keyboard events to
 the Chromium browser. Any operator can use it — no registration needed,
@@ -519,15 +545,30 @@ func get_preview_text() -> String:
     return "MyExt: %d items" % my_payload.size()
 ```
 
-### Step 2: Declare the Family in the Manifest
+### Step 2: Create a Renderer (Optional)
+
+```gdscript
+# addons/gn_ext_myext/ui/my_renderer.gd
+class_name MyExtRenderer
+extends GNDataRenderer
+
+func render_for_viewer(data: GNData, viewer) -> void:
+    viewer.set_info(data.get_preview_text(), "")
+
+func render_for_preview(data: GNData, host: Control) -> void:
+    host.set_text(data.get_preview_text())
+```
+
+### Step 3: Declare the Family in the Manifest
 
 ```ini
 [family.MYEXT]
 color = "0.3,0.8,0.6"
 data_script = "res://addons/gn_ext_myext/core/my_data.gd"
+renderer_script = "res://addons/gn_ext_myext/ui/my_renderer.gd"
 ```
 
-### Step 3: Write a Boot Script
+### Step 4: Write a Boot Script
 
 ```gdscript
 # addons/gn_ext_myext/boot.gd
@@ -535,20 +576,12 @@ extends RefCounted
 
 static func boot() -> void:
     # Boot scripts run at startup. Register runtime hooks here.
-    # Viewer display is now handled by overriding render_for_viewer()
-    # on your operator or family base class — no boot registration needed.
+    # Viewer display is handled automatically by renderer_script in the manifest.
+    # Override render_for_viewer() on individual operators for custom display.
     pass
 ```
 
-Viewer rendering example (in your operator):
-```gdscript
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-    var data: GNData = get_output_data(port_index)
-    if data != null:
-        viewer.set_info(data.get_preview_text(), "")
-```
-
-### Step 4: Write Operators
+### Step 5: Write Operators
 
 Operators in the new family extend `GNNode` directly (since there's no
 built-in base class for custom families) and set `family` to the registered

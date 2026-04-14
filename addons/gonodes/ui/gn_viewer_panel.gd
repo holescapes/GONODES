@@ -58,6 +58,17 @@ var _current_control: Control = null
 var _3d_viewport: SubViewport = null
 var _3d_display: TextureRect = null
 
+# ─ 3D orbit interaction state (per-viewer, used by GNGeoRenderer / GNParticleRenderer) ─
+var orbit_yaw: float = 45.0
+var orbit_pitch: float = -30.0
+var orbit_distance: float = 3.0
+var orbit_dragging: bool = false
+var wireframe: bool = false
+
+# ─ Volume slice state (per-viewer, used by GNVolumeRenderer) ────────────────
+var vol_slice_pos: float = 0.5
+var vol_show_mip: bool = false
+
 # ─ Info label ────────────────────────────────────────────────────────────────
 var _info_label: Label = null
 
@@ -215,14 +226,12 @@ func _on_tex_clip_resized() -> void:
 
 
 func _on_tex_gui_input(event: InputEvent) -> void:
-	# Forward to the node first
 	var node: GNNode = _displayed_node.get_ref() as GNNode
 	if node != null:
 		var local_pos := Vector2.ZERO
 		if event is InputEventMouse:
 			local_pos = (event as InputEventMouse).position
-		if node.handle_viewer_input(event, local_pos):
-			# Node consumed the event — re-render (e.g. VOL scroll updates slice)
+		if node.handle_viewer_input(event, local_pos, self, _selected_port_index):
 			node.render_for_viewer(self, _selected_port_index)
 			return
 
@@ -353,9 +362,9 @@ func _on_3d_gui_input(event: InputEvent) -> void:
 		var local_pos := Vector2.ZERO
 		if event is InputEventMouse:
 			local_pos = (event as InputEventMouse).position
-		if node.handle_viewer_input(event, local_pos):
-			# Node handled input (orbit, etc.) — re-render
+		if node.handle_viewer_input(event, local_pos, self, _selected_port_index):
 			node.render_for_viewer(self, _selected_port_index)
+			return
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -623,6 +632,15 @@ func set_target(p_node_id: String) -> void:
 	_zoom = 1.0
 	_pan = Vector2.ZERO
 	_panning = false
+	# Reset 3D orbit state for the new node.
+	orbit_yaw = 45.0
+	orbit_pitch = -30.0
+	orbit_distance = 3.0
+	orbit_dragging = false
+	wireframe = false
+	# Reset volume slice state for the new node.
+	vol_slice_pos = 0.5
+	vol_show_mip = false
 	# Reset waveform view state when switching nodes.
 	if _current_control is GNWaveformView:
 		(_current_control as GNWaveformView).reset_view()
@@ -713,10 +731,10 @@ func _on_port_selected(index: int) -> void:
 # Keyboard Shortcuts
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func _on_wireframe_toggled(_pressed: bool) -> void:
+func _on_wireframe_toggled(pressed: bool) -> void:
+	wireframe = pressed
 	var node: GNNode = _displayed_node.get_ref() as GNNode
-	if node != null and node.has_method("toggle_viewer_wireframe"):
-		node.toggle_viewer_wireframe()
+	if node != null:
 		node.render_for_viewer(self, _selected_port_index)
 
 
@@ -743,8 +761,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 		# M = toggle MIP (VOL)
 		elif key.keycode == KEY_M and not key.ctrl_pressed and not key.shift_pressed:
+			vol_show_mip = not vol_show_mip
 			var node: GNNode = _displayed_node.get_ref() as GNNode
-			if node != null and node.has_method("toggle_viewer_mip"):
-				node.toggle_viewer_mip()
+			if node != null:
 				node.render_for_viewer(self, _selected_port_index)
 				get_viewport().set_input_as_handled()

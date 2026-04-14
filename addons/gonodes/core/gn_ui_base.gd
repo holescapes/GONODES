@@ -38,6 +38,9 @@ var widget_state: Dictionary = {}
 ## Cached CHOP output built from widget_state after each cook.
 var _cached_state_chop: GNChannelData = null
 
+## Cached UI data wrapping _control_node, built automatically after each cook.
+var _cached_ui_data: GNUIData = null
+
 ## Optional ordering hint for layout inside PanelTOP's container.
 ## Lower values sort earlier. Set via parameter or left at default (0).
 var sort_order: int = 0
@@ -60,6 +63,11 @@ func initialize(p_id: String) -> void:
 	# Append state CHOP port after whatever ports the subclass defined.
 	# This makes it always the last output port on every UI widget.
 	add_output("state", GNFamily.Type.CHOP, "Widget state channels")
+
+
+## UI family data check for Switch/Null routing.
+func _is_family_data(data: GNData) -> bool:
+	return data is GNUIData
 
 
 ## Default output port.  Override in subclass to add inputs or extra outputs.
@@ -88,17 +96,30 @@ func get_control_node() -> Control:
 
 
 ## Routes output data by port.  The last port is always the CHOP state output.
+## Port 0 returns GNUIData wrapping this widget's control node.
 func get_output_data(port_index: int) -> GNData:
 	if port_index == output_ports.size() - 1:
 		return _cached_state_chop
-	return cached_output
+	return _cached_ui_data
 
 
-## Wraps _cook(): after the subclass cook runs, converts widget_state → CHOP.
+## Wraps _cook(): after the subclass cook runs, builds GNUIData from the
+## control node and converts widget_state → CHOP.
 func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 	var result := super.execute_cook(inputs, frame)
+	_build_ui_data()
 	_build_state_chop()
-	return result
+	return _cached_ui_data
+
+
+## Wraps _control_node into a GNUIData for typed output on the UI port.
+func _build_ui_data() -> void:
+	if _cached_ui_data == null:
+		_cached_ui_data = GNUIData.new()
+	_cached_ui_data.control_node = _control_node
+	_cached_ui_data.control_label = _control_node.get_class() if _control_node != null else ""
+	_cached_ui_data.valid = _control_node != null
+	_cached_ui_data.timestamp = Engine.get_process_frames()
 
 
 ## Converts this widget's widget_state dictionary into GNChannelData.
@@ -149,26 +170,6 @@ func render_for_preview(host) -> void:
 		host.set_text("%s\n%s" % [_control_node.get_class(), state_str.strip_edges()])
 	else:
 		host.set_text("no widget")
-
-
-## Shared SubViewport for UI widget preview rendering.
-var _viewer_ui_preview: Control = null
-
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	if _control_node != null:
-		# Re-duplicate only if the source control changed (new cook).
-		if _viewer_ui_preview == null or not is_instance_valid(_viewer_ui_preview):
-			_viewer_ui_preview = _control_node.duplicate()
-
-		# Build info from widget_state
-		var state_parts: PackedStringArray = []
-		for key in widget_state:
-			state_parts.append("%s: %s" % [key, widget_state[key]])
-		var info := ", ".join(state_parts) if state_parts.size() > 0 else "(no state)"
-		viewer.set_control(_viewer_ui_preview, info)
-		return
-	viewer.set_info("No UI output", "")
 
 
 ## Called by WindowOUT to deliver input events to overlay content.

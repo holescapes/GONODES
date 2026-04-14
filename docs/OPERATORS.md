@@ -1206,16 +1206,16 @@ Used as an organizational endpoint, a reference target for expressions, or to "n
 
 #### SwitchTOP
 
-Select one of up to 4 inputs by index.
+Select one of N dynamically-growing inputs by index.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| index | Int | 0 | 0–3 | Which input to output |
-| blend | Bool | false | — | Blend between adjacent inputs (stubbed) |
+| index | Int | 0 | 0–N | Which input to output |
+| null_on_missing | Bool | false | — | Output null instead of holding previous frame when selected input is empty |
 
-**Inputs:** `in0`, `in1`, `in2`, `in3` (all TOP).
+**Inputs:** Dynamic auto-grow (TOP).
 
-**How it works:** Returns the texture from the selected input index. Falls back to the first valid input if the selected index has no connection.
+**How it works:** Returns the texture from the selected input index. Holds the previous frame when the selected input is unavailable (smooth transition). For crossfading between textures, use CrossTOP.
 
 ---
 

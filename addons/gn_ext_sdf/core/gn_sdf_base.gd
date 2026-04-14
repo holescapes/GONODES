@@ -23,6 +23,10 @@ func initialize(p_id: String) -> void:
 	super.initialize(p_id)
 
 
+func _is_family_data(data: GNData) -> bool:
+	return data is GNSDFData
+
+
 ## Safe input extraction — returns null if port is empty or wrong type.
 func _get_input_sdf(inputs: Array[GNData], port: int = 0) -> GNSDFData:
 	if port < inputs.size() and inputs[port] is GNSDFData:

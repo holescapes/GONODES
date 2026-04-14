@@ -4,6 +4,10 @@ extends GNDatBase
 ## Outputs a table listing matching operators with their metadata.
 
 
+## Maps dropdown indices to family IDs (index 0 = "All" = -1).
+var _filter_family_ids: Array[int] = []
+
+
 func _init() -> void:
 	node_type = "op_find"
 
@@ -13,8 +17,17 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_enum("family_filter",
-		PackedStringArray(["All", "CHOP", "TOP", "DAT", "SOP", "COMP", "MAT"]), 0,
+	# Build family filter dynamically: "All" + every registered family
+	var fam_data: Array = GNFamily.get_all_families()
+	var fam_ids: Array[int] = fam_data[0]
+	var fam_names: PackedStringArray = fam_data[1]
+	# Prepend "All"
+	_filter_family_ids = [-1]
+	var options := PackedStringArray(["All"])
+	for i in range(fam_ids.size()):
+		_filter_family_ids.append(fam_ids[i])
+		options.append(fam_names[i])
+	add_parameter(GNParameter.create_enum("family_filter", options, 0,
 		"Family Filter", "Filter by operator family (All = no filter)"))
 	add_parameter(GNParameter.create_string("name_pattern", "*",
 		"Name Pattern", "Glob pattern to match operator names"))
@@ -39,15 +52,8 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	headers.append("num_outputs")
 	out.set_headers(headers)
 
-	# Map enum index to GNFamily.Type (-1 for All)
-	var target_family: int = -1
-	match family_idx:
-		1: target_family = GNFamily.Type.CHOP
-		2: target_family = GNFamily.Type.TOP
-		3: target_family = GNFamily.Type.DAT
-		4: target_family = GNFamily.Type.SOP
-		5: target_family = GNFamily.Type.COMP
-		6: target_family = GNFamily.Type.MAT
+	# Map dropdown index to family ID via the stored lookup table
+	var target_family: int = _filter_family_ids[family_idx] if family_idx >= 0 and family_idx < _filter_family_ids.size() else -1
 
 	# Walk up the scene tree to find the network node holding a GNNetwork
 	var network: GNNetwork = _find_network()

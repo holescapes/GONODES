@@ -48,6 +48,15 @@ func initialize(p_id: String) -> void:
 	super.initialize(p_id)
 
 
+func _is_family_data(data: GNData) -> bool:
+	return data is GNTextureData
+
+
+## TOPs use SubViewport rendering which requires the main thread.
+func requires_main_thread() -> bool:
+	return true
+
+
 ## Default output port.  Override _init_ports() in subclass to add inputs
 ## or extra outputs, but call super._init_ports() first (or add "out" yourself).
 func _init_ports() -> void:
@@ -76,18 +85,6 @@ func render_for_preview(host) -> void:
 			host.set_texture(td.texture)
 			return
 	host.set_text("")
-
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	var data: GNData = get_output_data(port_index)
-	if data is GNTextureData:
-		var tex_data: GNTextureData = data as GNTextureData
-		if tex_data.texture:
-			viewer.set_texture(tex_data.texture,
-				"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
-			viewer.set_texture_overlay(null)  # Default: no overlay
-			return
-	viewer.set_info("No texture output", "")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -129,7 +129,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_update_wheel_params()
 
 	node_warning = ""
-	return comp_data if comp_data != null else GNData.new()
+	return comp_data if comp_data != null else _build_comp_data()
 
 
 func _ensure_vehicle() -> void:
