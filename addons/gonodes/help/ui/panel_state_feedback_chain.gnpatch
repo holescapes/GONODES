@@ -30,7 +30,7 @@
                 "text": {
                     "value": "State Readout",
                     "mode": "EXPRESSION",
-                    "expression": "\"Vol: \" + str(int(chop(\"slider1\", \"slider1:value\"))) + \"  Pan: \" + str(snapped(chop(\"knob1\", \"knob1:value\"), 0.01))"
+                    "expression": "\"Vol: \" + str(int(chop(\"slider1\", \"value\"))) + \"  Pan: \" + str(snapped(chop(\"knob1\", \"value\"), 0.01))"
                 },
                 "font_size": { "value": 14 }
             }
@@ -68,7 +68,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Widget CHOP State Readback \u2014 Live Values\n\nEvery UI widget has a \u201cstate\u201d CHOP output port.\nchop() expressions read widget state directly:\n  chop(\"slider1\", \"slider1:value\")\n  chop(\"knob1\", \"knob1:value\")\n\nLabelUI text parameter uses an expression that reads\nsibling widget CHOP state and formats a live readout.\nNo PanelTOP or feedback wires needed.\n\nNote: nodes with expressions currently re-cook every\nframe (pre-cook pass marks them dirty). Wire-connected\nchanges propagate via event-driven dirty flags.",
+            "text": "Widget CHOP State Readback \u2014 Live Values\n\nEvery UI widget has a \u201cstate\u201d CHOP output port.\nchop() expressions read widget state directly:\n  chop(\"slider1\", \"value\")\n  chop(\"knob1\", \"value\")\n\nLabelUI text parameter uses an expression that reads\nsibling widget CHOP state and formats a live readout.\nNo PanelTOP or feedback wires needed.\n\nNote: nodes with expressions currently re-cook every\nframe (pre-cook pass marks them dirty). Wire-connected\nchanges propagate via event-driven dirty flags.",
             "position": [-150.0, -300.0],
             "size": [550.0, 150.0],
             "color": [0.2, 0.7, 0.9, 0.8]

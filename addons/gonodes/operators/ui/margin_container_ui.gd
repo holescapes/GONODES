@@ -36,7 +36,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var ms: Vector2i = get_param_value("min_size")
 	_margin.custom_minimum_size = Vector2(ms.x, ms.y)
 
-	_populate_child()
+	_populate_child(_inputs)
 
 	widget_state = {}
 	return null
@@ -52,12 +52,11 @@ func _ensure_margin() -> void:
 	_control_node = _margin
 
 
-func _populate_child() -> void:
+func _populate_child(inputs: Array[GNData]) -> void:
 	var new_child: Control = null
-	var nodes := get_input_nodes_sorted()
-	for upstream in nodes:
-		if upstream is GNUiBase:
-			new_child = (upstream as GNUiBase).get_control_node()
+	for data in inputs:
+		if data is GNUIData and (data as GNUIData).control_node != null:
+			new_child = (data as GNUIData).control_node
 			break
 
 	# Remove old child if changed

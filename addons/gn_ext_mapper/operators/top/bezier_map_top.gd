@@ -4,8 +4,17 @@ extends GNTopBase
 ## Uses Newton-Raphson inverse mapping from output pixel to source UV.
 ## Interactive overlay: drag 16 control points directly in the viewer.
 
-# Internal names match shader uniforms: cpCR where C=col (0-3), R=row (0-3)
+# Human-readable parameter names in row-major order (row 0-3 top→bottom,
+# col 0-3 left→right).  Matches BezierDragUI widget_state keys.
 const _CP_NAMES: PackedStringArray = [
+	"top_left", "top_cleft", "top_cright", "top_right",
+	"umid_left", "umid_cleft", "umid_cright", "umid_right",
+	"lmid_left", "lmid_cleft", "lmid_cright", "lmid_right",
+	"bot_left", "bot_cleft", "bot_cright", "bot_right",
+]
+
+# Shader uniform names (cpCR where C=col, R=row) in the same row-major order.
+const _SHADER_NAMES: PackedStringArray = [
 	"cp00", "cp10", "cp20", "cp30",
 	"cp01", "cp11", "cp21", "cp31",
 	"cp02", "cp12", "cp22", "cp32",
@@ -31,30 +40,20 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	# 16 control points (4x4 grid). Default positions form a uniform grid.
-	# Named by grid position: Row 0-3 (top to bottom), Col 0-3 (left to right)
 	var defaults := [
 		[0.0, 0.0], [0.333, 0.0], [0.667, 0.0], [1.0, 0.0],
 		[0.0, 0.333], [0.333, 0.333], [0.667, 0.333], [1.0, 0.333],
 		[0.0, 0.667], [0.333, 0.667], [0.667, 0.667], [1.0, 0.667],
 		[0.0, 1.0], [0.333, 1.0], [0.667, 1.0], [1.0, 1.0],
 	]
-	# Internal names must stay as cpXY for the shader uniforms
-	var names := [
-		"cp00", "cp10", "cp20", "cp30",
-		"cp01", "cp11", "cp21", "cp31",
-		"cp02", "cp12", "cp22", "cp32",
-		"cp03", "cp13", "cp23", "cp33",
-	]
 	# Human-readable labels: Row/Col grid positions
 	var row_labels := ["Top", "Upper Mid", "Lower Mid", "Bottom"]
 	var col_labels := ["Left", "Center-Left", "Center-Right", "Right"]
-	# Map internal index → (col, row) for labeling
-	# Grid layout: index = row * 4 + col, names are cpCR where C=col, R=row
 	for i in range(16):
-		var n: String = names[i]
+		var n: String = _CP_NAMES[i]
 		var d: Array = defaults[i]
-		var col_idx: int = int(n.substr(2, 1))  # cp[C]R → C
-		var row_idx: int = int(n.substr(3, 1))  # cpC[R] → R
+		var row_idx: int = i / 4
+		var col_idx: int = i % 4
 		var label := "%s %s" % [row_labels[row_idx], col_labels[col_idx]]
 		add_parameter(GNParameter.create_float(n + "_x", d[0], -1.0, 2.0, 0.001,
 			"%s X" % label, "Horizontal position for control point row %d, col %d" % [row_idx, col_idx]))
@@ -77,15 +76,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("input_tex", tex_in.texture)
 
-	var names := [
-		"cp00", "cp10", "cp20", "cp30",
-		"cp01", "cp11", "cp21", "cp31",
-		"cp02", "cp12", "cp22", "cp32",
-		"cp03", "cp13", "cp23", "cp33",
-	]
-	for n in names:
-		var pt := Vector2(get_param_value(n + "_x"), get_param_value(n + "_y"))
-		_material.set_shader_parameter(n, pt)
+	for i in range(16):
+		var pt := Vector2(get_param_value(_CP_NAMES[i] + "_x"), get_param_value(_CP_NAMES[i] + "_y"))
+		_material.set_shader_parameter(_SHADER_NAMES[i], pt)
 
 	_sync_overlay_points()
 
@@ -139,10 +132,8 @@ func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, p
 
 	elif event is InputEventMouseMotion:
 		if _dragging_index >= 0:
-			# _dragging_index is a grid index (row-major). Convert to param name.
-			var col: int = _dragging_index % 4
-			var row: int = _dragging_index / 4
-			var key := "cp%d%d" % [col, row]
+			# _dragging_index is a grid index (row-major). Look up param name.
+			var key: String = _CP_NAMES[_dragging_index]
 			set_param_value(key + "_x", uv.x)
 			set_param_value(key + "_y", uv.y)
 			_sync_overlay_points()
@@ -171,16 +162,7 @@ func _ensure_overlay() -> void:
 func _sync_overlay_points() -> void:
 	if _overlay == null:
 		return
-	# _CP_NAMES are ordered col-major (cpCR), but the overlay grid is row-major.
-	# Internal layout: index i → col = i % 4, row = i / 4
-	# Grid points are stored row-major: grid[row * cols + col]
+	# _CP_NAMES are in row-major order matching the overlay grid layout.
 	for i in range(16):
 		var key: String = _CP_NAMES[i]
-		var col_idx: int = int(key.substr(2, 1))
-		var row_idx: int = int(key.substr(3, 1))
-		var grid_idx: int = row_idx * 4 + col_idx
-		_overlay.points[grid_idx] = Vector2(get_param_value(key + "_x"), get_param_value(key + "_y"))
-	# Update column/row mapping for the reverse direction (grid_idx → param name)
-
-	# Also need to map back: when dragging grid point grid_idx, which _CP_NAMES index?
-	# grid_idx = row * 4 + col → cp name = "cp" + str(col) + str(row)
+		_overlay.points[i] = Vector2(get_param_value(key + "_x"), get_param_value(key + "_y"))

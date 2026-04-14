@@ -28,20 +28,13 @@ func get_active_input_indices() -> PackedInt32Array:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	# UI routing goes through get_control_node(), not GNData — custom cook.
 	var idx: int = clampi(get_param_value("index"), 0, inputs.size() - 1)
-	var selected_ui: GNUiBase = null
-	var input_nodes := get_input_nodes_sorted()
-	if idx < input_nodes.size() and input_nodes[idx] is GNUiBase:
-		selected_ui = input_nodes[idx] as GNUiBase
-
-	if selected_ui != null:
-		var ctrl: Control = selected_ui.get_control_node()
+	if idx < inputs.size() and inputs[idx] is GNUIData:
+		var ctrl: Control = (inputs[idx] as GNUIData).control_node
 		if ctrl != null:
 			_control_node = ctrl
-			widget_state = selected_ui.widget_state.duplicate() if selected_ui.widget_state != null else {}
-			return null  # UI output routed via get_control_node()
-
+			widget_state = {}
+			return null
 	_control_node = null
 	widget_state = {}
 	return null

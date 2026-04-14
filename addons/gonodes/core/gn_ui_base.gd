@@ -123,7 +123,9 @@ func _build_ui_data() -> void:
 
 
 ## Converts this widget's widget_state dictionary into GNChannelData.
-## Each key becomes a channel named "<id>:<key>" with a single float sample.
+## Each key becomes a plain channel name with a single float sample.
+## This matches standard CHOP naming: chop("slider1", "value") — no prefix.
+## ContainerUI overrides this to add child-ID prefixes for disambiguation.
 func _build_state_chop() -> void:
 	if _cached_state_chop == null:
 		_cached_state_chop = GNChannelData.new()
@@ -131,8 +133,7 @@ func _build_state_chop() -> void:
 	_cached_state_chop.length = 1
 	_cached_state_chop.sample_rate = 60.0
 	for key in widget_state:
-		var ch_name: String = "%s:%s" % [id, key]
-		_cached_state_chop.set_single_value(ch_name, float(widget_state[key]))
+		_cached_state_chop.set_single_value(key, float(widget_state[key]))
 
 
 ## Destroys the control node and resets this widget to pre-first-cook state.

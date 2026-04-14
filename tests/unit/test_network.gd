@@ -303,6 +303,35 @@ func test_rename_updates_connections() -> void:
 	GNTestAssert.assert_eq(inputs[0].from_node, "alpha", "connection updated to new name")
 
 
+func test_rename_updates_channel_prefix_in_expressions() -> void:
+	var src := _make_node("drag1")
+	var reader := _make_node("map1")
+	_network.add_node(src)
+	_network.add_node(reader)
+	# ContainerUI-style expression uses node:channel prefix for disambiguation.
+	# Rename should update the prefix portion.
+	var p: GNParameter = reader.parameters.values()[0]
+	p.mode = GNParameter.Mode.EXPRESSION
+	p.set_expression('chop("container1", "drag1:cp00_x")')
+	_network.rename_node("drag1", "drag")
+	GNTestAssert.assert_eq(p.expression, 'chop("container1", "drag:cp00_x")',
+		"channel prefix updated on rename")
+
+
+func test_rename_updates_plain_channel_expression() -> void:
+	var src := _make_node("slider1")
+	var reader := _make_node("label1")
+	_network.add_node(src)
+	_network.add_node(reader)
+	# Direct widget read uses plain channel name (consistent with regular CHOPs)
+	var p: GNParameter = reader.parameters.values()[0]
+	p.mode = GNParameter.Mode.EXPRESSION
+	p.set_expression('chop("slider1", "value")')
+	_network.rename_node("slider1", "vol_slider")
+	GNTestAssert.assert_eq(p.expression, 'chop("vol_slider", "value")',
+		"node name updated, plain channel unchanged")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Unique ID Generation
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -1,11 +1,13 @@
 class_name GridWarpTOP
 extends GNTopBase
 ## NxM bilinear grid warp with per-point control parameters.
-## Grid positions are passed directly as a vec2 uniform array — no CPU→GPU
-## texture pipeline, no ImageTexture timing issues.
+## Grid offsets are passed as a vec2 uniform array — displacement texture
+## sampling and amplitude scaling happen entirely on the GPU.
+## All point params are pre-allocated for MAX_GRID×MAX_GRID; inactive ones
+## are hidden in the inspector.  Changing grid size never loses offset values.
 ## Interactive overlay: drag grid control points directly in the viewer.
 
-const MAX_GRID := 8  # Max cols/rows with per-point params (8×8 = 64 points)
+const MAX_GRID := 8  # Max cols/rows (8×8 = 64 control points)
 
 var _last_cols: int = -1
 var _last_rows: int = -1
@@ -33,7 +35,20 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("grid_rows", 4, 2, MAX_GRID, "Grid Rows", "Number of control point rows"))
 	add_parameter(GNParameter.create_float("amplitude", 1.0, -2.0, 2.0, 0.001, "Amplitude",
 		"Global displacement multiplier applied to per-point offsets"))
-	_rebuild_point_params(4, 4)
+	# Pre-allocate ALL possible per-point offset parameters.
+	# Points outside the current grid_cols × grid_rows are hidden in the UI.
+	for y in range(MAX_GRID):
+		for x in range(MAX_GRID):
+			var pt_key := "pt_%d_%d" % [x, y]
+			var label := "Point (%d,%d)" % [x, y]
+			var px := GNParameter.create_float(pt_key + "_x", 0.0, -1.0, 1.0, 0.001,
+				"%s X" % label, "Horizontal offset for grid point (%d,%d)" % [x, y])
+			var py := GNParameter.create_float(pt_key + "_y", 0.0, -1.0, 1.0, 0.001,
+				"%s Y" % label, "Vertical offset for grid point (%d,%d)" % [x, y])
+			px.visible = (x < 4 and y < 4)
+			py.visible = (x < 4 and y < 4)
+			add_parameter(px)
+			add_parameter(py)
 	_last_cols = 4
 	_last_rows = 4
 
@@ -42,7 +57,7 @@ func _pre_cook(_delta: float) -> void:
 	var cols: int = get_param_value("grid_cols")
 	var rows: int = get_param_value("grid_rows")
 	if cols != _last_cols or rows != _last_rows:
-		_rebuild_point_params(cols, rows)
+		_update_point_visibility(cols, rows)
 		_last_cols = cols
 		_last_rows = rows
 	super._pre_cook(_delta)
@@ -59,11 +74,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var amp: float = get_param_value("amplitude")
 	var res: Vector2i = tex_in.resolution
 
-	# Optional displacement map from second input
 	var disp_tex: GNTextureData = _get_input_top(inputs, 1)
-
-	# Build the grid_points array (base UV + offset × amplitude)
-	var points := _build_grid_points(cols, rows, amp, disp_tex)
+	var offsets := _build_grid_offsets(cols, rows)
 
 	_init_shader_viewport("res://addons/gn_ext_mapper/shaders/grid_warp.gdshader", true, false, res)
 
@@ -74,74 +86,58 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("input_tex", tex_in.texture)
 	_material.set_shader_parameter("grid_cols", cols)
 	_material.set_shader_parameter("grid_rows", rows)
-	_material.set_shader_parameter("grid_points", points)
+	_material.set_shader_parameter("amplitude", amp)
+	_material.set_shader_parameter("grid_offsets", offsets)
+	_material.set_shader_parameter("has_disp", disp_tex != null)
+	if disp_tex != null:
+		_material.set_shader_parameter("disp_tex", disp_tex.texture)
 
-	_sync_overlay_points(cols, rows, points)
+	var overlay_pts := _build_overlay_points(cols, rows)
+	_sync_overlay_points(cols, rows, overlay_pts)
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
 
-## Builds a flat PackedVector2Array of displaced UV positions for the shader.
-func _build_grid_points(cols: int, rows: int, amp: float,
-		disp_data: GNTextureData = null) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	points.resize(cols * rows)
-
-	# Read displacement texture on CPU if connected
-	var disp_image: Image = null
-	if disp_data != null and disp_data.texture != null:
-		disp_image = disp_data.texture.get_image()
-
+## Returns raw per-point offsets from parameters.  Layout: [y * cols + x].
+func _build_grid_offsets(cols: int, rows: int) -> PackedVector2Array:
+	var offsets := PackedVector2Array()
+	offsets.resize(cols * rows)
 	for y in range(rows):
 		for x in range(cols):
-			var base_u: float = float(x) / float(cols - 1)
-			var base_v: float = float(y) / float(rows - 1)
-
-			var offset := Vector2.ZERO
 			var pt_key := "pt_%d_%d" % [x, y]
-			if parameters.has(pt_key + "_x"):
-				offset.x = get_param_value(pt_key + "_x")
-				offset.y = get_param_value(pt_key + "_y")
+			offsets[y * cols + x] = Vector2(
+				get_param_value(pt_key + "_x"),
+				get_param_value(pt_key + "_y"))
+	return offsets
 
-			# Displacement texture offsets (sampled at grid point position)
-			if disp_image != null:
-				var sx := clampi(int(base_u * float(disp_image.get_width() - 1)), 0, disp_image.get_width() - 1)
-				var sy := clampi(int(base_v * float(disp_image.get_height() - 1)), 0, disp_image.get_height() - 1)
-				var dc: Color = disp_image.get_pixel(sx, sy)
-				offset.x += dc.r - 0.5
-				offset.y += dc.g - 0.5
 
-			points[y * cols + x] = Vector2(
-				base_u + offset.x * amp,
-				base_v + offset.y * amp)
+## Returns UV positions for overlay drawing (base + raw offset).
+## Amplitude is shader-only and does not affect handle positions.
+func _build_overlay_points(cols: int, rows: int) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	points.resize(cols * rows)
+	for y in range(rows):
+		for x in range(cols):
+			var idx := y * cols + x
+			var base_u := float(x) / float(cols - 1)
+			var base_v := float(y) / float(rows - 1)
+			var pt_key := "pt_%d_%d" % [x, y]
+			points[idx] = Vector2(
+				base_u + get_param_value(pt_key + "_x"),
+				base_v + get_param_value(pt_key + "_y"))
 	return points
 
 
-## Dynamically adds/removes per-point offset params when grid size changes.
-func _rebuild_point_params(cols: int, rows: int) -> void:
-	# Remove old point params
-	var to_remove: Array[String] = []
-	for key in parameters:
-		if key.begins_with("pt_"):
-			to_remove.append(key)
-	for key in to_remove:
-		if parameters[key].value_changed.is_connected(_on_parameter_changed):
-			parameters[key].value_changed.disconnect(_on_parameter_changed)
-		if parameters[key].mode_changed.is_connected(_on_parameter_mode_changed):
-			parameters[key].mode_changed.disconnect(_on_parameter_mode_changed)
-		parameters.erase(key)
-
-	for y in range(rows):
-		for x in range(cols):
+## Shows/hides per-point params based on active grid dimensions.
+func _update_point_visibility(cols: int, rows: int) -> void:
+	for y in range(MAX_GRID):
+		for x in range(MAX_GRID):
+			var active: bool = (x < cols and y < rows)
 			var pt_key := "pt_%d_%d" % [x, y]
-			var label := "Point (%d,%d)" % [x, y]
-			var px := GNParameter.create_float(pt_key + "_x", 0.0, -1.0, 1.0, 0.001,
-				"%s X" % label, "Horizontal offset for grid point (%d,%d)" % [x, y])
-			var py := GNParameter.create_float(pt_key + "_y", 0.0, -1.0, 1.0, 0.001,
-				"%s Y" % label, "Vertical offset for grid point (%d,%d)" % [x, y])
-			add_parameter(px)
-			add_parameter(py)
+			parameters[pt_key + "_x"].visible = active
+			parameters[pt_key + "_y"].visible = active
+	parameters_changed.emit(id)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -158,8 +154,7 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 			_viewer_ref = weakref(viewer)
 			var cols: int = get_param_value("grid_cols")
 			var rows: int = get_param_value("grid_rows")
-			var amp: float = get_param_value("amplitude")
-			var points := _build_grid_points(cols, rows, amp)
+			var points := _build_overlay_points(cols, rows)
 			_ensure_overlay(cols, rows)
 			_sync_overlay_points(cols, rows, points)
 			viewer.set_texture_overlay(_overlay)
@@ -200,13 +195,11 @@ func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, p
 			# Compute base UV for this grid point
 			var base_u: float = float(x) / float(cols - 1)
 			var base_v: float = float(y) / float(get_param_value("grid_rows") - 1)
-			# Offset = (desired_uv - base_uv) / amplitude
-			var amp: float = get_param_value("amplitude")
-			if not is_zero_approx(amp):
-				var offset := Vector2((uv.x - base_u) / amp, (uv.y - base_v) / amp)
-				var pt_key := "pt_%d_%d" % [x, y]
-				set_param_value(pt_key + "_x", clampf(offset.x, -1.0, 1.0))
-				set_param_value(pt_key + "_y", clampf(offset.y, -1.0, 1.0))
+			# Offset = desired_uv - base_uv (amplitude only affects shader)
+			var offset := Vector2(uv.x - base_u, uv.y - base_v)
+			var pt_key := "pt_%d_%d" % [x, y]
+			set_param_value(pt_key + "_x", clampf(offset.x, -1.0, 1.0))
+			set_param_value(pt_key + "_y", clampf(offset.y, -1.0, 1.0))
 			mark_dirty()
 			return true
 		else:

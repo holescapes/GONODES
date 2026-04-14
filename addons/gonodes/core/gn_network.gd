@@ -282,6 +282,7 @@ func _replace_id_in_expr(text: String, old_id: String, new_id: String) -> String
 
 ## Replaces old_id as a complete path segment (split by "/") in a path string.
 ## "lfo1" → matches "lfo1", "subnet/lfo1", "lfo1/inner", "a/lfo1/b"
+## Also handles "old_id:channel" channel-reference prefixes (e.g. "drag1:top_left_x").
 ## Does NOT match "lfo10" or "my_lfo1" (must be exact segment).
 func _replace_path_segment(path: String, old_id: String, new_id: String) -> String:
 	var segments := path.split("/")
@@ -289,6 +290,9 @@ func _replace_path_segment(path: String, old_id: String, new_id: String) -> Stri
 	for i in range(segments.size()):
 		if segments[i] == old_id:
 			segments[i] = new_id
+			changed = true
+		elif segments[i].begins_with(old_id + ":"):
+			segments[i] = new_id + segments[i].substr(old_id.length())
 			changed = true
 	if changed:
 		return "/".join(segments)

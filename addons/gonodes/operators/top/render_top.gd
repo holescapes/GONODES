@@ -243,6 +243,8 @@ func _populate_scene_from_network() -> void:
 	if _viewport == null:
 		return
 
+	var cook_engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	var net: GNNetwork = cook_engine.network if cook_engine != null else null
 	var has_camera: bool = false
 
 	for upstream_node in get_input_nodes_sorted():
@@ -254,7 +256,8 @@ func _populate_scene_from_network() -> void:
 			continue
 
 		# Resolve the scene node — walks through pass-through COMPs automatically
-		var scene_nd: Node3D = resolve_comp_scene_node(upstream_node as GNCompBase)
+		var scene_nd: Node3D = GNCompBase.resolve_scene_node_upstream(
+			upstream_node as GNCompBase, net) if net != null else (upstream_node as GNCompBase).get_scene_node()
 		if scene_nd == null:
 			continue
 

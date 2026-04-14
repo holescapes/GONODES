@@ -91,6 +91,30 @@ func destroy_scene_node() -> void:
 		_scene_node = null
 
 
+## Walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP,
+## AnimationCOMP, etc.) to find the actual scene node.  Cycle-safe.
+static func resolve_scene_node_upstream(comp: GNCompBase, net: GNNetwork) -> Node3D:
+	return _resolve_scene_node_r(comp, net, {})
+
+
+static func _resolve_scene_node_r(comp: GNCompBase, net: GNNetwork,
+		visited: Dictionary) -> Node3D:
+	var scene_nd: Node3D = comp.get_scene_node()
+	if scene_nd != null:
+		return scene_nd
+	if visited.has(comp.id):
+		return null
+	visited[comp.id] = true
+	for conn in net.get_input_connections(comp.id):
+		var upstream: GNNode = net.nodes.get(conn.from_node, null)
+		if upstream is GNCompBase:
+			var resolved: Node3D = _resolve_scene_node_r(
+				upstream as GNCompBase, net, visited)
+			if resolved != null:
+				return resolved
+	return null
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Preview
 # ═══════════════════════════════════════════════════════════════════════════════

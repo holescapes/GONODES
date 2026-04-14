@@ -13,8 +13,11 @@ var _search_edit: LineEdit = null
 ## Scrollable row of family filter pills.
 var _pill_container: HBoxContainer = null
 
-## Currently selected family filter — -1 means "All".
+## Currently selected family filter — -1 means "All", -2 means "Custom only".
 var _active_family_filter: int = -1
+
+const _FILTER_ALL := -1
+const _FILTER_CUSTOM := -2
 
 ## Tree that displays operators grouped by family.
 var _tree: Tree = null
@@ -50,14 +53,14 @@ func _ready() -> void:
 	# Family filter pill row
 	var scroll := ScrollContainer.new()
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	scroll.custom_minimum_size.y = 26
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
+	scroll.custom_minimum_size.y = 24
 	vbox.add_child(scroll)
 
 	_pill_container = HBoxContainer.new()
 	_pill_container.add_theme_constant_override("separation", 3)
 	scroll.add_child(_pill_container)
-	_build_family_pills()
+	# Pills are built lazily on first popup — families aren't registered yet at _ready time.
 
 	# Tree
 	_tree = Tree.new()
@@ -75,7 +78,7 @@ func _ready() -> void:
 ## Opens the palette popup at the given global position.
 func popup_at(global_pos: Vector2) -> void:
 	_allowed_operators = []
-	_reset_pills()
+	_ensure_pills()
 	position = Vector2i(global_pos)
 	popup()
 	_search_edit.text = ""
@@ -87,7 +90,7 @@ func popup_at(global_pos: Vector2) -> void:
 ## Used when the user drops a connection on empty space — only compatible nodes shown.
 func popup_at_filtered(global_pos: Vector2, allowed: PackedStringArray) -> void:
 	_allowed_operators = allowed
-	_reset_pills()
+	_ensure_pills()
 	position = Vector2i(global_pos)
 	popup()
 	_search_edit.text = ""
@@ -95,16 +98,24 @@ func popup_at_filtered(global_pos: Vector2, allowed: PackedStringArray) -> void:
 	_populate_tree("")
 
 
+## Builds pills from the current registry, then resets the filter to "All".
+func _ensure_pills() -> void:
+	_build_family_pills()
+	_reset_pills()
+
+
 ## Resets the pill filter back to "All" without triggering a tree rebuild.
 func _reset_pills() -> void:
-	_active_family_filter = -1
+	_active_family_filter = _FILTER_ALL
 	for child in _pill_container.get_children():
 		var fid: int = child.get_meta("family_id")
-		var is_all := (fid == -1)
+		var is_all := (fid == _FILTER_ALL)
 		child.set_pressed_no_signal(is_all)
 		var color: Color
-		if fid == -1:
+		if fid == _FILTER_ALL:
 			color = Color(0.7, 0.7, 0.7)
+		elif fid == _FILTER_CUSTOM:
+			color = Color(0.9, 0.75, 0.3)
 		else:
 			color = GNFamily.get_color(fid)
 		_style_pill(child, color, is_all)
@@ -131,6 +142,19 @@ func _build_family_pills() -> void:
 	all_btn.toggled.connect(_on_pill_toggled.bind(-1))
 	_pill_container.add_child(all_btn)
 	_style_pill(all_btn, Color(0.7, 0.7, 0.7), true)
+
+	# "Custom" pill — shows only .gnasset custom operators
+	var custom_btn := Button.new()
+	custom_btn.text = "Custom"
+	custom_btn.toggle_mode = true
+	custom_btn.button_pressed = false
+	custom_btn.flat = true
+	custom_btn.custom_minimum_size = Vector2(32, 22)
+	custom_btn.add_theme_font_size_override("font_size", 11)
+	custom_btn.set_meta("family_id", _FILTER_CUSTOM)
+	custom_btn.toggled.connect(_on_pill_toggled.bind(_FILTER_CUSTOM))
+	_pill_container.add_child(custom_btn)
+	_style_pill(custom_btn, Color(0.9, 0.75, 0.3), false)
 
 	# One pill per registered family (sorted: core 0-11, then extensions 1000+)
 	var result: Array = GNFamily.get_all_families()
@@ -204,8 +228,10 @@ func _on_pill_toggled(pressed: bool, family_id: int) -> void:
 		var is_active := (fid == family_id)
 		child.set_pressed_no_signal(is_active)
 		var color: Color
-		if fid == -1:
+		if fid == _FILTER_ALL:
 			color = Color(0.7, 0.7, 0.7)
+		elif fid == _FILTER_CUSTOM:
+			color = Color(0.9, 0.75, 0.3)
 		else:
 			color = GNFamily.get_color(fid)
 		_style_pill(child, color, is_active)
@@ -231,7 +257,10 @@ func _populate_tree(filter: String) -> void:
 	var filter_lower := filter.to_lower()
 
 	# ── Built-in operators (excludes custom assets) ────────────────────
+	var _show_builtin := (_active_family_filter != _FILTER_CUSTOM)
 	for family_enum: int in GNFamily.FAMILY_NAMES:
+		if not _show_builtin:
+			break
 		var family_name: String = GNFamily.FAMILY_NAMES[family_enum]
 		if not registry_sectioned.has(family_name):
 			continue

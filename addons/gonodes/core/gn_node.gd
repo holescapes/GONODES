@@ -420,12 +420,6 @@ func render_for_preview(host) -> void:
 		if renderer != null:
 			renderer.render_for_preview(cached_output, host)
 			return
-	# Fallback: texture shortcut or plain text
-	if cached_output is GNTextureData and host.has_method("set_texture"):
-		var td: GNTextureData = cached_output as GNTextureData
-		if td.texture != null:
-			host.set_texture(td.texture)
-			return
 	if cached_output != null and host.has_method("set_text"):
 		host.set_text(cached_output.get_preview_text())
 	elif host.has_method("set_text"):
@@ -444,13 +438,7 @@ func update_preview_control(control: Control) -> void:
 			(control as TextureRect).texture = null
 		return
 
-	# Texture data → TextureRect (for cross-family nodes outputting textures)
-	if cached_output is GNTextureData:
-		if control is TextureRect:
-			(control as TextureRect).texture = (cached_output as GNTextureData).texture
-		return
-
-	# Everything else → Label via polymorphic get_preview_text()
+	# Delegate to polymorphic get_preview_text()
 	if control is Label:
 		(control as Label).text = cached_output.get_preview_text()
 
@@ -606,34 +594,6 @@ func get_input_nodes_sorted(min_port: int = 0) -> Array[GNNode]:
 		if node != null:
 			result.append(node)
 	return result
-
-
-## Resolves the scene Node3D for a [param comp], walking upstream through
-## pass-through COMPs (NullCOMP, SwitchCOMP, AnimationCOMP, etc.) that don't
-## own a scene node themselves.  Returns null if no scene node can be found.
-func resolve_comp_scene_node(comp: GNCompBase) -> Node3D:
-	var eng: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
-	if eng == null or eng.network == null:
-		return null
-	return _resolve_comp_scene_node_r(comp, eng.network, {})
-
-
-func _resolve_comp_scene_node_r(comp: GNCompBase, net: GNNetwork,
-		visited: Dictionary) -> Node3D:
-	var scene_nd: Node3D = comp.get_scene_node()
-	if scene_nd != null:
-		return scene_nd
-	if visited.has(comp.id):
-		return null
-	visited[comp.id] = true
-	for conn in net.get_input_connections(comp.id):
-		var upstream: GNNode = net.nodes.get(conn.from_node, null)
-		if upstream is GNCompBase:
-			var resolved: Node3D = _resolve_comp_scene_node_r(
-				upstream as GNCompBase, net, visited)
-			if resolved != null:
-				return resolved
-	return null
 
 
 ## Replaces all input ports with [param count] sequentially-named ports of the

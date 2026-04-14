@@ -129,6 +129,10 @@ var _editing_asset_node_id: String = ""
 
 
 func _ready() -> void:
+	# Prevent the engine from quitting immediately on window close so we can
+	# show the unsaved-changes dialog first.
+	get_tree().auto_accept_quit = false
+
 	# Wire log toggle early so extension scan results are visible
 	log_toggle.toggled.connect(_on_log_toggled)
 	GNLogger.enabled = log_toggle.button_pressed
@@ -690,6 +694,7 @@ func _on_host_io_pressed() -> void:
 	var desc := Label.new()
 	desc.text = "Declares this patch's interface for host applications.\nAuto-generated from HostIn/HostOut bridge operators."
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD
+	desc.custom_minimum_size.x = 560
 	vbox.add_child(desc)
 
 	var text_edit := TextEdit.new()
@@ -742,6 +747,19 @@ func _on_host_io_pressed() -> void:
 	dlg.canceled.connect(func(): dlg.queue_free())
 	add_child(dlg)
 	dlg.popup_centered()
+
+
+func _on_refresh_extensions_pressed() -> void:
+	var reg := GNExtensionRegistry.instance()
+	var before_ops := reg.get_all_operator_names().size()
+	reg.scan_extensions()
+	reg.scan_custom_assets()
+	var after_ops := reg.get_all_operator_names().size()
+	var delta := after_ops - before_ops
+	if delta > 0:
+		GNLogger.info("Editor", "Refresh: discovered %d new operator(s) (%d total)" % [delta, after_ops])
+	else:
+		GNLogger.info("Editor", "Refresh: no new extensions or assets found (%d operators)" % after_ops)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -960,6 +978,12 @@ func _setup_toolbar() -> void:
 	btn_host_io.tooltip_text = "View / edit the Host I/O manifest for embedded integration"
 	btn_host_io.pressed.connect(_on_host_io_pressed)
 	row1.add_child(btn_host_io)
+
+	var btn_refresh := Button.new()
+	btn_refresh.text = "Refresh"
+	btn_refresh.tooltip_text = "Re-scan for new extensions and custom assets added since startup"
+	btn_refresh.pressed.connect(_on_refresh_extensions_pressed)
+	row1.add_child(btn_refresh)
 
 	row1.add_child(VSeparator.new())
 
@@ -1400,6 +1424,7 @@ func _show_dirty_assets_dialog(path: String, dirty: Array[Dictionary]) -> void:
 
 	var msg := Label.new()
 	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	msg.custom_minimum_size.x = 420
 	var names: PackedStringArray = []
 	for d in dirty:
 		names.append(d["asset_path"].get_file())
@@ -1821,6 +1846,12 @@ func _navigate_to_depth(target_depth: int) -> void:
 			if subnet_node and subnet_node is SubNetworkNode:
 				subnet_node.sync_ports_from_tunnels()
 
+	# Remember the subnet node we're leaving so we can select it in the inspector
+	var returning_to_node_id: String = ""
+	if _nav_stack.size() > target_depth + 1:
+		var child_entry: _NavEntry = _nav_stack[target_depth + 1] as _NavEntry
+		returning_to_node_id = child_entry.subnet_node_id
+
 	# Pop entries until we reach target depth
 	while _nav_stack.size() > target_depth + 1:
 		_nav_stack.pop_back()
@@ -1838,6 +1869,10 @@ func _navigate_to_depth(target_depth: int) -> void:
 	_viewer_node_id = target.viewer_node_id
 	if not _viewer_node_id.is_empty():
 		_push_active_sinks()
+
+	# Select the subnet node we came out of in the inspector
+	if not returning_to_node_id.is_empty():
+		inspector.inspect_node(returning_to_node_id)
 
 	# Update breadcrumb
 	_update_breadcrumb()
@@ -1901,6 +1936,16 @@ func _update_breadcrumb() -> void:
 			btn.pressed.connect(_navigate_to_depth.bind(depth))
 		_breadcrumb_bar.add_child(btn)
 
+	# Up button — goes up one level (same as Backspace)
+	var up_btn := Button.new()
+	up_btn.text = "\u2934"
+	up_btn.tooltip_text = "Go up one level (Backspace)"
+	up_btn.flat = true
+	up_btn.add_theme_font_size_override("font_size", 16)
+	up_btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.9))
+	up_btn.pressed.connect(_navigate_to_depth.bind(_nav_stack.size() - 2))
+	_breadcrumb_bar.add_child(up_btn)
+
 	# Asset edit-mode banner
 	if not _editing_asset_node_id.is_empty():
 		var asset_node: GNNode = network.get_node_by_id(_editing_asset_node_id)
@@ -1921,18 +1966,21 @@ func _update_breadcrumb() -> void:
 
 		var save_btn := Button.new()
 		save_btn.text = "Save"
+		save_btn.tooltip_text = "Save changes to the asset file — updates all instances"
 		save_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 		save_btn.pressed.connect(_on_asset_edit_save)
 		_breadcrumb_bar.add_child(save_btn)
 
 		var discard_btn := Button.new()
 		discard_btn.text = "Discard"
+		discard_btn.tooltip_text = "Discard all changes and revert to the last saved version"
 		discard_btn.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
 		discard_btn.pressed.connect(_on_asset_edit_discard)
 		_breadcrumb_bar.add_child(discard_btn)
 
 		var repromote_btn := Button.new()
 		repromote_btn.text = "Re-promote\u2026"
+		repromote_btn.tooltip_text = "Re-run the promotion wizard to update the asset's public interface"
 		repromote_btn.pressed.connect(func() -> void: _on_repromote_asset_requested(_editing_asset_node_id))
 		_breadcrumb_bar.add_child(repromote_btn)
 
@@ -1951,6 +1999,7 @@ func _update_breadcrumb() -> void:
 		# Offer a button to start editing
 		var edit_btn := Button.new()
 		edit_btn.text = "Edit Asset Definition"
+		edit_btn.tooltip_text = "Unlock this asset for editing — changes apply to all instances"
 		edit_btn.add_theme_color_override("font_color", Color(0.3, 0.8, 1.0))
 		var current_entry := _nav_stack.back() as _NavEntry
 		edit_btn.pressed.connect(func():
@@ -2004,20 +2053,12 @@ func _on_asset_edit_save() -> void:
 	# Show confirmation dialog
 	var dlg := AcceptDialog.new()
 	dlg.title = "Save Asset Definition"
-	dlg.size = Vector2i(420, 180)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
-
-	var msg := Label.new()
-	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if instance_count > 1:
-		msg.text = "\"%s\" has %d instances in this project.\nSaving will update ALL instances to match." % [
+		dlg.dialog_text = "\"%s\" has %d instances in this project.\nSaving will update ALL instances to match." % [
 			asset_path.get_file(), instance_count]
 	else:
-		msg.text = "Save changes to \"%s\"?" % asset_path.get_file()
-	vbox.add_child(msg)
-	dlg.add_child(vbox)
+		dlg.dialog_text = "Save changes to \"%s\"?" % asset_path.get_file()
 
 	dlg.ok_button_text = "Save to All"
 	var save_as_btn := dlg.add_button("Save As New Asset…", true)

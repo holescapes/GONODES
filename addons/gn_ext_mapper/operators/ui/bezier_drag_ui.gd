@@ -1,14 +1,15 @@
 class_name BezierDragUI
 extends GNUiBase
 ## Interactive 4×4 Bezier control point grid.  Drag handles to reshape the
-## surface.  Outputs 32 CHOP channels (cp00_x/y through cp33_x/y) — wire
-## directly into BezierMapTOP parameters.
+## surface.  Outputs 32 CHOP channels with human-readable position names
+## (top_left_x/y through bot_right_x/y) — wire directly into BezierMapTOP.
 
+# Row-major order: row 0-3 (top→bottom), col 0-3 (left→right).
 const _CP_NAMES: PackedStringArray = [
-	"cp00", "cp10", "cp20", "cp30",
-	"cp01", "cp11", "cp21", "cp31",
-	"cp02", "cp12", "cp22", "cp32",
-	"cp03", "cp13", "cp23", "cp33",
+	"top_left", "top_cleft", "top_cright", "top_right",
+	"umid_left", "umid_cleft", "umid_cright", "umid_right",
+	"lmid_left", "lmid_cleft", "lmid_cright", "lmid_right",
+	"bot_left", "bot_cleft", "bot_cright", "bot_right",
 ]
 
 # Default positions: uniform 4×4 grid
@@ -51,12 +52,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	widget_state = {}
 	for i in range(16):
-		# Output names match BezierMapTOP shader uniforms (col-major naming)
-		# _defaults[i] maps to grid_row = i / 4, grid_col = i % 4
-		# cp name = "cp" + str(col) + str(row)
-		var col: int = i % 4
-		var row: int = i / 4
-		var key := "cp%d%d" % [col, row]
+		var key: String = _CP_NAMES[i]
 		widget_state[key + "_x"] = _points[i].x
 		widget_state[key + "_y"] = _points[i].y
 

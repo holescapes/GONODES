@@ -3154,7 +3154,7 @@
 					}
 				},
 				"text": {
-					"expression": "\"SelectTOP Index=\" + str(int(chop(\"slider1\", \"slider1:value\")))",
+					"expression": "\"SelectTOP Index=\" + str(int(chop(\"slider1\", \"value\")))",
 					"mode": "EXPRESSION",
 					"value": "SelectTop Index"
 				}
@@ -5385,7 +5385,7 @@
 					"value": 0.0
 				},
 				"index": {
-					"expression": "chop(\"slider1\", \"slider1:value\")",
+					"expression": "chop(\"slider1\", \"value\")",
 					"mode": "EXPRESSION",
 					"value": 0
 				}

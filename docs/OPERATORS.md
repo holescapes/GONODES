@@ -5716,7 +5716,7 @@ Interactive 4-corner drag pad for projection mapping. Drag handles to position q
 ### BezierDragUI *(ext: mapper)*
 Interactive 4×4 Bezier control point grid for curved surface mapping.
 - **Parameters:** `label` (STRING), `size` (INT, 200), `bg_color` (COLOR), `handle_color` (COLOR), `wire_color` (COLOR)
-- **State channels:** `cp00_x`, `cp00_y` ... `cp33_x`, `cp33_y` (32 channels)
+- **State channels:** `top_left_x`, `top_left_y` ... `bot_right_x`, `bot_right_y` (32 channels)
 
 ### GridDragUI *(ext: mapper)*
 Interactive NxM grid drag pad for grid warp control.

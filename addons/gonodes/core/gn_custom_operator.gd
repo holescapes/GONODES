@@ -263,7 +263,7 @@ static func _saveable_to_variant(value: Variant, vt: int) -> Variant:
 
 func to_dict() -> Dictionary:
 	var d: Dictionary = {
-		"type": "GNCustomOperator",
+		"type": node_type if not node_type.is_empty() else "GNCustomOperator",
 		"position": [graph_position.x, graph_position.y],
 		"asset_path": asset_path,
 	}

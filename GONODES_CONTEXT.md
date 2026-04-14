@@ -1736,6 +1736,7 @@ GONODES/
   - "Copy Output Ref" → copies family-appropriate reference:
     - CHOP: `chop("name", "out")` (uses first channel name if available)
     - TOP: `top("name")`
+    - UI: `chop("name", "value")` (reads widget state CHOP port)
     - Other: `op("name")`
   - Both require exactly one node selected; disabled otherwise
   - Menu items show the actual reference string that will be copied
@@ -4858,7 +4859,7 @@ Built a complete C++ GDExtension source tree for 69 CPU-heavy operators across 6
 ### 33.1 UI Family (10th Operator Family)
 
 - **GNFamily enum**: Added `UI` type with name "UI" and color Sky Blue `Color(0.2, 0.7, 0.9)`. GONODES now has 10 operator families: TOP, IMG, CHOP, SOP, POP, DAT, MAT, COMP, UI, OUT.
-- **GNUiBase** (`core/gn_ui_base.gd`): New base class extending GNNode. Manages `_control_node: Control` (parallel to GNCompBase's `_scene_node: Node3D`). Same lifecycle pattern: lazy create via `_ensure_control_node()`, `_notification(PREDELETE)` cleanup, reparenting into PanelTOP's SubViewport. Default output port "out" of type UI. **Every UI widget automatically gets a "state" CHOP output port** (appended as the last output in `initialize()` after `_init_ports()`). The base class `execute_cook()` override calls `_build_state_chop()` after `_cook()`, converting `widget_state` dict to `GNChannelData` with channels named `<id>:<key>`. ContainerUI overrides `_build_state_chop()` to aggregate all connected children's states.
+- **GNUiBase** (`core/gn_ui_base.gd`): New base class extending GNNode. Manages `_control_node: Control` (parallel to GNCompBase's `_scene_node: Node3D`). Same lifecycle pattern: lazy create via `_ensure_control_node()`, `_notification(PREDELETE)` cleanup, reparenting into PanelTOP's SubViewport. Default output port "out" of type UI. **Every UI widget automatically gets a "state" CHOP output port** (appended as the last output in `initialize()` after `_init_ports()`). The base class `execute_cook()` override calls `_build_state_chop()` after `_cook()`, converting `widget_state` dict to `GNChannelData` with plain channel names matching the `widget_state` keys (e.g., `"value"`, `"x"`, `"y"`). This is consistent with regular CHOP naming — `chop("slider1", "value")` works exactly like `chop("lfo1", "out")`. Only ContainerUI overrides `_build_state_chop()` to add `<child_id>:<key>` prefixes when aggregating multiple children's states for disambiguation (e.g., `chop("container1", "slider1:value")`).
 
 ### 33.2 Separated Context Architecture (Replaces panel_sources)
 

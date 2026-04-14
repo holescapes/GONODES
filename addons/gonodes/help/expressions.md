@@ -63,6 +63,19 @@ chop("math1", "result", 0)
 # Get channel info dictionary (advanced)
 chop("lfo1")
 # → { "channels": ["out"], "length": 1, "sample_rate": 60 }
+
+# --- UI Widget State ---
+# Every UI widget has a "state" CHOP output with plain channel names.
+# Read them exactly like any other CHOP:
+chop("slider1", "value")
+chop("knob1", "value")
+chop("xy_pad1", "x")
+chop("toggle1", "value")
+chop("colorpicker1", "r")
+
+# ContainerUI aggregates children — channels are prefixed with child ID:
+chop("container1", "slider1:value")
+chop("container1", "colorpicker1:r")
 ```
 
 ### `op(node_id, param_name)`

@@ -2011,6 +2011,11 @@ func paste_clipboard(target_graph_pos := Vector2(INF, INF)) -> void:
 		id_remap[old_id] = new_id
 		new_nodes.append(node)
 
+	# Remap expression references and wireless node-reference params inside
+	# pasted nodes so that chop("slider1", "value") becomes
+	# chop("slider1_copy", "value") when slider1 was also pasted.
+	_remap_pasted_references(new_nodes, id_remap)
+
 	# Add nodes to network (triggers view creation via signal)
 	for node in new_nodes:
 		network.add_node(node)
@@ -2057,6 +2062,78 @@ func paste_clipboard(target_graph_pos := Vector2(INF, INF)) -> void:
 	_undo_redo.commit_action(false)
 
 	GNLogger.info("GraphEditor", "Pasted %d node(s)" % new_nodes.size())
+
+
+## Remaps node-ID references inside expressions, component expressions,
+## script code bodies, and wireless node-reference parameters of pasted nodes
+## so that they point at the pasted copies instead of the originals.
+func _remap_pasted_references(pasted_nodes: Array[GNNode], id_remap: Dictionary) -> void:
+	for node in pasted_nodes:
+		for param_name in node.parameters:
+			var param: GNParameter = node.parameters[param_name]
+
+			# Main expression
+			if param.mode == GNParameter.Mode.EXPRESSION and not param.expression.is_empty():
+				var updated := param.expression
+				for old_id in id_remap:
+					updated = network._replace_id_in_expr(updated, old_id, id_remap[old_id])
+				if updated != param.expression:
+					param.set_expression(updated)
+
+			# Per-component expressions (Vector2/3/4, Color)
+			for i in range(param.component_expressions.size()):
+				if param.component_modes.size() > i and \
+						param.component_modes[i] == GNParameter.Mode.EXPRESSION:
+					var comp_expr: String = param.component_expressions[i]
+					if not comp_expr.is_empty():
+						var updated := comp_expr
+						for old_id in id_remap:
+							updated = network._replace_id_in_expr(updated, old_id, id_remap[old_id])
+						if updated != comp_expr:
+							param.component_expressions[i] = updated
+							param._compile_component_expression(i)
+
+		# Script operator code bodies
+		if node.node_type in network._SCRIPT_NODE_TYPES:
+			var code_param: GNParameter = node.parameters.get("code", null)
+			if code_param != null:
+				var code_val: String = code_param.value if code_param.value is String else ""
+				if not code_val.is_empty():
+					var updated := code_val
+					for old_id in id_remap:
+						if old_id in updated:
+							updated = network._replace_id_in_expr(updated, old_id, id_remap[old_id])
+					if updated != code_val:
+						node.set_param_value("code", updated)
+
+		# CallbackDAT script slots
+		if node.node_type == "callbackdat":
+			for cb_param_name in network._CALLBACK_CODE_PARAMS:
+				var cb_param: GNParameter = node.parameters.get(cb_param_name, null)
+				if cb_param != null:
+					var cb_val: String = cb_param.value if cb_param.value is String else ""
+					if not cb_val.is_empty():
+						var updated := cb_val
+						for old_id in id_remap:
+							if old_id in updated:
+								updated = network._replace_id_in_expr(updated, old_id, id_remap[old_id])
+						if updated != cb_val:
+							node.set_param_value(cb_param_name, updated)
+
+		# Wireless node-reference string parameters (Select ops, ParameterCHOP, etc.)
+		var ref_params: Dictionary = node.get_node_reference_params()
+		for ref_param_name in ref_params:
+			var ref_param: GNParameter = node.parameters.get(ref_param_name, null)
+			if ref_param == null:
+				continue
+			var val: String = str(ref_param.value)
+			for old_id in id_remap:
+				if val == old_id:
+					val = id_remap[old_id]
+				elif "/" in val:
+					val = network._replace_path_segment(val, old_id, id_remap[old_id])
+			if val != str(ref_param.value):
+				node.set_param_value(ref_param_name, val)
 
 
 ## Cuts selected nodes: copies to clipboard, then deletes them.
@@ -3308,7 +3385,7 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 			"top":
 				output_ref_label = 'Copy Output  top("%s")' % sel_node_name
 			"ui":
-				output_ref_label = 'Copy Output  chop("%s", "%s:value")' % [sel_node_name, sel_node_name]
+				output_ref_label = 'Copy Output  chop("%s", "value")' % sel_node_name
 			_:
 				output_ref_label = 'Copy Output  op("%s")' % sel_node_name
 	_context_menu.add_item(output_ref_label, _CtxID.COPY_OUTPUT_REF)

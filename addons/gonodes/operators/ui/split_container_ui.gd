@@ -37,7 +37,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_prev_managed = _managed_children.duplicate()
 	_managed_children.clear()
-	_populate_children()
+	_populate_children(inputs)
 	_remove_stale_children()
 
 	widget_state = {"offset": float(_split.split_offset)}
@@ -86,10 +86,10 @@ func _on_dragged(offset: int) -> void:
 	mark_dirty()
 
 
-func _populate_children() -> void:
-	for upstream in get_input_nodes_sorted():
-		if upstream is GNUiBase:
-			var ctrl: Control = (upstream as GNUiBase).get_control_node()
+func _populate_children(inputs: Array[GNData]) -> void:
+	for data in inputs:
+		if data is GNUIData:
+			var ctrl: Control = (data as GNUIData).control_node
 			if ctrl != null:
 				if ctrl.get_parent() != _split:
 					if ctrl.get_parent() != null:

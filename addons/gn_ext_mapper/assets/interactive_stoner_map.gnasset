@@ -1,156 +1,285 @@
 {
-	"identity": {
-		"op_name": "InteractiveStonerMap",
-		"family": "TOP",
-		"description": "Stoner keystone correction with interactive corner drag panel — connect both outputs to WindowOUT for live projection surface adjustment."
-	},
-	"inner_network": {
-		"nodes": {
-			"in1": {
-				"type": "InTunnel",
-				"position": [0, 100],
-				"parameters": {
-					"index": {"value": 0},
-					"family": {"value": 0},
-					"label": {"value": "texture"}
-				}
-			},
-			"drag1": {
-				"type": "CornerDragUI",
-				"position": [200, 300],
-				"parameters": {
-					"label": {"value": "Stoner Corners"},
-					"size": {"value": 250}
-				}
-			},
-			"map1": {
-				"type": "StonerTOP",
-				"position": [500, 100],
-				"parameters": {
-					"tl_x": {
-						"mode": "EXPRESSION",
-						"expression": "chop(\"drag1\", \"drag1:tl_x\")"
-					},
-					"tl_y": {
-						"mode": "EXPRESSION",
-						"expression": "chop(\"drag1\", \"drag1:tl_y\")"
-					},
-					"tr_x": {
-						"mode": "EXPRESSION",
-						"expression": "chop(\"drag1\", \"drag1:tr_x\")"
-					},
-					"tr_y": {
-						"mode": "EXPRESSION",
-						"expression": "chop(\"drag1\", \"drag1:tr_y\")"
-					},
-					"bl_x": {
-						"mode": "EXPRESSION",
-						"expression": "chop(\"drag1\", \"drag1:bl_x\")"
-					},
-					"bl_y": {
-						"mode": "EXPRESSION",
-						"expression": "chop(\"drag1\", \"drag1:bl_y\")"
-					},
-					"br_x": {
-						"mode": "EXPRESSION",
-						"expression": "chop(\"drag1\", \"drag1:br_x\")"
-					},
-					"br_y": {
-						"mode": "EXPRESSION",
-						"expression": "chop(\"drag1\", \"drag1:br_y\")"
-					}
-				}
-			},
-			"out_tex": {
-				"type": "OutTunnel",
-				"position": [850, 100],
-				"parameters": {
-					"index": {"value": 0},
-					"family": {"value": 0},
-					"label": {"value": "warped"}
-				}
-			},
-			"out_panel": {
-				"type": "OutTunnel",
-				"position": [850, 300],
-				"parameters": {
-					"index": {"value": 1},
-					"family": {"value": 9},
-					"label": {"value": "panel"}
-				}
-			}
-		},
-		"connections": [
-			{"from": "in1", "from_port": 0, "to": "map1", "to_port": 0},
-			{"from": "map1", "from_port": 0, "to": "out_tex", "to_port": 0},
-			{"from": "drag1", "from_port": 0, "to": "out_panel", "to_port": 0}
-		]
-	},
-	"promoted_parameters": [],
 	"custom_parameters": [
 		{
-			"name": "show_panel",
-			"value_type": 2,
-			"label": "Show Panel",
 			"default_value": true,
-			"min_value": 0,
-			"max_value": 1,
-			"step": 1
+			"label": "Show Panel",
+			"max_value": 1.0,
+			"min_value": 0.0,
+			"name": "show_panel",
+			"step": 1.0,
+			"value_type": 2.0
 		},
 		{
-			"name": "pad_size",
-			"value_type": 1,
+			"default_value": 250.0,
 			"label": "Pad Size",
-			"default_value": 250,
-			"min_value": 64,
-			"max_value": 512,
-			"step": 1
+			"max_value": 512.0,
+			"min_value": 64.0,
+			"name": "pad_size",
+			"step": 1.0,
+			"value_type": 1.0
 		},
 		{
-			"name": "softedge_left",
-			"value_type": 0,
+			"default_value": 0.0,
 			"label": "Soft Edge Left",
-			"default_value": 0.0,
-			"min_value": 0.0,
 			"max_value": 0.5,
-			"step": 0.01
+			"min_value": 0.0,
+			"name": "softedge_left",
+			"step": 0.01,
+			"value_type": 0.0
 		},
 		{
-			"name": "softedge_right",
-			"value_type": 0,
+			"default_value": 0.0,
 			"label": "Soft Edge Right",
-			"default_value": 0.0,
-			"min_value": 0.0,
 			"max_value": 0.5,
-			"step": 0.01
+			"min_value": 0.0,
+			"name": "softedge_right",
+			"step": 0.01,
+			"value_type": 0.0
 		},
 		{
-			"name": "softedge_top",
-			"value_type": 0,
+			"default_value": 0.0,
 			"label": "Soft Edge Top",
-			"default_value": 0.0,
-			"min_value": 0.0,
 			"max_value": 0.5,
-			"step": 0.01
+			"min_value": 0.0,
+			"name": "softedge_top",
+			"step": 0.01,
+			"value_type": 0.0
 		},
 		{
-			"name": "softedge_bottom",
-			"value_type": 0,
+			"default_value": 0.0,
 			"label": "Soft Edge Bottom",
-			"default_value": 0.0,
-			"min_value": 0.0,
 			"max_value": 0.5,
-			"step": 0.01
+			"min_value": 0.0,
+			"name": "softedge_bottom",
+			"step": 0.01,
+			"value_type": 0.0
 		},
 		{
-			"name": "test_pattern",
-			"value_type": 9,
+			"default_value": 0.0,
+			"enum_options": [
+				"Off",
+				"Grid",
+				"Gradient"
+			],
 			"label": "Test Pattern",
-			"default_value": 0,
-			"min_value": 0,
-			"max_value": 2,
-			"step": 1,
-			"enum_options": ["Off", "Grid", "Gradient"]
+			"max_value": 2.0,
+			"min_value": 0.0,
+			"name": "test_pattern",
+			"step": 1.0,
+			"value_type": 9.0
 		}
-	]
+	],
+	"identity": {
+		"description": "Stoner keystone correction with interactive corner drag panel — connect both outputs to WindowOUT for live projection surface adjustment.",
+		"family": "TOP",
+		"op_name": "InteractiveStonerMap"
+	},
+	"inner_network": {
+		"connections": [
+			{
+				"from": "in1",
+				"from_port": 0,
+				"to": "map1",
+				"to_port": 0
+			},
+			{
+				"from": "map1",
+				"from_port": 0,
+				"to": "out_tex",
+				"to_port": 0
+			},
+			{
+				"from": "drag1",
+				"from_port": 0,
+				"to": "out_panel",
+				"to_port": 0
+			}
+		],
+		"generator": "GONODES",
+		"nodes": {
+			"drag1": {
+				"parameters": {
+					"bg_color": {
+						"value": {
+							"_type": "Color",
+							"a": 1.0,
+							"b": 0.150000005960464,
+							"g": 0.119999997317791,
+							"r": 0.119999997317791
+						}
+					},
+					"handle_color": {
+						"value": {
+							"_type": "Color",
+							"a": 1.0,
+							"b": 0.150000005960464,
+							"g": 0.349999994039536,
+							"r": 1.0
+						}
+					},
+					"label": {
+						"value": "Stoner Corners"
+					},
+					"size": {
+						"value": 250
+					},
+					"wire_color": {
+						"value": {
+							"_type": "Color",
+							"a": 0.5,
+							"b": 1.0,
+							"g": 0.850000023841858,
+							"r": 0.600000023841858
+						}
+					}
+				},
+				"position": [
+					200.0,
+					300.0
+				],
+				"type": "CornerDragUI"
+			},
+			"in1": {
+				"parameters": {
+					"family": {
+						"value": 0
+					},
+					"index": {
+						"value": 0
+					},
+					"label": {
+						"value": "texture"
+					}
+				},
+				"position": [
+					0.0,
+					100.0
+				],
+				"tunnel_family": 0,
+				"tunnel_index": 0,
+				"tunnel_label": "in",
+				"type": "InTunnel"
+			},
+			"map1": {
+				"parameters": {
+					"bl_x": {
+						"expression": "chop(\"drag1\", \"bl_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"bl_y": {
+						"expression": "chop(\"drag1\", \"bl_y\")",
+						"mode": "EXPRESSION",
+						"value": 1.0
+					},
+					"br_x": {
+						"expression": "chop(\"drag1\", \"br_x\")",
+						"mode": "EXPRESSION",
+						"value": 1.0
+					},
+					"br_y": {
+						"expression": "chop(\"drag1\", \"br_y\")",
+						"mode": "EXPRESSION",
+						"value": 1.0
+					},
+					"grid_u": {
+						"value": 1
+					},
+					"grid_v": {
+						"value": 1
+					},
+					"softedge_bottom": {
+						"value": 0.0
+					},
+					"softedge_gamma": {
+						"value": 2.2
+					},
+					"softedge_left": {
+						"value": 0.0
+					},
+					"softedge_right": {
+						"value": 0.0
+					},
+					"softedge_top": {
+						"value": 0.0
+					},
+					"test_grid_lines": {
+						"value": 8
+					},
+					"test_pattern": {
+						"value": 0
+					},
+					"tl_x": {
+						"expression": "chop(\"drag1\", \"tl_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"tl_y": {
+						"expression": "chop(\"drag1\", \"tl_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"tr_x": {
+						"expression": "chop(\"drag1\", \"tr_x\")",
+						"mode": "EXPRESSION",
+						"value": 1.0
+					},
+					"tr_y": {
+						"expression": "chop(\"drag1\", \"tr_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					}
+				},
+				"position": [
+					500.0,
+					100.0
+				],
+				"type": "StonerTOP"
+			},
+			"out_panel": {
+				"parameters": {
+					"family": {
+						"value": 9
+					},
+					"index": {
+						"value": 1
+					},
+					"label": {
+						"value": "panel"
+					}
+				},
+				"position": [
+					850.0,
+					300.0
+				],
+				"tunnel_family": 9,
+				"tunnel_index": 1,
+				"tunnel_label": "panel",
+				"type": "OutTunnel"
+			},
+			"out_tex": {
+				"parameters": {
+					"family": {
+						"value": 0
+					},
+					"index": {
+						"value": 0
+					},
+					"label": {
+						"value": "warped"
+					}
+				},
+				"position": [
+					850.0,
+					100.0
+				],
+				"tunnel_family": 0,
+				"tunnel_index": 0,
+				"tunnel_label": "warped",
+				"type": "OutTunnel"
+			}
+		},
+		"version": "1.0.0"
+	},
+	"promoted_parameters": []
 }

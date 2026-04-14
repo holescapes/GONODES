@@ -40,7 +40,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_prev_managed = _managed_children.duplicate()
 	_managed_children.clear()
-	_populate_children(tab_names)
+	_populate_children(inputs, tab_names)
 	_remove_stale_children()
 
 	widget_state = {"tab": float(_tabs.current_tab) if _tabs.get_tab_count() > 0 else 0.0}
@@ -63,22 +63,23 @@ func _on_tab_changed(tab: int) -> void:
 	mark_dirty()
 
 
-func _populate_children(tab_names: PackedStringArray) -> void:
+func _populate_children(inputs: Array[GNData], tab_names: PackedStringArray) -> void:
 	var idx := 0
-	for upstream in get_input_nodes_sorted(1):
-		if upstream is GNUiBase:
-			var ctrl: Control = (upstream as GNUiBase).get_control_node()
-			if ctrl != null:
-				if ctrl.get_parent() != _tabs:
-					if ctrl.get_parent() != null:
-						ctrl.get_parent().remove_child(ctrl)
-					_tabs.add_child(ctrl)
-				# Set tab name
-				var tab_idx: int = ctrl.get_index()
-				var tab_name: String = tab_names[idx] if idx < tab_names.size() else "Tab %d" % (idx + 1)
-				_tabs.set_tab_title(tab_idx, tab_name)
-				_managed_children.append(ctrl)
-				idx += 1
+	for i in range(1, inputs.size()):
+		if not inputs[i] is GNUIData:
+			continue
+		var ctrl: Control = (inputs[i] as GNUIData).control_node
+		if ctrl != null:
+			if ctrl.get_parent() != _tabs:
+				if ctrl.get_parent() != null:
+					ctrl.get_parent().remove_child(ctrl)
+				_tabs.add_child(ctrl)
+			# Set tab name
+			var tab_idx: int = ctrl.get_index()
+			var tab_name: String = tab_names[idx] if idx < tab_names.size() else "Tab %d" % (idx + 1)
+			_tabs.set_tab_title(tab_idx, tab_name)
+			_managed_children.append(ctrl)
+			idx += 1
 
 
 func _remove_stale_children() -> void:

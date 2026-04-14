@@ -1,132 +1,649 @@
 {
-	"identity": {
-		"op_name": "InteractiveGridWarp",
-		"family": "TOP",
-		"description": "Grid warp with interactive NxM drag panel — connect both outputs to WindowOUT for live grid deformation."
-	},
-	"inner_network": {
-		"nodes": {
-			"in1": {
-				"type": "InTunnel",
-				"position": [0, 100],
-				"parameters": {
-					"index": {"value": 0},
-					"family": {"value": 0},
-					"label": {"value": "texture"}
-				}
-			},
-			"drag1": {
-				"type": "GridDragUI",
-				"position": [200, 300],
-				"parameters": {
-					"label": {"value": "Grid Points"},
-					"size": {"value": 250},
-					"grid_cols": {"value": 4},
-					"grid_rows": {"value": 4}
-				}
-			},
-			"map1": {
-				"type": "GridWarpTOP",
-				"position": [500, 100],
-				"parameters": {
-					"grid_cols": {"value": 4},
-					"grid_rows": {"value": 4},
-					"pt_0_0_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_0_0_x\")"},
-					"pt_0_0_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_0_0_y\")"},
-					"pt_1_0_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_1_0_x\")"},
-					"pt_1_0_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_1_0_y\")"},
-					"pt_2_0_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_2_0_x\")"},
-					"pt_2_0_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_2_0_y\")"},
-					"pt_3_0_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_3_0_x\")"},
-					"pt_3_0_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_3_0_y\")"},
-					"pt_0_1_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_0_1_x\")"},
-					"pt_0_1_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_0_1_y\")"},
-					"pt_1_1_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_1_1_x\")"},
-					"pt_1_1_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_1_1_y\")"},
-					"pt_2_1_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_2_1_x\")"},
-					"pt_2_1_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_2_1_y\")"},
-					"pt_3_1_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_3_1_x\")"},
-					"pt_3_1_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_3_1_y\")"},
-					"pt_0_2_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_0_2_x\")"},
-					"pt_0_2_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_0_2_y\")"},
-					"pt_1_2_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_1_2_x\")"},
-					"pt_1_2_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_1_2_y\")"},
-					"pt_2_2_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_2_2_x\")"},
-					"pt_2_2_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_2_2_y\")"},
-					"pt_3_2_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_3_2_x\")"},
-					"pt_3_2_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_3_2_y\")"},
-					"pt_0_3_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_0_3_x\")"},
-					"pt_0_3_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_0_3_y\")"},
-					"pt_1_3_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_1_3_x\")"},
-					"pt_1_3_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_1_3_y\")"},
-					"pt_2_3_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_2_3_x\")"},
-					"pt_2_3_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_2_3_y\")"},
-					"pt_3_3_x": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_3_3_x\")"},
-					"pt_3_3_y": {"mode": "EXPRESSION", "expression": "chop(\"drag1\", \"drag1:pt_3_3_y\")"}
-				}
-			},
-			"out_tex": {
-				"type": "OutTunnel",
-				"position": [850, 100],
-				"parameters": {
-					"index": {"value": 0},
-					"family": {"value": 0},
-					"label": {"value": "warped"}
-				}
-			},
-			"out_panel": {
-				"type": "OutTunnel",
-				"position": [850, 300],
-				"parameters": {
-					"index": {"value": 1},
-					"family": {"value": 9},
-					"label": {"value": "panel"}
-				}
-			}
-		},
-		"connections": [
-			{"from": "in1", "from_port": 0, "to": "map1", "to_port": 0},
-			{"from": "map1", "from_port": 0, "to": "out_tex", "to_port": 0},
-			{"from": "drag1", "from_port": 0, "to": "out_panel", "to_port": 0}
-		]
-	},
-	"promoted_parameters": [],
 	"custom_parameters": [
 		{
-			"name": "show_panel",
-			"value_type": 2,
-			"label": "Show Panel",
 			"default_value": true,
-			"min_value": 0,
-			"max_value": 1,
-			"step": 1
+			"label": "Show Panel",
+			"max_value": 1.0,
+			"min_value": 0.0,
+			"name": "show_panel",
+			"step": 1.0,
+			"value_type": 2.0
 		},
 		{
-			"name": "pad_size",
-			"value_type": 1,
+			"default_value": 250.0,
 			"label": "Pad Size",
-			"default_value": 250,
-			"min_value": 64,
-			"max_value": 512,
-			"step": 1
+			"max_value": 512.0,
+			"min_value": 64.0,
+			"name": "pad_size",
+			"step": 1.0,
+			"value_type": 1.0
 		},
 		{
-			"name": "grid_cols",
-			"value_type": 1,
+			"default_value": 4.0,
 			"label": "Grid Columns",
-			"default_value": 4,
-			"min_value": 2,
-			"max_value": 8,
-			"step": 1
+			"max_value": 8.0,
+			"min_value": 2.0,
+			"name": "grid_cols",
+			"step": 1.0,
+			"value_type": 1.0
 		},
 		{
-			"name": "grid_rows",
-			"value_type": 1,
+			"default_value": 4.0,
 			"label": "Grid Rows",
-			"default_value": 4,
-			"min_value": 2,
-			"max_value": 8,
-			"step": 1
+			"max_value": 8.0,
+			"min_value": 2.0,
+			"name": "grid_rows",
+			"step": 1.0,
+			"value_type": 1.0
 		}
-	]
+	],
+	"identity": {
+		"description": "Grid warp with interactive NxM drag panel — connect both outputs to WindowOUT for live grid deformation.",
+		"family": "TOP",
+		"op_name": "InteractiveGridWarp"
+	},
+	"inner_network": {
+		"connections": [
+			{
+				"from": "in1",
+				"from_port": 0,
+				"to": "map1",
+				"to_port": 0
+			},
+			{
+				"from": "map1",
+				"from_port": 0,
+				"to": "out_tex",
+				"to_port": 0
+			},
+			{
+				"from": "drag1",
+				"from_port": 0,
+				"to": "out_panel",
+				"to_port": 0
+			}
+		],
+		"generator": "GONODES",
+		"nodes": {
+			"drag1": {
+				"parameters": {
+					"bg_color": {
+						"value": {
+							"_type": "Color",
+							"a": 1.0,
+							"b": 0.150000005960464,
+							"g": 0.119999997317791,
+							"r": 0.119999997317791
+						}
+					},
+					"grid_cols": {
+						"value": 4
+					},
+					"grid_rows": {
+						"value": 4
+					},
+					"handle_color": {
+						"value": {
+							"_type": "Color",
+							"a": 1.0,
+							"b": 0.150000005960464,
+							"g": 0.349999994039536,
+							"r": 1.0
+						}
+					},
+					"label": {
+						"value": "Grid Points"
+					},
+					"size": {
+						"value": 250
+					},
+					"wire_color": {
+						"value": {
+							"_type": "Color",
+							"a": 0.5,
+							"b": 1.0,
+							"g": 0.850000023841858,
+							"r": 0.600000023841858
+						}
+					}
+				},
+				"position": [
+					200.0,
+					300.0
+				],
+				"type": "GridDragUI"
+			},
+			"in1": {
+				"parameters": {
+					"family": {
+						"value": 0
+					},
+					"index": {
+						"value": 0
+					},
+					"label": {
+						"value": "texture"
+					}
+				},
+				"position": [
+					0.0,
+					100.0
+				],
+				"tunnel_family": 0,
+				"tunnel_index": 0,
+				"tunnel_label": "in",
+				"type": "InTunnel"
+			},
+			"map1": {
+				"parameters": {
+					"amplitude": {
+						"value": 1.0
+					},
+					"grid_cols": {
+						"value": 4
+					},
+					"grid_rows": {
+						"value": 4
+					},
+					"pt_0_0_x": {
+						"expression": "chop(\"drag1\", \"pt_0_0_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_0_0_y": {
+						"expression": "chop(\"drag1\", \"pt_0_0_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_0_1_x": {
+						"expression": "chop(\"drag1\", \"pt_0_1_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_0_1_y": {
+						"expression": "chop(\"drag1\", \"pt_0_1_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_0_2_x": {
+						"expression": "chop(\"drag1\", \"pt_0_2_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_0_2_y": {
+						"expression": "chop(\"drag1\", \"pt_0_2_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_0_3_x": {
+						"expression": "chop(\"drag1\", \"pt_0_3_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_0_3_y": {
+						"expression": "chop(\"drag1\", \"pt_0_3_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_0_4_x": {
+						"value": 0.0
+					},
+					"pt_0_4_y": {
+						"value": 0.0
+					},
+					"pt_0_5_x": {
+						"value": 0.0
+					},
+					"pt_0_5_y": {
+						"value": 0.0
+					},
+					"pt_0_6_x": {
+						"value": 0.0
+					},
+					"pt_0_6_y": {
+						"value": 0.0
+					},
+					"pt_0_7_x": {
+						"value": 0.0
+					},
+					"pt_0_7_y": {
+						"value": 0.0
+					},
+					"pt_1_0_x": {
+						"expression": "chop(\"drag1\", \"pt_1_0_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_1_0_y": {
+						"expression": "chop(\"drag1\", \"pt_1_0_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_1_1_x": {
+						"expression": "chop(\"drag1\", \"pt_1_1_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_1_1_y": {
+						"expression": "chop(\"drag1\", \"pt_1_1_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_1_2_x": {
+						"expression": "chop(\"drag1\", \"pt_1_2_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_1_2_y": {
+						"expression": "chop(\"drag1\", \"pt_1_2_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_1_3_x": {
+						"expression": "chop(\"drag1\", \"pt_1_3_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_1_3_y": {
+						"expression": "chop(\"drag1\", \"pt_1_3_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_1_4_x": {
+						"value": 0.0
+					},
+					"pt_1_4_y": {
+						"value": 0.0
+					},
+					"pt_1_5_x": {
+						"value": 0.0
+					},
+					"pt_1_5_y": {
+						"value": 0.0
+					},
+					"pt_1_6_x": {
+						"value": 0.0
+					},
+					"pt_1_6_y": {
+						"value": 0.0
+					},
+					"pt_1_7_x": {
+						"value": 0.0
+					},
+					"pt_1_7_y": {
+						"value": 0.0
+					},
+					"pt_2_0_x": {
+						"expression": "chop(\"drag1\", \"pt_2_0_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_2_0_y": {
+						"expression": "chop(\"drag1\", \"pt_2_0_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_2_1_x": {
+						"expression": "chop(\"drag1\", \"pt_2_1_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_2_1_y": {
+						"expression": "chop(\"drag1\", \"pt_2_1_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_2_2_x": {
+						"expression": "chop(\"drag1\", \"pt_2_2_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_2_2_y": {
+						"expression": "chop(\"drag1\", \"pt_2_2_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_2_3_x": {
+						"expression": "chop(\"drag1\", \"pt_2_3_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_2_3_y": {
+						"expression": "chop(\"drag1\", \"pt_2_3_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_2_4_x": {
+						"value": 0.0
+					},
+					"pt_2_4_y": {
+						"value": 0.0
+					},
+					"pt_2_5_x": {
+						"value": 0.0
+					},
+					"pt_2_5_y": {
+						"value": 0.0
+					},
+					"pt_2_6_x": {
+						"value": 0.0
+					},
+					"pt_2_6_y": {
+						"value": 0.0
+					},
+					"pt_2_7_x": {
+						"value": 0.0
+					},
+					"pt_2_7_y": {
+						"value": 0.0
+					},
+					"pt_3_0_x": {
+						"expression": "chop(\"drag1\", \"pt_3_0_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_3_0_y": {
+						"expression": "chop(\"drag1\", \"pt_3_0_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_3_1_x": {
+						"expression": "chop(\"drag1\", \"pt_3_1_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_3_1_y": {
+						"expression": "chop(\"drag1\", \"pt_3_1_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_3_2_x": {
+						"expression": "chop(\"drag1\", \"pt_3_2_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_3_2_y": {
+						"expression": "chop(\"drag1\", \"pt_3_2_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_3_3_x": {
+						"expression": "chop(\"drag1\", \"pt_3_3_x\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_3_3_y": {
+						"expression": "chop(\"drag1\", \"pt_3_3_y\")",
+						"mode": "EXPRESSION",
+						"value": 0.0
+					},
+					"pt_3_4_x": {
+						"value": 0.0
+					},
+					"pt_3_4_y": {
+						"value": 0.0
+					},
+					"pt_3_5_x": {
+						"value": 0.0
+					},
+					"pt_3_5_y": {
+						"value": 0.0
+					},
+					"pt_3_6_x": {
+						"value": 0.0
+					},
+					"pt_3_6_y": {
+						"value": 0.0
+					},
+					"pt_3_7_x": {
+						"value": 0.0
+					},
+					"pt_3_7_y": {
+						"value": 0.0
+					},
+					"pt_4_0_x": {
+						"value": 0.0
+					},
+					"pt_4_0_y": {
+						"value": 0.0
+					},
+					"pt_4_1_x": {
+						"value": 0.0
+					},
+					"pt_4_1_y": {
+						"value": 0.0
+					},
+					"pt_4_2_x": {
+						"value": 0.0
+					},
+					"pt_4_2_y": {
+						"value": 0.0
+					},
+					"pt_4_3_x": {
+						"value": 0.0
+					},
+					"pt_4_3_y": {
+						"value": 0.0
+					},
+					"pt_4_4_x": {
+						"value": 0.0
+					},
+					"pt_4_4_y": {
+						"value": 0.0
+					},
+					"pt_4_5_x": {
+						"value": 0.0
+					},
+					"pt_4_5_y": {
+						"value": 0.0
+					},
+					"pt_4_6_x": {
+						"value": 0.0
+					},
+					"pt_4_6_y": {
+						"value": 0.0
+					},
+					"pt_4_7_x": {
+						"value": 0.0
+					},
+					"pt_4_7_y": {
+						"value": 0.0
+					},
+					"pt_5_0_x": {
+						"value": 0.0
+					},
+					"pt_5_0_y": {
+						"value": 0.0
+					},
+					"pt_5_1_x": {
+						"value": 0.0
+					},
+					"pt_5_1_y": {
+						"value": 0.0
+					},
+					"pt_5_2_x": {
+						"value": 0.0
+					},
+					"pt_5_2_y": {
+						"value": 0.0
+					},
+					"pt_5_3_x": {
+						"value": 0.0
+					},
+					"pt_5_3_y": {
+						"value": 0.0
+					},
+					"pt_5_4_x": {
+						"value": 0.0
+					},
+					"pt_5_4_y": {
+						"value": 0.0
+					},
+					"pt_5_5_x": {
+						"value": 0.0
+					},
+					"pt_5_5_y": {
+						"value": 0.0
+					},
+					"pt_5_6_x": {
+						"value": 0.0
+					},
+					"pt_5_6_y": {
+						"value": 0.0
+					},
+					"pt_5_7_x": {
+						"value": 0.0
+					},
+					"pt_5_7_y": {
+						"value": 0.0
+					},
+					"pt_6_0_x": {
+						"value": 0.0
+					},
+					"pt_6_0_y": {
+						"value": 0.0
+					},
+					"pt_6_1_x": {
+						"value": 0.0
+					},
+					"pt_6_1_y": {
+						"value": 0.0
+					},
+					"pt_6_2_x": {
+						"value": 0.0
+					},
+					"pt_6_2_y": {
+						"value": 0.0
+					},
+					"pt_6_3_x": {
+						"value": 0.0
+					},
+					"pt_6_3_y": {
+						"value": 0.0
+					},
+					"pt_6_4_x": {
+						"value": 0.0
+					},
+					"pt_6_4_y": {
+						"value": 0.0
+					},
+					"pt_6_5_x": {
+						"value": 0.0
+					},
+					"pt_6_5_y": {
+						"value": 0.0
+					},
+					"pt_6_6_x": {
+						"value": 0.0
+					},
+					"pt_6_6_y": {
+						"value": 0.0
+					},
+					"pt_6_7_x": {
+						"value": 0.0
+					},
+					"pt_6_7_y": {
+						"value": 0.0
+					},
+					"pt_7_0_x": {
+						"value": 0.0
+					},
+					"pt_7_0_y": {
+						"value": 0.0
+					},
+					"pt_7_1_x": {
+						"value": 0.0
+					},
+					"pt_7_1_y": {
+						"value": 0.0
+					},
+					"pt_7_2_x": {
+						"value": 0.0
+					},
+					"pt_7_2_y": {
+						"value": 0.0
+					},
+					"pt_7_3_x": {
+						"value": 0.0
+					},
+					"pt_7_3_y": {
+						"value": 0.0
+					},
+					"pt_7_4_x": {
+						"value": 0.0
+					},
+					"pt_7_4_y": {
+						"value": 0.0
+					},
+					"pt_7_5_x": {
+						"value": 0.0
+					},
+					"pt_7_5_y": {
+						"value": 0.0
+					},
+					"pt_7_6_x": {
+						"value": 0.0
+					},
+					"pt_7_6_y": {
+						"value": 0.0
+					},
+					"pt_7_7_x": {
+						"value": 0.0
+					},
+					"pt_7_7_y": {
+						"value": 0.0
+					}
+				},
+				"position": [
+					500.0,
+					100.0
+				],
+				"type": "GridWarpTOP"
+			},
+			"out_panel": {
+				"parameters": {
+					"family": {
+						"value": 9
+					},
+					"index": {
+						"value": 1
+					},
+					"label": {
+						"value": "panel"
+					}
+				},
+				"position": [
+					850.0,
+					300.0
+				],
+				"tunnel_family": 9,
+				"tunnel_index": 1,
+				"tunnel_label": "panel",
+				"type": "OutTunnel"
+			},
+			"out_tex": {
+				"parameters": {
+					"family": {
+						"value": 0
+					},
+					"index": {
+						"value": 0
+					},
+					"label": {
+						"value": "warped"
+					}
+				},
+				"position": [
+					850.0,
+					100.0
+				],
+				"tunnel_family": 0,
+				"tunnel_index": 0,
+				"tunnel_label": "warped",
+				"type": "OutTunnel"
+			}
+		},
+		"version": "1.0.0"
+	},
+	"promoted_parameters": []
 }
